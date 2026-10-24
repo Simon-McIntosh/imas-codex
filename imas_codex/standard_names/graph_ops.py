@@ -228,173 +228,22 @@ _historical_cpi_cache = import_module(
 )._historical_cpi_cache
 
 
-def query_pipeline_buckets(
-    threshold: float = 0.65,
-    cap: int = 3,
-    cache_ttl: float = 3.0,
-) -> Any:
-    """Query the 6 disjoint pipeline buckets from the graph.
+def query_pipeline_buckets(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_scope.query_pipeline_buckets."""
+    from .graph_store import graph_claim_scope
 
-    Uses a module-level time-based cache (TTL = *cache_ttl* seconds).
-
-    Bucket definitions (disjoint by construction):
-
-    - **A**: StandardNameSource nodes with ``status='extracted'``.
-    - **B**: StandardName with ``name_stage='drafted'`` and no
-      ``reviewer_score_name``.
-    - **C**: StandardName reviewed/refining, below *threshold*, under
-      *cap* → definite refine + re-review.
-    - **D**: StandardName accepted, docs not yet drafted.
-    - **E**: StandardName with ``docs_stage='drafted'``, no
-      ``reviewer_score_docs``.
-    - **F**: StandardName docs reviewed/refining, below *threshold*,
-      under *cap* → definite docs refine.
-
-    Args:
-        threshold: Score threshold below which a name/docs enters
-            the refine pool (default 0.65).
-        cap: Maximum refine rotations before exhaustion (default 3).
-        cache_ttl: Cache time-to-live in seconds (default 3.0).
-
-    Returns:
-        :class:`PipelineBuckets` with the 6 counts.
-    """
-    import time as _time
-
-    from imas_codex.standard_names.cost_model import PipelineBuckets
-
-    now = _time.time()
-    if (
-        _pipeline_buckets_cache["value"] is not None
-        and now - _pipeline_buckets_cache["ts"] < cache_ttl
-    ):
-        return _pipeline_buckets_cache["value"]
-
-    with GraphClient() as gc:
-        # Bucket A: pre-draft sources
-        r_a = gc.query(
-            "MATCH (sns:StandardNameSource {status: 'extracted'}) "
-            "RETURN count(*) AS cnt"
-        )
-        a = r_a[0]["cnt"] if r_a else 0
-
-        # Bucket B: drafted, not yet name-reviewed
-        r_b = gc.query(
-            "MATCH (sn:StandardName) "
-            "WHERE sn.name_stage = 'drafted' "
-            "AND sn.reviewer_score_name IS NULL "
-            "RETURN count(*) AS cnt"
-        )
-        b = r_b[0]["cnt"] if r_b else 0
-
-        # Bucket C: reviewed/refining, below threshold, under cap
-        r_c = gc.query(
-            "MATCH (sn:StandardName) "
-            "WHERE sn.name_stage IN ['reviewed', 'refining'] "
-            "AND coalesce(sn.reviewer_score_name, 0.0) < $threshold "
-            "AND coalesce(sn.chain_length, 0) < $cap "
-            "RETURN count(*) AS cnt",
-            threshold=threshold,
-            cap=cap,
-        )
-        c = r_c[0]["cnt"] if r_c else 0
-
-        # Bucket D: name accepted AND name-reviewed, docs not yet drafted.
-        # Mirrors the claim_generate_docs_batch hard gate — a name must carry a
-        # real name-review score (reviewer_score_name) before docs are eligible,
-        # so derived parents auto-accepted without review are excluded from the
-        # generate_docs backlog until REVIEW_NAME has scored them.
-        r_d = gc.query(
-            "MATCH (sn:StandardName) "
-            "WHERE sn.name_stage = 'accepted' "
-            "AND sn.reviewer_score_name IS NOT NULL "
-            "AND (sn.docs_stage IS NULL OR sn.docs_stage = 'pending') "
-            "RETURN count(*) AS cnt"
-        )
-        d = r_d[0]["cnt"] if r_d else 0
-
-        # Bucket E: docs drafted, not yet reviewed
-        r_e = gc.query(
-            "MATCH (sn:StandardName) "
-            "WHERE sn.docs_stage = 'drafted' "
-            "AND sn.reviewer_score_docs IS NULL "
-            "RETURN count(*) AS cnt"
-        )
-        e = r_e[0]["cnt"] if r_e else 0
-
-        # Bucket F: docs reviewed/refining, below threshold, under cap
-        # Schema note: plan.md referenced refine_docs_count but actual
-        # schema field is docs_chain_length.
-        r_f = gc.query(
-            "MATCH (sn:StandardName) "
-            "WHERE sn.docs_stage IN ['reviewed', 'refining'] "
-            "AND coalesce(sn.reviewer_score_docs, 0.0) < $threshold "
-            "AND coalesce(sn.docs_chain_length, 0) < $cap "
-            "RETURN count(*) AS cnt",
-            threshold=threshold,
-            cap=cap,
-        )
-        f = r_f[0]["cnt"] if r_f else 0
-
-    result = PipelineBuckets(
-        a_sources=a,
-        b_drafted_unreviewed=b,
-        c_refine_pending=c,
-        d_accepted_no_docs=d,
-        e_docs_unreviewed=e,
-        f_refine_docs_pending=f,
+    return graph_claim_scope.query_pipeline_buckets(
+        *args, services=_graph_foundation.services, **kwargs
     )
-    _pipeline_buckets_cache["value"] = result
-    _pipeline_buckets_cache["ts"] = now
-    return result
 
 
-def query_historical_cpi(model: str | None = None) -> dict[str, float]:
-    """Average per-phase LLM cost across past StandardName nodes.
+def query_historical_cpi(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_scope.query_historical_cpi."""
+    from .graph_store import graph_claim_scope
 
-    Returns dict keyed by pool name (``generate_name``, ``review_name``,
-    ``refine_name``, ``generate_docs``, ``review_docs``, ``refine_docs``).
-    Missing keys = no historical data for that pool.
-
-    Cached for the lifetime of the process (historical data is static
-    within a run).
-
-    Args:
-        model: Optional LLM model filter. If provided, restricts to
-            nodes composed with that model.
-    """
-    import time as _time
-
-    # Process-lifetime cache (historical data is static within a run)
-    if _historical_cpi_cache["value"] is not None:
-        return _historical_cpi_cache["value"]
-
-    result: dict[str, float] = {}
-    # Pool → (cost_field, count_field) — direct 1:1 mapping.
-    _pool_fields = {
-        "generate_name": ("llm_cost_generate_name", "generate_name_count"),
-        "review_name": ("llm_cost_review_name", "review_name_count"),
-        "refine_name": ("llm_cost_refine_name", "refine_name_count"),
-        "generate_docs": ("llm_cost_generate_docs", "generate_docs_count"),
-        "review_docs": ("llm_cost_review_docs", "review_docs_count"),
-        "refine_docs": ("llm_cost_refine_docs", "refine_docs_count"),
-    }
-    with GraphClient() as gc:
-        for pool, (cost_f, count_f) in _pool_fields.items():
-            rows = gc.query(
-                f"MATCH (sn:StandardName) "
-                f"WHERE sn.{cost_f} IS NOT NULL "
-                f"AND sn.{cost_f} > 0 "
-                f"AND coalesce(sn.{count_f}, 0) > 0 "
-                f"RETURN avg(sn.{cost_f} / sn.{count_f}) AS cpi, "
-                f"count(*) AS n"
-            )
-            if rows and rows[0]["n"] > 0 and rows[0]["cpi"] is not None:
-                result[pool] = float(rows[0]["cpi"])
-
-    _historical_cpi_cache["value"] = result
-    _historical_cpi_cache["ts"] = _time.time()
-    return result
+    return graph_claim_scope.query_historical_cpi(
+        *args, services=_graph_foundation.services, **kwargs
+    )
 
 
 # =============================================================================
@@ -402,105 +251,22 @@ def query_historical_cpi(model: str | None = None) -> dict[str, float]:
 # =============================================================================
 
 
-def get_extraction_candidates_dd(
-    ids_filter: str | None = None,
-    domain_filter: str | None = None,
-    limit: int = 500,
-) -> list[dict[str, Any]]:
-    """Query IMASNode paths grouped by semantic cluster.
+def get_extraction_candidates_dd(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_scope.get_extraction_candidates_dd."""
+    from .graph_store import graph_claim_scope
 
-    Returns dynamic leaf nodes that have been enriched (status=embedded),
-    optionally filtered by IDS or physics domain.
-    """
-    with GraphClient() as gc:
-        params: dict[str, Any] = {"limit": limit}
-        where_clauses = [
-            "n.node_type IN ['dynamic', 'constant']",
-            "n.description IS NOT NULL",
-            "n.description <> ''",
-            # DD-version gate: nodes absent from the current DD never seed.
-            "coalesce(n.lifecycle_status, '') <> 'removed'",
-        ]
-
-        if ids_filter:
-            where_clauses.append("ids.id = $ids_filter")
-            params["ids_filter"] = ids_filter
-        if domain_filter:
-            where_clauses.append("n.physics_domain = $domain_filter")
-            params["domain_filter"] = domain_filter
-
-        where = " AND ".join(where_clauses)
-        results = gc.query(
-            f"""
-            MATCH (n:IMASNode)-[:IN_IDS]->(ids:IDS)
-            WHERE {where}
-            WITH n, ids
-            OPTIONAL MATCH (n)-[:IN_CLUSTER]->(c:IMASSemanticCluster)
-            RETURN n.id AS path, n.description AS description,
-                   n.unit AS unit, n.data_type AS data_type,
-                   ids.id AS ids_name, c.label AS cluster_label
-            ORDER BY ids.id, n.id
-            LIMIT $limit
-            """,
-            **params,
-        )
-        from imas_codex.settings import get_dd_version
-        from imas_codex.standard_names.dd_resolutions import resolve_dd_rows
-
-        batch = resolve_dd_rows(results, dd_version=get_dd_version())
-        if batch.refusals:
-            logger.warning(
-                "Extraction candidates omitted %d changed DD fields: %s",
-                len(batch.refusals),
-                ", ".join(
-                    f"{refusal.path}:{refusal.field.value}"
-                    for refusal in batch.refusals
-                ),
-            )
-        return [
-            {
-                **results[resolved.row_index],
-                **resolved.context.as_pipeline_item(),
-            }
-            for resolved in batch.resolved
-        ]
+    return graph_claim_scope.get_extraction_candidates_dd(
+        *args, services=_graph_foundation.services, **kwargs
+    )
 
 
-def get_extraction_candidates_signals(
-    facility: str,
-    domain_filter: str | None = None,
-    limit: int = 500,
-) -> list[dict[str, Any]]:
-    """Query FacilitySignal nodes for a given facility.
+def get_extraction_candidates_signals(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_scope.get_extraction_candidates_signals."""
+    from .graph_store import graph_claim_scope
 
-    Returns signals that have been enriched, optionally filtered by
-    physics domain.
-    """
-    with GraphClient() as gc:
-        params: dict[str, Any] = {"facility": facility, "limit": limit}
-        where_clauses = ["s.status = 'enriched'"]
-
-        if domain_filter:
-            where_clauses.append("s.physics_domain = $domain_filter")
-            params["domain_filter"] = domain_filter
-
-        where = " AND ".join(where_clauses)
-        results = gc.query(
-            f"""
-            MATCH (s:FacilitySignal)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
-            WHERE {where}
-            WITH s
-            OPTIONAL MATCH (s)-[:MAPS_TO]->(m:IMASNode)
-            RETURN s.id AS signal_id, s.description AS description,
-                   s.physics_domain AS physics_domain,
-                   s.unit AS units,
-                   m.id AS imas_path
-            ORDER BY s.id
-            LIMIT $limit
-            """,
-            **params,
-        )
-        return list(results)
+    return graph_claim_scope.get_extraction_candidates_signals(
+        *args, services=_graph_foundation.services, **kwargs
+    )
 
 
 # =============================================================================
@@ -508,1269 +274,248 @@ def get_extraction_candidates_signals(
 # =============================================================================
 
 
-def get_existing_standard_names(gc: Any | None = None) -> set[str]:
-    """Return the set of existing StandardName node IDs for deduplication.
+def get_existing_standard_names(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_scope.get_existing_standard_names."""
+    from .graph_store import graph_claim_scope
 
-    This is the single definition of the graph-wide all-name read: callers that
-    would otherwise restate ``MATCH (sn:StandardName) RETURN sn.id AS id`` read
-    it here instead. A caller already holding an open client passes it as *gc*
-    so the read rides that session; with none, one is opened for this read.
-    """
-    if gc is not None:
-        results = gc.query("MATCH (sn:StandardName) RETURN sn.id AS id")
-        return {r["id"] for r in results}
-    with GraphClient() as own:
-        results = own.query("MATCH (sn:StandardName) RETURN sn.id AS id")
-        return {r["id"] for r in results}
-
-
-def get_named_source_ids() -> set[str]:
-    """Return source IDs already linked via HAS_STANDARD_NAME.
-
-    Used for resumability: extract skips sources that already have
-    a standard name unless --force is specified.
-    """
-    with GraphClient() as gc:
-        results = gc.query("""
-            MATCH (src)-[:HAS_STANDARD_NAME]->(sn:StandardName)
-            RETURN DISTINCT src.id AS source_id
-        """)
-        return {r["source_id"] for r in results}
-
-
-def partition_focus_by_accepted(
-    paths: list[str], *, gc: Any | None = None
-) -> tuple[list[str], list[str]]:
-    """Split focus DD paths into ``(gap, accepted)`` by live accepted name.
-
-    A path is *accepted* when its ``StandardNameSource`` (id ``dd:<path>``)
-    has PRODUCED a ``StandardName`` whose ``name_stage`` is ``accepted`` or
-    ``approved`` — i.e. it already carries a live, catalog-bound name. Gap
-    paths lack any such name and are the ones focused mop-up should (re)stage;
-    accepted paths are left untouched so a focus run never churns names the
-    catalog already holds. Input order is preserved in both lists.
-
-    *gc* may be an already-open graph client (reused for the query); when None a
-    fresh :class:`GraphClient` is opened.
-    """
-    if not paths:
-        return [], []
-    ids = [f"dd:{p}" for p in paths]
-    cypher = """
-        UNWIND $ids AS sid
-        MATCH (sns:StandardNameSource {id: sid})-[:PRODUCED_NAME]->(sn:StandardName)
-        WHERE sn.name_stage IN ['accepted', 'approved']
-        RETURN DISTINCT sid AS sid
-        """
-    if gc is not None:
-        rows = gc.query(cypher, ids=ids)
-    else:
-        with GraphClient() as _gc:
-            rows = _gc.query(cypher, ids=ids)
-    accepted_ids = {r["sid"] for r in (rows or [])}
-    gap = [p for p in paths if f"dd:{p}" not in accepted_ids]
-    accepted = [p for p in paths if f"dd:{p}" in accepted_ids]
-    return gap, accepted
-
-
-MANIFEST_DRAIN_DISPOSITIONS: tuple[str, ...] = (
-    "accepted",
-    "active_in_flight",
-    "genuine_gap",
-    "non_nameable",
-    "ambiguous",
-)
-
-
-def canonicalize_manifest_drain_paths(paths: list[str]) -> list[str]:
-    """Validate and de-duplicate exact DD paths without changing their order."""
-    canonical: list[str] = []
-    seen: set[str] = set()
-    for raw in paths:
-        if not isinstance(raw, str):
-            raise ValueError("bounded drain paths must be strings")
-        if raw.strip().startswith("dd:"):
-            raise ValueError(f"bounded drain accepts DD paths, not source IDs: {raw!r}")
-        if raw.strip().split(":", 1)[0] in {
-            "catalog",
-            "derived",
-            "signal",
-            "signals",
-        }:
-            raise ValueError(f"bounded drain accepts only canonical DD paths: {raw!r}")
-        path = raw.strip().strip("/")
-        if (
-            not path
-            or path != raw.strip()
-            or "*" in path
-            or "?" in path
-            or any(char.isspace() for char in path)
-            or ":" in path
-        ):
-            raise ValueError(f"bounded drain requires an exact DD path: {raw!r}")
-        if path not in seen:
-            seen.add(path)
-            canonical.append(path)
-    if not canonical:
-        raise ValueError("bounded drain manifest resolved to zero exact DD paths")
-    return canonical
-
-
-def classify_manifest_drain_item(item: dict[str, Any]) -> dict[str, Any]:
-    """Return one immutable five-way disposition from a manifest plan row."""
-    reasons: list[str] = []
-    node = item.get("node") or {}
-    source = item.get("source")
-    live_names = item.get("live_names") or []
-    all_name_ids = set(item.get("all_name_ids") or [])
-    parents = item.get("parents") or []
-    path = item["path"]
-    dd_version = item["dd_version"]
-
-    if not item.get("configured_version_present"):
-        reasons.append("configured DD version is not the unique current version")
-    if not node.get("id") or node.get("id") != path:
-        reasons.append("exact IMAS identity is missing")
-    if node.get("node_category") is None:
-        reasons.append("IMAS node category is missing")
-
-    if source:
-        unit_ids = node.get("unit_ids") or []
-        dd_parents = node.get("dd_parents") or []
-        authoritative_unit = node.get("unit") or (unit_ids[0] if unit_ids else None)
-        if (
-            source.get("id") != f"dd:{path}"
-            or source.get("source_type") != "dd"
-            or source.get("source_id") != path
-            or source.get("dd_version") != dd_version
-            or source.get("dd_snapshot_pinned") is not True
-            or sorted(source.get("dd_target_ids") or []) != [path]
-        ):
-            reasons.append("exact source identity or immutable DD pin is inconsistent")
-        if (
-            len(unit_ids) > 1
-            or len(dd_parents) > 1
-            or (
-                node.get("unit") is not None
-                and unit_ids
-                and unit_ids != [node.get("unit")]
-            )
-        ):
-            reasons.append("DD authority relationship cardinality is ambiguous")
-        elif (
-            source.get("description") != node.get("documentation")
-            or source.get("dd_documentation") != node.get("documentation")
-            or source.get("dd_data_type") != node.get("data_type")
-            or source.get("dd_unit") != authoritative_unit
-            or sorted(source.get("dd_coordinates") or [])
-            != sorted(node.get("coordinate_ids") or [])
-            or source.get("dd_lifecycle_status") != node.get("lifecycle_status")
-            or source.get("dd_lifecycle_version") != node.get("lifecycle_version")
-            or source.get("enhanced_description") != node.get("description")
-            or source.get("enhancement_kind") != node.get("enrichment_source")
-            or source.get("physics_domain") != node.get("physics_domain")
-            or source.get("dd_parent_path")
-            != (dd_parents[0].get("id") if dd_parents else None)
-            or source.get("dd_parent_documentation")
-            != (dd_parents[0].get("documentation") if dd_parents else None)
-        ):
-            reasons.append("immutable DD snapshot no longer matches authority")
-        produced_sn_id = source.get("produced_sn_id")
-        if produced_sn_id and produced_sn_id not in all_name_ids:
-            reasons.append("produced_sn_id has no matching PRODUCED_NAME edge")
-        if live_names and produced_sn_id != live_names[0].get("id"):
-            reasons.append("produced_sn_id does not identify the live name binding")
-        if source.get("scope_conflict"):
-            reasons.append("source is held by a non-stale competing drain scope")
-
-    if len(live_names) > 1:
-        reasons.append("source has multiple live PRODUCED_NAME bindings")
-    if any(name.get("scope_conflict") for name in live_names):
-        reasons.append("live name is held by a non-stale competing drain scope")
-    if any(parent.get("scope_conflict") for parent in parents):
-        reasons.append("derived parent is held by a non-stale competing drain scope")
-    if reasons:
-        disposition = "ambiguous"
-    else:
-        from imas_codex.core.node_categories import SN_SOURCE_CATEGORIES
-
-        non_nameable = node.get("node_category") not in SN_SOURCE_CATEGORIES or (
-            source and source.get("status") == "not_physical_quantity"
-        )
-        if non_nameable:
-            disposition = "non_nameable"
-        elif live_names:
-            live = live_names[0]
-            disposition = (
-                "accepted"
-                if live.get("validation_status") == "valid"
-                and live.get("name_stage") in {"accepted", "approved"}
-                and live.get("docs_stage") == "accepted"
-                else "active_in_flight"
-            )
-        elif source and source.get("worker_claim_live"):
-            disposition = "active_in_flight"
-        else:
-            disposition = "genuine_gap"
-
-    source_status = source.get("status") if source else None
-    drain_actionable = disposition == "genuine_gap" and (
-        source is None
-        or (
-            source_status == "extracted"
-            and int(source.get("attempt_count") or 0) < _MAX_COMPOSE_CLAIM_ATTEMPTS
-            and not all_name_ids
-        )
-    )
-    return {
-        **item,
-        "disposition": disposition,
-        "ambiguity_reasons": reasons,
-        "drain_actionable": drain_actionable,
-    }
-
-
-_MANIFEST_DRAIN_PLAN_QUERY = """
-UNWIND $paths AS path
-OPTIONAL MATCH (configured_version:DDVersion {id: $dd_version})
-WITH path, collect(configured_version) AS configured_versions
-CALL () {
-  MATCH (version:DDVersion)
-  RETURN [entry IN collect(properties(version))] AS version_authority
-}
-WITH path, configured_versions, version_authority,
-     size([version IN configured_versions
-           WHERE version.is_current = true]) = 1
-       AND size([version IN version_authority
-                 WHERE version.is_current = true]) = 1 AS configured_version_present
-OPTIONAL MATCH (node:IMASNode {id: path})
-OPTIONAL MATCH (source:StandardNameSource {id: 'dd:' + path})
-CALL (source) {
-  OPTIONAL MATCH (source)-[:FROM_DD_PATH]->(target:IMASNode)
-  RETURN [id IN collect(DISTINCT target.id) WHERE id IS NOT NULL]
-         AS dd_target_ids
-}
-CALL (source) {
-  OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(all_name:StandardName)
-  RETURN [id IN collect(DISTINCT all_name.id) WHERE id IS NOT NULL]
-         AS all_name_ids
-}
-CALL (source) {
-  OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(live:StandardName)
-  WHERE NOT (coalesce(live.name_stage, '') IN $terminal_stages)
-  RETURN [entry IN collect(DISTINCT CASE WHEN live IS NULL THEN null ELSE {
-    id: live.id,
-    name_stage: live.name_stage,
-    docs_stage: live.docs_stage,
-    validation_status: live.validation_status,
-    claim_token: live.claim_token,
-    claim_seq: live.claim_seq,
-    drain_scope_id: live.drain_scope_id,
-    drain_scope_claimed_at_epoch_ms:
-      live.drain_scope_claimed_at.epochMillis,
-    scope_conflict: live.drain_scope_id IS NOT NULL
-      AND live.drain_scope_id <> $drain_scope_id
-      AND live.drain_scope_claimed_at IS NOT NULL
-      AND live.drain_scope_claimed_at >= datetime() - duration($scope_cutoff)
-  } END) WHERE entry IS NOT NULL] AS live_names
-}
-CALL (source) {
-  OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(live:StandardName)
-  WHERE NOT (coalesce(live.name_stage, '') IN $terminal_stages)
-  OPTIONAL MATCH (live)-[:HAS_PARENT*1..]->(parent:StandardName)
-  WHERE parent.origin = 'derived'
-  RETURN [entry IN collect(DISTINCT CASE WHEN parent IS NULL THEN null ELSE {
-    id: parent.id,
-    name_stage: parent.name_stage,
-    docs_stage: parent.docs_stage,
-    validation_status: parent.validation_status,
-    claim_token: parent.claim_token,
-    claim_seq: parent.claim_seq,
-    drain_scope_id: parent.drain_scope_id,
-    drain_scope_claimed_at_epoch_ms:
-      parent.drain_scope_claimed_at.epochMillis,
-    scope_conflict: parent.drain_scope_id IS NOT NULL
-      AND parent.drain_scope_id <> $drain_scope_id
-      AND parent.drain_scope_claimed_at IS NOT NULL
-      AND parent.drain_scope_claimed_at >= datetime() - duration($scope_cutoff)
-  } END) WHERE entry IS NOT NULL] AS parents
-}
-CALL (path, node) {
-  OPTIONAL MATCH (gap:DDGap {path: path})
-  OPTIONAL MATCH (node)-[owned:HAS_DD_GAP]->(gap)
-  RETURN [entry IN collect(DISTINCT CASE WHEN gap IS NULL THEN null ELSE {
-    id: gap.id, kind: gap.kind, status: gap.status, linked: owned IS NOT NULL
-  } END) WHERE entry IS NOT NULL] AS dd_gaps
-}
-CALL (node) {
-  OPTIONAL MATCH (node)-[:HAS_UNIT]->(unit_node:Unit)
-  RETURN [id IN collect(unit_node.id) WHERE id IS NOT NULL] AS unit_ids
-}
-CALL (node) {
-  OPTIONAL MATCH (node)-[:HAS_COORDINATE]->(coordinate)
-  RETURN [id IN collect(coordinate.id) WHERE id IS NOT NULL] AS coordinate_ids
-}
-CALL (node) {
-  OPTIONAL MATCH (node)-[:HAS_PARENT]->(dd_parent:IMASNode)
-  RETURN [entry IN collect(CASE WHEN dd_parent IS NULL THEN null ELSE {
-    id: dd_parent.id, documentation: dd_parent.documentation
-  } END) WHERE entry IS NOT NULL] AS dd_parents
-}
-RETURN path, $dd_version AS dd_version,
-       configured_version_present,
-       version_authority,
-       CASE WHEN node IS NULL THEN null ELSE {
-         id: node.id, node_category: node.node_category,
-         lifecycle_status: node.lifecycle_status,
-         lifecycle_version: node.lifecycle_version,
-         documentation: node.documentation, data_type: node.data_type,
-         physics_domain: node.physics_domain, unit: node.unit,
-         description: node.description,
-         enrichment_source: node.enrichment_source,
-         unit_ids: unit_ids, coordinate_ids: coordinate_ids,
-         dd_parents: dd_parents
-       } END AS node,
-       CASE WHEN source IS NULL THEN null ELSE {
-         id: source.id, source_type: source.source_type,
-         source_id: source.source_id, status: source.status,
-         claim_token: source.claim_token, claim_seq: source.claim_seq,
-         worker_claim_live: source.claim_token IS NOT NULL
-           AND source.claimed_at IS NOT NULL
-           AND source.claimed_at >= datetime() - duration($worker_cutoff),
-         attempt_count: source.attempt_count,
-         produced_sn_id: source.produced_sn_id,
-         dd_version: source.dd_version,
-         dd_snapshot_pinned: source.dd_snapshot_pinned,
-         description: source.description,
-         physics_domain: source.physics_domain,
-         dd_documentation: source.dd_documentation,
-         dd_parent_path: source.dd_parent_path,
-         dd_parent_documentation: source.dd_parent_documentation,
-         dd_data_type: source.dd_data_type,
-         dd_unit: source.dd_unit,
-         dd_coordinates: source.dd_coordinates,
-         dd_lifecycle_status: source.dd_lifecycle_status,
-         dd_lifecycle_version: source.dd_lifecycle_version,
-         enhanced_description: source.enhanced_description,
-         enhancement_kind: source.enhancement_kind,
-         drain_scope_id: source.drain_scope_id,
-         drain_scope_claimed_at_epoch_ms:
-           source.drain_scope_claimed_at.epochMillis,
-         scope_conflict: source.drain_scope_id IS NOT NULL
-           AND source.drain_scope_id <> $drain_scope_id
-           AND source.drain_scope_claimed_at IS NOT NULL
-           AND source.drain_scope_claimed_at >= datetime() - duration($scope_cutoff),
-         dd_target_ids: dd_target_ids
-       } END AS source,
-       all_name_ids, live_names, parents, dd_gaps
-ORDER BY path
-"""
-
-
-def _resolved_manifest_drain_plan(
-    rows: list[dict[str, Any]], dd_version: str
-) -> list[dict[str, Any]]:
-    """Classify manifest rows only after resolving their DD node context."""
-    from imas_codex.standard_names.dd_resolutions import resolve_dd_row
-
-    resolved_rows = []
-    for raw_row in rows:
-        row = dict(raw_row)
-        if row.get("node"):
-            node = dict(row["node"])
-            context = resolve_dd_row(
-                {
-                    **node,
-                    "path": row["path"],
-                    "coordinates": node.get("coordinate_ids") or (),
-                },
-                dd_version=dd_version,
-            )
-            node.update(context.as_pipeline_item())
-            row["node"] = node
-        resolved_rows.append(row)
-    return [classify_manifest_drain_item(row) for row in resolved_rows]
-
-
-def build_manifest_drain_plan(
-    paths: list[str],
-    *,
-    dd_version: str,
-    drain_scope_id: str = "dry-run",
-    scope_timeout_seconds: int = 600,
-    worker_timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
-    gc: Any | None = None,
-) -> list[dict[str, Any]]:
-    """Read and classify every exact path without issuing any graph write."""
-    exact_paths = canonicalize_manifest_drain_paths(paths)
-    own = gc is None
-    client = GraphClient() if own else gc
-    try:
-        rows = client.query(
-            _MANIFEST_DRAIN_PLAN_QUERY,
-            paths=exact_paths,
-            dd_version=dd_version,
-            drain_scope_id=drain_scope_id,
-            scope_cutoff=f"PT{scope_timeout_seconds}S",
-            worker_cutoff=f"PT{worker_timeout_seconds}S",
-            terminal_stages=sorted(_TERMINAL_BINDING_NAME_STAGES),
-        )
-        return _resolved_manifest_drain_plan(rows, dd_version)
-    finally:
-        if own:
-            client.close()
-
-
-class ManifestDrainConflict(RuntimeError):
-    """The bounded manifest changed or contains an ambiguous identity."""
-
-
-def _manifest_plan_fingerprint(plan: list[dict[str, Any]]) -> str:
-    """Return a typed, order-stable snapshot of every projected authority."""
-    import json
-
-    def normalize(value: Any) -> Any:
-        if isinstance(value, dict):
-            return {key: normalize(value[key]) for key in sorted(value)}
-        if isinstance(value, list):
-            normalized = [normalize(item) for item in value]
-            return sorted(normalized, key=lambda item: json.dumps(item, sort_keys=True))
-        if value is None or isinstance(value, str | int | float | bool):
-            return value
-        if hasattr(value, "iso_format"):
-            return {"temporal": value.iso_format()}
-        if hasattr(value, "isoformat"):
-            return {"temporal": value.isoformat()}
-        return {"typed_repr": repr(value)}
-
-    return json.dumps(normalize(plan), sort_keys=True, separators=(",", ":"))
-
-
-def _lock_manifest_drain_authority(gc: Any, paths: list[str]) -> None:
-    """Take write locks on the exact DD authority and its current bindings."""
-    gc.query(
-        """
-        MATCH (version:DDVersion)
-        WITH collect(version) AS versions
-        UNWIND $paths AS path
-        MATCH (node:IMASNode {id: path})
-        OPTIONAL MATCH (node)-[:HAS_UNIT|HAS_COORDINATE|HAS_PARENT]->(authority)
-        OPTIONAL MATCH (source:StandardNameSource {id: 'dd:' + path})
-        OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(name:StandardName)
-        OPTIONAL MATCH (name)-[:HAS_PARENT*1..]->(parent:StandardName)
-        WITH versions, collect(DISTINCT node) + collect(DISTINCT authority)
-             + collect(DISTINCT source) + collect(DISTINCT name)
-             + collect(DISTINCT parent) AS nodes
-        UNWIND versions + [entry IN nodes WHERE entry IS NOT NULL] AS locked
-        SET locked._drain_scope_lock = true
-        REMOVE locked._drain_scope_lock
-        """,
-        paths=paths,
+    return graph_claim_scope.get_existing_standard_names(
+        *args, services=_graph_foundation.services, **kwargs
     )
 
 
-@retry_on_deadlock()
-def claim_manifest_drain_scope(
-    paths: list[str],
-    *,
-    dd_version: str,
-    drain_scope_id: str | None = None,
-    scope_timeout_seconds: int = 600,
-    gc: Any | None = None,
-) -> tuple[str, list[dict[str, Any]]]:
-    """Atomically create absent exact sources and CAS-stamp one bounded scope."""
-    exact_paths = canonicalize_manifest_drain_paths(paths)
-    scope_id = drain_scope_id or str(uuid.uuid4())
-    own = gc is None
-    client = GraphClient() if own else gc
-    try:
-        with client.session() as session:
-            tx = session.begin_transaction()
-            tx_gc = _TransactionQuery(tx)
-            try:
-                rows = tx_gc.query(
-                    _MANIFEST_DRAIN_PLAN_QUERY,
-                    paths=exact_paths,
-                    dd_version=dd_version,
-                    drain_scope_id=scope_id,
-                    scope_cutoff=f"PT{scope_timeout_seconds}S",
-                    worker_cutoff=f"PT{_CLAIM_TIMEOUT_SECONDS}S",
-                    terminal_stages=sorted(_TERMINAL_BINDING_NAME_STAGES),
-                )
-                plan = _resolved_manifest_drain_plan(rows, dd_version)
-                initial_fingerprint = _manifest_plan_fingerprint(plan)
-                _lock_manifest_drain_authority(tx_gc, exact_paths)
-                locked_rows = tx_gc.query(
-                    _MANIFEST_DRAIN_PLAN_QUERY,
-                    paths=exact_paths,
-                    dd_version=dd_version,
-                    drain_scope_id=scope_id,
-                    scope_cutoff=f"PT{scope_timeout_seconds}S",
-                    worker_cutoff=f"PT{_CLAIM_TIMEOUT_SECONDS}S",
-                    terminal_stages=sorted(_TERMINAL_BINDING_NAME_STAGES),
-                )
-                plan = _resolved_manifest_drain_plan(locked_rows, dd_version)
-                if _manifest_plan_fingerprint(plan) != initial_fingerprint:
-                    raise ManifestDrainConflict(
-                        "DD authority or binding state changed during manifest claim"
-                    )
-                ambiguous = [
-                    item for item in plan if item["disposition"] == "ambiguous"
-                ]
-                if ambiguous:
-                    details = "; ".join(
-                        f"{item['path']}: {', '.join(item['ambiguity_reasons'])}"
-                        for item in ambiguous[:10]
-                    )
-                    raise ManifestDrainConflict(
-                        f"bounded manifest contains {len(ambiguous)} ambiguous path(s): "
-                        + details
-                    )
+def get_named_source_ids(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_scope.get_named_source_ids."""
+    from .graph_store import graph_claim_scope
 
-                absent = [
-                    {
-                        "id": f"dd:{item['path']}",
-                        "source_type": "dd",
-                        "source_id": item["path"],
-                        "dd_path": item["path"],
-                        "batch_key": "bounded-manifest",
-                        "status": "extracted",
-                        "description": item["node"].get("documentation"),
-                        "physics_domain": item["node"].get("physics_domain"),
-                    }
-                    for item in plan
-                    if item["source"] is None and item["disposition"] == "genuine_gap"
-                ]
-                prepared = _pin_dd_source_snapshots(
-                    tx_gc, absent, default_dd_version=dd_version
-                )
-                if prepared:
-                    created = tx_gc.query(
-                        """
-                        UNWIND $sources AS src
-                        MATCH (version:DDVersion {id: src.dd_version, is_current: true})
-                        MATCH (node:IMASNode {id: src.dd_path})
-                        WHERE node.node_category = src.expected_node_category
-                          AND (node.documentation = src.expected_documentation OR
-                               (node.documentation IS NULL AND
-                                src.expected_documentation IS NULL))
-                          AND (node.lifecycle_status = src.expected_lifecycle_status OR
-                               (node.lifecycle_status IS NULL AND
-                                src.expected_lifecycle_status IS NULL))
-                        CREATE (source:StandardNameSource {
-                          id: src.id, source_type: 'dd', source_id: src.source_id,
-                          batch_key: src.batch_key, status: 'extracted',
-                          description: src.description,
-                          physics_domain: src.physics_domain,
-                          dd_version: src.dd_version,
-                          dd_documentation: src.dd_documentation,
-                          dd_snapshot_pinned: true,
-                          dd_parent_path: src.dd_parent_path,
-                          dd_parent_documentation: src.dd_parent_documentation,
-                          dd_data_type: src.dd_data_type,
-                          dd_unit: src.dd_unit,
-                          dd_coordinates: src.dd_coordinates,
-                          dd_lifecycle_status: src.dd_lifecycle_status,
-                          dd_lifecycle_version: src.dd_lifecycle_version,
-                          enhanced_description: src.enhanced_description,
-                          enhancement_kind: src.enhancement_kind,
-                          attempt_count: 0,
-                          drain_scope_id: $scope_id,
-                          drain_scope_claimed_at: datetime(),
-                          drain_scope_paths: [src.dd_path],
-                          drain_scope_actionable: true
-                        })
-                        CREATE (source)-[:FROM_DD_PATH]->(node)
-                        RETURN collect(source.id) AS ids
-                        """,
-                        sources=[
-                            {
-                                **source,
-                                "expected_node_category": next(
-                                    item["node"].get("node_category")
-                                    for item in plan
-                                    if item["path"] == source["dd_path"]
-                                ),
-                                "expected_documentation": next(
-                                    item["node"].get("documentation")
-                                    for item in plan
-                                    if item["path"] == source["dd_path"]
-                                ),
-                                "expected_lifecycle_status": next(
-                                    item["node"].get("lifecycle_status")
-                                    for item in plan
-                                    if item["path"] == source["dd_path"]
-                                ),
-                            }
-                            for source in prepared
-                        ],
-                        scope_id=scope_id,
-                    )
-                    created_ids = set(created[0]["ids"] if created else [])
-                    if created_ids != {source["id"] for source in prepared}:
-                        raise ManifestDrainConflict(
-                            "exact DD source creation changed during manifest stamp"
-                        )
-
-                existing = [
-                    {
-                        "id": item["source"]["id"],
-                        "status": item["source"].get("status"),
-                        "claim_token": item["source"].get("claim_token"),
-                        "claim_seq": item["source"].get("claim_seq"),
-                        "attempt_count": item["source"].get("attempt_count"),
-                        "produced_sn_id": item["source"].get("produced_sn_id"),
-                        "dd_version": item["source"].get("dd_version"),
-                        "prior_scope_id": item["source"].get("drain_scope_id"),
-                        "prior_scope_claimed_at_epoch_ms": item["source"].get(
-                            "drain_scope_claimed_at_epoch_ms"
-                        ),
-                        "dd_target_ids": item["source"].get("dd_target_ids") or [],
-                        "all_name_ids": item.get("all_name_ids") or [],
-                        "actionable": (item["drain_actionable"]),
-                        "path": item["path"],
-                    }
-                    for item in plan
-                    if item["source"] is not None
-                    and (
-                        item["disposition"] == "active_in_flight"
-                        or item["drain_actionable"]
-                    )
-                ]
-                stamped_sources: set[str] = set()
-                if existing:
-                    stamped = tx_gc.query(
-                        """
-                        UNWIND $items AS item
-                        MATCH (node:StandardNameSource {id: item.id})
-                        SET node._drain_scope_lock = true
-                        REMOVE node._drain_scope_lock
-                        WITH node, item
-                        OPTIONAL MATCH (node)-[:FROM_DD_PATH]->(dd:IMASNode)
-                        WITH node, item,
-                             [id IN collect(DISTINCT dd.id) WHERE id IS NOT NULL]
-                               AS dd_target_ids
-                        OPTIONAL MATCH (node)-[:PRODUCED_NAME]->(sn:StandardName)
-                        WITH node, item, dd_target_ids,
-                             [id IN collect(DISTINCT sn.id) WHERE id IS NOT NULL]
-                               AS all_name_ids
-                        WHERE node.status = item.status
-                          AND (node.claim_token = item.claim_token OR
-                               (node.claim_token IS NULL AND item.claim_token IS NULL))
-                          AND (node.claim_seq = item.claim_seq OR
-                               (node.claim_seq IS NULL AND item.claim_seq IS NULL))
-                          AND (node.attempt_count = item.attempt_count OR
-                               (node.attempt_count IS NULL AND item.attempt_count IS NULL))
-                          AND (node.produced_sn_id = item.produced_sn_id OR
-                               (node.produced_sn_id IS NULL AND
-                                item.produced_sn_id IS NULL))
-                          AND node.dd_version = item.dd_version
-                          AND node.dd_snapshot_pinned = true
-                          AND size(dd_target_ids) = size(item.dd_target_ids)
-                          AND all(id IN dd_target_ids
-                                  WHERE id IN item.dd_target_ids)
-                          AND size(all_name_ids) = size(item.all_name_ids)
-                          AND all(id IN all_name_ids
-                                  WHERE id IN item.all_name_ids)
-                          AND (node.drain_scope_id = item.prior_scope_id OR
-                               (node.drain_scope_id IS NULL AND
-                                item.prior_scope_id IS NULL))
-                          AND (node.drain_scope_claimed_at.epochMillis =
-                                 item.prior_scope_claimed_at_epoch_ms OR
-                               (node.drain_scope_claimed_at IS NULL AND
-                                item.prior_scope_claimed_at_epoch_ms IS NULL))
-                        SET node.drain_scope_id = $scope_id,
-                            node.drain_scope_claimed_at = datetime(),
-                            node.drain_scope_paths = [item.path],
-                            node.drain_scope_actionable = item.actionable
-                        RETURN collect(node.id) AS ids
-                        """,
-                        items=existing,
-                        scope_id=scope_id,
-                    )
-                    stamped_sources = set(stamped[0]["ids"] if stamped else [])
-                    if stamped_sources != {item["id"] for item in existing}:
-                        raise ManifestDrainConflict(
-                            "source identity or lifecycle changed during manifest stamp"
-                        )
-
-                expected_names: dict[str, dict[str, Any]] = {}
-                for item in plan:
-                    if item["disposition"] != "active_in_flight":
-                        continue
-                    for name in [
-                        *(item.get("live_names") or []),
-                        *(item.get("parents") or []),
-                    ]:
-                        expected = expected_names.setdefault(
-                            name["id"], {**name, "paths": []}
-                        )
-                        if item["path"] not in expected["paths"]:
-                            expected["paths"].append(item["path"])
-                if expected_names:
-                    stamped = tx_gc.query(
-                        """
-                        UNWIND $items AS item
-                        MATCH (node:StandardName {id: item.id})
-                        SET node._drain_scope_lock = true
-                        REMOVE node._drain_scope_lock
-                        WITH node, item
-                        WHERE (node.name_stage = item.name_stage OR
-                               (node.name_stage IS NULL AND item.name_stage IS NULL))
-                          AND (node.docs_stage = item.docs_stage OR
-                               (node.docs_stage IS NULL AND item.docs_stage IS NULL))
-                          AND (node.validation_status = item.validation_status OR
-                               (node.validation_status IS NULL AND
-                                item.validation_status IS NULL))
-                          AND (node.claim_token = item.claim_token OR
-                               (node.claim_token IS NULL AND item.claim_token IS NULL))
-                          AND (node.claim_seq = item.claim_seq OR
-                               (node.claim_seq IS NULL AND item.claim_seq IS NULL))
-                          AND (node.drain_scope_id = item.drain_scope_id OR
-                               (node.drain_scope_id IS NULL AND
-                                item.drain_scope_id IS NULL))
-                          AND (node.drain_scope_claimed_at.epochMillis =
-                                 item.drain_scope_claimed_at_epoch_ms OR
-                               (node.drain_scope_claimed_at IS NULL AND
-                                item.drain_scope_claimed_at_epoch_ms IS NULL))
-                        SET node.updated_at = datetime(), node.drain_scope_id = $scope_id,
-                            node.drain_scope_claimed_at = datetime(),
-                            node.drain_scope_paths = item.paths
-                        RETURN collect(node.id) AS ids
-                        """,
-                        items=list(expected_names.values()),
-                        scope_id=scope_id,
-                    )
-                    stamped_names = set(stamped[0]["ids"] if stamped else [])
-                    if stamped_names != set(expected_names):
-                        raise ManifestDrainConflict(
-                            "name lifecycle or ownership changed during manifest stamp"
-                        )
-                tx.commit()
-                return scope_id, plan
-            except BaseException:
-                with suppress(Exception):
-                    tx.rollback()
-                raise
-    finally:
-        if own:
-            client.close()
-
-
-def prepare_manifest_drain_scope(
-    paths: list[str],
-    *,
-    dd_version: str,
-    scope_timeout_seconds: int = 600,
-) -> tuple[str, list[dict[str, Any]]]:
-    """Recover expired intersecting leases, then claim a freshly planned scope."""
-    from imas_codex.standard_names.orphan_sweep import (
-        find_expired_manifest_drain_scopes,
-        recover_manifest_drain_scope,
-    )
-
-    exact_paths = canonicalize_manifest_drain_paths(paths)
-    for stale_scope_id in find_expired_manifest_drain_scopes(
-        exact_paths, scope_timeout_s=scope_timeout_seconds
-    ):
-        recover_manifest_drain_scope(
-            stale_scope_id,
-            scope_timeout_s=scope_timeout_seconds,
-            worker_timeout_s=_CLAIM_TIMEOUT_SECONDS,
-            paths=exact_paths,
-        )
-    return claim_manifest_drain_scope(
-        exact_paths,
-        dd_version=dd_version,
-        scope_timeout_seconds=scope_timeout_seconds,
+    return graph_claim_scope.get_named_source_ids(
+        *args, services=_graph_foundation.services, **kwargs
     )
 
 
-@retry_on_deadlock()
-def clear_manifest_drain_scope(
-    drain_scope_id: str, *, gc: Any | None = None
-) -> dict[str, int]:
-    """Clear only one owned manifest scope without touching worker claims."""
-    own = gc is None
-    client = GraphClient() if own else gc
-    try:
-        rows = client.query(
-            """
-            CALL {
-              MATCH (source:StandardNameSource {drain_scope_id: $scope_id})
-              REMOVE source.drain_scope_id, source.drain_scope_claimed_at,
-                     source.drain_scope_paths,
-                     source.drain_scope_actionable,
-                     source.drain_claim_scope_id
-              RETURN count(source) AS sources
-            }
-            CALL {
-              MATCH (name:StandardName {drain_scope_id: $scope_id})
-              REMOVE name.drain_scope_id, name.drain_scope_claimed_at,
-                     name.drain_scope_paths, name.drain_claim_scope_id
-              RETURN count(name) AS names
-            }
-            RETURN sources, names
-            """,
-            scope_id=drain_scope_id,
-        )
-        return dict(rows[0]) if rows else {"sources": 0, "names": 0}
-    finally:
-        if own:
-            client.close()
+def partition_focus_by_accepted(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_scope.partition_focus_by_accepted."""
+    from .graph_store import graph_claim_scope
+
+    return graph_claim_scope.partition_focus_by_accepted(
+        *args, services=_graph_foundation.services, **kwargs
+    )
 
 
-@retry_on_deadlock()
-def release_manifest_drain_claims(
-    drain_scope_id: str, *, gc: Any | None = None
-) -> dict[str, int]:
-    """Release only claims atomically attributed to this bounded invocation."""
-    own = gc is None
-    client = GraphClient() if own else gc
-    try:
-        rows = client.query(
-            """
-            CALL {
-              MATCH (source:StandardNameSource {
-                drain_claim_scope_id: $scope_id,
-                drain_scope_id: $scope_id
-              })
-              WHERE source.claim_token IS NOT NULL
-              REMOVE source.claim_token, source.claimed_at
-              RETURN count(source) AS sources
-            }
-            CALL {
-              MATCH (name:StandardName {
-                drain_claim_scope_id: $scope_id,
-                drain_scope_id: $scope_id
-              })
-              WHERE name.claim_token IS NOT NULL
-              SET name.updated_at = datetime(), name.name_stage = CASE
-                    WHEN name.name_stage = 'refining'
-                    THEN 'reviewed' ELSE name.name_stage END,
-                  name.docs_stage = CASE
-                    WHEN name.docs_stage = 'refining'
-                    THEN 'reviewed' ELSE name.docs_stage END
-              REMOVE name.claim_token, name.claimed_at
-              RETURN count(name) AS names
-            }
-            RETURN sources, names
-            """,
-            scope_id=drain_scope_id,
-        )
-        return dict(rows[0]) if rows else {"sources": 0, "names": 0}
-    finally:
-        if own:
-            client.close()
+MANIFEST_DRAIN_DISPOSITIONS = import_module(
+    ".graph_store.graph_claim_scope", __package__
+).MANIFEST_DRAIN_DISPOSITIONS
 
 
-def finalize_manifest_drain_scope(
-    drain_scope_id: str,
-    *,
-    paths: list[str],
-    dd_version: str,
-) -> list[dict[str, Any]]:
-    """Release exact claims, report final state, and always clear the lease."""
-    primary_error: BaseException | None = None
-    try:
-        release_manifest_drain_claims(drain_scope_id)
-        return build_manifest_drain_plan(
-            paths,
-            dd_version=dd_version,
-            drain_scope_id=drain_scope_id,
-        )
-    except BaseException as exc:
-        primary_error = exc
-        raise
-    finally:
-        try:
-            clear_manifest_drain_scope(drain_scope_id)
-        except Exception:
-            if primary_error is None:
-                raise
-            logger.exception(
-                "bounded drain scope clear failed while preserving primary error"
-            )
+def canonicalize_manifest_drain_paths(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_scope.canonicalize_manifest_drain_paths."""
+    from .graph_store import graph_claim_scope
+
+    return graph_claim_scope.canonicalize_manifest_drain_paths(
+        *args, services=_graph_foundation.services, **kwargs
+    )
 
 
-@retry_on_deadlock()
-def scope_focus_names(
-    sns_ids: list[str], run_id: str, *, reset: bool, gc: Any | None = None
-) -> int:
-    """Bind the names produced by focused sources to a scope ``run_id``.
+def classify_manifest_drain_item(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_scope.classify_manifest_drain_item."""
+    from .graph_store import graph_claim_scope
 
-    A ``--focus``/``--batch`` drain scopes its pools by ``run_id``; every name
-    that should be worked this run must carry it. Two modes:
-
-    - ``reset=False`` (default): bind ``run_id`` only, leaving each name in its
-      current stage so it cycles from where it is (``drafted``→review,
-      ``reviewed``→refine). This is the no-reset default — re-staging in-flight
-      names to ``pending`` churns the hard tail (a genuinely-hard name is
-      re-shot out of ``exhausted`` every pass and never settles).
-    - ``reset=True`` (opt-in via ``--reseed``): re-stage each name to
-      ``pending`` on both axes and clear its review scores/claims, then bind the
-      ``run_id`` — the blunt reset-all. Targeted resets use ``--reset-to``.
-
-    Returns the number of names bound.
-    """
-    if not sns_ids:
-        return 0
-    if reset:
-        cypher = """
-            UNWIND $ids AS sid
-            MATCH (sns:StandardNameSource {id: sid})-[:PRODUCED_NAME]->(sn:StandardName)
-            SET sn.name_stage = 'pending',
-                sn.docs_stage = 'pending',
-                sn.run_id = $run_id,
-                sn.reviewed_name_at = null,
-                sn.reviewed_docs_at = null,
-                sn.reviewer_score_name = null,
-                sn.reviewer_score_docs = null,
-                sn.claim_token = null,
-                sn.claimed_at = null,
-                sn.updated_at = datetime()
-            RETURN count(DISTINCT sn) AS n
-            """
-    else:
-        cypher = """
-            UNWIND $ids AS sid
-            MATCH (sns:StandardNameSource {id: sid})-[:PRODUCED_NAME]->(sn:StandardName)
-            SET sn.run_id = $run_id, sn.updated_at = datetime()
-            RETURN count(DISTINCT sn) AS n
-            """
-    own = gc is None
-    client = GraphClient() if own else gc
-    try:
-        rows = client.query(cypher, ids=sns_ids, run_id=run_id)
-    finally:
-        if own:
-            client.close()
-    return rows[0]["n"] if rows else 0
+    return graph_claim_scope.classify_manifest_drain_item(
+        *args, services=_graph_foundation.services, **kwargs
+    )
 
 
-class ExactNameScopeConflict(ValueError):
-    """An exact existing-name scope is unsafe or no longer exact."""
+_MANIFEST_DRAIN_PLAN_QUERY = import_module(
+    ".graph_store.graph_claim_scope", __package__
+)._MANIFEST_DRAIN_PLAN_QUERY
 
 
-_EXACT_NAME_SCOPE_PREFLIGHT_QUERY = """
-// EXACT_NAME_SCOPE_PREFLIGHT
-UNWIND $names AS requested_name
-OPTIONAL MATCH (requested:StandardName {id: requested_name})
-WITH requested_name, collect(DISTINCT requested) AS matches
-CALL (matches) {
-  WITH matches
-  UNWIND matches AS selected
-  OPTIONAL MATCH (selected)-[:HAS_PARENT*0..]->(ancestor:StandardName)
-  WITH selected, collect(DISTINCT ancestor) AS ancestors
-  OPTIONAL MATCH (descendant:StandardName)-[:HAS_PARENT*1..]->(selected)
-  WITH ancestors, collect(DISTINCT descendant) AS descendants
-  WITH ancestors + descendants AS lineage
-  UNWIND CASE WHEN lineage = [] THEN [null] ELSE lineage END AS member
-  OPTIONAL MATCH (producer:StandardNameSource)-[:PRODUCED_NAME]->(member)
-  RETURN collect(DISTINCT producer.id) AS producer_ids
-}
-RETURN requested_name,
-       [candidate IN matches | {
-         id: candidate.id,
-         name_stage: candidate.name_stage,
-         status: candidate.status,
-         claimed_at: candidate.claimed_at,
-         claim_token: candidate.claim_token,
-         // Age is the fallback evidence, used only when the owning run cannot
-         // be resolved; the run's own status is read separately and decides
-         // every claim whose run_id resolves.
-         claim_stale: candidate.claimed_at IS NOT NULL
-                      AND candidate.claimed_at
-                          < datetime() - duration({seconds: $claim_timeout_s}),
-         run_id: candidate.run_id,
-         drain_scope_id: candidate.drain_scope_id,
-         drain_scope_claimed_at: candidate.drain_scope_claimed_at,
-         drain_claim_scope_id: candidate.drain_claim_scope_id
-       }] AS matches,
-       [producer_id IN producer_ids
-        WHERE producer_id STARTS WITH $fixture_source_id_prefix] AS fixture_producers
-ORDER BY requested_name
-"""
+def _resolved_manifest_drain_plan(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_scope._resolved_manifest_drain_plan."""
+    from .graph_store import graph_claim_scope
 
-_EXACT_NAME_SCOPE_STAMP_QUERY = """
-// EXACT_NAME_SCOPE_STAMP
-UNWIND $names AS requested_name
-MATCH (name:StandardName {id: requested_name})
-WHERE NOT coalesce(name.name_stage, '') IN $terminal_name_stages
-  AND NOT coalesce(name.status, '') IN $terminal_statuses
-  AND (
-    (name.claimed_at IS NULL AND name.claim_token IS NULL)
-    OR name.id IN $released_ids
-    OR name.claimed_at < datetime() - duration({seconds: $claim_timeout_s})
-  )
-  AND name.drain_scope_id IS NULL
-  AND name.drain_scope_claimed_at IS NULL
-  AND name.drain_claim_scope_id IS NULL
-  AND NOT EXISTS {
-    MATCH (name)-[:HAS_PARENT*0..]->(ancestor:StandardName)
-    MATCH (fixture_source:StandardNameSource)-[:PRODUCED_NAME]->(ancestor)
-    WHERE fixture_source.id STARTS WITH $fixture_source_id_prefix
-  }
-  AND NOT EXISTS {
-    MATCH (descendant:StandardName)-[:HAS_PARENT*1..]->(name)
-    MATCH (fixture_source:StandardNameSource)-[:PRODUCED_NAME]->(descendant)
-    WHERE fixture_source.id STARTS WITH $fixture_source_id_prefix
-  }
-SET name.run_id = $run_id, name.updated_at = datetime(),
-    name.claimed_at = null, name.claim_token = null
-RETURN collect(name.id) AS stamped_ids
-"""
+    return graph_claim_scope._resolved_manifest_drain_plan(
+        *args, services=_graph_foundation.services, **kwargs
+    )
 
-_EXACT_NAME_SCOPE_RUN_STATUS_QUERY = """
-// EXACT_NAME_SCOPE_RUN_STATUS
-UNWIND $run_ids AS run_id
-MATCH (owner:SNRun {id: run_id})
-RETURN run_id, owner.status AS status
-"""
 
-_EXACT_SCOPE_TERMINAL_NAME_STAGES = frozenset({"superseded", "exhausted", "contested"})
-_EXACT_SCOPE_TERMINAL_STATUSES = frozenset({"deprecated", "superseded"})
+def build_manifest_drain_plan(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_scope.build_manifest_drain_plan."""
+    from .graph_store import graph_claim_scope
+
+    return graph_claim_scope.build_manifest_drain_plan(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+ManifestDrainConflict = import_module(
+    ".graph_store.graph_claim_scope", __package__
+).ManifestDrainConflict
+
+
+def _manifest_plan_fingerprint(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_scope._manifest_plan_fingerprint."""
+    from .graph_store import graph_claim_scope
+
+    return graph_claim_scope._manifest_plan_fingerprint(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def _lock_manifest_drain_authority(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_scope._lock_manifest_drain_authority."""
+    from .graph_store import graph_claim_scope
+
+    return graph_claim_scope._lock_manifest_drain_authority(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def claim_manifest_drain_scope(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_scope.claim_manifest_drain_scope."""
+    from .graph_store import graph_claim_scope
+
+    return graph_claim_scope.claim_manifest_drain_scope(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def prepare_manifest_drain_scope(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_scope.prepare_manifest_drain_scope."""
+    from .graph_store import graph_claim_scope
+
+    return graph_claim_scope.prepare_manifest_drain_scope(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def clear_manifest_drain_scope(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_scope.clear_manifest_drain_scope."""
+    from .graph_store import graph_claim_scope
+
+    return graph_claim_scope.clear_manifest_drain_scope(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def release_manifest_drain_claims(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_scope.release_manifest_drain_claims."""
+    from .graph_store import graph_claim_scope
+
+    return graph_claim_scope.release_manifest_drain_claims(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def finalize_manifest_drain_scope(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_scope.finalize_manifest_drain_scope."""
+    from .graph_store import graph_claim_scope
+
+    return graph_claim_scope.finalize_manifest_drain_scope(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def scope_focus_names(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_scope.scope_focus_names."""
+    from .graph_store import graph_claim_scope
+
+    return graph_claim_scope.scope_focus_names(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+ExactNameScopeConflict = import_module(
+    ".graph_store.graph_claim_scope", __package__
+).ExactNameScopeConflict
+
+
+_EXACT_NAME_SCOPE_PREFLIGHT_QUERY = import_module(
+    ".graph_store.graph_claim_scope", __package__
+)._EXACT_NAME_SCOPE_PREFLIGHT_QUERY
+
+
+_EXACT_NAME_SCOPE_STAMP_QUERY = import_module(
+    ".graph_store.graph_claim_scope", __package__
+)._EXACT_NAME_SCOPE_STAMP_QUERY
+
+
+_EXACT_NAME_SCOPE_RUN_STATUS_QUERY = import_module(
+    ".graph_store.graph_claim_scope", __package__
+)._EXACT_NAME_SCOPE_RUN_STATUS_QUERY
+
+
+_EXACT_SCOPE_TERMINAL_NAME_STAGES = import_module(
+    ".graph_store.graph_claim_scope", __package__
+)._EXACT_SCOPE_TERMINAL_NAME_STAGES
+
+_EXACT_SCOPE_TERMINAL_STATUSES = import_module(
+    ".graph_store.graph_claim_scope", __package__
+)._EXACT_SCOPE_TERMINAL_STATUSES
+
 
 #: ``SNRunStatus`` values that end a run's ownership of its claims. Every other
 #: status — ``started``, a status written by a future release, or a run row that
 #: cannot be read at all — leaves the claim held, so the reading here fails
 #: closed: only a run known to have stopped releases its claim.
-_TERMINAL_RUN_STATUSES = frozenset(
-    {
-        SNRunStatus.completed.value,
-        SNRunStatus.interrupted.value,
-        SNRunStatus.failed.value,
-        SNRunStatus.degraded.value,
-        SNRunStatus.stale.value,
-    }
-)
-
-_CLAIM_ABSENT = "absent"
-_CLAIM_HELD = "held"
-_CLAIM_RELEASED = "released"
+_TERMINAL_RUN_STATUSES = import_module(
+    ".graph_store.graph_claim_scope", __package__
+)._TERMINAL_RUN_STATUSES
 
 
-def _claim_disposition(candidate: dict[str, Any], run_statuses: dict[str, str]) -> str:
-    """Decide whether one preflight candidate's claim is held or abandoned.
+_CLAIM_ABSENT = import_module(
+    ".graph_store.graph_claim_scope", __package__
+)._CLAIM_ABSENT
 
-    A claim is evidence that a worker holds the row. The direct evidence of
-    abandonment is the owning run's terminal status: the claim died with the
-    run, so the row is reclaimable at any age. Age is only a proxy for that,
-    kept as the fallback for a claim whose owning run cannot be resolved — a
-    legacy row with no ``run_id``, or a claim written by a process that never
-    created a run. A token carrying no timestamp is never cleared by the orphan
-    sweep either, so it stays held rather than becoming a row the reaper would
-    leave behind.
-    """
-    claimed_at = candidate.get("claimed_at")
-    if claimed_at is None and candidate.get("claim_token") is None:
-        return _CLAIM_ABSENT
-    if claimed_at is None:
-        return _CLAIM_HELD
-    status = run_statuses.get(str(candidate.get("run_id") or ""))
-    if status is not None:
-        return _CLAIM_RELEASED if status in _TERMINAL_RUN_STATUSES else _CLAIM_HELD
-    return _CLAIM_RELEASED if candidate.get("claim_stale", False) else _CLAIM_HELD
+_CLAIM_HELD = import_module(".graph_store.graph_claim_scope", __package__)._CLAIM_HELD
+
+_CLAIM_RELEASED = import_module(
+    ".graph_store.graph_claim_scope", __package__
+)._CLAIM_RELEASED
 
 
-def _claimed_run_ids(rows: list[dict[str, Any]]) -> list[str]:
-    """Collect the runs owning a claim in one preflight snapshot, bounded."""
-    return sorted(
-        {
-            str(candidate["run_id"])
-            for row in rows
-            for candidate in (row.get("matches") or [])
-            if candidate.get("claimed_at") is not None and candidate.get("run_id")
-        }
+def _claim_disposition(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_scope._claim_disposition."""
+    from .graph_store import graph_claim_scope
+
+    return graph_claim_scope._claim_disposition(
+        *args, services=_graph_foundation.services, **kwargs
     )
 
 
-def _collect_run_statuses(run_ids: list[str], *, query: Any) -> dict[str, str]:
-    """Resolve run rows that exist; a run absent from the graph stays unresolved.
+def _claimed_run_ids(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_scope._claimed_run_ids."""
+    from .graph_store import graph_claim_scope
 
-    Callers only reach this when a claim is present, so the read is bounded by
-    the size of the requested scope rather than by the claim population.
-    """
-    if not run_ids:
-        return {}
-    return {
-        str(row["run_id"]): row.get("status")
-        for row in query(_EXACT_NAME_SCOPE_RUN_STATUS_QUERY, run_ids=run_ids)
-    }
-
-
-def _exact_name_scope_refusals(
-    rows: list[dict[str, Any]], run_statuses: dict[str, str] | None = None
-) -> list[str]:
-    """Return deterministic refusal messages for one preflight snapshot.
-
-    ``run_statuses`` maps the id of every run owning a claim in these rows to its
-    ``SNRun`` status. A claim's own timestamp and token say a worker took the
-    row; the owning run's status says whether that worker still exists, which is
-    the fact age only approximates.
-    """
-    statuses = run_statuses or {}
-    refusals: list[str] = []
-    for row in rows:
-        requested_name = str(row.get("requested_name") or "")
-        matches = row.get("matches") or []
-        if len(matches) != 1:
-            state = "missing" if not matches else "ambiguous"
-            refusals.append(f"{requested_name}: {state} StandardName identity")
-            continue
-        candidate = matches[0]
-        if candidate.get("name_stage") in _EXACT_SCOPE_TERMINAL_NAME_STAGES or (
-            candidate.get("status") in _EXACT_SCOPE_TERMINAL_STATUSES
-        ):
-            refusals.append(f"{requested_name}: terminal StandardName lifecycle")
-        if (
-            candidate.get("claimed_at") is not None
-            or candidate.get("claim_token") is not None
-        ):
-            # A claim is held while its owning run is unaccounted for: a run
-            # still executing holds it at any age, and a run that reached a
-            # terminal status released it the moment it stopped, so the row is
-            # reclaimable however recently it was claimed. Age against the
-            # orphan-sweep cutoff is the fallback for a claim whose run cannot
-            # be resolved — a legacy row with no run_id, or a claim whose run
-            # row is absent — and a token carrying no timestamp is never
-            # cleared by the sweep either, so it stays held.
-            if _claim_disposition(candidate, statuses) == _CLAIM_HELD:
-                refusals.append(f"{requested_name}: current worker claim (live)")
-        if any(
-            candidate.get(field) is not None
-            for field in (
-                "drain_scope_id",
-                "drain_scope_claimed_at",
-                "drain_claim_scope_id",
-            )
-        ):
-            refusals.append(f"{requested_name}: current drain scope")
-        fixture_producers = sorted(set(row.get("fixture_producers") or []))
-        if fixture_producers:
-            refusals.append(
-                f"{requested_name}: HAS_PARENT lineage is produced by fixture "
-                f"source(s): {', '.join(fixture_producers)}"
-            )
-    return refusals
-
-
-@retry_on_deadlock()
-def scope_exact_standard_names(
-    name_ids: list[str],
-    run_id: str,
-    *,
-    dry_run: bool = False,
-    gc: Any | None = None,
-) -> dict[str, Any]:
-    """Preflight and bind one exact set of existing names to a fresh run scope.
-
-    The read covers the complete requested set and both directions of its
-    transitive ``HAS_PARENT`` lineage.  Any missing, ambiguous, terminal,
-    claimed, drain-scoped, or fixture-lineage identity refuses the whole
-    invocation.  A claim is refused while its owning run is unaccounted for: a
-    run that is still executing refuses however old the claim is, while a run
-    that reached a terminal status released its claim when it stopped, so the
-    row is reclaimed at any age.  Age is the fallback for a claim whose owning
-    run cannot be resolved, since it is then the only available evidence.
-    ``run_id`` is durable provenance rather than a live lock, so a
-    live invocation atomically replaces it on exactly the requested
-    ``StandardName`` nodes after every live claim and drain field is clear.  It
-    never touches ``StandardNameSource`` nodes.  Dry-run performs only the
-    preflight read.
-    """
-    normalized = [str(name_id).strip() for name_id in name_ids]
-    if not normalized or any(not name_id for name_id in normalized):
-        raise ExactNameScopeConflict("--name requires at least one non-empty identity")
-    duplicates = sorted(
-        name_id for name_id in set(normalized) if normalized.count(name_id) > 1
+    return graph_claim_scope._claimed_run_ids(
+        *args, services=_graph_foundation.services, **kwargs
     )
-    if duplicates:
-        raise ExactNameScopeConflict(
-            "duplicate exact StandardName identity: " + ", ".join(duplicates)
-        )
 
-    from imas_codex.standard_names.fixture_sources import FIXTURE_SOURCE_ID_PREFIX
 
-    requested = sorted(normalized)
-    own = gc is None
-    client = GraphClient() if own else gc
-    try:
-        with client.session() as session:
-            transaction = session.begin_transaction()
-            try:
-                rows = [
-                    dict(row)
-                    for row in transaction.run(
-                        _EXACT_NAME_SCOPE_PREFLIGHT_QUERY,
-                        names=requested,
-                        fixture_source_id_prefix=FIXTURE_SOURCE_ID_PREFIX,
-                        claim_timeout_s=DEFAULT_ORPHAN_SWEEP_TIMEOUT_S,
-                    )
-                ]
-                returned = [str(row.get("requested_name") or "") for row in rows]
-                if returned != requested:
-                    raise ExactNameScopeConflict(
-                        "exact-name preflight did not return the complete requested set"
-                    )
-                run_statuses = _collect_run_statuses(
-                    _claimed_run_ids(rows), query=transaction.run
-                )
-                refusals = _exact_name_scope_refusals(rows, run_statuses)
-                if refusals:
-                    raise ExactNameScopeConflict("; ".join(refusals))
+def _collect_run_statuses(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_scope._collect_run_statuses."""
+    from .graph_store import graph_claim_scope
 
-                released_ids = sorted(
-                    {
-                        str(candidate["id"])
-                        for row in rows
-                        for candidate in (row.get("matches") or [])
-                        if _claim_disposition(candidate, run_statuses)
-                        == _CLAIM_RELEASED
-                    }
-                )
+    return graph_claim_scope._collect_run_statuses(
+        *args, services=_graph_foundation.services, **kwargs
+    )
 
-                stamped_ids: list[str] = []
-                if not dry_run:
-                    stamp_rows = list(
-                        transaction.run(
-                            _EXACT_NAME_SCOPE_STAMP_QUERY,
-                            names=requested,
-                            run_id=run_id,
-                            terminal_name_stages=sorted(
-                                _EXACT_SCOPE_TERMINAL_NAME_STAGES
-                            ),
-                            terminal_statuses=sorted(_EXACT_SCOPE_TERMINAL_STATUSES),
-                            fixture_source_id_prefix=FIXTURE_SOURCE_ID_PREFIX,
-                            claim_timeout_s=DEFAULT_ORPHAN_SWEEP_TIMEOUT_S,
-                            released_ids=released_ids,
-                        )
-                    )
-                    if len(stamp_rows) != 1:
-                        raise ExactNameScopeConflict(
-                            "exact-name stamp did not return one cardinality result"
-                        )
-                    stamped_ids = sorted(dict(stamp_rows[0]).get("stamped_ids") or [])
-                    if stamped_ids != requested:
-                        raise ExactNameScopeConflict(
-                            "exact-name state changed between preflight and stamp"
-                        )
-                    transaction.commit()
-                else:
-                    transaction.close()
-                return {
-                    "name_ids": requested,
-                    "run_id": run_id,
-                    "dry_run": dry_run,
-                    "stamped": len(stamped_ids),
-                }
-            except BaseException:
-                if not transaction.closed:
-                    transaction.close()
-                raise
-    finally:
-        if own:
-            client.close()
+
+def _exact_name_scope_refusals(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_scope._exact_name_scope_refusals."""
+    from .graph_store import graph_claim_scope
+
+    return graph_claim_scope._exact_name_scope_refusals(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def scope_exact_standard_names(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_scope.scope_exact_standard_names."""
+    from .graph_store import graph_claim_scope
+
+    return graph_claim_scope.scope_exact_standard_names(
+        *args, services=_graph_foundation.services, **kwargs
+    )
 
 
 def get_source_name_mapping(*args: Any, **kwargs: Any):
@@ -4802,271 +3547,22 @@ def _finalize_generated_name_stage(
     return winner_ids
 
 
-@retry_on_deadlock()
-def write_vocab_gaps(
-    gaps: list[dict[str, Any]],
-    source_type: str = "dd",
-    *,
-    skip_segment_filter: bool = False,
-    gc: Any | None = None,
-) -> int:
-    """Persist VocabGap nodes and HAS_STANDARD_NAME_VOCAB_GAP relationships.
+def write_vocab_gaps(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_catalog_reset.write_vocab_gaps."""
+    from .graph_store import graph_catalog_reset
 
-    Each gap dict has: source_id, segment, token, reason.
-
-    Deduplicates VocabGap nodes by id (vocab_gap:{segment}:{token}).
-    Creates HAS_STANDARD_NAME_VOCAB_GAP relationships from source entities with
-    per-source reason as a relationship property.
-
-    Args:
-        gaps: List of gap dicts.
-        source_type: Source type ('dd' or 'signals').
-        skip_segment_filter: When ``True``, bypass the segment filter.
-            Used by auto-VocabGap detection — we still want to
-            track novel tokens for ISN review.
-
-    Returns the number of VocabGap nodes written.
-    """
-    if not gaps:
-        return 0
-
-    from datetime import UTC
-
-    if not skip_segment_filter:
-        from imas_codex.standard_names.segments import filter_closed_segment_gaps
-
-        # Drop gaps on pseudo segments (grammar_ambiguity) — not missing tokens.
-        gaps, dropped = filter_closed_segment_gaps(gaps)
-        if dropped:
-            from collections import Counter
-
-            drop_hist = Counter(g.get("segment") for g in dropped)
-            logger.info(
-                "write_vocab_gaps: skipped %d gaps on pseudo segments (%s)",
-                len(dropped),
-                ", ".join(f"{seg}={n}" for seg, n in drop_hist.most_common()),
-            )
-        if not gaps:
-            return 0
-
-    now = datetime.now(UTC).isoformat()
-
-    # Classify gaps using the ISN-backed classify_gap() function
-    from imas_codex.graph.models import VocabGapDedupDecision
-    from imas_codex.standard_names.segments import (
-        NON_ACTIONABLE_GAP_CATEGORIES,
-        classify_gap,
-        is_valid_segment,
+    return graph_catalog_reset.write_vocab_gaps(
+        *args, services=_graph_foundation.services, **kwargs
     )
 
-    settled_dedup_decisions = [
-        VocabGapDedupDecision.reuse_confirmed.value,
-        VocabGapDedupDecision.distinct_confirmed.value,
-        VocabGapDedupDecision.checked_no_reuse.value,
-    ]
 
-    # Build deduplicated gap nodes and relationship batch
-    gap_nodes: dict[str, dict] = {}
-    rel_batch: list[dict] = []
+def fetch_vocab_gap_adjudications(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_catalog_reset.fetch_vocab_gap_adjudications."""
+    from .graph_store import graph_catalog_reset
 
-    for g in gaps:
-        segment = g["segment"]
-        token = g["token"]
-        gap_id = f"vocab_gap:{segment}:{token}"
-
-        if gap_id not in gap_nodes:
-            # Validate segment exists in ISN grammar
-            if not is_valid_segment(segment):
-                logger.warning(
-                    "write_vocab_gaps: skipping gap with unknown segment "
-                    "'%s' for token '%s'",
-                    segment,
-                    token,
-                )
-                continue
-
-            category, actual_segments = classify_gap(segment, token)
-
-            # Filter non-actionable gaps — these are not genuine vocabulary
-            # deficiencies but LLM mis-classifications or decomposable compounds.
-            # Shared with the source-marking path so the two never drift.
-            if category in NON_ACTIONABLE_GAP_CATEGORIES:
-                logger.debug(
-                    "write_vocab_gaps: skipping %s gap %s (token '%s', segment '%s')",
-                    category,
-                    gap_id,
-                    token,
-                    segment,
-                )
-                continue
-
-            gap_nodes[gap_id] = {
-                "id": gap_id,
-                "segment": segment,
-                "token": token,
-                "example_count": 0,
-                "category": category,
-                "actual_segments": actual_segments,
-                "nearest_token": None,
-                "nearest_similarity": None,
-                "dedup_decision": None,
-            }
-        gap_nodes[gap_id]["example_count"] += 1
-
-        # Carry the compose-time token-reuse adjudication. A settled decision
-        # from an earlier observation in this batch is monotonic.
-        _decision = g.get("dedup_decision")
-        _current_decision = gap_nodes[gap_id]["dedup_decision"]
-        if _decision == VocabGapDedupDecision.reuse_confirmed.value or (
-            _decision and _current_decision not in settled_dedup_decisions
-        ):
-            gap_nodes[gap_id]["dedup_decision"] = _decision
-            if _decision == VocabGapDedupDecision.distinct_confirmed.value:
-                gap_nodes[gap_id]["nearest_token"] = g.get("nearest_token")
-                gap_nodes[gap_id]["nearest_similarity"] = g.get("nearest_similarity")
-
-        rel_batch.append(
-            {
-                "gap_id": gap_id,
-                "evidence_id": f"vocab-gap-evidence:{uuid.uuid4()}",
-                "segment": segment,
-                "token": token,
-                "source_id": g["source_id"],
-                "reason": g.get("reason", ""),
-                "observed_at": now,
-            }
-        )
-
-    with nullcontext(gc) if gc is not None else GraphClient() as write_gc:
-        # MERGE VocabGap nodes — increment count, update timestamps
-        write_gc.query(
-            """
-            UNWIND $batch AS b
-            MERGE (vg:VocabGap {id: b.id})
-            SET vg.segment = b.segment,
-                vg.token = b.token,
-                vg.example_count = coalesce(vg.example_count, 0) + b.example_count,
-                vg.category = b.category,
-                vg.actual_segments = b.actual_segments,
-                vg.first_seen_at = coalesce(vg.first_seen_at, datetime()),
-                vg.last_seen_at = datetime()
-            // Settled token-reuse decisions are monotonic. A fresh observation
-            // may fill an unset/unchecked decision, but cannot erase a
-            // mechanical reuse verdict or a completed distinctness check.
-            FOREACH (_ IN CASE
-                WHEN b.dedup_decision IS NOT NULL
-                     AND NOT (coalesce(vg.dedup_decision, '')
-                              IN $settled_dedup_decisions)
-                THEN [1] ELSE [] END |
-                SET vg.dedup_decision = b.dedup_decision)
-            FOREACH (_ IN CASE
-                WHEN b.dedup_decision = $distinct_decision
-                     AND vg.dedup_decision = $distinct_decision
-                THEN [1] ELSE [] END |
-                SET vg.nearest_token = b.nearest_token,
-                    vg.nearest_similarity = b.nearest_similarity)
-            """,
-            batch=list(gap_nodes.values()),
-            settled_dedup_decisions=settled_dedup_decisions,
-            distinct_decision=VocabGapDedupDecision.distinct_confirmed.value,
-        )
-
-        # Preserve every observation independently of the normalized node and
-        # the convenience relationship properties below.
-        write_gc.query(
-            """
-            UNWIND $batch AS b
-            MATCH (vg:VocabGap {id: b.gap_id})
-            CREATE (e:VocabGapEvidence {
-                id: b.evidence_id,
-                source_id: b.source_id,
-                vocab_gap_id: b.gap_id,
-                segment: b.segment,
-                token: b.token,
-                source_type: $source_type,
-                description: b.reason,
-                reason: b.reason,
-                observed_at: datetime(b.observed_at)
-            })
-            MERGE (vg)-[:HAS_EVIDENCE]->(e)
-            SET vg.evidence = coalesce(vg.evidence, []) + b.evidence_id
-            """,
-            batch=rel_batch,
-            source_type=source_type,
-        )
-
-        # Create HAS_STANDARD_NAME_VOCAB_GAP relationships from the underlying
-        # DD path / facility signal entity (the DD-catalog view).
-        entity_label = "IMASNode" if source_type == "dd" else "FacilitySignal"
-        write_gc.query(
-            f"""
-            UNWIND $batch AS b
-            MATCH (vg:VocabGap {{id: b.gap_id}})
-            MATCH (src:{entity_label} {{id: b.source_id}})
-            MERGE (src)-[r:HAS_STANDARD_NAME_VOCAB_GAP]->(vg)
-            SET r.reason = b.reason,
-                r.observed_at = datetime(b.observed_at)
-            """,
-            batch=rel_batch,
-        )
-
-        # And a source-first link from the StandardNameSource itself — the
-        # canonical, one-hop "why is this source blocked?" edge that reconcile
-        # traverses. Its id is uniform across source types ({type}:{source_id}).
-        write_gc.query(
-            """
-            UNWIND $batch AS b
-            MATCH (vg:VocabGap {id: b.gap_id})
-            MATCH (sns:StandardNameSource {id: $prefix + b.source_id})
-            MERGE (sns)-[r:HAS_STANDARD_NAME_VOCAB_GAP]->(vg)
-            SET r.reason = b.reason,
-                r.observed_at = datetime(b.observed_at)
-            """,
-            batch=rel_batch,
-            prefix=f"{source_type}:",
-        )
-
-    written = len(gap_nodes)
-    logger.info("Wrote %d VocabGap nodes from %d gap reports", written, len(gaps))
-    return written
-
-
-def fetch_vocab_gap_adjudications(
-    gaps: list[dict[str, Any]],
-    gc: Any | None = None,
-) -> list[dict[str, Any]]:
-    """Read active editorial decisions for the exact gaps in one compose result."""
-    identities = sorted(
-        {
-            f"vocab_gap:{gap.get('segment')}:{gap.get('token')}"
-            for gap in gaps
-            if gap.get("segment") and gap.get("token") is not None
-        }
+    return graph_catalog_reset.fetch_vocab_gap_adjudications(
+        *args, services=_graph_foundation.services, **kwargs
     )
-    if not identities:
-        return []
-
-    own = gc is None
-    client = GraphClient() if own else gc
-    try:
-        rows = client.query(
-            """
-            UNWIND $ids AS gap_id
-            MATCH (vg:VocabGap {id: gap_id, editorial_active: true})
-            RETURN vg.id AS id, vg.segment AS segment, vg.token AS token,
-                   vg.editorial_disposition AS disposition,
-                   vg.editorial_target AS target,
-                   vg.editorial_reason AS reason,
-                   vg.editorial_grammar_signature AS grammar_signature,
-                   vg.editorial_grammar_version AS grammar_version
-            ORDER BY vg.segment, vg.token
-            """,
-            ids=identities,
-        )
-        return [dict(row) for row in rows]
-    finally:
-        if own:
-            client.close()
 
 
 # =============================================================================
@@ -5080,1102 +3576,117 @@ def fetch_vocab_gap_adjudications(
 #   5. release (on error): clear claimed_at/claim_token (token-verified)
 # =============================================================================
 
-_CLAIM_TIMEOUT = "PT300S"  # 5 minutes — matches DEFAULT_CLAIM_TIMEOUT_SECONDS
+_CLAIM_TIMEOUT = import_module(
+    ".graph_store.graph_catalog_reset", __package__
+)._CLAIM_TIMEOUT
 
 
-@retry_on_deadlock()
-def claim_names_for_validation(limit: int = 50) -> tuple[str, list[dict[str, Any]]]:
-    """Atomically claim unvalidated StandardNames for ISN validation.
+def claim_names_for_validation(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_catalog_reset.claim_names_for_validation."""
+    from .graph_store import graph_catalog_reset
 
-    Returns ``(token, items)`` where *token* must be passed to
-    ``mark_names_validated`` or ``release_validation_claims``.
-    """
-    import uuid
-
-    token = str(uuid.uuid4())
-    with GraphClient() as gc:
-        # Step 1: claim with random ordering and unique token
-        # Gate: any StandardName with a description that hasn't been validated.
-        # No stage filter — names with NULL name_stage must also be validated.
-        gc.query(
-            """
-            MATCH (sn:StandardName)
-            WHERE sn.description IS NOT NULL
-              AND sn.validated_at IS NULL
-              AND (sn.claimed_at IS NULL
-                   OR sn.claimed_at < datetime() - duration($timeout))
-            WITH sn ORDER BY rand() LIMIT $limit
-            SET sn.updated_at = datetime(), sn.claimed_at = datetime(), sn.claim_token = $token
-            """,
-            limit=limit,
-            token=token,
-            timeout=_CLAIM_TIMEOUT,
-        )
-        # Step 2: verify — only our token
-        results = gc.query(
-            """
-            MATCH (sn:StandardName {claim_token: $token})
-            OPTIONAL MATCH (sn)<-[:HAS_STANDARD_NAME]-(src)
-            OPTIONAL MATCH (child:StandardName)-[:HAS_PARENT]->(sn)
-            WHERE NOT coalesce(child.name_stage, '') IN ['superseded', 'exhausted', 'contested']
-            RETURN sn.id AS id, sn.description AS description,
-                   sn.documentation AS documentation, sn.kind AS kind,
-                   sn.unit AS unit, sn.links AS links,
-                   sn.source_paths AS source_paths,
-                   sn.object AS object,
-                   sn.physics_domain AS physics_domain,
-                   sn.origin AS origin,
-                   collect(DISTINCT src.id) AS source_ids,
-                   collect(DISTINCT child.id) AS children
-            """,
-            token=token,
-        )
-        return token, [dict(r) for r in results]
-
-
-def mark_names_validated(
-    token: str,
-    results: list[dict[str, Any]],
-) -> int:
-    """Write validation results and release claims atomically.
-
-    Each result dict must have ``id``, ``validation_issues`` (list[str]),
-    ``validation_layer_summary`` (JSON string), and ``validation_status``
-    (``"valid"`` or ``"quarantined"``).
-    Token-verified: only updates nodes still claimed by this token.
-    """
-    if not results:
-        return 0
-    batch = []
-    for r in results:
-        batch.append(
-            {
-                "id": r["id"],
-                "issues": r.get("validation_issues") or [],
-                "summary": _ensure_json(r.get("validation_layer_summary")),
-                "validation_status": r.get("validation_status", "valid"),
-            }
-        )
-    with GraphClient() as gc:
-        result = gc.query(
-            """
-            UNWIND $batch AS b
-            MATCH (sn:StandardName {id: b.id, claim_token: $token})
-            SET sn.updated_at = datetime(), sn.validated_at = datetime(),
-                sn.validation_issues = b.issues,
-                sn.validation_layer_summary = b.summary,
-                sn.validation_status = b.validation_status,
-                sn.claimed_at = null,
-                sn.claim_token = null
-            RETURN count(sn) AS marked
-            """,
-            batch=batch,
-            token=token,
-        )
-        return result[0]["marked"] if result else 0
-
-
-def release_validation_claims(token: str) -> int:
-    """Release validation claims on error. Token-verified."""
-    with GraphClient() as gc:
-        result = gc.query(
-            """
-            MATCH (sn:StandardName {claim_token: $token})
-            SET sn.updated_at = datetime(), sn.claimed_at = null, sn.claim_token = null
-            RETURN count(sn) AS released
-            """,
-            token=token,
-        )
-        return result[0]["released"] if result else 0
-
-
-@retry_on_deadlock()
-def claim_names_for_embedding(limit: int = 100) -> tuple[str, list[dict[str, Any]]]:
-    """Atomically claim validated StandardNames needing embedding.
-
-    Returns ``(token, items)`` with ``id`` and ``description``.
-    """
-    import uuid
-
-    token = str(uuid.uuid4())
-    with GraphClient() as gc:
-        gc.query(
-            """
-            MATCH (sn:StandardName)
-            WHERE NOT coalesce(sn.name_stage, '') IN ['superseded', 'exhausted', 'contested']
-              AND sn.validated_at IS NOT NULL
-              AND sn.embedding IS NULL
-              AND sn.description IS NOT NULL
-              AND (sn.claimed_at IS NULL
-                   OR sn.claimed_at < datetime() - duration($timeout))
-            WITH sn ORDER BY rand() LIMIT $limit
-            SET sn.updated_at = datetime(), sn.claimed_at = datetime(), sn.claim_token = $token
-            """,
-            limit=limit,
-            token=token,
-            timeout=_CLAIM_TIMEOUT,
-        )
-        results = gc.query(
-            """
-            MATCH (sn:StandardName {claim_token: $token})
-            RETURN sn.id AS id, sn.description AS description
-            """,
-            token=token,
-        )
-        return token, [dict(r) for r in results]
-
-
-def mark_names_embedded(
-    token: str,
-    embed_batch: list[dict[str, Any]],
-) -> int:
-    """Write embeddings and release claims. Token-verified.
-
-    Each item in *embed_batch* must have ``id`` and ``embedding``.
-    """
-    if not embed_batch:
-        return 0
-    with GraphClient() as gc:
-        result = gc.query(
-            """
-            UNWIND $batch AS b
-            MATCH (sn:StandardName {id: b.id, claim_token: $token})
-            SET sn.updated_at = datetime(), sn.embedding = b.embedding,
-                sn.embedded_at = datetime(),
-                sn.claimed_at = null,
-                sn.claim_token = null
-            RETURN count(sn) AS marked
-            """,
-            batch=[
-                {"id": e["id"], "embedding": e["embedding"]}
-                for e in embed_batch
-                if e.get("embedding")
-            ],
-            token=token,
-        )
-        return result[0]["marked"] if result else 0
-
-
-def release_embedding_claims(token: str) -> int:
-    """Release embedding claims on error. Token-verified."""
-    with GraphClient() as gc:
-        result = gc.query(
-            """
-            MATCH (sn:StandardName {claim_token: $token})
-            SET sn.updated_at = datetime(), sn.claimed_at = null, sn.claim_token = null
-            RETURN count(sn) AS released
-            """,
-            token=token,
-        )
-        return result[0]["released"] if result else 0
-
-
-def get_validated_names(
-    ids_filter: str | None = None,
-    limit: int = 2000,
-) -> list[dict[str, Any]]:
-    """Query all validated StandardNames for consolidation analysis.
-
-    Read-only — no claims needed since consolidation is a batch analysis.
-    Returns drafted names that have ``validated_at`` set and
-    ``validation_status`` = ``'valid'``.
-    """
-    where_parts = [
-        "sn.name_stage = 'drafted'",
-        "sn.validated_at IS NOT NULL",
-        "sn.validation_status = 'valid'",
-    ]
-    params: dict[str, Any] = {"limit": limit}
-
-    if ids_filter:
-        where_parts.append("ANY(p IN sn.source_paths WHERE p STARTS WITH $ids_prefix)")
-        from imas_codex.standard_names.source_paths import ids_prefix_for_source_paths
-
-        params["ids_prefix"] = ids_prefix_for_source_paths(ids_filter)
-
-    where_clause = " AND ".join(where_parts)
-
-    with GraphClient() as gc:
-        results = gc.query(
-            f"""
-            MATCH (sn:StandardName)
-            WHERE {where_clause}
-            OPTIONAL MATCH (sn)<-[:HAS_STANDARD_NAME]-(src)
-            WITH sn, collect(DISTINCT src.id) AS source_ids
-            RETURN sn.id AS id, sn.description AS description,
-                   sn.documentation AS documentation, sn.kind AS kind,
-                   sn.unit AS unit, sn.links AS links,
-                   sn.source_paths AS source_paths,
-                   source_ids
-            LIMIT $limit
-            """,
-            **params,
-        )
-        return [dict(r) for r in results]
-
-
-def mark_names_consolidated(name_ids: list[str]) -> int:
-    """Mark names as consolidated (approved by cross-batch analysis)."""
-    if not name_ids:
-        return 0
-    with GraphClient() as gc:
-        result = gc.query(
-            """
-            UNWIND $ids AS nid
-            MATCH (sn:StandardName {id: nid})
-            SET sn.updated_at = datetime(), sn.consolidated_at = datetime()
-            RETURN count(sn) AS marked
-            """,
-            ids=name_ids,
-        )
-        return result[0]["marked"] if result else 0
-
-
-def reset_standard_names(
-    *,
-    from_stage: str | None = "drafted",
-    to_stage: str | None = None,
-    include_accepted: bool = False,
-    source_filter: str | None = None,
-    ids_filter: str | None = None,
-    path_allowlist: list[str] | None = None,
-    dry_run: bool = False,
-    since: str | None = None,
-    before: str | None = None,
-    below_score: float | None = None,
-    tiers: list[str] | None = None,
-    validation_status: str | None = None,
-) -> int:
-    """Reset StandardName nodes to allow re-processing.
-
-    Clears transient fields (embedding, embedded_at, model, generated_at)
-    and removes HAS_STANDARD_NAME, HAS_UNIT, and
-    HAS_COCOS relationships for matching nodes.
-
-    Parameters
-    ----------
-    from_stage:
-        Only reset nodes with this ``name_stage`` (default ``"drafted"``).
-        ``None`` selects any live stage (terminal ``superseded`` /
-        ``exhausted`` stages are always excluded; ``accepted`` requires
-        ``include_accepted=True``).
-    to_stage:
-        Target ``name_stage`` after reset.  ``None`` (default) clears fields
-        only without changing the stage.
-    include_accepted:
-        Required to reset ``name_stage='accepted'`` names — these are
-        committed catalog entries and the operator must opt in explicitly.
-    source_filter:
-        Restrict to nodes whose ``source_types`` contains ``"dd"`` or
-        ``"signals"``.
-    ids_filter:
-        Restrict to nodes whose HAS_STANDARD_NAME source path starts with this
-        IDS name (matched via ``IMASNode -[:HAS_STANDARD_NAME]-> sn``).
-    path_allowlist:
-        Restrict to nodes attached to an IMASNode whose ``src.id`` is *exactly*
-        in this list (matched via ``IMASNode -[:HAS_STANDARD_NAME]-> sn`` with
-        ``src.id IN $path_allowlist``).  Unlike ``ids_filter`` this is an
-        exact-path allowlist, not a prefix — names on any other path are left
-        untouched.  Combines with ``ids_filter`` (both predicates apply).
-    dry_run:
-        Return the count of matching nodes without modifying anything.
-    since:
-        Only reset names with ``generated_at >= this`` ISO timestamp.
-    before:
-        Only reset names with ``generated_at < this`` ISO timestamp.
-    below_score:
-        Only reset names with ``reviewer_score < this`` value (0.0–1.0).
-    tiers:
-        Only reset names with ``review_tier`` in this list.
-    validation_status:
-        Only reset names with this ``validation_status`` value.
-
-    Returns
-    -------
-    Number of nodes reset (or that would be reset in dry-run mode).
-    """
-    with GraphClient() as gc:
-        params: dict[str, Any] = {}
-        where_clauses = [
-            "NOT coalesce(sn.name_stage, '') IN ['superseded', 'exhausted', 'contested']"
-        ]
-        if from_stage is not None:
-            where_clauses.append("sn.name_stage = $from_stage")
-            params["from_stage"] = from_stage
-        if not include_accepted and from_stage != "accepted":
-            where_clauses.append("coalesce(sn.name_stage, '') <> 'accepted'")
-
-        if source_filter:
-            where_clauses.append("$source_filter IN sn.source_types")
-            params["source_filter"] = source_filter
-
-        if since:
-            where_clauses.append("sn.generated_at >= datetime($since)")
-            params["since"] = since
-        if before:
-            where_clauses.append("sn.generated_at < datetime($before)")
-            params["before"] = before
-        if below_score is not None:
-            where_clauses.append("sn.reviewer_score_name < $below_score")
-            params["below_score"] = below_score
-        if tiers:
-            where_clauses.append("sn.review_tier IN $tiers")
-            params["tiers"] = tiers
-        if validation_status:
-            where_clauses.append("sn.validation_status = $validation_status")
-            params["validation_status"] = validation_status
-
-        where = " AND ".join(where_clauses)
-
-        # Build the optional IMASNode-source scope. ids_filter is a prefix
-        # match; path_allowlist is an exact-path membership test. Either (or
-        # both) forces selection to go through the HAS_STANDARD_NAME join.
-        src_clauses: list[str] = []
-        if ids_filter:
-            params["ids_prefix"] = ids_filter + "/"
-            src_clauses.append("src.id STARTS WITH $ids_prefix")
-        # Fail-closed: an empty allowlist selects the scoped branch and
-        # matches NOTHING (``src.id IN []``). Treating ``[]`` as falsy here
-        # would fall through to the unscoped branch and reset the whole graph
-        # — the 1863-name-wipe shape. ``None`` means "no allowlist scope".
-        if path_allowlist is not None:
-            params["path_allowlist"] = list(path_allowlist)
-            src_clauses.append("src.id IN $path_allowlist")
-        use_src_join = bool(src_clauses)
-        src_where = " AND ".join(src_clauses)
-
-        if use_src_join:
-            count_cypher = f"""
-                MATCH (src:IMASNode)-[:HAS_STANDARD_NAME]->(sn:StandardName)
-                WHERE {where}
-                AND {src_where}
-                RETURN count(DISTINCT sn) AS n
-            """
-        else:
-            count_cypher = f"""
-                MATCH (sn:StandardName)
-                WHERE {where}
-                RETURN count(sn) AS n
-            """
-
-        result = gc.query(count_cypher, **params)
-        count = result[0]["n"] if result else 0
-        logger.info(
-            "reset_standard_names: %d nodes match (from_stage=%s, source=%s, ids=%s)",
-            count,
-            from_stage,
-            source_filter,
-            ids_filter,
-        )
-
-        if dry_run or count == 0:
-            return count
-
-        if use_src_join:
-            # Collect matching SN ids first, then operate on them. This keeps
-            # every subsequent mutation scoped to exactly the names attached to
-            # the in-scope source paths — names on other paths are untouched.
-            collect_cypher = f"""
-                MATCH (src:IMASNode)-[:HAS_STANDARD_NAME]->(sn:StandardName)
-                WHERE {where}
-                AND {src_where}
-                RETURN DISTINCT sn.id AS sn_id
-            """
-            rows = gc.query(collect_cypher, **params)
-            sn_ids = [r["sn_id"] for r in rows]
-            reset_params: dict[str, Any] = {"sn_ids": sn_ids}
-            node_match = "MATCH (sn:StandardName) WHERE sn.id IN $sn_ids"
-        else:
-            reset_params = dict(params)
-            node_match = f"MATCH (sn:StandardName) WHERE {where}"
-
-        # Clear transient fields, optionally set a new stage
-        if to_stage is not None:
-            set_clause = (
-                "sn.embedding = null, sn.embedded_at = null, sn.model = null, "
-                "sn.generated_at = null, "
-                "sn.cocos_transformation_type = null, sn.cocos = null, sn.dd_version = null, "
-                "sn.name_stage = $to_stage, sn.updated_at = datetime()"
-            )
-            reset_params["to_stage"] = to_stage
-        else:
-            set_clause = (
-                "sn.embedding = null, sn.embedded_at = null, sn.model = null, "
-                "sn.generated_at = null, "
-                "sn.cocos_transformation_type = null, sn.cocos = null, sn.dd_version = null, "
-                "sn.updated_at = datetime()"
-            )
-
-        # Remove HAS_STANDARD_NAME, HAS_UNIT, and HAS_COCOS relationships and
-        # clear the transient fields in a SINGLE statement so the reset is
-        # atomic: a mid-sequence failure can no longer leave a node with its
-        # edges stripped but its fields (or target stage) untouched, or vice
-        # versa. Each DELETE runs in its own unit CALL subquery so the outer
-        # cardinality stays one row per node and the SET applies exactly once.
-        gc.query(
-            f"""
-            {node_match}
-            CALL {{
-                WITH sn
-                OPTIONAL MATCH (sn)<-[r:HAS_STANDARD_NAME]-()
-                DELETE r
-            }}
-            CALL {{
-                WITH sn
-                OPTIONAL MATCH (sn)-[r:HAS_UNIT]->()
-                DELETE r
-            }}
-            CALL {{
-                WITH sn
-                OPTIONAL MATCH (sn)-[r:HAS_COCOS]->()
-                DELETE r
-            }}
-            SET {set_clause}
-            """,
-            **reset_params,
-        )
-
-    logger.info("Reset %d StandardName nodes", count)
-    return count
-
-
-def clear_standard_names(
-    *,
-    stage_filter: list[str] | None = None,
-    source_filter: str | None = None,
-    ids_filter: str | None = None,
-    path_allowlist: list[str] | None = None,
-    include_accepted: bool = False,
-    dry_run: bool = False,
-    since: str | None = None,
-    before: str | None = None,
-    below_score: float | None = None,
-    tiers: list[str] | None = None,
-    validation_status: str | None = None,
-) -> int:
-    """Delete StandardName nodes and their relationships.
-
-    Safety model (relationship-first):
-
-    1. If ``ids_filter`` or ``source_filter`` is set, delete matching
-       ``HAS_STANDARD_NAME`` relationships first.
-    2. Then delete ``StandardName`` nodes that have zero remaining
-       ``HAS_STANDARD_NAME`` edges.
-
-    With no ``stage_filter`` every live stage is eligible except
-    ``accepted`` (requires ``include_accepted=True``); the terminal
-    ``superseded`` / ``exhausted`` stages are never deleted unless
-    explicitly listed (they carry REFINED_FROM chain history).
-
-    Parameters
-    ----------
-    stage_filter:
-        List of ``name_stage`` values to delete.  ``None`` (default)
-        selects all live stages, gated by ``include_accepted``.
-    source_filter:
-        Restrict to nodes whose ``source_types`` contains ``"dd"`` or
-        ``"signals"``.
-    ids_filter:
-        Delete only names linked to an IMASNode whose id starts with this IDS
-        name.  Relationships are removed first; nodes become orphans and are
-        then deleted.
-    path_allowlist:
-        Delete only names linked to an IMASNode whose ``src.id`` is *exactly*
-        in this list (``src.id IN $path_allowlist``).  Unlike ``ids_filter``
-        this is an exact-path allowlist, not a prefix.  Relationships are
-        removed first (relationship-first delete), so names attached to any
-        other path — including accepted catalog names — keep their edges and
-        are never deleted.  Combines with ``ids_filter``.
-    include_accepted:
-        Required to delete ``name_stage='accepted'`` names — these are
-        committed catalog entries and the operator must opt in explicitly.
-    dry_run:
-        Return the count of nodes that would be deleted without modifying
-        anything.
-    since:
-        Only clear names with ``generated_at >= this`` ISO timestamp.
-    before:
-        Only clear names with ``generated_at < this`` ISO timestamp.
-    below_score:
-        Only clear names with ``reviewer_score < this`` value (0.0–1.0).
-    tiers:
-        Only clear names with ``review_tier`` in this list.
-    validation_status:
-        Only clear names with this ``validation_status`` value.
-
-    Returns
-    -------
-    Number of nodes deleted (or that would be deleted in dry-run mode).
-    """
-    effective_stages = list(stage_filter) if stage_filter else []
-    # include_accepted only AUTHORIZES an explicitly-listed 'accepted' stage;
-    # it must NEVER inject 'accepted' into a stage list the operator did not
-    # name. ``--stage drafted --include-accepted`` deletes drafted names only —
-    # not accepted catalog entries. Without the opt-in, an explicitly-listed
-    # 'accepted' is dropped as a protection.
-    if stage_filter is not None and not include_accepted:
-        effective_stages = [s for s in effective_stages if s != "accepted"]
-
-    with GraphClient() as gc:
-        params: dict[str, Any] = {}
-        sn_where_clauses: list[str] = []
-        if stage_filter is None:
-            sn_where_clauses.append(
-                "NOT coalesce(sn.name_stage, '') IN ['superseded', 'exhausted', 'contested']"
-            )
-            if not include_accepted:
-                sn_where_clauses.append("coalesce(sn.name_stage, '') <> 'accepted'")
-        else:
-            params["stages"] = effective_stages
-            sn_where_clauses.append("sn.name_stage IN $stages")
-
-        if source_filter:
-            sn_where_clauses.append("$source_filter IN sn.source_types")
-            params["source_filter"] = source_filter
-
-        if since:
-            sn_where_clauses.append("sn.generated_at >= datetime($since)")
-            params["since"] = since
-        if before:
-            sn_where_clauses.append("sn.generated_at < datetime($before)")
-            params["before"] = before
-        if below_score is not None:
-            sn_where_clauses.append("sn.reviewer_score_name < $below_score")
-            params["below_score"] = below_score
-        if tiers:
-            sn_where_clauses.append("sn.review_tier IN $tiers")
-            params["tiers"] = tiers
-        if validation_status:
-            sn_where_clauses.append("sn.validation_status = $validation_status")
-            params["validation_status"] = validation_status
-
-        sn_where = " AND ".join(sn_where_clauses) if sn_where_clauses else "true"
-
-        # Build the optional IMASNode-source scope. ids_filter is a prefix
-        # match; path_allowlist is an exact-path membership test. Either (or
-        # both) forces the relationship-first delete path so names on other
-        # paths keep their edges and survive.
-        src_clauses: list[str] = []
-        if ids_filter:
-            params["ids_prefix"] = ids_filter + "/"
-            src_clauses.append("src.id STARTS WITH $ids_prefix")
-        # Fail-closed: an empty allowlist selects the scoped branch and
-        # matches NOTHING (``src.id IN []``). Treating ``[]`` as falsy here
-        # would fall through to the unscoped branch and delete across the
-        # whole graph — the 1863-name-wipe shape. ``None`` = no allowlist.
-        if path_allowlist is not None:
-            params["path_allowlist"] = list(path_allowlist)
-            src_clauses.append("src.id IN $path_allowlist")
-        use_src_join = bool(src_clauses)
-        src_where = " AND ".join(src_clauses)
-        # Same scope predicate rebound to an ``o`` producer, for the
-        # out-of-scope-producer guard below.
-        out_scope_where = src_where.replace("src.", "o.")
-
-        exact_reset_parent_where = """
-            (
-                parent.origin = 'derived'
-                OR (
-                    parent.origin IS NULL
-                    AND parent.transformation IS NOT NULL
-                )
-            )
-            AND coalesce(parent.name_stage, '') IN ['', 'pending']
-            AND NOT (parent.id IN reset_candidate_ids)
-            AND parent.claimed_at IS NULL
-            AND parent.claim_token IS NULL
-            AND all(key IN keys(parent)
-                    WHERE key IN $reset_skeleton_parent_keys)
-            AND NOT EXISTS {
-                MATCH (other)-[parent_rel]-(parent)
-                WHERE NOT (
-                    (
-                        type(parent_rel) = 'HAS_PARENT'
-                        AND parent_rel.operator_kind IS NOT NULL
-                        AND other.id IN reset_candidate_ids
-                        AND startNode(parent_rel) = other
-                        AND endNode(parent_rel) = parent
-                    )
-                    OR (
-                        type(parent_rel) = 'PRODUCED_NAME'
-                        AND other:StandardNameSource
-                        AND other.id = 'derived:' + parent.id
-                        AND startNode(parent_rel) = other
-                        AND endNode(parent_rel) = parent
-                    )
-                    OR (
-                        type(parent_rel) = 'HAS_PARENT'
-                        AND parent_rel.operator_kind IS NOT NULL
-                        AND other:StandardName
-                        AND startNode(parent_rel) = parent
-                        AND endNode(parent_rel) = other
-                    )
-                    OR (
-                        type(parent_rel) = 'HAS_LOCUS'
-                        AND other:Locus
-                        AND startNode(parent_rel) = parent
-                        AND endNode(parent_rel) = other
-                        AND parent_rel.locus_token = other.id
-                        AND parent_rel.locus_relation IS NOT NULL
-                    )
-                    OR (
-                        type(parent_rel) = 'HAS_SEGMENT'
-                        AND other:GrammarToken
-                        AND startNode(parent_rel) = parent
-                        AND endNode(parent_rel) = other
-                        AND parent_rel.segment = other.segment
-                        AND parent[parent_rel.segment] = other.value
-                    )
-                    OR (
-                        type(parent_rel) IN $reset_skeleton_segment_edge_types
-                        AND other:GrammarToken
-                        AND startNode(parent_rel) = parent
-                        AND endNode(parent_rel) = other
-                        AND parent[
-                            toLower(substring(type(parent_rel), 4))
-                        ] = other.value
-                    )
-                )
-            }
-            AND NOT EXISTS {
-                MATCH (mirror_source:StandardNameSource)
-                WHERE mirror_source.produced_sn_id = parent.id
-                  AND mirror_source.id <> 'derived:' + parent.id
-            }
-        """
-        exact_reset_source_where = """
-            derived_source IS NULL OR (
-                derived_source.source_type = 'derived'
-                AND derived_source.source_id = parent.id
-                AND coalesce(derived_source.batch_key, 'derived_parent') =
-                    'derived_parent'
-                AND coalesce(derived_source.attempt_count, 0) = 0
-                AND derived_source.claimed_at IS NULL
-                AND derived_source.claim_token IS NULL
-                AND derived_source.produced_sn_id = parent.id
-                AND (
-                    (
-                        derived_source.status IS NULL
-                        AND all(key IN keys(derived_source)
-                                WHERE key IN
-                                      $reset_skeleton_minimal_source_keys)
-                    )
-                    OR (
-                        derived_source.status = 'composed'
-                        AND derived_source.created_at IS NOT NULL
-                        AND derived_source.composed_at IS NOT NULL
-                        AND all(key IN keys(derived_source)
-                                WHERE key IN
-                                      $reset_skeleton_composed_source_keys)
-                    )
-                )
-                AND NOT EXISTS {
-                    MATCH (derived_source)-[source_rel]-()
-                    WHERE NOT (
-                        type(source_rel) = 'PRODUCED_NAME'
-                        AND endNode(source_rel) = parent
-                    )
-                }
-            )
-        """
-        if path_allowlist is not None:
-            params["reset_skeleton_parent_keys"] = [
-                "id",
-                "origin",
-                "name_stage",
-                "needs_composition",
-                "claimed_at",
-                "claim_token",
-                *_GRAMMAR_SEGMENT_COLUMNS,
-            ]
-            params["reset_skeleton_segment_edge_types"] = [
-                rel_type for _segment, rel_type in _SEGMENT_EDGE_TYPES
-            ]
-            params["reset_skeleton_minimal_source_keys"] = [
-                "id",
-                "source_type",
-                "source_id",
-                "batch_key",
-                "attempt_count",
-                "produced_sn_id",
-                "claimed_at",
-                "claim_token",
-            ]
-            params["reset_skeleton_composed_source_keys"] = [
-                *params["reset_skeleton_minimal_source_keys"],
-                "status",
-                "created_at",
-                "composed_at",
-            ]
-
-        if use_src_join:
-            # Count the names that will ACTUALLY be deleted, not merely the ones
-            # matched in scope: a name matched via an in-scope edge SURVIVES if
-            # it also has a producer outside the scope (relationship-first
-            # delete keeps that edge). Counting bare in-scope matches overcounts
-            # such survivors, so the reported/dry-run number would exceed the
-            # real deletions. Restrict to names whose producers are ALL in
-            # scope (no out-of-scope producer → truly orphaned after the edge
-            # delete).
-            if path_allowlist is not None:
-                count_cypher = f"""
-                    MATCH (src:IMASNode)-[:HAS_STANDARD_NAME]->(sn:StandardName)
-                    WHERE {sn_where}
-                    AND {src_where}
-                    WITH DISTINCT sn
-                    WHERE NOT EXISTS {{
-                        MATCH (o:IMASNode)-[:HAS_STANDARD_NAME]->(sn)
-                        WHERE NOT ({out_scope_where})
-                    }}
-                    WITH collect(sn) AS reset_candidates
-                    WITH reset_candidates,
-                         [candidate IN reset_candidates | candidate.id]
-                             AS reset_candidate_ids
-                    CALL {{
-                        WITH reset_candidates, reset_candidate_ids
-                        UNWIND reset_candidates AS candidate
-                        OPTIONAL MATCH (candidate)-[candidate_parent_edge:HAS_PARENT]->
-                                       (candidate_parent:StandardName)
-                        WHERE candidate_parent_edge.operator_kind IS NOT NULL
-                        WITH reset_candidate_ids,
-                             collect(DISTINCT candidate_parent) AS candidate_parents
-                        UNWIND CASE WHEN size(candidate_parents) = 0
-                            THEN [null] ELSE candidate_parents END AS parent
-                        WITH DISTINCT reset_candidate_ids, parent
-                        WHERE parent IS NOT NULL
-                          AND {exact_reset_parent_where}
-                        OPTIONAL MATCH (derived_source:StandardNameSource)
-                        WHERE derived_source.id = 'derived:' + parent.id
-                        WITH parent, derived_source
-                        WHERE {exact_reset_source_where}
-                        RETURN count(DISTINCT parent) AS skeleton_count
-                    }}
-                    RETURN size(reset_candidates) + skeleton_count AS n,
-                           size(reset_candidates) AS candidate_count,
-                           skeleton_count
-                """
-            else:
-                count_cypher = f"""
-                    MATCH (src:IMASNode)-[:HAS_STANDARD_NAME]->(sn:StandardName)
-                    WHERE {sn_where}
-                    AND {src_where}
-                    WITH DISTINCT sn
-                    WHERE NOT EXISTS {{
-                        MATCH (o:IMASNode)-[:HAS_STANDARD_NAME]->(sn)
-                        WHERE NOT ({out_scope_where})
-                    }}
-                    RETURN count(sn) AS n
-                """
-        else:
-            count_cypher = f"""
-                MATCH (sn:StandardName)
-                WHERE {sn_where}
-                RETURN count(sn) AS n
-            """
-
-        result = gc.query(count_cypher, **params)
-        count = result[0]["n"] if result else 0
-        logger.info(
-            "clear_standard_names: %d nodes match (stages=%s, source=%s, ids=%s)",
-            count,
-            effective_stages or "all-live",
-            source_filter,
-            ids_filter,
-        )
-
-        if dry_run or count == 0:
-            return count
-
-        # Delete the in-scope reviews and StandardName nodes in a SINGLE
-        # statement so the delete is atomic: a mid-sequence failure can no
-        # longer leave a name with its producer edge stripped but the node
-        # (or its review) still present, dropping the name out of every future
-        # regeneration while orphaning its review.
-        #
-        # DETACH DELETE on the StandardName alone would orphan its
-        # StandardNameReview (HAS_REVIEW goes StandardName -> StandardNameReview),
-        # so the review is deleted in the same statement inside a unit CALL
-        # subquery.
-        if use_src_join:
-            # Relationship-first, scope-safe: remove the in-scope producer
-            # edges, then (orphan-guard) delete only the names that have NO
-            # remaining HAS_STANDARD_NAME edge. Neo4j inserts an Eager barrier
-            # between the DELETE and the NOT EXISTS read so the guard sees
-            # post-delete state — a name still attached to any out-of-scope
-            # path survives with its review intact (survivor-review handling:
-            # the review is deleted only for names that actually go away).
-            # Verified against a live graph in
-            # tests/standard_names/test_clear_atomicity_graph.py.
-            deletion_clause = deletion_change_cypher("sn")
-            deletion_params = deletion_change_params(
-                "clear_selected_name",
-                reason="selected name removed by a scoped pipeline clear",
-            )
-            if path_allowlist is not None:
-                # An exact reset can delete the only child of a structural
-                # parent that relationship projection created as a bare
-                # scaffold. Carry only those former direct parents through the
-                # candidate delete and retire a parent in this SAME statement
-                # when it remains a null-lifecycle skeleton. The property-key,
-                # relationship, claim, and source-identity fences make this a
-                # cleanup of reset-created scaffolding rather than a general
-                # derived-parent reaper.
-                skeleton_params = deletion_change_params(
-                    "remove_skeleton_placeholder",
-                    reason=(
-                        "exact source reset removed the scaffold's only "
-                        "structural child"
-                    ),
-                )
-                # The scaffold receipt is a different operation from the
-                # candidate's, so it namespaces its parameters and shares the
-                # statement rather than writing a bare change row.
-                skeleton_clause = deletion_change_cypher(
-                    "parent", param_prefix="reset_skeleton_"
-                )
-                rows = gc.query(
-                    f"""
-                    MATCH (src:IMASNode)-[rel:HAS_STANDARD_NAME]->(sn:StandardName)
-                    WHERE {sn_where}
-                    AND {src_where}
-                    OPTIONAL MATCH (sn)-[candidate_parent_edge:HAS_PARENT]->
-                                   (candidate_parent:StandardName)
-                    WHERE candidate_parent_edge.operator_kind IS NOT NULL
-                    WITH sn,
-                         collect(DISTINCT rel) AS reset_relationships,
-                         collect(DISTINCT candidate_parent.id)
-                             AS candidate_parent_ids
-                    FOREACH (rel IN reset_relationships | DELETE rel)
-                    WITH sn, candidate_parent_ids
-                    WHERE NOT EXISTS {{ MATCH ()-[:HAS_STANDARD_NAME]->(sn) }}
-                    {deletion_clause}
-                    WITH sn, change, candidate_parent_ids,
-                         sn.id AS reset_candidate_id
-                    CALL {{
-                        WITH sn
-                        OPTIONAL MATCH (sn)-[:HAS_REVIEW]->(r:StandardNameReview)
-                        DETACH DELETE r
-                    }}
-                    DETACH DELETE sn
-                    WITH collect(DISTINCT change) AS candidate_changes,
-                         collect(DISTINCT reset_candidate_id)
-                             AS reset_candidate_ids,
-                         reduce(
-                             all_parent_ids = [],
-                             parent_ids IN collect(candidate_parent_ids) |
-                                 all_parent_ids + parent_ids
-                         ) AS candidate_parent_ids
-                    CALL {{
-                        WITH reset_candidate_ids, candidate_parent_ids
-                        UNWIND candidate_parent_ids AS parent_id
-                        WITH DISTINCT reset_candidate_ids, parent_id
-                        MATCH (parent:StandardName {{id: parent_id}})
-                        WHERE {exact_reset_parent_where}
-                        OPTIONAL MATCH (derived_source:StandardNameSource)
-                        WHERE derived_source.id = 'derived:' + parent.id
-                        WITH parent, derived_source
-                        WHERE {exact_reset_source_where}
-                        {skeleton_clause}
-                        FOREACH (source IN CASE
-                            WHEN derived_source IS NULL THEN [] ELSE [derived_source]
-                        END | DETACH DELETE source)
-                        DETACH DELETE parent
-                        RETURN count(DISTINCT parent) AS skeleton_count
-                    }}
-                    RETURN size(candidate_changes) + skeleton_count AS n,
-                           size(candidate_changes) AS candidate_count,
-                           skeleton_count
-                    """,
-                    **params,
-                    **deletion_params,
-                    **{
-                        f"reset_skeleton_{key}": value
-                        for key, value in skeleton_params.items()
-                    },
-                )
-                count = int(rows[0]["n"]) if rows else 0
-            else:
-                gc.query(
-                    f"""
-                    MATCH (src:IMASNode)-[rel:HAS_STANDARD_NAME]->(sn:StandardName)
-                    WHERE {sn_where}
-                    AND {src_where}
-                    DELETE rel
-                    WITH DISTINCT sn
-                    WHERE NOT EXISTS {{ MATCH ()-[:HAS_STANDARD_NAME]->(sn) }}
-                    {deletion_clause}
-                    WITH sn, change
-                    CALL {{
-                        WITH sn
-                        OPTIONAL MATCH (sn)-[:HAS_REVIEW]->(r:StandardNameReview)
-                        DETACH DELETE r
-                    }}
-                    DETACH DELETE sn
-                    """,
-                    **params,
-                    **deletion_params,
-                )
-        else:
-            deletion_clause = deletion_change_cypher("sn")
-            deletion_params = deletion_change_params(
-                "clear_selected_name",
-                reason="selected name removed by a pipeline clear",
-            )
-            gc.query(
-                f"""
-                MATCH (sn:StandardName)
-                WHERE {sn_where}
-                {deletion_clause}
-                WITH sn, change
-                CALL {{
-                    WITH sn
-                    OPTIONAL MATCH (sn)-[:HAS_REVIEW]->(r:StandardNameReview)
-                    DETACH DELETE r
-                }}
-                DETACH DELETE sn
-                """,
-                **params,
-                **deletion_params,
-            )
-
-        # Sweep any StandardNameReview node whose owner is absent.
-        orphan_result = gc.query(
-            """
-            MATCH (r:StandardNameReview)
-            WHERE NOT EXISTS { MATCH (:StandardName)-[:HAS_REVIEW]->(r) }
-            WITH r LIMIT 10000
-            DETACH DELETE r
-            RETURN count(r) AS n
-            """
-        )
-        orphan_count = orphan_result[0]["n"] if orphan_result else 0
-        if orphan_count:
-            logger.info("Swept %d orphaned StandardNameReview nodes", orphan_count)
-
-        # Reset orphaned sources. Deleting a StandardName strands its
-        # StandardNameSource at 'composed'/'attached' — a status the generate
-        # pool never claims — so without this reset the source silently drops
-        # out of all future regeneration. Orphan check (no remaining
-        # PRODUCED_NAME edge) is inherently scope-correct: sources whose names
-        # survived a filtered clear keep their status. The produced_sn_id
-        # scalar mirror is nulled in the same operation so it never outlives
-        # the deleted name (PRODUCED_NAME edge is the single source of truth).
-        reset_result = gc.query(
-            """
-            MATCH (sns:StandardNameSource)
-            WHERE sns.status IN ['composed', 'attached']
-            AND NOT (sns)-[:PRODUCED_NAME]->(:StandardName)
-            SET sns.status = 'extracted',
-                sns.claimed_at = null,
-                sns.claim_token = null,
-                sns.produced_sn_id = null
-            RETURN count(sns) AS n
-            """
-        )
-        reset_count = reset_result[0]["n"] if reset_result else 0
-        if reset_count:
-            logger.info(
-                "Reset %d orphaned StandardNameSource nodes to 'extracted'",
-                reset_count,
-            )
-
-    logger.info("Deleted %d StandardName nodes", count)
-    return count
-
-
-def clear_sn_subsystem(
-    *,
-    dry_run: bool = False,
-) -> dict[str, int]:
-    """Wipe every Standard Name the pipeline has produced.
-
-    Deletes the six labels owned by the SN pipeline output:
-
-    * ``StandardName`` — the generated names
-    * ``StandardNameReview`` — RD-quorum review records
-    * ``StandardNameSource`` — per-path extraction tracking
-    * ``DocsRevision`` — refine_docs snapshot history (orphans without parent SN)
-    * ``VocabGap`` — grammar vocabulary gap reports
-    * ``SNRun`` — run audit / rotation memory
-
-    ``LLMCost`` rows are an all-time record of money spent, independent of
-    the mutable pipeline state cleared here. They remain in place even when
-    every identity they name has been removed.
-
-    **Grammar nodes** (``GrammarToken``, ``GrammarSegment``,
-    ``GrammarTemplate``, ``ISNGrammarVersion``) are ISN-authoritative
-    reference data and are never touched here. They stay in the graph so
-    the vocabulary is immediately available for the next ``sn run``; the
-    ``sn clear`` CLI re-seeds them from the installed ISN release after a
-    wipe, and ``sn run`` auto-syncs at startup when the version differs.
-
-    Parameters
-    ----------
-    dry_run:
-        Count matching nodes without modifying the graph.
-
-    Returns
-    -------
-    Dict mapping node label to deleted count. In dry-run mode,
-    values are the current counts that would be deleted.
-    """
-    counts: dict[str, int] = {}
-    labels = (
-        "StandardName",
-        "StandardNameReview",
-        "StandardNameSource",
-        "DocsRevision",
-        "VocabGap",
-        "SNRun",
+    return graph_catalog_reset.claim_names_for_validation(
+        *args, services=_graph_foundation.services, **kwargs
     )
 
-    with GraphClient() as gc:
 
-        def _count(label: str) -> int:
-            r = gc.query(f"MATCH (n:{label}) RETURN count(n) AS n")
-            return r[0]["n"] if r else 0
+def mark_names_validated(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_catalog_reset.mark_names_validated."""
+    from .graph_store import graph_catalog_reset
 
-        for label in labels:
-            counts[label] = _count(label)
+    return graph_catalog_reset.mark_names_validated(
+        *args, services=_graph_foundation.services, **kwargs
+    )
 
-        if dry_run:
-            return counts
 
-        # Delete order is significant: StandardNameReview BEFORE StandardName so
-        # orphan StandardNameReview nodes can't linger if HAS_STANDARD_NAME edges
-        # are missing. DETACH DELETE handles remaining
-        # edges on each pass. At SN-pipeline scale (~thousands of
-        # nodes total) a single DETACH DELETE per label is sub-second.
-        gc.query("MATCH (r:StandardNameReview) DETACH DELETE r")
-        deletion_clause = deletion_change_cypher("sn")
-        gc.query(
-            f"""
-            MATCH (sn:StandardName)
-            {deletion_clause}
-            DETACH DELETE sn
-            RETURN count(sn) AS deleted
-            """,
-            **deletion_change_params(
-                "clear_subsystem_name",
-                reason="standard-name pipeline subsystem cleared",
-            ),
-        )
-        gc.query("MATCH (s:StandardNameSource) DETACH DELETE s")
-        gc.query("MATCH (d:DocsRevision) DETACH DELETE d")
-        gc.query("MATCH (v:VocabGap) DETACH DELETE v")
-        gc.query("MATCH (rr:SNRun) DETACH DELETE rr")
+def release_validation_claims(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_catalog_reset.release_validation_claims."""
+    from .graph_store import graph_catalog_reset
 
-    total = sum(counts.values())
-    logger.info("clear_sn_subsystem: deleted %d nodes (%s)", total, counts)
+    return graph_catalog_reset.release_validation_claims(
+        *args, services=_graph_foundation.services, **kwargs
+    )
 
-    return counts
+
+def claim_names_for_embedding(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_catalog_reset.claim_names_for_embedding."""
+    from .graph_store import graph_catalog_reset
+
+    return graph_catalog_reset.claim_names_for_embedding(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def mark_names_embedded(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_catalog_reset.mark_names_embedded."""
+    from .graph_store import graph_catalog_reset
+
+    return graph_catalog_reset.mark_names_embedded(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def release_embedding_claims(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_catalog_reset.release_embedding_claims."""
+    from .graph_store import graph_catalog_reset
+
+    return graph_catalog_reset.release_embedding_claims(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def get_validated_names(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_catalog_reset.get_validated_names."""
+    from .graph_store import graph_catalog_reset
+
+    return graph_catalog_reset.get_validated_names(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def mark_names_consolidated(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_catalog_reset.mark_names_consolidated."""
+    from .graph_store import graph_catalog_reset
+
+    return graph_catalog_reset.mark_names_consolidated(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def reset_standard_names(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_catalog_reset.reset_standard_names."""
+    from .graph_store import graph_catalog_reset
+
+    return graph_catalog_reset.reset_standard_names(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def clear_standard_names(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_catalog_reset.clear_standard_names."""
+    from .graph_store import graph_catalog_reset
+
+    return graph_catalog_reset.clear_standard_names(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def clear_sn_subsystem(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_catalog_reset.clear_sn_subsystem."""
+    from .graph_store import graph_catalog_reset
+
+    return graph_catalog_reset.clear_sn_subsystem(
+        *args, services=_graph_foundation.services, **kwargs
+    )
 
 
 # =============================================================================
 # Link resolution
 # =============================================================================
 
-_MAX_LINK_RETRIES = 5
+_MAX_LINK_RETRIES = import_module(
+    ".graph_store.graph_catalog_reset", __package__
+)._MAX_LINK_RETRIES
 
 
 def claim_unresolved_links(*args: Any, **kwargs: Any):
@@ -11401,1055 +8912,204 @@ def supersede_into_ancestor(*args: Any, **kwargs: Any):
 #
 
 
-@retry_on_deadlock()
-def release_generate_name_claims(
-    *,
-    source_ids: list[str],
-    claim_token: str,
-) -> int:
-    """Release StandardNameSource claims IFF ``claim_token`` matches.
+def release_generate_name_claims(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_release.release_generate_name_claims."""
+    from .graph_store import graph_claim_release
 
-    Clears ``claimed_at`` and ``claim_token`` so items become eligible for
-    re-claim.  Used by the generate_name pool's error-recovery path.
-
-    Returns the count of sources actually released.  A count less than
-    ``len(source_ids)`` means the orphan sweep (or another worker) already
-    cleared the stale claim — the caller can safely ignore this.
-    """
-    if not source_ids:
-        return 0
-    with GraphClient() as gc:
-        result = gc.query(
-            """
-            UNWIND $ids AS sid
-            MATCH (n:StandardNameSource {id: sid})
-            WHERE n.claim_token = $token
-            SET n.claimed_at = null, n.claim_token = null
-            RETURN count(n) AS released
-            """,
-            ids=source_ids,
-            token=claim_token,
-        )
-    released: int = result[0]["released"] if result else 0
-    if released < len(source_ids):
-        logger.debug(
-            "release_generate_name_claims: %d/%d released (token=%s) — "
-            "remainder already swept or re-claimed",
-            released,
-            len(source_ids),
-            claim_token[:8],
-        )
-    return released
-
-
-@retry_on_deadlock()
-def release_generate_name_failed_claims(
-    *,
-    source_ids: list[str],
-    claim_token: str,
-) -> int:
-    """Release StandardNameSource claims on worker failure IFF token matches.
-
-    Identical to :func:`release_generate_name_claims`; provided as the
-    symmetric "failed" variant so callers can be explicit about intent.
-
-    Returns the count of sources actually released.
-    """
-    return release_generate_name_claims(
-        source_ids=source_ids,
-        claim_token=claim_token,
+    return graph_claim_release.release_generate_name_claims(
+        *args, services=_graph_foundation.services, **kwargs
     )
 
 
-@retry_on_deadlock()
-def release_enrich_claims(
-    *,
-    sn_ids: list[str],
-    claim_token: str,
-    expected_stage: str | None = None,
-) -> int:
-    """Release StandardName enrichment claims IFF token (and stage) match.
+def release_generate_name_failed_claims(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_release.release_generate_name_failed_claims."""
+    from .graph_store import graph_claim_release
 
-    Parameters
-    ----------
-    sn_ids:
-        StandardName node ids to release.
-    claim_token:
-        Token that was set at claim time; nodes with a different token are
-        left untouched.
-    expected_stage:
-        If provided, also verify ``name_stage = $expected_stage`` before
-        clearing.  Pass ``None`` (default) to skip stage verification.
-
-    Returns the count of SNs actually released.
-    """
-    if not sn_ids:
-        return 0
-    stage_clause = (
-        "AND n.name_stage = $expected_stage" if expected_stage is not None else ""
-    )
-    extra: dict[str, Any] = (
-        {"expected_stage": expected_stage} if expected_stage is not None else {}
-    )
-    with GraphClient() as gc:
-        result = gc.query(
-            f"""
-            UNWIND $ids AS sid
-            MATCH (n:StandardName {{id: sid}})
-            WHERE n.claim_token = $token
-              {stage_clause}
-            SET n.updated_at = datetime(), n.claimed_at = null, n.claim_token = null
-            RETURN count(n) AS released
-            """,
-            ids=sn_ids,
-            token=claim_token,
-            **extra,
-        )
-    released: int = result[0]["released"] if result else 0
-    if released < len(sn_ids):
-        logger.debug(
-            "release_enrich_claims: %d/%d released (token=%s) — "
-            "remainder already swept or re-claimed",
-            released,
-            len(sn_ids),
-            claim_token[:8],
-        )
-    return released
-
-
-@retry_on_deadlock()
-def release_enrich_failed_claims(
-    *,
-    sn_ids: list[str],
-    claim_token: str,
-    from_stage: str | None = None,
-    to_stage: str | None = None,
-) -> int:
-    """Release StandardName enrichment claims on worker failure.
-
-    Clears claim state and optionally reverts ``name_stage`` to *to_stage*
-    when the worker processing failed and the item should be retried.
-
-    Parameters
-    ----------
-    sn_ids:
-        StandardName node ids to release.
-    claim_token:
-        Token set at claim time.
-    from_stage:
-        If provided, verify ``name_stage = $from_stage`` before acting.
-    to_stage:
-        If provided (and *from_stage* matches), revert ``name_stage`` to
-        this value so the item is eligible for a fresh claim.
-
-    Returns the count of SNs actually released.
-    """
-    if not sn_ids:
-        return 0
-    stage_where = "AND n.name_stage = $from_stage" if from_stage is not None else ""
-    stage_set = "n.name_stage = $to_stage," if to_stage is not None else ""
-    params: dict[str, Any] = {"ids": sn_ids, "token": claim_token}
-    if from_stage is not None:
-        params["from_stage"] = from_stage
-    if to_stage is not None:
-        params["to_stage"] = to_stage
-    with GraphClient() as gc:
-        result = gc.query(
-            f"""
-            UNWIND $ids AS sid
-            MATCH (n:StandardName {{id: sid}})
-            WHERE n.claim_token = $token
-              {stage_where}
-            SET n.updated_at = datetime(),
-                {stage_set}
-                n.claimed_at = null,
-                n.claim_token = null
-            RETURN count(n) AS released
-            """,
-            **params,
-        )
-    released: int = result[0]["released"] if result else 0
-    if released < len(sn_ids):
-        logger.debug(
-            "release_enrich_failed_claims: %d/%d released (token=%s) — "
-            "remainder already swept or re-claimed",
-            released,
-            len(sn_ids),
-            claim_token[:8],
-        )
-    return released
-
-
-@retry_on_deadlock()
-def release_review_names_claims(
-    *,
-    sn_ids: list[str],
-    claim_token: str,
-    expected_stage: str | None = None,
-) -> int:
-    """Release StandardName review-names claims IFF token (and stage) match.
-
-    Returns the count of SNs actually released.
-    """
-    if not sn_ids:
-        return 0
-    stage_clause = (
-        "AND n.name_stage = $expected_stage" if expected_stage is not None else ""
-    )
-    extra: dict[str, Any] = (
-        {"expected_stage": expected_stage} if expected_stage is not None else {}
-    )
-    with GraphClient() as gc:
-        result = gc.query(
-            f"""
-            UNWIND $ids AS sid
-            MATCH (n:StandardName {{id: sid}})
-            WHERE n.claim_token = $token
-              {stage_clause}
-            SET n.updated_at = datetime(), n.claimed_at = null, n.claim_token = null
-            RETURN count(n) AS released
-            """,
-            ids=sn_ids,
-            token=claim_token,
-            **extra,
-        )
-    released: int = result[0]["released"] if result else 0
-    if released < len(sn_ids):
-        logger.debug(
-            "release_review_names_claims: %d/%d released (token=%s) — "
-            "remainder already swept or re-claimed",
-            released,
-            len(sn_ids),
-            claim_token[:8],
-        )
-    return released
-
-
-@retry_on_deadlock()
-def release_review_names_failed_claims(
-    *,
-    sn_ids: list[str],
-    claim_token: str,
-    from_stage: str | None = None,
-    to_stage: str | None = None,
-) -> int:
-    """Release StandardName review-names claims on worker failure.
-
-    Clears claim state and optionally reverts ``name_stage``.
-
-    Returns the count of SNs actually released.
-    """
-    if not sn_ids:
-        return 0
-    stage_where = "AND n.name_stage = $from_stage" if from_stage is not None else ""
-    stage_set = "n.name_stage = $to_stage," if to_stage is not None else ""
-    params: dict[str, Any] = {"ids": sn_ids, "token": claim_token}
-    if from_stage is not None:
-        params["from_stage"] = from_stage
-    if to_stage is not None:
-        params["to_stage"] = to_stage
-    with GraphClient() as gc:
-        result = gc.query(
-            f"""
-            UNWIND $ids AS sid
-            MATCH (n:StandardName {{id: sid}})
-            WHERE n.claim_token = $token
-              {stage_where}
-            SET n.updated_at = datetime(),
-                {stage_set}
-                n.claimed_at = null,
-                n.claim_token = null
-            RETURN count(n) AS released
-            """,
-            **params,
-        )
-    released: int = result[0]["released"] if result else 0
-    if released < len(sn_ids):
-        logger.debug(
-            "release_review_names_failed_claims: %d/%d released (token=%s) — "
-            "remainder already swept or re-claimed",
-            released,
-            len(sn_ids),
-            claim_token[:8],
-        )
-    return released
-
-
-@retry_on_deadlock()
-def release_review_docs_claims(
-    *,
-    sn_ids: list[str],
-    claim_token: str,
-    expected_stage: str | None = None,
-) -> int:
-    """Release StandardName review-docs claims IFF token (and stage) match.
-
-    Returns the count of SNs actually released.
-    """
-    if not sn_ids:
-        return 0
-    stage_clause = (
-        "AND n.docs_stage = $expected_stage" if expected_stage is not None else ""
-    )
-    extra: dict[str, Any] = (
-        {"expected_stage": expected_stage} if expected_stage is not None else {}
-    )
-    with GraphClient() as gc:
-        result = gc.query(
-            f"""
-            UNWIND $ids AS sid
-            MATCH (n:StandardName {{id: sid}})
-            WHERE n.claim_token = $token
-              {stage_clause}
-            WITH n  // Preserve name_stage; this release owns the docs axis.
-            SET n.updated_at = datetime(), n.claimed_at = null, n.claim_token = null
-            RETURN count(n) AS released
-            """,
-            ids=sn_ids,
-            token=claim_token,
-            **extra,
-        )
-    released: int = result[0]["released"] if result else 0
-    if released < len(sn_ids):
-        logger.debug(
-            "release_review_docs_claims: %d/%d released (token=%s) — "
-            "remainder already swept or re-claimed",
-            released,
-            len(sn_ids),
-            claim_token[:8],
-        )
-    return released
-
-
-@retry_on_deadlock()
-def release_review_docs_failed_claims(
-    *,
-    sn_ids: list[str],
-    claim_token: str,
-    from_stage: str | None = None,
-    to_stage: str | None = None,
-) -> int:
-    """Release StandardName review-docs claims on worker failure.
-
-    Clears claim state and optionally reverts ``docs_stage``.
-
-    Returns the count of SNs actually released.
-    """
-    if not sn_ids:
-        return 0
-    stage_where = "AND n.docs_stage = $from_stage" if from_stage is not None else ""
-    stage_set = "n.docs_stage = $to_stage," if to_stage is not None else ""
-    params: dict[str, Any] = {"ids": sn_ids, "token": claim_token}
-    if from_stage is not None:
-        params["from_stage"] = from_stage
-    if to_stage is not None:
-        params["to_stage"] = to_stage
-    with GraphClient() as gc:
-        result = gc.query(
-            f"""
-            UNWIND $ids AS sid
-            MATCH (n:StandardName {{id: sid}})
-            WHERE n.claim_token = $token
-              {stage_where}
-            WITH n  // Preserve name_stage; this release owns the docs axis.
-            SET n.updated_at = datetime(),
-                {stage_set}
-                n.claimed_at = null,
-                n.claim_token = null
-            RETURN count(n) AS released
-            """,
-            **params,
-        )
-    released: int = result[0]["released"] if result else 0
-    if released < len(sn_ids):
-        logger.debug(
-            "release_review_docs_failed_claims: %d/%d released (token=%s) — "
-            "remainder already swept or re-claimed",
-            released,
-            len(sn_ids),
-            claim_token[:8],
-        )
-    return released
-
-
-REFINE_CLAIM_RELEASE_MANIFEST_SCHEMA = "imas-codex.refine-claim-release-manifest"
-REFINE_CLAIM_RELEASE_RECEIPT_SCHEMA = "imas-codex.refine-claim-release-receipt"
-REFINE_CLAIM_RELEASE_PROJECTION_VERSION = 1
-
-
-class RefineClaimReleaseConflict(RuntimeError):
-    """An exact stranded-refinement claim could not be safely released."""
-
-
-_LOCK_REFINE_CLAIM_RELEASE_QUERY = """
-// REFINE_CLAIM_RELEASE_LOCK
-MATCH (sn:StandardName {id: $target_id})
-WHERE sn.name_stage = $expected_stage
-  AND sn.claim_token = $claim_token
-  AND sn.claimed_at IS NOT NULL
-  AND ($scope_run_id IS NULL OR sn.run_id = $scope_run_id)
-SET sn._refine_claim_release_lock = true
-REMOVE sn._refine_claim_release_lock
-RETURN sn.id AS id
-"""
-
-
-_READ_REFINE_CLAIM_RELEASE_QUERY = """
-// REFINE_CLAIM_RELEASE_READ
-MATCH (sn:StandardName {id: $target_id})
-CALL (sn) {
-  OPTIONAL MATCH (source:StandardNameSource)-[binding:PRODUCED_NAME]->(sn)
-  OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(bound:StandardName)
-  WHERE NOT (bound.name_stage IN ['superseded', 'exhausted', 'contested'])
-  WITH source, binding,
-       collect(DISTINCT CASE WHEN bound IS NULL THEN null ELSE {
-         id: bound.id
-       } END) AS bound_names
-  RETURN collect(CASE WHEN source IS NULL THEN null ELSE {
-    source: properties(source),
-    relationship: properties(binding),
-    bound_names: bound_names
-  } END) AS source_bindings
-}
-CALL (sn) {
-  OPTIONAL MATCH (projection)-[edge:HAS_STANDARD_NAME]->(sn)
-  WHERE projection:IMASNode OR projection:FacilitySignal
-  RETURN collect(CASE WHEN projection IS NULL THEN null ELSE {
-    labels: labels(projection),
-    node: properties(projection),
-    relationship: properties(edge)
-  } END) AS source_projections
-}
-CALL (sn) {
-  OPTIONAL MATCH (sn)-[:REFINED_FROM]->(predecessor:StandardName)
-  RETURN collect(DISTINCT predecessor.id) AS predecessor_ids
-}
-CALL (sn) {
-  OPTIONAL MATCH (successor:StandardName)-[:REFINED_FROM]->(sn)
-  RETURN collect(DISTINCT successor.id) AS successor_ids
-}
-CALL (sn) {
-  OPTIONAL MATCH (sn)-[edge]->(related)
-  RETURN collect(CASE WHEN edge IS NULL THEN null ELSE {
-    type: type(edge),
-    relationship: properties(edge),
-    node_labels: labels(related),
-    node: properties(related)
-  } END) AS outgoing_relationships
-}
-CALL (sn) {
-  OPTIONAL MATCH (related)-[edge]->(sn)
-  RETURN collect(CASE WHEN edge IS NULL THEN null ELSE {
-    type: type(edge),
-    relationship: properties(edge),
-    node_labels: labels(related),
-    node: properties(related)
-  } END) AS incoming_relationships
-}
-RETURN properties(sn) AS standard_name,
-       toString(sn.claimed_at) AS claimed_at_text,
-       source_bindings,
-       source_projections,
-       predecessor_ids,
-       successor_ids,
-       outgoing_relationships,
-       incoming_relationships
-"""
-
-
-_WRITE_REFINE_CLAIM_RELEASE_QUERY = """
-// REFINE_CLAIM_RELEASE_WRITE
-MATCH (sn:StandardName {id: $target_id})
-WHERE sn.name_stage = $expected_stage
-  AND sn.claim_token = $claim_token
-  AND toString(sn.claimed_at) = $expected_claimed_at
-  AND ($scope_run_id IS NULL OR sn.run_id = $scope_run_id)
-SET sn.updated_at = datetime(), sn.name_stage = 'reviewed',
-    sn.claim_token = null,
-    sn.claimed_at = null
-RETURN sn.id AS id
-"""
-
-
-def _sorted_refine_claim_projection(values: Any) -> list[Any]:
-    normalized = [_authority_json_value(value) for value in values or []]
-    return sorted(
-        normalized,
-        key=lambda value: json.dumps(
-            value, sort_keys=True, separators=(",", ":"), ensure_ascii=False
-        ),
+    return graph_claim_release.release_generate_name_failed_claims(
+        *args, services=_graph_foundation.services, **kwargs
     )
 
 
-def _project_refine_claim_release_state(row: dict[str, Any]) -> dict[str, Any]:
-    properties = _authority_json_value(dict(row.get("standard_name") or {}))
-    description = str(properties.get("description") or "")
-    documentation = str(properties.get("documentation") or "")
-    return {
-        "target_id": properties.get("id"),
-        "name_stage": properties.get("name_stage"),
-        "claim": {
-            "token": properties.get("claim_token"),
-            "claimed_at": row.get("claimed_at_text") or properties.get("claimed_at"),
-        },
-        "scope": {
-            "run_id": properties.get("run_id"),
-            "drain_scope_id": properties.get("drain_scope_id"),
-            "drain_scope_claimed_at": properties.get("drain_scope_claimed_at"),
-            "drain_scope_paths": properties.get("drain_scope_paths"),
-            "drain_claim_scope_id": properties.get("drain_claim_scope_id"),
-        },
-        "content_hashes": {
-            "description_sha256": hashlib.sha256(description.encode()).hexdigest(),
-            "documentation_sha256": hashlib.sha256(documentation.encode()).hexdigest(),
-            "combined_sha256": _authority_payload_hash(
-                {
-                    "description": description,
-                    "documentation": documentation,
-                }
-            ),
-        },
-        "authority": {
-            "validation_status": properties.get("validation_status"),
-            "unit": properties.get("unit"),
-            "kind": properties.get("kind"),
-        },
-        "node_properties": properties,
-        "source_bindings": _sorted_refine_claim_projection(row.get("source_bindings")),
-        "source_projections": _sorted_refine_claim_projection(
-            row.get("source_projections")
-        ),
-        "predecessor_ids": sorted(
-            str(value) for value in row.get("predecessor_ids") or []
-        ),
-        "successor_ids": sorted(str(value) for value in row.get("successor_ids") or []),
-        "outgoing_relationships": _sorted_refine_claim_projection(
-            row.get("outgoing_relationships")
-        ),
-        "incoming_relationships": _sorted_refine_claim_projection(
-            row.get("incoming_relationships")
-        ),
-    }
+def release_enrich_claims(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_release.release_enrich_claims."""
+    from .graph_store import graph_claim_release
 
-
-def _predicted_refine_claim_release_state(
-    before: dict[str, Any],
-) -> dict[str, Any]:
-    predicted = json.loads(
-        json.dumps(before, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    return graph_claim_release.release_enrich_claims(
+        *args, services=_graph_foundation.services, **kwargs
     )
-    predicted["name_stage"] = "reviewed"
-    predicted["claim"] = {"token": None, "claimed_at": None}
-    predicted["node_properties"]["name_stage"] = "reviewed"
-    predicted["node_properties"].pop("claim_token", None)
-    predicted["node_properties"].pop("claimed_at", None)
-    return predicted
 
 
-def _refine_claim_release_manifest(
-    *,
-    target_id: str,
-    claim_token: str,
-    expected_stage: str,
-    scope_run_id: str | None,
-    before: dict[str, Any],
-    predicted_after: dict[str, Any],
-) -> dict[str, Any]:
-    return {
-        "schema": REFINE_CLAIM_RELEASE_MANIFEST_SCHEMA,
-        "projection_version": REFINE_CLAIM_RELEASE_PROJECTION_VERSION,
-        "operation": "release_stranded_refine_claim",
-        "target_id": target_id,
-        "expected_stage": expected_stage,
-        "claim_token": claim_token,
-        "expected_scope_run_id": scope_run_id,
-        "before": before,
-        "predicted_after": predicted_after,
-    }
+def release_enrich_failed_claims(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_release.release_enrich_failed_claims."""
+    from .graph_store import graph_claim_release
 
-
-def _refine_claim_no_change_receipt(
-    *,
-    target_id: str,
-    claim_token: str,
-    expected_stage: str,
-    scope_run_id: str | None,
-) -> dict[str, Any]:
-    return {
-        "schema": REFINE_CLAIM_RELEASE_RECEIPT_SCHEMA,
-        "projection_version": REFINE_CLAIM_RELEASE_PROJECTION_VERSION,
-        "outcome": "no_exact_eligible_claim",
-        "dry_run": True,
-        "eligible": False,
-        "would_release": 0,
-        "changed": 0,
-        "target_id": target_id,
-        "expected_stage": expected_stage,
-        "claim_token": claim_token,
-        "expected_scope_run_id": scope_run_id,
-        "manifest": None,
-        "manifest_sha256": None,
-    }
-
-
-def release_stranded_refine_claim(
-    standard_name: str,
-    *,
-    claim_token: str,
-    expected_stage: str,
-    scope_run_id: str | None = None,
-    apply: bool = False,
-    manifest_sha256: str | None = None,
-    gc: Any | None = None,
-) -> dict[str, Any]:
-    """Release one exact stranded name-refinement claim with full CAS fencing.
-
-    The default performs the same lock, compare-and-set write, and postflight
-    as apply, then rolls the transaction back. Apply additionally requires the
-    SHA-256 emitted by that dry run and an exact ``run_id`` scope. The only
-    durable changes are ``name_stage: refining -> reviewed`` and removal of the
-    matching main ``claim_token``/``claimed_at`` pair.
-    """
-    target_id = str(standard_name).strip()
-    token = str(claim_token).strip()
-    scope = str(scope_run_id).strip() if scope_run_id is not None else None
-    if not target_id:
-        raise ValueError("standard_name must be non-empty")
-    if not token:
-        raise ValueError("claim_token must be non-empty")
-    if expected_stage != "refining":
-        raise ValueError("expected_stage must be 'refining'")
-    if scope_run_id is not None and not scope:
-        raise ValueError("scope_run_id must be non-empty when supplied")
-    if apply and scope is None:
-        raise ValueError("apply requires an exact scope_run_id")
-    if apply and not manifest_sha256:
-        raise ValueError("apply requires manifest_sha256")
-    if manifest_sha256 is not None and not _SHA256_RE.fullmatch(manifest_sha256):
-        raise ValueError("manifest_sha256 must be a lowercase SHA-256 digest")
-
-    own = gc is None
-    client = GraphClient() if own else gc
-    try:
-        with client.session() as session:
-            transaction = session.begin_transaction()
-            try:
-                params = {
-                    "target_id": target_id,
-                    "claim_token": token,
-                    "expected_stage": expected_stage,
-                    "scope_run_id": scope,
-                }
-                locked = [
-                    dict(record)
-                    for record in transaction.run(
-                        _LOCK_REFINE_CLAIM_RELEASE_QUERY, **params
-                    )
-                ]
-                if not locked:
-                    transaction.rollback()
-                    if apply:
-                        raise RefineClaimReleaseConflict(
-                            "no exact eligible refine claim matched the target, "
-                            "stage, token, claimed_at, and scope fences"
-                        )
-                    return _refine_claim_no_change_receipt(**params)
-                if len(locked) != 1 or locked[0].get("id") != target_id:
-                    raise RefineClaimReleaseConflict(
-                        "refine claim lock did not resolve exactly one target"
-                    )
-
-                before_rows = [
-                    dict(record)
-                    for record in transaction.run(
-                        _READ_REFINE_CLAIM_RELEASE_QUERY, target_id=target_id
-                    )
-                ]
-                if len(before_rows) != 1:
-                    raise RefineClaimReleaseConflict(
-                        "refine claim projection did not resolve exactly one target"
-                    )
-                before = _project_refine_claim_release_state(before_rows[0])
-                if before["target_id"] != target_id:
-                    raise RefineClaimReleaseConflict(
-                        "refine claim target identity drifted"
-                    )
-                if before["name_stage"] != expected_stage:
-                    raise RefineClaimReleaseConflict("refine claim stage drifted")
-                if before["claim"]["token"] != token:
-                    raise RefineClaimReleaseConflict("refine claim token drifted")
-                if before["claim"]["claimed_at"] is None:
-                    raise RefineClaimReleaseConflict("refine claim timestamp is absent")
-                if scope is not None and before["scope"]["run_id"] != scope:
-                    raise RefineClaimReleaseConflict("refine claim scope drifted")
-                source_bindings = before["source_bindings"]
-                if not source_bindings:
-                    raise RefineClaimReleaseConflict(
-                        "refine claim has no current source binding"
-                    )
-                for binding in source_bindings:
-                    if binding.get("bound_names") != [{"id": target_id}]:
-                        raise RefineClaimReleaseConflict(
-                            "refine claim source does not have exactly one current "
-                            "binding to the target"
-                        )
-                binding_ids = sorted(
-                    str(binding.get("source", {}).get("id") or "")
-                    for binding in source_bindings
-                )
-                projected_source_ids = sorted(
-                    str(source_id)
-                    for source_id in before["node_properties"].get("source_paths", [])
-                )
-                if binding_ids != projected_source_ids:
-                    raise RefineClaimReleaseConflict(
-                        "refine claim source binding and scalar projection drifted"
-                    )
-
-                predicted_after = _predicted_refine_claim_release_state(before)
-                manifest = _refine_claim_release_manifest(
-                    target_id=target_id,
-                    claim_token=token,
-                    expected_stage=expected_stage,
-                    scope_run_id=scope,
-                    before=before,
-                    predicted_after=predicted_after,
-                )
-                computed_manifest_sha256 = _authority_payload_hash(manifest)
-                if apply and manifest_sha256 != computed_manifest_sha256:
-                    raise RefineClaimReleaseConflict(
-                        "refine claim manifest SHA-256 does not match current authority"
-                    )
-
-                write_rows = [
-                    dict(record)
-                    for record in transaction.run(
-                        _WRITE_REFINE_CLAIM_RELEASE_QUERY,
-                        **params,
-                        expected_claimed_at=str(before["claim"]["claimed_at"]),
-                    )
-                ]
-                if len(write_rows) != 1 or write_rows[0].get("id") != target_id:
-                    raise RefineClaimReleaseConflict(
-                        "refine claim compare-and-set did not change exactly one target"
-                    )
-
-                after_rows = [
-                    dict(record)
-                    for record in transaction.run(
-                        _READ_REFINE_CLAIM_RELEASE_QUERY, target_id=target_id
-                    )
-                ]
-                if len(after_rows) != 1:
-                    raise RefineClaimReleaseConflict(
-                        "refine claim postflight did not resolve exactly one target"
-                    )
-                after = _project_refine_claim_release_state(after_rows[0])
-                if after != predicted_after:
-                    raise RefineClaimReleaseConflict(
-                        "refine claim postflight detected collateral projection drift"
-                    )
-
-                if apply:
-                    transaction.commit()
-                else:
-                    transaction.rollback()
-                return {
-                    "schema": REFINE_CLAIM_RELEASE_RECEIPT_SCHEMA,
-                    "projection_version": REFINE_CLAIM_RELEASE_PROJECTION_VERSION,
-                    "outcome": "released" if apply else "would_release",
-                    "dry_run": not apply,
-                    "eligible": True,
-                    "would_release": 0 if apply else 1,
-                    "changed": 1 if apply else 0,
-                    "target_id": target_id,
-                    "manifest": manifest,
-                    "manifest_sha256": computed_manifest_sha256,
-                    "before": before,
-                    "predicted_after": predicted_after,
-                    "after": after if apply else predicted_after,
-                    "postflight_verified": True,
-                    "collateral_proof": {
-                        "node_properties_except_release_fields_unchanged": True,
-                        "relationships_unchanged": True,
-                        "source_bindings_unchanged": True,
-                        "source_projections_unchanged": True,
-                        "lineage_unchanged": True,
-                    },
-                }
-            except BaseException:
-                if not transaction.closed:
-                    transaction.rollback()
-                raise
-    finally:
-        if own:
-            client.close()
-
-
-@retry_on_deadlock()
-def release_refine_name_claims(
-    *,
-    sn_ids: list[str],
-    claim_token: str,
-    expected_stage: str | None = None,
-) -> int:
-    """Release StandardName refine-name claims IFF token (and stage) match.
-
-    Clears ``claimed_at`` and ``claim_token`` and reverts
-    ``name_stage`` from ``'refining'`` back to ``'reviewed'`` when
-    the node is still in the refining stage.
-
-    Returns the count of SNs actually released.
-    """
-    if not sn_ids:
-        return 0
-    stage_clause = (
-        "AND n.name_stage = $expected_stage" if expected_stage is not None else ""
+    return graph_claim_release.release_enrich_failed_claims(
+        *args, services=_graph_foundation.services, **kwargs
     )
-    extra: dict[str, Any] = (
-        {"expected_stage": expected_stage} if expected_stage is not None else {}
+
+
+def release_review_names_claims(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_release.release_review_names_claims."""
+    from .graph_store import graph_claim_release
+
+    return graph_claim_release.release_review_names_claims(
+        *args, services=_graph_foundation.services, **kwargs
     )
-    with GraphClient() as gc:
-        result = gc.query(
-            f"""
-            UNWIND $ids AS sid
-            MATCH (n:StandardName {{id: sid}})
-            WHERE n.claim_token = $token
-              {stage_clause}
-            SET n.updated_at = datetime(),
-                n.claimed_at = null,
-                n.claim_token = null,
-                n.name_stage = CASE
-                    WHEN n.name_stage = 'refining' THEN 'reviewed'
-                    ELSE n.name_stage
-                END
-            RETURN count(n) AS released
-            """,
-            ids=sn_ids,
-            token=claim_token,
-            **extra,
-        )
-    released: int = result[0]["released"] if result else 0
-    if released < len(sn_ids):
-        logger.debug(
-            "release_refine_name_claims: %d/%d released (token=%s) — "
-            "remainder already swept or re-claimed",
-            released,
-            len(sn_ids),
-            claim_token[:8],
-        )
-    return released
 
 
-def resubmit_pinned_rename_for_review(
-    *,
-    sn_id: str,
-    token: str,
-    rotation_cap: int = DEFAULT_REFINE_ROTATIONS,
-) -> str:
-    """Route a below-threshold pinned rename to a fresh review quorum.
+def release_review_names_failed_claims(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_release.release_review_names_failed_claims."""
+    from .graph_store import graph_claim_release
 
-    A rename edit (``edit_mode='rename'``) carries an operator-chosen name
-    string — the name is a fixed decision, not a draft to be rewritten. When
-    such a name scores below threshold (quorum variance on a borderline name),
-    the refine pool must NOT try to reword it: re-emitting the identical pinned
-    name trips the self-referential-refine guard and decomposing a lexicalised
-    base trips grammar validation — either way the pinned name is wrongly marked
-    ``exhausted`` and its (already-superseded) predecessor's quantity silently
-    drops from export.
-
-    Instead, resubmit the SAME name to review for a fresh quorum draw
-    (``name_stage`` → ``'drafted'``, reviewer name-score cleared), bounded by
-    ``review_resubmit_count < rotation_cap``. A borderline name whose siblings
-    accept at 0.96+ typically clears on a fresh draw. When the cap is reached
-    the name is left at ``'reviewed'`` (never exhausted) for operator
-    resolution; :func:`claim_refine_name_batch` excludes capped pinned renames
-    so they do not re-loop.
-
-    Token-and-stage verified (``claim_token = $token AND name_stage =
-    'refining'``). Returns ``'resubmitted'``, ``'capped'``, or ``''`` (no-op:
-    token/stage mismatch — a concurrent sweep or worker already moved it).
-    """
-    with GraphClient() as gc:
-        rows = gc.query(
-            """
-            MATCH (sn:StandardName {id: $sn_id})
-            WHERE sn.claim_token = $token AND sn.name_stage = 'refining'
-            WITH sn, coalesce(sn.review_resubmit_count, 0) AS n
-            SET sn.updated_at = datetime(), sn.name_stage = CASE WHEN n < $cap THEN 'drafted' ELSE 'reviewed' END,
-                sn.review_resubmit_count = CASE WHEN n < $cap THEN n + 1 ELSE n END,
-                sn.reviewer_score_name = CASE WHEN n < $cap
-                                              THEN null ELSE sn.reviewer_score_name END,
-                sn.claim_token = null,
-                sn.claimed_at = null
-            RETURN CASE WHEN n < $cap THEN 'resubmitted' ELSE 'capped' END AS outcome
-            """,
-            sn_id=sn_id,
-            token=token,
-            cap=rotation_cap,
-        )
-    return rows[0]["outcome"] if rows else ""
-
-
-RESCORE_ELIGIBILITY_QUERY = """
-            MATCH (sn:StandardName {id: $id})
-            WHERE sn.name_stage IN ['exhausted', 'reviewed']
-              AND NOT coalesce(sn.status, '') IN ['deprecated', 'superseded']
-            WITH sn, sn.name_stage AS prior_stage
-            // One compare-and-set transition: if another worker moves the
-            // stage before this MATCH acquires the write, no row is returned
-            // and the caller refuses the rescore. Dry-run retains the same
-            // eligibility query but executes no mutation.
-            FOREACH (_ IN CASE WHEN $dry_run THEN [] ELSE [1] END |
-                SET sn.updated_at = datetime(), sn.name_stage = 'drafted',
-                    sn.reviewer_score_name = null,
-                    sn.review_resubmit_count = 0,
-                    // The stale diagnosis of the last refinement goes; the
-                    // rotations it spent stay. A rescore buys a fresh quorum
-                    // draw on the SAME name, never a fresh rewrite budget —
-                    // refunding one would re-open the paid loop for a name
-                    // that scores low again. `sn edit` carries the new
-                    // steering information that reopens rewriting.
-                    sn.refine_stop_reason = null,
-                    sn.refine_stopped_at = null,
-                    sn.refine_collision_name = null,
-                    sn.claim_token = null,
-                    sn.claimed_at = null,
-                    sn.run_id = coalesce($run_id, sn.run_id),
-                    sn.validation_status = 'pending',
-                    sn.validation_issues = null,
-                    sn.validation_layer_summary = null,
-                    sn.validated_at = null
-            )
-            RETURN prior_stage AS prior_stage
-            """
-
-
-def stage_name_for_rescore(
-    sn_id: str,
-    *,
-    run_id: str | None = None,
-    dry_run: bool = False,
-) -> dict[str, Any]:
-    """Return a stranded non-accepted name to review for a fresh quorum.
-
-    Operator recovery path for names stuck at a terminal-but-unpublished
-    name-axis stage — an ``exhausted`` name (refine cap reached, or a
-    borderline name wrongly exhausted) or a ``reviewed`` name whose score never
-    cleared. Reverts ``name_stage`` to ``'drafted'`` so a review re-scores it
-    with a fresh quorum, clears the stale reviewer name-score and the stale
-    refinement diagnosis, resets the re-review budget, and clears any claim.
-    ``refine_attempts`` is deliberately preserved — see the query. Edit fields
-    are left intact so an attached hint (e.g. a "keep this form" steer) rides
-    the fresh review.
-
-    When *run_id* is given it is stamped on the node so a scoped review
-    (``run_sn_pools(scope_run_id=run_id)``) claims exactly this name — the
-    mechanism the ``sn rescore`` inline review uses. A predecessor that was
-    already superseded stays superseded — the recovered name keeps its
-    REFINED_FROM lineage and, once re-accepted, resolves the export gap it
-    left behind.
-
-    Refuses (``{"ok": False, "reason": ...}``) for names that must not be
-    force-staged: not found, terminal catalog status, already
-    ``accepted``/``approved``/``superseded``, or already live
-    (``drafted``/``refining``). A terminal identity needs a signed transition
-    before rescore can recover it.
-
-    Returns ``{"ok": True, "sn_id", "prior_stage", "run_id", "dry_run"}`` on
-    success.
-    """
-    with GraphClient() as gc:
-        rows = gc.query(
-            RESCORE_ELIGIBILITY_QUERY,
-            id=sn_id,
-            run_id=run_id,
-            dry_run=dry_run,
-        )
-        if not rows:
-            # Diagnostic only after the guarded transition lost eligibility;
-            # this read can refine the refusal message but can never turn the
-            # failed transition into success.
-            current = gc.query(
-                """MATCH (sn:StandardName {id: $id})
-                OPTIONAL MATCH (sn)-[:HAS_SUCCESSOR]->(next:StandardName)
-                RETURN sn.name_stage AS stage, sn.status AS status,
-                       next.id AS successor""",
-                id=sn_id,
-            )
-            if not current:
-                return {"ok": False, "reason": f"name {sn_id!r} not found"}
-            stage = current[0].get("stage")
-            status = current[0].get("status")
-            successor = current[0].get("successor")
-            reason = f"{sn_id!r} is name_stage={stage!r}, status={status!r} — "
-            if status in {"deprecated", "superseded"}:
-                reason += "rescore refuses terminal status"
-            elif stage == "superseded":
-                reason += "rescore refuses a superseded name stage"
-            else:
-                reason += "rescore only recovers 'exhausted' or 'reviewed' names"
-            if status in {"deprecated", "superseded"} or stage == "superseded":
-                reason += (
-                    "; use a signed transition in "
-                    "imas_codex/standard_names/signed_manifest.py to return it "
-                    "to a recoverable state"
-                )
-            if successor:
-                reason += f"; successor {successor!r}"
-            return {"ok": False, "reason": reason}
-        stage = rows[0].get("prior_stage")
-    result = {
-        "ok": True,
-        "sn_id": sn_id,
-        "prior_stage": stage,
-        "run_id": run_id,
-        "dry_run": dry_run,
-    }
-    logger.info(
-        "stage_name_for_rescore: %s (%s) → %s (run_id=%s)",
-        sn_id,
-        stage,
-        stage if dry_run else "drafted",
-        run_id,
+    return graph_claim_release.release_review_names_failed_claims(
+        *args, services=_graph_foundation.services, **kwargs
     )
-    return result
 
 
-@retry_on_deadlock()
-def restore_name_after_failed_rescore(
-    sn_id: str,
-    *,
-    run_id: str,
-    prior_stage: str,
-) -> bool:
-    """Restore a deterministically rejected rescore to its terminal stage.
+def release_review_docs_claims(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_release.release_review_docs_claims."""
+    from .graph_store import graph_claim_release
 
-    The run-id and drafted-stage guards make this a compare-and-set: a late
-    failure cannot overwrite a node another worker has already advanced. The
-    node remains quarantined, while every rescore-specific scope and claim is
-    removed atomically so no later scoped run can pick it up for paid review.
-    """
-    if prior_stage not in ("exhausted", "reviewed"):
-        raise ValueError(f"cannot restore rescore to stage {prior_stage!r}")
-    with GraphClient() as gc:
-        rows = gc.query(
-            """
-            MATCH (sn:StandardName {id: $id})
-            WHERE sn.name_stage = 'drafted'
-              AND sn.run_id = $run_id
-              AND sn.validation_status = 'quarantined'
-            SET sn.updated_at = datetime(), sn.name_stage = $prior_stage,
-                sn.run_id = null,
-                sn.claim_token = null,
-                sn.claimed_at = null
-            RETURN count(sn) AS restored
-            """,
-            id=sn_id,
-            run_id=run_id,
-            prior_stage=prior_stage,
-        )
-    return bool(rows and rows[0].get("restored"))
+    return graph_claim_release.release_review_docs_claims(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def release_review_docs_failed_claims(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_release.release_review_docs_failed_claims."""
+    from .graph_store import graph_claim_release
+
+    return graph_claim_release.release_review_docs_failed_claims(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+REFINE_CLAIM_RELEASE_MANIFEST_SCHEMA = import_module(
+    ".graph_store.graph_claim_release", __package__
+).REFINE_CLAIM_RELEASE_MANIFEST_SCHEMA
+
+REFINE_CLAIM_RELEASE_RECEIPT_SCHEMA = import_module(
+    ".graph_store.graph_claim_release", __package__
+).REFINE_CLAIM_RELEASE_RECEIPT_SCHEMA
+
+REFINE_CLAIM_RELEASE_PROJECTION_VERSION = import_module(
+    ".graph_store.graph_claim_release", __package__
+).REFINE_CLAIM_RELEASE_PROJECTION_VERSION
+
+
+RefineClaimReleaseConflict = import_module(
+    ".graph_store.graph_claim_release", __package__
+).RefineClaimReleaseConflict
+
+
+_LOCK_REFINE_CLAIM_RELEASE_QUERY = import_module(
+    ".graph_store.graph_claim_release", __package__
+)._LOCK_REFINE_CLAIM_RELEASE_QUERY
+
+
+_READ_REFINE_CLAIM_RELEASE_QUERY = import_module(
+    ".graph_store.graph_claim_release", __package__
+)._READ_REFINE_CLAIM_RELEASE_QUERY
+
+
+_WRITE_REFINE_CLAIM_RELEASE_QUERY = import_module(
+    ".graph_store.graph_claim_release", __package__
+)._WRITE_REFINE_CLAIM_RELEASE_QUERY
+
+
+def _sorted_refine_claim_projection(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_release._sorted_refine_claim_projection."""
+    from .graph_store import graph_claim_release
+
+    return graph_claim_release._sorted_refine_claim_projection(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def _project_refine_claim_release_state(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_release._project_refine_claim_release_state."""
+    from .graph_store import graph_claim_release
+
+    return graph_claim_release._project_refine_claim_release_state(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def _predicted_refine_claim_release_state(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_release._predicted_refine_claim_release_state."""
+    from .graph_store import graph_claim_release
+
+    return graph_claim_release._predicted_refine_claim_release_state(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def _refine_claim_release_manifest(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_release._refine_claim_release_manifest."""
+    from .graph_store import graph_claim_release
+
+    return graph_claim_release._refine_claim_release_manifest(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def _refine_claim_no_change_receipt(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_release._refine_claim_no_change_receipt."""
+    from .graph_store import graph_claim_release
+
+    return graph_claim_release._refine_claim_no_change_receipt(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def release_stranded_refine_claim(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_release.release_stranded_refine_claim."""
+    from .graph_store import graph_claim_release
+
+    return graph_claim_release.release_stranded_refine_claim(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def release_refine_name_claims(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_release.release_refine_name_claims."""
+    from .graph_store import graph_claim_release
+
+    return graph_claim_release.release_refine_name_claims(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def resubmit_pinned_rename_for_review(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_release.resubmit_pinned_rename_for_review."""
+    from .graph_store import graph_claim_release
+
+    return graph_claim_release.resubmit_pinned_rename_for_review(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+RESCORE_ELIGIBILITY_QUERY = import_module(
+    ".graph_store.graph_claim_release", __package__
+).RESCORE_ELIGIBILITY_QUERY
+
+
+def stage_name_for_rescore(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_release.stage_name_for_rescore."""
+    from .graph_store import graph_claim_release
+
+    return graph_claim_release.stage_name_for_rescore(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def restore_name_after_failed_rescore(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_release.restore_name_after_failed_rescore."""
+    from .graph_store import graph_claim_release
+
+    return graph_claim_release.restore_name_after_failed_rescore(
+        *args, services=_graph_foundation.services, **kwargs
+    )
 
 
 #: Stop reasons proving that no further attempt on this name can succeed.
@@ -12458,149 +9118,27 @@ def restore_name_after_failed_rescore(
 #: semantics that belong to ``sn edit``. A grammar or vocabulary failure is
 #: reproduced by the same prompt every cycle. Measured over one run, 830 of
 #: 830 collisions re-proposed the same identity, across two model vendors.
-_TERMINAL_REFINE_STOP_REASONS = frozenset(
-    {
-        RefineStopReason.successor_collision.value,
-        RefineStopReason.successor_lifecycle_collision.value,
-        RefineStopReason.vocabulary_gap.value,
-        RefineStopReason.grammar_invalid.value,
-    }
-)
+_TERMINAL_REFINE_STOP_REASONS = import_module(
+    ".graph_store.graph_claim_release", __package__
+)._TERMINAL_REFINE_STOP_REASONS
 
 
-@retry_on_deadlock()
-def stop_refine_name_attempt(
-    *,
-    sn_id: str,
-    token: str,
-    reason: str,
-    detail: str = "",
-    collision_name: str | None = None,
-    rotation_cap: int = DEFAULT_REFINE_ROTATIONS,
-) -> str:
-    """Close one failed refinement attempt and decide whether more may follow.
+def stop_refine_name_attempt(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_release.stop_refine_name_attempt."""
+    from .graph_store import graph_claim_release
 
-    Records *reason* (a :class:`RefineStopReason` value) with its timestamp and,
-    for a collision, the identity the refiner proposed — so the next attempt can
-    report what the last one hit and a parked name can be enumerated by cause.
-
-    The resulting stage is decided from committed state inside the write:
-    ``'exhausted'`` when at least one attempt was charged and either the reason
-    proves no further attempt can succeed or the charged budget is spent;
-    otherwise ``'reviewed'`` so the first or remaining rotation stays
-    available. Exhaustion closes an open name-steering edit, mirroring the
-    acceptance path.
-
-    Fenced on the claim token and the ``'refining'`` stage. Returns the stage
-    written, or ``''`` when the fence did not match (an orphan sweep or another
-    worker already moved the row).
-    """
-    terminal = reason in _TERMINAL_REFINE_STOP_REASONS
-    with GraphClient() as gc:
-        rows = gc.query(
-            """
-            MATCH (sn:StandardName {id: $sn_id})
-            WHERE sn.claim_token = $token
-              AND sn.name_stage = 'refining'
-            WITH sn, CASE
-                   WHEN coalesce(sn.refine_attempts, 0) > 0
-                    AND ($terminal
-                     OR coalesce(sn.refine_attempts, 0) >= $rotation_cap)
-                   THEN 'exhausted' ELSE 'reviewed' END AS target_stage
-            SET sn.updated_at = datetime(), sn.name_stage = target_stage,
-                sn.validation_status = CASE
-                    WHEN target_stage = 'exhausted'
-                     AND $reason IN ['grammar_invalid', 'vocabulary_gap']
-                    THEN 'quarantined'
-                    ELSE sn.validation_status END,
-                sn.validation_issues = CASE
-                    WHEN target_stage = 'exhausted'
-                     AND $reason IN ['grammar_invalid', 'vocabulary_gap']
-                    THEN coalesce(sn.validation_issues, []) + [CASE
-                        WHEN $detail = '' THEN $reason
-                        ELSE $reason + ': ' + $detail END]
-                    ELSE sn.validation_issues END,
-                sn.refine_stop_reason = CASE
-                    WHEN target_stage = 'exhausted' AND NOT $terminal
-                    THEN $attempts_exhausted ELSE $reason END,
-                sn.refine_stopped_at = datetime(),
-                sn.refine_collision_name = $collision_name,
-                sn.claim_token = null,
-                sn.claimed_at = null,
-                // A name-axis exhaust closes only a name-steering edit.
-                sn.edit_status = CASE
-                    WHEN target_stage = 'exhausted'
-                     AND sn.edit_status = 'open'
-                     AND sn.name_hint IS NOT NULL
-                    THEN 'exhausted' ELSE sn.edit_status END,
-                sn.reviewer_comments_name = CASE
-                    WHEN $detail = '' THEN sn.reviewer_comments_name
-                    ELSE coalesce(sn.reviewer_comments_name, '')
-                         + ' [' + $reason + '] ' + $detail END
-            RETURN target_stage AS stage
-            """,
-            sn_id=sn_id,
-            token=token,
-            reason=reason,
-            terminal=terminal,
-            rotation_cap=rotation_cap,
-            collision_name=collision_name,
-            detail=detail[:300],
-            attempts_exhausted=RefineStopReason.attempts_exhausted.value,
-        )
-    if not rows:
-        logger.debug(
-            "stop_refine_name_attempt: %s no longer holds token %s — no-op",
-            sn_id,
-            token[:8],
-        )
-        return ""
-    stage: str = rows[0]["stage"]
-    logger.info(
-        "refine_name: %s stopped at %s (reason=%s%s)",
-        sn_id,
-        stage,
-        reason,
-        f", collides with {collision_name}" if collision_name else "",
+    return graph_claim_release.stop_refine_name_attempt(
+        *args, services=_graph_foundation.services, **kwargs
     )
-    return stage
 
 
-def _mark_refine_docs_exhausted(
-    *,
-    sn_id: str,
-    token: str,
-    error_msg: str,
-) -> None:
-    """Mark a name's docs exhausted when refine_docs fails deterministically.
+def _mark_refine_docs_exhausted(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_release._mark_refine_docs_exhausted."""
+    from .graph_store import graph_claim_release
 
-    A docs-validation failure (e.g. the LLM consistently returns docs that
-    violate the ``RefinedDocs`` length constraints) is deterministic for a
-    given item — reverting ``docs_stage`` to 'reviewed' would re-claim and
-    re-burn budget forever.  Move to 'exhausted' instead and record the reason.
-    """
-    with GraphClient() as gc:
-        gc.query(
-            """
-            MATCH (sn:StandardName {id: $sn_id})
-            WHERE sn.claim_token = $token
-              AND sn.docs_stage = 'refining'
-            SET sn.updated_at = datetime(), sn.docs_stage = 'exhausted',
-                sn.claim_token = null,
-                sn.claimed_at = null,
-                // A docs-axis exhaust closes only a docs-steering edit.
-                sn.edit_status = CASE WHEN sn.edit_status = 'open'
-                                       AND sn.docs_hint IS NOT NULL
-                                      THEN 'exhausted'
-                                      ELSE sn.edit_status END,
-                sn.reviewer_comments_docs =
-                    coalesce(sn.reviewer_comments_docs, '')
-                    + ' [docs_refine_exhaust] ' + $error_msg
-            """,
-            sn_id=sn_id,
-            token=token,
-            error_msg=error_msg[:300],
-        )
+    return graph_claim_release._mark_refine_docs_exhausted(
+        *args, services=_graph_foundation.services, **kwargs
+    )
 
 
 # =============================================================================
@@ -12627,98 +9165,22 @@ def _mark_refine_docs_exhausted(
 # against the "every racer is momentarily the token holder" false-positive.
 
 
-def _verify_docs_claim_winners(
-    items: list[dict[str, Any]],
-    *,
-    eligible_stage: str,
-    settle_seconds: float = _CLAIM_VERIFY_SETTLE_SECONDS,
-) -> list[dict[str, Any]]:
-    """Drop docs-claim items that lost a concurrent-claim race.
+def _verify_docs_claim_winners(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_release._verify_docs_claim_winners."""
+    from .graph_store import graph_claim_release
 
-    *items* are the rows returned by :func:`_claim_sn_atomic` (all sharing one
-    ``claim_token``).  After a short *settle_seconds* pause — long enough for a
-    lock-serialised claim burst to finish committing — this re-reads committed
-    graph state and keeps only the nodes that STILL hold that token, remain at
-    *eligible_stage*, AND carry the exact ``claim_seq`` this worker was
-    assigned.  A race loser's ``claim_seq`` was superseded by a later
-    committer's higher value, so it is dropped here before any LLM call.
-
-    ``settle_seconds`` is overridable (tests pass ``0``); this function runs in
-    a worker thread (claims go through ``asyncio.to_thread``), so the pause does
-    not block the event loop.
-
-    Returns the filtered item list (order preserved).
-    """
-    return _verify_claim_winners(
-        items,
-        stage_field="docs_stage",
-        eligible_stage=eligible_stage,
-        settle_seconds=settle_seconds,
-        axis="docs",
+    return graph_claim_release._verify_docs_claim_winners(
+        *args, services=_graph_foundation.services, **kwargs
     )
 
 
-def _verify_claim_winners(
-    items: list[dict[str, Any]],
-    *,
-    stage_field: str,
-    eligible_stage: str,
-    settle_seconds: float,
-    axis: str,
-    require_validated: bool = False,
-) -> list[dict[str, Any]]:
-    """Shared claim-race winner verifier for the docs and names axes.
+def _verify_claim_winners(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_release._verify_claim_winners."""
+    from .graph_store import graph_claim_release
 
-    Keeps only items that still hold ``claim_token`` at *eligible_stage* with
-    the assigned ``claim_seq`` after settling; see the module comment above
-    :func:`_verify_docs_claim_winners` for the mechanism.
-    """
-    if not items:
-        return items
-    token = items[0].get("claim_token") or ""
-    if not token:
-        return items
-    # Per-item (id, claim_seq). Legacy claims that predate the seq stamp fall
-    # back to token+stage only so this never over-drops on missing data.
-    seqs = {it["id"]: it.get("claim_seq") for it in items}
-    have_seq = all(v is not None for v in seqs.values())
-    # The settle only helps the claim_seq dedup — it gives a lock-serialised
-    # claim burst time to finish committing so the seq re-read is decisive.
-    # Without claim_seq (legacy nodes / mocked claims) there is nothing for the
-    # pause to resolve, so skip it and fall through to the token-only check.
-    if have_seq and settle_seconds > 0:
-        time.sleep(settle_seconds)
-    ids = [it["id"] for it in items]
-    validation_gate = "AND sn.validation_status = 'valid'" if require_validated else ""
-    with GraphClient() as gc:
-        rows = gc.query(
-            f"""
-            UNWIND $ids AS sid
-            MATCH (sn:StandardName {{id: sid}})
-            WHERE sn.claim_token = $token
-              AND sn.{stage_field} = $eligible_stage
-              {validation_gate}
-            RETURN sn.id AS id, sn.claim_seq AS claim_seq
-            """,
-            ids=ids,
-            token=token,
-            eligible_stage=eligible_stage,
-        )
-    if have_seq:
-        winners = {r["id"] for r in rows if r.get("claim_seq") == seqs[r["id"]]}
-    else:
-        winners = {r["id"] for r in rows}
-    if len(winners) == len(items):
-        return items
-    logger.debug(
-        "_verify_claim_winners[%s]: %d/%d survived claim-race (token=%s, stage=%s)",
-        axis,
-        len(winners),
-        len(items),
-        token[:8],
-        eligible_stage,
+    return graph_claim_release._verify_claim_winners(
+        *args, services=_graph_foundation.services, **kwargs
     )
-    return [it for it in items if it["id"] in winners]
 
 
 # =============================================================================
@@ -12736,85 +9198,22 @@ def _verify_claim_winners(
 # earlier racer sees a higher committed seq and is dropped before any LLM call.
 
 
-def _verify_name_claim_winners(
-    items: list[dict[str, Any]],
-    *,
-    eligible_stage: str,
-    settle_seconds: float = _CLAIM_VERIFY_SETTLE_SECONDS,
-) -> list[dict[str, Any]]:
-    """Drop name-claim items that lost a concurrent-claim race.
+def _verify_name_claim_winners(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_release._verify_name_claim_winners."""
+    from .graph_store import graph_claim_release
 
-    Names-axis twin of :func:`_verify_docs_claim_winners` — same settle +
-    ``claim_seq`` mechanism, gated on ``name_stage`` instead of ``docs_stage``.
-    """
-    return _verify_claim_winners(
-        items,
-        stage_field="name_stage",
-        eligible_stage=eligible_stage,
-        settle_seconds=settle_seconds,
-        axis="name",
-        require_validated=True,
+    return graph_claim_release._verify_name_claim_winners(
+        *args, services=_graph_foundation.services, **kwargs
     )
 
 
-def _verify_source_claim_winners(
-    items: list[dict[str, Any]],
-    *,
-    settle_seconds: float = _CLAIM_VERIFY_SETTLE_SECONDS,
-) -> list[dict[str, Any]]:
-    """Drop generate_name source-claim items that lost a concurrent-claim race.
+def _verify_source_claim_winners(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_claim_release._verify_source_claim_winners."""
+    from .graph_store import graph_claim_release
 
-    The generate_name pool claims :class:`StandardNameSource` nodes (gate
-    ``status='extracted'``) rather than StandardName nodes, so it cannot share
-    :func:`_verify_name_claim_winners`.  Same mechanism: re-read committed
-    ``claim_token`` ownership and keep only the sources this worker still owns
-    at the eligible ``status='extracted'`` gate, dropping race losers before
-    the (paid) name-composition LLM call.
-
-    Returns the filtered item list (order preserved).
-    """
-    if not items:
-        return items
-    tokens = {item.get("claim_token") for item in items}
-    if len(tokens) != 1 or not next(iter(tokens)):
-        logger.warning(
-            "_verify_source_claim_winners: rejected %d claim(s) without one token",
-            len(items),
-        )
-        return []
-    token = next(iter(tokens))
-    seqs = {it["id"]: it.get("claim_seq") for it in items}
-    if any(seq is None for seq in seqs.values()):
-        logger.warning(
-            "_verify_source_claim_winners: rejected %d claim(s) without claim_seq",
-            len(items),
-        )
-        return []
-    if settle_seconds > 0:
-        time.sleep(settle_seconds)
-    ids = [it["id"] for it in items]
-    with GraphClient() as gc:
-        rows = gc.query(
-            """
-            UNWIND $ids AS sid
-            MATCH (sns:StandardNameSource {id: sid})
-            WHERE sns.claim_token = $token
-              AND sns.status = 'extracted'
-            RETURN sns.id AS id, sns.claim_seq AS claim_seq
-            """,
-            ids=ids,
-            token=token,
-        )
-    winners = {row["id"] for row in rows if row.get("claim_seq") == seqs[row["id"]]}
-    if len(winners) == len(items):
-        return items
-    logger.debug(
-        "_verify_source_claim_winners: %d/%d survived claim-race (token=%s)",
-        len(winners),
-        len(items),
-        token[:8],
+    return graph_claim_release._verify_source_claim_winners(
+        *args, services=_graph_foundation.services, **kwargs
     )
-    return [it for it in items if it["id"] in winners]
 
 
 # =============================================================================
@@ -12943,53 +9342,13 @@ def mark_for_refine_docs(*args: Any, **kwargs: Any):
     )
 
 
-@retry_on_deadlock()
-def release_all_orphan_claims() -> dict[str, int]:
-    """Release all claimed-but-unreleased StandardName and StandardNameSource nodes.
+def release_all_orphan_claims(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_parent_lifecycle.release_all_orphan_claims."""
+    from .graph_store import graph_parent_lifecycle
 
-    Called from the ``run_sn_pools`` finally block after clean shutdown so
-    that any batch still marked as claimed at process-exit is unlocked.
-    Per-batch release already happens inside each process() try/finally, but
-    batches in flight at the 60s grace-period timeout leave ``claimed_at``
-    set permanently.  This sweep clears them unconditionally — it is safe
-    because the run is over and no other process can be competing for the
-    same tokens.
-
-    A StandardName caught mid-refine sits at a transient ``'refining'`` stage.
-    Clearing only its claim would strand it there — reviewable/refinable only
-    after the periodic orphan sweep reverts the stage. Apply the same
-    ``refining -> reviewed`` revert the orphan sweep uses (see
-    ``orphan_sweep._SWEEP_QUERIES``) as part of the release, so shutdown leaves
-    no node in a transient stage with a cleared claim.
-
-    Returns a dict with ``"sn"`` and ``"sns"`` keys showing the counts
-    of released nodes.
-    """
-    with GraphClient() as gc:
-        sn_result = gc.query(
-            """
-            MATCH (n:StandardName)
-            WHERE n.claimed_at IS NOT NULL
-            SET n.updated_at = datetime(), n.name_stage = CASE WHEN n.name_stage = 'refining'
-                                    THEN 'reviewed' ELSE n.name_stage END,
-                n.docs_stage = CASE WHEN n.docs_stage = 'refining'
-                                    THEN 'reviewed' ELSE n.docs_stage END,
-                n.claimed_at = null,
-                n.claim_token = null
-            RETURN count(n) AS released
-            """
-        )
-        sns_result = gc.query(
-            """
-            MATCH (n:StandardNameSource)
-            WHERE n.claimed_at IS NOT NULL
-            SET n.claimed_at = null, n.claim_token = null
-            RETURN count(n) AS released
-            """
-        )
-    sn_count = sn_result[0]["released"] if sn_result else 0
-    sns_count = sns_result[0]["released"] if sns_result else 0
-    return {"sn": sn_count, "sns": sns_count}
+    return graph_parent_lifecycle.release_all_orphan_claims(
+        *args, services=_graph_foundation.services, **kwargs
+    )
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -12997,193 +9356,22 @@ def release_all_orphan_claims() -> dict[str, int]:
 # ═══════════════════════════════════════════════════════════════════════
 
 
-def pool_pending_counts(
-    *,
-    min_score: float = 0.75,
-    rotation_cap: int = 3,
-    domain: str | None = None,
-    scope_run_id: str | None = None,
-    edits_only: bool = False,
-) -> dict[str, int]:
-    """Return pending-work counts for all six worker pools in one query.
+def pool_pending_counts(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_parent_lifecycle.pool_pending_counts."""
+    from .graph_store import graph_parent_lifecycle
 
-    The six predicates mirror the eligibility criteria and optional scope in
-    the corresponding ``claim_*_batch`` functions but do NOT filter on
-    ``claimed_at`` — the counts reflect total eligible work,
-    including items currently being processed.  This is correct for
-    both throttle decisions (total queue depth matters) and display
-    (users want to see total pending, not just unclaimed).
-
-    Returns a dict keyed by pool name::
-
-        {
-            "generate_name": int,
-            "review_name": int,
-            "refine_name": int,
-            "generate_docs": int,
-            "review_docs": int,
-            "refine_docs": int,
-        }
-    """
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.defaults import (
-        DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+    return graph_parent_lifecycle.pool_pending_counts(
+        *args, services=_graph_foundation.services, **kwargs
     )
 
-    source_scope = ""
-    name_scope = ""
-    params: dict[str, Any] = {
-        "min_score": min_score,
-        "rotation_cap": rotation_cap,
-        "max_compose_attempts": _MAX_COMPOSE_CLAIM_ATTEMPTS,
-        "parent_desc_placeholder": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
-    }
-    if domain:
-        source_scope += " AND s.physics_domain = $domain"
-        name_scope += " AND sn.physics_domain = $domain"
-        params["domain"] = domain
-    if scope_run_id:
-        source_scope += " AND s.run_id = $scope_run_id"
-        name_scope += " AND sn.run_id = $scope_run_id"
-        params["scope_run_id"] = scope_run_id
-    if edits_only:
-        # Name-generation claims intentionally have no edits-only source path:
-        # rename/docs edits start from an already-composed StandardName.
-        source_scope += " AND false"
-        name_scope += " AND coalesce(sn.edit_status, '') = 'open'"
 
-    score_gate = (
-        ""
-        if (scope_run_id or edits_only)
-        else (
-            " AND (sn.reviewer_score_name IS NOT NULL"
-            " OR (coalesce(sn.origin, '') = 'derived'"
-            " AND EXISTS { MATCH (kid:StandardName)-[:HAS_PARENT]->(sn)"
-            " WHERE NOT (coalesce(kid.name_stage, '') IN"
-            " ['superseded', 'exhausted', 'contested']) }))"
-        )
+def scoped_terminal_residue(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_parent_lifecycle.scoped_terminal_residue."""
+    from .graph_store import graph_parent_lifecycle
+
+    return graph_parent_lifecycle.scoped_terminal_residue(
+        *args, services=_graph_foundation.services, **kwargs
     )
-
-    cypher = f"""
-    CALL {{ MATCH (s:StandardNameSource {{status: 'extracted'}})
-           WHERE coalesce(s.attempt_count, 0) < $max_compose_attempts
-             {source_scope}
-           RETURN count(s) AS generate_name }}
-    CALL {{ MATCH (sn:StandardName {{name_stage: 'drafted'}})
-           WHERE sn.description IS NOT NULL
-             AND sn.description <> $parent_desc_placeholder
-             AND coalesce(sn.origin, '') <> 'derived'
-             {name_scope}
-           RETURN count(sn) AS review_name }}
-    CALL {{ MATCH (sn:StandardName {{name_stage: 'reviewed'}})
-           WHERE sn.reviewer_score_name < $min_score
-             AND coalesce(sn.chain_length, 0) < $rotation_cap
-             AND coalesce(sn.origin, '') <> 'derived'
-             AND NOT (coalesce(sn.edit_mode, '') = 'rename'
-                      AND coalesce(sn.review_resubmit_count, 0)
-                          >= $rotation_cap)
-             {name_scope}
-           RETURN count(sn) AS refine_name }}
-    CALL {{ MATCH (sn:StandardName
-                   {{name_stage: 'accepted', docs_stage: 'pending'}})
-           WHERE true {score_gate}
-             {name_scope}
-           RETURN count(sn) AS generate_docs }}
-    CALL {{ MATCH (sn:StandardName {{docs_stage: 'drafted'}})
-           WHERE NOT (sn.name_stage IN
-                      ['superseded', 'exhausted', 'contested'])
-             {score_gate}
-             {name_scope}
-           RETURN count(sn) AS review_docs }}
-    CALL {{ MATCH (sn:StandardName {{docs_stage: 'reviewed'}})
-           WHERE sn.reviewer_score_docs < $min_score
-             AND coalesce(sn.docs_chain_length, 0) < $rotation_cap
-             AND NOT (sn.name_stage IN
-                      ['superseded', 'exhausted', 'contested'])
-             {score_gate}
-             {name_scope}
-           RETURN count(sn) AS refine_docs }}
-    RETURN generate_name, review_name, refine_name,
-           generate_docs, review_docs, refine_docs
-    """
-    with GraphClient() as gc:
-        rows = list(gc.query(cypher, **params))
-
-    if not rows:
-        return {
-            "generate_name": 0,
-            "review_name": 0,
-            "refine_name": 0,
-            "generate_docs": 0,
-            "review_docs": 0,
-            "refine_docs": 0,
-        }
-    r = rows[0]
-    return {
-        "generate_name": int(r.get("generate_name", 0)),
-        "review_name": int(r.get("review_name", 0)),
-        "refine_name": int(r.get("refine_name", 0)),
-        "generate_docs": int(r.get("generate_docs", 0)),
-        "review_docs": int(r.get("review_docs", 0)),
-        "refine_docs": int(r.get("refine_docs", 0)),
-    }
-
-
-def scoped_terminal_residue(
-    *,
-    scope_run_id: str | None = None,
-    drain_scope_id: str | None = None,
-) -> dict[str, Any]:
-    """Return claim and transient-stage residue inside one exact run scope."""
-    if bool(scope_run_id) == bool(drain_scope_id):
-        raise ValueError("exactly one scoped terminal selector is required")
-    scope_id = scope_run_id or drain_scope_id
-    scope_property = "run_id" if scope_run_id else "drain_scope_id"
-    cypher = f"""
-    CALL {{
-      MATCH (sn:StandardName)
-      WHERE sn.{scope_property} = $scope_id
-        AND (sn.claim_token IS NOT NULL
-             OR sn.claimed_at IS NOT NULL
-             OR sn.name_stage = 'refining'
-             OR sn.docs_stage = 'refining')
-      WITH sn ORDER BY sn.id
-      RETURN count(sn) AS name_count,
-             collect({{
-               id: sn.id,
-               name_stage: sn.name_stage,
-               docs_stage: sn.docs_stage,
-               claim_token: sn.claim_token,
-               claimed_at: toString(sn.claimed_at)
-             }})[0..50] AS names
-    }}
-    CALL {{
-      MATCH (sns:StandardNameSource)
-      WHERE sns.{scope_property} = $scope_id
-        AND (sns.claim_token IS NOT NULL OR sns.claimed_at IS NOT NULL)
-      WITH sns ORDER BY sns.id
-      RETURN count(sns) AS source_count,
-             collect({{
-               id: sns.id,
-               status: sns.status,
-               claim_token: sns.claim_token,
-               claimed_at: toString(sns.claimed_at)
-             }})[0..50] AS sources
-    }}
-    RETURN name_count, source_count, names, sources
-    """
-    with GraphClient() as gc:
-        rows = list(gc.query(cypher, scope_id=scope_id))
-    row = dict(rows[0]) if rows else {}
-    name_count = int(row.get("name_count") or 0)
-    source_count = int(row.get("source_count") or 0)
-    return {
-        "total": name_count + source_count,
-        "name_count": name_count,
-        "source_count": source_count,
-        "names": list(row.get("names") or []),
-        "sources": list(row.get("sources") or []),
-    }
 
 
 # =============================================================================
@@ -13201,1127 +9389,174 @@ def scoped_terminal_residue(
 # name.  Childless derived parents are legitimately unscoped and never claimed.
 
 
-def _verify_enrich_parents_claim_winners(
-    items: list[dict[str, Any]],
-) -> list[dict[str, Any]]:
-    """Drop enrich-parents claim items that lost a concurrent-claim race.
+def _verify_enrich_parents_claim_winners(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_parent_lifecycle._verify_enrich_parents_claim_winners."""
+    from .graph_store import graph_parent_lifecycle
 
-    Same two-step claim_token verify mandated for every claim function (see
-    :func:`_verify_name_claim_winners`): two replicas bind the same eligible
-    derived parent at the shared seed MATCH, the lock-serialised SET lets the
-    LAST claim_token win, but BOTH replicas returned the node and would proceed
-    to the (paid) enrichment LLM call. This re-reads committed state and keeps
-    only nodes that STILL hold our token AND remain enrichment-eligible (a
-    placeholder derived parent) — the race loser's token was overwritten, so it
-    is dropped before any LLM call.
-
-    Returns the filtered item list (order preserved).
-    """
-    if not items:
-        return items
-    token = items[0].get("claim_token") or ""
-    if not token:
-        return items
-    from imas_codex.standard_names.defaults import (
-        DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+    return graph_parent_lifecycle._verify_enrich_parents_claim_winners(
+        *args, services=_graph_foundation.services, **kwargs
     )
 
-    ids = [it["id"] for it in items]
-    with GraphClient() as gc:
-        rows = gc.query(
-            """
-            UNWIND $ids AS sid
-            MATCH (sn:StandardName {id: sid})
-            WHERE sn.claim_token = $token
-              AND sn.origin = 'derived'
-              AND sn.description = $placeholder
-            RETURN sn.id AS id
-            """,
-            ids=ids,
-            token=token,
-            placeholder=DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
-        )
-    winners = {r["id"] for r in rows}
-    if len(winners) == len(items):
-        return items
-    logger.debug(
-        "_verify_enrich_parents_claim_winners: %d/%d survived claim-race (token=%s)",
-        len(winners),
-        len(items),
-        token[:8],
-    )
-    return [it for it in items if it["id"] in winners]
 
+def claim_enrich_parents_batch(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_parent_lifecycle.claim_enrich_parents_batch."""
+    from .graph_store import graph_parent_lifecycle
 
-@retry_on_deadlock()
-def claim_enrich_parents_batch(
-    batch_size: int = DEFAULT_POOL_BATCH_SIZE,
-    timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
-    domain: str | None = None,
-    scope_run_id: str | None = None,
-    drain_scope_id: str | None = None,
-    edits_only: bool = False,
-) -> list[dict[str, Any]]:
-    """Claim placeholder derived parents that still need a real description.
-
-    Eligibility: ``origin = 'derived'`` AND the description is still the
-    deterministic-parent placeholder AND the parent has at least one live
-    (non-superseded/exhausted) ``HAS_PARENT`` child to ground on.  Childless
-    placeholders (legitimately unscoped) never match and are skipped.
-
-    The claim does NOT transition any stage — only ``claim_token`` /
-    ``claimed_at`` are written.  The stage transition to ``'drafted'`` happens
-    in :func:`persist_enriched_parent` once a real description + embedding
-    exist, so a failed LLM call leaves the parent claimable as a placeholder.
-
-    Returns claimed items as dicts with ``id``, ``name``, ``kind``, ``unit``,
-    ``physics_domain``, ``claim_token``.
-    """
-    from imas_codex.standard_names.defaults import (
-        DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+    return graph_parent_lifecycle.claim_enrich_parents_batch(
+        *args, services=_graph_foundation.services, **kwargs
     )
 
-    where = (
-        "sn.origin = 'derived'"
-        " AND sn.description = $parent_desc_placeholder"
-        " AND EXISTS { MATCH (child:StandardName)-[:HAS_PARENT]->(sn)"
-        "   WHERE NOT coalesce(child.name_stage, '') IN ['superseded', 'exhausted', 'contested'] }"
-    )
-    query_params: dict[str, Any] = {
-        "parent_desc_placeholder": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
-    }
-    items = _claim_sn_atomic(
-        eligibility_where=where,
-        query_params=query_params,
-        batch_size=batch_size,
-        timeout_seconds=timeout_seconds,
-        extra_return_fields=", coalesce(sn.name, sn.id) AS name",
-        domain=domain,
-        scope_run_id=scope_run_id,
-        drain_scope_id=drain_scope_id,
-        edits_only=edits_only,
-    )
-    # Two-step claim_token verify (mandated for every claim function): drop nodes
-    # a concurrent replica won at the lock-serialised SET, before any enrichment
-    # LLM call — otherwise multi-replica runs pay the enrichment cost N× per
-    # parent (the docs/name amplification analogue).
-    return _verify_enrich_parents_claim_winners(items)
 
+def fetch_derived_parent_children(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_parent_lifecycle.fetch_derived_parent_children."""
+    from .graph_store import graph_parent_lifecycle
 
-def fetch_derived_parent_children(
-    parent_ids: list[str],
-) -> dict[str, list[dict[str, Any]]]:
-    """Fetch the grounding children for a batch of derived parents.
-
-    For each parent id, returns its live (non-superseded/exhausted)
-    ``HAS_PARENT`` children with the fields the enrichment prompt grounds on:
-    the child standard name, its description, unit, and physics domain.  A
-    child still carrying the placeholder description contributes its NAME (the
-    name itself is meaningful) but an empty description, so the prompt grounds
-    on whatever real descriptions exist plus the child name set.
-
-    Returns ``{parent_id: [child_dict, ...]}``; parents with no live children
-    map to an empty list.
-    """
-    from imas_codex.standard_names.defaults import (
-        DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+    return graph_parent_lifecycle.fetch_derived_parent_children(
+        *args, services=_graph_foundation.services, **kwargs
     )
 
-    if not parent_ids:
-        return {}
-    with GraphClient() as gc:
-        rows = gc.query(
-            """
-            UNWIND $parent_ids AS pid
-            MATCH (child:StandardName)-[:HAS_PARENT]->(p:StandardName {id: pid})
-            WHERE NOT coalesce(child.name_stage, '') IN ['superseded', 'exhausted', 'contested']
-            WITH pid, child
-            ORDER BY child.id
-            RETURN pid AS parent_id,
-                   collect({
-                     name: child.id,
-                     description: CASE
-                         WHEN child.description = $placeholder THEN null
-                         ELSE child.description END,
-                     unit: child.unit,
-                     physics_domain: child.physics_domain,
-                     kind: child.kind
-                   }) AS children
-            """,
-            parent_ids=parent_ids,
-            placeholder=DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
-        )
-    return {r["parent_id"]: list(r["children"]) for r in rows}
+
+_STRUCTURAL_AUTHORITY_MECHANISM = import_module(
+    ".graph_store.graph_parent_lifecycle", __package__
+)._STRUCTURAL_AUTHORITY_MECHANISM
+
+_STRUCTURAL_AUTHORITY_SCHEMA = import_module(
+    ".graph_store.graph_parent_lifecycle", __package__
+)._STRUCTURAL_AUTHORITY_SCHEMA
+
+_STRUCTURAL_AUTHORITY_CANONICALIZATION = import_module(
+    ".graph_store.graph_parent_lifecycle", __package__
+)._STRUCTURAL_AUTHORITY_CANONICALIZATION
 
 
-_STRUCTURAL_AUTHORITY_MECHANISM = "deterministic-grammar-peel"
-_STRUCTURAL_AUTHORITY_SCHEMA = "StructuralNameAuthority"
-_STRUCTURAL_AUTHORITY_CANONICALIZATION = "json-sort-keys"
+StructuralAuthorityConflict = import_module(
+    ".graph_store.graph_parent_lifecycle", __package__
+).StructuralAuthorityConflict
 
 
-class StructuralAuthorityConflict(RuntimeError):
-    """A structural accept no longer matches its exact live child closure."""
+def _structural_authority_identities(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_parent_lifecycle._structural_authority_identities."""
+    from .graph_store import graph_parent_lifecycle
 
-
-def _structural_authority_identities() -> tuple[str, str]:
-    """Return immutable identities for the executing code and schema bytes."""
-    code_identity = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
-    schema_path = Path(__file__).parents[1] / "schemas" / "standard_name.yaml"
-    schema_identity = hashlib.sha256(schema_path.read_bytes()).hexdigest()
-    return code_identity, schema_identity
-
-
-def _structural_authority_snapshot(gc: Any, sn_id: str) -> dict[str, Any] | None:
-    """Read one parent and its exact ordered live child rows."""
-    rows = gc.query(
-        """
-        MATCH (parent:StandardName {id: $id})
-        OPTIONAL MATCH (child:StandardName)-[:HAS_PARENT]->(parent)
-        WHERE child IS NULL OR NOT coalesce(child.name_stage, '') IN
-          ['superseded', 'exhausted', 'contested']
-        WITH parent, child ORDER BY child.id
-        RETURN parent.id AS parent_id,
-               elementId(parent) AS parent_element_id,
-               parent.name_stage AS name_stage,
-               parent.origin AS origin,
-               parent.claim_token AS claim_token,
-               parent.reviewed_name_at AS reviewed_name_at,
-               parent.docs_stage AS docs_stage,
-               parent.validation_status AS validation_status,
-               parent.embedded_at AS embedded_at,
-               parent.chain_length AS chain_length,
-               [(parent)-[:HAS_STRUCTURAL_AUTHORITY]->(existing)
-                 | existing.id] AS authority_ids,
-               [item IN collect(CASE WHEN child IS NULL THEN null ELSE {
-                 id: child.id,
-                 element_id: elementId(child),
-                 name_stage: child.name_stage,
-                 reviewer_score_name: child.reviewer_score_name,
-                 reviewer_model_name: child.reviewer_model_name
-               } END) WHERE item IS NOT NULL] AS children
-        """,
-        id=sn_id,
+    return graph_parent_lifecycle._structural_authority_identities(
+        *args, services=_graph_foundation.services, **kwargs
     )
-    return dict(rows[0]) if rows else None
 
 
-def _structural_authority_record(
-    snapshot: dict[str, Any], *, accepting: bool
-) -> dict[str, Any]:
-    """Build a content-addressed signed authority from a live child snapshot."""
-    child_rows = list(snapshot.get("children") or [])
-    if not child_rows:
-        raise StructuralAuthorityConflict(
-            f"derived parent {snapshot.get('parent_id')!r} has no live children"
-        )
-    child_ids = [str(child["id"]) for child in child_rows]
-    if child_ids != sorted(child_ids) or len(child_ids) != len(set(child_ids)):
-        raise StructuralAuthorityConflict(
-            "structural authority requires unique children in canonical id order"
-        )
+def _structural_authority_snapshot(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_parent_lifecycle._structural_authority_snapshot."""
+    from .graph_store import graph_parent_lifecycle
 
-    parent_id = str(snapshot["parent_id"])
-    created_at_value = datetime.now(UTC)
-    created_at = created_at_value.isoformat()
-    code_identity, schema_identity = _structural_authority_identities()
-    signed_payload = {
-        "accepted_name_id": parent_id,
-        "child_rows": child_rows,
-        "code_identity": code_identity,
-        "created_at": created_at_value,
-        "entailment_mechanism": _STRUCTURAL_AUTHORITY_MECHANISM,
-        "operation": "accept-and-authorize"
-        if accepting
-        else "authorize-existing-accept",
-        "schema_identity": schema_identity,
-    }
-    payload_sha256 = _authority_payload_hash(signed_payload)
-    authority_id = f"structural-authority:{payload_sha256}"
-    prefix = authority_id + ":"
-    participants = [
-        {
-            "id": prefix + "participant:parent",
-            "kind": "node",
-            "graph_label": "StandardName",
-            "signature_sha256": _authority_payload_hash(
-                {
-                    "id": parent_id,
-                    "element_id": snapshot.get("parent_element_id"),
-                    "name_stage": snapshot.get("name_stage"),
-                }
-            ),
-        },
-        *[
-            {
-                "id": prefix + f"participant:child:{index}",
-                "kind": "node",
-                "graph_label": "StandardName",
-                "signature_sha256": _authority_payload_hash(child),
-            }
-            for index, child in enumerate(child_rows)
-        ],
-    ]
-    mutations = [
-        {
-            "id": prefix + "mutation:authority",
-            "order": 0,
-            "kind": "add_relationship",
-            "participant_id": participants[0]["id"],
-            "arguments": json.dumps(
-                {
-                    "relationship": "HAS_STRUCTURAL_AUTHORITY",
-                    "child_relationship": "ENTAILED_FROM_CHILD",
-                },
-                sort_keys=True,
-                separators=(",", ":"),
-            ),
-        }
-    ]
-    if accepting:
-        mutations.append(
-            {
-                "id": prefix + "mutation:accept",
-                "order": 1,
-                "kind": "set_properties",
-                "participant_id": participants[0]["id"],
-                "arguments": json.dumps(
-                    {"name_stage": "accepted"},
-                    sort_keys=True,
-                    separators=(",", ":"),
-                ),
-            }
-        )
-    guards = [
-        {
-            "id": prefix + "guard:participants",
-            "kind": "participant_lock",
-            "implementation": "lock-exact-parent-and-live-children",
-            "participant_ids": [participant["id"] for participant in participants],
-            "expected": len(participants),
-        },
-        {
-            "id": prefix + "guard:children",
-            "kind": "closure_digest",
-            "implementation": "ordered-live-child-row-digest",
-            "participant_ids": [participant["id"] for participant in participants[1:]],
-            "expected": payload_sha256,
-        },
-        {
-            "id": prefix + "guard:replay",
-            "kind": "replay_postcondition",
-            "implementation": "one-structural-authority-per-accept",
-            "participant_ids": [participants[0]["id"]],
-            "expected": 1,
-        },
-    ]
-    return {
-        "id": authority_id,
-        "child_rows": child_rows,
-        "expected_name_stage": snapshot.get("name_stage"),
-        "expected_claim_token": snapshot.get("claim_token"),
-        "identity": {
-            "id": prefix + "identity",
-            "kind": "standard_name",
-            "target_id": parent_id,
-        },
-        "signature": {
-            "id": prefix + "signature",
-            "profile": "each_row",
-            "sha256": payload_sha256,
-            "canonicalization": _STRUCTURAL_AUTHORITY_CANONICALIZATION,
-        },
-        "participants": participants,
-        "selection": {
-            "id": prefix + "selection",
-            "mode": "exact_caller_set",
-            "predicate": "exact-live-derived-parent-child-set",
-        },
-        "mutations": mutations,
-        "guards": guards,
-        "orphan_policy": "refuse",
-        "accepted_name_id": parent_id,
-        "child_ids": child_ids,
-        "children": child_ids,
-        "entailment_mechanism": _STRUCTURAL_AUTHORITY_MECHANISM,
-        "created_at": created_at,
-        "code_identity": code_identity,
-        "schema_identity": schema_identity,
-        "payload_sha256": payload_sha256,
-    }
-
-
-def _persist_structural_authority(
-    gc: Any,
-    record: dict[str, Any],
-    *,
-    parent_updates: dict[str, Any] | None = None,
-    require_derived: bool = True,
-    require_source_free: bool = False,
-) -> bool:
-    """Persist one authority and optional accept transition in one statement.
-
-    ``require_source_free`` re-checks inside the same guarded statement that no
-    ``StandardNameSource`` produces the parent. A caller that admits a parent on
-    the strength of it having no producer must hold that fact through the write,
-    or a source attached in between would be accepted without its name reviewed.
-    """
-    rows = gc.query(
-        """
-        MATCH (parent:StandardName {id: $parent_id})
-        WHERE ($require_derived = false OR parent.origin = 'derived')
-          AND ($require_source_free = false OR NOT EXISTS {
-                MATCH (:StandardNameSource)-[:PRODUCED_NAME]->(parent) })
-          AND parent.name_stage = $expected_name_stage
-          AND (parent.claim_token = $expected_claim_token
-               OR (parent.claim_token IS NULL AND $expected_claim_token IS NULL))
-          AND NOT (parent)-[:HAS_STRUCTURAL_AUTHORITY]->(:StructuralNameAuthority)
-        OPTIONAL MATCH (child:StandardName)-[:HAS_PARENT]->(parent)
-        WHERE child IS NULL OR NOT coalesce(child.name_stage, '') IN
-          ['superseded', 'exhausted', 'contested']
-        WITH parent, child ORDER BY child.id
-        WITH parent, [c IN collect(child) WHERE c IS NOT NULL] AS children
-        WHERE [c IN children | c.id] = $child_ids
-          AND [c IN children | elementId(c)] = $child_element_ids
-          AND size(children) > 0
-        SET parent += $parent_updates,
-            parent.updated_at = datetime(),
-            parent._structural_authority_lock = true
-        REMOVE parent._structural_authority_lock
-        CREATE (authority:StructuralNameAuthority)
-        SET authority = $authority_properties
-        CREATE (parent)-[:HAS_STRUCTURAL_AUTHORITY]->(authority)
-        CREATE (identity:RepairRowIdentity)
-        SET identity = $identity
-        CREATE (authority)-[:IDENTITY]->(identity)
-        CREATE (signature:RepairAuthorityDigest)
-        SET signature = $signature
-        CREATE (authority)-[:SIGNATURES]->(signature)
-        CREATE (selection:RepairSelection)
-        SET selection = $selection
-        CREATE (authority)-[:SELECTION]->(selection)
-        WITH parent, authority, children
-        UNWIND $participants AS participant_data
-        CREATE (participant:RepairParticipant)
-        SET participant = participant_data
-        CREATE (authority)-[:PARTICIPANTS]->(participant)
-        WITH DISTINCT parent, authority, children
-        UNWIND $mutations AS mutation_data
-        CREATE (mutation:RepairMutation)
-        SET mutation = mutation_data
-        CREATE (authority)-[:MUTATIONS]->(mutation)
-        WITH DISTINCT parent, authority, children
-        UNWIND $guards AS guard_data
-        CREATE (guard:RepairGuard)
-        SET guard = guard_data
-        CREATE (authority)-[:GUARDS]->(guard)
-        WITH DISTINCT parent, authority, children
-        UNWIND children AS entailing_child
-        CREATE (authority)-[:ENTAILED_FROM_CHILD]->(entailing_child)
-        WITH DISTINCT parent, authority
-        OPTIONAL MATCH (source:StandardNameSource)-[:PRODUCED_NAME]->(parent)
-        FOREACH (_ IN CASE WHEN $description IS NULL OR source IS NULL
-                           THEN [] ELSE [1] END |
-          SET source.description = $description)
-        RETURN DISTINCT parent.name_stage AS name_stage,
-                        authority.id AS authority_id
-        """,
-        parent_id=record["accepted_name_id"],
-        child_ids=record["child_ids"],
-        child_element_ids=[child["element_id"] for child in record["child_rows"]],
-        child_rows=record["child_rows"],
-        expected_name_stage=record["expected_name_stage"],
-        expected_claim_token=record["expected_claim_token"],
-        require_derived=require_derived,
-        require_source_free=require_source_free,
-        parent_updates=parent_updates or {},
-        authority_properties={
-            key: record[key]
-            for key in (
-                "id",
-                "orphan_policy",
-                "accepted_name_id",
-                "child_ids",
-                "children",
-                "entailment_mechanism",
-                "created_at",
-                "code_identity",
-                "schema_identity",
-            )
-        }
-        | {
-            "identity": record["identity"]["id"],
-            "signatures": [record["signature"]["id"]],
-            "participants": [item["id"] for item in record["participants"]],
-            "selection": record["selection"]["id"],
-            "mutations": [item["id"] for item in record["mutations"]],
-            "guards": [item["id"] for item in record["guards"]],
-        },
-        identity=record["identity"],
-        signature=record["signature"],
-        selection=record["selection"],
-        participants=record["participants"],
-        mutations=record["mutations"],
-        guards=record["guards"],
-        description=(parent_updates or {}).get("description"),
+    return graph_parent_lifecycle._structural_authority_snapshot(
+        *args, services=_graph_foundation.services, **kwargs
     )
-    returned_authority_ids = {row.get("authority_id") for row in rows}
-    return returned_authority_ids == {record["id"]}
 
 
-@retry_on_deadlock()
-def persist_enriched_parent(
-    *,
-    sn_id: str,
-    claim_token: str,
-    description: str,
-    embedding: list[float] | None,
-    model: str,
-    run_id: str | None = None,
-) -> str:
-    """Persist a synthesised derived-parent description and accept structurally.
+def _structural_authority_record(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_parent_lifecycle._structural_authority_record."""
+    from .graph_store import graph_parent_lifecycle
 
-    A derived parent's NAME is a deterministic grammar peel that already passed
-    the two-clause admission gate, and its DESCRIPTION is a faithful
-    generalisation over its already-RD-quorum-accepted children — so it inherits
-    name validity by construction.  It therefore SKIPS REVIEW_NAME: routing a
-    structurally-fixed abstraction through a name quorum that systematically
-    penalises it for being less specific than its children only sends it to a
-    futile refine→exhaust (measured: ~66% of derived parents scored <0.85,
-    mean 0.778, despite clean grammar).  The description's quality is still
-    gated downstream on the DOCS axis (generate_docs + review_docs).
-
-    Single write:
-
-    1. Verify the claim (token match OR cleared by the orphan sweep) and that
-       the node is still a derived parent.
-    2. SET ``description`` + ``embedding`` (+ ``embedded_at``), record the
-       enrichment model/time, and transition ``name_stage`` directly to
-       ``'accepted'``. The name is NOT scored — a derived parent name is a
-       deterministic grammar peel that is never reviewed/refined, so a
-       ``reviewer_score_name`` would be meaningless. ``reviewer_model_name`` is
-       stamped ``'structural-inheritance'`` (audit marker) and ``reviewed_name_at``
-       is set as the "name finalised, docs may proceed" signal. ``docs_stage``
-       defaults to ``'pending'`` so it becomes docs-eligible immediately (the
-       docs gates admit derived parents via ``origin``, not a name score).
-    3. Mirror the description onto the parent's ``StandardNameSource`` so
-       consolidation / export see the real text.
-
-    Returns the new ``name_stage`` (``'accepted'``), or ``''`` when the node no
-    longer matched (concurrent winner / not a derived parent).
-    """
-    description = _sanitize_doc_text(description)
-    with GraphClient() as gc:
-        snapshot = _structural_authority_snapshot(gc, sn_id)
-        if snapshot and "parent_id" not in snapshot:
-            return str(snapshot.get("name_stage") or "")
-        if (
-            snapshot is None
-            or snapshot.get("origin") != "derived"
-            or snapshot.get("claim_token") not in (claim_token, None)
-            or not snapshot.get("children")
-            or snapshot.get("authority_ids")
-        ):
-            logger.debug(
-                "persist_enriched_parent: %s no longer matched (concurrent "
-                "winner, missing child authority, or not a derived parent) — no-op",
-                sn_id,
-            )
-            return ""
-        record = _structural_authority_record(snapshot, accepting=True)
-        now = datetime.now(UTC)
-        applied = _persist_structural_authority(
-            gc,
-            record,
-            parent_updates={
-                "description": description,
-                "embedding": embedding,
-                "embedded_at": (
-                    now if embedding is not None else snapshot.get("embedded_at")
-                ),
-                "parent_enriched_at": now,
-                "parent_enrich_model": model,
-                "name_stage": "accepted",
-                "reviewer_model_name": "structural-inheritance",
-                "reviewed_name_at": snapshot.get("reviewed_name_at") or now,
-                "docs_stage": snapshot.get("docs_stage") or "pending",
-                "validation_status": snapshot.get("validation_status") or "valid",
-                "needs_composition": None,
-                "claim_token": None,
-                "claimed_at": None,
-            },
-        )
-        if not applied:
-            raise StructuralAuthorityConflict(
-                f"derived parent {sn_id!r} changed before atomic acceptance"
-            )
-
-    new_stage = "accepted"
-    logger.info(
-        "\033[32menrich_parents\033[0m: %s → name_stage=%s — %s",
-        sn_id,
-        new_stage,
-        (description or "")[:100],
+    return graph_parent_lifecycle._structural_authority_record(
+        *args, services=_graph_foundation.services, **kwargs
     )
-    # NB: deliberately no bump_sn_run_counter here — the SNRun ``names_enriched``
-    # scalar is reconciled against the generate_docs pool total (see
-    # run_sn_pools' async-counter drift check); enrich_parents telemetry is
-    # surfaced via the per-pool completed-count log instead. The ``run_id``
-    # parameter is retained for signature symmetry with the other persist_*
-    # functions and possible future per-pool counters.
-    return new_stage
+
+
+def _persist_structural_authority(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_parent_lifecycle._persist_structural_authority."""
+    from .graph_store import graph_parent_lifecycle
+
+    return graph_parent_lifecycle._persist_structural_authority(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def persist_enriched_parent(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_parent_lifecycle.persist_enriched_parent."""
+    from .graph_store import graph_parent_lifecycle
+
+    return graph_parent_lifecycle.persist_enriched_parent(
+        *args, services=_graph_foundation.services, **kwargs
+    )
 
 
 #: Path scalars that a ``PRODUCED_NAME`` edge is meant to back. On a name no
 #: source produces they are stale copies of a source that has since moved away,
 #: and they read as provenance the graph itself contradicts.
-_UNBACKED_SOURCE_PATH_SCALARS = ("source_path", "source_paths")
+_UNBACKED_SOURCE_PATH_SCALARS = import_module(
+    ".graph_store.graph_parent_lifecycle", __package__
+)._UNBACKED_SOURCE_PATH_SCALARS
 
 
-def _structural_accept_route(
-    *, origin: str | None, producer_count: int, live_child_count: int
-) -> str | None:
-    """Return how a stuck structural parent may be accepted, or ``None``.
+def _structural_accept_route(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_parent_lifecycle._structural_accept_route."""
+    from .graph_store import graph_parent_lifecycle
 
-    ``derived``
-        The parent already carries the derived-scaffold origin. Unchanged
-        behaviour: a derived parent's name is a grammar peel over its children
-        and is never name-reviewed, whether or not a source also produces it.
-
-    ``source_free``
-        The origin scalar is absent, yet the edges say this name is a structural
-        parent that NO source produces. There is nothing to review the name
-        against — the review it would need can never be earned — so its children
-        entail it exactly as they entail a stamped derived parent. Decided from
-        the edges rather than from ``origin``/``source_path``, because a scalar
-        that disagrees with the topology is the stale half of the pair.
-
-    A name with a live producing source and no scaffold origin is a reviewable
-    name and is refused, as is any name without a live child.
-    """
-    if live_child_count < 1:
-        return None
-    if origin == "derived":
-        return "derived"
-    if origin is None and producer_count == 0:
-        return "source_free"
-    return None
-
-
-@retry_on_deadlock()
-def structural_accept_derived_parents(gc: Any | None = None) -> int:
-    """Accept any derived parent stuck on the name axis structurally.
-
-    A derived parent's name is a deterministic grammar peel that already passed
-    the admission gate and generalises its accepted children by construction —
-    so it is NEVER name-reviewed or refined (both claim gates exclude
-    ``origin='derived'``). The enrich pool accepts placeholder parents directly
-    (:func:`persist_enriched_parent`), but a derived parent can still reach
-    ``drafted`` / ``reviewed`` / ``exhausted`` via OTHER paths — a child's
-    refine_name producing the parent-equal general name, or a legacy
-    materialise routing. Without this they would strand there forever (review
-    no longer claims them, refine excludes them).
-
-    This promotes every such parent that has a REAL (non-placeholder)
-    description to ``name_stage='accepted'`` (no ``reviewer_score_name`` — the
-    name is never reviewed, so scoring it is meaningless), stamping
-    ``reviewer_model_name='structural-inheritance'`` and ``reviewed_name_at``
-    (the "name finalised" signal the docs axis keys on). Idempotent and
-    self-healing — safe to call at every ``sn run`` startup. Placeholder-
-    description parents are left for the enrich pool (or are childless zombies).
-    Returns the count promoted.
-
-    A parent can also be a structural scaffold WITHOUT carrying the origin —
-    a name whose producing source moved to another identity, leaving children
-    attached and no ``PRODUCED_NAME`` edge behind. Its name cannot be reviewed
-    either (there is no source to review it against), so it strands in exactly
-    the same way. :func:`_structural_accept_route` admits that case from the
-    edges, and the promotion stamps the scaffold origin and clears the path
-    scalars no edge backs. The widening is fenced by ``require_source_free``:
-    a name with a live producing source is refused, in the selection and again
-    inside the guarded write.
-    """
-    from imas_codex.standard_names.defaults import (
-        DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+    return graph_parent_lifecycle._structural_accept_route(
+        *args, services=_graph_foundation.services, **kwargs
     )
 
-    _own_gc = gc is None
-    if _own_gc:
-        gc = GraphClient().__enter__()
-    try:
-        rows = gc.query(
-            """
-            MATCH (sn:StandardName)
-            WHERE (sn.origin = 'derived' OR sn.origin IS NULL)
-              AND sn.name_stage IN ['drafted', 'reviewed', 'exhausted', 'refining']
-              AND sn.description IS NOT NULL
-              AND sn.description <> $ph
-              AND NOT (sn)-[:HAS_STRUCTURAL_AUTHORITY]->(
-                :StructuralNameAuthority)
-              AND EXISTS { MATCH (:StandardName)-[:HAS_PARENT]->(sn) }
-            RETURN sn.id AS id,
-                   sn.origin AS origin,
-                   count {
-                     (:StandardNameSource)-[:PRODUCED_NAME]->(sn)
-                   } AS producer_count,
-                   count {
-                     (child:StandardName)-[:HAS_PARENT]->(sn)
-                     WHERE NOT coalesce(child.name_stage, '') IN
-                       ['superseded', 'exhausted', 'contested']
-                   } AS live_child_count
-            ORDER BY sn.id
-            """,
-            ph=DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
-        )
-        promoted = 0
-        for row in rows:
-            route = _structural_accept_route(
-                origin=row.get("origin"),
-                producer_count=int(row.get("producer_count") or 0),
-                live_child_count=int(row.get("live_child_count") or 0),
-            )
-            if route is None:
-                continue
-            snapshot = _structural_authority_snapshot(gc, str(row["id"]))
-            if snapshot is None or not snapshot.get("children"):
-                continue
-            record = _structural_authority_record(snapshot, accepting=True)
-            now = datetime.now(UTC)
-            parent_updates = {
-                "name_stage": "accepted",
-                "reviewer_model_name": "structural-inheritance",
-                "reviewed_name_at": snapshot.get("reviewed_name_at") or now,
-                "docs_stage": snapshot.get("docs_stage") or "pending",
-                "chain_length": snapshot.get("chain_length") or 0,
-                "claim_token": None,
-                "claimed_at": None,
-            }
-            if route == "source_free":
-                # Promotion is the statement that this name is a source-free
-                # scaffold, so it stamps the scaffold origin and drops the path
-                # scalars no edge backs in the same guarded write. Leaving them
-                # would keep a path this name never had readable as provenance.
-                parent_updates["origin"] = "derived"
-                parent_updates.update(dict.fromkeys(_UNBACKED_SOURCE_PATH_SCALARS))
-            if not _persist_structural_authority(
-                gc,
-                record,
-                parent_updates=parent_updates,
-                require_derived=route == "derived",
-                require_source_free=route == "source_free",
-            ):
-                raise StructuralAuthorityConflict(
-                    f"derived parent {row['id']!r} changed before atomic acceptance"
-                )
-            promoted += 1
-        if promoted:
-            logger.info(
-                "structural_accept_derived_parents: promoted %d derived parent(s) "
-                "to accepted (structural inheritance)",
-                promoted,
-            )
-        return promoted
-    finally:
-        if _own_gc:
-            gc.__exit__(None, None, None)
 
+def structural_accept_derived_parents(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_parent_lifecycle.structural_accept_derived_parents."""
+    from .graph_store import graph_parent_lifecycle
 
-@retry_on_deadlock()
-def backfill_structural_name_authorities(
-    *, receipt_path: Path | None = None, gc: Any | None = None
-) -> dict[str, Any]:
-    """Authorize every childful bare structural accept, exactly once.
-
-    The marker selects the historical cohort but grants no authority. Each
-    written record is instead signed from the exact ordered live child rows.
-    Childless parents remain unscoped and are reported without mutation.
-    """
-    own = gc is None
-    client = GraphClient() if own else gc
-    try:
-        candidate_rows = client.query(
-            """
-            MATCH (sn:StandardName)
-            WHERE sn.name_stage = 'accepted'
-              AND sn.reviewer_score_name IS NULL
-              AND sn.reviewer_model_name = 'structural-inheritance'
-              AND NOT (sn)-[:HAS_STRUCTURAL_AUTHORITY]->(
-                :StructuralNameAuthority)
-            RETURN sn.id AS id
-            ORDER BY sn.id
-            """
-        )
-        lacking_before = len(candidate_rows)
-        written: list[dict[str, Any]] = []
-        skipped: list[dict[str, str]] = []
-        refused: list[dict[str, str]] = []
-        for candidate in candidate_rows:
-            sn_id = str(candidate["id"])
-            snapshot = _structural_authority_snapshot(client, sn_id)
-            if snapshot is None:
-                refused.append({"id": sn_id, "reason": "parent disappeared"})
-                continue
-            if snapshot.get("authority_ids"):
-                refused.append(
-                    {"id": sn_id, "reason": "authority appeared during selection"}
-                )
-                continue
-            if not snapshot.get("children"):
-                skipped.append({"id": sn_id, "reason": "no live children"})
-                continue
-            record = _structural_authority_record(snapshot, accepting=False)
-            if not _persist_structural_authority(
-                client, record, parent_updates={}, require_derived=False
-            ):
-                refused.append(
-                    {"id": sn_id, "reason": "authority guard refused changed row"}
-                )
-                continue
-            written.append(
-                {
-                    "id": sn_id,
-                    "authority_id": record["id"],
-                    "child_ids": record["child_ids"],
-                    "payload_sha256": record["payload_sha256"],
-                }
-            )
-
-        eligible_before = lacking_before - len(skipped)
-        if refused:
-            raise StructuralAuthorityConflict(
-                "structural authority backfill refused rows: "
-                + "; ".join(f"{row['id']}: {row['reason']}" for row in refused)
-            )
-        if len(written) != eligible_before:
-            raise StructuralAuthorityConflict(
-                "structural authority receipt cardinality mismatch: "
-                f"eligible={eligible_before}, written={len(written)}"
-            )
-        receipt = {
-            "schema": "imas-codex.structural-authority-backfill-receipt",
-            "created_at": datetime.now(UTC).isoformat(),
-            "lacking_authority_before": lacking_before,
-            "eligible_before": eligible_before,
-            "written_count": len(written),
-            "written": written,
-            "skipped_count": len(skipped),
-            "skipped": skipped,
-            "refused_count": len(refused),
-            "refused": refused,
-        }
-        if receipt_path is not None:
-            receipt_path.parent.mkdir(parents=True, exist_ok=True)
-            receipt_path.write_text(
-                json.dumps(receipt, sort_keys=True, indent=2) + "\n",
-                encoding="utf-8",
-            )
-        return receipt
-    finally:
-        if own:
-            client.close()
-
-
-def find_orphan_parent_source_candidates(
-    gc: Any | None = None,
-) -> list[dict[str, Any]]:
-    """Return childful parents eligible for structural source reconstruction."""
-    own = gc is None
-    client = GraphClient() if own else gc
-    try:
-        return list(
-            client.query(
-                """
-                MATCH (parent:StandardName)
-                WHERE NOT ( (:StandardNameSource)-[:PRODUCED_NAME]->(parent) )
-                  AND NOT coalesce(parent.name_stage, '') IN
-                    ['superseded', 'exhausted', 'contested']
-                OPTIONAL MATCH (structural_source:StandardNameSource {
-                  id: 'derived:' + parent.id
-                })
-                WITH parent, structural_source
-                WHERE structural_source IS NULL
-                   OR structural_source.status <> 'stale'
-                WITH parent, structural_source
-                WHERE structural_source IS NULL OR NOT EXISTS {
-                  MATCH (structural_source)-[:PRODUCED_NAME]->(bound)
-                  WHERE bound <> parent
-                    AND NOT coalesce(bound.name_stage, '') IN
-                      ['superseded', 'exhausted', 'contested']
-                }
-                MATCH (child)-[:HAS_PARENT]->(parent)
-                WITH parent,
-                     count(child) AS total_children,
-                     count(CASE WHEN child.name_stage IS NOT NULL THEN 1 END)
-                       AS composed
-                WHERE total_children >= 1 AND total_children = composed
-                MATCH (c)-[:HAS_PARENT]->(parent)
-                OPTIONAL MATCH (cs:StandardNameSource)-[:PRODUCED_NAME]->(c)
-                OPTIONAL MATCH (cs)-[:FROM_DD_PATH]->(imas:IMASNode)
-                WITH parent,
-                     [p IN collect(DISTINCT imas.id) WHERE p IS NOT NULL]
-                       AS dd_paths
-                RETURN parent.id AS parent_id,
-                       parent.origin AS origin,
-                       dd_paths
-                ORDER BY parent.id
-                """
-            )
-        )
-    finally:
-        if own:
-            client.close()
-
-
-def classify_orphan_parent_source_candidates(
-    gc: Any,
-    candidates: list[dict[str, Any]] | None = None,
-) -> dict[str, list[dict[str, Any]]]:
-    """Partition parent-source candidates by structural admission.
-
-    Only ``origin='derived'`` nodes are structural scaffolds owned by the
-    parent admission gate. Pipeline and catalog nodes can also be HAS_PARENT
-    targets after refinement, but their identity and lifecycle remain owned by
-    those origin-specific paths; provenance recovery must not reinterpret or
-    retire them as derived scaffolds.
-
-    Returns the exact ``repairable`` rows safe to pass to source seeding and the
-    ``rejected_derived`` rows that must remain visible to fallback/unresolved
-    classification until lifecycle normalization retires them.
-    """
-    rows = (
-        find_orphan_parent_source_candidates(gc=gc)
-        if candidates is None
-        else list(candidates)
+    return graph_parent_lifecycle.structural_accept_derived_parents(
+        *args, services=_graph_foundation.services, **kwargs
     )
-    from imas_codex.standard_names.parents import is_admissible_parent_name
-
-    repairable: list[dict[str, Any]] = []
-    rejected_derived: list[dict[str, Any]] = []
-    for row in rows:
-        if row.get("origin") != "derived":
-            repairable.append(row)
-            continue
-        result = is_admissible_parent_name(row["parent_id"], gc)
-        if result.admit:
-            repairable.append(row)
-        else:
-            rejected_derived.append({**row, "admission_reason": result.reason})
-    return {
-        "repairable": repairable,
-        "rejected_derived": rejected_derived,
-    }
 
 
-def reconcile_orphan_parent_sources(
-    gc: Any | None = None,
-    *,
-    dry_run: bool = False,
-    classification: dict[str, list[dict[str, Any]]] | None = None,
-) -> int:
-    """Seed the missing structural provenance source for childful parents.
+def backfill_structural_name_authorities(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_parent_lifecycle.backfill_structural_name_authorities."""
+    from .graph_store import graph_parent_lifecycle
 
-    A structural parent (a ``StandardName`` that is the ``HAS_PARENT`` target of
-    at least one child) records its provenance as its own ``derived:<name>``
-    source linked via ``PRODUCED_NAME``. A common child DD path does not realize
-    the parent, so structural provenance has no ``FROM_DD_PATH`` relationship.
-    Both normal materialization and this recovery path use
-    :func:`_derived_parent_source_metadata`, so they cannot diverge on source
-    identity.
-
-    So a parent that acquires a non-null ``name_stage`` *before* it is seeded is
-    skipped forever and left a provenance orphan — the exact leak this repairs.
-    Two paths do it: a child's ``REFINE_NAME`` producing the parent-general name
-    (which routes that name through ``REVIEW_NAME`` to ``accepted`` as
-    ``origin='pipeline'``), and :func:`structural_accept_derived_parents` (which
-    flips the stage to ``accepted`` but writes no source). Both leave an accepted
-    parent with no ``PRODUCED_NAME`` source — a violation of the ledger invariant
-    (:func:`~imas_codex.standard_names.ledger.find_provenance_orphans`).
-
-    This decouples source-seeding from the acceptance path. For every parent with
-    at least one child, all children composed, and no ``PRODUCED_NAME`` source, it
-    materializes the structural source + ``PRODUCED_NAME`` without a DD
-    realization edge. It is origin- and operator-kind-agnostic, but only a live
-    parent may receive provenance. The canonical ``derived:<name>`` source must
-    also be unbound or bound only to this parent; a source migrated to another
-    live target is current authority for that target and must never be reused to
-    revive its terminal predecessor. This only records provenance and NEVER
-    mutates the parent's ``name_stage`` / ``origin`` / ``description``.
-    Idempotent: a parent that gains a source drops out of the selector. A stale
-    structural source is a lifecycle tombstone and is never rebound implicitly;
-    an explicit lifecycle transition must make it eligible first. Childless
-    sourceless names are not parents and are left untouched (a distinct stranded-
-    name concern). Every derived candidate is re-checked against the current
-    admission gate before seeding; an invalid scaffold remains source-less for
-    ledgered lifecycle retirement rather than being legitimized by synthetic
-    provenance. Non-derived parents bypass structural admission and retain their
-    origin-owned recovery path.
-
-    With ``dry_run=True``, returns the number eligible without writing.
-    Otherwise returns the number of parent sources seeded.
-    """
-    own = gc is None
-    client = GraphClient() if own else gc
-    try:
-        if classification is None:
-            classification = classify_orphan_parent_source_candidates(client)
-        for row in classification["rejected_derived"]:
-            logger.warning(
-                "reconcile_orphan_parent_sources: refusing to seed "
-                "inadmissible derived parent %s: %s",
-                row["parent_id"],
-                row["admission_reason"],
-            )
-        rows = classification["repairable"]
-        if dry_run:
-            return len(rows)
-        seeded = 0
-        for r in rows:
-            parent_id = r["parent_id"]
-            meta = _derived_parent_source_metadata(parent_id)
-            result = client.query(
-                """
-                MATCH (parent:StandardName {id: $parent_id})
-                OPTIONAL MATCH (existing_source:StandardNameSource {
-                  id: $source_node_id
-                })
-                WITH parent, existing_source
-                WHERE NOT coalesce(parent.name_stage, '') IN
-                        ['superseded', 'exhausted', 'contested']
-                  AND NOT EXISTS {
-                    MATCH (:StandardNameSource)-[:PRODUCED_NAME]->(parent)
-                  }
-                  AND (existing_source IS NULL
-                       OR existing_source.status <> 'stale')
-                  AND (existing_source IS NULL OR NOT EXISTS {
-                    MATCH (existing_source)-[:PRODUCED_NAME]->(bound)
-                    WHERE bound <> parent
-                      AND NOT coalesce(bound.name_stage, '') IN
-                        ['superseded', 'exhausted', 'contested']
-                  })
-                MERGE (sns:StandardNameSource {id: $source_node_id})
-                  ON CREATE SET sns.created_at = datetime(), sns.attempt_count = 0
-                SET sns.status = coalesce(sns.status, 'composed'),
-                    sns.source_type = $source_type,
-                    sns.source_id = $source_id,
-                    sns.batch_key = coalesce(sns.batch_key, $batch_key),
-                    sns.composed_at = coalesce(sns.composed_at, datetime()),
-                    sns.produced_sn_id = parent.id,
-                    sns.claimed_at = null,
-                    sns.claim_token = null
-                MERGE (sns)-[:PRODUCED_NAME]->(parent)
-                RETURN count(parent) AS seeded
-                """,
-                parent_id=parent_id,
-                **meta,
-            )
-            seeded += result[0]["seeded"] if result else 1
-    finally:
-        if own:
-            client.close()
-
-    if seeded:
-        logger.info(
-            "reconcile_orphan_parent_sources: seeded %d missing parent "
-            "provenance source(s)",
-            seeded,
-        )
-    return seeded
-
-
-def reconcile_orphan_parent_sources_batched(
-    gc: Any,
-    rows: list[dict[str, Any]],
-    *,
-    event_by_parent: dict[str, dict[str, Any]] | None = None,
-) -> int:
-    """Seed an exact accepted-parent cohort in one graph query."""
-    items = []
-    for row in rows:
-        parent_id = str(row["parent_id"])
-        items.append(
-            {
-                "parent_id": parent_id,
-                **_derived_parent_source_metadata(parent_id),
-                "event": (event_by_parent or {}).get(parent_id),
-            }
-        )
-    result = gc.query(
-        """
-        // STRUCTURAL_CLOSURE_BATCH_SEED_SOURCES
-        UNWIND $items AS requested_item
-        OPTIONAL MATCH (stale_source:StandardNameSource {
-          id: requested_item.source_node_id
-        })
-        WITH collect(requested_item) AS requested_items,
-             count(CASE WHEN stale_source.status = 'stale' THEN 1 END)
-               AS stale_source_count,
-             count(CASE WHEN EXISTS {
-               MATCH (stale_source)-[:PRODUCED_NAME]->(bound_target)
-               WHERE bound_target.id <> requested_item.parent_id
-                 AND NOT coalesce(bound_target.name_stage, '') IN
-                   ['superseded', 'exhausted', 'contested']
-             } THEN 1 END) AS conflicting_binding_count
-        WHERE stale_source_count = 0 AND conflicting_binding_count = 0
-        UNWIND requested_items AS item
-        MATCH (parent:StandardName {id: item.parent_id})
-        WHERE parent.name_stage = 'accepted'
-          AND NOT EXISTS {
-            MATCH (:StandardNameSource)-[:PRODUCED_NAME]->(parent)
-          }
-        MERGE (source:StandardNameSource {id: item.source_node_id})
-          ON CREATE SET source.created_at = datetime(), source.attempt_count = 0
-        SET source.status = coalesce(source.status, 'composed'),
-            source.source_type = item.source_type,
-            source.source_id = item.source_id,
-            source.batch_key = coalesce(source.batch_key, item.batch_key),
-            source.composed_at = coalesce(source.composed_at, datetime()),
-            source.produced_sn_id = parent.id,
-            source.claimed_at = null,
-            source.claim_token = null
-        MERGE (source)-[:PRODUCED_NAME]->(parent)
-        FOREACH (_ IN CASE WHEN item.event IS NULL THEN [] ELSE [1] END |
-          CREATE (change:StandardNameChange)
-          SET change = item.event
-          CREATE (parent)-[:HAS_INTERNAL_CHANGE]->(change)
-        )
-        RETURN collect(parent.id) AS ids
-        """,
-        items=items,
+    return graph_parent_lifecycle.backfill_structural_name_authorities(
+        *args, services=_graph_foundation.services, **kwargs
     )
-    expected = {str(item["parent_id"]) for item in items}
-    seeded_ids = set(result[0].get("ids") or []) if len(result) == 1 else set()
-    if seeded_ids != expected:
-        raise RuntimeError("batched accepted-parent source cardinality changed")
-    return len(expected)
 
 
-@retry_on_deadlock()
-def release_enrich_parents_claims(
-    *,
-    sn_ids: list[str],
-    claim_token: str,
-) -> int:
-    """Release enrich_parents claims (token-verified, no stage change).
+def find_orphan_parent_source_candidates(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_parent_lifecycle.find_orphan_parent_source_candidates."""
+    from .graph_store import graph_parent_lifecycle
 
-    Used both as the pool release adapter (clears any unprocessed items in a
-    batch) and on LLM/processing failure — the parent stays a placeholder and
-    is re-claimed on a later pass.
-    """
-    if not sn_ids:
-        return 0
-    with GraphClient() as gc:
-        result = gc.query(
-            """
-            UNWIND $sn_ids AS sid
-            MATCH (sn:StandardName {id: sid})
-            WHERE sn.claim_token = $token
-            SET sn.updated_at = datetime(), sn.claim_token = null,
-                sn.claimed_at  = null
-            RETURN count(sn) AS released
-            """,
-            sn_ids=sn_ids,
-            token=claim_token,
-        )
-    return result[0]["released"] if result else 0
+    return graph_parent_lifecycle.find_orphan_parent_source_candidates(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def classify_orphan_parent_source_candidates(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_parent_lifecycle.classify_orphan_parent_source_candidates."""
+    from .graph_store import graph_parent_lifecycle
+
+    return graph_parent_lifecycle.classify_orphan_parent_source_candidates(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def reconcile_orphan_parent_sources(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_parent_lifecycle.reconcile_orphan_parent_sources."""
+    from .graph_store import graph_parent_lifecycle
+
+    return graph_parent_lifecycle.reconcile_orphan_parent_sources(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def reconcile_orphan_parent_sources_batched(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_parent_lifecycle.reconcile_orphan_parent_sources_batched."""
+    from .graph_store import graph_parent_lifecycle
+
+    return graph_parent_lifecycle.reconcile_orphan_parent_sources_batched(
+        *args, services=_graph_foundation.services, **kwargs
+    )
+
+
+def release_enrich_parents_claims(*args: Any, **kwargs: Any):
+    """Forward to graph_store.graph_parent_lifecycle.release_enrich_parents_claims."""
+    from .graph_store import graph_parent_lifecycle
+
+    return graph_parent_lifecycle.release_enrich_parents_claims(
+        *args, services=_graph_foundation.services, **kwargs
+    )
 
 
 # Preserve the moved callables for signature and source inspection.
@@ -14709,4 +9944,220 @@ _reconcile_spurious_stub_source_scalars.__wrapped__ = (
 )
 _query_skeleton_placeholders_for_cleanup.__wrapped__ = (
     _moved_graph_lineage._query_skeleton_placeholders_for_cleanup
+)
+
+_moved_graph_catalog_reset = import_module(
+    ".graph_store.graph_catalog_reset", __package__
+)
+write_vocab_gaps.__wrapped__ = _moved_graph_catalog_reset.write_vocab_gaps
+fetch_vocab_gap_adjudications.__wrapped__ = (
+    _moved_graph_catalog_reset.fetch_vocab_gap_adjudications
+)
+claim_names_for_validation.__wrapped__ = (
+    _moved_graph_catalog_reset.claim_names_for_validation
+)
+mark_names_validated.__wrapped__ = _moved_graph_catalog_reset.mark_names_validated
+release_validation_claims.__wrapped__ = (
+    _moved_graph_catalog_reset.release_validation_claims
+)
+claim_names_for_embedding.__wrapped__ = (
+    _moved_graph_catalog_reset.claim_names_for_embedding
+)
+mark_names_embedded.__wrapped__ = _moved_graph_catalog_reset.mark_names_embedded
+release_embedding_claims.__wrapped__ = (
+    _moved_graph_catalog_reset.release_embedding_claims
+)
+get_validated_names.__wrapped__ = _moved_graph_catalog_reset.get_validated_names
+mark_names_consolidated.__wrapped__ = _moved_graph_catalog_reset.mark_names_consolidated
+reset_standard_names.__wrapped__ = _moved_graph_catalog_reset.reset_standard_names
+clear_standard_names.__wrapped__ = _moved_graph_catalog_reset.clear_standard_names
+clear_sn_subsystem.__wrapped__ = _moved_graph_catalog_reset.clear_sn_subsystem
+
+_moved_graph_claim_release = import_module(
+    ".graph_store.graph_claim_release", __package__
+)
+release_generate_name_claims.__wrapped__ = (
+    _moved_graph_claim_release.release_generate_name_claims
+)
+release_generate_name_failed_claims.__wrapped__ = (
+    _moved_graph_claim_release.release_generate_name_failed_claims
+)
+release_enrich_claims.__wrapped__ = _moved_graph_claim_release.release_enrich_claims
+release_enrich_failed_claims.__wrapped__ = (
+    _moved_graph_claim_release.release_enrich_failed_claims
+)
+release_review_names_claims.__wrapped__ = (
+    _moved_graph_claim_release.release_review_names_claims
+)
+release_review_names_failed_claims.__wrapped__ = (
+    _moved_graph_claim_release.release_review_names_failed_claims
+)
+release_review_docs_claims.__wrapped__ = (
+    _moved_graph_claim_release.release_review_docs_claims
+)
+release_review_docs_failed_claims.__wrapped__ = (
+    _moved_graph_claim_release.release_review_docs_failed_claims
+)
+_sorted_refine_claim_projection.__wrapped__ = (
+    _moved_graph_claim_release._sorted_refine_claim_projection
+)
+_project_refine_claim_release_state.__wrapped__ = (
+    _moved_graph_claim_release._project_refine_claim_release_state
+)
+_predicted_refine_claim_release_state.__wrapped__ = (
+    _moved_graph_claim_release._predicted_refine_claim_release_state
+)
+_refine_claim_release_manifest.__wrapped__ = (
+    _moved_graph_claim_release._refine_claim_release_manifest
+)
+_refine_claim_no_change_receipt.__wrapped__ = (
+    _moved_graph_claim_release._refine_claim_no_change_receipt
+)
+release_stranded_refine_claim.__wrapped__ = (
+    _moved_graph_claim_release.release_stranded_refine_claim
+)
+release_refine_name_claims.__wrapped__ = (
+    _moved_graph_claim_release.release_refine_name_claims
+)
+resubmit_pinned_rename_for_review.__wrapped__ = (
+    _moved_graph_claim_release.resubmit_pinned_rename_for_review
+)
+stage_name_for_rescore.__wrapped__ = _moved_graph_claim_release.stage_name_for_rescore
+restore_name_after_failed_rescore.__wrapped__ = (
+    _moved_graph_claim_release.restore_name_after_failed_rescore
+)
+stop_refine_name_attempt.__wrapped__ = (
+    _moved_graph_claim_release.stop_refine_name_attempt
+)
+_mark_refine_docs_exhausted.__wrapped__ = (
+    _moved_graph_claim_release._mark_refine_docs_exhausted
+)
+_verify_docs_claim_winners.__wrapped__ = (
+    _moved_graph_claim_release._verify_docs_claim_winners
+)
+_verify_claim_winners.__wrapped__ = _moved_graph_claim_release._verify_claim_winners
+_verify_name_claim_winners.__wrapped__ = (
+    _moved_graph_claim_release._verify_name_claim_winners
+)
+_verify_source_claim_winners.__wrapped__ = (
+    _moved_graph_claim_release._verify_source_claim_winners
+)
+
+_moved_graph_parent_lifecycle = import_module(
+    ".graph_store.graph_parent_lifecycle", __package__
+)
+release_all_orphan_claims.__wrapped__ = (
+    _moved_graph_parent_lifecycle.release_all_orphan_claims
+)
+pool_pending_counts.__wrapped__ = _moved_graph_parent_lifecycle.pool_pending_counts
+scoped_terminal_residue.__wrapped__ = (
+    _moved_graph_parent_lifecycle.scoped_terminal_residue
+)
+_verify_enrich_parents_claim_winners.__wrapped__ = (
+    _moved_graph_parent_lifecycle._verify_enrich_parents_claim_winners
+)
+claim_enrich_parents_batch.__wrapped__ = (
+    _moved_graph_parent_lifecycle.claim_enrich_parents_batch
+)
+fetch_derived_parent_children.__wrapped__ = (
+    _moved_graph_parent_lifecycle.fetch_derived_parent_children
+)
+_structural_authority_identities.__wrapped__ = (
+    _moved_graph_parent_lifecycle._structural_authority_identities
+)
+_structural_authority_snapshot.__wrapped__ = (
+    _moved_graph_parent_lifecycle._structural_authority_snapshot
+)
+_structural_authority_record.__wrapped__ = (
+    _moved_graph_parent_lifecycle._structural_authority_record
+)
+_persist_structural_authority.__wrapped__ = (
+    _moved_graph_parent_lifecycle._persist_structural_authority
+)
+persist_enriched_parent.__wrapped__ = (
+    _moved_graph_parent_lifecycle.persist_enriched_parent
+)
+_structural_accept_route.__wrapped__ = (
+    _moved_graph_parent_lifecycle._structural_accept_route
+)
+structural_accept_derived_parents.__wrapped__ = (
+    _moved_graph_parent_lifecycle.structural_accept_derived_parents
+)
+backfill_structural_name_authorities.__wrapped__ = (
+    _moved_graph_parent_lifecycle.backfill_structural_name_authorities
+)
+find_orphan_parent_source_candidates.__wrapped__ = (
+    _moved_graph_parent_lifecycle.find_orphan_parent_source_candidates
+)
+classify_orphan_parent_source_candidates.__wrapped__ = (
+    _moved_graph_parent_lifecycle.classify_orphan_parent_source_candidates
+)
+reconcile_orphan_parent_sources.__wrapped__ = (
+    _moved_graph_parent_lifecycle.reconcile_orphan_parent_sources
+)
+reconcile_orphan_parent_sources_batched.__wrapped__ = (
+    _moved_graph_parent_lifecycle.reconcile_orphan_parent_sources_batched
+)
+release_enrich_parents_claims.__wrapped__ = (
+    _moved_graph_parent_lifecycle.release_enrich_parents_claims
+)
+
+_moved_graph_claim_scope = import_module(".graph_store.graph_claim_scope", __package__)
+query_pipeline_buckets.__wrapped__ = _moved_graph_claim_scope.query_pipeline_buckets
+query_historical_cpi.__wrapped__ = _moved_graph_claim_scope.query_historical_cpi
+get_extraction_candidates_dd.__wrapped__ = (
+    _moved_graph_claim_scope.get_extraction_candidates_dd
+)
+get_extraction_candidates_signals.__wrapped__ = (
+    _moved_graph_claim_scope.get_extraction_candidates_signals
+)
+get_existing_standard_names.__wrapped__ = (
+    _moved_graph_claim_scope.get_existing_standard_names
+)
+get_named_source_ids.__wrapped__ = _moved_graph_claim_scope.get_named_source_ids
+partition_focus_by_accepted.__wrapped__ = (
+    _moved_graph_claim_scope.partition_focus_by_accepted
+)
+canonicalize_manifest_drain_paths.__wrapped__ = (
+    _moved_graph_claim_scope.canonicalize_manifest_drain_paths
+)
+classify_manifest_drain_item.__wrapped__ = (
+    _moved_graph_claim_scope.classify_manifest_drain_item
+)
+_resolved_manifest_drain_plan.__wrapped__ = (
+    _moved_graph_claim_scope._resolved_manifest_drain_plan
+)
+build_manifest_drain_plan.__wrapped__ = (
+    _moved_graph_claim_scope.build_manifest_drain_plan
+)
+_manifest_plan_fingerprint.__wrapped__ = (
+    _moved_graph_claim_scope._manifest_plan_fingerprint
+)
+_lock_manifest_drain_authority.__wrapped__ = (
+    _moved_graph_claim_scope._lock_manifest_drain_authority
+)
+claim_manifest_drain_scope.__wrapped__ = (
+    _moved_graph_claim_scope.claim_manifest_drain_scope
+)
+prepare_manifest_drain_scope.__wrapped__ = (
+    _moved_graph_claim_scope.prepare_manifest_drain_scope
+)
+clear_manifest_drain_scope.__wrapped__ = (
+    _moved_graph_claim_scope.clear_manifest_drain_scope
+)
+release_manifest_drain_claims.__wrapped__ = (
+    _moved_graph_claim_scope.release_manifest_drain_claims
+)
+finalize_manifest_drain_scope.__wrapped__ = (
+    _moved_graph_claim_scope.finalize_manifest_drain_scope
+)
+scope_focus_names.__wrapped__ = _moved_graph_claim_scope.scope_focus_names
+_claim_disposition.__wrapped__ = _moved_graph_claim_scope._claim_disposition
+_claimed_run_ids.__wrapped__ = _moved_graph_claim_scope._claimed_run_ids
+_collect_run_statuses.__wrapped__ = _moved_graph_claim_scope._collect_run_statuses
+_exact_name_scope_refusals.__wrapped__ = (
+    _moved_graph_claim_scope._exact_name_scope_refusals
+)
+scope_exact_standard_names.__wrapped__ = (
+    _moved_graph_claim_scope.scope_exact_standard_names
 )
