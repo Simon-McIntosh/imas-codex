@@ -23,7 +23,7 @@ import logging
 import random
 import re as _re
 from collections.abc import Callable, Sequence
-from functools import cache as _cache, lru_cache
+from functools import cache as _cache, lru_cache  # noqa: F401
 from typing import TYPE_CHECKING, Any
 
 from imas_codex.graph.models import RefineStopReason
@@ -36,8 +36,8 @@ from imas_codex.standard_names.budget import (
 from imas_codex.standard_names.defaults import (
     DEFAULT_ESCALATION_MODEL,
     DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
-    SEMANTIC_SIM_GATE_MODEL,
-    SEMANTIC_SIM_GATE_RESOLUTION_METHOD,
+    SEMANTIC_SIM_GATE_MODEL,  # noqa: F401
+    SEMANTIC_SIM_GATE_RESOLUTION_METHOD,  # noqa: F401
 )
 from imas_codex.standard_names.provenance import detect_value_provenance
 from imas_codex.standard_names.source_paths import (
@@ -46,238 +46,92 @@ from imas_codex.standard_names.source_paths import (
     strip_dd_prefix,
 )
 
+from .worker_tasks import worker_common as _moved_worker_common
+
+
+def _worker_dependency(name: str):
+    """Resolve a worker collaborator through the entrypoint."""
+    return globals()[name]
+
+
 if TYPE_CHECKING:
     from imas_codex.standard_names.budget import BudgetLease, BudgetManager
     from imas_codex.standard_names.sources.base import ExtractionBatch
     from imas_codex.standard_names.state import StandardNameBuildState
 
-logger = logging.getLogger(__name__)
+logger = _moved_worker_common.logger
 
 
-def backfill_semantic_similarity_gate_resolution_method(gc: Any | None = None) -> int:
-    """Type legacy deterministic gate reviews without granting them authority.
-
-    The model and reviewer-model pair is the durable identity of these rows.
-    Scores are deliberately not part of the predicate because genuine reviewer
-    verdicts can share the same normalized score.
-    """
-
-    def _backfill(client: Any) -> int:
-        rows = list(
-            client.query(
-                """
-                MATCH (review:StandardNameReview)
-                WHERE review.model = $model_identity
-                  AND review.reviewer_model = $model_identity
-                  AND review.resolution_method IS NULL
-                SET review.resolution_method = $resolution_method
-                RETURN count(review) AS updated
-                """,
-                model_identity=SEMANTIC_SIM_GATE_MODEL,
-                resolution_method=SEMANTIC_SIM_GATE_RESOLUTION_METHOD,
-            )
-            or []
-        )
-        return int(rows[0]["updated"]) if rows else 0
-
-    if gc is not None:
-        return _backfill(gc)
-
-    from imas_codex.graph.client import GraphClient
-
-    with GraphClient() as client:
-        return _backfill(client)
+def backfill_semantic_similarity_gate_resolution_method(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common.backfill_semantic_similarity_gate_resolution_method."""
+    return _moved_worker_common.backfill_semantic_similarity_gate_resolution_method(
+        _worker_dependency, *args, **kwargs
+    )
 
 
-def normalize_spelling(name: str) -> str:
-    """Deterministic British→American spelling normalization.
-
-    Splits the underscore-delimited name into tokens and converts each
-    via ``breame.spelling.get_american_spelling``.  A small domain-specific
-    supplement catches physics terms missing from breame's dictionary.
-    """
-    from breame.spelling import get_american_spelling
-
-    tokens = name.split("_")
-    return "_".join(_DOMAIN_UK_US.get(t, get_american_spelling(t)) for t in tokens)
+def normalize_spelling(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common.normalize_spelling."""
+    return _moved_worker_common.normalize_spelling(_worker_dependency, *args, **kwargs)
 
 
-def normalize_prose_spelling(text: str) -> str:
-    """British→American spelling normalization for prose text.
-
-    Unlike ``normalize_spelling`` which operates on underscore-delimited
-    name tokens, this function handles natural English prose — splitting
-    on word boundaries and preserving punctuation, whitespace, and
-    markdown formatting.
-    """
-    if not text:
-        return text
-    from breame.spelling import get_american_spelling
-
-    def _replace(match: _re.Match) -> str:
-        word = match.group(0)
-        # Preserve case: if the word is capitalized, capitalize the replacement
-        us = _DOMAIN_UK_US.get(word.lower(), get_american_spelling(word.lower()))
-        if us == word.lower():
-            return word  # no change
-        if word[0].isupper():
-            return us[0].upper() + us[1:]
-        return us
-
-    # Match word-like sequences (letters only, preserving everything else)
-    return _re.sub(r"[A-Za-z]+", _replace, text)
+def normalize_prose_spelling(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common.normalize_prose_spelling."""
+    return _moved_worker_common.normalize_prose_spelling(
+        _worker_dependency, *args, **kwargs
+    )
 
 
 # Spelled-out Greek letters become their Unicode symbols in description prose
 # (the ISN description-field convention: φ, θ, ρ; frames as (R, φ, Z)).
 # Lowercase only — a capitalized "Phi" may be the flux Φ or a sentence-start
 # angle, so it is left for review rather than guessed.
-_GREEK_WORD_TO_SYMBOL: dict[str, str] = {
-    "phi": "φ",
-    "theta": "θ",
-    "rho": "ρ",
-}
-_GREEK_WORD_RE = _re.compile(r"\b(phi|theta|rho)\b")
+_GREEK_WORD_TO_SYMBOL = _moved_worker_common._GREEK_WORD_TO_SYMBOL
+_GREEK_WORD_RE = _moved_worker_common._GREEK_WORD_RE
 
 # Backslash-escaped Greek commands: \phi \theta \rho \pi (and capitals) →
 # Unicode symbol. Includes \pi because it is the common LaTeX form that leaks
 # into descriptions. The trailing (?![a-zA-Z]) stops \phinx-style over-matching.
-_GREEK_CMD_TO_SYMBOL: dict[str, str] = {
-    "phi": "φ",
-    "theta": "θ",
-    "rho": "ρ",
-    "pi": "π",
-    "Phi": "Φ",
-    "Theta": "Θ",
-    "Rho": "Ρ",
-    "Pi": "Π",
-}
-_GREEK_CMD_RE = _re.compile(r"\\(phi|theta|rho|pi|Phi|Theta|Rho|Pi)(?![a-zA-Z])")
+_GREEK_CMD_TO_SYMBOL = _moved_worker_common._GREEK_CMD_TO_SYMBOL
+_GREEK_CMD_RE = _moved_worker_common._GREEK_CMD_RE
 # A backslash stranded in front of an already-Unicode Greek symbol — the
 # half-converted corruption (\φ) produced by the older word-only normalizer.
-_GREEK_STRANDED_BACKSLASH_RE = _re.compile(r"\\(?=[φθρπΦΘΡΠ])")
+_GREEK_STRANDED_BACKSLASH_RE = _moved_worker_common._GREEK_STRANDED_BACKSLASH_RE
 # A LaTeX command carrying a single braced argument: \mathbf{k} → k.
-_LATEX_CMD_ARG_RE = _re.compile(r"\\[a-zA-Z]+\s*\{([^{}]*)\}")
+_LATEX_CMD_ARG_RE = _moved_worker_common._LATEX_CMD_ARG_RE
 # A bare LaTeX command with no argument: \left \right \cdot \, → removed.
-_LATEX_CMD_BARE_RE = _re.compile(r"\\[a-zA-Z]+")
+_LATEX_CMD_BARE_RE = _moved_worker_common._LATEX_CMD_BARE_RE
 # Braced sub/superscripts: ^{1+} → 1+ ; _{i} → _i (keep the underscore).
-_SUPERSCRIPT_BRACE_RE = _re.compile(r"\^\{([^{}]*)\}")
-_SUBSCRIPT_BRACE_RE = _re.compile(r"_\{([^{}]*)\}")
+_SUPERSCRIPT_BRACE_RE = _moved_worker_common._SUPERSCRIPT_BRACE_RE
+_SUBSCRIPT_BRACE_RE = _moved_worker_common._SUBSCRIPT_BRACE_RE
 # Math delimiters: $$…$$ and $…$ — drop the delimiter, keep inner content.
-_MATH_DELIM_RE = _re.compile(r"\$\$?")
+_MATH_DELIM_RE = _moved_worker_common._MATH_DELIM_RE
 
 
-def normalize_description_notation(text: str) -> str:
-    """Normalize description prose to plain Unicode text.
-
-    Descriptions are plain text (the ISN convention); LaTeX and math markup
-    belong in the ``documentation`` field. Any LaTeX that leaks into a
-    description is stripped to a readable plain form:
-
-    - ``$…$`` / ``$$…$$`` delimiters removed (inner content kept);
-    - ``\\phi \\theta \\rho \\pi`` → ``φ θ ρ π`` (plus capitals), and a
-      stranded backslash in front of an already-Unicode symbol (``\\φ``) → φ;
-    - spelled-out ``phi/theta/rho`` prose words → ``φ/θ/ρ`` (word-bounded, so
-      DD tokens like ``phi_tor`` / ``b_field_phi`` are untouched);
-    - ``\\mathbf{k}`` → ``k`` and other backslash commands dropped;
-    - braced sub/superscripts (``^{1+}`` / ``_{i}``) flattened.
-
-    Idempotent — a description already in plain form is returned unchanged.
-    Applies to the description field only; ``documentation`` keeps LaTeX.
-    """
-    if not text:
-        return text
-    # 1. Backslash Greek commands and stranded backslashes → Unicode symbols.
-    text = _GREEK_CMD_RE.sub(lambda m: _GREEK_CMD_TO_SYMBOL[m.group(1)], text)
-    text = _GREEK_STRANDED_BACKSLASH_RE.sub("", text)
-    # 2. Spelled-out Greek prose words → Unicode (word-bounded; DD tokens safe).
-    text = _GREEK_WORD_RE.sub(lambda m: _GREEK_WORD_TO_SYMBOL[m.group(1)], text)
-    # 3. LaTeX commands: keep the argument of \cmd{arg}, drop bare commands.
-    text = _LATEX_CMD_ARG_RE.sub(r"\1", text)
-    text = _LATEX_CMD_BARE_RE.sub("", text)
-    # 4. Flatten braced sub/superscripts, then drop any residual braces.
-    text = _SUPERSCRIPT_BRACE_RE.sub(r"\1", text)
-    text = _SUBSCRIPT_BRACE_RE.sub(r"_\1", text)
-    text = text.replace("{", "").replace("}", "")
-    # 5. Drop math delimiters (inner content already kept).
-    text = _MATH_DELIM_RE.sub("", text)
-    # 6. Drop any residual backslash — plain text never carries one.
-    text = text.replace("\\", "")
-    # 7. Collapse runs of spaces/tabs left behind by the removals above.
-    text = _re.sub(r"[ \t]{2,}", " ", text)
-    return text
+def normalize_description_notation(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common.normalize_description_notation."""
+    return _moved_worker_common.normalize_description_notation(
+        _worker_dependency, *args, **kwargs
+    )
 
 
-def normalize_description_text(text: str) -> str:
-    """Full description-prose normalization: spelling, then Greek symbols."""
-    return normalize_description_notation(normalize_prose_spelling(text))
+def normalize_description_text(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common.normalize_description_text."""
+    return _moved_worker_common.normalize_description_text(
+        _worker_dependency, *args, **kwargs
+    )
 
 
 # Physics-domain UK→US supplements not in breame's dictionary.
-_DOMAIN_UK_US: dict[str, str] = {
-    "linearised": "linearized",
-    "linearise": "linearize",
-    "discretised": "discretized",
-    "discretise": "discretize",
-    "symmetrised": "symmetrized",
-    "symmetrise": "symmetrize",
-    "parameterised": "parameterized",
-    "parameterise": "parameterize",
-    "centreline": "centerline",
-    "centre": "center",
-    "grey": "gray",
-    "colour": "color",
-    "favour": "favor",
-    "favourite": "favorite",
-    "honour": "honor",
-    "labelled": "labeled",
-    "labelling": "labeling",
-    "travelled": "traveled",
-    "travelling": "traveling",
-    "catalogue": "catalog",
-    "programme": "program",
-    "analogue": "analog",
-    "dialogue": "dialog",
-}
+_DOMAIN_UK_US = _moved_worker_common._DOMAIN_UK_US
 
-_GRAMMAR_FIELDS = (
-    "physical_base",
-    "subject",
-    "component",
-    "coordinate",
-    "position",
-    "process",
-    "geometric_base",
-    "object",
-)
+_GRAMMAR_FIELDS = _moved_worker_common._GRAMMAR_FIELDS
 
 
-def _dedup_adjacent_tokens(name: str, log: logging.Logger | None = None) -> str:
-    """Remove adjacent duplicate tokens introduced by grammar round-trip.
-
-    The ISN grammar (≤ 0.7.0rc27) has a known bug where ``parse →
-    compose`` doubles certain tokens — e.g.
-    ``magnetic_field_probe`` → ``magnetic_magnetic_field_probe``.
-
-    This function collapses any ``tok_tok`` pair into a single ``tok``
-    while preserving legitimate compounds via
-    :data:`~imas_codex.standard_names.audits._COMPOUND_SUBJECT_PAIRS`.
-    """
-    from imas_codex.standard_names.audits import _COMPOUND_SUBJECT_PAIRS
-
-    tokens = name.split("_")
-    result: list[str] = [tokens[0]]
-    for tok in tokens[1:]:
-        if tok == result[-1] and f"{tok}_{tok}" not in _COMPOUND_SUBJECT_PAIRS:
-            if log:
-                log.debug(
-                    "Dedup adjacent token %r in %r",
-                    f"{tok}_{tok}",
-                    name,
-                )
-            continue
-        result.append(tok)
-    return "_".join(result)
+def _dedup_adjacent_tokens(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._dedup_adjacent_tokens."""
+    return _moved_worker_common._dedup_adjacent_tokens(
+        _worker_dependency, *args, **kwargs
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -304,868 +158,205 @@ def _dedup_adjacent_tokens(name: str, log: logging.Logger | None = None) -> str:
 # matches nothing. ISN's own naming guidance states the requirement ("Use
 # elongation_of_plasma_boundary or elongation_of_flux_surface, not elongation")
 # but exposes no machine-readable flag for it, so the selection lives here.
-_SHAPE_PARAMETER_BASE_POLICY: tuple[str, ...] = (
-    "triangularity",
-    "elongation",
-    "squareness",
-)
+_SHAPE_PARAMETER_BASE_POLICY = _moved_worker_common._SHAPE_PARAMETER_BASE_POLICY
 
 
-@_cache
-def _isn_segment_tokens(segment: str) -> frozenset[str]:
-    """The token universe ISN registers for one grammar *segment*.
-
-    Empty when ISN is absent or the segment is unknown. Callers must read empty
-    as "the vocabulary cannot be consulted", never as "no token qualifies" — a
-    rule keyed on an empty set would judge every name by a vocabulary it could
-    not read.
-    """
-    from imas_codex.standard_names.segments import grammar_tokens_by_segment
-
-    return frozenset(grammar_tokens_by_segment().get(segment) or ())
+def _isn_segment_tokens(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._isn_segment_tokens."""
+    return _moved_worker_common._isn_segment_tokens(_worker_dependency, *args, **kwargs)
 
 
-def _isn_physical_bases() -> frozenset[str]:
-    """The ISN ``physical_base`` token universe, or empty when ISN is absent."""
-    return _isn_segment_tokens("physical_base")
+def _isn_physical_bases(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._isn_physical_bases."""
+    return _moved_worker_common._isn_physical_bases(_worker_dependency, *args, **kwargs)
 
 
-def shape_parameter_base_drift() -> frozenset[str]:
-    """Policy tokens that are no longer ISN ``physical_base`` tokens.
-
-    Non-empty means ISN's vocabulary moved out from under the surface rule and
-    the policy needs updating (a renamed or retired shape descriptor). Empty
-    when ISN is unavailable — an absent vocabulary is not evidence of drift.
-    """
-    isn = _isn_physical_bases()
-    if not isn:
-        return frozenset()
-    return frozenset(_SHAPE_PARAMETER_BASE_POLICY) - isn
-
-
-@lru_cache(maxsize=1)
-def _shape_parameter_bases() -> frozenset[str]:
-    """Shape-descriptor bases that must carry a surface locus.
-
-    The codex policy intersected with the live ISN ``physical_base``
-    vocabulary: a token ISN no longer registers is dropped (and reported by
-    :func:`shape_parameter_base_drift`) rather than applied blind. When ISN is
-    unavailable the policy is returned as-is so the rule keeps working offline.
-    """
-    isn = _isn_physical_bases()
-    if not isn:
-        return frozenset(_SHAPE_PARAMETER_BASE_POLICY)
-    return frozenset(_SHAPE_PARAMETER_BASE_POLICY) & isn
-
-
-@lru_cache(maxsize=1)
-def _rate_natured_bases() -> frozenset[str]:
-    """ISN ``physical_base`` tokens that count a quantity per unit time.
-
-    A codex POLICY keyed on the live ISN vocabulary: a base that IS ``rate`` or
-    ``frequency``, or that ends in ``_rate`` / ``_frequency``, already denotes a
-    per-time quantity, so a name built on it reads as a rate without carrying a
-    ``time_derivative_of_`` prefix. Derived at runtime, so a base ISN adds or
-    renames is picked up with no codex edit; empty when ISN is unavailable,
-    which only relaxes the rate reading back to the prefix form.
-    """
-    return frozenset(
-        t
-        for t in _isn_physical_bases()
-        if t in {"rate", "frequency"} or t.endswith(("_rate", "_frequency"))
+def shape_parameter_base_drift(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common.shape_parameter_base_drift."""
+    return _moved_worker_common.shape_parameter_base_drift(
+        _worker_dependency, *args, **kwargs
     )
 
 
-@lru_cache(maxsize=1)
-def _state_resolution_tokens() -> frozenset[str]:
-    """Grammar tokens that mark a name as resolved to ONE state of a species.
-
-    The grammar carries state resolution two ways, and both are read from the
-    live vocabulary rather than restated here: a dedicated ``state`` segment
-    whose tokens name the KIND of state (a charge state, an internal excitation
-    state), and the ``subject`` tokens that fold the state into the species
-    (``ion_state``, ``neutral_state``, ``ion_charge_state``). Codex owns only
-    the POLICY on the subject side — a subject that names a state ends in
-    ``_state`` — so a new kind of state added upstream is recognised with no
-    codex edit. Empty when the vocabulary cannot be consulted, which switches
-    the rule off rather than judging every name species-level.
-    """
-    subjects = frozenset(
-        t for t in _isn_segment_tokens("subject") if t.endswith("_state")
-    )
-    return _isn_segment_tokens("state") | subjects
-
-
-def _name_denotes_state(sn_name: str) -> bool:
-    """True when *sn_name* is resolved to one state of a species.
-
-    Matched as whole grammar tokens, so a word that merely ends in ``state``
-    (``steady_state``, a regime rather than a species state) never counts.
-    """
-    padded = f"_{sn_name}_"
-    return any(f"_{t}_" in padded for t in _state_resolution_tokens())
-
-
-def _name_denotes_rate(sn_name: str) -> bool:
-    """True when *sn_name* is built on a rate-natured base.
-
-    Matched on token boundaries, so a word that merely contains a base as a
-    substring (``substrate`` ⊃ ``rate``) never counts as one.
-    """
-    padded = f"_{sn_name}_"
-    return any(f"_{t}_" in padded for t in _rate_natured_bases())
-
-
-def _ir_denotes_time_change(ir: Any) -> bool:
-    """Recursively find temporal-change semantics through the public ISN API."""
-    from imas_standard_names import get_operator_semantics
-
-    def denotes_time_change(token: Any) -> bool:
-        return isinstance(token, str) and (
-            "temporal_change" in get_operator_semantics(token)
-        )
-
-    for operator in getattr(ir, "operators", ()) or ():
-        if denotes_time_change(getattr(operator, "op", None)):
-            return True
-        if any(
-            _ir_denotes_time_change(argument)
-            for argument in getattr(operator, "args", ()) or ()
-        ):
-            return True
-
-    # The public parser can represent a bare-prefix operator as a qualifier.
-    # Semantic lookup is token-based and intentionally independent of where the
-    # parser places that token in the public IR.
-    return any(
-        denotes_time_change(getattr(qualifier, "token", None))
-        for qualifier in getattr(ir, "qualifiers", ()) or ()
+def _shape_parameter_bases(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._shape_parameter_bases."""
+    return _moved_worker_common._shape_parameter_bases(
+        _worker_dependency, *args, **kwargs
     )
 
 
-def _ir_claims_time_change_in_scope(ir: Any) -> bool:
-    """True when a temporal operator governs *ir*'s own tense, scope-aware.
+def _rate_natured_bases(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._rate_natured_bases."""
+    return _moved_worker_common._rate_natured_bases(_worker_dependency, *args, **kwargs)
 
-    A binary operator (``difference_of``, ``ratio_of``, ...) combines two
-    independently-scoped operand expressions into one result whose tense is
-    set by the binary operator itself, not by either operand: a difference of
-    a power and a stored-energy time derivative is dimensionally a power (the
-    derivative already carries the rate; the outer subtraction does not apply
-    a second one). So a temporal operator buried inside ONE operand of a
-    binary construction must not make the whole name read as a rate. A
-    temporal operator anywhere in a non-binary (unary) chain still does,
-    since a unary wrapper (``magnitude_of``, ``gradient_of``, ...) does not
-    introduce an independent operand scope of its own.
-    """
-    from imas_standard_names import get_operator_semantics
 
-    def denotes_time_change(token: Any) -> bool:
-        return isinstance(token, str) and (
-            "temporal_change" in get_operator_semantics(token)
-        )
-
-    for operator in getattr(ir, "operators", ()) or ():
-        if denotes_time_change(getattr(operator, "op", None)):
-            return True
-        if getattr(operator, "kind", None) == "binary":
-            continue
-        if any(
-            _ir_claims_time_change_in_scope(argument)
-            for argument in getattr(operator, "args", ()) or ()
-        ):
-            return True
-
-    return any(
-        denotes_time_change(getattr(qualifier, "token", None))
-        for qualifier in getattr(ir, "qualifiers", ()) or ()
+def _state_resolution_tokens(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._state_resolution_tokens."""
+    return _moved_worker_common._state_resolution_tokens(
+        _worker_dependency, *args, **kwargs
     )
 
 
-def _name_claims_time_change(sn_name: str) -> bool:
-    """Interpret temporal semantics structurally, with a legacy-safe fallback.
-
-    A retired operator spelling is rewritten to its registered token first, so
-    a name using the retired prefix still reads as claiming the temporal
-    semantics the grammar continues to publish for it under that token.
-    """
-    from imas_codex.standard_names.audits import resolve_retired_operator_spellings
-
-    sn_name = resolve_retired_operator_spellings(sn_name)
-    try:
-        from imas_codex.standard_names.grammar_adapter import parse_canonical_name
-
-        return _ir_denotes_time_change(parse_canonical_name(sn_name).ir)
-    except (TypeError, ValueError):
-        # Legacy identities can predate the strict grammar. Ask ISN about every
-        # contiguous token span so this conservative fallback remains entirely
-        # vocabulary-owned without duplicating operator names in codex.
-        from imas_standard_names import get_operator_semantics
-
-        parts = sn_name.split("_")
-        return any(
-            "temporal_change" in get_operator_semantics("_".join(parts[start:end]))
-            for start in range(len(parts))
-            for end in range(start + 1, len(parts) + 1)
-        )
+def _name_denotes_state(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._name_denotes_state."""
+    return _moved_worker_common._name_denotes_state(_worker_dependency, *args, **kwargs)
 
 
-def _time_change_claim_is_binary_scoped(sn_name: str) -> bool:
-    """True when *sn_name*'s ONLY temporal claim sits inside one operand of a
-    binary construction (``difference_of``, ``ratio_of``, ...), not in the
-    name's own outer operator scope.
-
-    Distinguishes ``time_derivative_of_stored_energy`` (outer scope is
-    temporal — still a rate) from
-    ``difference_of_heating_power_and_time_derivative_of_stored_energy``
-    (outer scope is the binary ``difference`` — the temporal operator only
-    governs its own operand). Returns ``False`` — never scoped, keep the
-    conservative reading — when strict parsing fails, matching the legacy
-    fallback in :func:`_name_claims_time_change`.
-    """
-    from imas_codex.standard_names.audits import resolve_retired_operator_spellings
-
-    resolved = resolve_retired_operator_spellings(sn_name)
-    try:
-        from imas_codex.standard_names.grammar_adapter import parse_canonical_name
-
-        ir = parse_canonical_name(resolved).ir
-    except (TypeError, ValueError):
-        return False
-    return _ir_denotes_time_change(ir) and not _ir_claims_time_change_in_scope(ir)
+def _name_denotes_rate(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._name_denotes_rate."""
+    return _moved_worker_common._name_denotes_rate(_worker_dependency, *args, **kwargs)
 
 
-def _shape_parameter_surface(dd_path: str | None) -> str:
-    """Surface a shape parameter from *dd_path* is defined *of*.
-
-    - ``profiles_1d`` / ``flux_surface`` paths → ``flux_surface`` (radial profile)
-    - all other paths (``boundary``, ``boundary_separatrix``, pulse-schedule
-      control targets, …) → ``plasma_boundary`` (the LCFS)
-
-    The default is the plasma boundary: "the triangularity" without further
-    qualification conventionally means the boundary/separatrix value.
-    """
-    p = (dd_path or "").lower()
-    if "/profiles_1d/" in p or "/flux_surface/" in p:
-        return "flux_surface"
-    return "plasma_boundary"
+def _ir_denotes_time_change(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._ir_denotes_time_change."""
+    return _moved_worker_common._ir_denotes_time_change(
+        _worker_dependency, *args, **kwargs
+    )
 
 
-def _inject_shape_parameter_surface(
-    candidate: Any, dd_path: str | None, log: logging.Logger | None = None
-) -> bool:
-    """Force a surface locus onto a bare shape-parameter candidate.
+def _ir_claims_time_change_in_scope(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._ir_claims_time_change_in_scope."""
+    return _moved_worker_common._ir_claims_time_change_in_scope(
+        _worker_dependency, *args, **kwargs
+    )
 
-    Mutates ``candidate.segments`` in place so ``compose_name()`` produces the
-    surface-explicit leaf. Deterministic and idempotent: fires only when the
-    base is a shape parameter (quantity kind) and the composer left the locus
-    empty; a composer-supplied locus is always preserved. Returns ``True`` when
-    an injection was applied.
-    """
-    seg = getattr(candidate, "segments", None)
-    if seg is None:
-        return False
-    if seg.base_kind != "quantity" or seg.base_token not in _shape_parameter_bases():
-        return False
-    if seg.locus_token:  # composer already named a surface — trust it
-        return False
-    surface = _shape_parameter_surface(dd_path)
-    seg.locus_token = surface
-    seg.locus_relation = "of"
-    seg.locus_type = "geometry"
-    if log:
-        log.debug(
-            "shape-param surface injection: base=%s src=%s -> _of_%s",
-            seg.base_token,
-            dd_path,
-            surface,
-        )
-    return True
+
+def _name_claims_time_change(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._name_claims_time_change."""
+    return _moved_worker_common._name_claims_time_change(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+def _time_change_claim_is_binary_scoped(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._time_change_claim_is_binary_scoped."""
+    return _moved_worker_common._time_change_claim_is_binary_scoped(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+def _shape_parameter_surface(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._shape_parameter_surface."""
+    return _moved_worker_common._shape_parameter_surface(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+def _inject_shape_parameter_surface(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._inject_shape_parameter_surface."""
+    return _moved_worker_common._inject_shape_parameter_surface(
+        _worker_dependency, *args, **kwargs
+    )
 
 
 # ---------------------------------------------------------------------------
 # Pre-validation gate: reject malformed LLM output before MERGE
 # ---------------------------------------------------------------------------
 
-_SNAKE_CASE_RE = _re.compile(r"[a-z][a-z0-9_]*")
+_SNAKE_CASE_RE = _moved_worker_common._SNAKE_CASE_RE
 
 
-def is_well_formed_candidate(raw_name: str) -> tuple[bool, str | None]:
-    """Check whether *raw_name* is a plausible standard-name candidate.
-
-    Returns ``(True, None)`` if the name passes all checks, or
-    ``(False, reason)`` if it should be rejected **before** MERGE.
-
-    Rejection criteria:
-    - Empty or whitespace-only
-    - Contains newline, tab, ``{``, ``}``, ``\\``, or triple-dot
-    - Not snake_case-shaped after stripping
-    """
-    if not raw_name or not raw_name.strip():
-        return False, "empty_or_whitespace"
-    name = raw_name.strip()
-    if any(ch in name for ch in ("\n", "\t", "{", "}", "\\")):
-        return False, "illegal_chars"
-    if "..." in name:
-        return False, "triple_dot"
-    if not _SNAKE_CASE_RE.fullmatch(name):
-        return False, "not_snake_case"
-    return True, None
-
-
-def _claimed_source_ids(batch: list[dict[str, Any]]) -> set[str]:
-    """Return the authoritative bare source ids carried by a claimed batch."""
-    return {
-        source_id
-        for item in batch
-        if (source_id := (item.get("path") or item.get("source_id")))
-    }
-
-
-def _strip_response_source_id(source_id: Any) -> Any:
-    """Remove only surrounding whitespace from a model-proposed source id."""
-    return source_id.strip() if isinstance(source_id, str) else source_id
-
-
-def _review_dd_source_bindings(item: dict[str, Any]) -> dict[str, str | None]:
-    """Return exact DD paths and versions from authoritative source edges."""
-    bindings: dict[str, str | None] = {}
-    for binding in item.get("source_bindings") or []:
-        if not isinstance(binding, dict) or binding.get("source_type") != "dd":
-            continue
-        path = binding.get("dd_path") or binding.get("source_id")
-        if isinstance(path, str) and (path := strip_dd_prefix(path)):
-            bindings[path] = binding.get("dd_version")
-    return bindings
-
-
-def _review_dd_source_ids(item: dict[str, Any]) -> set[str]:
-    """Return exact DD paths authorized by source-binding relationships."""
-    return set(_review_dd_source_bindings(item))
-
-
-def _sanitize_dd_gap_evidence(
-    evidence: list[Any],
-    allowed_source_ids: set[str],
-    *,
-    phase: str,
-) -> list[Any]:
-    """Fence DD evidence to exact paths owned by the current claimed batch."""
-    kept: list[Any] = []
-    rejected: set[str] = set()
-    for report in evidence:
-        if isinstance(report, dict):
-            path = _strip_response_source_id(report.get("path"))
-            reference_path = _strip_response_source_id(report.get("reference_path"))
-            report["path"] = path
-            if "reference_path" in report:
-                report["reference_path"] = reference_path
-        else:
-            path = _strip_response_source_id(getattr(report, "path", None))
-            reference_path = _strip_response_source_id(
-                getattr(report, "reference_path", None)
-            )
-            report.path = path
-            if hasattr(report, "reference_path"):
-                report.reference_path = reference_path
-        report_paths = {value for value in (path, reference_path) if value}
-        if path not in allowed_source_ids or not report_paths.issubset(
-            allowed_source_ids
-        ):
-            rejected.update(str(value) for value in report_paths)
-            continue
-        kept.append(report)
-    if rejected:
-        logger.warning(
-            "Pool %s: ignored %d DD-gap path proposal(s) outside the claimed batch: %s",
-            phase,
-            len(rejected),
-            ", ".join(sorted(rejected)[:8]),
-        )
-    return kept
-
-
-def _persist_dd_gap_evidence(
-    evidence: list[Any],
-    allowed_source_ids: set[str],
-    *,
-    phase: str,
-    reporter: str,
-    observed_dd_version: str | None = None,
-    source_versions: dict[str, str | None] | None = None,
-) -> int:
-    """Best-effort evidence persistence, isolated from pipeline outcomes."""
-    fenced = _sanitize_dd_gap_evidence(
-        evidence,
-        allowed_source_ids,
-        phase=phase,
-    )
-    if not fenced:
-        return 0
-
-    reports: list[dict[str, Any]] = []
-    for evidence_item in fenced:
-        if hasattr(evidence_item, "model_dump"):
-            report = evidence_item.model_dump(exclude_none=True)
-        else:
-            report = dict(evidence_item)
-        report["reporter"] = reporter
-        binding_version = (source_versions or {}).get(str(report.get("path") or ""))
-        if binding_version:
-            report["observed_dd_version"] = binding_version
-        elif observed_dd_version and not report.get("observed_dd_version"):
-            report["observed_dd_version"] = observed_dd_version
-        reports.append(report)
-
-    try:
-        from imas_codex.standard_names.dd_gaps import write_dd_gaps
-
-        result = write_dd_gaps(reports)
-        return int(result.get("reported", 0))
-    except Exception:
-        logger.warning(
-            "Pool %s: DD-gap evidence persistence failed without changing the "
-            "pipeline outcome",
-            phase,
-            exc_info=True,
-        )
-        return 0
-
-
-def _claimed_source_outcome(
-    batch: list[dict[str, Any]],
-    source_id: str,
-    *,
-    source_type: str,
-    status: str,
-    last_error: str | None = None,
-    skip_reason: str | None = None,
-    skip_reason_detail: str | None = None,
-) -> dict[str, Any] | None:
-    """Build an exact fenced outcome for one source in a claimed batch."""
-    item = next(
-        (
-            claimed
-            for claimed in batch
-            if (claimed.get("path") or claimed.get("source_id")) == source_id
-        ),
-        None,
-    )
-    if not item:
-        return None
-    token = item.get("claim_token")
-    seq = item.get("claim_seq")
-    if not token or seq is None:
-        return None
-    return {
-        "sns_id": f"{source_type}:{source_id}",
-        "source_id": source_id,
-        "claim_token": token,
-        "claim_seq": seq,
-        "status": status,
-        "last_error": last_error,
-        "skip_reason": skip_reason,
-        "skip_reason_detail": skip_reason_detail,
-    }
-
-
-def _sanitize_compose_result_sources(
-    result: Any,
-    allowed_source_ids: set[str],
-    *,
-    phase: str,
-) -> None:
-    """Fence every compose-result source projection to the claimed batch.
-
-    The prompt contains related and cross-IDS paths for context, so an LLM can
-    legitimately mention an unclaimed sibling. Context is not authorization:
-    only the sources in the graph-claimed batch may be attached, skipped,
-    marked with a vocabulary gap, or persisted through a candidate.
-    """
-    rejected: set[str] = set()
-
-    kept_candidates = []
-    for candidate in result.candidates:
-        candidate.source_id = _strip_response_source_id(candidate.source_id)
-        candidate.dd_paths = [
-            _strip_response_source_id(path) for path in candidate.dd_paths
-        ]
-        if candidate.source_id not in allowed_source_ids:
-            rejected.add(candidate.source_id)
-            continue
-        out_of_batch_paths = set(candidate.dd_paths) - allowed_source_ids
-        rejected.update(out_of_batch_paths)
-        candidate.dd_paths = [
-            path for path in candidate.dd_paths if path in allowed_source_ids
-        ]
-        kept_candidates.append(candidate)
-    result.candidates = kept_candidates
-
-    kept_attachments = []
-    for attachment in result.attachments:
-        attachment.source_id = _strip_response_source_id(attachment.source_id)
-        if attachment.source_id in allowed_source_ids:
-            kept_attachments.append(attachment)
-        else:
-            rejected.add(attachment.source_id)
-    result.attachments = kept_attachments
-
-    result.skipped = [
-        _strip_response_source_id(source_id) for source_id in result.skipped
-    ]
-    rejected.update(set(result.skipped) - allowed_source_ids)
-    result.skipped = [sid for sid in result.skipped if sid in allowed_source_ids]
-
-    kept_gaps = []
-    for gap in result.vocab_gaps:
-        gap.source_id = _strip_response_source_id(gap.source_id)
-        if gap.source_id in allowed_source_ids:
-            kept_gaps.append(gap)
-        else:
-            rejected.add(gap.source_id)
-    result.vocab_gaps = kept_gaps
-
-    # A malformed response may assign one source to several dispositions.
-    # Resolve that overlap before any graph call so transaction scheduling
-    # cannot decide the winner. Priority mirrors the durable handling order:
-    # vocabulary gap, existing-name attachment, documented skip, generated name.
-    selected: dict[str, str] = {}
-    overlaps: set[str] = set()
-
-    def _reserve(source_id: str, disposition: str) -> bool:
-        owner = selected.setdefault(source_id, disposition)
-        if owner != disposition:
-            overlaps.add(source_id)
-            return False
-        return True
-
-    result.vocab_gaps = [
-        gap for gap in result.vocab_gaps if _reserve(gap.source_id, "vocab_gap")
-    ]
-    result.attachments = [
-        attachment
-        for attachment in result.attachments
-        if _reserve(attachment.source_id, "attachment")
-    ]
-    result.skipped = [
-        source_id for source_id in result.skipped if _reserve(source_id, "skip")
-    ]
-    result.candidates = [
-        candidate
-        for candidate in result.candidates
-        if _reserve(candidate.source_id, "generated")
-    ]
-    if overlaps:
-        logger.warning(
-            "Pool %s: resolved %d multi-disposition source(s) by fixed priority: %s",
-            phase,
-            len(overlaps),
-            ", ".join(sorted(overlaps)[:8]),
-        )
-
-    result.dd_gaps = _sanitize_dd_gap_evidence(
-        list(getattr(result, "dd_gaps", None) or []),
-        allowed_source_ids,
-        phase=phase,
-    )
-
-    if rejected:
-        logger.warning(
-            "Pool %s: ignored %d out-of-batch source proposal(s): %s",
-            phase,
-            len(rejected),
-            ", ".join(sorted(rejected)[:8]),
-        )
-
-
-def _filter_persist_candidates_to_claimed_sources(
-    candidates: list[dict[str, Any]],
-    allowed_source_ids: set[str],
-    *,
-    phase: str,
-) -> list[dict[str, Any]]:
-    """Keep only candidates whose own source was separately claimed."""
-    kept = [
-        candidate
-        for candidate in candidates
-        if candidate.get("source_id") in allowed_source_ids
-    ]
-    rejected = len(candidates) - len(kept)
-    if rejected:
-        logger.warning(
-            "Pool %s: deferred %d candidate(s) without a source claim",
-            phase,
-            rejected,
-        )
-    return kept
-
-
-def _withhold_binding_conflicted_sources(
-    conflict: object,
-    candidates: list[dict[str, Any]],
-    *,
-    source_type: str,
-    phase: str,
-    compose_model: str,
-    dd_version: str | None,
-    cocos_version: int | None,
-    run_id: str | None,
-) -> list[str]:
-    """Record a compose refusal for a source already bound to a live identity.
-
-    A source held by a live identity outside the migration's predecessor is an
-    adjudicable state: recomposing cannot settle it, so releasing the claim to
-    retry would spend an attempt on a decision only an operator can make. The
-    same holds for a source bound to the live predecessor and a successor that
-    has itself been retired — one live claim beside a settled one. The withheld
-    source is left claimed, its holding identity and stage recorded (and the
-    retired identity where one applies), and no winner id is returned for it.
-    Every other candidate in the batch persists normally.
-    """
-    conflicted_source_ids = {
-        item.source_id for item in getattr(conflict, "conflicts", ())
-    }
-    for item in getattr(conflict, "conflicts", ()):
-        retired_identity = getattr(item, "retired_identity", None)
-        if retired_identity is None:
-            logger.warning(
-                "Pool %s: source %s bound to live identity %r at stage %r — "
-                "withheld for adjudication, no attempt spent",
-                phase,
-                item.source_id,
-                item.holding_identity,
-                item.holding_stage,
-            )
-        else:
-            logger.warning(
-                "Pool %s: source %s bound to live identity %r at stage %r "
-                "alongside retired identity %r at stage %r — withheld for "
-                "adjudication, no attempt spent",
-                phase,
-                item.source_id,
-                item.holding_identity,
-                item.holding_stage,
-                retired_identity,
-                getattr(item, "retired_stage", None),
-            )
-
-    remaining = [
-        candidate
-        for candidate in candidates
-        if _candidate_source_node_id(candidate, source_type)
-        not in conflicted_source_ids
-    ]
-    if not remaining:
-        return []
-
-    from imas_codex.standard_names.graph_ops import persist_generated_name_batch
-
-    return persist_generated_name_batch(
-        remaining,
-        compose_model=compose_model,
-        dd_version=dd_version,
-        cocos_version=cocos_version,
-        run_id=run_id,
-        return_winner_ids=True,
+def is_well_formed_candidate(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common.is_well_formed_candidate."""
+    return _moved_worker_common.is_well_formed_candidate(
+        _worker_dependency, *args, **kwargs
     )
 
 
-def _candidate_source_node_id(candidate: dict[str, Any], source_type: str) -> str:
-    source_id = candidate.get("source_id")
-    if not isinstance(source_id, str) or not source_id:
-        return ""
-    if source_type == "dd" and source_id.startswith("dd:"):
-        return source_id
-    return encode_source_path(source_type, source_id)
+def _claimed_source_ids(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._claimed_source_ids."""
+    return _moved_worker_common._claimed_source_ids(_worker_dependency, *args, **kwargs)
 
 
-def _persist_description_checked_candidates(
-    candidates: list[dict[str, Any]],
-    *,
-    source_type: str,
-    phase: str,
-    compose_model: str,
-    dd_version: str | None,
-    cocos_version: int | None,
-    run_id: str | None,
-) -> int | list[str]:
-    """Persist only candidates with prose, releasing rejected claims to retry.
-
-    The structured response contract requires a non-empty description, but
-    callers and test doubles can still supply unvalidated candidate-shaped
-    objects. This final boundary prevents those objects from creating a drafted name
-    before releasing each exact source claim through the canonical failure
-    path. A source with any descriptionless proposal is entirely deferred so
-    duplicate proposals cannot race the release with a richer sibling.
-    """
-    from imas_codex.standard_names.graph_ops import (
-        persist_generated_name_batch,
-        release_generate_name_failed_claims,
+def _strip_response_source_id(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._strip_response_source_id."""
+    return _moved_worker_common._strip_response_source_id(
+        _worker_dependency, *args, **kwargs
     )
 
-    rejected_source_ids = {
-        candidate.get("source_id")
-        for candidate in candidates
-        if not isinstance(candidate.get("description"), str)
-        or not candidate["description"].strip()
-    }
-    rejected_source_ids.discard(None)
-    rejected_count = sum(
-        1
-        for candidate in candidates
-        if not isinstance(candidate.get("description"), str)
-        or not candidate["description"].strip()
+
+def _review_dd_source_bindings(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._review_dd_source_bindings."""
+    return _moved_worker_common._review_dd_source_bindings(
+        _worker_dependency, *args, **kwargs
     )
 
-    releases_by_token: dict[str, set[str]] = {}
-    for candidate in candidates:
-        source_id = candidate.get("source_id")
-        if source_id not in rejected_source_ids:
-            continue
-        claim_token = candidate.get("source_claim_token")
-        if not isinstance(source_id, str) or not source_id or not claim_token:
-            continue
-        source_node_id = _candidate_source_node_id(candidate, source_type)
-        releases_by_token.setdefault(str(claim_token), set()).add(source_node_id)
 
-    released = 0
-    release_expected = sum(len(ids) for ids in releases_by_token.values())
-    for claim_token, source_ids in sorted(releases_by_token.items()):
-        released += release_generate_name_failed_claims(
-            source_ids=sorted(source_ids),
-            claim_token=claim_token,
-        )
-
-    if rejected_count:
-        logger.warning(
-            "Pool %s: rejected %d candidate(s) with empty descriptions; "
-            "released %d/%d exact source claim(s) for retry",
-            phase,
-            rejected_count,
-            released,
-            release_expected,
-        )
-
-    eligible = [
-        candidate
-        for candidate in candidates
-        if candidate.get("source_id") not in rejected_source_ids
-        and isinstance(candidate.get("description"), str)
-        and candidate["description"].strip()
-    ]
-    if not eligible:
-        return []
-
-    from imas_codex.standard_names.provenance_lifecycle import (
-        SourceBindingConflictError,
-        SourceRetiredSuccessorConflictError,
+def _review_dd_source_ids(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._review_dd_source_ids."""
+    return _moved_worker_common._review_dd_source_ids(
+        _worker_dependency, *args, **kwargs
     )
 
-    try:
-        return persist_generated_name_batch(
-            eligible,
-            compose_model=compose_model,
-            dd_version=dd_version,
-            cocos_version=cocos_version,
-            run_id=run_id,
-            return_winner_ids=True,
-        )
-    except (
-        SourceBindingConflictError,
-        SourceRetiredSuccessorConflictError,
-    ) as conflict:
-        return _withhold_binding_conflicted_sources(
-            conflict,
-            eligible,
-            source_type=source_type,
-            phase=phase,
-            compose_model=compose_model,
-            dd_version=dd_version,
-            cocos_version=cocos_version,
-            run_id=run_id,
-        )
 
-
-def _mark_source_prevalidation_failed(
-    source_id: str,
-    *,
-    source_type: str,
-    candidate_name: str,
-    reason: str,
-    claim_token: str | None = None,
-    claim_seq: int | None = None,
-) -> bool:
-    """Persist a terminal pre-validation failure with actionable diagnostics."""
-    from imas_codex.standard_names.graph_ops import persist_claimed_source_outcomes
-
-    error = f"candidate pre-validation failed ({reason}): {candidate_name}"
-    if not claim_token or claim_seq is None:
-        return False
-    winners = persist_claimed_source_outcomes(
-        [
-            {
-                "sns_id": f"{source_type}:{source_id}",
-                "claim_token": claim_token,
-                "claim_seq": claim_seq,
-                "status": "failed",
-                "last_error": error,
-            }
-        ]
+def _sanitize_dd_gap_evidence(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._sanitize_dd_gap_evidence."""
+    return _moved_worker_common._sanitize_dd_gap_evidence(
+        _worker_dependency, *args, **kwargs
     )
-    return bool(winners)
 
 
-def provenance_canonical_names(
-    candidates: list, log: logging.Logger | None = None
-) -> dict[str, str]:
-    """Map each base quantity to ONE canonical name for its estimator facets.
+def _persist_dd_gap_evidence(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._persist_dd_gap_evidence."""
+    return _moved_worker_common._persist_dd_gap_evidence(
+        _worker_dependency, *args, **kwargs
+    )
 
-    Per the locked ``name-multiplicity-rule`` (collapse provenance), the
-    measured / reconstructed / reference estimates of one physical quantity must
-    share ONE standard name — but the per-facet composer is non-deterministic
-    (e.g. ``pressure/measured`` -> ``plasma_pressure`` while
-    ``pressure/reconstructed`` -> ``total_plasma_pressure``). Estimator facets of
-    a quantity strip to the same ``base_path`` (and share a compose batch via
-    ``batch_key``), so we group every value-provenance candidate by base and
-    pick one canonical name; the caller overrides each facet's ``name_id`` (the
-    MERGE identity) with it, collapsing the group onto a single StandardName.
 
-    Canonical pick: most-frequently-composed name, ties broken by SHORTEST then
-    lexicographic. Shortest implements the "physics, not instrument" /
-    no-redundant-qualifier preference deterministically — it drops
-    ``_of_flux_loop`` (vs ``poloidal_magnetic_flux``) and ``total_plasma_pressure``
-    (vs ``plasma_pressure``). Returns ``{base_path: canonical_name}`` only for
-    bases whose facets disagree (a no-op map otherwise).
-    """
-    from collections import Counter
+def _claimed_source_outcome(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._claimed_source_outcome."""
+    return _moved_worker_common._claimed_source_outcome(
+        _worker_dependency, *args, **kwargs
+    )
 
-    groups: dict[str, list[str]] = {}
-    for c in candidates:
-        term, base = detect_value_provenance(getattr(c, "source_id", "") or "")
-        if not term:
-            continue
-        try:
-            nm = normalize_spelling(c.compose_name())
-        except Exception:
-            continue
-        groups.setdefault(base, []).append(nm)
 
-    canonical: dict[str, str] = {}
-    for base, member_names in groups.items():
-        distinct = set(member_names)
-        if len(distinct) <= 1:
-            continue  # already agree
-        counts = Counter(member_names)
-        winner = min(distinct, key=lambda n: (-counts[n], len(n), n))
-        canonical[base] = winner
-        if log:
-            log.info(
-                "provenance canon: base=%s -> %s (collapsed %d variants: %s)",
-                base,
-                winner,
-                len(distinct),
-                sorted(distinct),
-            )
-    return canonical
+def _sanitize_compose_result_sources(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._sanitize_compose_result_sources."""
+    return _moved_worker_common._sanitize_compose_result_sources(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+def _filter_persist_candidates_to_claimed_sources(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._filter_persist_candidates_to_claimed_sources."""
+    return _moved_worker_common._filter_persist_candidates_to_claimed_sources(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+def _withhold_binding_conflicted_sources(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._withhold_binding_conflicted_sources."""
+    return _moved_worker_common._withhold_binding_conflicted_sources(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+def _candidate_source_node_id(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._candidate_source_node_id."""
+    return _moved_worker_common._candidate_source_node_id(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+def _persist_description_checked_candidates(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._persist_description_checked_candidates."""
+    return _moved_worker_common._persist_description_checked_candidates(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+def _mark_source_prevalidation_failed(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._mark_source_prevalidation_failed."""
+    return _moved_worker_common._mark_source_prevalidation_failed(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+def provenance_canonical_names(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common.provenance_canonical_names."""
+    return _moved_worker_common.provenance_canonical_names(
+        _worker_dependency, *args, **kwargs
+    )
 
 
 # Bare coordinate/infrastructure tokens that are NOT physics observables.
@@ -1173,98 +364,26 @@ def provenance_canonical_names(
 # semantic-similarity gate (a reader cannot tell what is measured), then burns
 # review + every refine rotation before exhausting.  Catch them at compose time
 # and route the source to ``skipped`` instead of composing a doomed bare name.
-_NON_NAMEABLE_BARE_TOKENS: frozenset[str] = frozenset(
-    {
-        "time",  # independent signal coordinate / timestamp
-        "time_stamp",
-        "timestamp",
-        "delay",  # signal-chain latency
-        "latency",
-        "dead_time",
-        "index",  # array bookkeeping
-        "count",
-        "counter",
-        "version",  # pure metadata
-    }
-)
+_NON_NAMEABLE_BARE_TOKENS = _moved_worker_common._NON_NAMEABLE_BARE_TOKENS
 
 
-def is_non_nameable_coordinate(raw_name: str) -> tuple[bool, str | None]:
-    """Detect bare coordinate / infrastructure tokens that get no standard name.
-
-    Returns ``(True, reason)`` when *raw_name* is a bare non-nameable token
-    (a time coordinate / timestamp, signal-chain timing, an array counter, or
-    pure metadata) that should be routed to ``skipped`` rather than composed.
-    Returns ``(False, None)`` otherwise.
-
-    This is intentionally conservative: it only fires on *bare* tokens (no
-    qualifier/locus context). A qualified name like ``confinement_time`` or
-    ``major_radius_of_magnetic_axis`` is a real quantity and passes through.
-    """
-    if not raw_name:
-        return False, None
-    name = raw_name.strip()
-    if name in _NON_NAMEABLE_BARE_TOKENS:
-        return True, f"non_nameable_coordinate:{name}"
-    return False, None
+def is_non_nameable_coordinate(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common.is_non_nameable_coordinate."""
+    return _moved_worker_common.is_non_nameable_coordinate(
+        _worker_dependency, *args, **kwargs
+    )
 
 
-def _coerce_llm_metric(value: Any) -> int:
-    """Best-effort int coercion for LLM telemetry fields."""
-    try:
-        return int(value or 0)
-    except (TypeError, ValueError):
-        return 0
+def _coerce_llm_metric(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._coerce_llm_metric."""
+    return _moved_worker_common._coerce_llm_metric(_worker_dependency, *args, **kwargs)
 
 
-def _extract_llm_telemetry(
-    llm_out: Any,
-    *,
-    parsed_obj: Any = None,
-    tokens_fallback: Any = None,
-) -> tuple[int, int, int, int]:
-    """Normalize split token/cache telemetry across LLM return shapes."""
-
-    def _from_attrs(obj: Any) -> tuple[int, int, int, int]:
-        return (
-            _coerce_llm_metric(getattr(obj, "input_tokens", 0)),
-            _coerce_llm_metric(getattr(obj, "output_tokens", 0)),
-            _coerce_llm_metric(getattr(obj, "cache_read_tokens", 0)),
-            _coerce_llm_metric(getattr(obj, "cache_creation_tokens", 0)),
-        )
-
-    metrics = _from_attrs(llm_out)
-    if any(metrics):
-        return metrics
-
-    if parsed_obj is not None:
-        metrics = _from_attrs(parsed_obj)
-        if any(metrics):
-            return metrics
-
-    if isinstance(tokens_fallback, dict):
-        return (
-            _coerce_llm_metric(tokens_fallback.get("input_tokens", 0)),
-            _coerce_llm_metric(tokens_fallback.get("output_tokens", 0)),
-            _coerce_llm_metric(tokens_fallback.get("cache_read_tokens", 0)),
-            _coerce_llm_metric(
-                tokens_fallback.get(
-                    "cache_creation_tokens",
-                    tokens_fallback.get("cache_write_tokens", 0),
-                )
-            ),
-        )
-
-    if isinstance(tokens_fallback, tuple | list):
-        values = list(tokens_fallback)
-        return (
-            _coerce_llm_metric(values[0] if len(values) > 0 else 0),
-            _coerce_llm_metric(values[1] if len(values) > 1 else 0),
-            _coerce_llm_metric(values[2] if len(values) > 2 else 0),
-            _coerce_llm_metric(values[3] if len(values) > 3 else 0),
-        )
-
-    return (0, 0, 0, 0)
+def _extract_llm_telemetry(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._extract_llm_telemetry."""
+    return _moved_worker_common._extract_llm_telemetry(
+        _worker_dependency, *args, **kwargs
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -1272,306 +391,60 @@ def _extract_llm_telemetry(
 # ---------------------------------------------------------------------------
 
 
-@_cache
-def _load_known_physical_bases() -> frozenset[str]:
-    """Return the set of registered physical_base tokens from ISN.
-
-    Reads the ``grammar/vocabularies/physical_bases.yml`` vocabulary file
-    from the installed ``imas_standard_names`` package.  Falls back to an
-    empty set if the package or file is unavailable.
-    """
-    try:
-        from importlib.resources import files
-
-        import yaml
-
-        text = (
-            files("imas_standard_names")
-            .joinpath("grammar/vocabularies/physical_bases.yml")
-            .read_text()
-        )
-        data = yaml.safe_load(text)
-        bases = data.get("bases", {})
-        if isinstance(bases, dict):
-            return frozenset(bases.keys())
-        return frozenset()
-    except Exception:
-        return frozenset()
-
-
-def _auto_detect_physical_base_gaps(
-    candidates: list,  # StandardNameCandidate instances or dicts
-    known_bases: frozenset[str] | None = None,
-) -> list[dict]:
-    """Parse each candidate name and surface novel ``physical_base`` tokens.
-
-    Returns a list of VocabGap-compatible dicts for bases not in the ISN
-    registry.  These are auto-tracked so the LLM does not need to emit
-    explicit ``vocab_gap`` exits for ``physical_base``.
-
-    Args:
-        candidates: Parsed ``StandardNameCandidate`` objects or dicts.
-        known_bases: Pre-loaded set of registered physical_base tokens.
-            Defaults to ``_load_known_physical_bases()`` if not provided.
-            The flat registry under-reports the grammar's lexical-compound
-            bases (``internal_inductance``, ``major_radius`` …); on the default
-            path a base absent from the flat set is re-checked against the ISN
-            parser and emitted as a gap only when the parser also rejects it.
-            An explicit ``known_bases`` is treated as authoritative and the
-            parser escape hatch is NOT applied.
-    """
-    from imas_codex.standard_names.segments import is_known_physical_base
-
-    consult_parser = known_bases is None
-    if known_bases is None:
-        known_bases = _load_known_physical_bases()
-
-    gaps: list[dict] = []
-    seen: set[tuple[str, str]] = set()  # (source_id, base) dedup
-
-    for c in candidates:
-        try:
-            # Handle both model instances and dicts
-            if hasattr(c, "base_token"):
-                base = c.base_token
-                source_id = c.source_id
-                base_kind = getattr(c, "base_kind", "quantity")
-            elif isinstance(c, dict):
-                base = c.get("id", "")  # dict candidates use 'id' for name
-                source_id = c.get("source_id", "")
-                # This is an explicit legacy-field projection for gap
-                # classification, not a validity decision. Ordered-expression
-                # validity is handled by the lossless grammar adapter.
-                try:
-                    from imas_standard_names.grammar import parse_standard_name
-
-                    parsed = parse_standard_name(base)
-                    base = parsed.physical_base
-                    base_kind = "quantity"
-                except Exception:
-                    continue
-            else:
-                continue
-
-            if base_kind == "quantity" and base and base not in known_bases:
-                # The grammar resolves lexical-compound bases that never appear
-                # in the flat registry — those are valid, not gaps.  Skip them
-                # on the default path; an explicit known_bases stays strict.
-                if consult_parser and is_known_physical_base(base):
-                    continue
-                key = (source_id, base)
-                if key not in seen:
-                    seen.add(key)
-                    gaps.append(
-                        {
-                            "source_id": source_id,
-                            "segment": "physical_base",
-                            "token": base,
-                            "reason": (
-                                f"Novel physical_base proposed by compose: {base!r}"
-                            ),
-                        }
-                    )
-        except Exception:
-            continue  # parse failures already handled elsewhere
-
-    return gaps
-
-
-def _compute_token_reuse_hits(vocab_gaps: list) -> dict[tuple[str, str], Any]:
-    """Flag candidate-new tokens that duplicate a registered same-segment token.
-
-    For each ``vocab_gap`` the compose LLM emitted this attempt, embeds the
-    proposed token and compares it against its segment's registered vocabulary
-    (free local embeddings, batched by segment so each segment's vocab is
-    embedded once).  Returns a map ``(segment, token) -> TokenNeighbour`` for
-    every proposal scoring at/above ``get_sn_dedup_threshold()``.
-
-    Best-effort: never raises (the helper itself is defensive); the local
-    compose model + local embeddings add no OpenRouter spend.  Returns ``{}``
-    when there are no gaps or no near-synonym registered token.
-    """
-    if not vocab_gaps:
-        return {}
-
-    from imas_codex.settings import get_sn_dedup_threshold
-    from imas_codex.standard_names.vocab_semantic_dedup import (
-        nearest_registered_tokens,
-    )
-
-    threshold = get_sn_dedup_threshold()
-    # threshold > 1.0 can never be met — short-circuit (OFF arm of the A/B).
-    if threshold > 1.0:
-        return {}
-
-    # Unique (token, segment) pairs; the segment vocab is embedded once each.
-    items = sorted({(vg.token, vg.segment) for vg in vocab_gaps})
-    hits = nearest_registered_tokens(items, threshold=threshold)
-    # Re-key by (segment, token) for stamp/lookup ergonomics.
-    return {(hit.segment, hit.proposed_token): hit for hit in hits.values()}
-
-
-def _grammar_round_trip_failures(candidates: list[Any]) -> tuple[list[str], list[str]]:
-    """Names that fail the grammar round trip, with per-failure repair advice.
-
-    Returns ``(names, advice)``.  ``names`` identifies what failed (the composed
-    name, or the source id when even composing it raises).  ``advice`` holds one
-    actionable line per diagnosable failure.
-
-    The diagnosis comes from the public parser's structured residue. For an
-    unresolved base, ``describe_gap`` turns that residue into the slot to use
-    instead — that ``square`` is an operator rather than a qualifier, say.
-    Reporting only the failed name gives the composer nothing to change, so it
-    re-proposes the same token on every retry.
-
-    Vocabulary suggestions are deliberately NOT surfaced: the seat's prompt
-    already carries the full vocabulary, and repeating it would crowd out the
-    part that is new information — which token, and which slot.
-    """
-    names: list[str] = []
-    advice: list[str] = []
-    try:
-        from imas_standard_names import ParseError
-
-        from imas_codex.standard_names.grammar_adapter import parse_canonical_name
-        from imas_codex.standard_names.segments import describe_gap
-    except ImportError:
-        return names, advice  # ISN not installed — skip check
-
-    for candidate in candidates:
-        candidate_name: str | None = None
-        parse_error: ParseError | None = None
-        try:
-            candidate_name = candidate.compose_name()
-            parse_canonical_name(candidate_name)
-            continue
-        except ParseError as exc:
-            parse_error = exc
-        except Exception:
-            pass
-
-        if parse_error is not None and parse_error.residue:
-            try:
-                diagnosis = describe_gap("physical_base", parse_error.residue).guidance
-            except Exception:  # noqa: BLE001 — advice is best-effort
-                logger.debug(
-                    "could not describe grammar failure for %s",
-                    getattr(candidate, "source_id", "?"),
-                    exc_info=True,
-                )
-            else:
-                if diagnosis:
-                    advice.append(diagnosis)
-
-        try:
-            names.append(candidate_name or candidate.compose_name())
-        except Exception:  # noqa: BLE001 — fall back to identifying the source
-            names.append(candidate.source_id)
-    return names, advice
-
-
-def _build_grammar_retry_reason(failures: list[str], advice: list[str]) -> str:
-    """Render the grammar half of a retry directive.
-
-    Leads with the repair advice when there is any, because that is what lets the
-    composer converge; the bare "produce a different name" fallback only applies
-    when nothing about the failure could be diagnosed.
-    """
-    if advice:
-        return (
-            "Previous attempt failed the grammar round trip. Fix each:\n"
-            + "\n".join(f"- {line}" for line in dict.fromkeys(advice))
-        )
-    return (
-        f"Previous attempt failed: grammar round-trip failed for "
-        f"{', '.join(failures[:3])}. Consider expanded "
-        f"neighbour context and produce a different name."
+def _load_known_physical_bases(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._load_known_physical_bases."""
+    return _moved_worker_common._load_known_physical_bases(
+        _worker_dependency, *args, **kwargs
     )
 
 
-def _build_token_reuse_retry_reason(hits: dict[tuple[str, str], Any]) -> str:
-    """Render a retry directive naming each flagged candidate-new token.
-
-    The agent re-composes after seeing this: it either reuses the registered
-    token (dedup achieved) or re-emits the same gap (confirming the quantity is
-    genuinely distinct on that segment's axis, recorded as distinct-confirmed).
-    """
-    parts = []
-    for hit in hits.values():
-        parts.append(
-            f"Segment `{hit.segment}`: your proposed new token "
-            f"`{hit.proposed_token}` is {hit.similarity:.2f} similar to "
-            f"registered `{hit.nearest_token}`. Reuse the registered token "
-            f"unless this quantity is genuinely DISTINCT on the {hit.segment} "
-            f"axis; if distinct, keep it and it will be recorded as a "
-            f"new-vocab request."
-        )
-    return "Vocabulary reuse check — re-compose to reuse-or-confirm:\n" + "\n".join(
-        parts
+def _auto_detect_physical_base_gaps(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._auto_detect_physical_base_gaps."""
+    return _moved_worker_common._auto_detect_physical_base_gaps(
+        _worker_dependency, *args, **kwargs
     )
 
 
-def _active_editorial_gap_guidance(
-    vocab_gaps: list[Any],
-) -> tuple[str, bool]:
-    """Read reviewed decisions for only this result and render exact guidance."""
-    if not vocab_gaps:
-        return "", False
-    gap_dicts = [
-        {
-            "segment": getattr(gap, "segment", None),
-            "token": getattr(gap, "token", None),
-        }
-        for gap in vocab_gaps
-    ]
-    try:
-        from imas_codex.standard_names.graph_ops import (
-            fetch_vocab_gap_adjudications,
-        )
-        from imas_codex.standard_names.vocab_adjudication import (
-            editorial_retry_guidance,
-        )
-
-        rows = fetch_vocab_gap_adjudications(gap_dicts)
-        return editorial_retry_guidance(rows)
-    except Exception:
-        logger.debug("Editorial vocabulary guidance lookup failed", exc_info=True)
-        return "", False
+def _compute_token_reuse_hits(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._compute_token_reuse_hits."""
+    return _moved_worker_common._compute_token_reuse_hits(
+        _worker_dependency, *args, **kwargs
+    )
 
 
-def _stamp_dedup_decision(
-    gap_dicts: list[dict],
-    hits: dict[tuple[str, str], Any],
-) -> None:
-    """Stamp the compose-time token-reuse adjudication onto gap dicts in place.
+def _grammar_round_trip_failures(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._grammar_round_trip_failures."""
+    return _moved_worker_common._grammar_round_trip_failures(
+        _worker_dependency, *args, **kwargs
+    )
 
-    A gap whose ``(segment, token)`` was flagged and SURVIVED the chained retry
-    (the agent re-emitted it after being shown the near-token) is
-    ``distinct_confirmed`` and carries the nearest token + score.  Gaps that
-    were never flagged are ``unchecked``.  (Gaps the agent dropped after the
-    prompt — "reused" — are no longer in ``result.vocab_gaps`` and so are never
-    written.)
-    """
-    from imas_codex.graph.models import VocabGapDedupDecision
 
-    settled = {
-        VocabGapDedupDecision.reuse_confirmed.value,
-        VocabGapDedupDecision.distinct_confirmed.value,
-        VocabGapDedupDecision.checked_no_reuse.value,
-    }
-    for g in gap_dicts:
-        if g.get("dedup_decision") in settled:
-            continue
-        hit = hits.get((g.get("segment"), g.get("token")))
-        if hit is not None:
-            g["nearest_token"] = hit.nearest_token
-            g["nearest_similarity"] = hit.similarity
-            g["dedup_decision"] = VocabGapDedupDecision.distinct_confirmed.value
-        else:
-            g.setdefault(
-                "dedup_decision",
-                VocabGapDedupDecision.unchecked.value,
-            )
+def _build_grammar_retry_reason(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._build_grammar_retry_reason."""
+    return _moved_worker_common._build_grammar_retry_reason(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+def _build_token_reuse_retry_reason(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._build_token_reuse_retry_reason."""
+    return _moved_worker_common._build_token_reuse_retry_reason(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+def _active_editorial_gap_guidance(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._active_editorial_gap_guidance."""
+    return _moved_worker_common._active_editorial_gap_guidance(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+def _stamp_dedup_decision(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._stamp_dedup_decision."""
+    return _moved_worker_common._stamp_dedup_decision(
+        _worker_dependency, *args, **kwargs
+    )
 
 
 # =============================================================================
@@ -8794,8 +7667,8 @@ async def process_review_name_batch(
         from imas_codex.standard_names.audits import semantic_similarity_check
         from imas_codex.standard_names.defaults import (
             SEMANTIC_SIM_CRITICAL,
-            SEMANTIC_SIM_GATE_MODEL,
-            SEMANTIC_SIM_GATE_RESOLUTION_METHOD,
+            SEMANTIC_SIM_GATE_MODEL,  # noqa: F811
+            SEMANTIC_SIM_GATE_RESOLUTION_METHOD,  # noqa: F811
             SEMANTIC_SIM_SYNTHETIC_SCORE,
             SEMANTIC_SIM_WARNING,
         )
@@ -11794,3 +10667,81 @@ async def process_embed_batch(
             )
 
     return written
+
+
+backfill_semantic_similarity_gate_resolution_method.__wrapped__ = (
+    _moved_worker_common.backfill_semantic_similarity_gate_resolution_method
+)
+normalize_spelling.__wrapped__ = _moved_worker_common.normalize_spelling
+normalize_prose_spelling.__wrapped__ = _moved_worker_common.normalize_prose_spelling
+normalize_description_notation.__wrapped__ = (
+    _moved_worker_common.normalize_description_notation
+)
+normalize_description_text.__wrapped__ = _moved_worker_common.normalize_description_text
+_dedup_adjacent_tokens.__wrapped__ = _moved_worker_common._dedup_adjacent_tokens
+_isn_segment_tokens.__wrapped__ = _moved_worker_common._isn_segment_tokens
+_isn_physical_bases.__wrapped__ = _moved_worker_common._isn_physical_bases
+shape_parameter_base_drift.__wrapped__ = _moved_worker_common.shape_parameter_base_drift
+_shape_parameter_bases.__wrapped__ = _moved_worker_common._shape_parameter_bases
+_rate_natured_bases.__wrapped__ = _moved_worker_common._rate_natured_bases
+_state_resolution_tokens.__wrapped__ = _moved_worker_common._state_resolution_tokens
+_name_denotes_state.__wrapped__ = _moved_worker_common._name_denotes_state
+_name_denotes_rate.__wrapped__ = _moved_worker_common._name_denotes_rate
+_ir_denotes_time_change.__wrapped__ = _moved_worker_common._ir_denotes_time_change
+_ir_claims_time_change_in_scope.__wrapped__ = (
+    _moved_worker_common._ir_claims_time_change_in_scope
+)
+_name_claims_time_change.__wrapped__ = _moved_worker_common._name_claims_time_change
+_time_change_claim_is_binary_scoped.__wrapped__ = (
+    _moved_worker_common._time_change_claim_is_binary_scoped
+)
+_shape_parameter_surface.__wrapped__ = _moved_worker_common._shape_parameter_surface
+_inject_shape_parameter_surface.__wrapped__ = (
+    _moved_worker_common._inject_shape_parameter_surface
+)
+is_well_formed_candidate.__wrapped__ = _moved_worker_common.is_well_formed_candidate
+_claimed_source_ids.__wrapped__ = _moved_worker_common._claimed_source_ids
+_strip_response_source_id.__wrapped__ = _moved_worker_common._strip_response_source_id
+_review_dd_source_bindings.__wrapped__ = _moved_worker_common._review_dd_source_bindings
+_review_dd_source_ids.__wrapped__ = _moved_worker_common._review_dd_source_ids
+_sanitize_dd_gap_evidence.__wrapped__ = _moved_worker_common._sanitize_dd_gap_evidence
+_persist_dd_gap_evidence.__wrapped__ = _moved_worker_common._persist_dd_gap_evidence
+_claimed_source_outcome.__wrapped__ = _moved_worker_common._claimed_source_outcome
+_sanitize_compose_result_sources.__wrapped__ = (
+    _moved_worker_common._sanitize_compose_result_sources
+)
+_filter_persist_candidates_to_claimed_sources.__wrapped__ = (
+    _moved_worker_common._filter_persist_candidates_to_claimed_sources
+)
+_withhold_binding_conflicted_sources.__wrapped__ = (
+    _moved_worker_common._withhold_binding_conflicted_sources
+)
+_candidate_source_node_id.__wrapped__ = _moved_worker_common._candidate_source_node_id
+_persist_description_checked_candidates.__wrapped__ = (
+    _moved_worker_common._persist_description_checked_candidates
+)
+_mark_source_prevalidation_failed.__wrapped__ = (
+    _moved_worker_common._mark_source_prevalidation_failed
+)
+provenance_canonical_names.__wrapped__ = _moved_worker_common.provenance_canonical_names
+is_non_nameable_coordinate.__wrapped__ = _moved_worker_common.is_non_nameable_coordinate
+_coerce_llm_metric.__wrapped__ = _moved_worker_common._coerce_llm_metric
+_extract_llm_telemetry.__wrapped__ = _moved_worker_common._extract_llm_telemetry
+_load_known_physical_bases.__wrapped__ = _moved_worker_common._load_known_physical_bases
+_auto_detect_physical_base_gaps.__wrapped__ = (
+    _moved_worker_common._auto_detect_physical_base_gaps
+)
+_compute_token_reuse_hits.__wrapped__ = _moved_worker_common._compute_token_reuse_hits
+_grammar_round_trip_failures.__wrapped__ = (
+    _moved_worker_common._grammar_round_trip_failures
+)
+_build_grammar_retry_reason.__wrapped__ = (
+    _moved_worker_common._build_grammar_retry_reason
+)
+_build_token_reuse_retry_reason.__wrapped__ = (
+    _moved_worker_common._build_token_reuse_retry_reason
+)
+_active_editorial_gap_guidance.__wrapped__ = (
+    _moved_worker_common._active_editorial_gap_guidance
+)
+_stamp_dedup_decision.__wrapped__ = _moved_worker_common._stamp_dedup_decision
