@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "completed_at": "2026-10-24T20:58:48.737Z",
   "dispatched_at": "2026-10-24T20:44:31Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the finding carries no text; the review's scores and zero added failures stand",
+      "recorded_at": "2026-10-24T21:02:47.158181+00:00"
+    }
+  },
   "findings": [
     {
       "file": "logs/gate-head.log",
