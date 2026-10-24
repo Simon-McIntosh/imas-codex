@@ -433,14 +433,50 @@ def test_public_refresh_restamps_raw_convergence_without_steering(monkeypatch):
 # project graph's URI are owned by the package's shared disposable fixture.
 
 
-def _scheduled_graph_node() -> str | None:
-    """The node the scheduler reports for the project graph.
+def _project_bolt_port() -> int:
+    """The port this checkout's profile gives the project graph."""
+    from imas_codex.graph.profiles import resolve_neo4j
 
-    Read from ``squeue`` rather than from profile resolution so the addresses
-    this test requires stay independent of the function it is testing: a guard
-    and its only test sharing one resolver move together, and then a resolver
-    that returns only the loopback spelling keeps the test green.
+    return resolve_neo4j(auto_tunnel=False).bolt_port
+
+
+def _assert_refused(monkeypatch, address: str) -> None:
+    """Require the refusal for *address*, from the check and the fixture body."""
+    from tests.standard_names.conftest import (
+        disposable_neo4j_uri,
+        refuse_project_graph,
+    )
+
+    with pytest.raises(
+        pytest.fail.Exception, match="refusing to run against"
+    ) as refused:
+        refuse_project_graph(address)
+    print(f"refused {address}: {refused.value}")
+
+    body = getattr(disposable_neo4j_uri, "__wrapped__", disposable_neo4j_uri)
+    monkeypatch.setenv("IMAS_CODEX_TEST_NEO4J_URI", address)
+    monkeypatch.setenv("IMAS_CODEX_TEST_NEO4J_EPHEMERAL", "1")
+    with pytest.raises(pytest.fail.Exception, match="refusing to run against"):
+        next(iter(body()))
+
+
+def test_the_shared_fixture_refuses_the_project_loopback_address(monkeypatch):
+    """The protection the disposable fixtures exist for, shown refusing.
+
+    The fixture's whole value is that it cannot be pointed at production, and a
+    guard nothing exercises is a guard nobody knows works. This requires the
+    refusal for the loopback address the profile names, from the check and from
+    the fixture body, and accepts a disposable endpoint in the same breath so
+    the test cannot pass by refusing everything.
     """
+    from tests.standard_names.conftest import refuse_project_graph
+
+    _assert_refused(monkeypatch, f"bolt://localhost:{_project_bolt_port()}")
+    refuse_project_graph("bolt://127.0.0.1:1")
+
+
+def _scheduled_graph_node() -> str | None:
+    """The node the scheduler reports for the project graph."""
     try:
         completed = subprocess.run(
             ["squeue", "-h", "-n", "codex-neo4j", "-o", "%N"],
@@ -455,49 +491,23 @@ def _scheduled_graph_node() -> str | None:
     return nodes[0].split(",")[0] if nodes else None
 
 
-def test_the_shared_fixture_refuses_every_project_graph_address(monkeypatch):
-    """The protection the disposable fixtures exist for, shown refusing.
+@pytest.mark.graph
+def test_the_shared_fixture_refuses_the_scheduled_graph_address(monkeypatch):
+    """The other spelling, read from the scheduler rather than from the profile.
 
-    The fixture's whole value is that it cannot be pointed at production, and a
-    guard nothing exercises is a guard nobody knows works. Both spellings the
-    project graph answers to are required -- the loopback port a login node's
-    profile names, and the address the scheduler reports for the service node
-    a compute node connects to -- because a refusal that knows one of them
-    protects one host. A disposable endpoint is accepted in the same breath, so
-    the test cannot pass by refusing everything.
+    On a cluster whose graph runs as a service, the loopback port is not the
+    address a compute node connects to, so a refusal that knows only the
+    loopback protects nothing there. The address comes from ``squeue`` so that
+    a resolver narrowing to the loopback spelling cannot keep this green -- a
+    guard and its only test sharing one resolver move together. It needs a
+    running service, hence the graph marker.
     """
-    from imas_codex.graph.profiles import resolve_neo4j
-    from tests.standard_names.conftest import (
-        disposable_neo4j_uri,
-        refuse_project_graph,
-    )
-
-    port = resolve_neo4j(auto_tunnel=False).bolt_port
-    addresses = {f"bolt://localhost:{port}"}
     node = _scheduled_graph_node()
-    if node is None:
-        pytest.fail(
-            "the scheduler reports no task named codex-neo4j, so the "
-            "scheduled-instance arm of the refusal cannot be exercised; this "
-            "run cannot show that the fixture refuses the graph it will meet "
-            "on a compute node"
-        )
-    addresses.add(f"bolt://{node}:{port}")
-
-    body = getattr(disposable_neo4j_uri, "__wrapped__", disposable_neo4j_uri)
-    for address in sorted(addresses):
-        with pytest.raises(
-            pytest.fail.Exception, match="refusing to run against"
-        ) as refused:
-            refuse_project_graph(address)
-        print(f"refused {address}: {refused.value}")
-
-        monkeypatch.setenv("IMAS_CODEX_TEST_NEO4J_URI", address)
-        monkeypatch.setenv("IMAS_CODEX_TEST_NEO4J_EPHEMERAL", "1")
-        with pytest.raises(pytest.fail.Exception, match="refusing to run against"):
-            next(iter(body()))
-
-    refuse_project_graph("bolt://127.0.0.1:1")
+    assert node is not None, (
+        "the scheduler reports no task named codex-neo4j, so the "
+        "scheduled-instance arm of the refusal cannot be exercised"
+    )
+    _assert_refused(monkeypatch, f"bolt://{node}:{_project_bolt_port()}")
 
 
 @pytest.fixture
