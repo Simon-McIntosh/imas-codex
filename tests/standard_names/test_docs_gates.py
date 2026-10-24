@@ -563,3 +563,68 @@ def test_self_link_check_needs_the_documenting_name() -> None:
     )
 
     assert _hygiene_result(text).outcome is DocumentationGateOutcome.PASS
+
+
+_ANTENNA_STRAP_COORDINATE = (
+    "The vertical coordinate of the centre of the antenna strap in the "
+    "right-handed cylindrical (R, φ, Z) frame, where R is the major "
+    "radius, φ the toroidal angle and Z the vertical direction."
+)
+
+
+def test_a_coordinate_states_its_frame_and_needs_no_defining_relation() -> None:
+    score = score_documentation(
+        _ANTENNA_STRAP_COORDINATE,
+        physics_context=DocumentationPhysicsContext(
+            dd_path="antenna/antenna_strap/vertical_coordinate",
+            declared_unit="m",
+        ),
+        documenting_name="vertical_coordinate_of_antenna_strap",
+    )
+
+    result = score.gate_vector["defining_equation"]
+    assert result.outcome is DocumentationGateOutcome.PASS
+    assert (
+        result.reason
+        == "a coordinate states its frame and axes; no defining relation is required"
+    )
+
+
+def test_a_quantity_with_no_relation_still_fails_the_gate() -> None:
+    score = score_documentation(
+        "The volume-integrated particle source rate, computed over the plasma "
+        "volume stated by the grid subset and carried by the DD entry named in "
+        "the link, with no display equation of its own anywhere in the text so "
+        "the gate has nothing to check against the declared unit.",
+        physics_context=DocumentationPhysicsContext(
+            dd_path="core_sources/source/particles",
+            declared_unit="s^-1",
+        ),
+        documenting_name="volume_integrated_particle_source_rate",
+    )
+
+    result = score.gate_vector["defining_equation"]
+    assert result.outcome is DocumentationGateOutcome.FAIL
+    assert "lacks exactly one dimensionally checkable defining relation" in (
+        result.reason or ""
+    )
+
+
+def test_a_coordinate_without_a_frame_states_nothing_checkable() -> None:
+    score = score_documentation(
+        "The vertical coordinate of the centre of the antenna strap, taken at "
+        "the reference position and reported for the strap as installed on the "
+        "machine in the current configuration, with nothing said about how the "
+        "value is oriented in space.",
+        physics_context=DocumentationPhysicsContext(
+            dd_path="antenna/antenna_strap/vertical_coordinate",
+            declared_unit="m",
+        ),
+        documenting_name="vertical_coordinate_of_antenna_strap",
+    )
+
+    result = score.gate_vector["defining_equation"]
+    assert result.outcome is DocumentationGateOutcome.FAIL
+    assert (
+        result.reason == "coordinate documentation states no coordinate frame or axes"
+    )

@@ -358,12 +358,60 @@ def _expression_dimensions(
     return {str(dimensions)} if dimensions is not None else None
 
 
+_FRAME_WORDS_RE = re.compile(
+    r"\b(?:frame|coordinate system|coordinate frame|axes|axis|cylindrical|"
+    r"cartesian|spherical|right-handed)\b",
+    re.IGNORECASE,
+)
+
+
+def _names_a_position(name: str | None) -> bool:
+    """True when the parsed name denotes a coordinate, position or locus value.
+
+    A coordinate has no defining relation to state: its documentation says
+    which frame and axes give the value, and a dimensional identity between it
+    and a DD unit would be a tautology. The decision is taken from the grammar's
+    own parse — ``base.kind`` is ``geometry`` for a geometric base token, and
+    ``projection.shape`` is ``coordinate`` for a coordinate projection of a
+    quantity — so the class is read from the name's structure rather than from
+    words in its text.
+    """
+    if not name:
+        return False
+    from imas_standard_names import parse
+
+    try:
+        parsed = parse(name)
+    except Exception:
+        return False
+    ir = getattr(parsed, "ir", None)
+    if ir is None:
+        return False
+    kind = getattr(getattr(ir, "base", None), "kind", None)
+    if getattr(kind, "value", str(kind)) == "geometry":
+        return True
+    projection = getattr(ir, "projection", None)
+    shape = getattr(projection, "shape", None)
+    return getattr(shape, "value", str(shape)) == "coordinate"
+
+
 def _defining_equation_result(
     text: str,
     physics_context: DocumentationPhysicsContext | None,
+    documenting_name: str | None = None,
 ) -> DocumentationGateResult:
     """Compare one stated defining relation with the DD-declared unit."""
 
+    if _names_a_position(documenting_name):
+        if _FRAME_WORDS_RE.search(text):
+            return DocumentationGateResult(
+                outcome=DocumentationGateOutcome.PASS,
+                reason="a coordinate states its frame and axes; no defining relation is required",
+            )
+        return DocumentationGateResult(
+            outcome=DocumentationGateOutcome.FAIL,
+            reason="coordinate documentation states no coordinate frame or axes",
+        )
     if physics_context is None or not physics_context.declared_unit:
         return DocumentationGateResult(
             outcome=DocumentationGateOutcome.NOT_EVALUABLE,
@@ -1214,7 +1262,9 @@ def score_documentation(
         ),
     }
     gates = {
-        "defining_equation": _defining_equation_result(text, physics_context),
+        "defining_equation": _defining_equation_result(
+            text, physics_context, documenting_name
+        ),
         "symbol_definitions": _predicate_result(
             predicates["symbol_definitions"],
             pass_reason=reasons["symbol_definitions"][0],

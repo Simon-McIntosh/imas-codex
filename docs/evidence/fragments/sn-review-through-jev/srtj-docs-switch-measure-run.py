@@ -30,9 +30,7 @@ from imas_codex.graph.temp_neo4j import start_temp_neo4j, stop_temp_neo4j
 from imas_codex.settings import get_model
 from imas_codex.standard_names.review import cascade as cascade_mod
 from imas_codex.standard_names.review.audits import (
-    run_documentation_gate_checks,
-    run_house_style_checks,
-    run_lexical_lint,
+    run_lint_checks,
 )
 
 HERE = Path(__file__).resolve().parent
@@ -155,12 +153,8 @@ def fetch_export_rows(ids):
 
 
 def documentation_error_lint(candidate):
-    """Every lint family the product's audit runs, so the hold set matches it."""
-    findings = [
-        *run_lexical_lint([candidate]),
-        *run_house_style_checks([candidate]),
-        *run_documentation_gate_checks([candidate]),
-    ]
+    """The product's own lint composition, so the hold set cannot drift from it."""
+    findings = run_lint_checks([candidate])
     return [
         {
             "finding_type": f.finding_type,

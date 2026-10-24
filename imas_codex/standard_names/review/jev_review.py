@@ -702,18 +702,66 @@ def states_scope_non_requirement(sentence: str) -> bool:
     )
 
 
-def claim_settlement(claim: str, name: str) -> str | None:
+_RELATION_FORMS = frozenset(
+    {
+        "linear",
+        "quadratic",
+        "cubic",
+        "quartic",
+        "inverse",
+        "proportional",
+        "exponential",
+        "logarithmic",
+        "sinusoidal",
+    }
+)
+_RELATION_FORMS_RE = re.compile(r"\b(?:" + "|".join(sorted(_RELATION_FORMS)) + r")\b")
+_CONTRASTIVE_REPLACEMENT = re.compile(r"\b(?:instead of|rather than)\b")
+
+
+def _relation_forms(text: str) -> set[str]:
+    return set(_RELATION_FORMS_RE.findall(str(text or "").lower()))
+
+
+def replaces_document_relation(claim: str, documentation: str) -> bool:
+    """True when a claim swaps out a relation the document itself states.
+
+    "Calibration assumes a quadratic field-current relation instead of a linear
+    one." refuses the linear relation its own document defines, so the denial is
+    of the document under review rather than of any DD source: no source
+    evidence can answer it, and a judge asked only about sources answers "says
+    nothing" because the sources are silent about the calibration law. The
+    construction is an explicit replacement ("instead of", "rather than") whose
+    rejected alternative names a relation form the document states, and it is
+    read here so the denial does not depend on a source saying so.
+    """
+    text = " ".join(str(claim or "").split()).lower()
+    relevant = _relation_forms(documentation)
+    if not text or not relevant:
+        return False
+    for contrast in _CONTRASTIVE_REPLACEMENT.finditer(text):
+        rejected = _relation_forms(text[contrast.end() :])
+        if rejected & relevant:
+            return True
+    return False
+
+
+def claim_settlement(claim: str, name: str, documentation: str = "") -> str | None:
     """The category code settles for one claim without asking the judge.
 
-    The claim is settled code-side in two families. A scope disclaimer settles
-    on its own: a name that fixes a locus or an aggregation says where the
-    quantity is taken or how it is combined, which is a different axis from the
+    The claim is settled code-side in three families. A claim that replaces a
+    relation its own document states contradicts that document whatever any
+    source says, so it settles as a contradiction. A scope disclaimer settles on
+    its own: a name that fixes a locus or an aggregation says where the quantity
+    is taken or how it is combined, which is a different axis from the
     population it is restricted to, so the name's qualifier cannot turn a scope
     disclaimer into a claim a source denies. A locus or aggregation disclaimer
     settles only under a name with no such qualifier, because there the name
     itself fixes the locus the sentence is about. Every other claim goes to the
     judge unchanged.
     """
+    if replaces_document_relation(claim, documentation):
+        return "contradicts"
     if states_scope_non_requirement(claim):
         return "says nothing"
     if name_fixes_locus_or_aggregation(name):
@@ -724,13 +772,13 @@ def claim_settlement(claim: str, name: str) -> str | None:
 
 
 def deterministic_claim_determinations(
-    claims: Sequence[str], name: str
+    claims: Sequence[str], name: str, documentation: str = ""
 ) -> dict[int, str]:
     """The claims code decides itself, keyed by their index in the claim list."""
     return {
         index: outcome
         for index, claim in enumerate(claims)
-        if (outcome := claim_settlement(claim, name)) is not None
+        if (outcome := claim_settlement(claim, name, documentation)) is not None
     }
 
 
@@ -1021,10 +1069,16 @@ def settled_claim_answers(state: Mapping[str, Any]) -> dict[int, dict[str, Any]]
         index: {
             "choice": outcome,
             "probabilities": {outcome: 1.0},
-            "settled_by": "non_requirement_sentence",
+            "settled_by": (
+                "document_relation_replaced"
+                if outcome == "contradicts"
+                else "non_requirement_sentence"
+            ),
         }
         for index, outcome in deterministic_claim_determinations(
-            state["documentation_claims"], str(state.get("name_id") or "")
+            state["documentation_claims"],
+            str(state.get("name_id") or ""),
+            str(state.get("documentation") or ""),
         ).items()
     }
 
