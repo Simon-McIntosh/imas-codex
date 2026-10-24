@@ -1,0 +1,69 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-24T06:55:47.581Z",
+  "dispatched_at": "2026-10-24T06:31:54Z",
+  "figures": [
+    "docs/figures/sn-review-through-jev/srtj-docs-switch-causes/matched-answers.svg"
+  ],
+  "findings": [
+    {
+      "file": "docs/figures/sn-review-through-jev/srtj-docs-switch-causes/matched-answers.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The 'base threshold 0.30' annotation ends 2 px from the sample-3 marker on the same baseline; at the rendered size the trailing digits and the dot read as one mark, and the generator's save-time check tests only canvas bounds, never text-versus-data overlap, so the crowding passes uncaught."
+    },
+    {
+      "file": "docs/figures/sn-review-through-jev/srtj-docs-switch-causes/matched-answers.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The left panel's y axis says only 'judge probability' but plots two different quantities on one axis: each coloured mark is its answer's contradicts mass and each grey mark is its says-nothing mass. The dotted 0.30 line spans the whole panel although it governs only the contradicts series, so the ten grey markers read as sitting above a threshold the base veto never applies to them."
+    },
+    {
+      "file": "docs/figures/sn-review-through-jev/srtj-docs-switch-causes/matched-answers.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Legend and marks do not match: the 'base veto silent' swatch is an open circle with a white interior, but the three silent contradiction marks render as blue discs inside a dark ring, because the open marker is drawn over the blue one. The 'contradicts' swatch carries no ring although every blue mark in the panel does, so a reader matching swatches to marks finds no white-centred circle anywhere in the data."
+    },
+    {
+      "file": "docs/figures/sn-review-through-jev/srtj-docs-switch-causes/matched-answers.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The grey label text is #929292 on white, a 3.1:1 contrast. The two numbers a reader most needs, the 0.30 threshold label and the 'base veto 7 of 10' count, are the lowest-contrast text on the figure and fall below the 4.5:1 that 14 px text requires."
+    },
+    {
+      "file": "docs/figures/sn-review-through-jev/srtj-docs-switch-causes/matched-answers.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The caption says 'filled marks are the base veto's firings', but the ten grey filled marks are not firings; only the seven black ones are. Following the caption, a reader counts twenty filled marks against a stated seven firings."
+    },
+    {
+      "file": "docs/figures/sn-review-through-jev/srtj-docs-switch-causes/matched-answers.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The right panel's 'fixed veto 10 of 10' is drawn from the sample count n rather than from the recorded head_fires, so the same figure would still print 10 of 10 if a sampled answer stopped firing; the two agree here only because matched-answers.json records head_fires 10 of 10."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "RUBRIC legibility: defect: readable at a glance, but the left panel's y axis reads only 'judge probability' while carrying two different masses at once, the contradicts mass of each coloured mark and the says-nothing mass of each grey mark, and the 0.30 rule governs only the contradicts series.\nRUBRIC data_ink: pass: the ink is markers, labels and one dotted rule; no fills, bands or shading compete with the data.\nRUBRIC decoration: pass: no gradient, background fill, gridline or styled theme; both panels carry only a left spine and the shared bottom spine.\nRUBRIC contrast: defect: the grey label text (#929292 on white, 3.1:1) is below the 4.5:1 that the rendered 14 px text needs; the blue label reads 5.5:1 and the near-black text reads far higher.\nRUBRIC table_form: pass: the panel plots positional data, not tabular content; the two-count right panel is a small axis reading rather than a table.\nRUBRIC label_collision: defect: nothing is clipped and no label overlaps another, but 'base threshold 0.30' ends 2 px from the sample-3 marker on the same baseline and reads as touching it.\nFINDING docs/figures/sn-review-through-jev/srtj-docs-switch-causes/matched-answers.svg non-blocking: the 'base threshold 0.30' annotation ends 2 px from the sample-3 marker on the same baseline; at the rendered size the trailing digits and the dot read as one mark.\nFINDING docs/figures/sn-review-through-jev/srtj-docs-switch-causes/matched-answers.svg non-blocking: the y axis says only 'judge probability' but carries the contradicts mass of the coloured marks and the says-nothing mass of the grey marks on one axis, while the dotted 0.30 line spans the panel although it governs only the contradicts series.\nFINDING docs/figures/sn-review-through-jev/srtj-docs-switch-causes/matched-answers.svg non-blocking: the 'base veto silent' legend swatch is an open circle with a white interior, but the silent contradiction marks render as blue discs inside a dark ring; the 'contradicts' swatch carries no ring although every blue mark does.\nFINDING docs/figures/sn-review-through-jev/srtj-docs-switch-causes/matched-answers.svg non-blocking: grey label text at #929292 on white is 3.1:1, below the 4.5:1 the rendered 14 px text needs, and it carries the two numbers a reader most needs.\nFINDING docs/figures/sn-review-through-jev/srtj-docs-switch-causes/matched-answers.svg non-blocking: the caption's 'filled marks are the base veto's firings' is contradicted by the ten grey filled marks that do not fire.\nFINDING docs/figures/sn-review-through-jev/srtj-docs-switch-causes/matched-answers.svg non-blocking: the right panel's 'fixed veto 10 of 10' is drawn from the sample count rather than the recorded head_fires.\nVERDICT: 6 rubric items verdicted on the single attached PNG, 0 blocking findings and 6 non-blocking, judged from the rendered image at 1399x720 px with the figure's own generator script and data JSON read as corroboration.",
+  "review_run_id": "r-20261024T063124433505-review-of-srtj-docs-switch-causes-588c96b01112-figure",
+  "reviewed_base_sha": "cd52b01cd9c0de92742166f2a194b8173c92b6b4",
+  "reviewed_head_sha": "588c96b011120982af20613f725e5b3d7383aff4",
+  "reviewed_images": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T063124433505-review-of-srtj-docs-switch-causes-588c96b01112-figure/image-0.png"
+  ],
+  "reviewed_run_id": "r-20261023T191819797804-srtj-docs-switch-causes",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "contrast": "defect: the grey label text (#929292 on white, 3.1:1) is below the 4.5:1 that the rendered 14 px text needs; the blue label reads 5.5:1 and the near-black text reads far higher",
+    "data_ink": "pass: the ink is markers, labels and one dotted rule; no fills, bands or shading compete with the data",
+    "decoration": "pass: no gradient, background fill, gridline or styled theme; both panels carry only a left spine and the shared bottom spine",
+    "label_collision": "defect: nothing is clipped and no label overlaps another, but 'base threshold 0.30' ends 2 px from the sample-3 marker on the same baseline and reads as touching it",
+    "legibility": "defect: readable at a glance, but the left panel's y axis reads only 'judge probability' while carrying two different masses at once, the contradicts mass of each coloured mark and the says-nothing mass of each grey mark, and the 0.30 rule governs only the contradicts series",
+    "table_form": "pass: the panel plots positional data, not tabular content; the two-count right panel is a small axis reading rather than a table"
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T06:56:30.346600+00:00",
+  "total": null
+}
