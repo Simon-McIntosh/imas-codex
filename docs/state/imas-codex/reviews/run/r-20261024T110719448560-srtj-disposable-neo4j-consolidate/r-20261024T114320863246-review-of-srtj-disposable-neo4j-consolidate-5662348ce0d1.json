@@ -7,6 +7,13 @@
   "call_sites": [],
   "completed_at": "2026-10-24T11:56:45.685Z",
   "dispatched_at": "2026-10-24T11:49:40Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "srtj-disposable-neo4j-teardown",
+      "recorded_at": "2026-10-24T20:12:07.304165+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/standard_names/conftest.py",
