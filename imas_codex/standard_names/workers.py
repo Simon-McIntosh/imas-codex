@@ -18,6 +18,7 @@ marks phases done, and respects ``state.should_stop()``.
 from __future__ import annotations
 
 import asyncio
+import inspect as _inspect
 import json
 import random
 import re as _re
@@ -8893,3 +8894,15 @@ _self_refine_candidate.__wrapped__ = (
 _write_composed_name_domains.__wrapped__ = (
     _moved_worker_extraction_and_enrichment._write_composed_name_domains
 )
+
+for _forwarder in tuple(globals().values()):
+    if not callable(_forwarder) or getattr(_forwarder, "__module__", None) != __name__:
+        continue
+    _wrapped = getattr(_forwarder, "__wrapped__", None)
+    if _wrapped is None:
+        continue
+    _signature = _inspect.signature(_wrapped)
+    if "_worker_dependency" in _signature.parameters:
+        _forwarder.__signature__ = _signature.replace(
+            parameters=tuple(_signature.parameters.values())[1:]
+        )

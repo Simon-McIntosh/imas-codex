@@ -61,7 +61,7 @@ __all__ = [
     "vocabulary_source",
 ]
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("imas_codex.standard_names.workers")
 
 
 def backfill_semantic_similarity_gate_resolution_method(
