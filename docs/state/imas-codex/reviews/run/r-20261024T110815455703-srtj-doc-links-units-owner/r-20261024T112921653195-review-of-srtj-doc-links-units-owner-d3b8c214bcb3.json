@@ -16,6 +16,11 @@
       "kind": "exempted",
       "reason": "log header wording; the arm trees are named in the manifest and the verdicts match",
       "recorded_at": "2026-10-24T20:11:39.043577+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "the coordinator removed the run's scratch tree after landing",
+      "recorded_at": "2026-10-24T20:11:46.110646+00:00"
     }
   },
   "findings": [
