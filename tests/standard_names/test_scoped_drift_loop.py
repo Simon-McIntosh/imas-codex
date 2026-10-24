@@ -27,7 +27,12 @@ from typing import Any
 from unittest.mock import patch
 
 import pytest
-from neo4j.exceptions import ServiceUnavailable, SessionExpired, TransientError
+from neo4j.exceptions import (
+    DatabaseError,
+    ServiceUnavailable,
+    SessionExpired,
+    TransientError,
+)
 
 from imas_codex.standard_names import loop
 from tests.standard_names import test_scoped_global_maintenance as scoped_maintenance
@@ -83,7 +88,7 @@ def test_a_scope_answer_without_name_ids_skips_the_refresh(
         ServiceUnavailable("no route to the graph"),
         SessionExpired("session expired"),
         TransientError("lock timeout"),
-        OSError("network unreachable"),
+        OSError("connection refused"),
         TimeoutError("read timed out"),
     ],
     ids=lambda exc: type(exc).__name__,
@@ -95,13 +100,33 @@ def test_a_scope_read_that_fails_skips_the_refresh(
 
     ``SessionExpired`` and ``TransientError`` — a lock timeout among them — are
     what a concurrent drain meets, and letting either escape turns a skipped
-    refresh into a failed run.
+    refresh into a failed run. The class here is incidental: the handler asks
+    the repository's infrastructure classifier, so an ``OSError`` carrying a
+    recognised connection message belongs on this list beside the Neo4j types.
     """
     with caplog.at_level(logging.WARNING):
         _, refresh = _run(graph_error=error)
 
     refresh.assert_not_called()
     assert "bounded-run" in caplog.text
+
+
+def test_a_graph_that_needs_a_restart_skips_the_refresh(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """A critical database error is a scope not read, not a drain failed.
+
+    ``is_infrastructure_error`` treats ``DatabaseError`` as transient when the
+    server says it must be restarted, which is how a corrupted transaction log
+    on shared storage presents. The refresh is skipped and the run continues.
+    """
+    error = DatabaseError("The database needs to be restarted")
+    with caplog.at_level(logging.WARNING):
+        _, refresh = _run(graph_error=error)
+
+    refresh.assert_not_called()
+    assert "could not be read" in caplog.text
+    assert "DatabaseError" in caplog.text
 
 
 def test_scope_selector_reads_both_ways_a_run_binds_its_names() -> None:
