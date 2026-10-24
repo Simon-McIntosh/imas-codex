@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="270">
+<meta name="plan-version" content="271">
 <meta name="plan-modified" content="2026-10-25">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -1132,7 +1132,10 @@ without re-deriving it is visible.</p></div>
     <div class="r-comment-body"><p>Teardown stops the database, renames the store tree away in one metadata operation and hands the recursive delete to a detached process under the run's own TMPDIR, waiting at most 2 s for it; the remover's exit status decides the report, so a removal that fails inside the wait keeps its tree and traceback and fails the session's teardown, and one still running when the wait ends stays detached with its log beside the renamed tree. Teardown blocking is 15.27 s at head (15 s of it the existing stop_temp_neo4j SIGTERM wait), the store path is logged absent after the session by the fixture itself, and no teardown exceeds 30 s.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261024T232205195039-review-of-srtj-workers-split-step17-a3b7467c3545" data-who="reckon-build" data-when="2026-10-24T23:32:39.214Z">
-    <div class="r-comment-body"><p>review of r-20261024T214744109348-srtj-workers-split-step17 at head a3b7467c3545c30448a591af96f6a0b4df095284 scores goal_fidelity 19, evidence 17, scope_discipline 8, durability 18, fit 18, reuse 20, records added_failure_count 0 from the reviewed run&#x27;s own base and head gate logs, and carries one blocking finding: the run rewrote tests/standard_names/test_prompt_context_wiring.py, a path the dispatch&#x27;s FENCE SCOPE did not grant and the brief bade it leave alone</p></div>
+    <div class="r-comment-body"><p>review of r-20261024T214744109348-srtj-workers-split-step17 at head a3b7467c3545c30448a591af96f6a0b4df095284 scores goal_fidelity 19, evidence 17, scope_discipline 8, durability 18, fit 18, reuse 20, records added_failure_count 0 from the reviewed run's own base and head gate logs, and carries one blocking finding: the run rewrote tests/standard_names/test_prompt_context_wiring.py, a path the dispatch's FENCE SCOPE did not grant and the brief bade it leave alone</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261024T214744109348-srtj-workers-split-step17" data-who="reckon-build" data-when="2026-10-24T23:35:54Z">
+    <div class="r-comment-body"><p>srtj-workers-split-step17 moved compose_batch, process_generate_name_batch and _GRAMMAR_FAILURE_MARKERS from workers.py into worker_tasks/worker_compose_batches.py (commits 819b08cc6, 1f582ddc3); workers.py fell from 298,376 to 250,123 bytes (60,114 to 50,987 cl100k tokens; gate units 85,250.29 to 71,463.71) and the new module is 52,371 bytes; the declared gate tests/standard_names/test_compose_batch_embed.py passes at EXIT=0 and the 49 files that patch a moved symbol or a reached collaborator report the same seven failures at both archived trees.</p></div>
 </div>
 </section>
 </main>
