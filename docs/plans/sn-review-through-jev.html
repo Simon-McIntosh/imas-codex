@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="269">
+<meta name="plan-version" content="270">
 <meta name="plan-modified" content="2026-10-25">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -1129,7 +1129,10 @@ without re-deriving it is visible.</p></div>
     <div class="r-comment-body"><p>Reviewed r-20261024T202728538311-srtj-disposable-neo4j-teardown at base 265cf9946820c3e3a407ef6ad57a2617eeb30f55 / head 4b89fd649c85b1448e8867386f7a06dc0f522522: parsed record, scores goal_fidelity 18, evidence 16, scope_discipline 20, durability 17, fit 19, reuse 20, added_failure_count 0 with no added failure ids, four findings all non-blocking (manifest after_suite command drops the `-s` the head gate log header carries; the rename-failure fallback deletes synchronously in teardown; a removal failure in the finally masks a stop_temp_neo4j failure). No blocking finding, so the node can land.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261024T202728538311-srtj-disposable-neo4j-teardown" data-who="reckon-build" data-when="2026-10-24T22:45:58Z">
-    <div class="r-comment-body"><p>Teardown stops the database, renames the store tree away in one metadata operation and hands the recursive delete to a detached process under the run&#x27;s own TMPDIR, waiting at most 2 s for it; the remover&#x27;s exit status decides the report, so a removal that fails inside the wait keeps its tree and traceback and fails the session&#x27;s teardown, and one still running when the wait ends stays detached with its log beside the renamed tree. Teardown blocking is 15.27 s at head (15 s of it the existing stop_temp_neo4j SIGTERM wait), the store path is logged absent after the session by the fixture itself, and no teardown exceeds 30 s.</p></div>
+    <div class="r-comment-body"><p>Teardown stops the database, renames the store tree away in one metadata operation and hands the recursive delete to a detached process under the run's own TMPDIR, waiting at most 2 s for it; the remover's exit status decides the report, so a removal that fails inside the wait keeps its tree and traceback and fails the session's teardown, and one still running when the wait ends stays detached with its log beside the renamed tree. Teardown blocking is 15.27 s at head (15 s of it the existing stop_temp_neo4j SIGTERM wait), the store path is logged absent after the session by the fixture itself, and no teardown exceeds 30 s.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261024T232205195039-review-of-srtj-workers-split-step17-a3b7467c3545" data-who="reckon-build" data-when="2026-10-24T23:32:39.214Z">
+    <div class="r-comment-body"><p>review of r-20261024T214744109348-srtj-workers-split-step17 at head a3b7467c3545c30448a591af96f6a0b4df095284 scores goal_fidelity 19, evidence 17, scope_discipline 8, durability 18, fit 18, reuse 20, records added_failure_count 0 from the reviewed run&#x27;s own base and head gate logs, and carries one blocking finding: the run rewrote tests/standard_names/test_prompt_context_wiring.py, a path the dispatch&#x27;s FENCE SCOPE did not grant and the brief bade it leave alone</p></div>
 </div>
 </section>
 </main>

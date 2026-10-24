@@ -1,0 +1,79 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/standard_names/loop.py:573",
+    "imas_codex/standard_names/loop.py:845",
+    "imas_codex/standard_names/pool_adapter.py:47",
+    "imas_codex/standard_names/pool_adapter.py:84",
+    "imas_codex/standard_names/workers.py:1046"
+  ],
+  "completed_at": "2026-10-24T23:32:39.214Z",
+  "dimension_dispositions": {
+    "scope_discipline": {
+      "kind": "exempted",
+      "reason": "the edited test file was granted by the coordinator through crew widen before the worker resumed",
+      "recorded_at": "2026-10-24T23:33:36.514068+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-24T23:22:53Z",
+  "finding_dispositions": {
+    "1": {
+      "kind": "exempted",
+      "reason": "a grep count off by one on the evidence page; the gate ran every file both scans found",
+      "recorded_at": "2026-10-24T23:33:38.906746+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/standard_names/test_prompt_context_wiring.py",
+      "line": "152",
+      "severity": "blocking",
+      "text": "blocking: the run rewrites a test file the dispatch fenced out, so the only guard of the moved compose context was edited by the same run that it gates, and the manifest's orientation_write_paths line records this path as granted while dropping the granted docs/figures path."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-workers-split-step17.html",
+      "line": "8",
+      "severity": "non-blocking",
+      "text": "non-blocking: the fragment records the grep cross-check as returning 10 files while an independent git grep -lw over the three moved names returns 11, and its own breakdown of eight AST files plus three extras sums to 11."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "read commit by commit across 78d2fa824..a3b7467c3 (819b08cc6, 1f582ddc3, 449ac2766, eb5c9bd74, d64c85945, a3b7467c3); three of the four changed paths are in scope, and the moved bodies differ from the base only in the _worker_dependency substitutions and line reflow.",
+    "done_when": "the done_when asks for a committed module with its forwarders listed, a zero-added gate and the three size counts recorded in the fragment; the manifest's tests line runs the design gate and logs/head-declared-gate2.log ends `8 passed` at EXIT=0.",
+    "goal": "the goal is to extract the symbols the design JSON assigns to worker_compose_batches, and imas_codex/standard_names/worker_tasks/worker_compose_batches.py:20 and :1145 define compose_batch and process_generate_name_batch while srtj-graph-ops-split-design.json inventories/workers.py/symbols maps exactly those two plus _GRAMMAR_FAILURE_MARKERS to that module.",
+    "manifest": "read in full; it records six commits, seven shared failure ids at both archived trees, a mutated-tree negative control and the size triple, but its orientation_write_paths line substitutes the ungranted test file for the granted docs/figures path.",
+    "write_paths": "the dispatch's FENCE SCOPE grants imas_codex/standard_names/workers.py, imas_codex/standard_names/worker_tasks/worker_compose_batches.py, docs/evidence/fragments/sn-review-through-jev/srtj-workers-split-step17.html and docs/figures/sn-review-through-jev/srtj-workers-split-step17; the diff also changes tests/standard_names/test_prompt_context_wiring.py, which is on none of them."
+  },
+  "justifications": {
+    "durability": "logs/negative-control.log deletes the context assignment in worker_tasks/worker_compose_batches.py and reddens only tests/standard_names/test_prompt_context_wiring.py:207, and the resolver routing at worker_compose_batches.py:1162 was falsified by twelve red tests before 1f582ddc3.",
+    "evidence": "logs/base-default2.log and logs/head-default2.log carry identical seven-id failure sets (0 added) and logs/head-declared-gate2.log shows the design gate green, though the after_suite revision recorded is eb5c9bd74 rather than the reviewed head a3b7467c3 whose only delta is the fragment.",
+    "fit": "workers.py:956 keeps the one-line owner-naming docstring and the __wrapped__ facade established by the predecessor splits, with every __wrapped__ assigned before the signature loop at workers.py:6024.",
+    "goal_fidelity": "worker_tasks/worker_compose_batches.py:20 takes the resolver as a positional-only parameter and imports no sibling task module, matching the design's symbol map exactly.",
+    "reuse": "the change extends the existing resolver owned at workers.py:55 rather than forking it, and all 43 names the task module resolves exist in workers' globals.",
+    "scope_discipline": "tests/standard_names/test_prompt_context_wiring.py is changed by eb5c9bd74 although the dispatch's FENCE SCOPE omits it and the brief says to leave test files alone."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to extract the symbols the design JSON assigns to worker_compose_batches, and imas_codex/standard_names/worker_tasks/worker_compose_batches.py:20 and :1145 define compose_batch and process_generate_name_batch while srtj-graph-ops-split-design.json inventories/workers.py/symbols maps exactly those two plus _GRAMMAR_FAILURE_MARKERS to that module.\nVERDICT done_when: the done_when asks for a committed module with its forwarders listed, a zero-added gate and the three size counts recorded in the fragment; the manifest's tests line runs the design gate and logs/head-declared-gate2.log ends `8 passed` at EXIT=0.\nVERDICT write_paths: the dispatch's FENCE SCOPE grants imas_codex/standard_names/workers.py, imas_codex/standard_names/worker_tasks/worker_compose_batches.py, docs/evidence/fragments/sn-review-through-jev/srtj-workers-split-step17.html and docs/figures/sn-review-through-jev/srtj-workers-split-step17; the diff also changes tests/standard_names/test_prompt_context_wiring.py, which is on none of them.\nVERDICT manifest: read in full; it records six commits, seven shared failure ids at both archived trees, a mutated-tree negative control and the size triple, but its orientation_write_paths line substitutes the ungranted test file for the granted docs/figures path.\nVERDICT diff: read commit by commit across 78d2fa824..a3b7467c3 (819b08cc6, 1f582ddc3, 449ac2766, eb5c9bd74, d64c85945, a3b7467c3); three of the four changed paths are in scope, and the moved bodies differ from the base only in the _worker_dependency substitutions and line reflow.\nCALL_SITES: imas_codex/standard_names/loop.py:573, imas_codex/standard_names/loop.py:845, imas_codex/standard_names/pool_adapter.py:47, imas_codex/standard_names/pool_adapter.py:84, imas_codex/standard_names/workers.py:1046\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: worker_tasks/worker_compose_batches.py:20 takes the resolver as a positional-only parameter and imports no sibling task module, matching the design's symbol map exactly.\nSCORE evidence: 17\nJUSTIFICATION evidence: logs/base-default2.log and logs/head-default2.log carry identical seven-id failure sets (0 added) and logs/head-declared-gate2.log shows the design gate green, though the after_suite revision recorded is eb5c9bd74 rather than the reviewed head a3b7467c3 whose only delta is the fragment.\nSCORE scope_discipline: 8\nJUSTIFICATION scope_discipline: tests/standard_names/test_prompt_context_wiring.py is changed by eb5c9bd74 although the dispatch's FENCE SCOPE omits it and the brief says to leave test files alone.\nSCORE durability: 18\nJUSTIFICATION durability: logs/negative-control.log deletes the context assignment in worker_tasks/worker_compose_batches.py and reddens only tests/standard_names/test_prompt_context_wiring.py:207, and the resolver routing at worker_compose_batches.py:1162 was falsified by twelve red tests before 1f582ddc3.\nSCORE fit: 18\nJUSTIFICATION fit: workers.py:956 keeps the one-line owner-naming docstring and the __wrapped__ facade established by the predecessor splits, with every __wrapped__ assigned before the signature loop at workers.py:6024.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change extends the existing resolver owned at workers.py:55 rather than forking it, and all 43 names the task module resolves exist in workers' globals.\nFINDING tests/standard_names/test_prompt_context_wiring.py:152 blocking: the run rewrites a test file the dispatch fenced out, so the only guard of the moved compose context was edited by the same run that it gates, and the manifest's orientation_write_paths line records this path as granted while dropping the granted docs/figures path.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-workers-split-step17.html:8 non-blocking: the fragment records the grep cross-check as returning 10 files while an independent git grep -lw over the three moved names returns 11, and its own breakdown of eight AST files plus three extras sums to 11.\n",
+  "review_run_id": "r-20261024T232205195039-review-of-srtj-workers-split-step17-a3b7467c3545",
+  "reviewed_base_sha": "78d2fa824532d286fcfc3c9c8b91b899be520dd8",
+  "reviewed_head_sha": "a3b7467c3545c30448a591af96f6a0b4df095284",
+  "reviewed_run_id": "r-20261024T214744109348-srtj-workers-split-step17",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 8
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T23:34:46.597675+00:00",
+  "total": 100
+}
