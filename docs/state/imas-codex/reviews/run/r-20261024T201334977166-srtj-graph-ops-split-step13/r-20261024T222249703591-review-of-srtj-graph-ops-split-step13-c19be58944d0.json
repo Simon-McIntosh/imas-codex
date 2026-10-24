@@ -18,6 +18,11 @@
       "kind": "folded",
       "node": "srtj-graph-store-structure",
       "recorded_at": "2026-10-24T22:44:58.483260+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "the 36-file arms ran at the reviewed head; the earlier logs belong to the commit before it, which changed only the evidence page",
+      "recorded_at": "2026-10-24T22:45:07.039230+00:00"
     }
   },
   "findings": [
