@@ -18,7 +18,8 @@ code{background:#f4f4f4;padding:0 .2rem}
 <h1 id="srtj-docs-switch-causes-title">Documentation switch: why the panel vetoed acceptable documents</h1>
 
 <h2 id="srtj-docs-switch-causes-verdict">Verdict</h2>
-<p class="bar" id="srtj-docs-switch-causes-verdict-line">the switch bar is
+<p class="bar" id="srtj-docs-switch-causes-verdict-line">measured at the round-two
+commit, the switch bar is
 met on both passes: 19 of
 19 link-defect rows refine on pass A and
 19 of 19 on pass B, and
@@ -26,17 +27,17 @@ met on both passes: 19 of
 pass A and 0 of 30 on pass B. The
 bar is all 19 link defects refined and none of the 30 acceptable rows refined, on
 both passes.</p>
-<p id="srtj-docs-switch-causes-verdict-recall">The veto condition is that every
-planted contradiction fires except <code>contradicts-354</code>, the field-current
-relation row the bar names as a known recall gap; the replay fires on 59 of 60 on
-both passes with no other row missing. On ten stored answers from that row the base
-veto fires on 7 and the shipped veto on 1: the shipped rule is narrower,
-because it will not treat a contradiction mass that trails the silence mass as a
-denial. Every firing it makes is one the base makes (6 answers fire for the
-base alone, 0 for the shipped rule alone), and the row is the accepted gap
-rather than a rule to recover it: the settlement that had covered this row was
-removed as unsound, since it read only that a contrast word preceded a relation form
-the document used anywhere.</p>
+<p id="srtj-docs-switch-causes-verdict-recall">The recall bar is not met. The
+replay fires on 59 of 60 planted contradictions on both passes, and the row it
+misses both times is <code>contradicts-354</code>, the field-current relation row.
+That row's claim sits at the cutoff, so the shipped rule asks the judge a second
+time; the replay rechecks it on both passes (claim index 11) and the second reading
+answers "says nothing" again. On the ten stored answers from that row the base veto
+fires on 7 and the shipped veto on 1; eight of the ten sit within 0.05 of the cutoff,
+all eight were asked again, and no second reading denies the claim. Every firing the
+shipped rule makes is one the base makes. So the miss is the judge's reading twice
+over rather than a rule waiting to be widened, and the bar of 60 of 60 is reported as
+missed.</p>
 <h2 id="srtj-docs-switch-causes-diagnosis">Per-row diagnosis</h2>
 
 <div class="diag" id="srtj-docs-switch-causes-diag-s0010">
@@ -132,6 +133,20 @@ population axis is independent of both, so the name's qualifier cannot turn the
 disclaimer into a claim a source denies. Scope disclaimers now settle before that
 guard; every other claim still goes to the judge.</p>
 </div>
+<div id="srtj-docs-switch-causes-fix-recheck">
+<h3>Recall: an answer at the cutoff is put to the judge once more</h3>
+<p>An answer whose leading choice is "says nothing" and whose contradiction mass
+sits within 0.05 of the cutoff is asked again, through the same
+<code>decide_batch</code> path and the same question text, and the claim is vetoed
+if either reading denies it. Both readings stay on the record. The margin is a named
+constant, <code>CONTRADICTION_RECHECK_MARGIN = 0.05</code>, derived from the ten
+sampled readings of the row the veto misses: their contradiction masses are 0.25 to
+0.40, and the readings below the cutoff sit at 0.25, 0.25 and 0.29, the furthest
+0.05 away. A margin of 0.05 is the smallest that returns every one of those readings
+to the judge; a wider one buys no further reading of that claim and only puts
+settled-looking answers to a second draw. It recovers nothing here, which the recall
+line below measures rather than assumes.</p>
+</div>
 <div id="srtj-docs-switch-causes-fix-instrument">
 <h3>Instrument: the hold set and a call that never decided</h3>
 <p>The deterministic hold set now reads the lexical lint family as well as the
@@ -170,13 +185,22 @@ no frame or axes still fails, and every quantity keeps the dimensional rule.</p>
 populations: the 19 disagreement rows labelled link defects and the 30 labelled
 acceptable. The other 28 of the 77 measured rows carry no label in the disagreement
 sheet, so they enter no count here.</p>
+<p id="srtj-docs-switch-causes-remeasured-revision">These switch figures were measured
+at <code>588c96b0</code>, before the withdrawal of the relation-replacement settlement
+and before the recheck rule, so they are not a measurement of the shipping commit. A
+re-measurement at <code>aaf6ebefce67</code> was attempted twice in this round and did
+not complete: both attempts spent their whole budget in the temporary Neo4j dump load,
+which stalled part-way through writing the instance data (2.7 GB of a 2.6 GB dump, then
+idle) while the login node ran at a load average above 60. The load of the two attempts
+was 25 and 12 minutes, and neither reached the judging pass. The replay and matched
+answer figures elsewhere in this fragment were measured at
+<code>aaf6ebefce67</code>.</p>
 <h2 id="srtj-docs-switch-causes-replay">The veto's recall after the fix</h2>
 <p id="srtj-docs-switch-causes-replay-note">The replay asks the shipped criterion
 over the 46 recorded firings, the 60 planted contradictions and the 20 planted
-controls, on two passes. The bar names its one permitted gap by row id: every
-planted contradiction fires except <code>contradicts-354</code>, a miss on any
-other row fails, no more than 3 of the 46 recorded firings may fire, and no
-planted control may fire.</p>
+controls, on two passes. The bar is every one of the 60 planted contradictions
+fires, no more than 3 of the 46 recorded firings may fire, and no planted control
+may fire.</p>
 <table id="srtj-docs-switch-causes-replay-table">
 <thead><tr><th>pass</th><th>recorded still firing</th><th>planted contradictions</th><th>missed row</th><th>controls fired</th></tr></thead>
 <tbody>
@@ -187,70 +211,74 @@ planted control may fire.</p>
 <p id="srtj-docs-switch-causes-replay-miss">The one missed row is "Calibration
 assumes a quadratic field-current relation instead of a linear one." Its claim was
 sampled ten times through the shipped question, and every stored answer is scored by
-both the base veto, as it stands on main, and the shipped veto. The base fires on
-7 of the 10 and the shipped rule on 1; every shipped firing is also a
-base firing. The difference is the flat-distribution criterion: the shipped rule will
-not treat a contradiction mass that trails the "says nothing" mass as a denial, and
-6 of these answers have exactly that shape. This row is the gap the bar
-names, so its recall is not a defect to recover here; the settlement that had covered
-it was removed because it read only a contrast word followed by a relation form the
-document mentioned anywhere, without checking the relation the claim asserts. The
-samples are below and in the artifact under
-<code>supporting_evidence.matched_answers</code>.</p>
+the base veto, as it stands on main, and by the shipped rule, which asks the judge
+once more when an answer's leading choice is "says nothing" and its contradiction
+mass sits within 0.05 of the cutoff. The base fires on 7 of the 10 and the shipped
+rule on 1; every shipped firing is also a base firing. Eight of the ten answers sit
+at the cutoff and went back to the judge: their second readings are below, and not
+one of them denies the claim, so the shipped firing count is the same after the
+second ask as before it. The row is therefore not recovered by asking twice, and the
+bar of all 60 planted contradictions is not met. The replay harness rechecked this
+row's claim on both passes (claim index 11) and its second reading answered "says
+nothing" again.</p>
 <table id="srtj-docs-switch-causes-replay-miss-table">
-<thead><tr><th>sample</th><th>choice</th><th>contradicts</th><th>says nothing</th><th>supports</th><th>base veto</th><th>shipped veto</th></tr></thead>
+<thead><tr><th>sample</th><th>choice</th><th>contradicts</th><th>says nothing</th><th>supports</th><th>base veto</th><th>second ask</th><th>shipped veto</th></tr></thead>
 <tbody>
-<tr><td>1</td><td>says nothing</td><td>0.29</td><td>0.42</td><td>0.29</td><td>does not fire</td><td>does not fire</td></tr>
-<tr><td>2</td><td>says nothing</td><td>0.25</td><td>0.53</td><td>0.22</td><td>does not fire</td><td>does not fire</td></tr>
-<tr><td>3</td><td>says nothing</td><td>0.31</td><td>0.46</td><td>0.23</td><td>fires</td><td>does not fire</td></tr>
-<tr><td>4</td><td>says nothing</td><td>0.31</td><td>0.40</td><td>0.29</td><td>fires</td><td>does not fire</td></tr>
-<tr><td>5</td><td>says nothing</td><td>0.25</td><td>0.45</td><td>0.30</td><td>does not fire</td><td>does not fire</td></tr>
-<tr><td>6</td><td>says nothing</td><td>0.33</td><td>0.54</td><td>0.13</td><td>fires</td><td>does not fire</td></tr>
-<tr><td>7</td><td>says nothing</td><td>0.33</td><td>0.47</td><td>0.20</td><td>fires</td><td>does not fire</td></tr>
-<tr><td>8</td><td>contradicts</td><td>0.51</td><td>0.44</td><td>0.05</td><td>fires</td><td>fires</td></tr>
-<tr><td>9</td><td>says nothing</td><td>0.40</td><td>0.45</td><td>0.15</td><td>fires</td><td>does not fire</td></tr>
-<tr><td>10</td><td>says nothing</td><td>0.31</td><td>0.52</td><td>0.17</td><td>fires</td><td>does not fire</td></tr>
-<tr><td colspan="5">samples fired</td><td>7 / 10</td><td>1 / 10</td></tr>
+<tr><td>1</td><td>says nothing</td><td>0.29</td><td>0.42</td><td>0.29</td><td>does not fire</td><td>0.29, says nothing</td><td>does not fire</td></tr>
+<tr><td>2</td><td>says nothing</td><td>0.25</td><td>0.53</td><td>0.22</td><td>does not fire</td><td>0.25, says nothing</td><td>does not fire</td></tr>
+<tr><td>3</td><td>says nothing</td><td>0.31</td><td>0.46</td><td>0.23</td><td>fires</td><td>0.33, says nothing</td><td>does not fire</td></tr>
+<tr><td>4</td><td>says nothing</td><td>0.31</td><td>0.40</td><td>0.29</td><td>does not fire</td><td>0.26, says nothing</td><td>does not fire</td></tr>
+<tr><td>5</td><td>says nothing</td><td>0.25</td><td>0.45</td><td>0.30</td><td>does not fire</td><td>0.36, says nothing</td><td>does not fire</td></tr>
+<tr><td>6</td><td>says nothing</td><td>0.33</td><td>0.54</td><td>0.13</td><td>fires</td><td>0.40, says nothing</td><td>does not fire</td></tr>
+<tr><td>7</td><td>says nothing</td><td>0.33</td><td>0.47</td><td>0.20</td><td>fires</td><td>0.25, says nothing</td><td>does not fire</td></tr>
+<tr><td>8</td><td>contradicts</td><td>0.51</td><td>0.44</td><td>0.05</td><td>fires</td><td>not asked: the choice already denies</td><td>fires</td></tr>
+<tr><td>9</td><td>says nothing</td><td>0.40</td><td>0.45</td><td>0.15</td><td>fires</td><td>not asked: 0.10 from the cutoff</td><td>does not fire</td></tr>
+<tr><td>10</td><td>says nothing</td><td>0.31</td><td>0.52</td><td>0.17</td><td>fires</td><td>0.30, says nothing</td><td>does not fire</td></tr>
+<tr><td colspan="5">samples fired</td><td>7 / 10</td><td>8 asked again</td><td>1 / 10</td></tr>
 </tbody>
 </table>
-<p id="srtj-docs-switch-causes-replay-miss-controls">The shipped rule's firing count
-here is a re-score of the stored probability distributions through the criterion as it
-now ships, not a second sampling: the ten answers are the ones already collected, and
-the field-label change and the withdrawn settlement do not touch this claim's answer: the ten distributions are the ones the question returned. The replay harness
-separately settles a claim by withdrawing it from the question, which is why its 59 of
-60 is read against the row-named bar rather than against this table.</p>
+<p id="srtj-docs-switch-causes-replay-miss-controls">The first column pair is a
+re-score of the ten stored probability distributions, not a fresh sampling: the ten
+answers are the ones the question returned, and the field-label change and the
+withdrawn settlement do not touch this claim's answer. The second ask is a fresh
+judgment per sample, through the same <code>decide_batch</code> path and question
+text the cascade uses.</p>
 
 <figure id="srtj-docs-switch-causes-replay-miss-figure">
-<img src="/imas-codex/figures/sn-review-through-jev/srtj-docs-switch-causes/matched-answers.svg" alt="Contradiction and says-nothing masses for ten samples of the missed row, with the base veto's threshold and the two firing counts">
-<figcaption>Ten samples of the one missed row, scored by both vetoes. Grey is the
-judge's "says nothing" mass and blue its "contradicts" mass; a ring marks a sample the
-base veto fires on. The base fires whenever the contradiction mass reaches 0.30,
-which is 7 of 10 here; the shipped rule also requires that mass not to trail the
-silence mass, so it fires on sample 8 alone, labelled above. The right panel counts
-both. Every shipped firing is a base firing, and the row is the recall gap the bar
-names rather than a rule to recover it.</figcaption>
+<img src="/imas-codex/figures/sn-review-through-jev/srtj-docs-switch-causes/matched-answers.svg" alt="Contradiction and says-nothing masses for ten samples of the missed row, the second reading of each sample at the cutoff, and the two firing counts">
+<figcaption>Ten samples of the one missed row. Grey is the judge's "says nothing"
+mass and blue its "contradicts" mass; a ring marks a sample the base veto fires on.
+The base fires whenever the contradiction mass reaches 0.30, which is 7 of 10 here.
+An open circle joined to the filled one is the same sample's second reading, taken
+because its first answer sat within 0.05 of the cutoff: every second reading lands
+inside the spread the first ten already show, and none denies the claim. The shipped
+rule also requires the contradiction mass not to trail the silence mass, so it fires
+on sample 8 alone, labelled above. The right panel counts both vetoes. Every shipped
+firing is a base firing.</figcaption>
 </figure>
 
 <h2 id="srtj-docs-switch-causes-tests">Tests and the negative control</h2>
 <p id="srtj-docs-switch-causes-tests-head">The gate is the three test files the
-change can reach, run from two separate archived trees. On main the three collect 90
-tests: 71 pass, 19 are marker-deselected, none fails. At the node's head they collect
-106: 88 pass, 18 are marker-deselected, none fails. The head adds eleven test functions
-(<code>test_contradiction_veto_question.py</code> 15 to 23,
-<code>test_docs_gates.py</code> 36 to 39) compared with main, and removes none of
-main's. Three of the veto file's functions went with the settlement that was
-withdrawn, so the head carries three fewer tests than it did before that removal. The
-one test function the head does
-not carry is graph-marked and belongs to a main commit made after the branch point: it
-is deselected on both arms, so it neither passes nor fails here.</p>
+change can reach. The base arm is an archived tree of main at
+<code>b28fb1d4ec7c</code>, the head arm is the worktree at
+<code>aaf6ebefce67</code> whose only uncommitted paths are under <code>docs/</code>.
+On main the three collect 90 tests: 71 pass, 19 are marker-deselected, none fails. At
+the head they collect 110: 92 pass, 18 are marker-deselected, none fails. The head
+adds fifteen test functions compared with main, four of them for the recheck rule.
+Three of the veto file's functions went with the settlement that was withdrawn, so the
+head carries three fewer tests than it did before that removal. The one test function
+main has and the head does not is graph-marked and belongs to a main commit made after
+the branch point: it is deselected on both arms, so it neither passes nor fails
+here.</p>
 <p id="srtj-docs-switch-causes-tests-control">The declared mutation is to withdraw the
 coordinate exemption, leaving the tests unchanged: <code>_names_a_position</code>
-returns False for every name in an archived head tree. The gate then fails 2 tests,
-the coordinate that states its frame and the coordinate without a frame, with 86
-passing, and exits 1. The 2 failures are the exemption's own tests, so the mutation
-reaches the exemption and nothing else. An earlier mutation returning the narrowed
-veto criterion to its former form failed 10 tests and exited 1.</p>
+returns False for every name in a copy of the head tree at
+<code>aaf6ebefce67</code>. The gate then fails 2 tests, the coordinate that states its
+frame and the coordinate without a frame, with 90 passing, and exits 1. The 2 failures
+are the exemption's own tests, so the mutation reaches the exemption and nothing else.
+An earlier mutation returning the narrowed veto criterion to its former form failed 10
+tests and exited 1.</p>
 <h2 id="srtj-docs-switch-causes-spend">Spend</h2>
-<p id="srtj-docs-switch-causes-spend-line">Measurement 0.024066 USD, veto replay 0.018181 USD, matched answers and diagnosis probes at most 0.020000 USD; total upper bound 0.062247 USD against the 1.00 USD ceiling.</p>
+<p id="srtj-docs-switch-causes-spend-line">Measurement 0.024066 USD, veto replay 0.019192 USD, the second readings of the ten stored answers 0.000517 USD, diagnosis and sampling probes at most 0.020000 USD; total upper bound 0.063775 USD against the 1.00 USD ceiling. The two aborted measurement attempts made no Jev call, so they add nothing.</p>
 </body>
 </html>
