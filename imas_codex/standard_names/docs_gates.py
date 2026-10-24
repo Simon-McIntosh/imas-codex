@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import ast
-import functools
 import re
 from collections.abc import Mapping
 from dataclasses import dataclass
@@ -366,37 +365,6 @@ _FRAME_WORDS_RE = re.compile(
 )
 
 
-@functools.lru_cache(maxsize=1024)
-def _names_a_position(name: str | None) -> bool:
-    """True when the parsed name denotes a coordinate, position or locus value.
-
-    A coordinate has no defining relation to state: its documentation says
-    which frame and axes give the value, and a dimensional identity between it
-    and a DD unit would be a tautology. The decision is taken from the grammar's
-    own parse — ``base.kind`` is ``geometry`` for a geometric base token, and
-    ``projection.shape`` is ``coordinate`` for a coordinate projection of a
-    quantity — so the class is read from the name's structure rather than from
-    words in its text.
-    """
-    if not name:
-        return False
-    from imas_codex.standard_names.grammar_adapter import parse_canonical_name
-
-    try:
-        parsed = parse_canonical_name(name)
-    except (TypeError, ValueError):
-        return False
-    ir = getattr(parsed, "ir", None)
-    if ir is None:
-        return False
-    kind = getattr(getattr(ir, "base", None), "kind", None)
-    if getattr(kind, "value", str(kind)) == "geometry":
-        return True
-    projection = getattr(ir, "projection", None)
-    shape = getattr(projection, "shape", None)
-    return getattr(shape, "value", str(shape)) == "coordinate"
-
-
 def _defining_equation_result(
     text: str,
     physics_context: DocumentationPhysicsContext | None,
@@ -404,7 +372,9 @@ def _defining_equation_result(
 ) -> DocumentationGateResult:
     """Compare one stated defining relation with the DD-declared unit."""
 
-    if _names_a_position(documenting_name):
+    from imas_codex.standard_names.derivation import is_coordinate_name
+
+    if is_coordinate_name(documenting_name):
         if _FRAME_WORDS_RE.search(text):
             return DocumentationGateResult(
                 outcome=DocumentationGateOutcome.PASS,

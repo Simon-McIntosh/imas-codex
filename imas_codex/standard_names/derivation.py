@@ -12,6 +12,7 @@ peel more than one layer here.
 
 from __future__ import annotations
 
+import functools
 import logging
 from dataclasses import dataclass
 
@@ -465,3 +466,32 @@ def _geometric_coordinate_check(name: str) -> list[DerivedEdge]:
             },
         )
     ]
+
+
+@functools.lru_cache(maxsize=1024)
+def is_coordinate_name(name: str | None) -> bool:
+    """True when *name* denotes a coordinate, position or locus value.
+
+    A coordinate has no defining relation to state: its documentation says
+    which frame and axes give the value, and a dimensional identity between it
+    and a DD unit would be a tautology. The class is read from the name's
+    structure rather than from words in its text — ``base.kind`` is
+    ``geometry`` for a geometric base token, and ``projection.shape`` is
+    ``coordinate`` for a coordinate projection of a quantity.
+
+    A name the structural parser rejects is offered to the model-level parser,
+    whose coordinate slot recognises geometric forms the structural grammar
+    does not. This is the single owner of the decision: the documentation
+    gates ask it rather than reading the parse themselves.
+    """
+    if not name:
+        return False
+    try:
+        ir = _parse_structural_ir(name)
+    except (TypeError, ValueError):
+        return bool(_geometric_coordinate_check(name))
+    kind = getattr(getattr(ir, "base", None), "kind", None)
+    if getattr(kind, "value", str(kind)) == "geometry":
+        return True
+    shape = getattr(getattr(ir, "projection", None), "shape", None)
+    return getattr(shape, "value", str(shape)) == "coordinate"
