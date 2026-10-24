@@ -1,0 +1,53 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-24T11:56:45.685Z",
+  "dispatched_at": "2026-10-24T11:49:40Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/conftest.py",
+      "line": "487",
+      "severity": "non-blocking",
+      "text": "non-blocking: the session-scoped store's `directory.cleanup()` crossed the default 30s pytest-timeout once at head (37.12s teardown, gate-head-graph.log:70), a cost of consolidating four module-scoped instances into one session instance; fold into a node that owns the fixture and give the removal a background path or a larger teardown budget."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read both commits -- 8206b3554 deletes the three local launchers and their now-unused imports and repoints their consumers at disposable_neo4j_empty and disposable_neo4j_uri, and 5662348ce adds only the evidence fragment.",
+    "done_when": "all three measures were re-checked against the artefacts -- `git grep -nF \"_free_port()\" 5662348ce -- tests/standard_names/` returns nothing while the same grep at f657a98dc returns six hits in the three files and the positive control `_free_port_pair` returns four, negative_control.log:13 shows `assert 49152 != 49152` with the test FAILED and EXIT=1, and docs/evidence/fragments/sn-review-through-jev/srtj-disposable-neo4j-consolidate.html records both arms.",
+    "goal": "the goal is to route three standard-names test files through the shared disposable-Neo4j fixture and to add a test for the port pair; tests/standard_names/test_review_holds.py:18, tests/standard_names/test_bare_doc_link_normalize.py:156 and tests/standard_names/test_source_refresh_docs_requeue.py:120 now take the shared fixture, and the pair test landed at tests/standard_names/test_bare_doc_link_normalize.py:94.",
+    "manifest": "read; it records status complete, both commits, an honest retry_failures entry naming the single head teardown ERROR, and all five gate logs, though it carries no structured baseline_suite/after_suite keys so each arm's status had to be read from those named logs.",
+    "write_paths": "the declared scope was conftest.py, the three test files and the evidence fragment; the diff of f657a98dc..5662348ce touches exactly those three test files plus docs/evidence/fragments/sn-review-through-jev/srtj-disposable-neo4j-consolidate.html, and leaves conftest.py untouched."
+  },
+  "justifications": {
+    "durability": "the assertion at tests/standard_names/test_bare_doc_link_normalize.py:151 fails when the pair is reverted to two sequential calls (negative_control.log:13), while the routing half of the change is guarded only by the one-off grep in the done_when rather than by a test.",
+    "evidence": "gate-head-graph-rerun.log and gate-base-graph.log each record 29 passed with EXIT=0 and the graph marker ran rather than skipped, but the head claim rests on the rerun because the first head arm errored at teardown in gate-head-graph.log:70.",
+    "fit": "the added test at tests/standard_names/test_bare_doc_link_normalize.py:94 follows the module's local-import and pytest idiom, and ruff reports clean on all three touched files.",
+    "goal_fidelity": "tests/standard_names/test_bare_doc_link_normalize.py:156 and tests/standard_names/test_review_holds.py:18 consume the shared fixture, and the pair test at tests/standard_names/test_bare_doc_link_normalize.py:94 supplies the second half of the goal.",
+    "reuse": "the diff deletes three copies of a launcher in favour of the owned tests/standard_names/conftest.py:413 disposable_neo4j_uri, and a search of tests/ for socket doubles and port helpers found no existing owner for the test-local `_PoolSocket` double.",
+    "scope_discipline": "every path in `git diff --stat f657a98dc..5662348ce` lies inside the five declared write paths and no unrelated line changed."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to route three standard-names test files through the shared disposable-Neo4j fixture and to add a test for the port pair; tests/standard_names/test_review_holds.py:18, tests/standard_names/test_bare_doc_link_normalize.py:156 and tests/standard_names/test_source_refresh_docs_requeue.py:120 now take the shared fixture, and the pair test landed at tests/standard_names/test_bare_doc_link_normalize.py:94.\nVERDICT done_when: all three measures were re-checked against the artefacts -- `git grep -nF \"_free_port()\" 5662348ce -- tests/standard_names/` returns nothing while the same grep at f657a98dc returns six hits in the three files and the positive control `_free_port_pair` returns four, negative_control.log:13 shows `assert 49152 != 49152` with the test FAILED and EXIT=1, and docs/evidence/fragments/sn-review-through-jev/srtj-disposable-neo4j-consolidate.html records both arms.\nVERDICT write_paths: the declared scope was conftest.py, the three test files and the evidence fragment; the diff of f657a98dc..5662348ce touches exactly those three test files plus docs/evidence/fragments/sn-review-through-jev/srtj-disposable-neo4j-consolidate.html, and leaves conftest.py untouched.\nVERDICT manifest: read; it records status complete, both commits, an honest retry_failures entry naming the single head teardown ERROR, and all five gate logs, though it carries no structured baseline_suite/after_suite keys so each arm's status had to be read from those named logs.\nVERDICT diff: read both commits -- 8206b3554 deletes the three local launchers and their now-unused imports and repoints their consumers at disposable_neo4j_empty and disposable_neo4j_uri, and 5662348ce adds only the evidence fragment.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: tests/standard_names/test_bare_doc_link_normalize.py:156 and tests/standard_names/test_review_holds.py:18 consume the shared fixture, and the pair test at tests/standard_names/test_bare_doc_link_normalize.py:94 supplies the second half of the goal.\nSCORE evidence: 18\nJUSTIFICATION evidence: gate-head-graph-rerun.log and gate-base-graph.log each record 29 passed with EXIT=0 and the graph marker ran rather than skipped, but the head claim rests on the rerun because the first head arm errored at teardown in gate-head-graph.log:70.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in `git diff --stat f657a98dc..5662348ce` lies inside the five declared write paths and no unrelated line changed.\nSCORE durability: 18\nJUSTIFICATION durability: the assertion at tests/standard_names/test_bare_doc_link_normalize.py:151 fails when the pair is reverted to two sequential calls (negative_control.log:13), while the routing half of the change is guarded only by the one-off grep in the done_when rather than by a test.\nSCORE fit: 18\nJUSTIFICATION fit: the added test at tests/standard_names/test_bare_doc_link_normalize.py:94 follows the module's local-import and pytest idiom, and ruff reports clean on all three touched files.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff deletes three copies of a launcher in favour of the owned tests/standard_names/conftest.py:413 disposable_neo4j_uri, and a search of tests/ for socket doubles and port helpers found no existing owner for the test-local `_PoolSocket` double.\nFINDING tests/standard_names/conftest.py:487 non-blocking: the session-scoped store's `directory.cleanup()` crossed the default 30s pytest-timeout once at head (37.12s teardown, gate-head-graph.log:70), a cost of consolidating four module-scoped instances into one session instance; fold into a node that owns the fixture and give the removal a background path or a larger teardown budget.",
+  "review_run_id": "r-20261024T114320863246-review-of-srtj-disposable-neo4j-consolidate-5662348ce0d1",
+  "reviewed_base_sha": "f657a98dc491189be7c310ec8065b5eea057868e",
+  "reviewed_head_sha": "5662348ce0d10a11b2637e592a1a5ece4a7f8d32",
+  "reviewed_run_id": "r-20261024T110719448560-srtj-disposable-neo4j-consolidate",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T11:55:25.921602+00:00",
+  "total": 113
+}
