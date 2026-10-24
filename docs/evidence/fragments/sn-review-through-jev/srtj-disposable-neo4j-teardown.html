@@ -13,8 +13,10 @@ graph run could fail in teardown for reasons unrelated to the code under test.</
 database is stopped first. The store tree is then renamed away in one metadata
 operation, so the store path is gone immediately, and the recursive delete is
 handed to a detached process under the run's own <code>TMPDIR</code>. The session
-waits at most a 2&nbsp;s budget for that process and never for the delete itself;
-a removal that fails leaves its traceback beside the tree instead of vanishing.
+waits at most a 2&nbsp;s budget for that process and never for the delete itself.
+A remover that ends within the budget is judged by its exit status: a non-zero
+exit keeps the tree and its traceback where they are and fails the session's
+teardown, naming the log, rather than reporting a removal that did not happen.
 The fixture logs the stopped database, the removal outcome and its blocking time,
 so its own budget is measurable from a gate log.</p>
 

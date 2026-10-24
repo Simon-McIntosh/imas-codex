@@ -417,8 +417,9 @@ def _wipe(uri: str) -> None:
 #: to the detached remover.  The common filesystem finishes inside this.
 _STORE_REMOVAL_BUDGET_SECONDS = 2.0
 
-#: The detached remover.  No ``ignore_errors``: a removal that fails leaves its
-#: traceback in the log beside the trash rather than passing off an error.
+#: The detached remover.  No ``ignore_errors``: a removal that fails keeps its
+#: traceback in the log beside the trash and fails the session's teardown,
+#: rather than passing off an error as a completed removal.
 _STORE_REMOVER = "import shutil, sys; shutil.rmtree(sys.argv[1])"
 
 
@@ -463,6 +464,15 @@ def _detach_store_removal(directory: tempfile.TemporaryDirectory) -> str:
         return (
             f"store {root} handed to pid {remover.pid}, detached "
             f"({renamed:.2f}s rename, {waited:.2f}s waited)"
+        )
+    if remover.returncode != 0:
+        # A removal that failed is not a removal. Its log holds the traceback
+        # and the tree is still on disk, so both stay and the session's
+        # teardown reports the failure instead of claiming a clean exit.
+        raise RuntimeError(
+            f"removing the disposable Neo4j store {trash} failed with exit "
+            f"code {remover.returncode}; the tree is left in place and its "
+            f"log is {remover_log}"
         )
     remover_log.unlink(missing_ok=True)
     return (
