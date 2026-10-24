@@ -17,53 +17,59 @@ waits at most a 2&nbsp;s budget for that process and never for the delete itself
 A remover that ends within the budget is judged by its exit status: a non-zero
 exit keeps the tree and its traceback where they are and fails the session's
 teardown, naming the log, rather than reporting a removal that did not happen.
-The fixture logs the stopped database, the removal outcome and its blocking time,
-so its own budget is measurable from a gate log.</p>
+The fixture logs the stopped database, the removal outcome, its blocking time,
+and whether the store path is absent once the session has ended, so the gate log
+itself carries the post-session check.</p>
 
 <table id="srtj-disposable-neo4j-teardown-durations">
-<caption>Session-fixture teardown, three graph files, one arm each</caption>
+<caption>Session-fixture teardown, three graph files, archived trees</caption>
 <thead><tr><th>arm</th><th>revision</th><th>store removal</th><th>teardown blocking</th><th>store path after session</th></tr></thead>
 <tbody>
-<tr><td>base</td><td><code>265cf9946</code></td><td>0.00&nbsp;s, synchronous (node-local xfs)</td><td>15.01&nbsp;s</td><td>removed</td></tr>
-<tr><td>head</td><td><code>37f2bed3</code></td><td>0.21&nbsp;s, detached to a child process</td><td>15.21&nbsp;s</td><td>gone</td></tr>
-<tr><td>mutation</td><td><code>37f2bed3</code> + inline <code>directory.cleanup()</code></td><td>0.00&nbsp;s, synchronous (node-local xfs)</td><td>12.54&nbsp;s</td><td>removed</td></tr>
+<tr><td>base</td><td><code>265cf9946</code></td><td>not measured &mdash; the pre-change teardown emits no removal line</td><td>15.57&nbsp;s</td><td>absent, no <code>disposable-neo4j-*</code> in the arm's <code>TMPDIR</code> after the run</td></tr>
+<tr><td>head</td><td><code>b5858059</code></td><td>0.26&nbsp;s, detached to a child process</td><td>15.27&nbsp;s</td><td>absent, logged by the fixture (<code>absent after session: True</code>)</td></tr>
 </tbody>
 </table>
 
 <p id="srtj-disposable-neo4j-teardown-reading">Both arms are under the 30&nbsp;s
-budget on this node's node-local <code>TMPDIR</code>, and here the delete is
-effectively free (0.00&nbsp;&ndash;&nbsp;0.21&nbsp;s), so the recorded 37.1&nbsp;s
-does not reproduce on xfs: it is a property of the shared filesystem, where the
-same delete costs tens of seconds. What changes is who pays it. At base the
-delete ran inside the session's teardown and its duration was the session's to
-absorb, whatever the filesystem; at head the blocking cost no longer contains the
-delete at all, so the same store on a shared filesystem leaves the session
-blocking by the stop and the rename only. The remaining 15&nbsp;s of blocking is
-the existing <code>stop_temp_neo4j</code> SIGTERM wait inside
-<code>imas_codex/graph/temp_neo4j.py</code>, which is outside this change and
-still inside the budget.</p>
+budget on this node's node-local <code>TMPDIR</code>, where the delete is close to
+free, so the recorded 37.1&nbsp;s does not reproduce on xfs: it is a property of
+the shared filesystem, where the same delete costs tens of seconds. What changes
+is who pays it. At base the delete ran inside the session's own teardown and its
+duration was the session's to absorb, whatever the filesystem; at head the
+blocking cost contains only the stop and the rename, so the same store on a
+shared filesystem leaves the session waiting on those alone. The remaining
+~15&nbsp;s is <code>stop_temp_neo4j</code>'s SIGTERM wait in
+<code>imas_codex/graph/temp_neo4j.py</code>, outside this change and inside the
+budget.</p>
 
 <table id="srtj-disposable-neo4j-teardown-gate">
 <caption>Gate: <code>pytest -m graph</code> on the three named files</caption>
 <thead><tr><th>arm</th><th>outcome</th><th>log</th></tr></thead>
 <tbody>
-<tr><td>base <code>265cf9946</code></td><td>25 passed, 1 error (<code>test_held_document_keeps_judged_score_and_is_not_accepted</code> timed out at 180&nbsp;s in <em>setup</em> waiting for the disposable instance to reach Bolt readiness)</td><td><code>logs/base.log</code></td></tr>
-<tr><td>head <code>37f2bed3</code></td><td>26 passed, EXIT=0</td><td><code>logs/head-s.log</code></td></tr>
-<tr><td>mutation</td><td>26 passed, EXIT=0 with the synchronous delete restored</td><td><code>logs/mutation.log</code></td></tr>
+<tr><td>base <code>265cf9946</code></td><td>26 passed, EXIT=0</td><td><code>logs/gate-base.log</code></td></tr>
+<tr><td>head <code>b5858059</code></td><td>26 passed, EXIT=0</td><td><code>logs/gate-head.log</code></td></tr>
 </tbody>
 </table>
 
-<p id="srtj-disposable-neo4j-teardown-negative-control">The measure reads the gate
-log: it requires a teardown line naming the store path and a detached remover,
-blocking time at or under 30&nbsp;s, no test teardown over 30&nbsp;s, and the
-named store path absent afterwards. Against the head log it passes
-(EXIT=0); against the mutation log &mdash; the same tree with the synchronous
-<code>directory.cleanup()</code> restored &mdash; it fails with
-<code>test_teardown_budget.py::test_session_teardown_fits_the_test_timeout</code>
-and EXIT=1, because the log then reports the store removed synchronously rather
-than handed to a detached remover. On this filesystem the deleted tree is small
-enough that the synchronous arm still meets the duration bound, so the
-discriminating fact is the handoff, not the seconds; the seconds are what the
-handoff protects when the tree lives on a shared filesystem.</p>
+<table id="srtj-disposable-neo4j-teardown-guards">
+<caption>Teardown tests committed at <code>b5858059</code>, each guard removed in turn</caption>
+<thead><tr><th>arm</th><th>outcome</th><th>log</th></tr></thead>
+<tbody>
+<tr><td>head, both guards present</td><td>4 passed, EXIT=0</td><td><code>logs/guard-head.log</code></td></tr>
+<tr><td>teardown reverted to a synchronous <code>directory.cleanup()</code></td><td><code>test_the_session_teardown_uses_the_detached_removal</code> fails, EXIT=1</td><td><code>logs/guard-guard-a.log</code></td></tr>
+<tr><td>failed removal reported as success (exit status not read)</td><td><code>test_a_failed_removal_is_not_reported_as_a_removal</code> fails, EXIT=1</td><td><code>logs/guard-guard-b.log</code></td></tr>
+</tbody>
+</table>
+
+<p id="srtj-disposable-neo4j-teardown-negative-control">The two guards live in
+<code>tests/standard_names/test_disposable_neo4j_teardown.py</code> and each fails
+only when its own guarantee is removed. Reverting the fixture's teardown to a
+synchronous <code>directory.cleanup()</code> fails the wiring test, because the
+fixture no longer hands the removal off and no budget protects it. Deleting the
+remover's exit-status branch fails the failure test, because a remover that exits
+non-zero is then reported as a completed removal and its log is unlinked. The
+behavioural test that a removal outlasting the wait is detached runs the removal
+against a remover which never touches the tree, so it measures the handoff rather
+than how fast this filesystem deletes.</p>
 
 </section>
