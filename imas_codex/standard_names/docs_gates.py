@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+import functools
 import re
 from collections.abc import Mapping
 from dataclasses import dataclass
@@ -365,6 +366,7 @@ _FRAME_WORDS_RE = re.compile(
 )
 
 
+@functools.lru_cache(maxsize=1024)
 def _names_a_position(name: str | None) -> bool:
     """True when the parsed name denotes a coordinate, position or locus value.
 

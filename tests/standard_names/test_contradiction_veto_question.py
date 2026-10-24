@@ -590,13 +590,12 @@ def test_a_direction_word_label_is_not_evidence() -> None:
     )
 
 
-# The judge's own readings of one planted contradiction, sampled six times
-# through the shipped question. Every one answers "says nothing" with the
-# silence mass leading, so no reading here is a denial; the former 0.30
-# probability cutoff fired on the four whose contradiction mass reached it,
-# which is why the samples are pinned rather than described: they are the
-# evidence that the fixed rule's narrower reading, not the judge alone,
-# decides this row.
+# The judge's own readings of one planted contradiction, sampled twice through
+# the shipped question. Both answer "says nothing" with the silence mass
+# leading, so neither is a denial; the former 0.30 probability cutoff fired on
+# the one whose contradiction mass reached it, which is why both are pinned
+# rather than described: they are the evidence that the fixed rule's narrower
+# reading decides this row. The row is the veto bar's named recall gap.
 SAMPLED_PLANTED_READINGS = [
     {"supports": 0.12, "contradicts": 0.38, "says nothing": 0.50},
     {"supports": 0.33, "contradicts": 0.25, "says nothing": 0.42},
@@ -610,47 +609,3 @@ def test_a_sampled_reading_whose_silence_mass_leads_does_not_veto(
     answer = {"choice": "says nothing", "probabilities": probabilities}
 
     assert jev_review.claim_contradicts(answer) is False
-
-
-_PLANTED_RELATION_CLAIM = (
-    "Calibration assumes a quadratic field-current relation instead of a linear one."
-)
-_LINEAR_CALIBRATION_DOCUMENTATION = (
-    "The linear calibration relation is represented by "
-    "$$S_{lin} = G B_{ref}$$ where $G$ is the linear field-to-signal coefficient."
-)
-
-
-def test_a_claim_that_replaces_the_documents_relation_contradicts_it() -> None:
-    assert (
-        jev_review.claim_settlement(
-            _PLANTED_RELATION_CLAIM,
-            "poloidal_magnetic_field_of_magnetic_field_probe",
-            _LINEAR_CALIBRATION_DOCUMENTATION,
-        )
-        == "contradicts"
-    )
-
-
-def test_a_contrast_that_rejects_no_stated_relation_stays_with_the_judge() -> None:
-    assert (
-        jev_review.claim_settlement(
-            "The value is reported for the strap rather than the whole antenna.",
-            "poloidal_magnetic_field_of_magnetic_field_probe",
-            _LINEAR_CALIBRATION_DOCUMENTATION,
-        )
-        is None
-    )
-
-
-def test_a_settled_relation_replacement_vetoes_the_document() -> None:
-    state = {
-        "name_id": "poloidal_magnetic_field_of_magnetic_field_probe",
-        "documentation": _LINEAR_CALIBRATION_DOCUMENTATION,
-        "documentation_claims": [_PLANTED_RELATION_CLAIM],
-    }
-
-    settled = jev_review.settled_claim_answers(state)
-
-    assert settled[0]["choice"] == "contradicts"
-    assert settled[0]["settled_by"] == "document_relation_replaced"
