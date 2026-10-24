@@ -1159,7 +1159,7 @@ async def process_generate_name_batch(
 
     Returns count of items successfully processed.
     """
-    return await compose_batch(
+    return await _worker_dependency("compose_batch")(
         batch,
         mgr,
         stop_event,
