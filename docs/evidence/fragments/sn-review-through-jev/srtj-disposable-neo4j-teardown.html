@@ -1,0 +1,67 @@
+<section id="srtj-disposable-neo4j-teardown">
+<h2>Disposable Neo4j teardown fits the test timeout</h2>
+
+<p id="srtj-disposable-neo4j-teardown-finding">The shared session fixture in
+<code>tests/standard_names/conftest.py</code> stopped the disposable database and
+then deleted its store directory synchronously in teardown. A Neo4j store is
+thousands of small files, so the recursive delete pays one metadata operation per
+file; on a shared filesystem each unlink is a round trip, and the removal was
+recorded at 37.1&nbsp;s &mdash; longer than the 30&nbsp;s per-test timeout, so a
+graph run could fail in teardown for reasons unrelated to the code under test.</p>
+
+<p id="srtj-disposable-neo4j-teardown-change">Teardown keeps its order: the
+database is stopped first. The store tree is then renamed away in one metadata
+operation, so the store path is gone immediately, and the recursive delete is
+handed to a detached process under the run's own <code>TMPDIR</code>. The session
+waits at most a 2&nbsp;s budget for that process and never for the delete itself;
+a removal that fails leaves its traceback beside the tree instead of vanishing.
+The fixture logs the stopped database, the removal outcome and its blocking time,
+so its own budget is measurable from a gate log.</p>
+
+<table id="srtj-disposable-neo4j-teardown-durations">
+<caption>Session-fixture teardown, three graph files, one arm each</caption>
+<thead><tr><th>arm</th><th>revision</th><th>store removal</th><th>teardown blocking</th><th>store path after session</th></tr></thead>
+<tbody>
+<tr><td>base</td><td><code>265cf9946</code></td><td>0.00&nbsp;s, synchronous (node-local xfs)</td><td>15.01&nbsp;s</td><td>removed</td></tr>
+<tr><td>head</td><td><code>37f2bed3</code></td><td>0.21&nbsp;s, detached to a child process</td><td>15.21&nbsp;s</td><td>gone</td></tr>
+<tr><td>mutation</td><td><code>37f2bed3</code> + inline <code>directory.cleanup()</code></td><td>0.00&nbsp;s, synchronous (node-local xfs)</td><td>12.54&nbsp;s</td><td>removed</td></tr>
+</tbody>
+</table>
+
+<p id="srtj-disposable-neo4j-teardown-reading">Both arms are under the 30&nbsp;s
+budget on this node's node-local <code>TMPDIR</code>, and here the delete is
+effectively free (0.00&nbsp;&ndash;&nbsp;0.21&nbsp;s), so the recorded 37.1&nbsp;s
+does not reproduce on xfs: it is a property of the shared filesystem, where the
+same delete costs tens of seconds. What changes is who pays it. At base the
+delete ran inside the session's teardown and its duration was the session's to
+absorb, whatever the filesystem; at head the blocking cost no longer contains the
+delete at all, so the same store on a shared filesystem leaves the session
+blocking by the stop and the rename only. The remaining 15&nbsp;s of blocking is
+the existing <code>stop_temp_neo4j</code> SIGTERM wait inside
+<code>imas_codex/graph/temp_neo4j.py</code>, which is outside this change and
+still inside the budget.</p>
+
+<table id="srtj-disposable-neo4j-teardown-gate">
+<caption>Gate: <code>pytest -m graph</code> on the three named files</caption>
+<thead><tr><th>arm</th><th>outcome</th><th>log</th></tr></thead>
+<tbody>
+<tr><td>base <code>265cf9946</code></td><td>25 passed, 1 error (<code>test_held_document_keeps_judged_score_and_is_not_accepted</code> timed out at 180&nbsp;s in <em>setup</em> waiting for the disposable instance to reach Bolt readiness)</td><td><code>logs/base.log</code></td></tr>
+<tr><td>head <code>37f2bed3</code></td><td>26 passed, EXIT=0</td><td><code>logs/head-s.log</code></td></tr>
+<tr><td>mutation</td><td>26 passed, EXIT=0 with the synchronous delete restored</td><td><code>logs/mutation.log</code></td></tr>
+</tbody>
+</table>
+
+<p id="srtj-disposable-neo4j-teardown-negative-control">The measure reads the gate
+log: it requires a teardown line naming the store path and a detached remover,
+blocking time at or under 30&nbsp;s, no test teardown over 30&nbsp;s, and the
+named store path absent afterwards. Against the head log it passes
+(EXIT=0); against the mutation log &mdash; the same tree with the synchronous
+<code>directory.cleanup()</code> restored &mdash; it fails with
+<code>test_teardown_budget.py::test_session_teardown_fits_the_test_timeout</code>
+and EXIT=1, because the log then reports the store removed synchronously rather
+than handed to a detached remover. On this filesystem the deleted tree is small
+enough that the synchronous arm still meets the duration bound, so the
+discriminating fact is the handoff, not the seconds; the seconds are what the
+handoff protects when the tree lives on a shared filesystem.</p>
+
+</section>
