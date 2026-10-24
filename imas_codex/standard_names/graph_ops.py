@@ -14549,3 +14549,164 @@ _detach_stale_ancestor_sources.__wrapped__ = (
     _moved_graph_supersession._detach_stale_ancestor_sources
 )
 supersede_into_ancestor.__wrapped__ = _moved_graph_supersession.supersede_into_ancestor
+
+_moved_graph_doc_links = import_module(".graph_store.graph_doc_links", __package__)
+claim_unresolved_links.__wrapped__ = _moved_graph_doc_links.claim_unresolved_links
+resolve_links_batch.__wrapped__ = _moved_graph_doc_links.resolve_links_batch
+_sanitize_doc_text.__wrapped__ = _moved_graph_doc_links._sanitize_doc_text
+_doc_link_mismatches.__wrapped__ = _moved_graph_doc_links._doc_link_mismatches
+_normalize_bare_doc_links.__wrapped__ = _moved_graph_doc_links._normalize_bare_doc_links
+resolve_doc_links.__wrapped__ = _moved_graph_doc_links.resolve_doc_links
+_moved_graph_docs_persistence = import_module(
+    ".graph_store.graph_docs_persistence", __package__
+)
+claim_generate_docs_batch.__wrapped__ = (
+    _moved_graph_docs_persistence.claim_generate_docs_batch
+)
+persist_generated_docs.__wrapped__ = (
+    _moved_graph_docs_persistence.persist_generated_docs
+)
+release_generate_docs_claims.__wrapped__ = (
+    _moved_graph_docs_persistence.release_generate_docs_claims
+)
+release_generate_docs_failed_claims.__wrapped__ = (
+    _moved_graph_docs_persistence.release_generate_docs_failed_claims
+)
+claim_refine_docs_batch.__wrapped__ = (
+    _moved_graph_docs_persistence.claim_refine_docs_batch
+)
+persist_refined_docs.__wrapped__ = _moved_graph_docs_persistence.persist_refined_docs
+reset_standard_name_docs.__wrapped__ = (
+    _moved_graph_docs_persistence.reset_standard_name_docs
+)
+stamp_harmonized_families.__wrapped__ = (
+    _moved_graph_docs_persistence.stamp_harmonized_families
+)
+release_refine_docs_claims.__wrapped__ = (
+    _moved_graph_docs_persistence.release_refine_docs_claims
+)
+release_refine_docs_failed_claims.__wrapped__ = (
+    _moved_graph_docs_persistence.release_refine_docs_failed_claims
+)
+mark_for_refine_docs.__wrapped__ = _moved_graph_docs_persistence.mark_for_refine_docs
+_moved_graph_cost_and_claims = import_module(
+    ".graph_store.graph_cost_and_claims", __package__
+)
+_normalize_pool.__wrapped__ = _moved_graph_cost_and_claims._normalize_pool
+record_llm_cost.__wrapped__ = _moved_graph_cost_and_claims.record_llm_cost
+aggregate_spend_for_run.__wrapped__ = (
+    _moved_graph_cost_and_claims.aggregate_spend_for_run
+)
+aggregate_spend_per_phase.__wrapped__ = (
+    _moved_graph_cost_and_claims.aggregate_spend_per_phase
+)
+aggregate_calls_per_phase.__wrapped__ = (
+    _moved_graph_cost_and_claims.aggregate_calls_per_phase
+)
+aggregate_spend_per_name.__wrapped__ = (
+    _moved_graph_cost_and_claims.aggregate_spend_per_name
+)
+update_sn_per_phase_costs.__wrapped__ = (
+    _moved_graph_cost_and_claims.update_sn_per_phase_costs
+)
+_claim_sn_atomic.__wrapped__ = _moved_graph_cost_and_claims._claim_sn_atomic
+claim_generate_name_batch.__wrapped__ = (
+    _moved_graph_cost_and_claims.claim_generate_name_batch
+)
+claim_enrich_seed_and_expand.__wrapped__ = (
+    _moved_graph_cost_and_claims.claim_enrich_seed_and_expand
+)
+claim_review_names_seed_and_expand.__wrapped__ = (
+    _moved_graph_cost_and_claims.claim_review_names_seed_and_expand
+)
+claim_review_name_batch.__wrapped__ = (
+    _moved_graph_cost_and_claims.claim_review_name_batch
+)
+_moved_graph_lineage = import_module(".graph_store.graph_lineage", __package__)
+get_source_name_mapping.__wrapped__ = _moved_graph_lineage.get_source_name_mapping
+_get_rich_source_name_mapping.__wrapped__ = (
+    _moved_graph_lineage._get_rich_source_name_mapping
+)
+fetch_low_score_sources.__wrapped__ = _moved_graph_lineage.fetch_low_score_sources
+fetch_review_feedback_for_sources.__wrapped__ = (
+    _moved_graph_lineage.fetch_review_feedback_for_sources
+)
+fetch_reviewer_history_for_sources.__wrapped__ = (
+    _moved_graph_lineage.fetch_reviewer_history_for_sources
+)
+fetch_docs_review_feedback_for_standard_names.__wrapped__ = (
+    _moved_graph_lineage.fetch_docs_review_feedback_for_standard_names
+)
+fetch_docs_review_feedback_for_sns.__wrapped__ = (
+    _moved_graph_lineage.fetch_docs_review_feedback_for_sns
+)
+_filter_admissible_parents.__wrapped__ = _moved_graph_lineage._filter_admissible_parents
+_emit_magnitude_of_edges.__wrapped__ = _moved_graph_lineage._emit_magnitude_of_edges
+_bootstrap_missing_derived_parent_targets.__wrapped__ = (
+    _moved_graph_lineage._bootstrap_missing_derived_parent_targets
+)
+_write_standard_name_edges.__wrapped__ = _moved_graph_lineage._write_standard_name_edges
+_clear_superseded_child_derived_parent_edges.__wrapped__ = (
+    _moved_graph_lineage._clear_superseded_child_derived_parent_edges
+)
+rederive_structural_edges.__wrapped__ = _moved_graph_lineage.rederive_structural_edges
+_rewire_has_parent_off_superseded.__wrapped__ = (
+    _moved_graph_lineage._rewire_has_parent_off_superseded
+)
+_parse_parent_grammar.__wrapped__ = _moved_graph_lineage._parse_parent_grammar
+_query_seedable_derived_parents.__wrapped__ = (
+    _moved_graph_lineage._query_seedable_derived_parents
+)
+_query_legacy_repairable_derived_parents.__wrapped__ = (
+    _moved_graph_lineage._query_legacy_repairable_derived_parents
+)
+_query_derived_parents_for_admission_cleanup.__wrapped__ = (
+    _moved_graph_lineage._query_derived_parents_for_admission_cleanup
+)
+_delete_derived_parent_nodes.__wrapped__ = (
+    _moved_graph_lineage._delete_derived_parent_nodes
+)
+sweep_orphaned_docs_revisions.__wrapped__ = (
+    _moved_graph_lineage.sweep_orphaned_docs_revisions
+)
+_derived_parent_source_metadata.__wrapped__ = (
+    _moved_graph_lineage._derived_parent_source_metadata
+)
+_validate_derived_parent_identity.__wrapped__ = (
+    _moved_graph_lineage._validate_derived_parent_identity
+)
+_eligible_derived_parent_unit_children.__wrapped__ = (
+    _moved_graph_lineage._eligible_derived_parent_unit_children
+)
+_materialize_derived_parent_rows.__wrapped__ = (
+    _moved_graph_lineage._materialize_derived_parent_rows
+)
+_materialize_derived_parent_rows_batched.__wrapped__ = (
+    _moved_graph_lineage._materialize_derived_parent_rows_batched
+)
+stamp_standard_name_units.__wrapped__ = _moved_graph_lineage.stamp_standard_name_units
+seed_parent_sources.__wrapped__ = _moved_graph_lineage.seed_parent_sources
+normalize_derived_parent_lifecycle.__wrapped__ = (
+    _moved_graph_lineage.normalize_derived_parent_lifecycle
+)
+_canonicalize_lifecycleless_manifest_value.__wrapped__ = (
+    _moved_graph_lineage._canonicalize_lifecycleless_manifest_value
+)
+_derived_parent_unit_from_eligible_children.__wrapped__ = (
+    _moved_graph_lineage._derived_parent_unit_from_eligible_children
+)
+_spurious_stub_binding_authority.__wrapped__ = (
+    _moved_graph_lineage._spurious_stub_binding_authority
+)
+_partition_lifecycleless_stub_rows.__wrapped__ = (
+    _moved_graph_lineage._partition_lifecycleless_stub_rows
+)
+_lifecycleless_stub_manifest.__wrapped__ = (
+    _moved_graph_lineage._lifecycleless_stub_manifest
+)
+_reconcile_spurious_stub_source_scalars.__wrapped__ = (
+    _moved_graph_lineage._reconcile_spurious_stub_source_scalars
+)
+_query_skeleton_placeholders_for_cleanup.__wrapped__ = (
+    _moved_graph_lineage._query_skeleton_placeholders_for_cleanup
+)
