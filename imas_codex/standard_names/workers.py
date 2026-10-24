@@ -18,12 +18,12 @@ marks phases done, and respects ``state.should_stop()``.
 from __future__ import annotations
 
 import asyncio
+import inspect as _inspect
 import json
-import logging
 import random
 import re as _re
 from collections.abc import Callable, Sequence
-from functools import cache as _cache, lru_cache
+from functools import cache as _cache, lru_cache  # noqa: F401
 from typing import TYPE_CHECKING, Any
 
 from imas_codex.graph.models import RefineStopReason
@@ -36,8 +36,8 @@ from imas_codex.standard_names.budget import (
 from imas_codex.standard_names.defaults import (
     DEFAULT_ESCALATION_MODEL,
     DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
-    SEMANTIC_SIM_GATE_MODEL,
-    SEMANTIC_SIM_GATE_RESOLUTION_METHOD,
+    SEMANTIC_SIM_GATE_MODEL,  # noqa: F401
+    SEMANTIC_SIM_GATE_RESOLUTION_METHOD,  # noqa: F401
 )
 from imas_codex.standard_names.provenance import detect_value_provenance
 from imas_codex.standard_names.source_paths import (
@@ -46,238 +46,95 @@ from imas_codex.standard_names.source_paths import (
     strip_dd_prefix,
 )
 
+from .worker_tasks import (
+    worker_common as _moved_worker_common,
+    worker_extraction_and_enrichment as _moved_worker_extraction_and_enrichment,
+)
+
+
+def _worker_dependency(name: str):
+    """Resolve a worker collaborator through the entrypoint."""
+    return globals()[name]
+
+
 if TYPE_CHECKING:
     from imas_codex.standard_names.budget import BudgetLease, BudgetManager
     from imas_codex.standard_names.sources.base import ExtractionBatch
     from imas_codex.standard_names.state import StandardNameBuildState
 
-logger = logging.getLogger(__name__)
+logger = _moved_worker_common.logger
 
 
-def backfill_semantic_similarity_gate_resolution_method(gc: Any | None = None) -> int:
-    """Type legacy deterministic gate reviews without granting them authority.
-
-    The model and reviewer-model pair is the durable identity of these rows.
-    Scores are deliberately not part of the predicate because genuine reviewer
-    verdicts can share the same normalized score.
-    """
-
-    def _backfill(client: Any) -> int:
-        rows = list(
-            client.query(
-                """
-                MATCH (review:StandardNameReview)
-                WHERE review.model = $model_identity
-                  AND review.reviewer_model = $model_identity
-                  AND review.resolution_method IS NULL
-                SET review.resolution_method = $resolution_method
-                RETURN count(review) AS updated
-                """,
-                model_identity=SEMANTIC_SIM_GATE_MODEL,
-                resolution_method=SEMANTIC_SIM_GATE_RESOLUTION_METHOD,
-            )
-            or []
-        )
-        return int(rows[0]["updated"]) if rows else 0
-
-    if gc is not None:
-        return _backfill(gc)
-
-    from imas_codex.graph.client import GraphClient
-
-    with GraphClient() as client:
-        return _backfill(client)
+def backfill_semantic_similarity_gate_resolution_method(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common.backfill_semantic_similarity_gate_resolution_method."""
+    return _moved_worker_common.backfill_semantic_similarity_gate_resolution_method(
+        _worker_dependency, *args, **kwargs
+    )
 
 
-def normalize_spelling(name: str) -> str:
-    """Deterministic British→American spelling normalization.
-
-    Splits the underscore-delimited name into tokens and converts each
-    via ``breame.spelling.get_american_spelling``.  A small domain-specific
-    supplement catches physics terms missing from breame's dictionary.
-    """
-    from breame.spelling import get_american_spelling
-
-    tokens = name.split("_")
-    return "_".join(_DOMAIN_UK_US.get(t, get_american_spelling(t)) for t in tokens)
+def normalize_spelling(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common.normalize_spelling."""
+    return _moved_worker_common.normalize_spelling(_worker_dependency, *args, **kwargs)
 
 
-def normalize_prose_spelling(text: str) -> str:
-    """British→American spelling normalization for prose text.
-
-    Unlike ``normalize_spelling`` which operates on underscore-delimited
-    name tokens, this function handles natural English prose — splitting
-    on word boundaries and preserving punctuation, whitespace, and
-    markdown formatting.
-    """
-    if not text:
-        return text
-    from breame.spelling import get_american_spelling
-
-    def _replace(match: _re.Match) -> str:
-        word = match.group(0)
-        # Preserve case: if the word is capitalized, capitalize the replacement
-        us = _DOMAIN_UK_US.get(word.lower(), get_american_spelling(word.lower()))
-        if us == word.lower():
-            return word  # no change
-        if word[0].isupper():
-            return us[0].upper() + us[1:]
-        return us
-
-    # Match word-like sequences (letters only, preserving everything else)
-    return _re.sub(r"[A-Za-z]+", _replace, text)
+def normalize_prose_spelling(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common.normalize_prose_spelling."""
+    return _moved_worker_common.normalize_prose_spelling(
+        _worker_dependency, *args, **kwargs
+    )
 
 
 # Spelled-out Greek letters become their Unicode symbols in description prose
 # (the ISN description-field convention: φ, θ, ρ; frames as (R, φ, Z)).
 # Lowercase only — a capitalized "Phi" may be the flux Φ or a sentence-start
 # angle, so it is left for review rather than guessed.
-_GREEK_WORD_TO_SYMBOL: dict[str, str] = {
-    "phi": "φ",
-    "theta": "θ",
-    "rho": "ρ",
-}
-_GREEK_WORD_RE = _re.compile(r"\b(phi|theta|rho)\b")
+_GREEK_WORD_TO_SYMBOL = _moved_worker_common._GREEK_WORD_TO_SYMBOL
+_GREEK_WORD_RE = _moved_worker_common._GREEK_WORD_RE
 
 # Backslash-escaped Greek commands: \phi \theta \rho \pi (and capitals) →
 # Unicode symbol. Includes \pi because it is the common LaTeX form that leaks
 # into descriptions. The trailing (?![a-zA-Z]) stops \phinx-style over-matching.
-_GREEK_CMD_TO_SYMBOL: dict[str, str] = {
-    "phi": "φ",
-    "theta": "θ",
-    "rho": "ρ",
-    "pi": "π",
-    "Phi": "Φ",
-    "Theta": "Θ",
-    "Rho": "Ρ",
-    "Pi": "Π",
-}
-_GREEK_CMD_RE = _re.compile(r"\\(phi|theta|rho|pi|Phi|Theta|Rho|Pi)(?![a-zA-Z])")
+_GREEK_CMD_TO_SYMBOL = _moved_worker_common._GREEK_CMD_TO_SYMBOL
+_GREEK_CMD_RE = _moved_worker_common._GREEK_CMD_RE
 # A backslash stranded in front of an already-Unicode Greek symbol — the
 # half-converted corruption (\φ) produced by the older word-only normalizer.
-_GREEK_STRANDED_BACKSLASH_RE = _re.compile(r"\\(?=[φθρπΦΘΡΠ])")
+_GREEK_STRANDED_BACKSLASH_RE = _moved_worker_common._GREEK_STRANDED_BACKSLASH_RE
 # A LaTeX command carrying a single braced argument: \mathbf{k} → k.
-_LATEX_CMD_ARG_RE = _re.compile(r"\\[a-zA-Z]+\s*\{([^{}]*)\}")
+_LATEX_CMD_ARG_RE = _moved_worker_common._LATEX_CMD_ARG_RE
 # A bare LaTeX command with no argument: \left \right \cdot \, → removed.
-_LATEX_CMD_BARE_RE = _re.compile(r"\\[a-zA-Z]+")
+_LATEX_CMD_BARE_RE = _moved_worker_common._LATEX_CMD_BARE_RE
 # Braced sub/superscripts: ^{1+} → 1+ ; _{i} → _i (keep the underscore).
-_SUPERSCRIPT_BRACE_RE = _re.compile(r"\^\{([^{}]*)\}")
-_SUBSCRIPT_BRACE_RE = _re.compile(r"_\{([^{}]*)\}")
+_SUPERSCRIPT_BRACE_RE = _moved_worker_common._SUPERSCRIPT_BRACE_RE
+_SUBSCRIPT_BRACE_RE = _moved_worker_common._SUBSCRIPT_BRACE_RE
 # Math delimiters: $$…$$ and $…$ — drop the delimiter, keep inner content.
-_MATH_DELIM_RE = _re.compile(r"\$\$?")
+_MATH_DELIM_RE = _moved_worker_common._MATH_DELIM_RE
 
 
-def normalize_description_notation(text: str) -> str:
-    """Normalize description prose to plain Unicode text.
-
-    Descriptions are plain text (the ISN convention); LaTeX and math markup
-    belong in the ``documentation`` field. Any LaTeX that leaks into a
-    description is stripped to a readable plain form:
-
-    - ``$…$`` / ``$$…$$`` delimiters removed (inner content kept);
-    - ``\\phi \\theta \\rho \\pi`` → ``φ θ ρ π`` (plus capitals), and a
-      stranded backslash in front of an already-Unicode symbol (``\\φ``) → φ;
-    - spelled-out ``phi/theta/rho`` prose words → ``φ/θ/ρ`` (word-bounded, so
-      DD tokens like ``phi_tor`` / ``b_field_phi`` are untouched);
-    - ``\\mathbf{k}`` → ``k`` and other backslash commands dropped;
-    - braced sub/superscripts (``^{1+}`` / ``_{i}``) flattened.
-
-    Idempotent — a description already in plain form is returned unchanged.
-    Applies to the description field only; ``documentation`` keeps LaTeX.
-    """
-    if not text:
-        return text
-    # 1. Backslash Greek commands and stranded backslashes → Unicode symbols.
-    text = _GREEK_CMD_RE.sub(lambda m: _GREEK_CMD_TO_SYMBOL[m.group(1)], text)
-    text = _GREEK_STRANDED_BACKSLASH_RE.sub("", text)
-    # 2. Spelled-out Greek prose words → Unicode (word-bounded; DD tokens safe).
-    text = _GREEK_WORD_RE.sub(lambda m: _GREEK_WORD_TO_SYMBOL[m.group(1)], text)
-    # 3. LaTeX commands: keep the argument of \cmd{arg}, drop bare commands.
-    text = _LATEX_CMD_ARG_RE.sub(r"\1", text)
-    text = _LATEX_CMD_BARE_RE.sub("", text)
-    # 4. Flatten braced sub/superscripts, then drop any residual braces.
-    text = _SUPERSCRIPT_BRACE_RE.sub(r"\1", text)
-    text = _SUBSCRIPT_BRACE_RE.sub(r"_\1", text)
-    text = text.replace("{", "").replace("}", "")
-    # 5. Drop math delimiters (inner content already kept).
-    text = _MATH_DELIM_RE.sub("", text)
-    # 6. Drop any residual backslash — plain text never carries one.
-    text = text.replace("\\", "")
-    # 7. Collapse runs of spaces/tabs left behind by the removals above.
-    text = _re.sub(r"[ \t]{2,}", " ", text)
-    return text
+def normalize_description_notation(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common.normalize_description_notation."""
+    return _moved_worker_common.normalize_description_notation(
+        _worker_dependency, *args, **kwargs
+    )
 
 
-def normalize_description_text(text: str) -> str:
-    """Full description-prose normalization: spelling, then Greek symbols."""
-    return normalize_description_notation(normalize_prose_spelling(text))
+def normalize_description_text(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common.normalize_description_text."""
+    return _moved_worker_common.normalize_description_text(
+        _worker_dependency, *args, **kwargs
+    )
 
 
 # Physics-domain UK→US supplements not in breame's dictionary.
-_DOMAIN_UK_US: dict[str, str] = {
-    "linearised": "linearized",
-    "linearise": "linearize",
-    "discretised": "discretized",
-    "discretise": "discretize",
-    "symmetrised": "symmetrized",
-    "symmetrise": "symmetrize",
-    "parameterised": "parameterized",
-    "parameterise": "parameterize",
-    "centreline": "centerline",
-    "centre": "center",
-    "grey": "gray",
-    "colour": "color",
-    "favour": "favor",
-    "favourite": "favorite",
-    "honour": "honor",
-    "labelled": "labeled",
-    "labelling": "labeling",
-    "travelled": "traveled",
-    "travelling": "traveling",
-    "catalogue": "catalog",
-    "programme": "program",
-    "analogue": "analog",
-    "dialogue": "dialog",
-}
+_DOMAIN_UK_US = _moved_worker_common._DOMAIN_UK_US
 
-_GRAMMAR_FIELDS = (
-    "physical_base",
-    "subject",
-    "component",
-    "coordinate",
-    "position",
-    "process",
-    "geometric_base",
-    "object",
-)
+_GRAMMAR_FIELDS = _moved_worker_common._GRAMMAR_FIELDS
 
 
-def _dedup_adjacent_tokens(name: str, log: logging.Logger | None = None) -> str:
-    """Remove adjacent duplicate tokens introduced by grammar round-trip.
-
-    The ISN grammar (≤ 0.7.0rc27) has a known bug where ``parse →
-    compose`` doubles certain tokens — e.g.
-    ``magnetic_field_probe`` → ``magnetic_magnetic_field_probe``.
-
-    This function collapses any ``tok_tok`` pair into a single ``tok``
-    while preserving legitimate compounds via
-    :data:`~imas_codex.standard_names.audits._COMPOUND_SUBJECT_PAIRS`.
-    """
-    from imas_codex.standard_names.audits import _COMPOUND_SUBJECT_PAIRS
-
-    tokens = name.split("_")
-    result: list[str] = [tokens[0]]
-    for tok in tokens[1:]:
-        if tok == result[-1] and f"{tok}_{tok}" not in _COMPOUND_SUBJECT_PAIRS:
-            if log:
-                log.debug(
-                    "Dedup adjacent token %r in %r",
-                    f"{tok}_{tok}",
-                    name,
-                )
-            continue
-        result.append(tok)
-    return "_".join(result)
+def _dedup_adjacent_tokens(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._dedup_adjacent_tokens."""
+    return _moved_worker_common._dedup_adjacent_tokens(
+        _worker_dependency, *args, **kwargs
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -304,868 +161,205 @@ def _dedup_adjacent_tokens(name: str, log: logging.Logger | None = None) -> str:
 # matches nothing. ISN's own naming guidance states the requirement ("Use
 # elongation_of_plasma_boundary or elongation_of_flux_surface, not elongation")
 # but exposes no machine-readable flag for it, so the selection lives here.
-_SHAPE_PARAMETER_BASE_POLICY: tuple[str, ...] = (
-    "triangularity",
-    "elongation",
-    "squareness",
-)
+_SHAPE_PARAMETER_BASE_POLICY = _moved_worker_common._SHAPE_PARAMETER_BASE_POLICY
 
 
-@_cache
-def _isn_segment_tokens(segment: str) -> frozenset[str]:
-    """The token universe ISN registers for one grammar *segment*.
-
-    Empty when ISN is absent or the segment is unknown. Callers must read empty
-    as "the vocabulary cannot be consulted", never as "no token qualifies" — a
-    rule keyed on an empty set would judge every name by a vocabulary it could
-    not read.
-    """
-    from imas_codex.standard_names.segments import grammar_tokens_by_segment
-
-    return frozenset(grammar_tokens_by_segment().get(segment) or ())
+def _isn_segment_tokens(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._isn_segment_tokens."""
+    return _moved_worker_common._isn_segment_tokens(_worker_dependency, *args, **kwargs)
 
 
-def _isn_physical_bases() -> frozenset[str]:
-    """The ISN ``physical_base`` token universe, or empty when ISN is absent."""
-    return _isn_segment_tokens("physical_base")
+def _isn_physical_bases(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._isn_physical_bases."""
+    return _moved_worker_common._isn_physical_bases(_worker_dependency, *args, **kwargs)
 
 
-def shape_parameter_base_drift() -> frozenset[str]:
-    """Policy tokens that are no longer ISN ``physical_base`` tokens.
-
-    Non-empty means ISN's vocabulary moved out from under the surface rule and
-    the policy needs updating (a renamed or retired shape descriptor). Empty
-    when ISN is unavailable — an absent vocabulary is not evidence of drift.
-    """
-    isn = _isn_physical_bases()
-    if not isn:
-        return frozenset()
-    return frozenset(_SHAPE_PARAMETER_BASE_POLICY) - isn
-
-
-@lru_cache(maxsize=1)
-def _shape_parameter_bases() -> frozenset[str]:
-    """Shape-descriptor bases that must carry a surface locus.
-
-    The codex policy intersected with the live ISN ``physical_base``
-    vocabulary: a token ISN no longer registers is dropped (and reported by
-    :func:`shape_parameter_base_drift`) rather than applied blind. When ISN is
-    unavailable the policy is returned as-is so the rule keeps working offline.
-    """
-    isn = _isn_physical_bases()
-    if not isn:
-        return frozenset(_SHAPE_PARAMETER_BASE_POLICY)
-    return frozenset(_SHAPE_PARAMETER_BASE_POLICY) & isn
-
-
-@lru_cache(maxsize=1)
-def _rate_natured_bases() -> frozenset[str]:
-    """ISN ``physical_base`` tokens that count a quantity per unit time.
-
-    A codex POLICY keyed on the live ISN vocabulary: a base that IS ``rate`` or
-    ``frequency``, or that ends in ``_rate`` / ``_frequency``, already denotes a
-    per-time quantity, so a name built on it reads as a rate without carrying a
-    ``time_derivative_of_`` prefix. Derived at runtime, so a base ISN adds or
-    renames is picked up with no codex edit; empty when ISN is unavailable,
-    which only relaxes the rate reading back to the prefix form.
-    """
-    return frozenset(
-        t
-        for t in _isn_physical_bases()
-        if t in {"rate", "frequency"} or t.endswith(("_rate", "_frequency"))
+def shape_parameter_base_drift(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common.shape_parameter_base_drift."""
+    return _moved_worker_common.shape_parameter_base_drift(
+        _worker_dependency, *args, **kwargs
     )
 
 
-@lru_cache(maxsize=1)
-def _state_resolution_tokens() -> frozenset[str]:
-    """Grammar tokens that mark a name as resolved to ONE state of a species.
-
-    The grammar carries state resolution two ways, and both are read from the
-    live vocabulary rather than restated here: a dedicated ``state`` segment
-    whose tokens name the KIND of state (a charge state, an internal excitation
-    state), and the ``subject`` tokens that fold the state into the species
-    (``ion_state``, ``neutral_state``, ``ion_charge_state``). Codex owns only
-    the POLICY on the subject side — a subject that names a state ends in
-    ``_state`` — so a new kind of state added upstream is recognised with no
-    codex edit. Empty when the vocabulary cannot be consulted, which switches
-    the rule off rather than judging every name species-level.
-    """
-    subjects = frozenset(
-        t for t in _isn_segment_tokens("subject") if t.endswith("_state")
-    )
-    return _isn_segment_tokens("state") | subjects
-
-
-def _name_denotes_state(sn_name: str) -> bool:
-    """True when *sn_name* is resolved to one state of a species.
-
-    Matched as whole grammar tokens, so a word that merely ends in ``state``
-    (``steady_state``, a regime rather than a species state) never counts.
-    """
-    padded = f"_{sn_name}_"
-    return any(f"_{t}_" in padded for t in _state_resolution_tokens())
-
-
-def _name_denotes_rate(sn_name: str) -> bool:
-    """True when *sn_name* is built on a rate-natured base.
-
-    Matched on token boundaries, so a word that merely contains a base as a
-    substring (``substrate`` ⊃ ``rate``) never counts as one.
-    """
-    padded = f"_{sn_name}_"
-    return any(f"_{t}_" in padded for t in _rate_natured_bases())
-
-
-def _ir_denotes_time_change(ir: Any) -> bool:
-    """Recursively find temporal-change semantics through the public ISN API."""
-    from imas_standard_names import get_operator_semantics
-
-    def denotes_time_change(token: Any) -> bool:
-        return isinstance(token, str) and (
-            "temporal_change" in get_operator_semantics(token)
-        )
-
-    for operator in getattr(ir, "operators", ()) or ():
-        if denotes_time_change(getattr(operator, "op", None)):
-            return True
-        if any(
-            _ir_denotes_time_change(argument)
-            for argument in getattr(operator, "args", ()) or ()
-        ):
-            return True
-
-    # The public parser can represent a bare-prefix operator as a qualifier.
-    # Semantic lookup is token-based and intentionally independent of where the
-    # parser places that token in the public IR.
-    return any(
-        denotes_time_change(getattr(qualifier, "token", None))
-        for qualifier in getattr(ir, "qualifiers", ()) or ()
+def _shape_parameter_bases(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._shape_parameter_bases."""
+    return _moved_worker_common._shape_parameter_bases(
+        _worker_dependency, *args, **kwargs
     )
 
 
-def _ir_claims_time_change_in_scope(ir: Any) -> bool:
-    """True when a temporal operator governs *ir*'s own tense, scope-aware.
+def _rate_natured_bases(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._rate_natured_bases."""
+    return _moved_worker_common._rate_natured_bases(_worker_dependency, *args, **kwargs)
 
-    A binary operator (``difference_of``, ``ratio_of``, ...) combines two
-    independently-scoped operand expressions into one result whose tense is
-    set by the binary operator itself, not by either operand: a difference of
-    a power and a stored-energy time derivative is dimensionally a power (the
-    derivative already carries the rate; the outer subtraction does not apply
-    a second one). So a temporal operator buried inside ONE operand of a
-    binary construction must not make the whole name read as a rate. A
-    temporal operator anywhere in a non-binary (unary) chain still does,
-    since a unary wrapper (``magnitude_of``, ``gradient_of``, ...) does not
-    introduce an independent operand scope of its own.
-    """
-    from imas_standard_names import get_operator_semantics
 
-    def denotes_time_change(token: Any) -> bool:
-        return isinstance(token, str) and (
-            "temporal_change" in get_operator_semantics(token)
-        )
-
-    for operator in getattr(ir, "operators", ()) or ():
-        if denotes_time_change(getattr(operator, "op", None)):
-            return True
-        if getattr(operator, "kind", None) == "binary":
-            continue
-        if any(
-            _ir_claims_time_change_in_scope(argument)
-            for argument in getattr(operator, "args", ()) or ()
-        ):
-            return True
-
-    return any(
-        denotes_time_change(getattr(qualifier, "token", None))
-        for qualifier in getattr(ir, "qualifiers", ()) or ()
+def _state_resolution_tokens(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._state_resolution_tokens."""
+    return _moved_worker_common._state_resolution_tokens(
+        _worker_dependency, *args, **kwargs
     )
 
 
-def _name_claims_time_change(sn_name: str) -> bool:
-    """Interpret temporal semantics structurally, with a legacy-safe fallback.
-
-    A retired operator spelling is rewritten to its registered token first, so
-    a name using the retired prefix still reads as claiming the temporal
-    semantics the grammar continues to publish for it under that token.
-    """
-    from imas_codex.standard_names.audits import resolve_retired_operator_spellings
-
-    sn_name = resolve_retired_operator_spellings(sn_name)
-    try:
-        from imas_codex.standard_names.grammar_adapter import parse_canonical_name
-
-        return _ir_denotes_time_change(parse_canonical_name(sn_name).ir)
-    except (TypeError, ValueError):
-        # Legacy identities can predate the strict grammar. Ask ISN about every
-        # contiguous token span so this conservative fallback remains entirely
-        # vocabulary-owned without duplicating operator names in codex.
-        from imas_standard_names import get_operator_semantics
-
-        parts = sn_name.split("_")
-        return any(
-            "temporal_change" in get_operator_semantics("_".join(parts[start:end]))
-            for start in range(len(parts))
-            for end in range(start + 1, len(parts) + 1)
-        )
+def _name_denotes_state(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._name_denotes_state."""
+    return _moved_worker_common._name_denotes_state(_worker_dependency, *args, **kwargs)
 
 
-def _time_change_claim_is_binary_scoped(sn_name: str) -> bool:
-    """True when *sn_name*'s ONLY temporal claim sits inside one operand of a
-    binary construction (``difference_of``, ``ratio_of``, ...), not in the
-    name's own outer operator scope.
-
-    Distinguishes ``time_derivative_of_stored_energy`` (outer scope is
-    temporal — still a rate) from
-    ``difference_of_heating_power_and_time_derivative_of_stored_energy``
-    (outer scope is the binary ``difference`` — the temporal operator only
-    governs its own operand). Returns ``False`` — never scoped, keep the
-    conservative reading — when strict parsing fails, matching the legacy
-    fallback in :func:`_name_claims_time_change`.
-    """
-    from imas_codex.standard_names.audits import resolve_retired_operator_spellings
-
-    resolved = resolve_retired_operator_spellings(sn_name)
-    try:
-        from imas_codex.standard_names.grammar_adapter import parse_canonical_name
-
-        ir = parse_canonical_name(resolved).ir
-    except (TypeError, ValueError):
-        return False
-    return _ir_denotes_time_change(ir) and not _ir_claims_time_change_in_scope(ir)
+def _name_denotes_rate(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._name_denotes_rate."""
+    return _moved_worker_common._name_denotes_rate(_worker_dependency, *args, **kwargs)
 
 
-def _shape_parameter_surface(dd_path: str | None) -> str:
-    """Surface a shape parameter from *dd_path* is defined *of*.
-
-    - ``profiles_1d`` / ``flux_surface`` paths → ``flux_surface`` (radial profile)
-    - all other paths (``boundary``, ``boundary_separatrix``, pulse-schedule
-      control targets, …) → ``plasma_boundary`` (the LCFS)
-
-    The default is the plasma boundary: "the triangularity" without further
-    qualification conventionally means the boundary/separatrix value.
-    """
-    p = (dd_path or "").lower()
-    if "/profiles_1d/" in p or "/flux_surface/" in p:
-        return "flux_surface"
-    return "plasma_boundary"
+def _ir_denotes_time_change(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._ir_denotes_time_change."""
+    return _moved_worker_common._ir_denotes_time_change(
+        _worker_dependency, *args, **kwargs
+    )
 
 
-def _inject_shape_parameter_surface(
-    candidate: Any, dd_path: str | None, log: logging.Logger | None = None
-) -> bool:
-    """Force a surface locus onto a bare shape-parameter candidate.
+def _ir_claims_time_change_in_scope(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._ir_claims_time_change_in_scope."""
+    return _moved_worker_common._ir_claims_time_change_in_scope(
+        _worker_dependency, *args, **kwargs
+    )
 
-    Mutates ``candidate.segments`` in place so ``compose_name()`` produces the
-    surface-explicit leaf. Deterministic and idempotent: fires only when the
-    base is a shape parameter (quantity kind) and the composer left the locus
-    empty; a composer-supplied locus is always preserved. Returns ``True`` when
-    an injection was applied.
-    """
-    seg = getattr(candidate, "segments", None)
-    if seg is None:
-        return False
-    if seg.base_kind != "quantity" or seg.base_token not in _shape_parameter_bases():
-        return False
-    if seg.locus_token:  # composer already named a surface — trust it
-        return False
-    surface = _shape_parameter_surface(dd_path)
-    seg.locus_token = surface
-    seg.locus_relation = "of"
-    seg.locus_type = "geometry"
-    if log:
-        log.debug(
-            "shape-param surface injection: base=%s src=%s -> _of_%s",
-            seg.base_token,
-            dd_path,
-            surface,
-        )
-    return True
+
+def _name_claims_time_change(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._name_claims_time_change."""
+    return _moved_worker_common._name_claims_time_change(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+def _time_change_claim_is_binary_scoped(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._time_change_claim_is_binary_scoped."""
+    return _moved_worker_common._time_change_claim_is_binary_scoped(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+def _shape_parameter_surface(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._shape_parameter_surface."""
+    return _moved_worker_common._shape_parameter_surface(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+def _inject_shape_parameter_surface(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._inject_shape_parameter_surface."""
+    return _moved_worker_common._inject_shape_parameter_surface(
+        _worker_dependency, *args, **kwargs
+    )
 
 
 # ---------------------------------------------------------------------------
 # Pre-validation gate: reject malformed LLM output before MERGE
 # ---------------------------------------------------------------------------
 
-_SNAKE_CASE_RE = _re.compile(r"[a-z][a-z0-9_]*")
+_SNAKE_CASE_RE = _moved_worker_common._SNAKE_CASE_RE
 
 
-def is_well_formed_candidate(raw_name: str) -> tuple[bool, str | None]:
-    """Check whether *raw_name* is a plausible standard-name candidate.
-
-    Returns ``(True, None)`` if the name passes all checks, or
-    ``(False, reason)`` if it should be rejected **before** MERGE.
-
-    Rejection criteria:
-    - Empty or whitespace-only
-    - Contains newline, tab, ``{``, ``}``, ``\\``, or triple-dot
-    - Not snake_case-shaped after stripping
-    """
-    if not raw_name or not raw_name.strip():
-        return False, "empty_or_whitespace"
-    name = raw_name.strip()
-    if any(ch in name for ch in ("\n", "\t", "{", "}", "\\")):
-        return False, "illegal_chars"
-    if "..." in name:
-        return False, "triple_dot"
-    if not _SNAKE_CASE_RE.fullmatch(name):
-        return False, "not_snake_case"
-    return True, None
-
-
-def _claimed_source_ids(batch: list[dict[str, Any]]) -> set[str]:
-    """Return the authoritative bare source ids carried by a claimed batch."""
-    return {
-        source_id
-        for item in batch
-        if (source_id := (item.get("path") or item.get("source_id")))
-    }
-
-
-def _strip_response_source_id(source_id: Any) -> Any:
-    """Remove only surrounding whitespace from a model-proposed source id."""
-    return source_id.strip() if isinstance(source_id, str) else source_id
-
-
-def _review_dd_source_bindings(item: dict[str, Any]) -> dict[str, str | None]:
-    """Return exact DD paths and versions from authoritative source edges."""
-    bindings: dict[str, str | None] = {}
-    for binding in item.get("source_bindings") or []:
-        if not isinstance(binding, dict) or binding.get("source_type") != "dd":
-            continue
-        path = binding.get("dd_path") or binding.get("source_id")
-        if isinstance(path, str) and (path := strip_dd_prefix(path)):
-            bindings[path] = binding.get("dd_version")
-    return bindings
-
-
-def _review_dd_source_ids(item: dict[str, Any]) -> set[str]:
-    """Return exact DD paths authorized by source-binding relationships."""
-    return set(_review_dd_source_bindings(item))
-
-
-def _sanitize_dd_gap_evidence(
-    evidence: list[Any],
-    allowed_source_ids: set[str],
-    *,
-    phase: str,
-) -> list[Any]:
-    """Fence DD evidence to exact paths owned by the current claimed batch."""
-    kept: list[Any] = []
-    rejected: set[str] = set()
-    for report in evidence:
-        if isinstance(report, dict):
-            path = _strip_response_source_id(report.get("path"))
-            reference_path = _strip_response_source_id(report.get("reference_path"))
-            report["path"] = path
-            if "reference_path" in report:
-                report["reference_path"] = reference_path
-        else:
-            path = _strip_response_source_id(getattr(report, "path", None))
-            reference_path = _strip_response_source_id(
-                getattr(report, "reference_path", None)
-            )
-            report.path = path
-            if hasattr(report, "reference_path"):
-                report.reference_path = reference_path
-        report_paths = {value for value in (path, reference_path) if value}
-        if path not in allowed_source_ids or not report_paths.issubset(
-            allowed_source_ids
-        ):
-            rejected.update(str(value) for value in report_paths)
-            continue
-        kept.append(report)
-    if rejected:
-        logger.warning(
-            "Pool %s: ignored %d DD-gap path proposal(s) outside the claimed batch: %s",
-            phase,
-            len(rejected),
-            ", ".join(sorted(rejected)[:8]),
-        )
-    return kept
-
-
-def _persist_dd_gap_evidence(
-    evidence: list[Any],
-    allowed_source_ids: set[str],
-    *,
-    phase: str,
-    reporter: str,
-    observed_dd_version: str | None = None,
-    source_versions: dict[str, str | None] | None = None,
-) -> int:
-    """Best-effort evidence persistence, isolated from pipeline outcomes."""
-    fenced = _sanitize_dd_gap_evidence(
-        evidence,
-        allowed_source_ids,
-        phase=phase,
-    )
-    if not fenced:
-        return 0
-
-    reports: list[dict[str, Any]] = []
-    for evidence_item in fenced:
-        if hasattr(evidence_item, "model_dump"):
-            report = evidence_item.model_dump(exclude_none=True)
-        else:
-            report = dict(evidence_item)
-        report["reporter"] = reporter
-        binding_version = (source_versions or {}).get(str(report.get("path") or ""))
-        if binding_version:
-            report["observed_dd_version"] = binding_version
-        elif observed_dd_version and not report.get("observed_dd_version"):
-            report["observed_dd_version"] = observed_dd_version
-        reports.append(report)
-
-    try:
-        from imas_codex.standard_names.dd_gaps import write_dd_gaps
-
-        result = write_dd_gaps(reports)
-        return int(result.get("reported", 0))
-    except Exception:
-        logger.warning(
-            "Pool %s: DD-gap evidence persistence failed without changing the "
-            "pipeline outcome",
-            phase,
-            exc_info=True,
-        )
-        return 0
-
-
-def _claimed_source_outcome(
-    batch: list[dict[str, Any]],
-    source_id: str,
-    *,
-    source_type: str,
-    status: str,
-    last_error: str | None = None,
-    skip_reason: str | None = None,
-    skip_reason_detail: str | None = None,
-) -> dict[str, Any] | None:
-    """Build an exact fenced outcome for one source in a claimed batch."""
-    item = next(
-        (
-            claimed
-            for claimed in batch
-            if (claimed.get("path") or claimed.get("source_id")) == source_id
-        ),
-        None,
-    )
-    if not item:
-        return None
-    token = item.get("claim_token")
-    seq = item.get("claim_seq")
-    if not token or seq is None:
-        return None
-    return {
-        "sns_id": f"{source_type}:{source_id}",
-        "source_id": source_id,
-        "claim_token": token,
-        "claim_seq": seq,
-        "status": status,
-        "last_error": last_error,
-        "skip_reason": skip_reason,
-        "skip_reason_detail": skip_reason_detail,
-    }
-
-
-def _sanitize_compose_result_sources(
-    result: Any,
-    allowed_source_ids: set[str],
-    *,
-    phase: str,
-) -> None:
-    """Fence every compose-result source projection to the claimed batch.
-
-    The prompt contains related and cross-IDS paths for context, so an LLM can
-    legitimately mention an unclaimed sibling. Context is not authorization:
-    only the sources in the graph-claimed batch may be attached, skipped,
-    marked with a vocabulary gap, or persisted through a candidate.
-    """
-    rejected: set[str] = set()
-
-    kept_candidates = []
-    for candidate in result.candidates:
-        candidate.source_id = _strip_response_source_id(candidate.source_id)
-        candidate.dd_paths = [
-            _strip_response_source_id(path) for path in candidate.dd_paths
-        ]
-        if candidate.source_id not in allowed_source_ids:
-            rejected.add(candidate.source_id)
-            continue
-        out_of_batch_paths = set(candidate.dd_paths) - allowed_source_ids
-        rejected.update(out_of_batch_paths)
-        candidate.dd_paths = [
-            path for path in candidate.dd_paths if path in allowed_source_ids
-        ]
-        kept_candidates.append(candidate)
-    result.candidates = kept_candidates
-
-    kept_attachments = []
-    for attachment in result.attachments:
-        attachment.source_id = _strip_response_source_id(attachment.source_id)
-        if attachment.source_id in allowed_source_ids:
-            kept_attachments.append(attachment)
-        else:
-            rejected.add(attachment.source_id)
-    result.attachments = kept_attachments
-
-    result.skipped = [
-        _strip_response_source_id(source_id) for source_id in result.skipped
-    ]
-    rejected.update(set(result.skipped) - allowed_source_ids)
-    result.skipped = [sid for sid in result.skipped if sid in allowed_source_ids]
-
-    kept_gaps = []
-    for gap in result.vocab_gaps:
-        gap.source_id = _strip_response_source_id(gap.source_id)
-        if gap.source_id in allowed_source_ids:
-            kept_gaps.append(gap)
-        else:
-            rejected.add(gap.source_id)
-    result.vocab_gaps = kept_gaps
-
-    # A malformed response may assign one source to several dispositions.
-    # Resolve that overlap before any graph call so transaction scheduling
-    # cannot decide the winner. Priority mirrors the durable handling order:
-    # vocabulary gap, existing-name attachment, documented skip, generated name.
-    selected: dict[str, str] = {}
-    overlaps: set[str] = set()
-
-    def _reserve(source_id: str, disposition: str) -> bool:
-        owner = selected.setdefault(source_id, disposition)
-        if owner != disposition:
-            overlaps.add(source_id)
-            return False
-        return True
-
-    result.vocab_gaps = [
-        gap for gap in result.vocab_gaps if _reserve(gap.source_id, "vocab_gap")
-    ]
-    result.attachments = [
-        attachment
-        for attachment in result.attachments
-        if _reserve(attachment.source_id, "attachment")
-    ]
-    result.skipped = [
-        source_id for source_id in result.skipped if _reserve(source_id, "skip")
-    ]
-    result.candidates = [
-        candidate
-        for candidate in result.candidates
-        if _reserve(candidate.source_id, "generated")
-    ]
-    if overlaps:
-        logger.warning(
-            "Pool %s: resolved %d multi-disposition source(s) by fixed priority: %s",
-            phase,
-            len(overlaps),
-            ", ".join(sorted(overlaps)[:8]),
-        )
-
-    result.dd_gaps = _sanitize_dd_gap_evidence(
-        list(getattr(result, "dd_gaps", None) or []),
-        allowed_source_ids,
-        phase=phase,
-    )
-
-    if rejected:
-        logger.warning(
-            "Pool %s: ignored %d out-of-batch source proposal(s): %s",
-            phase,
-            len(rejected),
-            ", ".join(sorted(rejected)[:8]),
-        )
-
-
-def _filter_persist_candidates_to_claimed_sources(
-    candidates: list[dict[str, Any]],
-    allowed_source_ids: set[str],
-    *,
-    phase: str,
-) -> list[dict[str, Any]]:
-    """Keep only candidates whose own source was separately claimed."""
-    kept = [
-        candidate
-        for candidate in candidates
-        if candidate.get("source_id") in allowed_source_ids
-    ]
-    rejected = len(candidates) - len(kept)
-    if rejected:
-        logger.warning(
-            "Pool %s: deferred %d candidate(s) without a source claim",
-            phase,
-            rejected,
-        )
-    return kept
-
-
-def _withhold_binding_conflicted_sources(
-    conflict: object,
-    candidates: list[dict[str, Any]],
-    *,
-    source_type: str,
-    phase: str,
-    compose_model: str,
-    dd_version: str | None,
-    cocos_version: int | None,
-    run_id: str | None,
-) -> list[str]:
-    """Record a compose refusal for a source already bound to a live identity.
-
-    A source held by a live identity outside the migration's predecessor is an
-    adjudicable state: recomposing cannot settle it, so releasing the claim to
-    retry would spend an attempt on a decision only an operator can make. The
-    same holds for a source bound to the live predecessor and a successor that
-    has itself been retired — one live claim beside a settled one. The withheld
-    source is left claimed, its holding identity and stage recorded (and the
-    retired identity where one applies), and no winner id is returned for it.
-    Every other candidate in the batch persists normally.
-    """
-    conflicted_source_ids = {
-        item.source_id for item in getattr(conflict, "conflicts", ())
-    }
-    for item in getattr(conflict, "conflicts", ()):
-        retired_identity = getattr(item, "retired_identity", None)
-        if retired_identity is None:
-            logger.warning(
-                "Pool %s: source %s bound to live identity %r at stage %r — "
-                "withheld for adjudication, no attempt spent",
-                phase,
-                item.source_id,
-                item.holding_identity,
-                item.holding_stage,
-            )
-        else:
-            logger.warning(
-                "Pool %s: source %s bound to live identity %r at stage %r "
-                "alongside retired identity %r at stage %r — withheld for "
-                "adjudication, no attempt spent",
-                phase,
-                item.source_id,
-                item.holding_identity,
-                item.holding_stage,
-                retired_identity,
-                getattr(item, "retired_stage", None),
-            )
-
-    remaining = [
-        candidate
-        for candidate in candidates
-        if _candidate_source_node_id(candidate, source_type)
-        not in conflicted_source_ids
-    ]
-    if not remaining:
-        return []
-
-    from imas_codex.standard_names.graph_ops import persist_generated_name_batch
-
-    return persist_generated_name_batch(
-        remaining,
-        compose_model=compose_model,
-        dd_version=dd_version,
-        cocos_version=cocos_version,
-        run_id=run_id,
-        return_winner_ids=True,
+def is_well_formed_candidate(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common.is_well_formed_candidate."""
+    return _moved_worker_common.is_well_formed_candidate(
+        _worker_dependency, *args, **kwargs
     )
 
 
-def _candidate_source_node_id(candidate: dict[str, Any], source_type: str) -> str:
-    source_id = candidate.get("source_id")
-    if not isinstance(source_id, str) or not source_id:
-        return ""
-    if source_type == "dd" and source_id.startswith("dd:"):
-        return source_id
-    return encode_source_path(source_type, source_id)
+def _claimed_source_ids(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._claimed_source_ids."""
+    return _moved_worker_common._claimed_source_ids(_worker_dependency, *args, **kwargs)
 
 
-def _persist_description_checked_candidates(
-    candidates: list[dict[str, Any]],
-    *,
-    source_type: str,
-    phase: str,
-    compose_model: str,
-    dd_version: str | None,
-    cocos_version: int | None,
-    run_id: str | None,
-) -> int | list[str]:
-    """Persist only candidates with prose, releasing rejected claims to retry.
-
-    The structured response contract requires a non-empty description, but
-    callers and test doubles can still supply unvalidated candidate-shaped
-    objects. This final boundary prevents those objects from creating a drafted name
-    before releasing each exact source claim through the canonical failure
-    path. A source with any descriptionless proposal is entirely deferred so
-    duplicate proposals cannot race the release with a richer sibling.
-    """
-    from imas_codex.standard_names.graph_ops import (
-        persist_generated_name_batch,
-        release_generate_name_failed_claims,
+def _strip_response_source_id(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._strip_response_source_id."""
+    return _moved_worker_common._strip_response_source_id(
+        _worker_dependency, *args, **kwargs
     )
 
-    rejected_source_ids = {
-        candidate.get("source_id")
-        for candidate in candidates
-        if not isinstance(candidate.get("description"), str)
-        or not candidate["description"].strip()
-    }
-    rejected_source_ids.discard(None)
-    rejected_count = sum(
-        1
-        for candidate in candidates
-        if not isinstance(candidate.get("description"), str)
-        or not candidate["description"].strip()
+
+def _review_dd_source_bindings(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._review_dd_source_bindings."""
+    return _moved_worker_common._review_dd_source_bindings(
+        _worker_dependency, *args, **kwargs
     )
 
-    releases_by_token: dict[str, set[str]] = {}
-    for candidate in candidates:
-        source_id = candidate.get("source_id")
-        if source_id not in rejected_source_ids:
-            continue
-        claim_token = candidate.get("source_claim_token")
-        if not isinstance(source_id, str) or not source_id or not claim_token:
-            continue
-        source_node_id = _candidate_source_node_id(candidate, source_type)
-        releases_by_token.setdefault(str(claim_token), set()).add(source_node_id)
 
-    released = 0
-    release_expected = sum(len(ids) for ids in releases_by_token.values())
-    for claim_token, source_ids in sorted(releases_by_token.items()):
-        released += release_generate_name_failed_claims(
-            source_ids=sorted(source_ids),
-            claim_token=claim_token,
-        )
-
-    if rejected_count:
-        logger.warning(
-            "Pool %s: rejected %d candidate(s) with empty descriptions; "
-            "released %d/%d exact source claim(s) for retry",
-            phase,
-            rejected_count,
-            released,
-            release_expected,
-        )
-
-    eligible = [
-        candidate
-        for candidate in candidates
-        if candidate.get("source_id") not in rejected_source_ids
-        and isinstance(candidate.get("description"), str)
-        and candidate["description"].strip()
-    ]
-    if not eligible:
-        return []
-
-    from imas_codex.standard_names.provenance_lifecycle import (
-        SourceBindingConflictError,
-        SourceRetiredSuccessorConflictError,
+def _review_dd_source_ids(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._review_dd_source_ids."""
+    return _moved_worker_common._review_dd_source_ids(
+        _worker_dependency, *args, **kwargs
     )
 
-    try:
-        return persist_generated_name_batch(
-            eligible,
-            compose_model=compose_model,
-            dd_version=dd_version,
-            cocos_version=cocos_version,
-            run_id=run_id,
-            return_winner_ids=True,
-        )
-    except (
-        SourceBindingConflictError,
-        SourceRetiredSuccessorConflictError,
-    ) as conflict:
-        return _withhold_binding_conflicted_sources(
-            conflict,
-            eligible,
-            source_type=source_type,
-            phase=phase,
-            compose_model=compose_model,
-            dd_version=dd_version,
-            cocos_version=cocos_version,
-            run_id=run_id,
-        )
 
-
-def _mark_source_prevalidation_failed(
-    source_id: str,
-    *,
-    source_type: str,
-    candidate_name: str,
-    reason: str,
-    claim_token: str | None = None,
-    claim_seq: int | None = None,
-) -> bool:
-    """Persist a terminal pre-validation failure with actionable diagnostics."""
-    from imas_codex.standard_names.graph_ops import persist_claimed_source_outcomes
-
-    error = f"candidate pre-validation failed ({reason}): {candidate_name}"
-    if not claim_token or claim_seq is None:
-        return False
-    winners = persist_claimed_source_outcomes(
-        [
-            {
-                "sns_id": f"{source_type}:{source_id}",
-                "claim_token": claim_token,
-                "claim_seq": claim_seq,
-                "status": "failed",
-                "last_error": error,
-            }
-        ]
+def _sanitize_dd_gap_evidence(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._sanitize_dd_gap_evidence."""
+    return _moved_worker_common._sanitize_dd_gap_evidence(
+        _worker_dependency, *args, **kwargs
     )
-    return bool(winners)
 
 
-def provenance_canonical_names(
-    candidates: list, log: logging.Logger | None = None
-) -> dict[str, str]:
-    """Map each base quantity to ONE canonical name for its estimator facets.
+def _persist_dd_gap_evidence(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._persist_dd_gap_evidence."""
+    return _moved_worker_common._persist_dd_gap_evidence(
+        _worker_dependency, *args, **kwargs
+    )
 
-    Per the locked ``name-multiplicity-rule`` (collapse provenance), the
-    measured / reconstructed / reference estimates of one physical quantity must
-    share ONE standard name — but the per-facet composer is non-deterministic
-    (e.g. ``pressure/measured`` -> ``plasma_pressure`` while
-    ``pressure/reconstructed`` -> ``total_plasma_pressure``). Estimator facets of
-    a quantity strip to the same ``base_path`` (and share a compose batch via
-    ``batch_key``), so we group every value-provenance candidate by base and
-    pick one canonical name; the caller overrides each facet's ``name_id`` (the
-    MERGE identity) with it, collapsing the group onto a single StandardName.
 
-    Canonical pick: most-frequently-composed name, ties broken by SHORTEST then
-    lexicographic. Shortest implements the "physics, not instrument" /
-    no-redundant-qualifier preference deterministically — it drops
-    ``_of_flux_loop`` (vs ``poloidal_magnetic_flux``) and ``total_plasma_pressure``
-    (vs ``plasma_pressure``). Returns ``{base_path: canonical_name}`` only for
-    bases whose facets disagree (a no-op map otherwise).
-    """
-    from collections import Counter
+def _claimed_source_outcome(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._claimed_source_outcome."""
+    return _moved_worker_common._claimed_source_outcome(
+        _worker_dependency, *args, **kwargs
+    )
 
-    groups: dict[str, list[str]] = {}
-    for c in candidates:
-        term, base = detect_value_provenance(getattr(c, "source_id", "") or "")
-        if not term:
-            continue
-        try:
-            nm = normalize_spelling(c.compose_name())
-        except Exception:
-            continue
-        groups.setdefault(base, []).append(nm)
 
-    canonical: dict[str, str] = {}
-    for base, member_names in groups.items():
-        distinct = set(member_names)
-        if len(distinct) <= 1:
-            continue  # already agree
-        counts = Counter(member_names)
-        winner = min(distinct, key=lambda n: (-counts[n], len(n), n))
-        canonical[base] = winner
-        if log:
-            log.info(
-                "provenance canon: base=%s -> %s (collapsed %d variants: %s)",
-                base,
-                winner,
-                len(distinct),
-                sorted(distinct),
-            )
-    return canonical
+def _sanitize_compose_result_sources(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._sanitize_compose_result_sources."""
+    return _moved_worker_common._sanitize_compose_result_sources(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+def _filter_persist_candidates_to_claimed_sources(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._filter_persist_candidates_to_claimed_sources."""
+    return _moved_worker_common._filter_persist_candidates_to_claimed_sources(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+def _withhold_binding_conflicted_sources(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._withhold_binding_conflicted_sources."""
+    return _moved_worker_common._withhold_binding_conflicted_sources(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+def _candidate_source_node_id(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._candidate_source_node_id."""
+    return _moved_worker_common._candidate_source_node_id(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+def _persist_description_checked_candidates(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._persist_description_checked_candidates."""
+    return _moved_worker_common._persist_description_checked_candidates(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+def _mark_source_prevalidation_failed(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._mark_source_prevalidation_failed."""
+    return _moved_worker_common._mark_source_prevalidation_failed(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+def provenance_canonical_names(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common.provenance_canonical_names."""
+    return _moved_worker_common.provenance_canonical_names(
+        _worker_dependency, *args, **kwargs
+    )
 
 
 # Bare coordinate/infrastructure tokens that are NOT physics observables.
@@ -1173,98 +367,26 @@ def provenance_canonical_names(
 # semantic-similarity gate (a reader cannot tell what is measured), then burns
 # review + every refine rotation before exhausting.  Catch them at compose time
 # and route the source to ``skipped`` instead of composing a doomed bare name.
-_NON_NAMEABLE_BARE_TOKENS: frozenset[str] = frozenset(
-    {
-        "time",  # independent signal coordinate / timestamp
-        "time_stamp",
-        "timestamp",
-        "delay",  # signal-chain latency
-        "latency",
-        "dead_time",
-        "index",  # array bookkeeping
-        "count",
-        "counter",
-        "version",  # pure metadata
-    }
-)
+_NON_NAMEABLE_BARE_TOKENS = _moved_worker_common._NON_NAMEABLE_BARE_TOKENS
 
 
-def is_non_nameable_coordinate(raw_name: str) -> tuple[bool, str | None]:
-    """Detect bare coordinate / infrastructure tokens that get no standard name.
-
-    Returns ``(True, reason)`` when *raw_name* is a bare non-nameable token
-    (a time coordinate / timestamp, signal-chain timing, an array counter, or
-    pure metadata) that should be routed to ``skipped`` rather than composed.
-    Returns ``(False, None)`` otherwise.
-
-    This is intentionally conservative: it only fires on *bare* tokens (no
-    qualifier/locus context). A qualified name like ``confinement_time`` or
-    ``major_radius_of_magnetic_axis`` is a real quantity and passes through.
-    """
-    if not raw_name:
-        return False, None
-    name = raw_name.strip()
-    if name in _NON_NAMEABLE_BARE_TOKENS:
-        return True, f"non_nameable_coordinate:{name}"
-    return False, None
+def is_non_nameable_coordinate(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common.is_non_nameable_coordinate."""
+    return _moved_worker_common.is_non_nameable_coordinate(
+        _worker_dependency, *args, **kwargs
+    )
 
 
-def _coerce_llm_metric(value: Any) -> int:
-    """Best-effort int coercion for LLM telemetry fields."""
-    try:
-        return int(value or 0)
-    except (TypeError, ValueError):
-        return 0
+def _coerce_llm_metric(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._coerce_llm_metric."""
+    return _moved_worker_common._coerce_llm_metric(_worker_dependency, *args, **kwargs)
 
 
-def _extract_llm_telemetry(
-    llm_out: Any,
-    *,
-    parsed_obj: Any = None,
-    tokens_fallback: Any = None,
-) -> tuple[int, int, int, int]:
-    """Normalize split token/cache telemetry across LLM return shapes."""
-
-    def _from_attrs(obj: Any) -> tuple[int, int, int, int]:
-        return (
-            _coerce_llm_metric(getattr(obj, "input_tokens", 0)),
-            _coerce_llm_metric(getattr(obj, "output_tokens", 0)),
-            _coerce_llm_metric(getattr(obj, "cache_read_tokens", 0)),
-            _coerce_llm_metric(getattr(obj, "cache_creation_tokens", 0)),
-        )
-
-    metrics = _from_attrs(llm_out)
-    if any(metrics):
-        return metrics
-
-    if parsed_obj is not None:
-        metrics = _from_attrs(parsed_obj)
-        if any(metrics):
-            return metrics
-
-    if isinstance(tokens_fallback, dict):
-        return (
-            _coerce_llm_metric(tokens_fallback.get("input_tokens", 0)),
-            _coerce_llm_metric(tokens_fallback.get("output_tokens", 0)),
-            _coerce_llm_metric(tokens_fallback.get("cache_read_tokens", 0)),
-            _coerce_llm_metric(
-                tokens_fallback.get(
-                    "cache_creation_tokens",
-                    tokens_fallback.get("cache_write_tokens", 0),
-                )
-            ),
-        )
-
-    if isinstance(tokens_fallback, tuple | list):
-        values = list(tokens_fallback)
-        return (
-            _coerce_llm_metric(values[0] if len(values) > 0 else 0),
-            _coerce_llm_metric(values[1] if len(values) > 1 else 0),
-            _coerce_llm_metric(values[2] if len(values) > 2 else 0),
-            _coerce_llm_metric(values[3] if len(values) > 3 else 0),
-        )
-
-    return (0, 0, 0, 0)
+def _extract_llm_telemetry(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._extract_llm_telemetry."""
+    return _moved_worker_common._extract_llm_telemetry(
+        _worker_dependency, *args, **kwargs
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -1272,306 +394,60 @@ def _extract_llm_telemetry(
 # ---------------------------------------------------------------------------
 
 
-@_cache
-def _load_known_physical_bases() -> frozenset[str]:
-    """Return the set of registered physical_base tokens from ISN.
-
-    Reads the ``grammar/vocabularies/physical_bases.yml`` vocabulary file
-    from the installed ``imas_standard_names`` package.  Falls back to an
-    empty set if the package or file is unavailable.
-    """
-    try:
-        from importlib.resources import files
-
-        import yaml
-
-        text = (
-            files("imas_standard_names")
-            .joinpath("grammar/vocabularies/physical_bases.yml")
-            .read_text()
-        )
-        data = yaml.safe_load(text)
-        bases = data.get("bases", {})
-        if isinstance(bases, dict):
-            return frozenset(bases.keys())
-        return frozenset()
-    except Exception:
-        return frozenset()
-
-
-def _auto_detect_physical_base_gaps(
-    candidates: list,  # StandardNameCandidate instances or dicts
-    known_bases: frozenset[str] | None = None,
-) -> list[dict]:
-    """Parse each candidate name and surface novel ``physical_base`` tokens.
-
-    Returns a list of VocabGap-compatible dicts for bases not in the ISN
-    registry.  These are auto-tracked so the LLM does not need to emit
-    explicit ``vocab_gap`` exits for ``physical_base``.
-
-    Args:
-        candidates: Parsed ``StandardNameCandidate`` objects or dicts.
-        known_bases: Pre-loaded set of registered physical_base tokens.
-            Defaults to ``_load_known_physical_bases()`` if not provided.
-            The flat registry under-reports the grammar's lexical-compound
-            bases (``internal_inductance``, ``major_radius`` …); on the default
-            path a base absent from the flat set is re-checked against the ISN
-            parser and emitted as a gap only when the parser also rejects it.
-            An explicit ``known_bases`` is treated as authoritative and the
-            parser escape hatch is NOT applied.
-    """
-    from imas_codex.standard_names.segments import is_known_physical_base
-
-    consult_parser = known_bases is None
-    if known_bases is None:
-        known_bases = _load_known_physical_bases()
-
-    gaps: list[dict] = []
-    seen: set[tuple[str, str]] = set()  # (source_id, base) dedup
-
-    for c in candidates:
-        try:
-            # Handle both model instances and dicts
-            if hasattr(c, "base_token"):
-                base = c.base_token
-                source_id = c.source_id
-                base_kind = getattr(c, "base_kind", "quantity")
-            elif isinstance(c, dict):
-                base = c.get("id", "")  # dict candidates use 'id' for name
-                source_id = c.get("source_id", "")
-                # This is an explicit legacy-field projection for gap
-                # classification, not a validity decision. Ordered-expression
-                # validity is handled by the lossless grammar adapter.
-                try:
-                    from imas_standard_names.grammar import parse_standard_name
-
-                    parsed = parse_standard_name(base)
-                    base = parsed.physical_base
-                    base_kind = "quantity"
-                except Exception:
-                    continue
-            else:
-                continue
-
-            if base_kind == "quantity" and base and base not in known_bases:
-                # The grammar resolves lexical-compound bases that never appear
-                # in the flat registry — those are valid, not gaps.  Skip them
-                # on the default path; an explicit known_bases stays strict.
-                if consult_parser and is_known_physical_base(base):
-                    continue
-                key = (source_id, base)
-                if key not in seen:
-                    seen.add(key)
-                    gaps.append(
-                        {
-                            "source_id": source_id,
-                            "segment": "physical_base",
-                            "token": base,
-                            "reason": (
-                                f"Novel physical_base proposed by compose: {base!r}"
-                            ),
-                        }
-                    )
-        except Exception:
-            continue  # parse failures already handled elsewhere
-
-    return gaps
-
-
-def _compute_token_reuse_hits(vocab_gaps: list) -> dict[tuple[str, str], Any]:
-    """Flag candidate-new tokens that duplicate a registered same-segment token.
-
-    For each ``vocab_gap`` the compose LLM emitted this attempt, embeds the
-    proposed token and compares it against its segment's registered vocabulary
-    (free local embeddings, batched by segment so each segment's vocab is
-    embedded once).  Returns a map ``(segment, token) -> TokenNeighbour`` for
-    every proposal scoring at/above ``get_sn_dedup_threshold()``.
-
-    Best-effort: never raises (the helper itself is defensive); the local
-    compose model + local embeddings add no OpenRouter spend.  Returns ``{}``
-    when there are no gaps or no near-synonym registered token.
-    """
-    if not vocab_gaps:
-        return {}
-
-    from imas_codex.settings import get_sn_dedup_threshold
-    from imas_codex.standard_names.vocab_semantic_dedup import (
-        nearest_registered_tokens,
-    )
-
-    threshold = get_sn_dedup_threshold()
-    # threshold > 1.0 can never be met — short-circuit (OFF arm of the A/B).
-    if threshold > 1.0:
-        return {}
-
-    # Unique (token, segment) pairs; the segment vocab is embedded once each.
-    items = sorted({(vg.token, vg.segment) for vg in vocab_gaps})
-    hits = nearest_registered_tokens(items, threshold=threshold)
-    # Re-key by (segment, token) for stamp/lookup ergonomics.
-    return {(hit.segment, hit.proposed_token): hit for hit in hits.values()}
-
-
-def _grammar_round_trip_failures(candidates: list[Any]) -> tuple[list[str], list[str]]:
-    """Names that fail the grammar round trip, with per-failure repair advice.
-
-    Returns ``(names, advice)``.  ``names`` identifies what failed (the composed
-    name, or the source id when even composing it raises).  ``advice`` holds one
-    actionable line per diagnosable failure.
-
-    The diagnosis comes from the public parser's structured residue. For an
-    unresolved base, ``describe_gap`` turns that residue into the slot to use
-    instead — that ``square`` is an operator rather than a qualifier, say.
-    Reporting only the failed name gives the composer nothing to change, so it
-    re-proposes the same token on every retry.
-
-    Vocabulary suggestions are deliberately NOT surfaced: the seat's prompt
-    already carries the full vocabulary, and repeating it would crowd out the
-    part that is new information — which token, and which slot.
-    """
-    names: list[str] = []
-    advice: list[str] = []
-    try:
-        from imas_standard_names import ParseError
-
-        from imas_codex.standard_names.grammar_adapter import parse_canonical_name
-        from imas_codex.standard_names.segments import describe_gap
-    except ImportError:
-        return names, advice  # ISN not installed — skip check
-
-    for candidate in candidates:
-        candidate_name: str | None = None
-        parse_error: ParseError | None = None
-        try:
-            candidate_name = candidate.compose_name()
-            parse_canonical_name(candidate_name)
-            continue
-        except ParseError as exc:
-            parse_error = exc
-        except Exception:
-            pass
-
-        if parse_error is not None and parse_error.residue:
-            try:
-                diagnosis = describe_gap("physical_base", parse_error.residue).guidance
-            except Exception:  # noqa: BLE001 — advice is best-effort
-                logger.debug(
-                    "could not describe grammar failure for %s",
-                    getattr(candidate, "source_id", "?"),
-                    exc_info=True,
-                )
-            else:
-                if diagnosis:
-                    advice.append(diagnosis)
-
-        try:
-            names.append(candidate_name or candidate.compose_name())
-        except Exception:  # noqa: BLE001 — fall back to identifying the source
-            names.append(candidate.source_id)
-    return names, advice
-
-
-def _build_grammar_retry_reason(failures: list[str], advice: list[str]) -> str:
-    """Render the grammar half of a retry directive.
-
-    Leads with the repair advice when there is any, because that is what lets the
-    composer converge; the bare "produce a different name" fallback only applies
-    when nothing about the failure could be diagnosed.
-    """
-    if advice:
-        return (
-            "Previous attempt failed the grammar round trip. Fix each:\n"
-            + "\n".join(f"- {line}" for line in dict.fromkeys(advice))
-        )
-    return (
-        f"Previous attempt failed: grammar round-trip failed for "
-        f"{', '.join(failures[:3])}. Consider expanded "
-        f"neighbour context and produce a different name."
+def _load_known_physical_bases(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._load_known_physical_bases."""
+    return _moved_worker_common._load_known_physical_bases(
+        _worker_dependency, *args, **kwargs
     )
 
 
-def _build_token_reuse_retry_reason(hits: dict[tuple[str, str], Any]) -> str:
-    """Render a retry directive naming each flagged candidate-new token.
-
-    The agent re-composes after seeing this: it either reuses the registered
-    token (dedup achieved) or re-emits the same gap (confirming the quantity is
-    genuinely distinct on that segment's axis, recorded as distinct-confirmed).
-    """
-    parts = []
-    for hit in hits.values():
-        parts.append(
-            f"Segment `{hit.segment}`: your proposed new token "
-            f"`{hit.proposed_token}` is {hit.similarity:.2f} similar to "
-            f"registered `{hit.nearest_token}`. Reuse the registered token "
-            f"unless this quantity is genuinely DISTINCT on the {hit.segment} "
-            f"axis; if distinct, keep it and it will be recorded as a "
-            f"new-vocab request."
-        )
-    return "Vocabulary reuse check — re-compose to reuse-or-confirm:\n" + "\n".join(
-        parts
+def _auto_detect_physical_base_gaps(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._auto_detect_physical_base_gaps."""
+    return _moved_worker_common._auto_detect_physical_base_gaps(
+        _worker_dependency, *args, **kwargs
     )
 
 
-def _active_editorial_gap_guidance(
-    vocab_gaps: list[Any],
-) -> tuple[str, bool]:
-    """Read reviewed decisions for only this result and render exact guidance."""
-    if not vocab_gaps:
-        return "", False
-    gap_dicts = [
-        {
-            "segment": getattr(gap, "segment", None),
-            "token": getattr(gap, "token", None),
-        }
-        for gap in vocab_gaps
-    ]
-    try:
-        from imas_codex.standard_names.graph_ops import (
-            fetch_vocab_gap_adjudications,
-        )
-        from imas_codex.standard_names.vocab_adjudication import (
-            editorial_retry_guidance,
-        )
-
-        rows = fetch_vocab_gap_adjudications(gap_dicts)
-        return editorial_retry_guidance(rows)
-    except Exception:
-        logger.debug("Editorial vocabulary guidance lookup failed", exc_info=True)
-        return "", False
+def _compute_token_reuse_hits(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._compute_token_reuse_hits."""
+    return _moved_worker_common._compute_token_reuse_hits(
+        _worker_dependency, *args, **kwargs
+    )
 
 
-def _stamp_dedup_decision(
-    gap_dicts: list[dict],
-    hits: dict[tuple[str, str], Any],
-) -> None:
-    """Stamp the compose-time token-reuse adjudication onto gap dicts in place.
+def _grammar_round_trip_failures(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._grammar_round_trip_failures."""
+    return _moved_worker_common._grammar_round_trip_failures(
+        _worker_dependency, *args, **kwargs
+    )
 
-    A gap whose ``(segment, token)`` was flagged and SURVIVED the chained retry
-    (the agent re-emitted it after being shown the near-token) is
-    ``distinct_confirmed`` and carries the nearest token + score.  Gaps that
-    were never flagged are ``unchecked``.  (Gaps the agent dropped after the
-    prompt — "reused" — are no longer in ``result.vocab_gaps`` and so are never
-    written.)
-    """
-    from imas_codex.graph.models import VocabGapDedupDecision
 
-    settled = {
-        VocabGapDedupDecision.reuse_confirmed.value,
-        VocabGapDedupDecision.distinct_confirmed.value,
-        VocabGapDedupDecision.checked_no_reuse.value,
-    }
-    for g in gap_dicts:
-        if g.get("dedup_decision") in settled:
-            continue
-        hit = hits.get((g.get("segment"), g.get("token")))
-        if hit is not None:
-            g["nearest_token"] = hit.nearest_token
-            g["nearest_similarity"] = hit.similarity
-            g["dedup_decision"] = VocabGapDedupDecision.distinct_confirmed.value
-        else:
-            g.setdefault(
-                "dedup_decision",
-                VocabGapDedupDecision.unchecked.value,
-            )
+def _build_grammar_retry_reason(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._build_grammar_retry_reason."""
+    return _moved_worker_common._build_grammar_retry_reason(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+def _build_token_reuse_retry_reason(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._build_token_reuse_retry_reason."""
+    return _moved_worker_common._build_token_reuse_retry_reason(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+def _active_editorial_gap_guidance(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._active_editorial_gap_guidance."""
+    return _moved_worker_common._active_editorial_gap_guidance(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+def _stamp_dedup_decision(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_common._stamp_dedup_decision."""
+    return _moved_worker_common._stamp_dedup_decision(
+        _worker_dependency, *args, **kwargs
+    )
 
 
 # =============================================================================
@@ -1579,573 +455,86 @@ def _stamp_dedup_decision(
 # =============================================================================
 
 
-async def extract_worker(state: StandardNameBuildState, **_kwargs) -> None:
-    """Extract candidate quantities from graph entities into batches.
-
-    For DD source: queries IMASNode paths, groups by cluster/IDS/prefix.
-    Skips sources already linked via HAS_STANDARD_NAME unless --force.
-    Stores ExtractionBatch objects in ``state.extracted``.
-    """
-    from imas_codex.cli.logging import WorkerLogAdapter
-
-    wlog = WorkerLogAdapter(logger, worker_name="sn_extract_worker")
-    wlog.info("Starting extraction (source=%s)", state.source)
-
-    def _on_status(text: str) -> None:
-        state.extract_stats.status_text = text
-        if state.loop_extract_stats is not None:
-            state.loop_extract_stats.status_text = text
-            # Stream sub-stage events so the user sees a timeline rather than
-            # a single status string that can appear stuck during long
-            # downstream phases (compose, enrich, review).
-            try:
-                state.loop_extract_stats.stream_queue.add(
-                    [
-                        {
-                            "primary_text": "extract",
-                            "primary_text_style": "dim cyan",
-                            "description": text,
-                        }
-                    ]
-                )
-            except Exception:
-                pass
-
-    def _run() -> list:
-        from imas_codex.standard_names.graph_ops import (
-            get_existing_standard_names,
-            get_named_source_ids,
-        )
-        from imas_codex.standard_names.sources.dd import extract_dd_candidates
-
-        _on_status("loading existing names…")
-        existing = get_existing_standard_names()
-
-        # Regen mode: when --min-score F is passed, re-queue sources whose
-        # linked StandardName has reviewer_score < min_score. The subsequent
-        # feedback-injection block (always-on) attaches reviewer_comments /
-        # tier / scores to each item so compose regenerates with critique
-        # in-prompt.
-        if state.is_regen_mode() and state.source == "dd":
-            from imas_codex.standard_names.graph_ops import (
-                fetch_low_score_sources,
-            )
-            from imas_codex.standard_names.sources.dd import extract_specific_paths
-
-            _on_status(f"loading sources below reviewer_score={state.min_score}…")
-            regen_sources = fetch_low_score_sources(
-                min_score=state.min_score,
-                domain=state.domain_filter,
-                ids=state.ids_filter,
-                limit=state.limit,
-                source_type="dd",
-            )
-            if not regen_sources:
-                wlog.info(
-                    "Regen mode (--min-score %s): no low-score sources found "
-                    "(domain=%s, ids=%s, limit=%s)",
-                    state.min_score,
-                    state.domain_filter,
-                    state.ids_filter,
-                    state.limit,
-                )
-                return []
-            wlog.info(
-                "Regen mode: %d sources below reviewer_score=%s "
-                "(domain=%s, ids=%s, limit=%s)",
-                len(regen_sources),
-                state.min_score,
-                state.domain_filter,
-                state.ids_filter,
-                state.limit,
-            )
-            paths = [r["source_id"] for r in regen_sources]
-            batches = extract_specific_paths(
-                paths=paths,
-                existing_names=existing,
-                on_status=_on_status,
-                write_side_effects=not state.dry_run,
-            )
-            return batches
-
-        # Source-level skip for resumability
-        named_ids: set[str] = set()
-        if not state.force:
-            named_ids = get_named_source_ids()
-            if named_ids:
-                wlog.info("Skipping %d already-named sources", len(named_ids))
-
-        if state.source == "dd":
-            from imas_codex.standard_names.batching import (
-                get_generate_batch_config,
-            )
-
-            batch_cfg = get_generate_batch_config()
-            batches = extract_dd_candidates(
-                ids_filter=state.ids_filter,
-                domain_filter=state.domain_filter,
-                limit=state.limit,
-                existing_names=existing,
-                on_status=_on_status,
-                from_model=state.from_model,
-                force=state.force,
-                name_only=state.name_only,
-                name_only_batch_size=state.name_only_batch_size,
-                max_batch_size=batch_cfg["batch_size"],
-                max_tokens=batch_cfg["max_tokens"],
-                write_skipped=not state.dry_run,
-            )
-        else:
-            wlog.error("Unknown source: %s", state.source)
-            return []
-
-        # Filter out already-named sources from batches
-        if named_ids and not state.force:
-            for batch in batches:
-                batch.items = [
-                    item
-                    for item in batch.items
-                    if item.get("path", item.get("signal_id")) not in named_ids
-                ]
-            # Remove empty batches
-            batches = [b for b in batches if b.items]
-
-        return batches
-
-    batches = await asyncio.to_thread(_run)
-
-    # Inject previous name context for --force regeneration
-    if state.force:
-        # --paths mode gets rich metadata (full docs, links, linked DD paths)
-        use_rich = False
-
-        def _get_mapping():
-            from imas_codex.standard_names.graph_ops import get_source_name_mapping
-
-            return get_source_name_mapping(rich=use_rich)
-
-        source_names = await asyncio.to_thread(_get_mapping)
-        injected = 0
-        for batch in batches:
-            for item in batch.items:
-                path = item.get("path", item.get("signal_id"))
-                if path and path in source_names:
-                    item["previous_name"] = source_names[path]
-                    injected += 1
-        if injected:
-            wlog.info("Injected previous_name context for %d items", injected)
-
-    # Inject prior reviewer feedback for targeted regeneration (always on).
-    # The compose prompt's {% if item.review_feedback %} block surfaces the
-    # previous reviewer critique so the LLM can directly address it in the
-    # new name. No-op when no prior feedback exists.
-    def _get_feedback():
-        from imas_codex.standard_names.graph_ops import (
-            fetch_review_feedback_for_sources,
-        )
-
-        ids: set[str] = set()
-        for batch in batches:
-            for item in batch.items:
-                path = item.get("path", item.get("signal_id"))
-                if path:
-                    ids.add(path)
-        return fetch_review_feedback_for_sources(ids)
-
-    feedback_map = await asyncio.to_thread(_get_feedback)
-    fb_injected = 0
-    for batch in batches:
-        for item in batch.items:
-            path = item.get("path", item.get("signal_id"))
-            if path and path in feedback_map:
-                item["review_feedback"] = feedback_map[path]
-                fb_injected += 1
-    if fb_injected:
-        wlog.info(
-            "Injected review_feedback for %d items",
-            fb_injected,
-        )
-
-    # Inject full reviewer history from Review nodes.
-    # Complements the single-review review_feedback above with the
-    # complete chain of prior reviews — latest full + older themes.
-    def _get_reviewer_history():
-        from imas_codex.standard_names.graph_ops import (
-            fetch_reviewer_history_for_sources,
-        )
-
-        ids: set[str] = set()
-        for batch in batches:
-            for item in batch.items:
-                path = item.get("path", item.get("signal_id"))
-                if path:
-                    ids.add(path)
-        return fetch_reviewer_history_for_sources(ids)
-
-    history_map = await asyncio.to_thread(_get_reviewer_history)
-    hist_injected = 0
-    for batch in batches:
-        for item in batch.items:
-            path = item.get("path", item.get("signal_id"))
-            if path and path in history_map:
-                item["reviewer_history"] = history_map[path]
-                hist_injected += 1
-    if hist_injected:
-        wlog.info(
-            "Injected reviewer_history for %d items",
-            hist_injected,
-        )
-
-    # Write StandardNameSource nodes for crash-resilient tracking
-    if not state.dry_run and batches:
-        from imas_codex.settings import get_dd_version
-        from imas_codex.standard_names.graph_ops import merge_standard_name_sources
-
-        _dd_ver = get_dd_version()
-        sources = []
-        source_type = "dd" if state.source == "dd" else "signals"
-        for batch in batches:
-            for item in batch.items:
-                path = item.get("path", item.get("signal_id"))
-                if not path:
-                    continue
-                # Per-source dicts carry no version (the re-seed contract); the
-                # current version is the batch default, pinning only new sources
-                # while re-seeds keep their immutable stored pin.
-                sources.append(
-                    {
-                        "id": f"{source_type}:{path}",
-                        "source_type": source_type,
-                        "source_id": path,
-                        "dd_path": path if source_type == "dd" else None,
-                        "batch_key": batch.group_key,
-                        "status": "extracted",
-                        "description": item.get("description")
-                        or item.get("documentation")
-                        or "",
-                    }
-                )
-
-        if sources:
-            written = await asyncio.to_thread(
-                merge_standard_name_sources,
-                sources,
-                force=state.force,
-                default_dd_version=_dd_ver,
-            )
-            wlog.info("Wrote %d StandardNameSource nodes to graph", written)
-
-    total_items = sum(len(b.items) for b in batches)
-    state.extracted = batches
-    state.extract_stats.total = total_items
-    state.extract_stats.processed = total_items
-    state.extract_stats.record_batch(total_items)
-    if state.loop_extract_stats is not None:
-        state.loop_extract_stats.total = total_items
-        state.loop_extract_stats.processed = total_items
-        state.loop_extract_stats.record_batch(total_items)
-
-    wlog.info(
-        "Extraction complete: %d batches, %d items",
-        len(batches),
-        total_items,
+async def extract_worker(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_extraction_and_enrichment.extract_worker."""
+    return await _moved_worker_extraction_and_enrichment.extract_worker(
+        _worker_dependency, *args, **kwargs
     )
-    state.stats["extract_batches"] = len(batches)
-    state.stats["extract_count"] = total_items
-
-    state.extract_stats.freeze_rate()
-    state.extract_stats.status_text = ""
-    state.extract_phase.mark_done()
-    state.extract_stats.stream_queue.add(
-        [
-            {
-                "primary_text": "extract",
-                "description": f"{total_items} paths in {len(batches)} batches",
-            }
-        ]
-    )
-    if state.loop_extract_stats is not None:
-        state.loop_extract_stats.freeze_rate()
-        state.loop_extract_stats.status_text = ""
-        state.loop_extract_stats.stream_queue.add(
-            [
-                {
-                    "primary_text": "extract",
-                    "description": f"{total_items} paths in {len(batches)} batches",
-                }
-            ]
-        )
 
 
 # =============================================================================
 # COMPOSE phase
 # =============================================================================
 
-_NEARBY_COMPARATOR_HARD_CEILING = 60
+_NEARBY_COMPARATOR_HARD_CEILING = (
+    _moved_worker_extraction_and_enrichment._NEARBY_COMPARATOR_HARD_CEILING
+)
 
 
-def _search_nearby_names(query: str, k: int = 5) -> list[dict]:
-    """Search for existing standard names near *query* for collision avoidance.
-
-    Wraps :func:`imas_codex.standard_names.search.search_standard_names_vector`
-    with graceful fallback — never raises, returns ``[]`` if graph or
-    embeddings are unavailable.
-    """
-    try:
-        from imas_codex.standard_names.search import search_standard_names_vector
-
-        return search_standard_names_vector(query, k=k)
-    except Exception:
-        return []
-
-
-def _collect_nearby_name_comparators(
-    items: Sequence[dict[str, Any]],
-    *,
-    per_item_k: int = 5,
-    cap: int = 30,
-    search: Callable[..., list[dict]] | None = None,
-) -> list[dict]:
-    """Share a bounded nearby-name budget across the items in a batch.
-
-    The first pass gives each item a share before a second pass spends any
-    remaining capacity. Results remain deduplicated by standard-name id. The
-    configured cap is a floor while the batch fits the hard ceiling: up to sixty
-    items the comparator block grows linearly because composing against no cohort
-    comparator is worse than one extra comparator line. Above the ceiling the
-    allocation degrades to first-come, exactly the base behaviour, because the
-    per-item guarantee cannot hold for an unbounded batch without an unbounded
-    prompt and bounding the prompt wins.
-    """
-    if not items or cap <= 0:
-        return []
-
-    effective_cap = min(
-        max(cap, len(items)),
-        _NEARBY_COMPARATOR_HARD_CEILING,
+def _search_nearby_names(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_extraction_and_enrichment._search_nearby_names."""
+    return _moved_worker_extraction_and_enrichment._search_nearby_names(
+        _worker_dependency, *args, **kwargs
     )
-    search_names = search or _search_nearby_names
-    results_by_item = [
-        search_names(
-            item.get("description") or item.get("path", ""),
-            k=per_item_k,
-        )
-        for item in items
-    ]
-    per_item_allowance = max(1, cap // len(items))
-    seen: set[str] = set()
-    nearby: list[dict] = []
-    next_result_indices: list[int] = []
 
-    for item_results in results_by_item:
-        added = 0
-        next_index = 0
-        for result in item_results:
-            if len(nearby) >= effective_cap or added >= per_item_allowance:
-                break
-            next_index += 1
-            result_id = result.get("id", "")
-            if result_id and result_id not in seen:
-                seen.add(result_id)
-                nearby.append(result)
-                added += 1
-        next_result_indices.append(next_index)
 
-    if len(nearby) < effective_cap:
-        for item_results, next_index in zip(
-            results_by_item, next_result_indices, strict=True
-        ):
-            for result in item_results[next_index:]:
-                if len(nearby) >= effective_cap:
-                    break
-                result_id = result.get("id", "")
-                if result_id and result_id not in seen:
-                    seen.add(result_id)
-                    nearby.append(result)
-                if len(nearby) >= effective_cap:
-                    break
-
-    return nearby
+def _collect_nearby_name_comparators(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_extraction_and_enrichment._collect_nearby_name_comparators."""
+    return _moved_worker_extraction_and_enrichment._collect_nearby_name_comparators(
+        _worker_dependency, *args, **kwargs
+    )
 
 
 #: Lease floor for a rerank. The rerank's price is only known once it
 #: returns, so the lease is opened for this before the call and the actual
 #: spend is charged through the lease already held.
-_RERANK_LEASE_FLOOR_USD = 1e-6
+_RERANK_LEASE_FLOOR_USD = (
+    _moved_worker_extraction_and_enrichment._RERANK_LEASE_FLOOR_USD
+)
 
 
-async def _rerank_comparators_for_compose(
-    items: Sequence[dict[str, Any]], nearby: list[dict]
-) -> tuple[list[dict], float, str]:
-    """Rerank the nearby-name comparator block when the switch is on.
-
-    Off by default, so the block reaches the composed prompt exactly as the
-    embedding retrieval produced it. When on, each item judges the block and
-    it is reordered by judged relevance, keeping the embedding order on any
-    failure.
-
-    Ranking is not a gate, matching the sibling rerank callers: a raise out of
-    the judgement call — an unresolvable decision model, a state builder that
-    refuses — keeps the embedding order and logs why rather than aborting the
-    compose batch.
-
-    Returns:
-        ``(block, cost, seat)``. ``seat`` is the model the call was billed
-        under, empty when no call was made, so the caller charges the spend to
-        the seat that raised it rather than to the compose model.
-    """
-    from imas_codex.standard_names.context import (
-        comparator_rerank_enabled,
-        rerank_name_comparators,
+async def _rerank_comparators_for_compose(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_extraction_and_enrichment._rerank_comparators_for_compose."""
+    return (
+        await _moved_worker_extraction_and_enrichment._rerank_comparators_for_compose(
+            _worker_dependency, *args, **kwargs
+        )
     )
 
-    if not comparator_rerank_enabled():
-        return nearby, 0.0, ""
-    try:
-        ordered, cost, seat = await rerank_name_comparators(items, nearby)
-    except Exception as exc:  # noqa: BLE001 - ranking is not a gate
-        logger.warning("comparator rerank unavailable: %s", exc)
-        return nearby, 0.0, ""
-    return list(ordered), cost, seat
+
+def _book_rerank_spend(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_extraction_and_enrichment._book_rerank_spend."""
+    return _moved_worker_extraction_and_enrichment._book_rerank_spend(
+        _worker_dependency, *args, **kwargs
+    )
 
 
-def _book_rerank_spend(
-    lease: BudgetLease, cost: float, *, seat: str, phase: str
-) -> None:
-    """Charge a rerank's spend on the lease opened before it ran.
-
-    The lease is held before the call, so the charge never depends on a
-    reservation taken afterwards, and ``charge_event`` records it whether or
-    not the lease and the pool can fund it. The event names the seat that
-    actually billed the call, which is the judge seat rather than the compose
-    model.
-    """
-    if cost > 0:
-        from imas_codex.standard_names.budget import LLMCostEvent
-
-        lease.charge_event(
-            cost,
-            LLMCostEvent(
-                model=seat,
-                tokens_in=0,
-                tokens_out=0,
-                phase=phase,
-                service="standard-names",
-            ),
-        )
-    lease.release_unused()
+async def _reranked_nearby_comparators(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_extraction_and_enrichment._reranked_nearby_comparators."""
+    return await _moved_worker_extraction_and_enrichment._reranked_nearby_comparators(
+        _worker_dependency, *args, **kwargs
+    )
 
 
-async def _reranked_nearby_comparators(
-    mgr: BudgetManager,
-    items: Sequence[dict[str, Any]],
-    nearby: list[dict],
-    *,
-    phase: str,
-) -> tuple[list[dict], float]:
-    """Rerank a compose batch's comparator block and book what it spent.
-
-    The rerank is billed by the judge seat, and its price is only known once it
-    returns, so its lease is opened before the call and the spend is charged
-    through the lease already held. A pool that cannot fund even a floor lease
-    runs the batch without a rerank, in the embedding order the block already
-    has: nothing is charged for a call that was not made.
-
-    The switch is read before the lease is opened, so the off path books
-    nothing at all — no reservation, no charge — and a batch run without the
-    rerank touches the budget exactly as it did before the switch existed.
-
-    Returns ``(block, cost)``; ``cost`` is what the lease charged, ``0.0`` when
-    the switch is off or no lease could be opened.
-    """
-    from imas_codex.standard_names.context import comparator_rerank_enabled
-
-    if not comparator_rerank_enabled():
-        return nearby, 0.0
-    lease = mgr.reserve(_RERANK_LEASE_FLOOR_USD, phase=phase)
-    if lease is None:
-        logger.debug("comparator rerank skipped: no reservable lease")
-        return nearby, 0.0
-    ordered, cost, seat = await _rerank_comparators_for_compose(items, nearby)
-    _book_rerank_spend(lease, cost, seat=seat, phase=phase)
-    return ordered, cost
+def _compose_budget_phase(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_extraction_and_enrichment._compose_budget_phase."""
+    return _moved_worker_extraction_and_enrichment._compose_budget_phase(
+        _worker_dependency, *args, **kwargs
+    )
 
 
-def _compose_budget_phase(state: StandardNameBuildState) -> str:
-    """The phase a compose batch's spend belongs to."""
-    return getattr(state, "budget_phase_tag", "") or "generate_name"
-
-
-async def _rerank_comparators_for_worker(
-    state: StandardNameBuildState,
-    items: Sequence[dict[str, Any]],
-    nearby: list[dict],
-) -> list[dict]:
-    """Rerank a compose worker batch's block and book the spend it made.
-
-    The same booking as the batch path, through the same helper, so the two
-    cannot drift: a floor lease opened before the call, charged under the seat
-    that billed it, recorded even where neither the lease nor the pool can fund
-    it. The spend also goes to the compose cost the worker reports, which the
-    batch path has no equivalent of.
-
-    A worker running without a budget manager is unleased throughout — the
-    compose call it goes on to make is unleased too — so the rerank still runs
-    and the reported cost is its only record.
-    """
-    if state.budget_manager:
-        ordered, cost = await _reranked_nearby_comparators(
-            state.budget_manager, items, nearby, phase=_compose_budget_phase(state)
-        )
-    else:
-        ordered, cost, _seat = await _rerank_comparators_for_compose(items, nearby)
-    if cost:
-        state.compose_stats.cost += cost
-    return ordered
+async def _rerank_comparators_for_worker(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_extraction_and_enrichment._rerank_comparators_for_worker."""
+    return await _moved_worker_extraction_and_enrichment._rerank_comparators_for_worker(
+        _worker_dependency, *args, **kwargs
+    )
 
 
 # =============================================================================
 # DD context enrichment — fetch rich graph data before composing
 # =============================================================================
 
-_DD_CONTEXT_QUERY = """
-MATCH (n:IMASNode {id: $path})
-MATCH (current_dd_version:DDVersion {is_current: true})
-OPTIONAL MATCH (n)-[:HAS_IDENTIFIER_SCHEMA]->(ident:IdentifierSchema)
-OPTIONAL MATCH (n)-[:HAS_PARENT]->(parent:IMASNode)
-OPTIONAL MATCH (parent)-[:HAS_CHILD]->(sibling:IMASNode)
-WHERE sibling.id <> $path
-  AND NOT (sibling.data_type IN ['STRUCTURE', 'STRUCT_ARRAY'])
-WITH n, current_dd_version, ident, parent,
-     [(n)-[:HAS_UNIT]->(unit:Unit) | unit.id] AS unit_relations,
-     collect(DISTINCT {
-         path: sibling.id,
-         description: sibling.description,
-         data_type: sibling.data_type
-     })[0..8] AS sibling_fields
-RETURN n.coordinate1_same_as AS coordinate1,
-       n.coordinate2_same_as AS coordinate2,
-       n.coordinate3_same_as AS coordinate3,
-       n.timebasepath AS timebase,
-       n.cocos_transformation_type AS cocos_label,
-       n.cocos_transformation_expression AS cocos_expression,
-       n.lifecycle_status AS lifecycle_status,
-       n.data_type AS data_type,
-       n.description AS node_description,
-       n.documentation AS node_documentation,
-       ident.name AS identifier_schema_name,
-       ident.documentation AS identifier_schema_doc,
-       ident.options AS identifier_options,
-       current_dd_version.id AS dd_version,
-       n.unit AS raw_unit,
-       unit_relations,
-       CASE WHEN size(unit_relations) = 1
-            THEN head(unit_relations) ELSE null END AS unit_from_rel,
-       parent.id AS parent_path,
-       parent.description AS parent_description,
-       n.enrichment_source AS enrichment_source,
-       sibling_fields
-"""
+_DD_CONTEXT_QUERY = _moved_worker_extraction_and_enrichment._DD_CONTEXT_QUERY
 
 # Ancestor lineage context — walk HAS_PARENT up to the IDS root and collect
 # every ancestor that carries a non-empty description/documentation. A DD
@@ -2157,742 +546,94 @@ RETURN n.coordinate1_same_as AS coordinate1,
 # composition ground on the real physics + locus instead of the stub. Rich
 # LLM-enriched descriptions are preferred over terse DD documentation; nearest
 # ancestor first.
-_ANCESTOR_CONTEXT_QUERY = """
-MATCH path = (n:IMASNode {id: $path})-[:HAS_PARENT*1..8]->(a:IMASNode)
-WHERE coalesce(trim(a.description), '') <> ''
-   OR coalesce(trim(a.documentation), '') <> ''
-RETURN length(path) AS depth,
-       a.id AS path,
-       a.description AS description,
-       a.documentation AS documentation,
-       a.enrichment_source AS enrichment_source
-ORDER BY depth ASC
-"""
+_ANCESTOR_CONTEXT_QUERY = (
+    _moved_worker_extraction_and_enrichment._ANCESTOR_CONTEXT_QUERY
+)
 
-_CROSS_IDS_QUERY = """
-MATCH (n:IMASNode {id: $path})-[:IN_CLUSTER]->(c:IMASSemanticCluster)
-WHERE c.scope IN ['global', 'domain']
-WITH c ORDER BY c.scope ASC LIMIT 3
-MATCH (member:IMASNode)-[:IN_CLUSTER]->(c)
-WHERE member.id <> $path
-  AND NOT (member.data_type IN ['STRUCTURE', 'STRUCT_ARRAY'])
-RETURN c.label AS cluster_label,
-       c.description AS cluster_description,
-       c.scope AS cluster_scope,
-       collect(DISTINCT member.id)[0..5] AS member_paths
-"""
+_CROSS_IDS_QUERY = _moved_worker_extraction_and_enrichment._CROSS_IDS_QUERY
 
-_VERSION_HISTORY_QUERY = """
-MATCH (vc:IMASNodeChange)-[:FOR_IMAS_PATH]->(n:IMASNode {id: $path})
-WHERE vc.change_type IN [
-    'path_added', 'cocos_transformation_type', 'sign_convention',
-    'units', 'path_renamed', 'definition_clarification'
-]
-RETURN vc.id AS change_id, vc.change_type AS change_type
-"""
+_VERSION_HISTORY_QUERY = _moved_worker_extraction_and_enrichment._VERSION_HISTORY_QUERY
 
-_ERROR_FIELDS_QUERY = """
-MATCH (d:IMASNode {id: $path})-[:HAS_ERROR]->(e:IMASNode)
-RETURN e.id AS error_path
-"""
+_ERROR_FIELDS_QUERY = _moved_worker_extraction_and_enrichment._ERROR_FIELDS_QUERY
 
 # Per-member DD documentation grounding: a compose candidate's name can span
 # N sibling leaves (family_siblings, cross-IDS equivalents). Fetch the terse
 # DD-XML documentation for those member paths so the name is grounded on every
 # leaf it covers, not just the primary. Terse doc only — DISTINCT from the rich
 # enriched description the primary already renders.
-_MEMBER_DOC_QUERY = """
-UNWIND $paths AS p
-MATCH (n:IMASNode {id: p})
-RETURN n.id AS path, n.documentation AS documentation
-"""
+_MEMBER_DOC_QUERY = _moved_worker_extraction_and_enrichment._MEMBER_DOC_QUERY
 
 # Bound the per-item member-doc map so a large family/cluster cannot bloat the
 # compose prompt; the primary path's full grounding is always rendered.
-_MAX_MEMBER_DOCS = 8
+_MAX_MEMBER_DOCS = _moved_worker_extraction_and_enrichment._MAX_MEMBER_DOCS
 
 # Truncate each terse member clause so the grounding stays compact.
-_MEMBER_DOC_MAX_CHARS = 240
+_MEMBER_DOC_MAX_CHARS = _moved_worker_extraction_and_enrichment._MEMBER_DOC_MAX_CHARS
 
-_IDS_CONTEXT_QUERY = """
-MATCH (ids:IDS {id: $ids_name})
-OPTIONAL MATCH (child:IMASNode)-[:IN_IDS]->(ids)
-WHERE child.id STARTS WITH $ids_prefix
-  AND child.data_type IN ['STRUCTURE', 'STRUCT_ARRAY', 'FLT_1D']
-  AND size([x IN split(child.id, '/') WHERE true]) = 2
-WITH ids,
-     collect(DISTINCT {
-         name: child.id, description: child.description, data_type: child.data_type
-     })[0..10] AS top_sections
-RETURN ids.description AS ids_description,
-       ids.documentation AS ids_documentation,
-       top_sections
-"""
+_IDS_CONTEXT_QUERY = _moved_worker_extraction_and_enrichment._IDS_CONTEXT_QUERY
 
 
-def _enrich_ids_context(ids_name: str) -> dict | None:
-    """Fetch IDS-level context for batch header.
-
-    Returns dict with ids_description, ids_documentation, top_sections,
-    or None if IDS not found.
-    """
-    from imas_codex.graph.client import GraphClient
-
-    with GraphClient() as gc:
-        rows = list(
-            gc.query(
-                _IDS_CONTEXT_QUERY,
-                ids_name=ids_name,
-                ids_prefix=f"{ids_name}/",
-            )
-        )
-        if not rows:
-            return None
-        row = rows[0]
-        sections = row.get("top_sections") or []
-        valid = [s for s in sections if s.get("name")]
-        return {
-            "ids_description": row.get("ids_description") or "",
-            "ids_documentation": row.get("ids_documentation") or "",
-            "top_sections": valid,
-        }
-
-
-def _hybrid_search_neighbours_batch(
-    gc: Any,
-    items: list[tuple[str, str | None, str | None]],
-    *,
-    max_results: int = 15,
-    search_k: int = 10,
-) -> list[list[dict]]:
-    """Batch-embed then search neighbours for multiple (path, desc, domain) items.
-
-    Replaces the per-item N+1 embed pattern: collects all unique
-    description-query texts, embeds them in **one** remote round-trip
-    via :func:`embed_query_texts`, then fans out ``hybrid_dd_search``
-    calls with pre-computed embeddings.
-
-    Path-text queries (``"equilibrium/time_slice/..."``-style) don't
-    need embedding — ``hybrid_dd_search`` detects them and uses
-    text-only mode automatically.
-
-    Args:
-        gc: Active graph client.
-        items: List of ``(path, description, physics_domain)`` tuples.
-        max_results: Cap per-item neighbour count.
-        search_k: ``k`` passed to ``hybrid_dd_search``.
-
-    Returns:
-        List of neighbour-lists in the same order as *items*.
-    """
-    from imas_codex.embeddings.description import embed_query_texts
-    from imas_codex.graph.dd_search import hybrid_dd_search
-
-    if not items:
-        return []
-
-    # ── 1. Collect unique description queries needing embedding ─────
-    text_set: dict[str, None] = {}  # ordered-set via dict
-    item_desc_queries: list[str] = []  # per-item desc query text
-    for _path, description, _domain in items:
-        desc_query = (description or "")[:200].strip()
-        item_desc_queries.append(desc_query)
-        if desc_query:
-            text_set.setdefault(desc_query, None)
-
-    unique_texts = list(text_set)
-
-    # ── 2. Single batch embed call ──────────────────────────────────
-    embed_cache: dict[str, list[float]] = {}
-    if unique_texts:
-        try:
-            embeddings = embed_query_texts(unique_texts)
-            # Map by index — handle length mismatch gracefully (server may
-            # deduplicate or batch differently)
-            for i, emb in enumerate(embeddings):
-                if i < len(unique_texts):
-                    embed_cache[unique_texts[i]] = emb
-        except Exception:
-            logger.warning(
-                "Batch query embedding failed; falling back to text-only search",
-                exc_info=True,
-            )
-
-    # ── 3. Per-item hybrid search (with pre-computed embeddings) ────
-    all_results: list[list[dict]] = []
-    # Collect all hit paths across items for a single batch SN resolution
-    per_item_hits: list[dict[str, Any]] = []  # path → SearchHit per item
-
-    for idx, (path, _desc, physics_domain) in enumerate(items):
-        item_hits: dict[str, Any] = {}  # path → SearchHit (dedup)
-
-        # Query 1: description-based
-        desc_query = item_desc_queries[idx]
-        if desc_query:
-            pre_emb = embed_cache.get(desc_query)
-            try:
-                hits = hybrid_dd_search(
-                    gc,
-                    desc_query,
-                    node_category="quantity",
-                    physics_domain=physics_domain,
-                    k=search_k,
-                    embedding=pre_emb,
-                )
-                for h in hits:
-                    if h.path != path:
-                        item_hits[h.path] = h
-            except Exception:
-                logger.debug(
-                    "Hybrid search (description) failed for %s",
-                    path,
-                    exc_info=True,
-                )
-
-        # Query 2: path-text (no embedding needed — text-only inside)
-        try:
-            hits = hybrid_dd_search(
-                gc,
-                path,
-                node_category="quantity",
-                k=search_k,
-            )
-            for h in hits:
-                if h.path != path and h.path not in item_hits:
-                    item_hits[h.path] = h
-        except Exception:
-            logger.debug("Hybrid search (path) failed for %s", path, exc_info=True)
-
-        per_item_hits.append(item_hits)
-
-    # ── 4. Single batch HAS_STANDARD_NAME resolution ───────────────
-    # Gather all unique hit paths across all items
-    all_hit_paths: set[str] = set()
-    for item_hits in per_item_hits:
-        all_hit_paths.update(item_hits)
-
-    sn_map: dict[str, str | None] = {}
-    if all_hit_paths:
-        try:
-            rows = gc.query(
-                """
-                UNWIND $paths AS pid
-                MATCH (n:IMASNode {id: pid})
-                OPTIONAL MATCH (n)-[:HAS_STANDARD_NAME]->(sn:StandardName)
-                RETURN n.id AS path, sn.id AS sn_id
-                """,
-                paths=list(all_hit_paths),
-            )
-            for r in rows or []:
-                sn_map[r["path"]] = r.get("sn_id")
-        except Exception:
-            logger.debug("HAS_STANDARD_NAME batch pre-resolution failed", exc_info=True)
-
-    # ── 5. Build per-item result dicts ──────────────────────────────
-    for idx, (_path, _desc, _domain) in enumerate(items):
-        item_hits = per_item_hits[idx]
-
-        if not item_hits:
-            all_results.append([])
-            continue
-
-        sorted_hits = sorted(item_hits.values(), key=lambda h: h.score, reverse=True)[
-            :max_results
-        ]
-
-        neighbours: list[dict] = []
-        for h in sorted_hits:
-            sn_id = sn_map.get(h.path)
-            tag = f"name:{sn_id}" if sn_id else f"dd:{h.path}"
-            # Rich-first: prefer the LLM-enriched description over terse source
-            # documentation (matches the DD-enrichment coalesce precedence).
-            doc = (h.description or h.documentation or "")[:300]
-            neighbours.append(
-                {
-                    "tag": tag,
-                    "path": h.path,
-                    "ids": h.ids_name,
-                    "unit": h.units or "",
-                    "physics_domain": h.physics_domain or "",
-                    "doc_short": doc,
-                    "cocos_label": h.cocos_transformation_type or "",
-                    "lifecycle": h.lifecycle_status or "",
-                    "node_type": h.node_type or "",
-                    "score": float(h.score) if h.score is not None else None,
-                }
-            )
-        all_results.append(neighbours)
-
-    return all_results
-
-
-def _hybrid_search_neighbours(
-    gc: Any,
-    path: str,
-    description: str | None = None,
-    physics_domain: str | None = None,
-    max_results: int = 15,
-    search_k: int = 10,
-) -> list[dict]:
-    """Single-item shim around :func:`_hybrid_search_neighbours_batch`.
-
-    .. deprecated::
-        Prefer :func:`_hybrid_search_neighbours_batch` for multi-item
-        workloads.  This shim exists for any un-migrated callers.
-    """
-    results = _hybrid_search_neighbours_batch(
-        gc,
-        [(path, description, physics_domain)],
-        max_results=max_results,
-        search_k=search_k,
+def _enrich_ids_context(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_extraction_and_enrichment._enrich_ids_context."""
+    return _moved_worker_extraction_and_enrichment._enrich_ids_context(
+        _worker_dependency, *args, **kwargs
     )
-    return results[0] if results else []
+
+
+def _hybrid_search_neighbours_batch(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours_batch."""
+    return _moved_worker_extraction_and_enrichment._hybrid_search_neighbours_batch(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+def _hybrid_search_neighbours(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours."""
+    return _moved_worker_extraction_and_enrichment._hybrid_search_neighbours(
+        _worker_dependency, *args, **kwargs
+    )
 
 
 # Cap for graph-relationship neighbour injection (per path).
-_RELATED_MAX_RESULTS = 5
+_RELATED_MAX_RESULTS = _moved_worker_extraction_and_enrichment._RELATED_MAX_RESULTS
 
 
 # Compose retry: on grammar/validation failure, retry with expanded context.
 # Values resolved from settings accessors; module-level constants kept for
 # backwards compatibility with any direct importers.
-def _retry_attempts() -> int:
-    from imas_codex.settings import get_sn_retry_attempts
-
-    return get_sn_retry_attempts()
-
-
-def _retry_k_expansion() -> int:
-    from imas_codex.settings import get_sn_retry_k_expansion
-
-    return get_sn_retry_k_expansion()
+def _retry_attempts(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_extraction_and_enrichment._retry_attempts."""
+    return _moved_worker_extraction_and_enrichment._retry_attempts(
+        _worker_dependency, *args, **kwargs
+    )
 
 
-def _mark_vocab_gap_sources(
-    batch: list[dict],
-    error_detail: str,
-    source_kind: str,
-) -> int:
-    """Mark sources after a vocab-gap validation failure.
-
-    When batch_size == 1 the offending source is known, so it is marked
-    ``vocab_gap_compose`` (terminal — won't be reclaimed).  When
-    batch_size > 1 we cannot identify which source triggered the failure,
-    so all sources are marked ``failed`` with a retry-friendly reason —
-    they will be reclaimed on the next ``sn run`` and retried in a
-    different (possibly smaller) batch.
-    """
-    from imas_codex.standard_names.graph_ops import persist_claimed_source_outcomes
-
-    single_source = len(batch) == 1
-    reason = "vocab_gap_compose" if single_source else "vocab_gap_batch"
-    status = "skipped" if single_source else "extracted"
-    outcomes = []
-    for item in batch:
-        sid = item.get("source_id") or item.get("path")
-        if not sid:
-            continue
-        outcome = _claimed_source_outcome(
-            batch,
-            sid,
-            source_type=source_kind,
-            status=status,
-            last_error=error_detail[:300],
-            skip_reason=reason,
-            skip_reason_detail=error_detail[:300],
-        )
-        if outcome:
-            outcomes.append(outcome)
-    return len(persist_claimed_source_outcomes(outcomes))
+def _retry_k_expansion(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_extraction_and_enrichment._retry_k_expansion."""
+    return _moved_worker_extraction_and_enrichment._retry_k_expansion(
+        _worker_dependency, *args, **kwargs
+    )
 
 
-def _related_path_neighbours(
-    gc: Any,
-    path: str,
-    *,
-    max_results: int = _RELATED_MAX_RESULTS,
-) -> list[dict]:
-    """Fetch explicit graph-relationship neighbours for a DD path.
-
-    Calls :func:`related_dd_search` to find paths related via
-    cluster membership, shared coordinates, matching units, identifier
-    schemas, or COCOS transformation type.  Returns a compact list of
-    dicts suitable for Jinja template injection.
-    """
-    from imas_codex.graph.dd_search import related_dd_search
-
-    try:
-        result = related_dd_search(
-            gc,
-            path,
-            relationship_types="all",
-            max_results=max_results,
-        )
-    except Exception:
-        logger.debug("related_dd_search failed for %s", path, exc_info=True)
-        return []
-
-    if not result.hits:
-        return []
-
-    neighbours: list[dict] = []
-    for hit in result.hits:
-        entry: dict[str, Any] = {
-            "path": hit.path,
-            "ids": hit.ids,
-            "relationship_type": hit.relationship_type,
-            "via": hit.via,
-        }
-        if hit.doc:
-            entry["doc"] = hit.doc
-        if hit.physics_domain:
-            entry["physics_domain"] = hit.physics_domain
-        neighbours.append(entry)
-
-    return neighbours
+def _mark_vocab_gap_sources(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_extraction_and_enrichment._mark_vocab_gap_sources."""
+    return _moved_worker_extraction_and_enrichment._mark_vocab_gap_sources(
+        _worker_dependency, *args, **kwargs
+    )
 
 
-def _enrich_batch_items(items: list[dict]) -> None:
-    """Enrich batch items with rich DD context from the graph.
+def _related_path_neighbours(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_extraction_and_enrichment._related_path_neighbours."""
+    return _moved_worker_extraction_and_enrichment._related_path_neighbours(
+        _worker_dependency, *args, **kwargs
+    )
 
-    Fetches coordinate specs, COCOS info, identifier schemas, sibling
-    fields, cross-IDS cluster siblings, hybrid-search neighbours, and
-    version history for each item. Modifies items in-place.
-    """
-    from imas_codex.graph.client import GraphClient
 
-    with GraphClient() as gc:
-        for item in items:
-            path = item.get("path")
-            if not path:
-                continue
-
-            # Value-provenance collapse: a measured/reconstructed/reference facet
-            # is the SAME quantity as its base — ground on the base quantity (rich
-            # description) so the estimator facets compose ONE name, and flag the
-            # item so the prompt directs the composer to name the base quantity and
-            # NOT encode the estimator (collapse provenance, de-conflate physics).
-            # The estimator itself is recorded on StandardNameSource.provenance.
-            prov_term, base_path = detect_value_provenance(path)
-            grounding_path = path
-            if prov_term:
-                item["value_provenance"] = prov_term
-                item["provenance_base_path"] = base_path
-                grounding_path = base_path
-
-            rows = list(gc.query(_DD_CONTEXT_QUERY, path=grounding_path))
-            if not rows:
-                continue
-
-            row = rows[0]
-
-            from imas_codex.settings import get_dd_version
-            from imas_codex.standard_names.dd_resolutions import resolve_dd_row
-
-            prior_raw_context = item.get("raw_dd_context") or {}
-            unit_from_rel = row.get("unit_from_rel")
-            if "unit" in prior_raw_context:
-                raw_unit = prior_raw_context["unit"]
-            else:
-                raw_unit = unit_from_rel or row.get("raw_unit") or item.get("unit")
-            raw_context = {
-                "path": path,
-                "unit": raw_unit,
-                "documentation": prior_raw_context.get("documentation")
-                or row.get("node_documentation"),
-                "data_type": row.get("data_type"),
-                "physics_domain": row.get("physics_domain"),
-                "cocos_transformation_type": row.get("cocos_label"),
-                "cocos_transformation_expression": row.get("cocos_expression"),
-                "lifecycle_status": row.get("lifecycle_status"),
-            }
-            resolved_context = resolve_dd_row(
-                raw_context,
-                dd_version=str(
-                    row.get("dd_version") or item.get("dd_version") or get_dd_version()
-                ),
-            )
-            item.update(resolved_context.as_pipeline_item())
-
-            # Grounding text: prefer the rich LLM-enriched node description over
-            # the terse source documentation (rich-first, terse-fallback — the
-            # same precedence the DD-enrichment pipeline uses). Deterministic
-            # parent sources carry a placeholder StandardNameSource.description
-            # ("… pending LLM enrichment") that SHADOWS the rich node
-            # description which already exists on the IMASNode; without this
-            # backfill the composer never sees the physical qualifiers the
-            # source states (e.g. "coolant", "neutron", "maximum") and may drop
-            # them. Backfill the item's description/documentation so the compose
-            # prompt's grounding lines render the rich text for every item.
-            node_desc = (row.get("node_description") or "").strip()
-            node_doc = (row.get("node_documentation") or "").strip()
-            rich = node_desc or node_doc
-            if rich:
-                cur = (item.get("description") or "").strip()
-                # For a provenance facet the grounding was redirected to the base
-                # quantity, so its terse facet description ("Measured value") must
-                # be REPLACED — not just backfilled — with the base description.
-                if (
-                    not cur
-                    or cur == DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER
-                    or prov_term
-                ):
-                    item["description"] = rich
-                # Surface the terse, XML-backed DD documentation as a DISTINCT
-                # grounding line — NOT a copy of the rich description. Keeping
-                # them separate lets the compose template's
-                # ``documentation != description`` guard fire, so the model sees
-                # BOTH the rich enriched description AND the authoritative DD
-                # clause. Fall back to node_desc only when no terse doc exists
-                # (avoids an empty line). Previously this copied node_desc into
-                # documentation, making the two equal and silently suppressing
-                # the source-documentation line entirely.
-                item["documentation"] = node_doc or node_desc
-
-            # Ancestor lineage context: a terse value leaf ("Deuterium (D).")
-            # hides the meaningful physics + evaluation locus that lives on a
-            # parent quantity node ("Ion toroidal rotation velocity … at the
-            # pedestal top"). Surface the ancestor lineage so the composer sees
-            # the parent description IN ADDITION to the leaf — this is what lets
-            # a name resolve the correct locus (e.g. pedestal_top, not the bare
-            # DD path segment pedestal). Prefer rich LLM-enriched descriptions;
-            # fall back to terse DD documentation; nearest ancestor first; cap
-            # the block so a deep path cannot bloat the prompt.
-            if not item.get("ancestor_context"):
-                anc_rows = list(gc.query(_ANCESTOR_CONTEXT_QUERY, path=grounding_path))
-                lineage: list[dict[str, str]] = []
-                seen_text: set[str] = set()
-                for a in anc_rows:
-                    a_desc = (a.get("description") or "").strip()
-                    a_doc = (a.get("documentation") or "").strip()
-                    text = a_desc or a_doc
-                    if not text or text in seen_text:
-                        continue
-                    seen_text.add(text)
-                    lineage.append({"path": a.get("path") or "", "text": text})
-                    if len(lineage) >= 4:
-                        break
-                if lineage:
-                    item["ancestor_context"] = lineage
-
-            # Apply unit overrides AFTER re-injecting the DD unit.
-            # The override engine corrects upstream DD defects (e.g.,
-            # unit vectors tagged 'm' instead of dimensionless '1').
-            # Without this, the DD-unit re-injection above would bypass
-            # overrides that were applied during extraction.
-            if item.get("unit") and path:
-                from imas_codex.standard_names.unit_overrides import resolve_unit
-
-                resolved, meta = resolve_unit(path, item["unit"])
-                if meta and meta.get("rule") == "override":
-                    item["unit"] = resolved
-                elif meta and meta.get("rule") == "skip":
-                    item["unit"] = None  # will be caught by compose safety
-
-            # Coordinate context
-            coords = []
-            for key in ("coordinate1", "coordinate2", "coordinate3"):
-                val = row.get(key)
-                if val:
-                    coords.append(val)
-            if coords:
-                item["coordinate_paths"] = coords
-
-            timebase = row.get("timebase")
-            if timebase:
-                item["timebase"] = timebase
-
-            # COCOS
-            cocos_label = row.get("cocos_label")
-            cocos_expr = row.get("cocos_expression")
-            if cocos_label:
-                item["cocos_label"] = cocos_label
-            if cocos_expr:
-                item["cocos_expression"] = cocos_expr
-
-            # Lifecycle
-            lifecycle = row.get("lifecycle_status")
-            if lifecycle and lifecycle != "active":
-                item["lifecycle_status"] = lifecycle
-
-            # Parent description (complements parent_path from extraction)
-            parent_desc = row.get("parent_description")
-            if parent_desc and not item.get("parent_description"):
-                item["parent_description"] = parent_desc
-
-            # Identifier schema
-            ident_name = row.get("identifier_schema_name")
-            if ident_name:
-                item["identifier_schema"] = ident_name
-                ident_doc = row.get("identifier_schema_doc")
-                if ident_doc:
-                    item["identifier_schema_doc"] = ident_doc
-
-                # Parse identifier enum values from JSON-encoded options
-                raw_options = row.get("identifier_options")
-                if raw_options:
-                    try:
-                        parsed = (
-                            json.loads(raw_options)
-                            if isinstance(raw_options, str)
-                            else raw_options
-                        )
-                        if isinstance(parsed, list):
-                            item["identifier_values"] = [
-                                {
-                                    "name": opt.get("name", ""),
-                                    "index": opt.get("index", 0),
-                                    "description": opt.get("description", ""),
-                                }
-                                for opt in parsed
-                                if opt.get("name")
-                            ]
-                    except (json.JSONDecodeError, TypeError):
-                        pass
-
-            # Sibling fields (same parent, different leaf paths)
-            siblings = row.get("sibling_fields") or []
-            if siblings and isinstance(siblings, list):
-                valid = [s for s in siblings if s.get("path")]
-                if valid:
-                    item["sibling_fields"] = valid
-
-            # Cross-IDS cluster siblings
-            cross_rows = list(gc.query(_CROSS_IDS_QUERY, path=path))
-            if cross_rows:
-                clusters = []
-                cross_ids_paths = []
-                for cr in cross_rows:
-                    label = cr.get("cluster_label")
-                    members = cr.get("member_paths") or []
-                    if label and members:
-                        clusters.append(
-                            {
-                                "label": label,
-                                "description": cr.get("cluster_description") or "",
-                                "scope": cr.get("cluster_scope") or "",
-                                "members": members,
-                            }
-                        )
-                        cross_ids_paths.extend(members)
-                if clusters:
-                    item["clusters"] = clusters
-                if cross_ids_paths:
-                    # Deduplicate
-                    seen = set()
-                    unique = []
-                    for p in cross_ids_paths:
-                        if p not in seen:
-                            seen.add(p)
-                            unique.append(p)
-                    item["cross_ids_paths"] = unique[:8]
-
-            # Version history (COCOS/sign changes are most important)
-            version_rows = list(gc.query(_VERSION_HISTORY_QUERY, path=path))
-            if version_rows:
-                valid_changes = []
-                for vr in version_rows:
-                    change_id = vr.get("change_id") or ""
-                    change_type = vr.get("change_type") or ""
-                    # Version is encoded in the ID: path:change_type:version
-                    parts = change_id.rsplit(":", 1)
-                    version = parts[-1] if len(parts) >= 2 else ""
-                    if version and change_type:
-                        valid_changes.append(
-                            {"version": version, "change_type": change_type}
-                        )
-                if valid_changes:
-                    item["version_history"] = valid_changes
-
-            # Hybrid-search neighbours are batched outside the per-item loop
-            # (see below). Skip per-item call here.
-
-            # Graph-relationship neighbours (cluster, coordinate, unit,
-            # identifier, COCOS — explicit graph edges, not vector search).
-            related = _related_path_neighbours(gc, path)
-            if related:
-                item["related_neighbours"] = related
-
-            # Error companion fields (uncertainty: _error_upper/lower/index)
-            error_rows = list(gc.query(_ERROR_FIELDS_QUERY, path=path))
-            if error_rows:
-                error_fields = [
-                    ef["error_path"] for ef in error_rows if ef.get("error_path")
-                ]
-                if error_fields:
-                    item["error_fields"] = error_fields
-
-        # ── Batch hybrid-search neighbours (single embed round-trip) ───
-        batch_tuples: list[tuple[str, str | None, str | None]] = []
-        batch_indices: list[int] = []  # index into items
-        for idx, item in enumerate(items):
-            path = item.get("path")
-            if not path:
-                continue
-            batch_tuples.append(
-                (path, item.get("description"), item.get("physics_domain"))
-            )
-            batch_indices.append(idx)
-
-        if batch_tuples:
-            hybrid_results = _hybrid_search_neighbours_batch(gc, batch_tuples)
-            for bi, hr in zip(batch_indices, hybrid_results, strict=True):
-                if hr:
-                    items[bi]["hybrid_neighbours"] = hr
-
-        # ── Batch per-member DD documentation (grounding on covered leaves) ──
-        # The per-item loop above grounds only the primary ``path``. A name can
-        # span N sibling leaves (family_siblings, cross-IDS equivalents) that
-        # render today as bare path strings; without their DD clauses the name
-        # is grounded on one leaf. Collect every member path across the batch,
-        # fetch terse DD documentation in a SINGLE UNWIND, then attach the
-        # per-item subset as ``dd_paths_docs`` {path: terse_doc}. Terse and
-        # bounded — distinct from the rich primary description.
-        member_sets: list[set[str]] = []
-        all_members: set[str] = set()
-        for item in items:
-            primary = item.get("path")
-            members: set[str] = set()
-            for field in ("family_siblings", "cross_ids_paths"):
-                vals = item.get(field) or []
-                if isinstance(vals, list):
-                    members.update(v for v in vals if v and v != primary)
-            bounded = set(sorted(members)[:_MAX_MEMBER_DOCS])
-            member_sets.append(bounded)
-            all_members.update(bounded)
-
-        if all_members:
-            doc_rows = list(gc.query(_MEMBER_DOC_QUERY, paths=sorted(all_members)))
-            member_docs: dict[str, str] = {}
-            for r in doc_rows:
-                p = r.get("path")
-                doc = (r.get("documentation") or "").strip()
-                if p and doc:
-                    if len(doc) > _MEMBER_DOC_MAX_CHARS:
-                        doc = doc[:_MEMBER_DOC_MAX_CHARS].rstrip() + "…"
-                    member_docs[p] = doc
-            for item, members in zip(items, member_sets, strict=True):
-                docs = {p: member_docs[p] for p in members if p in member_docs}
-                if docs:
-                    item["dd_paths_docs"] = docs
-
-        # Accepted family siblings — a member composed inside a detected
-        # vector/geometric family follows its accepted siblings' established
-        # spellings rather than inventing one. Mirrors the docs-side
-        # child_components injection (same sort_by_axis_convention ordering,
-        # same {name, description, axis} per-entry fields) in the sibling
-        # direction; the tag is simply absent on any failure.
-        try:
-            from imas_codex.standard_names.enrichment import (
-                attach_family_accepted_siblings,
-            )
-
-            attach_family_accepted_siblings(items, gc=gc)
-        except Exception:
-            logger.debug(
-                "family accepted-sibling enrichment failed",
-                exc_info=True,
-            )
+def _enrich_batch_items(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_extraction_and_enrichment._enrich_batch_items."""
+    return _moved_worker_extraction_and_enrichment._enrich_batch_items(
+        _worker_dependency, *args, **kwargs
+    )
 
 
 #: A DD path segment naming a time derivative. The DD writes the differential
@@ -2902,9 +643,11 @@ def _enrich_batch_items(items: list[dict]) -> None:
 #: ``d_dt``. That leading ``d`` is what separates a derivative from the DD's
 #: OTHER use of the same suffix, the deuterium-tritium reaction
 #: (``emissivity_dt``, ``fusion_power_dt``), which differentiates nothing.
-_TIME_DERIVATIVE_SEGMENT_RE = _re.compile(r"d(?:_|.+_)dt(?:_.*)?")
+_TIME_DERIVATIVE_SEGMENT_RE = (
+    _moved_worker_extraction_and_enrichment._TIME_DERIVATIVE_SEGMENT_RE
+)
 
-_AXIS_LEAVES = frozenset({"x", "y", "z", "r", "phi"})
+_AXIS_LEAVES = _moved_worker_extraction_and_enrichment._AXIS_LEAVES
 
 # Device WORDS a hardware locus is expected to echo in its source path. Only
 # when the name's locus contains one of these do we apply the zero-overlap
@@ -2921,151 +664,57 @@ _AXIS_LEAVES = frozenset({"x", "y", "z", "r", "phi"})
 # over the live corpus it takes the flag count from 27 to 189, newly rejecting
 # whole families (``area_of_diagnostic_aperture``, ``…_of_optical_element``)
 # whose locus is simply not spelled in the DD path.
-_HARDWARE_LOCUS_WORDS = frozenset(
-    {
-        "coil",
-        "probe",
-        "sensor",
-        "gauge",
-        "camera",
-        "detector",
-        "launcher",
-        "mirror",
-        "antenna",
-        "loop",
-        "bolometer",
-        "injector",
-        "strap",
-        "electrode",
-        "magnet",
-        "valve",
-        "thermocouple",
-        "interferometer",
-        "polarimeter",
-        "reflectometer",
-        "spectrometer",
-        "waveguide",
-        "calorimeter",
-        "manometer",
-        "cryopump",
-    }
-)
+_HARDWARE_LOCUS_WORDS = _moved_worker_extraction_and_enrichment._HARDWARE_LOCUS_WORDS
 
 
 #: Ordinal position words the DD uses to index successive samples along ONE
 #: object. IMAS-DD PATH vocabulary — the DD gives each sampled position its own
 #: sub-structure and names it by its place along the object being sampled.
-_ORDINAL_POSITION_WORDS = frozenset(
-    {
-        "first",
-        "second",
-        "third",
-        "fourth",
-        "fifth",
-        "start",
-        "end",
-        "intermediate",
-        "middle",
-        "centre",
-        "centres",
-        "center",
-        "centers",
-    }
+_ORDINAL_POSITION_WORDS = (
+    _moved_worker_extraction_and_enrichment._ORDINAL_POSITION_WORDS
 )
 
 
 #: IMAS-DD path segments for solid hardware cross-section representations.
 #: These are DD structure tokens, not a duplicate of ISN grammar vocabulary.
-_SOLID_GEOMETRY_PATH_SEGMENTS = frozenset(
-    {"thick_line", "outline", "rectangle", "oblique", "arcs_of_circle"}
+_SOLID_GEOMETRY_PATH_SEGMENTS = (
+    _moved_worker_extraction_and_enrichment._SOLID_GEOMETRY_PATH_SEGMENTS
 )
 
 #: Words used by IMAS-DD path segments for optical ray/path representations.
 #: The name-side comparison below derives its words from the parsed surface
 #: locus; this set remains a DD representation policy, not a grammar token list.
-_OPTICAL_GEOMETRY_PATH_WORDS = frozenset({"beam", "sight"})
+_OPTICAL_GEOMETRY_PATH_WORDS = (
+    _moved_worker_extraction_and_enrichment._OPTICAL_GEOMETRY_PATH_WORDS
+)
 
 
-def _is_ordinal_point_sample(segment: str) -> bool:
-    """True when *segment* names one ordinal sample of a single object.
-
-    The DD samples one geometric object — a line of sight, a conductor path, a
-    thick line — at successive positions and gives each position its own
-    structure: ``line_of_sight/first_point``, ``line_of_sight/second_point``,
-    ``conductor/elements/start_points``, ``…/elements/centres``. Recognised by
-    shape: the DD's ``point``/``points`` sampling noun and/or an ordinal
-    position word, rather than by an exhaustive path list.
-
-    Where the sample sits along the object is a position on ONE quantity, not a
-    second quantity — which is what separates it from a distinct vector FIELD of
-    a device (``camera/direction`` vs ``camera/up``, a line of sight and an
-    image-up orientation) that genuinely measures something else.
-    """
-    words = segment.split("_")
-    if words[-1] in {"point", "points"}:
-        words = words[:-1]
-        if not words:  # a bare ``point``/``points`` sampling structure
-            return True
-    return all(w in _ORDINAL_POSITION_WORDS for w in words)
+def _is_ordinal_point_sample(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_extraction_and_enrichment._is_ordinal_point_sample."""
+    return _moved_worker_extraction_and_enrichment._is_ordinal_point_sample(
+        _worker_dependency, *args, **kwargs
+    )
 
 
-def _vector_fields_conflict(path_a: str, path_b: str) -> bool:
-    """True when two paths are the SAME axis leaf of DIFFERENT vector fields
-    of ONE DD device node.
-
-    e.g. ``.../camera/direction/z`` vs ``.../camera/up/z`` — same leaf ``z``,
-    differing vector-field parent (``direction`` vs ``up``), common device
-    grandparent (``.../camera``). Derived from path structure, not a hardcoded
-    device path.
-
-    Ordinal samples of one object (``line_of_sight/first_point/r`` vs
-    ``.../second_point/r``) are excluded: they are the same coordinate of the
-    same object read at successive positions, so they belong on one name and the
-    sample index never enters it.
-    """
-    sa = path_a.split("/")
-    sb = path_b.split("/")
-    if len(sa) < 3 or len(sb) < 3:
-        return False
-    if sa[-1] != sb[-1] or sa[-1] not in _AXIS_LEAVES:
-        return False  # not the same axis leaf
-    if sa[-2] == sb[-2]:
-        return False  # same vector field — legitimate sibling components
-    if _is_ordinal_point_sample(sa[-2]) and _is_ordinal_point_sample(sb[-2]):
-        return False  # successive samples of one object, not two vector fields
-    return sa[:-2] == sb[:-2]  # common device node up to the vector-field segment
+def _vector_fields_conflict(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_extraction_and_enrichment._vector_fields_conflict."""
+    return _moved_worker_extraction_and_enrichment._vector_fields_conflict(
+        _worker_dependency, *args, **kwargs
+    )
 
 
-def _content_tokens(text: str) -> set[str]:
-    """Lower-cased content tokens with a simple plural stem (drop trailing s)."""
-    raw = _re.split(r"[^a-z0-9]+", text.lower())
-    return {(t[:-1] if len(t) > 3 and t.endswith("s") else t) for t in raw if t}
+def _content_tokens(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_extraction_and_enrichment._content_tokens."""
+    return _moved_worker_extraction_and_enrichment._content_tokens(
+        _worker_dependency, *args, **kwargs
+    )
 
 
-def _expanded_path_tokens(source_id: str) -> set[str]:
-    """Content tokens of a DD path with its abbreviations spelled out.
-
-    A DD path names a device in the abbreviated form the IDS uses (``nbi``,
-    ``focs``, ``ec_launchers``, ``pf_active``) while a standard name must spell
-    it in full (``neutral_beam_injector``, ``fiber_optic_current_sensor``,
-    ``electron_cyclotron_launcher``, ``poloidal_field_coil``). Compared raw, the
-    two share no token and a correct attachment reads as a device mismatch, so
-    the path's tokens are expanded through the same abbreviation map the naming
-    audit uses before any overlap test.
-    """
-    from imas_codex.standard_names.audits import _FORBIDDEN_ABBREVIATIONS
-
-    tokens = _content_tokens(source_id)
-    expanded = set(tokens)
-    for abbrev, full in _FORBIDDEN_ABBREVIATIONS:
-        if abbrev.strip("_") in tokens:
-            expanded |= _content_tokens(full)
-    for abbrev, full in _DD_DEVICE_EXPANSIONS.items():
-        # Match on the stemmed form: ``_content_tokens`` drops a trailing 's',
-        # so a path segment ``focs`` arrives as ``foc``.
-        if tokens & _content_tokens(abbrev):
-            expanded |= _content_tokens(full)
-    return expanded
+def _expanded_path_tokens(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_extraction_and_enrichment._expanded_path_tokens."""
+    return _moved_worker_extraction_and_enrichment._expanded_path_tokens(
+        _worker_dependency, *args, **kwargs
+    )
 
 
 #: DD IDS / structure names that abbreviate a device the standard-name grammar
@@ -3073,377 +722,49 @@ def _expanded_path_tokens(source_id: str) -> set[str]:
 #: covers physics-concept contractions inside a NAME; these are IDS identifiers
 #: that only ever appear on the DD PATH side. Not ISN grammar vocabulary — a DD
 #: path token mapped to the words a locus token is built from.
-_DD_DEVICE_EXPANSIONS: dict[str, str] = {
-    "focs": "fiber_optic_current_sensor",
-    "nbi": "neutral_beam_injector",
-    "ece": "electron_cyclotron_emission",
-    "pf": "poloidal_field_coil",
-    "tf": "toroidal_field_coil",
-}
+_DD_DEVICE_EXPANSIONS = _moved_worker_extraction_and_enrichment._DD_DEVICE_EXPANSIONS
 
 
-def _name_locus_token(sn_name: str) -> str | None:
-    """Extract the trailing ``_of_<locus>`` / ``_at_<locus>`` locus token, or None."""
-    of_i = sn_name.rfind("_of_")
-    at_i = sn_name.rfind("_at_")
-    i = max(of_i, at_i)
-    if i < 0:
-        return None
-    locus = sn_name[i + 4 :]
-    # A process attribution follows the locus — trim it off.
-    due = locus.find("_due_to_")
-    if due >= 0:
-        locus = locus[:due]
-    return locus or None
-
-
-def _geometry_representation_conflicts(source_id: str, locus: str | None) -> bool:
-    """Return whether DD geometry shape and name locus assert opposite media.
-
-    A DD ``geometry/<solid primitive>/...`` subtree is a hardware conductor or
-    component cross-section.  A line-of-sight/beam subtree is an optical path.
-    Their scalar coordinate leaves commonly share unit ``m``, so dimensionality
-    cannot distinguish them.  Compare only DD-owned path representation tokens
-    with the words of the name's locus; no ISN vocabulary is enumerated here.
-    """
-    if not locus:
-        return False
-
-    segments = tuple(segment for segment in source_id.lower().split("/") if segment)
-    solid_path = any(
-        segment == "geometry"
-        and index + 1 < len(segments)
-        and segments[index + 1] in _SOLID_GEOMETRY_PATH_SEGMENTS
-        for index, segment in enumerate(segments)
-    )
-    optical_path = any(
-        _content_tokens(segment) & _OPTICAL_GEOMETRY_PATH_WORDS for segment in segments
-    )
-    locus_words = _content_tokens(locus)
-    solid_locus_words = set().union(
-        *(_content_tokens(segment) for segment in _SOLID_GEOMETRY_PATH_SEGMENTS)
-    )
-    optical_locus = bool(locus_words & _OPTICAL_GEOMETRY_PATH_WORDS)
-    solid_locus = bool(locus_words & solid_locus_words)
-    return (solid_path and optical_locus) or (optical_path and solid_locus)
-
-
-def _dd_standard_name_units_dimensionally_agree(
-    sn_unit: str, dd_unit: str, source_id: str
-) -> bool:
-    """True when *sn_unit* and *dd_unit* canonicalise to the same dimension.
-
-    Thin wrapper over the same registry the dimensionality rule below
-    consults, for callers that need a unit-agreement verdict before that
-    rule's own placement in the function.
-    """
-    from imas_codex.units.dd_unit_exceptions import canonical_or_none, units_agree
-
-    return (
-        canonical_or_none(dd_unit) is not None
-        and canonical_or_none(sn_unit) is not None
-        and units_agree(sn_unit, dd_unit, source_id)
+def _name_locus_token(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_extraction_and_enrichment._name_locus_token."""
+    return _moved_worker_extraction_and_enrichment._name_locus_token(
+        _worker_dependency, *args, **kwargs
     )
 
 
-def _is_attachment_consistent(
-    source_id: str,
-    sn_name: str,
-    existing_sources: Sequence[str] = (),
-    *,
-    dd_unit: str | None = None,
-    sn_unit: str | None = None,
-) -> tuple[bool, str]:
-    """Reject attachments where the DD path tense disagrees with the SN tense.
-
-    E.g. ``change_in_electron_density`` may not be attached to
-    ``core_profiles/.../density`` (a base quantity, not a change). Symmetric:
-    a base-quantity SN may not absorb an ``instant_changes`` path.
-
-    ``existing_sources`` are the DD paths already carried by ``sn_name`` (bare,
-    ``dd:``-prefix stripped) — used by the distinct-vector guard to reject a
-    second vector field of one device node collapsing onto one scalar name.
-
-    ``dd_unit`` / ``sn_unit`` enable the dimensionality rule. Both are optional
-    because the lexical rules are unit-independent; a caller with no unit
-    context gets exactly the pre-unit behaviour.
-    """
-    change_path_tokens = (
-        "instant_changes",
-        "/change/",
-        "_delta",
-        "tendency_",
+def _geometry_representation_conflicts(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_extraction_and_enrichment._geometry_representation_conflicts."""
+    return _moved_worker_extraction_and_enrichment._geometry_representation_conflicts(
+        _worker_dependency, *args, **kwargs
     )
-    # A name claims a derivative through its leading prefix; it can ALSO be a
-    # rate by construction, through a rate-natured base (``…_source_rate``,
-    # ``rotation_frequency_of_…``). Only the explicit claim demands a
-    # differentiating source — a directly measured frequency is its own base
-    # quantity — while either reading satisfies a derivative source.
-    sn_claims_derivative = _name_claims_time_change(sn_name)
-    sn_is_rate = sn_claims_derivative or _name_denotes_rate(sn_name)
-    # Rate-ness on the path side is a property of the individual SEGMENT that
-    # names the derivative, not of an enclosing container: a container of
-    # derivatives (``derivatives_1d``) also holds the radial grid they are
-    # computed on and the species metadata, which are plain quantities.
-    path_is_change = any(t in source_id for t in change_path_tokens) or any(
-        _TIME_DERIVATIVE_SEGMENT_RE.fullmatch(seg) for seg in source_id.split("/")
+
+
+def _dd_standard_name_units_dimensionally_agree(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_extraction_and_enrichment._dd_standard_name_units_dimensionally_agree."""
+    return _moved_worker_extraction_and_enrichment._dd_standard_name_units_dimensionally_agree(
+        _worker_dependency, *args, **kwargs
     )
-    if sn_claims_derivative and not path_is_change:
-        # A temporal operator buried inside one operand of a binary
-        # construction (a ``difference``/``ratio``/``product`` of the outer
-        # scope) does not make the WHOLE name a rate — the derivative already
-        # carries the rate, and the outer combination does not apply a second
-        # one. Only excuse the mismatch once the caller's own unit context
-        # proves the combination is dimensionally what the base-quantity path
-        # is: with no unit context, or with disagreeing units, this stays the
-        # conservative rejection.
-        excused = (
-            dd_unit
-            and sn_unit
-            and _time_change_claim_is_binary_scoped(sn_name)
-            and _dd_standard_name_units_dimensionally_agree(sn_unit, dd_unit, source_id)
-        )
-        if not excused:
-            return False, (
-                f"tense mismatch: SN '{sn_name}' is a change/rate but path "
-                f"'{source_id}' is a base quantity"
-            )
-    if path_is_change and not sn_is_rate:
-        return False, (
-            f"tense mismatch: path '{source_id}' is a change/rate but SN "
-            f"'{sn_name}' is a base quantity"
-        )
-
-    # State-resolution consistency: the DD resolves a species into its
-    # ionisation / excitation states through ``…/state/…`` sub-structures, and
-    # each state entry carries its own value. A state-resolved path therefore
-    # describes ONE state and must not source a species-level name (the species
-    # is the structural parent of the value, not a synonym for it), and a
-    # species-level path must not source a state name. Skipped entirely when the
-    # grammar vocabulary cannot be consulted — with no tokens to recognise, the
-    # name side would read as species-level for every name.
-    if _state_resolution_tokens():
-        sn_is_state = _name_denotes_state(sn_name)
-        path_is_state = "/state/" in source_id or source_id.endswith("/state")
-        if path_is_state and not sn_is_state:
-            return False, (
-                f"state-resolution mismatch: path '{source_id}' is state-resolved "
-                f"but SN '{sn_name}' is species-level"
-            )
-        if sn_is_state and not path_is_state:
-            return False, (
-                f"state-resolution mismatch: SN '{sn_name}' is state-resolved "
-                f"but path '{source_id}' is species-level"
-            )
-
-    # Shape-parameter surface consistency: a shape descriptor
-    # (triangularity/elongation/squareness) is defined OF a surface, and the
-    # boundary scalar and the flux-surface profile are DISTINCT quantities.
-    # A profiles_1d (flux-surface) source must not attach to a
-    # ``…_of_plasma_boundary`` name (and vice versa) — that re-merges the
-    # de-conflated siblings the compose-time injection separated, and triggers
-    # a supersede/refine cascade. A boundary_separatrix source attaching to a
-    # ``…_of_plasma_boundary`` name is consistent (the separatrix IS the
-    # boundary), since both derive ``plasma_boundary``. Mirrors
-    # :func:`_shape_parameter_surface`.
-    if any(b in sn_name for b in _shape_parameter_bases()) and any(
-        f"_of_{s}" in sn_name for s in ("plasma_boundary", "flux_surface")
-    ):
-        expected_surface = _shape_parameter_surface(source_id)
-        if f"_of_{expected_surface}" not in sn_name:
-            return False, (
-                f"shape-parameter surface mismatch: path '{source_id}' is "
-                f"of_{expected_surface} but SN '{sn_name}' carries a "
-                f"different surface"
-            )
-
-    # Distinct-vector guard: the target name must not collapse two DIFFERENT
-    # vector fields of one DD device node onto one scalar name (e.g. a camera's
-    # line-of-sight ``direction`` and its image-up ``up`` vector both landing on
-    # ``z_direction_unit_vector``). Derived from path structure.
-    for other in existing_sources:
-        if other and other != source_id and _vector_fields_conflict(source_id, other):
-            return False, (
-                f"distinct-vector conflict: path '{source_id}' and already-"
-                f"sourced '{other}' are the same axis leaf of DIFFERENT vector "
-                f"fields of one device node — SN '{sn_name}' must not carry both"
-            )
-
-    # Locus <-> source device compatibility: when the name carries a concrete
-    # hardware locus (``_of_<device>``/``_at_<device>``), the source path must
-    # share at least one content token with that device. Conservative — only
-    # rejects on ZERO overlap when the locus is a recognised hardware token.
-    from imas_codex.standard_names.segments import is_place_locus
-
-    locus = _name_locus_token(sn_name)
-    if locus:
-        if _geometry_representation_conflicts(source_id, locus):
-            return False, (
-                f"geometry representation mismatch: path '{source_id}' and "
-                f"SN '{sn_name}' describe incompatible solid/optical geometry"
-            )
-        locus_tokens = _content_tokens(locus)
-        if locus_tokens & _HARDWARE_LOCUS_WORDS and not is_place_locus(locus):
-            path_tokens = _expanded_path_tokens(source_id)
-            if not (locus_tokens & path_tokens):
-                return False, (
-                    f"locus/source device mismatch: SN '{sn_name}' has hardware "
-                    f"locus '{locus}' but path '{source_id}' shares no device "
-                    f"token with it"
-                )
-
-    # Dimensionality: a source cannot realize a name whose unit is a different
-    # physical quantity. Compares DIMENSIONALITY through the one canonical unit
-    # authority (``units_agree`` → ``imas_standard_names.canonical_unit``), so
-    # ordering-only and spelling-only differences (``m^-3.W`` vs ``W.m^-3``,
-    # ``Hz`` vs ``s^-1``) collapse and never reject. The DD contradicts itself on
-    # a curated set of paths — direction/up-vector components declared ``m`` when
-    # they are dimensionless cosines, charge NUMBER fields declared ``e`` — where
-    # the DD is wrong and the name is right; those route through the same
-    # ``dd_unit_exceptions.yaml`` registry ``units_agree`` already consults, so
-    # there is no second list here. A unit that is absent or that the canonical
-    # parser cannot resolve on either side is a DD-completeness gap, not an
-    # attachment defect: nothing to disagree with, so the pair is accepted.
-    if dd_unit:
-        from imas_codex.graph.models import DDResolutionField, DDResolutionValueKind
-        from imas_codex.settings import get_dd_version
-        from imas_codex.standard_names.dd_resolutions import (
-            DDResolutionValue,
-            read_graph_dd_field,
-        )
-
-        graph_unit = read_graph_dd_field(
-            path=source_id,
-            dd_version=get_dd_version(),
-            field=DDResolutionField.unit,
-            graph_value=DDResolutionValue(
-                kind=DDResolutionValueKind.string,
-                value=dd_unit,
-            ),
-        )
-        dd_unit = graph_unit.effective.value
-
-    if dd_unit and sn_unit:
-        from imas_codex.units.dd_unit_exceptions import canonical_or_none, units_agree
-
-        if (
-            canonical_or_none(dd_unit) is not None
-            and canonical_or_none(sn_unit) is not None
-            and not units_agree(sn_unit, dd_unit, source_id)
-        ):
-            return False, (
-                f"unit dimensionality mismatch: path '{source_id}' declares "
-                f"'{dd_unit}' but SN '{sn_name}' declares '{sn_unit}' — "
-                f"physically distinct quantities"
-            )
-
-    return True, ""
 
 
-def _process_attachments_core(
-    attachments: list,
-    wlog: logging.LoggerAdapter | logging.Logger,
-    *,
-    source_claims: list[dict[str, Any]] | None = None,
-    return_winner_ids: bool = False,
-) -> dict[str, Any]:
-    """Stateless attachment-processing helper used by both compose paths.
-
-    Filters by tense consistency, writes ``HAS_STANDARD_NAME`` edges and
-    appends ``source_paths``, and returns ``{"accepted", "rejected"}``
-    counts.  Caller is responsible for any state-side stats updates.
-    """
-
-    # Accumulate each target name's accepted sources within this batch so two
-    # conflicting attachments — e.g. two different vector fields of one DD
-    # device node — cannot both land on one scalar name. (The graph layer is
-    # only touched once something is accepted; the seed starts empty.)
-    existing_by_sn: dict[str, list[str]] = {}
-    rejected: list[tuple[str, str, str]] = []
-    accepted: list = []
-    for a in attachments:
-        existing = existing_by_sn.setdefault(a.standard_name, [])
-        ok, reason = _is_attachment_consistent(
-            a.source_id, a.standard_name, existing_sources=existing
-        )
-        if ok:
-            accepted.append(a)
-            existing.append(a.source_id)
-        else:
-            rejected.append((a.source_id, a.standard_name, reason))
-
-    for src, sn, why in rejected:
-        wlog.warning("Rejected attachment %s → %s: %s", src, sn, why)
-
-    counts: dict[str, Any] = {"accepted": 0, "rejected": len(rejected)}
-    if return_winner_ids:
-        counts["winner_ids"] = []
-    if not accepted:
-        return counts
-
-    if source_claims is None:
-        wlog.warning(
-            "Rejected %d attachments without source ownership fences",
-            len(accepted),
-        )
-        counts["rejected"] += len(accepted)
-        return counts
-
-    from imas_codex.standard_names.graph_ops import persist_claimed_attachments
-
-    fenced_batch = []
-    for attachment in accepted:
-        outcome = _claimed_source_outcome(
-            source_claims,
-            attachment.source_id,
-            source_type="dd",
-            status="attached",
-        )
-        if outcome:
-            fenced_batch.append(
-                {
-                    **outcome,
-                    "source_id": attachment.source_id,
-                    "standard_name": attachment.standard_name,
-                }
-            )
-    winner_ids = set(persist_claimed_attachments(fenced_batch))
-    if return_winner_ids:
-        counts["winner_ids"] = sorted(winner_ids)
-    accepted = [
-        attachment
-        for attachment in accepted
-        if f"dd:{attachment.source_id}" in winner_ids
-    ]
-    counts["rejected"] += len(attachments) - len(rejected) - len(accepted)
-    counts["accepted"] = len(accepted)
-    for attachment in accepted:
-        wlog.info(
-            "Attached %s → %s (%s)",
-            attachment.source_id,
-            attachment.standard_name,
-            attachment.reason,
-        )
-
-    return counts
+def _is_attachment_consistent(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_extraction_and_enrichment._is_attachment_consistent."""
+    return _moved_worker_extraction_and_enrichment._is_attachment_consistent(
+        _worker_dependency, *args, **kwargs
+    )
 
 
-def _process_attachments(
-    attachments: list, state: StandardNameBuildState, wlog: logging.LoggerAdapter
-) -> None:
-    """Attach DD paths to existing standard names without regeneration.
+def _process_attachments_core(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_extraction_and_enrichment._process_attachments_core."""
+    return _moved_worker_extraction_and_enrichment._process_attachments_core(
+        _worker_dependency, *args, **kwargs
+    )
 
-    Linear-path wrapper around :func:`_process_attachments_core` that
-    folds counts into the build state's stats dictionary.
-    """
-    counts = _process_attachments_core(attachments, wlog)
-    if counts["accepted"]:
-        prev = state.stats.get("attachments", 0)
-        state.stats["attachments"] = prev + counts["accepted"]
-    if counts["rejected"]:
-        state.stats["attachments_rejected"] = (
-            state.stats.get("attachments_rejected", 0) + counts["rejected"]
-        )
+
+def _process_attachments(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_extraction_and_enrichment._process_attachments."""
+    return _moved_worker_extraction_and_enrichment._process_attachments(
+        _worker_dependency, *args, **kwargs
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -3451,479 +772,79 @@ def _process_attachments(
 # ---------------------------------------------------------------------------
 
 
-def _update_sources_after_compose(
-    candidates: list[dict], source: str, wlog: logging.LoggerAdapter
-) -> None:
-    """Reject the unfenced legacy compose transition.
-
-    Claimed composition is finalized inside
-    :func:`graph_ops.persist_generated_name_batch`; source IDs alone are never
-    sufficient authority for a graph mutation.
-    """
-    if candidates:
-        wlog.warning(
-            "Ignored %d unfenced %s compose source updates",
-            len(candidates),
-            source,
-        )
-
-
-def _update_sources_after_attach(
-    attachments: list, source: str, wlog: logging.LoggerAdapter
-) -> None:
-    """Reject the unfenced legacy attachment transition."""
-    if attachments:
-        wlog.warning(
-            "Ignored %d unfenced %s attachment source updates",
-            len(attachments),
-            source,
-        )
-
-
-def _update_sources_after_vocab_gap(
-    vocab_gaps: list[dict],
-    source: str,
-    wlog: logging.LoggerAdapter,
-    *,
-    max_attempts: int = 3,
-) -> None:
-    """Reject the unfenced legacy vocabulary-gap transition."""
-    del max_attempts
-    if vocab_gaps:
-        wlog.warning(
-            "Ignored %d unfenced %s vocabulary-gap source updates",
-            len(vocab_gaps),
-            source,
-        )
-
-
-def _update_sources_after_skip(
-    skipped_ids: list[str],
-    source: str,
-    wlog: logging.LoggerAdapter | logging.Logger,
-) -> None:
-    """Reject the unfenced legacy skip transition."""
-    if skipped_ids:
-        wlog.warning(
-            "Ignored %d unfenced %s skip source updates",
-            len(skipped_ids),
-            source,
-        )
-
-
-def _persist_claimed_skips(
-    skipped_ids: list[str],
-    batch: list[dict[str, Any]],
-    *,
-    source_type: str,
-    reason: str,
-    detail: str | None = None,
-) -> list[str]:
-    """Persist skips only for exact source-claim winners."""
-    from imas_codex.standard_names.graph_ops import persist_claimed_source_outcomes
-
-    outcomes = []
-    for source_id in skipped_ids:
-        outcome = _claimed_source_outcome(
-            batch,
-            source_id,
-            source_type=source_type,
-            status="skipped",
-            skip_reason=reason,
-            skip_reason_detail=detail,
-        )
-        if outcome:
-            outcomes.append(outcome)
-    return persist_claimed_source_outcomes(outcomes)
-
-
-def _consume_claimed_vocab_gaps(
-    gaps: list[dict[str, Any]],
-    batch: list[dict[str, Any]],
-    *,
-    source_type: str,
-    max_attempts: int = 3,
-    return_winner_ids: bool = False,
-) -> list[dict[str, Any]] | tuple[list[dict[str, Any]], list[str]]:
-    """Persist vocabulary gaps while consuming their exact source claims."""
-    from imas_codex.standard_names.graph_ops import persist_claimed_vocab_gaps
-    from imas_codex.standard_names.segments import is_actionable_gap, is_open_segment
-
-    outcomes = []
-    gap_by_sns: dict[str, list[dict[str, Any]]] = {}
-    for gap in gaps:
-        if is_open_segment(gap.get("segment")):
-            continue
-        source_id = gap.get("source_id")
-        if not source_id:
-            continue
-        item = next(
-            (
-                claimed
-                for claimed in batch
-                if (claimed.get("path") or claimed.get("source_id")) == source_id
-            ),
-            None,
-        )
-        if not item:
-            continue
-        actionable = is_actionable_gap(gap.get("segment"), gap.get("token"))
-        status = (
-            "vocab_gap"
-            if actionable
-            else (
-                "failed"
-                if int(item.get("attempt_count") or 0) >= max_attempts
-                else "extracted"
-            )
-        )
-        outcome = _claimed_source_outcome(
-            batch,
-            source_id,
-            source_type=source_type,
-            status=status,
-            last_error=(
-                None
-                if actionable
-                else f"non-actionable vocabulary gap: {gap.get('reason', '')}"[:300]
-            ),
-        )
-        if outcome:
-            outcomes.append(outcome)
-            gap_by_sns.setdefault(outcome["sns_id"], []).append(gap)
-
-    winners = set(
-        persist_claimed_vocab_gaps(
-            gaps,
-            outcomes,
-            source_type=source_type,
-        )
-    )
-    persisted_gaps = [gap for sns_id in winners for gap in gap_by_sns.get(sns_id, [])]
-    if return_winner_ids:
-        return persisted_gaps, sorted(winners)
-    return persisted_gaps
-
-
-def _search_reference_exemplars(
-    items: list[dict],
-    domains: list[str],
-    *,
-    k: int = 5,
-) -> list[dict]:
-    """Synthesise a query from batch items and return reference SN exemplars.
-
-    Builds a query string from up to three item descriptions, calls
-    :func:`search_standard_names_with_documentation`, and excludes any SN whose
-    ``id`` matches an item already present in the batch (when items carry an
-    ``existing_name``).  *domains* filters via embedding-quality semantics
-    only (the search itself filters by ``validation_status='valid'``).
-
-    Returns an empty list if no descriptions are available or the search
-    backend is unavailable.
-    """
-    from imas_codex.standard_names.search import (
-        search_standard_names_with_documentation,
+def _update_sources_after_compose(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_extraction_and_enrichment._update_sources_after_compose."""
+    return _moved_worker_extraction_and_enrichment._update_sources_after_compose(
+        _worker_dependency, *args, **kwargs
     )
 
-    desc_snippets = [
-        item.get("description", "") for item in items[:3] if item.get("description")
-    ]
-    if not desc_snippets:
-        return []
-    synth_query = "; ".join(desc_snippets)
 
-    # Real SN ids of items already present in the batch (cluster-aware
-    # nearby retrieval injects these); avoid feeding the LLM duplicates.
-    exclude_ids = sorted(
-        {item.get("existing_name") for item in items if item.get("existing_name")}
+def _update_sources_after_attach(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_extraction_and_enrichment._update_sources_after_attach."""
+    return _moved_worker_extraction_and_enrichment._update_sources_after_attach(
+        _worker_dependency, *args, **kwargs
     )
 
-    try:
-        return search_standard_names_with_documentation(
-            synth_query, k=k, exclude_ids=exclude_ids or None
-        )
-    except Exception:
-        logger.debug("Reference exemplar search failed", exc_info=True)
-        return []
 
-
-async def _grammar_retry(
-    original_name: str,
-    parse_error: str,
-    model: str,
-    acall_fn,
-    *,
-    reasoning_effort: str | None = None,
-) -> tuple[str | None, float, int, int]:
-    """Single grammar-failure re-prompt.
-
-    Asks the LLM to revise a name that failed grammar round-trip,
-    providing the parse error and a grammar cheat-sheet fragment.
-
-    Returns ``(revised_name | None, cost_usd, tokens_in, tokens_out)``.
-    """
-    from pydantic import BaseModel, Field
-
-    class GrammarRetryResponse(BaseModel):
-        revised_name: str = Field(
-            description="The revised standard name that passes grammar parsing"
-        )
-        explanation: str = Field(description="Brief explanation of the fix")
-
-    retry_prompt = (
-        f"The standard name `{original_name}` failed grammar parsing with error:\n"
-        f"  {parse_error}\n\n"
-        "Revise ONLY the name to pass the grammar round-trip. Rules:\n"
-        "- Pattern: [subject_][physical_base|geometric_base][_component][_position][_process][_object]\n"
-        "- ALL segments are CLOSED including physical_base (80 registered tokens).\n"
-        "  Only use tokens from the registries. If no token fits, emit a vocab_gap.\n"
-        "- Closed-vocabulary tokens (e.g. toroidal, parallel, thermal,\n"
-        "  e_cross_b_drift, normalized, fast_ion, volume_averaged) MUST be\n"
-        "  placed in their closed segment slot. Never absorb them into\n"
-        "  physical_base.\n"
-        "- No abbreviations, no provenance verbs, no unit suffixes\n"
-        "- Return the MINIMAL fix — keep the name as close to the original as possible.\n"
+def _update_sources_after_vocab_gap(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_extraction_and_enrichment._update_sources_after_vocab_gap."""
+    return _moved_worker_extraction_and_enrichment._update_sources_after_vocab_gap(
+        _worker_dependency, *args, **kwargs
     )
 
-    try:
-        llm_out = await acall_fn(
-            model=model,
-            messages=[{"role": "user", "content": retry_prompt}],
-            response_model=GrammarRetryResponse,
-            service="standard-names",
-            reasoning_effort=reasoning_effort,
-        )
-        result, _cost, _tokens = llm_out
-        return (
-            result.revised_name if result else None,
-            float(_cost or 0.0),
-            getattr(llm_out, "input_tokens", 0) or 0,
-            getattr(llm_out, "output_tokens", 0) or 0,
-        )
-    except Exception:
-        return None, 0.0, 0, 0
 
-
-async def _self_refine_candidate(
-    name: str,
-    description: str,
-    segments: dict[str, Any] | None,
-    dd_context: dict[str, Any] | None,
-    model: str,
-    acall_fn,
-    *,
-    reasoning_effort: str | None = None,
-) -> tuple[str, str]:
-    """Free local self-improvement pass over a freshly-composed candidate.
-
-    Runs AFTER compose + grammar normalization and BEFORE persist (and so
-    before the paid review quorum). The *local* compose model critiques its
-    own ``name`` + ``description`` against deterministic grammar diagnostics
-    and the compose rubric and may emit an improved candidate. The contract
-    is **improve-or-no-op**: it never rejects.
-
-    Safety: the suggested name is re-validated via the grammar round-trip
-    (strict lossless parse → compose). If the rewrite
-    fails grammar parsing, or loses canonical order (round-trips to a
-    different string), or fails the well-formedness gate, the **original**
-    ``(name, description)`` is returned unchanged. The local model is free
-    (``get_model("sn-compose")`` served on the local GPU), so this charges
-    ``$0``; callers do not account any cost.
-
-    Returns ``(name, description)`` — improved when the rewrite is safe and
-    the model elected to change it, otherwise the originals unchanged.
-    """
-    from pydantic import BaseModel, Field
-
-    from imas_codex.llm.prompt_loader import render_prompt
-    from imas_codex.standard_names.context import build_compose_context
-    from imas_codex.standard_names.models import GrammarOperator
-
-    class SelfRefineSegments(BaseModel):
-        base_token: str = Field(description="Registered physical_base/geometry token")
-        base_kind: str = Field(default="quantity", description="quantity | geometry")
-        projection_axis: str | None = None
-        # projection_shape is derived from base_kind (see GrammarSegments) — not
-        # an LLM input.
-        qualifiers: list[str] = Field(default_factory=list)
-        locus_token: str | None = None
-        locus_relation: str | None = None
-        locus_type: str | None = None
-        process_token: str | None = None
-        operators: list[GrammarOperator] = Field(default_factory=list)
-
-    class SelfRefineResponse(BaseModel):
-        changed: bool = Field(
-            description="True only if name or description was improved"
-        )
-        name: str = Field(description="Improved (or unchanged) standard name")
-        description: str = Field(
-            default="", description="Improved (or unchanged) ≤120 char description"
-        )
-        segments: SelfRefineSegments | None = Field(
-            default=None,
-            description="IR grammar segments of the improved name",
-        )
-
-    # Build the deterministic diagnostics shown to the model. The name was
-    # already normalized to canonical form by the caller, so the headline is
-    # "round-trip OK"; we surface a couple of cheap structural observations.
-    diagnostics: list[str] = []
-    try:
-        from imas_codex.standard_names.grammar_adapter import parse_canonical_name
-
-        parse_canonical_name(name)
-        diagnostics.append(
-            "Round-trip: OK — name parses and re-composes to canonical form."
-        )
-    except Exception:
-        diagnostics.append(
-            "Round-trip: WARNING — name did not parse cleanly; prefer the closest "
-            "grammatical alternative."
-        )
-
-    try:
-        context = await asyncio.to_thread(build_compose_context)
-    except Exception:
-        context = {}
-
-    system_prompt = render_prompt("sn/self_refine_system", context)
-    user_prompt = render_prompt(
-        "sn/self_refine_user",
-        {
-            **context,
-            "name": name,
-            "description": description or "",
-            "segments": segments or {},
-            "dd_context": dd_context or {},
-            "diagnostics": diagnostics,
-        },
+def _update_sources_after_skip(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_extraction_and_enrichment._update_sources_after_skip."""
+    return _moved_worker_extraction_and_enrichment._update_sources_after_skip(
+        _worker_dependency, *args, **kwargs
     )
 
-    try:
-        llm_out = await acall_fn(
-            model=model,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
-            ],
-            response_model=SelfRefineResponse,
-            service="standard-names",
-            reasoning_effort=reasoning_effort,
-        )
-        result, _cost, _tokens = llm_out
-    except Exception:
-        logger.debug("Self-refine LLM call failed for %r — keeping original", name)
-        return name, description
 
-    if result is None or not result.changed:
-        return name, description
-
-    new_name = normalize_spelling((result.name or "").strip())
-    if not new_name or new_name == name:
-        # No-op rename; still adopt a tightened description if offered.
-        new_desc = normalize_description_text((result.description or "").strip())
-        return name, (new_desc or description)
-
-    # --- Re-validate the suggested name before adopting it. ---
-    _well_formed, _ = is_well_formed_candidate(new_name)
-    if not _well_formed:
-        logger.debug(
-            "Self-refine suggestion %r not well-formed — keeping original %r",
-            new_name,
-            name,
-        )
-        return name, description
-
-    try:
-        from imas_codex.standard_names.grammar_adapter import parse_canonical_name
-
-        parse_canonical_name(new_name)
-    except Exception:
-        logger.debug(
-            "Self-refine suggestion %r failed grammar round-trip — keeping %r",
-            new_name,
-            name,
-        )
-        return name, description
-
-    new_desc = normalize_description_text((result.description or "").strip())
-    logger.info("Self-refine improved %r → %r", name, new_name)
-    return new_name, (new_desc or description)
-
-
-_COMPOSE_DOMAIN_STATE_QUERY = """
-UNWIND $ids AS name_id
-MATCH (sn:StandardName {id: name_id})
-OPTIONAL MATCH (src:StandardNameSource)-[:PRODUCED_NAME]->(sn)
-OPTIONAL MATCH (src)-[:FROM_DD_PATH]->(dd:IMASNode)
-RETURN sn.id AS id,
-       sn.description AS description,
-       [p IN collect(DISTINCT {path: dd.id, domain: dd.physics_domain})
-        WHERE p.path IS NOT NULL] AS sources
-"""
-
-
-async def _write_composed_name_domains(
-    candidates: list[dict[str, Any]],
-    winner_ids: set[str],
-) -> int:
-    """Give each newly persisted name its domain through the one writer.
-
-    A composed name carries no domain of its own: its ``source_domains`` is the
-    one writer's, and its ``physics_domain`` is the Jev decision. Each name the
-    batch persisted is asked through ``domain_decision``'s Choice and then set
-    by :func:`imas_codex.standard_names.domain_decision.write_name_domain`; a
-    call that fails or a choice below the floor leaves the name undecided, per
-    the writer's rule. ``winner_ids`` are the persisted sources' ids, so a
-    composed name is one of *candidates* whose ``source_id`` is among them.
-
-    Returns the number of names written.
-    """
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.settings import get_model
-    from imas_codex.standard_names import domain_decision as _dd
-
-    names = sorted(
-        {
-            str(c["id"])
-            for c in candidates
-            if c.get("id") and c.get("source_id") in winner_ids
-        }
+def _persist_claimed_skips(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_extraction_and_enrichment._persist_claimed_skips."""
+    return _moved_worker_extraction_and_enrichment._persist_claimed_skips(
+        _worker_dependency, *args, **kwargs
     )
-    if not names:
-        return 0
 
-    ids_map = _dd.ids_domain_map()
-    model = get_model(_dd.SEAT)
-    with GraphClient() as gc:
-        rows = [dict(row) for row in gc.query(_COMPOSE_DOMAIN_STATE_QUERY, ids=names)]
 
-        semaphore = asyncio.Semaphore(_dd.CONCURRENCY)
+def _consume_claimed_vocab_gaps(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_extraction_and_enrichment._consume_claimed_vocab_gaps."""
+    return _moved_worker_extraction_and_enrichment._consume_claimed_vocab_gaps(
+        _worker_dependency, *args, **kwargs
+    )
 
-        async def _decide(row: dict[str, Any]) -> Any:
-            sources = {
-                str(p["path"]): (p.get("domain") or None)
-                for p in (row.get("sources") or [])
-                if p and p.get("path")
-            }
-            async with semaphore:
-                return await _dd.decide_domain(
-                    row["id"],
-                    row.get("description") or "",
-                    sources,
-                    ids_map,
-                    model=model,
-                )
 
-        decisions = await asyncio.gather(*(_decide(row) for row in rows))
+def _search_reference_exemplars(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_extraction_and_enrichment._search_reference_exemplars."""
+    return _moved_worker_extraction_and_enrichment._search_reference_exemplars(
+        _worker_dependency, *args, **kwargs
+    )
 
-        written = 0
-        for row, decision in zip(rows, decisions, strict=True):
-            await asyncio.to_thread(_dd.write_name_domain, gc, row["id"], decision)
-            written += 1
-    return written
+
+async def _grammar_retry(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_extraction_and_enrichment._grammar_retry."""
+    return await _moved_worker_extraction_and_enrichment._grammar_retry(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+async def _self_refine_candidate(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_extraction_and_enrichment._self_refine_candidate."""
+    return await _moved_worker_extraction_and_enrichment._self_refine_candidate(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+_COMPOSE_DOMAIN_STATE_QUERY = (
+    _moved_worker_extraction_and_enrichment._COMPOSE_DOMAIN_STATE_QUERY
+)
+
+
+async def _write_composed_name_domains(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_extraction_and_enrichment._write_composed_name_domains."""
+    return await _moved_worker_extraction_and_enrichment._write_composed_name_domains(
+        _worker_dependency, *args, **kwargs
+    )
 
 
 async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
@@ -8794,8 +5715,8 @@ async def process_review_name_batch(
         from imas_codex.standard_names.audits import semantic_similarity_check
         from imas_codex.standard_names.defaults import (
             SEMANTIC_SIM_CRITICAL,
-            SEMANTIC_SIM_GATE_MODEL,
-            SEMANTIC_SIM_GATE_RESOLUTION_METHOD,
+            SEMANTIC_SIM_GATE_MODEL,  # noqa: F811
+            SEMANTIC_SIM_GATE_RESOLUTION_METHOD,  # noqa: F811
             SEMANTIC_SIM_SYNTHETIC_SCORE,
             SEMANTIC_SIM_WARNING,
         )
@@ -11794,3 +8715,194 @@ async def process_embed_batch(
             )
 
     return written
+
+
+backfill_semantic_similarity_gate_resolution_method.__wrapped__ = (
+    _moved_worker_common.backfill_semantic_similarity_gate_resolution_method
+)
+normalize_spelling.__wrapped__ = _moved_worker_common.normalize_spelling
+normalize_prose_spelling.__wrapped__ = _moved_worker_common.normalize_prose_spelling
+normalize_description_notation.__wrapped__ = (
+    _moved_worker_common.normalize_description_notation
+)
+normalize_description_text.__wrapped__ = _moved_worker_common.normalize_description_text
+_dedup_adjacent_tokens.__wrapped__ = _moved_worker_common._dedup_adjacent_tokens
+_isn_segment_tokens.__wrapped__ = _moved_worker_common._isn_segment_tokens
+_isn_physical_bases.__wrapped__ = _moved_worker_common._isn_physical_bases
+shape_parameter_base_drift.__wrapped__ = _moved_worker_common.shape_parameter_base_drift
+_shape_parameter_bases.__wrapped__ = _moved_worker_common._shape_parameter_bases
+_rate_natured_bases.__wrapped__ = _moved_worker_common._rate_natured_bases
+_state_resolution_tokens.__wrapped__ = _moved_worker_common._state_resolution_tokens
+_name_denotes_state.__wrapped__ = _moved_worker_common._name_denotes_state
+_name_denotes_rate.__wrapped__ = _moved_worker_common._name_denotes_rate
+_ir_denotes_time_change.__wrapped__ = _moved_worker_common._ir_denotes_time_change
+_ir_claims_time_change_in_scope.__wrapped__ = (
+    _moved_worker_common._ir_claims_time_change_in_scope
+)
+_name_claims_time_change.__wrapped__ = _moved_worker_common._name_claims_time_change
+_time_change_claim_is_binary_scoped.__wrapped__ = (
+    _moved_worker_common._time_change_claim_is_binary_scoped
+)
+_shape_parameter_surface.__wrapped__ = _moved_worker_common._shape_parameter_surface
+_inject_shape_parameter_surface.__wrapped__ = (
+    _moved_worker_common._inject_shape_parameter_surface
+)
+is_well_formed_candidate.__wrapped__ = _moved_worker_common.is_well_formed_candidate
+_claimed_source_ids.__wrapped__ = _moved_worker_common._claimed_source_ids
+_strip_response_source_id.__wrapped__ = _moved_worker_common._strip_response_source_id
+_review_dd_source_bindings.__wrapped__ = _moved_worker_common._review_dd_source_bindings
+_review_dd_source_ids.__wrapped__ = _moved_worker_common._review_dd_source_ids
+_sanitize_dd_gap_evidence.__wrapped__ = _moved_worker_common._sanitize_dd_gap_evidence
+_persist_dd_gap_evidence.__wrapped__ = _moved_worker_common._persist_dd_gap_evidence
+_claimed_source_outcome.__wrapped__ = _moved_worker_common._claimed_source_outcome
+_sanitize_compose_result_sources.__wrapped__ = (
+    _moved_worker_common._sanitize_compose_result_sources
+)
+_filter_persist_candidates_to_claimed_sources.__wrapped__ = (
+    _moved_worker_common._filter_persist_candidates_to_claimed_sources
+)
+_withhold_binding_conflicted_sources.__wrapped__ = (
+    _moved_worker_common._withhold_binding_conflicted_sources
+)
+_candidate_source_node_id.__wrapped__ = _moved_worker_common._candidate_source_node_id
+_persist_description_checked_candidates.__wrapped__ = (
+    _moved_worker_common._persist_description_checked_candidates
+)
+_mark_source_prevalidation_failed.__wrapped__ = (
+    _moved_worker_common._mark_source_prevalidation_failed
+)
+provenance_canonical_names.__wrapped__ = _moved_worker_common.provenance_canonical_names
+is_non_nameable_coordinate.__wrapped__ = _moved_worker_common.is_non_nameable_coordinate
+_coerce_llm_metric.__wrapped__ = _moved_worker_common._coerce_llm_metric
+_extract_llm_telemetry.__wrapped__ = _moved_worker_common._extract_llm_telemetry
+_load_known_physical_bases.__wrapped__ = _moved_worker_common._load_known_physical_bases
+_auto_detect_physical_base_gaps.__wrapped__ = (
+    _moved_worker_common._auto_detect_physical_base_gaps
+)
+_compute_token_reuse_hits.__wrapped__ = _moved_worker_common._compute_token_reuse_hits
+_grammar_round_trip_failures.__wrapped__ = (
+    _moved_worker_common._grammar_round_trip_failures
+)
+_build_grammar_retry_reason.__wrapped__ = (
+    _moved_worker_common._build_grammar_retry_reason
+)
+_build_token_reuse_retry_reason.__wrapped__ = (
+    _moved_worker_common._build_token_reuse_retry_reason
+)
+_active_editorial_gap_guidance.__wrapped__ = (
+    _moved_worker_common._active_editorial_gap_guidance
+)
+_stamp_dedup_decision.__wrapped__ = _moved_worker_common._stamp_dedup_decision
+
+extract_worker.__wrapped__ = _moved_worker_extraction_and_enrichment.extract_worker
+_search_nearby_names.__wrapped__ = (
+    _moved_worker_extraction_and_enrichment._search_nearby_names
+)
+_collect_nearby_name_comparators.__wrapped__ = (
+    _moved_worker_extraction_and_enrichment._collect_nearby_name_comparators
+)
+_rerank_comparators_for_compose.__wrapped__ = (
+    _moved_worker_extraction_and_enrichment._rerank_comparators_for_compose
+)
+_book_rerank_spend.__wrapped__ = (
+    _moved_worker_extraction_and_enrichment._book_rerank_spend
+)
+_reranked_nearby_comparators.__wrapped__ = (
+    _moved_worker_extraction_and_enrichment._reranked_nearby_comparators
+)
+_compose_budget_phase.__wrapped__ = (
+    _moved_worker_extraction_and_enrichment._compose_budget_phase
+)
+_rerank_comparators_for_worker.__wrapped__ = (
+    _moved_worker_extraction_and_enrichment._rerank_comparators_for_worker
+)
+_enrich_ids_context.__wrapped__ = (
+    _moved_worker_extraction_and_enrichment._enrich_ids_context
+)
+_hybrid_search_neighbours_batch.__wrapped__ = (
+    _moved_worker_extraction_and_enrichment._hybrid_search_neighbours_batch
+)
+_hybrid_search_neighbours.__wrapped__ = (
+    _moved_worker_extraction_and_enrichment._hybrid_search_neighbours
+)
+_retry_attempts.__wrapped__ = _moved_worker_extraction_and_enrichment._retry_attempts
+_retry_k_expansion.__wrapped__ = (
+    _moved_worker_extraction_and_enrichment._retry_k_expansion
+)
+_mark_vocab_gap_sources.__wrapped__ = (
+    _moved_worker_extraction_and_enrichment._mark_vocab_gap_sources
+)
+_related_path_neighbours.__wrapped__ = (
+    _moved_worker_extraction_and_enrichment._related_path_neighbours
+)
+_enrich_batch_items.__wrapped__ = (
+    _moved_worker_extraction_and_enrichment._enrich_batch_items
+)
+_is_ordinal_point_sample.__wrapped__ = (
+    _moved_worker_extraction_and_enrichment._is_ordinal_point_sample
+)
+_vector_fields_conflict.__wrapped__ = (
+    _moved_worker_extraction_and_enrichment._vector_fields_conflict
+)
+_content_tokens.__wrapped__ = _moved_worker_extraction_and_enrichment._content_tokens
+_expanded_path_tokens.__wrapped__ = (
+    _moved_worker_extraction_and_enrichment._expanded_path_tokens
+)
+_name_locus_token.__wrapped__ = (
+    _moved_worker_extraction_and_enrichment._name_locus_token
+)
+_geometry_representation_conflicts.__wrapped__ = (
+    _moved_worker_extraction_and_enrichment._geometry_representation_conflicts
+)
+_dd_standard_name_units_dimensionally_agree.__wrapped__ = (
+    _moved_worker_extraction_and_enrichment._dd_standard_name_units_dimensionally_agree
+)
+_is_attachment_consistent.__wrapped__ = (
+    _moved_worker_extraction_and_enrichment._is_attachment_consistent
+)
+_process_attachments_core.__wrapped__ = (
+    _moved_worker_extraction_and_enrichment._process_attachments_core
+)
+_process_attachments.__wrapped__ = (
+    _moved_worker_extraction_and_enrichment._process_attachments
+)
+_update_sources_after_compose.__wrapped__ = (
+    _moved_worker_extraction_and_enrichment._update_sources_after_compose
+)
+_update_sources_after_attach.__wrapped__ = (
+    _moved_worker_extraction_and_enrichment._update_sources_after_attach
+)
+_update_sources_after_vocab_gap.__wrapped__ = (
+    _moved_worker_extraction_and_enrichment._update_sources_after_vocab_gap
+)
+_update_sources_after_skip.__wrapped__ = (
+    _moved_worker_extraction_and_enrichment._update_sources_after_skip
+)
+_persist_claimed_skips.__wrapped__ = (
+    _moved_worker_extraction_and_enrichment._persist_claimed_skips
+)
+_consume_claimed_vocab_gaps.__wrapped__ = (
+    _moved_worker_extraction_and_enrichment._consume_claimed_vocab_gaps
+)
+_search_reference_exemplars.__wrapped__ = (
+    _moved_worker_extraction_and_enrichment._search_reference_exemplars
+)
+_grammar_retry.__wrapped__ = _moved_worker_extraction_and_enrichment._grammar_retry
+_self_refine_candidate.__wrapped__ = (
+    _moved_worker_extraction_and_enrichment._self_refine_candidate
+)
+_write_composed_name_domains.__wrapped__ = (
+    _moved_worker_extraction_and_enrichment._write_composed_name_domains
+)
+
+for _forwarder in tuple(globals().values()):
+    if not callable(_forwarder) or getattr(_forwarder, "__module__", None) != __name__:
+        continue
+    _wrapped = getattr(_forwarder, "__wrapped__", None)
+    if _wrapped is None:
+        continue
+    _signature = _inspect.signature(_wrapped)
+    if "_worker_dependency" in _signature.parameters:
+        _forwarder.__signature__ = _signature.replace(
+            parameters=tuple(_signature.parameters.values())[1:]
+        )
