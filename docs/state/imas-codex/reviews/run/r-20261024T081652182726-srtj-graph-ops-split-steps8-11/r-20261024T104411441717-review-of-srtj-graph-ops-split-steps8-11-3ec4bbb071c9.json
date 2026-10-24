@@ -1,0 +1,76 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_source": "derived from the reviewed run's own gate logs, by set difference of the short-summary (FAILED)/(ERROR) lines rather than by comparing counts. The reviewed run's baseline_suite revision is b28fb1d4ec7c5fc06a682e0bed385f0f8cca84a3 (attribute_gate_base_attr_default.log, 9 failed, 468 passed, 58 deselected, exit 1) and its after_suite revision is 57c116cbe63054c9636580bae62baa87c500ab1c (attribute_gate_head_attr_default.log, 9 failed, 468 passed, 58 deselected, exit 1): 9 ids on each side, added = none, dropped = none. The graph arm is base b28fb1d4e (attribute_gate_base_attr_graph.log, 29 failed, 28 passed, 477 deselected, 1 warning, 1 error) against head 57c116cbe (attribute_gate_head_attr_graph.log, 29 failed, 29 passed, 477 deselected, 1 warning): 29 FAILED ids on each side, added = none, dropped = none, and the one extra base-side record is a setup ERROR on tests/standard_names/test_bare_doc_link_normalize.py::test_normalize_prose_against_disposable_graph, i.e. base-only and resolved. This review's own delta is 57c116cbe..3ec4bbb07, which changes one documented evidence fragment and no source or test file (git diff --name-only returns that single path), so zero added failures carry forward to the reviewed head unchanged.",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/standard_names/harmonize.py:552 get_existing_standard_names",
+    "imas_codex/standard_names/loop.py:1271 get_existing_standard_names",
+    "imas_codex/standard_names/workers.py:5292 claim_names_for_validation"
+  ],
+  "completed_at": "2026-10-24T11:11:12.146Z",
+  "dispatched_at": "2026-10-24T10:44:55Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-steps8-11.html",
+      "line": "12",
+      "severity": "non-blocking",
+      "text": "non-blocking: the added attribute-string section states the AST scan 'found 74 calls in 36 files' and that 'The table lists every matching file', but a like-for-like AST scan of the same tree resolves imports of imas_codex.standard_names.graph_ops and literal monkeypatch.setattr/patch.object names over the same eleven non-foundation modules and finds 89 calls in 38 files. Two patching files are absent from the table: tests/standard_names/test_manifest_drain.py, which carries 15 attribute-string patches against graph_ops (including build_manifest_drain_plan and claim_manifest_drain_scope, both owned by graph_claim_scope), and tests/standard_names/test_review_dimension_void.py:267, which patches graph_ops.isn_vocabulary_signature (owned by graph_audits, the count the table gives as 10 and the scan finds as 11). The first file was inside the earlier 33-file gate, so its omission misstates the record rather than the coverage; the second was run in neither arm's file list, so the section's own enumeration standard would have found it. The exposure is contained because the missed patch target still binds: graph_store/graph_audits.py:1513 resolves the symbol through foundation.services, which is the graph_ops facade the test patches."
+    }
+  ],
+  "findings_verified": [
+    {
+      "check": "independent AST scan of the reviewed head tree (git archive 3ec4bbb07) over tests/ for monkeypatch.setattr/patch.object with a literal name owned by one of the eleven extracted non-foundation modules: 89 matches, 38 files; graph_claim_scope 19 and graph_audits 11, against the table's 5 and 10",
+      "path": "docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-steps8-11.html:12"
+    },
+    {
+      "check": "grep -c against both gate command headers and the manifest tests line returns 0 for tests/standard_names/test_review_dimension_void.py in gate_base_default.log, gate_head_final_default.log and both attribute default arms",
+      "path": "tests/standard_names/test_review_dimension_void.py:267"
+    },
+    {
+      "check": "grep of graph_store/graph_audits.py shows the moved symbol is reached internally as foundation.services.isn_vocabulary_signature (line 1513), so the facade patch the test applies at line 267 still takes effect",
+      "path": "imas_codex/standard_names/graph_store/graph_audits.py:1513"
+    },
+    {
+      "check": "comm of the FAILED lines from artifact_gate_base_attr_default.log and attribute_gate_head_attr_default.log is empty in both directions; both files end at 9 failed, 468 passed, 58 deselected",
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T081652182726-srtj-graph-ops-split-steps8-11/attribute_gate_head_attr_default.log"
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read commit by commit from 57c116cbe to 3ec4bbb07: one commit, ten added lines, one file, documentation only; no product source, no test file and no CYPHER allowance row changed, so the code reviewed at 57c116cbe is byte-identical at the reviewed head.",
+    "done_when": "the done_when is unchanged by the delta and names the four modules, the forwarder list, zero added failures, the import and Cypher checks and three size counts; the delta adds a second gate arm whose result is recorded in the run's attribute_gate_* logs and whose totals the reviewed run's manifest carries in baseline_suite and after_suite.",
+    "goal": "the node goal is the four-module extraction already reviewed at 57c116cbe; the commits gained since are the single documentation commit 3ec4bbb07, which adds the attribute-string patch-coverage section at docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-steps8-11.html:11-21 and is the answer the prior review's finding 3 asked for.",
+    "manifest": "read; it now records the attribute arms as baseline_suite (b28fb1d4e, 9 failed, 468 passed) and after_suite (57c116cbe, 9 failed, 468 passed) with failure ids identical, and the headline carries the attested 74-call/36-file scan figure that finding 1 disputes.",
+    "write_paths": "the delta commit touches one path, docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-steps8-11.html, which is inside the run's declared write scope; git diff --name-only 57c116cbe..3ec4bbb07 returns that file alone."
+  },
+  "justifications": {
+    "durability": "the delta adds documentation only and no assertion; nothing in the repository fails if the table's file list drifts again, which is how the two missing entries in finding 1 went unnoticed -- the scan itself lives in run scratch, not in a committed test.",
+    "evidence": "both new arms reproduce in their own logs (attribute_gate_head_attr_default.log ends '9 failed, 468 passed, 58 deselected', attribute_gate_head_attr_graph.log ends '29 failed, 29 passed'), but the enumeration they document at srtj-graph-ops-split-steps8-11.html:12 is 15 calls and 2 files short of an independent scan of the same tree, so the recorded measurement measures less than its own wording claims.",
+    "fit": "the new section follows the fragment's existing grammar of a section id, an h3 title and a details-wrapped table, matching the symbol table at srtj-graph-ops-split-steps8-11.html:4-6, and introduces no name the naming rules forbid.",
+    "goal_fidelity": "docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-steps8-11.html:11-21 adds exactly the attribute-string patch-coverage record the node's own prior review asked for, and adds no code the goal does not imply.",
+    "reuse": "the delta adds no definition at all, so nothing can fork a capability; the underlying extraction extends the graph_store package and reuses the pre-existing _GraphServices slot at imas_codex/standard_names/graph_ops.py:70 rather than adding a second one.",
+    "scope_discipline": "git diff --name-only 57c116cbe..3ec4bbb07 returns the single evidence fragment, inside the run's seven declared write paths and with nothing the delta does not imply."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is the four-module extraction already reviewed at 57c116cbe; the commits gained since are the single documentation commit 3ec4bbb07, which adds the attribute-string patch-coverage section at docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-steps8-11.html:11-21 and is the answer the prior review's finding 3 asked for.\nVERDICT done_when: the done_when is unchanged by the delta and names the four modules, the forwarder list, zero added failures, the import and Cypher checks and three size counts; the delta adds a second gate arm whose result is recorded in the run's attribute_gate_* logs and whose totals the reviewed run's manifest carries in baseline_suite and after_suite.\nVERDICT write_paths: the delta commit touches one path, docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-steps8-11.html, which is inside the run's declared write scope; git diff --name-only 57c116cbe..3ec4bbb07 returns that file alone.\nVERDICT manifest: read; it now records the attribute arms as baseline_suite (b28fb1d4e, 9 failed, 468 passed) and after_suite (57c116cbe, 9 failed, 468 passed) with failure ids identical, and the headline carries the attested 74-call/36-file scan figure that finding 1 disputes.\nVERDICT diff: read commit by commit from 57c116cbe to 3ec4bbb07: one commit, ten added lines, one file, documentation only; no product source, no test file and no CYPHER allowance row changed, so the code reviewed at 57c116cbe is byte-identical at the reviewed head.\nCALL_SITES: imas_codex/standard_names/harmonize.py:552 get_existing_standard_names, imas_codex/standard_names/loop.py:1271 get_existing_standard_names, imas_codex/standard_names/workers.py:5292 claim_names_for_validation\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-steps8-11.html:11-21 adds exactly the attribute-string patch-coverage record the node's own prior review asked for, and adds no code the goal does not imply.\nSCORE evidence: 14\nJUSTIFICATION evidence: both new arms reproduce in their own logs (attribute_gate_head_attr_default.log ends '9 failed, 468 passed, 58 deselected', attribute_gate_head_attr_graph.log ends '29 failed, 29 passed'), but the enumeration they document at srtj-graph-ops-split-steps8-11.html:12 is 15 calls and 2 files short of an independent scan of the same tree, so the recorded measurement measures less than its own wording claims.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only 57c116cbe..3ec4bbb07 returns the single evidence fragment, inside the run's seven declared write paths and with nothing the delta does not imply.\nSCORE durability: 11\nJUSTIFICATION durability: the delta adds documentation only and no assertion; nothing in the repository fails if the table's file list drifts again, which is how the two missing entries in finding 1 went unnoticed -- the scan itself lives in run scratch, not in a committed test.\nSCORE fit: 19\nJUSTIFICATION fit: the new section follows the fragment's existing grammar of a section id, an h3 title and a details-wrapped table, matching the symbol table at srtj-graph-ops-split-steps8-11.html:4-6, and introduces no name the naming rules forbid.\nSCORE reuse: 20\nJUSTIFICATION reuse: the delta adds no definition at all, so nothing can fork a capability; the underlying extraction extends the graph_store package and reuses the pre-existing _GraphServices slot at imas_codex/standard_names/graph_ops.py:70 rather than adding a second one.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-steps8-11.html:12 non-blocking: the added attribute-string section states the AST scan 'found 74 calls in 36 files' and that 'The table lists every matching file', but a like-for-like AST scan of the same tree finds 89 calls in 38 files; tests/standard_names/test_manifest_drain.py (15 attribute-string patches on graph_ops) and tests/standard_names/test_review_dimension_void.py:267 (graph_ops.isn_vocabulary_signature) are absent from the table, and the second was run in neither gate arm.\n",
+  "review_run_id": "r-20261024T104411441717-review-of-srtj-graph-ops-split-steps8-11-3ec4bbb071c9",
+  "reviewed_base_sha": "57c116cbe63054c9636580bae62baa87c500ab1c",
+  "reviewed_head_sha": "3ec4bbb071c90f1a7386a4af8acf1316eaa38190",
+  "reviewed_run_id": "r-20261024T081652182726-srtj-graph-ops-split-steps8-11",
+  "rubric": "code",
+  "scores": {
+    "durability": 11,
+    "evidence": 14,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T11:20:00.000000+00:00",
+  "total": 102
+}
