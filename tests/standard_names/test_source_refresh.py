@@ -4,14 +4,13 @@ from __future__ import annotations
 
 import os
 import re
+import subprocess
 from collections.abc import Iterator
 from unittest.mock import MagicMock
 
 import pytest
-from neo4j import GraphDatabase
 
 from imas_codex.graph.client import GraphClient
-from imas_codex.graph.profiles import resolve_neo4j
 from imas_codex.graph.schema import GraphSchema
 from imas_codex.standard_names import source_refresh as sr
 
@@ -430,36 +429,145 @@ def test_public_refresh_restamps_raw_convergence_without_steering(monkeypatch):
 
 # ── Disposable-Neo4j contract ────────────────────────────────────────────────
 # The scan is Cypher, so it is proved on a real graph: an empty Neo4j the test
-# seeds itself. It refuses the project graph's URI and requires the ephemeral
-# marker, because a test that can reach production is not a test.
+# seeds itself. The endpoint, the environment naming it and the refusal of the
+# project graph's URI are owned by the package's shared disposable fixture.
 
 
-@pytest.fixture(scope="module")
-def disposable_neo4j() -> Iterator[tuple[str, str]]:
-    uri = os.environ.get("IMAS_CODEX_TEST_NEO4J_URI")
-    if not uri:
-        pytest.skip("IMAS_CODEX_TEST_NEO4J_URI is not configured")
-    if os.environ.get("IMAS_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
-        pytest.fail("source-drift refresh requires a disposable graph")
-    project_uri = resolve_neo4j(auto_tunnel=False).uri
-    if uri.rstrip("/") == project_uri.rstrip("/"):
-        pytest.fail("source-drift refresh refuses the project graph URI")
-    password = os.environ.get("IMAS_CODEX_TEST_NEO4J_PASSWORD", "")
-    auth = ("neo4j", password) if password else None
-    print(f"disposable_bolt_uri={uri}")
-    with GraphDatabase.driver(uri, auth=auth) as driver:
-        driver.verify_connectivity()
-        driver.execute_query("MATCH (node) DETACH DELETE node")
-    yield uri, password
+def _project_bolt_port() -> int:
+    """The port this checkout's profile gives the project graph."""
+    from imas_codex.graph.profiles import resolve_neo4j
+
+    return resolve_neo4j(auto_tunnel=False).bolt_port
+
+
+def _assert_refused(monkeypatch, address: str) -> None:
+    """Require the refusal for *address*, from the check and the fixture body."""
+    from tests.standard_names.conftest import (
+        disposable_neo4j_uri,
+        refuse_project_graph,
+    )
+
+    with pytest.raises(
+        pytest.fail.Exception, match="refusing to run against"
+    ) as refused:
+        refuse_project_graph(address)
+    print(f"refused {address}: {refused.value}")
+
+    body = getattr(disposable_neo4j_uri, "__wrapped__", disposable_neo4j_uri)
+    monkeypatch.setenv("IMAS_CODEX_TEST_NEO4J_URI", address)
+    monkeypatch.setenv("IMAS_CODEX_TEST_NEO4J_EPHEMERAL", "1")
+    with pytest.raises(pytest.fail.Exception, match="refusing to run against"):
+        next(iter(body()))
+
+
+def test_the_shared_fixture_refuses_the_project_loopback_address(monkeypatch):
+    """The protection the disposable fixtures exist for, shown refusing.
+
+    The fixture's whole value is that it cannot be pointed at production, and a
+    guard nothing exercises is a guard nobody knows works. This requires the
+    refusal for the loopback address the profile names, from the check and from
+    the fixture body, and accepts a disposable endpoint in the same breath so
+    the test cannot pass by refusing everything.
+    """
+    from tests.standard_names.conftest import refuse_project_graph
+
+    _assert_refused(monkeypatch, f"bolt://localhost:{_project_bolt_port()}")
+    refuse_project_graph("bolt://127.0.0.1:1")
+
+
+def _scheduled_graph_node() -> str | None:
+    """The node the scheduler reports for the project graph."""
+    try:
+        completed = subprocess.run(
+            ["squeue", "-h", "-n", "codex-neo4j", "-o", "%N"],
+            capture_output=True,
+            text=True,
+            timeout=60,
+            check=False,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    nodes = completed.stdout.split()
+    return nodes[0].split(",")[0] if nodes else None
+
+
+@pytest.mark.graph
+def test_the_shared_fixture_refuses_the_scheduled_graph_address(monkeypatch):
+    """The other spelling, read from the scheduler rather than from the profile.
+
+    On a cluster whose graph runs as a service, the loopback port is not the
+    address a compute node connects to, so a refusal that knows only the
+    loopback protects nothing there. The address comes from ``squeue`` so that
+    a resolver narrowing to the loopback spelling cannot keep this green -- a
+    guard and its only test sharing one resolver move together. It needs a
+    running service, hence the graph marker.
+    """
+    node = _scheduled_graph_node()
+    assert node is not None, (
+        "the scheduler reports no task named codex-neo4j, so the "
+        "scheduled-instance arm of the refusal cannot be exercised"
+    )
+    _assert_refused(monkeypatch, f"bolt://{node}:{_project_bolt_port()}")
+
+
+def test_a_failed_start_leaves_no_process_behind(monkeypatch, tmp_path):
+    """A start that never reaches readiness stops the process it began.
+
+    A container abandoned before readiness keeps its JVM and its memory on the
+    node the run shares with every other session, so a failed start has to take
+    the process group with it. The launch command is replaced by a long sleep
+    so the arm costs nothing, but the process and its group are the real ones:
+    the owner starts it in its own session and is the only thing that stops it.
+    """
+    from imas_codex.graph import temp_neo4j
+
+    started = []
+    real_popen = subprocess.Popen
+
+    def _popen(command, **kwargs):
+        process = real_popen(["sleep", "300"], **kwargs)
+        started.append(process)
+        return process
+
+    def _never_ready(process, *args, **kwargs):
+        assert process.poll() is None, "the arm must fail while the process is alive"
+        raise temp_neo4j.click.ClickException("Bolt readiness never arrived")
+
+    monkeypatch.setattr(temp_neo4j.subprocess, "Popen", _popen)
+    monkeypatch.setattr(temp_neo4j, "_wait_for_bolt_ready", _never_ready)
+
+    with pytest.raises(temp_neo4j.click.ClickException, match="Bolt readiness"):
+        temp_neo4j.start_temp_neo4j(tmp_path / "instance", 1, 2, load_dump=False)
+
+    assert len(started) == 1
+    assert started[0].poll() is not None, "the failed start left its process running"
 
 
 @pytest.fixture
-def graph(disposable_neo4j: tuple[str, str]) -> Iterator[GraphClient]:
-    uri, password = disposable_neo4j
+def graph(disposable_neo4j_uri: str, monkeypatch) -> Iterator[GraphClient]:
+    # An empty instance carries no DD-resolution authority, and the drift scan
+    # reads one to stamp each source snapshot. The scan's Cypher is what these
+    # tests prove, so the authority comes from the package's synthetic rows —
+    # the same boundary the mock tier uses — while every query still runs on
+    # the disposable graph.
+    from imas_codex.standard_names import dd_resolutions
+    from tests.standard_names.conftest import (
+        SyntheticDDResolutionReader,
+        neo4j_test_password,
+    )
+    from tests.standard_names.dd_resolution_test_data import (
+        SYNTHETIC_GRAPH_RESOLUTION_ROWS,
+    )
+
+    monkeypatch.setattr(
+        dd_resolutions,
+        "dd_resolution_graph_reader",
+        lambda: SyntheticDDResolutionReader(SYNTHETIC_GRAPH_RESOLUTION_ROWS),
+    )
     client = GraphClient(
-        uri=uri,
+        uri=disposable_neo4j_uri,
         username="neo4j",
-        password=password,
+        password=neo4j_test_password(),
         graph_name="source-drift-refresh",
     )
     client.query("MATCH (node) DETACH DELETE node")

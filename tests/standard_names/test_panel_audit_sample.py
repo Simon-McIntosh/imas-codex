@@ -700,52 +700,16 @@ def test_skipped_audit_row_carries_a_review_group_id():
     assert record["resolution_method"] == panel_audit.AUDIT_SKIPPED_METHOD
 
 
-@pytest.fixture(scope="module")
-def disposable_graph_uri() -> Iterator[str]:
-    """A loopback-only Neo4j this module may write to, or a refusal.
+@pytest.fixture
+def disposable_graph_uri(disposable_neo4j_empty: str) -> Iterator[str]:
+    """This test's empty graph.
 
     The audit row must land through the real ``write_reviews``, which builds
-    its own ``GraphClient()`` from the active profile, so the fixture refuses
-    unless that profile resolves to the disposable endpoint itself — otherwise
-    the write would reach the project graph.
+    its own ``GraphClient()`` from the active profile. The shared fixture has
+    already pointed that profile at the disposable endpoint and refused the
+    project graph's address, so the write cannot reach production.
     """
-    from neo4j import GraphDatabase
-
-    from imas_codex.graph.profiles import resolve_neo4j
-    from imas_codex.settings import get_graph_uri
-
-    uri = os.environ.get("IMAS_CODEX_TEST_NEO4J_URI")
-    if not uri:
-        pytest.skip("IMAS_CODEX_TEST_NEO4J_URI is not configured")
-    if os.environ.get("IMAS_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
-        pytest.fail("the panel-audit row contract requires a disposable graph")
-
-    # The endpoint this checkout would reach if the disposable export were
-    # absent. NEO4J_URI is withheld for the resolution because the run's own
-    # export legitimately points it at the disposable instance, so reading it
-    # back would only ever compare the disposable URI against itself.
-    saved_uri = os.environ.pop("NEO4J_URI", None)
-    try:
-        project_uri = resolve_neo4j(auto_tunnel=False).uri
-    finally:
-        if saved_uri is not None:
-            os.environ["NEO4J_URI"] = saved_uri
-    if uri.rstrip("/") == project_uri.rstrip("/"):
-        pytest.fail("the panel-audit row contract refuses the project graph URI")
-
-    resolved = get_graph_uri()
-    if resolved.rstrip("/") != uri.rstrip("/"):
-        pytest.fail(
-            f"write_reviews resolves the profile to {resolved}, not the "
-            f"disposable endpoint: export NEO4J_URI={uri} so the audit row "
-            "cannot be written to the project graph"
-        )
-    password = os.environ.get("IMAS_CODEX_TEST_NEO4J_PASSWORD", "")
-    auth = ("neo4j", password) if password else None
-    with GraphDatabase.driver(uri, auth=auth) as driver:
-        driver.verify_connectivity()
-        driver.execute_query("MATCH (node) DETACH DELETE node")
-    yield uri
+    yield disposable_neo4j_empty
 
 
 @pytest.mark.graph
@@ -758,13 +722,14 @@ def test_the_real_writer_stores_the_audit_row_and_the_aggregate_ignores_it(
         update_review_aggregates,
         write_reviews,
     )
+    from tests.standard_names.conftest import neo4j_test_password
 
     sn_id = "electron_temperature"
     group_id = "2c0e6a5e-0000-4000-8000-00000000fa11"
     client = GraphClient(
         uri=disposable_graph_uri,
         username="neo4j",
-        password=os.environ.get("IMAS_CODEX_TEST_NEO4J_PASSWORD", ""),
+        password=neo4j_test_password(),
         graph_name="panel-audit-row",
     )
     try:

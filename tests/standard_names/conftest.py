@@ -11,6 +11,11 @@ Stages map to worker pool names: ``'generate_name'``, ``'review_name'``,
 from __future__ import annotations
 
 import dataclasses
+import os
+import socket
+import tempfile
+from collections.abc import Iterator
+from pathlib import Path
 from typing import Any
 from unittest.mock import patch
 
@@ -100,6 +105,21 @@ def _synthetic_dd_resolution_rows():
     return SYNTHETIC_GRAPH_RESOLUTION_ROWS
 
 
+class SyntheticDDResolutionReader:
+    """Serve a fixed DD-resolution authority to tests that must not reach a graph.
+
+    The authority is a property of the DD version rather than of a graph, so a
+    test that exercises Cypher against an empty instance reads the same rows the
+    mock tier does instead of seeding a second copy of the real records.
+    """
+
+    def __init__(self, rows) -> None:
+        self._rows = rows
+
+    def read_resolutions(self):
+        return self._rows
+
+
 @pytest.fixture(autouse=True)
 def _block_live_graph(request, monkeypatch, _synthetic_dd_resolution_rows):
     """Raise RuntimeError if a default-tier test attempts to open a real
@@ -124,14 +144,10 @@ def _block_live_graph(request, monkeypatch, _synthetic_dd_resolution_rows):
     from imas_codex.graph.client import GraphClient
     from imas_codex.standard_names import dd_resolutions
 
-    class _SyntheticResolutionReader:
-        def read_resolutions(self):
-            return _synthetic_dd_resolution_rows
-
     monkeypatch.setattr(
         dd_resolutions,
         "dd_resolution_graph_reader",
-        _SyntheticResolutionReader,
+        lambda: SyntheticDDResolutionReader(_synthetic_dd_resolution_rows),
     )
 
     def _blocked_post_init(self, *args, **kwargs):
@@ -259,6 +275,223 @@ def graph_client():
 
     yield client
     client.close()
+
+
+# ---------------------------------------------------------------------------
+# Disposable Neo4j — the one convention for tests that run real Cypher
+# ---------------------------------------------------------------------------
+#
+# A test that exercises real Cypher needs a graph of its own, and every such
+# test in this package gets it the same way: one empty instance, named by both
+# ``NEO4J_URI`` (the profile every ``GraphClient()`` resolves through) and
+# ``IMAS_CODEX_TEST_NEO4J_URI`` (what the disposable-graph tests advertise), and
+# a loud refusal when an endpoint names the project graph.
+#
+# The refusal resolves the project graph's address with ``NEO4J_URI`` withheld.
+# Reading it back with the override in place compares the disposable endpoint
+# against itself, which passes for every endpoint — including the project
+# graph's own — and so protects nothing.
+
+#: Environment this fixture owns for a test's duration.
+_DISPOSABLE_ENV = (
+    "NEO4J_URI",
+    "NEO4J_PASSWORD",
+    "IMAS_CODEX_TEST_NEO4J_URI",
+    "IMAS_CODEX_TEST_NEO4J_EPHEMERAL",
+    "IMAS_CODEX_TEST_NEO4J_LOG",
+)
+
+
+def project_graph_uris() -> set[str]:
+    """Every address this checkout reaches the project graph at.
+
+    Two spellings, because two hosts reach the same graph by different routes:
+    the loopback port, which is what a login node's profile names and what an
+    SSH tunnel would front, and the address service discovery reports for the
+    scheduled instance, which is what a compute node actually connects to.
+    Naming only the loopback refuses nothing on a cluster whose graph runs on a
+    service node, and the port alone says nothing about which graph listens on
+    it, so both are collected.
+
+    Neither is resolved by opening a tunnel: discovery answers from the
+    scheduler, so reading an address stays a read.
+    """
+    from imas_codex.graph.profiles import resolve_neo4j
+    from imas_codex.remote.locations import resolve_service_url
+
+    withheld = os.environ.pop("NEO4J_URI", None)
+    try:
+        profile = resolve_neo4j(auto_tunnel=False)
+        uris = {f"bolt://localhost:{profile.bolt_port}"}
+        discovered = resolve_service_url(
+            profile.location, profile.bolt_port, protocol="bolt"
+        )
+        if discovered:
+            uris.add(discovered)
+        return {uri.rstrip("/") for uri in uris}
+    finally:
+        if withheld is not None:
+            os.environ["NEO4J_URI"] = withheld
+
+
+def refuse_project_graph(uri: str) -> None:
+    """Fail the run when *uri* names the project graph.
+
+    This is the protection the disposable fixtures exist for, so it fails
+    rather than skips: an endpoint that cannot be told apart from production is
+    a broken test setup, not a test that is not applicable here.
+    """
+    project_uris = project_graph_uris()
+    if uri.rstrip("/") in project_uris:
+        pytest.fail(
+            f"refusing to run against the project graph URI ({uri}): "
+            "these tests need a disposable graph; the project graph is at "
+            f"{', '.join(sorted(project_uris))}"
+        )
+
+
+def _free_port_pair() -> tuple[int, int]:
+    """Two distinct free loopback ports.
+
+    Both sockets are held open until both are bound, so the two ports cannot
+    be the same one -- binding them in turn would let the first port be handed
+    out again for the second.
+    """
+    sockets = [socket.socket(), socket.socket()]
+    try:
+        for sock in sockets:
+            sock.bind(("127.0.0.1", 0))
+        return int(sockets[0].getsockname()[1]), int(sockets[1].getsockname()[1])
+    finally:
+        for sock in sockets:
+            sock.close()
+
+
+def _start_empty_neo4j():
+    """Start one empty Neo4j through the module that owns the lifecycle.
+
+    Returns its scratch directory, process, log path and bolt port.  The
+    directory is removed if the start fails: a failure here must leave
+    neither a running instance nor a tree behind.
+    """
+    from imas_codex.graph import temp_neo4j
+
+    scratch = os.environ.get("TMPDIR") or None
+    directory = tempfile.TemporaryDirectory(prefix="disposable-neo4j-", dir=scratch)
+    root = Path(directory.name)
+    bolt_port, http_port = _free_port_pair()
+    try:
+        process, log = temp_neo4j.start_temp_neo4j(
+            root, bolt_port, http_port, load_dump=False
+        )
+    except BaseException:
+        directory.cleanup()
+        raise
+    return directory, process, log, bolt_port
+
+
+def neo4j_test_password() -> str:
+    """The password of the disposable graph, empty for an auth-free instance."""
+    return os.environ.get("IMAS_CODEX_TEST_NEO4J_PASSWORD", "")
+
+
+def _auth() -> tuple[str, str] | None:
+    password = neo4j_test_password()
+    return ("neo4j", password) if password else None
+
+
+def _wipe(uri: str) -> None:
+    from neo4j import GraphDatabase
+
+    with GraphDatabase.driver(uri, auth=_auth()) as driver:
+        driver.verify_connectivity()
+        driver.execute_query("MATCH (node) DETACH DELETE node")
+        records, _, _ = driver.execute_query("MATCH (node) RETURN count(node) AS n")
+        assert records[0]["n"] == 0
+
+
+@pytest.fixture(scope="session")
+def disposable_neo4j_uri() -> Iterator[str]:
+    """The one empty graph this package's real-Cypher tests share.
+
+    Attaches to ``IMAS_CODEX_TEST_NEO4J_URI`` when a run supplies one (which
+    must carry ``IMAS_CODEX_TEST_NEO4J_EPHEMERAL=1``), and otherwise starts an
+    empty instance of its own.  Either way the endpoint is compared against the
+    project graph's resolved address and the run fails if they are the same, so
+    no test here can write to the shared live graph.
+
+    For a test's duration both ``NEO4J_URI`` and ``IMAS_CODEX_TEST_NEO4J_URI``
+    name this endpoint, so a bare ``GraphClient()`` and an explicitly-addressed
+    one in the same test reach the same instance.
+    """
+    configured = os.environ.get("IMAS_CODEX_TEST_NEO4J_URI")
+    directory = process = log = None
+    if configured:
+        if os.environ.get("IMAS_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
+            pytest.fail(
+                "a disposable graph is required, but IMAS_CODEX_TEST_NEO4J_URI "
+                "is set without IMAS_CODEX_TEST_NEO4J_EPHEMERAL=1"
+            )
+        uri = configured
+    else:
+        try:
+            directory, process, log, bolt_port = _start_empty_neo4j()
+        except Exception as exc:
+            pytest.fail(f"no disposable Neo4j could start: {exc}")
+        uri = f"bolt://127.0.0.1:{bolt_port}"
+
+    previous = {key: os.environ.get(key) for key in _DISPOSABLE_ENV}
+    os.environ.update(
+        {
+            "NEO4J_URI": uri,
+            "NEO4J_PASSWORD": "",
+            "IMAS_CODEX_TEST_NEO4J_URI": uri,
+            "IMAS_CODEX_TEST_NEO4J_EPHEMERAL": "1",
+        }
+    )
+    try:
+        refuse_project_graph(uri)
+        from imas_codex.graph.profiles import resolve_neo4j
+
+        # The profile obeys NEO4J_URI, so this compares the override with
+        # itself and is no evidence about the project graph -- the refusal
+        # above is what protects production. What it does prove is that the
+        # override is still honoured, which is the whole wiring: a test that
+        # builds a bare GraphClient() must land on the instance it was given.
+        resolved = resolve_neo4j(auto_tunnel=False).uri
+        if resolved.rstrip("/") != uri.rstrip("/"):
+            pytest.fail(
+                f"the graph profile ignores NEO4J_URI and resolves to "
+                f"{resolved}: a bare GraphClient() would reach past the "
+                f"disposable endpoint {uri}"
+            )
+        _wipe(uri)
+        yield uri
+    finally:
+        for key, value in previous.items():
+            if value is None:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = value
+        if process is not None:
+            from imas_codex.graph import temp_neo4j
+
+            destination = previous.get("IMAS_CODEX_TEST_NEO4J_LOG")
+            if destination and log is not None:
+                import shutil
+
+                shutil.copyfile(log, destination)
+            try:
+                temp_neo4j.stop_temp_neo4j(process)
+            finally:
+                directory.cleanup()
+
+
+@pytest.fixture()
+def disposable_neo4j_empty(disposable_neo4j_uri: str) -> str:
+    """The shared endpoint, holding no nodes when the test starts."""
+    _wipe(disposable_neo4j_uri)
+    return disposable_neo4j_uri
 
 
 # ---------------------------------------------------------------------------
