@@ -420,9 +420,11 @@ class StructuralAuthorityConflict(RuntimeError):
 def _structural_authority_identities(*, services: Any) -> tuple[str, str]:
     """Return immutable identities for the executing code and schema bytes."""
     code_identity = services.hashlib.sha256(
-        services.Path(__file__).read_bytes()
+        services.Path(services.__file__).read_bytes()
     ).hexdigest()
-    schema_path = services.Path(__file__).parents[1] / "schemas" / "standard_name.yaml"
+    schema_path = (
+        services.Path(services.__file__).parents[1] / "schemas" / "standard_name.yaml"
+    )
     schema_identity = services.hashlib.sha256(schema_path.read_bytes()).hexdigest()
     return code_identity, schema_identity
 
