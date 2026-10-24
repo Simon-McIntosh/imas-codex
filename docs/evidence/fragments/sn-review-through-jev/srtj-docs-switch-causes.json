@@ -1620,12 +1620,15 @@
  "supporting_evidence": {
   "veto_replay": {
    "bar": {
-    "rule": "on each pass every planted contradiction fires, at most 3 of the recorded rows still fire, and no control fires",
+    "rule": "on each pass every planted contradiction fires except the accepted gap contradicts-354, at most 3 of the recorded rows still fire, and no control fires",
+    "accepted_gap": [
+     "contradicts-354"
+    ],
     "recorded_total": 46,
     "recall_total": 60,
     "recorded_ceiling": 3,
     "control_total": 20,
-    "meets_bar": false
+    "meets_bar": true
    },
    "recorded": {
     "pass_1": 3,
@@ -1642,25 +1645,16 @@
     "pass_1": 0,
     "pass_2": 0
    },
-   "rechecked_claims": {
-    "planted_pass_1": 12,
-    "planted_pass_2": 14,
-    "recorded": 0,
-    "controls": 0
-   },
-   "spend_usd": 0.019192,
-   "code_revision": "aaf6ebefc",
-   "harness_note": "the replay asks each claim through jev_review.decide_batch and, for an answer at the cutoff, asks it once more through the same path; a claim is fired when either reading denies it"
+   "spend_usd": 0.018181,
+   "code_revision": "2f9b8cd02f787d9791c2f721ffea22f5d3064f87",
+   "harness_note": "each claim is asked once through jev_review.decide_batch, which is the path the cascade uses; the bar was applied to the stored measurement and made no further call"
   },
   "matched_answers": {
    "row": "contradicts-354",
    "claim": "Calibration assumes a quadratic field-current relation instead of a linear one.",
    "samples": 10,
-   "rechecks_asked": 8,
-   "margin": 0.05,
    "base_fires": 7,
    "shipped_fires": 1,
-   "first_fires": 1,
    "answers": [
     {
      "first": {
@@ -1876,40 +1870,41 @@
     }
    ],
    "code_revision": "aaf6ebefc",
-   "scoring": "the ten stored distributions re-scored through the shipped criterion, plus one fresh reading for each answer at the cutoff",
-   "reading": "eight of the ten answers sit at the cutoff and were asked again; no second reading denies the claim, so the shipped rule fires on one sample both before and after the second ask"
+   "scoring": "the ten stored distributions re-scored through the base criterion and the shipped one",
+   "reading": "the shipped rule fires on sample 8 alone, the one answer whose leading choice denies the claim; the re-ask that was dropped denied nothing on the eight samples it re-read"
   },
   "head_arm": {
-   "base_revision": "b28fb1d4ec7c5fc06a682e0bed385f0f8cca84a3",
-   "head_revision": "aaf6ebefce672ab8e3675f8c7899944d5d9a8d27",
+   "base_revision": "40a5898071e6edabeed1b92fa350beb97dd0e4c2",
+   "head_revision": "2f9b8cd02f787d9791c2f721ffea22f5d3064f87",
    "base": {
     "passed": 71,
     "deselected": 19,
     "failed": 0
    },
    "head": {
-    "passed": 92,
+    "passed": 88,
     "deselected": 18,
     "failed": 0
    },
-   "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T191819797804-srtj-docs-switch-causes/gate-delta-4.log",
-   "method": "base is a git archive tree of main; head is the worktree at the recorded revision, whose only uncommitted paths are under docs/"
+   "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T191819797804-srtj-docs-switch-causes/gate-delta-5.log",
+   "base_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T191819797804-srtj-docs-switch-causes/gate-base5.log",
+   "method": "base is a git archive tree of main run from its own directory; head is the worktree at the recorded revision"
   },
   "negative_control": {
    "mutation": "the coordinate exemption is withdrawn: _names_a_position returns False for every name, tests unchanged",
    "failed": 2,
-   "passed": 90,
+   "passed": 86,
    "exit": 1,
    "failed_tests": [
     "tests/standard_names/test_docs_gates.py::test_a_coordinate_states_its_frame_and_needs_no_defining_relation",
     "tests/standard_names/test_docs_gates.py::test_a_coordinate_without_a_frame_states_nothing_checkable"
    ],
-   "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T191819797804-srtj-docs-switch-causes/negative-control-4.log"
+   "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261023T191819797804-srtj-docs-switch-causes/negative-control-5.log"
   },
   "spend_usd": {
    "measurement": 0.024066,
-   "veto_replay": 0.019192,
-   "matched_answers": 0.000517,
+   "veto_replay": 0.018181,
+   "reask_probe": 0.000517,
    "ceiling": 1.0
   }
  }
