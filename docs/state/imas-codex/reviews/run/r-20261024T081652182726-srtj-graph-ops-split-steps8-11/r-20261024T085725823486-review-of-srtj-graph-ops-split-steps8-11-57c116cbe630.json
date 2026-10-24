@@ -1,0 +1,88 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_source": "gate_base_default.log/gate_head_final_default.log and gate_base_graph.log/gate_head_final_graph.log; identical default failure-id sets on both arms (19 each) and zero failures on both graph arms, delta empty",
+  "call_site_count": 7,
+  "call_sites": [
+    "imas_codex/cli/sn.py:2159 build_manifest_drain_plan",
+    "imas_codex/cli/sn.py:2441 reset_standard_names",
+    "imas_codex/cli/sn.py:2664 scope_focus_names",
+    "imas_codex/standard_names/workers.py:5292 claim_names_for_validation",
+    "imas_codex/standard_names/workers.py:5316 release_validation_claims",
+    "imas_codex/standard_names/loop.py:856 release_refine_name_claims",
+    "imas_codex/standard_names/loop.py:919 claim_enrich_parents_batch"
+  ],
+  "completed_at": "2026-10-24T09:12:41.332Z",
+  "dispatched_at": "2026-10-24T08:58:14Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_claim_release.py",
+      "line": "1231",
+      "severity": "non-blocking",
+      "text": "non-blocking: the three _verify_*_claim_winners helpers (1231, 1333, 1354) and claim_enrich_parents_batch (graph_parent_lifecycle.py:303) are the only four moved definitions that are not a pure move; they replace import-time defaults (settle_seconds=_CLAIM_VERIFY_SETTLE_SECONDS, batch_size=DEFAULT_POOL_BATCH_SIZE) with None sentinels resolved per call from services, so the announced default changes to None, an explicit None argument is now silently defaulted instead of propagated, and each default became patch-sensitive where the base bound it at import."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_ops.py",
+      "line": "10136",
+      "severity": "non-blocking",
+      "text": "non-blocking: __wrapped__ binds the moved implementation for 80 more forwarders, so inspect.signature(graph_ops.<moved function>) now advertises the internal keyword-only services parameter that the facade never exposed, carrying forward the seam an earlier extraction review already recorded for the same facade."
+    },
+    {
+      "file": "tests/graph/test_manifest_drain.py",
+      "line": "863",
+      "severity": "non-blocking",
+      "text": "non-blocking: 12 test files that patch a moved symbol through the attribute-string form (monkeypatch.setattr(graph_ops, \"<name>\", ...) or patch.object(graph_ops, \"<name>\", ...)) are outside the 33-file gate, because the design's patch_targets.test_files_by_module scan records only dotted graph_ops.<name> literals; the node followed the brief and the design exactly, and the exposure is contained because every intra-module call in the four new modules routes through services (zero bare same-module calls), so the facade patch targets still bind."
+    }
+  ],
+  "findings_verified": [
+    {
+      "check": "AST comparison of all 84 moved functions/classes against b28fb1d4e:imas_codex/standard_names/graph_ops.py after normalising the services prefix reports exactly these four as differing, each by the None-sentinel default and its late-binding line",
+      "path": "imas_codex/standard_names/graph_store/graph_claim_release.py:1231"
+    },
+    {
+      "check": "grep of __wrapped__ assignments in the reviewed head graph_ops.py returns the moved implementation for the new forwarders (e.g. line 10136 binds _moved_graph_claim_scope._lock_manifest_drain_authority)",
+      "path": "imas_codex/standard_names/graph_ops.py:10136"
+    },
+    {
+      "check": "static scan of tests/ for setattr/patch.object on graph_ops with a moved symbol name finds 44 files; 12 are not in the recorded 33-file gate, and an AST scan of the four new modules finds zero bare same-module calls to a moved symbol, so services. is the only intra-module route",
+      "path": "tests/graph/test_manifest_drain.py:863"
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read commit by commit from b28fb1d4e to 57c116cbe: four extraction commits, one Cypher-allowance re-pointing fix, one facade-identity fix and one evidence commit; 83 non-forwarder graph_ops definitions are AST-identical to base, the four moved classes are re-exported by identity, and the four re-pointed Cypher allowances name the SET lines they claim (992, 923, 405, 647).",
+    "done_when": "the done_when names the four modules plus forwarder list, zero added failures, fresh imports, the Cypher check and three size counts, and the manifest records each with a log that reproduces it: gate_base_default.log and gate_head_final_default.log both end '19 failed, 628 passed', both graph arms end EXIT=0 with 2 passed, imports.log ends 'forwarders 80' EXIT=0, and cypher_final.log ends '4 passed' EXIT=0.",
+    "goal": "the goal is four more graph_store modules mapped by the design; the diff defines 109 design-mapped symbols in exactly those four modules (15/33/24/37, matching docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-design.json), leaves 80 thin forwarders on graph_ops, and no module exceeds the design's 60,000-token cap (largest: graph_claim_scope.py at 66,405 bytes).",
+    "manifest": "read; its headline (109 symbols, 80 forwarders, graph_ops.py 607,604 to 417,364 bytes, 128,101 to 87,319 cl100k tokens, 173,601.14 to 119,246.86 gate units) is re-derived here and each figure reproduces exactly.",
+    "write_paths": "the manifest declares seven paths and the diff touches exactly those seven, with no test file touched and no path outside the grant."
+  },
+  "justifications": {
+    "durability": "the diff adds no assertion at all because test files were held out of scope, so regression protection rests on pre-existing facade-patching tests such as tests/graph/test_manifest_drain.py:863 rather than on a guard written for this change, and the four late-bound defaults in finding 1 have no assertion covering them.",
+    "evidence": "gate_head_final_default.log ends '19 failed, 628 passed' with a failure-id set identical to gate_base_default.log and both graph arms end EXIT=0, but the 33 gate files equal the design's 32-file patch-target map plus the step gate, and that map omits the 12 attribute-string patch targets in finding 3, so the gate measures slightly less than the brief's wording claims.",
+    "fit": "imas_codex/standard_names/graph_store/graph_claim_release.py:7 follows the sibling idiom with a keyword-only services parameter, ruff reports no undefined names on the four new modules, the naming checks are clean, and the forwarder docstrings name their owner, though all four modules share the same generic opening docstring line so only the filename distinguishes their domains.",
+    "goal_fidelity": "imas_codex/standard_names/graph_store/graph_claim_scope.py:1 holds 37 of the 109 mapped symbols and graph_ops.py:3656 keeps the documented forwarder, with all 80 moved function bodies matching b28fb1d4e:imas_codex/standard_names/graph_ops.py after services normalisation except the four named in finding 1.",
+    "reuse": "the node extends the existing graph_store package and reuses the pre-existing _GraphServices slot at imas_codex/standard_names/graph_ops.py:70 rather than adding a second one, and the nearest neighbouring owner of claim acquisition (graph_cost_and_claims.py:398 claim_generate_name_batch, :210 _claim_sn_atomic) keeps that capability while these modules own claim release and claim scope, so nothing is forked.",
+    "scope_discipline": "every one of the seven paths in git diff --name-only b28fb1d4e..57c116cbe is listed in the manifest's write_paths, including imas_codex/graph/cypher_property_check.py:139, which the operator had to edit and this time was granted."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is four more graph_store modules mapped by the design; the diff defines 109 design-mapped symbols in exactly those four modules (15/33/24/37, matching docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-design.json), leaves 80 thin forwarders on graph_ops, and no module exceeds the design's 60,000-token cap (largest: graph_claim_scope.py at 66,405 bytes).\nVERDICT done_when: the done_when names the four modules plus forwarder list, zero added failures, fresh imports, the Cypher check and three size counts, and the manifest records each with a log that reproduces it: gate_base_default.log and gate_head_final_default.log both end '19 failed, 628 passed', both graph arms end EXIT=0 with 2 passed, imports.log ends 'forwarders 80' EXIT=0, and cypher_final.log ends '4 passed' EXIT=0.\nVERDICT write_paths: the manifest declares seven paths and the diff touches exactly those seven, with no test file touched and no path outside the grant.\nVERDICT manifest: read; its headline (109 symbols, 80 forwarders, graph_ops.py 607,604 to 417,364 bytes, 128,101 to 87,319 cl100k tokens, 173,601.14 to 119,246.86 gate units) is re-derived here and each figure reproduces exactly.\nVERDICT diff: read commit by commit from b28fb1d4e to 57c116cbe: four extraction commits, one Cypher-allowance re-pointing fix, one facade-identity fix and one evidence commit; 83 non-forwarder graph_ops definitions are AST-identical to base, the four moved classes are re-exported by identity, and the four re-pointed Cypher allowances name the SET lines they claim (992, 923, 405, 647).\nCALL_SITES: imas_codex/cli/sn.py:2159 build_manifest_drain_plan, imas_codex/cli/sn.py:2441 reset_standard_names, imas_codex/cli/sn.py:2664 scope_focus_names, imas_codex/standard_names/workers.py:5292 claim_names_for_validation, imas_codex/standard_names/workers.py:5316 release_validation_claims, imas_codex/standard_names/loop.py:856 release_refine_name_claims, imas_codex/standard_names/loop.py:919 claim_enrich_parents_batch\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/graph_store/graph_claim_scope.py:1 holds 37 of the 109 mapped symbols and graph_ops.py:3656 keeps the documented forwarder, with all 80 moved function bodies matching b28fb1d4e:imas_codex/standard_names/graph_ops.py after services normalisation except the four named in finding 1.\nSCORE evidence: 17\nJUSTIFICATION evidence: gate_head_final_default.log ends '19 failed, 628 passed' with a failure-id set identical to gate_base_default.log and both graph arms end EXIT=0, but the 33 gate files equal the design's 32-file patch-target map plus the step gate, and that map omits the 12 attribute-string patch targets in finding 3, so the gate measures slightly less than the brief's wording claims.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every one of the seven paths in git diff --name-only b28fb1d4e..57c116cbe is listed in the manifest's write_paths, including imas_codex/graph/cypher_property_check.py:139, which the operator had to edit and this time was granted.\nSCORE durability: 13\nJUSTIFICATION durability: the diff adds no assertion at all because test files were held out of scope, so regression protection rests on pre-existing facade-patching tests such as tests/graph/test_manifest_drain.py:863 rather than on a guard written for this change, and the four late-bound defaults in finding 1 have no assertion covering them.\nSCORE fit: 17\nJUSTIFICATION fit: imas_codex/standard_names/graph_store/graph_claim_release.py:7 follows the sibling idiom with a keyword-only services parameter, ruff reports no undefined names on the four new modules, the naming checks are clean, and the forwarder docstrings name their owner, though all four modules share the same generic opening docstring line so only the filename distinguishes their domains.\nSCORE reuse: 20\nJUSTIFICATION reuse: the node extends the existing graph_store package and reuses the pre-existing _GraphServices slot at imas_codex/standard_names/graph_ops.py:70 rather than adding a second one, and the nearest neighbouring owner of claim acquisition (graph_cost_and_claims.py:398 claim_generate_name_batch, :210 _claim_sn_atomic) keeps that capability while these modules own claim release and claim scope, so nothing is forked.\nFINDING imas_codex/standard_names/graph_store/graph_claim_release.py:1231 non-blocking: the three _verify_*_claim_winners helpers (1231, 1333, 1354) and claim_enrich_parents_batch (graph_parent_lifecycle.py:303) are the only four moved definitions that are not a pure move; they replace import-time defaults (settle_seconds=_CLAIM_VERIFY_SETTLE_SECONDS, batch_size=DEFAULT_POOL_BATCH_SIZE) with None sentinels resolved per call from services, so the announced default changes to None, an explicit None argument is now silently defaulted instead of propagated, and each default became patch-sensitive where the base bound it at import.\nFINDING imas_codex/standard_names/graph_ops.py:10136 non-blocking: __wrapped__ binds the moved implementation for 80 more forwarders, so inspect.signature(graph_ops.<moved function>) now advertises the internal keyword-only services parameter that the facade never exposed, carrying forward the seam an earlier extraction review already recorded for the same facade.\nFINDING tests/graph/test_manifest_drain.py:863 non-blocking: 12 test files that patch a moved symbol through the attribute-string form (monkeypatch.setattr(graph_ops, \"<name>\", ...) or patch.object(graph_ops, \"<name>\", ...)) are outside the 33-file gate, because the design's patch_targets.test_files_by_module scan records only dotted graph_ops.<name> literals; the node followed the brief and the design exactly, and the exposure is contained because every intra-module call in the four new modules routes through services (zero bare same-module calls), so the facade patch targets still bind.\n",
+  "review_run_id": "r-20261024T085725823486-review-of-srtj-graph-ops-split-steps8-11-57c116cbe630",
+  "reviewed_base_sha": "b28fb1d4ec7c5fc06a682e0bed385f0f8cca84a3",
+  "reviewed_head_sha": "57c116cbe63054c9636580bae62baa87c500ab1c",
+  "reviewed_run_id": "r-20261024T081652182726-srtj-graph-ops-split-steps8-11",
+  "rubric": "code",
+  "scores": {
+    "durability": 13,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T09:41:12.000000+00:00",
+  "total": 106
+}
