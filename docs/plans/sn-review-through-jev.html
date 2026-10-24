@@ -24,8 +24,8 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="225">
-<meta name="plan-modified" content="2026-10-23">
+<meta name="plan-version" content="226">
+<meta name="plan-modified" content="2026-10-24">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
 <body>
@@ -980,6 +980,12 @@ without re-deriving it is visible.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261023T213353824422-review-of-srtj-test-neo4j-uri-convention-3d790d606c87" data-who="reckon-build" data-when="2026-10-23T21:52:39.712Z">
     <div class="r-comment-body"><p>Independent review of r-20261023T193843392462-srtj-test-neo4j-uri-convention at head 3d790d606c: the one-fixture disposable-Neo4j convention is faithful to its goal and its gate (24 passed at head against 19 passed + 5 setup errors at base, 0 added default-marker failures, live-graph refusal shown firing), scored 18/15/17/13/16/14 with five non-blocking findings (auto-tunnel side effect, skip-on-failure hiding, no committed test for the refusal, duplicated synthetic-reader patch, password/auth mismatch).</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-s6-lead-ruling-coordinates-recall" data-who="lead" data-when="2026-10-24T05:30:00Z">
+    <div class="r-comment-body"><p>Lead rulings on the last two switch blockers.</p><ul><li>"Exempt position and coordinate names": a name whose base is a coordinate, position or locus value needs no defining equation, only its frame and axes. Every other quantity keeps the defining-relation rule. This clears S0062, <code>vertical_coordinate_of_antenna_strap</code>.</li><li>"Accept 59/60, record the miss": the veto recall bar is 59 of 60. The planted row "Calibration assumes a quadratic field-current relation instead of a linear one." is named as a known recall gap, to re-check on each recalibration. On six matched answers Jev reads it as "says nothing" below the cutoff, so neither the old rule nor the new one fires on it.</li></ul><p>With the veto fixes, the switch had refined 19 of 19 link defects and 1 of 30 acceptable rows on both passes. <code>srtj-docs-switch-causes</code> applies both rulings and re-measures.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-s6-split-steps-1-2" data-who="reckon-build" data-when="2026-10-24T05:30:00Z">
+    <div class="r-comment-body"><p>Split steps 1 and 2 landed on codex. <code>holds.sync_holds</code> owns raising and clearing review holds, replacing three inline copies (merge <code>728532beb</code>). A documentation regeneration now re-stamps the source snapshot (merge <code>24f4d55a8</code>). Step 3, the first <code>graph_store</code> extraction, is running.</p></div>
 </div>
 </section>
 </main>
