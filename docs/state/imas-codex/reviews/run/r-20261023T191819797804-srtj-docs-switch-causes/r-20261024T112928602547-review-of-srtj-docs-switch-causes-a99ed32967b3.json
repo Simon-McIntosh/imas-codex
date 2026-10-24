@@ -20,6 +20,11 @@
       "kind": "folded",
       "node": "srtj-coordinate-decision-owner",
       "recorded_at": "2026-10-24T20:11:06.347041+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "the lead ruled to switch with S0010 recorded as a known precision miss; the pass-1 hold reason is in the run's JSON wrong_rows",
+      "recorded_at": "2026-10-24T20:11:25.293159+00:00"
     }
   },
   "findings": [
