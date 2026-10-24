@@ -10,6 +10,13 @@
     }
   },
   "dispatched_at": "2026-10-24T22:08:24Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "srtj-disposable-neo4j-teardown",
+      "recorded_at": "2026-10-24T22:25:45.071484+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/standard_names/conftest.py",
