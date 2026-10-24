@@ -1,0 +1,405 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "265cf9946820c3e3a407ef6ad57a2617eeb30f55",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T201334977166-srtj-graph-ops-split-step13/brief.md",
+    "sha256": "bf5e4eae277b2ee84612b95b9c70426098d7387e2c5849fdd8befdb89ce47e93"
+  },
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 7132815,
+      "input_tokens_cumulative": 7132815,
+      "output_tokens": 33423,
+      "output_tokens_cumulative": 33423,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 2846,
+    "files": 4,
+    "removed": 2312
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "9489679e200ad6dab1045888d31b4665ea25d649",
+    "ed872d2ae060e0669ce98d14a7c1e7491ca610f0",
+    "ded8ae738f0cd7b0943bba8c1831a092a14ca2b7",
+    "c1e6351dfb6874eefd0e66f0ec11988edc2c1d27",
+    "c19be58944d078d047dff9b7a13239224b9be87b"
+  ],
+  "completed_at": "2026-10-24T22:21:50Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-24T20:15:40Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": "pre-existing-failure",
+  "gate": "failed",
+  "gate_check": {
+    "command": "cd /tmp/reckon-crew-scratch/r-20261024T201334977166-srtj-graph-ops-split-step13/head && PYTHONPATH=/tmp/reckon-crew-scratch/r-20261024T201334977166-srtj-graph-ops-split-step13/head UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv uv run --no-sync pytest -p no:cacheprovider  --basetemp=/tmp/reckon-crew-scratch/r-20261024T201334977166-srtj-graph-ops-split-step13/bt-head36-default tests/cli/test_sn_status_cli.py tests/standard_names/test_attachment_audit.py tests/standard_names/test_attachment_write_guards.py tests/standard_names/test_attempt_cap_disposition.py tests/standard_names/test_compose_claim_attempt_charge.py tests/standard_names/test_compose_source_scope.py tests/standard_names/test_dd_sources.py tests/standard_names/test_dead_end_identity_revival.py tests/standard_names/test_detachment_attribution_wiring.py tests/standard_names/test_domain_seed_pinning.py tests/standard_names/test_failed_source_reason.py tests/standard_names/test_focus_flag.py tests/standard_names/test_focus_reseed.py tests/standard_names/test_generate_name_persist.py tests/standard_names/test_graph_ops.py tests/standard_names/test_harmonize_finalize.py tests/standard_names/test_harmonize_reverse_links.py tests/standard_names/test_manifest_drain.py tests/standard_names/test_minted_name_carries_a_catalog_status.py tests/standard_names/test_orphan_sweep.py tests/standard_names/test_parked_disposition_vocabulary.py tests/standard_names/test_pipeline_recovery_mechanics.py tests/standard_names/test_polling_claims.py tests/standard_names/test_pool_adapter_claims.py tests/standard_names/test_pool_compose_helpers.py tests/standard_names/test_qualify_sources.py tests/standard_names/test_refine_claim_race.py tests/standard_names/test_scoped_global_maintenance.py tests/standard_names/test_scoped_run_embedding_drain.py tests/standard_names/test_skipped_source_retry_graph.py tests/standard_names/test_source_compose_hint.py tests/standard_names/test_source_invariants.py tests/standard_names/test_source_linking.py tests/standard_names/test_standard_name_source.py tests/standard_names/test_typed_gap_states_its_reason.py tests/standard_names/test_vocab_gap_source_persistence.py",
+    "exit_status": 1,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T201334977166-srtj-graph-ops-split-step13/logs/head-suite-default.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.5714285714285715,
+    "plan": "sn-review-through-jev",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-24T21:13:37.756201+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-24T20:13:37Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 19,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 10,
+    "headroom": 1,
+    "mean_context": 110000,
+    "observed_at": "2026-10-24T20:13:22Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 19,
+      "aggregate_tokens_per_second": 477.896,
+      "detail": "",
+      "mean_tokens_per_second": 46.853,
+      "observed_at": "2026-10-24T20:13:22Z",
+      "runs": 10.2,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-24T22:21:50Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T201334977166-srtj-graph-ops-split-step13/manifest.md",
+  "member": "disposable-r-20261024T201334977166-srtj-graph-ops-split-step13",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "srtj-graph-ops-split-step13",
+  "node_definition": {
+    "after": [],
+    "brief": "/home/ITER/mcintos/.cache/imas-codex-s18/briefs/srtj-graph-ops-split-step13.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T201334977166-srtj-graph-ops-split-step13/brief.md",
+    "brief_sha256": "bf5e4eae277b2ee84612b95b9c70426098d7387e2c5849fdd8befdb89ce47e93",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "elevated",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1439,
+          "cached_input_tokens": 299649,
+          "input_tokens": 301090,
+          "output_tokens": 2440,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 303530,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+      "session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea"
+    },
+    "done_when": "graph_store/graph_source_bindings.py holds the design's symbols and imports only graph_foundation, graph_ops.py keeps forwarders and its size is recorded, every module imports cleanly in a fresh interpreter, the Cypher property check passes, and test_compose_source_scope.py plus every file patching a moved symbol in dotted or attribute form show no added failures against main from archived base and head trees",
+    "estimated_hours": null,
+    "goal": "Extract graph_source_bindings from graph_ops.py into graph_store",
+    "id": "srtj-graph-ops-split-step13",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-24T20:13:37Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 19,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 10,
+      "headroom": 1,
+      "mean_context": 110000,
+      "observed_at": "2026-10-24T20:13:22Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 19,
+        "aggregate_tokens_per_second": 477.896,
+        "detail": "",
+        "mean_tokens_per_second": 46.853,
+        "observed_at": "2026-10-24T20:13:22Z",
+        "runs": 10.2,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T201334977166-srtj-graph-ops-split-step13/manifest.md",
+    "negative_control": "",
+    "plan": "sn-review-through-jev",
+    "regenerate_paths": [],
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§6",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "imas_codex/standard_names/graph_ops.py",
+      "imas_codex/standard_names/graph_store/graph_source_bindings.py",
+      "imas_codex/graph/cypher_property_check.py",
+      "docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-step13.html",
+      "docs/figures/sn-review-through-jev/srtj-graph-ops-split-step13"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 10137611.0,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "srtj-graph-ops-split-step13",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-24T20:15:19.303908+00:00",
+    "score": 0.71875,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "split-design step 13; s6 authored body unchanged since its stored content review",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5002.593,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {}
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.5714285714285715,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "c19be58944d078d047dff9b7a13239224b9be87b",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "c1e6351dfb6874eefd0e66f0ec11988edc2c1d27",
+    "reviewed_head_sha": "c19be58944d078d047dff9b7a13239224b9be87b",
+    "scores": {
+      "durability": 7,
+      "evidence": 16,
+      "fit": 18,
+      "goal_fidelity": 19,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 100
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261024T201334977166-srtj-graph-ops-split-step13",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§6",
+  "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+  "session_harness": "claude",
+  "session_id": "209a1dae-a0e4-4652-a6d0-b984bee0a542",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 19312389,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 2357.08,
+    "generated_tokens": 94811,
+    "generation_seconds": 956.112,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 77.4,
+    "machine_seconds": 1400.968,
+    "peak_input_tokens": 178168,
+    "tokens_per_second": 99.16,
+    "wall_tokens_per_second": 40.22
+  },
+  "time_budget": "60m",
+  "tool_steps": 104.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 7570,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-24T22:21:56Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-24T21:42:13Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [],
+    "run_id": "r-20261024T201334977166-srtj-graph-ops-split-step13",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 12303,
+    "worker_pid": 2337346
+  },
+  "worker_seconds": 4481,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": {
+    "classification": "retained-for-resume",
+    "retained_at": "2026-10-24T22:21:50Z",
+    "session_id": "209a1dae-a0e4-4652-a6d0-b984bee0a542",
+    "session_source": "stream",
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/srtj-graph-ops-split-step13"
+  }
+}
