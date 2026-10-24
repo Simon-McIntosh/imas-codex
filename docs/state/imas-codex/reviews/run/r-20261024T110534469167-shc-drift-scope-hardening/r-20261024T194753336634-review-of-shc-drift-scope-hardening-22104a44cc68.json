@@ -19,6 +19,11 @@
   },
   "dispatched_at": "2026-10-24T19:49:57Z",
   "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the coordinator widened the fence to the gate-named file before review",
+      "recorded_at": "2026-10-24T20:03:34.727270+00:00"
+    },
     "1": {
       "kind": "folded",
       "node": "shc-drift-scope-hardening",
