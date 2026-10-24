@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="241">
+<meta name="plan-version" content="242">
 <meta name="plan-modified" content="2026-10-24">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -1031,6 +1031,15 @@ without re-deriving it is visible.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261024T103434289770-review-of-srtj-docs-switch-causes-2c596a3459bf" data-who="reckon-build" data-when="2026-10-24T10:53:35.328Z">
     <div class="r-comment-body"><p>review recorded for r-20261023T191819797804-srtj-docs-switch-causes at head 2c596a3459bf72d34696e071ddfac380aed15727; scores goal_fidelity 17, evidence 8, scope_discipline 18, durability 17, fit 18, reuse 15 (total 93/120); one blocking and four non-blocking findings</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-s6-lead-ruling-recall-reask" data-who="lead" data-when="2026-10-24T09:30:00Z">
+    <div class="r-comment-body"><p>Lead rulings on the veto recall gap. A correction came first: on the missed planted row the old veto fires on 7 of 10 matched answers and the shipped rule on 1 of 10, so the old rule did not miss it too. The lead ruled "Keep fix, ask Jev twice", so a below-cutoff "says nothing" answer gets a second ask. The second ask failed its measurement, and the lead ruled "Keep fix, drop the re-ask". The shipped rule is the silence-mass veto without the second ask (commit <code>2f9b8cd02</code>). The bar stays at 59 of 60, with the row named as a known gap. Once the bar is met, the lead authorises the documentation switch: <code>cascade-deciding</code> covers both axes, and the 5% panel audit stays.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-s6-uri-convention-landed" data-who="reckon-build" data-when="2026-10-24T07:10:00Z">
+    <div class="r-comment-body"><p>The disposable-Neo4j tests now share one fixture, <code>disposable_neo4j_uri</code> in <code>tests/standard_names/conftest.py</code> (merge <code>a701540ca</code>). It starts or attaches the instance through <code>temp_neo4j</code> and points both URI variables at it. It also refuses the project graph's resolved address and loopback. The five source-drift tests that could not run in the integration gate now pass, and the gate files of every split step use this fixture.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-s6-split-steps-3-11" data-who="reckon-build" data-when="2026-10-24T10:50:00Z">
+    <div class="r-comment-body"><p>Split steps 3 to 11 landed, all on codex, because <code>graph_ops.py</code> did not fit the local window with the plan attached. <code>imas_codex/standard_names/graph_store/</code> now holds twelve modules, each importing only <code>graph_foundation</code>, with transitional forwarders left on <code>graph_ops</code>.</p><ul><li>Step 3 added <code>graph_foundation</code>, <code>graph_supersession</code>, <code>graph_audits</code> and <code>graph_review_persistence</code> (merge <code>1cd6e42a6</code>).</li><li>Steps 4 to 7 added <code>graph_doc_links</code>, <code>graph_docs_persistence</code>, <code>graph_cost_and_claims</code> and <code>graph_lineage</code> (merge <code>b28fb1d4e</code>). <code>graph_ops.py</code> went from 821 KB to 608 KB.</li><li>Steps 8 to 11 added <code>graph_catalog_reset</code>, <code>graph_claim_release</code>, <code>graph_parent_lifecycle</code> and <code>graph_claim_scope</code> (merge <code>8d88b14ee</code>). <code>graph_ops.py</code> is now 417 KB.</li></ul><p>Each step showed no added failures against a red base. Its promotion records <code>failed</code> with the classification <code>pre-existing-failure</code>. The file now fits the local lane, so step 12 (<code>graph_refinement</code>) runs locally. Step 15 runs in parallel on codex: it creates <code>worker_tasks/</code> with <code>worker_common</code> and <code>worker_extraction_and_enrichment</code>, the first cut of <code>workers.py</code> (481 KB).</p></div>
 </div>
 </section>
 </main>
