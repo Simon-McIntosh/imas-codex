@@ -8,6 +8,11 @@
       "kind": "folded",
       "node": "srtj-graph-store-structure",
       "recorded_at": "2026-10-24T23:47:10.626941+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "evidence-page wording; the module's imports match its siblings and the import check passes",
+      "recorded_at": "2026-10-24T23:47:12.989023+00:00"
     }
   },
   "findings": [
