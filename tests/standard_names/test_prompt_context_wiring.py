@@ -15,7 +15,10 @@ sanity check.
 
 from __future__ import annotations
 
+import asyncio
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 # ── Compose-side: _enrich_batch_items populates per-item context ─────────
 
@@ -146,37 +149,62 @@ def test_enrich_batch_items_populates_all_context_keys():
 # ── Compose context: compose_scored_examples key ────────────────────────
 
 
-def test_compose_context_has_scored_examples_key():
-    """compose_scored_examples is always set in compose context (even if empty)."""
-    # The compose worker always sets context["compose_scored_examples"] = ...
-    # We verify by checking the key is set in the code path.
-    import ast
-    from pathlib import Path
+async def test_compose_context_has_scored_examples_key():
+    """The compose context handed to the prompt carries compose_scored_examples.
 
-    workers_path = (
-        Path(__file__).resolve().parents[2]
-        / "imas_codex"
-        / "standard_names"
-        / "workers.py"
+    Runs the real ``compose_batch`` up to the first prompt render with the graph
+    and LLM boundaries patched out, then asserts on the context that render
+    receives. A missing assignment anywhere on that path fails here, whatever
+    module the batch processor lives in.
+    """
+    from imas_codex.standard_names.workers import compose_batch
+
+    scored_examples = [{"name": "electron_temperature", "comments": "scored"}]
+    batch = [
+        {
+            "path": "core_profiles/profiles_1d/electrons/temperature",
+            "description": "Electron temperature",
+        }
+    ]
+    seen: dict = {}
+
+    class _Rendered(Exception):
+        """Stops the processor once the system prompt context is captured."""
+
+    def _render_prompt(template, context):
+        seen["template"] = template
+        seen["context"] = context
+        raise _Rendered
+
+    mock_gc = MagicMock()
+    mock_gc.__enter__ = MagicMock(return_value=mock_gc)
+    mock_gc.__exit__ = MagicMock(return_value=False)
+
+    with (
+        patch(
+            "imas_codex.standard_names.graph_ops._verify_source_claim_winners",
+            side_effect=lambda items: items,
+        ),
+        patch("imas_codex.settings.get_model", return_value="test-compose"),
+        patch(
+            "imas_codex.standard_names.context.build_compose_context",
+            return_value={},
+        ),
+        patch("imas_codex.graph.client.GraphClient", return_value=mock_gc),
+        patch(
+            "imas_codex.standard_names.example_loader.load_compose_examples",
+            return_value=scored_examples,
+        ),
+        patch("imas_codex.llm.prompt_loader.render_prompt", side_effect=_render_prompt),
+    ):
+        with pytest.raises(_Rendered):
+            await compose_batch(batch, MagicMock(), asyncio.Event())
+
+    assert seen["template"] == "sn/generate_name_system"
+    assert "compose_scored_examples" in seen["context"], (
+        "compose context reached the system prompt without compose_scored_examples"
     )
-    source = workers_path.read_text()
-    tree = ast.parse(source)
-
-    # Find any assignment of compose_scored_examples
-    found = False
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Subscript):
-            if isinstance(node.value, ast.Name) and node.value.id == "context":
-                if (
-                    isinstance(node.slice, ast.Constant)
-                    and node.slice.value == "compose_scored_examples"
-                ):
-                    found = True
-                    break
-
-    assert found, (
-        "context['compose_scored_examples'] assignment not found in workers.py"
-    )
+    assert seen["context"]["compose_scored_examples"] == scored_examples
 
 
 # ── Review context: review_scored_examples key ──────────────────────────
