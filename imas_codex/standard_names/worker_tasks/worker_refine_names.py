@@ -9,9 +9,12 @@ hybrid-neighbour and DD-context enrichment helpers, the budget exposure
 helpers and the telemetry extractor, and the grammar-failure marker table owned
 by the compose-batch module — is reached through the batch processor's
 positional-only ``_worker_dependency`` resolver, so a patch on
-``workers.<name>`` stays visible inside the moved code.  Only standard-library
-modules are imported directly; ``RefineStopReason`` comes from the graph model
-module, and ``BudgetManager`` is imported for typing alone.
+``workers.<name>`` stays visible inside the moved code.  The candidate-name
+composer is resolved the same way even though it is a sibling here, because
+callers substitute it to exercise the duplicate and persistence paths without
+a model.  Only standard-library modules are imported directly;
+``RefineStopReason`` comes from the graph model module, and ``BudgetManager``
+is imported for typing alone.
 """
 
 from __future__ import annotations
@@ -648,7 +651,9 @@ async def process_refine_name_batch(
                 # Strict composition can fail even after the response model
                 # validates.  Cost is already recorded against the stable
                 # predecessor before this derived accessor is evaluated.
-                candidate_name = _compose_refined_candidate_name(result_obj)
+                candidate_name = _worker_dependency("_compose_refined_candidate_name")(
+                    result_obj
+                )
 
                 # ── Deterministic name-key dup guard ──────────────
                 # Name-key lookup AFTER the final retry's
