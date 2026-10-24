@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="264">
+<meta name="plan-version" content="265">
 <meta name="plan-modified" content="2026-10-25">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -1115,6 +1115,9 @@ without re-deriving it is visible.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-s6-step16-coordinate-landed" data-who="reckon-build" data-when="2026-10-24T22:00:00Z">
     <div class="r-comment-body"><p>Split step 16 landed (merge <code>28546824e</code>, review 106). <code>worker_compose_and_validate</code> moved into <code>worker_tasks</code>, and <code>workers.py</code> went from 372 KB to 298 KB. Step 17 (<code>worker_compose_batches</code>) is queued. Step 13 went back to its worker: its gate missed seven test files that patch moved symbols.</p><p>The coordinate decision now has one owner (merge <code>c41a5caa1</code>, review 110). The docs gate asks <code>derivation.py</code> whether a name is a coordinate. The holdout evaluation passes the documented name, so it judges coordinate documents as production does.</p><p>One store fault to fix in reckon: step 16's reviewer wrote the project as <code>imas_codex</code>, so the review was filed where no reader looks and the promotion found no review. The coordinator corrected that field by hand, keeping the delivered record as <code>.asdelivered</code>. The store should refuse an unknown project rather than create a new directory for it.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261024T220636395089-review-of-srtj-disposable-neo4j-teardown-fa6082acbec1" data-who="reckon-build" data-when="2026-10-24T22:20:40.158Z">
+    <div class="r-comment-body"><p>Reviewed run r-20261024T202728538311-srtj-disposable-neo4j-teardown at head fa6082acbec, base 265cf99468: parsed record stored at both review-records paths, scores goal_fidelity 18, evidence 14, scope_discipline 20, durability 5, fit 17, reuse 19, added_failure_count 0, four non-blocking findings (detached-path removal failure is unreported and the code comment overstates it, no committed regression guard, base log header omits one of the three gate files, the base arm&#x27;s store-removal figure is not measured in the base arm).</p></div>
 </div>
 </section>
 </main>

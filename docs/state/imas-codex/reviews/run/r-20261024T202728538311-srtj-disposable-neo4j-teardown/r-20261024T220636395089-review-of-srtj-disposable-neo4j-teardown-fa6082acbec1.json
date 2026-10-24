@@ -1,0 +1,50 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-24T22:20:40.158Z",
+  "dispatched_at": "2026-10-24T22:08:24Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/conftest.py",
+      "line": 421,
+      "severity": "non-blocking",
+      "text": "the _STORE_REMOVER comment promises that a failed removal 'fails the session's teardown', but the detached branch at line 463 returns as soon as the 2 s budget expires, before the remover's exit status exists; on the shared filesystem this change exists for, a removal that fails after the budget is reported as 'handed to pid ... detached' and its failure is never surfaced, so the code comment states a guarantee the code provides only for removals that finish inside the budget (the evidence fragment at line 17 is correctly conditional)."
+    },
+    {
+      "file": "tests/standard_names/conftest.py",
+      "line": 426,
+      "severity": "non-blocking",
+      "text": "no committed test fails if _detach_store_removal is reverted: the two negative-control modules (test_removal_failure.py, test_teardown_budget.py) existed only under /tmp/reckon-crew-scratch/r-20261024T202728538311-srtj-disposable-neo4j-teardown/ and that tree is gone, so logs/repair-reverted.log and logs/check-mutation.log record a real red but the guard cannot be re-run from the repository."
+    },
+    {
+      "file": "logs/base.log",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "the base log's header command names only tests/standard_names/test_review_holds.py and test_source_refresh.py, while the arm collected 26 items and reports a test_panel_audit_sample.py teardown at line 97; the header therefore disagrees with the baseline_suite command recorded in the manifest, and a reader who re-ran the header command would measure two of the three files."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-disposable-neo4j-teardown.html",
+      "line": 27,
+      "severity": "non-blocking",
+      "text": "the base row reports the store removal as '0.00 s, synchronous', but the base revision carries no instrumentation for the removal, so that figure is the mutation arm's measurement rather than the base arm's; the base arm's only measured figure is the 15.01 s teardown at logs/base.log:97."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to keep the shared Neo4j fixture teardown within the test timeout, and tests/standard_names/conftest.py:552-566 now stops the database first, renames the store away in one metadata operation and caps the session's wait at _STORE_REMOVAL_BUDGET_SECONDS (2 s) before detaching, with the global pytest timeout untouched.\nVERDICT done_when: the evidence fence asks for head teardown under 30 s, the store directory gone after the session, and no added failures against base; logs/final.log:63 records the slowest head teardown at 16.09 s with EXIT=0 and 26 passed, logs/base.log:97 records 15.01 s with one setup ERROR, and logs/final.log:51 records the remover finishing in 1.07 s with exit 0, so all three conditions are recorded rather than asserted.\nVERDICT write_paths: the declared scope is tests/standard_names/conftest.py and docs/evidence/fragments/sn-review-through-jev/srtj-disposable-neo4j-teardown.html; git diff 265cf99..fa6082a touches exactly those two files, 149 insertions and 1 deletion.\nVERDICT manifest: read; it records status complete, both suites with revision, literal command, exit status, log path, completed and failure ids, the negative-control log at logs/repair-reverted.log, and teardown numbers that reconcile with the logs it cites.\nVERDICT diff: read all four commits against 265cf99; fcea53b01 adds the detached removal and the teardown log line, 37f2bed3 names the remover in both outcome phrases, ad86efbb3 adds the evidence fragment, fa6082ac reads remover.returncode and raises on a non-zero remover exit; nothing outside the declared paths.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: tests/standard_names/conftest.py:552-566 keeps the stop-then-remove order, takes the recursive delete out of the blocking path behind a 2 s budget, and leaves the global 30 s pytest-timeout unraised.\nSCORE evidence: 14\nJUSTIFICATION evidence: logs/final.log:63 and logs/base.log:97 record both arms' slowest teardowns and both logs end in a bare EXIT= line, but logs/base.log:1 omits one of the three named files from its header command and no arm exercises the over-budget case the change exists to handle.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in git diff 265cf99..fa6082a is one of the two declared write paths in the manifest.\nSCORE durability: 5\nJUSTIFICATION durability: no assertion in the landed diff (tests/standard_names/conftest.py:426-473) fails if _detach_store_removal is reverted, and the two scratch negative-control tests that did fail are no longer on disk, so the guard is not reproducible from the repository.\nSCORE fit: 17\nJUSTIFICATION fit: tests/standard_names/conftest.py:419-423 follows the module's module-level constant, docstring and typing idiom and names the mechanism rather than a plan label, though the comment overstates the fast-path guarantee.\nSCORE reuse: 19\nJUSTIFICATION reuse: a capability search over imas_codex/ for recursive removal found no detached-removal owner (imas_codex/graph/dirs.py:304 is a synchronous shutil.rmtree, imas_codex/graph/temp_neo4j.py:285 detaches the server not a delete), so the helper legitimately lives beside the TemporaryDirectory that owns the tree in tests/standard_names/conftest.py:426.\nFINDING tests/standard_names/conftest.py:421 non-blocking: the _STORE_REMOVER comment promises a failed removal fails the session's teardown, but the detached branch at line 463 returns before the exit status exists, so on the slow filesystem the change targets a removal that fails after the 2 s budget is reported only as 'handed to pid ... detached'.\nFINDING tests/standard_names/conftest.py:426 non-blocking: nothing committed guards the detached removal, so a revert of _detach_store_removal reddens no test in the repository and logs/repair-reverted.log cannot be reproduced from it.\nFINDING logs/base.log:1 non-blocking: the header command omits tests/standard_names/test_panel_audit_sample.py although the arm collected it and reported its teardown at line 97.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-disposable-neo4j-teardown.html:27 non-blocking: the base row's '0.00 s, synchronous' store-removal figure was not measured in the base arm, which has no instrumentation for it.",
+  "review_run_id": "r-20261024T220636395089-review-of-srtj-disposable-neo4j-teardown-fa6082acbec1",
+  "reviewed_base_sha": "265cf9946820c3e3a407ef6ad57a2617eeb30f55",
+  "reviewed_head_sha": "fa6082acbec134b74ac47317030a6bc22a922782",
+  "reviewed_run_id": "r-20261024T202728538311-srtj-disposable-neo4j-teardown",
+  "scores": {
+    "durability": 5,
+    "evidence": 14,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T22:21:44.638572+00:00",
+  "total": 93
+}
