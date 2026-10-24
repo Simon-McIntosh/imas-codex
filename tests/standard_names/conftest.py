@@ -13,7 +13,6 @@ from __future__ import annotations
 import dataclasses
 import os
 import socket
-import subprocess
 import tempfile
 from collections.abc import Iterator
 from pathlib import Path
@@ -351,47 +350,43 @@ def refuse_project_graph(uri: str) -> None:
         )
 
 
-def _free_port() -> int:
-    with socket.socket() as sock:
-        sock.bind(("127.0.0.1", 0))
-        return int(sock.getsockname()[1])
+def _free_port_pair() -> tuple[int, int]:
+    """Two distinct free loopback ports.
+
+    Both sockets are held open until both are bound, so the two ports cannot
+    be the same one -- binding them in turn would let the first port be handed
+    out again for the second.
+    """
+    sockets = [socket.socket(), socket.socket()]
+    try:
+        for sock in sockets:
+            sock.bind(("127.0.0.1", 0))
+        return int(sockets[0].getsockname()[1]), int(sockets[1].getsockname()[1])
+    finally:
+        for sock in sockets:
+            sock.close()
 
 
 def _start_empty_neo4j():
-    """Start one empty Neo4j; returns its process, log path and bolt port."""
+    """Start one empty Neo4j through the module that owns the lifecycle.
+
+    Returns its scratch directory, process, log path and bolt port.  The
+    directory is removed if the start fails: a failure here must leave
+    neither a running instance nor a tree behind.
+    """
     from imas_codex.graph import temp_neo4j
 
     scratch = os.environ.get("TMPDIR") or None
     directory = tempfile.TemporaryDirectory(prefix="disposable-neo4j-", dir=scratch)
     root = Path(directory.name)
-    for part in ("data", "logs", "conf", "run", "tmp"):
-        (root / part).mkdir()
-    bolt_port, http_port = _free_port(), _free_port()
-    temp_neo4j.write_temp_neo4j_conf(root / "conf", bolt_port, http_port)
-    command = [
-        "apptainer",
-        "exec",
-        "--bind",
-        f"{root}/data:/data",
-        "--bind",
-        f"{root}/logs:/logs",
-        "--bind",
-        f"{root}/conf:/var/lib/neo4j/conf",
-        "--bind",
-        f"{root}/run:/var/lib/neo4j/run",
-        "--bind",
-        f"{root}/tmp:/tmp",
-        "--writable-tmpfs",
-        str(temp_neo4j._neo4j_image()),
-        "neo4j",
-        "console",
-    ]
-    log = root / "logs" / "neo4j-temp.log"
-    with log.open("w") as output:
-        process = subprocess.Popen(
-            command, stdout=output, stderr=subprocess.STDOUT, start_new_session=True
+    bolt_port, http_port = _free_port_pair()
+    try:
+        process, log = temp_neo4j.start_temp_neo4j(
+            root, bolt_port, http_port, load_dump=False
         )
-    temp_neo4j._wait_for_bolt_ready(process, bolt_port, log)
+    except BaseException:
+        directory.cleanup()
+        raise
     return directory, process, log, bolt_port
 
 
@@ -486,8 +481,10 @@ def disposable_neo4j_uri() -> Iterator[str]:
                 import shutil
 
                 shutil.copyfile(log, destination)
-            temp_neo4j.stop_temp_neo4j(process)
-            directory.cleanup()
+            try:
+                temp_neo4j.stop_temp_neo4j(process)
+            finally:
+                directory.cleanup()
 
 
 @pytest.fixture()

@@ -208,45 +208,53 @@ def start_temp_neo4j(
     temp_dir: Path,
     bolt_port: int,
     http_port: int,
+    *,
+    load_dump: bool = True,
 ) -> tuple[subprocess.Popen, Path]:
-    """Load a dump and start a temporary Neo4j instance for filtering.
+    """Start a temporary Neo4j instance, optionally loading a dump into it.
 
     Returns the process handle and log file path.  The caller is
     responsible for terminating the process.
 
+    ``load_dump=False`` starts an empty instance, which is what a test
+    needing a real server without any graph content wants.  A start that
+    fails before Bolt readiness stops the process it began, so a failed
+    start leaves nothing running.
+
     All Neo4j write paths are bind-mounted to host directories so that
     the Apptainer ``--writable-tmpfs`` overlay (often capped at 64 MB
-    by ``sessiondir max size``) is only used for trivial metadata.
+    by ``sessiondir max size``) is only used for startup metadata.
     """
     neo4j_image = _neo4j_image()
 
-    # Ensure all Neo4j write-target directories exist on host
-    for subdir in ("run", "tmp"):
-        (temp_dir / subdir).mkdir(exist_ok=True)
+    # Every bind-mounted host directory must exist before the container
+    # starts; the dump directory is only needed when one is loaded.
+    for subdir in ("data", "logs", "run", "tmp"):
+        (temp_dir / subdir).mkdir(parents=True, exist_ok=True)
 
-    # Load dump into temp data dir
-    click.echo("  Loading dump into temp instance...")
-    load_cmd = [
-        "apptainer",
-        "exec",
-        "--bind",
-        f"{temp_dir}/data:/data",
-        "--bind",
-        f"{temp_dir}/dumps:/dumps",
-        "--writable-tmpfs",
-        str(neo4j_image),
-        "neo4j-admin",
-        "database",
-        "load",
-        "neo4j",
-        "--from-path=/dumps",
-        "--overwrite-destination=true",
-    ]
-    result = subprocess.run(load_cmd, capture_output=True, text=True)
-    if result.returncode != 0:
-        raise click.ClickException(
-            f"Failed to load dump into temp instance: {result.stderr}"
-        )
+    if load_dump:
+        click.echo("  Loading dump into temp instance...")
+        load_cmd = [
+            "apptainer",
+            "exec",
+            "--bind",
+            f"{temp_dir}/data:/data",
+            "--bind",
+            f"{temp_dir}/dumps:/dumps",
+            "--writable-tmpfs",
+            str(neo4j_image),
+            "neo4j-admin",
+            "database",
+            "load",
+            "neo4j",
+            "--from-path=/dumps",
+            "--overwrite-destination=true",
+        ]
+        result = subprocess.run(load_cmd, capture_output=True, text=True)
+        if result.returncode != 0:
+            raise click.ClickException(
+                f"Failed to load dump into temp instance: {result.stderr}"
+            )
 
     # Write config file — neo4j console does not process NEO4J_ env vars
     conf_dir = temp_dir / "conf"

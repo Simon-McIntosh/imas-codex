@@ -510,6 +510,39 @@ def test_the_shared_fixture_refuses_the_scheduled_graph_address(monkeypatch):
     _assert_refused(monkeypatch, f"bolt://{node}:{_project_bolt_port()}")
 
 
+def test_a_failed_start_leaves_no_process_behind(monkeypatch, tmp_path):
+    """A start that never reaches readiness stops the process it began.
+
+    A container abandoned before readiness keeps its JVM and its memory on the
+    node the run shares with every other session, so a failed start has to take
+    the process group with it. The launch command is replaced by a long sleep
+    so the arm costs nothing, but the process and its group are the real ones:
+    the owner starts it in its own session and is the only thing that stops it.
+    """
+    from imas_codex.graph import temp_neo4j
+
+    started = []
+    real_popen = subprocess.Popen
+
+    def _popen(command, **kwargs):
+        process = real_popen(["sleep", "300"], **kwargs)
+        started.append(process)
+        return process
+
+    def _never_ready(process, *args, **kwargs):
+        assert process.poll() is None, "the arm must fail while the process is alive"
+        raise temp_neo4j.click.ClickException("Bolt readiness never arrived")
+
+    monkeypatch.setattr(temp_neo4j.subprocess, "Popen", _popen)
+    monkeypatch.setattr(temp_neo4j, "_wait_for_bolt_ready", _never_ready)
+
+    with pytest.raises(temp_neo4j.click.ClickException, match="Bolt readiness"):
+        temp_neo4j.start_temp_neo4j(tmp_path / "instance", 1, 2, load_dump=False)
+
+    assert len(started) == 1
+    assert started[0].poll() is not None, "the failed start left its process running"
+
+
 @pytest.fixture
 def graph(disposable_neo4j_uri: str, monkeypatch) -> Iterator[GraphClient]:
     # An empty instance carries no DD-resolution authority, and the drift scan
