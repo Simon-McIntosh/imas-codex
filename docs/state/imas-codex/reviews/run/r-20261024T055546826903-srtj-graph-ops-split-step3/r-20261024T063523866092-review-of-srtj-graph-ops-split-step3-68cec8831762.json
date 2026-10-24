@@ -1,0 +1,78 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "imas_codex/standard_names/promote.py:47",
+    "imas_codex/cli/sn.py:592",
+    "imas_codex/standard_names/pools.py:381",
+    "imas_codex/standard_names/workers.py:960",
+    "imas_codex/standard_names/ledger.py:51"
+  ],
+  "completed_at": "2026-10-24T06:58:59.200Z",
+  "dispatched_at": "2026-10-24T06:35:45Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_audits.py",
+      "line": 269,
+      "severity": "non-blocking",
+      "text": "PROMOTE_STRANDED_DOCS_WHERE carries the literal placeholder '{docs_review_eligibility_where} ' until graph_ops.py:12059 rewrites this module's global with a str.replace, so the domain module on its own holds a predicate that is not valid Cypher and nothing asserts the rewrite ran; the composed value is correct today (this review recomputed sha256 34a804254c71f1dab1148e22a7d282f9aa92daee0814d32da22d13e67ae7f9f7 and length 1941 in both the base and head archives), but a later step that imports graph_audits directly, or drops the rewrite, gets a silently malformed query instead of an error."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_ops.py",
+      "line": 77,
+      "severity": "non-blocking",
+      "text": "The module logger is rebound to graph_store.graph_foundation's logger, so records emitted by surviving graph_ops code now carry the name 'imas_codex.standard_names.graph_store.graph_foundation' rather than 'imas_codex.standard_names.graph_ops'; tests/standard_names/test_persist_segment_edges.py:354 and tests/standard_names/test_compose_claim_attempt_charge.py:97 still pass because caplog captures by propagation, but a level or filter configured for the graph_ops logger name no longer addresses the emitting logger."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_foundation.py",
+      "line": 63,
+      "severity": "non-blocking",
+      "text": "The design's cross-module rule is to pass an explicit service object, but the implementation publishes a module-global 'services = None' that the composition root fills at graph_ops.py:73, so a domain module imported alone raises AttributeError on first call rather than at import; the fresh-interpreter import checks cannot see this because they never invoke a function."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_review_persistence.py",
+      "line": 642,
+      "severity": "non-blocking",
+      "text": "claim_review_docs_batch declares 'batch_size: int = 25' where base used DEFAULT_POOL_BATCH_SIZE (graph_ops.py:12691, value 25), so the pooled batch size is now duplicated as a literal and a change to the shared constant would silently leave this one caller behind."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_store/__init__.py",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "No committed test asserts the new structural invariant (the four domain modules import only graph_foundation and never one another); imports-final.log proves it once for revision beaa94273, so a later edit that reintroduces a domain-to-domain import would leave the suite green."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit: bc39bec9 extracts 100+ definitions, cfb508d7 adds 94 forwarder functions each with a '__wrapped__' binding to the moved callable, beaa9427 repairs import independence (10 insertions), 68cec883 adds the evidence fragment; AST comparison after stripping the 'services.' prefix finds 100 of 102 moved definitions byte-identical to base, and the only two differences are graph_audits.py:2938 (local 'from datetime import UTC' folded into the service) and graph_review_persistence.py:642 ('DEFAULT_POOL_BATCH_SIZE' written as 25).",
+    "done_when": "The done_when measures zero added gate failures over the three named files plus every patch-target file, clean standalone imports and a Cypher property check; base-mapped.log and headverified-mapped.log both carry 41 failed/1528 passed over the same 96 files with EXIT=1, imports-final.log carries five fresh imports with EXIT=0 and cypher-property.log carries 4 passed with EXIT=0, and this review's own diff of the two FAILED lists is empty.",
+    "goal": "The goal is to create imas_codex/standard_names/graph_store/ and move graph_foundation, graph_supersession, graph_audits and graph_review_persistence out of graph_ops.py by the design's symbol map; the diff adds the four modules plus the package and removes 10481 lines from imas_codex/standard_names/graph_ops.py, with the design's two already-removed hold symbols documented as absent.",
+    "manifest": "Read; it records status complete, the four commits bc39bec9/cfb508d7/beaa9427/68cec883, baseline_suite and after_suite with identical 41-failure id lists, the literal gate command, and 241424 to 172879 cl100k tokens for imas_codex/standard_names/graph_ops.py.",
+    "write_paths": "The manifest declares imas_codex/standard_names/graph_ops.py, the five graph_store module paths and docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-step3.html; git diff --stat 24f4d55a8..68cec8831 lists exactly those seven paths and nothing else."
+  },
+  "justifications": {
+    "durability": "The 96-file archived gate in headverified-mapped.log fails if moved behaviour regresses, but nothing committed asserts the new invariant that the four domain modules import independently, which imports-final.log checks only once in a scratch tree and no test file was in scope to hold.",
+    "evidence": "The manifest's base-mapped.log and headverified-mapped.log both end '= 41 failed, 1528 passed, 5 skipped, 45 deselected' with EXIT=1, and diffing their FAILED lines in this review gives 0 added and 0 removed ids, while token-count.log's 241424/172879 recount reproduces exactly.",
+    "fit": "The moved modules keep the surrounding style (module docstring, '__future__' import, retry_on_deadlock decorators, grouped imports) with no plan, stage or ticket identifiers, though imas_codex/standard_names/graph_ops.py:77 rebinds the module logger to another module's logger and graph_review_persistence.py:642 restates a pooled default as a bare 25.",
+    "goal_fidelity": "imas_codex/standard_names/graph_store/graph_foundation.py, graph_supersession.py, graph_audits.py and graph_review_persistence.py hold the design-mapped symbols and graph_ops.py retains later domains plus 94 forwarders, with only the literal 'pass an explicit service object' rule met by a module-global shim at imas_codex/standard_names/graph_store/graph_foundation.py:63.",
+    "reuse": "No existing owner for a cross-domain service shim was found: a search of imas_codex for '_GraphServices' and 'services = None' returned only this change, and the nearest '__getattr__' proxy (imas_codex/cli/sn.py:101) is an unrelated write-suppression wrapper, so the shim is a first owner rather than a duplicate; imas_codex/standard_names/audits.py was opened and owns a different capability (post-generation candidate audits) from graph_audits.py.",
+    "scope_discipline": "Every path in the diff (imas_codex/standard_names/graph_ops.py, the five imas_codex/standard_names/graph_store/ files and the one evidence fragment) is inside the seven declared write paths, and no test file appears in git show --stat for any of the four commits."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to create imas_codex/standard_names/graph_store/ with graph_foundation, graph_supersession, graph_audits and graph_review_persistence moved out of graph_ops.py by the design's symbol map; the diff adds the four modules and the package and removes 10481 lines from imas_codex/standard_names/graph_ops.py.\nVERDICT done_when: the done_when names the three gate files plus every patch-target file, clean imports and the Cypher property check; base-mapped.log and headverified-mapped.log each record 41 failed/1528 passed over the same 96 files, imports-final.log records EXIT=0 and cypher-property.log records 4 passed, and this review's diff of the two FAILED lists is empty.\nVERDICT write_paths: the manifest declares graph_ops.py plus the five graph_store paths and one evidence fragment; git diff --stat 24f4d55a8..68cec8831 lists exactly those seven paths and no test file.\nVERDICT manifest: read; it records status complete, four commits, the literal gate command, the two suite blocks with identical 41-failure id lists, and the 241424 to 172879 token recount.\nVERDICT diff: read commit by commit; 100 of 102 moved definitions are AST-identical to base after stripping the service prefix, and the two differences are a folded datetime import at graph_audits.py:2938 and a literalised batch default at graph_review_persistence.py:642.\nCALL_SITES: imas_codex/standard_names/promote.py:47, imas_codex/cli/sn.py:592, imas_codex/standard_names/pools.py:381, imas_codex/standard_names/workers.py:960, imas_codex/standard_names/ledger.py:51\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: the four modules hold the design-mapped symbols and graph_ops.py keeps 94 forwarders, with only the 'pass an explicit service object' rule met by a module-global shim at imas_codex/standard_names/graph_store/graph_foundation.py:63.\nSCORE evidence: 19\nJUSTIFICATION evidence: base-mapped.log and headverified-mapped.log both end '41 failed, 1528 passed, 5 skipped, 45 deselected' and their FAILED-line diff is empty, and token-count.log's figures reproduce exactly.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff is one of the seven declared write paths and no test file appears in any of the four commits.\nSCORE durability: 16\nJUSTIFICATION durability: the 96-file gate in headverified-mapped.log fails on moved-behaviour regressions, but no committed test asserts the domain modules' mutual independence that imports-final.log checks once.\nSCORE fit: 17\nJUSTIFICATION fit: the modules follow the surrounding style with no plan labels, though imas_codex/standard_names/graph_ops.py:77 rebinds the module logger and graph_review_persistence.py:642 restates a pooled default as 25.\nSCORE reuse: 19\nJUSTIFICATION reuse: no owner exists for a cross-domain service shim (searched imas_codex for '_GraphServices' and 'services = None'), and imas_codex/standard_names/audits.py owns a different capability from graph_audits.py.\nFINDING imas_codex/standard_names/graph_store/graph_audits.py:269 non-blocking: PROMOTE_STRANDED_DOCS_WHERE keeps a '{docs_review_eligibility_where}' placeholder until graph_ops.py:12059 rewrites the module global, so the module alone carries an invalid predicate.\nFINDING imas_codex/standard_names/graph_ops.py:77 non-blocking: the module logger is rebound to graph_store.graph_foundation's logger, changing the logger name existing callers and tests address.\nFINDING imas_codex/standard_names/graph_store/graph_foundation.py:63 non-blocking: the design asked for an explicit service object; the module-global 'services = None' fails at first call rather than at import.\nFINDING imas_codex/standard_names/graph_store/graph_review_persistence.py:642 non-blocking: 'batch_size: int = 25' duplicates DEFAULT_POOL_BATCH_SIZE, so the two defaults can drift.\nFINDING imas_codex/standard_names/graph_store/__init__.py:1 non-blocking: no committed test asserts that the four domain modules import only graph_foundation.\n",
+  "review_run_id": "r-20261024T063523866092-review-of-srtj-graph-ops-split-step3-68cec8831762",
+  "reviewed_base_sha": "24f4d55a8eb583c8ccbf02a0a5bb6beac01b786d",
+  "reviewed_head_sha": "68cec883176207bfe26d4826338d8c7d1739dcd4",
+  "reviewed_run_id": "r-20261024T055546826903-srtj-graph-ops-split-step3",
+  "scores": {
+    "durability": 16,
+    "evidence": 19,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T07:00:06.225655+00:00",
+  "total": 109
+}
