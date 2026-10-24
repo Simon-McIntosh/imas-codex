@@ -21,11 +21,11 @@
   <meta name="plan-tags" content="standard-names,catalog-release">
   <meta name="plan-blocks" content="sn-west-prototype-release">
   <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;sn-catalog-grouping#s2&quot;,&quot;sn-house-style#s4&quot;],&quot;s3&quot;:[&quot;sn-house-style#s4&quot;,&quot;sn-catalog-grouping#s2&quot;,&quot;sn-harmonize-command#s5&quot;,&quot;sn-harmonize-command#s6&quot;,&quot;sn-harmonize-command#s7&quot;,&quot;sn-harmonize-command#s8&quot;,&quot;sn-harmonize-command#s9&quot;,&quot;sn-harmonize-command#s10&quot;,&quot;sn-harmonize-command#s11&quot;,&quot;sn-harmonize-command#s12&quot;,&quot;sn-harmonize-command#s13&quot;,&quot;sn-harmonize-command#s14&quot;],&quot;s4&quot;:[&quot;sn-house-style#s5&quot;,&quot;sn-harmonize-command#s13&quot;]}">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;done&quot;,&quot;s14&quot;:&quot;done&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s12&quot;:&quot;done&quot;,&quot;s13&quot;:&quot;done&quot;,&quot;s14&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;done&quot;}">
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="184">
+<meta name="plan-version" content="185">
 <meta name="plan-modified" content="2026-10-24">
 </head>
 <body>
@@ -273,6 +273,69 @@
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="_top" data-id="c-20261012-guard-confirmed" data-who="Simon McIntosh" data-when="2026-10-12T07:35:00Z">
     <div class="r-comment-body"><p><strong>Guard scope confirmed by the lead, 2026-10-12.</strong> "Recommended into a catalog pull request" means exactly the three classes in §2: roster members of an open candidate request, names at <code>approved</code>, and names at <code>contested</code>. All three are refused unless <code>--force</code> is given with a recorded reason, and the refusal test covers each class.</p></div>
+</div>
+<div class="r-comment" data-section="s10" data-id="c-run-r-20261014T213431662469-review-of-shc-report-pin-c6f003721e38" data-who="reckon-build" data-when="2026-10-14T21:46:51.896Z">
+    <div class="r-comment-body"><p>review-of-shc-report-pin-c6f003721e38 — independent review of r-20261014T205529707057-shc-report-pin stored at reviews/imas-codex/r-20261014T205529707057-shc-report-pin.json (and .at-c6f003721e38f41f8a6a6ba92e28f8b2a8109550.json): 6 dimensions scored goal_fidelity 18, evidence 20, scope_discipline 20, durability 18, fit 19, reuse 20; 2 follow-on findings; no blocking finding.</p></div>
+</div>
+<div class="r-comment" data-section="s10" data-id="c-close-s10" data-who="reckon-build" data-when="2026-10-15T06:08:00Z">
+    <div class="r-comment-body"><p>§10 closed. The report and the dry run resolve the anchor through one pin-reading helper, so what the operator sees is what the apply does (<code>c6f003721</code>, review 115/120). <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s10-report-pin">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s10" data-id="c-run-r-20261014T205529707057-shc-report-pin" data-who="reckon-build" data-when="2026-10-14T21:26:16.684Z">
+    <div class="r-comment-body"><p>shc-report-pin — the harmonize report and dry run now name the same anchor: report_family_rows and plan_family_applies both resolve through the new resolve_family_anchor, which reads the recorded pin via pinned_family_anchor and falls back to select_anchor only when no pin is recorded or the family is stamped; measure: with the report's pin read removed the stubbed pin-vs-outscorer test fails (assert 'base_at_axis' == 'base_at_axis' vs the outscorer named), while the harmonize gate is 135 passed at head against 134 at base (0 added failures).</p></div>
+</div>
+<div class="r-comment" data-section="s11" data-id="c-run-r-20261014T182527134435-review-of-shc-locus-definition-26a5fb3cb9d0" data-who="reckon-build" data-when="2026-10-14T18:36:11.357Z">
+    <div class="r-comment-body"><p>reviewed 26a5fb3cb9d0ca6c562c18a9d82e2b191ebffac2 against bc5acb919a70b460a3aed4d8cfa28ec73bdc1b85; verdict parsed with goal_fidelity 18, evidence 17, scope_discipline 19, durability 17, fit 18, reuse 16, total 105; two follow-on findings, no blocking finding</p></div>
+</div>
+<div class="r-comment" data-section="s11" data-id="c-run-r-20261014T180609575892-shc-locus-definition" data-who="reckon-build" data-when="2026-10-14T18:24:51.365Z">
+    <div class="r-comment-body"><p>rendered and checked the locus definition sentence — docs/evidence/fragments/sn-harmonize-command/shc-locus-definition.html; head gate 31 passed / 0 failed against base 25 passed / 0 failed, 0 added failures</p></div>
+</div>
+<div class="r-comment" data-section="s11" data-id="c-close-s11" data-who="reckon-build" data-when="2026-10-14T19:15:00Z">
+    <div class="r-comment-body"><p>§11 closed: the locus sentence is inserted from the registries and checked at acceptance (<code>bbfc184ae</code>, review 105/120). <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s11-locus-definition">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s12" data-id="c-run-r-20261014T195413696390-review-of-shc-dry-run-estimate-45e95a217eb8" data-who="reckon-build" data-when="2026-10-14T20:04:33.797Z">
+    <div class="r-comment-body"><p>Review of r-20261014T191013296262-shc-dry-run-estimate (base c0d68e7705cdbc25aedc2f69e1768bb240632058, head 45e95a217eb8f9cc6e929f4b7577742002e3ffe6) stored at both granted store paths: six dimensions scored (goal_fidelity 14, evidence 19, scope_discipline 19, durability 18, fit 18, reuse 16; total 104, all six checklist items carried), added_failure_count 0 with no added ids; one blocking finding that the harmonize apply call passes no cost_fn so the family-cap fix is inert on the production path, and three follow-ons (two self-referential assertions in the added test, one row-cap truncation before per-run aggregation).</p></div>
+</div>
+<div class="r-comment" data-section="s12" data-id="c-run-r-20261014T203557839921-review-of-shc-dry-run-estimate-1668e89c5bf4" data-who="reckon-build" data-when="2026-10-14T20:49:08.980Z">
+    <div class="r-comment-body"><p>Review of r-20261014T191013296262-shc-dry-run-estimate at head 1668e89c stored at both granted paths: six dimensions scored (goal_fidelity 19, evidence 19, scope_discipline 19, durability 19, fit 18, reuse 17; total 111), all six checklist items carried, added_failure_count 0 with no added ids, no blocking findings, three follow-on findings (two self-referential assertions in the added test, one row-cap LIMIT applied before per-run grouping).</p></div>
+</div>
+<div class="r-comment" data-section="s12" data-id="c-run-r-20261014T191013296262-shc-dry-run-estimate" data-who="reckon-build" data-when="2026-10-14T20:33:32.421Z">
+    <div class="r-comment-body"><p>The dry run now estimates from measured spend: for the 17-member boundary-density family it read 7 recent documentation runs covering 23 calls at $0.41 per call and printed $7.04, against the $6.26 the second forced apply recorded (anchor $1.026 + members $5.233), inside the 30% band and with the basis printed; with nothing recorded it states the estimate is unavailable rather than guessing, and the retired constant is gone. A member batch whose drain returns None is now charged the runner's cost_fn fallback to the family's spent total, so an unmeasurable batch can no longer let the family overrun its cap. The CLI's harmonize apply injects runner_kwargs={"cost_fn": aggregate_spend_for_run}, the recorded-spend hook the campaign path already passes, so that fallback measures the run's LLMCost spend instead of resolving to the default_cost stub that returns 0.00 — without it the family cap would still leak on the path the CLI runs.</p></div>
+</div>
+<div class="r-comment" data-section="s12" data-id="c-close-s12" data-who="reckon-build" data-when="2026-10-15T09:48:00Z">
+    <div class="r-comment-body"><p>§12 closed. The dry run estimates from measured whole-run cost and prints its basis: USD 7.04 against USD 6.26 spent on the boundary-density family. The CLI apply charges an unmeasured batch against the family cap (<code>c8ab3575c</code>, <code>3ba2de83b</code>; reviews 111 and 107/120). §3's final apply and §4's three-family measure are now unblocked. Both spend, and go to the lead with dry-run estimates. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s12-dry-run-estimate">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s12" data-id="c-run-r-20261015T092351060978-review-of-shc-estimate-whole-runs-3ba2de83b2a7" data-who="reckon-build" data-when="2026-10-15T09:41:57.015Z">
+    <div class="r-comment-body"><p>review of r-20261015T083623571117-shc-estimate-whole-runs stored at reviews/imas-codex/r-20261015T083623571117-shc-estimate-whole-runs.json — 107/120, 0 blocking findings, reviewed_base f4fd209a9 head 3ba2de83b</p></div>
+</div>
+<div class="r-comment" data-section="s12" data-id="c-run-r-20261015T083623571117-shc-estimate-whole-runs" data-who="reckon-build" data-when="2026-10-15T09:23:06.039Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/sn-harmonize-command/shc-estimate-whole-runs.html</p></div>
+</div>
+<div class="r-comment" data-section="s13" data-id="c-run-r-20261015T123243884448-review-of-shc-run-log-64d9d509e3bf" data-who="reckon-build" data-when="2026-10-15T12:44:46.003Z">
+    <div class="r-comment-body"><p>/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261015T115014182537-shc-run-log.json</p></div>
+</div>
+<div class="r-comment" data-section="s13" data-id="c-run-r-20261015T115014182537-shc-run-log" data-who="reckon-build" data-when="2026-10-15T12:31:16.964Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/sn-harmonize-command/shc-run-log.html</p></div>
+</div>
+<div class="r-comment" data-section="s13" data-id="c-land-s13-run-log" data-who="reckon-build" data-when="2026-10-15T19:40:00Z">
+    <div class="r-comment-body"><p>The logging change landed (merge <code>0db9968da</code>, review 103/120): six spending <code>sn</code> commands now write their run logs, enforced by a structural test. §13 closes when the verification of the four commands its gate did not cover reports no added failure. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s13-run-log">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s13" data-id="c-run-r-20261015T193445843812-review-of-shc-run-log-verify-28c5134395b2" data-who="reckon-build" data-when="2026-10-15T19:41:59Z">
+    <div class="r-comment-body"><p>/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261015T192418977789-shc-run-log-verify.at-28c5134395b2301c606a519cd85bcdaec6f9a711.json records six scored dimensions, the reviewed revision pair, and zero added failures.</p></div>
+</div>
+<div class="r-comment" data-section="s13" data-id="c-run-r-20261015T192418977789-shc-run-log-verify" data-who="reckon-build" data-when="2026-10-15T19:33:23Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/sn-harmonize-command/shc-run-log-verify.html records 146 base passes, 151 merged passes, and zero added failures.</p></div>
+</div>
+<div class="r-comment" data-section="s13" data-id="c-close-s13" data-who="reckon-build" data-when="2026-10-15T21:47:00Z">
+    <div class="r-comment-body"><p>§13 closed. Six spending <code>sn</code> commands write their run logs, and a structural test keeps a seventh from slipping by (merge <code>0db9968da</code>, review 103/120). The CLI tests of every changed command show zero added failures at the merged head (<code>59b317d4d</code>, review 114/120). §3's final apply and §4's measure are unblocked and dispatched under the lead's ceilings. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s13-run-log-verify">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s14" data-id="c-run-r-20261015T123045256234-review-of-shc-guard-open-requests-0b6a35a3465b" data-who="reckon-build" data-when="2026-10-15T12:41:33.347Z">
+    <div class="r-comment-body"><p>none — this node stores a review record at /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261015T120625137515-shc-guard-open-requests.json and does not edit the plan.</p></div>
+</div>
+<div class="r-comment" data-section="s14" data-id="c-run-r-20261015T120625137515-shc-guard-open-requests" data-who="reckon-build" data-when="2026-10-15T12:29:22.798Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/sn-harmonize-command/shc-guard-open-requests.html records the open-only roster rule and the read-only live check (boundary family protected members: 1 before, 0 after).</p></div>
+</div>
+<div class="r-comment" data-section="s14" data-id="c-close-s14" data-who="reckon-build" data-when="2026-10-15T19:40:00Z">
+    <div class="r-comment-body"><p>§14 closed. The recommended-name guard protects a roster's members only while its request is open, and an unreadable state still protects (merge <code>cea6889cd</code>, review 108/120). The boundary family's one protected member is released, as the lead ruled. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s14-guard-open-requests">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-shc-command-surface" data-who="reckon-build" data-when="2026-10-12T20:00:00Z">
     <div class="r-comment-body"><p>The report and the flag deletions landed (merge <code>e7184e3aa</code>); review 95/120. §2 stays open for the domain-scoped lint findings, the enumeration's home, the stale architecture doc and three self-comparing assertions. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s2-report">evidence</a></p></div>
@@ -649,6 +712,9 @@
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261023T214514437841-shc-docs-regen-restamp" data-who="reckon-build" data-when="2026-10-23T22:08:10Z">
     <div class="r-comment-body"><p>generated and refined documentation writes now re-stamp the current producing source after success; default gate 50 to 50 passed, graph gate 5 to 7 passed, zero added failures; removing the calls fails both new graph tests.</p></div>
 </div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261024T113523219764-review-of-shc-calls-per-phase-test-b29f52f1c2ca" data-who="reckon-build" data-when="2026-10-24T11:48:16.419Z">
+    <div class="r-comment-body"><p>review-of-shc-calls-per-phase-test-b29f52f1c2ca — independent review of run r-20261024T110620532362-shc-calls-per-phase-test at head b29f52f1c2ca (base f657a98dc); scores goal_fidelity 20, evidence 15, scope_discipline 20, durability 18, fit 17, reuse 18 (total 108); 0 added failures derived from the run&#x27;s own baseline_suite (15 passed, EXIT=0) and after_suite (20 passed, EXIT=0) arms; two non-blocking findings (a fragment figure that contradicts its cited log, and a double that recognises one literal predicate spelling); record passes `crew check --review`</p></div>
+</div>
 <div class="r-comment" data-section="s5" data-id="c-close-s5" data-who="reckon-build" data-when="2026-10-13T14:50:00Z">
     <div class="r-comment-body"><p>§5 closed. The harmonize report counts a link as dead only when no standard name in the graph carries its target, which removes the boundary-density family's 19 false dead links (reviewed head <code>73bbd94ba</code>, review 99/120). Its two reuse follow-ons go into the §<!-- -->7 node: call <code>get_existing_standard_names</code> and drop the scope-only fallback. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s5-report-graph-links">evidence</a></p></div>
 </div>
@@ -690,15 +756,6 @@ crew/reviews/imas-codex/r-20261013T145943345276-shc-pin-anchor.at-4ae756c8581cf6
 <div class="r-comment" data-section="s7" data-id="c-close-s7" data-who="reckon-build" data-when="2026-10-13T19:27:00Z">
     <div class="r-comment-body"><p>§7 closed. A harmonize run records its anchor when an apply starts and keeps it until the family is stamped harmonized; <code>--force</code> no longer releases it. The report reuses <code>get_existing_standard_names</code> (merge <code>a90aa9a2b</code>, review 107/120). Follow-on: declare <code>harmonized_anchor</code> in the schema. With §5, §6 and §7 closed, §3's re-apply of the boundary-density family is dispatched. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s7-anchor-pin">evidence</a></p></div>
 </div>
-<div class="r-comment" data-section="s11" data-id="c-run-r-20261014T182527134435-review-of-shc-locus-definition-26a5fb3cb9d0" data-who="reckon-build" data-when="2026-10-14T18:36:11.357Z">
-    <div class="r-comment-body"><p>reviewed 26a5fb3cb9d0ca6c562c18a9d82e2b191ebffac2 against bc5acb919a70b460a3aed4d8cfa28ec73bdc1b85; verdict parsed with goal_fidelity 18, evidence 17, scope_discipline 19, durability 17, fit 18, reuse 16, total 105; two follow-on findings, no blocking finding</p></div>
-</div>
-<div class="r-comment" data-section="s11" data-id="c-run-r-20261014T180609575892-shc-locus-definition" data-who="reckon-build" data-when="2026-10-14T18:24:51.365Z">
-    <div class="r-comment-body"><p>rendered and checked the locus definition sentence — docs/evidence/fragments/sn-harmonize-command/shc-locus-definition.html; head gate 31 passed / 0 failed against base 25 passed / 0 failed, 0 added failures</p></div>
-</div>
-<div class="r-comment" data-section="s11" data-id="c-close-s11" data-who="reckon-build" data-when="2026-10-14T19:15:00Z">
-    <div class="r-comment-body"><p>§11 closed: the locus sentence is inserted from the registries and checked at acceptance (<code>bbfc184ae</code>, review 105/120). <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s11-locus-definition">evidence</a></p></div>
-</div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261014T182726976776-review-of-shc-family-cost-cap-f3a57c5e84ae" data-who="reckon-build" data-when="2026-10-14T18:36:22.116Z">
     <div class="r-comment-body"><p>Independent review of r-20261014T180536961497-shc-family-cost-cap at head f3a57c5e8 scored 110/120 (goal_fidelity 19, evidence 18, scope_discipline 19, durability 17, fit 18, reuse 19) with two follow-on findings and no blockers; the family cap is enforced by _family_budget_drain (harmonize.py:1181) wrapping the drain with budget.campaign_cost_ceiling, and the done-when's 60%/40% split is a genuine guard that reddens on the recorded per-batch mutation.</p></div>
 </div>
@@ -707,33 +764,6 @@ crew/reviews/imas-codex/r-20261013T145943345276-shc-pin-anchor.at-4ae756c8581cf6
 </div>
 <div class="r-comment" data-section="s8" data-id="c-close-s8" data-who="reckon-build" data-when="2026-10-14T19:15:00Z">
     <div class="r-comment-body"><p>§8 closed: one cap covers the anchor and members together (<code>b5a58934f</code>, review 110/120). The review found a remaining leak, where a batch whose drain returns no cost escapes the family total. It goes to §12, which owns the same estimate path. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s8-family-cost-cap">evidence</a></p></div>
-</div>
-<div class="r-comment" data-section="s12" data-id="c-run-r-20261014T195413696390-review-of-shc-dry-run-estimate-45e95a217eb8" data-who="reckon-build" data-when="2026-10-14T20:04:33.797Z">
-    <div class="r-comment-body"><p>Review of r-20261014T191013296262-shc-dry-run-estimate (base c0d68e7705cdbc25aedc2f69e1768bb240632058, head 45e95a217eb8f9cc6e929f4b7577742002e3ffe6) stored at both granted store paths: six dimensions scored (goal_fidelity 14, evidence 19, scope_discipline 19, durability 18, fit 18, reuse 16; total 104, all six checklist items carried), added_failure_count 0 with no added ids; one blocking finding that the harmonize apply call passes no cost_fn so the family-cap fix is inert on the production path, and three follow-ons (two self-referential assertions in the added test, one row-cap truncation before per-run aggregation).</p></div>
-</div>
-<div class="r-comment" data-section="s12" data-id="c-run-r-20261014T203557839921-review-of-shc-dry-run-estimate-1668e89c5bf4" data-who="reckon-build" data-when="2026-10-14T20:49:08.980Z">
-    <div class="r-comment-body"><p>Review of r-20261014T191013296262-shc-dry-run-estimate at head 1668e89c stored at both granted paths: six dimensions scored (goal_fidelity 19, evidence 19, scope_discipline 19, durability 19, fit 18, reuse 17; total 111), all six checklist items carried, added_failure_count 0 with no added ids, no blocking findings, three follow-on findings (two self-referential assertions in the added test, one row-cap LIMIT applied before per-run grouping).</p></div>
-</div>
-<div class="r-comment" data-section="s12" data-id="c-run-r-20261014T191013296262-shc-dry-run-estimate" data-who="reckon-build" data-when="2026-10-14T20:33:32.421Z">
-    <div class="r-comment-body"><p>The dry run now estimates from measured spend: for the 17-member boundary-density family it read 7 recent documentation runs covering 23 calls at $0.41 per call and printed $7.04, against the $6.26 the second forced apply recorded (anchor $1.026 + members $5.233), inside the 30% band and with the basis printed; with nothing recorded it states the estimate is unavailable rather than guessing, and the retired constant is gone. A member batch whose drain returns None is now charged the runner's cost_fn fallback to the family's spent total, so an unmeasurable batch can no longer let the family overrun its cap. The CLI's harmonize apply injects runner_kwargs={"cost_fn": aggregate_spend_for_run}, the recorded-spend hook the campaign path already passes, so that fallback measures the run's LLMCost spend instead of resolving to the default_cost stub that returns 0.00 — without it the family cap would still leak on the path the CLI runs.</p></div>
-</div>
-<div class="r-comment" data-section="s12" data-id="c-close-s12" data-who="reckon-build" data-when="2026-10-15T09:48:00Z">
-    <div class="r-comment-body"><p>§12 closed. The dry run estimates from measured whole-run cost and prints its basis: USD 7.04 against USD 6.26 spent on the boundary-density family. The CLI apply charges an unmeasured batch against the family cap (<code>c8ab3575c</code>, <code>3ba2de83b</code>; reviews 111 and 107/120). §3's final apply and §4's three-family measure are now unblocked. Both spend, and go to the lead with dry-run estimates. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s12-dry-run-estimate">evidence</a></p></div>
-</div>
-<div class="r-comment" data-section="s12" data-id="c-run-r-20261015T092351060978-review-of-shc-estimate-whole-runs-3ba2de83b2a7" data-who="reckon-build" data-when="2026-10-15T09:41:57.015Z">
-    <div class="r-comment-body"><p>review of r-20261015T083623571117-shc-estimate-whole-runs stored at reviews/imas-codex/r-20261015T083623571117-shc-estimate-whole-runs.json — 107/120, 0 blocking findings, reviewed_base f4fd209a9 head 3ba2de83b</p></div>
-</div>
-<div class="r-comment" data-section="s12" data-id="c-run-r-20261015T083623571117-shc-estimate-whole-runs" data-who="reckon-build" data-when="2026-10-15T09:23:06.039Z">
-    <div class="r-comment-body"><p>docs/evidence/fragments/sn-harmonize-command/shc-estimate-whole-runs.html</p></div>
-</div>
-<div class="r-comment" data-section="s10" data-id="c-run-r-20261014T213431662469-review-of-shc-report-pin-c6f003721e38" data-who="reckon-build" data-when="2026-10-14T21:46:51.896Z">
-    <div class="r-comment-body"><p>review-of-shc-report-pin-c6f003721e38 — independent review of r-20261014T205529707057-shc-report-pin stored at reviews/imas-codex/r-20261014T205529707057-shc-report-pin.json (and .at-c6f003721e38f41f8a6a6ba92e28f8b2a8109550.json): 6 dimensions scored goal_fidelity 18, evidence 20, scope_discipline 20, durability 18, fit 19, reuse 20; 2 follow-on findings; no blocking finding.</p></div>
-</div>
-<div class="r-comment" data-section="s10" data-id="c-close-s10" data-who="reckon-build" data-when="2026-10-15T06:08:00Z">
-    <div class="r-comment-body"><p>§10 closed. The report and the dry run resolve the anchor through one pin-reading helper, so what the operator sees is what the apply does (<code>c6f003721</code>, review 115/120). <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s10-report-pin">evidence</a></p></div>
-</div>
-<div class="r-comment" data-section="s10" data-id="c-run-r-20261014T205529707057-shc-report-pin" data-who="reckon-build" data-when="2026-10-14T21:26:16.684Z">
-    <div class="r-comment-body"><p>shc-report-pin — the harmonize report and dry run now name the same anchor: report_family_rows and plan_family_applies both resolve through the new resolve_family_anchor, which reads the recorded pin via pinned_family_anchor and falls back to select_anchor only when no pin is recorded or the family is stamped; measure: with the report's pin read removed the stubbed pin-vs-outscorer test fails (assert 'base_at_axis' == 'base_at_axis' vs the outscorer named), while the harmonize gate is 135 passed at head against 134 at base (0 added failures).</p></div>
 </div>
 <div class="r-comment" data-section="s9" data-id="c-run-r-20261015T045608799573-review-of-shc-reverse-links-210eb60aedf6" data-who="reckon-build" data-when="2026-10-15T05:10:58.911Z">
     <div class="r-comment-body"><p>review of run r-20261015T040733444496-shc-reverse-links (base 033ee2a30, head 210eb60ae) stored as a parsed 6-dimension record, total 102, five follow-on findings; record stored, no repo change made.</p></div>
@@ -752,33 +782,6 @@ crew/reviews/imas-codex/r-20261013T145943345276-shc-pin-anchor.at-4ae756c8581cf6
 </div>
 <div class="r-comment" data-section="s9" data-id="c-run-r-20261015T082056563312-review-of-shc-reverse-links-a4e9c1687cd0" data-who="reckon-build" data-when="2026-10-15T08:40:42.625Z">
     <div class="r-comment-body"><p>review 84/120 of shc-reverse-links at a4e9c1687: an evidence-only blocking finding on a misdated green run, corrected in the landing record; reuse exempted and carried to shc-estimate-whole-runs</p></div>
-</div>
-<div class="r-comment" data-section="s14" data-id="c-run-r-20261015T123045256234-review-of-shc-guard-open-requests-0b6a35a3465b" data-who="reckon-build" data-when="2026-10-15T12:41:33.347Z">
-    <div class="r-comment-body"><p>none — this node stores a review record at /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261015T120625137515-shc-guard-open-requests.json and does not edit the plan.</p></div>
-</div>
-<div class="r-comment" data-section="s14" data-id="c-run-r-20261015T120625137515-shc-guard-open-requests" data-who="reckon-build" data-when="2026-10-15T12:29:22.798Z">
-    <div class="r-comment-body"><p>docs/evidence/fragments/sn-harmonize-command/shc-guard-open-requests.html records the open-only roster rule and the read-only live check (boundary family protected members: 1 before, 0 after).</p></div>
-</div>
-<div class="r-comment" data-section="s14" data-id="c-close-s14" data-who="reckon-build" data-when="2026-10-15T19:40:00Z">
-    <div class="r-comment-body"><p>§14 closed. The recommended-name guard protects a roster's members only while its request is open, and an unreadable state still protects (merge <code>cea6889cd</code>, review 108/120). The boundary family's one protected member is released, as the lead ruled. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s14-guard-open-requests">evidence</a></p></div>
-</div>
-<div class="r-comment" data-section="s13" data-id="c-run-r-20261015T123243884448-review-of-shc-run-log-64d9d509e3bf" data-who="reckon-build" data-when="2026-10-15T12:44:46.003Z">
-    <div class="r-comment-body"><p>/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261015T115014182537-shc-run-log.json</p></div>
-</div>
-<div class="r-comment" data-section="s13" data-id="c-run-r-20261015T115014182537-shc-run-log" data-who="reckon-build" data-when="2026-10-15T12:31:16.964Z">
-    <div class="r-comment-body"><p>docs/evidence/fragments/sn-harmonize-command/shc-run-log.html</p></div>
-</div>
-<div class="r-comment" data-section="s13" data-id="c-land-s13-run-log" data-who="reckon-build" data-when="2026-10-15T19:40:00Z">
-    <div class="r-comment-body"><p>The logging change landed (merge <code>0db9968da</code>, review 103/120): six spending <code>sn</code> commands now write their run logs, enforced by a structural test. §13 closes when the verification of the four commands its gate did not cover reports no added failure. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s13-run-log">evidence</a></p></div>
-</div>
-<div class="r-comment" data-section="s13" data-id="c-run-r-20261015T193445843812-review-of-shc-run-log-verify-28c5134395b2" data-who="reckon-build" data-when="2026-10-15T19:41:59Z">
-    <div class="r-comment-body"><p>/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261015T192418977789-shc-run-log-verify.at-28c5134395b2301c606a519cd85bcdaec6f9a711.json records six scored dimensions, the reviewed revision pair, and zero added failures.</p></div>
-</div>
-<div class="r-comment" data-section="s13" data-id="c-run-r-20261015T192418977789-shc-run-log-verify" data-who="reckon-build" data-when="2026-10-15T19:33:23Z">
-    <div class="r-comment-body"><p>docs/evidence/fragments/sn-harmonize-command/shc-run-log-verify.html records 146 base passes, 151 merged passes, and zero added failures.</p></div>
-</div>
-<div class="r-comment" data-section="s13" data-id="c-close-s13" data-who="reckon-build" data-when="2026-10-15T21:47:00Z">
-    <div class="r-comment-body"><p>§13 closed. Six spending <code>sn</code> commands write their run logs, and a structural test keeps a seventh from slipping by (merge <code>0db9968da</code>, review 103/120). The CLI tests of every changed command show zero added failures at the merged head (<code>59b317d4d</code>, review 114/120). §3's final apply and §4's measure are unblocked and dispatched under the lead's ceilings. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s13-run-log-verify">evidence</a></p></div>
 </div>
 </section>
 </main>

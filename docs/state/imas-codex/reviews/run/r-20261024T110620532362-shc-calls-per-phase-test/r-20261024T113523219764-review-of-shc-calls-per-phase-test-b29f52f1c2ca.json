@@ -1,0 +1,70 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_source": "derived from the reviewed run's own arms, by the failure ids each records rather than by comparing counts: baseline_suite (revision cc8592b71068e9e12a44cb3a8ccab49772bff525, gate-logs/base-default.log, 15 passed, EXIT=0, completed true, failure_ids []) against after_suite (revision e6cfdf2d8638e82bd5c7b37469e54685b17acf32, gate-logs/head-default.log, 20 passed, EXIT=0, completed true, failure_ids []). Both arms ran to their summary line and both carry zero failure ids, so added = none and dropped = none. The -m graph arms select nothing in this file on either side (gate-logs/base-graph.log 15 deselected EXIT=5, gate-logs/head-graph.log 20 deselected EXIT=5) and so contribute no failure ids either. Verified against the logs themselves, not the manifest's prose.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-24T11:48:16.419Z",
+  "dispatched_at": "2026-10-24T11:35:53Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-calls-per-phase-test.html",
+      "line": "37",
+      "severity": "non-blocking",
+      "text": "non-blocking: the base -m graph row records '20 deselected (no graph-marked test in this file)' but the log it cites, gate-logs/base-graph.log, ends '15 deselected, 1 warning in 0.25s'. The base arm collects 15 tests (gate-logs/base-default.log: '15 passed'), so 20 deselects is a figure carried over from the head arm and does not reconcile with the log beside it. The substance is unaffected (0 selected, EXIT=5 on both arms), but an evidence table quoting a number its own cited log contradicts is not checkable as written."
+    },
+    {
+      "file": "tests/standard_names/test_cost_graph_ops.py",
+      "line": "357",
+      "severity": "non-blocking",
+      "text": "non-blocking: the seeded-row double decides run scoping with `scoped = \"run_id:$run_id\" in cypher.replace(\" \", \"\")`, which recognises one literal predicate spelling only. A semantically equivalent correct rewrite of the production statement (for example `WHERE c.run_id = $run_id`) would leave `scoped` false, make the double count every run's rows, and turn all five new tests red while the code under test was right. It errs loudly rather than silently, so it does not weaken the guard, but it binds the tests to the statement's exact text."
+    }
+  ],
+  "findings_verified": [
+    {
+      "check": "tail of gate-logs/base-graph.log reads '====================== 15 deselected, 1 warning in 0.25s =======================' followed by 'EXIT=5'; tail of gate-logs/head-graph.log reads '20 deselected'; tail of gate-logs/base-default.log reads '15 passed'",
+      "path": "docs/evidence/fragments/sn-harmonize-command/shc-calls-per-phase-test.html:37"
+    },
+    {
+      "check": "read the double at head e6cfdf2d8; scoping is decided by substring membership in the lowered-whitespace Cypher, not by the parameters actually bound, so any predicate spelling other than 'run_id:$run_id' is treated as unscoped",
+      "path": "tests/standard_names/test_cost_graph_ops.py:357"
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read both commits against f657a98dc: e6cfdf2d8 adds 123 lines of tests only to tests/standard_names/test_cost_graph_ops.py and b29f52f1c adds the 62-line evidence fragment; git diff --stat f657a98dc e6cfdf2d8 -- imas_codex/ is empty, so the production code under test is byte-identical at head and base.",
+    "done_when": "the done_when requires a delta against main from separate git archive trees with their own basetemps on the named file, under default markers and -m graph, plus a logged negative control; gate-logs/base-default.log (15 passed, EXIT=0) and gate-logs/head-default.log (20 passed, EXIT=0) are the default pair, gate-logs/base-graph.log and gate-logs/head-graph.log record 0 selected EXIT=5 on both arms, and gate-logs/negative-control.log ends '5 failed, 15 passed' with EXIT=1 and the five ids this node added.",
+    "goal": "the node goal is to cover aggregate_calls_per_phase, untested while its spend siblings were, in tests/standard_names/test_cost_graph_ops.py; tests/standard_names/test_cost_graph_ops.py:375-437 adds TestAggregateCallsPerPhase and TestAggregateCallsPerPhaseForwarder asserting exact per-phase counts through the module function at imas_codex/standard_names/graph_store/graph_cost_and_claims.py:122 and the graph_ops forwarder at imas_codex/standard_names/graph_ops.py:6667, matching the goal and the brief.",
+    "manifest": "read; it records status complete, commits e6cfdf2d8 and b29f52f1c, baseline_suite (15 passed, EXIT=0) and after_suite (20 passed, EXIT=0) with empty failure_ids, measurement_module and measurement_cwd for the archive-tree runs, and negative_control_log pointing at gate-logs/negative-control.log.",
+    "write_paths": "the manifest declares tests/standard_names/test_cost_graph_ops.py, docs/evidence/fragments/sn-harmonize-command/shc-calls-per-phase-test.html and a figures directory; git diff --name-status f657a98dc..b29f52f1c returns exactly the first two, both inside the declared scope."
+  },
+  "justifications": {
+    "durability": "gate-logs/negative-control.log shows the declared mutation (dropping the run scoping) failing all five new ids while the 15 pre-existing ids pass, so the assertion at tests/standard_names/test_cost_graph_ops.py:383 fails when the guard regresses; the forwarding assertions at lines 399-400 and 424 compare the code under test's captured parameter against the call argument, which is independent of the return value they are not asserting.",
+    "evidence": "both arms' results are recorded and reconcile with gate-logs/base-default.log and gate-logs/head-default.log, but one half of the required selection ( -m graph ) selects nothing in this file on either side and the fragment's base row at docs/evidence/fragments/sn-harmonize-command/shc-calls-per-phase-test.html:37 states 20 deselected where its own log says 15.",
+    "fit": "the new classes follow the file's existing pure-unit idiom and reuse the module's own _mock_gc_ctx helper at tests/standard_names/test_cost_graph_ops.py:22 for the forwarder arms, though the seeded-row double at line 342 is a new pattern for a file whose other tests return fixed rows.",
+    "goal_fidelity": "tests/standard_names/test_cost_graph_ops.py:375-437 tests the module function and the forwarder with exact counts (docs 2, generate_name 3, review_name 1), another run's rows excluded and the zero-call phase absent, which is what the goal names.",
+    "reuse": "no owner for a seeded LLMCost row double exists: greps over tests/ for a scoping-aware seeded double found only unrelated transaction fakes, and the forwarder arms extend the existing _mock_gc_ctx rather than adding a second services helper.",
+    "scope_discipline": "git diff --name-status f657a98dc..b29f52f1c returns only tests/standard_names/test_cost_graph_ops.py and the evidence fragment, both inside the manifest's declared write paths and nothing the goal does not imply."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to cover aggregate_calls_per_phase in tests/standard_names/test_cost_graph_ops.py; tests/standard_names/test_cost_graph_ops.py:375-437 adds TestAggregateCallsPerPhase and TestAggregateCallsPerPhaseForwarder asserting exact per-phase counts through the module function at imas_codex/standard_names/graph_store/graph_cost_and_claims.py:122 and the graph_ops forwarder at imas_codex/standard_names/graph_ops.py:6667.\nVERDICT done_when: the gate runs the delta against main from separate git archive trees with their own basetemps on the named file under default markers and -m graph plus a logged negative control; gate-logs/base-default.log (15 passed, EXIT=0) and gate-logs/head-default.log (20 passed, EXIT=0) are the default pair, gate-logs/base-graph.log and gate-logs/head-graph.log record 0 selected EXIT=5 on both arms, and gate-logs/negative-control.log ends '5 failed, 15 passed' with EXIT=1.\nVERDICT write_paths: the manifest declares tests/standard_names/test_cost_graph_ops.py, docs/evidence/fragments/sn-harmonize-command/shc-calls-per-phase-test.html and a figures directory; git diff --name-status f657a98dc..b29f52f1c returns exactly the first two, both inside the declared scope.\nVERDICT manifest: read; it records status complete, commits e6cfdf2d8 and b29f52f1c, baseline_suite (15 passed, EXIT=0) and after_suite (20 passed, EXIT=0) with empty failure_ids, measurement_module and measurement_cwd for the archive-tree runs, and negative_control_log pointing at gate-logs/negative-control.log.\nVERDICT diff: read both commits against f657a98dc: e6cfdf2d8 adds 123 lines of tests only and b29f52f1c adds the 62-line evidence fragment; git diff --stat f657a98dc e6cfdf2d8 -- imas_codex/ is empty, so the code under test is byte-identical at head and base.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: tests/standard_names/test_cost_graph_ops.py:375-437 tests the module function and the forwarder with exact counts, another run's rows excluded and the zero-call phase absent, which is what the goal names.\nSCORE evidence: 15\nJUSTIFICATION evidence: both arms' results are recorded and reconcile with gate-logs/base-default.log and gate-logs/head-default.log, but the -m graph selection selects nothing in this file on either side and the fragment's base row at docs/evidence/fragments/sn-harmonize-command/shc-calls-per-phase-test.html:37 states 20 deselected where its own log says 15.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-status f657a98dc..b29f52f1c returns only tests/standard_names/test_cost_graph_ops.py and the evidence fragment, both inside the manifest's declared write paths.\nSCORE durability: 18\nJUSTIFICATION durability: gate-logs/negative-control.log shows the declared mutation failing all five new ids while the 15 pre-existing ids pass, so tests/standard_names/test_cost_graph_ops.py:383 fails when the run scoping regresses.\nSCORE fit: 17\nJUSTIFICATION fit: the new classes follow the file's pure-unit idiom and reuse _mock_gc_ctx at tests/standard_names/test_cost_graph_ops.py:22, though the seeded-row double at line 342 is a new pattern for this file.\nSCORE reuse: 18\nJUSTIFICATION reuse: no owner for a seeded LLMCost row double exists among the repository's test helpers, and the forwarder arms extend _mock_gc_ctx rather than adding a second services helper.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-calls-per-phase-test.html:37 non-blocking: the base -m graph row records '20 deselected' but the log it cites, gate-logs/base-graph.log, ends '15 deselected'; the base arm collects 15 tests, so the figure does not reconcile with its own cited log.\nFINDING tests/standard_names/test_cost_graph_ops.py:357 non-blocking: the double's scoping check recognises only the literal 'run_id:$run_id' spelling, so a semantically equivalent correct rewrite of the production predicate would turn all five tests red while the code under test was right.\n",
+  "review_run_id": "r-20261024T113523219764-review-of-shc-calls-per-phase-test-b29f52f1c2ca",
+  "reviewed_base_sha": "f657a98dc491189be7c310ec8065b5eea057868e",
+  "reviewed_head_sha": "b29f52f1c2ca6b95870b98b6c0da05661661b91b",
+  "reviewed_run_id": "r-20261024T110620532362-shc-calls-per-phase-test",
+  "rubric": "code",
+  "scores": {
+    "durability": 18,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 20,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T11:50:10.136275+00:00",
+  "total": 108
+}
