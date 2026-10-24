@@ -1,0 +1,87 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate logs, since its manifest carries no baseline_suite/after_suite objects: logs/base-default.log and logs/head-default.log both report 1 failed/454 passed and the same id (tests/standard_names/test_source_invariants.py::TestExtractWorkerEmitsDdPath::test_extract_worker_dd_source_includes_dd_path); logs/base-graph.log and logs/head-graph.log report the identical four ids (test_terminal_recovery_graph_fixture_refuses_production_uri and three test_focus_reseed tests). No head-only failure exists, so the added count is zero.",
+  "call_site_count": 13,
+  "call_sites": [
+    "imas_codex/standard_names/loop.py:2517",
+    "imas_codex/standard_names/loop.py:2543",
+    "imas_codex/standard_names/pool_adapter.py:141",
+    "imas_codex/standard_names/harmonize.py:1073",
+    "imas_codex/standard_names/orphan_sweep.py:163",
+    "imas_codex/standard_names/worker_tasks/worker_common.py:1067",
+    "imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py:200",
+    "imas_codex/standard_names/sources/dd.py:210",
+    "imas_codex/cli/sn.py:4217",
+    "imas_codex/cli/sn.py:7575",
+    "imas_codex/standard_names/graph_store/graph_docs_persistence.py:363",
+    "imas_codex/standard_names/graph_store/graph_claim_scope.py:821",
+    "imas_codex/standard_names/graph_store/graph_audits.py:573"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-10-24T20:15:40Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_harmonize_finalize.py",
+      "line": "29",
+      "severity": "non-blocking",
+      "text": "`monkeypatch.setattr(graph_ops, \"write_enrichment_results\", ...)` patches a moved symbol and this file is absent from the gate's 29-file set, as are tests/standard_names/test_harmonize_reverse_links.py:251 (same symbol), tests/standard_names/test_detachment_attribution_wiring.py:142, tests/standard_names/test_orphan_sweep.py:819, tests/standard_names/test_scoped_global_maintenance.py:157,512 and tests/standard_names/test_scoped_run_embedding_drain.py:56, which patch `persist_outcome_snapshot`, `reset_persist_outcomes` or `merge_standard_name_sources` through an f-string target that a literal-dotted-string AST scan cannot see; the brief required every such file in the gate, and the fragment's \"29 files\" claim is therefore not the union it is described as."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-step13.html",
+      "line": "6",
+      "severity": "non-blocking",
+      "text": "the moved-symbol list names `_record_persist_outcomes`, which no module defines, and omits `write_skipped_sources`, so the table claims 51 symbols while listing 50 with one wrong; the design JSON maps `_record_persist_outcome` and `write_skipped_sources`, both of which the landed module defines."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-step13.html",
+      "line": "8",
+      "severity": "non-blocking",
+      "text": "the gate paragraph states \"Separate archived base and head trees used distinct basetemps\" but none of the four stored logs' `# command:` lines carries `--basetemp`, and the checks paragraph counts \"Five runtime adjudication rows\" where imas_codex/graph/cypher_property_check.py:145-148 moved four rows (three StandardName reservations plus StandardNameSource.skipped_at)."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T201334977166-srtj-graph-ops-split-step13/manifest.md",
+      "line": "11",
+      "severity": "non-blocking",
+      "text": "the `tests:` line names a command carrying `--basetemp=.../bt-head-default2` while the log it cites (logs/head-default.log) records a command with no `--basetemp`, so the required and fallback command text disagree, and the manifest carries no `baseline_suite`/`after_suite` objects for a later reader to reduce the added-failure count from."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read the four commits against base 265cf9946 commit by commit \u2014 9489679e2 extracts the bodies, ed872d2ae routes every moved lookup through `services`, ded8ae738 re-points four adjudication rows in imas_codex/graph/cypher_property_check.py to graph_source_bindings.py with every verdict left `runtime`, c1e6351df adds the evidence fragment; the moved bodies themselves are byte-for-byte relocated code, so this review judges the boundary, not a rewritten algorithm.",
+    "done_when": "the done_when asks for a committed module, documented forwarders, no added gate failures, passing import and Cypher checks, and an evidence fragment carrying the moved list plus three size counts; logs/head-default.log and logs/base-default.log hold `1 failed, 454 passed, 27 deselected` with the same failing id, logs/head-graph.log and logs/base-graph.log hold the identical four failing ids, logs/head-cypher-final.log ends `4 passed` / `EXIT=0`, and the byte counts I recomputed from git match the fragment exactly (347,073 -> 267,069 bytes; new module 99,806 bytes, 76,305.43 and 28,516.00 gate units); the fragment's moved-symbol list is however wrong at two names (see findings).",
+    "goal": "the node goal is to move the `graph_source_bindings` symbols out of imas_codex/standard_names/graph_ops.py into imas_codex/standard_names/graph_store/graph_source_bindings.py under the design map; at c1e6351dfb the new module defines exactly the 51 symbols the design JSON maps to it (verified by AST against `inventories/graph_ops.py/symbols`), `graph_ops.py` defines one forwarder per moved function and nothing else of them (38 `def` names, no leftover body), and the 13 non-function names are re-exported by assignment.",
+    "manifest": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T201334977166-srtj-graph-ops-split-step13/manifest.md; status complete, four commits, gate and test-log paths recorded, `negative_control_log: none: node writes no test file`, but it carries no `baseline_suite`/`after_suite` objects (its gate facts live in `artifacts:` prose) and its `tests:` line names a basetemp-bearing command that no stored log matches.",
+    "write_paths": "the brief fences four paths; `git diff --stat 265cf9946 c1e6351dfb` lists exactly those four files and no others (graph_ops.py, graph_store/graph_source_bindings.py, graph/cypher_property_check.py, docs/evidence/.../srtj-graph-ops-split-step13.html)."
+  },
+  "justifications": {
+    "durability": "no assertion was added (the write scope excluded tests), so the only guard on the move is the existing suite's unchanged failure set between logs/base-default.log and logs/head-default.log, and nothing fails if a future change reintroduces a body into imas_codex/standard_names/graph_ops.py beside its forwarder.",
+    "evidence": "the base and head arms are distinct runs at distinct revisions (logs/base-default.log header names 265cf9946, logs/head-default.log names ed872d2ae) with identical failure sets, but six test files that patch a moved symbol were never in the 29-file gate, and the manifest's `tests:` line disagrees with the command its cited log records.",
+    "fit": "imas_codex/standard_names/graph_store/graph_source_bindings.py:12-13 imports `retry_on_deadlock` and `GraphClient` exactly as sibling graph_store/graph_cost_and_claims.py:8 does, the dice names describe capability with no plan or stage label, and the only drift is a `GraphClient` import used solely for the annotation at line 266.",
+    "goal_fidelity": "imas_codex/standard_names/graph_store/graph_source_bindings.py:1-60 plus the AST symbol comparison shows every design-mapped symbol defined in the new module and imas_codex/standard_names/graph_ops.py:3826-4159 holding one documented forwarder per function, which is the extraction the goal names.",
+    "reuse": "the change relocates existing code into the module the design designates rather than adding a second implementation, and it reuses `retry_on_deadlock` from imas_codex/discovery/base/claims.py rather than restating the retry loop; a capability search over imas_codex/standard_names/graph_store found no other owner of source-claim or source-binding storage.",
+    "scope_discipline": "`git diff --stat 265cf9946 c1e6351dfb` is the four declared write paths and nothing else, with no test, config or generated file touched."
+  },
+  "node": "review-of-srtj-graph-ops-split-step13-c1e6351dfb68",
+  "node:reviewed": "srtj-graph-ops-split-step13",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to move the `graph_source_bindings` symbols out of imas_codex/standard_names/graph_ops.py into imas_codex/standard_names/graph_store/graph_source_bindings.py under the design map; at c1e6351dfb the new module defines exactly the 51 symbols the design JSON maps to it (verified by AST against `inventories/graph_ops.py/symbols`), `graph_ops.py` defines one forwarder per moved function and nothing else of them (38 `def` names, no leftover body), and the 13 non-function names are re-exported by assignment.\nVERDICT done_when: the done_when asks for a committed module, documented forwarders, no added gate failures, passing import and Cypher checks, and an evidence fragment carrying the moved list plus three size counts; logs/head-default.log and logs/base-default.log hold `1 failed, 454 passed, 27 deselected` with the same failing id, logs/head-graph.log and logs/base-graph.log hold the identical four failing ids, logs/head-cypher-final.log ends `4 passed` / `EXIT=0`, and the byte counts I recomputed from git match the fragment exactly (347,073 -> 267,069 bytes; new module 99,806 bytes, 76,305.43 and 28,516.00 gate units); the fragment's moved-symbol list is however wrong at two names (see findings).\nVERDICT write_paths: the brief fences four paths; `git diff --stat 265cf9946 c1e6351dfb` lists exactly those four files and no others (graph_ops.py, graph_store/graph_source_bindings.py, graph/cypher_property_check.py, docs/evidence/.../srtj-graph-ops-split-step13.html).\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T201334977166-srtj-graph-ops-split-step13/manifest.md; status complete, four commits, gate and test-log paths recorded, `negative_control_log: none: node writes no test file`, but it carries no `baseline_suite`/`after_suite` objects (its gate facts live in `artifacts:` prose) and its `tests:` line names a basetemp-bearing command that no stored log matches.\nVERDICT diff: read the four commits against base 265cf9946 commit by commit \u2014 9489679e2 extracts the bodies, ed872d2ae routes every moved lookup through `services`, ded8ae738 re-points four adjudication rows in imas_codex/graph/cypher_property_check.py to graph_source_bindings.py with every verdict left `runtime`, c1e6351df adds the evidence fragment; the moved bodies themselves are byte-for-byte relocated code, so this review judges the boundary, not a rewritten algorithm.\nCALL_SITES: imas_codex/standard_names/loop.py:2517, imas_codex/standard_names/loop.py:2543, imas_codex/standard_names/pool_adapter.py:141, imas_codex/standard_names/harmonize.py:1073, imas_codex/standard_names/orphan_sweep.py:163, imas_codex/standard_names/worker_tasks/worker_common.py:1067, imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py:200, imas_codex/standard_names/sources/dd.py:210, imas_codex/cli/sn.py:4217, imas_codex/cli/sn.py:7575, imas_codex/standard_names/graph_store/graph_docs_persistence.py:363, imas_codex/standard_names/graph_store/graph_claim_scope.py:821, imas_codex/standard_names/graph_store/graph_audits.py:573\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/graph_store/graph_source_bindings.py:1-60 plus the AST symbol comparison shows every design-mapped symbol defined in the new module and imas_codex/standard_names/graph_ops.py:3826-4159 holding one documented forwarder per function, which is the extraction the goal names.\nSCORE evidence: 13\nJUSTIFICATION evidence: the base and head arms are distinct runs at distinct revisions (logs/base-default.log header names 265cf9946, logs/head-default.log names ed872d2ae) with identical failure sets, but six test files that patch a moved symbol were never in the 29-file gate, and the manifest's `tests:` line disagrees with the command its cited log records.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: `git diff --stat 265cf9946 c1e6351dfb` is the four declared write paths and nothing else, with no test, config or generated file touched.\nSCORE durability: 14\nJUSTIFICATION durability: no assertion was added (the write scope excluded tests), so the only guard on the move is the existing suite's unchanged failure set between logs/base-default.log and logs/head-default.log, and nothing fails if a future change reintroduces a body into imas_codex/standard_names/graph_ops.py beside its forwarder.\nSCORE fit: 18\nJUSTIFICATION fit: imas_codex/standard_names/graph_store/graph_source_bindings.py:12-13 imports `retry_on_deadlock` and `GraphClient` exactly as sibling graph_store/graph_cost_and_claims.py:8 does, the dice names describe capability with no plan or stage label, and the only drift is a `GraphClient` import used solely for the annotation at line 266.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change relocates existing code into the module the design designates rather than adding a second implementation, and it reuses `retry_on_deadlock` from imas_codex/discovery/base/claims.py rather than restating the retry loop; a capability search over imas_codex/standard_names/graph_store found no other owner of source-claim or source-binding storage.\nFINDING tests/standard_names/test_harmonize_finalize.py:29 non-blocking: `monkeypatch.setattr(graph_ops, \"write_enrichment_results\", ...)` patches a moved symbol and this file is absent from the gate's 29-file set, as are tests/standard_names/test_harmonize_reverse_links.py:251 (same symbol), tests/standard_names/test_detachment_attribution_wiring.py:142, tests/standard_names/test_orphan_sweep.py:819, tests/standard_names/test_scoped_global_maintenance.py:157,512 and tests/standard_names/test_scoped_run_embedding_drain.py:56, which patch `persist_outcome_snapshot`, `reset_persist_outcomes` or `merge_standard_name_sources` through an f-string target that a literal-dotted-string AST scan cannot see; the brief required every such file in the gate, and the fragment's \"29 files\" claim is therefore not the union it is described as.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-step13.html:6 non-blocking: the moved-symbol list names `_record_persist_outcomes`, which no module defines, and omits `write_skipped_sources`, so the table claims 51 symbols while listing 50 with one wrong; the design JSON maps `_record_persist_outcome` and `write_skipped_sources`, both of which the landed module defines.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-step13.html:8 non-blocking: the gate paragraph states \"Separate archived base and head trees used distinct basetemps\" but none of the four stored logs' `# command:` lines carries `--basetemp`, and the checks paragraph counts \"Five runtime adjudication rows\" where imas_codex/graph/cypher_property_check.py:145-148 moved four rows (three StandardName reservations plus StandardNameSource.skipped_at).\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261024T201334977166-srtj-graph-ops-split-step13/manifest.md:11 non-blocking: the `tests:` line names a command carrying `--basetemp=.../bt-head-default2` while the log it cites (logs/head-default.log) records a command with no `--basetemp`, so the required and fallback command text disagree, and the manifest carries no `baseline_suite`/`after_suite` objects for a later reader to reduce the added-failure count from.\n",
+  "review_run_id": "r-20261024T205417169334-review-of-srtj-graph-ops-split-step13-c1e6351dfb68",
+  "reviewed_base_sha": "265cf9946820c3e3a407ef6ad57a2617eeb30f55",
+  "reviewed_head_sha": "c1e6351dfb6874eefd0e66f0ec11988edc2c1d27",
+  "reviewed_run_id": "r-20261024T201334977166-srtj-graph-ops-split-step13",
+  "scores": {
+    "durability": 14,
+    "evidence": 13,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-24T21:39:24.296171+00:00",
+  "total": 104
+}
