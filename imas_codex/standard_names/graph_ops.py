@@ -2185,13 +2185,6 @@ def export_review_comments(*args: Any, **kwargs: Any):
 # Graph-backed LLM cost tracking API
 # =============================================================================
 
-# Phase → StandardName.llm_cost_<suffix> field mapping. It stays reachable on
-# this module because graph_store.graph_cost_and_claims reads it through the
-# ``services`` bridge, which resolves names from this module's globals.
-globals()["_PHASE_TO_SN_COST_FIELD"] = import_module(
-    ".graph_store.graph_audits", __package__
-)._PHASE_TO_SN_COST_FIELD
-
 
 def create_sn_run_open(*args: Any, **kwargs: Any):
     """Forward to graph_store.graph_audits.create_sn_run_open."""

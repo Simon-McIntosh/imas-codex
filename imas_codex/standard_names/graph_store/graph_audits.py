@@ -3083,7 +3083,7 @@ def export_review_comments(
     return count
 
 
-_PHASE_TO_SN_COST_FIELD: dict[str, str] = {
+_PHASE_TO_STANDARD_NAME_COST_FIELD: dict[str, str] = {
     "generate_name": "llm_cost_generate_name",
     "review_name": "llm_cost_review_name",
     "refine_name": "llm_cost_refine_name",
