@@ -9,6 +9,13 @@
     "imas_codex/standard_names/graph_store/graph_cost_and_claims.py:153"
   ],
   "completed_at": "2026-10-25T01:29:47.043Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "srtj-graph-store-structure",
+      "recorded_at": "2026-10-25T01:36:03.936999+00:00"
+    }
+  },
   "dispatched_at": "2026-10-25T01:21:13Z",
   "findings": [
     {
