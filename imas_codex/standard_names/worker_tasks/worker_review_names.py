@@ -907,6 +907,9 @@ async def process_review_name_batch(
     Returns count of items successfully reviewed.
     """
     logger = _worker_dependency("logger")
+    # Callers substitute this enricher to reach the review paths without a
+    # graph, so it is resolved through the entrypoint rather than called here.
+    enrich_name_review_items = _worker_dependency("_enrich_name_review_items")
     _persist_dd_gap_evidence = _worker_dependency("_persist_dd_gap_evidence")
     _review_dd_source_bindings = _worker_dependency("_review_dd_source_bindings")
     _persisting_quorum_cycles = _worker_dependency("_persisting_quorum_cycles")
@@ -947,7 +950,7 @@ async def process_review_name_batch(
     except Exception:
         disagreement_threshold = 0.20
 
-    await _asyncio.to_thread(_enrich_name_review_items, batch)
+    await _asyncio.to_thread(enrich_name_review_items, batch)
 
     processed = 0
 
