@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="280">
+<meta name="plan-version" content="281">
 <meta name="plan-modified" content="2026-10-25">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -1162,7 +1162,10 @@ without re-deriving it is visible.</p></div>
     <div class="r-comment-body"><p>Extracted twelve refine-name worker symbols from workers.py into worker_tasks/worker_refine_names.py, keeping ten names forwarded on the entrypoint (seven __wrapped__ forwarders plus three value aliases); workers.py fell from 250,123 bytes / 50,987 cl100k tokens / 71,463.71 gate units to 214,485 / 44,510 / 61,281.43, with zero added failures across the 21-file gate on default markers and an identical 12-failure live-graph set on -m graph; the fan-out confinement guard now scans both the entrypoint and the task module (aa6349b1b).</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261025T005216372253-review-of-srtj-split-scan-repairs-d7abb0c2e018" data-who="reckon-build" data-when="2026-10-25T01:01:57.641Z">
-    <div class="r-comment-body"><p>review of srtj-split-scan-repairs — code repairs verified (all eight ids fail at the node&#x27;s true base 3cb42fc7c and pass at head f9b87381d), one blocking finding that the recorded base arm was taken at pre-split 7da806df3 so the base/head pair in the evidence fragment proves nothing, and one non-blocking finding that graph_ops.py:2191 keeps _PHASE_TO_SN_COST_FIELD at runtime through globals() while the AST naming guard cannot see it; scores goal_fidelity 18, evidence 11, scope_discipline 19, durability 16, fit 16, reuse 19</p></div>
+    <div class="r-comment-body"><p>review of srtj-split-scan-repairs — code repairs verified (all eight ids fail at the node's true base 3cb42fc7c and pass at head f9b87381d), one blocking finding that the recorded base arm was taken at pre-split 7da806df3 so the base/head pair in the evidence fragment proves nothing, and one non-blocking finding that graph_ops.py:2191 keeps _PHASE_TO_SN_COST_FIELD at runtime through globals() while the AST naming guard cannot see it; scores goal_fidelity 18, evidence 11, scope_discipline 19, durability 16, fit 16, reuse 19</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261025T012019574172-review-of-srtj-split-scan-repairs-cda6b6b4c5cf" data-who="reckon-build" data-when="2026-10-25T01:29:47.043Z">
+    <div class="r-comment-body"><p>review of srtj-split-scan-repairs over d7abb0c2e..cda6b6b4c — the two findings from the earlier review at d7abb0c2e are answered and verified (the base arm is re-paired at this node&#x27;s own base 3cb42fc7c where all eight ids fail, and the cost-field map is renamed at its definition in graph_store/graph_audits.py with its single reader importing it directly, so no graph_ops alias and no globals() installation remain); scores goal_fidelity 19, evidence 17, scope_discipline 20, durability 8, fit 18, reuse 20, with two non-blocking findings: the naming audit surface still omits graph_store/* and worker_tasks/* so the abbreviation could return unseen, and the neighbouring _PHASE_TO_POOL still reads through the services bridge the change removes next door.</p></div>
 </div>
 </section>
 </main>
