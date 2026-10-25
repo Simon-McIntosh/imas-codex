@@ -8,11 +8,13 @@ fan-out at that site too, multiplying its LLM spend and its telemetry
 under a pool that was never budgeted or measured for it.  Confinement is
 therefore enforced mechanically rather than by convention.
 
-This lint AST-parses ``imas_codex/standard_names/workers.py`` and asserts
-that every reference to fan-out configuration or fan-out entry points sits
-inside ``process_refine_name_batch`` — never in compose, review or
-refine_docs.  It is intentionally narrow: one AST walk over an allow-list
-of fan-out attribute and function names.
+This lint AST-parses the entrypoint module and the refine-name task module and
+asserts that every reference to fan-out configuration or fan-out entry points
+sits inside ``process_refine_name_batch`` — never in compose, review or
+refine_docs.  Both files are scanned because the processor has moved to its
+own task module while the sibling pools still live on the entrypoint, so a
+plug-in site could appear in either.  It is intentionally narrow: one AST walk
+per file over an allow-list of fan-out attribute and function names.
 """
 
 from __future__ import annotations
@@ -22,12 +24,16 @@ import pathlib
 
 import pytest
 
-WORKERS_PATH = (
-    pathlib.Path(__file__).resolve().parents[2]
-    / "imas_codex"
-    / "standard_names"
-    / "workers.py"
+_STANDARD_NAMES = pathlib.Path(__file__).resolve().parents[2] / (
+    "imas_codex/standard_names"
 )
+
+WORKERS_PATH = _STANDARD_NAMES / "workers.py"
+REFINE_MODULE_PATH = _STANDARD_NAMES / "worker_tasks" / "worker_refine_names.py"
+
+# Every module that could host a fan-out plug-in site.  A path that does not
+# exist yet is skipped; the non-empty assertion below keeps the walk honest.
+SOURCE_PATHS = (WORKERS_PATH, REFINE_MODULE_PATH)
 
 # Names that hint a caller is consuming fan-out machinery.  Reading a
 # ``FanoutSettings`` attribute outside the refine-name worker means fan-out
@@ -51,11 +57,6 @@ _FANOUT_FUNCTIONS: frozenset[str] = frozenset(
         "assign_arm",
     }
 )
-
-
-def _load_module() -> ast.Module:
-    src = WORKERS_PATH.read_text(encoding="utf-8")
-    return ast.parse(src, filename=str(WORKERS_PATH))
 
 
 class _FanoutReferenceVisitor(ast.NodeVisitor):
@@ -92,28 +93,40 @@ class _FanoutReferenceVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
 
+def _collect_references() -> list[tuple[str, str, str, int]]:
+    """Return ``(module, containing_fn, name, lineno)`` for every source."""
+    references: list[tuple[str, str, str, int]] = []
+    for path in SOURCE_PATHS:
+        if not path.exists():
+            continue
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        visitor = _FanoutReferenceVisitor()
+        visitor.visit(tree)
+        references.extend(
+            (path.name, fn, name, line) for (fn, name, line) in visitor.references
+        )
+    return references
+
+
 def test_fanout_calls_confined_to_refine_name() -> None:
     """``run_fanout`` / ``should_trigger_fanout`` are referenced only
     inside ``process_refine_name_batch``."""
-    tree = _load_module()
-    visitor = _FanoutReferenceVisitor()
-    visitor.visit(tree)
-
     # Filter to the function-call references.
     fn_refs = [
-        (fn, name, line)
-        for (fn, name, line) in visitor.references
+        (module, fn, name, line)
+        for (module, fn, name, line) in _collect_references()
         if name in _FANOUT_FUNCTIONS
     ]
 
     assert fn_refs, (
         "expected at least one reference to run_fanout / should_trigger_fanout "
-        "in workers.py — the refine_name worker drives fan-out."
+        "in workers.py or worker_refine_names.py — the refine_name worker "
+        "drives fan-out."
     )
 
     bad = [
-        (fn, name, line)
-        for (fn, name, line) in fn_refs
+        (module, fn, name, line)
+        for (module, fn, name, line) in fn_refs
         if fn != "process_refine_name_batch"
     ]
     assert not bad, (
@@ -125,18 +138,14 @@ def test_fanout_calls_confined_to_refine_name() -> None:
 
 def test_fanout_settings_reads_confined_to_refine_name() -> None:
     """Attribute reads on ``fanout_settings`` are confined to refine_name."""
-    tree = _load_module()
-    visitor = _FanoutReferenceVisitor()
-    visitor.visit(tree)
-
     attr_refs = [
-        (fn, name, line)
-        for (fn, name, line) in visitor.references
+        (module, fn, name, line)
+        for (module, fn, name, line) in _collect_references()
         if name in _FANOUT_ATTRS
     ]
     bad = [
-        (fn, name, line)
-        for (fn, name, line) in attr_refs
+        (module, fn, name, line)
+        for (module, fn, name, line) in attr_refs
         if fn != "process_refine_name_batch"
     ]
     assert not bad, (
