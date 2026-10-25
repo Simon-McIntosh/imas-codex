@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="278">
+<meta name="plan-version" content="279">
 <meta name="plan-modified" content="2026-10-25">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -1157,6 +1157,9 @@ without re-deriving it is visible.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261025T003525130483-review-of-srtj-workers-split-step18-2a958b8e6ffb" data-who="reckon-build" data-when="2026-10-25T00:44:49.893Z">
     <div class="r-comment-body"><p>Reviewed run r-20261024T233739184664-srtj-workers-split-step18 at base 30ad34106 and head 2a958b8e6 across all five checklist items: the twelve refine-name symbols landed in worker_tasks/worker_refine_names.py with ten forwarders on the entrypoint, the 21-file gate is green on both arms with zero added failures, and the two findings are non-blocking; scores goal_fidelity 19, evidence 16, scope_discipline 19, durability 17, fit 18, reuse 20.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261024T233739184664-srtj-workers-split-step18" data-who="reckon-build" data-when="2026-10-25T00:34:20Z">
+    <div class="r-comment-body"><p>Extracted twelve refine-name worker symbols from workers.py into worker_tasks/worker_refine_names.py, keeping ten names forwarded on the entrypoint (seven __wrapped__ forwarders plus three value aliases); workers.py fell from 250,123 bytes / 50,987 cl100k tokens / 71,463.71 gate units to 214,485 / 44,510 / 61,281.43, with zero added failures across the 21-file gate on default markers and an identical 12-failure live-graph set on -m graph; the fan-out confinement guard now scans both the entrypoint and the task module (aa6349b1b).</p></div>
 </div>
 </section>
 </main>
