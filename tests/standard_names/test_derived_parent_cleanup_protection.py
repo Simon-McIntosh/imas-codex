@@ -8,6 +8,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from imas_codex.standard_names import graph_ops, protection, provenance_lifecycle
+from tests.standard_names.source_scan import graph_source_text
 
 
 def test_positive_llm_spend_is_materialized_and_refuses_deletion() -> None:
@@ -66,7 +67,7 @@ def test_structural_delete_requires_placeholder_and_keeps_recovery_material() ->
 
 
 def test_every_automatic_deletion_route_calls_the_common_refusal() -> None:
-    graph_source = inspect.getsource(graph_ops)
+    graph_source = graph_source_text()
     provenance_source = inspect.getsource(provenance_lifecycle)
 
     assert 'operation="structural derived-parent cleanup"' in graph_source

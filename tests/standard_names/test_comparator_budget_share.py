@@ -1,15 +1,14 @@
 """Nearby-name comparator allocation across compose batches."""
 
 import ast
-import inspect
 
 import pytest
 
-from imas_codex.standard_names import workers
 from imas_codex.standard_names.workers import (
     _NEARBY_COMPARATOR_HARD_CEILING,
     _collect_nearby_name_comparators,
 )
+from tests.standard_names.source_scan import worker_trees
 
 
 @pytest.mark.parametrize("item_count", [25, 31, 50, 60])
@@ -73,33 +72,52 @@ def test_item_without_search_results_uses_no_comparator_share() -> None:
     assert len(nearby_ids) == len(set(nearby_ids))
 
 
-def test_compose_paths_offload_comparator_searches() -> None:
-    tree = ast.parse(inspect.getsource(workers))
-    parents: dict[int, ast.AST] = {}
-    for parent in ast.walk(tree):
-        for child in ast.iter_child_nodes(parent):
-            parents[id(child)] = parent
+def _is_comparator_callee(node: ast.expr) -> bool:
+    """Whether *node* names the nearby-name comparator function.
 
-    direct_calls = [
-        node
-        for node in ast.walk(tree)
-        if isinstance(node, ast.Call)
+    A compose path reaches the comparator either as a resolved local name or
+    through the worker-dependency lookup, so both spellings count.
+    """
+    if isinstance(node, ast.Name):
+        return node.id == "_collect_nearby_name_comparators"
+    return (
+        isinstance(node, ast.Call)
         and isinstance(node.func, ast.Name)
-        and node.func.id == "_collect_nearby_name_comparators"
-    ]
-    offloaded_calls = [
-        node
-        for node in ast.walk(tree)
-        if isinstance(node, ast.Call)
-        and isinstance(node.func, ast.Attribute)
-        and isinstance(node.func.value, ast.Name)
-        and node.func.value.id == "asyncio"
-        and node.func.attr == "to_thread"
-        and node.args
-        and isinstance(node.args[0], ast.Name)
-        and node.args[0].id == "_collect_nearby_name_comparators"
-    ]
+        and node.func.id == "_worker_dependency"
+        and len(node.args) == 1
+        and isinstance(node.args[0], ast.Constant)
+        and node.args[0].value == "_collect_nearby_name_comparators"
+    )
+
+
+def test_compose_paths_offload_comparator_searches() -> None:
+    direct_calls: list[ast.Call] = []
+    offloaded_calls: list[ast.Call] = []
+    for _path, tree in worker_trees():
+        parents: dict[int, ast.AST] = {}
+        for parent in ast.walk(tree):
+            for child in ast.iter_child_nodes(parent):
+                parents[id(child)] = parent
+
+        direct_calls += [
+            node
+            for node in ast.walk(tree)
+            if isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id == "_collect_nearby_name_comparators"
+        ]
+        offloaded_calls += [
+            node
+            for node in ast.walk(tree)
+            if isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and isinstance(node.func.value, ast.Name)
+            and node.func.value.id == "asyncio"
+            and node.func.attr == "to_thread"
+            and node.args
+            and _is_comparator_callee(node.args[0])
+            and isinstance(parents.get(id(node)), ast.Await)
+        ]
 
     assert direct_calls == []
     assert len(offloaded_calls) == 2
-    assert all(isinstance(parents[id(call)], ast.Await) for call in offloaded_calls)

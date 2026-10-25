@@ -9,13 +9,13 @@ and write-path invariants.
 from __future__ import annotations
 
 import copy
-import importlib
-import inspect
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
 import yaml
+
+from tests.standard_names.source_scan import worker_source_text
 
 #: The shared sample names carry IDS names (``core_profiles``, ``magnetics``)
 #: where a physics domain belongs; the declared domain selector refuses a value
@@ -297,27 +297,21 @@ class TestComposeWorkerInjection:
 
     def test_unit_injected_from_source_not_llm(self) -> None:
         """The compose worker must set unit from source_item, not LLM output."""
-        source = inspect.getsource(
-            importlib.import_module("imas_codex.standard_names.workers")
-        )
+        source = worker_source_text()
         # The worker must reference source_item for unit
         # and must not assign unit from LLM candidate
         assert 'unit": unit' in source or '"unit": unit' in source
 
     def test_physics_domain_injected_from_source(self) -> None:
         """physics_domain must be injected from source DD, not LLM."""
-        source = inspect.getsource(
-            importlib.import_module("imas_codex.standard_names.workers")
-        )
+        source = worker_source_text()
         assert "physics_domain" in source
         # Must reference source_item for physics_domain
         assert 'source_item.get("physics_domain")' in source
 
     def test_cocos_injected_from_source(self) -> None:
         """cocos_transformation_type must come from source_item, not LLM."""
-        source = inspect.getsource(
-            importlib.import_module("imas_codex.standard_names.workers")
-        )
+        source = worker_source_text()
         assert 'source_item.get("cocos_label")' in source
 
 
