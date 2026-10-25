@@ -15,6 +15,11 @@
       "kind": "folded",
       "node": "srtj-split-scan-repairs",
       "recorded_at": "2026-10-25T01:04:55.475085+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "srtj-split-scan-repairs",
+      "recorded_at": "2026-10-25T01:05:08.016040+00:00"
     }
   },
   "findings": [
