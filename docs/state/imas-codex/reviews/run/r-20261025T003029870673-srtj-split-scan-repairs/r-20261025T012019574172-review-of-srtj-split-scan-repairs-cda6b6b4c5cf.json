@@ -17,6 +17,13 @@
     }
   },
   "dispatched_at": "2026-10-25T01:21:13Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "srtj-graph-store-structure",
+      "recorded_at": "2026-10-25T01:36:15.811327+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/standard_names/test_public_api_naming.py",
