@@ -15,6 +15,11 @@
       "kind": "folded",
       "node": "srtj-graph-store-structure",
       "recorded_at": "2026-10-25T00:47:33.999116+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "the final gate log is listed and its counts are the ones the manifest records",
+      "recorded_at": "2026-10-25T00:47:36.175491+00:00"
     }
   },
   "findings": [
