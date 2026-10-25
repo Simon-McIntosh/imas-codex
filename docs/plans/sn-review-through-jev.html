@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="277">
+<meta name="plan-version" content="278">
 <meta name="plan-modified" content="2026-10-25">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -1154,6 +1154,9 @@ without re-deriving it is visible.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261024T234929432675-srtj-split-integration-gate" data-who="reckon-build" data-when="2026-10-25T00:28:20.234Z">
     <div class="r-comment-body"><p>Measured the whole standard-names suite across the graph_ops split: head 410bcfe53 has 105 failed / 8954 passed against base 7da806df3 with 98 failed / 8900 passed, so eight source-scanning tests were added as failures (six grepping graph_ops.py or workers.py for code now in graph_store/ or worker_tasks/, two hitting forwarding functions that lost cache_clear), one guard was removed by the split, and 38 of 40 graph-marker failures are shared by both arms.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261025T003525130483-review-of-srtj-workers-split-step18-2a958b8e6ffb" data-who="reckon-build" data-when="2026-10-25T00:44:49.893Z">
+    <div class="r-comment-body"><p>Reviewed run r-20261024T233739184664-srtj-workers-split-step18 at base 30ad34106 and head 2a958b8e6 across all five checklist items: the twelve refine-name symbols landed in worker_tasks/worker_refine_names.py with ten forwarders on the entrypoint, the 21-file gate is green on both arms with zero added failures, and the two findings are non-blocking; scores goal_fidelity 19, evidence 16, scope_discipline 19, durability 17, fit 18, reuse 20.</p></div>
 </div>
 </section>
 </main>
