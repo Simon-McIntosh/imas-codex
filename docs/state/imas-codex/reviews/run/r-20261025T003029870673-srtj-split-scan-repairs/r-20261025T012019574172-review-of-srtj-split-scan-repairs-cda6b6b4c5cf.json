@@ -22,6 +22,11 @@
       "kind": "folded",
       "node": "srtj-graph-store-structure",
       "recorded_at": "2026-10-25T01:36:15.811327+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "srtj-graph-store-structure",
+      "recorded_at": "2026-10-25T01:36:23.614267+00:00"
     }
   },
   "findings": [
