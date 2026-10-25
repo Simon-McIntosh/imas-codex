@@ -461,17 +461,35 @@ def _incumbent_arguments_in(source: str) -> list:
     return arguments
 
 
-def _quorum_incumbent_arguments() -> list:
-    """The incumbent expression at each quorum call site in the workers module.
+def _worker_module_sources() -> list[str]:
+    """The source of the workers entrypoint and every worker task module.
 
-    The module is read through its import, so the check follows the code the
-    process would run rather than a path that may name another tree.
+    The quorum construction sites move between files as the worker tasks are
+    extracted, so the scan walks the whole set rather than one file: a site
+    that changes file is still counted, and one that is deleted is still
+    missed. Modules are read through their imports, so the check follows the
+    code the process would run rather than a path that may name another tree.
     """
+    import importlib
     import inspect
+    import pkgutil
 
+    import imas_codex.standard_names.worker_tasks as worker_tasks
     from imas_codex.standard_names import workers
 
-    return _incumbent_arguments_in(inspect.getsource(workers))
+    sources = [inspect.getsource(workers)]
+    for info in pkgutil.iter_modules(worker_tasks.__path__):
+        module = importlib.import_module(f"{worker_tasks.__name__}.{info.name}")
+        sources.append(inspect.getsource(module))
+    return sources
+
+
+def _quorum_incumbent_arguments() -> list:
+    """The incumbent expression at each quorum call site in the worker modules."""
+    arguments = []
+    for source in _worker_module_sources():
+        arguments.extend(_incumbent_arguments_in(source))
+    return arguments
 
 
 def _nested_persisting_partials(source: str) -> list:
