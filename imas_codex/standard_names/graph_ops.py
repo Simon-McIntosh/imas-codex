@@ -988,6 +988,16 @@ def _winning_review_resolution_methods(*args: Any, **kwargs: Any):
     )
 
 
+# The owning function is cached, so the forwarder carries its cache API and a
+# caller that clears the cache reaches the entries the forwarder reads.
+_winning_review_resolution_methods.cache_clear = import_module(
+    ".graph_store.graph_catalog", __package__
+)._winning_review_resolution_methods.cache_clear
+_winning_review_resolution_methods.cache_info = import_module(
+    ".graph_store.graph_catalog", __package__
+)._winning_review_resolution_methods.cache_info
+
+
 def _non_winning_review_resolution_methods(*args: Any, **kwargs: Any):
     """Forward to graph_store.graph_catalog._non_winning_review_resolution_methods."""
     from .graph_store import graph_catalog
@@ -1993,6 +2003,16 @@ def isn_vocabulary_signature(*args: Any, **kwargs: Any):
     return graph_audits.isn_vocabulary_signature(*args, **kwargs)
 
 
+# The owning function is cached, so the forwarder carries its cache API and a
+# caller that clears the cache reaches the entries the forwarder reads.
+isn_vocabulary_signature.cache_clear = import_module(
+    ".graph_store.graph_audits", __package__
+).isn_vocabulary_signature.cache_clear
+isn_vocabulary_signature.cache_info = import_module(
+    ".graph_store.graph_audits", __package__
+).isn_vocabulary_signature.cache_info
+
+
 def retry_vocab_gap_sources_on_grammar_change(*args: Any, **kwargs: Any):
     """Forward to graph_store.graph_audits.retry_vocab_gap_sources_on_grammar_change."""
     from .graph_store import graph_audits
@@ -2164,11 +2184,6 @@ def export_review_comments(*args: Any, **kwargs: Any):
 # =============================================================================
 # Graph-backed LLM cost tracking API
 # =============================================================================
-
-# Phase → StandardName.llm_cost_<suffix> field mapping.
-_PHASE_TO_SN_COST_FIELD = import_module(
-    ".graph_store.graph_audits", __package__
-)._PHASE_TO_SN_COST_FIELD
 
 
 def create_sn_run_open(*args: Any, **kwargs: Any):

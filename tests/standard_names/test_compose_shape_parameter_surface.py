@@ -11,12 +11,10 @@ the LLM.
 
 from __future__ import annotations
 
-import inspect
 import re
 
 import pytest
 
-from imas_codex.standard_names import workers as _workers
 from imas_codex.standard_names.models import GrammarSegments, StandardNameCandidate
 from imas_codex.standard_names.workers import (
     _inject_shape_parameter_surface,
@@ -25,6 +23,7 @@ from imas_codex.standard_names.workers import (
     _shape_parameter_surface,
     normalize_spelling,
 )
+from tests.standard_names.source_scan import worker_sources
 
 
 def _candidate(
@@ -250,21 +249,25 @@ def test_injection_precedes_every_compose_persist_site():
     """Every ``name_id = normalize_spelling(c.compose_name())`` persist site
     must be preceded by an ``_inject_shape_parameter_surface(c, ...)`` call in
     the same function body, so both compose paths force the surface locus."""
-    src = inspect.getsource(_workers)
-    lines = src.splitlines()
-    persist_re = re.compile(r"name_id\s*=\s*normalize_spelling\(c\.compose_name\(\)\)")
-    persist_lines = [i for i, ln in enumerate(lines) if persist_re.search(ln)]
-    assert len(persist_lines) >= 2, (
+    persist_re = re.compile(r"name_id\s*=\s*.*normalize_spelling.*c\.compose_name\(\)")
+    injection_re = re.compile(r"_inject_shape_parameter_surface\W{0,3}\(c,")
+    persist_sites: list[tuple[str, int]] = []
+    for path, src in worker_sources():
+        lines = src.splitlines()
+        for i, line in enumerate(lines):
+            if not persist_re.search(line):
+                continue
+            window = "\n".join(lines[max(0, i - 12) : i])
+            assert injection_re.search(window), (
+                f"compose persist site at {path.name} line {i + 1} is not "
+                "preceded by _inject_shape_parameter_surface — a compose path "
+                "would emit bare shape-parameter leaves"
+            )
+            persist_sites.append((path.name, i + 1))
+    assert len(persist_sites) >= 2, (
         "expected at least two compose persist sites (linear + pooled); "
-        f"found {len(persist_lines)}"
+        f"found {len(persist_sites)}"
     )
-    for i in persist_lines:
-        window = "\n".join(lines[max(0, i - 12) : i])
-        assert "_inject_shape_parameter_surface(c," in window, (
-            f"compose persist site at source line ~{i + 1} is not preceded by "
-            "_inject_shape_parameter_surface — a compose path would emit bare "
-            "shape-parameter leaves"
-        )
 
 
 def test_boundary_and_profile_siblings_deconflate():

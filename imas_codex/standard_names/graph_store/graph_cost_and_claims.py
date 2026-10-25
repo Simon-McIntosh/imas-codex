@@ -10,6 +10,7 @@ from imas_codex.standard_names.defaults import (
     DEFAULT_MIN_SCORE,
 )
 
+from .graph_audits import _PHASE_TO_STANDARD_NAME_COST_FIELD
 from .graph_foundation import _CLAIM_TIMEOUT_SECONDS
 
 
@@ -174,7 +175,7 @@ def update_sn_per_phase_costs(run_id: str, *, services: Any) -> int:
         cost = float(r["apportioned"])
         if sn_id not in per_name:
             per_name[sn_id] = {}
-        field = services._PHASE_TO_SN_COST_FIELD.get(phase)
+        field = _PHASE_TO_STANDARD_NAME_COST_FIELD.get(phase)
         if field:
             per_name[sn_id][field] = per_name[sn_id].get(field, 0.0) + cost
     updated_ids: set[str] = set()

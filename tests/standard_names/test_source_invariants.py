@@ -23,6 +23,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from tests.standard_names.source_scan import worker_source_text
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -358,18 +360,10 @@ class TestExtractWorkerEmitsDdPath:
     def test_extract_worker_dd_source_includes_dd_path(self):
         """For source_type='dd', the source dict passed to merge must
         include dd_path == path."""
-        # Read workers.py source to verify the key is in the constructed dict.
-        # This is a structural assertion; full async integration is covered
-        # by test_dd_source_with_dd_path_written above.
-        from pathlib import Path
-
-        workers_py = (
-            Path(__file__).parent.parent.parent
-            / "imas_codex"
-            / "standard_names"
-            / "workers.py"
-        )
-        text = workers_py.read_text()
+        # Read the worker package source to verify the key is in the
+        # constructed dict. This is a structural assertion; full async
+        # integration is covered by test_dd_source_with_dd_path_written above.
+        text = worker_source_text()
         # The source-dict construction in sn_extract_worker must include
         # a 'dd_path' key for source_type=='dd'.
         assert '"dd_path": path if source_type == "dd"' in text, (
