@@ -25,6 +25,11 @@
       "kind": "exempted",
       "reason": "a count inside the graph-tier rerun paragraph; the added default-marker failures, which the repairs act on, are listed per id with their logs",
       "recorded_at": "2026-10-25T00:44:47.703037+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "the per-test table carries the comparison; the repair node closes the delta, so a figure of it would be out of date at once",
+      "recorded_at": "2026-10-25T00:44:54.548522+00:00"
     }
   },
   "findings": [
