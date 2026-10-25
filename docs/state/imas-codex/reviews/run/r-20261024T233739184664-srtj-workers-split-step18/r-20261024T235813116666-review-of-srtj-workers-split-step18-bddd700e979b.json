@@ -1,0 +1,65 @@
+{
+  "added_failure_count": 1,
+  "added_failure_ids": [
+    "tests/lint/test_fanout_confined_to_refine_name.py::test_fanout_calls_confined_to_refine_name"
+  ],
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/standard_names/loop.py:575",
+    "imas_codex/standard_names/loop.py:659",
+    "imas_codex/standard_names/loop.py:882",
+    "imas_codex/standard_names/workers.py:4900",
+    "imas_codex/standard_names/workers.py:1110"
+  ],
+  "completed_at": "2026-10-25T00:13:02.141Z",
+  "dispatched_at": "2026-10-24T23:58:58Z",
+  "findings": [
+    {
+      "file": "tests/lint/test_fanout_confined_to_refine_name.py",
+      "line": "109",
+      "severity": "blocking",
+      "text": "blocking: the move empties workers.py of the run_fanout and should_trigger_fanout references this guard requires, so test_fanout_calls_confined_to_refine_name passes at base 30ad34106 (3 passed) and fails at head bddd700e9 with 'expected at least one reference to run_fanout / should_trigger_fanout in workers.py' (1 failed, 2 passed); the node leaves an added failure and an unowned guard for fan-out confinement, which its own outside_scope line does not report even though the brief asked for exactly this source-text class to be reported as a scope blocker."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-workers-split-step18.html",
+      "line": "8",
+      "severity": "non-blocking",
+      "text": "non-blocking: the patches paragraph states the grep cross-check returned 21 files with the 20-file gate as its intersection and test_refine_context.py as the only extra, but an independent git grep -l over the moved names returns 21 files of which only 14 are in the gate, and tests/standard_names/test_pool_endpoint_failure_scope.py:224 patches workers.process_refine_name_batch through a dotted string while never being run in either arm (it passes on the head tree, 3 passed)."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call sites: two loop.py import/adapter uses of process_refine_name_batch, the pool adapter that wraps it, and the two remaining readers of the moved names on workers.py.",
+    "diff": "read commit by commit across 30ad34106..bddd700e9 (210a6d630 moves the twelve symbols and installs seven __wrapped__ forwarders plus three value aliases, 70c25719a routes the sibling candidate-name composer through _worker_dependency, bddd700e9 adds the fragment); the moved bodies differ from the base only by the resolver substitutions and the forwarder block, and a fresh import of the head tree confirms all seven __wrapped__ bindings and resolver-free public signatures.",
+    "done_when": "the done_when asks for the module committed with its forwarders listed, a gate showing no added failures with the import checks passing, and the fragment carrying the moved symbols, forwarders, patch files and three size counts; the fragment carries all of these and logs/gate-head-default.log ends 318 passed EXIT=0, but the gate never ran tests/lint/test_fanout_confined_to_refine_name.py, which fails on the reviewed head and passes at the base.",
+    "goal": "the goal is to move the worker_refine_names symbols out of imas_codex/standard_names/workers.py per the design JSON; srtj-graph-ops-split-design.json inventories/workers.py/symbols maps exactly twelve symbols (two exception classes, three module constants, five classifiers, the scope-id helper and process_refine_name_batch) to worker_refine_names, and worker_tasks/worker_refine_names.py:34-40 and :156/:203 define the same twelve.",
+    "manifest": "read in full; it records three commits, the twenty-file gate command, four gate logs plus a negative-control log, the size triple (250,123 to 214,485 bytes; 50,987 to 44,510 cl100k tokens; 71,463.71 to 61,281.43 gate units) and a retry_failures entry for the composer seam, but its outside_scope line names only test_refine_context.py and misses the lint test the move breaks.",
+    "write_paths": "the diff changes only imas_codex/standard_names/workers.py, imas_codex/standard_names/worker_tasks/worker_refine_names.py and docs/evidence/fragments/sn-review-through-jev/srtj-workers-split-step18.html, all inside the three declared write paths, and no test file is touched."
+  },
+  "justifications": {
+    "durability": "the node adds no assertions of its own, and the one guard that covers fan-out confinement in the moved worker, tests/lint/test_fanout_confined_to_refine_name.py:109, is left red rather than relocated to worker_refine_names.py; the forwarder mechanism itself is protected because every gate test patches the moved names through workers.process_refine_name_batch at workers.py:1021.",
+    "evidence": "logs/gate-base-graph.log and logs/gate-head-graph.log carry identical twelve-id failure sets and both default arms are green, but the chosen twenty-file set omits tests/lint/test_fanout_confined_to_refine_name.py, which passes at base and fails at head, so the recorded zero added failures measures the selection rather than the change.",
+    "fit": "the forwarders at workers.py:981-1023 keep the one-line owner-naming docstring and the __wrapped__ facade established by steps 15-17, with every __wrapped__ assigned at workers.py:5198-5213 before the signature-stripping loop at workers.py:6025.",
+    "goal_fidelity": "worker_tasks/worker_refine_names.py:156 and :203 take the resolver as a positional-only parameter and the module imports no sibling task module, matching the design's twelve-symbol map for worker_refine_names.",
+    "reuse": "the change extends the existing _worker_dependency resolver owned at workers.py:59 and the division-into-worker_tasks layout owned by worker_common.py; it introduces no second resolver, no services slot and no duplicated capability, and all nine collaborators the moved body resolves exist in workers' globals.",
+    "scope_discipline": "git diff --stat 30ad34106 bddd700e9 lists only the three declared write paths, and no test or figure path is touched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to move the worker_refine_names symbols out of imas_codex/standard_names/workers.py per the design JSON; srtj-graph-ops-split-design.json inventories/workers.py/symbols maps exactly twelve symbols (two exception classes, three module constants, five classifiers, the scope-id helper and process_refine_name_batch) to worker_refine_names, and worker_tasks/worker_refine_names.py:34-40 and :156/:203 define the same twelve.\nVERDICT done_when: the done_when asks for the module committed with its forwarders listed, a gate showing no added failures with the import checks passing, and the fragment carrying the moved symbols, forwarders, patch files and three size counts; the fragment carries all of these and logs/gate-head-default.log ends 318 passed EXIT=0, but the gate never ran tests/lint/test_fanout_confined_to_refine_name.py, which fails on the reviewed head and passes at the base.\nVERDICT write_paths: the diff changes only imas_codex/standard_names/workers.py, imas_codex/standard_names/worker_tasks/worker_refine_names.py and docs/evidence/fragments/sn-review-through-jev/srtj-workers-split-step18.html, all inside the three declared write paths, and no test file is touched.\nVERDICT manifest: read in full; it records three commits, the twenty-file gate command, four gate logs plus a negative-control log, the size triple (250,123 to 214,485 bytes; 50,987 to 44,510 cl100k tokens; 71,463.71 to 61,281.43 gate units) and a retry_failures entry for the composer seam, but its outside_scope line names only test_refine_context.py and misses the lint test the move breaks.\nVERDICT diff: read commit by commit across 30ad34106..bddd700e9 (210a6d630 moves the twelve symbols and installs seven __wrapped__ forwarders plus three value aliases, 70c25719a routes the sibling candidate-name composer through _worker_dependency, bddd700e9 adds the fragment); the moved bodies differ from the base only by the resolver substitutions and the forwarder block, and a fresh import of the head tree confirms all seven __wrapped__ bindings and resolver-free public signatures.\nCALL_SITES: imas_codex/standard_names/loop.py:575, imas_codex/standard_names/loop.py:659, imas_codex/standard_names/loop.py:882, imas_codex/standard_names/workers.py:4900, imas_codex/standard_names/workers.py:1110\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: worker_tasks/worker_refine_names.py:156 and :203 take the resolver as a positional-only parameter and the module imports no sibling task module, matching the design's twelve-symbol map for worker_refine_names.\nSCORE evidence: 9\nJUSTIFICATION evidence: logs/gate-base-graph.log and logs/gate-head-graph.log carry identical twelve-id failure sets and both default arms are green, but the chosen twenty-file set omits tests/lint/test_fanout_confined_to_refine_name.py, which passes at base and fails at head, so the recorded zero added failures measures the selection rather than the change.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat 30ad34106 bddd700e9 lists only the three declared write paths, and no test or figure path is touched.\nSCORE durability: 13\nJUSTIFICATION durability: the node adds no assertions of its own, and the one guard that covers fan-out confinement in the moved worker, tests/lint/test_fanout_confined_to_refine_name.py:109, is left red rather than relocated to worker_refine_names.py; the forwarder mechanism itself is protected because every gate test patches the moved names through workers.process_refine_name_batch at workers.py:1021.\nSCORE fit: 18\nJUSTIFICATION fit: the forwarders at workers.py:981-1023 keep the one-line owner-naming docstring and the __wrapped__ facade established by steps 15-17, with every __wrapped__ assigned at workers.py:5198-5213 before the signature-stripping loop at workers.py:6025.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change extends the existing _worker_dependency resolver owned at workers.py:59 and the division-into-worker_tasks layout owned by worker_common.py; it introduces no second resolver, no services slot and no duplicated capability, and all nine collaborators the moved body resolves exist in workers' globals.\nFINDING tests/lint/test_fanout_confined_to_refine_name.py:109 blocking: the move empties workers.py of the run_fanout and should_trigger_fanout references this guard requires, so test_fanout_calls_confined_to_refine_name passes at base 30ad34106 (3 passed) and fails at head bddd700e9 with 'expected at least one reference to run_fanout / should_trigger_fanout in workers.py' (1 failed, 2 passed); the node leaves an added failure and an unowned guard for fan-out confinement, which its own outside_scope line does not report even though the brief asked for exactly this source-text class to be reported as a scope blocker.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-workers-split-step18.html:8 non-blocking: the patches paragraph states the grep cross-check returned 21 files with the 20-file gate as its intersection and test_refine_context.py as the only extra, but an independent git grep -l over the moved names returns 21 files of which only 14 are in the gate, and tests/standard_names/test_pool_endpoint_failure_scope.py:224 patches workers.process_refine_name_batch through a dotted string while never being run in either arm (it passes on the head tree, 3 passed).\n",
+  "review_run_id": "r-20261024T235813116666-review-of-srtj-workers-split-step18-bddd700e979b",
+  "reviewed_base_sha": "30ad341067837121c2256e7d23475a686b681f73",
+  "reviewed_head_sha": "bddd700e979ba19530ab84c36682c787f0aa953e",
+  "reviewed_run_id": "r-20261024T233739184664-srtj-workers-split-step18",
+  "scores": {
+    "durability": 13,
+    "evidence": 9,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-25T00:24:00+00:00",
+  "total": 98
+}

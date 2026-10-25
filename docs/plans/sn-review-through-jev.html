@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="274">
+<meta name="plan-version" content="275">
 <meta name="plan-modified" content="2026-10-25">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -1145,6 +1145,9 @@ without re-deriving it is visible.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-s6-graph-ops-split-done" data-who="reckon-build" data-when="2026-10-24T23:50:00Z">
     <div class="r-comment-body"><p>The <code>graph_ops.py</code> split is complete. Steps 13 and 14 landed:</p><ul><li>step 13 moved <code>graph_source_bindings</code> (merge <code>3f0e82707</code>, review 100), after its gate was widened to seven attribute-patching files the first pass missed;</li><li>step 14 moved <code>graph_catalog</code> (merge <code>fceb00c30</code>, review 107).</li></ul><p>The file went from 821 KB to 167 KB. It now holds the composition root, the service wiring and the transitional forwarders. Each step's gate covered the tests that patch its moved symbols. The step 14 review found 41 more files that only import moved symbols through <code>graph_ops</code>, so <code>srtj-split-integration-gate</code> measures the whole suite at <code>main</code> against the pre-split base <code>7da806df3</code>.</p><p>On the <code>workers.py</code> track, step 17 moved <code>worker_compose_batches</code> (merge <code>30ad34106</code>, review 100), and <code>workers.py</code> went from 298 KB to 250 KB. Its wiring test no longer reads <code>workers.py</code> source: it runs <code>compose_batch</code> up to the prompt render and asserts on the context. Step 18 (<code>worker_refine_names</code>) is running.</p><p>The shared disposable-Neo4j fixture's teardown now stays within the test timeout (merge <code>4afe02e8c</code>, review 110, after three rounds). The store is removed in a detached process, and the result is judged by that process's exit status. Four committed tests guard this.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261024T235813116666-review-of-srtj-workers-split-step18-bddd700e979b" data-who="reckon-build" data-when="2026-10-25T00:13:02.141Z">
+    <div class="r-comment-body"><p>Review for r-20261024T233739184664-srtj-workers-split-step18 at head bddd700e979ba19530ab84c36682c787f0aa953e: goal_fidelity 19, evidence 9, scope_discipline 19, durability 13, fit 18, reuse 20; the twelve design-mapped symbols landed in worker_tasks/worker_refine_names.py with seven __wrapped__ forwarders and three value aliases, but the move leaves tests/lint/test_fanout_confined_to_refine_name.py::test_fanout_calls_confined_to_refine_name red (3 passed at base 30ad34106, 1 failed 2 passed at head), a guard the node&#x27;s twenty-file gate never ran.</p></div>
 </div>
 </section>
 </main>
