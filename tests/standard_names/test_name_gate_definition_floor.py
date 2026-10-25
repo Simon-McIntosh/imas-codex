@@ -25,6 +25,7 @@ import pytest
 from imas_codex.standard_names import workers
 from imas_codex.standard_names.audits import semantic_similarity_check
 from imas_codex.standard_names.defaults import SEMANTIC_SIM_CRITICAL
+from imas_codex.standard_names.worker_tasks import worker_review_names
 
 
 def semantic_gate_name_text(name: str) -> str:
@@ -117,8 +118,13 @@ def test_the_critical_floor_is_unchanged() -> None:
 
 
 def test_the_gate_call_site_builds_its_text_through_the_lookup() -> None:
-    """The review batch reaches the gate through the definition substitution."""
-    co_names = workers.process_review_name_batch.__code__.co_names
+    """The review batch reaches the gate through the definition substitution.
+
+    The processor's own code object is read, not the entrypoint forwarder's:
+    the forwarder delegates and names neither the builder nor the gate, so a
+    read of it would pass whatever the implementation did.
+    """
+    co_names = worker_review_names.process_review_name_batch.__code__.co_names
 
     assert "semantic_gate_name_text" in co_names
 
