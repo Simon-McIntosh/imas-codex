@@ -1,0 +1,38 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-25T01:51:43.744Z",
+  "dispatched_at": "2026-10-25T01:41:58Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261025T004957479962-srtj-workers-split-step19/manifest.md",
+      "line": 7,
+      "severity": "non-blocking",
+      "summary": "The commits line names four commits but five land between the base and the reviewed head; 59ab859c1 (the first evidence-fragment commit) is omitted, so the record does not enumerate the range it delivered."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261025T004957479962-srtj-workers-split-step19/manifest.md",
+      "line": 12,
+      "severity": "non-blocking",
+      "summary": "The run carries no machine-readable baseline_suite/after_suite blocks (both parse as null) although it armed a negative control and gated two suites, so the zero-added-failure claim can only be re-derived by reading four log files by hand."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to move the worker_review_names symbols out of workers.py into worker_tasks/worker_review_names.py; at 4a40e0724 all 17 design-assigned symbols are defined in imas_codex/standard_names/worker_tasks/worker_review_names.py and none of the 10 functions is defined in imas_codex/standard_names/workers.py any more, which keeps only bindings.\nVERDICT done_when: the done_when asks for the committed module, the listed forwarders, an import check, a zero-added-failure gate and three size counts; logs/gate-base-default.log and logs/gate-head-default.log both end '10 failed, 407 passed, 1 skipped, 6 deselected' with EXIT=1 and the same ten FAILED ids, logs/gate-base-graph.log and logs/gate-head-graph.log both read '4 failed, 1 passed, ... 1 error' with the same ids, logs/import-check.log ends IMPORT_CHECK_OK, and the three counts recompute exactly (214,485 -> 156,528 bytes, 44,510 -> 32,679 cl100k tokens, 61,281.43 -> 44,722.29 gate units, new module 64,152 bytes / 13,193 tokens).\nVERDICT write_paths: the diff touches exactly imas_codex/standard_names/workers.py, imas_codex/standard_names/worker_tasks/worker_review_names.py, docs/evidence/fragments/sn-review-through-jev/srtj-workers-split-step19.html and tests/standard_names/test_name_gate_definition_floor.py plus test_panel_audit_sample.py, the last two under the scope grant recorded in the reviewed run's resume-1-advice.txt.\nVERDICT manifest: read manifest.md; it records status complete with the zero-delta gate on both marker sets, the three size counts and the three negative controls, but the target it describes is not machine-readable for the suite arms and its commits line under-enumerates the landed range.\nVERDICT diff: read all five commits against base 2c5e7f0c5 one by one: cb84f2173 moves the 17 symbols and adds 7 __wrapped__ forwarders plus 6 value aliases, 34fd1666f resolves the review enricher through _worker_dependency (5 lines, repairing 18 test failures), 1a57eff2d repairs the two source-text guards to read where the code now lives, 59ab859c1 and 4a40e0724 are the evidence fragment and its gate record.\nCALL_SITES: imas_codex/standard_names/loop.py:577, imas_codex/standard_names/pools.py:1419, imas_codex/standard_names/campaign_pricing.py:365, imas_codex/standard_names/review/panel_audit.py:111, imas_codex/standard_names/docs_holdout_eval.py:208\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/worker_tasks/worker_review_names.py defines all 17 design-assigned symbols (design inventories.workers.py symbols mapped to module worker_review_names) and workers.py:1039-1108 holds only forwarders and aliases for them.\nSCORE evidence: 17\nJUSTIFICATION evidence: the gate in logs/gate-head-default.log is the suite the done_when names, ends in a completed summary and EXIT=1 with base-identical failure ids, but the arms live only as log files (manifest.md:12 carries null baseline_suite/after_suite) so the delta is machine-derivable only from the logs this review had to read.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the five changed paths all sit inside the declared write paths, with the two test files covered by the grant at resume-1-advice.txt:2, and no unrelated code moved in the diff.\nSCORE durability: 16\nJUSTIFICATION durability: tests/standard_names/test_name_gate_definition_floor.py:118 and tests/standard_names/test_panel_audit_sample.py:544 were each shown red against a broken subject (logs/guard-control-gate-call-site.log, logs/guard-control-quorum-site.log, EXIT=1), but nothing tests the remaining 11 hook resolutions in imas_codex/standard_names/worker_tasks/worker_review_names.py:61-64 so only the enricher route has a demonstrated guard.\nSCORE fit: 19\nJUSTIFICATION fit: imas_codex/standard_names/worker_tasks/worker_review_names.py:1-23 repeats the docstring and direct-standard-library-import shape of the step-18 owner imas_codex/standard_names/worker_tasks/worker_refine_names.py:1-24, and the forwarder block at workers.py:1042-1108 follows the surrounding forwarder idiom.\nSCORE reuse: 20\nJUSTIFICATION reuse: every added definition extends an owner the repository already has -- the moved symbols belong to the design's worker_review_names module, the forwarders reuse workers.py's existing __wrapped__/__signature__ block, and the collaborator resolver is workers.py:59 _worker_dependency; a search of imas_codex/ and tests/ for a shared module-walker or forwarder helper found none, so tests/standard_names/test_panel_audit_sample.py:464 _worker_module_sources is the first owner of that capability.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261025T004957479962-srtj-workers-split-step19/manifest.md:7 non-blocking: the commits line names four commits but five landed between base 2c5e7f0c5 and head 4a40e0724 -- 59ab859c1 is missing, so a reader checking the delivery against the landed range finds an incomplete enumeration.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261025T004957479962-srtj-workers-split-step19/manifest.md:12 non-blocking: the run carries no machine-readable baseline_suite/after_suite blocks (both parse as null in classification.json) although it armed a negative control and gated two suites, so the zero-added-failure claim has to be re-derived by hand from four logs instead of read from the record.\n",
+  "review_run_id": "r-20261025T014059565029-review-of-srtj-workers-split-step19-4a40e0724277",
+  "reviewed_base_sha": "2c5e7f0c5ad07fac8ae97c312af750bf6b4d61f3",
+  "reviewed_head_sha": "4a40e07242770a23c57d714224436ee4c37c7a25",
+  "reviewed_run_id": "r-20261025T004957479962-srtj-workers-split-step19",
+  "scores": {
+    "durability": 16,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-25T01:52:31.290802+00:00",
+  "total": 110
+}
