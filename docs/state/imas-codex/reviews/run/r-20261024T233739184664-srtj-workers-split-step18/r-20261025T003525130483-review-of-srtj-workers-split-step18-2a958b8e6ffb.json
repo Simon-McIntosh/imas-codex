@@ -10,6 +10,13 @@
   ],
   "completed_at": "2026-10-25T00:44:49.893Z",
   "dispatched_at": "2026-10-25T00:36:33Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "srtj-graph-store-structure",
+      "recorded_at": "2026-10-25T00:47:33.999116+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/standard_names/test_pool_endpoint_failure_scope.py",
