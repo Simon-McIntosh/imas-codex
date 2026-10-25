@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="276">
+<meta name="plan-version" content="277">
 <meta name="plan-modified" content="2026-10-25">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -1150,7 +1150,10 @@ without re-deriving it is visible.</p></div>
     <div class="r-comment-body"><p>Review for r-20261024T233739184664-srtj-workers-split-step18 at head bddd700e979ba19530ab84c36682c787f0aa953e: goal_fidelity 19, evidence 9, scope_discipline 19, durability 13, fit 18, reuse 20; the twelve design-mapped symbols landed in worker_tasks/worker_refine_names.py with seven __wrapped__ forwarders and three value aliases, but the move leaves tests/lint/test_fanout_confined_to_refine_name.py::test_fanout_calls_confined_to_refine_name red (3 passed at base 30ad34106, 1 failed 2 passed at head), a guard the node's twenty-file gate never ran.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261025T002838249254-review-of-srtj-split-integration-gate-ae6bfdc25590" data-who="reckon-build" data-when="2026-10-25T00:37:32.610Z">
-    <div class="r-comment-body"><p>Reviewed r-20261024T234929432675-srtj-split-integration-gate at head ae6bfdc255906a6613f100d8bfbd97ed870f735f against base fceb00c304129d206c4163d45509d85dccfa3b67: the landed fragment&#x27;s default-arm counts, eight added failures with their merge attributions and the 38-of-40 shared graph set all re-derive from the gate logs, one graph paragraph misstates the isolated rerun (four passed at head where the log records two), and the granted figures path went unused.</p></div>
+    <div class="r-comment-body"><p>Reviewed r-20261024T234929432675-srtj-split-integration-gate at head ae6bfdc255906a6613f100d8bfbd97ed870f735f against base fceb00c304129d206c4163d45509d85dccfa3b67: the landed fragment's default-arm counts, eight added failures with their merge attributions and the 38-of-40 shared graph set all re-derive from the gate logs, one graph paragraph misstates the isolated rerun (four passed at head where the log records two), and the granted figures path went unused.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261024T234929432675-srtj-split-integration-gate" data-who="reckon-build" data-when="2026-10-25T00:28:20.234Z">
+    <div class="r-comment-body"><p>Measured the whole standard-names suite across the graph_ops split: head 410bcfe53 has 105 failed / 8954 passed against base 7da806df3 with 98 failed / 8900 passed, so eight source-scanning tests were added as failures (six grepping graph_ops.py or workers.py for code now in graph_store/ or worker_tasks/, two hitting forwarding functions that lost cache_clear), one guard was removed by the split, and 38 of 40 graph-marker failures are shared by both arms.</p></div>
 </div>
 </section>
 </main>
