@@ -12,6 +12,13 @@
   ],
   "call_sites": [],
   "completed_at": "2026-10-25T00:37:32.610Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "srtj-split-scan-repairs",
+      "recorded_at": "2026-10-25T00:44:40.548348+00:00"
+    }
+  },
   "dispatched_at": "2026-10-25T00:29:41Z",
   "findings": [
     {
