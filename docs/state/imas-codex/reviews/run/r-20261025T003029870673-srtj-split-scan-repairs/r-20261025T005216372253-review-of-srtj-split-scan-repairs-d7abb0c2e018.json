@@ -1,0 +1,62 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/standard_names/graph_store/graph_cost_and_claims.py:177",
+    "imas_codex/standard_names/graph_ops.py:71"
+  ],
+  "completed_at": "2026-10-25T01:01:57.641Z",
+  "dispatched_at": "2026-10-25T00:52:56Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-split-scan-repairs.html",
+      "line": "3",
+      "severity": "blocking",
+      "text": "blocking: the recorded base arm is at 7da806df3, which predates the split (git diff --stat 7da806df3 3cb42fc7c shows 31k lines leaving graph_ops.py), so all eight ids pass there and the base/head pair proves nothing; re-running the same command at the node's own base 3cb42fc7c gives 8 failed, 5 passed, EXIT=1 on the eight ids and 9 failed, 95 passed on their files, and the fragment's sentence \"all eight pass at base 7da806df3\" would otherwise be the permanent record."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_ops.py",
+      "line": "2191",
+      "severity": "non-blocking",
+      "text": "non-blocking: assigning through globals()[\"_PHASE_TO_SN_COST_FIELD\"] keeps the abbreviation as a runtime attribute of the audited module while test_public_api_naming.py:88 collects only top-level ast.Assign targets, so the guard now passes because it cannot see the name rather than because the name is gone; the durable repair is renaming the constant at imas_codex/standard_names/graph_store/graph_audits.py:3086, outside this node's write paths."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read both commits against base 3cb42fc7c; f9b87381d touches imas_codex/standard_names/graph_ops.py, tests/standard_names/source_scan.py (new) and five test files (7 files, +183/-69), and d7abb0c2e adds only the 17-line evidence fragment.",
+    "done_when": "the done_when names the eight ids plus their files at base and head with a logged negative control; the head eight-id arm, both whole-file arms and the negative control are logged from archive trees with the module path recorded, but the recorded base arm was taken at 7da806df3, a pre-split revision where all eight already pass, so it does not measure the failure the repair removes.",
+    "goal": "the node's goal is that the eight tests the worker/graph split broke follow their subject; tests/standard_names/source_scan.py:36 supplies the whole-owning-package file set, graph_ops.py:993 gives the two forwarders the owning functions' cache API, and all eight ids pass at head f9b87381d (13 passed, EXIT=0, logs/gate-head-eight.log).",
+    "manifest": "read; it states status complete, records commits f9b87381d and d7abb0c2e, names the four gate logs and logs/negative-control.log, and reports eight-id arms 13 passed at both revisions with 1 failed / 103 passed on the whole-file arms.",
+    "write_paths": "the manifest declares graph_ops.py, the eight test files, tests/standard_names/source_scan.py and the evidence fragment; every path in the diff is inside that set and the three test files that needed no edit (test_gate_verdict_provenance.py, test_source_revival.py, test_public_api_naming.py) were correctly left untouched."
+  },
+  "justifications": {
+    "durability": "logs/negative-control.log narrows source_scan._read_split_modules to the root modules and the five scan tests redden (5 failed, EXIT=1), so those assertions fail on the reverted widening; the naming guard's durability is weakened because graph_ops.py:2191 is invisible to the AST collector at tests/standard_names/test_public_api_naming.py:88.",
+    "evidence": "the manifest's baseline_suite and gate-base-eight.log are recorded at 7da806df3, a pre-split tree that still holds all 31k lines of graph_store inside graph_ops.py, so the base arm reads 13 passed and cannot show the eight failing that the head arm repairs.",
+    "fit": "source_scan.py:1 follows the surrounding test-module idiom and carries no plan label, while graph_ops.py:2191 introduces the module's first globals-subscript assignment, a shape no neighbouring re-export uses.",
+    "goal_fidelity": "tests/standard_names/source_scan.py:36 plus graph_ops.py:993 deliver the three repairs the brief names, and the eight ids read 13 passed at head while measuring 8 failed at the node's own base 3cb42fc7c.",
+    "reuse": "the search over tests/ and imas_codex/ for a package-source reader found only local package.glob(\"*.py\") loops in tests/standard_names/test_cost_ledger_augments_only.py:22 and tests/standard_names/test_declared_attribute_access.py:159, with no shared owner, so source_scan.py is the first owner rather than a duplicate.",
+    "scope_discipline": "every changed path in f9b87381d and d7abb0c2e sits inside the manifest's orientation_write_paths, with no edit outside the owning package and no unrelated cleanup."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is that the eight tests the worker/graph split broke follow their subject; tests/standard_names/source_scan.py:36 supplies the whole-owning-package file set, graph_ops.py:993 gives the two forwarders the owning functions' cache API, and all eight ids pass at head f9b87381d (13 passed, EXIT=0, logs/gate-head-eight.log).\nVERDICT done_when: the done_when names the eight ids plus their files at base and head with a logged negative control; the head eight-id arm, both whole-file arms and the negative control are logged from archive trees with the module path recorded, but the recorded base arm was taken at 7da806df3, a pre-split revision where all eight already pass, so it does not measure the failure the repair removes.\nVERDICT write_paths: the manifest declares graph_ops.py, the eight test files, tests/standard_names/source_scan.py and the evidence fragment; every path in the diff is inside that set and the three test files that needed no edit (test_gate_verdict_provenance.py, test_source_revival.py, test_public_api_naming.py) were correctly left untouched.\nVERDICT manifest: read; it states status complete, records commits f9b87381d and d7abb0c2e, names the four gate logs and logs/negative-control.log, and reports eight-id arms 13 passed at both revisions with 1 failed / 103 passed on the whole-file arms.\nVERDICT diff: read both commits against base 3cb42fc7c; f9b87381d touches imas_codex/standard_names/graph_ops.py, tests/standard_names/source_scan.py (new) and five test files (7 files, +183/-69), and d7abb0c2e adds only the 17-line evidence fragment.\nCALL_SITES: imas_codex/standard_names/graph_store/graph_cost_and_claims.py:177, imas_codex/standard_names/graph_ops.py:71\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: tests/standard_names/source_scan.py:36 plus graph_ops.py:993 deliver the three repairs the brief names, and the eight ids read 13 passed at head while measuring 8 failed at the node's own base 3cb42fc7c.\nSCORE evidence: 11\nJUSTIFICATION evidence: the manifest's baseline_suite and gate-base-eight.log are recorded at 7da806df3, a pre-split tree that still holds all 31k lines of graph_store inside graph_ops.py, so the base arm reads 13 passed and cannot show the eight failing that the head arm repairs.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every changed path in f9b87381d and d7abb0c2e sits inside the manifest's orientation_write_paths, with no edit outside the owning package and no unrelated cleanup.\nSCORE durability: 16\nJUSTIFICATION durability: logs/negative-control.log narrows source_scan._read_split_modules to the root modules and the five scan tests redden (5 failed, EXIT=1), so those assertions fail on the reverted widening; the naming guard's durability is weakened because graph_ops.py:2191 is invisible to the AST collector at tests/standard_names/test_public_api_naming.py:88.\nSCORE fit: 16\nJUSTIFICATION fit: source_scan.py:1 follows the surrounding test-module idiom and carries no plan label, while graph_ops.py:2191 introduces the module's first globals-subscript assignment, a shape no neighbouring re-export uses.\nSCORE reuse: 19\nJUSTIFICATION reuse: the search over tests/ and imas_codex/ for a package-source reader found only local package.glob(\"*.py\") loops in tests/standard_names/test_cost_ledger_augments_only.py:22 and tests/standard_names/test_declared_attribute_access.py:159, with no shared owner, so source_scan.py is the first owner rather than a duplicate.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-split-scan-repairs.html:3 blocking: the recorded base arm is at 7da806df3, which predates the split (git diff --stat 7da806df3 3cb42fc7c shows 31k lines leaving graph_ops.py), so all eight ids pass there and the base/head pair proves nothing; re-running the same command at the node's own base 3cb42fc7c gives 8 failed, 5 passed, EXIT=1 on the eight ids and 9 failed, 95 passed on their files, and the fragment's sentence \"all eight pass at base 7da806df3\" would otherwise be the permanent record.\nFINDING imas_codex/standard_names/graph_ops.py:2191 non-blocking: assigning through globals()[\"_PHASE_TO_SN_COST_FIELD\"] keeps the abbreviation as a runtime attribute of the audited module while test_public_api_naming.py:88 collects only top-level ast.Assign targets, so the guard now passes because it cannot see the name rather than because the name is gone; the durable repair is renaming the constant at imas_codex/standard_names/graph_store/graph_audits.py:3086, outside this node's write paths.",
+  "review_run_id": "r-20261025T005216372253-review-of-srtj-split-scan-repairs-d7abb0c2e018",
+  "reviewed_base_sha": "3cb42fc7c1a527206f166796c068adbbae98517e",
+  "reviewed_head_sha": "d7abb0c2e018a9fa4de106fc8d4b3983c676b334",
+  "reviewed_run_id": "r-20261025T003029870673-srtj-split-scan-repairs",
+  "scores": {
+    "durability": 16,
+    "evidence": 11,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-25T01:04:18.139737+00:00",
+  "total": 99
+}
