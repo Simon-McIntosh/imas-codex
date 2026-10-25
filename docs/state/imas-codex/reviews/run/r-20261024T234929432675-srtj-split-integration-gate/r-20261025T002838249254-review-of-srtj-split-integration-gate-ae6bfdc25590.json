@@ -20,6 +20,13 @@
     }
   },
   "dispatched_at": "2026-10-25T00:29:41Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "a count inside the graph-tier rerun paragraph; the added default-marker failures, which the repairs act on, are listed per id with their logs",
+      "recorded_at": "2026-10-25T00:44:47.703037+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-review-through-jev/srtj-split-integration-gate.html",
