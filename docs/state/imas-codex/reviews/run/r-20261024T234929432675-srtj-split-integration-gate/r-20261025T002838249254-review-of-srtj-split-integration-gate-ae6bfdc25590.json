@@ -1,0 +1,63 @@
+{
+  "added_failure_count": 8,
+  "added_failure_ids": [
+    "tests/standard_names/test_comparator_budget_share.py::test_compose_paths_offload_comparator_searches",
+    "tests/standard_names/test_compose_shape_parameter_surface.py::test_injection_precedes_every_compose_persist_site",
+    "tests/standard_names/test_derived_parent_cleanup_protection.py::test_every_automatic_deletion_route_calls_the_common_refusal",
+    "tests/standard_names/test_gate_verdict_provenance.py::test_similarity_method_is_declared_without_expanding_winning_authority",
+    "tests/standard_names/test_metadata_invariants.py::TestComposeWorkerInjection::test_cocos_injected_from_source",
+    "tests/standard_names/test_public_api_naming.py::test_no_sn_abbreviation_in_public_names[module_path1]",
+    "tests/standard_names/test_source_invariants.py::TestExtractWorkerEmitsDdPath::test_extract_worker_dd_source_includes_dd_path",
+    "tests/standard_names/test_source_revival.py::test_vocabulary_signature_tracks_token_changes"
+  ],
+  "call_sites": [],
+  "completed_at": "2026-10-25T00:37:32.610Z",
+  "dispatched_at": "2026-10-25T00:29:41Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-split-integration-gate.html",
+      "line": 108,
+      "severity": "non-blocking",
+      "text": "The graph paragraph says four added ids passed at head on the isolated rerun, but logs/head-graph-targeted.log records 2 passed, 1 deselected, 3 errors against five added ids, so four-passed plus three-reproduced cannot both hold; the two extra are the ids that fail at base and pass at head (test_docs_lifecycle::test_generate_docs_gates_on_name_accepted and test_provenance_ledger::test_live_source_loss_probe_matches_independent_count)."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-split-integration-gate.html",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "The node was granted docs/figures/sn-review-through-jev/srtj-split-integration-gate but produced no figure, though the two-arm failure delta and the 38-of-40 shared set are exactly the comparison the repository's figure mandate asks to be drawn."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "No production call sites: no runtime code in this repository reads the fragment, and imas_codex/standard_names/review/cascade_calibration.py:373 reads a different JSON in the same directory.",
+    "diff": "Read commit by commit against fceb00c30: one commit, ae6bfdc25, adding 135 lines to one HTML file and nothing else.",
+    "done_when": "The done_when names docs/evidence/fragments/sn-review-through-jev/srtj-split-integration-gate.html carrying both shas, each arm's totals, added failures with attribution and the shared failures; all four are present and every count reconciles against the gate logs.",
+    "goal": "The node's goal is to measure the whole standard-names suite once after the graph_ops split and record the added failures with attribution; the landed fragment does exactly that and writes no product code.",
+    "manifest": "Read; it records status complete, commit ae6bfdc25, the default and graph arm results, baseline_suite and after_suite with 98 and 105 failure ids, and three scaffolding-attributed fixture timeouts.",
+    "write_paths": "The node was fenced to the fragment HTML and a docs/figures directory; the single changed path is the HTML, so the diff stays inside the fence while the granted figures path went unused."
+  },
+  "justifications": {
+    "durability": "No test reads this fragment's claims; tests/docs/test_documentation_layout.py:41 covers archive-path legality only, so a future re-run that invalidates the recorded deltas would leave the fragment silently wrong.",
+    "evidence": "Every default-arm count re-derives from logs/base-default.log and logs/head-default.log (98 failed / 8900 passed versus 105 / 8954, exactly eight added ids and one removed), but the graph paragraph at line 108 states four added ids passed at head where logs/head-graph-targeted.log records two.",
+    "fit": "The fragment follows the sibling record docs/evidence/fragments/sn-review-through-jev/srtj-wave-integration-gate.html in arm table, per-arm log column and module.__file__ provenance.",
+    "goal_fidelity": "The fragment at docs/evidence/fragments/sn-review-through-jev/srtj-split-integration-gate.html:12-17 records both revisions and each arm's totals, which is what the node's done_when names.",
+    "reuse": "The diff adds no function, class or module; a search of docs/evidence/fragments, tests/ and reckon for a shared gate-record emitter found none, so each node's record is authored as its own fragment.",
+    "scope_discipline": "git diff fceb00c30 ae6bfdc25 changes one path, docs/evidence/fragments/sn-review-through-jev/srtj-split-integration-gate.html, inside the node's declared write paths."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261025T002838249254-review-of-srtj-split-integration-gate-ae6bfdc25590",
+  "reviewed_base_sha": "fceb00c304129d206c4163d45509d85dccfa3b67",
+  "reviewed_head_sha": "ae6bfdc255906a6613f100d8bfbd97ed870f735f",
+  "reviewed_run_id": "r-20261024T234929432675-srtj-split-integration-gate",
+  "scores": {
+    "durability": 8,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-25T00:50:00+00:00",
+  "total": 100
+}
