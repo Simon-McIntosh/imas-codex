@@ -1,0 +1,135 @@
+<section id="srtj-split-integration-gate" data-node="srtj-split-integration-gate">
+  <h2 id="srtj-split-integration-gate-title">Whole standard-names suite after the graph_ops split</h2>
+  <p id="srtj-split-integration-gate-summary">
+    Two arms, each a separate <code>git archive</code> tree under node-local
+    <code>TMPDIR</code>, with the five generated model files copied in and the
+    main checkout's <code>.env</code> linked. Each arm printed its own
+    <code>graph_ops.__file__</code> before the suite, so the tree that ran is
+    recorded rather than assumed.
+  </p>
+
+  <table id="srtj-split-integration-gate-arms">
+    <caption>Arm totals, default markers (<code>tests/standard_names/ tests/graph/ -n 8</code>)</caption>
+    <thead><tr><th>arm</th><th>revision</th><th>result</th><th>log</th></tr></thead>
+    <tbody>
+      <tr><td>base</td><td><code>7da806df3</code></td><td>98 failed, 8900 passed, 9 skipped in 244 s</td><td><code>logs/base-default.log</code></td></tr>
+      <tr><td>head</td><td><code>410bcfe53c8dea0dd5dbed7198d2b26d44690a27</code></td><td>105 failed, 8954 passed, 9 skipped in 198 s</td><td><code>logs/head-default.log</code></td></tr>
+    </tbody>
+  </table>
+  <p id="srtj-split-integration-gate-default-delta">
+    <strong>Eight failures added at head, one removed.</strong> The removed one is
+    <code>tests/graph/test_updated_at_coverage.py::test_graph_ops_standard_name_writes_have_hard_zero</code>,
+    which asserts that <code>graph_ops.py</code> performs no standard-name writes: the split
+    emptied that module of writes, so the guard now passes. Every added failure is a
+    source-scanning test that greps the text of <code>graph_ops.py</code> or
+    <code>workers.py</code> for code the split moved out.
+  </p>
+
+  <table id="srtj-split-integration-gate-added">
+    <caption>Failures present at head and absent at base (default markers)</caption>
+    <thead><tr><th>test</th><th>traceback line</th><th>attributed merge</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>test_compose_shape_parameter_surface.py::test_injection_precedes_every_compose_persist_site</code></td>
+        <td><code>AssertionError: expected at least two compose persist sites (linear + pooled); found 0</code></td>
+        <td><code>30ad34106</code> merge: extract the compose batch workers</td>
+      </tr>
+      <tr>
+        <td><code>test_metadata_invariants.py::TestComposeWorkerInjection::test_cocos_injected_from_source</code></td>
+        <td><code>assert 'source_item.get("cocos_label")' in source</code></td>
+        <td><code>30ad34106</code> (compose worker now in <code>worker_tasks/worker_compose_and_validate.py</code>)</td>
+      </tr>
+      <tr>
+        <td><code>test_comparator_budget_share.py::test_compose_paths_offload_comparator_searches</code></td>
+        <td><code>assert len(offloaded_calls) == 2 &rarr; assert 0 == 2</code></td>
+        <td><code>30ad34106</code></td>
+      </tr>
+      <tr>
+        <td><code>test_source_invariants.py::TestExtractWorkerEmitsDdPath::test_extract_worker_dd_source_includes_dd_path</code></td>
+        <td><code>AssertionError: workers.sn_extract_worker must populate dd_path for dd sources</code></td>
+        <td><code>6664996c6</code> merge: extract the worker foundation and the extraction and enrichment tasks</td>
+      </tr>
+      <tr>
+        <td><code>test_derived_parent_cleanup_protection.py::test_every_automatic_deletion_route_calls_the_common_refusal</code></td>
+        <td><code>assert 'operation="structural derived-parent cleanup"' in graph_source</code></td>
+        <td><code>b28fb1d4e</code> merge: extract four more graph_store modules (now <code>graph_store/graph_lineage.py</code>)</td>
+      </tr>
+      <tr>
+        <td><code>test_gate_verdict_provenance.py::test_similarity_method_is_declared_without_expanding_winning_authority</code></td>
+        <td><code>AttributeError: 'function' object has no attribute 'cache_clear'</code> on <code>graph_ops._winning_review_resolution_methods.cache_clear()</code></td>
+        <td><code>fceb00c30</code> merge: extract the catalog persistence (owner now <code>graph_store/graph_catalog.py</code>)</td>
+      </tr>
+      <tr>
+        <td><code>test_source_revival.py::test_vocabulary_signature_tracks_token_changes</code></td>
+        <td><code>AttributeError: 'function' object has no attribute 'cache_clear'</code></td>
+        <td><code>1cd6e42a6</code> merge: extract the first four graph_store modules (<code>graph_ops.isn_vocabulary_signature</code> forwarder)</td>
+      </tr>
+      <tr>
+        <td><code>test_public_api_naming.py::test_no_sn_abbreviation_in_public_names[module_path1]</code></td>
+        <td><code>naming violation in imas_codex/standard_names/graph_ops.py: [('_PHASE_TO_SN_COST_FIELD', 2169)]</code></td>
+        <td><code>fceb00c30</code> (forwarder import re-exposes the name in <code>graph_ops.py</code>)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p id="srtj-split-integration-gate-forwarders">
+    <strong>Two added failures are forwarder defects, not stale scans.</strong>
+    <code>graph_ops._winning_review_resolution_methods</code> and
+    <code>graph_ops.isn_vocabulary_signature</code> are now plain forwarding functions, so
+    the <code>cache_clear</code> attribute their callers patch is gone; the real definitions
+    live in <code>graph_store/graph_catalog.py</code> and <code>graph_store/graph_audits.py</code>.
+    The remaining six are tests that read <code>graph_ops.py</code> or <code>workers.py</code> as
+    text and did not follow their subject to <code>graph_store/</code> or
+    <code>worker_tasks/</code>.
+  </p>
+
+  <table id="srtj-split-integration-gate-graph">
+    <caption>Graph marker set (<code>tests/standard_names/ -m graph -n 8</code>)</caption>
+    <thead><tr><th>arm</th><th>result</th><th>note</th></tr></thead>
+    <tbody>
+      <tr><td>base <code>7da806df3</code></td><td>40 failed, 153 passed, 190 skipped, 0 errors in 224 s</td><td>first run</td></tr>
+      <tr><td>head <code>410bcfe53</code>, run 1</td><td>43 failed, 144 passed, 148 skipped, 49 errors in 292 s</td><td>discarded: 49 fixture errors, all "refuses the project graph URI"</td></tr>
+      <tr><td>head <code>410bcfe53</code>, run 2</td><td>40 failed, 157 passed, 184 skipped, 4 errors in 353 s</td><td>the arm used for the comparison</td></tr>
+    </tbody>
+  </table>
+  <p id="srtj-split-integration-gate-graph-note">
+    Run 1 is kept as evidence of an instrument failure, not a code signal: its 49 errors are
+    module-scoped fixtures that compare the disposable endpoint against
+    <code>resolve_neo4j()</code> while the session fixture has <code>NEO4J_URI</code> pointed at
+    that same disposable endpoint, so the comparison is between a value and itself and fails
+    whenever xdist schedules those modules inside the session fixture's lifetime. Run 2 has
+    zero such errors. <strong>38 of 40 graph failures are shared by both arms</strong>
+    (16 files; <code>test_name_lifecycle.py</code> 9, <code>test_physics_domain_multi.py</code> 5,
+    <code>test_reviewable_name_stage.py</code> 4, <code>test_e2e_rotation.py</code> and
+    <code>test_e2e_exhaustion.py</code> and <code>test_focus_reseed.py</code> 3 each, the rest 1
+    or 2). They are not regressions.
+  </p>
+  <p id="srtj-split-integration-gate-graph-added">
+    Run 2's added ids were re-run in isolation on both arms. Four passed at head on the
+    isolated rerun, so they are run-to-run noise. Three reproduced their failure at head and
+    passed at base, and all three fail in <code>conftest.py::_start_empty_neo4j</code> with
+    <code>Failed: Timeout (&gt;30.0s) from pytest-timeout</code> before reaching code under
+    test: <code>test_panel_audit_sample.py::test_the_real_writer_stores_the_audit_row_and_the_aggregate_ignores_it</code>
+    and both parametrisations of
+    <code>test_source_refresh_docs_requeue.py::test_docs_regeneration_tracks_source_and_refuses_stale_claim</code>.
+    Attributed to scaffolding (temporary Neo4j not bolt-ready within the repo's 30 s per-test
+    timeout), reproducible at head across two attempts, and not evidence about the split.
+  </p>
+
+  <p id="srtj-split-integration-gate-verdict">
+    <strong>Verdict.</strong> The split itself is sound across the whole suite: no behavioural
+    test regressed. The failure delta is one class, source-scanning invariants that read
+    <code>graph_ops.py</code> and <code>workers.py</code> as text, plus two forwarding
+    functions that lost their <code>cache_clear</code> attribute. That is the 41-file
+    follow-on the step 14 review predicted, now measured at eight default-marker tests.
+  </p>
+
+  <p id="srtj-split-integration-gate-reproduce">
+    Logs: <code>logs/{base,head}-default.log</code>, <code>logs/base-graph.log</code>,
+    <code>logs/head-graph.log</code> (discarded run 1), <code>logs/head-graph-rerun.log</code>,
+    <code>logs/{base,head}-graph-targeted.log</code>, <code>logs/head-graph-retarget.log</code>.
+    Each header names the revision, the absolute tree, the module as imported and the resolved
+    working directory; each ends in a bare <code>EXIT=</code> line. No graph write and no LLM
+    call was made: the graph arms used the disposable Neo4j fixture only.
+  </p>
+</section>
