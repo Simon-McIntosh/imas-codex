@@ -10,6 +10,13 @@
   ],
   "completed_at": "2026-10-25T01:01:57.641Z",
   "dispatched_at": "2026-10-25T00:52:56Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "srtj-split-scan-repairs",
+      "recorded_at": "2026-10-25T01:04:55.475085+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-review-through-jev/srtj-split-scan-repairs.html",
