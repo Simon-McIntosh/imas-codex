@@ -1,0 +1,44 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-26T21:19:09.958Z",
+  "dispatched_at": "2026-10-26T21:08:25Z",
+  "findings": [
+    {
+      "detail": "tests/standard_names/test_review_docs_stages.py contributes 18 of the 27 default-marker failures and fails identically at base and head (assert '' == 'accepted' at its line 175 of base_default.log), so the delta measure alone witnesses that module.",
+      "disposition": "folded",
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-workers-split-steps20-23.html",
+      "folded_into": "the fragment's gate paragraph, to state per declared gate file whether it carries passing coverage of its module",
+      "line": 20,
+      "severity": "non-blocking",
+      "summary": "The gate paragraph does not disclose that a declared gate file is wholly red on both arms, leaving the 16-symbol review-docs extraction without green coverage."
+    },
+    {
+      "detail": "The signature-stripping loop at workers.py:1675 relies on each forwarder already carrying __wrapped__; the run proved the 26 bindings with imports.log, but that is a receipt rather than a test, and nothing reddens if a later extraction omits one.",
+      "disposition": "folded",
+      "file": "imas_codex/standard_names/workers.py",
+      "folded_into": "a committed test asserting every workers.py forwarder carries __wrapped__ and exposes no _worker_dependency parameter",
+      "line": 1675,
+      "severity": "non-blocking",
+      "summary": "The __wrapped__-before-loop requirement has no committed guard; only an ephemeral scratch script checked it."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to move the design-map symbols of four documentation workers out of imas_codex/standard_names/workers.py into worker_tasks/ with transitional forwarders; all 27 mapped symbols (7/2/16/2) are defined in worker_generate_docs.py, worker_enrich_parents.py, worker_review_docs.py and worker_refine_docs.py, and none remains as an implementation in workers.py.\nVERDICT done_when: the done_when names the four gate files plus every test that patches or imports a moved symbol through workers, base and head from separate git archive trees on default and -m graph markers, zero added failure ids, fresh imports, three size counts and a fragment recording what is left; each is present, and I re-derived the failure-id sets (27/27 default, 4/4 graph, zero added in both), the three size counts and the 27-symbol placement from the tree and logs.\nVERDICT write_paths: the declared scope is workers.py, the four worker_tasks modules and srtj-workers-split-steps20-23.html; the diff of 18daf78f5..963d95825 touches exactly those six paths and nothing else.\nVERDICT manifest: read; it records status complete, five commits, the base/head log paths, both suite blocks with completed:true and 27 failure ids each, and evidence_inputs with 33 ast patch files against 35 grep candidates.\nVERDICT diff: read commit by commit \u2014 45a733958, 8bd11b957, d5bb0f828, fba50471a each move one module and leave the rest of workers.py alone, and 963d95825 adds only the fragment; no test file is modified.\nCALL_SITES: imas_codex/standard_names/loop.py:415 (imports process_embed_batch from workers and calls it at :428), imas_codex/standard_names/loop.py:571-576 (imports process_enrich_parents_batch, process_generate_docs_batch, process_refine_docs_batch and process_review_docs_batch from workers and dispatches them to pools at :895 and :901, :919, :939, :955)\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: every one of the design map's 27 symbols lands in its assigned module (imas_codex/standard_names/worker_tasks/worker_review_docs.py:789 for process_review_docs_batch) and workers.py retains only 135 forwarders plus _worker_dependency at line 58.\nSCORE evidence: 19\nJUSTIFICATION evidence: the gate receipts at base_default.log and head_default.log carry identical 27-id failure sets and import_check results in imports.log at EXIT=0, and I reproduced 156528/32679/44722.29 and 67473/14988/19278.00 bytes, cl100k tokens and gate units exactly from the two trees.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the six changed paths in docs/evidence/fragments/sn-review-through-jev/srtj-workers-split-steps20-23.html and the four worker_tasks modules are exactly the declared write paths, with no test edit and no sibling-module import.\nSCORE durability: 14\nJUSTIFICATION durability: tests/standard_names/test_workers_docs_enrich.py:43 and test_docs_review_dd_context.py:15 import moved symbols through workers.forwarders and pass, and the run's own KeyError: '_re' reproduction shows those paths can redden, but no committed test guards the __wrapped__-before-loop binding at imas_codex/standard_names/workers.py:1675.\nSCORE fit: 19\nJUSTIFICATION fit: the modules reproduce the step-15 to step-19 idiom exactly \u2014 positional-only _worker_dependency, one-line owner docstrings, stdlib imported directly \u2014 and a five-check naming scan over the four modules found no banned label.\nSCORE reuse: 20\nJUSTIFICATION reuse: the search over imas_codex/standard_names for an existing owner of sibling-task extraction and collaborator resolution found worker_tasks/worker_common.py, and a top-level AST comparison shows zero name overlap with its 58 definitions, so the new modules extend the owner rather than fork it.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-workers-split-steps20-23.html:20 non-blocking: the gate paragraph says only that the observed failures are pre-existing, but one of the four declared gate files, tests/standard_names/test_review_docs_stages.py, contributes 18 of the 27 default-marker failures and is wholly red on both arms (assert '' == 'accepted' at tests/standard_names/test_review_docs_stages.py:175 of base_default.log), so the 16-symbol review-docs extraction is witnessed by no green assertion and the fragment should say which declared gate file carries none.\nFINDING imas_codex/standard_names/workers.py:1675 non-blocking: the requirement that every forwarder carry __wrapped__ before the signature-stripping loop runs is verified only by an uncommitted scratch script whose tree the run deleted, receipts in imports.log aside, so a later extraction that omits one binding would silently widen that forwarder to (*args, **kwargs) with no test to catch it.\n",
+  "review_run_id": "r-20261026T210731880854-review-of-srtj-workers-split-steps20-23-963d958259a8",
+  "reviewed_base_sha": "18daf78f53e50cad8a8a2b3375600498d48561bb",
+  "reviewed_head_sha": "963d958259a80f1ac1383854ab7f7a7c46de9a7a",
+  "reviewed_run_id": "r-20261026T204013704572-srtj-workers-split-steps20-23",
+  "scores": {
+    "durability": 14,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-26T21:22:28.354991+00:00",
+  "total": 112
+}
