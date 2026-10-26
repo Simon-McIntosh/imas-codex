@@ -1,0 +1,86 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261026T203855156887-srtj-fanout-excerpt-retire/logs/head-gate.log",
+  "assertion_analysis": [
+    {
+      "failure_condition": "Returning an always-empty excerpt from should_trigger_fanout makes the excerpt and prompt assertions red; logs/negative-control.log records this mutation failing test_prompt_names_the_checks_that_fired.",
+      "file": "tests/standard_names/test_fanout_review_feedback.py",
+      "lines": "95-108"
+    },
+    {
+      "failure_condition": "Inventing a reason when the trigger does not fire, or dropping the (none) fallback at dispatcher.py:92, reddens the check-free test.",
+      "file": "tests/standard_names/test_fanout_review_feedback.py",
+      "lines": "111-124"
+    },
+    {
+      "failure_condition": "Removing the check.retrieval filter at trigger.py:118 reddens the non-retrieval test, which asserts the identifier never reaches the prompt.",
+      "file": "tests/standard_names/test_fanout_review_feedback.py",
+      "lines": "127-138"
+    },
+    {
+      "failure_condition": "Dropping the veto filter at trigger.py:95 makes the passing check appear in the excerpt and fires on it; logs/negative-control-veto-filter.log records this exact mutation failing this test and test_a_lone_passing_check_cannot_fire_the_trigger.",
+      "file": "tests/standard_names/test_fanout_review_feedback.py",
+      "lines": "141-172"
+    },
+    {
+      "failure_condition": "Treating a non-vetoed entry as a failure at any threshold makes the lone-passing-check assertions red; the veto-filter control log shows it.",
+      "file": "tests/standard_names/test_fanout_review_feedback.py",
+      "lines": "175-194"
+    },
+    {
+      "failure_condition": "Removing the truncation or the check-count break in trigger.py:136-138 yields eight long lines and reddens the cap test, but the expected values are the module's own constants, so the budget itself is not pinned.",
+      "file": "tests/standard_names/test_fanout_review_feedback.py",
+      "lines": "215-229"
+    }
+  ],
+  "base_log_revision": "18daf78f53e50cad8a8a2b3375600498d48561bb",
+  "baseline_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261026T203855156887-srtj-fanout-excerpt-retire/logs/base-gate.log",
+  "call_site_count": 6,
+  "call_sites": [
+    "imas_codex/standard_names/worker_tasks/worker_refine_names.py:488",
+    "imas_codex/standard_names/worker_tasks/worker_refine_names.py:530",
+    "imas_codex/standard_names/worker_tasks/worker_refine_names.py:540",
+    "imas_codex/standard_names/fanout/dispatcher.py:91",
+    "imas_codex/standard_names/fanout/dispatcher.py:108",
+    "imas_codex/standard_names/fanout/dispatcher.py:144"
+  ],
+  "completed_at": "2026-10-26T21:34:18.036Z",
+  "dispatched_at": "2026-10-26T21:28:02Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_fanout_review_feedback.py",
+      "line": "224",
+      "severity": "non-blocking",
+      "text": "non-blocking: the cap test compares the produced line count and line lengths against _EXCERPT_MAX_CHECKS and _EXCERPT_MAX_CHARS imported from the module under test (also used at line 227), so it proves a cap is applied but passes unchanged if the budget is raised; literal 6 and 240 on the expected side would make the budget the guarded value."
+    }
+  ],
+  "head_log_revision": "966864ba8c35da14a5511febd8d33082b0b51992",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to make the fan-out proposer prompt carry real review feedback or none; imas_codex/standard_names/fanout/trigger.py:159-161 now returns the fired checks' reason lines and imas_codex/standard_names/fanout/dispatcher.py:91 renders them under the renamed heading, which is the preferred route the brief named.\nVERDICT done_when: the done_when asks for the fired checks' reasons in the proposer prompt, a check-free path unchanged, tests in tests/standard_names/test_fanout_review_feedback.py, a gate with no added failures and a logged control; logs/base-gate.log records 111 passed EXIT=0 at 18daf78f5 and logs/head-gate.log 117 passed EXIT=0 at 966864ba8, with logs/negative-control.log at 3 failed EXIT=1.\nVERDICT write_paths: the reviewed manifest declares five write paths, and git diff --stat 18daf78f5 0ce5d148f touches exactly those five files (trigger.py, dispatcher.py, worker_refine_names.py, the new test file and the evidence fragment) with nothing outside them.\nVERDICT manifest: read; it names the preferred route and why, the six commits, both gate arms, two refusal controls, the passing-check correction this review's predecessor raised, and two retry failures attributed to its own invocation as scaffolding; every stated count matched the log it cites.\nVERDICT diff: read commit by commit against 18daf78f5 \u2014 a3737afe6 adds check_results_from_failed_checks and failed_check_reasons and swaps the call site, 1401c0ff0 adds the veto filter with two tests, 813617ecf/01e5f7b1e/966864ba8/0ce5d148f add and correct the evidence fragment; the last commit is docs-only, one line of the fragment, so the head arm's 966864ba8 measures the same code as the reviewed head.\nCALL_SITES: imas_codex/standard_names/worker_tasks/worker_refine_names.py:488, imas_codex/standard_names/worker_tasks/worker_refine_names.py:530, imas_codex/standard_names/worker_tasks/worker_refine_names.py:540, imas_codex/standard_names/fanout/dispatcher.py:91, imas_codex/standard_names/fanout/dispatcher.py:108, imas_codex/standard_names/fanout/dispatcher.py:144\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/fanout/trigger.py:159-161 joins the fired checks' reason and evidence lines into the returned excerpt, which imas_codex/standard_names/fanout/dispatcher.py:91 places in the proposer prompt in place of the always-(none) slot.\nSCORE evidence: 18\nJUSTIFICATION evidence: logs/base-gate.log (111 passed, EXIT=0 at 18daf78f5) and logs/head-gate.log (117 passed, EXIT=0 at 966864ba8) each open with revision, tree, command, module.__file__ and cwd, and both refusal controls end EXIT=1 naming their failing test ids.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 18daf78f5 0ce5d148f lists only the five paths the manifest declares, and the final commit changes one line of the evidence fragment.\nSCORE durability: 18\nJUSTIFICATION durability: tests/standard_names/test_fanout_review_feedback.py:95 reddens under the restored empty excerpt and :141 reddens under the dropped veto filter, both demonstrated in the control logs; the cap assertions at :224-227 import their expected values from the module they test.\nSCORE fit: 17\nJUSTIFICATION fit: imas_codex/standard_names/fanout/trigger.py:13-22 and __all__ at :39-46 document the new surface in the module's own idiom, but the parameter at imas_codex/standard_names/fanout/dispatcher.py:297 is still named reviewer_excerpt although it now carries named-check reasons.\nSCORE reuse: 16\nJUSTIFICATION reuse: searching imas_codex/standard_names for a renderer of these records found imas_codex/standard_names/review/cascade.py:471-507 and the prompt block at imas_codex/llm/prompts/sn/refine_name_user.md:109-115; failed_check_reasons at trigger.py:107 is a second renderer over the same data, justified by the fan-out prompt being built in Python and site-agnostic, but it does not extend that owner.\nFINDING tests/standard_names/test_fanout_review_feedback.py:224 non-blocking: the cap test takes both expected values from the module under test (_EXCERPT_MAX_CHECKS at :224, _EXCERPT_MAX_CHARS at :227), so a change to the caps passes unchanged and only the application of a cap is guarded.",
+  "review_run_id": "r-20261026T212659965389-review-of-srtj-fanout-excerpt-retire-0ce5d148fcfa",
+  "reviewed_base_sha": "18daf78f53e50cad8a8a2b3375600498d48561bb",
+  "reviewed_commits": [
+    "a3737afe6344185f9eddd10c49b38d6001a1494e",
+    "813617ecf855ecda7cc839e00768ecc5b79890a4",
+    "01e5f7b1ef6a863bd9bbce7efe9c28e5068a7030",
+    "1401c0ff0c82012d8f738ba19009cfab2954f7f6",
+    "966864ba8c35da14a5511febd8d33082b0b51992",
+    "0ce5d148fcfaf30af2f3471c78a8dd481be5f3fb"
+  ],
+  "reviewed_head_sha": "0ce5d148fcfaf30af2f3471c78a8dd481be5f3fb",
+  "reviewed_run_id": "r-20261026T203855156887-srtj-fanout-excerpt-retire",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 16,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-26T21:35:16.384811+00:00",
+  "total": 108
+}
