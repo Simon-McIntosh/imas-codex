@@ -74,22 +74,34 @@ def check_results_from_failed_checks(
 ) -> dict[str, dict[str, Any]]:
     """Build trigger check results from a deciding route's named failures.
 
-    Each named failure was already decided against its check, so its
-    failure probability is 1.0.  The criterion, the judge's reason and the
-    evidence are carried across so the trigger can hand the proposer the
-    same facts the route acted on, without re-reading the graph.
+    The persisted list is the union of the checks a route vetoed and the
+    checks it holds details for, so it also carries checks that were
+    answered and passed.  ``veto`` is the field that separates them, and
+    only a vetoed check becomes a failure here: an entry carrying
+    ``veto: False`` passed and must neither be reported to the proposer as
+    a failure nor reach the trigger's firing decision.  An entry written
+    before the flag existed is a failure, which is what its inclusion in a
+    failed-check list meant.
+
+    A vetoed check reports ``failure_probability`` 1.0 because the route's
+    decision is what the trigger acts on; re-deriving one from the recorded
+    probability could suppress a failure the route already routed on.  The
+    criterion, the judge's reason and the evidence are carried across so the
+    proposer is told the same facts the route acted on, without a new read
+    of graph state.
     """
-    return {
-        str(check["id"]): {
+    results: dict[str, dict[str, Any]] = {}
+    for check in failed_checks:
+        if not check.get("id") or not check.get("veto", True):
+            continue
+        results[str(check["id"])] = {
             "answered": True,
             "failure_probability": 1.0,
             "criterion": str(check.get("criterion") or ""),
             "reason": str(check.get("judgment_evidence") or ""),
             "evidence": str(check.get("evidence") or ""),
         }
-        for check in failed_checks
-        if check.get("id")
-    }
+    return results
 
 
 def failed_check_reasons(

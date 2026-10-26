@@ -6,17 +6,22 @@ proposer's own prompt; an empty slot renders the heading with ``(none)``
 beneath it, which tells the proposer nothing and is indistinguishable from a
 candidate that failed no check.
 
-Three properties are locked here:
+Five properties are locked here:
 
 - the prompt names the checks that fired, with the reason each was decided
   against and the evidence the deciding route already held;
 - a check-free candidate still takes the unchanged path — no trigger, empty
   excerpt, ``(none)`` in the prompt;
 - a failure that does not request retrieval never reaches the excerpt, so a
-  grammar-only failure cannot manufacture retrieval intent.
+  grammar-only failure cannot manufacture retrieval intent;
+- a check the route answered and passed is never listed as a failure and never
+  fires the trigger, even though the persisted failed-check list carries it;
+- the excerpt stops at its line and character caps.
 
-Mutation that must turn ``test_prompt_names_the_checks_that_fired`` red:
-make ``should_trigger_fanout`` return an always-empty excerpt again.
+Mutations that must turn a test here red: make ``should_trigger_fanout``
+return an always-empty excerpt again (``test_prompt_names_the_checks_that_fired``),
+or drop the veto filter from ``check_results_from_failed_checks``
+(``test_a_passing_check_never_reaches_the_excerpt_or_the_decision``).
 """
 
 from __future__ import annotations
@@ -26,6 +31,8 @@ from typing import Any
 from imas_codex.standard_names.fanout.dispatcher import _build_proposer_user_prompt
 from imas_codex.standard_names.fanout.schemas import CandidateContext, FanoutScope
 from imas_codex.standard_names.fanout.trigger import (
+    _EXCERPT_MAX_CHARS,
+    _EXCERPT_MAX_CHECKS,
     check_results_from_failed_checks,
     should_trigger_fanout,
 )
@@ -137,4 +144,87 @@ def test_a_non_retrieval_failure_never_reaches_the_excerpt() -> None:
     assert "grammar_only" not in prompt, (
         "a check that does not request retrieval must not be presented to the "
         f"proposer as a reason to search; the prompt read:\n{prompt}"
+    )
+
+
+def test_a_passing_check_never_reaches_the_excerpt_or_the_decision() -> None:
+    """The persisted list carries passing checks; the trigger must not.
+
+    ``failed_check_mirror`` style entries are the union of the route's
+    vetoed checks and the checks it holds details for, so an
+    answered-and-passing check sits in the same list.  Its ``veto`` flag is
+    the only thing that separates it from a failure, and ignoring it both
+    reports a passing check as a failure and lets it fire fan-out.
+    """
+    failed = _check(check_id="bound_to_wrong_object", retrieval=True)
+    passed = _check(check_id="collapsed_two_quantities", retrieval=True)
+    persisted = [
+        _failed_check(),
+        _failed_check(
+            id="collapsed_two_quantities",
+            veto=False,
+            probability=0.05,
+            judgment_evidence="One quantity, carried intact.",
+        ),
+    ]
+
+    fires, excerpt = _trigger(persisted, [failed, passed])
+
+    assert fires is True, "the vetoed check still fires the trigger"
+    assert "bound_to_wrong_object" in excerpt
+    assert "collapsed_two_quantities" not in excerpt, (
+        "a check that was answered and passed must not be reported as a "
+        f"failure; the excerpt read:\n{excerpt}"
+    )
+    prompt = _build_proposer_user_prompt(_candidate(), excerpt, FanoutScope())
+    assert "collapsed_two_quantities" not in prompt, (
+        "a passing check reached the proposer's failure section; the prompt "
+        f"read:\n{prompt}"
+    )
+
+
+def test_a_lone_passing_check_cannot_fire_the_trigger() -> None:
+    """With every persisted check passing, there is no failure to fan out on."""
+    passed = _check(check_id="collapsed_two_quantities", retrieval=True)
+    persisted = [
+        _failed_check(id="collapsed_two_quantities", veto=False, probability=0.05)
+    ]
+
+    for threshold in (0.5, 0.0):
+        fires, excerpt = should_trigger_fanout(
+            checks=[passed],
+            check_results=check_results_from_failed_checks(persisted),
+            check_threshold=threshold,
+        )
+        assert fires is False, (
+            "a passing check fired the trigger at threshold "
+            f"{threshold}; the decision must rest on failures only"
+        )
+        assert excerpt == ""
+
+    prompt = _build_proposer_user_prompt(_candidate(), "", FanoutScope())
+    assert "(none)" in prompt
+
+
+def test_the_excerpt_honours_its_line_and_length_caps() -> None:
+    """A long failure list cannot grow the proposer's prompt without bound."""
+    checks = [_check(check_id=f"check_{i}", retrieval=True) for i in range(8)]
+    persisted = [
+        _failed_check(
+            id=f"check_{i}",
+            judgment_evidence="a reason long enough to overrun the per-line cap " * 8,
+        )
+        for i in range(8)
+    ]
+
+    fires, excerpt = _trigger(persisted, checks)
+
+    assert fires is True
+    lines = excerpt.splitlines()
+    assert len(lines) == _EXCERPT_MAX_CHECKS, (
+        f"expected the line cap {_EXCERPT_MAX_CHECKS}, got {len(lines)} lines"
+    )
+    assert all(len(line) <= _EXCERPT_MAX_CHARS for line in lines), (
+        "a line overran the character cap: "
+        f"{[len(line) for line in lines]} > {_EXCERPT_MAX_CHARS}"
     )
