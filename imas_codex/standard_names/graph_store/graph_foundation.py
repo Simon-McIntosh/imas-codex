@@ -262,7 +262,7 @@ def reclassify_standard_name_domain(
             "reason": f"unknown physics domain {domain!r}; one of: {valid}",
         }
 
-    with GraphClient() as gc:
+    with get_services().GraphClient() as gc:
         rows = list(
             gc.query(
                 "MATCH (name:StandardName {id: $id}) "

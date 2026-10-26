@@ -47,6 +47,18 @@ def test_package_imports_only_shared_module(package: str, module_path: Path) -> 
                     for alias in node.names
                     if alias.name in siblings
                 )
+            elif node.level == 2 and (
+                base == package or base.startswith(package + ".")
+            ):
+                target = base.removeprefix(package).lstrip(".").split(".")[0]
+                if target in siblings:
+                    forbidden.append((node.lineno, base))
+                elif not target:
+                    forbidden.extend(
+                        (node.lineno, alias.name)
+                        for alias in node.names
+                        if alias.name in siblings
+                    )
             elif node.level == 0 and base.startswith(prefix + "."):
                 if base.removeprefix(prefix + ".").split(".")[0] in siblings:
                     forbidden.append((node.lineno, base))
@@ -61,11 +73,13 @@ def test_package_imports_only_shared_module(package: str, module_path: Path) -> 
 
 def test_unwired_graph_services_refuse(monkeypatch: pytest.MonkeyPatch) -> None:
     """A standalone domain import reports missing wiring at first use."""
-    from imas_codex.standard_names.graph_store import graph_foundation
+    from imas_codex.standard_names.graph_store import graph_audits, graph_foundation
 
     monkeypatch.setattr(graph_foundation, "_services", None)
     with pytest.raises(RuntimeError, match="Graph services are not wired"):
         graph_foundation.get_services()
+    with pytest.raises(RuntimeError, match="Graph services are not wired"):
+        graph_audits.promote_stranded_reviewed(dry_run=True)
 
 
 def test_stranded_docs_predicate_is_complete() -> None:

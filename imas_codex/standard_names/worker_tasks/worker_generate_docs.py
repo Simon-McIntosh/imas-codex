@@ -893,7 +893,7 @@ async def process_generate_docs_batch(
             # Keep log preview short; pass full description to on_event so
             # terminal-aware clipping can use the available display width.
             _desc_log = result_obj.description[:100]
-            logger.info(
+            _worker_dependency("logger").info(
                 "\033[32mgenerate_docs\033[0m: %s — %s",
                 sn_id,
                 _desc_log,
