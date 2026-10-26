@@ -30,6 +30,13 @@
   ],
   "completed_at": "2026-10-26T21:06:07.593Z",
   "dispatched_at": "2026-10-26T21:00:23Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "srtj-fanout-excerpt-retire",
+      "recorded_at": "2026-10-26T21:08:30.391680+00:00"
+    }
+  },
   "findings": [
     {
       "file": "imas_codex/standard_names/fanout/trigger.py",
