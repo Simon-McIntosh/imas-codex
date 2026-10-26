@@ -47,6 +47,13 @@
   ],
   "completed_at": "2026-10-26T21:34:18.036Z",
   "dispatched_at": "2026-10-26T21:28:02Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the test proves the cap is applied; the budget values are tuning, not a contract to pin",
+      "recorded_at": "2026-10-26T21:40:06.593282+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/standard_names/test_fanout_review_feedback.py",
