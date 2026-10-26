@@ -17,21 +17,20 @@ marks phases done, and respects ``state.should_stop()``.
 
 from __future__ import annotations
 
-import asyncio
+import asyncio  # noqa: F401 - resolved by task modules through _worker_dependency
 import inspect as _inspect
-import json
-import re as _re
-from collections.abc import Callable
+import json  # noqa: F401 - resolved by task modules through _worker_dependency
+import re as _re  # noqa: F401 - resolved by worker_common through _worker_dependency
 from functools import cache as _cache, lru_cache  # noqa: F401
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from imas_codex.standard_names.budget import (
-    bind_attempt_exposure,
-    charge_billable_exception,
-    model_provider_exposure,
+    bind_attempt_exposure,  # noqa: F401
+    charge_billable_exception,  # noqa: F401
+    model_provider_exposure,  # noqa: F401
 )
 from imas_codex.standard_names.defaults import (
-    DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+    DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,  # noqa: F401
     SEMANTIC_SIM_GATE_MODEL,  # noqa: F401
     SEMANTIC_SIM_GATE_RESOLUTION_METHOD,  # noqa: F401
 )
@@ -40,17 +39,21 @@ from imas_codex.standard_names.defaults import (
 # ``_worker_dependency``, which reads this module's globals.
 from imas_codex.standard_names.provenance import detect_value_provenance  # noqa: F401
 from imas_codex.standard_names.source_paths import (
-    DD_PREFIX,
+    DD_PREFIX,  # noqa: F401
     encode_source_path,  # noqa: F401
-    strip_dd_prefix,
+    strip_dd_prefix,  # noqa: F401
 )
 
 from .worker_tasks import (
     worker_common as _moved_worker_common,
     worker_compose_and_validate as _moved_worker_compose_and_validate,
     worker_compose_batches as _moved_worker_compose_batches,
+    worker_enrich_parents as _moved_worker_enrich_parents,
     worker_extraction_and_enrichment as _moved_worker_extraction_and_enrichment,
+    worker_generate_docs as _moved_worker_generate_docs,
+    worker_refine_docs as _moved_worker_refine_docs,
     worker_refine_names as _moved_worker_refine_names,
+    worker_review_docs as _moved_worker_review_docs,
     worker_review_names as _moved_worker_review_names,
 )
 
@@ -59,9 +62,6 @@ def _worker_dependency(name: str):
     """Resolve a worker collaborator through the entrypoint."""
     return globals()[name]
 
-
-if TYPE_CHECKING:
-    from imas_codex.standard_names.budget import BudgetManager
 
 logger = _moved_worker_common.logger
 
@@ -1108,2090 +1108,295 @@ _DOCS_GEN_PARENT_CHILDREN_QUERY = (
 _DOCS_GEN_NEARBY_QUERY = _moved_worker_review_names._DOCS_GEN_NEARBY_QUERY
 
 
-def _enrich_dd_path_context(gc: Any, item: dict, source_path: str) -> None:
-    """Enrich an item dict with DD path context (keywords, clusters, version history).
-
-    Fetches lightweight context from the IMASNode for *source_path* and populates:
-
-    - ``dd_keywords``: list of keyword strings from the IMASNode.
-    - ``dd_clusters``: list of ``{label, description, scope}`` dicts.
-    - ``dd_version_history``: list of ``{version, change_type}`` dicts.
-    - ``dd_parent_description``: description of the parent structure node.
-
-    Best-effort — failures are debug-logged and the item is left without
-    the missing key.  Modifies *item* in-place.
-    """
-    try:
-        rows = list(gc.query(_DD_PATH_CONTEXT_QUERY, path=source_path))
-    except Exception:
-        logger.debug(
-            "_enrich_dd_path_context: query failed for %s", source_path, exc_info=True
-        )
-        return
-    if not rows:
-        return
-    row = rows[0]
-
-    # Keywords
-    kw = row.get("keywords")
-    if kw:
-        if isinstance(kw, str):
-            kw = [k.strip() for k in kw.split(",") if k.strip()]
-        if kw:
-            item["dd_keywords"] = kw
-
-    # DD ground truth — the authoritative definition the reviewer verifies
-    # documentation claims against (physics_accuracy grounding).
-    dd_doc = row.get("dd_documentation")
-    if dd_doc:
-        item["dd_documentation"] = dd_doc
-    dd_desc = row.get("dd_description")
-    if dd_desc:
-        item["dd_description"] = dd_desc
-    dd_units = row.get("dd_units")
-    if dd_units:
-        item["dd_units"] = dd_units
-
-    # Parent description
-    parent_desc = row.get("parent_description")
-    if parent_desc:
-        item["dd_parent_description"] = parent_desc
-
-    # Clusters
-    clusters_raw = row.get("clusters") or []
-    clusters = [
-        {
-            "label": c["label"],
-            "description": c.get("description") or "",
-            "scope": c.get("scope") or "",
-        }
-        for c in clusters_raw
-        if c.get("label")
-    ]
-    if clusters:
-        item["dd_clusters"] = clusters
-
-    # Version history
-    changes = row.get("changes") or []
-    version_history = []
-    for ch in changes:
-        change_id = ch.get("change_id") or ""
-        change_type = ch.get("change_type") or ""
-        parts = change_id.rsplit(":", 1)
-        version = parts[-1] if len(parts) >= 2 else ""
-        if version and change_type:
-            version_history.append({"version": version, "change_type": change_type})
-    if version_history:
-        item["dd_version_history"] = version_history
-
-
-def _enrich_for_docs_gen(
-    gc: Any, items: list[dict], cocos_params: dict | None = None
-) -> None:
-    """Enrich generate_docs items with DD source context.
-
-    Populates per-item keys (all guarded by ``if`` in the prompt template):
-
-    - ``source_paths``: bare DD paths (``dd:`` prefix stripped).
-    - ``dd_source_docs``: list of ``{id, documentation, unit}`` from linked
-      :class:`~imas_codex.graph.models.IMASNode` nodes.
-    - ``dd_aliases``: list of alias strings from IMASNodes.
-    - ``related_neighbours``: graph-relationship neighbours derived from the
-      first DD source path (via :func:`_related_path_neighbours`).
-    - ``nearest_peers``: vector-similar :class:`StandardName` neighbours from
-      :func:`_search_nearby_names` formatted as ``{tag, unit, physics_domain,
-      doc_short, cocos_label}``.
-    - ``cocos_label``: COCOS transformation type from the SN node.
-    - ``cocos_guidance``: rendered sign convention guidance for the LLM.
-    - ``sibling_family``: the HAS_PARENT sibling family (parent, anchor,
-      siblings) from :func:`~imas_codex.standard_names.context.fetch_sibling_family`
-      — drives the parallel-structure directive in the docs prompts.
-
-    Modifies *items* in-place.  Never raises — individual item failures are
-    debug-logged and the item is left without the missing key.
-    """
-    for item in items:
-        sn_id = item.get("id")
-        if not sn_id:
-            continue
-
-        # ── 1. Source paths + linked IMASNode documentation ───────────
-        try:
-            rows = list(gc.query(_DOCS_GEN_ENRICH_QUERY, sn_id=sn_id))
-        except Exception:
-            logger.debug(
-                "_enrich_for_docs_gen: graph query failed for %s",
-                sn_id,
-                exc_info=True,
-            )
-            continue
-
-        if not rows:
-            continue
-        row = rows[0]
-
-        raw_paths = row.get("source_paths") or []
-        if isinstance(raw_paths, str):
-            raw_paths = [raw_paths]
-        source_paths = [
-            strip_dd_prefix(p) for p in raw_paths if p and isinstance(p, str)
-        ]
-        if source_paths:
-            item["source_paths"] = source_paths
-
-        dd_nodes = [n for n in (row.get("dd_nodes") or []) if n and n.get("id")]
-        if dd_nodes:
-            from imas_codex.settings import get_dd_version
-            from imas_codex.standard_names.dd_resolutions import resolve_dd_rows
-
-            batch = resolve_dd_rows(
-                [
-                    {
-                        "path": node["id"],
-                        "unit": node.get("unit"),
-                        "documentation": node.get("documentation"),
-                    }
-                    for node in dd_nodes
-                ],
-                dd_version=get_dd_version(),
-            )
-            if batch.refusals:
-                logger.warning(
-                    "Documentation context omitted %d changed DD fields: %s",
-                    len(batch.refusals),
-                    ", ".join(
-                        f"{refusal.path}:{refusal.field.value}"
-                        for refusal in batch.refusals
-                    ),
-                )
-            item["dd_source_docs"] = [
-                {
-                    "id": n["id"],
-                    # Rich-first: the LLM-enriched description grounds the docs
-                    # prompts; fall back to terse source documentation only when
-                    # no enriched description exists.
-                    "documentation": n.get("description")
-                    or context.documentation
-                    or "",
-                    "unit": context.unit or "",
-                    "raw_dd_context": context.as_pipeline_item()["raw_dd_context"],
-                    "published_dd_context": context.as_pipeline_item()[
-                        "published_dd_context"
-                    ],
-                    "dd_resolution_ids": list(context.applied_resolution_ids),
-                    "dd_resolution_converged_ids": list(
-                        context.converged_resolution_ids
-                    ),
-                    "dd_resolution_manifest_digest": context.manifest_digest,
-                }
-                for resolved in batch.resolved
-                if resolved.row_index < 5
-                for n, context in [(dd_nodes[resolved.row_index], resolved.context)]
-            ]
-            aliases = [n["alias"] for n in dd_nodes if n.get("alias")]
-            if aliases:
-                item["dd_aliases"] = aliases
-
-            # Surface the DD ancestor lineage: the primary source leaf is often
-            # a terse template stub, while the quantity's physics + evaluation
-            # locus live on a parent quantity node up the HAS_PARENT chain
-            # (e.g. "…rotation velocity … at the pedestal top"). Mirrors the
-            # name-generation grounding so docs ground on the real physics/locus
-            # instead of the stub. Nearest rich ancestor first; capped.
-            primary = dd_nodes[0]["id"]
-            try:
-                anc_rows = list(gc.query(_ANCESTOR_CONTEXT_QUERY, path=primary))
-            except Exception:
-                anc_rows = []
-            lineage: list[dict[str, str]] = []
-            seen_anc: set[str] = set()
-            for a in anc_rows:
-                text = (a.get("description") or "").strip() or (
-                    a.get("documentation") or ""
-                ).strip()
-                if not text or text in seen_anc:
-                    continue
-                seen_anc.add(text)
-                lineage.append({"path": a.get("path") or "", "text": text})
-                if len(lineage) >= 4:
-                    break
-            if lineage:
-                item["ancestor_context"] = lineage
-
-        # ── 1a. Derived-parent children grounding ─────────────────────
-        # A derived parent has no DD source of its own; its concrete physics
-        # lives in its accepted children. Inject them so generate_docs writes a
-        # GENERALISED parent doc (the shared quantity) rather than over-
-        # specialising to one child's component/qualifier (observed defect:
-        # ``perturbed_velocity`` documented as its single ``normalized_parallel``
-        # child). The placeholder description is dropped (null) so only real
-        # child meaning grounds the prompt.
-        if row.get("origin") == "derived":
-            try:
-                from imas_codex.standard_names.defaults import (
-                    DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
-                )
-
-                kid_rows = list(gc.query(_DOCS_GEN_PARENT_CHILDREN_QUERY, sn_id=sn_id))
-                children = [
-                    {
-                        "name": k["name"],
-                        "description": (
-                            None
-                            if k.get("description")
-                            == DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER
-                            else k.get("description")
-                        ),
-                        "unit": k.get("unit"),
-                        "physics_domain": k.get("physics_domain"),
-                    }
-                    for k in kid_rows
-                ]
-                if children:
-                    item["derived_children"] = children
-            except Exception:
-                logger.debug(
-                    "_enrich_for_docs_gen: derived children fetch failed for %s",
-                    sn_id,
-                    exc_info=True,
-                )
-
-        # ── 1b. COCOS sign convention context ─────────────────────────
-        cocos_label = row.get("cocos_label")
-        if cocos_label:
-            item["cocos_label"] = cocos_label
-            if cocos_params:
-                try:
-                    from imas_codex.standard_names.context import (
-                        render_cocos_guidance,
-                    )
-
-                    item["cocos_guidance"] = render_cocos_guidance(
-                        cocos_label, cocos_params
-                    )
-                except Exception:
-                    logger.debug(
-                        "_enrich_for_docs_gen: cocos guidance render failed for %s",
-                        sn_id,
-                        exc_info=True,
-                    )
-
-        # ── 2. Graph-relationship neighbours from first DD source path ─
-        if source_paths:
-            try:
-                related = _related_path_neighbours(gc, source_paths[0])
-                if related:
-                    item["related_neighbours"] = related
-            except Exception:
-                logger.debug(
-                    "_enrich_for_docs_gen: related_neighbours failed for %s",
-                    sn_id,
-                    exc_info=True,
-                )
-
-        # ── 2b. DD path context (keywords, clusters, version history) ─
-        if source_paths:
-            try:
-                _enrich_dd_path_context(gc, item, source_paths[0])
-            except Exception:
-                logger.debug(
-                    "_enrich_for_docs_gen: dd_path_context failed for %s",
-                    sn_id,
-                    exc_info=True,
-                )
-
-        # ── 3. Vector-similar SN neighbours ───────────────────────────
-        description = item.get("description") or sn_id.replace("_", " ")
-        try:
-            peers_raw = _search_nearby_names(description, k=6)
-            peers = [
-                {
-                    "tag": f"name:{p['id']}",
-                    "unit": p.get("unit") or "",
-                    "physics_domain": p.get("physics_domain") or "",
-                    "doc_short": (p.get("description") or "")[:120],
-                    "cocos_label": p.get("cocos_label") or "",
-                }
-                for p in peers_raw
-                if p.get("id") and p.get("id") != sn_id
-            ][:5]
-            if peers:
-                item["nearest_peers"] = peers
-        except Exception:
-            logger.debug(
-                "_enrich_for_docs_gen: nearest_peers failed for %s",
-                sn_id,
-                exc_info=True,
-            )
-
-        # ── 4. Parent/child component context ─────────────────────────
-        try:
-            # Check if this SN is a component of a parent
-            parent_rows = list(
-                gc.query(
-                    """
-                    MATCH (sn:StandardName {id: $sn_id})-[r:HAS_PARENT]->(parent:StandardName)
-                    RETURN parent.id AS name,
-                           parent.description AS description,
-                           parent.documentation AS documentation,
-                           r.axis AS axis
-                    LIMIT 1
-                    """,
-                    sn_id=sn_id,
-                )
-            )
-            if parent_rows:
-                p = parent_rows[0]
-                item["parent_sn"] = {
-                    "name": p["name"],
-                    "description": p.get("description") or "",
-                    "documentation": p.get("documentation") or "",
-                }
-                item["component_axis"] = p.get("axis") or ""
-
-            # Check if this SN has children (is a parent)
-            child_rows = list(
-                gc.query(
-                    """
-                    MATCH (child:StandardName)-[r:HAS_PARENT]->(sn:StandardName {id: $sn_id})
-                    RETURN child.id AS name,
-                           child.description AS description,
-                           r.axis AS axis
-                    ORDER BY child.id
-                    """,
-                    sn_id=sn_id,
-                )
-            )
-            if child_rows:
-                from imas_codex.standard_names.families import sort_by_axis_convention
-
-                child_dicts = [
-                    {
-                        "name": c["name"],
-                        "description": c.get("description") or "",
-                        "axis": c.get("axis") or "",
-                    }
-                    for c in child_rows
-                ]
-                item["child_components"] = sort_by_axis_convention(child_dicts)
-        except Exception:
-            logger.debug(
-                "_enrich_for_docs_gen: component context failed for %s",
-                sn_id,
-                exc_info=True,
-            )
-
-        # ── 5. Derivative / base-quantity context ─────────────────────────
-        try:
-            from imas_codex.standard_names.families import DD_DERIVATIVE_MAP
-
-            parent_sn_data = item.get("parent_sn")
-            if parent_sn_data:
-                parent_name = parent_sn_data["name"]
-                # Query parent unit and sibling derivatives sharing same parent
-                bq_rows = list(
-                    gc.query(
-                        """
-                        MATCH (parent:StandardName {id: $parent_name})
-                        OPTIONAL MATCH (sib:StandardName)-[:HAS_PARENT]->(parent)
-                        WHERE sib.id <> $sn_id
-                        WITH parent, collect(sib.id) AS siblings
-                        RETURN parent.unit AS unit, siblings
-                        """,
-                        parent_name=parent_name,
-                        sn_id=sn_id,
-                    )
-                )
-                if bq_rows:
-                    bq_row = bq_rows[0]
-                    item["base_quantity"] = {
-                        "name": parent_name,
-                        "description": parent_sn_data.get("description") or "",
-                        "documentation": parent_sn_data.get("documentation") or "",
-                        "unit": bq_row.get("unit") or "",
-                    }
-                    if sn_id in DD_DERIVATIVE_MAP:
-                        numerator, denominator = DD_DERIVATIVE_MAP[sn_id]
-                        raw_siblings = bq_row.get("siblings") or []
-                        siblings = [s for s in raw_siblings if s]
-                        item["derivative_context"] = {
-                            "numerator": numerator,
-                            "denominator": denominator,
-                            "siblings": siblings,
-                        }
-        except Exception:
-            logger.debug(
-                "_enrich_for_docs_gen: derivative context failed for %s",
-                sn_id,
-                exc_info=True,
-            )
-
-        # ── 6. Sibling-family (parallel-structure) context ─────────────
-        try:
-            from imas_codex.standard_names.context import fetch_sibling_family
-
-            family = fetch_sibling_family(sn_id, gc=gc)
-            if family and family.get("siblings"):
-                item["sibling_family"] = family
-        except Exception:
-            logger.debug(
-                "_enrich_for_docs_gen: sibling family failed for %s",
-                sn_id,
-                exc_info=True,
-            )
-
-
-def _nearby_names_for_docs_gen(gc: Any, items: list[dict]) -> list[dict]:
-    """Return accepted StandardNames in the same physics domain(s) as *items*.
-
-    Queries up to 20 accepted SNs per unique domain found across the batch.
-    Results are deduplicated and capped at 40 total.  Used to populate the
-    batch-level ``nearby_existing_names`` context key in
-    :func:`process_generate_docs_batch`.
-    """
-    domains: set[str] = set()
-    for item in items:
-        dom = item.get("physics_domain")
-        if isinstance(dom, list):
-            domains.update(dom)
-        elif dom:
-            domains.add(dom)
-
-    nearby: list[dict] = []
-    seen_ids: set[str] = set()
-    batch_ids: set[str] = {item["id"] for item in items if item.get("id")}
-
-    for domain in sorted(domains):
-        # Use the first batch item id as the exclusion anchor; the query
-        # already uses != so any id from the batch suffices.
-        anchor = next(iter(batch_ids), "")
-        try:
-            rows = list(gc.query(_DOCS_GEN_NEARBY_QUERY, domain=domain, sn_id=anchor))
-        except Exception:
-            logger.debug(
-                "_nearby_names_for_docs_gen: query failed for domain=%s",
-                domain,
-                exc_info=True,
-            )
-            continue
-        for r in rows:
-            nid = r.get("id")
-            if nid and nid not in seen_ids and nid not in batch_ids:
-                seen_ids.add(nid)
-                nearby.append(dict(r))
-                if len(nearby) >= 40:
-                    break
-        if len(nearby) >= 40:
-            break
-
-    return nearby
-
-
-def _fill_template_sentence(sentence: str, fields: dict[str, str]) -> str:
-    """Substitute a name's own segments into one template sentence.
-
-    Every ``{placeholder}`` the sentence carries is filled from the name. A
-    sentence whose name supplies no value for one of its placeholders renders
-    nothing, so a half-filled opening is never written.
-    """
-    filled = sentence.strip()
-    for placeholder in set(_re.findall(r"\{([^{}]+)\}", filled)):
-        if placeholder not in fields:
-            return ""
-        filled = filled.replace(f"{{{placeholder}}}", fields[placeholder])
-    return filled
-
-
-def _instantiated_template_sentences(
-    name: str, templates: tuple[Any, ...]
-) -> tuple[str | None, tuple[str, ...]]:
-    """Fill the template sentences the grammar selects for one name.
-
-    The grammar owns which sentences a name selects and in what order: each
-    selected template's opening, then its note once per distinct note. Each
-    sentence renders only where the name itself supplies its placeholders, so
-    a name that does not fill its template's fields keeps the written opening.
-
-    Returns the first renderable opening and the notes that render.
-    """
-    from imas_standard_names.grammar.parser import ParseError, parse
-    from imas_standard_names.grammar.terms import template_sentences
-    from imas_standard_names.grammar.vocab_loaders import load_subjects
-
-    try:
-        ir = parse(name, strict=True).ir
-    except ParseError:
-        return None, ()
-    subject_tokens = [q.token for q in ir.qualifiers if q.token in load_subjects()]
-    fields: dict[str, str] = {}
-    if len(subject_tokens) == 1:
-        fields["subject"] = subject_tokens[0].replace("_", " ")
-    if ir.locus is not None:
-        fields["locus"] = (
-            f"{ir.locus.relation.value} {ir.locus.token.replace('_', ' ')}"
-        )
-    openings = {template.documentation.strip() for template in templates}
-    opening: str | None = None
-    notes: list[str] = []
-    for sentence in template_sentences(name):
-        filled = _fill_template_sentence(sentence, fields)
-        if not filled:
-            continue
-        if sentence.strip() in openings:
-            if opening is None:
-                opening = filled
-        elif filled not in notes:
-            notes.append(filled)
-    return opening, tuple(notes)
-
-
-def _documentation_with_registry_form(
-    name: str, documentation: str, conventions: dict[str, Any] | None
-) -> str:
-    """Write the selected openings, notes and canonical forms before persistence."""
-    from imas_standard_names.grammar.terms import AppliedConventions
-
-    from imas_codex.standard_names.docs_gates import (
-        _DISPLAY_MATH_RE,
-        HouseStyleFindingClass,
-        _is_canonical_equation,
-        _locus_registry_tokens,
-        _opening_line,
-        house_style_findings,
-        locus_definition_sentence,
+def _enrich_dd_path_context(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_generate_docs._enrich_dd_path_context."""
+    return _moved_worker_generate_docs._enrich_dd_path_context(
+        _worker_dependency, *args, **kwargs
     )
 
-    written = normalize_prose_spelling(documentation)
-    if not conventions:
-        return written
-    applied = AppliedConventions.model_validate(conventions)
-    opening, notes = _instantiated_template_sentences(name, applied.templates)
-    missing_notes = [note for note in notes if note not in written]
-    if opening is not None or missing_notes:
-        lines = written.splitlines()
-        model_opening = _opening_line(written)
-        first = next(
-            (i for i, line in enumerate(lines) if line.strip() == model_opening), None
-        )
-        if first is None:
-            written = "\n\n".join(
-                ([opening] if opening is not None else []) + missing_notes
-            )
-        else:
-            block = [opening if opening is not None else lines[first], *missing_notes]
-            lines[first : first + 1] = ["\n\n".join(block)]
-            written = "\n".join(lines)
 
-    concepts = {f"concept:{concept.token}": concept for concept in applied.concepts}
-    for match in reversed(list(_DISPLAY_MATH_RE.finditer(written))):
-        findings = house_style_findings(applied, documentation=f"$${match.group(1)}$$")
-        concept = next(
-            (
-                concepts[finding.registry_entry]
-                for finding in findings
-                if finding.registry_entry in concepts
-                and finding.finding_class
-                in {
-                    HouseStyleFindingClass.NON_CANONICAL_EQUATION,
-                    HouseStyleFindingClass.FORBIDDEN_EQUATION_VARIANT,
-                }
-            ),
-            None,
-        )
-        if concept is not None:
-            written = (
-                written[: match.start()]
-                + f"$${concept.equation}$$"
-                + written[match.end() :]
-            )
-
-    for concept in applied.concepts:
-        if concept.restates_equation and not any(
-            _is_canonical_equation(concept, match.group(1))
-            for match in _DISPLAY_MATH_RE.finditer(written)
-        ):
-            written = f"{written.rstrip()}\n\n$${concept.equation}$$"
-
-    locus_tokens = _locus_registry_tokens()
-    for concept in applied.concepts:
-        if concept.token not in locus_tokens:
-            continue
-        sentence = locus_definition_sentence(concept)
-        if sentence and sentence not in written:
-            written = f"{written.rstrip()}\n\n{sentence}"
-        break
-    return written
-
-
-async def process_generate_docs_batch(
-    batch: list[dict[str, Any]],
-    mgr: BudgetManager,
-    stop_event: asyncio.Event,
-    *,
-    on_event: Callable[[dict[str, Any]], None] | None = None,
-) -> int:
-    """Process a batch of accepted StandardNames for generate_docs.
-
-    For each item in the batch:
-
-    1. Enrich items with DD source context via :func:`_enrich_for_docs_gen`
-       and :func:`_nearby_names_for_docs_gen` (source_paths, dd_source_docs,
-       dd_aliases, nearest_peers, related_neighbours, nearby_existing_names).
-    2. Render prompt via ``render_prompt("sn/generate_docs_user", {...})`` with
-       reviewer feedback (reviewer_score_name, reviewer_comments_name),
-       chain history, and the new DD context as context.
-    3. Use ``get_model("sn-docs")`` — docs generation model.
-    4. Call ``acall_llm_structured`` with ``service="standard-names"`` and
-       response_model=``GeneratedDocs``.
-    5. Reserve budget and charge ``LLMCostEvent``.
-    6. Persist via ``persist_generated_docs`` (transitions docs_stage → 'drafted').
-    7. On error: ``release_generate_docs_failed_claims``.
-    8. Stream per-item progress: name + first 100 chars of generated description.
-
-    Returns count of items successfully processed.
-    """
-    import asyncio as _asyncio
-
-    from imas_codex.discovery.base.llm import acall_llm_structured
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.llm.prompt_loader import render_prompt
-    from imas_codex.settings import get_model, get_reasoning_effort
-    from imas_codex.standard_names.budget import LLMCostEvent
-    from imas_codex.standard_names.graph_ops import (
-        persist_generated_docs,
-        release_generate_docs_failed_claims,
-    )
-    from imas_codex.standard_names.models import GeneratedDocs
-
-    model = get_model("sn-docs")
-    processed = 0
-
-    # ── Enrich batch with DD context (source paths, docs, peers) ──────────
-    nearby_existing_names: list[dict] = []
-    compose_scored_examples: list[dict] = []
-    try:
-
-        def _do_enrich() -> list[dict]:
-            with GraphClient() as gc:
-                # Load COCOS singleton params for sign guidance rendering
-                cocos_params = None
-                try:
-                    from imas_codex.settings import get_dd_version
-
-                    dd_version = get_dd_version()
-                    cocos_rows = list(
-                        gc.query(
-                            _DOCS_GEN_COCOS_PARAMS_QUERY,
-                            ver=dd_version,
-                        )
-                    )
-                    if cocos_rows:
-                        cocos_params = cocos_rows[0]["cocos_params"]
-                except Exception:
-                    logger.debug(
-                        "process_generate_docs_batch: COCOS params load failed",
-                        exc_info=True,
-                    )
-                _enrich_for_docs_gen(gc, batch, cocos_params=cocos_params)
-                return _nearby_names_for_docs_gen(gc, batch)
-
-        nearby_existing_names = await _asyncio.to_thread(_do_enrich)
-    except Exception:
-        logger.debug("process_generate_docs_batch: enrichment failed", exc_info=True)
-
-    # ── Load scored examples for docs generation ──────────────────────
-    try:
-        from imas_codex.standard_names.example_loader import load_compose_examples
-
-        batch_domains = list(
-            {
-                item.get("physics_domain", "")
-                for item in batch
-                if item.get("physics_domain")
-            }
-        )
-
-        def _load_docs_scored_examples() -> list[dict]:
-            with GraphClient() as gc:
-                return load_compose_examples(
-                    gc, physics_domains=batch_domains, axis="docs"
-                )
-
-        compose_scored_examples = await _asyncio.to_thread(_load_docs_scored_examples)
-        if compose_scored_examples:
-            logger.info(
-                "generate_docs: Loaded %d scored examples (domains=%s)",
-                len(compose_scored_examples),
-                batch_domains or "all",
-            )
-    except Exception:
-        logger.debug(
-            "process_generate_docs_batch: scored examples load failed",
-            exc_info=True,
-        )
-
-    for item in batch:
-        if stop_event.is_set():
-            break
-
-        sn_id = item["id"]
-        claim_token = item.get("claim_token") or ""
-        chain_history = item.get("chain_history") or []
-        # The docs user template reads ``item.chain_history``. Keep it on the
-        # item so refined documentation sees predecessor history.
-        item["chain_history"] = chain_history
-
-        # ── Build prompt context ───────────────────────────────────────
-        # Merge the cached compose context so the docs SYSTEM prompt's
-        # ``_grammar_reference.md`` include renders the closed-vocabulary map
-        # (otherwise the grammar block is empty). Cached after first call.
-        from imas_codex.standard_names.context import (
-            build_compose_context,
-            conventions_context_for,
-            locus_context_for,
-        )
-
-        prompt_context: dict[str, Any] = {
-            **build_compose_context(),
-            "item": item,
-            "chain_history": chain_history,
-            "nearby_existing_names": nearby_existing_names,
-            "compose_scored_examples": compose_scored_examples,
-            # Locus-defining cross-link context: the ISN-registry gloss and
-            # position-defining standard quantity for this name's locus, so the
-            # docs prompt can link e.g. *_at_pedestal_top ->
-            # normalized_poloidal_flux_coordinate_of_pedestal. None when the name
-            # has no locus or the locus carries no gloss/defining quantity.
-            "locus_context": locus_context_for(sn_id),
-            "conventions": conventions_context_for(sn_id),
-        }
-
-        try:
-            user_prompt = render_prompt("sn/generate_docs_user", prompt_context)
-        except Exception:
-            logger.debug("generate_docs: prompt render failed for %s", sn_id)
-            user_prompt = (
-                f"Generate description and documentation for the IMAS standard name: "
-                f"{sn_id}\nKind: {item.get('kind', 'scalar')}\n"
-                f"Unit: {item.get('unit', '')}"
-            )
-
-        try:
-            system_prompt = render_prompt("sn/generate_docs_system", prompt_context)
-        except Exception:
-            logger.debug("generate_docs: system prompt render failed for %s", sn_id)
-            system_prompt = None
-
-        _messages = (
-            [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
-            ]
-            if system_prompt
-            else [{"role": "user", "content": user_prompt}]
-        )
-        maximum_exposure = model_provider_exposure(
-            model,
-            _messages,
-            response_model=GeneratedDocs,
-            provider_attempts=1,
-        )
-        lease = mgr.reserve(maximum_exposure, phase="generate_docs")
-        if lease is None:
-            continue
-
-        # ── LLM call ──────────────────────────────────────────────────
-        try:
-            llm_out = await acall_llm_structured(
-                model=model,
-                messages=_messages,
-                response_model=GeneratedDocs,
-                service="standard-names",
-                reasoning_effort=get_reasoning_effort("sn-docs"),
-                before_attempt=bind_attempt_exposure(
-                    lease, model, _messages, response_model=GeneratedDocs
-                ),
-            )
-
-            result_obj, cost, _tokens = llm_out
-
-            # Charge cost to lease
-            if lease:
-                _event = LLMCostEvent(
-                    model=model,
-                    tokens_in=getattr(llm_out, "input_tokens", 0) or 0,
-                    tokens_out=getattr(llm_out, "output_tokens", 0) or 0,
-                    tokens_cached_read=(getattr(llm_out, "cache_read_tokens", 0) or 0),
-                    tokens_cached_write=(
-                        getattr(llm_out, "cache_creation_tokens", 0) or 0
-                    ),
-                    sn_ids=(sn_id,),
-                    phase="generate_docs",
-                    service="standard-names",
-                )
-                lease.charge_event(cost, _event)
-
-            # ── Persist ───────────────────────────────────────────────
-            await _asyncio.to_thread(
-                persist_generated_docs,
-                sn_id=sn_id,
-                claim_token=claim_token,
-                description=normalize_description_text(result_obj.description),
-                documentation=_documentation_with_registry_form(
-                    sn_id, result_obj.documentation, prompt_context["conventions"]
-                ),
-                model=model,
-                run_id=mgr.run_id,
-            )
-            processed += 1
-
-            # ── Per-item progress ──────────────────────────────────────
-            # Keep log preview short; pass full description to on_event so
-            # terminal-aware clipping can use the available display width.
-            _desc_log = result_obj.description[:100]
-            logger.info(
-                "\033[32mgenerate_docs\033[0m: %s — %s",
-                sn_id,
-                _desc_log,
-            )
-
-            if on_event is not None:
-                on_event(
-                    {
-                        "pool": "generate_docs",
-                        "name": sn_id,
-                        "description": result_obj.description,
-                        "model": model,
-                        "cost": cost,
-                    }
-                )
-
-        except Exception as _doc_exc:
-            charge_billable_exception(
-                lease,
-                _doc_exc,
-                model=model,
-                sn_ids=(sn_id,),
-                phase="generate_docs",
-            )
-            # A "token mismatch or node not found" persist error is an EXPECTED
-            # race, not a failure: the orphan sweep reclaimed the item (docs
-            # generation can outrun the claim TTL) or another worker took it.
-            # The name is not lost — it stays at its prior stage and is
-            # re-claimed. Log it quietly; reserve the full traceback for
-            # genuinely unexpected errors.
-            if "token mismatch or node not found" in str(_doc_exc):
-                logger.warning(
-                    "generate_docs claim lost for %s (reclaimed mid-generation) "
-                    "— will retry on a later pass",
-                    sn_id,
-                )
-            else:
-                logger.exception("generate_docs failed for %s", sn_id)
-            try:
-                await _asyncio.to_thread(
-                    release_generate_docs_failed_claims,
-                    sn_ids=[sn_id],
-                    claim_token=claim_token,
-                )
-            except Exception:
-                logger.debug(
-                    "release_generate_docs_failed_claims also failed for %s",
-                    sn_id,
-                )
-        finally:
-            # Always return the unused portion of the lease to the pool.
-            # Without this the unspent remainder leaks every iteration and
-            # the pool exhausts at ~25 % of cost_limit.
-            if lease is not None:
-                try:
-                    lease.release_unused()
-                except Exception:
-                    pass
-
-    return processed
-
-
-async def process_enrich_parents_batch(
-    batch: list[dict[str, Any]],
-    mgr: BudgetManager,
-    stop_event: asyncio.Event,
-    *,
-    on_event: Callable[[dict[str, Any]], None] | None = None,
-) -> int:
-    """Synthesize real descriptions for placeholder derived parents.
-
-    A derived parent materialised by ``_materialize_derived_parent_rows`` keeps
-    the deterministic placeholder description until something writes a real one.
-    That placeholder deadlocks it: REVIEW_NAME drops it (no real description),
-    so it never earns a ``reviewer_score_name``, so generate_docs drops it too.
-    This worker breaks the deadlock — for each claimed parent:
-
-    1. Fetch the parent's live children (the concrete instances it abstracts
-       over) for grounding.
-    2. Render the children-grounded enrichment prompt and call
-       ``get_model("sn-parent-enrich")`` (compose-tier; generate_docs rewrites
-       the full documentation downstream).
-    3. Charge the budget lease.
-    4. Embed the synthesised description locally (free) so REVIEW_NAME's
-       semantic-similarity check has an embedding immediately.
-    5. Persist via :func:`persist_enriched_parent` (writes description +
-       embedding, routes ``name_stage`` to ``'drafted'``).
-
-    Returns the count of parents successfully enriched.
-    """
-    import asyncio as _asyncio
-
-    from imas_codex.discovery.base.llm import acall_llm_structured
-    from imas_codex.embeddings.description import embed_description
-    from imas_codex.llm.prompt_loader import render_prompt
-    from imas_codex.settings import get_model, get_reasoning_effort
-    from imas_codex.standard_names.budget import LLMCostEvent
-    from imas_codex.standard_names.context import build_compose_context
-    from imas_codex.standard_names.graph_ops import (
-        fetch_derived_parent_children,
-        persist_enriched_parent,
-        release_enrich_parents_claims,
-    )
-    from imas_codex.standard_names.models import EnrichedParentDescription
-
-    model = get_model("sn-parent-enrich")
-    processed = 0
-
-    # ── Fetch grounding children for the whole batch (one round-trip) ─────
-    try:
-        children_by_parent = await _asyncio.to_thread(
-            fetch_derived_parent_children, [item["id"] for item in batch]
-        )
-    except Exception:
-        logger.debug(
-            "process_enrich_parents_batch: children fetch failed", exc_info=True
-        )
-        children_by_parent = {}
-
-    # Static grammar/context block (cached after first render) so the system
-    # prompt's grammar include renders the closed-vocabulary map.
-    _base_ctx = build_compose_context()
-
-    for item in batch:
-        if stop_event.is_set():
-            break
-
-        sn_id = item["id"]
-        claim_token = item.get("claim_token") or ""
-        # The claim returns id as the StandardName id (== the name string).
-        item.setdefault("name", sn_id)
-        children = children_by_parent.get(sn_id, [])
-
-        # A parent with no live children cannot be grounded — skip (the claim
-        # gate already requires ≥1 child, so this is defensive). Release it.
-        if not children:
-            logger.debug("enrich_parents: %s has no live children — releasing", sn_id)
-            try:
-                await _asyncio.to_thread(
-                    release_enrich_parents_claims,
-                    sn_ids=[sn_id],
-                    claim_token=claim_token,
-                )
-            except Exception:
-                pass
-            continue
-
-        prompt_context: dict[str, Any] = {
-            **_base_ctx,
-            "item": item,
-            "children": children,
-        }
-        try:
-            user_prompt = render_prompt("sn/enrich_parent_user", prompt_context)
-        except Exception:
-            logger.debug("enrich_parents: user prompt render failed for %s", sn_id)
-            _child_lines = "\n".join(
-                f"- {c.get('name')}: {c.get('description') or ''}" for c in children
-            )
-            user_prompt = (
-                f"Describe the derived parent standard name '{sn_id}' "
-                f"(unit: {item.get('unit') or '—'}, kind: {item.get('kind') or 'scalar'}) "
-                f"by generalising over its children:\n{_child_lines}"
-            )
-        try:
-            system_prompt = render_prompt("sn/enrich_parent_system", prompt_context)
-        except Exception:
-            logger.debug("enrich_parents: system prompt render failed for %s", sn_id)
-            system_prompt = None
-
-        _messages = (
-            [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
-            ]
-            if system_prompt
-            else [{"role": "user", "content": user_prompt}]
-        )
-        maximum_exposure = model_provider_exposure(
-            model,
-            _messages,
-            response_model=EnrichedParentDescription,
-            provider_attempts=1,
-        )
-        lease = mgr.reserve(maximum_exposure, phase="enrich_parents")
-        if lease is None:
-            continue
-
-        try:
-            llm_out = await acall_llm_structured(
-                model=model,
-                messages=_messages,
-                response_model=EnrichedParentDescription,
-                service="standard-names",
-                reasoning_effort=get_reasoning_effort("sn-parent-enrich"),
-                before_attempt=bind_attempt_exposure(
-                    lease,
-                    model,
-                    _messages,
-                    response_model=EnrichedParentDescription,
-                ),
-            )
-            result_obj, cost, _tokens = llm_out
-
-            if lease:
-                _event = LLMCostEvent(
-                    model=model,
-                    tokens_in=getattr(llm_out, "input_tokens", 0) or 0,
-                    tokens_out=getattr(llm_out, "output_tokens", 0) or 0,
-                    tokens_cached_read=(getattr(llm_out, "cache_read_tokens", 0) or 0),
-                    tokens_cached_write=(
-                        getattr(llm_out, "cache_creation_tokens", 0) or 0
-                    ),
-                    sn_ids=(sn_id,),
-                    phase="enrich_parents",
-                    service="standard-names",
-                )
-                lease.charge_event(cost, _event)
-
-            description = normalize_description_text(
-                (result_obj.description or "").strip()
-            )
-
-            # Embed locally (free) so REVIEW_NAME has an embedding immediately.
-            embedding = await _asyncio.to_thread(embed_description, description)
-
-            await _asyncio.to_thread(
-                persist_enriched_parent,
-                sn_id=sn_id,
-                claim_token=claim_token,
-                description=description,
-                embedding=embedding,
-                model=model,
-                run_id=mgr.run_id,
-            )
-            processed += 1
-
-            if on_event is not None:
-                on_event(
-                    {
-                        "pool": "enrich_parents",
-                        "name": sn_id,
-                        "description": description,
-                        "model": model,
-                        "cost": cost,
-                    }
-                )
-
-        except Exception as _enrich_exc:
-            charge_billable_exception(
-                lease,
-                _enrich_exc,
-                model=model,
-                sn_ids=(sn_id,),
-                phase="enrich_parents",
-            )
-            if "token mismatch or node not found" in str(_enrich_exc):
-                logger.warning(
-                    "enrich_parents claim lost for %s (reclaimed mid-enrich) "
-                    "— will retry on a later pass",
-                    sn_id,
-                )
-            else:
-                logger.exception("enrich_parents failed for %s", sn_id)
-            try:
-                await _asyncio.to_thread(
-                    release_enrich_parents_claims,
-                    sn_ids=[sn_id],
-                    claim_token=claim_token,
-                )
-            except Exception:
-                logger.debug("release_enrich_parents_claims also failed for %s", sn_id)
-        finally:
-            if lease is not None:
-                try:
-                    lease.release_unused()
-                except Exception:
-                    pass
-
-    return processed
-
-
-_DOCS_REVIEW_VOLATILE_ITEM_FIELDS = frozenset(
-    {
-        "claim_token",
-        "claim_seq",
-        "claimed_at",
-        "docs_stage",
-        "run_id",
-        "reviewer_score_docs",
-        "reviewer_scores_docs",
-        "reviewer_comments_docs",
-        "reviewer_comments_per_dim_docs",
-        "reviewer_model_docs",
-        "docs_review_quorum_shortfall",
-        "docs_review_quorum_shortfall_at",
-        "reviewed_docs_at",
-    }
+_enrich_dd_path_context.__wrapped__ = (
+    _moved_worker_generate_docs._enrich_dd_path_context
 )
 
 
-def _canonical_docs_review_item(item: dict[str, Any]) -> dict[str, Any]:
-    """Copy the prompt-bearing fields while excluding claim/lifecycle state."""
-    import copy
-
-    return {
-        key: copy.deepcopy(value)
-        for key, value in item.items()
-        if key not in _DOCS_REVIEW_VOLATILE_ITEM_FIELDS
-    }
-
-
-def _bound_docs_review_dd_paths(item: dict[str, Any]) -> list[str]:
-    """List every DD path bound to the name, preserving source order.
-
-    Only DD paths are returned: the paths of ``dd`` source bindings, the
-    ``dd_source_paths`` a prepared review item carries, or ``source_paths``
-    entries carrying the ``dd:`` prefix. A facility signal path names no DD
-    text, so it never becomes a required DD path. ``dd_source_paths`` is this
-    function's own output for the item, kept beside the ``dd:``-stripped
-    ``source_paths`` a prepared review item is normalised to, so the DD
-    provenance survives that normalisation.
-    """
-    bindings = item.get("source_bindings") or []
-    paths = [
-        binding.get("dd_path") or binding.get("source_id") or binding.get("id")
-        for binding in bindings
-        if binding and binding.get("source_type") == "dd"
-    ]
-    if not paths:
-        paths = item.get("dd_source_paths")
-        if paths is None:
-            paths = item.get("source_paths") or []
-            if isinstance(paths, str):
-                try:
-                    paths = json.loads(paths)
-                except (json.JSONDecodeError, TypeError):
-                    paths = [paths]
-            if isinstance(paths, str):
-                paths = [paths]
-            paths = [
-                path
-                for path in paths
-                if isinstance(path, str) and path.startswith(DD_PREFIX)
-            ]
-    if isinstance(paths, str):
-        paths = [paths]
-    return list(
-        dict.fromkeys(
-            strip_dd_prefix(path) for path in paths if isinstance(path, str) and path
-        )
+def _enrich_for_docs_gen(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_generate_docs._enrich_for_docs_gen."""
+    return _moved_worker_generate_docs._enrich_for_docs_gen(
+        _worker_dependency, *args, **kwargs
     )
 
 
-def _set_docs_review_dd_source_paths(item: dict[str, Any]) -> list[str]:
-    """Normalise an item's DD paths, keeping the DD provenance beside them.
-
-    ``source_paths`` is set to the bare DD paths so the DD-source read and the
-    review prompt see paths without the ``dd:`` prefix. ``dd_source_paths``
-    records the same list, so a later :func:`_bound_docs_review_dd_paths` call
-    on the normalised item still recognises the paths as DD rather than as
-    unlabelled ``source_paths`` entries. A facility signal path is dropped:
-    it names no DD text.
-    """
-    dd_paths = _bound_docs_review_dd_paths(item)
-    item["dd_source_paths"] = dd_paths
-    item["source_paths"] = dd_paths
-    return dd_paths
+_enrich_for_docs_gen.__wrapped__ = _moved_worker_generate_docs._enrich_for_docs_gen
 
 
-def _has_dd_source_reference(item: dict[str, Any]) -> bool:
-    """Report whether an item names DD source text to compare claims against.
-
-    A DD path reaches the item either as a ``dd`` source binding or as a
-    ``dd:``-prefixed entry, which a binding of another source type can also
-    carry. Items whose sources are all derived or manual name no DD text, so
-    there is nothing for a claim comparison to read.
-    """
-    if _bound_docs_review_dd_paths(item):
-        return True
-    paths = item.get("source_paths")
-    entries: list[Any] = list(paths) if isinstance(paths, (list, tuple)) else []
-    bindings = item.get("source_bindings")
-    if isinstance(bindings, (list, tuple)):
-        entries.extend(bindings)
-    for entry in entries:
-        if isinstance(entry, str):
-            if entry.startswith(DD_PREFIX):
-                return True
-            continue
-        if isinstance(entry, dict) and any(
-            isinstance(entry.get(key), str) and entry[key].startswith(DD_PREFIX)
-            for key in ("dd_path", "source_id", "path", "id")
-        ):
-            return True
-    return False
-
-
-def _load_docs_review_source_item(sn_id: str) -> dict[str, Any]:
-    """Read the same prompt-bearing projection returned by a docs claim."""
-    from imas_codex.graph.client import GraphClient
-
-    with GraphClient() as gc:
-        rows = gc.query(
-            """
-            MATCH (sn:StandardName {id: $id})
-            OPTIONAL MATCH (sn)-[:HAS_UNIT]->(u:Unit)
-            OPTIONAL MATCH (sn)-[:IN_CLUSTER]->(c:IMASSemanticCluster)
-            RETURN sn.id AS id,
-                   sn.id AS name,
-                   sn.description AS description,
-                   sn.documentation AS documentation,
-                   sn.kind AS kind,
-                   coalesce(u.id, sn.unit) AS unit,
-                   c.id AS cluster_id,
-                   sn.physics_domain AS physics_domain,
-                   sn.validation_status AS validation_status,
-                   sn.tags AS tags,
-                   coalesce(sn.docs_chain_length, 0) AS docs_chain_length,
-                   sn.docs_stage AS docs_stage,
-                   sn.edit_mode AS edit_mode,
-                   sn.name_hint AS name_hint,
-                   sn.docs_hint AS docs_hint,
-                   sn.edit_reason AS edit_reason,
-                   sn.edit_origin AS edit_origin,
-                   sn.origin AS origin,
-                   sn.run_id AS run_id,
-                   sn.source_paths AS source_paths,
-                   [(source:StandardNameSource)-[:PRODUCED_NAME]->(sn) | {
-                       id: source.id,
-                       source_type: source.source_type,
-                       source_id: source.source_id,
-                       dd_path: source.dd_path,
-                       dd_version: source.dd_version
-                   }] AS source_bindings
-            """,
-            id=sn_id,
-        )
-    if len(rows) != 1:
-        raise ValueError(f"documentation review target {sn_id!r} is not unique")
-    return dict(rows[0])
-
-
-def _load_docs_review_parent_children(item: dict[str, Any]) -> list[dict[str, Any]]:
-    """Read the canonical live children for one derived parent candidate."""
-    if item.get("origin") != "derived":
-        return []
-    from imas_codex.graph.client import GraphClient
-
-    with GraphClient() as gc:
-        rows = gc.query(
-            """
-            MATCH (p:StandardName {id: $id, origin: 'derived'})
-            MATCH (c:StandardName)-[:HAS_PARENT]->(p)
-            WHERE NOT (coalesce(c.name_stage, '') IN
-                       ['superseded', 'exhausted', 'contested'])
-            WITH c ORDER BY c.id
-            RETURN collect({
-                name: c.id,
-                description: CASE WHEN c.description = $placeholder
-                    THEN null ELSE c.description END,
-                unit: c.unit,
-                physics_domain: c.physics_domain
-            })[..12] AS children
-            """,
-            id=item["id"],
-            placeholder=DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
-        )
-    return list(rows[0].get("children") or []) if rows else []
-
-
-def _load_docs_review_examples(item: dict[str, Any]) -> list[dict[str, Any]]:
-    """Read the scored documentation examples used by the reviewer prompt."""
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.example_loader import load_review_examples
-
-    domain = item.get("physics_domain") or ""
-    with GraphClient() as gc:
-        return list(load_review_examples(gc, physics_domains=[domain], axis="docs"))
-
-
-def _enrich_docs_review_dd_context(item: dict[str, Any]) -> None:
-    """Attach the same first-source DD context used at worker dispatch.
-
-    A name with no bound source has no DD path to read, which is a valid
-    state rather than an error: review proceeds on the name, description, and
-    documentation alone. Reaching for a first element that is not there would
-    abort preparation and fail the whole quorum for that name.
-    """
-    source_paths = item.get("source_paths") or []
-    if isinstance(source_paths, list):
-        first_source = source_paths[0] if source_paths else None
-    else:
-        first_source = source_paths
-    if isinstance(first_source, str):
-        first_source = strip_dd_prefix(first_source)
-    if not first_source:
-        return
-    from imas_codex.graph.client import GraphClient
-
-    with GraphClient() as gc:
-        _enrich_dd_path_context(gc, item, first_source)
-
-
-def _docs_review_request_identity(payload: dict[str, Any]) -> str:
-    """Hash a canonical rendered request and its priced reviewer sequence."""
-    import hashlib
-
-    serialized = json.dumps(
-        payload,
-        sort_keys=True,
-        separators=(",", ":"),
-        ensure_ascii=False,
-        allow_nan=False,
-    )
-    return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
-
-
-def _bounded_docs_escalation_factory(
-    *,
-    base_user_prompt: str,
-    system_prompt: str,
-    response_model: type[Any],
-    input_token_bound: int,
-) -> Callable[[list[dict[str, Any]]], str]:
-    """Render the canonical critique request within a proven input bound.
-
-    The canonical budget infrastructure proves input tokens are no greater
-    than the complete serialized UTF-8 byte length plus chat framing. This
-    factory binary-searches the critique prefix against that same complete
-    request serialization, so the actual escalator request can never exceed
-    the cataloged model input limit used for admission pricing.
-    """
-    if input_token_bound <= 0:
-        raise ValueError("escalator input token bound must be positive")
-    from imas_codex.standard_names.budget import _CHAT_FRAMING_TOKEN_ALLOWANCE
-
-    serialized_byte_bound = input_token_bound - _CHAT_FRAMING_TOKEN_ALLOWANCE
-    if serialized_byte_bound <= 0:
-        raise ValueError("escalator input allowance cannot cover chat framing")
-    marker = "\n\n## Prior reviewer critiques for authoritative escalation\n"
-    schema = response_model.model_json_schema()
-
-    def _serialized_size(user_prompt: str) -> int:
-        return len(
-            json.dumps(
-                {
-                    "messages": [
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": user_prompt},
-                    ],
-                    "response_schema": schema,
-                },
-                ensure_ascii=False,
-                sort_keys=True,
-                separators=(",", ":"),
-            ).encode("utf-8")
-        )
-
-    def _render(prior_reviews: list[dict[str, Any]]) -> str:
-        critique = json.dumps(
-            prior_reviews,
-            ensure_ascii=True,
-            sort_keys=True,
-            separators=(",", ":"),
-        )
-        prefix = base_user_prompt + marker
-        if _serialized_size(prefix) > serialized_byte_bound:
-            raise ValueError("base escalation request exceeds catalog input bound")
-        low, high = 0, len(critique)
-        while low < high:
-            midpoint = (low + high + 1) // 2
-            if _serialized_size(prefix + critique[:midpoint]) <= serialized_byte_bound:
-                low = midpoint
-            else:
-                high = midpoint - 1
-        return prefix + critique[:low]
-
-    return _render
-
-
-async def prepare_docs_review_request(item: dict[str, Any]) -> dict[str, Any]:
-    """Render and price one canonical docs-review request without mutation.
-
-    This is the sole docs-review prompt construction path. Admission and the
-    claimed worker both call it, so context, templates, reviewer models,
-    response schema, effort settings, possible escalator exposure, and request
-    identity cannot drift through duplicated preparation code.
-    """
-    import asyncio as _asyncio
-
-    from imas_codex.llm.prompt_loader import render_prompt
-    from imas_codex.settings import (
-        get_model,
-        get_sn_review_disagreement_threshold,
-        get_sn_review_docs_models,
-        get_sn_review_escalation_reasoning_effort,
-        get_sn_review_names_models,
-        get_sn_review_reasoning_effort,
-    )
-    from imas_codex.standard_names.context import (
-        conventions_context_for,
-        fetch_review_neighbours,
-    )
-    from imas_codex.standard_names.models import (
-        StandardNameQualityReviewDocsBatch,
-        StandardNameQualityReviewDocsParentBatch,
-    )
-
-    source_item = item
-    if item.get("docs_stage") in {"accepted", "reviewed", "exhausted"}:
-        source_item = await _asyncio.to_thread(
-            _load_docs_review_source_item, str(item.get("id") or "")
-        )
-    prepared_item = _canonical_docs_review_item(source_item)
-    try:
-        review_models = list(get_sn_review_docs_models())
-    except (ValueError, IndexError):
-        review_models = []
-    if not review_models:
-        try:
-            review_models = list(get_sn_review_names_models())
-        except (ValueError, IndexError):
-            review_models = []
-    if not review_models:
-        review_models = [get_model("sn-refine")]
-
-    try:
-        disagreement_threshold = get_sn_review_disagreement_threshold()
-    except Exception:
-        disagreement_threshold = 0.20
-
-    try:
-        children = await _asyncio.to_thread(
-            _load_docs_review_parent_children, prepared_item
-        )
-    except Exception:
-        logger.debug("review_docs: parent children fetch failed", exc_info=True)
-        children = []
-    if children:
-        prepared_item["derived_children"] = children
-
-    try:
-        neighbours = await _asyncio.to_thread(fetch_review_neighbours, prepared_item)
-    except Exception:
-        logger.debug(
-            "review_docs: neighbour fetch failed for %s",
-            prepared_item.get("id"),
-            exc_info=True,
-        )
-        neighbours = {
-            "vector_neighbours": [],
-            "same_base_neighbours": [],
-            "same_path_neighbours": [],
-        }
-    try:
-        review_examples = await _asyncio.to_thread(
-            _load_docs_review_examples, prepared_item
-        )
-    except Exception:
-        logger.debug(
-            "review_docs: scored-example load failed for %s",
-            prepared_item.get("id"),
-            exc_info=True,
-        )
-        review_examples = []
-    try:
-        await _asyncio.to_thread(_enrich_docs_review_dd_context, prepared_item)
-    except Exception:
-        logger.debug(
-            "review_docs: dd_path_context failed for %s",
-            prepared_item.get("id"),
-            exc_info=True,
-        )
-
-    prompt_context: dict[str, Any] = {
-        "item": prepared_item,
-        **neighbours,
-        "review_scored_examples": review_examples,
-    }
-    prompt_context["conventions"] = conventions_context_for(prepared_item["id"])
-    is_parent = bool(prepared_item.get("derived_children"))
-    user_template = "sn/review_docs_parent_user" if is_parent else "sn/review_docs_user"
-    system_template = (
-        "sn/review_docs_parent_system" if is_parent else "sn/review_docs_system"
-    )
-    user_prompt = render_prompt(user_template, prompt_context)
-    system_prompt = render_prompt(system_template, prompt_context)
-    if is_parent and prompt_context["conventions"]:
-        user_prompt += "\n\n" + render_prompt("sn/_conventions", prompt_context)
-    response_model = (
-        StandardNameQualityReviewDocsParentBatch
-        if is_parent
-        else StandardNameQualityReviewDocsBatch
-    )
-    rubric_dims = (
-        ("generalization", "positioning", "physics_accuracy", "clarity")
-        if is_parent
-        else (
-            "description_quality",
-            "documentation_quality",
-            "completeness",
-            "physics_accuracy",
-        )
-    )
-    base_messages = [
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": user_prompt},
-    ]
-    mandatory_exposures = [
-        model_provider_exposure(
-            model,
-            base_messages,
-            response_model=response_model,
-            provider_attempts=1,
-        )
-        for model in review_models[:2]
-    ]
-    conditional_exposure = 0.0
-    escalation_input_token_bound = None
-    escalation_prompt_factory = None
-    if len(review_models) >= 3:
-        from imas_codex.discovery.base.llm import get_catalog_model_info
-
-        catalog_bound = get_catalog_model_info(review_models[2]).get("max_input_tokens")
-        if not isinstance(catalog_bound, int) or catalog_bound <= 0:
-            raise ValueError("escalator catalog input allowance is not bounded")
-        escalation_input_token_bound = catalog_bound
-        escalation_prompt_factory = _bounded_docs_escalation_factory(
-            base_user_prompt=user_prompt,
-            system_prompt=system_prompt,
-            response_model=response_model,
-            input_token_bound=catalog_bound,
-        )
-        worst_case_prompt = escalation_prompt_factory(
-            [{"critique": "x" * catalog_bound}]
-        )
-        escalation_messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": worst_case_prompt},
-        ]
-        conditional_exposure = model_provider_exposure(
-            review_models[2],
-            escalation_messages,
-            response_model=response_model,
-            provider_attempts=1,
-        )
-    exposures = [*mandatory_exposures]
-    if conditional_exposure > 0:
-        exposures.append(conditional_exposure)
-
-    reasoning_effort = get_sn_review_reasoning_effort()
-    escalation_reasoning_effort = get_sn_review_escalation_reasoning_effort()
-    identity_payload = {
-        "id": prepared_item["id"],
-        "models": review_models,
-        "messages": base_messages,
-        "response_schema": response_model.model_json_schema(),
-        "rubric_dims": list(rubric_dims),
-        "disagreement_threshold": disagreement_threshold,
-        "reasoning_effort": reasoning_effort,
-        "escalation_reasoning_effort": escalation_reasoning_effort,
-        "expected_exposures": exposures,
-        "mandatory_exposures": mandatory_exposures,
-        "conditional_exposure": conditional_exposure,
-        "escalation_input_token_bound": escalation_input_token_bound,
-    }
-    veto_item = _canonical_docs_review_item(prepared_item)
-    _set_docs_review_dd_source_paths(veto_item)
-    if veto_item["source_paths"]:
-        from imas_codex.standard_names.review.pipeline import _fetch_review_dd_context
-
-        try:
-            await _asyncio.to_thread(_fetch_review_dd_context, [veto_item])
-        except Exception:
-            logger.warning(
-                "review_docs: DD source batch read failed for %s",
-                veto_item["id"],
-                exc_info=True,
-            )
-    return {
-        **identity_payload,
-        "veto_item": veto_item,
-        "request_identity": _docs_review_request_identity(identity_payload),
-        "expected_exposure": sum(exposures),
-        "provider_policy_ceiling_is_separate": True,
-        "response_model": response_model,
-        "user_prompt": user_prompt,
-        "system_prompt": system_prompt,
-        "escalation_prompt_factory": escalation_prompt_factory,
-    }
-
-
-async def _release_docs_review_claim(item: dict[str, Any]) -> None:
-    """Return one unreviewed documentation claim to the drafted pool."""
-    import asyncio as _asyncio
-
-    from imas_codex.standard_names.graph_ops import release_review_docs_failed_claims
-
-    claim_token = item.get("claim_token") or ""
-    if not claim_token:
-        return
-    await _asyncio.to_thread(
-        release_review_docs_failed_claims,
-        sn_ids=[item["id"]],
-        claim_token=claim_token,
-        from_stage="drafted",
-        to_stage="drafted",
+def _nearby_names_for_docs_gen(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_generate_docs._nearby_names_for_docs_gen."""
+    return _moved_worker_generate_docs._nearby_names_for_docs_gen(
+        _worker_dependency, *args, **kwargs
     )
 
 
-def _documentation_conformance_note(item: dict[str, Any]) -> str | None:
-    """Name the registry findings that bar a reviewed document from acceptance.
+_nearby_names_for_docs_gen.__wrapped__ = (
+    _moved_worker_generate_docs._nearby_names_for_docs_gen
+)
 
-    A review score judges the prose; it does not check the opening against the
-    selected template, a forbidden equation variant, or an equation for a
-    registered concept written other than in its canonical form. Those are
-    decided here, on the same findings the audit report carries. A canonical
-    equation is the converged statement and is accepted. A name the grammar cannot parse
-    selects no registry entry and so carries no finding.
-    """
-    from imas_standard_names.grammar.parser import ParseError
 
-    from imas_codex.standard_names.docs_gates import (
-        HouseStyleFindingClass,
-        conformance_findings,
-    )
-
-    barring = {
-        HouseStyleFindingClass.TEMPLATE_OPENING,
-        HouseStyleFindingClass.FORBIDDEN_EQUATION_VARIANT,
-        HouseStyleFindingClass.FORBIDDEN_LOCUS_GLOSS,
-        HouseStyleFindingClass.LOCUS_DEFINITION,
-        HouseStyleFindingClass.NON_CANONICAL_EQUATION,
-    }
-    try:
-        findings = conformance_findings(
-            item["id"],
-            description=item.get("description") or "",
-            documentation=item.get("documentation") or "",
-        )
-    except ParseError:
-        logger.debug("review_docs: no registry selection for %s", item["id"])
-        return None
-    details = [
-        f"{finding.finding_class.value}: {finding.detail} [{finding.registry_entry}]"
-        for finding in findings
-        if finding.finding_class in barring
-    ]
-    if not details:
-        return None
-    return (
-        "documentation does not conform to the conventions registry — "
-        "correct each finding: " + "; ".join(details)
+def _fill_template_sentence(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_generate_docs._fill_template_sentence."""
+    return _moved_worker_generate_docs._fill_template_sentence(
+        _worker_dependency, *args, **kwargs
     )
 
 
-async def _documentation_banned_prose_note(
-    item: dict[str, Any], mgr: BudgetManager
-) -> str | None:
-    """Hold a policy candidate only when prose adjudication confirms it."""
-    from imas_codex.settings import get_model, get_reasoning_effort
-    from imas_codex.standard_names.prose_adjudicator import _adjudicate_one
-    from imas_codex.standard_names.prose_policy import (
-        BANNED_PROSE_PATTERNS,
-        banned_prose_findings,
+_fill_template_sentence.__wrapped__ = (
+    _moved_worker_generate_docs._fill_template_sentence
+)
+
+
+def _instantiated_template_sentences(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_generate_docs._instantiated_template_sentences."""
+    return _moved_worker_generate_docs._instantiated_template_sentences(
+        _worker_dependency, *args, **kwargs
     )
 
-    text = f"{item.get('description') or ''}\n{item.get('documentation') or ''}"
-    findings = banned_prose_findings(text)
-    if not any(findings.values()):
-        return None
-    try:
-        genuine = await _adjudicate_one(
-            get_model("sn-prose-adjudicator"),
-            item["id"],
-            text,
-            findings,
-            reasoning_effort=get_reasoning_effort("sn-prose-adjudicator", "low"),
-            service="standard-names",
-            budget_manager=mgr,
-        )
-    except Exception:
-        logger.warning(
-            "review_docs: prose adjudication failed for %s; holding candidate",
-            item["id"],
-            exc_info=True,
-        )
-        genuine = True
-    if not genuine:
-        return None
-    for category, patterns in BANNED_PROSE_PATTERNS.items():
-        for pattern in patterns:
-            if match := pattern.search(text):
-                return f"banned prose ({category}): {match.group(0)!r}"
-    return None
+
+_instantiated_template_sentences.__wrapped__ = (
+    _moved_worker_generate_docs._instantiated_template_sentences
+)
 
 
-async def _documentation_contradiction_note(
-    item: dict[str, Any], mgr: BudgetManager
-) -> str | None:
-    """Compare authored claims with bound DD text before accepting them."""
-    from imas_codex.settings import get_model
-    from imas_codex.standard_names.budget import LLMCostEvent
-    from imas_codex.standard_names.review import jev_review
-
-    required_paths = _bound_docs_review_dd_paths(item)
-    sources = item.get("dd_source_docs") or []
-    if not sources and not required_paths and item.get("dd_documentation"):
-        sources = [{"documentation": item["dd_documentation"]}]
-    present_paths = {
-        strip_dd_prefix(str(source.get("id") or source.get("path") or ""))
-        for source in sources
-    }
-    missing_paths = [path for path in required_paths if path not in present_paths]
-    if missing_paths:
-        logger.warning(
-            "review_docs: DD source text missing for %s at %s",
-            item["id"],
-            ", ".join(missing_paths),
-        )
-        return "DD source text unavailable at " + ", ".join(missing_paths)
-    empty_paths = [
-        str(source.get("id") or source.get("path") or "DD source")
-        for source in sources
-        if not (source.get("documentation") or source.get("description"))
-    ]
-    if empty_paths:
-        logger.warning(
-            "review_docs: DD source text empty for %s at %s",
-            item["id"],
-            ", ".join(empty_paths),
-        )
-        return "DD source text unavailable at " + ", ".join(empty_paths)
-    if not sources:
-        if _has_dd_source_reference(item):
-            logger.warning("review_docs: DD source text unavailable for %s", item["id"])
-            return "DD source text unavailable; claim comparison could not run"
-        return None
-
-    states = [
-        jev_review.build_docs_state({**item, "dd_source_docs": [source]})
-        for source in sources
-    ]
-    claims = states[0]["documentation_claims"]
-    if not claims:
-        return None
-    questions = {
-        key: question
-        for key, question in jev_review.docs_question_table(
-            jev_review._default_checks(), claims
-        ).items()
-        if key.startswith("check:claim_contradicts_source:")
-    }
-    lease = mgr.reserve(0.001 * len(sources), phase="review_docs")
-    if lease is None:
-        logger.warning("review_docs: claim comparison unfunded for %s", item["id"])
-        return "claim comparison unavailable: run budget refused the call"
-    try:
-        model = get_model("sn-judge")
-        results, _ = await jev_review.decide_batch(
-            states, questions, model=model, service=jev_review.SERVICE
-        )
-        if len(results) != len(sources):
-            logger.warning("review_docs: claim result count differs for %s", item["id"])
-            return "claim comparison unavailable: Jev omitted a DD source"
-        contradictions = []
-        unavailable = []
-        for source, state, result in zip(sources, states, results, strict=True):
-            source_path = str(source.get("id") or source.get("path") or "DD source")
-            if result is None:
-                unavailable.append(source_path)
-                continue
-            answers, spent = result
-            lease.charge_event(
-                spent,
-                LLMCostEvent(
-                    model=model,
-                    tokens_in=0,
-                    tokens_out=0,
-                    sn_ids=(item["id"],),
-                    phase="review_docs",
-                ),
-            )
-            verdict = jev_review.aggregate_docs_review(
-                state, jev_review._default_checks(), answers
-            )
-            if verdict["contradiction_veto"]:
-                dd_text = source.get("documentation") or source.get("description") or ""
-                contradictions.append(
-                    f"{source_path}: {verdict['contradiction_reason']}; DD: {dd_text}"
-                )
-            elif any(
-                answer is None
-                or answer.get("choice") not in {"supports", "says nothing"}
-                for answer in verdict["claim_answers"]
-            ):
-                unavailable.append(source_path)
-        if contradictions:
-            return "contradicts source: " + " | ".join(contradictions)
-        if unavailable:
-            logger.warning(
-                "review_docs: claim answer missing for %s at %s",
-                item["id"],
-                ", ".join(unavailable),
-            )
-            return "claim comparison unavailable at " + ", ".join(unavailable)
-        return None
-    except Exception:
-        logger.warning(
-            "review_docs: claim comparison errored for %s; holding candidate",
-            item["id"],
-            exc_info=True,
-        )
-        return "claim comparison unavailable: Jev error"
-    finally:
-        lease.release_unused()
-
-
-async def process_review_docs_batch(
-    batch: list[dict[str, Any]],
-    mgr: BudgetManager,
-    stop_event: asyncio.Event,
-    *,
-    on_event: Callable[[dict[str, Any]], None] | None = None,
-) -> int:
-    """Process a batch of drafted StandardNames for docs review (RD-quorum).
-
-    Mirrors :func:`process_review_name_batch` for the docs axis: runs the
-    full ``[sn.review.docs].models`` chain (cycle 0 + cycle 1 unconditionally,
-    cycle 2 only when per-dim disagreement exceeds threshold). Persists each
-    cycle as a ``StandardNameReview`` node and transitions ``docs_stage`` via
-    :func:`~imas_codex.standard_names.graph_ops.persist_reviewed_docs`.
-
-    Returns count of items successfully reviewed.
-    """
-    import asyncio as _asyncio
-
-    from imas_codex.discovery.base.llm import acall_llm_structured
-    from imas_codex.standard_names.defaults import (
-        DEFAULT_MIN_SCORE,
-        DEFAULT_REFINE_ROTATIONS,
-    )
-    from imas_codex.standard_names.graph_ops import (
-        persist_reviewed_docs,
-        update_review_aggregates,
+def _documentation_with_registry_form(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_generate_docs._documentation_with_registry_form."""
+    return _moved_worker_generate_docs._documentation_with_registry_form(
+        _worker_dependency, *args, **kwargs
     )
 
-    processed = 0
 
-    for item in batch:
-        if stop_event.is_set():
-            await _release_docs_review_claim(item)
-            continue
+_documentation_with_registry_form.__wrapped__ = (
+    _moved_worker_generate_docs._documentation_with_registry_form
+)
 
-        sn_id = item["id"]
-        claim_token = item.get("claim_token") or ""
-        lease = None
 
-        try:
-            request = await prepare_docs_review_request(item)
+async def process_generate_docs_batch(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_generate_docs.process_generate_docs_batch."""
+    return await _moved_worker_generate_docs.process_generate_docs_batch(
+        _worker_dependency, *args, **kwargs
+    )
 
-            from functools import partial
 
-            from imas_codex.standard_names.review.cascade import adjudicate_review
+process_generate_docs_batch.__wrapped__ = (
+    _moved_worker_generate_docs.process_generate_docs_batch
+)
 
-            quorum = await adjudicate_review(
-                "docs",
-                request.get("veto_item", item),
-                request["models"],
-                partial(
-                    _persisting_quorum_cycles,
-                    sn_id=sn_id,
-                    review_axis="docs",
-                    response_model=request["response_model"],
-                    user_prompt=request["user_prompt"],
-                    system_prompt=request["system_prompt"],
-                    disagreement_threshold=request["disagreement_threshold"],
-                    rubric_dims=tuple(request["rubric_dims"]),
-                    lease=lease,
-                    budget_manager=mgr,
-                    phase="review_docs",
-                    acall_llm_structured=acall_llm_structured,
-                    reasoning_effort=request["reasoning_effort"],
-                    escalation_reasoning_effort=request["escalation_reasoning_effort"],
-                    run_id=mgr.run_id,
-                    escalation_prompt_factory=request.get("escalation_prompt_factory"),
-                    review_group_id=None,
-                ),
-                mgr=mgr,
-            )
 
-            if quorum is None:
-                await _release_docs_review_claim(item)
-                continue
+async def process_enrich_parents_batch(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_enrich_parents.process_enrich_parents_batch."""
+    return await _moved_worker_enrich_parents.process_enrich_parents_batch(
+        _worker_dependency, *args, **kwargs
+    )
 
-            score = quorum["winning_score"]
-            comments = quorum["winning_comments"]
-            comments_per_dim = quorum["winning_comments_per_dim"]
-            conformance_note = _documentation_conformance_note(item)
-            prose_note = await _documentation_banned_prose_note(item, mgr)
-            contradiction_note = await _documentation_contradiction_note(
-                request.get("veto_item", item), mgr
-            )
-            checked_holds = (
-                ("registry_conformance", conformance_note, "conventions-registry"),
-                ("banned_prose", prose_note, "prose-adjudicator"),
-                (
-                    "documentation_contradiction",
-                    contradiction_note,
-                    "jev-contradiction",
-                ),
-            )
-            review_holds: list[dict[str, str]] = []
-            for kind, note, raised_by in checked_holds:
-                if note is None:
-                    continue
-                evidence = json.dumps(
-                    {
-                        "claim": note,
-                        "documentation": item.get("documentation") or "",
-                        "dd_source_docs": item.get("dd_source_docs") or [],
-                    },
-                    sort_keys=True,
-                    default=str,
-                )
-                review_holds.append(
-                    {
-                        "kind": kind,
-                        "finding": note,
-                        "evidence": evidence,
-                        "raised_by": raised_by,
-                    }
-                )
-            if any(note is not None for _, note, _ in checked_holds):
-                notes = [
-                    note
-                    for note in (conformance_note, prose_note, contradiction_note)
-                    if note
-                ]
-                comments = "\n".join(filter(None, (comments, *notes)))
-                comments_per_dim = dict(comments_per_dim or {})
-                if conformance_note is not None:
-                    comments_per_dim["registry_conformance"] = conformance_note
-                if prose_note is not None:
-                    comments_per_dim["banned_prose"] = prose_note
-                if contradiction_note is not None:
-                    comments_per_dim["contradicts_source"] = contradiction_note
-                logger.info(
-                    "review_docs: %s found documentation veto — %s",
-                    sn_id,
-                    "; ".join(notes),
-                )
-            new_stage = await _asyncio.to_thread(
-                persist_reviewed_docs,
-                sn_id=sn_id,
-                claim_token=claim_token,
-                claim_seq=item.get("claim_seq"),
-                score=score,
-                scores=quorum["winning_scores"],
-                comments=comments,
-                comments_per_dim=comments_per_dim,
-                review_holds=review_holds,
-                checked_hold_kinds={kind for kind, _, _ in checked_holds},
-                model=quorum["canonical_model"],
-                min_score=DEFAULT_MIN_SCORE,
-                rotation_cap=DEFAULT_REFINE_ROTATIONS,
-                llm_cost=quorum["total_cost"],
-                llm_tokens_in=quorum["total_tokens_in"],
-                llm_tokens_out=quorum["total_tokens_out"],
-                llm_tokens_cached_read=0,
-                llm_tokens_cached_write=0,
-                llm_service="standard-names",
-                run_id=mgr.run_id,
-                skip_review_node=True,
-                resolution_method=quorum["resolution_method"],
-                reviewer_chain_size=len(request["models"]),
-            )
-            if new_stage:
-                source_versions = _review_dd_source_bindings(item)
-                await _asyncio.to_thread(
-                    _persist_dd_gap_evidence,
-                    quorum["dd_gaps"],
-                    set(source_versions),
-                    phase="review_docs",
-                    reporter="review-docs",
-                    source_versions=source_versions,
-                )
 
-            try:
-                await _asyncio.to_thread(update_review_aggregates, [sn_id])
-            except Exception:
-                logger.debug(
-                    "update_review_aggregates failed for %s", sn_id, exc_info=True
-                )
+process_enrich_parents_batch.__wrapped__ = (
+    _moved_worker_enrich_parents.process_enrich_parents_batch
+)
 
-            if new_stage:
-                processed += 1
-                _comment_log = (quorum["winning_comments"] or "")[:80]
-                logger.info(
-                    "review_docs: %s → %s (score=%.3f, cycles=%d, method=%s) %s",
-                    sn_id,
-                    new_stage,
-                    quorum["winning_score"],
-                    len(quorum["records"]),
-                    quorum["resolution_method"],
-                    _comment_log,
-                )
-                if on_event is not None:
-                    on_event(
-                        {
-                            "pool": "review_docs",
-                            "name": sn_id,
-                            "score": quorum["winning_score"],
-                            "comment": quorum["winning_comments"] or "",
-                            "stage": new_stage,
-                            "model": quorum["canonical_model"],
-                            "cost": quorum["total_cost"],
-                            "cycles": len(quorum["records"]),
-                            "resolution_method": quorum["resolution_method"],
-                        }
-                    )
-            else:
-                logger.debug("review_docs: %s persist no-op (token mismatch?)", sn_id)
 
-        except asyncio.CancelledError:
-            await _release_docs_review_claim(item)
-            raise
-        except Exception:
-            logger.exception("review_docs failed for %s", sn_id)
-            try:
-                await _release_docs_review_claim(item)
-            except Exception:
-                logger.debug("documentation claim cleanup also failed for %s", sn_id)
-        finally:
-            if lease is not None:
-                try:
-                    lease.release_unused()
-                except Exception:
-                    pass
+_DOCS_REVIEW_VOLATILE_ITEM_FIELDS = (
+    _moved_worker_enrich_parents._DOCS_REVIEW_VOLATILE_ITEM_FIELDS
+)
 
-    return processed
+
+def _canonical_docs_review_item(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_review_docs._canonical_docs_review_item."""
+    return _moved_worker_review_docs._canonical_docs_review_item(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+_canonical_docs_review_item.__wrapped__ = (
+    _moved_worker_review_docs._canonical_docs_review_item
+)
+
+
+def _bound_docs_review_dd_paths(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_review_docs._bound_docs_review_dd_paths."""
+    return _moved_worker_review_docs._bound_docs_review_dd_paths(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+_bound_docs_review_dd_paths.__wrapped__ = (
+    _moved_worker_review_docs._bound_docs_review_dd_paths
+)
+
+
+def _set_docs_review_dd_source_paths(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_review_docs._set_docs_review_dd_source_paths."""
+    return _moved_worker_review_docs._set_docs_review_dd_source_paths(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+_set_docs_review_dd_source_paths.__wrapped__ = (
+    _moved_worker_review_docs._set_docs_review_dd_source_paths
+)
+
+
+def _has_dd_source_reference(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_review_docs._has_dd_source_reference."""
+    return _moved_worker_review_docs._has_dd_source_reference(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+_has_dd_source_reference.__wrapped__ = (
+    _moved_worker_review_docs._has_dd_source_reference
+)
+
+
+def _load_docs_review_source_item(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_review_docs._load_docs_review_source_item."""
+    return _moved_worker_review_docs._load_docs_review_source_item(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+_load_docs_review_source_item.__wrapped__ = (
+    _moved_worker_review_docs._load_docs_review_source_item
+)
+
+
+def _load_docs_review_parent_children(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_review_docs._load_docs_review_parent_children."""
+    return _moved_worker_review_docs._load_docs_review_parent_children(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+_load_docs_review_parent_children.__wrapped__ = (
+    _moved_worker_review_docs._load_docs_review_parent_children
+)
+
+
+def _load_docs_review_examples(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_review_docs._load_docs_review_examples."""
+    return _moved_worker_review_docs._load_docs_review_examples(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+_load_docs_review_examples.__wrapped__ = (
+    _moved_worker_review_docs._load_docs_review_examples
+)
+
+
+def _enrich_docs_review_dd_context(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_review_docs._enrich_docs_review_dd_context."""
+    return _moved_worker_review_docs._enrich_docs_review_dd_context(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+_enrich_docs_review_dd_context.__wrapped__ = (
+    _moved_worker_review_docs._enrich_docs_review_dd_context
+)
+
+
+def _docs_review_request_identity(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_review_docs._docs_review_request_identity."""
+    return _moved_worker_review_docs._docs_review_request_identity(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+_docs_review_request_identity.__wrapped__ = (
+    _moved_worker_review_docs._docs_review_request_identity
+)
+
+
+def _bounded_docs_escalation_factory(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_review_docs._bounded_docs_escalation_factory."""
+    return _moved_worker_review_docs._bounded_docs_escalation_factory(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+_bounded_docs_escalation_factory.__wrapped__ = (
+    _moved_worker_review_docs._bounded_docs_escalation_factory
+)
+
+
+async def prepare_docs_review_request(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_review_docs.prepare_docs_review_request."""
+    return await _moved_worker_review_docs.prepare_docs_review_request(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+prepare_docs_review_request.__wrapped__ = (
+    _moved_worker_review_docs.prepare_docs_review_request
+)
+
+
+async def _release_docs_review_claim(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_review_docs._release_docs_review_claim."""
+    return await _moved_worker_review_docs._release_docs_review_claim(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+_release_docs_review_claim.__wrapped__ = (
+    _moved_worker_review_docs._release_docs_review_claim
+)
+
+
+def _documentation_conformance_note(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_review_docs._documentation_conformance_note."""
+    return _moved_worker_review_docs._documentation_conformance_note(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+_documentation_conformance_note.__wrapped__ = (
+    _moved_worker_review_docs._documentation_conformance_note
+)
+
+
+async def _documentation_banned_prose_note(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_review_docs._documentation_banned_prose_note."""
+    return await _moved_worker_review_docs._documentation_banned_prose_note(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+_documentation_banned_prose_note.__wrapped__ = (
+    _moved_worker_review_docs._documentation_banned_prose_note
+)
+
+
+async def _documentation_contradiction_note(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_review_docs._documentation_contradiction_note."""
+    return await _moved_worker_review_docs._documentation_contradiction_note(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+_documentation_contradiction_note.__wrapped__ = (
+    _moved_worker_review_docs._documentation_contradiction_note
+)
+
+
+async def process_review_docs_batch(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_review_docs.process_review_docs_batch."""
+    return await _moved_worker_review_docs.process_review_docs_batch(
+        _worker_dependency, *args, **kwargs
+    )
+
+
+process_review_docs_batch.__wrapped__ = (
+    _moved_worker_review_docs.process_review_docs_batch
+)
 
 
 # =============================================================================
@@ -3199,369 +1404,16 @@ async def process_review_docs_batch(
 # =============================================================================
 
 
-async def process_refine_docs_batch(
-    batch: list[dict[str, Any]],
-    mgr: BudgetManager,
-    stop_event: asyncio.Event,
-    *,
-    on_event: Callable[[dict[str, Any]], None] | None = None,
-) -> int:
-    """Process a batch of reviewed StandardNames for docs refinement.
-
-    For each item in the batch:
-
-    1. Read ``docs_chain_length``, decide model (escalation on final attempt).
-    2. Render prompt with current docs, reviewer feedback, and chain history.
-    3. Call LLM to produce refined docs (``RefinedDocs`` response model).
-    4. Persist via ``persist_refined_docs`` — snapshots old docs into
-       ``DocsRevision``, updates SN in-place, advances chain.
-    5. On failure: release claims via ``release_refine_docs_failed_claims``.
-
-    Returns count of items successfully processed.
-    """
-    import asyncio as _asyncio
-
-    from imas_codex.discovery.base.llm import acall_llm_structured
-    from imas_codex.llm.prompt_loader import render_prompt
-    from imas_codex.settings import get_model, get_reasoning_effort
-    from imas_codex.standard_names.budget import LLMCostEvent
-    from imas_codex.standard_names.context import conventions_context_for
-    from imas_codex.standard_names.defaults import (
-        DEFAULT_ESCALATION_MODEL,
-        DEFAULT_REFINE_ROTATIONS,
+async def process_refine_docs_batch(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_refine_docs.process_refine_docs_batch."""
+    return await _moved_worker_refine_docs.process_refine_docs_batch(
+        _worker_dependency, *args, **kwargs
     )
-    from imas_codex.standard_names.graph_ops import (
-        _mark_refine_docs_exhausted,
-        persist_refined_docs,
-        release_refine_docs_failed_claims,
-    )
-    from imas_codex.standard_names.models import RefinedDocs
 
-    rotation_cap = DEFAULT_REFINE_ROTATIONS
-    processed = 0
 
-    for item in batch:
-        if stop_event.is_set():
-            break
-
-        sn_id = item["id"]
-        claim_token = item.get("claim_token") or ""
-        docs_chain_length = item.get("docs_chain_length", 0) or 0
-        docs_chain_history = item.get("docs_chain_history", [])
-
-        # ── Escalation decision ───────────────────────────────────
-        escalate = docs_chain_length >= rotation_cap - 1
-        if escalate:
-            model = DEFAULT_ESCALATION_MODEL
-        else:
-            # Dedicated refine seat — see the refine_name comment for why
-            # refine owns its own model choice rather than sharing compose's.
-            model = get_model("sn-refine")
-
-        # ── Build prompt context ──────────────────────────────────
-        prompt_context: dict[str, Any] = {
-            "sn_name": sn_id,
-            "description": item.get("description", ""),
-            "documentation": item.get("documentation", ""),
-            "kind": item.get("kind", "scalar"),
-            "unit": item.get("unit", ""),
-            "physics_domain": item.get("physics_domain", ""),
-            "docs_chain_length": docs_chain_length,
-            "docs_chain_history": docs_chain_history,
-            "reviewer_score_docs": item.get("reviewer_score_docs"),
-            "reviewer_comments_per_dim_docs": item.get(
-                "reviewer_comments_per_dim_docs"
-            ),
-            "dd_paths": [],
-            # Expert edit steering (imas-codex sn edit) — the refine_docs_user
-            # template reads these as top-level context vars, not item.*,
-            # because this prompt_context is a hand-built whitelist rather
-            # than an `item` merge.
-            "docs_hint": item.get("docs_hint"),
-            "edit_reason": item.get("edit_reason"),
-            "edit_origin": item.get("edit_origin"),
-        }
-        from imas_codex.standard_names.review.cascade import failed_check_instructions
-
-        failed_checks = failed_check_instructions(item, "docs")
-        if failed_checks:
-            prompt_context["failed_checks"] = failed_checks
-        prompt_context["conventions"] = conventions_context_for(sn_id)
-
-        # Best-effort DD path enrichment
-        from imas_codex.standard_names.dd_resolutions import DDResolutionError
-
-        try:
-            from imas_codex.graph.client import GraphClient
-
-            with GraphClient() as gc:
-                dd_rows = gc.query(
-                    """
-                    MATCH (n)-[:HAS_STANDARD_NAME]->(sn:StandardName {id: $sn_id})
-                    WHERE n:IMASNode
-                    RETURN n.id AS path, n.ids AS ids,
-                           n.unit AS unit,
-                           n.documentation AS documentation,
-                           n.description AS description
-                    LIMIT 5
-                    """,
-                    sn_id=sn_id,
-                )
-                from imas_codex.settings import get_dd_version
-                from imas_codex.standard_names.dd_resolutions import resolve_dd_rows
-
-                raw_rows = [dict(row) for row in dd_rows]
-                batch = resolve_dd_rows(raw_rows, dd_version=get_dd_version())
-                if batch.refusals:
-                    logger.warning(
-                        "Refine context omitted %d changed DD fields: %s",
-                        len(batch.refusals),
-                        ", ".join(
-                            f"{refusal.path}:{refusal.field.value}"
-                            for refusal in batch.refusals
-                        ),
-                    )
-                prompt_context["dd_paths"] = [
-                    {
-                        **raw_rows[resolved.row_index],
-                        **resolved.context.as_pipeline_item(),
-                    }
-                    for resolved in batch.resolved
-                ]
-        except DDResolutionError:
-            raise
-        except Exception:
-            logger.debug("refine_docs: DD path enrichment failed for %s", sn_id)
-
-        # Parent-aware refine: inject children (origin='derived' only) so the
-        # rewrite GENERALISES over them rather than re-hugging one child — the
-        # parent-aware reviewer dock that routes single-child parents here is
-        # for over-specialisation, which only children-grounding can fix.
-        try:
-            from imas_codex.graph.client import GraphClient as _GCRefKids
-            from imas_codex.standard_names.defaults import (
-                DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER as _PH_REF,
-            )
-
-            with _GCRefKids() as gc:
-                krows = gc.query(
-                    """
-                    MATCH (p:StandardName {id: $sn_id}) WHERE p.origin = 'derived'
-                    MATCH (c:StandardName)-[:HAS_PARENT]->(p)
-                    WHERE NOT coalesce(c.name_stage, '') IN ['superseded', 'exhausted', 'contested']
-                    WITH c ORDER BY c.id
-                    RETURN c.id AS name,
-                           CASE WHEN c.description = $ph THEN null
-                                ELSE c.description END AS description,
-                           c.unit AS unit, c.physics_domain AS physics_domain
-                    LIMIT 12
-                    """,
-                    sn_id=sn_id,
-                    ph=_PH_REF,
-                )
-                kids = [dict(r) for r in krows]
-                if kids:
-                    prompt_context["derived_children"] = kids
-        except Exception:
-            logger.debug("refine_docs: derived children fetch failed for %s", sn_id)
-
-        # Sibling-family context so the rewrite converges on the family's
-        # parallel documentation template rather than drifting further.
-        try:
-            from imas_codex.standard_names.context import fetch_sibling_family
-
-            family = fetch_sibling_family(sn_id)
-            if family and family.get("siblings"):
-                prompt_context["sibling_family"] = family
-        except Exception:
-            logger.debug("refine_docs: sibling family fetch failed for %s", sn_id)
-
-        # Locus-defining cross-link context, matching generated documentation.
-        try:
-            from imas_codex.standard_names.context import locus_context_for
-
-            prompt_context["locus_context"] = locus_context_for(sn_id)
-        except Exception:
-            logger.debug("refine_docs: locus context fetch failed for %s", sn_id)
-
-        try:
-            user_prompt = render_prompt("sn/refine_docs_user", prompt_context)
-        except Exception:
-            logger.exception("refine_docs: prompt render failed for %s", sn_id)
-            user_prompt = (
-                f"Refine the documentation for standard name: {sn_id}\n"
-                f"Current description: {item.get('description', '')}\n"
-                f"Current documentation: {item.get('documentation', '')}\n"
-                f"Reviewer feedback: {item.get('reviewer_comments_docs', '')}"
-            )
-
-        try:
-            system_prompt = render_prompt("sn/refine_docs_system", prompt_context)
-        except Exception:
-            logger.debug("refine_docs: system prompt render failed for %s", sn_id)
-            system_prompt = None
-
-        _messages = (
-            [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
-            ]
-            if system_prompt
-            else [{"role": "user", "content": user_prompt}]
-        )
-        maximum_exposure = model_provider_exposure(
-            model,
-            _messages,
-            response_model=RefinedDocs,
-            provider_attempts=1,
-        )
-        lease = mgr.reserve(maximum_exposure, phase="refine_docs")
-        if lease is None:
-            continue
-
-        # ── LLM call ──────────────────────────────────────────────
-        try:
-            llm_out = await acall_llm_structured(
-                model=model,
-                messages=_messages,
-                response_model=RefinedDocs,
-                service="standard-names",
-                reasoning_effort=get_reasoning_effort("sn-refine"),
-                before_attempt=bind_attempt_exposure(
-                    lease, model, _messages, response_model=RefinedDocs
-                ),
-            )
-
-            result_obj, cost, _tokens = llm_out
-
-            # Charge cost to lease
-            if lease:
-                _event = LLMCostEvent(
-                    model=model,
-                    tokens_in=getattr(llm_out, "input_tokens", 0) or 0,
-                    tokens_out=getattr(llm_out, "output_tokens", 0) or 0,
-                    tokens_cached_read=(getattr(llm_out, "cache_read_tokens", 0) or 0),
-                    tokens_cached_write=(
-                        getattr(llm_out, "cache_creation_tokens", 0) or 0
-                    ),
-                    sn_ids=(sn_id,),
-                    phase="refine_docs",
-                    service="standard-names",
-                )
-                lease.charge_event(cost, _event)
-
-            # ── Persist ───────────────────────────────────────────
-            await _asyncio.to_thread(
-                persist_refined_docs,
-                sn_id=sn_id,
-                claim_token=claim_token,
-                description=normalize_description_text(result_obj.description),
-                documentation=_documentation_with_registry_form(
-                    sn_id, result_obj.documentation, prompt_context["conventions"]
-                ),
-                model=model,
-                current_description=item.get("description") or "",
-                current_documentation=item.get("documentation") or "",
-                current_model=item.get("docs_model"),
-                current_generated_at=(
-                    str(item["docs_generated_at"])
-                    if item.get("docs_generated_at")
-                    else None
-                ),
-                reviewer_score_to_snapshot=item.get("reviewer_score_docs"),
-                reviewer_comments_to_snapshot=item.get("reviewer_comments_docs"),
-                reviewer_comments_per_dim_to_snapshot=item.get(
-                    "reviewer_comments_per_dim_docs"
-                ),
-                run_id=mgr.run_id,
-            )
-            processed += 1
-
-            desc_preview = result_obj.description[:80]
-            logger.info(
-                "\033[35mrefine_docs\033[0m: %s — %s (chain=%d, model=%s)",
-                sn_id,
-                desc_preview,
-                docs_chain_length + 1,
-                model,
-            )
-
-            if on_event is not None:
-                on_event(
-                    {
-                        "pool": "refine_docs",
-                        "name": sn_id,
-                        "description": result_obj.description,
-                        "revision": docs_chain_length + 1,
-                        "model": model,
-                        "cost": cost,
-                    }
-                )
-
-        except Exception as exc:
-            charge_billable_exception(
-                lease,
-                exc,
-                model=model,
-                sn_ids=(sn_id,),
-                phase="refine_docs",
-            )
-            # A deterministic ``RefinedDocs`` validation failure (docs that
-            # consistently violate the schema length bounds) is a NORMAL
-            # failed-refine outcome, not a crash — the model keeps producing
-            # the same invalid docs for this item.  Mark it exhausted instead
-            # of reverting to 'reviewed', which would re-claim and re-charge it
-            # on a paid model every cycle (an infinite paid loop).  Log such
-            # failures at WARNING; only unexpected errors get ERROR + traceback.
-            is_terminal = _is_refine_docs_failure(exc)
-            if is_terminal:
-                logger.warning(
-                    "refine_docs failed (deterministic, marking exhausted) for %s: %s",
-                    sn_id,
-                    str(exc)[:200],
-                )
-            else:
-                logger.exception("refine_docs failed for %s", sn_id)
-            try:
-                if is_terminal:
-                    await _asyncio.to_thread(
-                        _mark_refine_docs_exhausted,
-                        sn_id=sn_id,
-                        token=claim_token,
-                        error_msg=str(exc)[:500],
-                    )
-                else:
-                    await _asyncio.to_thread(
-                        release_refine_docs_failed_claims,
-                        sn_ids=[sn_id],
-                        claim_token=claim_token,
-                    )
-            except Exception:
-                logger.debug(
-                    "release/exhaust refine_docs also failed for %s",
-                    sn_id,
-                )
-            if on_event is not None:
-                on_event(
-                    {
-                        "pool": "refine_docs",
-                        "name": sn_id,
-                        "outcome": "refine_failed",
-                        "model": model,
-                        "cost": 0.0,
-                    }
-                )
-        finally:
-            # Always return the unused portion of the lease to the pool.
-            # Without this the unspent remainder leaks every iteration and
-            # the pool exhausts at ~25 % of cost_limit.
-            if lease is not None:
-                try:
-                    lease.release_unused()
-                except Exception:
-                    pass
-
-    return processed
+process_refine_docs_batch.__wrapped__ = (
+    _moved_worker_refine_docs.process_refine_docs_batch
+)
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -3569,63 +1421,14 @@ async def process_refine_docs_batch(
 # ═══════════════════════════════════════════════════════════════════════
 
 
-async def process_embed_batch(
-    items: list[dict[str, Any]],
-    mgr: Any,
-    stop_event: asyncio.Event,
-    *,
-    on_event: Callable | None = None,
-) -> int:
-    """Batch-embed StandardName nodes.
-
-    No LLM cost — uses embedding server only.  Does not charge budget.
-    """
-    from imas_codex.embeddings.description import embed_descriptions_batch
-    from imas_codex.standard_names.graph_ops import (
-        _compute_embed_hash,
-        persist_embed_batch,
+async def process_embed_batch(*args: Any, **kwargs: Any):
+    """Forward to worker_tasks.worker_refine_docs.process_embed_batch."""
+    return await _moved_worker_refine_docs.process_embed_batch(
+        _worker_dependency, *args, **kwargs
     )
 
-    if stop_event.is_set():
-        return 0
 
-    # Build embed texts
-    for item in items:
-        desc = item.get("description")
-        sn_id = item["id"]
-        item["_embed_text"] = f"{sn_id} — {desc}" if desc else sn_id
-        item["embed_text_hash"] = _compute_embed_hash(sn_id, desc)
-
-    # Batch embed (no LLM cost — uses embedding server)
-    await asyncio.to_thread(embed_descriptions_batch, items, text_field="_embed_text")
-
-    # Filter to those that got embeddings
-    to_persist = [
-        {
-            "id": it["id"],
-            "embedding": it["embedding"],
-            "embed_text_hash": it["embed_text_hash"],
-        }
-        for it in items
-        if it.get("embedding") is not None
-    ]
-
-    if to_persist:
-        written = await asyncio.to_thread(persist_embed_batch, to_persist)
-    else:
-        written = 0
-
-    # Emit events for display
-    if on_event:
-        for it in to_persist:
-            on_event(
-                {
-                    "pool": "embed_name",
-                    "name": it["id"],
-                }
-            )
-
-    return written
+process_embed_batch.__wrapped__ = _moved_worker_refine_docs.process_embed_batch
 
 
 backfill_semantic_similarity_gate_resolution_method.__wrapped__ = (
