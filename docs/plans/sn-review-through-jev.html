@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="292">
+<meta name="plan-version" content="293">
 <meta name="plan-modified" content="2026-10-26">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -1198,7 +1198,10 @@ without re-deriving it is visible.</p></div>
     <div class="r-comment-body"><p>The <code>workers.py</code> split is complete. Step 19 (<code>worker_review_names</code>, merge <code>18daf78f5</code>, review 110) and steps 20 to 23, the four documentation workers (merge <code>a8ae89a98</code>, review 112), landed with zero added failures. <code>workers.py</code> went from 481 KB to 67 KB, and <code>graph_ops.py</code> from 821 KB to 167 KB. Each now holds its entrypoint or composition root, the wiring, and transitional forwarders.</p><p>The fan-out proposer prompt now names the checks the route vetoed, with reason and evidence, in place of an always-empty slot (merge <code>7e1310ded</code>, review 108). The same filter fixed an older defect, where a check that passed could fire fan-out.</p><p>Running:</p><ul><li><code>srtj-graph-store-structure</code> applies the split's folded structural findings: an explicit service object, an import-boundary test, valid Cypher in its owning module, logger names, defaults, worker hygiene, and naming-audit coverage.</li><li><code>srtj-graph-tier-parallel-fixtures</code> moves 30 test modules onto the shared disposable-Neo4j fixture, so the graph tier runs under xdist. Closing their local guards exposes tests that used to skip. At least one now fails in <code>signed_manifest.py</code> (<code>receipt cohort is incomplete</code>), and those go to a product repair node. Deleting the forwarders follows both.</li></ul></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261026T222423859498-review-of-srtj-graph-store-structure-4bbb3d2c51ae" data-who="reckon-build" data-when="2026-10-26T22:39:08.673Z">
-    <div class="r-comment-body"><p>Reviewed run r-20261026T214053170406-srtj-graph-store-structure at b4d3c45c7db4ca573c8965bc2d259917f6e3839b..4bbb3d2c51ae6581c6a1f25e83c9bb88e68aaa7a: scores goal_fidelity 17, evidence 18, scope_discipline 19, durability 18, fit 15, reuse 19; added_failure_count 0 recomputed from the run&#x27;s own base/head suite logs; one non-blocking finding on residual service-bridge reaches to imported names. Record stored under the reviewed run&#x27;s review-records/ and validated parsed.</p></div>
+    <div class="r-comment-body"><p>Reviewed run r-20261026T214053170406-srtj-graph-store-structure at b4d3c45c7db4ca573c8965bc2d259917f6e3839b..4bbb3d2c51ae6581c6a1f25e83c9bb88e68aaa7a: scores goal_fidelity 17, evidence 18, scope_discipline 19, durability 18, fit 15, reuse 19; added_failure_count 0 recomputed from the run's own base/head suite logs; one non-blocking finding on residual service-bridge reaches to imported names. Record stored under the reviewed run's review-records/ and validated parsed.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261026T214053170406-srtj-graph-store-structure" data-who="reckon-build" data-when="2026-10-26T22:23:20Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/sn-review-through-jev/srtj-graph-store-structure.html — absolute archived suites: 111 shared failures, 0 added IDs, 8951 base vs 9007 head passes; 27 fresh imports; predicate SHA-256 unchanged; USD 0 of USD 0.</p></div>
 </div>
 </section>
 </main>
