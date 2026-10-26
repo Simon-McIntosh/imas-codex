@@ -22,13 +22,34 @@
     Two functions carry it. <code>check_results_from_failed_checks</code> turns
     a route's named failures into the trigger's check-result mapping, keeping
     the criterion, the reason and the evidence beside the probability of
-    <code>1.0</code> each failure already implies. <code>failed_check_reasons</code>
+    <code>1.0</code> each failure carries. <code>failed_check_reasons</code>
     renders the checks that actually fired — retrieval checks, answered, at or
     above the threshold — as one line each, capped at six lines of 240
     characters, and only when the result carries a reason, so a caller supplying
     bare probabilities still gets an empty excerpt rather than a list of
     identifiers. The prompt section is renamed from reviewer feedback to the
     named checks that fired, since that is what it now carries.
+  </p>
+  <p>
+    Membership is decided by the <code>veto</code> flag, not by presence in
+    the list. The persisted failed-check list is the union of a route's vetoed
+    checks and every check it holds details for, so it also carries checks that
+    were answered and passed; mapping the whole list to a failure probability of
+    <code>1.0</code> reported a passing check to the proposer under a heading
+    that said it had failed, and let it fire the trigger. Only
+    <code>veto: True</code> is a failure now. An entry written before the flag
+    existed is still treated as a failure, which is what its inclusion in that
+    list meant.
+  </p>
+  <p>
+    The firing half of that defect predates this work. Before the trigger
+    rendered anything, the refine call site already mapped every persisted entry
+    to <code>failure_probability 1.0</code>
+    (<code>worker_refine_names.py</code> at <code>18daf78f5</code>), and
+    <code>should_trigger_fanout_from_checks</code> reads only that field, so a
+    passing check could open a fan-out search on its own. Filtering at the
+    mapping fixes the excerpt and the decision together, since both read the
+    same results.
   </p>
 
   <h3 id="srtj-fanout-excerpt-retire-prompt">The prompt, before and after</h3>
@@ -51,8 +72,9 @@ Named checks this candidate failed (why the search was opened):
     <thead><tr><th>Arm</th><th>Result</th></tr></thead>
     <tbody>
       <tr><td>base <code>18daf78f5</code></td><td>111 passed, <code>EXIT=0</code></td></tr>
-      <tr><td>head <code>813617ecf</code></td><td>114 passed, <code>EXIT=0</code> — three added passes, zero added failures</td></tr>
-      <tr><td>negative control</td><td>2 passed, 1 failed, <code>EXIT=1</code></td></tr>
+      <tr><td>head <code>1401c0ff0</code></td><td>117 passed, <code>EXIT=0</code> — six added passes, zero added failures</td></tr>
+      <tr><td>declared control: empty excerpt restored</td><td>3 failed, 3 passed, <code>EXIT=1</code></td></tr>
+      <tr><td>second control: veto filter dropped</td><td>2 failed, 4 passed, <code>EXIT=1</code></td></tr>
     </tbody>
   </table>
   <p>
@@ -66,10 +88,20 @@ Named checks this candidate failed (why the search was opened):
   </p>
   <p>
     The declared mutation restores the always-empty excerpt by returning
-    <code>fire, ""</code> from the trigger. Under it
-    <code>test_prompt_names_the_checks_that_fired</code> fails while the other
-    two pass, which is the direction that matters: the passing suite alone would
-    not have shown that the check can see an empty slot.
+    <code>fire, ""</code> from the trigger. Under it three of the six tests
+    fail — <code>test_prompt_names_the_checks_that_fired</code>,
+    <code>test_a_passing_check_never_reaches_the_excerpt_or_the_decision</code>
+    and <code>test_the_excerpt_honours_its_line_and_length_caps</code> — which is
+    the direction that matters: the passing suite alone would not have shown
+    that the tests can see an empty slot.
+  </p>
+  <p>
+    A second control drops the veto filter, and exactly the two passing-check
+    tests fail:
+    <code>test_a_passing_check_never_reaches_the_excerpt_or_the_decision</code>
+    and <code>test_a_lone_passing_check_cannot_fire_the_trigger</code>. That is
+    the mutation for the defect this record exists to correct, and it is
+    separate from the declared one.
   </p>
 
   <h3 id="srtj-fanout-excerpt-retire-tests">What the new tests lock</h3>
@@ -77,8 +109,11 @@ Named checks this candidate failed (why the search was opened):
     <code>tests/standard_names/test_fanout_review_feedback.py</code> asserts that
     a fired trigger puts the check's identifier, its reason and its evidence
     into the rendered proposer prompt with no <code>(none)</code> left behind;
-    that a check-free candidate keeps the empty slot and reports no failure; and
-    that a failure which does not request retrieval never reaches the prompt, so
-    a grammar-only failure cannot manufacture retrieval intent.
+    that a check-free candidate keeps the empty slot and reports no failure; that
+    a failure which does not request retrieval never reaches the prompt, so a
+    grammar-only failure cannot manufacture retrieval intent; that a check the
+    route answered and passed is neither listed as a failure nor able to fire
+    the trigger, even at a zero threshold; and that the excerpt stops at its
+    line and character caps.
   </p>
 </section>
