@@ -24,8 +24,8 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="285">
-<meta name="plan-modified" content="2026-10-25">
+<meta name="plan-version" content="286">
+<meta name="plan-modified" content="2026-10-26">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
 <body>
@@ -1178,6 +1178,9 @@ without re-deriving it is visible.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261025T004957479962-srtj-workers-split-step19" data-who="reckon-build" data-when="2026-10-25T01:40:35Z">
     <div class="r-comment-body"><p>Extracted the seventeen design-assigned review-name worker symbols from workers.py into worker_tasks/worker_review_names.py, keeping thirteen names bound on the entrypoint (seven __wrapped__ forwarders plus six value aliases); workers.py fell from 214,485 bytes / 44,510 cl100k tokens / 61,281.43 gate units to 156,528 / 32,679 / 44,722.29, the two source-text guards that read the entrypoint were repaired to read the code where it now lives, and the 30-file gate on archived base and head trees is identical on both marker sets — 10 failed / 407 passed with the same ten failure ids on default markers, the same five on -m graph — so the extraction adds no failure.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261026T205931560095-review-of-srtj-fanout-excerpt-retire-01e5f7b1ef6a" data-who="reckon-build" data-when="2026-10-26T21:06:07.593Z">
+    <div class="r-comment-body"><p>review of r-20261026T203855156887-srtj-fanout-excerpt-retire at head 01e5f7b1ef6a over base 18daf78f5 — goal_fidelity 18, evidence 19, scope_discipline 20, durability 16, fit 17, reuse 19; added_failure_count 0; two non-blocking findings (trigger.py:85 drops the veto flag when mapping failed checks so an answered-and-passing retrieval check renders as failed; no test covers the excerpt cap at trigger.py:51-52); parsed record at review-records/ inside the reviewed run directory.</p></div>
 </div>
 </section>
 </main>

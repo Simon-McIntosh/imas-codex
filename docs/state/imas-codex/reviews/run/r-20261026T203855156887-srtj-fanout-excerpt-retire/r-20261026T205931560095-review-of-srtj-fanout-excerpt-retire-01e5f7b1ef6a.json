@@ -1,0 +1,72 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261026T203855156887-srtj-fanout-excerpt-retire/logs/head-gate.log",
+  "assertion_analysis": [
+    {
+      "failure_condition": "Returning an always-empty excerpt from should_trigger_fanout makes lines 95-97 and 105-107 red; the recorded negative control demonstrates exactly that (1 failed, 2 passed, EXIT=1).",
+      "file": "tests/standard_names/test_fanout_review_feedback.py",
+      "lines": "94-107"
+    },
+    {
+      "failure_condition": "Rendering an invented reason for a candidate with no failed checks, or dropping the (none) fallback from _build_proposer_user_prompt, reddens lines 118-122.",
+      "file": "tests/standard_names/test_fanout_review_feedback.py",
+      "lines": "118-122"
+    },
+    {
+      "failure_condition": "Letting a non-retrieval check contribute to the excerpt or to the trigger's maximum reddens lines 134-137; no production input is re-supplied on both sides of these assertions.",
+      "file": "tests/standard_names/test_fanout_review_feedback.py",
+      "lines": "134-137"
+    }
+  ],
+  "base_log_revision": "18daf78f53e50cad8a8a2b3375600498d48561bb",
+  "baseline_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261026T203855156887-srtj-fanout-excerpt-retire/logs/base-gate.log",
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/standard_names/worker_tasks/worker_refine_names.py:491",
+    "imas_codex/standard_names/worker_tasks/worker_refine_names.py:537",
+    "imas_codex/standard_names/fanout/dispatcher.py:108",
+    "imas_codex/standard_names/fanout/dispatcher.py:144"
+  ],
+  "completed_at": "2026-10-26T21:06:07.593Z",
+  "dispatched_at": "2026-10-26T21:00:23Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/fanout/trigger.py",
+      "line": "85",
+      "severity": "non-blocking",
+      "text": "non-blocking: check_results_from_failed_checks assigns failure_probability 1.0 to every persisted entry and never reads the veto flag, while imas_codex/standard_names/review/cascade.py:477 builds that list from the union of route.failed_checks and route.check_details. An answered-and-passing retrieval check therefore renders in the proposer prompt under 'Named checks this candidate failed', and because failed_check_reasons:121 falls back to the criterion when no reason is present, even a passed check with no judgment evidence is named. The over-firing of the trigger itself predates this change and lives in cascade.py, outside the node's write scope, but the new rendering is where the misstatement becomes visible to the proposer."
+    },
+    {
+      "file": "tests/standard_names/test_fanout_review_feedback.py",
+      "line": "91",
+      "severity": "non-blocking",
+      "text": "non-blocking: no test exercises the extraction cap _EXCERPT_MAX_CHECKS / _EXCERPT_MAX_CHARS (trigger.py:51-52), yet the evidence fragment states the cap as a delivered property; a regression that drops either bound passes the suite unchanged, so that claim rests on reading the code rather than on a guard."
+    }
+  ],
+  "head_log_revision": "813617ecf855ecda7cc839e00768ecc5b79890a4",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source node's goal is 'Make the fan-out proposer prompt carry real review feedback or none'; imas_codex/standard_names/fanout/trigger.py:129-148 now returns the fired checks as reason lines and imas_codex/standard_names/fanout/dispatcher.py:91 renders them under a renamed heading.\nVERDICT done_when: the done_when asks that the prompt carry the failed checks that fired (or no section), that new tests cover it and fail with the empty excerpt restored, and that the gate show no added failures; the recorded base arm is 111 passed EXIT=0 and the head arm 114 passed EXIT=0 with the negative control 1 failed 2 passed EXIT=1 in logs/base-gate.log, logs/head-gate.log and logs/negative-control.log.\nVERDICT write_paths: the manifest declares five paths, and git diff 18daf78f5..01e5f7b1ef6a touches exactly those five (trigger.py, dispatcher.py, worker_refine_names.py, the new test file and the evidence fragment), with nothing outside them.\nVERDICT manifest: read; it records the preferred route with its reason, the three commits, both gate arms, the negative-control log path and the pytest-exit-4 scaffolding retry, and its stated results match the logs it names.\nVERDICT diff: read commit by commit against 18daf78f5 \u2014 a3737afe6 carries the two new trigger functions with the call-site swap, 813617ecf adds the evidence fragment and prompt transcripts, 01e5f7b1e corrects the fragment's revision citation; each is inside the declared scope.\nCALL_SITES: imas_codex/standard_names/worker_tasks/worker_refine_names.py:491, imas_codex/standard_names/worker_tasks/worker_refine_names.py:537, imas_codex/standard_names/fanout/dispatcher.py:108, imas_codex/standard_names/fanout/dispatcher.py:144\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/fanout/trigger.py:139-148 joins the fired checks' reasons into the returned excerpt, which dispatcher.py:91 places in the proposer prompt.\nSCORE evidence: 19\nJUSTIFICATION evidence: logs/head-gate.log opens with the revision, tree and command and ends EXIT=0 over 114 passed, against logs/base-gate.log at 18daf78f5 with 111 passed EXIT=0.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in git diff --stat 18daf78f5..01e5f7b1ef6a lies inside the manifest's five declared write paths.\nSCORE durability: 16\nJUSTIFICATION durability: tests/standard_names/test_fanout_review_feedback.py:95 reddens under the restored empty excerpt in logs/negative-control.log, but the cap at trigger.py:51-52 no test exercises.\nSCORE fit: 17\nJUSTIFICATION fit: the module's docstring and __all__ at imas_codex/standard_names/fanout/trigger.py:33-45 are updated with the new surface, while the retained parameter name reviewer_excerpt at dispatcher.py:309 no longer describes what it carries.\nSCORE reuse: 19\nJUSTIFICATION reuse: no renderer of failed-check reasons exists elsewhere \u2014 imas_codex/standard_names/review/cascade.py:497 only persists judgment_evidence \u2014 so failed_check_reasons at trigger.py:95 is the first owner and extends should_trigger_fanout_from_checks rather than duplicating it.\nFINDING imas_codex/standard_names/fanout/trigger.py:85 non-blocking: check_results_from_failed_checks assigns failure_probability 1.0 to every persisted entry without reading the veto flag, and cascade.py:477 unions failed checks with merely answered ones, so an answered-and-passing retrieval check is rendered as 'a named check this candidate failed'.\nFINDING tests/standard_names/test_fanout_review_feedback.py:91 non-blocking: no test exercises _EXCERPT_MAX_CHECKS / _EXCERPT_MAX_CHARS, so the cap claimed in the evidence fragment is unguarded.",
+  "review_run_id": "r-20261026T205931560095-review-of-srtj-fanout-excerpt-retire-01e5f7b1ef6a",
+  "reviewed_base_sha": "18daf78f53e50cad8a8a2b3375600498d48561bb",
+  "reviewed_commits": [
+    "a3737afe6344185f9eddd10c49b38d6001a1494e",
+    "813617ecf855ecda7cc839e00768ecc5b79890a4",
+    "01e5f7b1ef6a863bd9bbce7efe9c28e5068a7030"
+  ],
+  "reviewed_head_sha": "01e5f7b1ef6a863bd9bbce7efe9c28e5068a7030",
+  "reviewed_run_id": "r-20261026T203855156887-srtj-fanout-excerpt-retire",
+  "scores": {
+    "durability": 16,
+    "evidence": 19,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-26T21:06:53.485912+00:00",
+  "total": 109
+}
