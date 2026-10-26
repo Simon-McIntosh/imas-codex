@@ -344,15 +344,17 @@ _TEST_ID_PREFIX = "orphan_sweep_test__"
 
 
 @pytest.fixture()
-def _gc():
-    """Function-scoped GraphClient; skip if Neo4j is unreachable."""
-    try:
-        from imas_codex.graph.client import GraphClient
+def _gc(disposable_neo4j_uri: str):
+    """Function-scoped client bound to the shared disposable graph."""
+    from imas_codex.graph.client import GraphClient
 
-        client = GraphClient()
-        client.get_stats()
-    except Exception as exc:
-        pytest.skip(f"Neo4j not available: {exc}")
+    client = GraphClient(
+        uri=disposable_neo4j_uri,
+        username="neo4j",
+        password="",
+        graph_name="orphan-sweep-tests",
+    )
+    client.get_stats()
 
     yield client
     client.close()
