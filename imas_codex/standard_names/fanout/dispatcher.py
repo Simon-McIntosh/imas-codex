@@ -88,7 +88,7 @@ def _build_proposer_user_prompt(
     if scope.physics_domain:
         parts.append(f"Caller scope — physics_domain: {scope.physics_domain}")
     parts.append("")
-    parts.append("Recent reviewer feedback (clarity / disambiguation only):")
+    parts.append("Named checks this candidate failed (why the search was opened):")
     parts.append(reviewer_excerpt or "(none)")
     return "\n".join(parts)
 
@@ -309,9 +309,10 @@ async def run_fanout(
         site: Plug-in site name (MVP: ``"refine_name"``).  Recorded on
             the Fanout telemetry node.
         candidate: Refine-site candidate metadata.
-        reviewer_excerpt: Pre-truncated reviewer-comment slice (caller
-            applies the dim allow-list and char cap before passing it
-            in — fan-out itself is site-agnostic).
+        reviewer_excerpt: Reasons the caller's trigger fired, already
+            rendered and capped — fan-out itself is site-agnostic and
+            only places the text in the proposer's prompt.  Empty means
+            the caller had no failure to report, and the prompt says so.
         scope: Caller-injected scope (never LLM-supplied).
         gc: Refine cycle's :class:`GraphClient` (one per cycle).
         parent_lease: Caller's :class:`BudgetLease`; proposer cost is
