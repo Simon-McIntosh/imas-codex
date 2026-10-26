@@ -19,6 +19,8 @@ from imas_codex.discovery.base.claims import retry_on_deadlock
 from imas_codex.graph.client import GraphClient
 from imas_codex.graph.schema import GraphSchema
 
+from . import graph_foundation as foundation
+
 logger = logging.getLogger(__name__)
 
 
@@ -1102,7 +1104,7 @@ def plan_review_dimension_void(
         "void_grammar_signature": grammar_signature,
     }
     records.append(record)
-    score = (sum(surviving.values()) / len(surviving)) / services._DIMENSION_SCALE
+    score = (sum(surviving.values()) / len(surviving)) / _DIMENSION_SCALE
     return {
         "void_records": records,
         "void_record": record,
@@ -1185,9 +1187,7 @@ def void_review_dimension(
     own = gc is None
     client: Any = services.GraphClient() if own else gc
     try:
-        rows = list(
-            client.query(services._VOID_REVIEW_DIMENSION_READ, review_id=review_id)
-        )
+        rows = list(client.query(_VOID_REVIEW_DIMENSION_READ, review_id=review_id))
         if not rows:
             raise services.ReviewDimensionVoidRefused(
                 f"no StandardNameReview {review_id!r} — nothing to void"
@@ -1235,7 +1235,7 @@ def void_review_dimension(
             return result
 
         client.query(
-            services._VOID_REVIEW_DIMENSION_WRITE,
+            _VOID_REVIEW_DIMENSION_WRITE,
             review_id=review_id,
             score=plan["score"],
             tier=plan["tier"],
@@ -1863,17 +1863,17 @@ def _write_grammar_decomposition(
     # and relationship names come from a closed module-level tuple (never user
     # input), so direct interpolation is safe.
     edge_delete_types = "|".join(
-        ["HAS_SEGMENT", *(rel for _seg, rel in services._SEGMENT_EDGE_TYPES)]
+        ["HAS_SEGMENT", *(rel for _seg, rel in _SEGMENT_EDGE_TYPES)]
     )
     columns_to_null = (
         ",\n                    ".join(
-            f"sn.{col} = null" for col in services._GRAMMAR_SEGMENT_COLUMNS
+            f"sn.{col} = null" for col in _GRAMMAR_SEGMENT_COLUMNS
         )
         + ",\n                    sn.updated_at = datetime()"
     )
     columns_to_set = (
         ",\n                ".join(
-            f"sn.{col} = ${col}" for col in services._GRAMMAR_SEGMENT_COLUMNS
+            f"sn.{col} = ${col}" for col in _GRAMMAR_SEGMENT_COLUMNS
         )
         + ",\n                sn.updated_at = datetime()"
     )
@@ -1881,7 +1881,7 @@ def _write_grammar_decomposition(
         f"FOREACH (_ IN CASE WHEN t IS NOT NULL AND edge.segment = '{seg}' "
         f"THEN [1] ELSE [] END |\n                    "
         f"MERGE (sn)-[:{rel}]->(t)\n                )"
-        for seg, rel in services._SEGMENT_EDGE_TYPES
+        for seg, rel in _SEGMENT_EDGE_TYPES
     )
 
     for sn_id in name_ids:
@@ -1939,7 +1939,7 @@ def _write_grammar_decomposition(
                 "token": token,
             }
             for position, segment in enumerate(services._public_grammar_segment_order())
-            if segment in services._GRAMMAR_SEGMENT_COLUMNS
+            if segment in _GRAMMAR_SEGMENT_COLUMNS
             if (token := column_values.get(segment)) is not None
             and segment in synced_segments
         ]
@@ -2182,7 +2182,7 @@ def persist_generated_name_winners(
         if (
             not entry.get("cocos_transformation_type")
             and entry.get("kind") == "scalar"
-            and (entry.get("unit") or "") in services.SAFE_SCALAR_COCOS_UNITS
+            and (entry.get("unit") or "") in SAFE_SCALAR_COCOS_UNITS
         ):
             entry["cocos_transformation_type"] = "one_like"
 
@@ -2248,7 +2248,7 @@ def persist_generated_name_winners(
                         or (
                             "stable_reuse"
                             if row.get("target_stage")
-                            in services._STABLE_BINDING_NAME_STAGES
+                            in foundation._STABLE_BINDING_NAME_STAGES
                             else "owned_reservation"
                         )
                     )
@@ -2370,7 +2370,7 @@ def persist_generated_name_winners(
                     __RETIRE_FINALIZED_SOURCE_GAPS__
                     """.replace(
                                 "__RETIRE_FINALIZED_SOURCE_GAPS__",
-                                services._RETIRE_FINALIZED_SOURCE_GAPS,
+                                _RETIRE_FINALIZED_SOURCE_GAPS,
                             ),
                             batch=reserved_finalize_batch,
                             pending_stage=services.NameStage.pending.value,
@@ -2425,10 +2425,12 @@ def persist_generated_name_winners(
                     __RETIRE_FINALIZED_SOURCE_GAPS__
                     """.replace(
                                 "__RETIRE_FINALIZED_SOURCE_GAPS__",
-                                services._RETIRE_FINALIZED_SOURCE_GAPS,
+                                _RETIRE_FINALIZED_SOURCE_GAPS,
                             ),
                             batch=stable_finalize_batch,
-                            stable_stages=sorted(services._STABLE_BINDING_NAME_STAGES),
+                            stable_stages=sorted(
+                                foundation._STABLE_BINDING_NAME_STAGES
+                            ),
                         )
                     )
                 finalized_ids = [row["id"] for row in finalized_rows]
@@ -2670,7 +2672,7 @@ def _finalize_generated_name_stage(
                     __RETIRE_FINALIZED_SOURCE_GAPS__
                     """.replace(
                             "__RETIRE_FINALIZED_SOURCE_GAPS__",
-                            services._RETIRE_FINALIZED_SOURCE_GAPS,
+                            _RETIRE_FINALIZED_SOURCE_GAPS,
                         ),
                         batch=batch,
                     )

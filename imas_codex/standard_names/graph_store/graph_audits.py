@@ -408,9 +408,9 @@ def _docs_axis_rederive_query(*, dry_run: bool, ids: list[str] | None) -> str:
     if dry_run:
         tail = (
             f"RETURN count(sn) AS with_winner,\n"
-            f"       sum(CASE WHEN {foundation.get_services()._DOCS_AXIS_MIRROR_DISAGREES} THEN 1 ELSE 0 END)"
+            f"       sum(CASE WHEN {_DOCS_AXIS_MIRROR_DISAGREES} THEN 1 ELSE 0 END)"
             f" AS repair,\n"
-            f"       sum(CASE WHEN {foundation.get_services()._DOCS_AXIS_MIRROR_AGREES} THEN 1 ELSE 0 END)"
+            f"       sum(CASE WHEN {_DOCS_AXIS_MIRROR_AGREES} THEN 1 ELSE 0 END)"
             f" AS agree"
         )
     else:
@@ -421,14 +421,10 @@ def _docs_axis_rederive_query(*, dry_run: bool, ids: list[str] | None) -> str:
         )
     return (
         f"{scope}"
-        f"WHERE {foundation.get_services().DOCS_AXIS_REDERIVE_NAME_WHERE}\n"
+        f"WHERE {DOCS_AXIS_REDERIVE_NAME_WHERE}\n"
         f"CALL {{\n  WITH sn\n{foundation.docs_review_winner_query_body()}\n}}\n"
         f"WITH sn, winner\n"
-        + (
-            f"WHERE {foundation.get_services()._DOCS_AXIS_MIRROR_DISAGREES}\n"
-            if not dry_run
-            else ""
-        )
+        + (f"WHERE {_DOCS_AXIS_MIRROR_DISAGREES}\n" if not dry_run else "")
         + tail
     )
 
@@ -921,9 +917,7 @@ def reconcile_source_status_liveness(
                    sum(size(stale_projections)) AS projections,
                    sum(source_paths_removed) AS source_paths
             """,
-            terminal_stages=sorted(
-                foundation.get_services()._TERMINAL_BINDING_NAME_STAGES
-            ),
+            terminal_stages=sorted(foundation._TERMINAL_BINDING_NAME_STAGES),
             source_ids=source_ids,
         )
         orphaned_reset = orphan_rows[0]["n"] if orphan_rows else 0
@@ -995,9 +989,7 @@ def reconcile_source_status_liveness(
                    sum(terminal_targets) AS terminal_targets,
                    sum(projections) AS projections
             """,
-            terminal_stages=sorted(
-                foundation.get_services()._TERMINAL_BINDING_NAME_STAGES
-            ),
+            terminal_stages=sorted(foundation._TERMINAL_BINDING_NAME_STAGES),
             source_ids=source_ids,
         )
         projection_ghosts_reset = projection_rows[0]["n"] if projection_rows else 0
@@ -1394,7 +1386,7 @@ def revive_unit_skipped_sources(gc: Any | None = None) -> dict[str, int]:
                             ELSE null END AS unit_from_rel,
                        n.unit AS node_unit
                 """,
-                prefix=foundation.get_services()._UNIT_SKIP_REASON_PREFIX,
+                prefix=_UNIT_SKIP_REASON_PREFIX,
             )
         )
 
@@ -2008,7 +2000,7 @@ def reconcile_standard_name_source_paths(gc: Any | None = None) -> dict[str, int
                    [p IN hsn WHERE p IS NOT NULL AND p <> 'dd:'] AS hsn_paths,
                    prod AS produced_paths
             """,
-            terminal=foundation.get_services()._TERMINAL_NAME_STAGES,
+            terminal=_TERMINAL_NAME_STAGES,
         )
         updates = []
         for r in rows:
@@ -2342,7 +2334,7 @@ def reconcile_sourceless_pipeline_names(gc: Any | None = None) -> dict[str, int]
 
     own = gc is None
     client = foundation.get_services().GraphClient() if own else gc
-    terminal = foundation.get_services()._TERMINAL_NAME_STAGES
+    terminal = _TERMINAL_NAME_STAGES
     try:
         names = client.query(
             """
@@ -2576,7 +2568,7 @@ def reconcile_standard_name_dd_edges(gc: Any | None = None) -> dict[str, int]:
                    sn.unit AS sn_unit, du.id AS dd_unit,
                    collect(DISTINCT bound.id) AS existing_dd_paths
             """,
-            terminal=foundation.get_services()._TERMINAL_NAME_STAGES,
+            terminal=_TERMINAL_NAME_STAGES,
             categories=list(SN_SOURCE_CATEGORIES),
         )
         attach: list[dict[str, str]] = []
@@ -2694,7 +2686,7 @@ def reconcile_grammar_segments() -> dict[str, int]:
                 f"CREATE (change:StandardNameChange {{"
                 f"  id: 'sn-change:' + randomUUID(),"
                 f"  from_name: sn.id, to_name: sn.id,"
-                f"  operation: '{foundation.get_services()._SEGMENT_REALIGN_OPERATION}',"
+                f"  operation: '{_SEGMENT_REALIGN_OPERATION}',"
                 f"  reason: 'stored grammar segments disagreed with the "
                 f"canonical-name parse', origin: 'graph_reconcile',"
                 f"  changed_at: datetime(), internal: true}}) "
@@ -2809,10 +2801,10 @@ def realign_grammar_segments_for_name(
                 id=name,
                 segments={column: parsed.get(column) for column in cols},
                 change_id=change_id,
-                operation=foundation.get_services()._SEGMENT_REALIGN_OPERATION,
+                operation=_SEGMENT_REALIGN_OPERATION,
                 reason=foundation.get_services()._segment_drift_reason(drift),
                 changed_at=foundation.get_services()
-                .datetime.now(foundation.get_services().UTC)
+                .datetime.now(foundation.UTC)
                 .isoformat(),
             )
         )
@@ -2965,11 +2957,7 @@ def write_run_provenance(
     if not name_ids:
         return 0
 
-    now = (
-        foundation.get_services()
-        .datetime.now(foundation.get_services().UTC)
-        .isoformat()
-    )
+    now = foundation.get_services().datetime.now(foundation.UTC).isoformat()
 
     with foundation.get_services().GraphClient() as gc:
         result = gc.query(

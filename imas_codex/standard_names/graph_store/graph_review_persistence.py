@@ -581,7 +581,7 @@ def persist_reviewed_name(
             import uuid as _uuid
             from datetime import datetime as _dt
 
-            _now_iso = llm_at or _dt.now(foundation.get_services().UTC).isoformat()
+            _now_iso = llm_at or _dt.now(foundation.UTC).isoformat()
             _group_id = str(_uuid.uuid4())
             _review_id = f"{sn_id}:name:{_group_id}:0"
             # Map normalised score (0-1) to tier name per the rubric.
@@ -1030,7 +1030,7 @@ def persist_reviewed_docs(
             import uuid as _uuid
             from datetime import datetime as _dt
 
-            _now_iso = llm_at or _dt.now(foundation.get_services().UTC).isoformat()
+            _now_iso = llm_at or _dt.now(foundation.UTC).isoformat()
             _group_id = str(_uuid.uuid4())
             _review_id = f"{sn_id}:docs:{_group_id}:0"
             if score >= 0.85:

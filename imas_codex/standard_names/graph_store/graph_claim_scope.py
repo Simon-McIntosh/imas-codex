@@ -8,6 +8,7 @@ from typing import Any
 from imas_codex.discovery.base.claims import retry_on_deadlock
 from imas_codex.graph.models import SNRunStatus
 
+from . import graph_foundation as foundation
 from .graph_foundation import _CLAIM_TIMEOUT_SECONDS
 
 logger = logging.getLogger(__name__)
@@ -686,13 +687,13 @@ def build_manifest_drain_plan(
     client = services.GraphClient() if own else gc
     try:
         rows = client.query(
-            services._MANIFEST_DRAIN_PLAN_QUERY,
+            _MANIFEST_DRAIN_PLAN_QUERY,
             paths=exact_paths,
             dd_version=dd_version,
             drain_scope_id=drain_scope_id,
             scope_cutoff=f"PT{scope_timeout_seconds}S",
             worker_cutoff=f"PT{worker_timeout_seconds}S",
-            terminal_stages=sorted(services._TERMINAL_BINDING_NAME_STAGES),
+            terminal_stages=sorted(foundation._TERMINAL_BINDING_NAME_STAGES),
         )
         return services._resolved_manifest_drain_plan(rows, dd_version)
     finally:
@@ -769,25 +770,25 @@ def claim_manifest_drain_scope(
             tx_gc = services._TransactionQuery(tx)
             try:
                 rows = tx_gc.query(
-                    services._MANIFEST_DRAIN_PLAN_QUERY,
+                    _MANIFEST_DRAIN_PLAN_QUERY,
                     paths=exact_paths,
                     dd_version=dd_version,
                     drain_scope_id=scope_id,
                     scope_cutoff=f"PT{scope_timeout_seconds}S",
-                    worker_cutoff=f"PT{services._CLAIM_TIMEOUT_SECONDS}S",
-                    terminal_stages=sorted(services._TERMINAL_BINDING_NAME_STAGES),
+                    worker_cutoff=f"PT{foundation._CLAIM_TIMEOUT_SECONDS}S",
+                    terminal_stages=sorted(foundation._TERMINAL_BINDING_NAME_STAGES),
                 )
                 plan = services._resolved_manifest_drain_plan(rows, dd_version)
                 initial_fingerprint = services._manifest_plan_fingerprint(plan)
                 services._lock_manifest_drain_authority(tx_gc, exact_paths)
                 locked_rows = tx_gc.query(
-                    services._MANIFEST_DRAIN_PLAN_QUERY,
+                    _MANIFEST_DRAIN_PLAN_QUERY,
                     paths=exact_paths,
                     dd_version=dd_version,
                     drain_scope_id=scope_id,
                     scope_cutoff=f"PT{scope_timeout_seconds}S",
-                    worker_cutoff=f"PT{services._CLAIM_TIMEOUT_SECONDS}S",
-                    terminal_stages=sorted(services._TERMINAL_BINDING_NAME_STAGES),
+                    worker_cutoff=f"PT{foundation._CLAIM_TIMEOUT_SECONDS}S",
+                    terminal_stages=sorted(foundation._TERMINAL_BINDING_NAME_STAGES),
                 )
                 plan = services._resolved_manifest_drain_plan(locked_rows, dd_version)
                 if services._manifest_plan_fingerprint(plan) != initial_fingerprint:
@@ -1057,7 +1058,7 @@ def prepare_manifest_drain_scope(
         recover_manifest_drain_scope(
             stale_scope_id,
             scope_timeout_s=scope_timeout_seconds,
-            worker_timeout_s=services._CLAIM_TIMEOUT_SECONDS,
+            worker_timeout_s=foundation._CLAIM_TIMEOUT_SECONDS,
             paths=exact_paths,
         )
     return services.claim_manifest_drain_scope(
@@ -1356,21 +1357,13 @@ def _claim_disposition(
     """
     claimed_at = candidate.get("claimed_at")
     if claimed_at is None and candidate.get("claim_token") is None:
-        return services._CLAIM_ABSENT
+        return _CLAIM_ABSENT
     if claimed_at is None:
-        return services._CLAIM_HELD
+        return _CLAIM_HELD
     status = run_statuses.get(str(candidate.get("run_id") or ""))
     if status is not None:
-        return (
-            services._CLAIM_RELEASED
-            if status in services._TERMINAL_RUN_STATUSES
-            else services._CLAIM_HELD
-        )
-    return (
-        services._CLAIM_RELEASED
-        if candidate.get("claim_stale", False)
-        else services._CLAIM_HELD
-    )
+        return _CLAIM_RELEASED if status in _TERMINAL_RUN_STATUSES else _CLAIM_HELD
+    return _CLAIM_RELEASED if candidate.get("claim_stale", False) else _CLAIM_HELD
 
 
 def _claimed_run_ids(rows: list[dict[str, Any]], *, services: Any) -> list[str]:
@@ -1397,7 +1390,7 @@ def _collect_run_statuses(
         return {}
     return {
         str(row["run_id"]): row.get("status")
-        for row in query(services._EXACT_NAME_SCOPE_RUN_STATUS_QUERY, run_ids=run_ids)
+        for row in query(_EXACT_NAME_SCOPE_RUN_STATUS_QUERY, run_ids=run_ids)
     }
 
 
@@ -1424,10 +1417,8 @@ def _exact_name_scope_refusals(
             refusals.append(f"{requested_name}: {state} StandardName identity")
             continue
         candidate = matches[0]
-        if candidate.get(
-            "name_stage"
-        ) in services._EXACT_SCOPE_TERMINAL_NAME_STAGES or (
-            candidate.get("status") in services._EXACT_SCOPE_TERMINAL_STATUSES
+        if candidate.get("name_stage") in _EXACT_SCOPE_TERMINAL_NAME_STAGES or (
+            candidate.get("status") in _EXACT_SCOPE_TERMINAL_STATUSES
         ):
             refusals.append(f"{requested_name}: terminal StandardName lifecycle")
         if (
@@ -1442,7 +1433,7 @@ def _exact_name_scope_refusals(
             # be resolved — a legacy row with no run_id, or a claim whose run
             # row is absent — and a token carrying no timestamp is never
             # cleared by the sweep either, so it stays held.
-            if services._claim_disposition(candidate, statuses) == services._CLAIM_HELD:
+            if services._claim_disposition(candidate, statuses) == _CLAIM_HELD:
                 refusals.append(f"{requested_name}: current worker claim (live)")
         if any(
             candidate.get(field) is not None
@@ -1512,10 +1503,10 @@ def scope_exact_standard_names(
                 rows = [
                     dict(row)
                     for row in transaction.run(
-                        services._EXACT_NAME_SCOPE_PREFLIGHT_QUERY,
+                        _EXACT_NAME_SCOPE_PREFLIGHT_QUERY,
                         names=requested,
                         fixture_source_id_prefix=FIXTURE_SOURCE_ID_PREFIX,
-                        claim_timeout_s=services.DEFAULT_ORPHAN_SWEEP_TIMEOUT_S,
+                        claim_timeout_s=foundation.DEFAULT_ORPHAN_SWEEP_TIMEOUT_S,
                     )
                 ]
                 returned = [str(row.get("requested_name") or "") for row in rows]
@@ -1536,7 +1527,7 @@ def scope_exact_standard_names(
                         for row in rows
                         for candidate in (row.get("matches") or [])
                         if services._claim_disposition(candidate, run_statuses)
-                        == services._CLAIM_RELEASED
+                        == _CLAIM_RELEASED
                     }
                 )
 
@@ -1544,17 +1535,15 @@ def scope_exact_standard_names(
                 if not dry_run:
                     stamp_rows = list(
                         transaction.run(
-                            services._EXACT_NAME_SCOPE_STAMP_QUERY,
+                            _EXACT_NAME_SCOPE_STAMP_QUERY,
                             names=requested,
                             run_id=run_id,
                             terminal_name_stages=sorted(
-                                services._EXACT_SCOPE_TERMINAL_NAME_STAGES
+                                _EXACT_SCOPE_TERMINAL_NAME_STAGES
                             ),
-                            terminal_statuses=sorted(
-                                services._EXACT_SCOPE_TERMINAL_STATUSES
-                            ),
+                            terminal_statuses=sorted(_EXACT_SCOPE_TERMINAL_STATUSES),
                             fixture_source_id_prefix=FIXTURE_SOURCE_ID_PREFIX,
-                            claim_timeout_s=services.DEFAULT_ORPHAN_SWEEP_TIMEOUT_S,
+                            claim_timeout_s=foundation.DEFAULT_ORPHAN_SWEEP_TIMEOUT_S,
                             released_ids=released_ids,
                         )
                     )

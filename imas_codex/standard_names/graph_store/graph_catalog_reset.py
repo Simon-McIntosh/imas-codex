@@ -312,7 +312,7 @@ def claim_names_for_validation(
             """,
             limit=limit,
             token=token,
-            timeout=services._CLAIM_TIMEOUT,
+            timeout=_CLAIM_TIMEOUT,
         )
         # Step 2: verify — only our token
         results = gc.query(
@@ -417,7 +417,7 @@ def claim_names_for_embedding(
             """,
             limit=limit,
             token=token,
-            timeout=services._CLAIM_TIMEOUT,
+            timeout=_CLAIM_TIMEOUT,
         )
         results = gc.query(
             """

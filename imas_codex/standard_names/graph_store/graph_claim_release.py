@@ -586,8 +586,8 @@ def _refine_claim_release_manifest(
     services: Any,
 ) -> dict[str, Any]:
     return {
-        "schema": services.REFINE_CLAIM_RELEASE_MANIFEST_SCHEMA,
-        "projection_version": services.REFINE_CLAIM_RELEASE_PROJECTION_VERSION,
+        "schema": REFINE_CLAIM_RELEASE_MANIFEST_SCHEMA,
+        "projection_version": REFINE_CLAIM_RELEASE_PROJECTION_VERSION,
         "operation": "release_stranded_refine_claim",
         "target_id": target_id,
         "expected_stage": expected_stage,
@@ -607,8 +607,8 @@ def _refine_claim_no_change_receipt(
     services: Any,
 ) -> dict[str, Any]:
     return {
-        "schema": services.REFINE_CLAIM_RELEASE_RECEIPT_SCHEMA,
-        "projection_version": services.REFINE_CLAIM_RELEASE_PROJECTION_VERSION,
+        "schema": REFINE_CLAIM_RELEASE_RECEIPT_SCHEMA,
+        "projection_version": REFINE_CLAIM_RELEASE_PROJECTION_VERSION,
         "outcome": "no_exact_eligible_claim",
         "dry_run": True,
         "eligible": False,
@@ -677,7 +677,7 @@ def release_stranded_refine_claim(
                 locked = [
                     dict(record)
                     for record in transaction.run(
-                        services._LOCK_REFINE_CLAIM_RELEASE_QUERY, **params
+                        _LOCK_REFINE_CLAIM_RELEASE_QUERY, **params
                     )
                 ]
                 if not locked:
@@ -696,7 +696,7 @@ def release_stranded_refine_claim(
                 before_rows = [
                     dict(record)
                     for record in transaction.run(
-                        services._READ_REFINE_CLAIM_RELEASE_QUERY, target_id=target_id
+                        _READ_REFINE_CLAIM_RELEASE_QUERY, target_id=target_id
                     )
                 ]
                 if len(before_rows) != 1:
@@ -766,7 +766,7 @@ def release_stranded_refine_claim(
                 write_rows = [
                     dict(record)
                     for record in transaction.run(
-                        services._WRITE_REFINE_CLAIM_RELEASE_QUERY,
+                        _WRITE_REFINE_CLAIM_RELEASE_QUERY,
                         **params,
                         expected_claimed_at=str(before["claim"]["claimed_at"]),
                     )
@@ -779,7 +779,7 @@ def release_stranded_refine_claim(
                 after_rows = [
                     dict(record)
                     for record in transaction.run(
-                        services._READ_REFINE_CLAIM_RELEASE_QUERY, target_id=target_id
+                        _READ_REFINE_CLAIM_RELEASE_QUERY, target_id=target_id
                     )
                 ]
                 if len(after_rows) != 1:
@@ -797,8 +797,8 @@ def release_stranded_refine_claim(
                 else:
                     transaction.rollback()
                 return {
-                    "schema": services.REFINE_CLAIM_RELEASE_RECEIPT_SCHEMA,
-                    "projection_version": services.REFINE_CLAIM_RELEASE_PROJECTION_VERSION,
+                    "schema": REFINE_CLAIM_RELEASE_RECEIPT_SCHEMA,
+                    "projection_version": REFINE_CLAIM_RELEASE_PROJECTION_VERSION,
                     "outcome": "released" if apply else "would_release",
                     "dry_run": not apply,
                     "eligible": True,
@@ -1002,7 +1002,7 @@ def stage_name_for_rescore(
     """
     with services.GraphClient() as gc:
         rows = gc.query(
-            services.RESCORE_ELIGIBILITY_QUERY,
+            RESCORE_ELIGIBILITY_QUERY,
             id=sn_id,
             run_id=run_id,
             dry_run=dry_run,
@@ -1128,7 +1128,7 @@ def stop_refine_name_attempt(
     written, or ``''`` when the fence did not match (an orphan sweep or another
     worker already moved the row).
     """
-    terminal = reason in services._TERMINAL_REFINE_STOP_REASONS
+    terminal = reason in _TERMINAL_REFINE_STOP_REASONS
     with services.GraphClient() as gc:
         rows = gc.query(
             """

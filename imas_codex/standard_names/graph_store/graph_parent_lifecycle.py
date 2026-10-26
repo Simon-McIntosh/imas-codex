@@ -8,6 +8,7 @@ from typing import Any
 
 from imas_codex.discovery.base.claims import retry_on_deadlock
 
+from . import graph_foundation as foundation
 from .graph_foundation import _CLAIM_TIMEOUT_SECONDS, DEFAULT_POOL_BATCH_SIZE
 
 logger = logging.getLogger(__name__)
@@ -482,7 +483,7 @@ def _structural_authority_record(
         )
 
     parent_id = str(snapshot["parent_id"])
-    created_at_value = services.datetime.now(services.UTC)
+    created_at_value = services.datetime.now(foundation.UTC)
     created_at = created_at_value.isoformat()
     code_identity, schema_identity = services._structural_authority_identities()
     signed_payload = {
@@ -490,7 +491,7 @@ def _structural_authority_record(
         "child_rows": child_rows,
         "code_identity": code_identity,
         "created_at": created_at_value,
-        "entailment_mechanism": services._STRUCTURAL_AUTHORITY_MECHANISM,
+        "entailment_mechanism": _STRUCTURAL_AUTHORITY_MECHANISM,
         "operation": "accept-and-authorize"
         if accepting
         else "authorize-existing-accept",
@@ -589,7 +590,7 @@ def _structural_authority_record(
             "id": prefix + "signature",
             "profile": "each_row",
             "sha256": payload_sha256,
-            "canonicalization": services._STRUCTURAL_AUTHORITY_CANONICALIZATION,
+            "canonicalization": _STRUCTURAL_AUTHORITY_CANONICALIZATION,
         },
         "participants": participants,
         "selection": {
@@ -603,7 +604,7 @@ def _structural_authority_record(
         "accepted_name_id": parent_id,
         "child_ids": child_ids,
         "children": child_ids,
-        "entailment_mechanism": services._STRUCTURAL_AUTHORITY_MECHANISM,
+        "entailment_mechanism": _STRUCTURAL_AUTHORITY_MECHANISM,
         "created_at": created_at,
         "code_identity": code_identity,
         "schema_identity": schema_identity,
@@ -791,7 +792,7 @@ def persist_enriched_parent(
             )
             return ""
         record = services._structural_authority_record(snapshot, accepting=True)
-        now = services.datetime.now(services.UTC)
+        now = services.datetime.now(foundation.UTC)
         applied = services._persist_structural_authority(
             gc,
             record,
@@ -945,7 +946,7 @@ def structural_accept_derived_parents(gc: Any | None = None, *, services: Any) -
             if snapshot is None or not snapshot.get("children"):
                 continue
             record = services._structural_authority_record(snapshot, accepting=True)
-            now = services.datetime.now(services.UTC)
+            now = services.datetime.now(foundation.UTC)
             parent_updates = {
                 "name_stage": "accepted",
                 "reviewer_model_name": "structural-inheritance",
@@ -961,9 +962,7 @@ def structural_accept_derived_parents(gc: Any | None = None, *, services: Any) -
                 # scalars no edge backs in the same guarded write. Leaving them
                 # would keep a path this name never had readable as provenance.
                 parent_updates["origin"] = "derived"
-                parent_updates.update(
-                    dict.fromkeys(services._UNBACKED_SOURCE_PATH_SCALARS)
-                )
+                parent_updates.update(dict.fromkeys(_UNBACKED_SOURCE_PATH_SCALARS))
             if not services._persist_structural_authority(
                 gc,
                 record,
@@ -1060,7 +1059,7 @@ def backfill_structural_name_authorities(
             )
         receipt = {
             "schema": "imas-codex.structural-authority-backfill-receipt",
-            "created_at": services.datetime.now(services.UTC).isoformat(),
+            "created_at": services.datetime.now(foundation.UTC).isoformat(),
             "lacking_authority_before": lacking_before,
             "eligible_before": eligible_before,
             "written_count": len(written),

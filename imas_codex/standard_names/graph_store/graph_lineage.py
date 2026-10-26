@@ -11,6 +11,8 @@ from typing import Any
 
 from imas_codex.standard_names.signed_manifest import apply_signed_manifest
 
+from . import graph_foundation as foundation
+
 logger = logging.getLogger(__name__)
 
 
@@ -1237,9 +1239,9 @@ def _delete_derived_parent_nodes(
     parent_ids = sorted(set(parent_ids))
     if not parent_ids:
         return 0
-    if len(parent_ids) > services.DERIVED_PARENT_CLEANUP_DELETION_LIMIT:
+    if len(parent_ids) > foundation.DERIVED_PARENT_CLEANUP_DELETION_LIMIT:
         raise services.DerivedParentCleanupRefusal(
-            f"Refused structural derived-parent cleanup: {len(parent_ids)} candidate identities exceeds the {services.DERIVED_PARENT_CLEANUP_DELETION_LIMIT}-identity ceiling"
+            f"Refused structural derived-parent cleanup: {len(parent_ids)} candidate identities exceeds the {foundation.DERIVED_PARENT_CLEANUP_DELETION_LIMIT}-identity ceiling"
         )
     try:
         services.refuse_protected_automatic_deletion(
@@ -2200,7 +2202,7 @@ def _lifecycleless_stub_manifest(
     partitions: dict[str, list[dict[str, Any]]], *, services: Any
 ) -> dict[str, Any]:
     return {
-        "schema": services.LIFECYCLELESS_STUB_MANIFEST_SCHEMA,
+        "schema": LIFECYCLELESS_STUB_MANIFEST_SCHEMA,
         "operation": "reconcile_lifecycleless_standard_name_stubs",
         "rows": {
             action: services._canonicalize_lifecycleless_manifest_value(items)
@@ -2284,7 +2286,7 @@ def _query_skeleton_placeholders_for_cleanup(
     if not candidate_ids:
         return []
     rows = gc.query(
-        f"\n        // STANDARD_NAME_SKELETON_PLACEHOLDER_SELECTION\n        MATCH (sn:StandardName)\n        WHERE sn.id IN $candidate_ids\n          AND {services._SKELETON_PLACEHOLDER_PREDICATE}\n        RETURN sn.id AS candidate_id\n        ",
+        f"\n        // STANDARD_NAME_SKELETON_PLACEHOLDER_SELECTION\n        MATCH (sn:StandardName)\n        WHERE sn.id IN $candidate_ids\n          AND {_SKELETON_PLACEHOLDER_PREDICATE}\n        RETURN sn.id AS candidate_id\n        ",
         candidate_ids=sorted(candidate_ids),
     )
     return sorted(

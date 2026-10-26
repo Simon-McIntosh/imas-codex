@@ -830,7 +830,7 @@ def _scalar_selected_dedup_authority(
         )
 
     manifest = {
-        "schema": foundation.get_services().SCALAR_SELECTED_DEDUP_MANIFEST_SCHEMA,
+        "schema": SCALAR_SELECTED_DEDUP_MANIFEST_SCHEMA,
         "operation": "deduplicate_scalar_selected_sources",
         "reason": reason,
         "source_ids": source_ids,
@@ -1058,7 +1058,7 @@ def deduplicate_scalar_selected_sources(
                                 )
                         transaction.rollback()
                         return {
-                            "schema": foundation.get_services().SCALAR_SELECTED_DEDUP_RECEIPT_SCHEMA,
+                            "schema": SCALAR_SELECTED_DEDUP_RECEIPT_SCHEMA,
                             "outcome": "already_applied",
                             "dry_run": False,
                             "changed": 0,
@@ -1088,7 +1088,7 @@ def deduplicate_scalar_selected_sources(
                 if blocking_refusals:
                     transaction.rollback()
                     return {
-                        "schema": foundation.get_services().SCALAR_SELECTED_DEDUP_RECEIPT_SCHEMA,
+                        "schema": SCALAR_SELECTED_DEDUP_RECEIPT_SCHEMA,
                         "outcome": "refused",
                         "dry_run": not apply,
                         "changed": 0,
@@ -1101,7 +1101,7 @@ def deduplicate_scalar_selected_sources(
                 if not apply:
                     transaction.rollback()
                     return {
-                        "schema": foundation.get_services().SCALAR_SELECTED_DEDUP_RECEIPT_SCHEMA,
+                        "schema": SCALAR_SELECTED_DEDUP_RECEIPT_SCHEMA,
                         "outcome": "would_apply",
                         "dry_run": True,
                         "changed": 0,
@@ -1256,7 +1256,7 @@ def deduplicate_scalar_selected_sources(
                     )
                 transaction.commit()
                 return {
-                    "schema": foundation.get_services().SCALAR_SELECTED_DEDUP_RECEIPT_SCHEMA,
+                    "schema": SCALAR_SELECTED_DEDUP_RECEIPT_SCHEMA,
                     "outcome": "applied",
                     "dry_run": False,
                     "changed": 1,
@@ -1338,10 +1338,7 @@ def _catalog_edit_adjudication_signature_hash(value: Any) -> str:
 def _validate_signed_source_adjudication(
     adjudication: dict[str, Any],
 ) -> tuple[str, str, list[dict[str, Any]]]:
-    if (
-        adjudication.get("schema")
-        != foundation.get_services().SIGNED_SOURCE_DISPOSITION_ADJUDICATION_SCHEMA
-    ):
+    if adjudication.get("schema") != SIGNED_SOURCE_DISPOSITION_ADJUDICATION_SCHEMA:
         raise ValueError("unsupported source-disposition adjudication schema")
     signature = adjudication.get("signature")
     if not isinstance(signature, dict) or signature.get("algorithm") != "sha256":
@@ -1390,7 +1387,7 @@ def _validate_signed_source_adjudication(
             raise ValueError("source disposition ids must be unique")
         seen_sources.add(source_id)
         disposition = row.get("disposition")
-        if disposition not in foundation.get_services()._SIGNED_SOURCE_DISPOSITIONS:
+        if disposition not in _SIGNED_SOURCE_DISPOSITIONS:
             raise ValueError("source disposition is outside the closed set")
         candidates = row.get("candidate_live_targets")
         removed = row.get("removed_targets")
@@ -1428,9 +1425,7 @@ def _validate_signed_source_adjudication(
     if summary is not None:
         disposition_counts = {
             disposition: sum(row["disposition"] == disposition for row in rows)
-            for disposition in sorted(
-                foundation.get_services()._SIGNED_SOURCE_DISPOSITIONS
-            )
+            for disposition in sorted(_SIGNED_SOURCE_DISPOSITIONS)
         }
         if (
             not isinstance(summary, dict)
@@ -1472,10 +1467,7 @@ def _validate_structural_legitimacy_authority(
         != authority_sha256
     ):
         raise ValueError("structural legitimacy authority signature does not match")
-    if (
-        authority.get("schema")
-        != foundation.get_services()._STRUCTURAL_LEGITIMACY_AUTHORITY_SCHEMA
-    ):
+    if authority.get("schema") != _STRUCTURAL_LEGITIMACY_AUTHORITY_SCHEMA:
         raise ValueError("unsupported structural legitimacy authority schema")
     if authority.get("read_only") is not True:
         raise ValueError("structural legitimacy authority must be read-only evidence")
@@ -1489,11 +1481,10 @@ def _validate_structural_legitimacy_authority(
             isinstance(row, dict) and row.get("disposition") == disposition
             for row in raw_rows
         )
-        for disposition in sorted(foundation.get_services()._ORPHAN_DISPOSITIONS)
+        for disposition in sorted(_ORPHAN_DISPOSITIONS)
     }
     if any(
-        not isinstance(row, dict)
-        or row.get("disposition") not in foundation.get_services()._ORPHAN_DISPOSITIONS
+        not isinstance(row, dict) or row.get("disposition") not in _ORPHAN_DISPOSITIONS
         for row in raw_rows
     ):
         raise ValueError("structural legitimacy authority has an unknown disposition")
@@ -1508,10 +1499,7 @@ def _validate_structural_legitimacy_authority(
 
     structural_targets: set[str] = set()
     for row in raw_rows:
-        if (
-            row["disposition"]
-            != foundation.get_services()._STRUCTURAL_LEGITIMACY_DISPOSITION
-        ):
+        if row["disposition"] != _STRUCTURAL_LEGITIMACY_DISPOSITION:
             continue
         target_id = row.get("name")
         if not isinstance(target_id, str) or not target_id:
@@ -1727,7 +1715,7 @@ def _signed_source_disposition_authority(
             binding
             for binding in bindings
             if (binding.get("target_properties") or {}).get("name_stage")
-            not in foundation.get_services()._TERMINAL_BINDING_NAME_STAGES
+            not in foundation._TERMINAL_BINDING_NAME_STAGES
         ]
         live_target_ids = [binding["target_id"] for binding in live_bindings]
         expected_targets = expected["candidate_live_targets"]
@@ -1755,7 +1743,7 @@ def _signed_source_disposition_authority(
             for projection in backing["projections"]:
                 if (projection.get("target_properties") or {}).get(
                     "name_stage"
-                ) not in foundation.get_services()._TERMINAL_BINDING_NAME_STAGES:
+                ) not in foundation._TERMINAL_BINDING_NAME_STAGES:
                     projection_by_target.setdefault(projection["target_id"], []).append(
                         {**projection, "backing_element_id": backing["element_id"]}
                     )
@@ -1885,7 +1873,7 @@ def _signed_source_disposition_authority(
         ),
     )
     manifest = {
-        "schema": foundation.get_services().SIGNED_SOURCE_DISPOSITION_MANIFEST_SCHEMA,
+        "schema": SIGNED_SOURCE_DISPOSITION_MANIFEST_SCHEMA,
         "operation": "apply_adjudicated_source_dispositions",
         "reason": reason,
         "adjudication_sha256": adjudication_sha256,
@@ -1901,7 +1889,7 @@ def _signed_source_disposition_authority(
     }
     if structural_authority_sha256 is not None:
         manifest["structural_legitimacy_authority"] = {
-            "schema": foundation.get_services()._STRUCTURAL_LEGITIMACY_AUTHORITY_SCHEMA,
+            "schema": _STRUCTURAL_LEGITIMACY_AUTHORITY_SCHEMA,
             "payload_sha256": structural_authority_sha256,
             "target_ids": sorted(structural_target_ids),
         }
@@ -2247,7 +2235,7 @@ def _semantic_mirror_repair_authority(
             binding
             for binding in bindings
             if (binding.get("target_properties") or {}).get("name_stage")
-            not in foundation.get_services()._TERMINAL_BINDING_NAME_STAGES
+            not in foundation._TERMINAL_BINDING_NAME_STAGES
         ]
         if refusal is None and len(live_bindings) != 1:
             refusal = "source does not have exactly one live target"
@@ -2257,11 +2245,7 @@ def _semantic_mirror_repair_authority(
             "dd": "FROM_DD_PATH",
             "signals": "FROM_SIGNAL",
         }.get(source_type)
-        if (
-            refusal is None
-            and source_type
-            in foundation.get_services()._PROJECTED_SEMANTIC_SOURCE_TYPES
-        ):
+        if refusal is None and source_type in _PROJECTED_SEMANTIC_SOURCE_TYPES:
             if len(backings) != 1 or backings[0]["origin_type"] != expected_origin_type:
                 refusal = "projected source does not have one exact upstream backing"
             elif properties.get("source_id") != backings[0]["properties"].get("id"):
@@ -2277,7 +2261,7 @@ def _semantic_mirror_repair_authority(
         target_id = target["target_id"]
         scalar_change = properties.get("produced_sn_id") != target_id
         projection_additions: list[dict[str, foundation.get_services().Any]] = []
-        if source_type in foundation.get_services()._PROJECTED_SEMANTIC_SOURCE_TYPES:
+        if source_type in _PROJECTED_SEMANTIC_SOURCE_TYPES:
             backing = backings[0]
             matching_projections = [
                 projection
@@ -2319,7 +2303,7 @@ def _semantic_mirror_repair_authority(
         refusals, key=lambda refusal: (refusal["source_id"], refusal["reason"])
     )
     manifest = {
-        "schema": foundation.get_services().SEMANTIC_MIRROR_REPAIR_MANIFEST_SCHEMA,
+        "schema": SEMANTIC_MIRROR_REPAIR_MANIFEST_SCHEMA,
         "operation": "repair_scalar_projection_mismatches",
         "reason": reason,
         "source_ids": source_ids,
@@ -2514,10 +2498,7 @@ def _validate_signed_orphan_retirement_authority(
         != authority_sha256
     ):
         raise ValueError("orphan retirement authority signature does not match")
-    if (
-        authority.get("schema")
-        != foundation.get_services()._STRUCTURAL_LEGITIMACY_AUTHORITY_SCHEMA
-    ):
+    if authority.get("schema") != _STRUCTURAL_LEGITIMACY_AUTHORITY_SCHEMA:
         raise ValueError("unsupported orphan retirement authority schema")
     if authority.get("read_only") is not True:
         raise ValueError("orphan retirement authority must be read-only evidence")
@@ -2526,8 +2507,7 @@ def _validate_signed_orphan_retirement_authority(
     if not isinstance(raw_rows, list) or not raw_rows:
         raise ValueError("orphan retirement authority requires target rows")
     if any(
-        not isinstance(row, dict)
-        or row.get("disposition") not in foundation.get_services()._ORPHAN_DISPOSITIONS
+        not isinstance(row, dict) or row.get("disposition") not in _ORPHAN_DISPOSITIONS
         for row in raw_rows
     ):
         raise ValueError("orphan retirement authority has an unknown disposition")
@@ -2539,7 +2519,7 @@ def _validate_signed_orphan_retirement_authority(
 
     disposition_counts = {
         disposition: sum(row["disposition"] == disposition for row in raw_rows)
-        for disposition in sorted(foundation.get_services()._ORPHAN_DISPOSITIONS)
+        for disposition in sorted(_ORPHAN_DISPOSITIONS)
     }
     summary = authority.get("summary")
     if (
@@ -2552,10 +2532,7 @@ def _validate_signed_orphan_retirement_authority(
 
     retirements: list[dict[str, foundation.get_services().Any]] = []
     for raw_row in raw_rows:
-        if (
-            raw_row["disposition"]
-            != foundation.get_services()._SIGNED_ORPHAN_RETIREMENT_DISPOSITION
-        ):
+        if raw_row["disposition"] != _SIGNED_ORPHAN_RETIREMENT_DISPOSITION:
             continue
         row = dict(raw_row)
         if row.get("mutation_authority") != "classification_only":
@@ -2815,7 +2792,7 @@ def _signed_dual_authority_retirement_manifest(
             binding
             for binding in bindings
             if (binding.get("target_properties") or {}).get("name_stage")
-            not in foundation.get_services()._TERMINAL_BINDING_NAME_STAGES
+            not in foundation._TERMINAL_BINDING_NAME_STAGES
         ]
         if (
             refusal is None
@@ -2835,7 +2812,7 @@ def _signed_dual_authority_retirement_manifest(
             for projection in backing["projections"]:
                 if (projection.get("target_properties") or {}).get(
                     "name_stage"
-                ) not in foundation.get_services()._TERMINAL_BINDING_NAME_STAGES:
+                ) not in foundation._TERMINAL_BINDING_NAME_STAGES:
                     projection_by_target.setdefault(projection["target_id"], []).append(
                         {**projection, "backing_element_id": backing["element_id"]}
                     )
@@ -2940,7 +2917,7 @@ def _signed_dual_authority_retirement_manifest(
         )
     )
     manifest = {
-        "schema": foundation.get_services().SIGNED_DUAL_AUTHORITY_RETIREMENT_MANIFEST_SCHEMA,
+        "schema": SIGNED_DUAL_AUTHORITY_RETIREMENT_MANIFEST_SCHEMA,
         "operation": "retire_signed_dual_authority_targets",
         "reason": reason,
         "source_authority": {
@@ -3308,7 +3285,7 @@ def _exhausted_orphan_supersession_authority(
         )
 
     manifest = {
-        "schema": foundation.get_services().EXHAUSTED_ORPHAN_SUPERSESSION_MANIFEST_SCHEMA,
+        "schema": EXHAUSTED_ORPHAN_SUPERSESSION_MANIFEST_SCHEMA,
         "operation": "supersede_exhausted_standard_name_orphans",
         "reason": reason,
         "name_ids": name_ids,
@@ -3421,7 +3398,7 @@ def supersede_exhausted_standard_name_orphans(
                             )
                         transaction.rollback()
                         return {
-                            "schema": foundation.get_services().EXHAUSTED_ORPHAN_SUPERSESSION_RECEIPT_SCHEMA,
+                            "schema": EXHAUSTED_ORPHAN_SUPERSESSION_RECEIPT_SCHEMA,
                             "outcome": "already_applied",
                             "dry_run": False,
                             "changed": 0,
@@ -3452,7 +3429,7 @@ def supersede_exhausted_standard_name_orphans(
                 if refusals:
                     transaction.rollback()
                     return {
-                        "schema": foundation.get_services().EXHAUSTED_ORPHAN_SUPERSESSION_RECEIPT_SCHEMA,
+                        "schema": EXHAUSTED_ORPHAN_SUPERSESSION_RECEIPT_SCHEMA,
                         "outcome": "refused",
                         "dry_run": not apply,
                         "changed": 0,
@@ -3465,7 +3442,7 @@ def supersede_exhausted_standard_name_orphans(
                 if not apply:
                     transaction.rollback()
                     return {
-                        "schema": foundation.get_services().EXHAUSTED_ORPHAN_SUPERSESSION_RECEIPT_SCHEMA,
+                        "schema": EXHAUSTED_ORPHAN_SUPERSESSION_RECEIPT_SCHEMA,
                         "outcome": "would_apply" if actions else "already_clean",
                         "dry_run": True,
                         "changed": 0,
@@ -3555,7 +3532,7 @@ def supersede_exhausted_standard_name_orphans(
                     )
                 transaction.commit()
                 return {
-                    "schema": foundation.get_services().EXHAUSTED_ORPHAN_SUPERSESSION_RECEIPT_SCHEMA,
+                    "schema": EXHAUSTED_ORPHAN_SUPERSESSION_RECEIPT_SCHEMA,
                     "outcome": "applied",
                     "dry_run": False,
                     "changed": len(changed_rows),
@@ -3745,7 +3722,7 @@ def _ancestor_supersession_authority(
         old_id=old_id,
     )
     manifest = {
-        "schema": foundation.get_services().ANCESTOR_SUPERSESSION_MANIFEST_SCHEMA,
+        "schema": ANCESTOR_SUPERSESSION_MANIFEST_SCHEMA,
         "operation": "supersede_into_ancestor",
         "old_id": old_id,
         "ancestor_id": ancestor_id,
@@ -4002,7 +3979,7 @@ def supersede_into_ancestor(
                             )
                         transaction.rollback()
                         return {
-                            "schema": foundation.get_services().ANCESTOR_SUPERSESSION_RECEIPT_SCHEMA,
+                            "schema": ANCESTOR_SUPERSESSION_RECEIPT_SCHEMA,
                             "outcome": "already_applied",
                             "dry_run": False,
                             "changed": 0,
@@ -4052,7 +4029,7 @@ def supersede_into_ancestor(
                 if stale_refusal_ids:
                     transaction.rollback()
                     return {
-                        "schema": foundation.get_services().ANCESTOR_SUPERSESSION_RECEIPT_SCHEMA,
+                        "schema": ANCESTOR_SUPERSESSION_RECEIPT_SCHEMA,
                         "outcome": "refused",
                         "dry_run": not apply,
                         "changed": 0,
@@ -4131,7 +4108,7 @@ def supersede_into_ancestor(
                 if not apply:
                     transaction.rollback()
                     return {
-                        "schema": foundation.get_services().ANCESTOR_SUPERSESSION_RECEIPT_SCHEMA,
+                        "schema": ANCESTOR_SUPERSESSION_RECEIPT_SCHEMA,
                         "outcome": "would_apply",
                         "dry_run": True,
                         "changed": 0,
@@ -4326,7 +4303,7 @@ def supersede_into_ancestor(
                     )
                 transaction.commit()
                 return {
-                    "schema": foundation.get_services().ANCESTOR_SUPERSESSION_RECEIPT_SCHEMA,
+                    "schema": ANCESTOR_SUPERSESSION_RECEIPT_SCHEMA,
                     "outcome": "applied",
                     "dry_run": False,
                     "changed": 1,
