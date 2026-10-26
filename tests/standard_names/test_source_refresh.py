@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import re
 import subprocess
+import time
 from collections.abc import Iterator
 from unittest.mock import MagicMock
 
@@ -443,9 +444,9 @@ def test_public_refresh_restamps_raw_convergence_without_steering(monkeypatch):
 
 def _project_bolt_port() -> int:
     """The port this checkout's profile gives the project graph."""
-    from imas_codex.graph.profiles import resolve_neo4j
+    from imas_codex.graph.profiles import _convention_bolt_port, get_graph_location
 
-    return resolve_neo4j(auto_tunnel=False).bolt_port
+    return _convention_bolt_port(get_graph_location())
 
 
 def _assert_refused(monkeypatch, address: str) -> None:
@@ -549,6 +550,22 @@ def test_a_failed_start_leaves_no_process_behind(monkeypatch, tmp_path):
 
     assert len(started) == 1
     assert started[0].poll() is not None, "the failed start left its process running"
+
+
+def test_disposable_startup_has_an_independent_deadline(monkeypatch, tmp_path):
+    """A stalled launch fails at its own bound and removes its scratch tree."""
+    from imas_codex.graph import temp_neo4j
+    from tests.standard_names import conftest
+
+    monkeypatch.setenv("TMPDIR", str(tmp_path))
+    monkeypatch.setattr(conftest, "_DISPOSABLE_STARTUP_TIMEOUT_SECONDS", 0.05)
+    monkeypatch.setattr(
+        temp_neo4j, "start_temp_neo4j", lambda *_args, **_kwargs: time.sleep(1)
+    )
+
+    with pytest.raises(TimeoutError, match="startup exceeded 0.05 seconds"):
+        conftest._start_empty_neo4j()
+    assert list(tmp_path.iterdir()) == []
 
 
 @pytest.fixture

@@ -4,17 +4,14 @@ from __future__ import annotations
 
 import hashlib
 import json
-import os
 from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 
 import pytest
-from neo4j import GraphDatabase
 
 from imas_codex.graph.client import GraphClient
 from imas_codex.graph.models import RepairMutationKind
-from imas_codex.graph.profiles import resolve_neo4j
 from imas_codex.standard_names import signed_manifest as operator
 from imas_codex.standard_names.signed_manifest import (
     apply_signed_manifest,
@@ -117,25 +114,6 @@ def _write_authority(path: Path, rows: list[dict[str, Any]]) -> tuple[str, str]:
     content = json.dumps(authority, sort_keys=True, indent=2).encode()
     path.write_bytes(content)
     return hashlib.sha256(content).hexdigest(), payload_sha256
-
-
-@pytest.fixture(scope="module")
-def disposable_neo4j() -> Iterator[tuple[str, str]]:
-    uri = os.environ.get("IMAS_CODEX_TEST_NEO4J_URI")
-    if not uri:
-        pytest.skip("IMAS_CODEX_TEST_NEO4J_URI is not configured")
-    if os.environ.get("IMAS_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
-        pytest.fail("structural reparenting requires a disposable graph")
-    project_uri = resolve_neo4j(auto_tunnel=False).uri
-    if uri.rstrip("/") == project_uri.rstrip("/"):
-        pytest.fail("structural reparenting refuses the project graph URI")
-    password = os.environ.get("IMAS_CODEX_TEST_NEO4J_PASSWORD", "")
-    auth = ("neo4j", password) if password else None
-    print(f"disposable_bolt_uri={uri}")
-    with GraphDatabase.driver(uri, auth=auth) as driver:
-        driver.verify_connectivity()
-        driver.execute_query("MATCH (node) DETACH DELETE node")
-    yield uri, password
 
 
 @pytest.fixture

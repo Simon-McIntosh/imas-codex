@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import dataclasses
 import os
+import signal
 import socket
 import subprocess
 import sys
@@ -23,6 +24,27 @@ from typing import Any
 from unittest.mock import patch
 
 import pytest
+
+
+def pytest_collection_modifyitems(items):
+    """Give shared-graph startup its own deadline outside test call timeouts."""
+    for item in items:
+        if "disposable_neo4j_uri" not in item.fixturenames:
+            continue
+        existing = item.get_closest_marker("timeout")
+        args = (
+            existing.args
+            if existing
+            else (
+                float(
+                    item.config.getoption("timeout") or item.config.getini("timeout")
+                ),
+            )
+        )
+        kwargs = dict(existing.kwargs) if existing else {}
+        kwargs["func_only"] = True
+        item.add_marker(pytest.mark.timeout(*args, **kwargs), append=False)
+
 
 # ---------------------------------------------------------------------------
 # Structural guard — block live GraphClient connections in default-tier tests
@@ -370,6 +392,9 @@ def _free_port_pair() -> tuple[int, int]:
             sock.close()
 
 
+_DISPOSABLE_STARTUP_TIMEOUT_SECONDS = 240.0
+
+
 def _start_empty_neo4j():
     """Start one empty Neo4j through the module that owns the lifecycle.
 
@@ -383,6 +408,17 @@ def _start_empty_neo4j():
     directory = tempfile.TemporaryDirectory(prefix="disposable-neo4j-", dir=scratch)
     root = Path(directory.name)
     bolt_port, http_port = _free_port_pair()
+
+    def _startup_expired(_signum, _frame):
+        raise TimeoutError(
+            "disposable Neo4j startup exceeded "
+            f"{_DISPOSABLE_STARTUP_TIMEOUT_SECONDS:g} seconds"
+        )
+
+    previous_handler = signal.signal(signal.SIGALRM, _startup_expired)
+    previous_timer = signal.setitimer(
+        signal.ITIMER_REAL, _DISPOSABLE_STARTUP_TIMEOUT_SECONDS
+    )
     try:
         process, log = temp_neo4j.start_temp_neo4j(
             root, bolt_port, http_port, load_dump=False
@@ -390,6 +426,9 @@ def _start_empty_neo4j():
     except BaseException:
         directory.cleanup()
         raise
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, *previous_timer)
+        signal.signal(signal.SIGALRM, previous_handler)
     return directory, process, log, bolt_port
 
 
@@ -575,6 +614,12 @@ def disposable_neo4j_empty(disposable_neo4j_uri: str) -> str:
     """The shared endpoint, holding no nodes when the test starts."""
     _wipe(disposable_neo4j_uri)
     return disposable_neo4j_uri
+
+
+@pytest.fixture()
+def disposable_neo4j(disposable_neo4j_uri: str) -> tuple[str, str]:
+    """The shared endpoint in the URI/password shape used by graph clients."""
+    return disposable_neo4j_uri, neo4j_test_password()
 
 
 # ---------------------------------------------------------------------------
