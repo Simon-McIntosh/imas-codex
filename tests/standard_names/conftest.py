@@ -26,8 +26,17 @@ from unittest.mock import patch
 import pytest
 
 
-def pytest_collection_modifyitems(items):
-    """Give shared-graph startup its own deadline outside test call timeouts."""
+def pytest_collection_modifyitems(config, items):
+    """Select graph items and keep their startup outside test call timeouts."""
+    if config.getoption("markexpr") == "graph":
+        deselected = [
+            item for item in items if item.get_closest_marker("graph") is None
+        ]
+        if deselected:
+            config.hook.pytest_deselected(items=deselected)
+            items[:] = [
+                item for item in items if item.get_closest_marker("graph") is not None
+            ]
     for item in items:
         if (
             "disposable_neo4j_uri" not in item.fixturenames
