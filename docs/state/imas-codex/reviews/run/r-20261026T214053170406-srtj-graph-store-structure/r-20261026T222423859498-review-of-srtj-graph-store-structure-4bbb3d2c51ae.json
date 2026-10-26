@@ -1,0 +1,49 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "imas_codex/cli/sn.py",
+    "imas_codex/standard_names/loop.py",
+    "imas_codex/standard_names/pool_adapter.py",
+    "imas_codex/standard_names/edit.py",
+    "imas_codex/standard_names/review/holds.py"
+  ],
+  "completed_at": "2026-10-26T22:39:08.673Z",
+  "dispatched_at": "2026-10-26T22:25:11Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_supersession.py",
+      "line": 3104,
+      "severity": "non-blocking",
+      "text": "foundation.get_services().defaultdict(set) reaches collections.defaultdict through the service object, so a domain module imported without the composition root still raises 'Graph services are not wired' for a plain dict factory (same shape at graph_review_persistence.py:78-85 for json and hashlib, and at graph_audits.py:3055 for json.JSONDecodeError). Brief item 1 says to remove every reach for a name through the bridge where the owning module can be imported; the change applied that rule to constants and its probe counted 'accessible constants', so imported stdlib and typing names stayed bridged (275 get_services().<attr> reaches remain across graph_store)."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "pass \u2014 four commits read in order; only the last is docs.",
+    "done_when": "pass \u2014 both archived suite arms are recorded and their failure id sets are identical, so added failures are zero.",
+    "goal": "pass \u2014 graph_foundation.py:66-77 exposes wire_services/get_services and the nine brief items are present in the diff.",
+    "manifest": "pass \u2014 manifest.md records the commits, the gate command, both suite logs and the completed flags.",
+    "write_paths": "pass \u2014 all 30 changed files are inside the scope declared in brief.md."
+  },
+  "node": "review-of-srtj-graph-store-structure-4bbb3d2c51ae",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: pass \u2014 the goal is that the split graph and worker packages hold their own rules; imas_codex/standard_names/graph_store/graph_foundation.py:66-77 adds wire_services/get_services so the service object is explicit and refuses an unwired call, and all nine brief items are represented in the diff.\nVERDICT done_when: pass \u2014 brief.md Done when names the whole tests/standard_names and tests/graph suites at base and head with zero added failure ids; manifest.md baseline_suite and after_suite record both arms and I recomputed the pair from base-absolute-suite.log (111 failed, 8951 passed) and head-absolute-suite.log (111 failed, 9007 passed), which share an identical failure id set.\nVERDICT write_paths: pass \u2014 read the declared write scope in brief.md; git diff --name-only b4d3c45c7 4bbb3d2c5 lists 30 files and every one is inside graph_ops.py, workers.py, graph_store/, worker_tasks/, the two tests/standard_names files, or the evidence fragment.\nVERDICT manifest: pass \u2014 read manifest.md; status is complete, it carries the four commit shas, the literal gate command, test_logs naming both archived suite logs, the negative-control log path, and baseline_suite/after_suite JSON with exit_status, completed and failure_ids.\nVERDICT diff: pass \u2014 read commit by commit against base b4d3c45c7: 9cbeb339d does the accessor, constants, predicate, logger, default and hygiene work; 3a4b7c74a restores the transitional patch seams after the first head arm added three failures; 7d90a07c4 makes accessible constants direct; 4bbb3d2c5 adds only the evidence fragment.\nCALL_SITES: imas_codex/cli/sn.py, imas_codex/standard_names/loop.py, imas_codex/standard_names/pool_adapter.py, imas_codex/standard_names/edit.py, imas_codex/standard_names/review/holds.py\n",
+  "review_run_id": "r-20261026T222423859498-review-of-srtj-graph-store-structure-4bbb3d2c51ae",
+  "reviewed_base_sha": "b4d3c45c7db4ca573c8965bc2d259917f6e3839b",
+  "reviewed_head_sha": "4bbb3d2c51ae6581c6a1f25e83c9bb88e68aaa7a",
+  "reviewed_run_id": "r-20261026T214053170406-srtj-graph-store-structure",
+  "rubric": "run-review",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 15,
+    "goal_fidelity": 17,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-26T22:40:01.419209+00:00",
+  "total": 106
+}
