@@ -5,10 +5,15 @@ from __future__ import annotations
 import functools
 import inspect
 import json
+import logging
 from collections import Counter
 from typing import Any
 
 from imas_codex.standard_names.signed_manifest import apply_signed_manifest
+
+from . import graph_foundation as foundation
+
+logger = logging.getLogger(__name__)
 
 
 def get_source_name_mapping(*, rich: bool = False, services: Any) -> dict[str, dict]:
@@ -499,9 +504,7 @@ def _filter_admissible_parents(
             )
         )
     except Exception:
-        services.logger.exception(
-            "Parent-admission topology probe failed; aborting reconcile"
-        )
+        logger.exception("Parent-admission topology probe failed; aborting reconcile")
         raise
     superseded_targets = superseded_parent_names(gc, targets, lifecycle_rows=rows)
     for r in rows:
@@ -540,9 +543,7 @@ def _filter_admissible_parents(
                 )
             )
         except Exception as exc:
-            services.logger.warning(
-                "Batch shadow-source probe failed: %s; skipping veto", exc
-            )
+            logger.warning("Batch shadow-source probe failed: %s; skipping veto", exc)
             srows = []
         for r in srows:
             shadow_info[r["target"]] = {
@@ -617,7 +618,7 @@ def _filter_admissible_parents(
             dropped_count += 1
             dropped_targets.add(e["to_name"])
     if dropped_count:
-        services.logger.info(
+        logger.info(
             "Parent admission gate: dropped %d HAS_PARENT edges to %d inadmissible targets (sample: %s)",
             dropped_count,
             len(dropped_targets),
@@ -748,7 +749,7 @@ def _bootstrap_missing_derived_parent_targets(
         if not progressed:
             break
     if remaining:
-        services.logger.warning(
+        logger.warning(
             "Refused %d missing derived-parent target(s) without complete authority: %s",
             len(remaining),
             ", ".join(sorted(remaining)[:5]),
@@ -1074,7 +1075,7 @@ def rederive_structural_edges(*, services: Any) -> dict[str, int]:
         services._write_standard_name_edges(gc, names, full_rebuild=True)
         dead_cleared = services._clear_superseded_child_derived_parent_edges(gc)
         migrated = services._rewire_has_parent_off_superseded(gc)
-    services.logger.info(
+    logger.info(
         "rederive_structural_edges: processed %d live names, cleared %d dead-name edges, migrated %d HAS_PARENT edges",
         len(names),
         dead_cleared,
@@ -1168,9 +1169,9 @@ def _parse_parent_grammar(name_id: str, *, services: Any) -> dict[str, str | Non
             return dict.fromkeys(services._GRAMMAR_SEGMENT_COLUMNS)
         return services._segments_from_ir(result.ir)
     except ImportError:
-        services.logger.debug("ISN unavailable — no grammar for parent %s", name_id)
+        logger.debug("ISN unavailable — no grammar for parent %s", name_id)
     except Exception:
-        services.logger.debug("ISN strict grammar rejected parent %s", name_id)
+        logger.debug("ISN strict grammar rejected parent %s", name_id)
     return dict.fromkeys(services._GRAMMAR_SEGMENT_COLUMNS)
 
 
@@ -1238,9 +1239,9 @@ def _delete_derived_parent_nodes(
     parent_ids = sorted(set(parent_ids))
     if not parent_ids:
         return 0
-    if len(parent_ids) > services.DERIVED_PARENT_CLEANUP_DELETION_LIMIT:
+    if len(parent_ids) > foundation.DERIVED_PARENT_CLEANUP_DELETION_LIMIT:
         raise services.DerivedParentCleanupRefusal(
-            f"Refused structural derived-parent cleanup: {len(parent_ids)} candidate identities exceeds the {services.DERIVED_PARENT_CLEANUP_DELETION_LIMIT}-identity ceiling"
+            f"Refused structural derived-parent cleanup: {len(parent_ids)} candidate identities exceeds the {foundation.DERIVED_PARENT_CLEANUP_DELETION_LIMIT}-identity ceiling"
         )
     try:
         services.refuse_protected_automatic_deletion(
@@ -1294,9 +1295,7 @@ def sweep_orphaned_docs_revisions(gc: Any, *, services: Any) -> int:
     )
     n = int(rows[0]["n"]) if rows else 0
     if n:
-        services.logger.info(
-            "sweep_orphaned_docs_revisions: deleted %d orphaned revisions", n
-        )
+        logger.info("sweep_orphaned_docs_revisions: deleted %d orphaned revisions", n)
     return n
 
 
@@ -1399,7 +1398,7 @@ def _materialize_derived_parent_rows(
             if authorized_unit is None and (
                 not any(k in seedable_edge_kinds for k in edge_kinds)
             ):
-                services.logger.debug(
+                logger.debug(
                     "Parent %s has only non-seedable edges (%s) — skipping",
                     parent_id,
                     edge_kinds,
@@ -1416,7 +1415,7 @@ def _materialize_derived_parent_rows(
         elif is_geometric:
             unit = None
         elif len(child_units) > 1:
-            services.logger.warning(
+            logger.warning(
                 "Parent %s has children with heterogeneous units: %s — skipping (needs manual review)",
                 parent_id,
                 child_units,
@@ -1454,7 +1453,7 @@ def _materialize_derived_parent_rows(
         props.update(services._derived_parent_source_metadata(parent_id))
         props["bootstrap_edges"] = row.get("bootstrap_edges") or []
         if not unit:
-            services.logger.warning(
+            logger.warning(
                 "Parent %s has no authoritative unit — skipping materialization",
                 parent_id,
             )
@@ -1463,7 +1462,7 @@ def _materialize_derived_parent_rows(
             parent_id, kind=kind, unit=unit
         )
         if validation_issues:
-            services.logger.warning(
+            logger.warning(
                 "Parent %s failed the name-validity oracle — skipping: %s",
                 parent_id,
                 "; ".join(validation_issues),
@@ -1492,7 +1491,7 @@ def _materialize_derived_parent_rows(
         if bootstrap_missing and (
             not any(returned.get("parent_id") == parent_id for returned in result)
         ):
-            services.logger.warning(
+            logger.warning(
                 "Parent %s bootstrap authority changed before persistence — refusing",
                 parent_id,
             )
@@ -1709,7 +1708,7 @@ def seed_parent_sources(gc: Any | None = None, *, services: Any) -> int:
         if not parents:
             return 0
         seeded = services._materialize_derived_parent_rows(gc, parents)
-        services.logger.info("seed_parent_sources: populated %d parent SNs", seeded)
+        logger.info("seed_parent_sources: populated %d parent SNs", seeded)
         return seeded
     finally:
         if _own_gc:
@@ -1746,7 +1745,7 @@ def normalize_derived_parent_lifecycle(gc: Any | None = None, *, services: Any) 
                 invalid_parents.append(parent_id)
         deleted = services._delete_derived_parent_nodes(gc, invalid_parents)
         if deleted:
-            services.logger.info(
+            logger.info(
                 "normalize_derived_parent_lifecycle: deleted %d inadmissible derived parents",
                 deleted,
             )
@@ -1791,7 +1790,7 @@ def normalize_derived_parent_lifecycle(gc: Any | None = None, *, services: Any) 
             reaped = services._delete_derived_parent_nodes(gc, childless)
             if reaped:
                 deleted += reaped
-                services.logger.info(
+                logger.info(
                     "normalize_derived_parent_lifecycle: reaped %d childless derived parents",
                     reaped,
                 )
@@ -1854,11 +1853,11 @@ def normalize_derived_parent_lifecycle(gc: Any | None = None, *, services: Any) 
             )
             deleted += rejected
             if rejected:
-                services.logger.info(
+                logger.info(
                     "normalize_derived_parent_lifecycle: deleted %d identity-invalid pending derived parents",
                     rejected,
                 )
-        services.logger.info(
+        logger.info(
             "normalize_derived_parent_lifecycle: repaired %d derived parent SNs",
             repaired,
         )
@@ -2203,7 +2202,7 @@ def _lifecycleless_stub_manifest(
     partitions: dict[str, list[dict[str, Any]]], *, services: Any
 ) -> dict[str, Any]:
     return {
-        "schema": services.LIFECYCLELESS_STUB_MANIFEST_SCHEMA,
+        "schema": LIFECYCLELESS_STUB_MANIFEST_SCHEMA,
         "operation": "reconcile_lifecycleless_standard_name_stubs",
         "rows": {
             action: services._canonicalize_lifecycleless_manifest_value(items)
@@ -2287,7 +2286,7 @@ def _query_skeleton_placeholders_for_cleanup(
     if not candidate_ids:
         return []
     rows = gc.query(
-        f"\n        // STANDARD_NAME_SKELETON_PLACEHOLDER_SELECTION\n        MATCH (sn:StandardName)\n        WHERE sn.id IN $candidate_ids\n          AND {services._SKELETON_PLACEHOLDER_PREDICATE}\n        RETURN sn.id AS candidate_id\n        ",
+        f"\n        // STANDARD_NAME_SKELETON_PLACEHOLDER_SELECTION\n        MATCH (sn:StandardName)\n        WHERE sn.id IN $candidate_ids\n          AND {_SKELETON_PLACEHOLDER_PREDICATE}\n        RETURN sn.id AS candidate_id\n        ",
         candidate_ids=sorted(candidate_ids),
     )
     return sorted(

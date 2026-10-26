@@ -2,66 +2,77 @@
 
 from __future__ import annotations
 
-import asyncio
-import json
 import logging
-import random
 import re as _re
-from collections.abc import Callable, Sequence
 from functools import cache as _cache, lru_cache
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
-from imas_codex.graph.models import RefineStopReason
-from imas_codex.standard_names import vocabulary_definitions as vocabulary_source
-from imas_codex.standard_names.budget import (
-    bind_attempt_exposure,
-    charge_billable_exception,
-    model_provider_exposure,
-)
-from imas_codex.standard_names.defaults import (
-    DEFAULT_ESCALATION_MODEL,
-    DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
-    SEMANTIC_SIM_GATE_MODEL,
-    SEMANTIC_SIM_GATE_RESOLUTION_METHOD,
-)
-from imas_codex.standard_names.provenance import detect_value_provenance
-from imas_codex.standard_names.source_paths import (
-    DD_PREFIX,
-    encode_source_path,
-    strip_dd_prefix,
-)
-
-if TYPE_CHECKING:
-    pass
 __all__ = [
-    "Any",
-    "Callable",
-    "DD_PREFIX",
-    "DEFAULT_ESCALATION_MODEL",
-    "DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER",
-    "RefineStopReason",
-    "SEMANTIC_SIM_GATE_MODEL",
-    "SEMANTIC_SIM_GATE_RESOLUTION_METHOD",
-    "Sequence",
-    "TYPE_CHECKING",
-    "_cache",
-    "_re",
-    "annotations",
-    "asyncio",
-    "bind_attempt_exposure",
-    "charge_billable_exception",
-    "detect_value_provenance",
-    "encode_source_path",
-    "json",
-    "logging",
-    "lru_cache",
-    "model_provider_exposure",
-    "random",
-    "strip_dd_prefix",
-    "vocabulary_source",
+    "logger",
+    "backfill_semantic_similarity_gate_resolution_method",
+    "normalize_spelling",
+    "normalize_prose_spelling",
+    "_GREEK_WORD_TO_SYMBOL",
+    "_GREEK_WORD_RE",
+    "_GREEK_CMD_TO_SYMBOL",
+    "_GREEK_CMD_RE",
+    "_GREEK_STRANDED_BACKSLASH_RE",
+    "_LATEX_CMD_ARG_RE",
+    "_LATEX_CMD_BARE_RE",
+    "_SUPERSCRIPT_BRACE_RE",
+    "_SUBSCRIPT_BRACE_RE",
+    "_MATH_DELIM_RE",
+    "normalize_description_notation",
+    "normalize_description_text",
+    "_DOMAIN_UK_US",
+    "_GRAMMAR_FIELDS",
+    "_dedup_adjacent_tokens",
+    "_SHAPE_PARAMETER_BASE_POLICY",
+    "_isn_segment_tokens",
+    "_isn_physical_bases",
+    "shape_parameter_base_drift",
+    "_shape_parameter_bases",
+    "_rate_natured_bases",
+    "_state_resolution_tokens",
+    "_name_denotes_state",
+    "_name_denotes_rate",
+    "_ir_denotes_time_change",
+    "_ir_claims_time_change_in_scope",
+    "_name_claims_time_change",
+    "_time_change_claim_is_binary_scoped",
+    "_shape_parameter_surface",
+    "_inject_shape_parameter_surface",
+    "_SNAKE_CASE_RE",
+    "is_well_formed_candidate",
+    "_claimed_source_ids",
+    "_strip_response_source_id",
+    "_review_dd_source_bindings",
+    "_review_dd_source_ids",
+    "_sanitize_dd_gap_evidence",
+    "_persist_dd_gap_evidence",
+    "_claimed_source_outcome",
+    "_sanitize_compose_result_sources",
+    "_filter_persist_candidates_to_claimed_sources",
+    "_withhold_binding_conflicted_sources",
+    "_candidate_source_node_id",
+    "_persist_description_checked_candidates",
+    "_mark_source_prevalidation_failed",
+    "provenance_canonical_names",
+    "_NON_NAMEABLE_BARE_TOKENS",
+    "is_non_nameable_coordinate",
+    "_coerce_llm_metric",
+    "_extract_llm_telemetry",
+    "_load_known_physical_bases",
+    "_auto_detect_physical_base_gaps",
+    "_compute_token_reuse_hits",
+    "_grammar_round_trip_failures",
+    "_build_grammar_retry_reason",
+    "_build_token_reuse_retry_reason",
+    "_active_editorial_gap_guidance",
+    "_stamp_dedup_decision",
 ]
 
-logger = logging.getLogger("imas_codex.standard_names.workers")
+logger = logging.getLogger(__name__)
 
 
 def backfill_semantic_similarity_gate_resolution_method(
@@ -123,7 +134,7 @@ def normalize_prose_spelling(_worker_dependency, /, text: str) -> str:
         return text
     from breame.spelling import get_american_spelling
 
-    def _replace(match: _worker_dependency("_re").Match) -> str:
+    def _replace(match: _re.Match) -> str:
         word = match.group(0)
         us = _worker_dependency("_DOMAIN_UK_US").get(
             word.lower(), get_american_spelling(word.lower())
@@ -134,7 +145,7 @@ def normalize_prose_spelling(_worker_dependency, /, text: str) -> str:
             return us[0].upper() + us[1:]
         return us
 
-    return _worker_dependency("_re").sub("[A-Za-z]+", _replace, text)
+    return _re.sub("[A-Za-z]+", _replace, text)
 
 
 _GREEK_WORD_TO_SYMBOL: dict[str, str] = {"phi": "φ", "theta": "θ", "rho": "ρ"}
@@ -192,7 +203,7 @@ def normalize_description_notation(_worker_dependency, /, text: str) -> str:
     text = text.replace("{", "").replace("}", "")
     text = _worker_dependency("_MATH_DELIM_RE").sub("", text)
     text = text.replace("\\", "")
-    text = _worker_dependency("_re").sub("[ \\t]{2,}", " ", text)
+    text = _re.sub("[ \\t]{2,}", " ", text)
     return text
 
 
@@ -652,7 +663,7 @@ def _sanitize_dd_gap_evidence(
             continue
         kept.append(report)
     if rejected:
-        _worker_dependency("logger").warning(
+        logger.warning(
             "Pool %s: ignored %d DD-gap path proposal(s) outside the claimed batch: %s",
             phase,
             len(rejected),
@@ -697,7 +708,7 @@ def _persist_dd_gap_evidence(
         result = write_dd_gaps(reports)
         return int(result.get("reported", 0))
     except Exception:
-        _worker_dependency("logger").warning(
+        logger.warning(
             "Pool %s: DD-gap evidence persistence failed without changing the pipeline outcome",
             phase,
             exc_info=True,
@@ -825,7 +836,7 @@ def _sanitize_compose_result_sources(
         if _reserve(candidate.source_id, "generated")
     ]
     if overlaps:
-        _worker_dependency("logger").warning(
+        logger.warning(
             "Pool %s: resolved %d multi-disposition source(s) by fixed priority: %s",
             phase,
             len(overlaps),
@@ -835,7 +846,7 @@ def _sanitize_compose_result_sources(
         list(getattr(result, "dd_gaps", None) or []), allowed_source_ids, phase=phase
     )
     if rejected:
-        _worker_dependency("logger").warning(
+        logger.warning(
             "Pool %s: ignored %d out-of-batch source proposal(s): %s",
             phase,
             len(rejected),
@@ -859,7 +870,7 @@ def _filter_persist_candidates_to_claimed_sources(
     ]
     rejected = len(candidates) - len(kept)
     if rejected:
-        _worker_dependency("logger").warning(
+        logger.warning(
             "Pool %s: deferred %d candidate(s) without a source claim", phase, rejected
         )
     return kept
@@ -895,7 +906,7 @@ def _withhold_binding_conflicted_sources(
     for item in getattr(conflict, "conflicts", ()):
         retired_identity = getattr(item, "retired_identity", None)
         if retired_identity is None:
-            _worker_dependency("logger").warning(
+            logger.warning(
                 "Pool %s: source %s bound to live identity %r at stage %r — withheld for adjudication, no attempt spent",
                 phase,
                 item.source_id,
@@ -903,7 +914,7 @@ def _withhold_binding_conflicted_sources(
                 item.holding_stage,
             )
         else:
-            _worker_dependency("logger").warning(
+            logger.warning(
                 "Pool %s: source %s bound to live identity %r at stage %r alongside retired identity %r at stage %r — withheld for adjudication, no attempt spent",
                 phase,
                 item.source_id,
@@ -1001,7 +1012,7 @@ def _persist_description_checked_candidates(
             source_ids=sorted(source_ids), claim_token=claim_token
         )
     if rejected_count:
-        _worker_dependency("logger").warning(
+        logger.warning(
             "Pool %s: rejected %d candidate(s) with empty descriptions; released %d/%d exact source claim(s) for retry",
             phase,
             rejected_count,
@@ -1408,7 +1419,7 @@ def _grammar_round_trip_failures(
             try:
                 diagnosis = describe_gap("physical_base", parse_error.residue).guidance
             except Exception:
-                _worker_dependency("logger").debug(
+                logger.debug(
                     "could not describe grammar failure for %s",
                     getattr(candidate, "source_id", "?"),
                     exc_info=True,
@@ -1478,9 +1489,7 @@ def _active_editorial_gap_guidance(
         rows = fetch_vocab_gap_adjudications(gap_dicts)
         return editorial_retry_guidance(rows)
     except Exception:
-        _worker_dependency("logger").debug(
-            "Editorial vocabulary guidance lookup failed", exc_info=True
-        )
+        logger.debug("Editorial vocabulary guidance lookup failed", exc_info=True)
         return ("", False)
 
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from datetime import UTC
 from typing import Any
 
@@ -10,13 +11,19 @@ from imas_codex.standard_names.defaults import (
     DEFAULT_MIN_SCORE,
 )
 
-from .graph_audits import _PHASE_TO_STANDARD_NAME_COST_FIELD
-from .graph_foundation import _CLAIM_TIMEOUT_SECONDS
+from .graph_foundation import (
+    _CLAIM_TIMEOUT_SECONDS,
+    _PHASE_TO_POOL,
+    _PHASE_TO_STANDARD_NAME_COST_FIELD,
+    DEFAULT_POOL_BATCH_SIZE,
+)
+
+logger = logging.getLogger(__name__)
 
 
 def _normalize_pool(phase: str, *, services: Any) -> str:
     """Map a raw phase string to a canonical pool name."""
-    return services._PHASE_TO_POOL.get(phase, phase)
+    return _PHASE_TO_POOL.get(phase, phase)
 
 
 @retry_on_deadlock()
@@ -59,7 +66,7 @@ def record_llm_cost(
         model == "test-model"
         and services.os.environ.get("IMAS_CODEX_ALLOW_TEST_MODEL") != "1"
     ):
-        services.logger.warning(
+        logger.warning(
             "record_llm_cost: refusing model='test-model' (run=%s phase=%s) — fixture leak guard. Mock the write or set IMAS_CODEX_ALLOW_TEST_MODEL=1 against a test-scoped graph profile (never `codex`).",
             run_id,
             phase,
@@ -92,7 +99,7 @@ def record_llm_cost(
         from neo4j.exceptions import ConstraintError
 
         if isinstance(exc, ConstraintError):
-            services.logger.debug(
+            logger.debug(
                 "record_llm_cost: duplicate id=%s (idempotent), skipping", spend_id
             )
         else:
@@ -201,8 +208,6 @@ def update_sn_per_phase_costs(run_id: str, *, services: Any) -> int:
     return len(updated_ids)
 
 
-DEFAULT_POOL_BATCH_SIZE = 25
-
 _PIPELINE_FROZEN_NAME_STAGES = ("approved", "contested")
 
 _MAX_COMPOSE_CLAIM_ATTEMPTS = 5
@@ -300,7 +305,7 @@ def _claim_sn_atomic(
         **query_params,
         "token": token,
         "cutoff": cutoff,
-        "frozen_name_stages": list(services._PIPELINE_FROZEN_NAME_STAGES),
+        "frozen_name_stages": list(_PIPELINE_FROZEN_NAME_STAGES),
     }
     stage_set = ""
     if stage_field and to_stage:
@@ -380,7 +385,7 @@ def _claim_sn_atomic(
                         f"\n                        MATCH (sn:StandardName {{claim_token: $token}})\n                        WHERE $drain_scope_id IS NULL\n                           OR sn.drain_scope_id = $drain_scope_id\n                        WITH sn\n                        WHERE NOT (coalesce(sn.name_stage, '')\n                                   IN $frozen_name_stages)\n                        OPTIONAL MATCH (sn)-[:HAS_UNIT]->(u:Unit)\n                        OPTIONAL MATCH (sn)-[:IN_CLUSTER]\n                            ->(c:IMASSemanticCluster)\n                        RETURN sn.id AS id,\n                               sn.description AS description,\n                               sn.documentation AS documentation,\n                               sn.kind AS kind,\n                               coalesce(u.id, sn.unit) AS unit,\n                               c.id AS cluster_id,\n                               sn.physics_domain AS physics_domain,\n                               sn.validation_status\n                                   AS validation_status,\n                               sn.claim_token AS claim_token,\n                               sn.claim_seq AS claim_seq\n                               {extra_return_fields}\n                        ",
                         token=token,
                         drain_scope_id=drain_scope_id,
-                        frozen_name_stages=list(services._PIPELINE_FROZEN_NAME_STAGES),
+                        frozen_name_stages=list(_PIPELINE_FROZEN_NAME_STAGES),
                     )
                 )
                 items = [dict(r) for r in results]
@@ -389,9 +394,7 @@ def _claim_sn_atomic(
                 if tx.closed is False:
                     tx.close()
                 raise
-    services.logger.debug(
-        "_claim_sn_atomic: claimed %d (token=%s)", len(items), token[:8]
-    )
+    logger.debug("_claim_sn_atomic: claimed %d (token=%s)", len(items), token[:8])
     return items
 
 
@@ -447,7 +450,7 @@ def claim_generate_name_batch(
     facility_where = ""
     facility_where_sns2 = ""
     extra_params: dict[str, services.Any] = {}
-    extra_params["frozen_name_stages"] = list(services._PIPELINE_FROZEN_NAME_STAGES)
+    extra_params["frozen_name_stages"] = list(_PIPELINE_FROZEN_NAME_STAGES)
     if facility:
         facility_where = "AND (sns.source_type = 'dd' OR EXISTS {  MATCH (sns)-[:FROM_SIGNAL]->(:FacilitySignal)    -[:AT_FACILITY]->(:Facility {id: $facility})})"
         facility_where_sns2 = "AND (sns2.source_type = 'dd' OR EXISTS {  MATCH (sns2)-[:FROM_SIGNAL]->(:FacilitySignal)    -[:AT_FACILITY]->(:Facility {id: $facility})})"
@@ -481,7 +484,7 @@ def claim_generate_name_batch(
                         f"\n                        MATCH (sns:StandardNameSource)\n                        WHERE sns.status = 'extracted'\n                          AND NOT EXISTS {{\n                            MATCH (sns)-[:PRODUCED_NAME]->(frozen:StandardName)\n                            WHERE frozen.name_stage IN $frozen_name_stages\n                          }}\n                          AND coalesce(sns.attempt_count, 0) < $max_attempts\n                          AND (sns.claimed_at IS NULL\n                               OR sns.claimed_at < datetime()\n                                    - duration($cutoff))\n                          {facility_where}\n                          {domain_where}\n                          {scope_sns_where}\n                        MATCH (sns)-[:FROM_DD_PATH]->(imas0:IMASNode)\n                        WITH DISTINCT coalesce(imas0.physics_domain, 'general') AS pd\n                        WITH pd ORDER BY rand() LIMIT 1\n                        MATCH (sns2:StandardNameSource)\n                              -[:FROM_DD_PATH]->(imas2:IMASNode)\n                        WHERE sns2.status = 'extracted'\n                          AND NOT EXISTS {{\n                            MATCH (sns2)-[:PRODUCED_NAME]->(frozen:StandardName)\n                            WHERE frozen.name_stage IN $frozen_name_stages\n                          }}\n                          AND coalesce(sns2.attempt_count, 0) < $max_attempts\n                          AND (sns2.claimed_at IS NULL\n                               OR sns2.claimed_at < datetime()\n                                    - duration($cutoff))\n                          AND coalesce(imas2.physics_domain, 'general') = pd\n                          {facility_where_sns2}\n                          {scope_sns2_where}\n                        WITH sns2 ORDER BY rand() LIMIT 1\n                        SET sns2._claim_lock = true\n                        REMOVE sns2._claim_lock\n                        WITH sns2\n                        WHERE sns2.status = 'extracted'\n                          AND NOT EXISTS {{\n                            MATCH (sns2)-[:PRODUCED_NAME]->(frozen:StandardName)\n                            WHERE frozen.name_stage IN $frozen_name_stages\n                          }}\n                          AND coalesce(sns2.attempt_count, 0) < $max_attempts\n                          AND (sns2.claimed_at IS NULL\n                               OR sns2.claimed_at < datetime()\n                                    - duration($cutoff))\n                        SET sns2.claimed_at = datetime(),\n                            sns2.claim_token = $token,\n                            sns2.claim_seq = coalesce(sns2.claim_seq, 0) + 1,\n                            sns2.attempt_count = coalesce(sns2.attempt_count, 0) + 1\n                            {claim_owner_set.replace('sns.', 'sns2.')}\n                        WITH sns2 AS sns\n                        OPTIONAL MATCH (sns)-[:FROM_DD_PATH]\n                            ->(imas:IMASNode)\n                        OPTIONAL MATCH (imas)-[:IN_CLUSTER]\n                            ->(c:IMASSemanticCluster)\n                        OPTIONAL MATCH (imas)-[:HAS_UNIT]->(u:Unit)\n                        OPTIONAL MATCH (sns)-[:FROM_SIGNAL]\n                            ->(sig:FacilitySignal)\n                        RETURN c.id AS _cluster_id,\n                               CASE WHEN u IS NOT NULL THEN u.id\n                                    WHEN sig IS NOT NULL\n                                    THEN sig.unit\n                                    ELSE null END AS _unit,\n                               CASE WHEN imas IS NOT NULL\n                                    THEN imas.physics_domain\n                                    WHEN sig IS NOT NULL\n                                    THEN sig.physics_domain\n                                    ELSE null END\n                                        AS _physics_domain,\n                               sns.batch_key AS _batch_key\n                        ",
                         token=token,
                         cutoff=cutoff,
-                        max_attempts=services._MAX_COMPOSE_CLAIM_ATTEMPTS,
+                        max_attempts=_MAX_COMPOSE_CLAIM_ATTEMPTS,
                         **extra_params,
                     )
                 )
@@ -504,7 +507,7 @@ def claim_generate_name_batch(
                             unit=unit,
                             expand_limit=expand_limit,
                             cutoff=cutoff,
-                            max_attempts=services._MAX_COMPOSE_CLAIM_ATTEMPTS,
+                            max_attempts=_MAX_COMPOSE_CLAIM_ATTEMPTS,
                             **extra_params,
                         )
                         expanded = True
@@ -516,7 +519,7 @@ def claim_generate_name_batch(
                             unit=unit,
                             expand_limit=expand_limit,
                             cutoff=cutoff,
-                            max_attempts=services._MAX_COMPOSE_CLAIM_ATTEMPTS,
+                            max_attempts=_MAX_COMPOSE_CLAIM_ATTEMPTS,
                             **extra_params,
                         )
                         expanded = True
@@ -527,7 +530,7 @@ def claim_generate_name_batch(
                             batch_key=batch_key,
                             expand_limit=expand_limit,
                             cutoff=cutoff,
-                            max_attempts=services._MAX_COMPOSE_CLAIM_ATTEMPTS,
+                            max_attempts=_MAX_COMPOSE_CLAIM_ATTEMPTS,
                             **extra_params,
                         )
                 results = list(
@@ -544,7 +547,7 @@ def claim_generate_name_batch(
                     tx.close()
                 raise
     items = services._verify_source_claim_winners(items)
-    services.logger.debug(
+    logger.debug(
         "claim_generate_name_batch: claimed %d (token=%s)", len(items), token[:8]
     )
     return items
@@ -657,7 +660,7 @@ def claim_review_name_batch(
         "facility": facility,
     }
     items = services._claim_sn_atomic(
-        eligibility_where=services.REVIEW_NAME_ELIGIBILITY_WHERE,
+        eligibility_where=REVIEW_NAME_ELIGIBILITY_WHERE,
         query_params=query_params,
         batch_size=batch_size,
         timeout_seconds=timeout_seconds,

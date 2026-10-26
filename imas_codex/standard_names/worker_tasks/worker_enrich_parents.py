@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from imas_codex.standard_names.budget import BudgetManager
@@ -42,7 +45,6 @@ async def process_enrich_parents_batch(
     """
     bind_attempt_exposure = _worker_dependency("bind_attempt_exposure")
     charge_billable_exception = _worker_dependency("charge_billable_exception")
-    logger = _worker_dependency("logger")
     model_provider_exposure = _worker_dependency("model_provider_exposure")
     normalize_description_text = _worker_dependency("normalize_description_text")
     import asyncio as _asyncio

@@ -60,7 +60,21 @@ from imas_codex.standard_names.review.holds import (
 )
 from imas_codex.standard_names.signed_manifest import apply_signed_manifest
 
-services = None
+_services: Any | None = None
+
+
+def wire_services(services: Any) -> None:
+    """Install entrypoint collaborators for graph operations."""
+    global _services
+    _services = services
+
+
+def get_services() -> Any:
+    """Return wired collaborators or explain a missing composition root."""
+    if _services is None:
+        raise RuntimeError("Graph services are not wired; import graph_ops first")
+    return _services
+
 
 logger = logging.getLogger(__name__)
 
@@ -93,6 +107,72 @@ _SETTLED_SOURCE_BINDING_STAGES: frozenset[str] = frozenset(
 
 
 _CLAIM_TIMEOUT_SECONDS = 300
+DEFAULT_POOL_BATCH_SIZE = 25
+_CLAIM_VERIFY_SETTLE_SECONDS = 0.5
+
+_PHASE_TO_POOL: dict[str, str] = {
+    "generate": "compose",
+    "generate_name": "compose",
+    "compose": "compose",
+    "regen": "refine_name",
+    "refine_name": "refine_name",
+    "refine_docs": "refine_docs",
+    "validate": "validate",
+    "validate_name": "validate",
+    "review_names": "review",
+    "review_docs": "review",
+    "review": "review",
+    "enrich": "enrich",
+    "enrich_links": "enrich",
+}
+
+_PHASE_TO_STANDARD_NAME_COST_FIELD: dict[str, str] = {
+    "generate_name": "llm_cost_generate_name",
+    "review_name": "llm_cost_review_name",
+    "refine_name": "llm_cost_refine_name",
+    "generate_docs": "llm_cost_generate_docs",
+    "review_docs": "llm_cost_review_docs",
+    "refine_docs": "llm_cost_refine_docs",
+}
+
+
+def docs_review_winner_query_body() -> str:
+    """Return the shared traversal that selects a winning docs group."""
+    return """
+        MATCH (sn)-[:HAS_REVIEW]->(review:StandardNameReview)
+        WHERE review.review_axis = 'docs'
+          AND review.review_group_id IS NOT NULL
+          AND NOT EXISTS {
+              MATCH (sn)-[:HAS_REVIEW]->(non_winner:StandardNameReview)
+              WHERE non_winner.review_axis = 'docs'
+                AND non_winner.resolution_method
+                    IN $docs_review_non_winning_methods
+          }
+        WITH review.review_group_id AS review_group_id,
+             max(CASE WHEN coalesce(review.is_canonical, false)
+                 THEN 1 ELSE 0 END) AS canonical_group,
+             max(review.reviewed_at) AS group_reviewed_at,
+             [item IN collect({
+                 review_id: review.id,
+                 reviewed_at: review.reviewed_at,
+                 resolution_method: review.resolution_method,
+                 score: review.score
+             }) WHERE item.resolution_method IN $docs_review_winning_methods]
+                 AS winning_records
+        WHERE size(winning_records) > 0
+        UNWIND winning_records AS winning_record
+        WITH review_group_id, canonical_group, group_reviewed_at, winning_record
+        ORDER BY canonical_group DESC, group_reviewed_at DESC,
+                 review_group_id DESC, winning_record.reviewed_at DESC,
+                 winning_record.review_id DESC
+        WITH collect({
+            review_group_id: review_group_id,
+            review_id: winning_record.review_id,
+            resolution_method: winning_record.resolution_method,
+            score: winning_record.score
+        })[0] AS winner
+        RETURN winner
+    """
 
 
 DERIVED_PARENT_CLEANUP_DELETION_LIMIT = 80
@@ -119,7 +199,7 @@ def _ensure_json(value: Any) -> str | None:
         return None
     if isinstance(value, str):
         return value
-    return services.json.dumps(value)
+    return json.dumps(value)
 
 
 def _ensure_list(value: Any) -> list[str]:
@@ -182,7 +262,7 @@ def reclassify_standard_name_domain(
             "reason": f"unknown physics domain {domain!r}; one of: {valid}",
         }
 
-    with services.GraphClient() as gc:
+    with get_services().GraphClient() as gc:
         rows = list(
             gc.query(
                 "MATCH (name:StandardName {id: $id}) "
@@ -207,7 +287,7 @@ def reclassify_standard_name_domain(
             result["noop"] = before["domain"] == target_domain
             return result
 
-        change_id = f"sn-change:{services.uuid.uuid4()}"
+        change_id = f"sn-change:{uuid.uuid4()}"
         mutation = list(
             gc.query(
                 """
@@ -234,7 +314,7 @@ def reclassify_standard_name_domain(
                 domain=target_domain,
                 change_id=change_id,
                 reason=reason,
-                changed_at=services.datetime.now(services.UTC).isoformat(),
+                changed_at=datetime.now(UTC).isoformat(),
             )
         )
         if [row.get("id") for row in mutation] != [name]:
@@ -265,7 +345,7 @@ def normalize_name_id(name: str) -> str:
     Returns:
         Normalized lowercase name ID with physics abbreviations expanded.
     """
-    for abbrev, expansion in services._PHYSICS_ABBREVIATIONS.items():
+    for abbrev, expansion in _PHYSICS_ABBREVIATIONS.items():
         name = name.replace(abbrev, expansion)
     return name.lower()
 
@@ -285,7 +365,7 @@ def _public_segment_token_index() -> dict[str, tuple[str, ...]]:
     index: dict[str, list[str]] = {}
     for section in get_grammar_context().get("vocabulary_sections", []):
         segment = section.get("segment")
-        if segment not in services._GRAMMAR_SEGMENT_COLUMNS:
+        if segment not in get_services()._GRAMMAR_SEGMENT_COLUMNS:
             continue
         for token in section.get("tokens") or []:
             index.setdefault(str(token), []).append(str(segment))
@@ -314,12 +394,14 @@ def _segments_from_ir(ir: Any) -> dict[str, str | None]:
     so consumers that still expect one scalar can inspect it without mistaking
     that projection for the complete operator tree.
     """
-    columns: dict[str, str | None] = dict.fromkeys(services._GRAMMAR_SEGMENT_COLUMNS)
+    columns: dict[str, str | None] = dict.fromkeys(
+        get_services()._GRAMMAR_SEGMENT_COLUMNS
+    )
     operators = list(getattr(ir, "operators", ()) or ())
     primary = ir
     if operators:
         outer = operators[0]
-        columns["transformation"] = services._coerce_segment_value(
+        columns["transformation"] = get_services()._coerce_segment_value(
             getattr(outer, "op", None)
         )
         # A binary operator can sit below any number of unary wrappers, and a
@@ -341,33 +423,34 @@ def _segments_from_ir(ir: Any) -> dict[str, str | None]:
             primary = primary_binary.args[0]
 
     base = getattr(primary, "base", None)
-    base_token = services._coerce_segment_value(getattr(base, "token", None))
+    base_token = get_services()._coerce_segment_value(getattr(base, "token", None))
     base_kind = getattr(base, "kind", None)
     if base_token:
         is_geometry = (
-            isinstance(base_kind, services.StrEnum)
-            and base_kind is base_kind.__class__.GEOMETRY
+            isinstance(base_kind, StrEnum) and base_kind is base_kind.__class__.GEOMETRY
         )
         column = "geometric_base" if is_geometry else "physical_base"
         columns[column] = base_token
 
     projection = getattr(primary, "projection", None)
     if projection is not None:
-        shape = services._coerce_segment_value(getattr(projection, "shape", None))
+        shape = get_services()._coerce_segment_value(getattr(projection, "shape", None))
         column = "coordinate" if shape == "coordinate" else "component"
-        columns[column] = services._coerce_segment_value(
+        columns[column] = get_services()._coerce_segment_value(
             getattr(projection, "axis", None)
         )
 
-    token_index = services._public_segment_token_index()
+    token_index = _public_segment_token_index()
     qualifier_values: dict[str, list[str]] = {}
     qualifiers = list(getattr(primary, "qualifiers", ()) or ())
 
     locus = getattr(primary, "locus", None)
     if locus is not None:
         qualifiers.extend(list(getattr(locus, "qualifiers", ()) or ()))
-        locus_token = services._coerce_segment_value(getattr(locus, "token", None))
-        locus_type = services._coerce_segment_value(getattr(locus, "type", None))
+        locus_token = get_services()._coerce_segment_value(
+            getattr(locus, "token", None)
+        )
+        locus_type = get_services()._coerce_segment_value(getattr(locus, "type", None))
         locus_column = {
             "position": "position",
             "region": "region",
@@ -378,7 +461,7 @@ def _segments_from_ir(ir: Any) -> dict[str, str | None]:
             columns[locus_column] = locus_token
 
     for qualifier in qualifiers:
-        token = services._coerce_segment_value(getattr(qualifier, "token", None))
+        token = get_services()._coerce_segment_value(getattr(qualifier, "token", None))
         if not token:
             continue
         for segment in token_index.get(token, ()):
@@ -389,7 +472,7 @@ def _segments_from_ir(ir: Any) -> dict[str, str | None]:
 
     mechanism = getattr(primary, "mechanism", None)
     if mechanism is not None:
-        columns["process"] = services._coerce_segment_value(
+        columns["process"] = get_services()._coerce_segment_value(
             getattr(mechanism, "token", None)
         )
 
@@ -423,7 +506,7 @@ def _parse_grammar(name: str) -> dict[str, Any]:
         return {
             "grammar_parse_version": None,
             "validation_diagnostics_json": None,
-            **dict.fromkeys(services._GRAMMAR_SEGMENT_COLUMNS),
+            **dict.fromkeys(get_services()._GRAMMAR_SEGMENT_COLUMNS),
         }
 
     try:
@@ -439,19 +522,19 @@ def _parse_grammar(name: str) -> dict[str, Any]:
                 diagnostics.append(diagnostic.model_dump(mode="json"))
             else:
                 diagnostics.append(str(diagnostic))
-        diags = services.json.dumps(diagnostics)
+        diags = json.dumps(diagnostics)
     except Exception as exc:
-        services.logger.debug("ISN strict grammar rejected '%s': %s", name, exc)
+        logger.debug("ISN strict grammar rejected '%s': %s", name, exc)
         return {
             "grammar_parse_version": version,
             "validation_diagnostics_json": "[]",
-            **dict.fromkeys(services._GRAMMAR_SEGMENT_COLUMNS),
+            **dict.fromkeys(get_services()._GRAMMAR_SEGMENT_COLUMNS),
         }
 
     return {
         "grammar_parse_version": version,
         "validation_diagnostics_json": diags,
-        **services._segments_from_ir(result.ir),
+        **_segments_from_ir(result.ir),
     }
 
 
@@ -473,12 +556,12 @@ def _semantic_ir_expression(ir: Any) -> str:
     arguments = list(getattr(outer, "args", ()) or ())
     if arguments:
         rendered_arguments = ", ".join(
-            services._semantic_ir_expression(argument) for argument in arguments
+            _semantic_ir_expression(argument) for argument in arguments
         )
         return f"{outer.op}({rendered_arguments})"
 
     operand = ir.model_copy(update={"operators": operators[1:]})
-    return f"{outer.op}({services._semantic_ir_expression(operand)})"
+    return f"{outer.op}({_semantic_ir_expression(operand)})"
 
 
 def strict_review_grammar_context(name: str) -> dict[str, Any]:
@@ -493,7 +576,7 @@ def strict_review_grammar_context(name: str) -> dict[str, Any]:
     from imas_codex.standard_names.grammar_adapter import parse_canonical_name
 
     parsed = parse_canonical_name(name)
-    fields = services._segments_from_ir(parsed.ir)
+    fields = _segments_from_ir(parsed.ir)
     return {
         "grammar_parse_version": imas_standard_names.__version__,
         "grammar_round_trip": parsed.name,
@@ -502,8 +585,8 @@ def strict_review_grammar_context(name: str) -> dict[str, Any]:
             for field, value in fields.items()
             if value is not None
         ],
-        "semantic_ir": services._semantic_ir_expression(parsed.ir),
-        "semantic_ir_json": services.json.dumps(
+        "semantic_ir": _semantic_ir_expression(parsed.ir),
+        "semantic_ir_json": json.dumps(
             parsed.ir.model_dump(mode="json"), sort_keys=True
         ),
         **fields,
@@ -566,7 +649,7 @@ def _extract_links_from_docs(
     seen: set[str] = set()
     self_link = f"name:{self_name}" if self_name else None
 
-    for m in services._LINK_RE.finditer(documentation):
+    for m in _LINK_RE.finditer(documentation):
         name_id = m.group(2) or m.group(3)
         if name_id:
             ref = f"name:{name_id}"
@@ -576,7 +659,7 @@ def _extract_links_from_docs(
                 links.append(ref)
                 seen.add(ref)
 
-    for m in services._DD_LINK_RE.finditer(documentation):
+    for m in _DD_LINK_RE.finditer(documentation):
         dd_path = m.group(2) or m.group(3)
         if dd_path:
             ref = f"dd:{dd_path}"

@@ -11,6 +11,7 @@ Relationship direction: entity → concept
 from __future__ import annotations
 
 import functools
+import logging
 from pathlib import Path
 from typing import Any
 
@@ -26,6 +27,8 @@ from imas_codex.standard_names.signed_manifest import apply_signed_manifest
 
 from . import graph_foundation as foundation
 from .graph_foundation import _CLAIM_TIMEOUT_SECONDS
+
+logger = logging.getLogger(__name__)
 
 
 @retry_on_deadlock()
@@ -47,10 +50,10 @@ def claim_compose_sources(
     Returns ``(token, claimed_sources)`` where each source dict has keys
     ``id``, ``source_id``, ``source_type``, ``batch_key``, ``description``.
     """
-    token = str(foundation.services.uuid.uuid4())
+    token = str(foundation.get_services().uuid.uuid4())
     cutoff = f"PT{timeout_seconds}S"
 
-    with foundation.services.GraphClient() as gc:
+    with foundation.get_services().GraphClient() as gc:
         # Step 1: Atomically claim with random ordering + unique token
         gc.query(
             """
@@ -81,7 +84,7 @@ def claim_compose_sources(
             )
         )
 
-    foundation.services.logger.debug(
+    logger.debug(
         "claim_compose_sources: requested %d, won %d (token=%s)",
         limit,
         len(claimed),
@@ -104,7 +107,7 @@ def count_extracted_for_domain(domain: str, source: str = "dd") -> int:
         Number of extracted sources whose backing entity belongs to *domain*.
     """
     if source == "dd":
-        with foundation.services.GraphClient() as gc:
+        with foundation.get_services().GraphClient() as gc:
             result = gc.query(
                 """
                 MATCH (sns:StandardNameSource)-[:FROM_DD_PATH]->(n:IMASNode)
@@ -128,7 +131,7 @@ def count_eligible_compose_sources(
     no active leases remain, the compose phase is complete.
     """
     cutoff = f"PT{timeout_seconds}S"
-    with foundation.services.GraphClient() as gc:
+    with foundation.get_services().GraphClient() as gc:
         result = gc.query(
             """
             MATCH (sns:StandardNameSource)
@@ -161,10 +164,10 @@ def claim_review_names(
     if not name_ids:
         return "", []
 
-    token = str(foundation.services.uuid.uuid4())
+    token = str(foundation.get_services().uuid.uuid4())
     cutoff = f"PT{timeout_seconds}S"
 
-    with foundation.services.GraphClient() as gc:
+    with foundation.get_services().GraphClient() as gc:
         # Step 1: Atomically claim unclaimed/stale-claimed names
         gc.query(
             """
@@ -191,7 +194,7 @@ def claim_review_names(
         )
         claimed = [r["id"] for r in result] if result else []
 
-    foundation.services.logger.debug(
+    logger.debug(
         "claim_review_names: requested %d, won %d (token=%s)",
         len(name_ids),
         len(claimed),
@@ -212,7 +215,7 @@ def release_review_claims(token: str) -> int:
     if not token:
         return 0
 
-    with foundation.services.GraphClient() as gc:
+    with foundation.get_services().GraphClient() as gc:
         result = gc.query(
             """
             MATCH (sn:StandardName {claim_token: $token})
@@ -243,7 +246,7 @@ def refresh_name_claims(sn_ids: list[str], claim_token: str) -> int:
     """
     if not claim_token or not sn_ids:
         return 0
-    with foundation.services.GraphClient() as gc:
+    with foundation.get_services().GraphClient() as gc:
         result = gc.query(
             """
             UNWIND $ids AS nid
@@ -271,7 +274,7 @@ PROMOTE_STRANDED_DOCS_WHERE = (
     f"AND {docs_acceptance_where()} "
     "AND sn.name_stage = 'accepted' "
     "AND coalesce(sn.validation_status, '') <> 'quarantined' "
-    "AND {docs_review_eligibility_where} "
+    f"AND EXISTS {{{foundation.docs_review_winner_query_body()}}} "
     "AND sn.docs_review_quorum_shortfall IS NULL"
 )
 
@@ -317,10 +320,10 @@ def promote_stranded_reviewed(
     Returns ``{"name": n_name, "docs": n_docs}`` — the number promoted on each
     axis (or that would be promoted in ``dry_run``).
     """
-    name_where = foundation.services.PROMOTE_STRANDED_NAME_WHERE
-    docs_where = foundation.services.PROMOTE_STRANDED_DOCS_WHERE
-    with foundation.services.GraphClient() as gc:
-        eligibility_params = foundation.services.docs_review_eligibility_params()
+    name_where = PROMOTE_STRANDED_NAME_WHERE
+    docs_where = PROMOTE_STRANDED_DOCS_WHERE
+    with foundation.get_services().GraphClient() as gc:
+        eligibility_params = foundation.get_services().docs_review_eligibility_params()
         if dry_run:
             n_name = gc.query(
                 f"MATCH (sn:StandardName) WHERE {name_where} RETURN count(sn) AS n",
@@ -350,7 +353,7 @@ def promote_stranded_reviewed(
             f"""
             MATCH (sn:StandardName)
             WHERE {docs_where}
-            SET sn.updated_at = datetime(), {foundation.services.docs_acceptance_set()}
+            SET sn.updated_at = datetime(), {foundation.get_services().docs_acceptance_set()}
             RETURN count(sn) AS n
             """,
             min_score=min_score,
@@ -361,7 +364,7 @@ def promote_stranded_reviewed(
         "docs": r_docs[0]["n"] if r_docs else 0,
     }
     if promoted["name"] or promoted["docs"]:
-        foundation.services.logger.info(
+        logger.info(
             "promote_stranded_reviewed: promoted %d name(s) + %d docs to "
             "accepted (stored score >= %.3f threshold)",
             promoted["name"],
@@ -405,9 +408,9 @@ def _docs_axis_rederive_query(*, dry_run: bool, ids: list[str] | None) -> str:
     if dry_run:
         tail = (
             f"RETURN count(sn) AS with_winner,\n"
-            f"       sum(CASE WHEN {foundation.services._DOCS_AXIS_MIRROR_DISAGREES} THEN 1 ELSE 0 END)"
+            f"       sum(CASE WHEN {_DOCS_AXIS_MIRROR_DISAGREES} THEN 1 ELSE 0 END)"
             f" AS repair,\n"
-            f"       sum(CASE WHEN {foundation.services._DOCS_AXIS_MIRROR_AGREES} THEN 1 ELSE 0 END)"
+            f"       sum(CASE WHEN {_DOCS_AXIS_MIRROR_AGREES} THEN 1 ELSE 0 END)"
             f" AS agree"
         )
     else:
@@ -418,14 +421,10 @@ def _docs_axis_rederive_query(*, dry_run: bool, ids: list[str] | None) -> str:
         )
     return (
         f"{scope}"
-        f"WHERE {foundation.services.DOCS_AXIS_REDERIVE_NAME_WHERE}\n"
-        f"CALL {{\n  WITH sn\n{foundation.services._docs_review_winner_query_body()}\n}}\n"
+        f"WHERE {DOCS_AXIS_REDERIVE_NAME_WHERE}\n"
+        f"CALL {{\n  WITH sn\n{foundation.docs_review_winner_query_body()}\n}}\n"
         f"WITH sn, winner\n"
-        + (
-            f"WHERE {foundation.services._DOCS_AXIS_MIRROR_DISAGREES}\n"
-            if not dry_run
-            else ""
-        )
+        + (f"WHERE {_DOCS_AXIS_MIRROR_DISAGREES}\n" if not dry_run else "")
         + tail
     )
 
@@ -482,19 +481,23 @@ def reconcile_docs_axis_from_reviews(
         ``{"agree", "repair", "with_winner", "refused_no_review"}`` in
         ``dry_run``, or ``{"repaired"}`` after a real run.
     """
-    eligibility = foundation.services.docs_review_eligibility_params()
-    params: dict[str, foundation.services.Any] = dict(eligibility)
+    eligibility = foundation.get_services().docs_review_eligibility_params()
+    params: dict[str, foundation.get_services().Any] = dict(eligibility)
     if ids is not None:
         params["ids"] = list(ids)
     if gc is None:
-        with foundation.services.GraphClient() as graph:
+        with foundation.get_services().GraphClient() as graph:
             rows = graph.query(
-                foundation.services._docs_axis_rederive_query(dry_run=dry_run, ids=ids),
+                foundation.get_services()._docs_axis_rederive_query(
+                    dry_run=dry_run, ids=ids
+                ),
                 **params,
             )
     else:
         rows = gc.query(
-            foundation.services._docs_axis_rederive_query(dry_run=dry_run, ids=ids),
+            foundation.get_services()._docs_axis_rederive_query(
+                dry_run=dry_run, ids=ids
+            ),
             **params,
         )
     if dry_run:
@@ -511,9 +514,7 @@ def reconcile_docs_axis_from_reviews(
         }
     repaired = int(rows[0]["repair"]) if rows else 0
     if repaired:
-        foundation.services.logger.info(
-            "reconcile_docs_axis_from_reviews: repaired %d name(s)", repaired
-        )
+        logger.info("reconcile_docs_axis_from_reviews: repaired %d name(s)", repaired)
     return {"repaired": repaired}
 
 
@@ -545,9 +546,9 @@ def reconcile_standard_name_sources(source_type: str = "dd") -> dict:
     Returns dict with counts: {relinked, stale_marked, revived}.
     """
     upstream_present = (
-        foundation.services._standard_name_source_upstream_present_cypher("sns")
+        foundation.get_services()._standard_name_source_upstream_present_cypher("sns")
     )
-    with foundation.services.GraphClient() as gc:
+    with foundation.get_services().GraphClient() as gc:
         if source_type == "dd":
             # Find stale: sources whose DD path no longer exists, or whose
             # node the DD-version lifecycle stamped removed (absent from the
@@ -570,7 +571,7 @@ def reconcile_standard_name_sources(source_type: str = "dd") -> dict:
                 )
             )
             stale_ids = [r["id"] for r in stale]
-            stale_count = foundation.services.mark_sources_stale(stale_ids)
+            stale_count = foundation.get_services().mark_sources_stale(stale_ids)
 
             # Revive: stale sources whose DD path now exists again
             revived = gc.query(
@@ -622,7 +623,7 @@ def reconcile_standard_name_sources(source_type: str = "dd") -> dict:
                 )
             )
             stale_ids = [r["id"] for r in stale]
-            stale_count = foundation.services.mark_sources_stale(stale_ids)
+            stale_count = foundation.get_services().mark_sources_stale(stale_ids)
 
             revived = gc.query(
                 """
@@ -677,7 +678,7 @@ def fetch_manifest_source_release_rows(
         return []
 
     own = gc is None
-    client = foundation.services.GraphClient() if own else gc
+    client = foundation.get_services().GraphClient() if own else gc
     try:
         source_rows = client.query(
             """
@@ -721,7 +722,7 @@ def fetch_manifest_source_release_rows(
                 if name_id
             }
         )
-        terminal_by_seed: dict[str, dict[str, foundation.services.Any]] = {}
+        terminal_by_seed: dict[str, dict[str, foundation.get_services().Any]] = {}
         if seed_ids:
             successor_rows = client.query(
                 """
@@ -739,7 +740,7 @@ def fetch_manifest_source_release_rows(
             for row in successor_rows or []:
                 terminal_by_seed.setdefault(str(row["start_id"]), dict(row))
 
-        resolved: list[dict[str, foundation.services.Any]] = []
+        resolved: list[dict[str, foundation.get_services().Any]] = []
         for row in source_rows or []:
             direct_ids = sorted(row.get("direct_ids") or [])
             produced_id = row.get("produced_sn_id")
@@ -809,7 +810,7 @@ def reconcile_source_status_liveness(
     edge, and scalar liveness agree.
     """
     own = gc is None
-    client = foundation.services.GraphClient() if own else gc
+    client = foundation.get_services().GraphClient() if own else gc
     try:
         live_rows = client.query(
             """
@@ -916,7 +917,7 @@ def reconcile_source_status_liveness(
                    sum(size(stale_projections)) AS projections,
                    sum(source_paths_removed) AS source_paths
             """,
-            terminal_stages=sorted(foundation.services._TERMINAL_BINDING_NAME_STAGES),
+            terminal_stages=sorted(foundation._TERMINAL_BINDING_NAME_STAGES),
             source_ids=source_ids,
         )
         orphaned_reset = orphan_rows[0]["n"] if orphan_rows else 0
@@ -988,7 +989,7 @@ def reconcile_source_status_liveness(
                    sum(terminal_targets) AS terminal_targets,
                    sum(projections) AS projections
             """,
-            terminal_stages=sorted(foundation.services._TERMINAL_BINDING_NAME_STAGES),
+            terminal_stages=sorted(foundation._TERMINAL_BINDING_NAME_STAGES),
             source_ids=source_ids,
         )
         projection_ghosts_reset = projection_rows[0]["n"] if projection_rows else 0
@@ -1005,7 +1006,7 @@ def reconcile_source_status_liveness(
             client.close()
 
     if live_realigned or orphaned_reset or projection_ghosts_reset:
-        foundation.services.logger.info(
+        logger.info(
             "reconcile_source_status_liveness: realigned %d source(s) with a "
             "live target; returned %d source(s) without one to extracted "
             "(%d stale edge(s), %d projection(s), and %d source-path entry(s) "
@@ -1042,7 +1043,7 @@ def retire_unreachable_hint_edits(gc: Any | None = None) -> int:
     this startup repair closes rows written before that gate existed.
     """
     own = gc is None
-    client = foundation.services.GraphClient() if own else gc
+    client = foundation.get_services().GraphClient() if own else gc
     try:
         rows = client.query(
             """
@@ -1063,7 +1064,7 @@ def retire_unreachable_hint_edits(gc: Any | None = None) -> int:
         if own:
             client.close()
     if retired:
-        foundation.services.logger.info(
+        logger.info(
             "retire_unreachable_hint_edits: rejected %d terminal name-hint edit(s)",
             retired,
         )
@@ -1094,12 +1095,12 @@ def reconcile_vocab_gaps() -> dict[str, int]:
 
     segs = known_segments()
     if segs is None:
-        foundation.services.logger.warning(
+        logger.warning(
             "reconcile_vocab_gaps: ISN unavailable — skipping reconciliation"
         )
         return {"checked": 0, "skipped": True}
 
-    with foundation.services.GraphClient() as gc:
+    with foundation.get_services().GraphClient() as gc:
         all_gaps = list(
             gc.query(
                 """
@@ -1146,7 +1147,7 @@ def reconcile_vocab_gaps() -> dict[str, int]:
             )
             stats["reclassified"] += 1
 
-    with foundation.services.GraphClient() as gc:
+    with foundation.get_services().GraphClient() as gc:
         if to_delete:
             gc.query(
                 """
@@ -1156,7 +1157,7 @@ def reconcile_vocab_gaps() -> dict[str, int]:
                 """,
                 ids=to_delete,
             )
-            foundation.services.logger.info(
+            logger.info(
                 "reconcile_vocab_gaps: deleted %d false-positive/invalid gaps",
                 len(to_delete),
             )
@@ -1172,7 +1173,7 @@ def reconcile_vocab_gaps() -> dict[str, int]:
                 """,
                 batch=to_update,
             )
-            foundation.services.logger.info(
+            logger.info(
                 "reconcile_vocab_gaps: reclassified %d gaps",
                 len(to_update),
             )
@@ -1196,7 +1197,7 @@ def reconcile_vocab_gaps() -> dict[str, int]:
         rows = list(retried) if retried else []
         stats["sources_retried"] = rows[0].get("n", 0) if rows else 0
         if stats["sources_retried"]:
-            foundation.services.logger.info(
+            logger.info(
                 "reconcile_vocab_gaps: reset %d vocab_gap sources to 'extracted'",
                 stats["sources_retried"],
             )
@@ -1239,7 +1240,7 @@ def triage_vocab_gaps(
 
     editorial_buckets = tuple(item.value for item in VocabGapDisposition)
     own = gc is None
-    client = foundation.services.GraphClient() if own else gc
+    client = foundation.get_services().GraphClient() if own else gc
     try:
         rows = client.query(
             """
@@ -1253,7 +1254,7 @@ def triage_vocab_gaps(
                    vg.example_count AS n
             """
         )
-        buckets: dict[str, list[dict[str, foundation.services.Any]]] = {
+        buckets: dict[str, list[dict[str, foundation.get_services().Any]]] = {
             **{value: [] for value in editorial_buckets},
             "reuse": [],
             "rule_violation": [],
@@ -1366,7 +1367,7 @@ def revive_unit_skipped_sources(gc: Any | None = None) -> dict[str, int]:
     from imas_codex.standard_names.unit_overrides import resolve_unit
 
     own = gc is None
-    client = foundation.services.GraphClient() if own else gc
+    client = foundation.get_services().GraphClient() if own else gc
     try:
         candidates = list(
             client.query(
@@ -1385,7 +1386,7 @@ def revive_unit_skipped_sources(gc: Any | None = None) -> dict[str, int]:
                             ELSE null END AS unit_from_rel,
                        n.unit AS node_unit
                 """,
-                prefix=foundation.services._UNIT_SKIP_REASON_PREFIX,
+                prefix=_UNIT_SKIP_REASON_PREFIX,
             )
         )
 
@@ -1423,7 +1424,7 @@ def revive_unit_skipped_sources(gc: Any | None = None) -> dict[str, int]:
             client.close()
 
     if revived:
-        foundation.services.logger.info(
+        logger.info(
             "revive_unit_skipped_sources: revived %d of %d unit-skipped "
             "source(s) whose unit the current resolver parses",
             revived,
@@ -1456,7 +1457,7 @@ def isn_vocabulary_signature() -> str | None:
     Returns ``None`` when ISN is unavailable, so callers can no-op rather than
     stamp a meaningless identity.
     """
-    ctx = foundation.services._isn_grammar_context()
+    ctx = foundation.get_services()._isn_grammar_context()
     if not ctx:
         return None
 
@@ -1473,9 +1474,11 @@ def isn_vocabulary_signature() -> str | None:
     if not payload:
         return None
     payload.sort()
-    return foundation.services.hashlib.sha256(
-        foundation.services.json.dumps(payload).encode()
-    ).hexdigest()[:16]
+    return (
+        foundation.get_services()
+        .hashlib.sha256(foundation.get_services().json.dumps(payload).encode())
+        .hexdigest()[:16]
+    )
 
 
 def retry_vocab_gap_sources_on_grammar_change(
@@ -1510,16 +1513,16 @@ def retry_vocab_gap_sources_on_grammar_change(
 
     Returns dict: {checked, revived} (plus ``skipped`` when ISN is unavailable).
     """
-    signature = foundation.services.isn_vocabulary_signature()
+    signature = foundation.get_services().isn_vocabulary_signature()
     if signature is None:
-        foundation.services.logger.warning(
+        logger.warning(
             "retry_vocab_gap_sources_on_grammar_change: ISN vocabulary "
             "unavailable — skipping retry pass"
         )
         return {"checked": 0, "revived": 0, "skipped": True}
 
     own = gc is None
-    client = foundation.services.GraphClient() if own else gc
+    client = foundation.get_services().GraphClient() if own else gc
     try:
         rows = client.query(
             """
@@ -1553,7 +1556,7 @@ def retry_vocab_gap_sources_on_grammar_change(
             client.close()
 
     if revived:
-        foundation.services.logger.info(
+        logger.info(
             "retry_vocab_gap_sources_on_grammar_change: returned %d of %d "
             "parked source(s) to 'extracted' for one retry under vocabulary %s",
             revived,
@@ -1590,10 +1593,10 @@ def reconcile_provenance() -> dict[str, int]:
     Returns dict with counts: {edges_reattached, scalars_cleared,
     orphan_sources_deleted}.
     """
-    with foundation.services.GraphClient() as gc:
+    with foundation.get_services().GraphClient() as gc:
         # Pass 0: heal live scalar/missing-edge desyncs before cleanup. Disjoint
         # from pass 1 (that only touches scalars whose target no longer exists).
-        edges_reattached = foundation.services.reattach_produced_name_edges(gc=gc)
+        edges_reattached = foundation.get_services().reattach_produced_name_edges(gc=gc)
 
         scalars = gc.query(
             """
@@ -1625,7 +1628,7 @@ def reconcile_provenance() -> dict[str, int]:
         orphan_sources_deleted = orphans[0]["n"] if orphans else 0
 
     if edges_reattached or scalars_cleared or orphan_sources_deleted:
-        foundation.services.logger.info(
+        logger.info(
             "reconcile_provenance: reattached %d missing PRODUCED_NAME edge(s), "
             "cleared %d stale produced_sn_id scalar(s), "
             "deleted %d orphaned derived-parent source(s)",
@@ -1664,7 +1667,7 @@ def reconcile_catalog_edit_origins(
     ``changed``.  With ``dry_run=True`` no graph mutation occurs.
     """
     own = gc is None
-    client = foundation.services.GraphClient() if own else gc
+    client = foundation.get_services().GraphClient() if own else gc
     try:
         classification = client.query(
             """
@@ -1741,7 +1744,7 @@ def reconcile_catalog_edit_origins(
             client.close()
 
     if counts["changed"]:
-        foundation.services.logger.info(
+        logger.info(
             "reconcile_catalog_edit_origins: reassigned %d identity origin(s) "
             "(%d pipeline, %d derived, %d unset)",
             counts["changed"],
@@ -1769,7 +1772,7 @@ def reconcile_standard_name_cocos_links(gc: Any | None = None) -> dict[str, int]
     Returns dict: {convention, scalars_set, edges_created}.
     """
     own = gc is None
-    client = foundation.services.GraphClient() if own else gc
+    client = foundation.get_services().GraphClient() if own else gc
     try:
         row = client.query(
             "MATCH (v:DDVersion {is_current: true}) RETURN v.cocos AS cocos"
@@ -1778,7 +1781,7 @@ def reconcile_standard_name_cocos_links(gc: Any | None = None) -> dict[str, int]
             row[0]["cocos"] if row and row[0].get("cocos") is not None else None
         )
         if convention is None:
-            foundation.services.logger.debug(
+            logger.debug(
                 "reconcile_standard_name_cocos_links: no current DD COCOS convention — skipping"
             )
             return {"convention": 0, "scalars_set": 0, "edges_created": 0}
@@ -1811,7 +1814,7 @@ def reconcile_standard_name_cocos_links(gc: Any | None = None) -> dict[str, int]
             client.close()
 
     if scalars_set or edges_created:
-        foundation.services.logger.info(
+        logger.info(
             "reconcile_standard_name_cocos_links: convention=COCOS %s, set %d cocos scalar(s), "
             "created %d HAS_COCOS edge(s)",
             convention,
@@ -1852,7 +1855,7 @@ def reconcile_standard_name_unit_edges(gc: Any | None = None) -> dict[str, int]:
     Returns dict: {names_realigned, edges_dropped, edges_created}.
     """
     own = gc is None
-    client = foundation.services.GraphClient() if own else gc
+    client = foundation.get_services().GraphClient() if own else gc
     try:
         rows = client.query(
             """
@@ -1887,7 +1890,7 @@ def reconcile_standard_name_unit_edges(gc: Any | None = None) -> dict[str, int]:
         if own:
             client.close()
 
-    foundation.services.logger.info(
+    logger.info(
         "reconcile_standard_name_unit_edges: realigned %d name(s) — dropped %d "
         "stale unit edge(s), created %d missing edge(s)",
         len(rows),
@@ -1917,7 +1920,7 @@ def reconcile_constraint_fit_artifacts(gc: Any | None = None) -> dict[str, int]:
     Returns dict: {nodes_reclassified}.
     """
     own = gc is None
-    client = foundation.services.GraphClient() if own else gc
+    client = foundation.get_services().GraphClient() if own else gc
     try:
         rows = client.query(
             """
@@ -1942,7 +1945,7 @@ def reconcile_constraint_fit_artifacts(gc: Any | None = None) -> dict[str, int]:
 
     reclassified = int(rows[0].get("reclassified", 0)) if rows else 0
     if reclassified:
-        foundation.services.logger.info(
+        logger.info(
             "reconcile_constraint_fit_artifacts: reclassified %d constraint "
             "fit-artifact leaf node(s)",
             reclassified,
@@ -1981,7 +1984,7 @@ def reconcile_standard_name_source_paths(gc: Any | None = None) -> dict[str, int
     Returns dict: {names_reconciled}.
     """
     own = gc is None
-    client = foundation.services.GraphClient() if own else gc
+    client = foundation.get_services().GraphClient() if own else gc
     try:
         rows = client.query(
             """
@@ -1997,7 +2000,7 @@ def reconcile_standard_name_source_paths(gc: Any | None = None) -> dict[str, int
                    [p IN hsn WHERE p IS NOT NULL AND p <> 'dd:'] AS hsn_paths,
                    prod AS produced_paths
             """,
-            terminal=foundation.services._TERMINAL_NAME_STAGES,
+            terminal=_TERMINAL_NAME_STAGES,
         )
         updates = []
         for r in rows:
@@ -2022,7 +2025,7 @@ def reconcile_standard_name_source_paths(gc: Any | None = None) -> dict[str, int
             client.close()
 
     if updates:
-        foundation.services.logger.info(
+        logger.info(
             "reconcile_standard_name_source_paths: materialized source_paths "
             "from live edges on %d name(s)",
             len(updates),
@@ -2052,7 +2055,7 @@ def reconcile_catalog_status(gc: Any | None = None) -> dict[str, int]:
     total_changed}.
     """
     own = gc is None
-    client = foundation.services.GraphClient() if own else gc
+    client = foundation.get_services().GraphClient() if own else gc
     try:
         superseded_rows = client.query(
             """
@@ -2110,7 +2113,7 @@ def reconcile_catalog_status(gc: Any | None = None) -> dict[str, int]:
     }
     result["total_changed"] = sum(result.values())
     if result["total_changed"]:
-        foundation.services.logger.info(
+        logger.info(
             "reconcile_catalog_status: set %d name(s) to draft, revived %d, "
             "%d to superseded; exhausted names remain validation-neutral; "
             "deprecated writes: 0",
@@ -2163,7 +2166,7 @@ def reconcile_reviewable_name_stage(gc: Any | None = None) -> dict[str, int]:
     Returns dict: {names_advanced}.
     """
     own = gc is None
-    client = foundation.services.GraphClient() if own else gc
+    client = foundation.get_services().GraphClient() if own else gc
     try:
         rows = client.query(
             """
@@ -2180,16 +2183,16 @@ def reconcile_reviewable_name_stage(gc: Any | None = None) -> dict[str, int]:
             RETURN count(sn) AS advanced
             """
         )
-        foundation.services.reconcile_descriptionless_composed_names(gc=client)
-        foundation.services.reconcile_sourceless_pipeline_names(gc=client)
-        foundation.services.reconcile_constraint_fit_artifacts(gc=client)
+        foundation.get_services().reconcile_descriptionless_composed_names(gc=client)
+        foundation.get_services().reconcile_sourceless_pipeline_names(gc=client)
+        foundation.get_services().reconcile_constraint_fit_artifacts(gc=client)
     finally:
         if own:
             client.close()
 
     advanced = rows[0]["advanced"] if rows else 0
     if advanced:
-        foundation.services.logger.info(
+        logger.info(
             "reconcile_reviewable_name_stage: advanced %d stranded "
             "source-backed name(s) to 'drafted' for review",
             advanced,
@@ -2230,7 +2233,7 @@ def reconcile_descriptionless_composed_names(
     Returns dict: {names_reopened, sources_reopened}.
     """
     own = gc is None
-    client = foundation.services.GraphClient() if own else gc
+    client = foundation.get_services().GraphClient() if own else gc
     try:
         rows = client.query(
             """
@@ -2269,7 +2272,7 @@ def reconcile_descriptionless_composed_names(
     names_reopened = int(rows[0].get("names") or 0) if rows else 0
     sources_reopened = int(rows[0].get("sources_freed") or 0) if rows else 0
     if names_reopened:
-        foundation.services.logger.info(
+        logger.info(
             "reconcile_descriptionless_composed_names: re-opened %d name(s) "
             "carrying no description — %d source(s) returned to 'extracted' "
             "so compose rewrites the missing prose",
@@ -2330,8 +2333,8 @@ def reconcile_sourceless_pipeline_names(gc: Any | None = None) -> dict[str, int]
     )
 
     own = gc is None
-    client = foundation.services.GraphClient() if own else gc
-    terminal = foundation.services._TERMINAL_NAME_STAGES
+    client = foundation.get_services().GraphClient() if own else gc
+    terminal = _TERMINAL_NAME_STAGES
     try:
         names = client.query(
             """
@@ -2464,7 +2467,7 @@ def reconcile_sourceless_pipeline_names(gc: Any | None = None) -> dict[str, int]
                     except (
                         Exception
                     ):  # pragma: no cover - audit crumb must not block the heal
-                        foundation.services.logger.debug(
+                        logger.debug(
                             "Failed to record reattachment of %s",
                             dd_path,
                             exc_info=True,
@@ -2480,7 +2483,7 @@ def reconcile_sourceless_pipeline_names(gc: Any | None = None) -> dict[str, int]
             client.close()
 
     if reattached:
-        foundation.services.logger.info(
+        logger.info(
             "reconcile_sourceless_pipeline_names: reattached %d detached "
             "source(s) to %d live pipeline name(s) whose detachment reason no "
             "longer holds",
@@ -2488,7 +2491,7 @@ def reconcile_sourceless_pipeline_names(gc: Any | None = None) -> dict[str, int]
             names_reattached,
         )
     if blockers:
-        foundation.services.logger.warning(
+        logger.warning(
             "reconcile_sourceless_pipeline_names: %d live pipeline name(s) "
             "stay sourceless because their recorded detachment reason still "
             "holds under the current grammar: %s",
@@ -2496,7 +2499,7 @@ def reconcile_sourceless_pipeline_names(gc: Any | None = None) -> dict[str, int]
             "; ".join(blockers)[:1200],
         )
     if unrecoverable:
-        foundation.services.logger.warning(
+        logger.warning(
             "reconcile_sourceless_pipeline_names: %d live pipeline name(s) "
             "have no recorded detached source to re-pair and are surfaced "
             "for review: %s",
@@ -2550,7 +2553,7 @@ def reconcile_standard_name_dd_edges(gc: Any | None = None) -> dict[str, int]:
     from imas_codex.standard_names.workers import _is_attachment_consistent
 
     own = gc is None
-    client = foundation.services.GraphClient() if own else gc
+    client = foundation.get_services().GraphClient() if own else gc
     try:
         rows = client.query(
             """
@@ -2565,11 +2568,11 @@ def reconcile_standard_name_dd_edges(gc: Any | None = None) -> dict[str, int]:
                    sn.unit AS sn_unit, du.id AS dd_unit,
                    collect(DISTINCT bound.id) AS existing_dd_paths
             """,
-            terminal=foundation.services._TERMINAL_NAME_STAGES,
+            terminal=_TERMINAL_NAME_STAGES,
             categories=list(SN_SOURCE_CATEGORIES),
         )
         attach: list[dict[str, str]] = []
-        dropped: list[dict[str, foundation.services.Any]] = []
+        dropped: list[dict[str, foundation.get_services().Any]] = []
         accepted_by_name: dict[str, list[str]] = {}
         for r in sorted(rows, key=lambda row: (row["sn_id"], row["dd_path"])):
             accepted = accepted_by_name.setdefault(
@@ -2602,7 +2605,7 @@ def reconcile_standard_name_dd_edges(gc: Any | None = None) -> dict[str, int]:
             client.close()
 
     if attach:
-        foundation.services.logger.info(
+        logger.info(
             "reconcile_standard_name_dd_edges: materialized %d HAS_STANDARD_NAME "
             "edge(s) from provenance",
             len(attach),
@@ -2610,7 +2613,7 @@ def reconcile_standard_name_dd_edges(gc: Any | None = None) -> dict[str, int]:
     if dropped:
         # A rejected pair is a wrong name or source, never an edge to force.
         # Surface a bounded sample for attachment triage.
-        foundation.services.logger.warning(
+        logger.warning(
             "reconcile_standard_name_dd_edges: dropped %d provenance pair(s) on "
             "attachment consistency (route to attachment triage). First few: %s",
             len(dropped),
@@ -2657,18 +2660,18 @@ def reconcile_grammar_segments() -> dict[str, int]:
     """
     from imas_codex.standard_names.ledger import LIVE_NAME
 
-    cols = foundation.services._GRAMMAR_SEGMENT_COLUMNS
+    cols = foundation.get_services()._GRAMMAR_SEGMENT_COLUMNS
     select = ", ".join(f"sn.{c} AS {c}" for c in cols)
     set_clause = (
         ", ".join(f"sn.{c} = b.{c}" for c in cols) + ", sn.updated_at = datetime()"
     )
-    batch: list[dict[str, foundation.services.Any]] = []
-    with foundation.services.GraphClient() as gc:
+    batch: list[dict[str, foundation.get_services().Any]] = []
+    with foundation.get_services().GraphClient() as gc:
         rows = gc.query(
             f"MATCH (sn:StandardName) WHERE {LIVE_NAME} RETURN sn.id AS id, {select}"
         )
         for r in rows:
-            parsed = foundation.services._parse_grammar(r["id"])
+            parsed = foundation.get_services()._parse_grammar(r["id"])
             # A successful ISN parse always yields a physical_base; an all-None
             # parse means the model rejected the name — leave its stored
             # segments untouched rather than wiping them.
@@ -2683,7 +2686,7 @@ def reconcile_grammar_segments() -> dict[str, int]:
                 f"CREATE (change:StandardNameChange {{"
                 f"  id: 'sn-change:' + randomUUID(),"
                 f"  from_name: sn.id, to_name: sn.id,"
-                f"  operation: '{foundation.services._SEGMENT_REALIGN_OPERATION}',"
+                f"  operation: '{_SEGMENT_REALIGN_OPERATION}',"
                 f"  reason: 'stored grammar segments disagreed with the "
                 f"canonical-name parse', origin: 'graph_reconcile',"
                 f"  changed_at: datetime(), internal: true}}) "
@@ -2691,12 +2694,12 @@ def reconcile_grammar_segments() -> dict[str, int]:
                 batch=batch,
             )
     if batch:
-        foundation.services.logger.info(
+        logger.info(
             "reconcile_grammar_segments: realigned %d name(s) to their canonical "
             "id parse",
             len(batch),
         )
-    foundation.services.reconcile_standard_name_kinds()
+    foundation.get_services().reconcile_standard_name_kinds()
     return {"names_realigned": len(batch)}
 
 
@@ -2727,13 +2730,13 @@ def realign_grammar_segments_for_name(
         ``drift`` maps each disagreeing segment column to its ``stored`` and
         ``parsed`` values, or ``{"ok": False, "reason": ...}`` for a refusal.
     """
-    cols = foundation.services._GRAMMAR_SEGMENT_COLUMNS
+    cols = foundation.get_services()._GRAMMAR_SEGMENT_COLUMNS
     name = (name or "").strip()
     if not name:
         return {"ok": False, "reason": "a standard name is required"}
 
     select = ", ".join(f"sn.{c} AS {c}" for c in cols)
-    with foundation.services.GraphClient() as gc:
+    with foundation.get_services().GraphClient() as gc:
         rows = list(
             gc.query(
                 "MATCH (sn:StandardName {id: $id}) "
@@ -2745,7 +2748,7 @@ def realign_grammar_segments_for_name(
             return {"ok": False, "reason": f"standard name {name!r} not found"}
 
         stored = rows[0]
-        parsed = foundation.services._parse_grammar(name)
+        parsed = foundation.get_services()._parse_grammar(name)
         # A successful ISN parse always yields a physical_base; an all-None
         # parse means the grammar rejected the name, whose segments belong to
         # the quarantine path and are never wiped from here.
@@ -2763,7 +2766,7 @@ def realign_grammar_segments_for_name(
             for column in cols
             if parsed.get(column) != stored.get(column)
         }
-        result: dict[str, foundation.services.Any] = {
+        result: dict[str, foundation.get_services().Any] = {
             "ok": True,
             "name": name,
             "stage": stored.get("stage"),
@@ -2777,7 +2780,7 @@ def realign_grammar_segments_for_name(
         if dry_run or not drift:
             return result
 
-        change_id = f"sn-change:{foundation.services.uuid.uuid4()}"
+        change_id = f"sn-change:{foundation.get_services().uuid.uuid4()}"
         set_clause = ", ".join(f"sn.{c} = seg.{c}" for c in cols)
         mutation = list(
             gc.query(
@@ -2798,11 +2801,11 @@ def realign_grammar_segments_for_name(
                 id=name,
                 segments={column: parsed.get(column) for column in cols},
                 change_id=change_id,
-                operation=foundation.services._SEGMENT_REALIGN_OPERATION,
-                reason=foundation.services._segment_drift_reason(drift),
-                changed_at=foundation.services.datetime.now(
-                    foundation.services.UTC
-                ).isoformat(),
+                operation=_SEGMENT_REALIGN_OPERATION,
+                reason=foundation.get_services()._segment_drift_reason(drift),
+                changed_at=foundation.get_services()
+                .datetime.now(foundation.UTC)
+                .isoformat(),
             )
         )
         if [row.get("id") for row in mutation] != [name]:
@@ -2834,7 +2837,7 @@ def reconcile_standard_name_kinds(gc: Any | None = None) -> dict[str, int]:
     from imas_codex.standard_names.ledger import LIVE_NAME
 
     own = gc is None
-    client = gc or foundation.services.GraphClient()
+    client = gc or foundation.get_services().GraphClient()
     try:
         rows = client.query(
             f"MATCH (sn:StandardName) WHERE {LIVE_NAME} "
@@ -2884,7 +2887,7 @@ def reconcile_standard_name_kinds(gc: Any | None = None) -> dict[str, int]:
             client.close()
 
     if changed:
-        foundation.services.logger.info(
+        logger.info(
             "reconcile_standard_name_kinds: refreshed %d stored kind(s) from "
             "canonical-name derivation",
             len(changed),
@@ -2894,7 +2897,7 @@ def reconcile_standard_name_kinds(gc: Any | None = None) -> dict[str, int]:
 
 def _open_graph_client() -> GraphClient:
     """Create the graph client used by manifest-backed compatibility exports."""
-    return foundation.services.GraphClient().__enter__()
+    return foundation.get_services().GraphClient().__enter__()
 
 
 _error_sibling_reconcile_apply = functools.partial(
@@ -2919,7 +2922,7 @@ def get_standard_name_source_stats(
 
     Returns dict mapping status → count. Optionally filtered by source_type.
     """
-    with foundation.services.GraphClient() as gc:
+    with foundation.get_services().GraphClient() as gc:
         where = ""
         params: dict = {}
         if source_type:
@@ -2954,9 +2957,9 @@ def write_run_provenance(
     if not name_ids:
         return 0
 
-    now = foundation.services.datetime.now(foundation.services.UTC).isoformat()
+    now = foundation.get_services().datetime.now(foundation.UTC).isoformat()
 
-    with foundation.services.GraphClient() as gc:
+    with foundation.get_services().GraphClient() as gc:
         result = gc.query(
             """
             UNWIND $ids AS nid
@@ -3005,10 +3008,10 @@ def export_review_comments(
     -------
     Number of StandardNameReview records written (0 if none found).
     """
-    output_path = foundation.services.Path(output_path)
+    output_path = foundation.get_services().Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    params: dict[str, foundation.services.Any] = {}
+    params: dict[str, foundation.get_services().Any] = {}
     where_clauses: list[str] = []
     if domain:
         where_clauses.append("sn.physics_domain = $domain")
@@ -3031,11 +3034,11 @@ def export_review_comments(
         ORDER BY sn.id, r.reviewed_at
     """
 
-    with foundation.services.GraphClient() as gc:
+    with foundation.get_services().GraphClient() as gc:
         rows = gc.query(cypher, **params)
 
     if not rows:
-        foundation.services.logger.info(
+        logger.info(
             "export_review_comments: no StandardNameReview nodes found (domain=%s)",
             domain,
         )
@@ -3048,15 +3051,15 @@ def export_review_comments(
             cpd_raw = row.get("comments_per_dim_json")
             if isinstance(cpd_raw, str):
                 try:
-                    cpd = foundation.services.json.loads(cpd_raw)
-                except (foundation.services.json.JSONDecodeError, ValueError):
+                    cpd = foundation.get_services().json.loads(cpd_raw)
+                except (foundation.get_services().json.JSONDecodeError, ValueError):
                     cpd = {}
             elif isinstance(cpd_raw, dict):
                 cpd = cpd_raw
             else:
                 cpd = {}
 
-            record: dict[str, foundation.services.Any] = {
+            record: dict[str, foundation.get_services().Any] = {
                 "name": row.get("name"),
                 "domain": row.get("domain"),
                 "reviewer_model": row.get("reviewer_model"),
@@ -3071,26 +3074,18 @@ def export_review_comments(
                 if row.get("reviewed_at")
                 else None,
             }
-            fh.write(foundation.services.json.dumps(record, ensure_ascii=False) + "\n")
+            fh.write(
+                foundation.get_services().json.dumps(record, ensure_ascii=False) + "\n"
+            )
             count += 1
 
-    foundation.services.logger.info(
+    logger.info(
         "export_review_comments: wrote %d records to %s (domain=%s)",
         count,
         output_path,
         domain,
     )
     return count
-
-
-_PHASE_TO_STANDARD_NAME_COST_FIELD: dict[str, str] = {
-    "generate_name": "llm_cost_generate_name",
-    "review_name": "llm_cost_review_name",
-    "refine_name": "llm_cost_refine_name",
-    "generate_docs": "llm_cost_generate_docs",
-    "review_docs": "llm_cost_review_docs",
-    "refine_docs": "llm_cost_refine_docs",
-}
 
 
 def create_sn_run_open(
@@ -3135,7 +3130,7 @@ def create_sn_run_open(
     )
     props = run.model_dump(mode="json")
     try:
-        with foundation.services.GraphClient() as gc:
+        with foundation.get_services().GraphClient() as gc:
             gc.create_nodes("SNRun", [props])
             # Set created_at via Cypher datetime() for Neo4j-native timestamp
             gc.query(
@@ -3143,9 +3138,7 @@ def create_sn_run_open(
                 run_id=run_id,
             )
     except Exception as exc:
-        foundation.services.logger.error(
-            "Failed to pre-create SNRun %s: %s", run_id, exc
-        )
+        logger.error("Failed to pre-create SNRun %s: %s", run_id, exc)
         raise
 
 
@@ -3181,13 +3174,11 @@ def bump_sn_run_counter(
         "names_enriched",
     }
     if counter not in _ALLOWED:
-        foundation.services.logger.warning(
-            "bump_sn_run_counter: unknown counter %r — skipping", counter
-        )
+        logger.warning("bump_sn_run_counter: unknown counter %r — skipping", counter)
         return
 
     try:
-        with foundation.services.GraphClient() as gc:
+        with foundation.get_services().GraphClient() as gc:
             gc.query(
                 f"MATCH (rr:SNRun {{id: $run_id}}) "
                 f"SET rr.{counter} = coalesce(rr.{counter}, 0) + $delta",
@@ -3195,7 +3186,7 @@ def bump_sn_run_counter(
                 delta=delta,
             )
     except Exception as exc:  # pragma: no cover — defensive
-        foundation.services.logger.debug(
+        logger.debug(
             "bump_sn_run_counter(%s, %s, %d) failed: %s",
             run_id,
             counter,
@@ -3235,15 +3226,13 @@ def update_sn_run_progress(
         params["events_total"] = int(events_total)
 
     try:
-        with foundation.services.GraphClient() as gc:
+        with foundation.get_services().GraphClient() as gc:
             gc.query(
                 "MATCH (rr:SNRun {id: $run_id}) SET " + ", ".join(set_parts),
                 **params,
             )
     except Exception as exc:  # pragma: no cover — defensive
-        foundation.services.logger.debug(
-            "update_sn_run_progress(%s) failed: %s", run_id, exc
-        )
+        logger.debug("update_sn_run_progress(%s) failed: %s", run_id, exc)
 
 
 def finalize_sn_run(
@@ -3276,7 +3265,7 @@ def finalize_sn_run(
     agg_cost: float = 0.0
     agg_events: int = 0
     try:
-        with foundation.services.GraphClient() as gc:
+        with foundation.get_services().GraphClient() as gc:
             agg_rows = list(
                 gc.query(
                     "MATCH (c:LLMCost {run_id: $rid}) "
@@ -3288,7 +3277,7 @@ def finalize_sn_run(
                 agg_cost = float(agg_rows[0].get("cost") or 0.0)
                 agg_events = int(agg_rows[0].get("events") or 0)
     except Exception as exc:  # pragma: no cover — defensive
-        foundation.services.logger.warning(
+        logger.warning(
             "finalize_sn_run: LLMCost aggregation failed for %s: %s", run_id, exc
         )
 
@@ -3301,7 +3290,7 @@ def finalize_sn_run(
         "rr.cost_total = $cost_total",
         "rr.events_total = $events_total",
     ]
-    params: dict[str, foundation.services.Any] = {
+    params: dict[str, foundation.get_services().Any] = {
         "run_id": run_id,
         "status": status,
         "cost_spent": round(cost_spent, 6),
@@ -3327,16 +3316,12 @@ def finalize_sn_run(
         "RETURN rr.id AS id"
     )
     try:
-        with foundation.services.GraphClient() as gc:
+        with foundation.get_services().GraphClient() as gc:
             result = gc.query(cypher, **params)
             if not result:
-                foundation.services.logger.warning(
-                    "finalize_sn_run: no SNRun found with id=%s", run_id
-                )
+                logger.warning("finalize_sn_run: no SNRun found with id=%s", run_id)
     except Exception as exc:  # pragma: no cover — defensive
-        foundation.services.logger.warning(
-            "Failed to finalize SNRun %s: %s", run_id, exc
-        )
+        logger.warning("Failed to finalize SNRun %s: %s", run_id, exc)
 
 
 def mark_orphaned_standard_name_runs_stale(
@@ -3364,7 +3349,7 @@ def mark_orphaned_standard_name_runs_stale(
     Idempotent: a second call matches nothing (the rows are now ``'stale'``).
     Returns the number of runs marked stale.
     """
-    with foundation.services.GraphClient() as gc:
+    with foundation.get_services().GraphClient() as gc:
         rows = gc.query(
             """
             MATCH (rr:SNRun)
@@ -3385,7 +3370,7 @@ def mark_orphaned_standard_name_runs_stale(
         )
     marked = len(rows or [])
     if marked:
-        foundation.services.logger.info(
+        logger.info(
             "mark_orphaned_standard_name_runs_stale: marked %d orphaned SNRun(s) stale "
             "(no finalize, older than %.1fh)",
             marked,
@@ -3412,7 +3397,7 @@ def normalize_stored_standard_name_kinds() -> int:
     from imas_codex.standard_names.kind_derivation import to_isn_kind
 
     allowed = [k.value for k in Kind]
-    with foundation.services.GraphClient() as gc:
+    with foundation.get_services().GraphClient() as gc:
         rows = gc.query(
             """
             MATCH (sn:StandardName)
@@ -3435,7 +3420,7 @@ def normalize_stored_standard_name_kinds() -> int:
             )
     rewritten = len(updates)
     if rewritten:
-        foundation.services.logger.info(
+        logger.info(
             "normalize_stored_standard_name_kinds: collapsed %d node(s) with a "
             "retired/off-enum kind to the ISN-canonical value",
             rewritten,
@@ -3459,22 +3444,5 @@ def backfill_sn_run_telemetry() -> list[dict[str, Any]]:
         r.events_total = coalesce(r.events_total, event_count, 0)
     RETURN r.id AS id, r.cost_total AS cost, r.events_total AS events
     """
-    with foundation.services.GraphClient() as gc:
+    with foundation.get_services().GraphClient() as gc:
         return list(gc.query(cypher))
-
-
-_PHASE_TO_POOL: dict[str, str] = {
-    "generate": "compose",
-    "generate_name": "compose",
-    "compose": "compose",
-    "regen": "refine_name",
-    "refine_name": "refine_name",
-    "refine_docs": "refine_docs",
-    "validate": "validate",
-    "validate_name": "validate",
-    "review_names": "review",
-    "review_docs": "review",
-    "review": "review",
-    "enrich": "enrich",
-    "enrich_links": "enrich",
-}

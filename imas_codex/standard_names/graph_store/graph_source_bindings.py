@@ -5,12 +5,17 @@ Source claims, fences, outcomes and retry state.
 
 from __future__ import annotations
 
+import logging
 import uuid
 from collections import Counter
 from typing import Any
 
 from imas_codex.discovery.base.claims import retry_on_deadlock
 from imas_codex.graph.client import GraphClient
+
+from . import graph_foundation as foundation
+
+logger = logging.getLogger(__name__)
 
 
 def write_enrichment_results(
@@ -42,7 +47,7 @@ def write_enrichment_results(
 
     results, skipped = filter_protected(results, override=override)
     if skipped:
-        services.logger.warning(
+        logger.warning(
             "write_enrichment_results: stripped protected fields from %d name(s): %s",
             len(skipped),
             ", ".join(skipped[:5]),
@@ -78,7 +83,7 @@ def write_enrichment_results(
             ],
         )
 
-    services.logger.info("Enriched %d StandardName nodes", len(results))
+    logger.info("Enriched %d StandardName nodes", len(results))
     return len(results)
 
 
@@ -144,7 +149,7 @@ def _source_compose_hint_decision(
         source_id=source_id,
         replace=replace,
         attempt_cap=services._MAX_COMPOSE_CLAIM_ATTEMPTS,
-        terminal_stages=sorted(services._TERMINAL_BINDING_NAME_STAGES),
+        terminal_stages=sorted(foundation._TERMINAL_BINDING_NAME_STAGES),
     )
     return dict(rows[0]) if rows else {"decision": "missing_source", "id": None}
 
@@ -173,14 +178,14 @@ def set_source_compose_hint(
         raise ValueError("source-hint requires a non-empty hint")
     if not reason:
         raise ValueError("source-hint requires a non-empty reason")
-    if len(hint) > services._MAX_SOURCE_COMPOSE_HINT_CHARS:
+    if len(hint) > _MAX_SOURCE_COMPOSE_HINT_CHARS:
         raise ValueError(
-            f"source hint exceeds {services._MAX_SOURCE_COMPOSE_HINT_CHARS} characters"
+            f"source hint exceeds {_MAX_SOURCE_COMPOSE_HINT_CHARS} characters"
         )
-    if len(reason) > services._MAX_SOURCE_COMPOSE_HINT_REASON_CHARS:
+    if len(reason) > _MAX_SOURCE_COMPOSE_HINT_REASON_CHARS:
         raise ValueError(
             "source hint reason exceeds "
-            f"{services._MAX_SOURCE_COMPOSE_HINT_REASON_CHARS} characters"
+            f"{_MAX_SOURCE_COMPOSE_HINT_REASON_CHARS} characters"
         )
 
     own = gc is None
@@ -233,7 +238,7 @@ def set_source_compose_hint(
             reason=reason,
             replace=replace,
             attempt_cap=services._MAX_COMPOSE_CLAIM_ATTEMPTS,
-            terminal_stages=sorted(services._TERMINAL_BINDING_NAME_STAGES),
+            terminal_stages=sorted(foundation._TERMINAL_BINDING_NAME_STAGES),
         )
         if rows:
             result.update(
@@ -456,13 +461,11 @@ def merge_standard_name_sources(
     if not sources:
         return 0
 
-    invalid = {
-        s.get("source_type") for s in sources
-    } - services._VALID_PIPELINE_SOURCE_TYPES
+    invalid = {s.get("source_type") for s in sources} - _VALID_PIPELINE_SOURCE_TYPES
     if invalid:
         raise ValueError(
             f"Invalid source_type(s) for pipeline: {invalid}. "
-            f"Only {services._VALID_PIPELINE_SOURCE_TYPES} are valid."
+            f"Only {_VALID_PIPELINE_SOURCE_TYPES} are valid."
         )
 
     # Birth-invariant: a 'dd' source with no dd_path cannot have a FROM_DD_PATH
@@ -476,7 +479,7 @@ def merge_standard_name_sources(
     valid_sources: list[dict] = []
     for s in sources:
         if s.get("source_type") == "dd" and not s.get("dd_path"):
-            services.logger.warning(
+            logger.warning(
                 "merge_standard_name_sources: skipping dd source %r — "
                 "no dd_path supplied; writing would create an orphan "
                 "(birth invariant violation).",
@@ -694,11 +697,11 @@ def claim_explicit_standard_name_sources(
     sns_ids = [f"dd:{source_id}" for source_id in dict.fromkeys(source_ids)]
     with services.GraphClient() as gc:
         rows = gc.query(
-            services._EXPLICIT_SOURCE_CLAIM_QUERY,
+            _EXPLICIT_SOURCE_CLAIM_QUERY,
             ids=sns_ids,
             token=token,
             timeout=timeout_minutes,
-            settled_stages=sorted(services._SETTLED_SOURCE_BINDING_STAGES),
+            settled_stages=sorted(foundation._SETTLED_SOURCE_BINDING_STAGES),
         )
     claimed: list[dict[str, Any]] = []
     withheld: list[dict[str, Any]] = []
@@ -719,7 +722,7 @@ def claim_explicit_standard_name_sources(
                 }
             )
     if withheld:
-        services.logger.warning(
+        logger.warning(
             "Withheld %d explicit source claim conflict(s): %s",
             len(withheld),
             ", ".join(
@@ -1048,14 +1051,14 @@ def _lock_claimed_name_bindings(
         batch=batch,
         allow_own_pending=allow_own_pending_reservation,
         allow_dead_end_revival=allow_dead_end_revival,
-        stable_stages=sorted(services._STABLE_BINDING_NAME_STAGES),
+        stable_stages=sorted(foundation._STABLE_BINDING_NAME_STAGES),
         revivable_stages=sorted(
             {
                 services.NameStage.superseded.value,
                 services.NameStage.exhausted.value,
             }
         ),
-        terminal_stages=sorted(services._TERMINAL_BINDING_NAME_STAGES),
+        terminal_stages=sorted(foundation._TERMINAL_BINDING_NAME_STAGES),
         pending_stage=services.NameStage.pending.value,
         reviewable_stage=services.NameStage.drafted.value,
     )
@@ -1154,13 +1157,13 @@ def _lock_claimed_name_bindings(
                 END
             """,
             batch=collision_batch,
-            stable_stages=sorted(services._STABLE_BINDING_NAME_STAGES),
+            stable_stages=sorted(foundation._STABLE_BINDING_NAME_STAGES),
         )
     for row in rows:
         if row.get("outcome", "winner") == "winner":
             continue
         reason = attachment_refusals.get(row.get("id") or "")
-        services.logger.warning(
+        logger.warning(
             "Released source %s after %s for candidate %s at name stage %s "
             "(attempt %s retained)%s",
             row.get("id"),
@@ -1412,7 +1415,7 @@ def persist_claimed_attachments(
                         RETURN sns.id AS id
                         """,
                         batch=winner_batch,
-                        stable_stages=sorted(services._STABLE_BINDING_NAME_STAGES),
+                        stable_stages=sorted(foundation._STABLE_BINDING_NAME_STAGES),
                     )
                     winner_ids = [row["id"] for row in rows]
                     if set(winner_ids) != locked_ids:
@@ -1639,7 +1642,7 @@ def classify_parked_source(evidence: dict[str, Any], *, services: Any) -> str:
     if str(evidence.get("lifecycle_status") or "").strip() == "removed":
         return "upstream_quantity_removed"
     reason = str(evidence.get("last_error") or "").strip()
-    if reason and reason != services._COMPOSE_CAP_REASON:
+    if reason and reason != _COMPOSE_CAP_REASON:
         if "vocabulary gap" in reason.lower():
             return "vocabulary_gap"
         return "attempt_budget_exhausted"
@@ -1730,11 +1733,11 @@ def record_parked_dispositions(
         written: list[dict[str, str]] = []
         for row in rows:
             disposition = services.classify_parked_source(row)
-            if disposition not in services.CAP_PARKED_DISPOSITIONS:
+            if disposition not in CAP_PARKED_DISPOSITIONS:
                 raise ValueError(f"row {row['id']!r} has no triage disposition")
             written.append({"id": row["id"], "disposition": disposition})
         if not dry_run and written:
-            client.query(services._CAP_DISPOSITION_WRITE, rows=written)
+            client.query(_CAP_DISPOSITION_WRITE, rows=written)
         counts = Counter(row["disposition"] for row in written)
         return {
             "parked": len(written),
@@ -1765,7 +1768,7 @@ def disposition_parked_sources(
         rows = [
             dict(r)
             for r in client.query(
-                services._CAP_PARKED_QUERY, cap=services._MAX_COMPOSE_CLAIM_ATTEMPTS
+                _CAP_PARKED_QUERY, cap=services._MAX_COMPOSE_CLAIM_ATTEMPTS
             )
         ]
         return services.record_parked_dispositions(rows, dry_run=dry_run, gc=client)
@@ -1811,9 +1814,7 @@ def record_dispositions_for_undisposed_parks(
     try:
         rows = [
             dict(r)
-            for r in client.query(
-                services._CAP_UNDISPOSED_QUERY, cap_reason=services._COMPOSE_CAP_REASON
-            )
+            for r in client.query(_CAP_UNDISPOSED_QUERY, cap_reason=_COMPOSE_CAP_REASON)
         ]
         return services.record_parked_dispositions(rows, dry_run=dry_run, gc=client)
     finally:
@@ -1855,7 +1856,7 @@ def census_parked_dispositions(
         rows = [
             dict(r)
             for r in client.query(
-                services._CAP_DISPOSITION_READBACK,
+                _CAP_DISPOSITION_READBACK,
                 cap=services._MAX_COMPOSE_CLAIM_ATTEMPTS,
             )
         ]
@@ -1867,7 +1868,7 @@ def census_parked_dispositions(
     unexpected = sorted(
         r["id"]
         for r in rows
-        if r["disposition"] and r["disposition"] not in services.CAP_PARKED_DISPOSITIONS
+        if r["disposition"] and r["disposition"] not in CAP_PARKED_DISPOSITIONS
     )
     return {
         "parked": len(rows),
@@ -2424,8 +2425,6 @@ def release_standard_name_source_claims(token: str, *, services: Any) -> int:
 # would fire a paid LLM call. Waiting out this short window lets the burst's
 # final committer land, so exactly one replica survives the re-read. Kept small
 # (batch LLM calls dwarf it) and overridable to 0 in tests.
-_CLAIM_VERIFY_SETTLE_SECONDS = 0.5
-
 
 # In-process tally of paid-call outcomes at the persist step, keyed by
 # (run_id, pool). ``attempts`` counts every persist call that follows a paid

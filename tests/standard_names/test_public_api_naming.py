@@ -49,6 +49,7 @@ OUT_OF_SCOPE_NAMES: frozenset[str] = frozenset(
 )
 
 EXEMPT: frozenset[str] = ALIAS_BRIDGE_NAMES | OUT_OF_SCOPE_NAMES
+REPO_ROOT = Path(__file__).resolve().parents[2]
 
 # Public modules under audit. The "sn" token is allowed in import paths
 # (e.g. ``standard_names``) but not in defined names within these modules.
@@ -59,6 +60,18 @@ AUDITED_MODULES: tuple[Path, ...] = (
     Path("imas_codex/standard_names/review/audits.py"),
     Path("imas_codex/standard_names/review/enrichment.py"),
     Path("imas_codex/llm/sn_tools.py"),
+    *(
+        path.relative_to(REPO_ROOT)
+        for path in sorted(
+            (REPO_ROOT / "imas_codex/standard_names/graph_store").glob("*.py")
+        )
+    ),
+    *(
+        path.relative_to(REPO_ROOT)
+        for path in sorted(
+            (REPO_ROOT / "imas_codex/standard_names/worker_tasks").glob("*.py")
+        )
+    ),
 )
 
 
@@ -91,8 +104,7 @@ def test_no_sn_abbreviation_in_public_names(module_path: Path) -> None:
 
     Exemptions (retain-list): explicit alias-bridge names.
     """
-    repo_root = Path(__file__).resolve().parents[2]
-    full_path = repo_root / module_path
+    full_path = REPO_ROOT / module_path
     source = full_path.read_text(encoding="utf-8")
     tree = ast.parse(source, filename=str(full_path))
 

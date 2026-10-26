@@ -4,8 +4,11 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from imas_codex.standard_names.budget import BudgetManager
@@ -344,7 +347,6 @@ async def prepare_docs_review_request(
     _set_docs_review_dd_source_paths = _worker_dependency(
         "_set_docs_review_dd_source_paths"
     )
-    logger = _worker_dependency("logger")
     model_provider_exposure = _worker_dependency("model_provider_exposure")
     import asyncio as _asyncio
 
@@ -582,7 +584,6 @@ def _documentation_conformance_note(
     equation is the converged statement and is accepted. A name the grammar cannot parse
     selects no registry entry and so carries no finding.
     """
-    logger = _worker_dependency("logger")
     from imas_standard_names.grammar.parser import ParseError
 
     from imas_codex.standard_names.docs_gates import (
@@ -623,7 +624,6 @@ async def _documentation_banned_prose_note(
     _worker_dependency, /, item: dict[str, Any], mgr: BudgetManager
 ) -> str | None:
     """Hold a policy candidate only when prose adjudication confirms it."""
-    logger = _worker_dependency("logger")
     from imas_codex.settings import get_model, get_reasoning_effort
     from imas_codex.standard_names.prose_adjudicator import _adjudicate_one
     from imas_codex.standard_names.prose_policy import (
@@ -667,7 +667,6 @@ async def _documentation_contradiction_note(
     """Compare authored claims with bound DD text before accepting them."""
     _bound_docs_review_dd_paths = _worker_dependency("_bound_docs_review_dd_paths")
     _has_dd_source_reference = _worker_dependency("_has_dd_source_reference")
-    logger = _worker_dependency("logger")
     strip_dd_prefix = _worker_dependency("strip_dd_prefix")
     from imas_codex.settings import get_model
     from imas_codex.standard_names.budget import LLMCostEvent
@@ -818,7 +817,6 @@ async def process_review_docs_batch(
     _persisting_quorum_cycles = _worker_dependency("_persisting_quorum_cycles")
     _release_docs_review_claim = _worker_dependency("_release_docs_review_claim")
     _review_dd_source_bindings = _worker_dependency("_review_dd_source_bindings")
-    logger = _worker_dependency("logger")
     prepare_docs_review_request = _worker_dependency("prepare_docs_review_request")
     import asyncio as _asyncio
 

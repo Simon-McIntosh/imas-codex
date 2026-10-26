@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import logging
 import re
 import uuid
 from typing import Any
+
+logger = logging.getLogger(__name__)
 
 
 def claim_unresolved_links(limit: int = 20, *, services: Any) -> list[dict[str, Any]]:
@@ -58,7 +61,7 @@ def resolve_links_batch(
         items, override=override, override_names=override_names
     )
     if skipped:
-        services.logger.warning(
+        logger.warning(
             "resolve_links_batch: stripped protected fields from %d name(s): %s",
             len(skipped),
             ", ".join(skipped[:5]),
@@ -129,11 +132,11 @@ def _sanitize_doc_text(text: str | None, *, services: Any) -> str | None:
     """Repair JSON-escape-mangled LaTeX control characters in LLM doc text."""
     if not text:
         return text
-    for ctrl, repl in services._JSON_ESCAPE_CTRL.items():
+    for ctrl, repl in _JSON_ESCAPE_CTRL.items():
         if ctrl in text:
             text = text.replace(ctrl, repl)
-    if services._STRIP_CTRL_RE.search(text):
-        text = services._STRIP_CTRL_RE.sub("", text)
+    if _STRIP_CTRL_RE.search(text):
+        text = _STRIP_CTRL_RE.sub("", text)
     return text
 
 
@@ -157,7 +160,7 @@ def _doc_link_mismatches(
         return []
     pairs = [
         (label.strip().lower().replace(" ", "_").replace("-", "_"), target, label)
-        for label, target in services._DOC_LINK_RE.findall(documentation)
+        for label, target in _DOC_LINK_RE.findall(documentation)
     ]
     candidates = {lid for lid, target, _ in pairs if lid != target}
     if not candidates:
@@ -197,7 +200,7 @@ def _normalize_bare_doc_links(
     accept path passes its already-read *documentation* so docs without bare
     candidates need no second graph read.
     """
-    if documentation is not services._DOC_TEXT_UNSET:
+    if documentation is not _DOC_TEXT_UNSET:
         if sn_id is None:
             raise ValueError("documentation requires a scoped standard name id")
         if not documentation or "[" not in documentation:
@@ -316,7 +319,7 @@ def _normalize_bare_doc_links(
             ],
         )
     if updates:
-        services.logger.info(
+        logger.info(
             "resolve_doc_links: normalized bare [name] brackets in %d doc(s)%s",
             len(updates),
             f" (scoped to {sn_id})" if sn_id else "",
@@ -369,7 +372,7 @@ def resolve_doc_links(gc: Any | None = None, *, services: Any) -> dict[str, int]
         superseded_ids: set[str] = set()
         for row in rows:
             docs = row.get("docs") or ""
-            for match in services._NAME_LINK_RE.finditer(docs):
+            for match in _NAME_LINK_RE.finditer(docs):
                 target = match.group(1)
                 if target not in valid_targets:
                     superseded_ids.add(target)
@@ -402,12 +405,12 @@ def resolve_doc_links(gc: Any | None = None, *, services: Any) -> dict[str, int]
                     removed += 1
                     return ""
 
-            new_docs = services._NAME_LINK_RE.sub(_replace_link, docs)
+            new_docs = _NAME_LINK_RE.sub(_replace_link, docs)
             if new_docs != original_docs:
                 self_link = f"name:{row['id']}"
                 seen: set[str] = set()
                 new_links: list[str] = []
-                for m in services._NAME_LINK_RE.finditer(new_docs):
+                for m in _NAME_LINK_RE.finditer(new_docs):
                     ref = f"name:{m.group(1)}"
                     if ref == self_link or ref in seen:
                         continue
@@ -421,7 +424,7 @@ def resolve_doc_links(gc: Any | None = None, *, services: Any) -> dict[str, int]
                 )
             else:
                 unchanged += 1
-        services.logger.info(
+        logger.info(
             "resolve_doc_links: resolved=%d rewritten, %d removed, %d unchanged",
             resolved,
             removed,

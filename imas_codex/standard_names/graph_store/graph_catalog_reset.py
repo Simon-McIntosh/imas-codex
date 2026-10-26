@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 from imas_codex.discovery.base.claims import retry_on_deadlock
+
+logger = logging.getLogger(__name__)
 
 
 @retry_on_deadlock()
@@ -47,7 +50,7 @@ def write_vocab_gaps(
             from collections import Counter
 
             drop_hist = Counter(g.get("segment") for g in dropped)
-            services.logger.info(
+            logger.info(
                 "write_vocab_gaps: skipped %d gaps on pseudo segments (%s)",
                 len(dropped),
                 ", ".join(f"{seg}={n}" for seg, n in drop_hist.most_common()),
@@ -83,7 +86,7 @@ def write_vocab_gaps(
         if gap_id not in gap_nodes:
             # Validate segment exists in ISN grammar
             if not is_valid_segment(segment):
-                services.logger.warning(
+                logger.warning(
                     "write_vocab_gaps: skipping gap with unknown segment "
                     "'%s' for token '%s'",
                     segment,
@@ -97,7 +100,7 @@ def write_vocab_gaps(
             # deficiencies but LLM mis-classifications or decomposable compounds.
             # Shared with the source-marking path so the two never drift.
             if category in NON_ACTIONABLE_GAP_CATEGORIES:
-                services.logger.debug(
+                logger.debug(
                     "write_vocab_gaps: skipping %s gap %s (token '%s', segment '%s')",
                     category,
                     gap_id,
@@ -237,9 +240,7 @@ def write_vocab_gaps(
         )
 
     written = len(gap_nodes)
-    services.logger.info(
-        "Wrote %d VocabGap nodes from %d gap reports", written, len(gaps)
-    )
+    logger.info("Wrote %d VocabGap nodes from %d gap reports", written, len(gaps))
     return written
 
 
@@ -311,7 +312,7 @@ def claim_names_for_validation(
             """,
             limit=limit,
             token=token,
-            timeout=services._CLAIM_TIMEOUT,
+            timeout=_CLAIM_TIMEOUT,
         )
         # Step 2: verify — only our token
         results = gc.query(
@@ -416,7 +417,7 @@ def claim_names_for_embedding(
             """,
             limit=limit,
             token=token,
-            timeout=services._CLAIM_TIMEOUT,
+            timeout=_CLAIM_TIMEOUT,
         )
         results = gc.query(
             """
@@ -662,7 +663,7 @@ def reset_standard_names(
 
         result = gc.query(count_cypher, **params)
         count = result[0]["n"] if result else 0
-        services.logger.info(
+        logger.info(
             "reset_standard_names: %d nodes match (from_stage=%s, source=%s, ids=%s)",
             count,
             from_stage,
@@ -737,7 +738,7 @@ def reset_standard_names(
             **reset_params,
         )
 
-    services.logger.info("Reset %d StandardName nodes", count)
+    logger.info("Reset %d StandardName nodes", count)
     return count
 
 
@@ -1078,7 +1079,7 @@ def clear_standard_names(
 
         result = gc.query(count_cypher, **params)
         count = result[0]["n"] if result else 0
-        services.logger.info(
+        logger.info(
             "clear_standard_names: %d nodes match (stages=%s, source=%s, ids=%s)",
             count,
             effective_stages or "all-live",
@@ -1253,9 +1254,7 @@ def clear_standard_names(
         )
         orphan_count = orphan_result[0]["n"] if orphan_result else 0
         if orphan_count:
-            services.logger.info(
-                "Swept %d orphaned StandardNameReview nodes", orphan_count
-            )
+            logger.info("Swept %d orphaned StandardNameReview nodes", orphan_count)
 
         # Reset orphaned sources. Deleting a StandardName strands its
         # StandardNameSource at 'composed'/'attached' — a status the generate
@@ -1279,12 +1278,12 @@ def clear_standard_names(
         )
         reset_count = reset_result[0]["n"] if reset_result else 0
         if reset_count:
-            services.logger.info(
+            logger.info(
                 "Reset %d orphaned StandardNameSource nodes to 'extracted'",
                 reset_count,
             )
 
-    services.logger.info("Deleted %d StandardName nodes", count)
+    logger.info("Deleted %d StandardName nodes", count)
     return count
 
 
@@ -1368,7 +1367,7 @@ def clear_sn_subsystem(*, dry_run: bool = False, services: Any) -> dict[str, int
         gc.query("MATCH (rr:SNRun) DETACH DELETE rr")
 
     total = sum(counts.values())
-    services.logger.info("clear_sn_subsystem: deleted %d nodes (%s)", total, counts)
+    logger.info("clear_sn_subsystem: deleted %d nodes (%s)", total, counts)
 
     return counts
 

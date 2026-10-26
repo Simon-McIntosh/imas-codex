@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 from imas_codex.discovery.base.claims import retry_on_deadlock
@@ -11,6 +12,8 @@ from imas_codex.standard_names.defaults import (
 )
 
 from .graph_foundation import _CLAIM_TIMEOUT_SECONDS
+
+logger = logging.getLogger(__name__)
 
 
 @retry_on_deadlock()
@@ -68,7 +71,7 @@ def claim_generate_docs_batch(
     items = services._verify_docs_claim_winners(items, eligible_stage="pending")
     for item in items:
         item["chain_history"] = name_chain_history(item["id"])
-    services.logger.debug("claim_generate_docs_batch: claimed %d", len(items))
+    logger.debug("claim_generate_docs_batch: claimed %d", len(items))
     return items
 
 
@@ -131,9 +134,7 @@ def persist_generated_docs(
 
         stamp_source_snapshots(sn_ids=[sn_id], gc=gc)
     new_stage: str = result[0]["docs_stage"]
-    services.logger.debug(
-        "persist_generated_docs: %s → docs_stage=%s", sn_id, new_stage
-    )
+    logger.debug("persist_generated_docs: %s → docs_stage=%s", sn_id, new_stage)
     services.bump_sn_run_counter(run_id, "names_enriched")
     return new_stage
 
@@ -160,7 +161,7 @@ def release_generate_docs_claims(
         )
     released: int = result[0]["released"] if result else 0
     if released < len(sn_ids):
-        services.logger.debug(
+        logger.debug(
             "release_generate_docs_claims: %d/%d released (token=%s) — remainder already cleared or re-claimed",
             released,
             len(sn_ids),
@@ -191,7 +192,7 @@ def release_generate_docs_failed_claims(
         )
     released: int = result[0]["released"] if result else 0
     if released < len(sn_ids):
-        services.logger.debug(
+        logger.debug(
             "release_generate_docs_failed_claims: %d/%d released (token=%s) — remainder already swept or re-claimed",
             released,
             len(sn_ids),
@@ -278,7 +279,7 @@ def claim_refine_docs_batch(
             per_dim[f"hold:{hold['kind']}:{hold['finding_key'][:12]}"] = hold["finding"]
         current_review["reviewer_comments_per_dim"] = per_dim
         item["prior_docs_reviews"] = item["docs_chain_history"] + [current_review]
-    services.logger.debug("claim_refine_docs_batch: claimed %d", len(items))
+    logger.debug("claim_refine_docs_batch: claimed %d", len(items))
     return items
 
 
@@ -345,7 +346,7 @@ def persist_refined_docs(
                 raise
     if result:
         row = dict(result[0])
-        services.logger.debug(
+        logger.debug(
             "persist_refined_docs: %s (chain_length=%d, rev=%s)",
             sn_id,
             row["docs_chain_length"],
@@ -363,9 +364,7 @@ def persist_refined_docs(
         services._record_persist_outcome(run_id, "refine_docs", persisted=True)
         return row
     services._record_persist_outcome(run_id, "refine_docs", persisted=False)
-    services.logger.debug(
-        "persist_refined_docs: no-op for %s (token/stage mismatch)", sn_id
-    )
+    logger.debug("persist_refined_docs: no-op for %s (token/stage mismatch)", sn_id)
     return {"docs_chain_length": -1, "revision_id": ""}
 
 
@@ -423,7 +422,7 @@ def reset_standard_name_docs(
                 run_id=run_id,
             )
     reset: int = result[0]["reset"] if result else 0
-    services.logger.info(
+    logger.info(
         "reset_standard_name_docs: %d/%d reset to docs pending (run_id=%s)",
         reset,
         len(sn_ids),
@@ -490,7 +489,7 @@ def release_refine_docs_claims(
         )
     released: int = result[0]["released"] if result else 0
     if released < len(sn_ids):
-        services.logger.debug(
+        logger.debug(
             "release_refine_docs_claims: %d/%d released (token=%s) — remainder already swept or re-claimed",
             released,
             len(sn_ids),
@@ -521,7 +520,7 @@ def release_refine_docs_failed_claims(
         )
     released: int = result[0]["released"] if result else 0
     if released < len(sn_ids):
-        services.logger.debug(
+        logger.debug(
             "release_refine_docs_failed_claims: %d/%d released (token=%s) — remainder already swept or re-claimed",
             released,
             len(sn_ids),
@@ -579,7 +578,7 @@ def mark_for_refine_docs(
             synthetic_score=synthetic_score,
         )
     updated = result[0]["updated"] if result else 0
-    services.logger.debug(
+    logger.debug(
         "mark_for_refine_docs: %s sim=%.3f updated=%d",
         sn_id,
         desc_name_similarity,
