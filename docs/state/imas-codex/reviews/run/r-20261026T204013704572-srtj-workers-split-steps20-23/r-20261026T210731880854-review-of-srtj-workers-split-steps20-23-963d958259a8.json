@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "completed_at": "2026-10-26T21:19:09.958Z",
   "dispatched_at": "2026-10-26T21:08:25Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the finding carries no text",
+      "recorded_at": "2026-10-26T21:25:44.684775+00:00"
+    }
+  },
   "findings": [
     {
       "detail": "tests/standard_names/test_review_docs_stages.py contributes 18 of the 27 default-marker failures and fails identically at base and head (assert '' == 'accepted' at its line 175 of base_default.log), so the delta measure alone witnesses that module.",
