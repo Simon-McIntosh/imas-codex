@@ -9,7 +9,6 @@ import pytest
 from neo4j import GraphDatabase
 
 from imas_codex.graph.client import GraphClient
-from imas_codex.settings import get_graph_uri
 from imas_codex.standard_names.graph_ops import (
     _rewire_has_parent_off_superseded,
 )
@@ -41,22 +40,10 @@ TEST_NODE_IDS = [
 
 
 @pytest.fixture()
-def disposable_graph() -> Iterator[GraphClient]:
-    uri = os.environ.get("IMAS_CODEX_TEST_NEO4J_URI")
-    if not uri:
-        pytest.skip("IMAS_CODEX_TEST_NEO4J_URI is not configured")
-    if os.environ.get("IMAS_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
-        pytest.fail("successor-rewire tests require a disposable graph")
-    project_uri = os.environ.get("IMAS_CODEX_TEST_PROJECT_NEO4J_URI") or get_graph_uri()
-    if uri == project_uri:
-        pytest.fail("successor-rewire tests refuse the project graph")
+def disposable_graph(disposable_neo4j_uri: str) -> Iterator[GraphClient]:
     password = os.environ.get("IMAS_CODEX_TEST_NEO4J_PASSWORD", "")
-    auth = ("neo4j", password) if password else None
-    with GraphDatabase.driver(uri, auth=auth) as driver:
-        driver.verify_connectivity()
-
     client = GraphClient(
-        uri=uri,
+        uri=disposable_neo4j_uri,
         username="neo4j",
         password=password,
         graph_name="disposable-structural-rewire",

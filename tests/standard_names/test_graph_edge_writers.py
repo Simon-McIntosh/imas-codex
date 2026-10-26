@@ -25,7 +25,6 @@ from neo4j import GraphDatabase
 from neo4j.exceptions import ClientError
 
 from imas_codex.graph.client import GraphClient as RealGraphClient
-from imas_codex.settings import get_graph_uri
 
 imas_sn = pytest.importorskip("imas_standard_names")
 
@@ -570,22 +569,6 @@ class TestEndpointAuthority:
             if row["child"] == "maximum_of_electron_temperature"
         )
         assert child_reconcile["keep"] == ["electron_temperature"]
-
-
-@pytest.fixture(scope="module")
-def disposable_neo4j() -> Iterator[tuple[str, str]]:
-    uri = os.environ.get("IMAS_CODEX_TEST_NEO4J_URI")
-    if not uri:
-        pytest.skip("IMAS_CODEX_TEST_NEO4J_URI is not configured")
-    if os.environ.get("IMAS_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
-        pytest.fail("bootstrap transaction test requires a disposable graph")
-    if uri == (os.environ.get("IMAS_CODEX_TEST_PROJECT_NEO4J_URI") or get_graph_uri()):
-        pytest.fail("bootstrap transaction test refuses the project graph")
-    password = os.environ.get("IMAS_CODEX_TEST_NEO4J_PASSWORD", "")
-    auth = ("neo4j", password) if password else None
-    with GraphDatabase.driver(uri, auth=auth) as driver:
-        driver.verify_connectivity()
-    yield uri, password
 
 
 @pytest.mark.graph

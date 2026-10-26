@@ -12,7 +12,6 @@ from neo4j import GraphDatabase
 from neo4j.time import DateTime
 
 from imas_codex.graph.client import GraphClient as RealGraphClient
-from imas_codex.settings import get_graph_uri
 from imas_codex.standard_names import graph_ops
 
 
@@ -88,23 +87,6 @@ def test_write_reviews_converts_iso_parameters_to_neo4j_datetimes(axis: str) -> 
     assert batch[0]["id"] == record["id"]
     assert batch[0]["reviewed_at"] == reviewed_at
     assert batch[0]["llm_at"] == reviewed_at
-
-
-@pytest.fixture(scope="module")
-def disposable_neo4j() -> Iterator[tuple[str, str]]:
-    uri = os.environ.get("IMAS_CODEX_TEST_NEO4J_URI")
-    if not uri:
-        pytest.skip("IMAS_CODEX_TEST_NEO4J_URI is not configured")
-    if os.environ.get("IMAS_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
-        pytest.fail("review timestamp persistence requires a disposable graph")
-    project_uri = os.environ.get("IMAS_CODEX_TEST_PROJECT_NEO4J_URI") or get_graph_uri()
-    if uri == project_uri:
-        pytest.fail("review timestamp persistence refuses the project graph")
-    password = os.environ.get("IMAS_CODEX_TEST_NEO4J_PASSWORD", "")
-    auth = ("neo4j", password) if password else None
-    with GraphDatabase.driver(uri, auth=auth) as driver:
-        driver.verify_connectivity()
-    yield uri, password
 
 
 @pytest.mark.graph

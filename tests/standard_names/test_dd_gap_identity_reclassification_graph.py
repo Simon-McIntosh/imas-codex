@@ -13,7 +13,6 @@ from neo4j.exceptions import ConstraintError
 
 from imas_codex.graph.client import GraphClient
 from imas_codex.graph.schema import get_schema
-from imas_codex.settings import get_graph_uri
 from imas_codex.standard_names.dd_gaps import (
     _RECLASSIFY_REGISTRY_FACT_QUERY,
     _REGISTRY_FACTS_QUERY,
@@ -30,17 +29,8 @@ pytestmark = pytest.mark.graph
 
 
 @pytest.fixture(scope="module")
-def ephemeral_driver() -> Iterator:
-    uri = os.environ.get("IMAS_CODEX_TEST_NEO4J_URI")
-    if not uri:
-        pytest.skip("IMAS_CODEX_TEST_NEO4J_URI is not configured")
-    if os.environ.get("IMAS_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
-        pytest.fail("stateful DD-gap tests require an explicitly ephemeral graph")
-    project_uri = os.environ.get("IMAS_CODEX_TEST_PROJECT_NEO4J_URI") or get_graph_uri()
-    if uri == project_uri:
-        pytest.fail("stateful DD-gap tests refuse the configured project graph")
-
-    driver = GraphDatabase.driver(uri, auth=None)
+def ephemeral_driver(disposable_neo4j_uri: str) -> Iterator:
+    driver = GraphDatabase.driver(disposable_neo4j_uri, auth=None)
     driver.verify_connectivity()
     try:
         yield driver

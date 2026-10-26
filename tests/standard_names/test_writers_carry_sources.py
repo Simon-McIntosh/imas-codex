@@ -9,7 +9,6 @@ import pytest
 from neo4j import GraphDatabase
 
 from imas_codex.graph.client import GraphClient
-from imas_codex.settings import get_graph_uri
 from imas_codex.standard_names.attachment_audit import _find_orphaned_names
 from imas_codex.standard_names.source_invariant import (
     MissingStandardNameSource,
@@ -18,19 +17,9 @@ from imas_codex.standard_names.source_invariant import (
 
 
 @pytest.fixture
-def source_graph() -> Iterator[GraphClient]:
-    uri = os.environ.get("IMAS_CODEX_TEST_NEO4J_URI")
-    if not uri:
-        pytest.skip("IMAS_CODEX_TEST_NEO4J_URI is not configured")
-    if os.environ.get("IMAS_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
-        pytest.fail("source invariant tests require an ephemeral graph")
-    project_uri = os.environ.get("IMAS_CODEX_TEST_PROJECT_NEO4J_URI") or get_graph_uri()
-    if uri.rstrip("/") == project_uri.rstrip("/"):
-        pytest.fail("source invariant tests refuse the project graph")
-    with GraphDatabase.driver(uri, auth=None) as driver:
-        driver.verify_connectivity()
+def source_graph(disposable_neo4j_uri: str) -> Iterator[GraphClient]:
     with GraphClient(
-        uri=uri,
+        uri=disposable_neo4j_uri,
         username="neo4j",
         password="",
         graph_name="ephemeral-source-invariant",

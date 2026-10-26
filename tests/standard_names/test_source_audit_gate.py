@@ -12,7 +12,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from imas_codex.graph.client import GraphClient
-from imas_codex.settings import get_graph_uri
 from imas_codex.standard_names.graph_ops import (
     classify_sourceless_standard_names,
     supersede_exhausted_standard_name_orphans,
@@ -23,17 +22,10 @@ from imas_codex.standard_names.source_invariant import find_sourceless_live_name
 
 
 @pytest.fixture()
-def planted_graph() -> Iterator[GraphClient]:
+def planted_graph(disposable_neo4j_uri: str) -> Iterator[GraphClient]:
     """Plant six audit subjects and their source-carrying support nodes."""
-    uri = os.environ.get("IMAS_CODEX_TEST_NEO4J_URI")
-    if not uri:
-        pytest.skip("a disposable Neo4j URI is required")
-    if os.environ.get("IMAS_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
-        pytest.fail("source audit fixture requires a disposable graph")
-    if uri == (os.environ.get("IMAS_CODEX_TEST_PROJECT_NEO4J_URI") or get_graph_uri()):
-        pytest.fail("source audit fixture refuses the project graph")
     client = GraphClient(
-        uri=uri,
+        uri=disposable_neo4j_uri,
         username="neo4j",
         password=os.environ.get("IMAS_CODEX_TEST_NEO4J_PASSWORD", ""),
         graph_name="source-audit-fixture",

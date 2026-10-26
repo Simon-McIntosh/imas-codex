@@ -13,7 +13,6 @@ import pytest
 from neo4j import GraphDatabase
 
 from imas_codex.graph.client import GraphClient
-from imas_codex.settings import get_graph_uri
 from imas_codex.standard_names.provenance_lifecycle import (
     StaleSourceDetachConflict,
     _load_signed_stale_source_rows,
@@ -58,23 +57,6 @@ def _resign_rows(authority: dict[str, object]) -> None:
         rows, sort_keys=True, separators=(",", ":"), ensure_ascii=False
     )
     authority["signature"]["digest"] = sha256((canonical + "\n").encode()).hexdigest()
-
-
-@pytest.fixture(scope="module")
-def disposable_neo4j() -> Iterator[tuple[str, str]]:
-    uri = os.environ.get("IMAS_CODEX_TEST_NEO4J_URI")
-    if not uri:
-        pytest.skip("IMAS_CODEX_TEST_NEO4J_URI is not configured")
-    if os.environ.get("IMAS_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
-        pytest.fail("stale-source detachment requires a disposable graph")
-    if uri == (os.environ.get("IMAS_CODEX_TEST_PROJECT_NEO4J_URI") or get_graph_uri()):
-        pytest.fail("stale-source detachment refuses the project graph")
-    password = os.environ.get("IMAS_CODEX_TEST_NEO4J_PASSWORD", "")
-    auth = ("neo4j", password) if password else None
-    print(f"GRAPH_ENDPOINT={uri}")
-    with GraphDatabase.driver(uri, auth=auth) as driver:
-        driver.verify_connectivity()
-    yield uri, password
 
 
 def _client(endpoint: tuple[str, str]) -> GraphClient:
