@@ -17,6 +17,7 @@ from imas_codex.standard_names.signed_manifest import (
     apply_signed_manifest,
     signed_payload_sha256,
 )
+from tests.standard_names.conftest import disposable_neo4j as disposable_neo4j
 
 _SELECTION = {
     "id": "artifact-rows",
