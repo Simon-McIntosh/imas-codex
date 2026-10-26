@@ -237,4 +237,5 @@
 <tr><td><code>tests/standard_names/test_vector_semantics.py::test_cluster_labels_match_member_sns</code></td><td>no</td></tr>
 </tbody></table></details>
 <p>One file mixes outcomes: <code>tests/graph/test_dd_unit_correction_reconcile.py::test_no_live_dd_node_contradicts_the_registry</code> only reads, while its other four reached graph tests write through setup or cleanup. The prior 19 product failures remain a separate repair input; this resumed attempt did not rerun the graph gate or claim a new failure delta.</p>
+<p id="srtj-graph-tier-parallel-fixtures-focused-four">After the audit, a focused <code>pytest -m graph -n 4</code> arm selecting only the four newly migrated modules completed with <strong>36 passed, 5 warnings, EXIT=0</strong> in 73.89 seconds. All 13 fixture-failure IDs previously observed in these files occur in that selection; the whole selection passed. This verifies the four explicit disposable endpoints without executing any of the 26 ungranted writing files. It is not a replacement for the blocked full graph arm.</p>
 </article>
