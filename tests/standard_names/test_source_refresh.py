@@ -568,6 +568,17 @@ def test_disposable_startup_has_an_independent_deadline(monkeypatch, tmp_path):
     assert list(tmp_path.iterdir()) == []
 
 
+@pytest.mark.graph
+def test_disposable_session_setup_preserves_other_test_endpoint(request):
+    """Starting the shared instance must not redirect unrelated tests."""
+    keys = ("NEO4J_URI", "NEO4J_PASSWORD", "IMAS_CODEX_TEST_NEO4J_URI")
+    before = {key: os.environ.get(key) for key in keys}
+
+    request.getfixturevalue("disposable_neo4j_uri")
+
+    assert {key: os.environ.get(key) for key in keys} == before
+
+
 @pytest.fixture
 def graph(disposable_neo4j_uri: str, monkeypatch) -> Iterator[GraphClient]:
     # An empty instance carries no DD-resolution authority, and the drift scan

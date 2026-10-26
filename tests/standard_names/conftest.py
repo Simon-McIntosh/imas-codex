@@ -532,9 +532,8 @@ def disposable_neo4j_uri() -> Iterator[str]:
     project graph's resolved address and the run fails if they are the same, so
     no test here can write to the shared live graph.
 
-    For a test's duration both ``NEO4J_URI`` and ``IMAS_CODEX_TEST_NEO4J_URI``
-    name this endpoint, so a bare ``GraphClient()`` and an explicitly-addressed
-    one in the same test reach the same instance.
+    A function fixture below points graph clients at this endpoint only while
+    a test using it runs. Other tests in the worker retain the project URI.
     """
     configured = os.environ.get("IMAS_CODEX_TEST_NEO4J_URI")
     directory = process = log = None
@@ -578,6 +577,11 @@ def disposable_neo4j_uri() -> Iterator[str]:
                 f"disposable endpoint {uri}"
             )
         _wipe(uri)
+        for key, value in previous.items():
+            if value is None:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = value
         yield uri
     finally:
         for key, value in previous.items():
@@ -607,6 +611,33 @@ def disposable_neo4j_uri() -> Iterator[str]:
                 f"{not Path(directory.name).exists()}",
                 flush=True,
             )
+
+
+@pytest.fixture(autouse=True)
+def _disposable_graph_environment(request: pytest.FixtureRequest) -> Iterator[None]:
+    """Keep the disposable URI out of tests that do not request its fixture."""
+    if "disposable_neo4j_uri" not in request.fixturenames:
+        yield
+        return
+
+    uri = request.getfixturevalue("disposable_neo4j_uri")
+    previous = {key: os.environ.get(key) for key in _DISPOSABLE_ENV}
+    os.environ.update(
+        {
+            "NEO4J_URI": uri,
+            "NEO4J_PASSWORD": "",
+            "IMAS_CODEX_TEST_NEO4J_URI": uri,
+            "IMAS_CODEX_TEST_NEO4J_EPHEMERAL": "1",
+        }
+    )
+    try:
+        yield
+    finally:
+        for key, value in previous.items():
+            if value is None:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = value
 
 
 @pytest.fixture()
