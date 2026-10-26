@@ -238,6 +238,9 @@ async def process_refine_name_batch(
         should_trigger_fanout,
     )
     from imas_codex.standard_names.fanout.dispatcher import proposer_exposure
+    from imas_codex.standard_names.fanout.trigger import (
+        check_results_from_failed_checks,
+    )
     from imas_codex.standard_names.graph_ops import (
         RefinedNamePersistenceRefusal,
         RefinedNamePersistenceRefusalReason,
@@ -482,10 +485,7 @@ async def process_refine_name_batch(
                         for check in load_review_checks()[0]
                         if check.axis == "name"
                     ],
-                    "check_results": {
-                        check["id"]: {"answered": True, "failure_probability": 1.0}
-                        for check in failed_checks
-                    },
+                    "check_results": check_results_from_failed_checks(failed_checks),
                     "check_threshold": fanout_settings.refine_trigger_check_threshold,
                 }
             fanout_eligible, reviewer_excerpt = should_trigger_fanout(**check_trigger)

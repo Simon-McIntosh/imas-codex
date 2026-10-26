@@ -1,0 +1,119 @@
+<section id="srtj-fanout-excerpt-retire-section">
+  <h2 id="srtj-fanout-excerpt-retire-title">The fan-out proposer is told which checks opened its search</h2>
+  <p>
+    The refine fan-out fires only on a failed named check, but the trigger
+    still returned an always-empty excerpt and the dispatcher rendered it as a
+    comment-feedback section reading <code>(none)</code>. The proposer was
+    therefore asked to plan retrieval with no statement of why, and a candidate
+    that had just failed a check was indistinguishable from one that failed
+    none.
+  </p>
+
+  <h3 id="srtj-fanout-excerpt-retire-route">Route chosen, and why</h3>
+  <p>
+    <strong>The slot is filled, not removed.</strong> The deciding route's
+    failed-check records already carry the check's criterion, the judge's
+    reason and the field evidence that decided it, so the reasons are in hand at
+    the refine call site and no reader of graph state is added. Removing the
+    slot would have been the fallback only if producing them needed a new graph
+    read.
+  </p>
+  <p>
+    Two functions carry it. <code>check_results_from_failed_checks</code> turns
+    a route's named failures into the trigger's check-result mapping, keeping
+    the criterion, the reason and the evidence beside the probability of
+    <code>1.0</code> each failure carries. <code>failed_check_reasons</code>
+    renders the checks that actually fired — retrieval checks, answered, at or
+    above the threshold — as one line each, capped at six lines of 240
+    characters, and only when the result carries a reason, so a caller supplying
+    bare probabilities still gets an empty excerpt rather than a list of
+    identifiers. The prompt section is renamed from reviewer feedback to the
+    named checks that fired, since that is what it now carries.
+  </p>
+  <p>
+    Membership is decided by the <code>veto</code> flag, not by presence in
+    the list. The persisted failed-check list is the union of a route's vetoed
+    checks and every check it holds details for, so it also carries checks that
+    were answered and passed; mapping the whole list to a failure probability of
+    <code>1.0</code> reported a passing check to the proposer under a heading
+    that said it had failed, and let it fire the trigger. Only
+    <code>veto: True</code> is a failure now. An entry written before the flag
+    existed is still treated as a failure, which is what its inclusion in that
+    list meant.
+  </p>
+  <p>
+    The firing half of that defect predates this work. Before the trigger
+    rendered anything, the refine call site already mapped every persisted entry
+    to <code>failure_probability 1.0</code>
+    (<code>worker_refine_names.py</code> at <code>18daf78f5</code>), and
+    <code>should_trigger_fanout_from_checks</code> reads only that field, so a
+    passing check could open a fan-out search on its own. Filtering at the
+    mapping fixes the excerpt and the decision together, since both read the
+    same results.
+  </p>
+
+  <h3 id="srtj-fanout-excerpt-retire-prompt">The prompt, before and after</h3>
+  <p>
+    Both blocks below are rendered by the same script from two
+    <code>git archive</code> trees, over one candidate whose route failed
+    <code>bound_to_wrong_object</code>. The trigger fires in both.
+  </p>
+  <pre><code># base 18daf78f5 — trigger fires, prompt carries no reason
+fires=True
+Recent reviewer feedback (clarity / disambiguation only):
+(none)</code></pre>
+  <pre><code># head — the same trigger, the same candidate
+fires=True
+Named checks this candidate failed (why the search was opened):
+- bound_to_wrong_object: The name denotes the profile, not the bound scalar it contains. (evidence: source_paths='equilibrium/time_slice/profiles_1d/zeff')</code></pre>
+
+  <h3 id="srtj-fanout-excerpt-retire-gate">Gate and refusal control</h3>
+  <table>
+    <thead><tr><th>Arm</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>base <code>18daf78f5</code></td><td>111 passed, <code>EXIT=0</code></td></tr>
+      <tr><td>head <code>966864ba8</code></td><td>117 passed, <code>EXIT=0</code> — six added passes, zero added failures</td></tr>
+      <tr><td>declared control: empty excerpt restored</td><td>3 failed, 3 passed, <code>EXIT=1</code></td></tr>
+      <tr><td>second control: veto filter dropped</td><td>2 failed, 4 passed, <code>EXIT=1</code></td></tr>
+    </tbody>
+  </table>
+  <p>
+    The selection was the new test file, the fan-out confinement lint,
+    every test under <code>tests/standard_names/fanout/</code>, and
+    <code>tests/standard_names/test_refine_name_chain.py</code>, run with default
+    markers in a separate extracted tree per arm, each with its own
+    <code>--basetemp</code>. Each arm's log header records the module under test
+    as imported (<code>module.__file__</code>) and the resolved working
+    directory, so the tree a result came from is readable rather than assumed.
+  </p>
+  <p>
+    The declared mutation restores the always-empty excerpt by returning
+    <code>fire, ""</code> from the trigger. Under it three of the six tests
+    fail — <code>test_prompt_names_the_checks_that_fired</code>,
+    <code>test_a_passing_check_never_reaches_the_excerpt_or_the_decision</code>
+    and <code>test_the_excerpt_honours_its_line_and_length_caps</code> — which is
+    the direction that matters: the passing suite alone would not have shown
+    that the tests can see an empty slot.
+  </p>
+  <p>
+    A second control drops the veto filter, and exactly the two passing-check
+    tests fail:
+    <code>test_a_passing_check_never_reaches_the_excerpt_or_the_decision</code>
+    and <code>test_a_lone_passing_check_cannot_fire_the_trigger</code>. That is
+    the mutation for the defect this record exists to correct, and it is
+    separate from the declared one.
+  </p>
+
+  <h3 id="srtj-fanout-excerpt-retire-tests">What the new tests lock</h3>
+  <p>
+    <code>tests/standard_names/test_fanout_review_feedback.py</code> asserts that
+    a fired trigger puts the check's identifier, its reason and its evidence
+    into the rendered proposer prompt with no <code>(none)</code> left behind;
+    that a check-free candidate keeps the empty slot and reports no failure; that
+    a failure which does not request retrieval never reaches the prompt, so a
+    grammar-only failure cannot manufacture retrieval intent; that a check the
+    route answered and passed is neither listed as a failure nor able to fire
+    the trigger, even at a zero threshold; and that the excerpt stops at its
+    line and character caps.
+  </p>
+</section>

@@ -11,10 +11,16 @@ Public surface
 --------------
 
 - :func:`should_trigger_fanout` — return ``(fire, excerpt)`` for the
-  refine call site.  ``excerpt`` is always empty: the check path reads
-  no comments.
+  refine call site.  ``excerpt`` names the checks that fired, with the
+  reason each was decided against, so the proposer is told why it was
+  asked.  It is empty when nothing fired; no comment text is read.
 - :func:`should_trigger_fanout_from_checks` — fire on the maximum failure
   probability among answered checks that request retrieval.
+- :func:`check_results_from_failed_checks` — build the check-result
+  mapping a deciding route's named failures imply, carrying the criterion,
+  the judge's reason and the evidence those failures already hold.
+- :func:`failed_check_reasons` — render the fired checks as the lines the
+  proposer prompt carries.
 - :func:`assign_arm` — deterministic 50/50 (or
   ``refine_fanout_arm_percent``) within-cohort A/B label, hashing
   ``(sn_id, cycle_index)`` via blake2b for stability across runs.
@@ -33,9 +39,17 @@ from imas_codex.standard_names.review.checks import ReviewCheck
 
 __all__ = [
     "assign_arm",
+    "check_results_from_failed_checks",
+    "failed_check_reasons",
     "should_trigger_fanout",
     "should_trigger_fanout_from_checks",
 ]
+
+# The excerpt is budgeted: it is read by a proposer whose job is to plan
+# searches, so a handful of named checks is signal and a full failure list is
+# noise.
+_EXCERPT_MAX_CHECKS = 6
+_EXCERPT_MAX_CHARS = 240
 
 
 def should_trigger_fanout_from_checks(
@@ -55,6 +69,76 @@ def should_trigger_fanout_from_checks(
     return bool(probabilities) and max(probabilities) >= threshold
 
 
+def check_results_from_failed_checks(
+    failed_checks: Sequence[Mapping[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    """Build trigger check results from a deciding route's named failures.
+
+    The persisted list is the union of the checks a route vetoed and the
+    checks it holds details for, so it also carries checks that were
+    answered and passed.  ``veto`` is the field that separates them, and
+    only a vetoed check becomes a failure here: an entry carrying
+    ``veto: False`` passed and must neither be reported to the proposer as
+    a failure nor reach the trigger's firing decision.  An entry written
+    before the flag existed is a failure, which is what its inclusion in a
+    failed-check list meant.
+
+    A vetoed check reports ``failure_probability`` 1.0 because the route's
+    decision is what the trigger acts on; re-deriving one from the recorded
+    probability could suppress a failure the route already routed on.  The
+    criterion, the judge's reason and the evidence are carried across so the
+    proposer is told the same facts the route acted on, without a new read
+    of graph state.
+    """
+    results: dict[str, dict[str, Any]] = {}
+    for check in failed_checks:
+        if not check.get("id") or not check.get("veto", True):
+            continue
+        results[str(check["id"])] = {
+            "answered": True,
+            "failure_probability": 1.0,
+            "criterion": str(check.get("criterion") or ""),
+            "reason": str(check.get("judgment_evidence") or ""),
+            "evidence": str(check.get("evidence") or ""),
+        }
+    return results
+
+
+def failed_check_reasons(
+    checks: Sequence[ReviewCheck],
+    check_results: Mapping[str, Mapping[str, Any]],
+    *,
+    threshold: float,
+) -> list[str]:
+    """Render the retrieval checks that fired as concise reason lines.
+
+    A check contributes only when it is the kind that requests retrieval,
+    its result is answered, its failure probability reaches ``threshold``
+    and its result carries a reason.  A caller that supplies probabilities
+    alone therefore gets no lines rather than a bare identifier list.
+    """
+    reasons: list[str] = []
+    for check in checks:
+        if not check.retrieval or check.id not in check_results:
+            continue
+        result = check_results[check.id]
+        if not result.get("answered", False):
+            continue
+        if float(result.get("failure_probability", 0.0)) < threshold:
+            continue
+        detail = str(result.get("reason") or result.get("criterion") or "").strip()
+        if not detail:
+            continue
+        evidence = str(result.get("evidence") or "").strip()
+        line = f"- {check.id}: {detail}"
+        if evidence:
+            line = f"{line} (evidence: {evidence})"
+        reasons.append(line[:_EXCERPT_MAX_CHARS])
+        if len(reasons) == _EXCERPT_MAX_CHECKS:
+            break
+    return reasons
+
+
 def should_trigger_fanout(
     *,
     checks: Sequence[ReviewCheck] = (),
@@ -65,14 +149,16 @@ def should_trigger_fanout(
 
     The trigger fires when the maximum failure probability over the
     answered retrieval checks reaches ``check_threshold``.  Comment text
-    is never read, so the returned ``excerpt`` is always the empty
-    string; it is returned so the call site keeps one shape, and callers
-    must not read it as review signal.
+    is never read.  ``excerpt`` names the checks that fired and the reason
+    each was decided against, so the proposer is told why it was asked;
+    it is empty when the trigger does not fire.
     """
-    fire = should_trigger_fanout_from_checks(
-        checks, check_results or {}, threshold=check_threshold
-    )
-    return fire, ""
+    results = check_results or {}
+    fire = should_trigger_fanout_from_checks(checks, results, threshold=check_threshold)
+    if not fire:
+        return False, ""
+    reasons = failed_check_reasons(checks, results, threshold=check_threshold)
+    return True, "\n".join(reasons)
 
 
 def assign_arm(
