@@ -8,6 +8,11 @@
       "kind": "exempted",
       "reason": "the finding carries no text",
       "recorded_at": "2026-10-26T21:25:44.684775+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "the finding carries no text",
+      "recorded_at": "2026-10-26T21:25:52.403794+00:00"
     }
   },
   "findings": [
