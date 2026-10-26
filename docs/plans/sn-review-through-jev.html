@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="290">
+<meta name="plan-version" content="291">
 <meta name="plan-modified" content="2026-10-26">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -1193,6 +1193,9 @@ without re-deriving it is visible.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261026T203855156887-srtj-fanout-excerpt-retire" data-who="reckon-build" data-when="2026-10-26T21:26:14Z">
     <div class="r-comment-body"><p>srtj-fanout-excerpt-retire — the fan-out proposer prompt carries the named checks the route vetoed, with reason and evidence, and never an answered-and-passing check; the same veto filter also stops a passing check firing fan-out, a defect that predates this node; gate base 18daf78f5 111 passed EXIT=0, head 966864ba8 117 passed EXIT=0, zero added failures; declared control 3 failed 3 passed EXIT=1, veto-filter control 2 failed 4 passed EXIT=1; record at docs/evidence/fragments/sn-review-through-jev/srtj-fanout-excerpt-retire.html</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-s6-workers-split-done" data-who="reckon-build" data-when="2026-10-26T21:45:00Z">
+    <div class="r-comment-body"><p>The <code>workers.py</code> split is complete. Step 19 (<code>worker_review_names</code>, merge <code>18daf78f5</code>, review 110) and steps 20 to 23, the four documentation workers (merge <code>a8ae89a98</code>, review 112), landed with zero added failures. <code>workers.py</code> went from 481 KB to 67 KB, and <code>graph_ops.py</code> from 821 KB to 167 KB. Each now holds its entrypoint or composition root, the wiring, and transitional forwarders.</p><p>The fan-out proposer prompt now names the checks the route vetoed, with reason and evidence, in place of an always-empty slot (merge <code>7e1310ded</code>, review 108). The same filter fixed an older defect, where a check that passed could fire fan-out.</p><p>Running:</p><ul><li><code>srtj-graph-store-structure</code> applies the split's folded structural findings: an explicit service object, an import-boundary test, valid Cypher in its owning module, logger names, defaults, worker hygiene, and naming-audit coverage.</li><li><code>srtj-graph-tier-parallel-fixtures</code> moves 30 test modules onto the shared disposable-Neo4j fixture, so the graph tier runs under xdist. Closing their local guards exposes tests that used to skip. At least one now fails in <code>signed_manifest.py</code> (<code>receipt cohort is incomplete</code>), and those go to a product repair node. Deleting the forwarders follows both.</li></ul></div>
 </div>
 </section>
 </main>
