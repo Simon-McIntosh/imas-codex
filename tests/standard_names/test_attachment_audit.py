@@ -441,8 +441,19 @@ def test_as_dict_reports_name_level_defects() -> None:
 
 
 @pytest.fixture()
-def _gc(disposable_neo4j_uri: str):
+def _gc(disposable_neo4j_uri: str, monkeypatch):
     from imas_codex.graph.client import GraphClient
+    from imas_codex.standard_names import dd_resolutions
+    from tests.standard_names.conftest import SyntheticDDResolutionReader
+    from tests.standard_names.dd_resolution_test_data import (
+        SYNTHETIC_GRAPH_RESOLUTION_ROWS,
+    )
+
+    monkeypatch.setattr(
+        dd_resolutions,
+        "dd_resolution_graph_reader",
+        lambda: SyntheticDDResolutionReader(SYNTHETIC_GRAPH_RESOLUTION_ROWS),
+    )
 
     client = GraphClient(
         uri=disposable_neo4j_uri,

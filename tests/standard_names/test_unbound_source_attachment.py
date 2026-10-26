@@ -122,7 +122,18 @@ def _write_authority(path: Path) -> tuple[str, str]:
 
 
 @pytest.fixture
-def client(disposable_neo4j: tuple[str, str]) -> Iterator[GraphClient]:
+def client(disposable_neo4j: tuple[str, str], monkeypatch) -> Iterator[GraphClient]:
+    from imas_codex.standard_names import dd_resolutions
+    from tests.standard_names.conftest import SyntheticDDResolutionReader
+    from tests.standard_names.dd_resolution_test_data import (
+        SYNTHETIC_GRAPH_RESOLUTION_ROWS,
+    )
+
+    monkeypatch.setattr(
+        dd_resolutions,
+        "dd_resolution_graph_reader",
+        lambda: SyntheticDDResolutionReader(SYNTHETIC_GRAPH_RESOLUTION_ROWS),
+    )
     uri, password = disposable_neo4j
     graph = GraphClient(
         uri=uri,
