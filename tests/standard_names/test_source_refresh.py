@@ -579,6 +579,18 @@ def test_disposable_session_setup_preserves_other_test_endpoint(request):
     assert {key: os.environ.get(key) for key in keys} == before
 
 
+@pytest.mark.graph
+def test_bare_graph_client_uses_disposable_endpoint(request):
+    """The graph marker alone routes a bare client to the empty instance."""
+    from tests.standard_names.conftest import project_graph_uris
+
+    expected = request.getfixturevalue("disposable_neo4j_uri")
+    with GraphClient() as client:
+        assert client.uri.rstrip("/") == expected.rstrip("/")
+        assert client.uri.rstrip("/") not in project_graph_uris()
+        assert client.query("RETURN 1 AS reachable")[0]["reachable"] == 1
+
+
 @pytest.fixture
 def graph(disposable_neo4j_uri: str, monkeypatch) -> Iterator[GraphClient]:
     # An empty instance carries no DD-resolution authority, and the drift scan

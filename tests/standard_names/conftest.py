@@ -29,7 +29,10 @@ import pytest
 def pytest_collection_modifyitems(items):
     """Give shared-graph startup its own deadline outside test call timeouts."""
     for item in items:
-        if "disposable_neo4j_uri" not in item.fixturenames:
+        if (
+            "disposable_neo4j_uri" not in item.fixturenames
+            and item.get_closest_marker("graph") is None
+        ):
             continue
         existing = item.get_closest_marker("timeout")
         args = (
@@ -532,8 +535,8 @@ def disposable_neo4j_uri() -> Iterator[str]:
     project graph's resolved address and the run fails if they are the same, so
     no test here can write to the shared live graph.
 
-    A function fixture below points graph clients at this endpoint only while
-    a test using it runs. Other tests in the worker retain the project URI.
+    Autouse fixtures below point graph clients at this endpoint for graph-marked
+    tests and explicit users. Other tests in the worker retain their own URI.
     """
     configured = os.environ.get("IMAS_CODEX_TEST_NEO4J_URI")
     directory = process = log = None
@@ -613,10 +616,46 @@ def disposable_neo4j_uri() -> Iterator[str]:
             )
 
 
+@pytest.fixture(scope="module", autouse=True)
+def _module_disposable_graph_environment(
+    request: pytest.FixtureRequest,
+) -> Iterator[None]:
+    """Bind graph modules before their module-scoped graph clients are built."""
+    graph_items = any(
+        item.get_closest_marker("graph") is not None and item.path == request.node.path
+        for item in request.session.items
+    )
+    if not graph_items:
+        yield
+        return
+
+    uri = request.getfixturevalue("disposable_neo4j_uri")
+    previous = {key: os.environ.get(key) for key in _DISPOSABLE_ENV}
+    os.environ.update(
+        {
+            "NEO4J_URI": uri,
+            "NEO4J_PASSWORD": "",
+            "IMAS_CODEX_TEST_NEO4J_URI": uri,
+            "IMAS_CODEX_TEST_NEO4J_EPHEMERAL": "1",
+        }
+    )
+    try:
+        yield
+    finally:
+        for key, value in previous.items():
+            if value is None:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = value
+
+
 @pytest.fixture(autouse=True)
 def _disposable_graph_environment(request: pytest.FixtureRequest) -> Iterator[None]:
-    """Keep the disposable URI out of tests that do not request its fixture."""
-    if "disposable_neo4j_uri" not in request.fixturenames:
+    """Bind graph-marked tests and explicit fixture users to the empty graph."""
+    if (
+        "disposable_neo4j_uri" not in request.fixturenames
+        and request.node.get_closest_marker("graph") is None
+    ):
         yield
         return
 
