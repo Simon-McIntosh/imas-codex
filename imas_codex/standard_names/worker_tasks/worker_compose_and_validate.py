@@ -4,10 +4,13 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 import random
 import re as _re
 from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from imas_codex.standard_names.budget import BudgetLease
@@ -26,9 +29,7 @@ async def compose_worker(
     """
     from imas_codex.cli.logging import WorkerLogAdapter
 
-    wlog = WorkerLogAdapter(
-        _worker_dependency("logger"), worker_name="sn_compose_worker"
-    )
+    wlog = WorkerLogAdapter(logger, worker_name="sn_compose_worker")
 
     total_items = sum(len(b.items) for b in state.extracted)
 
@@ -366,7 +367,7 @@ async def compose_worker(
                 )
                 _exc_str = str(compose_exc)
                 if "not a registered" in _exc_str:
-                    _worker_dependency("logger").warning(
+                    logger.warning(
                         "Compose: vocab gap validation error — marking "
                         "%d sources as vocab_gap: %s",
                         len(batch),
@@ -1377,9 +1378,7 @@ def validate_name_candidate(
             if audit_issues:
                 issues.extend(audit_issues)
         except Exception:
-            _worker_dependency("logger").debug(
-                "validate_name_candidate: audits failed for %r", name
-            )
+            logger.debug("validate_name_candidate: audits failed for %r", name)
 
         if entry.get("_grammar_retry_exhausted"):
             issues.append("audit:grammar_retry_exhausted")
@@ -1450,7 +1449,7 @@ async def drain_validation_backlog(
             marked = await asyncio.to_thread(mark_names_validated, token, results)
             totals["validated"] += marked
         except Exception:
-            _worker_dependency("logger").warning(
+            logger.warning(
                 "drain_validation_backlog: batch failed — releasing claims",
                 exc_info=True,
             )
@@ -1573,7 +1572,7 @@ async def drain_validation_for_ids(
             marked = await asyncio.to_thread(mark_names_validated, token, results)
             totals["validated"] += marked
         except Exception:
-            _worker_dependency("logger").warning(
+            logger.warning(
                 "drain_validation_for_ids: batch failed — releasing claims",
                 exc_info=True,
             )
@@ -1593,9 +1592,7 @@ async def validate_worker(
     """
     from imas_codex.cli.logging import WorkerLogAdapter
 
-    wlog = WorkerLogAdapter(
-        _worker_dependency("logger"), worker_name="sn_validate_worker"
-    )
+    wlog = WorkerLogAdapter(logger, worker_name="sn_validate_worker")
 
     # Initialize finalize progress (3 steps: validate, consolidate, persist)
     state.finalize_stats.total = 3
@@ -1750,9 +1747,7 @@ async def consolidate_worker(
     """
     from imas_codex.cli.logging import WorkerLogAdapter
 
-    wlog = WorkerLogAdapter(
-        _worker_dependency("logger"), worker_name="sn_consolidate_worker"
-    )
+    wlog = WorkerLogAdapter(logger, worker_name="sn_consolidate_worker")
 
     state.finalize_stats.status_text = "consolidating…"
 
@@ -1841,9 +1836,7 @@ async def persist_worker(
     """
     from imas_codex.cli.logging import WorkerLogAdapter
 
-    wlog = WorkerLogAdapter(
-        _worker_dependency("logger"), worker_name="sn_persist_worker"
-    )
+    wlog = WorkerLogAdapter(logger, worker_name="sn_persist_worker")
 
     state.finalize_stats.status_text = "embedding…"
 

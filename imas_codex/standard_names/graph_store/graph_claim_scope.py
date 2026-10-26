@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 from imas_codex.discovery.base.claims import retry_on_deadlock
 from imas_codex.graph.models import SNRunStatus
 
 from .graph_foundation import _CLAIM_TIMEOUT_SECONDS
+
+logger = logging.getLogger(__name__)
 
 
 def query_pipeline_buckets(
@@ -228,7 +231,7 @@ def get_extraction_candidates_dd(
 
         batch = resolve_dd_rows(results, dd_version=get_dd_version())
         if batch.refusals:
-            services.logger.warning(
+            logger.warning(
                 "Extraction candidates omitted %d changed DD fields: %s",
                 len(batch.refusals),
                 ", ".join(
@@ -1163,7 +1166,7 @@ def finalize_manifest_drain_scope(
         except Exception:
             if primary_error is None:
                 raise
-            services.logger.exception(
+            logger.exception(
                 "bounded drain scope clear failed while preserving primary error"
             )
 

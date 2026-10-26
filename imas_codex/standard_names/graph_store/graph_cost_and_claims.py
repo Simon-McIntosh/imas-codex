@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from datetime import UTC
 from typing import Any
 
@@ -10,13 +11,19 @@ from imas_codex.standard_names.defaults import (
     DEFAULT_MIN_SCORE,
 )
 
-from .graph_audits import _PHASE_TO_STANDARD_NAME_COST_FIELD
-from .graph_foundation import _CLAIM_TIMEOUT_SECONDS
+from .graph_foundation import (
+    _CLAIM_TIMEOUT_SECONDS,
+    _PHASE_TO_POOL,
+    _PHASE_TO_STANDARD_NAME_COST_FIELD,
+    DEFAULT_POOL_BATCH_SIZE,
+)
+
+logger = logging.getLogger(__name__)
 
 
 def _normalize_pool(phase: str, *, services: Any) -> str:
     """Map a raw phase string to a canonical pool name."""
-    return services._PHASE_TO_POOL.get(phase, phase)
+    return _PHASE_TO_POOL.get(phase, phase)
 
 
 @retry_on_deadlock()
@@ -59,7 +66,7 @@ def record_llm_cost(
         model == "test-model"
         and services.os.environ.get("IMAS_CODEX_ALLOW_TEST_MODEL") != "1"
     ):
-        services.logger.warning(
+        logger.warning(
             "record_llm_cost: refusing model='test-model' (run=%s phase=%s) — fixture leak guard. Mock the write or set IMAS_CODEX_ALLOW_TEST_MODEL=1 against a test-scoped graph profile (never `codex`).",
             run_id,
             phase,
@@ -92,7 +99,7 @@ def record_llm_cost(
         from neo4j.exceptions import ConstraintError
 
         if isinstance(exc, ConstraintError):
-            services.logger.debug(
+            logger.debug(
                 "record_llm_cost: duplicate id=%s (idempotent), skipping", spend_id
             )
         else:
@@ -200,8 +207,6 @@ def update_sn_per_phase_costs(run_id: str, *, services: Any) -> int:
                 updated_ids.add(sn_id)
     return len(updated_ids)
 
-
-DEFAULT_POOL_BATCH_SIZE = 25
 
 _PIPELINE_FROZEN_NAME_STAGES = ("approved", "contested")
 
@@ -389,9 +394,7 @@ def _claim_sn_atomic(
                 if tx.closed is False:
                     tx.close()
                 raise
-    services.logger.debug(
-        "_claim_sn_atomic: claimed %d (token=%s)", len(items), token[:8]
-    )
+    logger.debug("_claim_sn_atomic: claimed %d (token=%s)", len(items), token[:8])
     return items
 
 
@@ -544,7 +547,7 @@ def claim_generate_name_batch(
                     tx.close()
                 raise
     items = services._verify_source_claim_winners(items)
-    services.logger.debug(
+    logger.debug(
         "claim_generate_name_batch: claimed %d (token=%s)", len(items), token[:8]
     )
     return items

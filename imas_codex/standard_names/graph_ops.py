@@ -72,10 +72,10 @@ class _GraphServices:
         return globals()[name]
 
 
-_graph_foundation.services = _GraphServices()
+_graph_foundation.wire_services(_GraphServices())
 
 
-logger = import_module(".graph_store.graph_foundation", __package__).logger
+logger = logging.getLogger(__name__)
 
 
 _STABLE_BINDING_NAME_STAGES = import_module(
@@ -233,7 +233,7 @@ def query_pipeline_buckets(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_scope
 
     return graph_claim_scope.query_pipeline_buckets(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -242,7 +242,7 @@ def query_historical_cpi(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_scope
 
     return graph_claim_scope.query_historical_cpi(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -256,7 +256,7 @@ def get_extraction_candidates_dd(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_scope
 
     return graph_claim_scope.get_extraction_candidates_dd(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -265,7 +265,7 @@ def get_extraction_candidates_signals(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_scope
 
     return graph_claim_scope.get_extraction_candidates_signals(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -279,7 +279,7 @@ def get_existing_standard_names(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_scope
 
     return graph_claim_scope.get_existing_standard_names(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -288,7 +288,7 @@ def get_named_source_ids(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_scope
 
     return graph_claim_scope.get_named_source_ids(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -297,7 +297,7 @@ def partition_focus_by_accepted(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_scope
 
     return graph_claim_scope.partition_focus_by_accepted(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -311,7 +311,7 @@ def canonicalize_manifest_drain_paths(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_scope
 
     return graph_claim_scope.canonicalize_manifest_drain_paths(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -320,7 +320,7 @@ def classify_manifest_drain_item(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_scope
 
     return graph_claim_scope.classify_manifest_drain_item(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -334,7 +334,7 @@ def _resolved_manifest_drain_plan(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_scope
 
     return graph_claim_scope._resolved_manifest_drain_plan(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -343,7 +343,7 @@ def build_manifest_drain_plan(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_scope
 
     return graph_claim_scope.build_manifest_drain_plan(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -357,7 +357,7 @@ def _manifest_plan_fingerprint(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_scope
 
     return graph_claim_scope._manifest_plan_fingerprint(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -366,7 +366,7 @@ def _lock_manifest_drain_authority(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_scope
 
     return graph_claim_scope._lock_manifest_drain_authority(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -375,7 +375,7 @@ def claim_manifest_drain_scope(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_scope
 
     return graph_claim_scope.claim_manifest_drain_scope(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -384,7 +384,7 @@ def prepare_manifest_drain_scope(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_scope
 
     return graph_claim_scope.prepare_manifest_drain_scope(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -393,7 +393,7 @@ def clear_manifest_drain_scope(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_scope
 
     return graph_claim_scope.clear_manifest_drain_scope(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -402,7 +402,7 @@ def release_manifest_drain_claims(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_scope
 
     return graph_claim_scope.release_manifest_drain_claims(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -411,7 +411,7 @@ def finalize_manifest_drain_scope(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_scope
 
     return graph_claim_scope.finalize_manifest_drain_scope(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -420,7 +420,7 @@ def scope_focus_names(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_scope
 
     return graph_claim_scope.scope_focus_names(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -478,7 +478,7 @@ def _claim_disposition(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_scope
 
     return graph_claim_scope._claim_disposition(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -487,7 +487,7 @@ def _claimed_run_ids(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_scope
 
     return graph_claim_scope._claimed_run_ids(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -496,7 +496,7 @@ def _collect_run_statuses(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_scope
 
     return graph_claim_scope._collect_run_statuses(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -505,7 +505,7 @@ def _exact_name_scope_refusals(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_scope
 
     return graph_claim_scope._exact_name_scope_refusals(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -514,7 +514,7 @@ def scope_exact_standard_names(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_scope
 
     return graph_claim_scope.scope_exact_standard_names(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -523,7 +523,7 @@ def get_source_name_mapping(*args: Any, **kwargs: Any):
     from .graph_store import graph_lineage
 
     return graph_lineage.get_source_name_mapping(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -532,7 +532,7 @@ def _get_rich_source_name_mapping(*args: Any, **kwargs: Any):
     from .graph_store import graph_lineage
 
     return graph_lineage._get_rich_source_name_mapping(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -546,7 +546,7 @@ def fetch_low_score_sources(*args: Any, **kwargs: Any):
     from .graph_store import graph_lineage
 
     return graph_lineage.fetch_low_score_sources(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -555,7 +555,7 @@ def fetch_review_feedback_for_sources(*args: Any, **kwargs: Any):
     from .graph_store import graph_lineage
 
     return graph_lineage.fetch_review_feedback_for_sources(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -564,7 +564,7 @@ def fetch_reviewer_history_for_sources(*args: Any, **kwargs: Any):
     from .graph_store import graph_lineage
 
     return graph_lineage.fetch_reviewer_history_for_sources(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -573,7 +573,7 @@ def fetch_docs_review_feedback_for_standard_names(*args: Any, **kwargs: Any):
     from .graph_store import graph_lineage
 
     return graph_lineage.fetch_docs_review_feedback_for_standard_names(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -587,7 +587,7 @@ def fetch_docs_review_feedback_for_sns(*args: Any, **kwargs: Any):
     from .graph_store import graph_lineage
 
     return graph_lineage.fetch_docs_review_feedback_for_sns(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -596,7 +596,7 @@ def _filter_admissible_parents(*args: Any, **kwargs: Any):
     from .graph_store import graph_lineage
 
     return graph_lineage._filter_admissible_parents(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -605,7 +605,7 @@ def _emit_magnitude_of_edges(*args: Any, **kwargs: Any):
     from .graph_store import graph_lineage
 
     return graph_lineage._emit_magnitude_of_edges(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -614,7 +614,7 @@ def _bootstrap_missing_derived_parent_targets(*args: Any, **kwargs: Any):
     from .graph_store import graph_lineage
 
     return graph_lineage._bootstrap_missing_derived_parent_targets(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -623,7 +623,7 @@ def _write_standard_name_edges(*args: Any, **kwargs: Any):
     from .graph_store import graph_lineage
 
     return graph_lineage._write_standard_name_edges(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -641,7 +641,7 @@ def _clear_superseded_child_derived_parent_edges(*args: Any, **kwargs: Any):
     from .graph_store import graph_lineage
 
     return graph_lineage._clear_superseded_child_derived_parent_edges(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -650,7 +650,7 @@ def rederive_structural_edges(*args: Any, **kwargs: Any):
     from .graph_store import graph_lineage
 
     return graph_lineage.rederive_structural_edges(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -659,7 +659,7 @@ def _rewire_has_parent_off_superseded(*args: Any, **kwargs: Any):
     from .graph_store import graph_lineage
 
     return graph_lineage._rewire_has_parent_off_superseded(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -668,7 +668,7 @@ def _parse_parent_grammar(*args: Any, **kwargs: Any):
     from .graph_store import graph_lineage
 
     return graph_lineage._parse_parent_grammar(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -677,7 +677,7 @@ def _query_seedable_derived_parents(*args: Any, **kwargs: Any):
     from .graph_store import graph_lineage
 
     return graph_lineage._query_seedable_derived_parents(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -686,7 +686,7 @@ def _query_legacy_repairable_derived_parents(*args: Any, **kwargs: Any):
     from .graph_store import graph_lineage
 
     return graph_lineage._query_legacy_repairable_derived_parents(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -695,7 +695,7 @@ def _query_derived_parents_for_admission_cleanup(*args: Any, **kwargs: Any):
     from .graph_store import graph_lineage
 
     return graph_lineage._query_derived_parents_for_admission_cleanup(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -704,7 +704,7 @@ def _delete_derived_parent_nodes(*args: Any, **kwargs: Any):
     from .graph_store import graph_lineage
 
     return graph_lineage._delete_derived_parent_nodes(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -713,7 +713,7 @@ def sweep_orphaned_docs_revisions(*args: Any, **kwargs: Any):
     from .graph_store import graph_lineage
 
     return graph_lineage.sweep_orphaned_docs_revisions(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -722,7 +722,7 @@ def _derived_parent_source_metadata(*args: Any, **kwargs: Any):
     from .graph_store import graph_lineage
 
     return graph_lineage._derived_parent_source_metadata(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -731,7 +731,7 @@ def _validate_derived_parent_identity(*args: Any, **kwargs: Any):
     from .graph_store import graph_lineage
 
     return graph_lineage._validate_derived_parent_identity(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -740,7 +740,7 @@ def _eligible_derived_parent_unit_children(*args: Any, **kwargs: Any):
     from .graph_store import graph_lineage
 
     return graph_lineage._eligible_derived_parent_unit_children(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -749,7 +749,7 @@ def _materialize_derived_parent_rows(*args: Any, **kwargs: Any):
     from .graph_store import graph_lineage
 
     return graph_lineage._materialize_derived_parent_rows(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -763,7 +763,7 @@ def _materialize_derived_parent_rows_batched(*args: Any, **kwargs: Any):
     from .graph_store import graph_lineage
 
     return graph_lineage._materialize_derived_parent_rows_batched(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -781,7 +781,7 @@ def stamp_standard_name_units(*args: Any, **kwargs: Any):
     from .graph_store import graph_lineage
 
     return graph_lineage.stamp_standard_name_units(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -790,7 +790,7 @@ def seed_parent_sources(*args: Any, **kwargs: Any):
     from .graph_store import graph_lineage
 
     return graph_lineage.seed_parent_sources(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -799,7 +799,7 @@ def normalize_derived_parent_lifecycle(*args: Any, **kwargs: Any):
     from .graph_store import graph_lineage
 
     return graph_lineage.normalize_derived_parent_lifecycle(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -831,7 +831,7 @@ def _canonicalize_lifecycleless_manifest_value(*args: Any, **kwargs: Any):
     from .graph_store import graph_lineage
 
     return graph_lineage._canonicalize_lifecycleless_manifest_value(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -840,7 +840,7 @@ def _derived_parent_unit_from_eligible_children(*args: Any, **kwargs: Any):
     from .graph_store import graph_lineage
 
     return graph_lineage._derived_parent_unit_from_eligible_children(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -849,7 +849,7 @@ def _spurious_stub_binding_authority(*args: Any, **kwargs: Any):
     from .graph_store import graph_lineage
 
     return graph_lineage._spurious_stub_binding_authority(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -858,7 +858,7 @@ def _partition_lifecycleless_stub_rows(*args: Any, **kwargs: Any):
     from .graph_store import graph_lineage
 
     return graph_lineage._partition_lifecycleless_stub_rows(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -867,7 +867,7 @@ def _lifecycleless_stub_manifest(*args: Any, **kwargs: Any):
     from .graph_store import graph_lineage
 
     return graph_lineage._lifecycleless_stub_manifest(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -876,7 +876,7 @@ def _reconcile_spurious_stub_source_scalars(*args: Any, **kwargs: Any):
     from .graph_store import graph_lineage
 
     return graph_lineage._reconcile_spurious_stub_source_scalars(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -917,7 +917,7 @@ def _query_skeleton_placeholders_for_cleanup(*args: Any, **kwargs: Any):
     from .graph_store import graph_lineage
 
     return graph_lineage._query_skeleton_placeholders_for_cleanup(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -930,7 +930,7 @@ def write_standard_names(*args: Any, **kwargs: Any):
     from .graph_store import graph_catalog
 
     return graph_catalog.write_standard_names(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -939,7 +939,7 @@ def write_reviews(*args: Any, **kwargs: Any):
     from .graph_store import graph_catalog
 
     return graph_catalog.write_reviews(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -948,7 +948,7 @@ def update_review_aggregates(*args: Any, **kwargs: Any):
     from .graph_store import graph_catalog
 
     return graph_catalog.update_review_aggregates(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -957,7 +957,7 @@ def _review_tier(*args: Any, **kwargs: Any):
     from .graph_store import graph_catalog
 
     return graph_catalog._review_tier(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -966,7 +966,7 @@ def plan_review_dimension_void(*args: Any, **kwargs: Any):
     from .graph_store import graph_catalog
 
     return graph_catalog.plan_review_dimension_void(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -975,7 +975,7 @@ def void_review_dimension(*args: Any, **kwargs: Any):
     from .graph_store import graph_catalog
 
     return graph_catalog.void_review_dimension(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -984,7 +984,7 @@ def _winning_review_resolution_methods(*args: Any, **kwargs: Any):
     from .graph_store import graph_catalog
 
     return graph_catalog._winning_review_resolution_methods(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1003,7 +1003,7 @@ def _non_winning_review_resolution_methods(*args: Any, **kwargs: Any):
     from .graph_store import graph_catalog
 
     return graph_catalog._non_winning_review_resolution_methods(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1012,7 +1012,7 @@ def docs_review_eligibility_params(*args: Any, **kwargs: Any):
     from .graph_store import graph_catalog
 
     return graph_catalog.docs_review_eligibility_params(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1021,7 +1021,7 @@ def _docs_review_winner_query_body(*args: Any, **kwargs: Any):
     from .graph_store import graph_catalog
 
     return graph_catalog._docs_review_winner_query_body(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1030,7 +1030,7 @@ def docs_review_eligibility_where(*args: Any, **kwargs: Any):
     from .graph_store import graph_catalog
 
     return graph_catalog.docs_review_eligibility_where(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1039,7 +1039,7 @@ def property_coverage(*args: Any, **kwargs: Any):
     from .graph_store import graph_catalog
 
     return graph_catalog.property_coverage(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1048,7 +1048,7 @@ def docs_review_property_coverage(*args: Any, **kwargs: Any):
     from .graph_store import graph_catalog
 
     return graph_catalog.docs_review_property_coverage(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1057,7 +1057,7 @@ def write_name_review_results(*args: Any, **kwargs: Any):
     from .graph_store import graph_catalog
 
     return graph_catalog.write_name_review_results(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1066,7 +1066,7 @@ def write_docs_review_results(*args: Any, **kwargs: Any):
     from .graph_store import graph_catalog
 
     return graph_catalog.write_docs_review_results(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1075,7 +1075,7 @@ def _resolve_grammar_token_version(*args: Any, **kwargs: Any):
     from .graph_store import graph_catalog
 
     return graph_catalog._resolve_grammar_token_version(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1084,7 +1084,7 @@ def _coerce_segment_value(*args: Any, **kwargs: Any):
     from .graph_store import graph_catalog
 
     return graph_catalog._coerce_segment_value(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1093,7 +1093,7 @@ def _resolve_synced_segments(*args: Any, **kwargs: Any):
     from .graph_store import graph_catalog
 
     return graph_catalog._resolve_synced_segments(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1102,7 +1102,7 @@ def _write_grammar_decomposition(*args: Any, **kwargs: Any):
     from .graph_store import graph_catalog
 
     return graph_catalog._write_grammar_decomposition(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1111,7 +1111,7 @@ def _write_segment_edges(*args: Any, **kwargs: Any):
     from .graph_store import graph_catalog
 
     return graph_catalog._write_segment_edges(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1120,7 +1120,7 @@ def persist_generated_name_winners(*args: Any, **kwargs: Any):
     from .graph_store import graph_catalog
 
     return graph_catalog.persist_generated_name_winners(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1129,7 +1129,7 @@ def persist_generated_name_batch(*args: Any, **kwargs: Any):
     from .graph_store import graph_catalog
 
     return graph_catalog.persist_generated_name_batch(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1138,7 +1138,7 @@ def _backfill_cluster_from_sources(*args: Any, **kwargs: Any):
     from .graph_store import graph_catalog
 
     return graph_catalog._backfill_cluster_from_sources(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1147,7 +1147,7 @@ def _finalize_generated_name_stage(*args: Any, **kwargs: Any):
     from .graph_store import graph_catalog
 
     return graph_catalog._finalize_generated_name_stage(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1206,7 +1206,7 @@ def write_vocab_gaps(*args: Any, **kwargs: Any):
     from .graph_store import graph_catalog_reset
 
     return graph_catalog_reset.write_vocab_gaps(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1215,7 +1215,7 @@ def fetch_vocab_gap_adjudications(*args: Any, **kwargs: Any):
     from .graph_store import graph_catalog_reset
 
     return graph_catalog_reset.fetch_vocab_gap_adjudications(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1240,7 +1240,7 @@ def claim_names_for_validation(*args: Any, **kwargs: Any):
     from .graph_store import graph_catalog_reset
 
     return graph_catalog_reset.claim_names_for_validation(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1249,7 +1249,7 @@ def mark_names_validated(*args: Any, **kwargs: Any):
     from .graph_store import graph_catalog_reset
 
     return graph_catalog_reset.mark_names_validated(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1258,7 +1258,7 @@ def release_validation_claims(*args: Any, **kwargs: Any):
     from .graph_store import graph_catalog_reset
 
     return graph_catalog_reset.release_validation_claims(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1267,7 +1267,7 @@ def claim_names_for_embedding(*args: Any, **kwargs: Any):
     from .graph_store import graph_catalog_reset
 
     return graph_catalog_reset.claim_names_for_embedding(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1276,7 +1276,7 @@ def mark_names_embedded(*args: Any, **kwargs: Any):
     from .graph_store import graph_catalog_reset
 
     return graph_catalog_reset.mark_names_embedded(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1285,7 +1285,7 @@ def release_embedding_claims(*args: Any, **kwargs: Any):
     from .graph_store import graph_catalog_reset
 
     return graph_catalog_reset.release_embedding_claims(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1294,7 +1294,7 @@ def get_validated_names(*args: Any, **kwargs: Any):
     from .graph_store import graph_catalog_reset
 
     return graph_catalog_reset.get_validated_names(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1303,7 +1303,7 @@ def mark_names_consolidated(*args: Any, **kwargs: Any):
     from .graph_store import graph_catalog_reset
 
     return graph_catalog_reset.mark_names_consolidated(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1312,7 +1312,7 @@ def reset_standard_names(*args: Any, **kwargs: Any):
     from .graph_store import graph_catalog_reset
 
     return graph_catalog_reset.reset_standard_names(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1321,7 +1321,7 @@ def clear_standard_names(*args: Any, **kwargs: Any):
     from .graph_store import graph_catalog_reset
 
     return graph_catalog_reset.clear_standard_names(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1330,7 +1330,7 @@ def clear_sn_subsystem(*args: Any, **kwargs: Any):
     from .graph_store import graph_catalog_reset
 
     return graph_catalog_reset.clear_sn_subsystem(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1348,7 +1348,7 @@ def claim_unresolved_links(*args: Any, **kwargs: Any):
     from .graph_store import graph_doc_links
 
     return graph_doc_links.claim_unresolved_links(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1357,7 +1357,7 @@ def resolve_links_batch(*args: Any, **kwargs: Any):
     from .graph_store import graph_doc_links
 
     return graph_doc_links.resolve_links_batch(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1390,7 +1390,7 @@ def _sanitize_doc_text(*args: Any, **kwargs: Any):
     from .graph_store import graph_doc_links
 
     return graph_doc_links._sanitize_doc_text(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1410,7 +1410,7 @@ def _doc_link_mismatches(*args: Any, **kwargs: Any):
     from .graph_store import graph_doc_links
 
     return graph_doc_links._doc_link_mismatches(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1419,7 +1419,7 @@ def _normalize_bare_doc_links(*args: Any, **kwargs: Any):
     from .graph_store import graph_doc_links
 
     return graph_doc_links._normalize_bare_doc_links(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1428,7 +1428,7 @@ def resolve_doc_links(*args: Any, **kwargs: Any):
     from .graph_store import graph_doc_links
 
     return graph_doc_links.resolve_doc_links(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1454,9 +1454,7 @@ _CAP_PARKED_QUERY = import_module(
 _CAP_UNDISPOSED_QUERY = import_module(
     ".graph_store.graph_source_bindings", __package__
 )._CAP_UNDISPOSED_QUERY
-_CLAIM_VERIFY_SETTLE_SECONDS = import_module(
-    ".graph_store.graph_source_bindings", __package__
-)._CLAIM_VERIFY_SETTLE_SECONDS
+_CLAIM_VERIFY_SETTLE_SECONDS = _graph_foundation._CLAIM_VERIFY_SETTLE_SECONDS
 _COMPOSE_CAP_REASON = import_module(
     ".graph_store.graph_source_bindings", __package__
 )._COMPOSE_CAP_REASON
@@ -1482,7 +1480,7 @@ def write_enrichment_results(*args: Any, **kwargs: Any):
     from .graph_store import graph_source_bindings
 
     return graph_source_bindings.write_enrichment_results(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1491,7 +1489,7 @@ def _exact_dd_source_id(*args: Any, **kwargs: Any):
     from .graph_store import graph_source_bindings
 
     return graph_source_bindings._exact_dd_source_id(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1500,7 +1498,7 @@ def _source_compose_hint_decision(*args: Any, **kwargs: Any):
     from .graph_store import graph_source_bindings
 
     return graph_source_bindings._source_compose_hint_decision(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1509,7 +1507,7 @@ def set_source_compose_hint(*args: Any, **kwargs: Any):
     from .graph_store import graph_source_bindings
 
     return graph_source_bindings.set_source_compose_hint(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1518,7 +1516,7 @@ def _pin_dd_source_snapshots(*args: Any, **kwargs: Any):
     from .graph_store import graph_source_bindings
 
     return graph_source_bindings._pin_dd_source_snapshots(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1527,7 +1525,7 @@ def merge_standard_name_sources(*args: Any, **kwargs: Any):
     from .graph_store import graph_source_bindings
 
     return graph_source_bindings.merge_standard_name_sources(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1536,7 +1534,7 @@ def claim_standard_name_source_batch(*args: Any, **kwargs: Any):
     from .graph_store import graph_source_bindings
 
     return graph_source_bindings.claim_standard_name_source_batch(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1545,7 +1543,7 @@ def claim_explicit_standard_name_sources(*args: Any, **kwargs: Any):
     from .graph_store import graph_source_bindings
 
     return graph_source_bindings.claim_explicit_standard_name_sources(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1554,7 +1552,7 @@ def _complete_source_fences(*args: Any, **kwargs: Any):
     from .graph_store import graph_source_bindings
 
     return graph_source_bindings._complete_source_fences(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1563,7 +1561,7 @@ def _require_failure_reason(*args: Any, **kwargs: Any):
     from .graph_store import graph_source_bindings
 
     return graph_source_bindings._require_failure_reason(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1572,7 +1570,7 @@ def _guard_failed_source_reasons(*args: Any, **kwargs: Any):
     from .graph_store import graph_source_bindings
 
     return graph_source_bindings._guard_failed_source_reasons(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1581,7 +1579,7 @@ def _guard_existing_target_pairings(*args: Any, **kwargs: Any):
     from .graph_store import graph_source_bindings
 
     return graph_source_bindings._guard_existing_target_pairings(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1590,7 +1588,7 @@ def _lock_claimed_name_bindings(*args: Any, **kwargs: Any):
     from .graph_store import graph_source_bindings
 
     return graph_source_bindings._lock_claimed_name_bindings(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1599,7 +1597,7 @@ def persist_claimed_source_outcomes(*args: Any, **kwargs: Any):
     from .graph_store import graph_source_bindings
 
     return graph_source_bindings.persist_claimed_source_outcomes(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1608,7 +1606,7 @@ def persist_claimed_vocab_gaps(*args: Any, **kwargs: Any):
     from .graph_store import graph_source_bindings
 
     return graph_source_bindings.persist_claimed_vocab_gaps(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1617,7 +1615,7 @@ def persist_claimed_attachments(*args: Any, **kwargs: Any):
     from .graph_store import graph_source_bindings
 
     return graph_source_bindings.persist_claimed_attachments(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1626,7 +1624,7 @@ def stage_claimed_generated_candidates(*args: Any, **kwargs: Any):
     from .graph_store import graph_source_bindings
 
     return graph_source_bindings.stage_claimed_generated_candidates(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1635,7 +1633,7 @@ def fetch_claimed_source_metadata(*args: Any, **kwargs: Any):
     from .graph_store import graph_source_bindings
 
     return graph_source_bindings.fetch_claimed_source_metadata(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1644,7 +1642,7 @@ def mark_sources_composed(*args: Any, **kwargs: Any):
     from .graph_store import graph_source_bindings
 
     return graph_source_bindings.mark_sources_composed(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1653,7 +1651,7 @@ def mark_sources_attached(*args: Any, **kwargs: Any):
     from .graph_store import graph_source_bindings
 
     return graph_source_bindings.mark_sources_attached(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1662,7 +1660,7 @@ def classify_parked_source(*args: Any, **kwargs: Any):
     from .graph_store import graph_source_bindings
 
     return graph_source_bindings.classify_parked_source(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1671,7 +1669,7 @@ def mark_sources_failed(*args: Any, **kwargs: Any):
     from .graph_store import graph_source_bindings
 
     return graph_source_bindings.mark_sources_failed(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1680,7 +1678,7 @@ def record_parked_dispositions(*args: Any, **kwargs: Any):
     from .graph_store import graph_source_bindings
 
     return graph_source_bindings.record_parked_dispositions(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1689,7 +1687,7 @@ def disposition_parked_sources(*args: Any, **kwargs: Any):
     from .graph_store import graph_source_bindings
 
     return graph_source_bindings.disposition_parked_sources(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1698,7 +1696,7 @@ def record_dispositions_for_undisposed_parks(*args: Any, **kwargs: Any):
     from .graph_store import graph_source_bindings
 
     return graph_source_bindings.record_dispositions_for_undisposed_parks(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1707,7 +1705,7 @@ def census_parked_dispositions(*args: Any, **kwargs: Any):
     from .graph_store import graph_source_bindings
 
     return graph_source_bindings.census_parked_dispositions(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1716,7 +1714,7 @@ def retry_failed_sources(*args: Any, **kwargs: Any):
     from .graph_store import graph_source_bindings
 
     return graph_source_bindings.retry_failed_sources(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1725,7 +1723,7 @@ def retry_skipped_sources(*args: Any, **kwargs: Any):
     from .graph_store import graph_source_bindings
 
     return graph_source_bindings.retry_skipped_sources(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1734,7 +1732,7 @@ def _skipped_recovery_error(*args: Any, **kwargs: Any):
     from .graph_store import graph_source_bindings
 
     return graph_source_bindings._skipped_recovery_error(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1743,7 +1741,7 @@ def mark_source_skipped(*args: Any, **kwargs: Any):
     from .graph_store import graph_source_bindings
 
     return graph_source_bindings.mark_source_skipped(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1752,7 +1750,7 @@ def mark_sources_stale(*args: Any, **kwargs: Any):
     from .graph_store import graph_source_bindings
 
     return graph_source_bindings.mark_sources_stale(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1761,7 +1759,7 @@ def write_skipped_sources(*args: Any, **kwargs: Any):
     from .graph_store import graph_source_bindings
 
     return graph_source_bindings.write_skipped_sources(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1770,7 +1768,7 @@ def list_skipped_sources(*args: Any, **kwargs: Any):
     from .graph_store import graph_source_bindings
 
     return graph_source_bindings.list_skipped_sources(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1779,7 +1777,7 @@ def get_skipped_source_counts(*args: Any, **kwargs: Any):
     from .graph_store import graph_source_bindings
 
     return graph_source_bindings.get_skipped_source_counts(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1788,7 +1786,7 @@ def release_standard_name_source_claims(*args: Any, **kwargs: Any):
     from .graph_store import graph_source_bindings
 
     return graph_source_bindings.release_standard_name_source_claims(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1797,7 +1795,7 @@ def _record_persist_outcome(*args: Any, **kwargs: Any):
     from .graph_store import graph_source_bindings
 
     return graph_source_bindings._record_persist_outcome(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1806,7 +1804,7 @@ def persist_outcome_snapshot(*args: Any, **kwargs: Any):
     from .graph_store import graph_source_bindings
 
     return graph_source_bindings.persist_outcome_snapshot(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1815,7 +1813,7 @@ def reset_persist_outcomes(*args: Any, **kwargs: Any):
     from .graph_store import graph_source_bindings
 
     return graph_source_bindings.reset_persist_outcomes(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -1878,11 +1876,6 @@ PROMOTE_STRANDED_NAME_WHERE = import_module(
 """Canonical graph predicate for name-axis stranded promotion."""
 
 _graph_audits = import_module(".graph_store.graph_audits", __package__)
-_graph_audits.PROMOTE_STRANDED_DOCS_WHERE = (
-    _graph_audits.PROMOTE_STRANDED_DOCS_WHERE.replace(
-        "{docs_review_eligibility_where}", docs_review_eligibility_where()
-    )
-)
 PROMOTE_STRANDED_DOCS_WHERE = _graph_audits.PROMOTE_STRANDED_DOCS_WHERE
 
 """Canonical graph predicate for docs-axis stranded promotion."""
@@ -2239,7 +2232,7 @@ def backfill_sn_run_telemetry(*args: Any, **kwargs: Any):
 # LLMCost pool normalisation
 # ---------------------------------------------------------------------------
 # Maps the raw ``phase`` labels used by callers to six canonical pool names.
-_PHASE_TO_POOL = import_module(".graph_store.graph_audits", __package__)._PHASE_TO_POOL
+_PHASE_TO_POOL = _graph_foundation._PHASE_TO_POOL
 
 
 def _normalize_pool(*args: Any, **kwargs: Any):
@@ -2247,7 +2240,7 @@ def _normalize_pool(*args: Any, **kwargs: Any):
     from .graph_store import graph_cost_and_claims
 
     return graph_cost_and_claims._normalize_pool(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -2256,7 +2249,7 @@ def record_llm_cost(*args: Any, **kwargs: Any):
     from .graph_store import graph_cost_and_claims
 
     return graph_cost_and_claims.record_llm_cost(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -2265,7 +2258,7 @@ def aggregate_spend_for_run(*args: Any, **kwargs: Any):
     from .graph_store import graph_cost_and_claims
 
     return graph_cost_and_claims.aggregate_spend_for_run(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -2274,7 +2267,7 @@ def aggregate_spend_per_phase(*args: Any, **kwargs: Any):
     from .graph_store import graph_cost_and_claims
 
     return graph_cost_and_claims.aggregate_spend_per_phase(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -2283,7 +2276,7 @@ def aggregate_calls_per_phase(*args: Any, **kwargs: Any):
     from .graph_store import graph_cost_and_claims
 
     return graph_cost_and_claims.aggregate_calls_per_phase(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -2292,7 +2285,7 @@ def aggregate_spend_per_name(*args: Any, **kwargs: Any):
     from .graph_store import graph_cost_and_claims
 
     return graph_cost_and_claims.aggregate_spend_per_name(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -2301,7 +2294,7 @@ def update_sn_per_phase_costs(*args: Any, **kwargs: Any):
     from .graph_store import graph_cost_and_claims
 
     return graph_cost_and_claims.update_sn_per_phase_costs(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -2348,7 +2341,7 @@ def _claim_sn_atomic(*args: Any, **kwargs: Any):
     from .graph_store import graph_cost_and_claims
 
     return graph_cost_and_claims._claim_sn_atomic(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -2360,7 +2353,7 @@ def claim_generate_name_batch(*args: Any, **kwargs: Any):
     from .graph_store import graph_cost_and_claims
 
     return graph_cost_and_claims.claim_generate_name_batch(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -2372,7 +2365,7 @@ def claim_enrich_seed_and_expand(*args: Any, **kwargs: Any):
     from .graph_store import graph_cost_and_claims
 
     return graph_cost_and_claims.claim_enrich_seed_and_expand(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -2384,7 +2377,7 @@ def claim_review_names_seed_and_expand(*args: Any, **kwargs: Any):
     from .graph_store import graph_cost_and_claims
 
     return graph_cost_and_claims.claim_review_names_seed_and_expand(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -2408,7 +2401,7 @@ def claim_review_name_batch(*args: Any, **kwargs: Any):
     from .graph_store import graph_cost_and_claims
 
     return graph_cost_and_claims.claim_review_name_batch(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -2564,7 +2557,7 @@ def stage_docs_for_rescore(*args: Any, **kwargs: Any):
     from .graph_store import graph_refinement
 
     return graph_refinement.stage_docs_for_rescore(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -2573,7 +2566,7 @@ def _charge_refine_name_attempts(*args: Any, **kwargs: Any):
     from .graph_store import graph_refinement
 
     return graph_refinement._charge_refine_name_attempts(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -2582,7 +2575,7 @@ def claim_refine_name_batch(*args: Any, **kwargs: Any):
     from .graph_store import graph_refinement
 
     return graph_refinement.claim_refine_name_batch(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -2591,7 +2584,7 @@ def _embed_single_standard_name(*args: Any, **kwargs: Any):
     from .graph_store import graph_refinement
 
     return graph_refinement._embed_single_standard_name(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -2600,7 +2593,7 @@ def claim_embed_batch(*args: Any, **kwargs: Any):
     from .graph_store import graph_refinement
 
     return graph_refinement.claim_embed_batch(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -2609,7 +2602,7 @@ def release_embed_claims(*args: Any, **kwargs: Any):
     from .graph_store import graph_refinement
 
     return graph_refinement.release_embed_claims(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -2618,7 +2611,7 @@ def persist_embed_batch(*args: Any, **kwargs: Any):
     from .graph_store import graph_refinement
 
     return graph_refinement.persist_embed_batch(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -2627,7 +2620,7 @@ def persist_refined_name(*args: Any, **kwargs: Any):
     from .graph_store import graph_refinement
 
     return graph_refinement.persist_refined_name(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -2636,7 +2629,7 @@ def carry_accepted_documentation_across_rename(*args: Any, **kwargs: Any):
     from .graph_store import graph_refinement
 
     return graph_refinement.carry_accepted_documentation_across_rename(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3051,7 +3044,7 @@ def release_generate_name_claims(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_release
 
     return graph_claim_release.release_generate_name_claims(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3060,7 +3053,7 @@ def release_generate_name_failed_claims(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_release
 
     return graph_claim_release.release_generate_name_failed_claims(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3069,7 +3062,7 @@ def release_enrich_claims(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_release
 
     return graph_claim_release.release_enrich_claims(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3078,7 +3071,7 @@ def release_enrich_failed_claims(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_release
 
     return graph_claim_release.release_enrich_failed_claims(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3087,7 +3080,7 @@ def release_review_names_claims(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_release
 
     return graph_claim_release.release_review_names_claims(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3096,7 +3089,7 @@ def release_review_names_failed_claims(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_release
 
     return graph_claim_release.release_review_names_failed_claims(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3105,7 +3098,7 @@ def release_review_docs_claims(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_release
 
     return graph_claim_release.release_review_docs_claims(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3114,7 +3107,7 @@ def release_review_docs_failed_claims(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_release
 
     return graph_claim_release.release_review_docs_failed_claims(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3156,7 +3149,7 @@ def _sorted_refine_claim_projection(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_release
 
     return graph_claim_release._sorted_refine_claim_projection(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3165,7 +3158,7 @@ def _project_refine_claim_release_state(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_release
 
     return graph_claim_release._project_refine_claim_release_state(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3174,7 +3167,7 @@ def _predicted_refine_claim_release_state(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_release
 
     return graph_claim_release._predicted_refine_claim_release_state(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3183,7 +3176,7 @@ def _refine_claim_release_manifest(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_release
 
     return graph_claim_release._refine_claim_release_manifest(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3192,7 +3185,7 @@ def _refine_claim_no_change_receipt(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_release
 
     return graph_claim_release._refine_claim_no_change_receipt(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3201,7 +3194,7 @@ def release_stranded_refine_claim(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_release
 
     return graph_claim_release.release_stranded_refine_claim(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3210,7 +3203,7 @@ def release_refine_name_claims(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_release
 
     return graph_claim_release.release_refine_name_claims(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3219,7 +3212,7 @@ def resubmit_pinned_rename_for_review(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_release
 
     return graph_claim_release.resubmit_pinned_rename_for_review(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3233,7 +3226,7 @@ def stage_name_for_rescore(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_release
 
     return graph_claim_release.stage_name_for_rescore(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3242,7 +3235,7 @@ def restore_name_after_failed_rescore(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_release
 
     return graph_claim_release.restore_name_after_failed_rescore(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3262,7 +3255,7 @@ def stop_refine_name_attempt(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_release
 
     return graph_claim_release.stop_refine_name_attempt(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3271,7 +3264,7 @@ def _mark_refine_docs_exhausted(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_release
 
     return graph_claim_release._mark_refine_docs_exhausted(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3304,7 +3297,7 @@ def _verify_docs_claim_winners(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_release
 
     return graph_claim_release._verify_docs_claim_winners(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3313,7 +3306,7 @@ def _verify_claim_winners(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_release
 
     return graph_claim_release._verify_claim_winners(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3337,7 +3330,7 @@ def _verify_name_claim_winners(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_release
 
     return graph_claim_release._verify_name_claim_winners(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3346,7 +3339,7 @@ def _verify_source_claim_winners(*args: Any, **kwargs: Any):
     from .graph_store import graph_claim_release
 
     return graph_claim_release._verify_source_claim_winners(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3362,7 +3355,7 @@ def claim_generate_docs_batch(*args: Any, **kwargs: Any):
     from .graph_store import graph_docs_persistence
 
     return graph_docs_persistence.claim_generate_docs_batch(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3371,7 +3364,7 @@ def persist_generated_docs(*args: Any, **kwargs: Any):
     from .graph_store import graph_docs_persistence
 
     return graph_docs_persistence.persist_generated_docs(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3380,7 +3373,7 @@ def release_generate_docs_claims(*args: Any, **kwargs: Any):
     from .graph_store import graph_docs_persistence
 
     return graph_docs_persistence.release_generate_docs_claims(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3389,7 +3382,7 @@ def release_generate_docs_failed_claims(*args: Any, **kwargs: Any):
     from .graph_store import graph_docs_persistence
 
     return graph_docs_persistence.release_generate_docs_failed_claims(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3408,7 +3401,7 @@ def claim_refine_docs_batch(*args: Any, **kwargs: Any):
     from .graph_store import graph_docs_persistence
 
     return graph_docs_persistence.claim_refine_docs_batch(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3422,7 +3415,7 @@ def persist_refined_docs(*args: Any, **kwargs: Any):
     from .graph_store import graph_docs_persistence
 
     return graph_docs_persistence.persist_refined_docs(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3431,7 +3424,7 @@ def reset_standard_name_docs(*args: Any, **kwargs: Any):
     from .graph_store import graph_docs_persistence
 
     return graph_docs_persistence.reset_standard_name_docs(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3440,7 +3433,7 @@ def stamp_harmonized_families(*args: Any, **kwargs: Any):
     from .graph_store import graph_docs_persistence
 
     return graph_docs_persistence.stamp_harmonized_families(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3449,7 +3442,7 @@ def release_refine_docs_claims(*args: Any, **kwargs: Any):
     from .graph_store import graph_docs_persistence
 
     return graph_docs_persistence.release_refine_docs_claims(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3458,7 +3451,7 @@ def release_refine_docs_failed_claims(*args: Any, **kwargs: Any):
     from .graph_store import graph_docs_persistence
 
     return graph_docs_persistence.release_refine_docs_failed_claims(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3472,7 +3465,7 @@ def mark_for_refine_docs(*args: Any, **kwargs: Any):
     from .graph_store import graph_docs_persistence
 
     return graph_docs_persistence.mark_for_refine_docs(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3481,7 +3474,7 @@ def release_all_orphan_claims(*args: Any, **kwargs: Any):
     from .graph_store import graph_parent_lifecycle
 
     return graph_parent_lifecycle.release_all_orphan_claims(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3495,7 +3488,7 @@ def pool_pending_counts(*args: Any, **kwargs: Any):
     from .graph_store import graph_parent_lifecycle
 
     return graph_parent_lifecycle.pool_pending_counts(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3504,7 +3497,7 @@ def scoped_terminal_residue(*args: Any, **kwargs: Any):
     from .graph_store import graph_parent_lifecycle
 
     return graph_parent_lifecycle.scoped_terminal_residue(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3528,7 +3521,7 @@ def _verify_enrich_parents_claim_winners(*args: Any, **kwargs: Any):
     from .graph_store import graph_parent_lifecycle
 
     return graph_parent_lifecycle._verify_enrich_parents_claim_winners(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3537,7 +3530,7 @@ def claim_enrich_parents_batch(*args: Any, **kwargs: Any):
     from .graph_store import graph_parent_lifecycle
 
     return graph_parent_lifecycle.claim_enrich_parents_batch(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3546,7 +3539,7 @@ def fetch_derived_parent_children(*args: Any, **kwargs: Any):
     from .graph_store import graph_parent_lifecycle
 
     return graph_parent_lifecycle.fetch_derived_parent_children(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3573,7 +3566,7 @@ def _structural_authority_identities(*args: Any, **kwargs: Any):
     from .graph_store import graph_parent_lifecycle
 
     return graph_parent_lifecycle._structural_authority_identities(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3582,7 +3575,7 @@ def _structural_authority_snapshot(*args: Any, **kwargs: Any):
     from .graph_store import graph_parent_lifecycle
 
     return graph_parent_lifecycle._structural_authority_snapshot(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3591,7 +3584,7 @@ def _structural_authority_record(*args: Any, **kwargs: Any):
     from .graph_store import graph_parent_lifecycle
 
     return graph_parent_lifecycle._structural_authority_record(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3600,7 +3593,7 @@ def _persist_structural_authority(*args: Any, **kwargs: Any):
     from .graph_store import graph_parent_lifecycle
 
     return graph_parent_lifecycle._persist_structural_authority(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3609,7 +3602,7 @@ def persist_enriched_parent(*args: Any, **kwargs: Any):
     from .graph_store import graph_parent_lifecycle
 
     return graph_parent_lifecycle.persist_enriched_parent(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3626,7 +3619,7 @@ def _structural_accept_route(*args: Any, **kwargs: Any):
     from .graph_store import graph_parent_lifecycle
 
     return graph_parent_lifecycle._structural_accept_route(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3635,7 +3628,7 @@ def structural_accept_derived_parents(*args: Any, **kwargs: Any):
     from .graph_store import graph_parent_lifecycle
 
     return graph_parent_lifecycle.structural_accept_derived_parents(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3644,7 +3637,7 @@ def backfill_structural_name_authorities(*args: Any, **kwargs: Any):
     from .graph_store import graph_parent_lifecycle
 
     return graph_parent_lifecycle.backfill_structural_name_authorities(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3653,7 +3646,7 @@ def find_orphan_parent_source_candidates(*args: Any, **kwargs: Any):
     from .graph_store import graph_parent_lifecycle
 
     return graph_parent_lifecycle.find_orphan_parent_source_candidates(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3662,7 +3655,7 @@ def classify_orphan_parent_source_candidates(*args: Any, **kwargs: Any):
     from .graph_store import graph_parent_lifecycle
 
     return graph_parent_lifecycle.classify_orphan_parent_source_candidates(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3671,7 +3664,7 @@ def reconcile_orphan_parent_sources(*args: Any, **kwargs: Any):
     from .graph_store import graph_parent_lifecycle
 
     return graph_parent_lifecycle.reconcile_orphan_parent_sources(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3680,7 +3673,7 @@ def reconcile_orphan_parent_sources_batched(*args: Any, **kwargs: Any):
     from .graph_store import graph_parent_lifecycle
 
     return graph_parent_lifecycle.reconcile_orphan_parent_sources_batched(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 
@@ -3689,7 +3682,7 @@ def release_enrich_parents_claims(*args: Any, **kwargs: Any):
     from .graph_store import graph_parent_lifecycle
 
     return graph_parent_lifecycle.release_enrich_parents_claims(
-        *args, services=_graph_foundation.services, **kwargs
+        *args, services=_graph_foundation.get_services(), **kwargs
     )
 
 

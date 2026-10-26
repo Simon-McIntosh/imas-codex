@@ -21,10 +21,13 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
 from imas_codex.graph.models import RefineStopReason
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from imas_codex.standard_names.budget import BudgetManager
@@ -163,7 +166,6 @@ def _return_unspent_refine_attempt(
     row, in which case this pool no longer owns the charge and must not
     rewrite the counter under its own token.
     """
-    logger = _worker_dependency("logger")
     try:
         rows = gc.query(
             _RETURN_UNSPENT_REFINE_ATTEMPT,
@@ -212,8 +214,6 @@ async def process_refine_name_batch(
     Returns count of items successfully processed.
     """
     import asyncio as _asyncio
-
-    logger = _worker_dependency("logger")
 
     from imas_codex.discovery.base.llm import (
         LLMStructuredCallError,

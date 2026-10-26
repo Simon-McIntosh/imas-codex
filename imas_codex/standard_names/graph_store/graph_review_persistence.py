@@ -10,6 +10,7 @@ Relationship direction: entity → concept
 
 from __future__ import annotations
 
+import logging
 import re
 from typing import Any
 
@@ -24,6 +25,8 @@ from imas_codex.standard_names.review.holds import (
 
 from . import graph_foundation as foundation
 
+logger = logging.getLogger(__name__)
+
 
 def _quorum_admits_acceptance(
     resolution_method: str | None,
@@ -36,12 +39,12 @@ def _quorum_admits_acceptance(
     once it reaches the stage decision.  Acceptance therefore has to ask how
     the score was reached, not just how high it is.
     """
-    if resolution_method in foundation.services.QUORATE_RESOLUTION_METHODS:
+    if resolution_method in foundation.get_services().QUORATE_RESOLUTION_METHODS:
         return None
     if resolution_method is None:
         return "review carried no resolution method"
     if resolution_method == "max_cycles_reached":
-        if (reviewer_chain_size or 0) < foundation.services._ESCALATOR_CHAIN_SIZE:
+        if (reviewer_chain_size or 0) < foundation.get_services()._ESCALATOR_CHAIN_SIZE:
             return None
         return (
             "blind seats disagreed and the escalator seat did not resolve them "
@@ -57,11 +60,11 @@ def _authority_json_value(value: Any) -> Any:
     """Convert driver values to deterministic JSON-compatible values."""
     if isinstance(value, dict):
         return {
-            str(key): foundation.services._authority_json_value(item)
+            str(key): foundation.get_services()._authority_json_value(item)
             for key, item in sorted(value.items(), key=lambda pair: str(pair[0]))
         }
     if isinstance(value, list | tuple):
-        return [foundation.services._authority_json_value(item) for item in value]
+        return [foundation.get_services()._authority_json_value(item) for item in value]
     if hasattr(value, "iso_format"):
         return value.iso_format()
     if hasattr(value, "isoformat") and not isinstance(value, str):
@@ -72,14 +75,14 @@ def _authority_json_value(value: Any) -> Any:
 
 
 def _authority_payload_hash(value: Any) -> str:
-    payload = foundation.services.json.dumps(
-        foundation.services._authority_json_value(value),
+    payload = foundation.get_services().json.dumps(
+        foundation.get_services()._authority_json_value(value),
         sort_keys=True,
         separators=(",", ":"),
         ensure_ascii=False,
         allow_nan=False,
     )
-    return foundation.services.hashlib.sha256(payload.encode("utf-8")).hexdigest()
+    return foundation.get_services().hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
 @retry_on_deadlock()
@@ -180,7 +183,7 @@ def persist_reviewed_name(
     # sweep may have nullified claim_token while the RD-quorum review was
     # still in flight).  The name_stage='drafted' check is the real CAS
     # guard — a name can only transition OUT of drafted once.
-    with foundation.services.GraphClient() as gc:
+    with foundation.get_services().GraphClient() as gc:
         rows = gc.query(
             """
             MATCH (sn:StandardName {id: $id})
@@ -206,7 +209,7 @@ def persist_reviewed_name(
         )
 
     if not rows:
-        foundation.services.logger.debug(
+        logger.debug(
             "persist_reviewed_name: stage/token mismatch for %s (token=%s) — no-op",
             sn_id,
             claim_token[:8],
@@ -281,13 +284,13 @@ def persist_reviewed_name(
     # recovery, and the next quorate review clears it by writing null here.
     quorum_shortfall: str | None = None
     if not quorum_exempt:
-        quorum_shortfall = foundation.services._quorum_admits_acceptance(
+        quorum_shortfall = foundation.get_services()._quorum_admits_acceptance(
             resolution_method, reviewer_chain_size
         )
         if quorum_shortfall is not None:
             if target_stage == "accepted":
                 target_stage = "reviewed"
-                foundation.services.logger.warning(
+                logger.warning(
                     "persist_reviewed_name: refusing acceptance of %s at "
                     "score %.3f — %s",
                     sn_id,
@@ -295,7 +298,7 @@ def persist_reviewed_name(
                     quorum_shortfall,
                 )
             else:
-                foundation.services.logger.warning(
+                logger.warning(
                     "persist_reviewed_name: parking %s at %s without a refine "
                     "rotation (score %.3f) — %s",
                     sn_id,
@@ -322,12 +325,12 @@ def persist_reviewed_name(
                 if has_refine_attempt or not attempt_state_known
                 else "reviewed"
             )
-            foundation.services.logger.warning(
+            logger.warning(
                 "persist_reviewed_name: quarantining grammar-invalid name %s: %s",
                 sn_id,
                 exc,
             )
-    grammar_identity = foundation.services._parse_grammar(sn_id)
+    grammar_identity = foundation.get_services()._parse_grammar(sn_id)
 
     # ── Cascade atomicity preflight (edit rename acceptance) ─────────────
     # A family/subtree rename edit accepts the ROOT and cascades every
@@ -349,7 +352,7 @@ def persist_reviewed_name(
     ):
         from imas_codex.standard_names.cascade import cascade_descendants_of
 
-        with foundation.services.GraphClient() as gc:
+        with foundation.get_services().GraphClient() as gc:
             pred_rows = gc.query(
                 """
                 MATCH (sn:StandardName {id: $id})-[:REFINED_FROM]->(pred:StandardName)
@@ -374,7 +377,7 @@ def persist_reviewed_name(
             # invalid. Route back to 'reviewed' so an operator can resolve
             # the collision; nothing is accepted and nothing is renamed.
             target_stage = "reviewed"
-            foundation.services.logger.warning(
+            logger.warning(
                 "persist_reviewed_name: %s scored acceptance but its "
                 "descendant cascade has %d conflict(s) — refusing acceptance "
                 "(name_stage=reviewed, no rename applied): %s",
@@ -402,7 +405,7 @@ def persist_reviewed_name(
         _json.dumps(comments_per_dim) if comments_per_dim is not None else None
     )
 
-    with foundation.services.GraphClient() as gc:
+    with foundation.get_services().GraphClient() as gc:
         write_rows = gc.query(
             """
             MATCH (sn:StandardName {id: $id})
@@ -461,22 +464,22 @@ def persist_reviewed_name(
             grammar_identity=grammar_identity,
             quorum_shortfall=quorum_shortfall,
             resolution_method=resolution_method,
-            grammar_invalid_reason=foundation.services.RefineStopReason.grammar_invalid.value,
-            attempts_exhausted_reason=foundation.services.RefineStopReason.attempts_exhausted.value,
+            grammar_invalid_reason=foundation.get_services().RefineStopReason.grammar_invalid.value,
+            attempts_exhausted_reason=foundation.get_services().RefineStopReason.attempts_exhausted.value,
         )
 
     # A concurrent reviewer already transitioned this node out of 'drafted'
     # between our readback and this SET — our review is a duplicate; report a
     # no-op so the worker does not double-count or emit a spurious event.
     if not write_rows:
-        foundation.services.logger.debug(
+        logger.debug(
             "persist_reviewed_name: %s already transitioned out of 'drafted' "
             "(concurrent reviewer won) — no-op",
             sn_id,
         )
         return ""
 
-    foundation.services.logger.info(
+    logger.info(
         "persist_reviewed_name: %s → name_stage=%s "
         "(score=%.3f, rotations=%d/%d, chain=%d)",
         sn_id,
@@ -491,7 +494,7 @@ def persist_reviewed_name(
     # an operator can resolve the collision. Nothing was accepted, nothing
     # renamed; the name stays reviewable.
     if cascade_preflight_conflicts:
-        with foundation.services.GraphClient() as gc:
+        with foundation.get_services().GraphClient() as gc:
             gc.query(
                 """
                 MATCH (sn:StandardName {id: $id})
@@ -517,7 +520,7 @@ def persist_reviewed_name(
     ):
         from imas_codex.standard_names.cascade import cascade_descendants_of
 
-        with foundation.services.GraphClient() as gc:
+        with foundation.get_services().GraphClient() as gc:
             pred_rows = gc.query(
                 """
                 MATCH (sn:StandardName {id: $id})-[:REFINED_FROM]->(pred:StandardName)
@@ -539,7 +542,7 @@ def persist_reviewed_name(
                 # The preflight was clean, so a conflict here is a genuine
                 # concurrent-write race between preflight and apply. Record it
                 # for operator follow-up; the acceptance already landed.
-                foundation.services.logger.warning(
+                logger.warning(
                     "persist_reviewed_name: edit accepted for %s but the "
                     "descendant cascade raced to %d conflict(s) after a clean "
                     "preflight — descendants left unrenamed: %s",
@@ -557,7 +560,7 @@ def persist_reviewed_name(
                     conflicts=cascade_result.conflicts,
                 )
             else:
-                foundation.services.logger.info(
+                logger.info(
                     "persist_reviewed_name: edit-cascade applied for %s — "
                     "%d descendant(s) renamed",
                     sn_id,
@@ -578,7 +581,7 @@ def persist_reviewed_name(
             import uuid as _uuid
             from datetime import datetime as _dt
 
-            _now_iso = llm_at or _dt.now(foundation.services.UTC).isoformat()
+            _now_iso = llm_at or _dt.now(foundation.get_services().UTC).isoformat()
             _group_id = str(_uuid.uuid4())
             _review_id = f"{sn_id}:name:{_group_id}:0"
             # Map normalised score (0-1) to tier name per the rubric.
@@ -590,7 +593,7 @@ def persist_reviewed_name(
                 _tier = "inadequate"
             else:
                 _tier = "poor"
-            foundation.services.write_reviews(
+            foundation.get_services().write_reviews(
                 [
                     {
                         "id": _review_id,
@@ -625,13 +628,13 @@ def persist_reviewed_name(
             )
         except Exception:
             # Don't let review-node bookkeeping fail the stage transition.
-            foundation.services.logger.exception(
+            logger.exception(
                 "persist_reviewed_name: failed to write StandardNameReview for %s",
                 sn_id,
             )
 
     # Async counter bump — live progress visibility for ``sn status``
-    foundation.services.bump_sn_run_counter(run_id, "names_reviewed")
+    foundation.get_services().bump_sn_run_counter(run_id, "names_reviewed")
 
     return target_stage
 
@@ -639,7 +642,7 @@ def persist_reviewed_name(
 @retry_on_deadlock()
 def claim_review_docs_batch(
     facility: str | None = None,
-    batch_size: int = 25,
+    batch_size: int = foundation.DEFAULT_POOL_BATCH_SIZE,
     timeout_seconds: int = foundation._CLAIM_TIMEOUT_SECONDS,
     domain: str | None = None,
     scope_run_id: str | None = None,
@@ -691,11 +694,11 @@ def claim_review_docs_batch(
     )
     if facility is not None:
         where += " AND sn.facility = $facility"
-        query_params: dict[str, foundation.services.Any] = {"facility": facility}
+        query_params: dict[str, foundation.get_services().Any] = {"facility": facility}
     else:
         query_params = {}
     query_params.update(drain_scope_id=drain_scope_id, min_score=min_score)
-    items = foundation.services._claim_sn_atomic(
+    items = foundation.get_services()._claim_sn_atomic(
         eligibility_where=where,
         query_params=query_params,
         batch_size=batch_size,
@@ -729,7 +732,7 @@ def claim_review_docs_batch(
     )
     # Drop claim-race losers BEFORE the reviewer quorum spends LLM calls (see
     # _verify_docs_claim_winners). review_docs is gated on docs_stage='drafted'.
-    return foundation.services._verify_docs_claim_winners(
+    return foundation.get_services()._verify_docs_claim_winners(
         items, eligible_stage="drafted"
     )
 
@@ -829,7 +832,7 @@ def persist_reviewed_docs(
     """
     import json as _json
 
-    quorum_shortfall = foundation.services._quorum_admits_acceptance(
+    quorum_shortfall = foundation.get_services()._quorum_admits_acceptance(
         resolution_method, reviewer_chain_size
     )
     pending_holds = list(review_holds or [])
@@ -838,10 +841,10 @@ def persist_reviewed_docs(
 
     # The preflight SET takes the name's write lock. A stale claimant cannot
     # mutate holds, and the final score and hold changes commit together.
-    with foundation.services.GraphClient() as gc:
+    with foundation.get_services().GraphClient() as gc:
         with gc.session() as session:
             tx = session.begin_transaction()
-            graph = foundation.services._TransactionQuery(tx)
+            graph = foundation.get_services()._TransactionQuery(tx)
             try:
                 rows = graph.query(
                     """
@@ -863,7 +866,7 @@ def persist_reviewed_docs(
                 )
                 if not rows:
                     tx.rollback()
-                    foundation.services.logger.debug(
+                    logger.debug(
                         "persist_reviewed_docs: stage/token mismatch for %s "
                         "(token=%s) — no-op",
                         sn_id,
@@ -888,11 +891,11 @@ def persist_reviewed_docs(
                 # transaction. A failed scan did not check the link kind.
                 if target_stage == "accepted":
                     try:
-                        mismatches = foundation.services._doc_link_mismatches(
+                        mismatches = foundation.get_services()._doc_link_mismatches(
                             graph, documentation
                         )
                     except Exception:
-                        foundation.services.logger.debug(
+                        logger.debug(
                             "persist_reviewed_docs: link-mismatch scan failed for %s "
                             "(non-fatal; accepting)",
                             sn_id,
@@ -920,7 +923,7 @@ def persist_reviewed_docs(
                                 "raised_by": "doc-link-target-check",
                             }
                         )
-                        foundation.services.logger.info(
+                        logger.info(
                             "persist_reviewed_docs: %s held — %d mismatched doc link(s)",
                             sn_id,
                             len(mismatches),
@@ -928,14 +931,17 @@ def persist_reviewed_docs(
 
                 sync_holds(sn_id, "docs", checked_kinds, pending_holds, graph=graph)
 
-                if target_stage == "accepted" and not foundation.services.docs_accepted(
-                    score, min_score, sn_id, graph=graph
+                if (
+                    target_stage == "accepted"
+                    and not foundation.get_services().docs_accepted(
+                        score, min_score, sn_id, graph=graph
+                    )
                 ):
                     # Keep a held passing document triageable even at the cap.
                     target_stage = "reviewed"
 
                 if target_stage == "accepted":
-                    foundation.services._normalize_bare_doc_links(
+                    foundation.get_services()._normalize_bare_doc_links(
                         graph, sn_id=sn_id, documentation=documentation
                     )
 
@@ -943,7 +949,7 @@ def persist_reviewed_docs(
                 if edit_status_before == "open" and target_stage == "exhausted":
                     new_edit_status = "exhausted"
                 stage_assignments = (
-                    foundation.services.docs_acceptance_set()
+                    foundation.get_services().docs_acceptance_set()
                     if target_stage == "accepted"
                     else "sn.docs_stage = $target_stage, sn.edit_status = $new_edit_status"
                 )
@@ -991,7 +997,7 @@ def persist_reviewed_docs(
                 )
                 if not write_rows:
                     tx.rollback()
-                    foundation.services.logger.debug(
+                    logger.debug(
                         "persist_reviewed_docs: %s transitioned before the "
                         "claim-locked write — no-op",
                         sn_id,
@@ -1004,7 +1010,7 @@ def persist_reviewed_docs(
             finally:
                 tx.close()
 
-    foundation.services.logger.info(
+    logger.info(
         "persist_reviewed_docs: %s → docs_stage=%s "
         "(score=%.3f, chain=%d/%d, resolution=%s, shortfall=%s)",
         sn_id,
@@ -1024,7 +1030,7 @@ def persist_reviewed_docs(
             import uuid as _uuid
             from datetime import datetime as _dt
 
-            _now_iso = llm_at or _dt.now(foundation.services.UTC).isoformat()
+            _now_iso = llm_at or _dt.now(foundation.get_services().UTC).isoformat()
             _group_id = str(_uuid.uuid4())
             _review_id = f"{sn_id}:docs:{_group_id}:0"
             if score >= 0.85:
@@ -1035,7 +1041,7 @@ def persist_reviewed_docs(
                 _tier = "inadequate"
             else:
                 _tier = "poor"
-            foundation.services.write_reviews(
+            foundation.get_services().write_reviews(
                 [
                     {
                         "id": _review_id,
@@ -1069,13 +1075,13 @@ def persist_reviewed_docs(
                 ],
             )
         except Exception:
-            foundation.services.logger.exception(
+            logger.exception(
                 "persist_reviewed_docs: failed to write StandardNameReview for %s",
                 sn_id,
             )
 
     # Async counter bump — live progress visibility for ``sn status``
-    foundation.services.bump_sn_run_counter(run_id, "names_reviewed")
+    foundation.get_services().bump_sn_run_counter(run_id, "names_reviewed")
 
     return target_stage
 

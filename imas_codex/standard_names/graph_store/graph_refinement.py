@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import uuid
 from contextlib import suppress
 from enum import StrEnum
@@ -18,7 +19,13 @@ from imas_codex.standard_names.defaults import (
     DEFAULT_REFINE_ROTATIONS,
 )
 
-from .graph_foundation import _CLAIM_TIMEOUT_SECONDS, _TransactionQuery
+from .graph_foundation import (
+    _CLAIM_TIMEOUT_SECONDS,
+    DEFAULT_POOL_BATCH_SIZE,
+    _TransactionQuery,
+)
+
+logger = logging.getLogger(__name__)
 
 
 def _docs_rescore_ineligible(sn_id: str, state: dict[str, Any]) -> dict[str, Any]:
@@ -190,7 +197,7 @@ def _charge_refine_name_attempts(
             continue
         attempts = charged.get(item["id"])
         if attempts is None:
-            services.logger.debug(
+            logger.debug(
                 "claim_refine_name_batch: %s lost its claim before the attempt "
                 "was charged — dropping",
                 item["id"],
@@ -205,7 +212,7 @@ def _charge_refine_name_attempts(
 def claim_refine_name_batch(
     min_score: float = DEFAULT_MIN_SCORE,
     rotation_cap: int = DEFAULT_REFINE_ROTATIONS,
-    batch_size: int | None = None,
+    batch_size: int = DEFAULT_POOL_BATCH_SIZE,
     timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
     domain: str | None = None,
     scope_run_id: str | None = None,
@@ -229,8 +236,6 @@ def claim_refine_name_batch(
     """
     from imas_codex.standard_names.chain_history import name_chain_history
 
-    if batch_size is None:
-        batch_size = services.DEFAULT_POOL_BATCH_SIZE
     items = services._claim_sn_atomic(
         eligibility_where=REFINE_NAME_ELIGIBILITY_WHERE,
         query_params={"min_score": min_score, "rotation_cap": rotation_cap},
@@ -331,14 +336,14 @@ def _embed_single_standard_name(
                     id=sn_id,
                     embedding=vec,
                 )
-            services.logger.debug("_embed_single_standard_name: embedded %s", sn_id)
+            logger.debug("_embed_single_standard_name: embedded %s", sn_id)
         else:
-            services.logger.warning(
+            logger.warning(
                 "_embed_single_standard_name: embedding returned None for %s",
                 sn_id,
             )
     except Exception:
-        services.logger.warning(
+        logger.warning(
             "Failed to embed StandardName %s — will retry later",
             sn_id,
             exc_info=True,
@@ -757,7 +762,7 @@ def persist_refined_name(
 
     derived_kind = derive_kind(new_name)
     if derived_kind != kind:
-        services.logger.info(
+        logger.info(
             "Refined successor %s kind corrected from %s to %s",
             new_name,
             kind,
@@ -1359,7 +1364,7 @@ def persist_refined_name(
 
     if result:
         row = dict(result[0])
-        services.logger.debug(
+        logger.debug(
             "persist_refined_name: %s → %s (chain_length=%d)",
             old_name,
             new_name,

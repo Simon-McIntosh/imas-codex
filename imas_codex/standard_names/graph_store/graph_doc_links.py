@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import logging
 import re
 import uuid
 from typing import Any
+
+logger = logging.getLogger(__name__)
 
 
 def claim_unresolved_links(limit: int = 20, *, services: Any) -> list[dict[str, Any]]:
@@ -58,7 +61,7 @@ def resolve_links_batch(
         items, override=override, override_names=override_names
     )
     if skipped:
-        services.logger.warning(
+        logger.warning(
             "resolve_links_batch: stripped protected fields from %d name(s): %s",
             len(skipped),
             ", ".join(skipped[:5]),
@@ -316,7 +319,7 @@ def _normalize_bare_doc_links(
             ],
         )
     if updates:
-        services.logger.info(
+        logger.info(
             "resolve_doc_links: normalized bare [name] brackets in %d doc(s)%s",
             len(updates),
             f" (scoped to {sn_id})" if sn_id else "",
@@ -421,7 +424,7 @@ def resolve_doc_links(gc: Any | None = None, *, services: Any) -> dict[str, int]
                 )
             else:
                 unchanged += 1
-        services.logger.info(
+        logger.info(
             "resolve_doc_links: resolved=%d rewritten, %d removed, %d unchanged",
             resolved,
             removed,

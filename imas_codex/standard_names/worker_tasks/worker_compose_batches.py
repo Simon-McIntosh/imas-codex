@@ -10,8 +10,11 @@ inside the moved code.  Only standard-library modules are imported directly;
 from __future__ import annotations
 
 import asyncio
+import logging
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from imas_codex.standard_names.budget import BudgetManager
@@ -222,9 +225,7 @@ async def compose_batch(
             cluster_names = await asyncio.to_thread(_cluster_roster)
             existing_names_set.update(cluster_names)
     except Exception:
-        _worker_dependency("logger").debug(
-            "Cluster-aware existing_names lookup failed", exc_info=True
-        )
+        logger.debug("Cluster-aware existing_names lookup failed", exc_info=True)
 
     # ── Accepted family siblings into the prompt ───────────────────────
     # A family member that belongs to a detected vector/geometric family
@@ -355,7 +356,7 @@ async def compose_batch(
                 )
                 _exc_str = str(compose_exc)
                 if "not a registered" in _exc_str:
-                    _worker_dependency("logger").warning(
+                    logger.warning(
                         "Pool %s: vocab gap validation error — marking "
                         "%d sources as vocab_gap: %s",
                         phase_tag,
@@ -433,7 +434,7 @@ async def compose_batch(
                 break
 
             # Re-enrich items with expanded hybrid search for retry
-            _worker_dependency("logger").info(
+            logger.info(
                 "Pool %s: composition retry %d/%d: %d grammar failures (%s), "
                 "%d token-reuse hits, editorial_retry=%s — "
                 "re-composing with expanded DD context",
@@ -1059,9 +1060,7 @@ async def compose_batch(
                 written = len(candidates)
             else:
                 written = int(persisted)
-            _worker_dependency("logger").debug(
-                "Pool %s: persisted %d candidates", phase_tag, written
-            )
+            logger.debug("Pool %s: persisted %d candidates", phase_tag, written)
 
             # A persisted name's domain is its stored Jev decision, set by the
             # one writer rather than carried from the source item.
@@ -1133,9 +1132,7 @@ async def compose_batch(
         return written if candidates else 0
 
     except Exception:
-        _worker_dependency("logger").exception(
-            "Pool %s: compose batch failed", phase_tag
-        )
+        logger.exception("Pool %s: compose batch failed", phase_tag)
         raise
     finally:
         if lease:

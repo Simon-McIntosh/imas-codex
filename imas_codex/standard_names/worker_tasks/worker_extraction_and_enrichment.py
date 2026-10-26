@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import logging
+import re as _re
 from collections.abc import Callable, Sequence
 from typing import TYPE_CHECKING, Any
 
-from .worker_common import _re
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from imas_codex.standard_names.budget import BudgetLease, BudgetManager
@@ -24,9 +25,7 @@ async def extract_worker(
     """
     from imas_codex.cli.logging import WorkerLogAdapter
 
-    wlog = WorkerLogAdapter(
-        _worker_dependency("logger"), worker_name="sn_extract_worker"
-    )
+    wlog = WorkerLogAdapter(logger, worker_name="sn_extract_worker")
     wlog.info("Starting extraction (source=%s)", state.source)
 
     def _on_status(text: str) -> None:
@@ -378,7 +377,7 @@ async def _rerank_comparators_for_compose(
     try:
         ordered, cost, seat = await rerank_name_comparators(items, nearby)
     except Exception as exc:
-        _worker_dependency("logger").warning("comparator rerank unavailable: %s", exc)
+        logger.warning("comparator rerank unavailable: %s", exc)
         return (nearby, 0.0, "")
     return (list(ordered), cost, seat)
 
@@ -440,9 +439,7 @@ async def _reranked_nearby_comparators(
         return (nearby, 0.0)
     lease = mgr.reserve(_worker_dependency("_RERANK_LEASE_FLOOR_USD"), phase=phase)
     if lease is None:
-        _worker_dependency("logger").debug(
-            "comparator rerank skipped: no reservable lease"
-        )
+        logger.debug("comparator rerank skipped: no reservable lease")
         return (nearby, 0.0)
     ordered, cost, seat = await _worker_dependency("_rerank_comparators_for_compose")(
         items, nearby
@@ -580,7 +577,7 @@ def _hybrid_search_neighbours_batch(
                 if i < len(unique_texts):
                     embed_cache[unique_texts[i]] = emb
         except Exception:
-            _worker_dependency("logger").warning(
+            logger.warning(
                 "Batch query embedding failed; falling back to text-only search",
                 exc_info=True,
             )
@@ -604,7 +601,7 @@ def _hybrid_search_neighbours_batch(
                     if h.path != path:
                         item_hits[h.path] = h
             except Exception:
-                _worker_dependency("logger").debug(
+                logger.debug(
                     "Hybrid search (description) failed for %s", path, exc_info=True
                 )
         try:
@@ -613,9 +610,7 @@ def _hybrid_search_neighbours_batch(
                 if h.path != path and h.path not in item_hits:
                     item_hits[h.path] = h
         except Exception:
-            _worker_dependency("logger").debug(
-                "Hybrid search (path) failed for %s", path, exc_info=True
-            )
+            logger.debug("Hybrid search (path) failed for %s", path, exc_info=True)
         per_item_hits.append(item_hits)
     all_hit_paths: set[str] = set()
     for item_hits in per_item_hits:
@@ -630,9 +625,7 @@ def _hybrid_search_neighbours_batch(
             for r in rows or []:
                 sn_map[r["path"]] = r.get("sn_id")
         except Exception:
-            _worker_dependency("logger").debug(
-                "HAS_STANDARD_NAME batch pre-resolution failed", exc_info=True
-            )
+            logger.debug("HAS_STANDARD_NAME batch pre-resolution failed", exc_info=True)
     for idx, (_path, _desc, _domain) in enumerate(items):
         item_hits = per_item_hits[idx]
         if not item_hits:
@@ -762,9 +755,7 @@ def _related_path_neighbours(
             gc, path, relationship_types="all", max_results=max_results
         )
     except Exception:
-        _worker_dependency("logger").debug(
-            "related_dd_search failed for %s", path, exc_info=True
-        )
+        logger.debug("related_dd_search failed for %s", path, exc_info=True)
         return []
     if not result.hits:
         return []
@@ -1048,9 +1039,7 @@ def _enrich_batch_items(_worker_dependency, /, items: list[dict]) -> None:
 
             attach_family_accepted_siblings(items, gc=gc)
         except Exception:
-            _worker_dependency("logger").debug(
-                "family accepted-sibling enrichment failed", exc_info=True
-            )
+            logger.debug("family accepted-sibling enrichment failed", exc_info=True)
 
 
 _TIME_DERIVATIVE_SEGMENT_RE = _re.compile("d(?:_|.+_)dt(?:_.*)?")
@@ -1161,7 +1150,7 @@ def _vector_fields_conflict(_worker_dependency, /, path_a: str, path_b: str) -> 
 
 def _content_tokens(_worker_dependency, /, text: str) -> set[str]:
     """Lower-cased content tokens with a simple plural stem (drop trailing s)."""
-    raw = _worker_dependency("_re").split("[^a-z0-9]+", text.lower())
+    raw = _re.split("[^a-z0-9]+", text.lower())
     return {t[:-1] if len(t) > 3 and t.endswith("s") else t for t in raw if t}
 
 
@@ -1688,9 +1677,7 @@ def _search_reference_exemplars(
             synth_query, k=k, exclude_ids=exclude_ids or None
         )
     except Exception:
-        _worker_dependency("logger").debug(
-            "Reference exemplar search failed", exc_info=True
-        )
+        logger.debug("Reference exemplar search failed", exc_info=True)
         return []
 
 
@@ -1840,9 +1827,7 @@ async def _self_refine_candidate(
         )
         result, _cost, _tokens = llm_out
     except Exception:
-        _worker_dependency("logger").debug(
-            "Self-refine LLM call failed for %r — keeping original", name
-        )
+        logger.debug("Self-refine LLM call failed for %r — keeping original", name)
         return (name, description)
     if result is None or not result.changed:
         return (name, description)
@@ -1854,7 +1839,7 @@ async def _self_refine_candidate(
         return (name, new_desc or description)
     _well_formed, _ = _worker_dependency("is_well_formed_candidate")(new_name)
     if not _well_formed:
-        _worker_dependency("logger").debug(
+        logger.debug(
             "Self-refine suggestion %r not well-formed — keeping original %r",
             new_name,
             name,
@@ -1865,7 +1850,7 @@ async def _self_refine_candidate(
 
         parse_canonical_name(new_name)
     except Exception:
-        _worker_dependency("logger").debug(
+        logger.debug(
             "Self-refine suggestion %r failed grammar round-trip — keeping %r",
             new_name,
             name,
@@ -1874,7 +1859,7 @@ async def _self_refine_candidate(
     new_desc = _worker_dependency("normalize_description_text")(
         (result.description or "").strip()
     )
-    _worker_dependency("logger").info("Self-refine improved %r → %r", name, new_name)
+    logger.info("Self-refine improved %r → %r", name, new_name)
     return (new_name, new_desc or description)
 
 

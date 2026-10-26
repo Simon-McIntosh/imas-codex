@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 from typing import Any
 
 from imas_codex.discovery.base.claims import retry_on_deadlock
 
-from .graph_foundation import _CLAIM_TIMEOUT_SECONDS
+from .graph_foundation import _CLAIM_TIMEOUT_SECONDS, DEFAULT_POOL_BATCH_SIZE
+
+logger = logging.getLogger(__name__)
 
 
 @retry_on_deadlock()
@@ -290,7 +293,7 @@ def _verify_enrich_parents_claim_winners(
     winners = {r["id"] for r in rows}
     if len(winners) == len(items):
         return items
-    services.logger.debug(
+    logger.debug(
         "_verify_enrich_parents_claim_winners: %d/%d survived claim-race (token=%s)",
         len(winners),
         len(items),
@@ -301,7 +304,7 @@ def _verify_enrich_parents_claim_winners(
 
 @retry_on_deadlock()
 def claim_enrich_parents_batch(
-    batch_size: int | None = None,
+    batch_size: int = DEFAULT_POOL_BATCH_SIZE,
     timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
     domain: str | None = None,
     scope_run_id: str | None = None,
@@ -325,8 +328,6 @@ def claim_enrich_parents_batch(
     Returns claimed items as dicts with ``id``, ``name``, ``kind``, ``unit``,
     ``physics_domain``, ``claim_token``.
     """
-    if batch_size is None:
-        batch_size = services.DEFAULT_POOL_BATCH_SIZE
     from imas_codex.standard_names.defaults import (
         DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
     )
@@ -783,7 +784,7 @@ def persist_enriched_parent(
             or not snapshot.get("children")
             or snapshot.get("authority_ids")
         ):
-            services.logger.debug(
+            logger.debug(
                 "persist_enriched_parent: %s no longer matched (concurrent "
                 "winner, missing child authority, or not a derived parent) — no-op",
                 sn_id,
@@ -818,7 +819,7 @@ def persist_enriched_parent(
             )
 
     new_stage = "accepted"
-    services.logger.info(
+    logger.info(
         "\033[32menrich_parents\033[0m: %s → name_stage=%s — %s",
         sn_id,
         new_stage,
@@ -975,7 +976,7 @@ def structural_accept_derived_parents(gc: Any | None = None, *, services: Any) -
                 )
             promoted += 1
         if promoted:
-            services.logger.info(
+            logger.info(
                 "structural_accept_derived_parents: promoted %d derived parent(s) "
                 "to accepted (structural inheritance)",
                 promoted,
@@ -1225,7 +1226,7 @@ def reconcile_orphan_parent_sources(
         if classification is None:
             classification = services.classify_orphan_parent_source_candidates(client)
         for row in classification["rejected_derived"]:
-            services.logger.warning(
+            logger.warning(
                 "reconcile_orphan_parent_sources: refusing to seed "
                 "inadmissible derived parent %s: %s",
                 row["parent_id"],
@@ -1280,7 +1281,7 @@ def reconcile_orphan_parent_sources(
             client.close()
 
     if seeded:
-        services.logger.info(
+        logger.info(
             "reconcile_orphan_parent_sources: seeded %d missing parent "
             "provenance source(s)",
             seeded,

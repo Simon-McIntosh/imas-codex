@@ -5,12 +5,15 @@ Source claims, fences, outcomes and retry state.
 
 from __future__ import annotations
 
+import logging
 import uuid
 from collections import Counter
 from typing import Any
 
 from imas_codex.discovery.base.claims import retry_on_deadlock
 from imas_codex.graph.client import GraphClient
+
+logger = logging.getLogger(__name__)
 
 
 def write_enrichment_results(
@@ -42,7 +45,7 @@ def write_enrichment_results(
 
     results, skipped = filter_protected(results, override=override)
     if skipped:
-        services.logger.warning(
+        logger.warning(
             "write_enrichment_results: stripped protected fields from %d name(s): %s",
             len(skipped),
             ", ".join(skipped[:5]),
@@ -78,7 +81,7 @@ def write_enrichment_results(
             ],
         )
 
-    services.logger.info("Enriched %d StandardName nodes", len(results))
+    logger.info("Enriched %d StandardName nodes", len(results))
     return len(results)
 
 
@@ -476,7 +479,7 @@ def merge_standard_name_sources(
     valid_sources: list[dict] = []
     for s in sources:
         if s.get("source_type") == "dd" and not s.get("dd_path"):
-            services.logger.warning(
+            logger.warning(
                 "merge_standard_name_sources: skipping dd source %r — "
                 "no dd_path supplied; writing would create an orphan "
                 "(birth invariant violation).",
@@ -719,7 +722,7 @@ def claim_explicit_standard_name_sources(
                 }
             )
     if withheld:
-        services.logger.warning(
+        logger.warning(
             "Withheld %d explicit source claim conflict(s): %s",
             len(withheld),
             ", ".join(
@@ -1160,7 +1163,7 @@ def _lock_claimed_name_bindings(
         if row.get("outcome", "winner") == "winner":
             continue
         reason = attachment_refusals.get(row.get("id") or "")
-        services.logger.warning(
+        logger.warning(
             "Released source %s after %s for candidate %s at name stage %s "
             "(attempt %s retained)%s",
             row.get("id"),
@@ -2424,8 +2427,6 @@ def release_standard_name_source_claims(token: str, *, services: Any) -> int:
 # would fire a paid LLM call. Waiting out this short window lets the burst's
 # final committer land, so exactly one replica survives the re-read. Kept small
 # (batch LLM calls dwarf it) and overridable to 0 in tests.
-_CLAIM_VERIFY_SETTLE_SECONDS = 0.5
-
 
 # In-process tally of paid-call outcomes at the persist step, keyed by
 # (run_id, pool). ``attempts`` counts every persist call that follows a paid

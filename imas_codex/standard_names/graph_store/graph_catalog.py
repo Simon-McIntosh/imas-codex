@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import functools
 import json
+import logging
 import re
 from contextlib import nullcontext, suppress
 from datetime import UTC, datetime
@@ -17,6 +18,8 @@ from typing import Any
 from imas_codex.discovery.base.claims import retry_on_deadlock
 from imas_codex.graph.client import GraphClient
 from imas_codex.graph.schema import GraphSchema
+
+logger = logging.getLogger(__name__)
 
 
 def write_standard_names(
@@ -73,7 +76,7 @@ def write_standard_names(
 
     names, skipped = filter_protected(names, override=override)
     if skipped:
-        services.logger.warning(
+        logger.warning(
             "write_standard_names: stripped protected fields from %d catalog-edited name(s): %s",
             len(skipped),
             ", ".join(skipped[:5]),
@@ -100,13 +103,13 @@ def write_standard_names(
                     raise ValueError("strict grammar round-trip changed the name")
                 valid_names.append(n)
             except Exception as exc:
-                services.logger.warning(
+                logger.warning(
                     "write_standard_names: rejecting '%s' — grammar parse failed: %s",
                     n["id"],
                     str(exc)[:120],
                 )
         if len(valid_names) < len(names):
-            services.logger.info(
+            logger.info(
                 "Grammar gate: %d/%d names passed parse validation",
                 len(valid_names),
                 len(names),
@@ -200,13 +203,11 @@ def write_standard_names(
                     f"{c['name']}: {c['existing_unit']} vs {c['incoming_unit']}"
                     for c in unit_conflicts
                 )
-                services.logger.warning("Unit conflicts detected: %s", conflict_details)
+                logger.warning("Unit conflicts detected: %s", conflict_details)
                 conflicting_ids = {c["name"] for c in unit_conflicts}
                 names = [n for n in names if n["id"] not in conflicting_ids]
                 if not names:
-                    services.logger.warning(
-                        "All entries had unit conflicts — nothing to write"
-                    )
+                    logger.warning("All entries had unit conflicts — nothing to write")
                     return [] if return_written_ids else 0
 
         # MERGE StandardName nodes with provenance — coalesce to preserve existing data
@@ -476,7 +477,7 @@ def write_standard_names(
                     )
                     accepted_paths.append(row["source_id"])
                 else:
-                    services.logger.warning(
+                    logger.warning(
                         "write_standard_names: rejected DD pairing %s → %s: %s",
                         row["source_id"],
                         row["id"],
@@ -649,12 +650,10 @@ def write_standard_names(
                 )
                 swept_count = int(swept[0]["swept"]) if swept else 0
     if swept_count:
-        services.logger.info(
-            "Swept %d skeleton StandardName placeholder(s)", swept_count
-        )
+        logger.info("Swept %d skeleton StandardName placeholder(s)", swept_count)
 
     written = len(names)
-    services.logger.info("Wrote %d StandardName nodes", written)
+    logger.info("Wrote %d StandardName nodes", written)
     if return_written_ids:
         return [name["id"] for name in names]
     return written
@@ -932,7 +931,7 @@ def write_reviews(
                     ],
                 )
 
-    services.logger.info(
+    logger.info(
         "Wrote %d StandardNameReview nodes; cleared suggestions: "
         "non-distinct=%d, unparseable=%d",
         len(valid),
@@ -1267,7 +1266,7 @@ def void_review_dimension(
         if own:
             client.close()
 
-    services.logger.info(
+    logger.info(
         "void_review_dimension: %s voided on %s by %s — score %s to %.6f (%s)",
         dimension,
         review_id,
@@ -1351,41 +1350,9 @@ def _docs_review_winner_query_body(
     """Return the single graph traversal that selects a winning docs group."""
     if name_variable != "sn":
         raise ValueError("docs-review eligibility requires the StandardName alias 'sn'")
-    return """
-        MATCH (sn)-[:HAS_REVIEW]->(review:StandardNameReview)
-        WHERE review.review_axis = 'docs'
-          AND review.review_group_id IS NOT NULL
-          AND NOT EXISTS {
-              MATCH (sn)-[:HAS_REVIEW]->(non_winner:StandardNameReview)
-              WHERE non_winner.review_axis = 'docs'
-                AND non_winner.resolution_method
-                    IN $docs_review_non_winning_methods
-          }
-        WITH review.review_group_id AS review_group_id,
-             max(CASE WHEN coalesce(review.is_canonical, false)
-                 THEN 1 ELSE 0 END) AS canonical_group,
-             max(review.reviewed_at) AS group_reviewed_at,
-             [item IN collect({
-                 review_id: review.id,
-                 reviewed_at: review.reviewed_at,
-                 resolution_method: review.resolution_method,
-                 score: review.score
-             }) WHERE item.resolution_method IN $docs_review_winning_methods]
-                 AS winning_records
-        WHERE size(winning_records) > 0
-        UNWIND winning_records AS winning_record
-        WITH review_group_id, canonical_group, group_reviewed_at, winning_record
-        ORDER BY canonical_group DESC, group_reviewed_at DESC,
-                 review_group_id DESC, winning_record.reviewed_at DESC,
-                 winning_record.review_id DESC
-        WITH collect({
-            review_group_id: review_group_id,
-            review_id: winning_record.review_id,
-            resolution_method: winning_record.resolution_method,
-            score: winning_record.score
-        })[0] AS winner
-        RETURN winner
-    """
+    from .graph_foundation import docs_review_winner_query_body
+
+    return docs_review_winner_query_body()
 
 
 def docs_review_eligibility_where(
@@ -1574,7 +1541,7 @@ def write_name_review_results(
         )
 
     written = len(entries)
-    services.logger.info("write_name_review_results: wrote %d names", written)
+    logger.info("write_name_review_results: wrote %d names", written)
     return written
 
 
@@ -1639,7 +1606,7 @@ def write_docs_review_results(
     for e in entries:
         eid = e.get("id", "")
         if not gated.get(eid, False):
-            services.logger.error(
+            logger.error(
                 "write_docs_review_results: skipping %r — reviewed_name_at IS NULL",
                 eid,
             )
@@ -1689,7 +1656,7 @@ def write_docs_review_results(
         )
 
     written = len(passed)
-    services.logger.info("write_docs_review_results: wrote %d names", written)
+    logger.info("write_docs_review_results: wrote %d names", written)
     return written
 
 
@@ -1734,7 +1701,7 @@ def _resolve_grammar_token_version(
     )
     fallback = select_grammar_version(rows)
     if fallback is not None:
-        services.logger.warning(
+        logger.warning(
             "No GrammarToken nodes for ISN %s — falling back to %s. "
             "`sn run` auto-syncs the grammar at startup; re-run to update.",
             isn_version,
@@ -1880,9 +1847,7 @@ def _write_grammar_decomposition(
         from imas_standard_names import __version__ as isn_version
         from imas_standard_names.grammar import compose, parse
     except ImportError:
-        services.logger.debug(
-            "ISN grammar not available — skipping grammar decomposition"
-        )
+        logger.debug("ISN grammar not available — skipping grammar decomposition")
         return all_gaps
 
     # Token version is required for typed-edge writing only; column-write
@@ -1925,7 +1890,7 @@ def _write_grammar_decomposition(
             if compose(parsed.ir) != sn_id:
                 raise ValueError("strict grammar round-trip changed the name")
         except Exception as exc:
-            services.logger.warning("Grammar parse failed for '%s': %s", sn_id, exc)
+            logger.warning("Grammar parse failed for '%s': %s", sn_id, exc)
             # Clear columns and typed/segment edges for genuinely invalid names.
             gc.query(
                 f"""
@@ -2019,7 +1984,7 @@ def _write_grammar_decomposition(
             if not r.get("matched", True) and r.get("segment") in synced_segments
         ]
         if missing:
-            services.logger.warning(
+            logger.warning(
                 "Token-miss for '%s': %s (ISN %s, tokens %s) — vocab gap",
                 sn_id,
                 ", ".join(missing),
@@ -2621,14 +2586,14 @@ def _backfill_cluster_from_sources(
                 sn_ids=sn_ids,
             )
             if results:
-                services.logger.debug(
+                logger.debug(
                     "_backfill_cluster_from_sources: linked %d SNs to clusters",
                     len(results),
                 )
     except Exception:
         if strict:
             raise
-        services.logger.debug("_backfill_cluster_from_sources: failed", exc_info=True)
+        logger.debug("_backfill_cluster_from_sources: failed", exc_info=True)
 
 
 @retry_on_deadlock()
@@ -2717,7 +2682,7 @@ def _finalize_generated_name_stage(
                     tx.close()
                 raise
 
-    services.logger.debug(
+    logger.debug(
         "_finalize_generated_name_stage: finalized %d SNs",
         len(winner_ids),
     )

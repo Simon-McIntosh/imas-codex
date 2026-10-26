@@ -2,11 +2,16 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 from imas_codex.discovery.base.claims import retry_on_deadlock
 from imas_codex.graph.models import RefineStopReason
 from imas_codex.standard_names.defaults import DEFAULT_REFINE_ROTATIONS
+
+from .graph_foundation import _CLAIM_VERIFY_SETTLE_SECONDS
+
+logger = logging.getLogger(__name__)
 
 
 @retry_on_deadlock()
@@ -38,7 +43,7 @@ def release_generate_name_claims(
         )
     released: int = result[0]["released"] if result else 0
     if released < len(source_ids):
-        services.logger.debug(
+        logger.debug(
             "release_generate_name_claims: %d/%d released (token=%s) — "
             "remainder already swept or re-claimed",
             released,
@@ -112,7 +117,7 @@ def release_enrich_claims(
         )
     released: int = result[0]["released"] if result else 0
     if released < len(sn_ids):
-        services.logger.debug(
+        logger.debug(
             "release_enrich_claims: %d/%d released (token=%s) — "
             "remainder already swept or re-claimed",
             released,
@@ -176,7 +181,7 @@ def release_enrich_failed_claims(
         )
     released: int = result[0]["released"] if result else 0
     if released < len(sn_ids):
-        services.logger.debug(
+        logger.debug(
             "release_enrich_failed_claims: %d/%d released (token=%s) — "
             "remainder already swept or re-claimed",
             released,
@@ -222,7 +227,7 @@ def release_review_names_claims(
         )
     released: int = result[0]["released"] if result else 0
     if released < len(sn_ids):
-        services.logger.debug(
+        logger.debug(
             "release_review_names_claims: %d/%d released (token=%s) — "
             "remainder already swept or re-claimed",
             released,
@@ -273,7 +278,7 @@ def release_review_names_failed_claims(
         )
     released: int = result[0]["released"] if result else 0
     if released < len(sn_ids):
-        services.logger.debug(
+        logger.debug(
             "release_review_names_failed_claims: %d/%d released (token=%s) — "
             "remainder already swept or re-claimed",
             released,
@@ -320,7 +325,7 @@ def release_review_docs_claims(
         )
     released: int = result[0]["released"] if result else 0
     if released < len(sn_ids):
-        services.logger.debug(
+        logger.debug(
             "release_review_docs_claims: %d/%d released (token=%s) — "
             "remainder already swept or re-claimed",
             released,
@@ -372,7 +377,7 @@ def release_review_docs_failed_claims(
         )
     released: int = result[0]["released"] if result else 0
     if released < len(sn_ids):
-        services.logger.debug(
+        logger.debug(
             "release_review_docs_failed_claims: %d/%d released (token=%s) — "
             "remainder already swept or re-claimed",
             released,
@@ -869,7 +874,7 @@ def release_refine_name_claims(
         )
     released: int = result[0]["released"] if result else 0
     if released < len(sn_ids):
-        services.logger.debug(
+        logger.debug(
             "release_refine_name_claims: %d/%d released (token=%s) — "
             "remainder already swept or re-claimed",
             released,
@@ -1042,7 +1047,7 @@ def stage_name_for_rescore(
         "run_id": run_id,
         "dry_run": dry_run,
     }
-    services.logger.info(
+    logger.info(
         "stage_name_for_rescore: %s (%s) → %s (run_id=%s)",
         sn_id,
         stage,
@@ -1177,14 +1182,14 @@ def stop_refine_name_attempt(
             attempts_exhausted=services.RefineStopReason.attempts_exhausted.value,
         )
     if not rows:
-        services.logger.debug(
+        logger.debug(
             "stop_refine_name_attempt: %s no longer holds token %s — no-op",
             sn_id,
             token[:8],
         )
         return ""
     stage: str = rows[0]["stage"]
-    services.logger.info(
+    logger.info(
         "refine_name: %s stopped at %s (reason=%s%s)",
         sn_id,
         stage,
@@ -1232,7 +1237,7 @@ def _verify_docs_claim_winners(
     items: list[dict[str, Any]],
     *,
     eligible_stage: str,
-    settle_seconds: float | None = None,
+    settle_seconds: float = _CLAIM_VERIFY_SETTLE_SECONDS,
     services: Any,
 ) -> list[dict[str, Any]]:
     """Drop docs-claim items that lost a concurrent-claim race.
@@ -1251,8 +1256,6 @@ def _verify_docs_claim_winners(
 
     Returns the filtered item list (order preserved).
     """
-    if settle_seconds is None:
-        settle_seconds = services._CLAIM_VERIFY_SETTLE_SECONDS
     return services._verify_claim_winners(
         items,
         stage_field="docs_stage",
@@ -1315,7 +1318,7 @@ def _verify_claim_winners(
         winners = {r["id"] for r in rows}
     if len(winners) == len(items):
         return items
-    services.logger.debug(
+    logger.debug(
         "_verify_claim_winners[%s]: %d/%d survived claim-race (token=%s, stage=%s)",
         axis,
         len(winners),
@@ -1330,7 +1333,7 @@ def _verify_name_claim_winners(
     items: list[dict[str, Any]],
     *,
     eligible_stage: str,
-    settle_seconds: float | None = None,
+    settle_seconds: float = _CLAIM_VERIFY_SETTLE_SECONDS,
     services: Any,
 ) -> list[dict[str, Any]]:
     """Drop name-claim items that lost a concurrent-claim race.
@@ -1338,8 +1341,6 @@ def _verify_name_claim_winners(
     Names-axis twin of :func:`_verify_docs_claim_winners` — same settle +
     ``claim_seq`` mechanism, gated on ``name_stage`` instead of ``docs_stage``.
     """
-    if settle_seconds is None:
-        settle_seconds = services._CLAIM_VERIFY_SETTLE_SECONDS
     return services._verify_claim_winners(
         items,
         stage_field="name_stage",
@@ -1351,7 +1352,10 @@ def _verify_name_claim_winners(
 
 
 def _verify_source_claim_winners(
-    items: list[dict[str, Any]], *, settle_seconds: float | None = None, services: Any
+    items: list[dict[str, Any]],
+    *,
+    settle_seconds: float = _CLAIM_VERIFY_SETTLE_SECONDS,
+    services: Any,
 ) -> list[dict[str, Any]]:
     """Drop generate_name source-claim items that lost a concurrent-claim race.
 
@@ -1364,13 +1368,11 @@ def _verify_source_claim_winners(
 
     Returns the filtered item list (order preserved).
     """
-    if settle_seconds is None:
-        settle_seconds = services._CLAIM_VERIFY_SETTLE_SECONDS
     if not items:
         return items
     tokens = {item.get("claim_token") for item in items}
     if len(tokens) != 1 or not next(iter(tokens)):
-        services.logger.warning(
+        logger.warning(
             "_verify_source_claim_winners: rejected %d claim(s) without one token",
             len(items),
         )
@@ -1378,7 +1380,7 @@ def _verify_source_claim_winners(
     token = next(iter(tokens))
     seqs = {it["id"]: it.get("claim_seq") for it in items}
     if any(seq is None for seq in seqs.values()):
-        services.logger.warning(
+        logger.warning(
             "_verify_source_claim_winners: rejected %d claim(s) without claim_seq",
             len(items),
         )
@@ -1401,7 +1403,7 @@ def _verify_source_claim_winners(
     winners = {row["id"] for row in rows if row.get("claim_seq") == seqs[row["id"]]}
     if len(winners) == len(items):
         return items
-    services.logger.debug(
+    logger.debug(
         "_verify_source_claim_winners: %d/%d survived claim-race (token=%s)",
         len(winners),
         len(items),

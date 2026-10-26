@@ -22,11 +22,14 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
 from imas_codex.standard_names import vocabulary_definitions as vocabulary_source
 from imas_codex.standard_names.defaults import DEFAULT_ESCALATION_MODEL
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from imas_codex.standard_names.budget import BudgetManager
@@ -58,7 +61,6 @@ def _enrich_name_review_items(
     context is added through the same batch enrichment used by composition;
     mutable graph enrichment never replaces the pinned source text.
     """
-    logger = _worker_dependency("logger")
     strip_dd_prefix = _worker_dependency("strip_dd_prefix")
     _enrich_batch_items = _worker_dependency("_enrich_batch_items")
     _name_review_source_context_limit = _worker_dependency(
@@ -370,7 +372,6 @@ async def _run_rd_quorum_cycles(
         - ``total_cost`` — float, sum of all cycles.
         - ``total_tokens_in`` / ``total_tokens_out`` — int.
     """
-    logger = _worker_dependency("logger")
     model_provider_exposure = _worker_dependency("model_provider_exposure")
     bind_attempt_exposure = _worker_dependency("bind_attempt_exposure")
     charge_billable_exception = _worker_dependency("charge_billable_exception")
@@ -906,7 +907,6 @@ async def process_review_name_batch(
 
     Returns count of items successfully reviewed.
     """
-    logger = _worker_dependency("logger")
     # Callers substitute this enricher to reach the review paths without a
     # graph, so it is resolved through the entrypoint rather than called here.
     enrich_name_review_items = _worker_dependency("_enrich_name_review_items")

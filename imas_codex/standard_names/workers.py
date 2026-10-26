@@ -20,6 +20,7 @@ from __future__ import annotations
 import asyncio  # noqa: F401 - resolved by task modules through _worker_dependency
 import inspect as _inspect
 import json  # noqa: F401 - resolved by task modules through _worker_dependency
+import logging
 import re as _re  # noqa: F401 - resolved by worker_common through _worker_dependency
 from functools import cache as _cache, lru_cache  # noqa: F401
 from typing import Any
@@ -63,7 +64,7 @@ def _worker_dependency(name: str):
     return globals()[name]
 
 
-logger = _moved_worker_common.logger
+logger = logging.getLogger(__name__)
 
 
 def backfill_semantic_similarity_gate_resolution_method(*args: Any, **kwargs: Any):
