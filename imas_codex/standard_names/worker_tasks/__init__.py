@@ -27,7 +27,7 @@ def _bind_task(function: Any) -> Any:
 
         @functools.wraps(function)
         async def async_bound(*args: Any, **kwargs: Any) -> Any:
-            if args and callable(args[0]):
+            if args and (inspect.isfunction(args[0]) or inspect.ismethod(args[0])):
                 return await function(*args, **kwargs)
             return await function(_resolve_dependency, *args, **kwargs)
 
@@ -36,7 +36,7 @@ def _bind_task(function: Any) -> Any:
 
         @functools.wraps(function)
         def bound(*args: Any, **kwargs: Any) -> Any:
-            if args and callable(args[0]):
+            if args and (inspect.isfunction(args[0]) or inspect.ismethod(args[0])):
                 return function(*args, **kwargs)
             return function(_resolve_dependency, *args, **kwargs)
 
