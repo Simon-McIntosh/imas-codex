@@ -137,15 +137,14 @@
   <h3 id="srtj-quorum-deciding-retire-gate">Gate</h3>
   <p id="srtj-quorum-deciding-retire-gate-result">
     Whole <code>tests/standard_names/</code> suite, default markers,
-    <code>-n 8</code>, each arm from its own <code>git archive</code> tree with
-    the decision key provisioned: base <code>137eb8fd4</code> 95 failed / 8392
-    passed / 12 skipped; head <code>6ff64b2d3</code> 96 failed / 8390 passed / 12
-    skipped. The failure-set delta is one added id and zero removed. The added
-    one is this node's own change seen from a file outside its write fence:
-    <code>test_cascade_deciding_axes.py::test_names_deciding_leaves_documentation_with_the_incumbent[docs-False]</code>
-    still expects the shadow-mode fallback to run the configured chain, and the
-    fallback now runs the single chat seat, so it is reported for the file's
-    owner rather than edited here.
+    <code>-n 3</code>, each arm from its own <code>git archive</code> tree with
+    the decision key provisioned and its own <code>--basetemp</code>: base
+    <code>137eb8fd4</code> 73 failed / 8415 passed / 11 skipped in 410&nbsp;s;
+    head <code>62c18bf78</code> 73 failed / 8414 passed / 11 skipped in
+    482&nbsp;s. Both arms are a true delta: the 73 failure ids are identical
+    set-for-set, so this node adds none and removes none. The one id the node
+    added before its shadow-mode expectation was repointed now passes, and it
+    is the only difference between the pass counts.
   </p>
 
 </section>
