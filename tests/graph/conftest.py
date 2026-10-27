@@ -354,6 +354,12 @@ def _call_name(node: ast.Call) -> str | None:
     return None
 
 
+#: Methods that send Cypher. Only their string argument is inspected: scanning
+#: every string in the test would read a docstring's prose (a sentence with the
+#: word "set") as a write.
+_CYPHER_METHODS = frozenset({"query", "run", "execute_query", "execute_write"})
+
+
 def _writer_facts(source: str) -> tuple[bool, bool]:
     """Return ``(writes, bare_client)`` for one test function's source."""
     try:
@@ -364,19 +370,25 @@ def _writer_facts(source: str) -> tuple[bool, bool]:
     writes = False
     bare_client = False
     for node in ast.walk(tree):
-        if isinstance(node, ast.Constant) and isinstance(node.value, str):
-            if _WRITE_CYPHER.search(node.value):
+        if not isinstance(node, ast.Call):
+            continue
+        name = _call_name(node)
+        if name is None:
+            continue
+        if name.startswith(_WRITE_CALL_PREFIXES):
+            writes = True
+        if name in _CYPHER_METHODS and node.args:
+            first = node.args[0]
+            if (
+                isinstance(first, ast.Constant)
+                and isinstance(first.value, str)
+                and _WRITE_CYPHER.search(first.value)
+            ):
                 writes = True
-        elif isinstance(node, ast.Call):
-            name = _call_name(node)
-            if name is None:
-                continue
-            if name.startswith(_WRITE_CALL_PREFIXES):
-                writes = True
-            if name == "GraphClient":
-                has_uri = any(kw.arg == "uri" for kw in node.keywords) or node.args
-                if not has_uri:
-                    bare_client = True
+        if name == "GraphClient":
+            has_uri = any(kw.arg == "uri" for kw in node.keywords) or node.args
+            if not has_uri:
+                bare_client = True
     return writes, bare_client
 
 
