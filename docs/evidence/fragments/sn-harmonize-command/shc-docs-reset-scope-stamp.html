@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="reckon-type" content="evidence-fragment">
+  <meta name="plan-slug" content="sn-harmonize-command">
+    <meta name="node-id" content="shc-docs-reset-scope-stamp">
+  <title>A scoped docs reset stamps its batch even when it resets nothing</title>
+</head>
+<body>
+<main>
+  <h1 id="shc-docs-reset-scope-stamp-title">A scoped docs reset stamps its batch even when it resets nothing</h1>
+
+  <section>
+    <h2 id="shc-docs-reset-scope-stamp-defect">The defect, reproduced before repair</h2>
+    <p id="shc-docs-reset-scope-stamp-defect-body">
+      <code>reset_standard_name_docs</code> counted its eligible names and returned at once when the
+      count was zero. That return preceded the query that binds the batch to the run id, so a
+      harmonize anchor already at <code>docs_stage = 'pending'</code> reset nothing and stayed bound
+      only to whatever run had left it there. The scoped generate-docs claim then matched no node,
+      and the convergence gate halted the family after zero calls — the
+      <a href="/imas-codex/evidence/fragments/sn-harmonize-command/shc-family-eligibility-diagnosis.html">eligibility
+      diagnosis</a> measured exactly this on <code>electrostatic_potential</code>.
+    </p>
+    <p id="shc-docs-reset-scope-stamp-fix">
+      The reset and the scope stamp answer two different questions, so only the reset is gated on
+      eligibility now. A scoped call stamps its batch whenever a run id is set, whatever the reset
+      count; an unscoped call still writes nothing; <code>reset</code> carries a default so the
+      no-reset path reports a number rather than indexing an unbound result. The reset query, the
+      stamp query and the empty-input guard are unchanged.
+    </p>
+  </section>
+
+  <section>
+    <h2 id="shc-docs-reset-scope-stamp-tests">The tests, and the control</h2>
+    <p id="shc-docs-reset-scope-stamp-tests-body">
+      Three tests in <code>tests/standard_names/test_docs_reset_scope_stamp.py</code> run against the
+      package's disposable Neo4j instance. A scoped reset over two names already at
+      <code>docs_stage = 'pending'</code> reports <code>{"eligible": 0, "reset": 0}</code>, both nodes
+      carry the run id, and <code>claim_generate_docs_batch(scope_run_id=...)</code> returns both. An
+      unscoped reset over the same names returns the same zero result and leaves their carried run id
+      untouched. A scoped reset over an eligible name still snapshots a revision, resets the stage and
+      binds the run.
+    </p>
+    <p id="shc-docs-reset-scope-stamp-control">
+      The control restores the early return before the scope stamp and keeps its own run.
+      <code>test_scoped_reset_stamps_names_that_need_no_reset</code> fails there and the other two pass,
+      so the check is aimed at the early return rather than at the surrounding machinery: 1 failed,
+      2 passed, <code>EXIT=1</code>.
+    </p>
+  </section>
+
+  <section>
+    <h2 id="shc-docs-reset-scope-stamp-gate">The gate</h2>
+    <p id="shc-docs-reset-scope-stamp-gate-body">
+      Base <code>970cdb0d9</code> and head <code>9d8bde6be</code> were extracted with
+      <code>git archive</code> into separate trees under node-local <code>TMPDIR</code>, each with its
+      own <code>--basetemp</code>. The new file's arm reports 3 passed at head; at base the file does
+      not exist, so its arm is a collection error and carries no failure id. The two named stage files
+      report 21 failed / 42 passed in both arms. The default <code>tests/standard_names/</code> suite
+      with <code>-n 8</code> reports 103 failed / 8375 passed / 15 skipped in both arms, and the 107
+      failure ids are the same set on each side. Added failure count: <strong>0</strong>.
+    </p>
+    <p id="shc-docs-reset-scope-stamp-note">
+      Those pre-existing failures are outside this node's scope and were not triaged or repaired.
+      No live graph was written and no LLM was called: spend USD 0.
+    </p>
+  </section>
+</main>
+</body>
+</html>
