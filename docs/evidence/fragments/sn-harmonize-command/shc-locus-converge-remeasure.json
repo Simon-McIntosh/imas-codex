@@ -1,0 +1,141 @@
+{
+"acceptance_threshold": 0.85,
+"family": {
+"members": [
+"electrostatic_potential",
+"electrostatic_potential_at_langmuir_probe_position",
+"electrostatic_potential_at_outboard_midplane",
+"electrostatic_potential_at_wall",
+"floating_electrostatic_potential"
+],
+"seed": "electrostatic_potential"
+},
+"fixture": {
+"after": {
+"fixture_low_scoring_member": 0.8,
+"fixture_stable_member": 0.9
+},
+"before": {
+"fixture_low_scoring_member": 0.95,
+"fixture_stable_member": 0.9
+},
+"named": [
+"fixture_low_scoring_member"
+],
+"result": {
+"below_threshold": [
+{
+"after": 0.8,
+"before": 0.95,
+"id": "fixture_low_scoring_member"
+}
+],
+"fell": [
+{
+"after": 0.8,
+"before": 0.95,
+"id": "fixture_low_scoring_member"
+}
+]
+},
+"threshold": 0.85
+},
+"phases": {
+"before": {
+"anchor": "electrostatic_potential_at_langmuir_probe_position",
+"decision": "apply",
+"documentation_scores": {
+"electrostatic_potential": 0.849,
+"electrostatic_potential_at_langmuir_probe_position": null,
+"electrostatic_potential_at_outboard_midplane": null,
+"electrostatic_potential_at_wall": 0.8625,
+"floating_electrostatic_potential": 0.9375
+},
+"drift": 0.8,
+"estimate_basis": {
+"calls": 33,
+"mean_usd_per_call": 0.7405,
+"runs": 26,
+"total_usd": 24.4366
+},
+"estimate_usd": 3.7025,
+"harmonized": false,
+"invariant": [
+"electrostatic_potential",
+"",
+"",
+"",
+""
+],
+"lint": {
+"link_missing_reverse": 2
+},
+"lint_total": 2,
+"member_status": {
+"electrostatic_potential": {
+"docs_stage": "reviewed",
+"id": "electrostatic_potential",
+"name_stage": "accepted",
+"validation_status": "valid"
+},
+"electrostatic_potential_at_langmuir_probe_position": {
+"docs_stage": "pending",
+"id": "electrostatic_potential_at_langmuir_probe_position",
+"name_stage": "accepted",
+"validation_status": "valid"
+},
+"electrostatic_potential_at_outboard_midplane": {
+"docs_stage": "pending",
+"id": "electrostatic_potential_at_outboard_midplane",
+"name_stage": "reviewed",
+"validation_status": "valid"
+},
+"electrostatic_potential_at_wall": {
+"docs_stage": "accepted",
+"id": "electrostatic_potential_at_wall",
+"name_stage": "reviewed",
+"validation_status": "valid"
+},
+"floating_electrostatic_potential": {
+"docs_stage": "accepted",
+"id": "floating_electrostatic_potential",
+"name_stage": "accepted",
+"validation_status": "valid"
+}
+},
+"members": [
+"electrostatic_potential",
+"electrostatic_potential_at_langmuir_probe_position",
+"electrostatic_potential_at_outboard_midplane",
+"electrostatic_potential_at_wall",
+"floating_electrostatic_potential"
+],
+"phase": "before",
+"physical_base": "electrostatic_potential",
+"planned_calls": 5,
+"refusals": {},
+"seed": "electrostatic_potential",
+"status_counts": {
+"accepted": 2,
+"other": 3
+}
+}
+},
+"roster_check": {
+"member_matches": {
+"electrostatic_potential": 0,
+"electrostatic_potential_at_langmuir_probe_position": 0,
+"electrostatic_potential_at_outboard_midplane": 0,
+"electrostatic_potential_at_wall": 0,
+"floating_electrostatic_potential": 0
+},
+"members_in_west_rosters": [],
+"positive_control": "flux_surface_averaged_electron_density_at_plasma_boundary",
+"positive_control_expected": 10,
+"positive_control_match_count": 10,
+"roster_files": 14,
+"searched": "imas_codex/standard_names/manifests/reviews",
+"valid_non_west": true
+},
+"seed": "electrostatic_potential"
+}
