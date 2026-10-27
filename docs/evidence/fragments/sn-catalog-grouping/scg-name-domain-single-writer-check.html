@@ -1,0 +1,128 @@
+<h2 id="scg-name-domain-single-writer-check">A guard keeps a name's domain to the one writer</h2>
+
+<p><code>tests/standard_names/test_name_domain_single_writer.py</code> reads every
+Python module under <code>imas_codex/standard_names/</code>, extracts each string
+constant that parses as Cypher, and refuses three writes made outside
+<code>domain_decision.write_name_domain</code> and the functions it reaches: a
+<code>SET</code> of a standard name's <code>physics_domain</code> or
+<code>source_domains</code>; and a <code>MERGE</code>, <code>CREATE</code> or
+<code>DELETE</code> of a <code>HAS_PHYSICS_DOMAIN</code> relationship from one.
+It reads clauses rather than text, so <code>WHERE sn.physics_domain = $domain</code>
+is a read and does not trip it.</p>
+
+<p>Downstream of that, the check records what it already knows. The two derived-parent
+materialisers in <code>graph_store/graph_lineage.py</code> still seed their
+parent's scalar from the children's most frequent domain before calling the
+writer, which is the rule §3 retires and which no node of this section has
+removed yet. Those two are named in <code>EXEMPT_SITES</code> with their reason,
+and a second test fails when that table and the writes actually present
+disagree — so an exemption that is retired must be deleted, and a new direct
+write cannot join it silently.</p>
+
+<h3 id="scg-name-domain-single-writer-check-allowed">Every allowed site, and why</h3>
+
+<table>
+  <tr><th>Site</th><th>What it writes</th><th>Why it is allowed</th></tr>
+  <tr>
+    <td><code>domain_decision._WRITE_DOMAIN</code><br>
+      (<code>domain_decision.py:366</code>, executed by
+      <code>write_name_domain</code>)</td>
+    <td><code>sn.source_domains</code>, <code>sn.physics_domain</code>,
+      <code>DELETE old</code> and <code>MERGE (sn)-[:HAS_PHYSICS_DOMAIN]-&gt;(d)</code></td>
+    <td>The one writer. All three are set in one transaction so they cannot
+      disagree.</td>
+  </tr>
+  <tr>
+    <td>Any statement whose target variable is labelled with a label other than
+      <code>StandardName</code></td>
+    <td>A DD path's own <code>physics_domain</code> (e.g.
+      <code>graph_source_bindings.py:502</code> writes
+      <code>(sns:StandardNameSource)</code>)</td>
+    <td>Rule-level allowance: <code>IMASNode.physics_domain</code> is the source
+      of truth a name's decision reads, and a source node's domain is copied,
+      not decided.</td>
+  </tr>
+  <tr>
+    <td><code>graph_store/graph_lineage.py</code>,
+      <code>_materialize_derived_parent_rows</code></td>
+    <td><code>SET parent.physics_domain = coalesce($physics_domain, …) ←</code>
+      the children's most frequent domain</td>
+    <td>Recorded exemption: retiring the child rule edits a module outside this
+      node's write scope.</td>
+  </tr>
+  <tr>
+    <td><code>graph_store/graph_lineage.py</code>,
+      <code>_materialize_derived_parent_rows_batched</code></td>
+    <td><code>SET parent.physics_domain = coalesce(row.physics_domain, …) ←</code>
+      the same rule over the batch rows</td>
+    <td>Same exemption, same reason.</td>
+  </tr>
+</table>
+
+<p>A variable the statement leaves unlabelled counts as a name. The single
+materialiser's Cypher carries <code>parent</code> unlabelled — its label arrives
+through a substituted <code>__PARENT_MATCH__</code> fragment — so a reader that
+required a visible <code>:StandardName</code> would have reported the whole
+package clean while that write was present.</p>
+
+<h3 id="scg-name-domain-single-writer-check-controls">The controls</h3>
+
+<table>
+  <tr><th>Arm</th><th>Planted</th><th>Result</th></tr>
+  <tr>
+    <td>head, unmodified</td>
+    <td>nothing</td>
+    <td>10 passed. Both the writer's own three writes and the two recorded
+      exemptions are found, which is what makes "no other site" an observation
+      rather than a blind pass.</td>
+  </tr>
+  <tr>
+    <td>negative control, <code>graph_store</code> module</td>
+    <td><code>_PLANTED_DOMAIN_WRITE</code>: a
+      <code>SET sn.physics_domain = $physics_domain</code> on a matched
+      <code>:StandardName</code>, appended to
+      <code>graph_store/graph_catalog.py</code></td>
+    <td><code>FAILED …::test_no_module_writes_a_name_domain_outside_the_writer</code>
+      and <code>FAILED …::test_exempt_sites_are_exactly_the_recorded_ones</code>,
+      <code>EXIT=1</code>. The message names the site:
+      <code>graph_store/graph_catalog.py:2624 in _PLANTED_DOMAIN_WRITE: set
+      physics_domain on sn.physics_domain</code>.</td>
+  </tr>
+  <tr>
+    <td>negative control, non-<code>graph_store</code> module</td>
+    <td>the same planted write appended to
+      <code>imas_codex/standard_names/export.py</code></td>
+    <td>the same two failures, <code>EXIT=1</code>, naming
+      <code>export.py</code>.</td>
+  </tr>
+  <tr>
+    <td>baseline, <code>main</code> at <code>62aa4003e</code></td>
+    <td>—</td>
+    <td>the default <code>tests/standard_names</code> suite, run from its own
+      <code>git archive</code> tree. The added-failure count against head is
+      recorded in the run's manifest and its two logs.</td>
+  </tr>
+</table>
+
+<p>Both planted writes are <em>new</em> sites, not edits to an exempt one: a
+control planted inside <code>graph_lineage.py</code> would be indistinguishable
+from the recorded debt and would prove nothing about the rule.</p>
+
+<h3 id="scg-name-domain-single-writer-check-open">What the check still reports</h3>
+
+<p>Two direct scalar writes remain, both in
+<code>imas_codex/standard_names/graph_store/graph_lineage.py</code>:
+<code>parent.physics_domain = coalesce($physics_domain, parent.physics_domain)</code>
+in the single materialiser and its batched twin. The value is computed there —
+<code>Counter(child_domain_list)</code>, the most frequent child domain, with
+ties broken alphabetically — and the writer is then called with an undecided
+decision that keeps the current scalar, so the retired rule is still the origin
+of a derived parent's domain. Retiring it is the open piece of §3's one-writer
+item; until then the guard holds every other writer at zero:</p>
+
+<pre>tests/standard_names/test_name_domain_single_writer.py::test_no_module_writes_a_name_domain_outside_the_writer PASSED
+tests/standard_names/test_name_domain_single_writer.py::test_exempt_sites_are_exactly_the_recorded_ones PASSED</pre>
+
+<p>The scan covers 157 modules. An empty or short scan would pass every
+assertion vacuously, so one test asserts the module count and that the writer's
+own writes were among the findings.</p>
