@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="sn-review-through-jev">
   <meta name="plan-title" content="Review As Named Checks: Jev Judges, The Language Model Writes">
   <meta name="plan-summary" content="Decompose name and documentation review into Jev Scores and named-check Nouls, feed refine the failed checks, and keep a chat reviewer only for uncertain cases.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="done">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="22.0">
   <meta name="plan-capability-version" content="1.0">
@@ -20,11 +20,11 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names,review">
   <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;sn-judgment-evaluation#s2&quot;,&quot;sn-judgment-evaluation#s3&quot;,&quot;sn-judgment-evaluation#s4&quot;,&quot;sn-selection-over-generation#s4&quot;],&quot;s4&quot;:[&quot;sn-judgment-evaluation#s5&quot;,&quot;sn-house-style#s4&quot;,&quot;sn-selection-over-generation#s4&quot;],&quot;s5&quot;:[&quot;sn-review-through-jev#s3&quot;,&quot;sn-review-through-jev#s4&quot;],&quot;s6&quot;:[&quot;sn-judgment-evaluation#s6&quot;,&quot;sn-review-through-jev#s3&quot;,&quot;sn-review-through-jev#s4&quot;],&quot;s7&quot;:[&quot;sn-review-through-jev#s6&quot;]}">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;}">
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="318">
+<meta name="plan-version" content="320">
 <meta name="plan-modified" content="2026-10-27">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -232,7 +232,7 @@
     </p>
 
     <h2 id="s7">§7 — Delete what Jev took over</h2>
-    <section data-reckon="section" data-id="s7" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s7" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
     <p>
       For each decision that passed the rule, delete the incumbent's code path and seat rather
       than leaving both. That covers the quorum cycles that no longer run and the review seats
@@ -250,10 +250,11 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-srtj-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-review" data-written-at="2026-10-12" data-recommends-skill="/reckon-build sn-review-through-jev §2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-srtj-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-review" data-written-at="2026-10-12" data-recommends-skill="/reckon-build sn-review-through-jev §2" data-resolved-at="2026-10-27T17:47:22+00:00" data-resolved-by="reckon-build">
     <h4 class="r-fu-title">Name the checks first; it is the only section that needs no harness</h4>
     <div class="r-fu-body"><p>§2 can start now and is coordinator-heavy, since mapping 136 human reasons to checks is reading, not code. §3 waits on the evaluation module and golden A, and §4 on golden B, so the docs prototype is the one that takes longest to become measurable.</p></div>
     <pre class="r-fu-prompt">/reckon-build sn-review-through-jev §2</pre>
+    <p class="r-fu-outcome">done — no followup. Jev decides name and documentation review with a 5% paid panel audit; refine reads the failed checks; the quorum's deciding path is deleted (merges a4461ab5e, 35214991e, d15c705db).</p>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -1277,6 +1278,9 @@ without re-deriving it is visible.</p></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261027T141326199592-srtj-quorum-deciding-retire" data-who="reckon-build" data-when="2026-10-27T17:11:14Z">
     <div class="r-comment-body"><p>worktree srtj-quorum-deciding-retire, commits 18575cce1..3218855d3 on detached HEAD off 137eb8fd4; not merged or pushed by this worker</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-close-s7" data-who="reckon-build" data-when="2026-10-27T17:45:00Z">
+    <div class="r-comment-body"><p>§7 closed. The quorum no longer decides any review: its persisting cycle and the incumbent fallback are deleted, unjudged items go to the single chat reviewer, and the non-persisting runner remains the 5% audit (merge <code>d15c705db</code>, review 103/120, zero added failures). Every section of the plan is now done. <a href="/imas-codex/evidence/archive/sn-review-through-jev-landed.html#s7-quorum-deciding-retired">evidence</a></p></div>
 </div>
 </section>
 </main>
