@@ -1642,6 +1642,12 @@ def _terminal_recovery_preserved_payload(
         if path not in target_context["dd_paths"]
         and path not in target_context["source_ids"]
     ]
+    # The recovery statement stamps the name's modification time in the same SET
+    # clause that drops the binding, so the stamp is a field the mutation writes.
+    # A preserved-state proof that includes it can never hold: the postflight
+    # read would compare the before-value against the stamp this very pass set.
+    # Excluded on the same footing as the source-side mutable fields.
+    name_properties.pop("updated_at", None)
     return {
         "source": {
             "element_id": source.get("element_id"),
