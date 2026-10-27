@@ -482,9 +482,23 @@ def write_standard_names(
         )
 
         # Emit structural edges: HAS_PARENT, HAS_ERROR, HAS_PREDECESSOR,
-        # HAS_SUCCESSOR, IN_CLUSTER, HAS_PHYSICS_DOMAIN.
+        # HAS_SUCCESSOR, IN_CLUSTER.
         # Tail pass — all nodes in this batch exist before edges are written.
-        skeleton_candidate_ids = services._write_standard_name_edges(write_gc, names)
+        # The domain pair is withheld: a name's physics_domain, source_domains
+        # and HAS_PHYSICS_DOMAIN edges belong to domain_decision.write_name_domain,
+        # which rewrites all three together, so a payload domain must not mint
+        # edges here that the one writer would then leave beside its own.
+        structural_names = [
+            {
+                key: value
+                for key, value in n.items()
+                if key not in ("physics_domain", "source_domains")
+            }
+            for n in names
+        ]
+        skeleton_candidate_ids = services._write_standard_name_edges(
+            write_gc, structural_names
+        )
 
         from imas_codex.standard_names.source_invariant import require_producing_sources
 
