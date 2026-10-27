@@ -911,6 +911,32 @@ def extract_cocos_labels_for_version(version: str) -> dict[str, str]:
     return labels
 
 
+def _reference_cocos_labels(
+    version_data: dict[str, dict],
+) -> tuple[str | None, dict[str, str]]:
+    """Return the newest 3.x version present and the labels it declares.
+
+    The 4.x DD line dropped ``cocos_label_transformation`` from its XML, so the
+    newest 3.x version in the build's scope is the only authority that declares
+    XML labels. Both the forward-port backfill and the stale-label clear read
+    this: a label is only judged by a version that could have declared it.
+    """
+    sorted_versions = sorted(version_data.keys())
+    last_3x: str | None = None
+    for v in reversed(sorted_versions):
+        if v.startswith("3."):
+            last_3x = v
+            break
+
+    ref_labels: dict[str, str] = {}
+    if last_3x:
+        for path, info in version_data[last_3x]["paths"].items():
+            label = info.get("cocos_transformation_type")
+            if label:
+                ref_labels[path] = label
+    return last_3x, ref_labels
+
+
 def _backfill_cocos_labels(
     client: "GraphClient", version_data: dict[str, dict]
 ) -> tuple[int, set[str]]:
@@ -941,18 +967,7 @@ def _backfill_cocos_labels(
     latest_paths = version_data[latest_version]["paths"]
 
     # Build reference labels from the latest 3.x version
-    last_3x: str | None = None
-    for v in reversed(sorted_versions):
-        if v.startswith("3."):
-            last_3x = v
-            break
-
-    ref_labels: dict[str, str] = {}
-    if last_3x:
-        for path, info in version_data[last_3x]["paths"].items():
-            label = info.get("cocos_transformation_type")
-            if label:
-                ref_labels[path] = label
+    _last_3x, ref_labels = _reference_cocos_labels(version_data)
 
     updates: list[dict] = []
     handled: set[str] = set()
@@ -1971,21 +1986,39 @@ def phase_build(
         backfill_count, backfilled_paths = _backfill_cocos_labels(client, version_data)
         stats["cocos_labels_backfilled"] = backfill_count
 
-        # Clear stale labels — exclude BOTH XML-sourced AND backfilled paths.
-        # Clear cocos_label_source in the SAME pass: a path that loses its
-        # transformation type must not keep a dangling label source, or it
-        # enters a half-state (source set, type null) that is invisible to
-        # COCOS-filtered queries. Removed/historical paths hit exactly this.
-        all_labeled = latest_labeled | backfilled_paths
+        # Clear stale labels — exclude XML-sourced, backfilled AND
+        # 3.x-declared paths. Clear cocos_label_source in the SAME pass: a
+        # path that loses its transformation type must not keep a dangling
+        # label source, or it enters a half-state (source set, type null)
+        # that is invisible to COCOS-filtered queries.
+        #
+        # The clear is scoped to what THIS build examined. Builds are run
+        # sharded by IDS (``--ids``) and incrementally by version
+        # (``--from-version``), so a global clear would strip every label the
+        # shard did not itself re-derive. A label leaves the graph only when a
+        # build covering its path — and a version that can declare it — shows
+        # the DD no longer declares it.
+        _last_3x, ref_labels = _reference_cocos_labels(version_data)
+        authority_covered = _last_3x is not None
+        scope_ids = {
+            p.split("/", 1)[0] for data in version_data.values() for p in data["paths"]
+        }
+        all_labeled = latest_labeled | backfilled_paths | set(ref_labels)
         client.query(
             """
             MATCH (p:IMASNode)
             WHERE p.cocos_transformation_type IS NOT NULL
+            AND split(p.id, '/')[0] IN $scope_ids
             AND NOT p.id IN $labeled_paths
+            AND ($authority_covered
+                 OR NOT coalesce(p.cocos_label_source, '') IN $authority_sources)
             SET p.cocos_transformation_type = null,
                 p.cocos_label_source = null
             """,
+            scope_ids=list(scope_ids),
             labeled_paths=list(all_labeled),
+            authority_covered=authority_covered,
+            authority_sources=["xml", "inferred_forward"],
         )
 
         # Groom any pre-existing half-state left by earlier builds: a source
