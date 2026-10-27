@@ -58,7 +58,7 @@
 "f51c39f5-5332-471b-9294-e05e8f4eadde",
 "fce91144-2df6-4613-8ad8-4695eac0b17a"
 ],
-"run_ids_source": "the apply's own --json summary",
+"run_ids_source": "selected from the exact LLMCost rows written between the apply log's own '# started' and '# ended' lines; the summary's scope run ids own none",
 "run_selection": {
 "all_claimed_names_in_roster": true,
 "claimed_names": {
@@ -74,16 +74,22 @@
 "f51c39f5-5332-471b-9294-e05e8f4eadde",
 "fce91144-2df6-4613-8ad8-4695eac0b17a"
 ],
+"pool_run_ids_with_cost_rows": [
+"f51c39f5-5332-471b-9294-e05e8f4eadde",
+"fce91144-2df6-4613-8ad8-4695eac0b17a"
+],
 "pool_run_rows": {
 "f51c39f5-5332-471b-9294-e05e8f4eadde": {
 "cap": 4.0,
 "cost_spent": 0.082293,
+"id": "f51c39f5-5332-471b-9294-e05e8f4eadde",
 "started_at": "2026-10-27T14:26:37.203986Z",
 "stop_reason": "no_eligible_work"
 },
 "fce91144-2df6-4613-8ad8-4695eac0b17a": {
 "cap": 3.917707,
 "cost_spent": 0.178029,
+"id": "fce91144-2df6-4613-8ad8-4695eac0b17a",
 "started_at": "2026-10-27T14:35:38.457804Z",
 "stop_reason": "no_eligible_work"
 }
@@ -92,7 +98,7 @@
 "f51c39f5-5332-471b-9294-e05e8f4eadde": 0.082293,
 "fce91144-2df6-4613-8ad8-4695eac0b17a": 0.178029
 },
-"selection": "the runs that wrote LLMCost rows between the apply's start and end; the summary's scope run ids own no cost rows",
+"selection": "selected from the exact LLMCost rows written between the apply log's own '# started' and '# ended' lines; the summary's scope run ids own none",
 "summary_scope_run_ids": [
 "67a45b57-d1ad-48f7-b904-f273e7fac30f",
 "c1560b3c-54c7-4a28-b40b-075d97b17acd"
@@ -122,6 +128,10 @@
 "below_threshold": [],
 "fell": []
 },
+"selection_window_utc": {
+"ended": "2026-10-27T14:42:56Z",
+"started": "2026-10-27T14:26:17Z"
+},
 "stamped": false,
 "summary": {
 "batches_run": 2,
@@ -145,6 +155,10 @@
 "total_selected": 5,
 "total_touched": 3
 },
+"summary_scope_run_ids": [
+"67a45b57-d1ad-48f7-b904-f273e7fac30f",
+"c1560b3c-54c7-4a28-b40b-075d97b17acd"
+],
 "wall_seconds": 999.0
 }
 ],

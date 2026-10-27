@@ -6,8 +6,9 @@ per-member documentation score.  ``record-apply`` ingests a captured apply log,
 the graph owner of the ``LLMCost`` aggregation, and ``render`` assembles the
 HTML fragment from the JSON record.
 
-Every cost figure is selected by the exact run id the apply's own summary
-reported, never by a prefix.  ``aggregate_calls_per_phase``,
+``select-runs`` reads the exact run ids that own this apply's ``LLMCost``
+rows from the apply log's own start and end window; the campaign summary's
+``result.run_ids`` are scope ids and own none.  ``aggregate_calls_per_phase``,
 ``aggregate_spend_per_phase`` and ``aggregate_spend_per_name`` are imported
 from ``graph_store.graph_cost_and_claims``, the module that owns them, so this
 runner does not depend on the ``graph_ops`` entrypoint forwarding them.
@@ -43,6 +44,15 @@ SEED = "electrostatic_potential"
 POSITIVE_CONTROL = "flux_surface_averaged_electron_density_at_plasma_boundary"
 POSITIVE_CONTROL_EXPECTED = 10
 COST_CAP_USD = 4.00
+# Where the run ids used for cost selection come from.  The campaign summary's
+# ``result.run_ids`` are scope ids and own no cost rows; the rows hang on the
+# drain runs the apply starts for each batch, so they are selected from the
+# ``LLMCost`` rows written inside the apply's own start/end window.
+RUN_IDS_SOURCE = (
+    "selected from the exact LLMCost rows written between the apply log's own "
+    "'# started' and '# ended' lines; the summary's scope run ids own none"
+)
+RUN_IDS_UNSELECTED = "unselected: run select-runs after the apply"
 # One held attachment as the reconciliation pass reports it: the DD path, the
 # name it would have stranded, and the pass's reason.
 HELD_ATTACHMENT = re.compile(r"(\S+) → (\S+) \(([^)]*)\)")
@@ -258,12 +268,15 @@ def record_apply(
         None,
     )
     entry = summary[0] if summary else {}
+    # The summary names scope ids, which are not the ids that carry cost rows.
+    # They are recorded for the comparison; the cost selection is set later by
+    # ``select-runs`` from the graph, so nothing here claims to source it.
+    summary_scope_ids = [
+        rid for rid in (entry.get("result") or {}).get("run_ids") or [] if rid
+    ] + [rid for rid in (run_ids or []) if rid]
     joined = " ".join(ln.strip() for ln in lines)
     family = next((m.groupdict() for m in map(FAMILY_STATUS.search, [joined]) if m), {})
     totals = next((m.groupdict() for m in map(SCOPE_TOTALS.search, [joined]) if m), {})
-    chosen_ids = [rid for rid in (run_ids or []) if rid]
-    if summary is not None:
-        chosen_ids = (entry.get("result") or {}).get("run_ids") or chosen_ids
     payload = read_results()
     payload.setdefault("applies", []).append(
         {
@@ -294,12 +307,9 @@ def record_apply(
             if totals.get("applied")
             else None,
             "summary": entry.get("result"),
-            "run_ids": chosen_ids,
-            "run_ids_source": (
-                "the apply's own --json summary"
-                if summary is not None
-                else "named by the operator from the run's own rows: the exact id, never a prefix"
-            ),
+            "run_ids": [],
+            "run_ids_source": RUN_IDS_UNSELECTED,
+            "summary_scope_run_ids": summary_scope_ids,
             "held_attachments": held_attachments(lines),
             "score_regressions": entry.get("score_regressions"),
         }
@@ -308,13 +318,89 @@ def record_apply(
     print(json.dumps(payload["applies"][-1], sort_keys=True))
 
 
+def select_runs(log_path: str) -> None:
+    """Select the run ids that own this apply's cost rows, from the graph.
+
+    The summary's ``result.run_ids`` are scope ids and own no ``LLMCost`` rows,
+    so selecting on them reads zero spend.  The rows hang on the drain runs the
+    apply starts per batch.  They are selected by the apply log's own start and
+    end, which bounds the row set to the rows this apply could have written.
+    """
+    from imas_codex.graph.client import GraphClient
+
+    lines = Path(log_path).read_text().splitlines()
+    started = next((ln.split(":", 1)[1].strip() for ln in lines
+                    if ln.startswith("# started:")), None)
+    ended = next((ln.split(":", 1)[1].strip() for ln in lines
+                  if ln.startswith("# ended:")), None)
+    if not started or not ended:
+        raise RuntimeError("the apply log carries no '# started'/'# ended' lines")
+    payload = read_results()
+    roster = set(payload.get("family", {}).get("members") or [])
+    if not roster:
+        raise RuntimeError("the family roster is absent from the record")
+    with GraphClient() as graph:
+        rows = graph.query(
+            """
+            MATCH (c:LLMCost)
+            WHERE c.llm_at >= datetime($started) AND c.llm_at <= datetime($ended)
+            RETURN c.run_id AS run_id, count(c) AS calls,
+                   sum(c.llm_cost) AS usd,
+                   collect(DISTINCT c.standard_name_ids) AS name_lists
+            ORDER BY run_id
+            """,
+            started=started,
+            ended=ended,
+        )
+    pool_ids = [row["run_id"] for row in rows]
+    claimed: dict[str, list[str]] = {}
+    spend: dict[str, float] = {}
+    for row in rows:
+        names = sorted({name for group in row["name_lists"] or []
+                        for name in (group or []) if name})
+        claimed[row["run_id"]] = names
+        spend[row["run_id"]] = round(float(row["usd"] or 0.0), 6)
+    pool_rows: dict[str, dict] = {}
+    if pool_ids:
+        with GraphClient() as graph:
+            run_rows = graph.query(
+                """
+                UNWIND $ids AS rid
+                MATCH (r:SNRun {id: rid})
+                RETURN r.id AS id, r.cost_limit AS cap,
+                       r.cost_spent AS cost_spent, r.started_at AS started_at,
+                       r.stop_reason AS stop_reason
+                """,
+                ids=pool_ids,
+            )
+        pool_rows = {row["id"]: row for row in run_rows}
+    entry = (payload.get("applies") or [{}])[-1]
+    entry["run_ids"] = pool_ids
+    entry["run_ids_source"] = RUN_IDS_SOURCE
+    entry["selection_window_utc"] = {"started": started, "ended": ended}
+    entry["run_selection"] = {
+        "selection": RUN_IDS_SOURCE,
+        "pool_run_ids": pool_ids,
+        "pool_run_ids_with_cost_rows": pool_ids,
+        "claimed_names": claimed,
+        "pool_run_rows": pool_rows,
+        "pool_run_spend": spend,
+        "all_claimed_names_in_roster": all(
+            set(names) <= roster for names in claimed.values()
+        ),
+        "summary_scope_run_ids": entry.get("summary_scope_run_ids") or [],
+    }
+    write_results(payload)
+    print(json.dumps(entry["run_selection"], sort_keys=True))
+
+
 def record_cost() -> None:
     """Record the apply's calls, per-phase spend, per-name cost and its scope.
 
-    Every figure is selected by the exact run ids the apply's own summary
-    reported.  The per-name map is the run's cost rows apportioned to the
-    names each row carries, so its keys are the names the run actually paid
-    for; comparing them with the family roster is the out-of-family check.
+    Every figure is selected by the exact run ids ``select-runs`` recorded.
+    The per-name map is the run's cost rows apportioned to the names each row
+    carries, so its keys are the names the run actually paid for; comparing
+    them with the family roster is the out-of-family check.
     """
     from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
         aggregate_calls_per_phase,
@@ -326,9 +412,14 @@ def record_cost() -> None:
     if not payload.get("applies"):
         raise RuntimeError("record the apply before its cost")
     entry = payload["applies"][-1]
+    if entry.get("run_ids_source") != RUN_IDS_SOURCE or not entry.get("run_selection"):
+        raise RuntimeError(
+            "run select-runs first: cost is selected from the LLMCost rows the "
+            "apply window owns, not from the summary's scope ids"
+        )
     run_ids = [r for r in (entry.get("run_ids") or []) if r]
     if not run_ids:
-        raise RuntimeError("the apply summary named no run id to select on")
+        raise RuntimeError("the apply window owns no LLMCost rows to select on")
     services = _CostServices()
     phases: dict[str, dict[str, float]] = {}
     per_name: dict[str, float] = {}
@@ -640,6 +731,38 @@ def verify() -> int:
     scope = apply_entry.get("scope_check") or {}
     if scope.get("outside_roster"):
         problems.append(f"names outside the roster: {scope['outside_roster']}")
+    # Provenance: the cost selection must name the LLMCost window it came from
+    # and agree with it, so no figure rests on the campaign summary's scope ids.
+    selection = apply_entry.get("run_selection") or {}
+    if apply_entry.get("run_ids_source") != RUN_IDS_SOURCE:
+        problems.append(
+            "run_ids_source does not state the LLMCost-window selection: "
+            f"{apply_entry.get('run_ids_source')!r}"
+        )
+    if not selection:
+        problems.append("no run selection recorded")
+    else:
+        cost_ids = list(cost.get("run_ids") or [])
+        pool_ids = list(selection.get("pool_run_ids") or [])
+        if sorted(cost_ids) != sorted(pool_ids):
+            problems.append(
+                f"cost run ids {cost_ids} are not the selected window ids {pool_ids}"
+            )
+        if sorted(apply_entry.get("run_ids") or []) != sorted(pool_ids):
+            problems.append(
+                f"run_ids {apply_entry.get('run_ids')} disagree with the selection"
+            )
+        if not selection.get("all_claimed_names_in_roster"):
+            problems.append("a selected run claims a name outside the roster")
+        if set(pool_ids) & set(selection.get("summary_scope_run_ids") or []):
+            problems.append(
+                "a selected run is a summary scope id, which owns no cost rows"
+            )
+        window_spend = sum((selection.get("pool_run_spend") or {}).values())
+        if cost and abs(window_spend - float(cost.get("spend_usd") or 0.0)) > 0.01:
+            problems.append(
+                "the selected run ids' spend disagrees with the recorded cost"
+            )
     if not before or not after:
         problems.append("a before/after snapshot is missing")
     else:
@@ -700,13 +823,8 @@ def main() -> None:
         "--cost-limit", dest="cost_limit", type=float, default=COST_CAP_USD
     )
     rec.add_argument("--dry-run-log", dest="dry_run_log", default=None)
-    rec.add_argument(
-        "--run-id",
-        dest="run_ids",
-        action="append",
-        default=None,
-        help="the exact run id whose LLMCost rows this apply wrote; repeatable",
-    )
+    sel = subcommands.add_parser("select-runs")
+    sel.add_argument("log", help="the apply log carrying its '# started'/'# ended' lines")
     subcommands.add_parser("record-cost")
     subcommands.add_parser("render")
     subcommands.add_parser("verify")
@@ -731,8 +849,9 @@ def main() -> None:
             args.wall_seconds,
             args.cost_limit,
             args.dry_run_log,
-            args.run_ids,
         )
+    elif args.command == "select-runs":
+        select_runs(args.log)
     elif args.command == "record-cost":
         record_cost()
     elif args.command == "render":
