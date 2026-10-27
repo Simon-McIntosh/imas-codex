@@ -1,0 +1,71 @@
+<h2 id="scg-name-domain-exempt-writes">The derived-parent domain write goes through the one writer</h2>
+
+<p>The single-writer guard refused every direct <code>SET</code> of a standard
+name's domain except two, both in the derived-parent materialiser
+(<code>graph_store/graph_lineage.py</code>), and each carried the same reason:
+the materialiser seeded the parent's scalar from its children's most frequent
+domain before calling the writer. The rule held only by exemption, so the guard
+could not see a new direct write as a defect while those two entries stood.</p>
+
+<p>Both entries are gone. The majority rule now lives in
+<code>domain_decision.derived_parent_domain_decision(decision, child_domains)</code>:
+a stored choice wins, because a settled decision outranks an inherited one;
+otherwise the domain most children carry becomes the parent's choice, ties
+broken by name so the same child set always yields the same parent; a parent
+whose children carry no domain keeps the scalar it holds and stays undecided.
+The materialiser writes no domain at all — it calls
+<code>write_name_domain</code> for every parent it materialises, passing that
+decision, so the scalar, the source set and the <code>HAS_PHYSICS_DOMAIN</code>
+edges land in the writer's one transaction.</p>
+
+<p>One value was carried across one step further than the exemption named: the <code>StandardNameSource</code>
+copy (<code>sns.physics_domain = coalesce(parent.physics_domain, ...)</code>)
+read the parent's scalar from the same statement that wrote it. With that write
+retired the copy now reads the derived domain from the statement's own
+parameter, so the composed source's recorded domain is unchanged.</p>
+
+<h3>What the guard reads now</h3>
+
+<table>
+  <tr><th>before</th><th>after</th></tr>
+  <tr>
+    <td><code>_clauses</code> / <code>_CLAUSE_RE</code>, a second clause parser
+    in the test</td>
+    <td><code>cli.sn.cypher_mutation_clause</code>, the classifier the
+    write-suppressing review run already uses, and
+    <code>cli.sn.CYPHER_LITERAL_OR_COMMENT</code> to blank the literal and
+    comment spans before any clause is read</td>
+  </tr>
+  <tr>
+    <td><code>_NODE_LABEL_RE</code> / <code>_node_labels</code></td>
+    <td><code>graph.cypher_property_check.NODE_BINDING_RE</code>, promoted to a
+    public name because the guard reads it across modules</td>
+  </tr>
+  <tr>
+    <td><code>_cypher_literals</code>, an AST walk over constant strings</td>
+    <td><code>graph.cypher_property_check.python_cypher_strings(path, require_property=False)</code>,
+    the surviving AST reader, which decides for itself which strings are
+    Cypher</td>
+  </tr>
+  <tr>
+    <td>clause bodies split by the test's own keyword table</td>
+    <td><code>graph.cypher_property_check.cypher_set_blocks</code>, the SET
+    splitter the <code>updated_at</code> audit uses</td>
+  </tr>
+</table>
+
+<p>Blanked literals and comments change what counts: a commented-out
+<code>SET sn.physics_domain</code> and one quoted inside another string are no
+longer writes, while a real one beside them still is. Three tests hold that,
+and the guard's table is now empty, so
+<code>test_exempt_sites_are_exactly_the_recorded_ones</code> asserts that no
+outside write of any kind exists in the package.</p>
+
+<h3>Evidence</h3>
+
+<ul>
+  <li>logs, with literal commands and both arms, are listed in the run's
+  <code>manifest.md</code>; the negative control plants one commented
+  <code>SET sn.physics_domain</code> (guard green) and then one real
+  <code>SET</code> beside it (guard red, two failing ids).</li>
+</ul>
