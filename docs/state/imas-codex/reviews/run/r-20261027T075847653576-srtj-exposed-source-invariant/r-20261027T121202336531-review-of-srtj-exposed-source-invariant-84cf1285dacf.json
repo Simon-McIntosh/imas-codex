@@ -27,6 +27,11 @@
       "kind": "exempted",
       "reason": "gate isolation and log-header wording; the reviewer confirmed the measurement stands",
       "recorded_at": "2026-10-27T13:08:37.706685+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "gate isolation and log-header wording; the reviewer confirmed the measurement stands",
+      "recorded_at": "2026-10-27T13:08:40.588526+00:00"
     }
   },
   "findings": [
