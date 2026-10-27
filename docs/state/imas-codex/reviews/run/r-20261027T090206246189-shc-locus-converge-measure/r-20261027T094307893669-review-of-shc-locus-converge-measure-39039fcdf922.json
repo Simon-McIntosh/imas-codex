@@ -1,0 +1,50 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-27T09:56:39.873Z",
+  "dispatched_at": "2026-10-27T09:45:07Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-measure-run.py",
+      "line": 313,
+      "severity": "non-blocking",
+      "text": "the human-summary branch derives the apply's `stamped` flag from the family's `applied` count, discarding the `stamped` group that SCOPE_TOTALS captured on the line above; a family that applies without stamping (exactly this run's outcome) would be recorded stamped=True, which flips the rendered verdict to \"converged\" at line 547 though no member's score moved. The delivered record is unaffected because its apply log carried the --json summary, so this path was never exercised."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-measure-run.py",
+      "line": 806,
+      "severity": "non-blocking",
+      "text": "check() stops at the second dry run's planned calls and never asserts two conditions the node's done-when names: the convergence verdict with the below-0.85 members named, and the held stranding detaches with their names and DD paths. Both are present in the landed record, but a renderer that dropped the below-threshold naming or a reconciliation that held an unasserted extra detach would still exit EXIT=0, so the gate protects four of the six recorded conditions and not these two."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-measure-run.py",
+      "line": 558,
+      "severity": "non-blocking",
+      "text": "`cost_rows = cost.get(\"phases\") or cost.get(\"phases\") or {}` reads the same key twice, so the second operand is unreachable; it is a duplicate of the first rather than a fallback to a different source, and conveys nothing."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-measure-run.py",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "the module duplicates the capability of its sibling docs/evidence/fragments/sn-harmonize-command/shc-locus-remeasure-rerun-run.py rather than extending it: the docstring's lead paragraph, every module constant, and the full function set (read_results, write_results, _fmt, roster_check, snapshot, fixture, held_attachments, record_apply, record_cost, _score_rows, render, main) are carried over, with 530 diff lines between the two files. Only check() and the direct cost-owner import are new. The node was fenced out of the sibling path, so extraction was not available to it; the observation is recorded for a shared helper, not charged against this node's correctness."
+    }
+  ],
+  "project": "imas-codex",
+  "review_run_id": "r-20261027T094307893669-review-of-shc-locus-converge-measure-39039fcdf922",
+  "reviewed_base_sha": "6c0c4cfe2b0aa823c028629890b0b3ec830975ff",
+  "reviewed_head_sha": "39039fcdf9227cdde108f0c0a1d2b01585493d34",
+  "reviewed_run_id": "r-20261027T090206246189-shc-locus-converge-measure",
+  "rubric_text": "VERDICT goal: the node's goal is to re-measure the electrostatic-potential locus family on the fixed review cascade; docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-measure.html:1-39 lands that measurement as an evidence fragment with the roster check, the dry run, the apply's cost and scope, every member's before/after score, the held detach and the convergence verdict.\nVERDICT done_when: the done-when asks the html and its JSON to hold the dry run, the figures, the out-of-family check, the convergence answer and the per-name cost, with a log ending in a real EXIT=; logs/gate-runner.log records revision 39039fcdf and a final line EXIT=0, and the fragment holds each named item.\nVERDICT write_paths: the declared scope is the three sn-harmonize-command/shc-locus-converge-measure files plus a figures directory; git diff --stat 6c0c4cfe2..39039fcdf shows only those three files, 1251 insertions, and the figures directory is unused rather than escaped.\nVERDICT manifest: read; it records status complete, commit 39039fcdf, the gate command and logs/gate-runner.log, the headline metrics that the fragment repeats, and files the anchor-batch no-eligible-work discrepancy under outside_scope.\nVERDICT diff: one commit against base 6c0c4cfe2 adds the runner (880 lines), the HTML fragment (39 lines) and the JSON record (332 lines); all inside the declared scope, no product source touched.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: shc-locus-converge-measure.html:2-3 records the family re-measured with the apply's real outcome (0 calls, USD 0.0000 of 4.00, halted at 1 of 2 batches), which is what the goal asked to measure.\nSCORE evidence: 16\nJUSTIFICATION evidence: logs/gate-runner.log ends EXIT=0 at revision 39039fcdf and its printed line reconciles with the fragment, and the out-of-family absence is proved against control run 1805a6c5 rather than assumed (shc-locus-converge-measure-run.py:459-478), but the gate leaves the convergence naming unasserted (line 806).\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in git diff 6c0c4cfe2..39039fcdf lies inside the three declared evidence paths, and no product source, test or figure outside them was touched.\nSCORE durability: 13\nJUSTIFICATION durability: the fixture at shc-locus-converge-measure-run.py:183-205 reddens if docs_score_regressions stops naming a below-threshold member, and check() at line 780 asserts EXIT=0, the USD 4.00 cap, the member score keys and a zero out-of-family count, but nothing runs check() automatically and two done-when conditions are unguarded.\nSCORE fit: 16\nJUSTIFICATION fit: shc-locus-converge-measure-run.py:1-30 follows the idiom of its sibling runners and carries no plan label, phase id or changelog prose, though line 558 keeps a dead duplicated expression.\nSCORE reuse: 12\nJUSTIFICATION reuse: no shared owner for an evidence-fragment runner exists under imas_codex/ (the search over docs/evidence/fragments/sn-harmonize-command found eight bespoke siblings and no shared helper), so the addition forks no owned mechanism, but it duplicates shc-locus-remeasure-rerun-run.py rather than extending it.\n",
+  "scores": {
+    "durability": 13,
+    "evidence": 16,
+    "fit": 16,
+    "goal_fidelity": 17,
+    "reuse": 12,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T09:57:58.337704+00:00",
+  "total": 94
+}
