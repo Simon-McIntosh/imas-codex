@@ -9,6 +9,13 @@
     "imas_codex/standard_names/pools.py:1"
   ],
   "completed_at": "2026-10-27T10:24:01.877Z",
+  "dimension_dispositions": {
+    "scope_discipline": {
+      "kind": "exempted",
+      "reason": "every out-of-fence path was granted by the coordinator during the run",
+      "recorded_at": "2026-10-27T10:30:33.800750+00:00"
+    }
+  },
   "dispatched_at": "2026-10-27T10:08:11Z",
   "finding_dispositions": {
     "0": {
