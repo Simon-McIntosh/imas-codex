@@ -13,6 +13,13 @@
   ],
   "call_sites_emission": "sites",
   "completed_at": "2026-10-27T10:42:11.399Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "shc-docs-reset-scope-stamp",
+      "recorded_at": "2026-10-27T10:47:58.547424+00:00"
+    }
+  },
   "dispatched_at": "2026-10-27T10:29:14Z",
   "findings": [
     {
