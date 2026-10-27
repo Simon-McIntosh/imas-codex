@@ -36,6 +36,11 @@
       "kind": "exempted",
       "reason": "the finding carries no text",
       "recorded_at": "2026-10-27T10:48:16.519971+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "the finding carries no text",
+      "recorded_at": "2026-10-27T10:48:22.112094+00:00"
     }
   },
   "findings": [
