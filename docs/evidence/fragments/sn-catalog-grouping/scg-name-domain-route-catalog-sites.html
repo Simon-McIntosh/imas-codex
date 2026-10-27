@@ -38,6 +38,18 @@ one transaction.</p>
       scalar otherwise (undecided, with that reason recorded), a carried
       correction only when the rename preserves meaning, and the edges from the
       migrated sources.</td>
+  <tr>
+    <td><code>graph_catalog.write_standard_names</code>, the structural edge
+      pass it delegates to <code>graph_lineage._write_standard_name_edges</code></td>
+    <td>The pass was handed the batch as-is, and its
+      <code>HAS_PHYSICS_DOMAIN</code> branch minted an edge per entry of the
+      payload's <code>physics_domain</code> and <code>source_domains</code> —
+      edges the one writer never saw, and which it could therefore never
+      withdraw.</td>
+    <td>The batch is handed on with those two fields removed, so the pass mints
+      no domain edge. The domain, its source domains and its edges are written
+      together by <code>write_name_domain</code>, which deletes the edges it
+      replaces.</td>
   </tr>
 </table>
 
@@ -82,16 +94,43 @@ outside scope rather than changed here.</p>
       <code>test_persist_refined_name_carries_the_stored_decision_through_the_writer</code>.
       The catalog site's test is unaffected, as it exercises the other path.</li>
   <li>Gate, default markers at head and base with <code>-n 8</code>: head
-      <code>106 failed, 8376 passed</code> against base
-      <code>73 failed, 8409 passed</code>. Normalising the base ids to
-      repository-relative paths leaves 33 head-only ids: 32 from
-      <code>TestEditLifecycle</code>/rename fixtures that fail identically at
-      both arms when run in isolation (<code>4 failed</code> each — a test
-      service-wiring ordering defect, not this change), and one invariant test,
-      <code>test_metadata_invariants::test_physics_domain_uses_coalesce</code>,
-      which asserts the very <code>coalesce</code> write this node removed.</li>
+      <code>73 failed, 8410 passed, 11 skipped</code> against base
+      <code>73 failed, 8409 passed, 11 skipped</code>; the added-failure count
+      is <strong>0</strong>.</li>
   <li>Gate, <code>-m graph</code> at head and base with <code>-n 8</code>: head
-      <code>59 failed, 310 passed</code> against base
-      <code>60 failed, 306 passed</code>; the added-failure count is
+      <code>60 failed, 309 passed, 19 skipped</code> against base
+      <code>60 failed, 306 passed, 20 skipped</code>; the added-failure count is
       <strong>0</strong> and both new path tests pass at the head.</li>
 </ul>
+
+<h3 id="scg-name-domain-route-catalog-sites-invariant">The invariant that guarded the old write</h3>
+
+<p><code>TestWriteCypherInvariants::test_physics_domain_uses_coalesce</code>
+asserted that <code>coalesce(</code> and <code>physics_domain</code> co-occurred
+in this path's Cypher, so a null payload could not clobber a stored domain. A
+value that must be preserved is not the contract any more, so the test now
+asserts the stronger property: the catalog write's Cypher carries no
+<code>physics_domain</code> and no <code>source_domains</code>, its structural
+edge pass mints no <code>HAS_PHYSICS_DOMAIN</code> edge, and a companion
+assertion drives <code>write_name_domain</code> through a recording client so
+the deferral names a real destination that sets all three. Two mutations were
+applied and each darkened exactly that test:
+
+<table>
+  <tr><th>Mutation applied</th><th>Result</th></tr>
+  <tr>
+    <td>A <code>physics_domain</code> SET reintroduced into
+      <code>write_standard_names</code>, behind <code>coalesce</code>:
+      <code>SET sn.physics_domain = coalesce(b.physics_domain,
+      sn.physics_domain)</code></td>
+    <td><code>test_domain_is_written_only_through_the_one_writer</code> failed
+      on the <code>physics_domain</code> token; <code>1 failed, 7 passed</code>,
+      <code>EXIT=1</code>.</td>
+  </tr>
+  <tr>
+    <td>The structural edge pass handed the batch as-is again, so it mints
+      <code>HAS_PHYSICS_DOMAIN</code> from the payload</td>
+    <td>The same test failed on the edge token;
+      <code>1 failed, 7 passed</code>, <code>EXIT=1</code>.</td>
+  </tr>
+</table>
