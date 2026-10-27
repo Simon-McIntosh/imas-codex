@@ -48,6 +48,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from imas_codex.standard_names.defaults import DEFAULT_MIN_SCORE
 from imas_codex.standard_names.prose_policy import (
     BANNED_PROSE_PATTERNS,
     banned_prose_findings,
@@ -542,6 +543,10 @@ class BatchOutcome:
     accepted_reintroduced: int = 0
     reintroduced_ids: list[str] = field(default_factory=list)
     name_drift: list[str] = field(default_factory=list)
+    # Members whose documentation the review judged at or above the acceptance
+    # score while the pipeline held it in ``reviewed`` for a refinement round.
+    # They count as accepted; the list names them so a hold stays visible.
+    score_accepted: list[str] = field(default_factory=list)
     cost: float = 0.0
     # Deterministic-audit deltas from re-stamping the refreshed batch: how many
     # members a fresh ISN audit re-quarantined (genuine defect) vs cleared.
@@ -601,20 +606,36 @@ def evaluate_convergence(
 
 
 def measure_batch(
-    refreshed_rows: list[dict[str, Any]],
+    refreshed_rows: Sequence[dict[str, Any]],
     batch_ids: Sequence[str],
     *,
     batch_index: int,
     cost: float = 0.0,
     adjudicate: Callable[[Sequence[tuple[str, str, dict[str, int]]]], list[bool]]
     | None = None,
+    prior_rows: Sequence[dict[str, Any]] | None = None,
+    accept_score: float = DEFAULT_MIN_SCORE,
 ) -> BatchOutcome:
     """Compute a :class:`BatchOutcome` from post-drain graph rows — pure.
 
     ``refreshed_rows`` needs ``id``, ``name_stage``, ``docs_stage``,
-    ``description`` and ``documentation`` for each still-present member.  A
-    batch id absent from the rows, or present with a non-accepted name stage,
-    counts as name-axis drift.
+    ``description``, ``documentation`` and ``reviewer_score_docs`` for each
+    still-present member.  ``prior_rows`` is the same read taken before the
+    batch was drained, so the gate can tell a state the batch produced from one
+    it inherited.
+
+    A batch id that is absent after the drain, or whose name stage *moved*
+    between the two reads and did not land on ``accepted``, counts as
+    name-axis drift.  A member that was already outside ``accepted`` before the
+    drain and is still there is skipped rather than reported: a docs-only
+    campaign never writes the name axis, so an unchanged stage is not its doing.
+
+    A member's documentation counts as accepted when the drain left it at
+    ``accepted``, or when the review the drain wrote judged it at or above
+    ``accept_score`` while the pipeline held it in ``reviewed`` for a further
+    refinement round.  The score is the verdict the review actually reached;
+    reading the stage alone reports a hold as an acceptance failure and reports
+    every member left below the score as a hold.
 
     The banned-prose grep is a cheap, over-inclusive pre-filter.  A doc it flags
     is a *candidate* reintroduction; when ``adjudicate`` is supplied, the flagged
@@ -626,10 +647,12 @@ def measure_batch(
     every grep flag counts as reintroduction (grep-only fallback).
     """
     by_id = {r["id"]: r for r in refreshed_rows}
+    prior_by_id = {r["id"]: r for r in (prior_rows or [])}
     accepted = 0
     accepted_ids: set[str] = set()
     flagged: list[tuple[str, str, dict[str, int]]] = []
     drift: list[str] = []
+    score_accepted: list[str] = []
     touched = 0
 
     for sid in batch_ids:
@@ -637,13 +660,32 @@ def measure_batch(
         if row is None:
             drift.append(sid)
             continue
-        if (row.get("name_stage") or "") != "accepted":
-            drift.append(sid)
+        stage = row.get("name_stage") or ""
+        prior = prior_by_id.get(sid)
+        if prior is not None:
+            # Only a stage the batch itself moved can be its drift: an
+            # inherited non-accepted stage is skipped, and moving into
+            # accepted is the batch succeeding on the name axis.
+            prior_stage = prior.get("name_stage") or ""
+            if stage != prior_stage and stage != "accepted":
+                drift.append(sid)
+                continue
+        if stage != "accepted":
+            # Either the batch moved the name axis and did not land on
+            # accepted (drift, above), or the stage was inherited unchanged and
+            # is none of this batch's doing.
             continue
         touched += 1
-        if (row.get("docs_stage") or "") == "accepted":
+        docs_stage = row.get("docs_stage") or ""
+        if docs_stage == "accepted":
             accepted += 1
             accepted_ids.add(sid)
+        elif docs_stage == "reviewed":
+            score = row.get("reviewer_score_docs")
+            if score is not None and float(score) >= accept_score:
+                accepted += 1
+                accepted_ids.add(sid)
+                score_accepted.append(sid)
         text = f"{row.get('description') or ''}\n{row.get('documentation') or ''}"
         findings = banned_prose_findings(text)
         if any(v > 0 for v in findings.values()):
@@ -673,6 +715,7 @@ def measure_batch(
         accepted_reintroduced=len(accepted_ids.intersection(reintroduced)),
         reintroduced_ids=reintroduced,
         name_drift=drift,
+        score_accepted=score_accepted,
         cost=cost,
         prose_adjudicated_clear=adjudicated_clear,
     )
@@ -1020,6 +1063,11 @@ class CampaignRunner:
                 result.resume_from = index
                 break
 
+            # 0. Read the state this batch inherits, before anything below
+            #    touches it. The convergence gate compares against this read,
+            #    so a stage nobody moved cannot be reported as the batch's.
+            inherited = fetch_refreshed_fn(gc, batch)
+
             # 1. Lift audit quarantine so the docs pools can claim these names.
             clear_quarantine_fn(gc, batch)
 
@@ -1048,6 +1096,7 @@ class CampaignRunner:
                 batch_index=index,
                 cost=cost,
                 adjudicate=adjudicate_prose_fn,
+                prior_rows=inherited,
             )
 
             touched_ids = [r["id"] for r in refreshed]

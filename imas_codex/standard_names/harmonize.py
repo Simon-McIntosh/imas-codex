@@ -22,6 +22,7 @@ from __future__ import annotations
 import hashlib
 import logging
 import re
+from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any
@@ -1224,6 +1225,48 @@ def reconcile_family_reverse_links(
     }
 
 
+_NAME_STAGE_QUERY = """
+UNWIND $ids AS sid
+MATCH (sn:StandardName {id: sid})
+RETURN sn.id AS id, coalesce(sn.name_stage, '') AS name_stage
+"""
+
+
+def _name_stages(gc: Any, ids: Sequence[str]) -> dict[str, str]:
+    """Return the stored name stage of each live name in *ids*.
+
+    A family's member rows carry the documentation columns but not the name
+    stage, and the stage decides whether the documentation pools can claim a
+    member at all, so the planner reads it once for the whole roster.
+    """
+    if not ids:
+        return {}
+    rows = gc.query(_NAME_STAGE_QUERY, ids=list(ids)) or []
+    return {str(row.get("id")): str(row.get("name_stage") or "") for row in rows}
+
+
+def _split_name_accepted(
+    member_ids: Sequence[str], stages: dict[str, str]
+) -> tuple[list[str], list[dict[str, str]]]:
+    """Split a family roster into the docs-eligible ids and the skipped ones.
+
+    A docs-only campaign never writes the name axis, so a member that is not
+    name-accepted can never be claimed by the documentation pools: including it
+    would collect nothing from the drain and then report the untouched stage as
+    drift. It is skipped and reported with the stage it carries, so the family's
+    outcome names it instead of blaming the run for it.
+    """
+    eligible: list[str] = []
+    skipped: list[dict[str, str]] = []
+    for mid in member_ids:
+        stage = stages.get(mid) or ""
+        if stage == "accepted":
+            eligible.append(mid)
+        else:
+            skipped.append({"id": mid, "name_stage": stage})
+    return eligible, skipped
+
+
 def plan_family_applies(
     gc: Any | None = None,
     *,
@@ -1238,13 +1281,25 @@ def plan_family_applies(
     one and the family is not yet stamped harmonized; otherwise it is
     ``select_anchor``'s live ranking. A family whose members already carry the
     current ``harmonized_group_signature`` is ``harmonized`` and plans no
-    batch; a family with no selectable anchor is ``deferred``. Writes nothing.
+    batch; a family with no selectable anchor, or whose anchor is not
+    name-accepted, is ``deferred``. Members outside ``accepted`` are listed
+    under ``skipped`` with their name stage and never enter a batch. Writes
+    nothing.
     """
     from imas_codex.standard_names.campaign import anchor_gated_batches
 
     resolved_gc, own_gc = _resolve_gc(gc)
     try:
         families = fetch_pattern_families(resolved_gc, seeds=seeds, min_size=min_size)
+        roster = sorted(
+            {
+                m.get("id")
+                for family in families
+                for m in family["members"]
+                if m.get("id")
+            }
+        )
+        stages = _name_stages(resolved_gc, roster)
     finally:
         _close_if_owned(resolved_gc, own_gc)
 
@@ -1253,6 +1308,7 @@ def plan_family_applies(
         members = family["members"]
         member_ids = sorted(m.get("id") for m in members if m.get("id"))
         signature = group_signature(members)
+        eligible_ids, skipped = _split_name_accepted(member_ids, stages)
         stored = {
             m.get("harmonized_group_signature")
             for m in members
@@ -1267,10 +1323,10 @@ def plan_family_applies(
         )
         if member_ids and stored == {signature}:
             decision, batches = "harmonized", []
-        elif anchor is None:
+        elif anchor is None or anchor not in eligible_ids:
             decision, batches = "deferred", []
         else:
-            rest = [mid for mid in member_ids if mid != anchor]
+            rest = [mid for mid in eligible_ids if mid != anchor]
             decision, batches = "apply", anchor_gated_batches(anchor, rest)
         plans.append(
             {
@@ -1278,6 +1334,8 @@ def plan_family_applies(
                 "invariant": list(family["invariant"]),
                 "anchor": anchor,
                 "members": member_ids,
+                "docs_eligible": eligible_ids,
+                "skipped": skipped,
                 "n": len(member_ids),
                 "group_signature": signature,
                 "harmonized": decision == "harmonized",
