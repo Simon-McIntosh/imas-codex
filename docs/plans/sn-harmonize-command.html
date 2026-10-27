@@ -25,7 +25,7 @@
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="194">
+<meta name="plan-version" content="195">
 <meta name="plan-modified" content="2026-10-27">
 </head>
 <body>
@@ -741,6 +741,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261027T102928661733-review-of-shc-family-eligibility-diagnosis-2a32deacf5bf-figure" data-who="reckon-build" data-when="2026-10-27T10:40:12.254Z">
     <div class="r-comment-body"><p>Figure review of docs/figures/sn-harmonize-command/shc-family-eligibility-diagnosis/eligibility-chain.svg at head 2a32deacf is parsed with all six rubric items answered; it carries one non-blocking defect — the entire right-hand column is #929292 on white at a measured 3.11:1, the only place the four batch-2 members and their stages are named — and no blocking finding, so nothing holds the run.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261027T102517819468-review-of-shc-family-eligibility-diagnosis-2a32deacf5bf" data-who="reckon-build" data-when="2026-10-27T10:42:11.399Z">
+    <div class="r-comment-body"><p>independent review of run r-20261027T094625253761-shc-family-eligibility-diagnosis at 2a32deacf: parsed record, six dimensions scored 19/13/18/9/18/20 (total 97), four non-blocking findings and no blocking finding — the diagnosis reproduces in code (reset early return at graph_docs_persistence.py:410 precedes the scope stamp at 418-423), the JSON omits the classification/fix the done_when assigns it, the recorded gate log is at the parent revision 46a127882 rather than the head, guards.graph_writes is a hardcoded literal, and the batch-level zero is read from anchor_gated_batches rather than measured; added_failure_count 0 over the reviewed run&#x27;s not-run suite pair</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-close-s5" data-who="reckon-build" data-when="2026-10-13T14:50:00Z">
     <div class="r-comment-body"><p>§5 closed. The harmonize report counts a link as dead only when no standard name in the graph carries its target, which removes the boundary-density family's 19 false dead links (reviewed head <code>73bbd94ba</code>, review 99/120). Its two reuse follow-ons go into the §<!-- -->7 node: call <code>get_existing_standard_names</code> and drop the scope-only fallback. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s5-report-graph-links">evidence</a></p></div>
