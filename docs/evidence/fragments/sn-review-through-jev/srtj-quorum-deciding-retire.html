@@ -59,6 +59,12 @@
         <td>3</td>
         <td>The last place a quorum verdict could become the item's outcome; it now reaches the same single chat reviewer as an unjudged item.</td>
       </tr>
+      <tr id="srtj-quorum-deciding-retire-d7">
+        <td><code>imas_codex/standard_names/review/cascade.py</code></td>
+        <td><code>_chat_seat</code> — the one place the configured chain is narrowed to the chat reviewer's head (5 lines), used by both fallback paths</td>
+        <td>5</td>
+        <td>Shadow mode now runs one chat seat and records only the route shadow row beside it; it no longer runs the chain, and it no longer writes an unjudged row for an item Jev did judge.</td>
+      </tr>
     </tbody>
   </table>
 
@@ -99,6 +105,29 @@
     restoring the incumbent fallback (the full chain rather than one seat) fails
     the unjudged test, and registering a review seat that <code>get_model</code>
     resolves fails the seat test. Each mutation's run is recorded in the node's negative-control log.
+  </p>
+  <p id="srtj-quorum-deciding-retire-pool-tests">
+    Seven tests in <code>tests/standard_names/test_review_quorum_pool.py</code>
+    were deleted (357 lines). Each asserted how the reviewer chain cycled inside
+    a pool batch — cycle 0 + 1 always, cycle 2 on disagreement, group ids and
+    per-cycle cost — which is the deciding path this node removes: a batch item
+    now reaches the cascade and, unjudged, takes one chat seat. The chain's own
+    cycle semantics are still covered where the audit runs them, by
+    <code>test_rd_quorum_integrity.py</code> and <code>test_panel_audit_sample.py</code>.
+  </p>
+
+  <h3 id="srtj-quorum-deciding-retire-gate">Gate</h3>
+  <p id="srtj-quorum-deciding-retire-gate-result">
+    Whole <code>tests/standard_names/</code> suite, default markers,
+    <code>-n 8</code>, each arm from its own <code>git archive</code> tree with
+    the decision key provisioned: base <code>137eb8fd4</code> 95 failed / 8392
+    passed / 12 skipped; head <code>6ff64b2d3</code> 96 failed / 8390 passed / 12
+    skipped. The failure-set delta is one added id and zero removed. The added
+    one is this node's own change seen from a file outside its write fence:
+    <code>test_cascade_deciding_axes.py::test_names_deciding_leaves_documentation_with_the_incumbent[docs-False]</code>
+    still expects the shadow-mode fallback to run the configured chain, and the
+    fallback now runs the single chat seat, so it is reported for the file's
+    owner rather than edited here.
   </p>
 
 </section>
