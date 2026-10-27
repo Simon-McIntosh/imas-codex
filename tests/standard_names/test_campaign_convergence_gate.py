@@ -20,12 +20,15 @@ refinement round at a score above the acceptance threshold.
 
 from __future__ import annotations
 
+import logging
+
 from imas_codex.standard_names.campaign import (
     ConvergenceThresholds,
     evaluate_convergence,
     measure_batch,
 )
 from imas_codex.standard_names.defaults import DEFAULT_MIN_SCORE
+from imas_codex.standard_names.harmonize import apply_families
 
 
 def _row(sid: str, *, name_stage: str, docs_stage: str, score: float | None = None):
@@ -166,3 +169,69 @@ def test_a_held_review_is_not_accepted_however_it_scored():
     converged, reasons = evaluate_convergence(outcome, ConvergenceThresholds())
     assert not converged
     assert "docs acceptance 50.00% < 90.00% (1/2 touched)" in reasons
+
+
+def test_unchanged_non_accepted_stage_is_not_drift():
+    """A stage the batch did not move is not drift, accepted or not.
+
+    This is the behavioural guard on the inherited-versus-post-drain
+    comparison: the same non-accepted stage in both reads is skipped, while an
+    absolute check of the post-drain stage reports drift instead.
+    """
+    inherited = [_row("untouched", name_stage="reviewed", docs_stage="pending")]
+    after = [_row("untouched", name_stage="reviewed", docs_stage="pending")]
+
+    outcome = measure_batch(
+        after,
+        ["untouched"],
+        batch_index=1,
+        prior_rows=inherited,
+    )
+    assert outcome.name_drift == []
+    assert outcome.touched == 0
+    assert outcome.accepted == 0
+
+
+def test_apply_reports_each_skipped_member_with_its_stage(caplog):
+    """The apply names each skipped member and its stage in the outcome."""
+    plan = [
+        {
+            "physical_base": "electrostatic_potential",
+            "invariant": ["electrostatic_potential", "", "", "", ""],
+            "anchor": None,
+            "members": [
+                "electrostatic_potential",
+                "electrostatic_potential_at_wall",
+            ],
+            "docs_eligible": ["electrostatic_potential"],
+            "skipped": [
+                {"id": "electrostatic_potential_at_wall", "name_stage": "reviewed"}
+            ],
+            "n": 2,
+            "group_signature": "sig",
+            "harmonized": False,
+            "decision": "deferred",
+            "batches": [],
+            "planned_calls": 0,
+            "member_scores": {},
+        }
+    ]
+
+    logger_name = "imas_codex.standard_names.harmonize"
+    with caplog.at_level(logging.INFO, logger=logger_name):
+        summary = apply_families(object(), plan=plan, drain_fn=None)
+
+    assert summary["skipped"] == [
+        {
+            "physical_base": "electrostatic_potential",
+            "id": "electrostatic_potential_at_wall",
+            "name_stage": "reviewed",
+        }
+    ]
+    assert summary["applied"][0]["skipped"] == [
+        {"id": "electrostatic_potential_at_wall", "name_stage": "reviewed"}
+    ]
+    assert (
+        "member electrostatic_potential_at_wall skipped (name_stage=reviewed)"
+        in caplog.text
+    )

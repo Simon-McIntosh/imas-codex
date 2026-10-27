@@ -1269,6 +1269,24 @@ def _split_name_accepted(
     return eligible, skipped
 
 
+def skipped_members(plans: Sequence[dict[str, Any]]) -> list[dict[str, str]]:
+    """Flatten every plan's skipped members, each with its family and stage.
+
+    A skipped member never enters a batch, so nothing the campaign measures can
+    name it. This is the list an apply reports, so a new read can see which
+    names the run left alone and the stage that kept them out.
+    """
+    return [
+        {
+            "physical_base": plan["physical_base"],
+            "id": entry["id"],
+            "name_stage": entry["name_stage"],
+        }
+        for plan in plans
+        for entry in plan.get("skipped") or []
+    ]
+
+
 def plan_family_applies(
     gc: Any | None = None,
     *,
@@ -1800,6 +1818,14 @@ def apply_families(
     )
     spec = CampaignSpec(raw="harmonize-pattern-family")
     kwargs = dict(runner_kwargs or {})
+    skipped = skipped_members(plans)
+    for entry in skipped:
+        logger.info(
+            "Family '%s': member %s skipped (name_stage=%s), so no batch claims it",
+            entry["physical_base"],
+            entry["id"],
+            entry["name_stage"],
+        )
 
     # The recommended-name guard runs BEFORE any family is marked: a reset
     # rewrites text a reviewer was asked to read, so the whole apply is refused
@@ -1889,6 +1915,7 @@ def apply_families(
     return {
         "plans": plans,
         "applied": applied,
+        "skipped": skipped,
         "recommended_guards": guards,
         "force_reason": force if guards else None,
         "force_run_id": override_run_id,
