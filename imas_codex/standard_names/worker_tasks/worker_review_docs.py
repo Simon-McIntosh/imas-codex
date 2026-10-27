@@ -558,7 +558,9 @@ async def _release_docs_review_claim(
     """Return one unreviewed documentation claim to the drafted pool."""
     import asyncio as _asyncio
 
-    from imas_codex.standard_names.graph_ops import release_review_docs_failed_claims
+    from imas_codex.standard_names.graph_store.graph_claim_release import (
+        release_review_docs_failed_claims,
+    )
 
     claim_token = item.get("claim_token") or ""
     if not claim_token:
@@ -825,9 +827,11 @@ async def process_review_docs_batch(
         DEFAULT_MIN_SCORE,
         DEFAULT_REFINE_ROTATIONS,
     )
-    from imas_codex.standard_names.graph_ops import (
-        persist_reviewed_docs,
+    from imas_codex.standard_names.graph_store.graph_catalog import (
         update_review_aggregates,
+    )
+    from imas_codex.standard_names.graph_store.graph_review_persistence import (
+        persist_reviewed_docs,
     )
 
     processed = 0
