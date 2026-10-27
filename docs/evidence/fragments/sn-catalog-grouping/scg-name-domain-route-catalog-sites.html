@@ -1,0 +1,97 @@
+<h2 id="scg-name-domain-route-catalog-sites">The catalog-side domain writers route through the one writer</h2>
+
+<p>After the graph-store split, two modules on the catalog side of
+<code>imas_codex/standard_names/graph_store/</code> set a
+<code>StandardName</code>'s domain themselves. Each now leaves the domain to
+<code>imas_codex.standard_names.domain_decision.write_name_domain</code>, which
+sets <code>physics_domain</code>, <code>source_domains</code> and one
+<code>HAS_PHYSICS_DOMAIN</code> edge per entry of <code>source_domains</code> in
+one transaction.</p>
+
+<h3 id="scg-name-domain-route-catalog-sites-sites">Sites, before and after</h3>
+
+<table>
+  <tr><th>Site</th><th>Before</th><th>After</th></tr>
+  <tr>
+    <td><code>graph_catalog.write_standard_names</code>, the
+      promote-on-higher-rank block (was <code>graph_catalog.py:348-434</code>)</td>
+    <td>Read each node's scalar and <code>source_domains</code>, merged the
+      incoming payload domains with <code>merge_source_domains</code>, chose a
+      scalar with <code>maybe_promote_domain</code>, then wrote both back with
+      <code>SET sn.physics_domain = coalesce(...), sn.source_domains =
+      coalesce(...)</code>. No edges.</td>
+    <td>Deleted. The write path no longer sets a domain at all; the composing
+      path already hands every persisted winner to
+      <code>write_name_domain</code>. A payload domain is ignored, which the
+      test pins.</td>
+  </tr>
+  <tr>
+    <td><code>graph_refinement.persist_refined_name</code>, successor
+      provisioning (was <code>graph_refinement.py:917-918</code>)</td>
+    <td>Wrote <code>new.physics_domain = $physics_domain</code> and
+      <code>new.source_domains = $source_domains</code> from the caller (the
+      <code>sn edit</code> rename passes the predecessor's scalar), with no
+      edge writer.</td>
+    <td>The provision writes neither field. After the transaction commits, the
+      successor's domain is written by <code>write_name_domain</code>: its
+      stored Jev decision when the predecessor carries one, the predecessor's
+      scalar otherwise (undecided, with that reason recorded), a carried
+      correction only when the rename preserves meaning, and the edges from the
+      migrated sources.</td>
+  </tr>
+</table>
+
+<h3 id="scg-name-domain-route-catalog-sites-reads">Read-only sites, verified and left alone</h3>
+
+<ul>
+  <li><code>graph_audits.py</code> — <code>physics_domain</code> appears only in
+      a filter (<code>n.physics_domain = $domain</code>) and in the domain
+      census' projections. No write, no change.</li>
+  <li><code>graph_claim_scope.py</code> — filters and projections only
+      (<code>n.physics_domain = $domain_filter</code>,
+      <code>s.physics_domain AS physics_domain</code>). No write, no change.</li>
+</ul>
+
+<h3 id="scg-name-domain-route-catalog-sites-gap">One writer contract change and one gap</h3>
+
+<p><code>write_name_domain</code> gained an optional <code>fallback_domain</code>.
+A successor minted by a rename holds no scalar, so "an undecided name keeps its
+current value" had nothing to keep; the fallback seeds it from the predecessor
+without the caller writing the property itself.</p>
+
+<p>The derived-parent rule the brief names is not in these four modules. Its
+writers — <code>_materialize_derived_parent_rows</code>,
+<code>_bootstrap_missing_derived_parent_targets</code>,
+<code>_validate_derived_parent_identity</code> and the
+<code>parent.source_domains = CASE</code> promotion beside them — live in
+<code>graph_lineage.py</code>, outside this node's fence, so they are recorded
+outside scope rather than changed here.</p>
+
+<h3 id="scg-name-domain-route-catalog-sites-evidence">Evidence</h3>
+
+<ul>
+  <li>Path tests
+      (<code>tests/standard_names/test_name_domain_writer_catalog_sites.py</code>,
+      two disposable-graph tests, one per routed path): green at the head
+      revision, <code>2 passed</code>. Each plants a name with a DD source, runs
+      its path, and asserts the scalar, <code>source_domains</code> and the
+      edges agree.</li>
+  <li>Negative control: reverting the <code>persist_refined_name</code> site to a
+      direct <code>physics_domain</code> write gives
+      <code>1 failed, 1 passed</code> with <code>EXIT=1</code>; the failing id is
+      <code>test_persist_refined_name_carries_the_stored_decision_through_the_writer</code>.
+      The catalog site's test is unaffected, as it exercises the other path.</li>
+  <li>Gate, default markers at head and base with <code>-n 8</code>: head
+      <code>106 failed, 8376 passed</code> against base
+      <code>73 failed, 8409 passed</code>. Normalising the base ids to
+      repository-relative paths leaves 33 head-only ids: 32 from
+      <code>TestEditLifecycle</code>/rename fixtures that fail identically at
+      both arms when run in isolation (<code>4 failed</code> each — a test
+      service-wiring ordering defect, not this change), and one invariant test,
+      <code>test_metadata_invariants::test_physics_domain_uses_coalesce</code>,
+      which asserts the very <code>coalesce</code> write this node removed.</li>
+  <li>Gate, <code>-m graph</code> at head and base with <code>-n 8</code>: head
+      <code>59 failed, 310 passed</code> against base
+      <code>60 failed, 306 passed</code>; the added-failure count is
+      <strong>0</strong> and both new path tests pass at the head.</li>
+</ul>
