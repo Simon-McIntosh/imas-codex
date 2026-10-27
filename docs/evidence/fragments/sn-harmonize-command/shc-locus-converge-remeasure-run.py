@@ -763,6 +763,14 @@ def verify() -> int:
             problems.append(
                 "the selected run ids' spend disagrees with the recorded cost"
             )
+    # Attachment holds: one entry per (name, path, reason); the fragment's prose
+    # and its table must report the same number.
+    held = apply_entry.get("held_attachments") or []
+    seen = {(h.get("sn_id"), h.get("dd_path"), h.get("reason")) for h in held}
+    if len(seen) != len(held):
+        problems.append(
+            f"held_attachments carries {len(held)} entries for {len(seen)} holds"
+        )
     if not before or not after:
         problems.append("a before/after snapshot is missing")
     else:
@@ -793,6 +801,22 @@ def verify() -> int:
         rendered = HTML.read_text()
         if f'id="{NODE}-convergence"' not in rendered:
             problems.append("the HTML fragment states no convergence verdict")
+        prose = re.search(r"held (\d+) stranding detach", rendered)
+        if not prose:
+            problems.append("the HTML fragment states no held-detach count")
+        elif int(prose.group(1)) != len(held):
+            problems.append(
+                f"the fragment reports {prose.group(1)} held detach(es) against "
+                f"{len(held)} recorded"
+            )
+        held_section = rendered.split(f'id="{NODE}-held"', 1)
+        if len(held_section) == 2 and held:
+            table_rows = held_section[1].split("<h3", 1)[0].count("<tr><td><code>")
+            if table_rows != len(held):
+                problems.append(
+                    f"the held table carries {table_rows} row(s) against "
+                    f"{len(held)} recorded hold(s)"
+                )
     if problems:
         for problem in problems:
             print(f"FAIL {problem}")

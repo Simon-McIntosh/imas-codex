@@ -42,11 +42,6 @@
 "dd_path": "ic_antennas/antenna/module/strap/geometry/arcs_of_circle/z",
 "reason": "locus/source device mismatch: SN 'vertical_coordinate_of_coil_conductor' has hardware locus 'coil_conductor' but path 'ic_antennas/antenna/module/strap/geometry/arcs_of_circle/z' shares no device token with it",
 "sn_id": "vertical_coordinate_of_coil_conductor"
-},
-{
-"dd_path": "ic_antennas/antenna/module/strap/geometry/arcs_of_circle/z",
-"reason": "locus/source device mismatch: SN 'vertical_coordinate_of_coil_conductor' has hardware locus 'coil_conductor' but path 'ic_antennas/antenna/module/strap/geometry/arcs_of_circle/z' shares no device token with it",
-"sn_id": "vertical_coordinate_of_coil_conductor"
 }
 ],
 "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T132248464167-shc-locus-converge-remeasure/logs/apply.log",
