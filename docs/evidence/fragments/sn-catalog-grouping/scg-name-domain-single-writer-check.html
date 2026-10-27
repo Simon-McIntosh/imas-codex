@@ -98,15 +98,22 @@ package clean while that write was present.</p>
   <tr>
     <td>baseline, <code>main</code> at <code>62aa4003e</code></td>
     <td>—</td>
-    <td>the default <code>tests/standard_names</code> suite, run from its own
-      <code>git archive</code> tree. The added-failure count against head is
-      recorded in the run's manifest and its two logs.</td>
+    <td>the default <code>tests/standard_names</code> suite, 101 failed / 8397
+      passed / 15 skipped.</td>
   </tr>
 </table>
 
 <p>Both planted writes are <em>new</em> sites, not edits to an exempt one: a
 control planted inside <code>graph_lineage.py</code> would be indistinguishable
 from the recorded debt and would prove nothing about the rule.</p>
+
+<p>The suite gate runs both arms from separate <code>git archive</code> trees
+under the run's <code>TMPDIR</code>, each with its own <code>--basetemp</code>.
+Head reads <strong>101 failed / 8407 passed / 15 skipped</strong> against the
+baseline's <strong>101 failed / 8397 passed / 15 skipped</strong>: the ten new
+tests are the whole difference and the failing-id sets are identical, so the
+added-failure count is <strong>0</strong>. The 101 pre-existing failures are
+unchanged between the arms and sit in modules this node does not touch.</p>
 
 <h3 id="scg-name-domain-single-writer-check-open">What the check still reports</h3>
 
