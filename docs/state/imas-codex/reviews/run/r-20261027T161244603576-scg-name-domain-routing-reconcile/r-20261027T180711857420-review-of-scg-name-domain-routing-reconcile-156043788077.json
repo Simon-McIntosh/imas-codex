@@ -1,0 +1,105 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own gate logs, not from its manifest. gate_base_suite.log holds 95 lines beginning 'FAILED ' and gate_head_suite.log 93; comm -13 over the sorted id sets is empty, so the landed head adds no failure id. The two ids the head no longer fails are tests/standard_names/test_snrun_async_counters.py::TestGenerateDocsBumpsEnriched::test_generate_docs_bumps_enriched and ::TestNoRunIdNoBump::test_no_run_id_skips_bump.",
+  "base_log_revision": "af4cc071959d88e44e3afa4103550cdba7811206",
+  "call_sites": [
+    "imas_codex/standard_names/graph_store/graph_catalog.py:write_standard_names",
+    "imas_codex/standard_names/graph_store/graph_lineage.py:_write_standard_name_edges",
+    "imas_codex/standard_names/signed_manifest.py:_apply_structural_edge_reconcile",
+    "imas_codex/standard_names/graph_store/graph_refinement.py:persist_refined_name",
+    "imas_codex/standard_names/graph_store/graph_foundation.py:reclassify_standard_name_domain",
+    "imas_codex/standard_names/graph_ops.py (service bridge facade)",
+    "imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py:1943"
+  ],
+  "completed_at": "2026-10-27T18:46:23.720Z",
+  "dispatched_at": "2026-10-27T18:29:17Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-routing-reconcile.html",
+      "line": "136",
+      "severity": "blocking",
+      "text": "the required artifact is stale at the reviewed head, reporting \"One added failure id: test_facade_closure.py::test_service_bridge_resolves_only_wired_names\" and a head of 89251bb66 at 102 failed, while gate_head_suite.log at 156043788 records 93 failed and the delta against gate_base_suite.log is empty; the correction exists only as an uncommitted working-tree edit made at 19:06:19, so promoting 156043788 lands a gate result the run's own logs contradict."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-routing-reconcile.html",
+      "line": "157",
+      "severity": "non-blocking",
+      "text": "the fragment states graph_ops.py \"lies outside this node's write fence, so the line is not changed here\", but 8ef8d6518 changes exactly that line, so the record of the change contradicts the change."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-routing-reconcile.html",
+      "line": "75",
+      "severity": "non-blocking",
+      "text": "the fragment says the merged test drives electron_temperature, while the test plants sn_id ion_temperature at test_name_domain_routing_reconcile.py:124, so the cited witness is not the one the test uses."
+    },
+    {
+      "file": "tests/standard_names/test_name_domain_routing_reconcile.py",
+      "line": "80",
+      "severity": "non-blocking",
+      "text": "_RecordingClient is a per-suite recording double beside tests/recording_graph_client.py:16, whose docstring exists because each suite carrying its own copy forced a capture change to be repeated everywhere; subclassing RecordingGraphClient and forwarding query would have extended the owner."
+    },
+    {
+      "file": "tests/standard_names/test_name_domain_routing_reconcile.py",
+      "line": "92",
+      "severity": "non-blocking",
+      "text": "_domain_state is duplicated from test_name_domain_writer_catalog_sites.py:66 with one added line, so the three-way domain assertion now lives in two places that can drift apart."
+    },
+    {
+      "file": "tests/standard_names/test_name_domain_routing_reconcile.py",
+      "line": "150",
+      "severity": "non-blocking",
+      "text": "the direct-write count matches the literal substring \"sn.physics_domain =\" over every recorded statement, so a direct write spelled any other way on the catalog path would not be counted and the one-writer claim would still read green."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_ops.py",
+      "line": "89",
+      "severity": "non-blocking",
+      "text": "the graph-marker gate was last run at 28605ed6b (graph_focused_head.log), one commit before the reviewed head 156043788, so this wiring change and the new module that reaches the graph through it are covered only by the default suite's facade test and never by a graph-marker run at the landed revision."
+    }
+  ],
+  "gate_base_sha": "af4cc071959d88e44e3afa4103550cdba7811206",
+  "head_log_revision": "15604378807725551a9119b40d7e16e1868abe41",
+  "item_verdicts": {
+    "diff": "read commit by commit from 43ae5712c to 156043788; the integration commit 1bfcb1bce resolves the graph_catalog.py tail-pass comment and the test_graph_edge_writers.py HAS_PHYSICS_DOMAIN assertions, 89251bb66 makes the writer spy create=True so a reverted writer reddens the count rather than the setup, 2625cdd3e and 28605ed6b write the evidence fragment, and 8ef8d6518 removes _ensure_list from _WIRED_SERVICE_NAMES.",
+    "done_when": "the work is concluded at 156043788 (parents 8ef8d6518, af4cc0719); the new test fails under both reverts, neg_control_lineage_revert.log reading \"applied the domain writer 0 times, not exactly once\" and neg_control_catalog_revert.log reading \"2 domain writes ran\", both EXIT=1; and the zero-added-failure measure reproduces from gate_base_suite.log (95 FAILED lines) against gate_head_suite.log (93 FAILED lines), comm -13 empty.",
+    "goal": "the source goal is to land the catalog half of the name-domain routing on main so each written name gets exactly one domain-writer application; graph_catalog.py:484-500 withholds physics_domain and source_domains from the batch it hands the structural tail pass, and graph_lineage.py:1014-1032 applies domain_decision.write_name_domain once for every name the graph holds, so the count is exactly one and never zero.",
+    "manifest": "the manifest declares status complete with six commits and records baseline_suite and after_suite as completed with their EXIT=1 logs and failure-id lists, but its checkpoint claims the worktree is clean at 156043788 while docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-routing-reconcile.html is modified in that worktree at 19:06:19, after the 18:59:53 conclusion.",
+    "write_paths": "the run's prompt.txt:122-131 declares nine paths, and every changed path is inside them except imas_codex/standard_names/graph_ops.py, which commit 8ef8d6518 modifies by one line and which is not in the declared set."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_name_domain_routing_reconcile.py:124-166 fails when either half's routing is restored, the lineage arm failing on the application count and the catalog arm on the direct-write count, and test_graph_edge_writers.py:873-897 asserts the edges come from the source set rather than from the payload the test passed in.",
+    "evidence": "the zero-added measure reproduces from gate_base_suite.log and gate_head_suite.log, but docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-routing-reconcile.html:125-136 as landed still reports base 43ae5712c at 103 failed against head 89251bb66 at 102 failed with one added id, which the run's own logs contradict.",
+    "fit": "the resolved tests state the rule in the surrounding prose idiom and the new module names no plan label, though test_name_domain_routing_reconcile.py:80 carries a second recording double beside the shared one.",
+    "goal_fidelity": "graph_lineage.py:1014-1032 applies the writer from _stored_domain_decisions, which graph_lineage.py:50-55 maps to an entry for every id the graph holds, so a catalog-written name is never applied zero times while the catalog path never applies it twice.",
+    "reuse": "test_name_domain_routing_reconcile.py:80 re-implements the statement-capturing double that tests/recording_graph_client.py:16 exists to own, and :92 duplicates _domain_state from test_name_domain_writer_catalog_sites.py:66.",
+    "scope_discipline": "imas_codex/standard_names/graph_ops.py:89 is changed by 8ef8d6518 although the declared write paths at prompt.txt:122-131 do not list it, and no scope extension is recorded in the manifest."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source goal is to land the catalog half of the name-domain routing on main so each written name gets exactly one domain-writer application; graph_catalog.py:484-500 withholds physics_domain and source_domains from the batch it hands the structural tail pass, and graph_lineage.py:1014-1032 applies domain_decision.write_name_domain once for every name the graph holds, so the count is exactly one and never zero.\nVERDICT done_when: the work is concluded at 156043788 (parents 8ef8d6518, af4cc0719); the new test fails under both reverts, neg_control_lineage_revert.log reading \"applied the domain writer 0 times, not exactly once\" and neg_control_catalog_revert.log reading \"2 domain writes ran\", both EXIT=1; and the zero-added-failure measure reproduces from gate_base_suite.log (95 FAILED lines) against gate_head_suite.log (93 FAILED lines), comm -13 empty.\nVERDICT write_paths: the run's prompt.txt:122-131 declares nine paths, and every changed path is inside them except imas_codex/standard_names/graph_ops.py, which commit 8ef8d6518 modifies by one line and which is not in the declared set.\nVERDICT manifest: the manifest declares status complete with six commits and records baseline_suite and after_suite as completed with their EXIT=1 logs and failure-id lists, but its checkpoint claims the worktree is clean at 156043788 while docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-routing-reconcile.html is modified in that worktree at 19:06:19, after the 18:59:53 conclusion.\nVERDICT diff: read commit by commit from 43ae5712c to 156043788; the integration commit 1bfcb1bce resolves the graph_catalog.py tail-pass comment and the test_graph_edge_writers.py HAS_PHYSICS_DOMAIN assertions, 89251bb66 makes the writer spy create=True so a reverted writer reddens the count rather than the setup, 2625cdd3e and 28605ed6b write the evidence fragment, and 8ef8d6518 removes _ensure_list from _WIRED_SERVICE_NAMES.\nCALL_SITES: imas_codex/standard_names/graph_store/graph_catalog.py:write_standard_names, imas_codex/standard_names/graph_store/graph_lineage.py:_write_standard_name_edges, imas_codex/standard_names/signed_manifest.py:_apply_structural_edge_reconcile, imas_codex/standard_names/graph_store/graph_refinement.py:persist_refined_name, imas_codex/standard_names/graph_store/graph_foundation.py:reclassify_standard_name_domain, imas_codex/standard_names/graph_ops.py (service bridge facade), imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py:1943\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: graph_lineage.py:1014-1032 applies the writer from _stored_domain_decisions, which graph_lineage.py:50-55 maps to an entry for every id the graph holds, so a catalog-written name is never applied zero times while the catalog path never applies it twice.\nSCORE evidence: 15\nJUSTIFICATION evidence: the zero-added measure reproduces from gate_base_suite.log and gate_head_suite.log, but docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-routing-reconcile.html:125-136 as landed still reports base 43ae5712c at 103 failed against head 89251bb66 at 102 failed with one added id, which the run's own logs contradict.\nSCORE scope_discipline: 11\nJUSTIFICATION scope_discipline: imas_codex/standard_names/graph_ops.py:89 is changed by 8ef8d6518 although the declared write paths at prompt.txt:122-131 do not list it, and no scope extension is recorded in the manifest.\nSCORE durability: 18\nJUSTIFICATION durability: tests/standard_names/test_name_domain_routing_reconcile.py:124-166 fails when either half's routing is restored, the lineage arm failing on the application count and the catalog arm on the direct-write count, and test_graph_edge_writers.py:873-897 asserts the edges come from the source set rather than from the payload the test passed in.\nSCORE fit: 17\nJUSTIFICATION fit: the resolved tests state the rule in the surrounding prose idiom and the new module names no plan label, though test_name_domain_routing_reconcile.py:80 carries a second recording double beside the shared one.\nSCORE reuse: 5\nJUSTIFICATION reuse: test_name_domain_routing_reconcile.py:80 re-implements the statement-capturing double that tests/recording_graph_client.py:16 exists to own, and :92 duplicates _domain_state from test_name_domain_writer_catalog_sites.py:66.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-routing-reconcile.html:136 blocking: the required artifact is stale at the reviewed head, reporting \"One added failure id: test_facade_closure.py::test_service_bridge_resolves_only_wired_names\" and a head of 89251bb66 at 102 failed, while gate_head_suite.log at 156043788 records 93 failed and the delta against gate_base_suite.log is empty; the correction exists only as an uncommitted working-tree edit made at 19:06:19, so promoting 156043788 lands a gate result the run's own logs contradict.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-routing-reconcile.html:157 non-blocking: the fragment states graph_ops.py \"lies outside this node's write fence, so the line is not changed here\", but 8ef8d6518 changes exactly that line, so the record of the change contradicts the change.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-routing-reconcile.html:75 non-blocking: the fragment says the merged test drives electron_temperature, while the test plants sn_id ion_temperature at test_name_domain_routing_reconcile.py:124, so the cited witness is not the one the test uses.\nFINDING tests/standard_names/test_name_domain_routing_reconcile.py:80 non-blocking: _RecordingClient is a per-suite recording double beside tests/recording_graph_client.py:16, whose docstring exists because each suite carrying its own copy forced a capture change to be repeated everywhere; subclassing RecordingGraphClient and forwarding query would have extended the owner.\nFINDING tests/standard_names/test_name_domain_routing_reconcile.py:92 non-blocking: _domain_state is duplicated from test_name_domain_writer_catalog_sites.py:66 with one added line, so the three-way domain assertion now lives in two places that can drift apart.\nFINDING tests/standard_names/test_name_domain_routing_reconcile.py:150 non-blocking: the direct-write count matches the literal substring \"sn.physics_domain =\" over every recorded statement, so a direct write spelled any other way on the catalog path would not be counted and the one-writer claim would still read green.\nFINDING imas_codex/standard_names/graph_ops.py:89 non-blocking: the graph-marker gate was last run at 28605ed6b (graph_focused_head.log), one commit before the reviewed head 156043788, so this wiring change and the new module that reaches the graph through it are covered only by the default suite's facade test and never by a graph-marker run at the landed revision.\n",
+  "review_run_id": "r-20261027T180711857420-review-of-scg-name-domain-routing-reconcile-156043788077",
+  "reviewed_base_sha": "43ae5712c9e7c1fc0b20866834743ddad55664c4",
+  "reviewed_commits": [
+    "15604378807725551a9119b40d7e16e1868abe41",
+    "8ef8d6518",
+    "28605ed6b",
+    "2625cdd3e",
+    "89251bb66",
+    "1bfcb1bce"
+  ],
+  "reviewed_head_sha": "15604378807725551a9119b40d7e16e1868abe41",
+  "reviewed_run_id": "r-20261027T161244603576-scg-name-domain-routing-reconcile",
+  "scores": {
+    "durability": 18,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 11
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T19:35:00Z",
+  "total": 85,
+  "worktree_note": "The reviewed worktree at /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/scg-name-domain-routing-reconcile stands at 15604378807725551a9119b40d7e16e1868abe41 with one uncommitted modification, docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-routing-reconcile.html, mtime 2026-10-27 19:06:19 +0100."
+}
