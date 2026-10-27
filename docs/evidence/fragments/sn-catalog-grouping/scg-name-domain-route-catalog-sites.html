@@ -93,14 +93,24 @@ outside scope rather than changed here.</p>
       <code>1 failed, 1 passed</code> with <code>EXIT=1</code>; the failing id is
       <code>test_persist_refined_name_carries_the_stored_decision_through_the_writer</code>.
       The catalog site's test is unaffected, as it exercises the other path.</li>
+  <li>Proxy-client test
+      (<code>test_persist_refined_name_writes_the_domain_for_a_client_that_is_not_a_graph_client</code>):
+      drives the client register with a wrapper that forwards
+      <code>query</code> and <code>session</code> and is deliberately not a
+      <code>GraphClient</code>, and asserts the successor's scalar,
+      <code>source_domains</code> and edges were written.</li>
   <li>Gate, default markers at head and base with <code>-n 8</code>: head
-      <code>73 failed, 8410 passed, 11 skipped</code> against base
+      <code>71 failed, 8412 passed, 11 skipped</code> against base
       <code>73 failed, 8409 passed, 11 skipped</code>; the added-failure count
       is <strong>0</strong>.</li>
   <li>Gate, <code>-m graph</code> at head and base with <code>-n 8</code>: head
-      <code>60 failed, 309 passed, 19 skipped</code> against base
+      <code>59 failed, 311 passed, 19 skipped</code> against base
       <code>60 failed, 306 passed, 20 skipped</code>; the added-failure count is
-      <strong>0</strong> and both new path tests pass at the head.</li>
+      <strong>0</strong> and all three path tests pass at the head.</li>
+  <li>Negative control on the client check: with the old
+      <code>isinstance(gc, GraphClient)</code> gate restored, the proxy-client
+      test fails with <code>1 failed, 2 deselected</code> and
+      <code>EXIT=1</code>.</li>
 </ul>
 
 <h3 id="scg-name-domain-route-catalog-sites-invariant">The invariant that guarded the old write</h3>
@@ -134,3 +144,17 @@ applied and each darkened exactly that test:
       <code>1 failed, 7 passed</code>, <code>EXIT=1</code>.</td>
   </tr>
 </table>
+<h3 id="scg-name-domain-route-catalog-sites-client">The write does not depend on the client's class</h3>
+
+<p>The successor's domain write sat behind <code>isinstance(gc, GraphClient)</code>.
+A proxy, subclass or wrapper a caller handed in therefore skipped
+<code>physics_domain</code>, <code>source_domains</code> and the edges with only a
+debug log — a dropped domain behind a message nobody reads. The branch is now a
+capability check: any client the call path accepts reaches
+<code>write_name_domain</code>, and a client that offers no <code>query</code>
+raises <code>TypeError</code> naming what would have been lost rather than
+skipping.</p>
+
+<p>Two statements in the same function still bound <code>physics_domain</code>
+and <code>source_domains</code> as Cypher parameters after the provision stopped
+setting those properties. The parameters are gone from both.</p>
