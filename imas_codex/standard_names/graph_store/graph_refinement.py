@@ -1033,6 +1033,9 @@ def persist_refined_name(
                         description=description,
                         kind=kind,
                         unit=unit,
+                        physics_domain=physics_domain,
+                        source_domains=source_domains
+                        or ([physics_domain] if physics_domain else []),
                         tags=tags or [],
                         model=model,
                         reason=reason,
@@ -1275,6 +1278,9 @@ def persist_refined_name(
                         description=description,
                         kind=kind,
                         unit=unit,
+                        physics_domain=physics_domain,
+                        source_domains=source_domains
+                        or ([physics_domain] if physics_domain else []),
                         tags=tags or [],
                         model=model,
                         reason=reason,
