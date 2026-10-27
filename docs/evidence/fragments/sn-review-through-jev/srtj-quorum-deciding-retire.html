@@ -59,13 +59,7 @@
         <td>3</td>
         <td>The last place a quorum verdict could become the item's outcome; it now reaches the same single chat reviewer as an unjudged item.</td>
       </tr>
-      <tr id="srtj-quorum-deciding-retire-d7">
-        <td><code>imas_codex/standard_names/review/cascade.py</code></td>
-        <td><code>_chat_seat</code> — the one place the configured chain is narrowed to the chat reviewer's head (5 lines), used by both fallback paths</td>
-        <td>5</td>
-        <td>Shadow mode now runs one chat seat and records only the route shadow row beside it; it no longer runs the chain, and it no longer writes an unjudged row for an item Jev did judge.</td>
-      </tr>
-    </tbody>
+      </tbody>
   </table>
 
   <h3 id="srtj-quorum-deciding-retire-seats">Review seats</h3>
@@ -89,6 +83,17 @@
     <code>pyproject.toml</code> therefore needed no change for this deletion.
   </p>
 
+  <h3 id="srtj-quorum-deciding-retire-added">Added, with line counts</h3>
+  <ul id="srtj-quorum-deciding-retire-added-list">
+    <li id="srtj-quorum-deciding-retire-a1">
+      <code>imas_codex/standard_names/review/cascade.py</code>:
+      <code>_chat_seat</code> (5 lines) — the one place the configured chain is
+      narrowed to the head the chat reviewer runs. It is the fallback's seat
+      rule, used by an unjudged item and by a judged item whose axis is in
+      shadow mode, so both take the same reviewer rather than a chain.
+    </li>
+  </ul>
+
   <h3 id="srtj-quorum-deciding-retire-kept">Kept, and why</h3>
   <ul id="srtj-quorum-deciding-retire-kept-list">
     <li id="srtj-quorum-deciding-retire-k1"><code>_run_rd_quorum_cycles</code> — the cycle runner the audit panel runs through <code>panel_audit.quorum_without_persisting</code>. It persists nothing, so keeping it keeps the audit non-deciding.</li>
@@ -100,11 +105,24 @@
   <h3 id="srtj-quorum-deciding-retire-tests">Tests</h3>
   <p id="srtj-quorum-deciding-retire-test-note">
     <code>tests/standard_names/test_review_deciding_paths_retired.py</code> adds
-    six assertions. Three were shown to fail with their deleted path restored:
-    re-declaring <code>_persisting_quorum_cycles</code> fails the first,
-    restoring the incumbent fallback (the full chain rather than one seat) fails
-    the unjudged test, and registering a review seat that <code>get_model</code>
-    resolves fails the seat test. Each mutation's run is recorded in the node's negative-control log.
+    six tests, and each either reads an expectation that does not come from the
+    code it checks or drives the code it names. The seat test compares the
+    resolver against the seats <code>pyproject.toml</code> declares (a section's
+    own <code>models</code> plus every profile's, read with
+    <code>tomllib</code>), so a chain that silently loses its profile seats is
+    caught rather than agreeing with itself. The retained runner is driven for
+    real: two configured seats run two cycles against a stub structured-call
+    double with the graph writer patched, so the test asserts two records
+    returned and zero canonical rows written. The unjudged test asserts the four
+    values the fallback is responsible for — the item, the axis, the unavailable
+    judge's label and the reason returned by
+    <code>decisions_key_absent_reason</code> — rather than a tuple the stub
+    built. Every one was shown to fail when its path is broken: shortening the
+    names chain to its top-level seats fails the seat test, writing
+    <code>records</code> inside <code>_run_rd_quorum_cycles</code> fails the
+    runner test, and returning the full chain from <code>_chat_seat</code> and
+    substituting a generic reason each fail the unjudged test. Each mutation's
+    run is recorded in <code>logs/negative-control-tests.log</code>.
   </p>
   <p id="srtj-quorum-deciding-retire-pool-tests">
     Seven tests in <code>tests/standard_names/test_review_quorum_pool.py</code>
