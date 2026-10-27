@@ -1,0 +1,53 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/standard_names/graph_store/graph_lineage.py:1023",
+    "imas_codex/standard_names/graph_store/graph_lineage.py:1555",
+    "imas_codex/standard_names/graph_store/graph_lineage.py:1646"
+  ],
+  "completed_at": "2026-10-27T23:22:39.468Z",
+  "dispatched_at": "2026-10-27T23:15:00Z",
+  "findings": [
+    {
+      "detail": "item 6's fix switches the test to disposable_neo4j_empty, which is the right remedy, but no recorded log shows the pre-fix failure or the test passing alone: the recorded base arm (logs/base-graph.log, 12 passed, EXIT=0) already passes with the old fixture because test_name_domain_writer_catalog_sites.py wipes the graph between test_name_domain_followups.py and this file, so the reproduction the fragment asserts and the done_when's 'passing alone' clause are unmeasured rather than measured.",
+      "file": "tests/standard_names/test_graph_edge_writers.py",
+      "id": "fc331f69caa",
+      "line": 633,
+      "severity": "non-blocking"
+    },
+    {
+      "detail": "the done_when's first clause says every local recording double builds on RecordingGraphClient, but at head at least test_domain_audit.py:22 (_StubGraph), test_bare_doc_link_normalize.py:38 (_RecordingGC) and test_docs_review_eligibility.py:26 (_Graph) still carry their own Cypher-capturing graph doubles, and the manifest's outside_scope names none of them; the node could not edit them under its fence, so the correct action was to report them there rather than to leave the clause reading as met.",
+      "file": "tests/standard_names/test_domain_audit.py",
+      "id": "f92e069482a",
+      "line": 22,
+      "severity": "non-blocking"
+    },
+    {
+      "detail": "assert stored is not None became unreachable-false once item 8 corrected _stored_domain_decisions to dict[str, DomainDecision] and the function returns an undecided decision for every present name, so the assertion can name no condition under which it fails and should have been dropped with the contract change.",
+      "file": "tests/standard_names/test_name_domain_followups.py",
+      "id": "f642fc521b5",
+      "line": 150,
+      "severity": "non-blocking"
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source node's goal is to consolidate the domain-writer test doubles onto their shared owners; the diff at 2734179a0 lifts answer_domain_state into tests/standard_names/conftest.py:798 and domain_state/plant_name_with_dd_source into tests/standard_names/conftest.py:769,789, and rebases the two Cypher recorders on tests/recording_graph_client.py:22.\nVERDICT done_when: the done_when names RecordingGraphClient for every local recording double, the conftest helper set, the bootstrap rollback test's cause with it passing alone and in the five-file graph run, and the widened single-domain negative test; the logs record the default-marker arms (logs/base-suite.log and logs/head-suite.log, 70 failed / 8434 passed each), the five-file graph arms (logs/base-graph.log 12 passed, logs/head-graph.log 13 passed) and the widened-condition control (logs/widened-condition.log), but no log shows the bootstrap test passing alone or failing before the fix.\nVERDICT write_paths: the manifest declares fifteen paths and git diff 2c08526b6..2734179a0 touches thirteen files, every one of them inside that set; tests/recording_graph_client.py and tests/standard_names/test_export_catalog_files.py were granted and correctly left alone.\nVERDICT manifest: read r-20261027T224723369980-scg-name-domain-followups-tests/manifest.md; it records status complete, the single commit 2734179a0, both suite arms as JSON with literal commands, four gate logs and two negative-control logs, and its claims reproduce against the logs except for the item 6 reproduction and surviving-alone clause.\nVERDICT diff: read commit 2734179a0 against 2c08526b6 commit by commit (13 files, +280/-272); the production change is confined to the annotation and docstring of _stored_domain_decisions at imas_codex/standard_names/graph_store/graph_lineage.py:24, and the rest is helper consolidation plus one new graph test and one fixture change.\nCALL_SITES: imas_codex/standard_names/graph_store/graph_lineage.py:1023, imas_codex/standard_names/graph_store/graph_lineage.py:1555, imas_codex/standard_names/graph_store/graph_lineage.py:1646\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: tests/standard_names/conftest.py:769 and :798 are now the single owners of domain_state, plant_name_with_dd_source and answer_domain_state, which is what the goal names, but the RecordingGraphClient clause holds for only two of the graph doubles the repository carries.\nSCORE evidence: 14\nJUSTIFICATION evidence: logs/base-suite.log and logs/head-suite.log were independently reduced to 70 identical failure ids, so the zero-added-failures claim is measured, while tests/standard_names/test_graph_edge_writers.py:633's cause and its passing-alone arm rest on a narrative with no log behind it.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every one of the thirteen changed paths is inside the fifteen declared write paths, and the RecordingGraphClient breakage exists only in the scratch tree that logs/negative-control.log names.\nSCORE durability: 17\nJUSTIFICATION durability: tests/standard_names/test_name_domain_followups.py:76 fails on the widened condition exactly as logs/widened-condition.log records ('assert core_plasma_physics is None'), and the migrated capture at tests/standard_names/test_metadata_invariants.py:192 and test_name_domain_routing_reconcile.py:122 reddens when capture is broken, but item 8's contract change at imas_codex/standard_names/graph_store/graph_lineage.py:24 carries no assertion at all.\nSCORE fit: 17\nJUSTIFICATION fit: the new helpers follow the surrounding conftest style at tests/standard_names/conftest.py:769 and the imports sit in the project-import block of each migrated file, with no plan, sprint or ticket identifiers anywhere in the diff.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change is itself deduplication; tests/standard_names/conftest.py:769,789,798 are the only definitions of the three helpers at head, and tests/standard_names/test_metadata_invariants.py:192 subclasses tests/recording_graph_client.py:22 rather than forking its capability.\nFINDING tests/standard_names/test_graph_edge_writers.py:633 non-blocking: item 6's fix switches the test to disposable_neo4j_empty, which is the right remedy, but no recorded log shows the pre-fix failure or the test passing alone; the recorded base arm already passes with the old fixture, so the done_when's 'passing alone' clause is unmeasured.\nFINDING tests/standard_names/test_domain_audit.py:22 non-blocking: recording graph doubles at test_domain_audit.py:22, test_bare_doc_link_normalize.py:38 and test_docs_review_eligibility.py:26 still do not build on RecordingGraphClient, and outside_scope names none of them.\nFINDING tests/standard_names/test_name_domain_followups.py:150 non-blocking: assert stored is not None became unreachable-false under the corrected dict[str, DomainDecision] contract, so it guards nothing and should have gone with item 8.\n",
+  "review_run_id": "r-20261027T231406324662-review-of-scg-name-domain-followups-tests-2734179a0086",
+  "reviewed_base_sha": "2c08526b6b04471f3fa87938988640efa201509b",
+  "reviewed_head_sha": "2734179a008669b814c6ad13ac4816815cadf3de",
+  "reviewed_run_id": "r-20261027T224723369980-scg-name-domain-followups-tests",
+  "scores": {
+    "durability": 17,
+    "evidence": 14,
+    "fit": 17,
+    "goal_fidelity": 16,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T23:23:33.858991+00:00",
+  "total": 103
+}
