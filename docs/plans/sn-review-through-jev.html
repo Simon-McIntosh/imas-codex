@@ -20,11 +20,11 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names,review">
   <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;sn-judgment-evaluation#s2&quot;,&quot;sn-judgment-evaluation#s3&quot;,&quot;sn-judgment-evaluation#s4&quot;,&quot;sn-selection-over-generation#s4&quot;],&quot;s4&quot;:[&quot;sn-judgment-evaluation#s5&quot;,&quot;sn-house-style#s4&quot;,&quot;sn-selection-over-generation#s4&quot;],&quot;s5&quot;:[&quot;sn-review-through-jev#s3&quot;,&quot;sn-review-through-jev#s4&quot;],&quot;s6&quot;:[&quot;sn-judgment-evaluation#s6&quot;,&quot;sn-review-through-jev#s3&quot;,&quot;sn-review-through-jev#s4&quot;],&quot;s7&quot;:[&quot;sn-review-through-jev#s6&quot;]}">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="314">
+<meta name="plan-version" content="315">
 <meta name="plan-modified" content="2026-10-27">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -198,7 +198,7 @@
     </p>
 
     <h2 id="s6">§6 — The cascade</h2>
-    <section data-reckon="section" data-id="s6" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s6" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="done" data-links=""></section>
     <p>
       Jev reviews every candidate:
     </p>
@@ -1261,7 +1261,10 @@ without re-deriving it is visible.</p></div>
     <div class="r-comment-body"><p>independent review of run r-20261027T103506911824-srtj-facade-closure over the commits it gained since review at eb80e1674, read against base eb80e1674b0244a1f20dfe4e950f4ab149ad5948 and head 0d761f882ee7833a19452db84abccfc36ac73a72; two commits touch only tests/standard_names/test_facade_closure.py, tests/standard_names/test_graph_ops.py and docs/evidence/fragments/sn-review-through-jev/srtj-facade-closure.html; scores goal_fidelity 19, evidence 18, scope_discipline 20, durability 19, fit 19, reuse 20 (total 115/120), zero added failure ids, one non-blocking finding and no blocking finding</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261027T103506911824-srtj-facade-closure" data-who="reckon-build" data-when="2026-10-27T13:14:00Z">
-    <div class="r-comment-body"><p>srtj-facade-closure — closed the retired graph facade: the service bridge serves only the 187 collaborators the graph store modules read (declared roster held to the store&#x27;s own AST-scanned reads), graph_ops.__getattr__ refuses a moved name naming its owner module, and the reintroduction guard selects forwarders by body and by import alias in either the relative or absolute spelling on both entrypoints, with owner-map integrity checks that enumerate graph_store/*.py rather than trusting the map; paired gate base 111 failed/9016 passed vs head 111 failed/9022 passed, identical failure ids</p></div>
+    <div class="r-comment-body"><p>srtj-facade-closure — closed the retired graph facade: the service bridge serves only the 187 collaborators the graph store modules read (declared roster held to the store's own AST-scanned reads), graph_ops.__getattr__ refuses a moved name naming its owner module, and the reintroduction guard selects forwarders by body and by import alias in either the relative or absolute spelling on both entrypoints, with owner-map integrity checks that enumerate graph_store/*.py rather than trusting the map; paired gate base 111 failed/9016 passed vs head 111 failed/9022 passed, identical failure ids</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-close-s6" data-who="reckon-build" data-when="2026-10-27T14:30:00Z">
+    <div class="r-comment-body"><p>§6 closed. Jev decides both review axes, with a 5% paid audit (merge <code>a4461ab5e</code>, review 116). The lead's operating-point ruling (merge <code>2b84bdc24</code>) replaced the fixed-cohort comparison, which stopped on router defects. The split, the forwarder retirement and the facade closure (merge <code>5d40b75c5</code>, review 115) have all landed. §7 is released. <a href="/imas-codex/evidence/archive/sn-review-through-jev-landed.html#s6-cascade">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-s7-lead-ruling-audit-panel" data-who="lead" data-when="2026-10-27T07:20:00Z">
     <div class="r-comment-body"><p>Lead ruling, "Keep quorum as audit panel". §7 deletes the quorum as a deciding path: its persisting cycle, the review seats only that path uses, and the fallback that sends items Jev could not judge to it. Those items go to the single chat reviewer instead. The quorum stays only as the 5% panel audit's non-deciding panel, which runs through <code>panel_audit.quorum_without_persisting</code>, so the drift measure the switch kept is unchanged. §7 waits on §6, because the forwarder retirement and the product repairs §6 still owes touch the same worker and review modules.</p></div>
