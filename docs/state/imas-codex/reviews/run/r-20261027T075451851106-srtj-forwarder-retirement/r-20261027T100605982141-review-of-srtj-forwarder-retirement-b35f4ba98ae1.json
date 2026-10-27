@@ -15,6 +15,11 @@
       "kind": "exempted",
       "reason": "the coordinator granted test_rerank_label_sheet.py by crew widen before review; the retargeting there is part of the codemod",
       "recorded_at": "2026-10-27T10:30:01.727338+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "both scripts and the vocabulary test were granted by crew widen during the run",
+      "recorded_at": "2026-10-27T10:30:07.576582+00:00"
     }
   },
   "findings": [
