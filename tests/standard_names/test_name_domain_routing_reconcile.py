@@ -123,7 +123,7 @@ def test_catalog_write_applies_the_domain_writer_exactly_once(
     # which would make this measurement pass while exercising nothing.
     sn_id = "ion_temperature"
     applications: list[str] = []
-    real_writer = graph_lineage.write_name_domain
+    real_writer = getattr(graph_lineage, "write_name_domain", None)
 
     def _counting(gc: Any, name: str, decision: Any, **kwargs: Any) -> Any:
         applications.append(name)
@@ -132,7 +132,7 @@ def test_catalog_write_applies_the_domain_writer_exactly_once(
     with GraphClient() as real:
         _plant_decided_name_with_dd_source(real, sn_id, "dd:routing/path")
         recorder = _RecordingClient(real)
-        with patch.object(graph_lineage, "write_name_domain", _counting):
+        with patch.object(graph_lineage, "write_name_domain", _counting, create=True):
             write_standard_names(
                 [
                     {
@@ -147,9 +147,7 @@ def test_catalog_write_applies_the_domain_writer_exactly_once(
             )
         settled = _domain_state(real, sn_id)
         direct_domain_writes = [
-            cypher
-            for cypher in recorder.queries
-            if "sn.physics_domain =" in cypher
+            cypher for cypher in recorder.queries if "sn.physics_domain =" in cypher
         ]
 
     assert applications == [sn_id], (
