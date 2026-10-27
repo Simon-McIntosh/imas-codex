@@ -10,12 +10,13 @@ name on one review.
 
 Every collaborator that lives on the entrypoint module — the logger, the
 batch-enrichment helper and the source-prefix stripper, the budget exposure
-helpers, the DD-gap persistence helpers and the quorum persistence wrapper —
-is reached through the batch processor's positional-only ``_worker_dependency``
-resolver, so a patch on ``workers.<name>`` stays visible inside the moved code
-and the persisting wrapper a caller sees is the entrypoint's own object, which
-is what the panel audit recognises structurally. Only standard-library modules
-are imported directly; ``BudgetManager`` is imported for typing alone.
+helpers, the DD-gap persistence helpers and the chat-review persistence
+wrapper — is reached through the batch processor's positional-only
+``_worker_dependency`` resolver, so a patch on ``workers.<name>`` stays visible
+inside the moved code and the persisting wrapper a caller sees is the
+entrypoint's own object, which is what the panel audit recognises structurally.
+Only standard-library modules are imported directly; ``BudgetManager`` is
+imported for typing alone.
 """
 
 from __future__ import annotations
@@ -345,8 +346,9 @@ async def _run_rd_quorum_cycles(
     to 0–1).
 
     Persists no graph state directly — the returned ``records`` list is
-    written by :func:`_persisting_quorum_cycles`, and the SN-side stage
-    transition belongs to the caller.
+    written by :func:`_persisting_chat_review` for the unjudged fallback and by
+    the panel audit's own non-persisting path, and the SN-side stage transition
+    belongs to the caller.
 
     Each cycle's cost is charged to *lease* via a fresh
     :class:`~imas_codex.standard_names.budget.LLMCostEvent` tagged with
@@ -819,16 +821,22 @@ async def _run_rd_quorum_cycles(
     }
 
 
-async def _persisting_quorum_cycles(
+async def _persisting_chat_review(
     _worker_dependency, /, **kwargs: Any
 ) -> dict[str, Any] | None:
-    """Run the quorum cycles and persist their records before returning.
+    """Run the one chat reviewer and persist its row before returning.
 
-    The calibrated cascade records its shadow route after the incumbent's rows,
-    so the incumbent writes its own reviews here instead of handing them back to
-    the caller. A cycle chain that produced no reviews returns ``None`` and
-    writes nothing.
+    The chat reviewer decides an item Jev could not judge, so its review is that
+    item's canonical record: it is written here rather than handed back to the
+    caller. Exactly one seat may be passed — the fallback is one reviewer, not a
+    quorum — and a reviewer that produced no parseable result returns ``None``
+    and writes nothing.
     """
+    models = list(kwargs.get("models") or [])
+    if len(models) != 1:
+        raise ValueError(
+            f"the chat reviewer runs one seat; got {len(models)} model(s): {models}"
+        )
     run_rd_quorum_cycles = _worker_dependency("_run_rd_quorum_cycles")
     result = await run_rd_quorum_cycles(**kwargs)
     if result is not None:
@@ -914,7 +922,7 @@ async def process_review_name_batch(
     enrich_name_review_items = _worker_dependency("_enrich_name_review_items")
     _persist_dd_gap_evidence = _worker_dependency("_persist_dd_gap_evidence")
     _review_dd_source_bindings = _worker_dependency("_review_dd_source_bindings")
-    _persisting_quorum_cycles = _worker_dependency("_persisting_quorum_cycles")
+    _persisting_chat_review = _worker_dependency("_persisting_chat_review")
 
     import asyncio as _asyncio
 
@@ -1310,7 +1318,7 @@ async def process_review_name_batch(
                 item,
                 review_models,
                 partial(
-                    _persisting_quorum_cycles,
+                    _persisting_chat_review,
                     sn_id=sn_id,
                     review_axis="name",
                     response_model=StandardNameQualityReviewNameOnlyBatch,

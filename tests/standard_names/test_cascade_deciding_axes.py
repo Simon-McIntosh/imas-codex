@@ -81,16 +81,17 @@ async def test_names_deciding_leaves_documentation_with_the_incumbent(
 ):
     """With ``cascade-deciding = ["name"]`` only the name axis is Jev's.
 
-    The incumbent's verdict is what a docs item returns, byte for byte, while
-    the name axis returns Jev's own decision.
+    The chat reviewer's verdict is what a docs item returns, byte for byte, while
+    the name axis returns Jev's own decision. That reviewer runs a single seat,
+    so the fallback receives the head of the configured chain.
     """
     from imas_codex.standard_names.review.checks import (
         DOCS_DIMENSIONS,
         NAME_DIMENSIONS,
     )
 
-    incumbent_result = {"winning_score": 0.62, "resolution_method": "quorum_consensus"}
-    incumbent_calls = []
+    reviewer_result = {"winning_score": 0.62, "resolution_method": "quorum_consensus"}
+    reviewer_calls = []
 
     async def judgment(_item, _model):
         dimensions = NAME_DIMENSIONS if axis == "name" else DOCS_DIMENSIONS
@@ -107,9 +108,9 @@ async def test_names_deciding_leaves_documentation_with_the_incumbent(
             0.0,
         )
 
-    async def incumbent(*, models):
-        incumbent_calls.append(list(models))
-        return incumbent_result
+    async def chat_reviewer(*, models):
+        reviewer_calls.append(list(models))
+        return reviewer_result
 
     async def store(*_args, **_kwargs):
         pass
@@ -128,14 +129,14 @@ async def test_names_deciding_leaves_documentation_with_the_incumbent(
         axis,
         {"id": "temperature"},
         ["primary", "secondary"],
-        incumbent,
+        chat_reviewer,
         mgr=_Manager(),
     )
 
     if jev_decides:
         assert result["resolution_method"] == "jev_cascade_accept"
         assert result["winning_score"] == 0.92
-        assert incumbent_calls == [], "a decided axis never calls the incumbent"
+        assert reviewer_calls == [], "a decided axis never calls the chat reviewer"
     else:
-        assert result is incumbent_result
-        assert incumbent_calls == [["primary", "secondary"]]
+        assert result is reviewer_result
+        assert reviewer_calls == [["primary"]]

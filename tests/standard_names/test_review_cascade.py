@@ -608,8 +608,8 @@ async def test_deciding_name_pass_does_not_reconcile_docs_holds(monkeypatch):
     async def audit(*_args, **_kwargs):
         pass
 
-    async def incumbent(*, models):
-        pytest.fail(f"deciding route called incumbent: {models}")
+    async def chat_reviewer(*, models):
+        pytest.fail(f"deciding route called the chat reviewer: {models}")
 
     def sync(*args, **kwargs):
         reconciled.append((args, kwargs))
@@ -628,7 +628,7 @@ async def test_deciding_name_pass_does_not_reconcile_docs_holds(monkeypatch):
     manager.reserve.return_value = MagicMock()
 
     result = await cascade.adjudicate_review(
-        "name", {"id": "temperature"}, ["incumbent"], incumbent, mgr=manager
+        "name", {"id": "temperature"}, ["incumbent"], chat_reviewer, mgr=manager
     )
     assert result is not None
     assert reconciled == []
@@ -688,7 +688,7 @@ async def test_shadow_records_route_and_keeps_incumbent_result(monkeypatch):
     async def store(_item, _axis, _model, route, _answers, _cost):
         records.append(route.route)
 
-    async def incumbent(*, models):
+    async def chat_reviewer(*, models):
         calls.append(list(models))
         return {"winning_score": 0.2, "resolution_method": "quorum_consensus"}
 
@@ -711,11 +711,11 @@ async def test_shadow_records_route_and_keeps_incumbent_result(monkeypatch):
         "name",
         {"id": "temperature"},
         ["primary", "secondary"],
-        incumbent,
+        chat_reviewer,
         mgr=Manager(),
     )
     assert records == ["accept"]
-    assert calls == [["primary", "secondary"]]
+    assert calls == [["primary"]]
     assert result["winning_score"] == 0.2
 
 
@@ -735,7 +735,7 @@ async def test_deciding_never_calls_chat(
     async def store(*_args):
         pass
 
-    async def incumbent(*, models):
+    async def chat_reviewer(*, models):
         calls.append(models)
         return {"winning_score": 0.1}
 
@@ -753,7 +753,11 @@ async def test_deciding_never_calls_chat(
     monkeypatch.setattr(cascade, "_store_route", store)
     monkeypatch.setattr(cascade, "deciding_enabled", lambda _axis: True)
     result = await cascade.adjudicate_review(
-        axis, {"id": "temperature"}, ["primary", "secondary"], incumbent, mgr=Manager()
+        axis,
+        {"id": "temperature"},
+        ["primary", "secondary"],
+        chat_reviewer,
+        mgr=Manager(),
     )
     assert calls == []
     assert result["resolution_method"] == "jev_cascade_" + expected_route
@@ -814,7 +818,7 @@ async def test_unjudged_review_keeps_full_incumbent(monkeypatch, failure, decidi
     async def store(*args, **kwargs):
         stored.append((args, kwargs))
 
-    async def incumbent(*, models):
+    async def chat_reviewer(*, models):
         calls.append(list(models))
         return {"winning_score": 0.3}
 
@@ -830,7 +834,7 @@ async def test_unjudged_review_keeps_full_incumbent(monkeypatch, failure, decidi
         "name",
         {"id": "temperature"},
         ["primary", "secondary"],
-        incumbent,
+        chat_reviewer,
         mgr=Manager(),
     )
     assert len(stored) == 1
@@ -838,7 +842,7 @@ async def test_unjudged_review_keeps_full_incumbent(monkeypatch, failure, decidi
     assert ("lease" if failure == "lease" else "Jev unavailable") in stored[0][1][
         "reason"
     ]
-    assert calls == [["primary", "secondary"]]
+    assert calls == [["primary"]]
 
 
 @pytest.mark.asyncio
@@ -862,7 +866,7 @@ async def test_unjudged_shadow_row_preserves_incumbent_and_aggregate(
     async def fail_judgment(_item, _model):
         raise RuntimeError("Jev unavailable")
 
-    async def incumbent(*, models):
+    async def chat_reviewer(*, models):
         calls.append(list(models))
         return incumbent_result
 
@@ -883,11 +887,11 @@ async def test_unjudged_shadow_row_preserves_incumbent_and_aggregate(
         axis,
         {"id": "temperature"},
         ["primary", "secondary"],
-        incumbent,
+        chat_reviewer,
         mgr=Manager(),
     )
     assert result is incumbent_result
-    assert calls == [["primary", "secondary"]]
+    assert calls == [["primary"]]
     assert len(stored) == 1
     row = stored[0]
     assert row["judge_kind"] == "jev" and row["is_canonical"] is False
@@ -1022,7 +1026,7 @@ class _OrderingManager:
 def _ordering_incumbent(writes, *, produces):
     """An incumbent that persists its own rows, as the review pool does."""
 
-    async def incumbent(*, models):
+    async def chat_reviewer(*, models):
         if not produces:
             return None
         writes.append(
@@ -1033,7 +1037,7 @@ def _ordering_incumbent(writes, *, produces):
         )
         return {"winning_score": 0.2, "resolution_method": "quorum_consensus"}
 
-    return incumbent
+    return chat_reviewer
 
 
 @pytest.mark.asyncio
