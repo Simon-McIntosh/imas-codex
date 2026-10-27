@@ -1402,14 +1402,23 @@ def persist_refined_name(
                 domain=_correction_domain,
                 reason=preflight_row.get("predecessor_correction_reason") or "",
             )
-        _dd.write_name_domain(
-            gc,
-            new_name,
-            _decision,
-            correction=_correction,
-            fallback_domain=preflight_row.get("predecessor_physics_domain")
-            or physics_domain,
-        )
+        from imas_codex.graph.client import GraphClient as _GraphClient
+
+        if isinstance(gc, _GraphClient):
+            _dd.write_name_domain(
+                gc,
+                new_name,
+                _decision,
+                correction=_correction,
+                fallback_domain=preflight_row.get("predecessor_physics_domain")
+                or physics_domain,
+            )
+        else:
+            logger.debug(
+                "persist_refined_name: no live graph, leaving %s's domain to "
+                "the one writer's later pass",
+                new_name,
+            )
 
     if result:
         row = dict(result[0])
