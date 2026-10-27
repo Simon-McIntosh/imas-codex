@@ -19,12 +19,12 @@
   <meta name="plan-sprint" content="S18">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names,review">
-  <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;sn-judgment-evaluation#s2&quot;,&quot;sn-judgment-evaluation#s3&quot;,&quot;sn-judgment-evaluation#s4&quot;,&quot;sn-selection-over-generation#s4&quot;],&quot;s4&quot;:[&quot;sn-judgment-evaluation#s5&quot;,&quot;sn-house-style#s4&quot;,&quot;sn-selection-over-generation#s4&quot;],&quot;s5&quot;:[&quot;sn-review-through-jev#s3&quot;,&quot;sn-review-through-jev#s4&quot;],&quot;s6&quot;:[&quot;sn-judgment-evaluation#s6&quot;,&quot;sn-review-through-jev#s3&quot;,&quot;sn-review-through-jev#s4&quot;]}">
+  <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;sn-judgment-evaluation#s2&quot;,&quot;sn-judgment-evaluation#s3&quot;,&quot;sn-judgment-evaluation#s4&quot;,&quot;sn-selection-over-generation#s4&quot;],&quot;s4&quot;:[&quot;sn-judgment-evaluation#s5&quot;,&quot;sn-house-style#s4&quot;,&quot;sn-selection-over-generation#s4&quot;],&quot;s5&quot;:[&quot;sn-review-through-jev#s3&quot;,&quot;sn-review-through-jev#s4&quot;],&quot;s6&quot;:[&quot;sn-judgment-evaluation#s6&quot;,&quot;sn-review-through-jev#s3&quot;,&quot;sn-review-through-jev#s4&quot;],&quot;s7&quot;:[&quot;sn-review-through-jev#s6&quot;]}">
   <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="294">
+<meta name="plan-version" content="295">
 <meta name="plan-modified" content="2026-10-27">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -1205,6 +1205,9 @@ without re-deriving it is visible.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261026T214053170406-srtj-graph-store-structure" data-who="reckon-build" data-when="2026-10-26T22:23:20Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/sn-review-through-jev/srtj-graph-store-structure.html — absolute archived suites: 111 shared failures, 0 added IDs, 8951 base vs 9007 head passes; 27 fresh imports; predicate SHA-256 unchanged; USD 0 of USD 0.</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-s7-lead-ruling-audit-panel" data-who="lead" data-when="2026-10-27T07:20:00Z">
+    <div class="r-comment-body"><p>Lead ruling, "Keep quorum as audit panel". §7 deletes the quorum as a deciding path: its persisting cycle, the review seats only that path uses, and the fallback that sends items Jev could not judge to it. Those items go to the single chat reviewer instead. The quorum stays only as the 5% panel audit's non-deciding panel, which runs through <code>panel_audit.quorum_without_persisting</code>, so the drift measure the switch kept is unchanged. §7 waits on §6, because the forwarder retirement and the product repairs §6 still owes touch the same worker and review modules.</p></div>
 </div>
 </section>
 </main>
