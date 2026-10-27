@@ -22,11 +22,13 @@ _DEFAULT_SCRIPT = (
     / "docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-label-sheet-run.py"
 )
 _SCRIPT = Path(os.environ.get("SN_RERANK_LABEL_SHEET_SCRIPT", str(_DEFAULT_SCRIPT)))
+pytestmark = pytest.mark.skipif(
+    _SCRIPT.resolve() == _DEFAULT_SCRIPT.resolve(),
+    reason="archived evidence runner is bound to its recorded revision",
+)
 
 
 def _load_driver():
-    if _SCRIPT.resolve() == _DEFAULT_SCRIPT.resolve():
-        pytest.skip("archived evidence runner is bound to its recorded revision")
     spec = importlib.util.spec_from_file_location(
         "ssog_rerank_label_sheet_run", _SCRIPT
     )
