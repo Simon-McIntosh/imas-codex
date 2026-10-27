@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "completed_at": "2026-10-27T15:12:18.471Z",
   "dispatched_at": "2026-10-27T15:01:14Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-shc-locus-converge-remeasure-2b5c8bcd8b4c",
+      "recorded_at": "2026-10-27T15:39:34.092304+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-remeasure.json",
