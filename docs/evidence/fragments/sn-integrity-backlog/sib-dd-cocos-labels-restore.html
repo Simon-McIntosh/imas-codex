@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-dd-cocos-labels-restore">
+<title>One full unsharded DD build restored the COCOS labels</title>
+</head>
+<body>
+<main>
+<h1 id="sib-dd-cocos-labels-restore-title">One full unsharded DD build restored the COCOS labels</h1>
+
+<p id="sib-dd-cocos-labels-restore-summary">
+A single unsharded <code>imas-codex imas dd build</code> over every DD version raised
+the count of labelled <code>IMASNode</code>s from <strong>9 to 574</strong>
+(404 <code>xml</code>, 109 <code>inferred_forward</code>, 61
+<code>inferred_sign_flip</code>) and put all <strong>24</strong> labelled holdout
+paths back on their frozen labels. The unmodified holdout authority test passes
+(<code>EXIT=0</code>). The restoration also invalidated the clustering input text,
+so the build's last phase began relabelling 350 clusters; it was stopped at 150 of
+them to bound spend. A resume through the CLI's own resumable path then labelled
+only the <strong>200</strong> remaining clusters for <strong>$0.5346</strong>,
+leaving 2,201 clusters with none unlabelled, none unembedded and a stored hash
+that matches the current path set. Spend recorded in the log is
+<strong>$0.9546</strong> across both runs, within the coordinator's USD 2.00
+ceiling for the resume.
+</p>
+
+<h2 id="sib-dd-cocos-labels-restore-census">Before and after counts</h2>
+<table>
+<thead>
+<tr><th>Measure</th><th>Before</th><th>After</th></tr>
+</thead>
+<tbody>
+<tr><td><code>IMASNode</code> total</td><td>61,366</td><td>61,366</td></tr>
+<tr><td>nodes with <code>cocos_transformation_type</code></td><td>9</td><td>574</td></tr>
+<tr><td>&#8195;<code>cocos_label_source='xml'</code></td><td>6</td><td>404</td></tr>
+<tr><td>&#8195;<code>cocos_label_source='inferred_sign_flip'</code></td><td>3</td><td>61</td></tr>
+<tr><td>&#8195;<code>cocos_label_source='inferred_forward'</code></td><td>0</td><td>109</td></tr>
+<tr><td>labelled holdout paths matching the frozen record</td><td>2 of 24</td><td>24 of 24</td></tr>
+</tbody>
+</table>
+
+<p>Other <code>IMASNode</code> properties are unchanged by the build, so the label
+pass touched nothing else:</p>
+
+<table>
+<thead>
+<tr><th>Property (non-null count except <code>total</code>)</th><th>Before</th><th>After</th></tr>
+</thead>
+<tbody>
+<tr><td><code>IMASNode</code> total</td><td>61,366</td><td>61,366</td></tr>
+<tr><td><code>documentation</code></td><td>61,366</td><td>61,366</td></tr>
+<tr><td><code>units</code></td><td>706</td><td>706</td></tr>
+<tr><td><code>cocos_transformation_expression</code></td><td>404</td><td>404</td></tr>
+<tr><td><code>embedding</code></td><td>9,524</td><td>9,524</td></tr>
+</tbody>
+</table>
+
+<h2 id="sib-dd-cocos-labels-restore-invocation">The invocation and its log</h2>
+<p>The build ran once, unsharded, with no IDS filter and no reset:</p>
+<pre><code>UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv \
+  uv run --directory /home/ITER/mcintos/Code/imas-codex --no-sync \
+  imas-codex imas dd build</code></pre>
+<p>
+Run from the main checkout at <code>main</code> (<code>2c08526b6</code>), which
+carries the scoped-clear fix. The CLI wrote its own log to
+<code>~/.local/share/imas-codex/logs/imas_dd_dd.log</code>, starting at line
+33,867 and spanning 181 lines (2026-10-27 23:55:20 to 2026-10-28 00:05:39
+Europe/Paris). Its summary reported 35 versions, 61,474 paths, 0 paths enriched,
+0 embeddings updated, 0 cluster nodes, elapsed 619.2&#8239;s.
+</p>
+
+<h2 id="sib-dd-cocos-labels-restore-holdout">The 24 holdout paths</h2>
+<table>
+<thead>
+<tr><th>DD path</th><th>Frozen label</th><th>Graph after</th><th>Source</th></tr>
+</thead>
+<tbody>
+<tr><td><code>core_profiles/profiles_1d/q</code></td><td>q_like</td><td>q_like</td><td>xml</td></tr>
+<tr><td><code>core_sources/source/profiles_1d/grid/psi</code></td><td>psi_like</td><td>psi_like</td><td>inferred_forward</td></tr>
+<tr><td><code>disruption/profiles_1d/grid/psi</code></td><td>psi_like</td><td>psi_like</td><td>inferred_forward</td></tr>
+<tr><td><code>distribution_sources/source/profiles_1d/grid/psi</code></td><td>psi_like</td><td>psi_like</td><td>inferred_forward</td></tr>
+<tr><td><code>distributions/distribution/profiles_1d/grid/psi</code></td><td>psi_like</td><td>psi_like</td><td>inferred_forward</td></tr>
+<tr><td><code>edge_profiles/profiles_1d/grid/psi</code></td><td>psi_like</td><td>psi_like</td><td>inferred_sign_flip</td></tr>
+<tr><td><code>edge_profiles/profiles_1d/q</code></td><td>q_like</td><td>q_like</td><td>xml</td></tr>
+<tr><td><code>equilibrium/time_slice/ggd/psi/values</code></td><td>psi_like</td><td>psi_like</td><td>inferred_sign_flip</td></tr>
+<tr><td><code>equilibrium/time_slice/profiles_1d/q</code></td><td>q_like</td><td>q_like</td><td>xml</td></tr>
+<tr><td><code>equilibrium/time_slice/profiles_2d/psi</code></td><td>psi_like</td><td>psi_like</td><td>inferred_forward</td></tr>
+<tr><td><code>magnetics/b_field_phi_probe/field</code></td><td>one_like</td><td>one_like</td><td>xml</td></tr>
+<tr><td><code>magnetics/b_field_pol_probe/field</code></td><td>one_like</td><td>one_like</td><td>xml</td></tr>
+<tr><td><code>mhd/ggd/psi/values</code></td><td>psi_like</td><td>psi_like</td><td>inferred_sign_flip</td></tr>
+<tr><td><code>plasma_profiles/ggd/psi/values</code></td><td>psi_like</td><td>psi_like</td><td>inferred_sign_flip</td></tr>
+<tr><td><code>plasma_profiles/profiles_1d/grid/psi</code></td><td>psi_like</td><td>psi_like</td><td>inferred_sign_flip</td></tr>
+<tr><td><code>plasma_profiles/profiles_1d/q</code></td><td>q_like</td><td>q_like</td><td>xml</td></tr>
+<tr><td><code>plasma_transport/model/profiles_1d/grid_d/psi</code></td><td>psi_like</td><td>psi_like</td><td>inferred_sign_flip</td></tr>
+<tr><td><code>plasma_transport/model/profiles_1d/grid_flux/psi</code></td><td>psi_like</td><td>psi_like</td><td>inferred_sign_flip</td></tr>
+<tr><td><code>plasma_transport/model/profiles_1d/grid_v/psi</code></td><td>psi_like</td><td>psi_like</td><td>inferred_sign_flip</td></tr>
+<tr><td><code>runaway_electrons/profiles_1d/grid/psi</code></td><td>psi_like</td><td>psi_like</td><td>inferred_forward</td></tr>
+<tr><td><code>transport_solver_numerics/solver_1d/grid/psi</code></td><td>psi_like</td><td>psi_like</td><td>inferred_forward</td></tr>
+<tr><td><code>wall/description_ggd/ggd/psi/values</code></td><td>psi_like</td><td>psi_like</td><td>inferred_sign_flip</td></tr>
+<tr><td><code>waves/coherent_wave/profiles_1d/grid/psi</code></td><td>psi_like</td><td>psi_like</td><td>inferred_forward</td></tr>
+<tr><td><code>waves/coherent_wave/profiles_2d/grid/psi</code></td><td>psi_like</td><td>psi_like</td><td>inferred_sign_flip</td></tr>
+</tbody>
+</table>
+
+<h2 id="sib-dd-cocos-labels-restore-test">The authority test, unmodified</h2>
+<p>
+<code>tests/standard_names/test_docs_holdout_set.py::test_docs_holdout_physics_authority_matches_dd_path_bindings</code>
+ran unmodified against the live graph before and after the build. Before, it
+failed at <code>test_docs_holdout_set.py:51</code> with
+<code>assert 'one_like' == None</code> (<code>EXIT=1</code>); after, it passes
+in 7.17&#8239;s (<code>1 passed</code>, <code>EXIT=0</code>), and again after the
+cluster resume, when it passed in 8.47&#8239;s (<code>EXIT=0</code>) with the
+labelled <code>IMASNode</code> count still 574.
+</p>
+
+<h2 id="sib-dd-cocos-labels-restore-gap">What the build still leaves unlabelled</h2>
+<p>
+The cause record predicted 617 labels restored from the 623 fields 3.42.2
+declares. The build set <strong>495</strong> of those 623 and left
+<strong>128</strong> null, with zero disagreements and zero missing nodes; the
+remaining labelled nodes come from the inferred sources (109 forward, 61 sign
+flip), which take the total to 574. The 128 nulls are paths the latest DD
+version no longer carries, such as <code>equilibrium/time_slice/profiles_1d/j_tor</code>,
+<code>.../b_tor</code> and <code>.../bpol_probe/measured</code>: the forward-port
+backfill writes onto the latest version's path set, so a path renamed or dropped
+in 4.x is skipped even though its node is still in the graph. Every holdout path
+survives that boundary, so the authority test is unaffected, but the restoration
+is 128 labels short of the DD's own declaration for older-version nodes.
+</p>
+
+<h2 id="sib-dd-cocos-labels-restore-spend">The paid work the CLI could not skip</h2>
+<p>
+Preflight found no enrichment work (0 IMASNode, 0 identifier schema and 0 IDS
+nodes needed enrichment; 0 Tier-1 domain-classification candidates), and the
+build confirmed it: 0 paths enriched, 0 embeddings updated. But restoring the
+labels changes the clustering input text, so the cluster input hash no longer
+matched and the cluster worker recomputed 3,025 clusters and began labelling the
+350 unlabelled ones with <code>openrouter/anthropic/claude-sonnet-4.6</code>.
+Three batches billed $0.1599, $0.1258 and $0.1343 ($0.42 total, three batches of
+50 of 350 clusters) before the build was sent SIGTERM at 150/350; a fourth batch
+was in flight when it stopped. One Tier-1 domain classification also ran
+(1 path, cost not itemised in the log). The process printed its full summary and
+then hung joining executor threads, so it was sent SIGKILL after the summary;
+the wrapper recorded exit 137.
+</p>
+
+<h2 id="sib-dd-cocos-labels-restore-clusters">Completing the cluster labels</h2>
+<p>
+The resume ran the same CLI invocation again, which re-queries
+<code>IMASSemanticCluster</code>s whose <code>label</code> is null, so the 150
+clusters already labelled were not paid for twice: it labelled exactly
+<strong>200</strong>. Four batches billed $0.1481, $0.1240, $0.1422 and $0.1203,
+<strong>$0.5346</strong> in total, well inside the USD 2.00 ceiling, and the run
+exited 0 after 493.9&#8239;s.
+</p>
+<table>
+<thead>
+<tr><th>Cluster measure</th><th>Before resume</th><th>After resume</th></tr>
+</thead>
+<tbody>
+<tr><td>clusters in graph</td><td>2,474</td><td>2,201</td></tr>
+<tr><td>labelled</td><td>2,274</td><td>2,201</td></tr>
+<tr><td>unlabelled</td><td>200</td><td>0</td></tr>
+<tr><td>labelled but unembedded</td><td>0</td><td>0</td></tr>
+<tr><td>stored <code>cluster_input_hash</code> vs the current path set</td><td>stale</td><td>matches (<code>24a8e717a761f719</code>)</td></tr>
+<tr><td><code>IN_CLUSTER</code> memberships pointing at no node</td><td>&#8212;</td><td>0</td></tr>
+</tbody>
+</table>
+<p>
+The count fell from 2,474 to 2,201 because the run recomputed the clustering and
+deleted the content-hash clusters the new computation did not produce; the labels
+on surviving clusters were preserved by the merge, and none of the 200 relabelled
+clusters had been labelled before.
+</p>
+<p>
+<strong>These costs are not in the <code>LLMCost</code> graph rows.</strong> The
+cluster labeler discards the cost the call layer returns
+(<code>imas_codex/clusters/labeler.py</code>, <code>parsed_batch, _cost, _tokens =
+call_llm_structured(...)</code>), so a total measured from
+<code>MATCH (l:LLMCost)</code> over the resume window is <strong>0 rows,
+$0.0000</strong> while the CLI log records four billed calls. The per-call
+<code>cost=$…</code> lines in <code>imas_dd_dd.log</code> are the only record of
+this spend, and the figures above are read from them.
+</p>
+</main>
+</body>
+</html>
