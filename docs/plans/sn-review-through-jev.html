@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="310">
+<meta name="plan-version" content="311">
 <meta name="plan-modified" content="2026-10-27">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -1250,6 +1250,9 @@ without re-deriving it is visible.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261027T075748845126-srtj-exposed-signed-manifest" data-who="reckon-build" data-when="2026-10-27T11:51:50Z">
     <div class="r-comment-body"><p>Product defects, not stale tests; fixed in imas_codex/standard_names/signed_manifest.py (4383597eb) with no test file modified, and the fragment landed as bcf802de9. All seven ids are product defects: test_replay_after_quarantine_is_measured_write_free (receipt replay resolved its cohort before the rows existed) plus six test_reconcile_lifecycleless_stubs ids (stub deletion refused the signed cohort for lack of a needs_composition flag); measure: pytest -m graph on both files at head gives 18 passed, EXIT=0, and reverting only that module gives 7 failed (exactly the seven), EXIT=1, with zero added failures across the whole default tests/standard_names/ suite (95 failed on both base and head).</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261027T121202336531-review-of-srtj-exposed-source-invariant-84cf1285dacf" data-who="reckon-build" data-when="2026-10-27T12:59:09.009Z">
+    <div class="r-comment-body"><p>review of r-20261027T075847653576-srtj-exposed-source-invariant at head 84cf1285dacf: status parsed, six dimensions scored 19/15/20/18/20/20, zero added failure ids derived independently from suite-base.log and suite-head.log, four non-blocking findings</p></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-s7-lead-ruling-audit-panel" data-who="lead" data-when="2026-10-27T07:20:00Z">
     <div class="r-comment-body"><p>Lead ruling, "Keep quorum as audit panel". §7 deletes the quorum as a deciding path: its persisting cycle, the review seats only that path uses, and the fallback that sends items Jev could not judge to it. Those items go to the single chat reviewer instead. The quorum stays only as the 5% panel audit's non-deciding panel, which runs through <code>panel_audit.quorum_without_persisting</code>, so the drift measure the switch kept is unchanged. §7 waits on §6, because the forwarder retirement and the product repairs §6 still owes touch the same worker and review modules.</p></div>

@@ -1,0 +1,78 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived here from the reviewed run's own arms: FAILED lines of /home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T075847653576-srtj-exposed-source-invariant/logs/suite-head.log (73 ids) minus those of /home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T075847653576-srtj-exposed-source-invariant/logs/suite-base.log (95 ids) using comm -23 gives an empty set, so zero ids were added at head.",
+  "call_site_count": 8,
+  "call_sites": [
+    "imas_codex/standard_names/edit.py:3370",
+    "imas_codex/standard_names/attachment_audit.py:1322",
+    "imas_codex/standard_names/attachment_audit.py:2991",
+    "imas_codex/standard_names/signed_manifest.py:4134",
+    "imas_codex/standard_names/signed_manifest.py:6951",
+    "imas_codex/standard_names/signed_manifest.py:7266",
+    "imas_codex/standard_names/graph_store/graph_refinement.py:1332",
+    "imas_codex/standard_names/graph_store/graph_catalog.py:576"
+  ],
+  "completed_at": "2026-10-27T12:59:09.009Z",
+  "dispatched_at": "2026-10-27T12:49:16Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T075847653576-srtj-exposed-source-invariant/logs/graph-head.log",
+      "line": "2",
+      "text": "non-blocking: the head graph arm ran from the worktree tree line rather than from a git archive tree under TMPDIR as the brief's gate requires, so the isolation the gate asked for was not used; the worktree is clean at 84cf1285d and its module.__file__ names the reviewed code, so the measurement itself stands."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T075847653576-srtj-exposed-source-invariant/logs/graph-base.log",
+      "line": "3",
+      "text": "non-blocking: the base arm's UV_PROJECT_ENVIRONMENT names /home/ITER/mcintos/standard-venv, a path that no longer exists and is not the repo .venv the head arm used, so base and head are not environment-controlled against each other and the logged base command cannot be re-run as written."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T075847653576-srtj-exposed-source-invariant/logs/suite-base.log",
+      "line": "1",
+      "text": "non-blocking: the base-arm suite and default-marker logs were run in a scratch tree but omit the module.__file__ and cwd header lines the manifest contract requires for such a run, so the log alone cannot show which source tree served the measurement."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-exposed-source-invariant.html",
+      "line": "5",
+      "text": "non-blocking: the stale-test-data verdict rests on project-graph producer counts (23, 9, 10) quoted only in prose, with no logged command or result behind them, so a reader cannot reproduce the one piece of fresh evidence for that verdict."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read both commits against base 970cdb0d9; 2375383a2 changes one Cypher clause in source_invariant.py:52 and adds a surviving-producer seed block to test_stale_source_detach.py:147-164, and 84cf1285d adds only the 18-line evidence fragment, +40/-1 in total.",
+    "done_when": "the gate names pytest -m graph on tests/standard_names/test_stale_source_detach.py and tests/standard_names/test_writers_carry_sources.py at base and head, plus the default-marker set and the default suite; all five arms are logged and I recomputed the suite delta myself from the FAILED lines of suite-base.log and suite-head.log, 95 ids at base against 73 at head with comm -23 empty.",
+    "goal": "the node goal is to make the five graph tests that now reach imas_codex/standard_names/source_invariant.py pass, or say why they cannot, with a per-test verdict and evidence; all five pass at head 2375383a2 and each verdict is recorded at docs/evidence/fragments/sn-review-through-jev/srtj-exposed-source-invariant.html:4-10.",
+    "manifest": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T075847653576-srtj-exposed-source-invariant/manifest.md; it states status complete, commits 2375383a2 and 84cf1285d, graph head 13 passed EXIT=0, graph base 5 failed EXIT=1, suite delta 0 added ids, and a negative control at 1 failed EXIT=1.",
+    "write_paths": "the manifest declares imas_codex/standard_names/source_invariant.py, tests/standard_names/test_stale_source_detach.py, tests/standard_names/test_writers_carry_sources.py and the docs fragment; git diff --stat 970cdb0d9..84cf1285d touches source_invariant.py, test_stale_source_detach.py and the fragment, all inside them, and test_writers_carry_sources.py is correctly left unchanged."
+  },
+  "justifications": {
+    "durability": "negative-control.log reinstates the pre-fix predicate in a scratch tree and reddens exactly test_real_invariant_allows_one_source at tests/standard_names/test_writers_carry_sources.py:98, an id the head arm passes, so the product fix has a guard that fails on the regression it repairs; the fixture change adds no new assertion of its own and its realism rests on the four detach ids reddening without it, as graph-base.log shows.",
+    "evidence": "every arm is logged with a revision header and a bare EXIT line (graph-head.log:13 passed EXIT=0, graph-base.log:5 failed EXIT=1, negative-control.log:1 failed EXIT=1) and the suite delta recomputes to zero added ids, but the head graph arm ran in the worktree and the base arm under a virtualenv path that no longer exists, so neither arm is reproducible as recorded.",
+    "fit": "source_invariant.py:52 uses the same coalesce(...,'') idiom the surrounding predicate already uses at :55-56 and :59, and the seed block at test_stale_source_detach.py:147 follows the file's client.query(UNWIND $rows ...) idiom with a mechanism-only comment and no plan, issue or version label.",
+    "goal_fidelity": "source_invariant.py:52 now counts a status-less StandardNameSource as a live producer, which is exactly the predicate the failing id test_writers_carry_sources.py:87 seeds, and the four detach ids pass with their fixture corrected rather than their assertions relaxed.",
+    "reuse": "the change extends find_sourceless_live_names, the owner of the sourceless-live-name capability at source_invariant.py:27, and adds no new definition; a search over imas_codex/standard_names for a second producer-count owner found only attachment_audit.py's own _ATTACHMENTS_QUERY, which is a distinct capability the change neither extends nor forks.",
+    "scope_discipline": "git diff 970cdb0d9..84cf1285d changes only source_invariant.py, test_stale_source_detach.py and the declared evidence fragment, and the sibling null-unsafe predicates in signed_manifest.py and attachment_audit.py were reported under outside_scope instead of being touched."
+  },
+  "node": "review-of-srtj-exposed-source-invariant-84cf1285dacf",
+  "node:reviewed": "srtj-exposed-source-invariant",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to make the five graph tests that now reach imas_codex/standard_names/source_invariant.py pass, or say why they cannot, with a per-test verdict and evidence; all five pass at head 2375383a2 and each verdict is recorded at docs/evidence/fragments/sn-review-through-jev/srtj-exposed-source-invariant.html:4-10.\nVERDICT done_when: the gate names pytest -m graph on tests/standard_names/test_stale_source_detach.py and tests/standard_names/test_writers_carry_sources.py at base and head, plus the default-marker set and the default suite; all five arms are logged and I recomputed the suite delta myself from the FAILED lines of suite-base.log and suite-head.log, 95 ids at base against 73 at head with comm -23 empty.\nVERDICT write_paths: the manifest declares imas_codex/standard_names/source_invariant.py, tests/standard_names/test_stale_source_detach.py, tests/standard_names/test_writers_carry_sources.py and the docs fragment; git diff --stat 970cdb0d9..84cf1285d touches source_invariant.py, test_stale_source_detach.py and the fragment, all inside them, and test_writers_carry_sources.py is correctly left unchanged.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T075847653576-srtj-exposed-source-invariant/manifest.md; it states status complete, commits 2375383a2 and 84cf1285d, graph head 13 passed EXIT=0, graph base 5 failed EXIT=1, suite delta 0 added ids, and a negative control at 1 failed EXIT=1.\nVERDICT diff: read both commits against base 970cdb0d9; 2375383a2 changes one Cypher clause in source_invariant.py:52 and adds a surviving-producer seed block to test_stale_source_detach.py:147-164, and 84cf1285d adds only the 18-line evidence fragment, +40/-1 in total.\nCALL_SITES: imas_codex/standard_names/edit.py:3370, imas_codex/standard_names/attachment_audit.py:1322, imas_codex/standard_names/attachment_audit.py:2991, imas_codex/standard_names/signed_manifest.py:4134, imas_codex/standard_names/signed_manifest.py:6951, imas_codex/standard_names/signed_manifest.py:7266, imas_codex/standard_names/graph_store/graph_refinement.py:1332, imas_codex/standard_names/graph_store/graph_catalog.py:576\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: source_invariant.py:52 now counts a status-less StandardNameSource as a live producer, which is exactly the predicate the failing id test_writers_carry_sources.py:87 seeds, and the four detach ids pass with their fixture corrected rather than their assertions relaxed.\nSCORE evidence: 15\nJUSTIFICATION evidence: every arm is logged with a revision header and a bare EXIT line (graph-head.log:13 passed EXIT=0, graph-base.log:5 failed EXIT=1, negative-control.log:1 failed EXIT=1) and the suite delta recomputes to zero added ids, but the head graph arm ran in the worktree and the base arm under a virtualenv path that no longer exists, so neither arm is reproducible as recorded.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 970cdb0d9..84cf1285d changes only source_invariant.py, test_stale_source_detach.py and the declared evidence fragment, and the sibling null-unsafe predicates in signed_manifest.py and attachment_audit.py were reported under outside_scope instead of being touched.\nSCORE durability: 18\nJUSTIFICATION durability: negative-control.log reinstates the pre-fix predicate in a scratch tree and reddens exactly test_real_invariant_allows_one_source at tests/standard_names/test_writers_carry_sources.py:98, an id the head arm passes, so the product fix has a guard that fails on the regression it repairs; the fixture change adds no new assertion of its own and its realism rests on the four detach ids reddening without it, as graph-base.log shows.\nSCORE fit: 20\nJUSTIFICATION fit: source_invariant.py:52 uses the same coalesce(...,'') idiom the surrounding predicate already uses at :55-56 and :59, and the seed block at test_stale_source_detach.py:147 follows the file's client.query(UNWIND $rows ...) idiom with a mechanism-only comment and no plan, issue or version label.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change extends find_sourceless_live_names, the owner of the sourceless-live-name capability at source_invariant.py:27, and adds no new definition; a search over imas_codex/standard_names for a second producer-count owner found only attachment_audit.py's own _ATTACHMENTS_QUERY, which is a distinct capability the change neither extends nor forks.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T075847653576-srtj-exposed-source-invariant/logs/graph-head.log:2 non-blocking: the head graph arm ran from the worktree tree line rather than from a git archive tree under TMPDIR as the brief's gate requires, so the isolation the gate asked for was not used; the worktree is clean at 84cf1285d and its module.__file__ names the reviewed code, so the measurement itself stands.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T075847653576-srtj-exposed-source-invariant/logs/graph-base.log:3 non-blocking: the base arm's UV_PROJECT_ENVIRONMENT names /home/ITER/mcintos/standard-venv, a path that no longer exists and is not the repo .venv the head arm used, so base and head are not environment-controlled against each other and the logged base command cannot be re-run as written.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T075847653576-srtj-exposed-source-invariant/logs/suite-base.log:1 non-blocking: the base-arm suite and default-marker logs were run in a scratch tree but omit the module.__file__ and cwd header lines the manifest contract requires for such a run, so the log alone cannot show which source tree served the measurement.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-exposed-source-invariant.html:5 non-blocking: the stale-test-data verdict rests on project-graph producer counts (23, 9, 10) quoted only in prose, with no logged command or result behind them, so a reader cannot reproduce the one piece of fresh evidence for that verdict.\n",
+  "review_run_id": "r-20261027T121202336531-review-of-srtj-exposed-source-invariant-84cf1285dacf",
+  "reviewed_base_sha": "970cdb0d918702642a71601496ac4683a300b0c5",
+  "reviewed_head_sha": "84cf1285dacf472e2c0bb15febb4feaef637ace5",
+  "reviewed_run_id": "r-20261027T075847653576-srtj-exposed-source-invariant",
+  "scores": {
+    "durability": 18,
+    "evidence": 15,
+    "fit": 20,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T12:58:00+00:00",
+  "total": 112
+}
