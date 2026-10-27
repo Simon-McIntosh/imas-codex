@@ -1,0 +1,61 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/standard_names/harmonize.py:708 mark_families_for_regeneration calls reset_standard_name_docs(sn_ids=member_ids, run_id=run_id)",
+    "imas_codex/standard_names/edit.py:3778 the sn edit docs axis calls reset_standard_name_docs(sn_ids=[target], run_id=run_id)"
+  ],
+  "completed_at": "2026-10-27T13:18:51.038Z",
+  "dispatched_at": "2026-10-27T13:05:12Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T104901661767-shc-docs-reset-scope-stamp/manifest.md",
+      "line": "17",
+      "severity": "non-blocking",
+      "text": "non-blocking: after_suite records revision 9d8bde6be9a523c688cda7272946c9e4f18a1107 while the reviewed head is f46dc2dde33980e4e9951299ca4dba90059b6cdb; the intervening commit changes only docs/evidence/fragments/sn-harmonize-command/shc-docs-reset-scope-stamp.html, so the failure set is unaffected, but the record does not say why the gate revision differs from the promoted head."
+    }
+  ],
+  "gate_sources": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T104901661767-shc-docs-reset-scope-stamp/logs/gate-head.log",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T104901661767-shc-docs-reset-scope-stamp/logs/gate-base.log",
+    "negative_control": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T104901661767-shc-docs-reset-scope-stamp/logs/negative-control.log",
+    "new_file_arm": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T104901661767-shc-docs-reset-scope-stamp/logs/head-arm-node.log"
+  },
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "Read commit by commit; 9d8bde6be splits the early return in graph_docs_persistence.py:409-429 and adds the disposable-graph test file, while f46dc2dde adds only the 71-line evidence fragment.",
+    "done_when": "The done_when asks for the stamp on a zero-reset scoped call, tests that redden when the early return is restored, and a zero-added-failure gate; tests/standard_names/test_docs_reset_scope_stamp.py:99 asserts both names carry the run id after an eligible=0 call, logs/negative-control.log records that assertion failing with the early return restored (1 failed, 2 passed, EXIT=1), and logs/gate-base.log and logs/gate-head.log both end 103 failed / 8375 passed with identical 106-id FAILED sets.",
+    "goal": "The source goal is that a scoped docs reset stamps its batch even when it resets nothing; imas_codex/standard_names/graph_store/graph_docs_persistence.py:409 now gates only the reset on eligibility and graph_docs_persistence.py:424 always runs the scope stamp when run_id is set.",
+    "manifest": "The source manifest reports status complete, commits 9d8bde6be and f46dc2dde, added failure ids 0 and a red negative control; its referenced logs/gate-base.log, logs/gate-head.log and logs/negative-control.log are present and support those claims.",
+    "write_paths": "The brief grants three files; git diff 970cdb0d9..f46dc2dde changes exactly those three: graph_docs_persistence.py (+22/-8), test_docs_reset_scope_stamp.py (+183) and the evidence fragment (+71)."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_docs_reset_scope_stamp.py:99 asserts the independently re-read run id, and logs/negative-control.log shows it reddening as [None, None] when the early return is restored, so the assertion fails exactly on the guarded regression.",
+    "evidence": "logs/gate-base.log and logs/gate-head.log each end 103 failed / 8375 passed with the same 106 FAILED ids (delta computed zero both ways), and logs/negative-control.log ends 1 failed, 2 passed, EXIT=1 on the scoped test.",
+    "fit": "The module keeps the inline-Cypher style and mechanism-worded comment of its neighbours at graph_docs_persistence.py:411-415, and the new test file carries the pytestmark = pytest.mark.graph tiering used by eight siblings in tests/standard_names/.",
+    "goal_fidelity": "imas_codex/standard_names/graph_store/graph_docs_persistence.py:415-429 initialises reset to 0, runs the reset query only when eligible, and runs the stamp query whenever run_id is set.",
+    "reuse": "the capability search found the scope-stamp Cypher already owned by reset_standard_name_docs, and the change extends that query rather than adding a second stamp path.",
+    "scope_discipline": "git diff 970cdb0d9..f46dc2dde touches only the three paths the brief granted, with no change outside them."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source goal is that a scoped docs reset stamps its batch even when it resets nothing; imas_codex/standard_names/graph_store/graph_docs_persistence.py:409 gates only the reset on eligibility and graph_docs_persistence.py:424 always runs the scope stamp when run_id is set.\nVERDICT done_when: The done_when asks for the stamp on a scoped reset that resets nothing, tests that redden when the early return is restored, and a zero-added-failure gate; tests/standard_names/test_docs_reset_scope_stamp.py:99 asserts both names carry the run id after an eligible=0 call, logs/negative-control.log records that assertion failing with the early return restored (1 failed, 2 passed, EXIT=1), and logs/gate-base.log and logs/gate-head.log both end 103 failed / 8375 passed with identical 106-id FAILED sets.\nVERDICT write_paths: The brief grants three files; git diff 970cdb0d9..f46dc2dde changes exactly those three: graph_docs_persistence.py (+22/-8), test_docs_reset_scope_stamp.py (+183) and the evidence fragment (+71).\nVERDICT manifest: The source manifest reports status complete, commits 9d8bde6be and f46dc2dde, added failure ids 0 and a red negative control; its referenced logs/gate-base.log, logs/gate-head.log and logs/negative-control.log are present and support those claims.\nVERDICT diff: Read commit by commit; 9d8bde6be splits the early return in graph_docs_persistence.py:409-429 and adds the disposable-graph test file, while f46dc2dde adds only the 71-line evidence fragment.\nCALL_SITES: imas_codex/standard_names/harmonize.py:708 mark_families_for_regeneration calls reset_standard_name_docs, imas_codex/standard_names/edit.py:3778 the sn edit docs axis calls reset_standard_name_docs\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/graph_store/graph_docs_persistence.py:415-429 initialises reset to 0, runs the reset query only when eligible, and runs the stamp query whenever run_id is set.\nSCORE evidence: 19\nJUSTIFICATION evidence: logs/gate-base.log and logs/gate-head.log each end 103 failed / 8375 passed with the same 106 FAILED ids, and logs/negative-control.log ends 1 failed, 2 passed, EXIT=1 on the scoped test.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 970cdb0d9..f46dc2dde touches only the three paths the brief granted, with no change outside them.\nSCORE durability: 20\nJUSTIFICATION durability: tests/standard_names/test_docs_reset_scope_stamp.py:99 asserts the independently re-read run id, and logs/negative-control.log shows it reddening as [None, None] when the early return is restored.\nSCORE fit: 20\nJUSTIFICATION fit: graph_docs_persistence.py:411-415 keeps the inline-Cypher style and mechanism-worded comment of its neighbours, and the test file carries the pytest.mark.graph tiering used by eight siblings in tests/standard_names/.\nSCORE reuse: 20\nJUSTIFICATION reuse: the capability search found the scope-stamp Cypher already owned by reset_standard_name_docs, and the change extends that query rather than adding a second stamp path.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T104901661767-shc-docs-reset-scope-stamp/manifest.md:17 non-blocking: after_suite records revision 9d8bde6be while the reviewed head is f46dc2dde; the intervening commit changes only the evidence fragment, so the failure set is unaffected, but the record does not state why the gate revision differs from the promoted head.",
+  "review_run_id": "r-20261027T121810775263-review-of-shc-docs-reset-scope-stamp-f46dc2dde339",
+  "reviewed_base_sha": "970cdb0d918702642a71601496ac4683a300b0c5",
+  "reviewed_head_sha": "f46dc2dde33980e4e9951299ca4dba90059b6cdb",
+  "reviewed_run_id": "r-20261027T104901661767-shc-docs-reset-scope-stamp",
+  "scores": {
+    "durability": 20,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T13:11:25+00:00",
+  "total": 119
+}
