@@ -82,8 +82,14 @@ plants a decided name whose DD source and payload disagree, drives the whole
 catalog path against a disposable graph, and asserts four things: the writer
 was applied exactly once for that name; the scalar is the stored decision; the
 source set is the DD source's; the edges equal the source set; and exactly one
-statement on the path assigns <code>sn.physics_domain</code>, and it is the
-writer's.</p>
+statement on the path assigns <code>physics_domain</code>, and it is the
+writer's. The count does not look for one spelling: it reads every
+<code>SET</code> clause and matches a dotted assignment (<code>=</code>,
+<code>+=</code>, <code>|=</code>), a map literal keyed by
+<code>physics_domain</code>, and a map parameter carrying the key, so a direct
+write that avoids the literal template still fails. A default-tier test drives
+five spellings and three reads against the same detector, so the count cannot
+pass by recognising nothing.</p>
 
 <table>
   <thead>
@@ -128,8 +134,8 @@ own <code>--basetemp</code>:</p>
     </tr>
     <tr>
       <td>head</td>
-      <td><code>156043788</code>, tree <code>6911687b1</code></td>
-      <td>93 failed, 8394 passed, 12 skipped, <code>EXIT=1</code></td>
+      <td><code>9025c0d8b</code> (final head), tree <code>c42df0f02</code></td>
+      <td>93 failed, 8402 passed, 12 skipped, <code>EXIT=1</code></td>
     </tr>
   </tbody>
 </table>
@@ -138,6 +144,17 @@ own <code>--basetemp</code>:</p>
 are both in <code>test_snrun_async_counters.py</code>:
 <code>TestGenerateDocsBumpsEnriched::test_generate_docs_bumps_enriched</code> and
 <code>::TestNoRunIdNoBump::test_no_run_id_skips_bump</code>.</p>
+
+<p>Both arms above were re-run once the reconcile was on main, so the figures
+describe the final head rather than the tree an intermediate commit carried:
+base <code>af4cc0719</code> and head <code>9025c0d8b</code>, each from its own
+<code>git archive</code> tree and <code>--basetemp</code>, and
+<code>comm -13</code> over the two failure-id lists is empty. The focused
+five-file <code>-m graph</code> gate was re-run at the same head after the
+facade wiring changed: 1 failed, 9 passed, the failure being
+<code>test_graph_edge_writers.py::test_bootstrap_transaction_rolls_back_partial_parent</code>,
+which passes when run alone and passed in an earlier four-file run, so it is
+cross-file parallel state in that test rather than this merge.</p>
 
 <p>The first gate, run against the dispatch base <code>43ae5712c</code>, added
 exactly one id: <code>test_facade_closure.py::test_service_bridge_resolves_only_wired_names</code>.
