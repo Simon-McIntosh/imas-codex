@@ -123,6 +123,34 @@ class _RacingEditTransaction:
         raise AssertionError(f"unexpected transaction query: {cypher}")
 
 
+def _answer_domain_state(gc):
+    """Let a mock client answer the domain writer's state read.
+
+    ``persist_refined_name`` hands the successor to ``write_name_domain``,
+    which reads the name's stored physics domain, its own domains and its
+    children before writing. A mock that answers every query with nothing
+    cannot answer that read, so it returns an unsourced, childless successor
+    for it and defers every other query to the client's own behaviour.
+    """
+    inner = gc.query
+
+    def _query(cypher, **params):
+        if "AS child_stored_domains" in cypher:
+            return [
+                {
+                    "physics_domain": None,
+                    "own_domains": [],
+                    "child_ids": [],
+                    "child_dd_domains": [],
+                    "child_stored_domains": [],
+                }
+            ]
+        return inner(cypher, **params)
+
+    gc.query = MagicMock(side_effect=_query)
+    return gc
+
+
 def _graph(transaction: MagicMock) -> MagicMock:
     graph = MagicMock()
     graph.__enter__.return_value = graph
@@ -131,7 +159,7 @@ def _graph(transaction: MagicMock) -> MagicMock:
     session.begin_transaction.return_value = transaction
     graph.session.return_value.__enter__.return_value = session
     graph.session.return_value.__exit__.return_value = False
-    return graph
+    return _answer_domain_state(graph)
 
 
 @contextmanager

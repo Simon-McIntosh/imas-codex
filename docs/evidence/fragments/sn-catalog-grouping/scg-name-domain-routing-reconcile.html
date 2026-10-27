@@ -1,0 +1,204 @@
+<h2 id="scg-name-domain-routing-reconcile">A catalog-written name's domain has one owner: the structural tail pass</h2>
+
+<p>Two nodes routed the graph store's <code>StandardName</code> domain writes
+through <code>domain_decision.write_name_domain</code>. The lineage half landed
+first (merge <code>ed50a9115</code>) and made the structural edge pass
+<code>_write_standard_name_edges</code> write every name in its batch through
+the writer, from the name's stored decision and its DD sources. The catalog
+half deleted the promote-on-higher-rank domain write from
+<code>graph_catalog.write_standard_names</code> and handed the tail pass the
+batch <em>without</em> the domain fields, on the reading that the tail pass
+mints no domain edge.</p>
+
+<p>Those two readings cannot both hold. After the lineage half, the tail pass
+is a domain writer; if the catalog path delegates to it, a
+<code>StandardName</code> written by <code>write_standard_names</code> gets its
+domain, its source domains and its domain edges from exactly that one
+application. The merge keeps that path and discards the catalog half's reading.
+The conflict in <code>tests/standard_names/test_graph_edge_writers.py</code> is
+resolved to it.</p>
+
+<h3 id="scg-name-domain-routing-reconcile-owner">The owner, and why</h3>
+
+<table>
+  <thead>
+    <tr><th>Candidate owner</th><th>Effect on a catalog-written name</th><th>Verdict</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>the structural tail pass, inside <code>write_standard_names</code></td>
+      <td>one application per name in the batch, from the name's stored
+      decision and DD sources; it also reaches every closure parent and every
+      name <code>rederive_structural_edges</code> passes through the same
+      function.</td>
+      <td>chosen &mdash; the path already exists, is the one the lineage half
+      landed, and covers names the catalog path materializes but never writes
+      itself.</td>
+    </tr>
+    <tr>
+      <td>an explicit call in <code>write_standard_names</code> before the tail
+      pass</td>
+      <td>two applications for every name, because the tail pass writes the
+      same names again.</td>
+      <td>rejected &mdash; twice for every name.</td>
+    </tr>
+    <tr>
+      <td>the tail pass, with the catalog path's names excluded from its domain
+      write</td>
+      <td>one application, but only by changing the tail pass's interface and
+      exempting the names the catalog path just wrote.</td>
+      <td>rejected &mdash; contradicts the lineage half's contract and costs an
+      interface for no behavioural gain.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>A payload domain is therefore ignored: the tail pass withholds
+<code>physics_domain</code> and <code>source_domains</code> from the batch it
+hands the edge pass, so the payload can neither mint an edge of its own nor
+supply a source set the writer would have to overwrite. A name that carries no
+stored decision is written undecided and keeps the scalar it already holds,
+which is the writer's documented contract.</p>
+
+<h3 id="scg-name-domain-routing-reconcile-defect">A test that measured nothing</h3>
+
+<p>The catalog half's own catalog-path test planted a synthetic identity
+(<code>test_domain_route__catalog_0ab12c34</code>) and called
+<code>write_standard_names</code> on it. That path gates on the name grammar and
+rejects an identity <code>imas_standard_names.parse</code> cannot parse before
+the write runs, so the test's post-conditions held because
+<code>write_standard_names</code> returned early. Measured directly:</p>
+
+<pre><code>parse('test_domain_route__catalog_ab12', strict=True)
+  ParseError: name 'test_domain_route__catalog_ab12' is not a valid grammar name</code></pre>
+
+<p>The merged test drives <code>electron_temperature</code> instead, and the
+once-per-name test on this page drives <code>ion_temperature</code>.</p>
+
+<h3 id="scg-name-domain-routing-reconcile-evidence">Evidence</h3>
+
+<p><code>tests/standard_names/test_name_domain_routing_reconcile.py</code>
+plants a decided name whose DD source and payload disagree, drives the whole
+catalog path against a disposable graph, and asserts four things: the writer
+was applied exactly once for that name; the scalar is the stored decision; the
+source set is the DD source's; the edges equal the source set; and exactly one
+statement on the path assigns <code>physics_domain</code>, and it is the
+writer's. The count does not look for one spelling: it reads every
+<code>SET</code> clause and matches a dotted assignment (<code>=</code>,
+<code>+=</code>, <code>|=</code>), a map literal keyed by
+<code>physics_domain</code>, and a map parameter carrying the key, so a direct
+write that avoids the literal template still fails. A default-tier test drives
+five spellings and three reads against the same detector, so the count cannot
+pass by recognising nothing.</p>
+
+<table>
+  <thead>
+    <tr><th>Arm</th><th>What was reverted</th><th>Result</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>head</td>
+      <td>nothing</td>
+      <td>1 passed, <code>EXIT=0</code></td>
+    </tr>
+    <tr>
+      <td>catalog half</td>
+      <td><code>graph_catalog.py</code> restored from <code>43ae5712c</code>,
+      which reinstates the promote-on-higher-rank domain write</td>
+      <td>1 failed, <code>EXIT=1</code>: <code>a statement outside the one
+      writer set the scalar: 2 domain writes ran</code></td>
+    </tr>
+    <tr>
+      <td>lineage half</td>
+      <td><code>graph_lineage.py</code> restored from <code>e2fee62a4</code>,
+      which reinstates the inline <code>HAS_PHYSICS_DOMAIN</code> merge</td>
+      <td>1 failed, <code>EXIT=1</code>: <code>the catalog path applied the
+      domain writer 0 times, not exactly once</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Suite gate, <code>tests/standard_names/</code> with default markers and
+<code>-n 8</code>, from separate <code>git archive</code> trees each with its
+own <code>--basetemp</code>:</p>
+
+<table>
+  <thead>
+    <tr><th>Arm</th><th>Revision</th><th>Summary</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>base</td>
+      <td><code>af4cc0719</code> (main at gate time)</td>
+      <td>95 failed, 8391 passed, 12 skipped, <code>EXIT=1</code></td>
+    </tr>
+    <tr>
+      <td>head</td>
+      <td><code>9025c0d8b</code> (final head), tree <code>c42df0f02</code></td>
+      <td>93 failed, 8402 passed, 12 skipped, <code>EXIT=1</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>No failure id is added.</strong> The two ids the head no longer fails
+are both in <code>test_snrun_async_counters.py</code>:
+<code>TestGenerateDocsBumpsEnriched::test_generate_docs_bumps_enriched</code> and
+<code>::TestNoRunIdNoBump::test_no_run_id_skips_bump</code>.</p>
+
+<p>Both arms above were re-run once the reconcile was on main, so the figures
+describe the final head rather than the tree an intermediate commit carried:
+base <code>af4cc0719</code> and head <code>9025c0d8b</code>, each from its own
+<code>git archive</code> tree and <code>--basetemp</code>, and
+<code>comm -13</code> over the two failure-id lists is empty. The focused
+five-file <code>-m graph</code> gate was re-run at the same head after the
+facade wiring changed: 1 failed, 9 passed, the failure being
+<code>test_graph_edge_writers.py::test_bootstrap_transaction_rolls_back_partial_parent</code>,
+which passes when run alone and passed in an earlier four-file run, so it is
+cross-file parallel state in that test rather than this merge.</p>
+
+<p>The first gate, run against the dispatch base <code>43ae5712c</code>, added
+exactly one id: <code>test_facade_closure.py::test_service_bridge_resolves_only_wired_names</code>.
+It is a seam failure the two halves create together and neither creates alone.</p>
+
+<p>The catalog half deleted the promote-on-higher-rank block, which was
+<code>graph_catalog</code>'s only reader of <code>services._ensure_list</code>.
+The lineage half removed the inline domain reads that also used it. The facade
+closure invariant asserts that <code>graph_ops._WIRED_SERVICE_NAMES</code> is
+exactly the set of service attributes the <code>graph_store</code> modules
+read, and <code>_ensure_list</code> is still listed there while nothing reads
+it. Deleting that one element of the frozenset makes the test pass; measured in
+a scratch copy of the head tree:</p>
+
+<pre><code>$ pytest tests/standard_names/test_facade_closure.py::test_service_bridge_resolves_only_wired_names
+1 passed, 1 warning in 7.48s</code></pre>
+
+<p>The element is gone from <code>_WIRED_SERVICE_NAMES</code> in
+<code>imas_codex/standard_names/graph_ops.py</code>, changed here at
+<code>8ef8d6518</code>, and
+<code>test_facade_closure.py</code> now reports <code>6 passed</code>. Neither
+arm of the gate on this page carries that id.</p>
+
+<h3 id="scg-name-domain-routing-reconcile-baseline">Why this base arm differs from an earlier reading</h3>
+
+<p>The dispatch base <code>43ae5712c</code> measured 103 failed, 8381 passed,
+15 skipped. <code>af4cc0719</code>, main at gate time, measures 95. The fifteen
+commits between them retire the review quorum's deciding path: they repair nine
+ids, all in <code>test_review_cascade.py</code>, and introduce one,
+<code>test_docs_holdout_set.py::test_docs_holdout_physics_authority_matches_dd_path_bindings</code>.</p>
+
+<p>A reading of 73 on main does not come from those landings: the ids it differs
+by were already failing at <code>43ae5712c</code> and still fail here. Part of
+the gap is this node's environment, and it is measurable: the CLI tests fail
+inside the worker's fence with <code>OSError(30, 'Read-only file system')</code>,
+the CLI's own log directory being unwritable there. That covers all fourteen
+ids in <code>test_cli_export.py</code> and most of <code>test_export_*</code>,
+whatever main contains. The rest of the gap is not classified here.</p>
+
+<h3 id="scg-name-domain-routing-reconcile-outside">Outside this node</h3>
+
+<p>The lineage fragment records that the derived-parent writers
+(<code>_materialize_derived_parent_rows</code>,
+<code>_bootstrap_missing_derived_parent_targets</code>,
+<code>_validate_derived_parent_identity</code> and the <code>parent.source_domains = CASE</code>
+promotion beside them) live in <code>graph_lineage.py</code>; this node did not
+change them beyond the merge.</p>

@@ -146,7 +146,19 @@ class TestPersistRefinedNameRecording:
             def session(self):
                 return _Session()
 
-            def query(self, *args, **kwargs):
+            def query(self, cypher, **params):
+                # The domain writer reads the successor's stored state
+                # before writing it; this successor is unsourced and childless.
+                if "AS child_stored_domains" in cypher:
+                    return [
+                        {
+                            "physics_domain": None,
+                            "own_domains": [],
+                            "child_ids": [],
+                            "child_dd_domains": [],
+                            "child_stored_domains": [],
+                        }
+                    ]
                 return []
 
         with patch(_GC_PATH, return_value=_GC()):

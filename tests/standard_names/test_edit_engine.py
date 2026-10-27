@@ -201,6 +201,23 @@ class FakeGraph:
     # -- query() dispatch -----------------------------------------------------
 
     def query(self, cypher: str, **params: Any) -> list[dict[str, Any]]:  # noqa: PLR0911, PLR0912
+        # ---- the domain writer's state read ----
+        if "AS child_stored_domains" in cypher:
+            node = self.nodes.get(params["sn_id"])
+            if node is None:
+                return []
+            stored = node.get("source_domains") or (
+                [node["physics_domain"]] if node.get("physics_domain") else []
+            )
+            return [
+                {
+                    "physics_domain": node.get("physics_domain"),
+                    "own_domains": stored,
+                    "child_ids": [],
+                    "child_dd_domains": [],
+                    "child_stored_domains": [],
+                }
+            ]
         # ---- edit.py's own marked queries ----
         if "// EDIT_FETCH_TARGET" in cypher:
             sn_id = params["id"]
@@ -642,7 +659,7 @@ class FakeGraph:
                 description=params["description"],
                 kind=params["kind"],
                 unit=params["unit"],
-                physics_domain=params["physics_domain"],
+                physics_domain=params.get("physics_domain"),
                 tags=params["tags"],
                 model=params["model"],
                 run_id=params.get("run_id"),

@@ -86,7 +86,6 @@ _WIRED_SERVICE_NAMES: frozenset[str] = frozenset(
         "_eligible_derived_parent_unit_children",
         "_emit_magnitude_of_edges",
         "_ensure_json",
-        "_ensure_list",
         "_exact_dd_source_id",
         "_exact_name_scope_refusals",
         "_exhausted_orphan_change_id",

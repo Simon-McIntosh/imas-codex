@@ -311,9 +311,7 @@ def decide_domain_for(
     model: str,
 ) -> DomainDecision:
     """Synchronous face of :func:`decide_domain`."""
-    return asyncio.run(
-        decide_domain(name, description, sources, ids_map, model=model)
-    )
+    return asyncio.run(decide_domain(name, description, sources, ids_map, model=model))
 
 
 @dataclass(frozen=True)
@@ -412,15 +410,18 @@ def write_name_domain(
     decision: DomainDecision,
     *,
     correction: DomainCorrection | None = None,
+    fallback_domain: str | None = None,
 ) -> NameDomainWrite:
     """Set a name's ``physics_domain``, ``source_domains`` and edges together.
 
     ``source_domains`` is the name's current DD sources' domains (a derived
     parent's is its children's union). ``physics_domain`` is the recorded
     correction when one exists, otherwise the stored decision; an undecided
-    name keeps its current value. The ``HAS_PHYSICS_DOMAIN`` edges are written
-    to exactly one per entry of ``source_domains``. All of it is one
-    transaction, so the three cannot disagree.
+    name keeps its current value, or ``fallback_domain`` when it holds none —
+    a successor minted by a rename carries no scalar yet and inherits its
+    predecessor's. The ``HAS_PHYSICS_DOMAIN`` edges are written to exactly one
+    per entry of ``source_domains``. All of it is one transaction, so the three
+    cannot disagree.
     """
     rows = [dict(row) for row in gc.query(_READ_STATE, sn_id=sn_id)]
     if not rows:
@@ -428,6 +429,8 @@ def write_name_domain(
     row = rows[0]
     source_domains = _expected_source_domains(row)
     current = row.get("physics_domain")
+    if current is None:
+        current = fallback_domain
     if correction is not None:
         target = correction.domain
         reason = None

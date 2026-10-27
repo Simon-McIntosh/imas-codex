@@ -346,93 +346,6 @@ def write_standard_names(
             ],
         )
 
-        # Promote-on-higher-rank: read existing scalar primary +
-        # source_domains, compute promotion in Python, write back.
-        # Replaces the legacy list-append-with-dedupe semantics.
-        from imas_codex.standard_names.domain_ranking import (
-            maybe_promote_domain,
-            merge_source_domains,
-        )
-
-        pd_inputs = []
-        for n in names:
-            sn_id = n.get("id")
-            if not sn_id:
-                continue
-            candidate = services._scalar_domain(n.get("physics_domain"))
-            incoming_sources = services._ensure_list(n.get("source_domains"))
-            if candidate and candidate not in incoming_sources:
-                incoming_sources = [*incoming_sources, candidate]
-            if not candidate and not incoming_sources:
-                continue
-            pd_inputs.append(
-                {
-                    "id": sn_id,
-                    "candidate": candidate,
-                    "incoming_sources": incoming_sources,
-                }
-            )
-
-        if pd_inputs:
-            # Read existing values for this batch so we can compute
-            # promotion in Python (rank tables are not encodable in Cypher).
-            existing_rows = (
-                write_gc.query(
-                    """
-                    UNWIND $ids AS sid
-                    MATCH (sn:StandardName {id: sid})
-                    RETURN sn.id AS id,
-                           sn.physics_domain AS physics_domain,
-                           sn.source_domains AS source_domains
-                    """,
-                    ids=[p["id"] for p in pd_inputs],
-                )
-                or []
-            )
-            existing_map = {
-                row["id"]: row
-                for row in existing_rows  # type: ignore[index]
-            }
-
-            pd_batch = []
-            for p in pd_inputs:
-                row = existing_map.get(p["id"], {})
-                existing_primary = services._scalar_domain(row.get("physics_domain"))
-                existing_sources = services._ensure_list(row.get("source_domains"))
-                # Legacy nodes may have list-valued physics_domain — fold
-                # those into source_domains too.
-                legacy_list = (
-                    row.get("physics_domain")
-                    if isinstance(row.get("physics_domain"), list)
-                    else None
-                )
-                if legacy_list:
-                    existing_sources = list(
-                        dict.fromkeys([*existing_sources, *legacy_list])
-                    )
-
-                merged_sources = merge_source_domains(
-                    existing_sources, *p["incoming_sources"]
-                )
-                promoted = maybe_promote_domain(existing_primary, p["candidate"])
-                pd_batch.append(
-                    {
-                        "id": p["id"],
-                        "physics_domain": promoted,
-                        "source_domains": merged_sources or None,
-                    }
-                )
-
-            write_gc.query(
-                """
-                UNWIND $batch AS b
-                MERGE (sn:StandardName {id: b.id})
-                SET sn.updated_at = datetime(), sn.physics_domain = coalesce(b.physics_domain, sn.physics_domain),
-                    sn.source_domains = coalesce(b.source_domains, sn.source_domains)
-                """,
-                batch=pd_batch,
-            )
-
         # Create HAS_STANDARD_NAME relationships: entity → concept
         dd_names = [n for n in names if "dd" in (n.get("source_types") or [])]
         signal_names = [n for n in names if "signals" in (n.get("source_types") or [])]
@@ -569,9 +482,25 @@ def write_standard_names(
         )
 
         # Emit structural edges: HAS_PARENT, HAS_ERROR, HAS_PREDECESSOR,
-        # HAS_SUCCESSOR, IN_CLUSTER, HAS_PHYSICS_DOMAIN.
+        # HAS_SUCCESSOR, IN_CLUSTER.
         # Tail pass — all nodes in this batch exist before edges are written.
-        skeleton_candidate_ids = services._write_standard_name_edges(write_gc, names)
+        # A name's physics_domain, source_domains and HAS_PHYSICS_DOMAIN edges
+        # are written by the tail pass through
+        # domain_decision.write_name_domain, once per name and from the name's
+        # stored decision and DD sources. The domain pair is withheld from the
+        # batch so a payload domain can neither mint an edge of its own nor
+        # supply a source set the writer would have to overwrite.
+        structural_names = [
+            {
+                key: value
+                for key, value in n.items()
+                if key not in ("physics_domain", "source_domains")
+            }
+            for n in names
+        ]
+        skeleton_candidate_ids = services._write_standard_name_edges(
+            write_gc, structural_names
+        )
 
         from imas_codex.standard_names.source_invariant import require_producing_sources
 
