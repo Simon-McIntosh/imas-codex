@@ -58,6 +58,7 @@ __all__ = [
     "decide_domain",
     "ids_domain_map",
     "option_text",
+    "undecided",
     "write_name_domain",
 ]
 
@@ -224,7 +225,13 @@ class DomainCorrection:
     reason: str
 
 
-def _undecided(name: str, options: Sequence[str], reason: str) -> DomainDecision:
+def undecided(name: str, options: Sequence[str], reason: str) -> DomainDecision:
+    """The decision for a name whose Choice could not be made, with its reason.
+
+    The candidates it was offered are kept, so a caller that stores the
+    decision keeps what the name could have chosen among rather than erasing
+    the record.
+    """
     return DomainDecision(
         name=name,
         candidates=tuple(options),
@@ -273,20 +280,20 @@ async def decide_domain(
         if isinstance(answers, dict):
             answer = answers.get(QUESTION)
     if not isinstance(answer, dict):
-        return _undecided(name, options, "the Jev call returned no answer")
+        return undecided(name, options, "the Jev call returned no answer")
     choice = answer.get("choice")
     probabilities = {
         str(k): float(v) for k, v in (answer.get("probabilities") or {}).items()
     }
     probability = probabilities.get(str(choice))
     if choice not in options:
-        return _undecided(
+        return undecided(
             name, options, f"the choice {choice!r} is not one of the candidates"
         )
     if probability is None:
-        return _undecided(name, options, "the answer carried no probability")
+        return undecided(name, options, "the answer carried no probability")
     if probability < CONFIDENCE_FLOOR:
-        return _undecided(
+        return undecided(
             name,
             options,
             f"chosen probability {probability:.3f} is below the floor "
@@ -419,9 +426,12 @@ def write_name_domain(
     correction when one exists, otherwise the stored decision; an undecided
     name keeps its current value, or ``fallback_domain`` when it holds none —
     a successor minted by a rename carries no scalar yet and inherits its
-    predecessor's. The ``HAS_PHYSICS_DOMAIN`` edges are written to exactly one
-    per entry of ``source_domains``. All of it is one transaction, so the three
-    cannot disagree.
+    predecessor's. An undecided name that holds no scalar and whose sources
+    agree on a single domain takes that domain, so its scalar, its source set
+    and its edges agree; several source domains stay unset and undecided. The
+    ``HAS_PHYSICS_DOMAIN`` edges are written to exactly one per entry of
+    ``source_domains``. All of it is one transaction, so the three cannot
+    disagree.
     """
     rows = [dict(row) for row in gc.query(_READ_STATE, sn_id=sn_id)]
     if not rows:
@@ -445,6 +455,13 @@ def write_name_domain(
         else:
             target = current
             reason = decision.undecided_reason or "no stored decision"
+    if target is None and len(source_domains) == 1:
+        # An undecided name with no scalar of its own still has to agree with
+        # its edges, so it takes the one domain its DD sources carry. The
+        # sources agree on it, so this is derived rather than a guess; more
+        # than one source domain is an ambiguity the Choice exists to settle,
+        # so it stays unset and the name is reported undecided.
+        target = next(iter(source_domains))
     edge_domains = sorted(source_domains)
     gc.query(
         _WRITE_DOMAIN,

@@ -11,7 +11,7 @@ from typing import Any
 
 from imas_codex.standard_names.domain_decision import (
     DomainDecision,
-    _undecided,
+    undecided,
     write_name_domain,
 )
 from imas_codex.standard_names.signed_manifest import apply_signed_manifest
@@ -50,12 +50,21 @@ def _stored_domain_decisions(
     decided: dict[str, DomainDecision | None] = {}
     for row in rows:
         choice = row.get("choice")
+        candidates = tuple(row.get("candidates") or ())
         if not choice:
-            decided[str(row["id"])] = None
+            # The candidates the name was offered are kept: a decision that
+            # carries no choice is still a record of what could have been
+            # chosen among, and the audit reads that list.
+            decided[str(row["id"])] = undecided(
+                str(row["id"]),
+                candidates,
+                "the stored decision carries no choice; the name keeps its "
+                "current domain",
+            )
             continue
         decided[str(row["id"])] = DomainDecision(
             name=str(row["id"]),
-            candidates=tuple(row.get("candidates") or ()),
+            candidates=candidates,
             choice=str(choice),
             probability=row.get("probability"),
             model=row.get("model"),
@@ -1011,14 +1020,7 @@ def _write_standard_name_edges(
     name_ids = [str(n["id"]) for n in names if n.get("id")]
     domain_batch = []
     for sn_id, stored in _stored_domain_decisions(gc, name_ids).items():
-        write_name_domain(
-            gc,
-            sn_id,
-            stored
-            or _undecided(
-                sn_id, (), "no stored Jev decision; the name keeps its current domain"
-            ),
-        )
+        write_name_domain(gc, sn_id, stored)
         domain_batch.append({"sn_id": sn_id})
     candidate_name_ids = {n["id"] for n in names if n.get("id")}
     for batch in (co_batch, he_batch, pred_batch):
@@ -1551,17 +1553,7 @@ def _materialize_derived_parent_rows(
             )
         stored = _stored_domain_decisions(gc, [parent_id])
         if parent_id in stored:
-            write_name_domain(
-                gc,
-                parent_id,
-                stored[parent_id]
-                or _undecided(
-                    parent_id,
-                    source_domains,
-                    "a derived parent has no stored Jev decision; it keeps the "
-                    "domain its children give it",
-                ),
-            )
+            write_name_domain(gc, parent_id, stored[parent_id])
         seeded += 1
     return seeded
 
@@ -1655,17 +1647,7 @@ def _materialize_derived_parent_rows_batched(
         parent_id = str(row["parent_id"])
         if parent_id not in stored_by_parent:
             continue
-        write_name_domain(
-            gc,
-            parent_id,
-            stored_by_parent[parent_id]
-            or _undecided(
-                parent_id,
-                row.get("source_domains") or (),
-                "a derived parent has no stored Jev decision; it keeps the "
-                "domain its children give it",
-            ),
-        )
+        write_name_domain(gc, parent_id, stored_by_parent[parent_id])
     return len(expected)
 
 

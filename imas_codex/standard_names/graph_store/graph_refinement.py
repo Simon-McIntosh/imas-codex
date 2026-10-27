@@ -690,7 +690,6 @@ def persist_refined_name(
     kind: str = "scalar",
     unit: str | None = None,
     physics_domain: str | None = None,
-    source_domains: list[str] | None = None,
     tags: list[str] | None = None,
     old_chain_length: int = 0,
     model: str = "unknown",
