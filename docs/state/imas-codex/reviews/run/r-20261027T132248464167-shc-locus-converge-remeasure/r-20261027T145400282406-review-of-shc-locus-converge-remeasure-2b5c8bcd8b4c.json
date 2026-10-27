@@ -1,0 +1,62 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-27T15:12:18.471Z",
+  "dispatched_at": "2026-10-27T15:01:14Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-remeasure.json",
+      "line": "61",
+      "severity": "blocking",
+      "summary": "run_ids_source asserts the apply summary as the source while run_ids are the two drain runs and the summary's ids are recorded as owning no cost rows; run.log shows the values were written by hand after record-apply."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-remeasure.html",
+      "line": "21",
+      "severity": "blocking",
+      "summary": "the fragment reports 2 held stranding detaches and prints the same name and DD path twice, while apply.log says 1 attachment held and the manifest records 1; the runner's dedupe was never applied to the shipped record."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-remeasure.json",
+      "line": "39",
+      "severity": "non-blocking",
+      "summary": "halted false and halt_reasons null sit beside the embedded summary's halted true and two halt reasons, because the family-status regex matches nothing in the log and verify() checks none of those fields."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-remeasure-run.py",
+      "line": "643",
+      "severity": "non-blocking",
+      "summary": "verify() treats an absent scope_check as compliant, so a record with no out-of-family comparison passes the gate that the done-when makes mandatory."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-remeasure-run.py",
+      "line": "677",
+      "severity": "non-blocking",
+      "summary": "verify() prints the converged verdict from stamped alone, contradicting render()'s definition at line 436; a stamped family with an unscored member would print converged: yes."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T132248464167-shc-locus-converge-remeasure/logs/run.log",
+      "line": "1",
+      "severity": "non-blocking",
+      "summary": "the gate log names revision 137eb8fd4, where the runner file does not exist and its fell comparison raises TypeError on this record; the receipt names a revision at which the gate cannot run."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to re-measure the non-WEST locus family electrostatic_potential through a scoped apply and record its figures; docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-remeasure.html and .json carry the dry run (5 planned calls, USD 3.7025), the apply (17 calls, USD 0.260322 of a USD 4.00 cap, 999 s; generate_docs 3, review_docs 14), lint {\"link_missing_reverse\": 2} before and after, every member's before/after score, stamped=false, the second dry run (5 calls, USD 3.742), the held detach and the per-name cost.\nVERDICT done_when: the done-when asks that the HTML and JSON hold the six figure groups, the out-of-family check and the convergence verdict; verify() at shc-locus-converge-remeasure-run.py:622 asserts spend against the cap, an empty outside_roster, a before/after score for every member, no fallen member and the presence of the convergence paragraph, but asserts nothing about the lint counts, the dry-run planned calls, the stamped status, the per-name cost, or that the out-of-family comparison was recorded at all.\nVERDICT write_paths: the manifest declares four paths (the .html, .json and runner .py fragments plus docs/figures/sn-harmonize-command/shc-locus-converge-remeasure); the diff 137eb8fd4..2b5c8bcd8b4c touches exactly the three fragment files and nothing else, so the figures directory is unused and no product source changed.\nVERDICT manifest: read; it records the gate command (the runner's verify at the worktree path), three run logs, and figures that reproduce the apply log's own summary, but its landing line says \"Held detach: 1, vertical_coordinate_of_coil_conductor\" while the landed HTML renders that same detach twice.\nVERDICT diff: read both commits against base 137eb8fd4 \u2014 65f02d901 adds the 707-line runner and the record, 2b5c8bcd8b4c adds the convergence verdict, an unscored-member tally, a None-safe fell comparison and a dedupe of held attachments; the second commit's messages state the drain-run substitution honestly while the record's run_ids_source field does not.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-remeasure.html states \"Converged: no\" and names the unstamped family, the unscored member and 0 names paid outside the roster, which is the measure the brief asked for.\nSCORE evidence: 14\nJUSTIFICATION evidence: shc-locus-converge-remeasure-run.py:638-666 gates spend, out-of-family and fallen scores, and the figures at .json phases.before/after reproduce the apply log's own summary (total_cost 0.2603, stamped false, four non-null scores) checked independently of the record.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: git diff 137eb8fd4..2b5c8bcd8b4c --stat lists only the three declared fragment paths, and the no-product-source guard held.\nSCORE durability: 12\nJUSTIFICATION durability: shc-locus-converge-remeasure-run.py:671 reddens if the render stops emitting the convergence paragraph, but the parity with line 436's definition and the dedupe at line 222 carry no assertion at all \u2014 the shipped record still shows the duplicate the dedupe was written to remove.\nSCORE fit: 16\nJUSTIFICATION fit: the runner follows its sibling docs/evidence/fragments/sn-harmonize-command/shc-locus-remeasure-rerun-run.py in shape and comment style, and its one local shim is _CostServices at shc-locus-converge-remeasure-run.py:75.\nSCORE reuse: 18\nJUSTIFICATION reuse: the runner calls plan_family_applies, report_family_rows, measure_doc_call_cost and docs_score_regressions from imas_codex.standard_names.harmonize and the three cost aggregations from graph_store.graph_cost_and_claims:319, which owns them; the _CostServices shim exists only because graph_foundation.services_for_call would re-import the graph_ops forwarders the brief retires.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-remeasure.json:61 blocking: run_ids_source says \"the apply's own --json summary\" while run_ids on lines 55-58 are the two drain runs f51c39f5/fce91144, and the summary's own ids sit at run_selection.summary_scope_run_ids as owning no cost rows; run.log lines 19-31 show record-apply first wrote the summary's ids (calls 0) and the landed values were then written by hand, so the record misstates the provenance of the one selection every spend figure rests on, and re-running record-apply on the cited log reproduces different ids.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-remeasure.html:21 blocking: the fragment reports \"held 2 detach(es)\" and prints the same sn_id and dd_path twice at HTML:25, while apply.log's own line reads \"1 attachment(s) held\" and the manifest's landing records \"1\"; held_attachments at shc-locus-converge-remeasure-run.py:222 dedupes correctly (1 from the two identical log lines) but the record was written by record-apply at 65f02d901 before that fix and the artifact was never regenerated, so the shipped evidence double-counts a stranding detach and the fix it adds is unexercised.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-remeasure.json:39 non-blocking: halted is false and halt_reasons is null (line 38) beside the same object's embedded summary carrying halted true (line 133) and two halt reasons (line 129), because FAMILY_STATUS at shc-locus-converge-remeasure-run.py:49 matches nothing in the apply log and verify() checks none of members_touched, members_accepted, batches_run or halted, so a record can state the opposite of the summary it carries.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-remeasure-run.py:643 non-blocking: verify() reads `apply_entry.get(\"scope_check\") or {}` and refuses only a non-empty outside_roster, so a record carrying no out-of-family comparison at all passes the gate, although the done-when names that comparison as required.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-remeasure-run.py:677 non-blocking: verify() prints \"converged\" from stamped alone, while render() at line 436 defines it as stamped and not below and not fell and not unscored; a stamped family with an unscored member would print \"converged: yes\" against an artifact that says no.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T132248464167-shc-locus-converge-remeasure/logs/run.log:1 non-blocking: the gate log's \"# revision: 137eb8fd480a...\" names the base, where the runner file does not exist (it is added in 65f02d901) and where the fell comparison at 65f02d901:636 raises TypeError on this record as run.log:47 itself shows, so the receipt names a revision at which the gate it records cannot run; the manifest's command re-runs green at the landed head (verify exits 0, re-run by this review).\n",
+  "review_run_id": "r-20261027T145400282406-review-of-shc-locus-converge-remeasure-2b5c8bcd8b4c",
+  "reviewed_base_sha": "137eb8fd480a7dcd988c3808c31766e317f1b9d8",
+  "reviewed_head_sha": "2b5c8bcd8b4c19664cf4f14b831f5cb26c33abde",
+  "reviewed_run_id": "r-20261027T132248464167-shc-locus-converge-remeasure",
+  "scores": {
+    "durability": 12,
+    "evidence": 14,
+    "fit": 16,
+    "goal_fidelity": 17,
+    "reuse": 18,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T15:13:04.404856+00:00",
+  "total": 95
+}
