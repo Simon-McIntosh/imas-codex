@@ -125,8 +125,12 @@ def _clauses(text: str) -> list[tuple[str, str]]:
     clauses = []
     for index, mark in enumerate(marks):
         end = marks[index + 1].start() if index + 1 < len(marks) else len(text)
-        clauses.append((" ".join(mark.group(1).replace("\n", " ").split()).upper(),
-                        text[mark.end():end]))
+        clauses.append(
+            (
+                " ".join(mark.group(1).replace("\n", " ").split()).upper(),
+                text[mark.end() : end],
+            )
+        )
     return clauses
 
 
@@ -187,7 +191,9 @@ def _module_level_constant_names(tree: ast.Module) -> dict[int, str]:
         if not isinstance(value, ast.Constant) or not isinstance(value.value, str):
             continue
         for target in (
-            statement.targets if isinstance(statement, ast.Assign) else [statement.target]
+            statement.targets
+            if isinstance(statement, ast.Assign)
+            else [statement.target]
         ):
             if isinstance(target, ast.Name):
                 names[value.lineno] = target.id
@@ -218,9 +224,7 @@ def _called_names(function: ast.AST) -> set[str]:
 
 
 def _referenced_names(function: ast.AST) -> set[str]:
-    return {
-        node.id for node in ast.walk(function) if isinstance(node, ast.Name)
-    }
+    return {node.id for node in ast.walk(function) if isinstance(node, ast.Name)}
 
 
 def _writer_scope() -> tuple[set[tuple[str, str]], set[str]]:
@@ -277,8 +281,14 @@ def _findings() -> list[tuple[str, int, str, str, str, str]]:
                 )
             for kind, target in domain_writes(text):
                 findings.append(
-                    (relative, lineno, owner or constants.get(lineno, "?"),
-                     kind, target, "writer" if allowed else "outside")
+                    (
+                        relative,
+                        lineno,
+                        owner or constants.get(lineno, "?"),
+                        kind,
+                        target,
+                        "writer" if allowed else "outside",
+                    )
                 )
     return findings
 
@@ -305,9 +315,7 @@ def test_scanner_sees_a_direct_edge_write() -> None:
         "MERGE (d:PhysicsDomain {id: $domain}) "
         "MERGE (sn)-[:HAS_PHYSICS_DOMAIN]->(d)"
     )
-    assert [kind for kind, _ in domain_writes(cypher)] == [
-        "merge HAS_PHYSICS_DOMAIN"
-    ]
+    assert [kind for kind, _ in domain_writes(cypher)] == ["merge HAS_PHYSICS_DOMAIN"]
 
 
 def test_scanner_sees_a_direct_edge_delete() -> None:
