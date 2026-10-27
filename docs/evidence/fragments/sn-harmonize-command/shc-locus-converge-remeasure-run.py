@@ -214,13 +214,13 @@ def held_attachments(lines: list[str]) -> list[dict]:
             continue
         tail = line.split("retire the name: ", 1)[-1]
         for match in HELD_ATTACHMENT.finditer(tail):
-            held.append(
-                {
-                    "dd_path": match.group(1),
-                    "sn_id": match.group(2),
-                    "reason": match.group(3),
-                }
-            )
+            item = {
+                "dd_path": match.group(1),
+                "sn_id": match.group(2),
+                "reason": match.group(3),
+            }
+            if item not in held:
+                held.append(item)
     return held
 
 
@@ -406,6 +406,7 @@ def render() -> None:
 
     below = []
     fell = []
+    unscored = [m for m in members if scores_after.get(m) is None]
     for member in members:
         b = scores_before.get(member)
         a = scores_after.get(member)
@@ -432,7 +433,7 @@ def render() -> None:
     calls_total = cost.get("calls_total")
     stamped = apply_entry.get("stamped")
     crash = bool(apply_entry.get("error_line"))
-    converged = bool(stamped) and not below and not fell
+    converged = bool(stamped) and not below and not fell and not unscored
     verdict = "converged" if converged else ("raised" if crash else "halted")
     halt_reasons = apply_entry.get("halt_reasons") or "; ".join(
         summary.get("halt_reasons") or []
@@ -491,11 +492,26 @@ def render() -> None:
         + (f" ({calls_by_phase})" if calls_by_phase else "")
         + f"; wall {_fmt(apply_entry.get('wall_seconds'), 0)}s. Lint findings "
         f"{lint_before} before, {lint_after} after. {len(below)} member(s) are below "
-        f"the {DEFAULT_MIN_SCORE} threshold after the apply and {len(fell)} fell. "
+        f"the {DEFAULT_MIN_SCORE} threshold after the apply, {len(fell)} fell and "
+        f"{len(unscored)} carry no score. "
         f"{scope.get('outside_count', '—')} name(s) outside the family roster were "
         f"paid for. Attachment reconciliation held {len(held)} stranding detach(es)."
     )
     lines.append("  </p>")
+    lines.append(
+        f'  <p id="{_id("convergence")}"><strong>Converged:</strong> '
+        + (
+            "yes — stamped with every member scored at or above "
+            f"{DEFAULT_MIN_SCORE} and none fallen."
+            if converged
+            else "no — the family is unstamped, "
+            f"{len(unscored)} of {len(members)} member(s) carry no documentation "
+            "score ("
+            + ", ".join(f"<code>{m}</code>" for m in unscored)
+            + "), and the halt reasons above stand."
+        )
+        + "</p>"
+    )
     lines.append(f'  <h3 id="{_id("choice")}">Family choice and roster check</h3>')
     lines.append(f'  <p id="{_id("choice-body")}">')
     lines.append(
@@ -607,6 +623,7 @@ def verify() -> int:
     """Assert the done-when conditions from the record alone."""
     payload = read_results()
     problems: list[str] = []
+    below_ref: tuple[list[str], list[str], list[str]] = ([], [], [])
     applies = payload.get("applies") or []
     if not applies:
         problems.append("no apply recorded")
@@ -632,16 +649,39 @@ def verify() -> int:
         missing = [m for m in members if m not in scores_b or m not in scores_a]
         if missing:
             problems.append(f"members with no before/after score: {missing}")
-        fell = [m for m in members if m in scores_a and m in scores_b
-                and scores_a[m] is not None and scores_a[m] < scores_b[m]]
+        fell = [
+            m
+            for m in members
+            if scores_a.get(m) is not None
+            and scores_b.get(m) is not None
+            and scores_a[m] < scores_b[m]
+        ]
+        below_ref = (
+            [m for m in members if scores_a.get(m) is not None
+             and scores_a[m] < DEFAULT_MIN_SCORE],
+            fell,
+            [m for m in members if scores_a.get(m) is None],
+        )
         if fell:
             problems.append(f"members whose score fell: {fell}")
     if not HTML.exists():
         problems.append("the HTML fragment is absent")
+    else:
+        rendered = HTML.read_text()
+        if f'id="{NODE}-convergence"' not in rendered:
+            problems.append("the HTML fragment states no convergence verdict")
     if problems:
         for problem in problems:
             print(f"FAIL {problem}")
         return 1
+    stamped = apply_entry.get("stamped")
+    print(
+        "converged: " + ("yes" if stamped else "no")
+        + " | stamped: " + str(stamped)
+        + " | below threshold: " + str(len(below_ref[0]))
+        + " | fell: " + str(len(below_ref[1]))
+        + " | unscored: " + str(len(below_ref[2]))
+    )
     print("OK")
     return 0
 

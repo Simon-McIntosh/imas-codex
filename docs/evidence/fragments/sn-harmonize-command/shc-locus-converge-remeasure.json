@@ -1,5 +1,153 @@
 {
 "acceptance_threshold": 0.85,
+"applies": [
+{
+"anchor": "electrostatic_potential_at_langmuir_probe_position",
+"applied": true,
+"batches_run": null,
+"cost": {
+"calls_total": 17,
+"per_name_usd": {
+"electrostatic_potential": 0.093446,
+"electrostatic_potential_at_langmuir_probe_position": 0.082293,
+"floating_electrostatic_potential": 0.084583
+},
+"phases": {
+"generate_docs": {
+"calls": 3,
+"usd": 0.257398
+},
+"review_docs": {
+"calls": 14,
+"usd": 0.002924
+}
+},
+"run_ids": [
+"f51c39f5-5332-471b-9294-e05e8f4eadde",
+"fce91144-2df6-4613-8ad8-4695eac0b17a"
+],
+"spend_usd": 0.260322
+},
+"cost_limit_unspent_usd": 3.7397,
+"cost_limit_usd": 4.0,
+"decision": "apply",
+"dry_run_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T132248464167-shc-locus-converge-remeasure/logs/dryrun-1.log",
+"error_line": null,
+"exit_line": "EXIT=0",
+"families_applied": null,
+"halt_reasons": null,
+"halted": false,
+"held_attachments": [
+{
+"dd_path": "ic_antennas/antenna/module/strap/geometry/arcs_of_circle/z",
+"reason": "locus/source device mismatch: SN 'vertical_coordinate_of_coil_conductor' has hardware locus 'coil_conductor' but path 'ic_antennas/antenna/module/strap/geometry/arcs_of_circle/z' shares no device token with it",
+"sn_id": "vertical_coordinate_of_coil_conductor"
+},
+{
+"dd_path": "ic_antennas/antenna/module/strap/geometry/arcs_of_circle/z",
+"reason": "locus/source device mismatch: SN 'vertical_coordinate_of_coil_conductor' has hardware locus 'coil_conductor' but path 'ic_antennas/antenna/module/strap/geometry/arcs_of_circle/z' shares no device token with it",
+"sn_id": "vertical_coordinate_of_coil_conductor"
+}
+],
+"log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T132248464167-shc-locus-converge-remeasure/logs/apply.log",
+"members_accepted": null,
+"members_touched": null,
+"physical_base": "electrostatic_potential",
+"produced_summary": true,
+"run_ids": [
+"f51c39f5-5332-471b-9294-e05e8f4eadde",
+"fce91144-2df6-4613-8ad8-4695eac0b17a"
+],
+"run_ids_source": "the apply's own --json summary",
+"run_selection": {
+"all_claimed_names_in_roster": true,
+"claimed_names": {
+"f51c39f5-5332-471b-9294-e05e8f4eadde": [
+"electrostatic_potential_at_langmuir_probe_position"
+],
+"fce91144-2df6-4613-8ad8-4695eac0b17a": [
+"electrostatic_potential",
+"floating_electrostatic_potential"
+]
+},
+"pool_run_ids": [
+"f51c39f5-5332-471b-9294-e05e8f4eadde",
+"fce91144-2df6-4613-8ad8-4695eac0b17a"
+],
+"pool_run_rows": {
+"f51c39f5-5332-471b-9294-e05e8f4eadde": {
+"cap": 4.0,
+"cost_spent": 0.082293,
+"started_at": "2026-10-27T14:26:37.203986Z",
+"stop_reason": "no_eligible_work"
+},
+"fce91144-2df6-4613-8ad8-4695eac0b17a": {
+"cap": 3.917707,
+"cost_spent": 0.178029,
+"started_at": "2026-10-27T14:35:38.457804Z",
+"stop_reason": "no_eligible_work"
+}
+},
+"pool_run_spend": {
+"f51c39f5-5332-471b-9294-e05e8f4eadde": 0.082293,
+"fce91144-2df6-4613-8ad8-4695eac0b17a": 0.178029
+},
+"selection": "the runs that wrote LLMCost rows between the apply's start and end; the summary's scope run ids own no cost rows",
+"summary_scope_run_ids": [
+"67a45b57-d1ad-48f7-b904-f273e7fac30f",
+"c1560b3c-54c7-4a28-b40b-075d97b17acd"
+]
+},
+"scope_check": {
+"outside_count": 0,
+"outside_roster": [],
+"roster": [
+"electrostatic_potential",
+"electrostatic_potential_at_langmuir_probe_position",
+"electrostatic_potential_at_outboard_midplane",
+"electrostatic_potential_at_wall",
+"floating_electrostatic_potential"
+],
+"roster_names_not_touched": [
+"electrostatic_potential_at_outboard_midplane",
+"electrostatic_potential_at_wall"
+],
+"touched_names": [
+"electrostatic_potential",
+"electrostatic_potential_at_langmuir_probe_position",
+"floating_electrostatic_potential"
+]
+},
+"score_regressions": {
+"below_threshold": [],
+"fell": []
+},
+"stamped": false,
+"summary": {
+"batches_run": 2,
+"batches_total": 2,
+"halt_reasons": [
+"docs acceptance 50.00% < 90.00% (1/2 touched)",
+"name-axis drift on 2 name(s) in a docs-only campaign: electrostatic_potential_at_outboard_midplane, electrostatic_potential_at_wall"
+],
+"halted": true,
+"resume_from": 2,
+"run_ids": [
+"67a45b57-d1ad-48f7-b904-f273e7fac30f",
+"c1560b3c-54c7-4a28-b40b-075d97b17acd"
+],
+"spec": "harmonize-pattern-family",
+"total_accepted": 2,
+"total_audit_cleared": 0,
+"total_audit_requarantined": 0,
+"total_cost": 0.2603,
+"total_quarantined": 0,
+"total_selected": 5,
+"total_touched": 3
+},
+"wall_seconds": 999.0
+}
+],
 "family": {
 "members": [
 "electrostatic_potential",
@@ -41,6 +189,85 @@
 "threshold": 0.85
 },
 "phases": {
+"after": {
+"anchor": "electrostatic_potential_at_langmuir_probe_position",
+"decision": "apply",
+"documentation_scores": {
+"electrostatic_potential": 0.9520774288745436,
+"electrostatic_potential_at_langmuir_probe_position": 0.9516312428057694,
+"electrostatic_potential_at_outboard_midplane": null,
+"electrostatic_potential_at_wall": 0.8625,
+"floating_electrostatic_potential": 0.9590343748874928
+},
+"drift": 0.6,
+"estimate_basis": {
+"calls": 33,
+"mean_usd_per_call": 0.7484,
+"runs": 28,
+"total_usd": 24.697
+},
+"estimate_usd": 3.742,
+"harmonized": false,
+"invariant": [
+"electrostatic_potential",
+"",
+"",
+"",
+""
+],
+"lint": {
+"link_missing_reverse": 2
+},
+"lint_total": 2,
+"member_status": {
+"electrostatic_potential": {
+"docs_stage": "reviewed",
+"id": "electrostatic_potential",
+"name_stage": "accepted",
+"validation_status": "valid"
+},
+"electrostatic_potential_at_langmuir_probe_position": {
+"docs_stage": "accepted",
+"id": "electrostatic_potential_at_langmuir_probe_position",
+"name_stage": "accepted",
+"validation_status": "valid"
+},
+"electrostatic_potential_at_outboard_midplane": {
+"docs_stage": "pending",
+"id": "electrostatic_potential_at_outboard_midplane",
+"name_stage": "reviewed",
+"validation_status": "valid"
+},
+"electrostatic_potential_at_wall": {
+"docs_stage": "accepted",
+"id": "electrostatic_potential_at_wall",
+"name_stage": "reviewed",
+"validation_status": "valid"
+},
+"floating_electrostatic_potential": {
+"docs_stage": "accepted",
+"id": "floating_electrostatic_potential",
+"name_stage": "accepted",
+"validation_status": "valid"
+}
+},
+"members": [
+"electrostatic_potential",
+"electrostatic_potential_at_langmuir_probe_position",
+"electrostatic_potential_at_outboard_midplane",
+"electrostatic_potential_at_wall",
+"floating_electrostatic_potential"
+],
+"phase": "after",
+"physical_base": "electrostatic_potential",
+"planned_calls": 5,
+"refusals": {},
+"seed": "electrostatic_potential",
+"status_counts": {
+"accepted": 3,
+"other": 2
+}
+},
 "before": {
 "anchor": "electrostatic_potential_at_langmuir_probe_position",
 "decision": "apply",
