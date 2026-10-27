@@ -15,6 +15,11 @@
       "kind": "exempted",
       "reason": "the coordinator granted test_metadata_invariants.py and test_graph_edge_writers.py by crew widen; both edits are necessary",
       "recorded_at": "2026-10-27T13:44:32.019322+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "base-arm header wording; the reviewer confirmed the base tree ran",
+      "recorded_at": "2026-10-27T13:44:38.587315+00:00"
     }
   },
   "findings": [
