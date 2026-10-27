@@ -7,10 +7,27 @@ reset/clear filter plumbing
 
 from __future__ import annotations
 
+import ast
 import copy
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
+
+
+def test_graph_composition_root_has_no_transitional_forwarders() -> None:
+    """Moved graph calls resolve at their owner rather than through the root."""
+    from imas_codex.standard_names import graph_ops
+
+    tree = ast.parse(Path(graph_ops.__file__).read_text())
+    forwarders = [
+        node.name
+        for node in tree.body
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+        and (ast.get_docstring(node) or "").startswith("Forward to ")
+    ]
+    assert forwarders == []
+
 
 #: The shared sample names carry IDS names (``core_profiles``, ``magnetics``)
 #: where a physics domain belongs; the declared domain selector refuses a value

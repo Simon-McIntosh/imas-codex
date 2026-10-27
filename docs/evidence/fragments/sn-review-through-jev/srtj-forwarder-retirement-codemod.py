@@ -276,6 +276,27 @@ def main() -> int:
     paths = [name for name in paths if name not in args.exclude]
     totals: Counter[str] = Counter()
     changed: list[str] = []
+    forwarders: dict[str, list[str]] = {}
+    value_aliases: dict[str, list[str]] = {}
+    for facade in FACADES:
+        module = ROOT / "imas_codex" / "standard_names" / f"{facade}.py"
+        tree = ast.parse(module.read_text())
+        forwarders[facade] = [
+            node.name
+            for node in tree.body
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+            and (ast.get_docstring(node) or "").startswith("Forward to ")
+        ]
+        value_aliases[facade] = [
+            target.id
+            for node in tree.body
+            if isinstance(node, ast.Assign)
+            and isinstance(node.value, ast.Attribute)
+            and isinstance(node.value.value, ast.Name)
+            and node.value.value.id.startswith("_moved_")
+            for target in node.targets
+            if isinstance(target, ast.Name)
+        ]
     for name in paths:
         path = ROOT / name
         original = path.read_text()
@@ -293,13 +314,18 @@ def main() -> int:
                 "files": len(changed),
                 "references": sum(totals.values()),
                 "by_kind": totals,
+                "forwarders": forwarders,
+                "value_aliases": value_aliases,
                 "stale_map": stale,
                 "paths": changed,
             },
             indent=2,
         )
     )
-    return int(args.check and bool(changed))
+    return int(
+        args.check
+        and (bool(changed) or any(forwarders.values()) or any(value_aliases.values()))
+    )
 
 
 if __name__ == "__main__":
