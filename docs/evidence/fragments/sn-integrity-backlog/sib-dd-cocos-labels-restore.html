@@ -17,13 +17,14 @@ the count of labelled <code>IMASNode</code>s from <strong>9 to 574</strong>
 (404 <code>xml</code>, 109 <code>inferred_forward</code>, 61
 <code>inferred_sign_flip</code>) and put all <strong>24</strong> labelled holdout
 paths back on their frozen labels. The unmodified holdout authority test passes
-(<code>EXIT=0</code>). The build was <strong>stopped at its last phase</strong>
-because the CLI cannot skip paid LLM work for this change: the restored labels
-alter the clustering input text, which invalidated the cluster hash and started
-350 paid cluster labels. Billed spend before the stop was <strong>$0.42</strong>
-against an authorised budget of USD 0, so the "no paid LLM call" clause of the
-done-when is <strong>unmet</strong> and this node is reported blocked on it rather
-than complete.
+(<code>EXIT=0</code>). The restoration also invalidated the clustering input text,
+so the build's last phase began relabelling 350 clusters; it was stopped at 150 of
+them to bound spend. A resume through the CLI's own resumable path then labelled
+only the <strong>200</strong> remaining clusters for <strong>$0.5346</strong>,
+leaving 2,201 clusters with none unlabelled, none unembedded and a stored hash
+that matches the current path set. Spend recorded in the log is
+<strong>$0.9546</strong> across both runs, within the coordinator's USD 2.00
+ceiling for the resume.
 </p>
 
 <h2 id="sib-dd-cocos-labels-restore-census">Before and after counts</h2>
@@ -110,7 +111,9 @@ Europe/Paris). Its summary reported 35 versions, 61,474 paths, 0 paths enriched,
 ran unmodified against the live graph before and after the build. Before, it
 failed at <code>test_docs_holdout_set.py:51</code> with
 <code>assert 'one_like' == None</code> (<code>EXIT=1</code>); after, it passes
-in 7.17&#8239;s (<code>1 passed</code>, <code>EXIT=0</code>).
+in 7.17&#8239;s (<code>1 passed</code>, <code>EXIT=0</code>), and again after the
+cluster resume, when it passed in 8.47&#8239;s (<code>EXIT=0</code>) with the
+labelled <code>IMASNode</code> count still 574.
 </p>
 
 <h2 id="sib-dd-cocos-labels-restore-gap">What the build still leaves unlabelled</h2>
@@ -142,6 +145,45 @@ was in flight when it stopped. One Tier-1 domain classification also ran
 (1 path, cost not itemised in the log). The process printed its full summary and
 then hung joining executor threads, so it was sent SIGKILL after the summary;
 the wrapper recorded exit 137.
+</p>
+
+<h2 id="sib-dd-cocos-labels-restore-clusters">Completing the cluster labels</h2>
+<p>
+The resume ran the same CLI invocation again, which re-queries
+<code>IMASSemanticCluster</code>s whose <code>label</code> is null, so the 150
+clusters already labelled were not paid for twice: it labelled exactly
+<strong>200</strong>. Four batches billed $0.1481, $0.1240, $0.1422 and $0.1203,
+<strong>$0.5346</strong> in total, well inside the USD 2.00 ceiling, and the run
+exited 0 after 493.9&#8239;s.
+</p>
+<table>
+<thead>
+<tr><th>Cluster measure</th><th>Before resume</th><th>After resume</th></tr>
+</thead>
+<tbody>
+<tr><td>clusters in graph</td><td>2,474</td><td>2,201</td></tr>
+<tr><td>labelled</td><td>2,274</td><td>2,201</td></tr>
+<tr><td>unlabelled</td><td>200</td><td>0</td></tr>
+<tr><td>labelled but unembedded</td><td>0</td><td>0</td></tr>
+<tr><td>stored <code>cluster_input_hash</code> vs the current path set</td><td>stale</td><td>matches (<code>24a8e717a761f719</code>)</td></tr>
+<tr><td><code>IN_CLUSTER</code> memberships pointing at no node</td><td>&#8212;</td><td>0</td></tr>
+</tbody>
+</table>
+<p>
+The count fell from 2,474 to 2,201 because the run recomputed the clustering and
+deleted the content-hash clusters the new computation did not produce; the labels
+on surviving clusters were preserved by the merge, and none of the 200 relabelled
+clusters had been labelled before.
+</p>
+<p>
+<strong>These costs are not in the <code>LLMCost</code> graph rows.</strong> The
+cluster labeler discards the cost the call layer returns
+(<code>imas_codex/clusters/labeler.py</code>, <code>parsed_batch, _cost, _tokens =
+call_llm_structured(...)</code>), so a total measured from
+<code>MATCH (l:LLMCost)</code> over the resume window is <strong>0 rows,
+$0.0000</strong> while the CLI log records four billed calls. The per-call
+<code>cost=$…</code> lines in <code>imas_dd_dd.log</code> are the only record of
+this spend, and the figures above are read from them.
 </p>
 </main>
 </body>
