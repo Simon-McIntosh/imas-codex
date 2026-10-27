@@ -1,4 +1,4 @@
-"""Exercise code reference statements on the live graph in a rolled-back transaction."""
+"""Exercise code reference statements on a disposable graph in a rolled-back transaction."""
 
 from uuid import uuid4
 
@@ -25,7 +25,8 @@ class _TransactionGraph:
 
 
 @pytest.mark.graph
-def test_real_code_reference_links_and_missing_count_guard():
+@pytest.mark.timeout(300)
+def test_real_code_reference_links_and_missing_count_guard(disposable_graph):
     suffix = uuid4().hex
     example = f"reference-check:{suffix}"
     known = f"known{suffix}"
@@ -39,6 +40,9 @@ def test_real_code_reference_links_and_missing_count_guard():
     missing_chunk_id = f"{example}:missing"
 
     with GraphClient() as client, client.session() as session:
+        # The disposable graph starts empty; the reference resolution below
+        # reads this facility, so seed the one row it needs.
+        client.query("CREATE (:Facility {id: 'jt-60sa'})")
         transaction = session.begin_transaction()
         graph = _TransactionGraph(transaction)
         try:

@@ -5,6 +5,13 @@ is not reachable, tests are skipped automatically via the top-level
 conftest.py pytest_collection_modifyitems hook (visible as "skipped").
 """
 
+from __future__ import annotations
+
+import ast
+import inspect
+import os
+import re
+from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
@@ -13,6 +20,8 @@ from imas_codex.graph.schema import GraphSchema, get_schema
 
 # Apply graph marker to all tests in this directory
 pytestmark = pytest.mark.graph
+
+_GRAPH_PACKAGE = Path(__file__).resolve().parent
 
 
 # =============================================================================
@@ -187,3 +196,288 @@ def embedding_dimension() -> int:
     from imas_codex.settings import get_embedding_dimension
 
     return get_embedding_dimension()
+
+
+# =============================================================================
+# Disposable Neo4j for the graph-marked tests that write
+# =============================================================================
+#
+# Most tests in this package read the live graph on purpose. A test that writes
+# cannot: it would land its fixture rows in the project graph. Those tests get
+# an empty instance of their own, started with the same machinery the
+# standard_names package owns rather than a second kind of starter.
+#
+# The address is started once for the session, but the environment is bound per
+# test and undone when that test ends. Binding it for the whole session would
+# redirect every later live-graph reader to the empty instance — the writers
+# would pass and the readers would silently measure nothing.
+
+#: Fixtures that give a test the shared empty graph.
+_DISPOSABLE_FIXTURES = frozenset(
+    {"disposable_graph", "disposable_neo4j_uri", "disposable_neo4j_empty"}
+)
+
+#: Environment the disposable binding owns for one test.
+_DISPOSABLE_ENV_KEYS = (
+    "NEO4J_URI",
+    "NEO4J_PASSWORD",
+    "IMAS_CODEX_TEST_NEO4J_URI",
+    "IMAS_CODEX_TEST_NEO4J_EPHEMERAL",
+    "IMAS_CODEX_TEST_NEO4J_PASSWORD",
+)
+
+
+@pytest.fixture(scope="session")
+def _disposable_neo4j_address() -> Iterator[str]:
+    """One empty graph for this session, or the one the run advertises.
+
+    Supplies only the address. No environment is changed here: the binding
+    belongs to ``disposable_graph`` and lasts exactly one test.
+    """
+    from tests.standard_names.conftest import (
+        _detach_store_removal,
+        _start_empty_neo4j,
+    )
+
+    configured = os.environ.get("IMAS_CODEX_TEST_NEO4J_URI")
+    if configured:
+        if os.environ.get("IMAS_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
+            pytest.fail(
+                "a disposable graph is required, but IMAS_CODEX_TEST_NEO4J_URI "
+                "is set without IMAS_CODEX_TEST_NEO4J_EPHEMERAL=1"
+            )
+        yield configured
+        return
+
+    try:
+        directory, process, _log, bolt_port = _start_empty_neo4j()
+    except Exception as exc:
+        pytest.fail(f"no disposable Neo4j could start: {exc}")
+        return
+    try:
+        yield f"bolt://127.0.0.1:{bolt_port}"
+    finally:
+        from imas_codex.graph import temp_neo4j
+
+        try:
+            temp_neo4j.stop_temp_neo4j(process)
+        finally:
+            _detach_store_removal(directory)
+
+
+@pytest.fixture()
+def disposable_graph(_disposable_neo4j_address, monkeypatch) -> Iterator[str]:
+    """Bind one test to the shared empty graph and refuse the project graph.
+
+    Refuses before wiping: an endpoint that turns out to be the project graph
+    must be identified before anything is deleted from it. ``refuse_project_graph``
+    resolves the project address with ``NEO4J_URI`` withheld, so it compares the
+    disposable endpoint against production rather than against itself.
+    """
+    from imas_codex.graph.profiles import resolve_neo4j
+    from tests.standard_names.conftest import _wipe, refuse_project_graph
+
+    uri = _disposable_neo4j_address
+    for key in _DISPOSABLE_ENV_KEYS:
+        monkeypatch.delenv(key, raising=False)
+    monkeypatch.setenv("NEO4J_URI", uri)
+    monkeypatch.setenv("NEO4J_PASSWORD", "")
+    monkeypatch.setenv("IMAS_CODEX_TEST_NEO4J_URI", uri)
+    monkeypatch.setenv("IMAS_CODEX_TEST_NEO4J_EPHEMERAL", "1")
+
+    refuse_project_graph(uri)
+
+    resolved = resolve_neo4j(auto_tunnel=False).uri
+    if resolved.rstrip("/") != uri.rstrip("/"):
+        pytest.fail(
+            f"the graph profile ignores NEO4J_URI and resolves to {resolved}: "
+            f"a bare GraphClient() would reach past the disposable endpoint {uri}"
+        )
+    _wipe(uri)
+    yield uri
+
+
+# =============================================================================
+# Collection guard — a graph writer must not reach the project graph
+# =============================================================================
+#
+# A graph-marked test that builds a bare ``GraphClient()`` and writes has no
+# disposable routing, so running the suite writes fixture rows into the project
+# graph. That is invisible in a green run: the writes land, the assertions pass,
+# and the only trace is data the project graph did not ask for. This guard
+# refuses such a test at collection time, naming it, and the refusal is what
+# keeps the hazard from returning.
+
+#: Cypher that changes the graph. ``SET``, ``CREATE`` and ``MERGE`` cover the
+#: fixtures these tests build; ``DELETE``/``DETACH`` and the constraint DDL cover
+#: the clean-up and schema paths.
+_WRITE_CYPHER = re.compile(
+    r"\b(CREATE|MERGE|SET|DELETE|DETACH|REMOVE|DROP|FOREACH|LOAD CSV)\b",
+    re.IGNORECASE,
+)
+
+#: Functions whose names say they write. A test that calls one and also holds a
+#: bare client is a writer.
+_WRITE_CALL_PREFIXES = (
+    "write_",
+    "link_",
+    "create_",
+    "delete_",
+    "upsert_",
+    "merge_",
+    "reconcile_",
+    "persist_",
+    "seed_",
+    "backfill_",
+    "attach_",
+    "detach_",
+    "accept_",
+    "promote_",
+    "retire_",
+    "reset_",
+    "repair_",
+    "initialize_",
+    "wipe",
+)
+
+#: Fixtures that yield a client resolved from the process environment, i.e. a
+#: pool a bare ``GraphClient()`` would join.
+_BARE_CLIENT_FIXTURES = frozenset({"_gc", "graph_client", "graph_with_schema"})
+
+
+def _call_name(node: ast.Call) -> str | None:
+    func = node.func
+    if isinstance(func, ast.Name):
+        return func.id
+    if isinstance(func, ast.Attribute):
+        return func.attr
+    return None
+
+
+#: Methods that send Cypher. Only their string argument is inspected: scanning
+#: every string in the test would read a docstring's prose (a sentence with the
+#: word "set") as a write.
+_CYPHER_METHODS = frozenset({"query", "run", "execute_query", "execute_write"})
+
+
+def _module_functions(source: str) -> dict[str, ast.AST]:
+    """Top-level functions defined in one module, by name.
+
+    A test that delegates its write to a helper in the same file would
+    otherwise read as a reader: the write is one call away.
+    """
+    try:
+        tree = ast.parse(source)
+    except SyntaxError:
+        return {}
+    return {
+        node.name: node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
+    }
+
+
+def _scan_calls(
+    tree: ast.AST,
+    local: dict[str, ast.AST],
+    seen: frozenset[str] = frozenset(),
+) -> tuple[bool, bool]:
+    """Return ``(writes, bare_client)`` for one function body."""
+    writes = False
+    bare_client = False
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        name = _call_name(node)
+        if name is None:
+            continue
+        if name.startswith(_WRITE_CALL_PREFIXES):
+            writes = True
+        elif name in _CYPHER_METHODS and node.args:
+            first = node.args[0]
+            if (
+                isinstance(first, ast.Constant)
+                and isinstance(first.value, str)
+                and _WRITE_CYPHER.search(first.value)
+            ):
+                writes = True
+        elif name == "GraphClient":
+            has_uri = any(kw.arg == "uri" for kw in node.keywords) or node.args
+            if not has_uri:
+                bare_client = True
+        elif name in local and name not in seen:
+            helper_writes, helper_bare = _scan_calls(local[name], local, seen | {name})
+            writes = writes or helper_writes
+            bare_client = bare_client or helper_bare
+    return writes, bare_client
+
+
+def _writer_facts(source: str, module_source: str = "") -> tuple[bool, bool]:
+    """Return ``(writes, bare_client)`` for one test function's source.
+
+    Calls to functions defined at the top level of the same module are
+    followed, so a test whose only statement is ``_seed_nodes(client)`` is
+    recognised as the writer that helper makes it.
+    """
+    try:
+        tree = ast.parse(source)
+    except SyntaxError:
+        return False, False
+    local = _module_functions(module_source or source)
+    return _scan_calls(tree, local)
+
+
+# What this guard cannot see, and why the refusal is still worth having:
+#
+# * a write that happens inside an imported helper from another module, or
+#   inside a fixture body — only the test function and the top-level functions
+#   of its own file are read;
+# * Cypher assembled at runtime (a keyword built from a variable) or sent
+#   through a method outside ``_CYPHER_METHODS``;
+# * a client obtained inside a helper from the environment rather than passed
+#   in, when the test itself never names ``GraphClient``;
+# * a write reached through a class method or a callable value.
+#
+# Each of those is visible to a reader of the test; the guard is the backstop
+# for the ordinary shape, where a test builds a client and writes through it.
+
+
+def pytest_collection_modifyitems(config, items):  # noqa: ARG001
+    """Refuse a graph writer that is not routed to the disposable graph."""
+    module_sources: dict[str, str] = {}
+    offenders: list[str] = []
+    for item in items:
+        if not item.get_closest_marker("graph"):
+            continue
+        if Path(str(item.fspath)).resolve().parent != _GRAPH_PACKAGE:
+            continue
+        fixturenames = set(item.fixturenames or ())
+        if fixturenames & _DISPOSABLE_FIXTURES:
+            continue
+        try:
+            source = inspect.getsource(item.obj)
+        except (OSError, TypeError):
+            continue
+        module_source = ""
+        try:
+            module_path = inspect.getsourcefile(item.obj) or ""
+        except TypeError:
+            module_path = ""
+        if module_path:
+            if module_path not in module_sources:
+                try:
+                    module_sources[module_path] = Path(module_path).read_text()
+                except OSError:
+                    module_sources[module_path] = ""
+            module_source = module_sources[module_path]
+        writes, bare_client = _writer_facts(source, module_source)
+        if not writes:
+            continue
+        if bare_client or (fixturenames & _BARE_CLIENT_FIXTURES):
+            offenders.append(item.nodeid)
+
+    if offenders:
+        raise pytest.UsageError(
+            "graph-marked tests that write must run on the disposable graph "
+            "(request the 'disposable_graph' fixture): " + ", ".join(sorted(offenders))
+        )
