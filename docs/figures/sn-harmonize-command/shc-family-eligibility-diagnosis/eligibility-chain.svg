@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="720" viewBox="0 0 1400 720" role="img" aria-label="Where the scoped harmonize drain stops">
+  <rect width="1400" height="720" fill="#ffffff"/>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#4a4a4a"/>
+    </marker>
+    <marker id="arrowstop" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#b3261e"/>
+    </marker>
+  </defs>
+
+  <text x="60" y="52" font-family="DejaVu Sans, sans-serif" font-size="23" fill="#1a1a1a">batch 1 — the anchor alone (docs-eligible)</text>
+  <text x="800" y="52" font-family="DejaVu Sans, sans-serif" font-size="23" fill="#929292">batch 2 — the other four members</text>
+
+  <g font-family="DejaVu Sans, sans-serif" font-size="20">
+    <rect x="60" y="84" width="660" height="72" rx="6" fill="none" stroke="#929292" stroke-width="2"/>
+    <text x="84" y="116" fill="#1a1a1a">family enumeration admits 5 members</text>
+    <text x="84" y="142" fill="#5a5a5a" font-size="16">families.py:1098 — only stage filter is "not superseded"</text>
+
+    <rect x="60" y="184" width="660" height="72" rx="6" fill="none" stroke="#929292" stroke-width="2"/>
+    <text x="84" y="216" fill="#1a1a1a">pin overrides the anchor pick</text>
+    <text x="84" y="242" fill="#5a5a5a" font-size="16">harmonize.py:940 — pin replaces floating (0.9375)</text>
+
+    <rect x="60" y="284" width="660" height="96" rx="6" fill="#fdeceb" stroke="#b3261e" stroke-width="2.5"/>
+    <text x="84" y="316" fill="#1a1a1a">reset finds 0 eligible → returns early</text>
+    <text x="84" y="342" fill="#7a1c16" font-size="16">graph_docs_persistence.py:410 — anchor is already "pending"</text>
+    <text x="84" y="366" fill="#7a1c16" font-size="16">so the scope stamp at :418-423 never runs</text>
+
+    <rect x="60" y="408" width="660" height="96" rx="6" fill="#fdeceb" stroke="#b3261e" stroke-width="2.5"/>
+    <text x="84" y="440" fill="#1a1a1a">claim AND sn.run_id = fresh uuid</text>
+    <text x="84" y="466" fill="#7a1c16" font-size="16">graph_cost_and_claims.py:329 — node carries an older id</text>
+    <text x="84" y="490" fill="#7a1c16" font-size="16">0 names claimed</text>
+
+    <rect x="60" y="532" width="660" height="72" rx="6" fill="#fdeceb" stroke="#b3261e" stroke-width="2.5"/>
+    <text x="84" y="564" fill="#1a1a1a">0 LLM calls · stop reason "no_eligible_work"</text>
+    <text x="84" y="590" fill="#7a1c16" font-size="16">campaign.py:1098 halts the family here</text>
+  </g>
+
+  <path d="M 390 156 L 390 184" stroke="#4a4a4a" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M 390 256 L 390 284" stroke="#4a4a4a" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M 390 380 L 390 408" stroke="#b3261e" stroke-width="2" marker-end="url(#arrowstop)"/>
+  <path d="M 390 504 L 390 532" stroke="#b3261e" stroke-width="2" marker-end="url(#arrowstop)"/>
+
+  <text x="800" y="248" font-family="DejaVu Sans, sans-serif" font-size="17" fill="#929292">reached only once batch 1 converges</text>
+  <rect x="800" y="272" width="540" height="212" rx="6" fill="none" stroke="#b0b0b0" stroke-width="2" stroke-dasharray="7 6"/>
+  <g font-family="DejaVu Sans, sans-serif" fill="#929292">
+    <text x="824" y="310" font-size="20">never marked, never drained</text>
+    <text x="824" y="344" font-size="16">electrostatic_potential — docs "reviewed"</text>
+    <text x="824" y="370" font-size="16">floating_electrostatic_potential — docs "accepted"</text>
+    <text x="824" y="396" font-size="16">..._at_outboard_midplane — name "reviewed"</text>
+    <text x="824" y="422" font-size="16">..._at_wall — name "reviewed"</text>
+    <text x="824" y="456" font-size="16">the last two need name-axis work first</text>
+  </g>
+</svg>
