@@ -1,0 +1,86 @@
+<h2 id="scg-name-domain-followups-product">The catalog write leaves a name's domain whole</h2>
+
+<p>Three merges routed every <code>StandardName</code> domain write through
+<code>domain_decision.write_name_domain</code>. Their reviews left five findings
+open on the product side; this fragment records each one and how it closed. A
+sixth, the shared-state test failure, belongs to the test node.</p>
+
+<table>
+  <tr><th>Item</th><th>Finding</th><th>How it closed</th></tr>
+  <tr>
+    <td>1</td>
+    <td>A name written through <code>write_standard_names</code> with no stored
+      decision ended with <code>physics_domain</code> null while its
+      <code>source_domains</code> and <code>HAS_PHYSICS_DOMAIN</code> edges were
+      set, so any caller that skipped the compose follow-up
+      (<code>worker_extraction_and_enrichment._write_composed_name_domains</code>)
+      left the three disagreeing.</td>
+    <td>Fixed in the writer, where the invariant lives. An undecided name that
+      holds no scalar and whose DD sources agree on one domain now takes that
+      domain: it is derived from the sources rather than chosen, so it is not a
+      guess. Several source domains remain a genuine ambiguity — what the Choice
+      exists to settle — so the scalar stays unset and the name is reported
+      undecided. The scalar, the source set and the edges now agree after
+      <code>write_standard_names</code> alone, with no follow-up.
+      Test:
+      <code>test_write_standard_names_alone_leaves_an_undecided_name_whole</code>.</td>
+  </tr>
+  <tr>
+    <td>2</td>
+    <td>A stored decision carrying candidates but no choice mapped to
+      <code>None</code> in <code>graph_lineage._stored_domain_decisions</code>,
+      so the caller wrote an empty candidate list back over the record the audit
+      reads.</td>
+    <td>The reader now returns an undecided <code>DomainDecision</code> that
+      keeps the stored candidates, and the three lineage call sites no longer
+      substitute an empty-candidate fallback. Test:
+      <code>test_an_undecided_stored_decision_keeps_its_candidates</code>.</td>
+  </tr>
+  <tr>
+    <td>3</td>
+    <td><code>_undecided</code> was private to <code>domain_decision.py</code>
+      while <code>graph_lineage.py</code> imported it across modules.</td>
+    <td>Promoted to the public <code>domain_decision.undecided</code>, exported
+      in <code>__all__</code>, with the candidates it kept documented. Test:
+      <code>test_undecided_is_public_in_its_owner</code>.</td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td><code>persist_refined_name</code> carried a dead
+      <code>source_domains</code> parameter, and
+      <code>worker_refine_names.py</code> passed a value that was discarded.</td>
+    <td>Parameter and argument removed; the successor's source set comes from
+      the migrated sources through the one writer. Test:
+      <code>test_persist_refined_name_carries_no_source_domains_parameter</code>.</td>
+  </tr>
+  <tr>
+    <td>7</td>
+    <td>The catalog-sites record claimed <code>graph_claim_scope.py</code>
+      performs no write.</td>
+    <td>Corrected in
+      <a href="#scg-name-domain-route-catalog-sites-reads">the catalog-sites
+      fragment</a>: the source-pinning path stores the DD path's
+      <code>physics_domain</code> onto the created
+      <code>StandardNameSource</code>. That is source-snapshot provenance read
+      from <code>IMASNode</code>, not a name-domain decision, so it does not
+      belong with the one writer.</td>
+  </tr>
+</table>
+
+<h3 id="scg-name-domain-followups-product-measure">Measure</h3>
+
+<p>From separate archive trees of main (<code>62aa4003e</code>) and this node's
+head, each with its own <code>--basetemp</code>:
+<code>tests/standard_names/</code> on default markers with <code>-n 8</code>
+gave <strong>93 failed, 8408 passed</strong> at main and <strong>71 failed,
+8433 passed</strong> at head, with <strong>zero added failure ids</strong>
+(<code>comm -13</code> of the two <code>FAILED</code> lists is empty). The
+<code>-m graph</code> arm over the <code>test_name_domain_*</code> files,
+<code>test_graph_edge_writers.py</code> and the new follow-ups file gave 11
+passed and one failure,
+<code>test_bootstrap_transaction_rolls_back_partial_parent</code>, which passes
+alone at both main and head and therefore fails only inside a multi-file graph
+run — item 6's shared-state question, owned by the test node.</p>
+
+<p>Negative control: the four new tests, copied into the main tree, all four
+fail there (<code>EXIT=1</code>) and pass at head.</p>

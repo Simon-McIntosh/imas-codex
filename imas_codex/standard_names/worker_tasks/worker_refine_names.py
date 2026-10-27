@@ -730,11 +730,6 @@ async def process_refine_name_batch(
                         )
                         or None
                     ),
-                    source_domains=(
-                        item.get("source_domains")
-                        if isinstance(item.get("source_domains"), list)
-                        else None
-                    ),
                     old_chain_length=chain_length,
                     model=model,
                     reason=result_obj.reason,

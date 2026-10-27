@@ -113,8 +113,9 @@ def test_write_standard_names_leaves_the_domain_to_the_one_writer(
         )
         settled = _domain_state(gc, sn_id)
 
-    assert settled["physics_domain"] is None, (
-        "write_standard_names wrote the payload domain; the one writer owns it"
+    assert settled["physics_domain"] == "equilibrium", (
+        "write_standard_names wrote the payload domain instead of the domain "
+        "its sources carry; the one writer owns the scalar"
     )
     assert set(settled["source_domains"]) == {"equilibrium"}
     assert set(settled["edge_domains"]) == set(settled["source_domains"])

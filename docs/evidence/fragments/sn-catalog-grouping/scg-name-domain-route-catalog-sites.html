@@ -64,6 +64,25 @@ one transaction.</p>
       <code>s.physics_domain AS physics_domain</code>). No write, no change.</li>
 </ul>
 
+<p class="correction"><strong>Correction.</strong> The
+<code>graph_claim_scope.py</code> entry above is wrong: the file does perform a
+write. In the source-pinning path the "absent path" branch builds each
+<code>StandardNameSource</code> with <code>physics_domain: src.physics_domain</code>
+and the <code>CREATE (source:StandardNameSource {…, physics_domain:
+src.physics_domain, …})</code> at about line 845 stores it on the source node.
+The value is the DD path's own <code>IMASNode.physics_domain</code>, copied onto
+the source as snapshot provenance when the source is pinned; it is not a
+decision about a standard name, and it writes no <code>StandardName</code>
+scalar and no <code>HAS_PHYSICS_DOMAIN</code> edge. It therefore does
+<strong>not</strong> belong with the one writer, which sets a name's scalar,
+source-domain set and edges together: this write belongs with the DD
+source-snapshot materialization, whose ground truth is the DD classifier's
+<code>IMASNode.physics_domain</code>. It is a read of that ground truth copied
+beside the source, so it is consistent with the single-source rule rather than
+a second selector. The rest of that entry — the filter and the projection —
+is read-only, so only the "no write" claim is corrected; the site needed no
+change.</p>
+
 <h3 id="scg-name-domain-route-catalog-sites-gap">One writer contract change and one gap</h3>
 
 <p><code>write_name_domain</code> gained an optional <code>fallback_domain</code>.
