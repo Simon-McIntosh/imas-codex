@@ -13,6 +13,13 @@
     "imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py:1943"
   ],
   "completed_at": "2026-10-27T18:46:23.720Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "scg-name-domain-routing-reconcile",
+      "recorded_at": "2026-10-27T18:48:31.722091+00:00"
+    }
+  },
   "dispatched_at": "2026-10-27T18:29:17Z",
   "findings": [
     {
