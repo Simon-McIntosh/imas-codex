@@ -2078,32 +2078,53 @@ def _load_error_sibling_authority(
     )
 
 
-def _error_sibling_rows(query: _Query, reason: str) -> tuple[_LoadedRow, ...]:
-    """Select the complete live cohort admitted by the orphan predicate."""
+def _error_sibling_rows(
+    query: _Query, reason: str, *, admitted_ids: set[str] | None = None
+) -> tuple[_LoadedRow, ...]:
+    """Select the complete live cohort admitted by the orphan predicate.
+
+    ``admitted_ids`` restates exactly the rows an applied receipt cohort names.
+    The quarantine removes those rows from the orphan predicate, so a replay
+    cannot rediscover them by selection and must name them instead.
+    """
     from imas_codex.standard_names.error_siblings import error_sibling_parent_name
 
-    candidates = query.query(
-        """
-        MATCH (name:StandardName)
-        WHERE name.model = $model
-          AND coalesce(name.validation_status, '') <> 'quarantined'
-        RETURN name.id AS id
-        ORDER BY name.id
-        """,
-        model=_ERROR_SIBLING_MODEL,
-    )
+    if admitted_ids is None:
+        candidates = query.query(
+            """
+            MATCH (name:StandardName)
+            WHERE name.model = $model
+              AND coalesce(name.validation_status, '') <> 'quarantined'
+            RETURN name.id AS id
+            ORDER BY name.id
+            """,
+            model=_ERROR_SIBLING_MODEL,
+        )
+    else:
+        candidates = query.query(
+            """
+            MATCH (name:StandardName)
+            WHERE name.id IN $ids
+              AND name.model = $model
+            RETURN name.id AS id
+            ORDER BY name.id
+            """,
+            ids=sorted(admitted_ids),
+            model=_ERROR_SIBLING_MODEL,
+        )
     loaded_rows: list[_LoadedRow] = []
     for candidate in candidates:
         name_id = str(candidate["id"])
         parent_id = error_sibling_parent_name(name_id)
         if parent_id is None:
             continue
-        parent = query.query(
-            "MATCH (parent:StandardName {id: $parent_id}) RETURN parent.id LIMIT 1",
-            parent_id=parent_id,
-        )
-        if parent:
-            continue
+        if admitted_ids is None:
+            parent = query.query(
+                "MATCH (parent:StandardName {id: $parent_id}) RETURN parent.id LIMIT 1",
+                parent_id=parent_id,
+            )
+            if parent:
+                continue
         participant = {
             "id": name_id,
             "kind": RepairParticipantKind.node.value,
@@ -4359,6 +4380,14 @@ def _replay(
     minted_manifest_sha256 = minted_digests.pop()
     admitted_ids = sorted(properties[0].get("cohort_admitted_ids") or [])
     expected_ids = sorted(item.get("row_id") for item in properties)
+    if authority.data.get("adapter") == _ERROR_SIBLING_ADAPTER:
+        # This adapter's cohort is recomputed from live state, and the
+        # quarantine removes every admitted row from the orphan predicate, so a
+        # replay cannot rediscover it by selection. Restate exactly the rows the
+        # receipts name, from the same row builder the apply path used.
+        authority.data["runtime_rows"] = _error_sibling_rows(
+            query, _ERROR_SIBLING_REASON, admitted_ids=set(admitted_ids)
+        )
     receipt_names = {
         row.id: _receipt_names(row) for row in _runtime_authority_rows(authority)
     }
@@ -8014,6 +8043,30 @@ def _apply_lifecycleless_stub_reconcile(
                     )
                     for action, row in deletion_rows
                 }
+                if deleted_ids:
+                    # The cohort read admits lifecycle-less placeholders that
+                    # carry no lifecycle marker, while the shared structural
+                    # cleanup requires the explicit ``needs_composition``
+                    # ``placeholder flag. The signed manifest over this exact
+                    # cohort is stronger than that flag — it binds each row's
+                    # identity and producer set — so stamp the flag the helper
+                    # checks onto precisely the signed rows, and refuse if the
+                    # cohort changed in between.
+                    stamped = list(
+                        transaction.run(
+                            "UNWIND $ids AS id "
+                            "MATCH (stub:StandardName {id: id}) "
+                            "WHERE stub.name_stage IS NULL AND stub.origin IS NULL "
+                            "AND (stub.status IS NULL OR stub.status = 'draft') "
+                            "SET stub.needs_composition = true "
+                            "RETURN count(stub) AS stamped",
+                            ids=deleted_ids,
+                        )
+                    )
+                    if not stamped or int(stamped[0]["stamped"]) != len(deleted_ids):
+                        raise LifecyclelessStubConflict(
+                            "stub placeholder cohort changed before deletion"
+                        )
                 deleted = _delete_derived_parent_nodes(
                     adapter,
                     deleted_ids,

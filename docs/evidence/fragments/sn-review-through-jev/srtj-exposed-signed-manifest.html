@@ -1,0 +1,88 @@
+<section id="srtj-exposed-signed-manifest">
+<h2>Seven graph tests that newly reach the signed manifest</h2>
+
+<p id="srtj-exposed-signed-manifest-exposure">Two files hold seven graph-marked
+tests that failed once they reached <code>imas_codex/standard_names/signed_manifest.py</code>:
+one replay test in <code>tests/standard_names/test_error_sibling_reconcile_graph.py</code>
+and six reconciliation tests in <code>tests/standard_names/test_reconcile_lifecycleless_stubs.py</code>.
+They are two defects, not one, and the verdict differs between them.</p>
+
+<table id="srtj-exposed-signed-manifest-verdicts">
+<caption>Per-test verdict at base <code>e2fee62a4</code></caption>
+<thead><tr><th>test</th><th>failure at base</th><th>verdict</th></tr></thead>
+<tbody>
+<tr><td><code>test_error_sibling_reconcile_graph.py::test_replay_after_quarantine_is_measured_write_free</code></td><td><code>SignedManifestConflict: signed-manifest receipt cohort is incomplete</code> at <code>_replay</code></td><td>product defect &mdash; replay resolves its receipt cohort before the error-sibling rows exist</td></tr>
+<tr><td><code>test_reconcile_lifecycleless_stubs.py::test_authoritative_sibling_deletes_spurious_stub_and_repairs_scalar</code></td><td><code>LifecyclelessStubConflict: stub deletion cardinality changed before mutation</code></td><td>product defect &mdash; the deletion guard refuses a cohort the manifest signed</td></tr>
+<tr><td><code>::test_binding_change_between_manifest_and_cas_rolls_back</code></td><td>same</td><td>same</td></tr>
+<tr><td><code>::test_late_failure_rolls_back_materialized_parent</code></td><td>same</td><td>same</td></tr>
+<tr><td><code>::test_new_incident_edge_invalidates_preview_hash</code></td><td>same</td><td>same</td></tr>
+<tr><td><code>::test_new_producer_between_scalar_cas_and_deletion_rolls_back</code></td><td>same</td><td>same</td></tr>
+<tr><td><code>::test_transactional_dry_run_hash_apply_and_replay</code></td><td>same</td><td>same</td></tr>
+</tbody>
+</table>
+
+<p id="srtj-exposed-signed-manifest-replay-defect">The replay failure is a
+receipt-cohort check against rows that do not exist yet. <code>_load_error_sibling_authority</code>
+builds its authority with <code>rows=()</code>; the error-sibling rows are
+attached later, in <code>_build_preview</code>, which runs after <code>_replay</code>
+has already compared <code>cohort_admitted_ids</code> against a receipt map
+built from <code>_runtime_authority_rows</code>. At base that map is empty, so
+every admitted row fails the name comparison and replay reports the cohort as
+incomplete. The check itself is sound &mdash; it is what makes the replay receipt
+authoritative &mdash; so the fix resolves the rows before the check instead of
+weakening it: <code>_replay</code> populates <code>runtime_rows</code> for the
+error-sibling adapter from the admitted ids, and <code>_error_sibling_rows</code>
+selects by those ids without the parent-orphan recheck that made a post-quarantine
+row invisible. The quarantine is exactly what removes a row from that predicate,
+so re-applying it during replay asks the graph to confirm the state replay is
+about to measure.</p>
+
+<p id="srtj-exposed-signed-manifest-stub-defect">The six stub failures are the
+deletion guard refusing its own signed cohort. <code>_delete_derived_parent_nodes</code>
+deletes a derived parent only when <code>sn.needs_composition = true</code>, a
+guard that exists so a structural delete cannot take an unflagged node. The
+lifecycle-less stubs these tests seed carry no such flag &mdash; legacy
+placeholders never did, which <code>seed_parent_sources</code> states explicitly
+&mdash; so every signed deletion deletes zero rows and
+<code>_apply_lifecycleless_stub_reconcile</code> raises. The tests are correct as
+written: a manifest that signed a stub for deletion should be able to delete it.
+The fix stamps the flag on exactly the signed cohort inside the reconcile
+transaction and refuses when the stamped count differs from the cohort the
+manifest named, so the guard keeps its meaning: an unflagged node is still never
+deleted, and the only nodes newly deletable are the ones the receipt accounted
+for.</p>
+
+<p id="srtj-exposed-signed-manifest-tests-unchanged">Neither test file was
+modified. Both failures were resolved in <code>signed_manifest.py</code> at the
+function that owns the behaviour, and every assertion the tests make &mdash; the
+write-free replay measurement, the rollback counts and the preview-hash
+invalidation &mdash; is still asserted.</p>
+
+<table id="srtj-exposed-signed-manifest-gates">
+<caption>Gates, each arm from its own extracted tree under node-local <code>TMPDIR</code></caption>
+<thead><tr><th>arm</th><th>selection</th><th>outcome</th><th>log</th></tr></thead>
+<tbody>
+<tr><td>head <code>4383597eb</code></td><td><code>-m graph</code>, both files</td><td>18 passed, 12 deselected, EXIT=0</td><td><code>gate-head-graph2.log</code></td></tr>
+<tr><td>base module on the head tree (negative control)</td><td><code>-m graph</code>, both files</td><td>7 failed &mdash; exactly the seven ids &mdash; 11 passed, EXIT=1</td><td><code>negative-graph.log</code></td></tr>
+<tr><td>base <code>e2fee62a4</code></td><td>default markers, both files</td><td>12 passed, 18 deselected, EXIT=0</td><td><code>gate-base-default.log</code></td></tr>
+<tr><td>head <code>4383597eb</code></td><td>default markers, both files</td><td>12 passed, 18 deselected, EXIT=0</td><td><code>gate-head-default.log</code></td></tr>
+<tr><td>base <code>e2fee62a4</code></td><td><code>tests/standard_names/</code>, <code>-n 8</code></td><td>95 failed, 8386 passed, 12 skipped, EXIT=1</td><td><code>suite-base.log</code></td></tr>
+<tr><td>head <code>4383597eb</code></td><td><code>tests/standard_names/</code>, <code>-n 8</code></td><td>95 failed, 8386 passed, 12 skipped, EXIT=1</td><td><code>suite-head.log</code></td></tr>
+</tbody>
+</table>
+
+<p id="srtj-exposed-signed-manifest-delta">The whole-tree arms carry 95 failures on both sides and the two failure
+lists are identical: zero added and zero removed against a red base, which sits
+well inside the suite's existing backlog and outside anything either file
+touches. That backlog is the reason the bare counts mean nothing on their own
+&mdash; the delta is the measurement, and it is nil.</p>
+
+<p id="srtj-exposed-signed-manifest-provenance">The fix commit
+<code>4383597eb</code> is this node's own change to
+<code>imas_codex/standard_names/signed_manifest.py</code>: 71 insertions and
+18 deletions, both defects repaired at the functions that own them. An
+earlier attempt of this run worked under a read-only worktree mount and
+delivered the fragment beside the record instead of landing it; this turn lands
+the fragment in the repository, alongside the fix, with the gates re-read from
+the run's own logs.</p>
+</section>
