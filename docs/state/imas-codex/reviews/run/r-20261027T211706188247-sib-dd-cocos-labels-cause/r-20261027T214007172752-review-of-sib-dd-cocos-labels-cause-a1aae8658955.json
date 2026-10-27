@@ -1,0 +1,75 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/graph/dd_workers.py:316 build_worker calls phase_build with state.version_data and state.ids_filter-scoped paths",
+    "imas_codex/graph/dd_workers.py:261 imports phase_build into the build worker",
+    "imas_codex/graph/build_dd.py:4915 exports phase_build in __all__"
+  ],
+  "completed_at": "2026-10-27T21:53:09.584Z",
+  "dispatched_at": "2026-10-27T21:41:54Z",
+  "findings": [
+    {
+      "file": "tests/graph/test_dd_cocos_label_preservation.py",
+      "id": "fdd7ce2bed9",
+      "line": "148",
+      "severity": "non-blocking",
+      "text": "non-blocking: all three tests assert that a label survives; none asserts that the clear still removes a label the covered DD no longer declares, so a regression turning the clear into a no-op would leave every new assertion green and stale labels would accumulate silently \u2014 add a case where a path in scope with a 4.x-declared removal loses its label."
+    },
+    {
+      "file": "imas_codex/graph/build_dd.py",
+      "id": "f333fe860e1",
+      "line": "2013",
+      "severity": "non-blocking",
+      "text": "non-blocking: the `$authority_covered` false branch (a `--from-version 4.x` build with no 3.x in scope) is exercised by no test, yet it is the branch that stops an incremental 4.x build wiping every xml label; a regression there restores the original defect and every current test still passes."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-dd-cocos-labels-cause.html",
+      "id": "f7988403d96",
+      "line": "48",
+      "severity": "non-blocking",
+      "text": "non-blocking: the dated invocation is the 2026-10-15 shard wave whose surviving set the graph still carries, and the fragment itself records the earliest scoped invocation as 2026-06-18, so the stated date is a lower bound on the first loss rather than the invocation that first dropped the labels; say so explicitly where the date is attributed."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-dd-cocos-labels-cause.html",
+      "id": "f8c519024aa",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the fragment carries no figure; the shard wave at 11:38 and 11:43, the shard that finished last, and the 22-of-24 holdout loss are a shape a single timeline-and-bar figure would show at a glance, and the repository's graphics mandate expects one where it aids understanding."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read both commits from 058c6a1e1 to a1aae8658: 45eb2442d extracts _reference_cocos_labels and scopes the stale-label clear by IDS unit, added-path set and authority coverage in imas_codex/graph/build_dd.py:914-937 and :1986-2022; a1aae8658 adds the 148-line disposable-graph test file and the evidence fragment, and every added definition is inside the declared scope.",
+    "done_when": "The brief's done-when asks for a fragment stating cause, date and invocation, a committed fix with three tests red on main and green at head, the restoration list, and a gate adding zero failure ids; logs/negative-control-base.log ends '3 failed ... EXIT=1', logs/head-arm.log ends '3 passed ... EXIT=0', logs/gate-base-default.log and logs/gate-head-default.log both end '3 failed, 646 passed' with the same three ids, and the fragment's restoration table lists 617 restorable labels and all 24 holdout paths.",
+    "goal": "The node's goal is to establish why the DD build dropped the COCOS labels (with the date and the invocation) and to stop a build dropping a label it did not re-derive; docs/evidence/fragments/sn-integrity-backlog/sib-dd-cocos-labels-cause.html states the cause as the unscoped stale-label clear in phase_build and imas_codex/graph/build_dd.py:1986-2022 scopes that clear.",
+    "manifest": "Read the delivered manifest; it names commits 45eb2442d and a1aae8658, the six gate logs, identical base and head failure sets, baseline_suite and after_suite carrying completed=true with 3 failures each, and the 617/623/24 measurement, and the logs it cites exist and hold those numbers.",
+    "write_paths": "The manifest declares six write paths; git diff 058c6a1e1..a1aae8658 touches only imas_codex/graph/build_dd.py, tests/graph/test_dd_cocos_label_preservation.py and docs/evidence/fragments/sn-integrity-backlog/sib-dd-cocos-labels-cause.html, all inside that set."
+  },
+  "justifications": {
+    "durability": "The three tests genuinely fail against the base build_dd.py, but tests/graph/test_dd_cocos_label_preservation.py:148 asserts only survival and idempotence, so nothing reddens if the clear stops clearing.",
+    "evidence": "logs/negative-control-base.log ends '3 failed, 1 warning ... EXIT=1' at revision 058c6a1e1 and logs/head-arm.log ends '3 passed ... EXIT=0' at 45eb2442d, while logs/gate-base-default.log and logs/gate-head-default.log both record the same three pre-existing failure ids at 3 failed / 646 passed.",
+    "fit": "imas_codex/graph/build_dd.py:914-937 follows the surrounding logger/Cypher/FastAPI-free style and names the capability by what it does; ruff --select=E,F,W,I over the changed file is 10 findings at base and 10 at head, so the change adds none.",
+    "goal_fidelity": "imas_codex/graph/build_dd.py:2011-2014 confines the clear to split(p.id,'/')[0] IN $scope_ids and to paths not declared by the in-scope 3.x reference, which is the 'cannot drop a label it did not re-derive' the goal states.",
+    "reuse": "The capability search over imas_codex/ for a newest-3.x label reference found only the inline block this diff replaces, so _reference_cocos_labels extends the sole owner rather than forking it, and _backfill_cocos_labels at :970 now calls it.",
+    "scope_discipline": "git diff --stat 058c6a1e1 a1aae8658 shows three files, all declared in the manifest's orientation_write_paths, with no plan edit and no live-graph write."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The node's goal is to establish why the DD build dropped the COCOS labels (with the date and the invocation) and to stop a build dropping a label it did not re-derive; docs/evidence/fragments/sn-integrity-backlog/sib-dd-cocos-labels-cause.html states the cause as the unscoped stale-label clear in phase_build and imas_codex/graph/build_dd.py:1986-2022 scopes that clear.\nVERDICT done_when: The brief's done-when asks for a fragment stating cause, date and invocation, a committed fix with three tests red on main and green at head, the restoration list, and a gate adding zero failure ids; logs/negative-control-base.log ends '3 failed ... EXIT=1', logs/head-arm.log ends '3 passed ... EXIT=0', logs/gate-base-default.log and logs/gate-head-default.log both end '3 failed, 646 passed' with the same three ids, and the fragment's restoration table lists 617 restorable labels and all 24 holdout paths.\nVERDICT write_paths: The manifest declares six write paths; git diff 058c6a1e1..a1aae8658 touches only imas_codex/graph/build_dd.py, tests/graph/test_dd_cocos_label_preservation.py and docs/evidence/fragments/sn-integrity-backlog/sib-dd-cocos-labels-cause.html, all inside that set.\nVERDICT manifest: Read the delivered manifest; it names commits 45eb2442d and a1aae8658, the six gate logs, identical base and head failure sets, baseline_suite and after_suite carrying completed=true with 3 failures each, and the 617/623/24 measurement, and the logs it cites exist and hold those numbers.\nVERDICT diff: Read both commits from 058c6a1e1 to a1aae8658: 45eb2442d extracts _reference_cocos_labels and scopes the stale-label clear by IDS unit, added paths and authority coverage in imas_codex/graph/build_dd.py:914-937 and :1986-2022; a1aae8658 adds the 148-line disposable-graph test file and the evidence fragment.\nCALL_SITES: imas_codex/graph/dd_workers.py:316 build_worker calls phase_build with state.version_data and state.ids_filter-scoped paths, imas_codex/graph/dd_workers.py:261 imports phase_build into the build worker, imas_codex/graph/build_dd.py:4915 exports phase_build in __all__\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/graph/build_dd.py:2011-2014 confines the clear to split(p.id,'/')[0] IN $scope_ids and to paths not declared by the in-scope 3.x reference, which is the 'cannot drop a label it did not re-derive' the goal states.\nSCORE evidence: 18\nJUSTIFICATION evidence: logs/negative-control-base.log ends '3 failed, 1 warning ... EXIT=1' at revision 058c6a1e1 and logs/head-arm.log ends '3 passed ... EXIT=0' at 45eb2442d, while logs/gate-base-default.log and logs/gate-head-default.log both record the same three pre-existing failure ids at 3 failed / 646 passed.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 058c6a1e1 a1aae8658 shows three files, all declared in the manifest's orientation_write_paths, with no plan edit and no live-graph write.\nSCORE durability: 15\nJUSTIFICATION durability: The three tests genuinely fail against the base build_dd.py, but tests/graph/test_dd_cocos_label_preservation.py:148 asserts only survival and idempotence, so nothing reddens if the clear stops clearing.\nSCORE fit: 19\nJUSTIFICATION fit: imas_codex/graph/build_dd.py:914-937 follows the surrounding logger and Cypher style and names the capability by what it does; ruff --select=E,F,W,I over the changed file is 10 findings at base and 10 at head, so the change adds none.\nSCORE reuse: 20\nJUSTIFICATION reuse: The capability search over imas_codex/ for a newest-3.x label reference found only the inline block this diff replaces, so _reference_cocos_labels extends the sole owner rather than forking it, and _backfill_cocos_labels at :970 now calls it.\nFINDING tests/graph/test_dd_cocos_label_preservation.py:148 non-blocking: all three tests assert that a label survives and none asserts that the clear still removes a label the covered DD no longer declares, so a regression turning the clear into a no-op would leave every new assertion green and stale labels would accumulate silently.\nFINDING imas_codex/graph/build_dd.py:2013 non-blocking: the $authority_covered false branch (a --from-version 4.x build with no 3.x in scope) is exercised by no test, yet it is the branch that stops an incremental 4.x build wiping every xml label, so a regression there restores the original defect with all current tests still green.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-dd-cocos-labels-cause.html:48 non-blocking: the dated invocation is the 2026-10-15 shard wave whose surviving set the graph still carries and the fragment itself records the earliest scoped invocation as 2026-06-18, so the stated date bounds the first loss rather than naming it.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-dd-cocos-labels-cause.html:1 non-blocking: the fragment carries no figure, so the shard wave, the shard that finished last and the 22-of-24 holdout loss are not shown in a form a reader can take in at a glance.\n",
+  "review_run_id": "r-20261027T214007172752-review-of-sib-dd-cocos-labels-cause-a1aae8658955",
+  "reviewed_base_sha": "058c6a1e1bc82ec18601f98c9693dfeec799166d",
+  "reviewed_head_sha": "a1aae865895544d14f54f1af24a03bf070c9088c",
+  "reviewed_run_id": "r-20261027T211706188247-sib-dd-cocos-labels-cause",
+  "scores": {
+    "durability": 15,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T22:00:00+00:00",
+  "total": 110
+}

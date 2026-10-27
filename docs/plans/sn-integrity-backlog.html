@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="244">
+<meta name="plan-version" content="245">
 <meta name="plan-modified" content="2026-10-27">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -892,6 +892,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s38" data-id="c-close-s38" data-who="reckon-build" data-when="2026-10-20T06:45:00Z">
     <div class="r-comment-body"><p>§38 closed. All four rulings on the live sourceless names are applied: two retirements with successor links, one binding, and the separatrix swap through the new signed source-exchange writer (merges <code>505e28c55</code> and <code>c9b26a250</code>, reviews 102 and 101). The six names no DD path measures are held from release, and the export gate counts live names only (merge <code>6060ab5c5</code>). The stale-source census found no dropped source. On the live read-back, the only live names without a DD source are the 6 held ones and the 2 derived parents. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s38-lost-sources-closed">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s39" data-id="c-run-r-20261027T214007172752-review-of-sib-dd-cocos-labels-cause-a1aae8658955" data-who="reckon-build" data-when="2026-10-27T21:53:09.584Z">
+    <div class="r-comment-body"><p>COCOS label loss cause is the unscoped stale-label clear in phase_build, dated to the 2026-10-15 11:43 IDS-sharded build wave in which edge_profiles finished last; the fix scopes that clear to the build&#x27;s IDS units, its labelled and 3.x-declared paths, and to builds carrying a label-declaring version. Review scores goal_fidelity 18, evidence 18, scope_discipline 20, durability 15, fit 19, reuse 20; zero added failure ids; four non-blocking findings, the load-bearing one being that no test asserts the clear still clears.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
