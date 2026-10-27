@@ -14,19 +14,22 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from tests.standard_names.test_facade_closure import _delegating_functions
+
 
 def test_graph_composition_root_has_no_transitional_forwarders() -> None:
-    """Moved graph calls resolve at their owner rather than through the root."""
+    """Moved graph calls resolve at their owner rather than through the root.
+
+    A forwarder is identified by what its body does, not by how it is
+    described, so one written without the documentation prefix is still a
+    forwarder. Nothing this entrypoint defines may be a single delegation to a
+    symbol owned by a ``graph_store`` module.
+    """
     from imas_codex.standard_names import graph_ops
+    from imas_codex.standard_names.graph_store import _OWNER_BY_NAME
 
     tree = ast.parse(Path(graph_ops.__file__).read_text())
-    forwarders = [
-        node.name
-        for node in tree.body
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
-        and (ast.get_docstring(node) or "").startswith("Forward to ")
-    ]
-    assert forwarders == []
+    assert _delegating_functions(tree, set(_OWNER_BY_NAME)) == []
 
 
 #: The shared sample names carry IDS names (``core_profiles``, ``magnetics``)

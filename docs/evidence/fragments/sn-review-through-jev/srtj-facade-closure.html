@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>srtj-facade-closure — a moved symbol is reachable only from its owner</title>
+</head>
+<body>
+<article class="r-fragment" id="srtj-facade-closure">
+
+<h1 id="srtj-facade-closure-title">A moved symbol is reachable only from its owner</h1>
+
+<p id="srtj-facade-closure-summary">The forwarder retirement left three ways for the
+retired <code>graph_ops</code> façade to come back unnoticed. Each is now closed
+by a property, not by a docstring convention, and each closure was shown to fire
+by reintroducing its defect.</p>
+
+<table id="srtj-facade-closure-table">
+<thead>
+<tr><th>Defect</th><th>Before</th><th>After</th></tr>
+</thead>
+<tbody>
+<tr>
+<td>Service bridge</td>
+<td><code>_GraphServices.__getattr__</code> resolved every name in the owner map,
+so <code>get_services().write_reviews</code> worked for any of the 501 moved names.</td>
+<td>Resolves only the 187 collaborators the graph store modules read, declared as
+<code>_WIRED_SERVICE_NAMES</code>. Anything else raises <code>AttributeError</code>
+naming the owning module.</td>
+</tr>
+<tr>
+<td>Entrypoint</td>
+<td>None — but nothing stopped a module-level <code>__getattr__</code> from
+restoring the façade, and the test selected forwarders by the docstring prefix
+<code>"Forward to "</code>.</td>
+<td><code>graph_ops.__getattr__</code> refuses every moved name with
+<code>… is not wired into the standard-name graph composition root; import it from
+imas_codex.standard_names.graph_store.&lt;module&gt;</code>.</td>
+</tr>
+<tr>
+<td>Owner map</td>
+<td>501 hand-written entries, unbound to the modules they name.</td>
+<td>Kept, and pinned by two checks: every entry resolves at the module it names,
+and every public symbol a store module defines is mapped.</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="srtj-facade-closure-checks">The checks</h2>
+
+<p id="srtj-facade-closure-checks-body">All live in
+<code>tests/standard_names/test_facade_closure.py</code>, plus the replaced guard in
+<code>tests/standard_names/test_graph_ops.py</code>:</p>
+
+<ul id="srtj-facade-closure-check-list">
+<li><code>test_service_bridge_resolves_only_wired_names</code> — the declared roster
+equals the attribute set scanned from the store's own AST (both
+<code>get_services().x</code> chains and the injected <code>services</code>
+parameter and its aliases), and a moved name outside it raises naming its owner.</li>
+<li><code>test_entrypoint_refuses_moved_symbols</code> — no callable the owner map
+places in a store module resolves on <code>graph_ops</code> or
+<code>workers</code>, with a positive control on the witness set (it must not be
+empty).</li>
+<li><code>test_owner_map_entries_resolve_at_their_owner</code> — a stale entry, or one
+that resolves somewhere other than the named module, fails.</li>
+<li><code>test_owner_map_covers_every_public_definition</code> — the store's module set is
+enumerated from <code>graph_store/*.py</code> rather than from the map, so a module
+the map omits fails outright; and every public name a store module defines (AST,
+excluding <code>logger</code> and the <code>graph_foundation</code> wiring module,
+which siblings import directly) is in the map.</li>
+<li><code>test_facades_define_no_delegating_forwarder</code> — a function whose body
+only returns a call that lands on a moved store symbol or a
+<code>worker_tasks</code> symbol is a forwarder however it is described, including
+through an import alias in either spelling.</li>
+<li><code>test_forwarder_scan_catches_absolute_import_delegation</code> — the detector
+itself is exercised on planted source: an absolute import
+(<code>from imas_codex.standard_names.graph_store.graph_catalog import … as
+_impl</code>) and a relative one must both be caught. The absolute spelling is the
+repository's common one, and a scan that knew only the relative form accepted it
+silently.</li>
+</ul>
+
+<h2 id="srtj-facade-closure-controls">Controls — each test made to fire</h2>
+
+<table id="srtj-facade-closure-controls-table">
+<thead>
+<tr><th>Mutation applied</th><th>Failing test</th><th>Log</th></tr>
+</thead>
+<tbody>
+<tr><td>Blanket bridge resolution restored in
+<code>_GraphServices.__getattr__</code></td>
+<td><code>test_service_bridge_resolves_only_wired_names</code></td>
+<td><code>logs/negative-control-blanket-bridge.log</code></td></tr>
+<tr><td>Stale owner-map entry
+<code>reconcile_stale_symbol</code> added to <code>graph_catalog</code></td>
+<td><code>test_owner_map_entries_resolve_at_their_owner</code></td>
+<td><code>logs/negative-control-stale-map-entry.log</code></td></tr>
+<tr><td>Forwarder appended to <code>graph_ops</code> with no docstring, importing
+the owner under a local alias</td>
+<td><code>test_entrypoint_refuses_moved_symbols</code> and
+<code>test_facades_define_no_delegating_forwarder</code></td>
+<td><code>logs/negative-control-undocumented-forwarder.log</code></td></tr>
+<tr><td>Forwarder appended to <code>graph_ops</code> importing its owner by
+absolute path (<code>from imas_codex.standard_names.graph_store.graph_catalog
+import write_standard_names as _impl</code>)</td>
+<td><code>test_facades_define_no_delegating_forwarder</code> and
+<code>test_graph_composition_root_has_no_transitional_forwarders</code></td>
+<td><code>logs/negative-control-absolute-import-forwarder.log</code></td></tr>
+<tr><td>An unmapped module planted in <code>graph_store/</code> defining one public
+function</td>
+<td><code>test_owner_map_covers_every_public_definition</code>, naming
+<code>graph_unmapped_probe</code> as absent from the map</td>
+<td><code>logs/negative-control-unmapped-module.log</code></td></tr>
+</tbody>
+</table>
+
+<p id="srtj-facade-closure-controls-note">The aliased-import control is why the
+forwarder check reads imports as well as callee. A first version keyed only on the
+callee name, and a delegation written as
+<code>from .graph_store.graph_catalog import write_standard_names as _impl;
+return _impl(...)</code> passed it — the shape a reintroduced façade actually takes.
+That first alias reader understood only relative imports, which left the
+repository's dominant spelling — the same delegation written
+<code>from imas_codex.standard_names.graph_store.graph_catalog import
+write_standard_names as _impl</code> — passing it again. Both the mapping and the
+guard are now exercised in both spellings, the absolute one by a test on planted
+source and by a control run against the live entrypoint.</p>
+
+<h2 id="srtj-facade-closure-gate">Gate</h2>
+
+<p id="srtj-facade-closure-gate-body">Whole <code>tests/standard_names/</code> and
+<code>tests/graph/</code>, default markers, <code>-n 8</code>, from separate
+<code>git archive</code> trees under node-local scratch, each with its own
+<code>--basetemp</code>, the five generated files copied in:</p>
+
+<ul id="srtj-facade-closure-gate-list">
+<li>base <code>5c1df22d1</code> — 111 failed, 9016 passed (EXIT=1)</li>
+<li>head <code>01a2a0a00</code> — 111 failed, 9022 passed (EXIT=1), <strong>the
+same 111 ids</strong>: zero added, zero fixed</li>
+</ul>
+
+<p id="srtj-facade-closure-gate-pair">Both arms were re-run together after the guard
+changes, each from its own <code>git archive</code> tree with its own
+<code>--basetemp</code>. The head pass count rose from 9021 to 9022 with the planted
+absolute-import test; the failing id sets are identical between arms (<code>comm</code>
+reports zero rows in either direction).</p>
+
+<p id="srtj-facade-closure-gate-flake">A first head run reported one extra id,
+<code>test_pool_registry_import_orders_succeed_in_fresh_process[…]</code>. It passes
+in isolation on both arms (3 passed each) and did not recur on the second full
+head run; it spawns fresh interpreters under <code>-n 8</code> and is
+order-dependent. The second run is the arm of record.</p>
+
+<p id="srtj-facade-closure-gate-imports">Fresh-interpreter import of every module in
+<code>imas_codex/standard_names/graph_store/</code> and
+<code>imas_codex/standard_names/worker_tasks/</code>: 25 modules imported, EXIT=0.</p>
+
+<h2 id="srtj-facade-closure-correction">What the first gate run caught</h2>
+
+<p id="srtj-facade-closure-correction-body">The first head arm added eleven ids, all
+in the structural-authority path. The store reads <code>services.__file__</code> to
+fingerprint the module it lives in, and the declared roster had been built with the
+scan filtered of dunder names, so the bridge refused <code>__file__</code>. The
+roster and its scanner now carry the name; the eleven pass, which is why the
+declaration is checked against the store's reads rather than written once.</p>
+
+</article>
+</body>
+</html>
