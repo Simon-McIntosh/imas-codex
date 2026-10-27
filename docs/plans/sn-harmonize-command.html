@@ -25,7 +25,7 @@
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="196">
+<meta name="plan-version" content="197">
 <meta name="plan-modified" content="2026-10-27">
 </head>
 <body>
@@ -746,7 +746,10 @@
     <div class="r-comment-body"><p>independent review of run r-20261027T094625253761-shc-family-eligibility-diagnosis at 2a32deacf: parsed record, six dimensions scored 19/13/18/9/18/20 (total 97), four non-blocking findings and no blocking finding — the diagnosis reproduces in code (reset early return at graph_docs_persistence.py:410 precedes the scope stamp at 418-423), the JSON omits the classification/fix the done_when assigns it, the recorded gate log is at the parent revision 46a127882 rather than the head, guards.graph_writes is a hardcoded literal, and the batch-level zero is read from anchor_gated_batches rather than measured; added_failure_count 0 over the reviewed run's not-run suite pair</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261027T094625253761-shc-family-eligibility-diagnosis" data-who="reckon-build" data-when="2026-10-27T10:24:32.500Z">
-    <div class="r-comment-body"><p>docs/evidence/fragments/sn-harmonize-command/shc-family-eligibility-diagnosis.html records the diagnosis: the electrostatic-potential family&#x27;s anchor is docs-eligible but unclaimable because it is already at docs_stage pending, so reset_standard_name_docs counts zero eligible and returns before its own scope-stamping query, leaving the batch unbound to the uuid the apply minted; the scoped claim then matches nothing and the convergence gate halts the family before its other four members are marked.</p></div>
+    <div class="r-comment-body"><p>docs/evidence/fragments/sn-harmonize-command/shc-family-eligibility-diagnosis.html records the diagnosis: the electrostatic-potential family's anchor is docs-eligible but unclaimable because it is already at docs_stage pending, so reset_standard_name_docs counts zero eligible and returns before its own scope-stamping query, leaving the batch unbound to the uuid the apply minted; the scoped claim then matches nothing and the convergence gate halts the family before its other four members are marked.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-s4-locus-no-work-diagnosed" data-who="reckon-build" data-when="2026-10-27T11:00:00Z">
+    <div class="r-comment-body"><p>The locus family was re-measured on the fixed review cascade (merge <code>bd0461248</code>). The apply made 0 calls and spent USD 0.00 of a USD 4.00 cap. <code>electrostatic_potential</code> stays at 0.849, two members are unscored, and no name outside the family was touched.</p><p>The diagnosis (merge <code>6fdecfa27</code>, review 97) found why. The anchor is docs-eligible but already at <code>docs_stage</code> pending, so <code>reset_standard_name_docs</code> counts zero eligible. It then returns before its own scope-stamping query, so the batch is never bound to the apply's run id. The scoped claim matches nothing, and the convergence gate halts the family before its other four members are marked.</p><p><code>shc-docs-reset-scope-stamp</code> makes a scoped reset stamp its batch even when it resets nothing. The locus family is re-measured after it lands.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-close-s5" data-who="reckon-build" data-when="2026-10-13T14:50:00Z">
     <div class="r-comment-body"><p>§5 closed. The harmonize report counts a link as dead only when no standard name in the graph carries its target, which removes the boundary-density family's 19 false dead links (reviewed head <code>73bbd94ba</code>, review 99/120). Its two reuse follow-ons go into the §<!-- -->7 node: call <code>get_existing_standard_names</code> and drop the scope-only fallback. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s5-report-graph-links">evidence</a></p></div>
