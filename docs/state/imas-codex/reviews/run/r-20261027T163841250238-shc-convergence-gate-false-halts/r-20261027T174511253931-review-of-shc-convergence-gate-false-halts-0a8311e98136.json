@@ -1,0 +1,103 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": {
+    "tests/standard_names/test_campaign.py:750": "fails if the runner stops taking its pre-drain read before clear_quarantine, because the expected event list begins with fetch:a; it does not fail on what that read is used for.",
+    "tests/standard_names/test_campaign_convergence_gate.py:108": "fails if _split_name_accepted stops excluding a reviewed member, because eligible would then contain all four ids; it does not fail if measure_batch's drift comparison is removed, because the batch it hands over holds only accepted names.",
+    "tests/standard_names/test_campaign_convergence_gate.py:139": "does not fail if the prior_rows comparison at campaign.py:670 is removed: the fixture's post-drain stage (reviewed) is not accepted, so the unrepaired absolute check reports the same drift; it fails only if the drift clause itself is deleted.",
+    "tests/standard_names/test_campaign_convergence_gate.py:163": "fails if any score-based acceptance is reintroduced at campaign.py:671-673, because accepted would read 2 and the literal 50.00% (1/2 touched) halt string would not be produced; logs-pinned-truth-mutation.log records exactly that reinstatement reddening this test alone."
+  },
+  "call_site_count": 6,
+  "call_sites": [
+    "imas_codex/cli/sn.py:6184",
+    "imas_codex/cli/sn.py:6264",
+    "imas_codex/standard_names/harmonize.py:1501",
+    "imas_codex/standard_names/harmonize.py:1586",
+    "imas_codex/standard_names/harmonize.py:1795",
+    "imas_codex/standard_names/campaign.py:1045"
+  ],
+  "completed_at": "2026-10-27T17:59:53.805Z",
+  "dispatched_at": "2026-10-27T17:46:01Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_campaign_convergence_gate.py",
+      "line": 128,
+      "severity": "non-blocking",
+      "text": "non-blocking: test_member_the_drain_moves_out_of_accepted_still_halts cannot fail on the defect it names. Its fixture moves one name from accepted to reviewed, which the pre-repair absolute-stage check also reports as drift, so reinstating that check \u2014 or deleting the prior_rows comparison at campaign.py:656-668 \u2014 leaves name_drift == ['moved_away'], touched 0 and the drift halt all intact. The drift repair therefore has no behavioural guard: no test calls measure_batch with a member whose non-accepted stage is unchanged between the two reads (test_member_outside_accepted_before_the_drain_is_skipped_not_drift filters those out of batch_ids first), so the false halt fixed here is pinned only by the planning split at harmonize.py:1313. Add a case carrying an unchanged reviewed member in batch_ids with prior_rows supplied and assert name_drift == []."
+    },
+    {
+      "file": "imas_codex/standard_names/harmonize.py",
+      "line": 1340,
+      "severity": "non-blocking",
+      "text": "non-blocking: the plan's skipped and docs_eligible keys are written and never read. `git grep` over the head tree for docs_eligible finds only this construction site, and no CLI or apply path prints or stores plan['skipped'], so `sn harmonize --apply` reports a family applying with fewer members and no record of which were excluded or what stage they carry. The brief asks for exactly that report ('report it as skipped, with its stage, so the family's outcome names it'), so the second half of the planning repair is data on an internal dict rather than anything an operator or the run's outcome can see."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-convergence-gate-false-halts.html",
+      "line": 167,
+      "severity": "non-blocking",
+      "text": "non-blocking: the tests table says the first test asserts 'measure_batch over the eligible pair yields no drift, 2 touched, 2 accepted'. At the reviewed head that test asserts no accepted count at all (the assertion was removed in 5d319309d) and the landed rule yields accepted == 1, because the held member is reviewed. Two is the number the withdrawn score-based rule produced, so this row describes code the same commit removed and contradicts the fragment's own 'a held document is not accepted' narrative at line 177."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-convergence-gate-false-halts.html",
+      "line": 84,
+      "severity": "non-blocking",
+      "text": "non-blocking: the sentence says the excluded members are 'carried in the plan under skipped with their stage, so the family's outcome names them', but no consumer of that key exists anywhere in imas_codex/, so the outcome never names them; the sentence overclaims what landed, in the same way as the table row at line 167."
+    },
+    {
+      "file": "manifest.md",
+      "line": 23,
+      "severity": "non-blocking",
+      "text": "non-blocking: baseline_suite and after_suite are prose sentences rather than the JSON objects the dispatch contract asks for (revision, command, exit_status, log_path, completed, failure_count, failure_ids). completed has no value at all, so both arms read as unreadable by shape even though the logs behind them are complete and reconcile; the failure delta had to be re-derived from logs-gate-base.log and logs-gate-head.log to produce added_failure_ids here."
+    },
+    {
+      "file": "manifest.md",
+      "line": 17,
+      "severity": "non-blocking",
+      "text": "non-blocking: the tests field is a description of the gate ('two-arm gate over 22 files covering campaign and harmonize, from separate git archive trees ...') rather than the literal command a shell was handed, so the promotion gate receipt cannot be filled from it; the real command exists in each log's `# command:` header, which the fallback would find, but the field as written is a sentence, not a re-runnable command."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "Five production call sites reach the change: imas_codex/cli/sn.py:6184 plans every `sn harmonize --apply` family and :6264 runs the apply, imas_codex/standard_names/harmonize.py:1501 finalizes families through the same plan, harmonize.py:1586 replans after stamping, harmonize.py:1795 derives the apply plan, imas_codex/standard_names/campaign.py:1045 calls measure_batch with the new prior_rows argument; the node's own test files were excluded from this count.",
+    "diff": "Read commit by commit from 43ae5712c to 0a8311e981: 0754e8725 adds the inherited-versus-post-drain comparison and the planning skip alongside a score-based acceptance rule; 50e14d581 makes an unanswerable stage eligible and threads the pre-drain read through CampaignRunner and the test harness; 5d319309d removes the score path and pins the held-review rule; 6a52f5140, 369ccb212 and 0a8311e98 touch only the fragment, so no production code lands after the gated revision 5d319309d.",
+    "done_when": "The prompt's evidence measure asks for both causes in the fragment, drift measured as a change between the pre-drain and post-drain reads, non-accepted members skipped at planning, the acceptance count fixed, three new tests failing on main and zero added failure ids; the manifest records two git-archive arms (base 4 failed/230 passed, head 1 failed/233 passed, EXIT=1 on each), the fragment records both causes with the two ReviewHold ids and the judged clause, but the acceptance-count clause is deliberately not met \u2014 resume-1-advice.txt:1-2 rejects that repair and the measure text was never amended to record the withdrawal, so the recorded gate does not assert one clause it is scored against.",
+    "goal": "The node goal is to make the harmonize convergence gate halt only on changes the campaign made; campaign.py:656-671 now appends a member to name_drift only when its post-drain name_stage moved off the inherited read and did not land on accepted, and harmonize.py:1313-1314 splits non-name-accepted members out of the batch before planning, so the two reviewed locus names can no longer be reported as campaign-caused drift.",
+    "manifest": "Read in full: it records status complete, five commits, both arm commands with their log paths and EXIT=1, the 4-to-1 failure counts with added ids none, the prose-hold failure attributed and re-run at base in isolation, and the pre-drain ordering claim; its tests field is a prose summary rather than the literal command and its baseline_suite/after_suite are prose sentences rather than the required JSON objects.",
+    "write_paths": "The declared grant is imas_codex/standard_names/campaign.py, imas_codex/standard_names/harmonize.py, tests/standard_names/test_campaign.py, tests/standard_names/test_campaign_convergence_gate.py and the evidence fragment; `git diff --stat 43ae5712c..0a8311e981` lists exactly those five paths and nothing else."
+  },
+  "justifications": {
+    "durability": "test_campaign_convergence_gate.py:128 asserts drift for a member moved off accepted, which the unrepaired absolute-stage check reports identically, so deleting the prior_rows comparison leaves all three tests green; only :150 pins a rule the old code violates, and plan_family_applies' skipped list and anchor-deferral have no test at all.",
+    "evidence": "logs-gate-base.log and logs-gate-head.log each open with revision, tree, the literal command and module.__file__, and close EXIT=1 at 4 failed/230 passed and 1 failed/233 passed, from which the added ids are none, but the done_when's acceptance-count clause is unmet and the measure text was never amended.",
+    "fit": "The added symbols _name_stages (harmonize.py:1235) and _split_name_accepted (:1248) are named for their mechanism, carry no plan or ticket labels, follow the module's deferred-import and gc.query idiom, and all three touched Python files pass ruff check and ruff format --check at the head revision.",
+    "goal_fidelity": "campaign.py:656-668 compares the post-drain stage against prior_stage before deciding drift, and harmonize.py:1331 builds each batch from eligible_ids only, so neither the false drift nor a non-accepted member entering a docs-only batch can recur; the acceptance halt is left standing under the coordinator's recorded ruling at resume-1-advice.txt:1-2. The planning skip is not surfaced anywhere, so the goal's second half \u2014 naming the excluded member \u2014 is only half delivered.",
+    "reuse": "The eligibility split has no owner, but _name_stages (harmonize.py:1235) re-reads a column that campaign.py:741 (_REFRESH_QUERY / default_fetch_refreshed) already owns a by-ids reader for and that families.py:1041 _family_member_collect could carry in one line, so the duplication rule applies rather than a genuine fork.",
+    "scope_discipline": "Every path in `git diff --stat 43ae5712c..0a8311e981` is inside the declared grant, and tests/standard_names/test_campaign.py:604-640 changes only the fake fetch the new pre-drain read needs."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to make the harmonize convergence gate halt only on changes the campaign made; campaign.py:656-671 appends to name_drift only when a member's post-drain name_stage moved off the inherited read and did not land on accepted, and harmonize.py:1313 excludes non-accepted members from the batch at planning, so the two reviewed locus names cannot be reported as campaign-caused.\nVERDICT done_when: the measure asks for both causes in the fragment, drift as a change between the two reads, non-accepted members skipped at planning, the acceptance count fixed, three tests failing on main and zero added failure ids; the manifest records base 4 failed/230 passed and head 1 failed/233 passed with EXIT=1 on both, and the fragment records both causes with the two ReviewHold ids and the judged clause, but the acceptance-count clause is unmet by the coordinator's ruling at resume-1-advice.txt:1-2 and the measure was never amended to say so.\nVERDICT write_paths: the grant is campaign.py, harmonize.py, test_campaign.py, test_campaign_convergence_gate.py and the fragment; `git diff --stat 43ae5712c..0a8311e981` lists exactly those five and nothing else.\nVERDICT manifest: read; it records complete, five commits, both arm commands with logs and EXIT=1, the 4-to-1 counts, added ids none, the prose-hold failure attributed and re-run at base in isolation, and the pre-drain ordering claim; its tests line is prose rather than the literal command and its baseline_suite/after_suite are prose rather than the required JSON.\nVERDICT diff: read commit by commit; 0754e8725 adds the inherited-versus-post-drain comparison, the planning skip and a score-based acceptance rule, 50e14d581 makes an unanswerable stage eligible and threads the pre-drain read through the runner and its harness, 5d319309d removes the score path and pins the hold, and 6a52f5140, 369ccb212 and 0a8311e98 touch only the fragment, so no production code lands after the gated revision 5d319309d.\nCALL_SITES: imas_codex/cli/sn.py:6184, imas_codex/cli/sn.py:6264, imas_codex/standard_names/harmonize.py:1501, imas_codex/standard_names/harmonize.py:1586, imas_codex/standard_names/harmonize.py:1795, imas_codex/standard_names/campaign.py:1045\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: campaign.py:656-668 compares against prior_stage and harmonize.py:1331 builds batches from eligible_ids only, so neither false halt recurs, though the skipped list is surfaced nowhere.\nSCORE evidence: 15\nJUSTIFICATION evidence: both logs open with revision, command and module.__file__ and close EXIT=1 at 4 failed/230 passed and 1 failed/233 passed, but the acceptance-count clause of the measure is unmet and unrecorded.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every path in `git diff --stat 43ae5712c..0a8311e981` is inside the declared grant.\nSCORE durability: 11\nJUSTIFICATION durability: test_campaign_convergence_gate.py:128 reports drift under both the repaired and the unrepaired gate, so the drift repair has no behavioural guard; only :150 pins a rule the old code violates, and plan_family_applies' skip output is untested.\nSCORE fit: 16\nJUSTIFICATION fit: _name_stages (harmonize.py:1235) and _split_name_accepted (:1248) are mechanism-named, label-free and pass ruff check and ruff format --check at head.\nSCORE reuse: 5\nJUSTIFICATION reuse: _name_stages (harmonize.py:1235) duplicates the by-ids stage read owned by campaign.py:741 _REFRESH_QUERY / default_fetch_refreshed and reachable as a one-line extension of families.py:1041 _family_member_collect, so the duplication rule applies even though the eligibility split itself has no owner.\nFINDING tests/standard_names/test_campaign_convergence_gate.py:128 non-blocking: the moved-out-of-accepted fixture reports drift under both the repaired and the unrepaired check, so deleting the prior_rows comparison leaves all three tests green and the drift repair is unpinned.\nFINDING imas_codex/standard_names/harmonize.py:1340 non-blocking: plan['skipped'] and docs_eligible are written and never read, so the apply and the family outcome never name the excluded members or their stage.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-convergence-gate-false-halts.html:167 non-blocking: the test table says the first test yields '2 touched, 2 accepted', which is the withdrawn score-based count; the landed test asserts no accepted count and the landed rule yields 1.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-convergence-gate-false-halts.html:84 non-blocking: it claims the family's outcome names the skipped members, but no consumer of the key exists.\nFINDING manifest.md:23 non-blocking: baseline_suite and after_suite are prose rather than the required JSON, so both arms read as unreadable by shape and the delta had to be re-derived from the logs.\nFINDING manifest.md:17 non-blocking: the tests field describes the gate instead of carrying the literal command the shell ran.\n",
+  "review_run_id": "r-20261027T174511253931-review-of-shc-convergence-gate-false-halts-0a8311e98136",
+  "reviewed_base_sha": "43ae5712c9e7c1fc0b20866834743ddad55664c4",
+  "reviewed_commits": [
+    "0754e8725",
+    "50e14d581",
+    "5d319309d",
+    "6a52f5140",
+    "369ccb212",
+    "0a8311e98"
+  ],
+  "reviewed_head_sha": "0a8311e981366e486102d838898c0d6f850f535f",
+  "reviewed_run_id": "r-20261027T163841250238-shc-convergence-gate-false-halts",
+  "scores": {
+    "durability": 11,
+    "evidence": 15,
+    "fit": 16,
+    "goal_fidelity": 17,
+    "reuse": 5,
+    "scope_discipline": 18
+  },
+  "self_comparison_assertion_note": "No added assertion compares a value against the same variable the test passed in: test_campaign_convergence_gate.py:105-112 asserts the split against literal id lists, :141 against a literal drift list, and :165 against the literal halt string 'docs acceptance 50.00% < 90.00% (1/2 touched)'. The durability weakness recorded at :128 is the weaker failure mode of an assertion that is independent but does not discriminate the regression, not a tautology check.",
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T18:01:54.535701+00:00",
+  "total": 82
+}
