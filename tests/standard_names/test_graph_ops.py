@@ -14,6 +14,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from tests.standard_names.test_facade_closure import _delegating_functions
+
 
 def test_graph_composition_root_has_no_transitional_forwarders() -> None:
     """Moved graph calls resolve at their owner rather than through the root.
@@ -27,38 +29,7 @@ def test_graph_composition_root_has_no_transitional_forwarders() -> None:
     from imas_codex.standard_names.graph_store import _OWNER_BY_NAME
 
     tree = ast.parse(Path(graph_ops.__file__).read_text())
-    delegating = [
-        node.name
-        for node in ast.walk(tree)
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
-        and _delegated_name(node) in _OWNER_BY_NAME
-    ]
-    assert delegating == []
-
-
-def _delegated_name(node: ast.FunctionDef | ast.AsyncFunctionDef) -> str | None:
-    """Return the symbol a function body only returns a call to, if any."""
-    body = [
-        statement
-        for statement in node.body
-        if not (
-            isinstance(statement, ast.Expr)
-            and isinstance(statement.value, ast.Constant)
-            and isinstance(statement.value.value, str)
-        )
-    ]
-    if len(body) != 1 or not isinstance(body[0], ast.Return):
-        return None
-    value = body[0].value
-    if isinstance(value, ast.Call):
-        callee = value.func
-        if isinstance(callee, ast.Name):
-            return callee.id
-        if isinstance(callee, ast.Attribute):
-            return callee.attr
-    if isinstance(value, ast.Name):
-        return value.id
-    return None
+    assert _delegating_functions(tree, set(_OWNER_BY_NAME)) == []
 
 
 #: The shared sample names carry IDS names (``core_profiles``, ``magnetics``)

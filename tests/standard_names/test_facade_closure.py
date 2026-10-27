@@ -29,13 +29,22 @@ _NOT_MOVED = frozenset({"logger"})
 _NOT_MOVED_MODULES = frozenset({"graph_foundation"})
 
 
-def _owner_modules() -> dict[str, object]:
+def _store_modules() -> dict[str, object]:
+    """Import every module the store package holds, mapped or not.
+
+    The set comes from the package directory rather than from the owner map:
+    a module the map omits is exactly the one whose public symbols would go
+    unmapped unnoticed, so taking the set from the map would hide the defect
+    this check exists to find.
+    """
     from imas_codex.standard_names import graph_store
 
-    return {
-        name: importlib.import_module(f".{name}", graph_store.__name__)
-        for name in graph_store._OWNERS_BY_MODULE
-    }
+    modules: dict[str, object] = {}
+    for path in sorted(Path(graph_store.__file__).parent.glob("*.py")):
+        if path.stem == "__init__":
+            continue
+        modules[path.stem] = importlib.import_module(f".{path.stem}", _STORE_PACKAGE)
+    return modules
 
 
 def _moved_callables() -> dict[str, str]:
@@ -148,19 +157,48 @@ def _worker_task_names() -> set[str]:
     return names
 
 
+def _owner_package_module(module: str | None) -> str | None:
+    """Return the owner-package-relative module path an import names."""
+    if not module:
+        return None
+    parts = module.split(".")
+    for package in ("graph_store", "worker_tasks"):
+        if package in parts:
+            index = parts.index(package)
+            return ".".join(parts[index:])
+    return None
+
+
 def _import_aliases(tree: ast.Module) -> dict[str, str]:
-    """Map a local import alias to the symbol it brings in."""
+    """Map a local import alias to the symbol it brings in.
+
+    An import may be relative (``from .graph_store.graph_catalog import x``) or
+    absolute (``from imas_codex.standard_names.graph_store.graph_catalog``
+    ``import x``). The absolute spelling is the common one in this repository,
+    so a scan that understood only the relative form would accept a forwarder.
+    """
     aliases: dict[str, str] = {}
     for node in ast.walk(tree):
         if not isinstance(node, ast.ImportFrom):
             continue
-        module = (node.module or "").lstrip(".")
-        if not module.startswith(("graph_store", "worker_tasks")):
+        if _owner_package_module(node.module) is None:
             continue
         for imported in node.names:
-            alias = imported.asname or imported.name
-            aliases[alias] = imported.name
+            aliases[imported.asname or imported.name] = imported.name
     return aliases
+
+
+def _delegating_functions(module: ast.Module, targets: set[str]) -> list[str]:
+    """Names of functions whose whole body delegates to a target symbol."""
+    aliases = _import_aliases(module)
+    forwarders: list[str] = []
+    for node in ast.walk(module):
+        if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        delegated = _delegated_name(node)
+        if delegated in targets or aliases.get(delegated) in targets:
+            forwarders.append(node.name)
+    return forwarders
 
 
 def _delegated_name(node: ast.FunctionDef | ast.AsyncFunctionDef) -> str | None:
@@ -208,11 +246,17 @@ def test_owner_map_entries_resolve_at_their_owner() -> None:
 
 
 def test_owner_map_covers_every_public_definition() -> None:
-    """A newly defined public symbol must enter the map or be wired directly."""
+    """A store module, and every public symbol in it, must enter the map."""
     from imas_codex.standard_names.graph_store import _OWNERS_BY_MODULE
 
+    modules = _store_modules()
+    assert modules, "the store package enumerated no modules"
+
+    unmapped = sorted(set(modules) - set(_OWNERS_BY_MODULE) - _NOT_MOVED_MODULES)
+    assert unmapped == [], f"store modules absent from the owner map: {unmapped}"
+
     missing: list[str] = []
-    for module_name, module in _owner_modules().items():
+    for module_name, module in modules.items():
         if module_name in _NOT_MOVED_MODULES:
             continue
         roster = set(_OWNERS_BY_MODULE[module_name])
@@ -273,18 +317,42 @@ def test_facades_define_no_delegating_forwarder() -> None:
     """A one-line delegation is a forwarder however it is described."""
     from imas_codex.standard_names import graph_ops, workers
 
-    delegating_targets = set(_moved_callables()) | _worker_task_names()
+    targets = set(_moved_callables()) | _worker_task_names()
+    assert targets, "the owner map named no delegable symbol; the check is blind"
+
     forwarders: list[str] = []
     for facade in (graph_ops, workers):
         module = ast.parse(Path(facade.__file__).read_text())
-        aliases = _import_aliases(module)
-        tree = ast.walk(module)
-        for node in tree:
-            if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                continue
-            delegated = _delegated_name(node)
-            if delegated in delegating_targets or (
-                aliases.get(delegated) in delegating_targets
-            ):
-                forwarders.append(f"{facade.__name__}.{node.name}")
+        forwarders.extend(
+            f"{facade.__name__}.{name}"
+            for name in _delegating_functions(module, targets)
+        )
     assert forwarders == []
+
+
+def test_forwarder_scan_catches_absolute_import_delegation() -> None:
+    """A delegation spelled with an absolute import is still a forwarder.
+
+    The scan is exercised on planted source so the detector itself is checked:
+    the absolute spelling is the common one in this repository, and a scan
+    that only understood relative imports would accept it silently.
+    """
+    targets = {"write_standard_names"}
+
+    absolute = ast.parse(
+        "from imas_codex.standard_names.graph_store.graph_catalog import (\n"
+        "    write_standard_names as _impl,\n"
+        ")\n"
+        "\n"
+        "def persist_names(names):\n"
+        "    return _impl(names)\n"
+    )
+    assert _delegating_functions(absolute, targets) == ["persist_names"]
+
+    relative = ast.parse(
+        "from .graph_store.graph_catalog import write_standard_names\n"
+        "\n"
+        "def persist_names(names):\n"
+        "    return write_standard_names(names)\n"
+    )
+    assert _delegating_functions(relative, targets) == ["persist_names"]
