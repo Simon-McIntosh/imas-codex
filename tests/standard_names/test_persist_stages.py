@@ -45,6 +45,34 @@ _ROTATION_CAP: int = 3
 # =============================================================================
 
 
+def _answer_domain_state(gc: MagicMock) -> MagicMock:
+    """Let a mock client answer the domain writer's state read.
+
+    ``persist_refined_name`` hands the successor to ``write_name_domain``,
+    which reads the name's stored physics domain, its own domains and its
+    children before writing. A mock that answers every query with nothing
+    cannot answer that read, so it returns an unsourced, childless successor
+    for it and defers every other query to the client's own behaviour.
+    """
+    inner = gc.query
+
+    def _query(cypher, **params):
+        if "AS child_stored_domains" in cypher:
+            return [
+                {
+                    "physics_domain": None,
+                    "own_domains": [],
+                    "child_ids": [],
+                    "child_dd_domains": [],
+                    "child_stored_domains": [],
+                }
+            ]
+        return inner(cypher, **params)
+
+    gc.query = MagicMock(side_effect=_query)
+    return gc
+
+
 def _mock_gc_query(
     return_values: list[list[dict[str, Any]]] | None = None,
 ) -> MagicMock:
@@ -61,7 +89,7 @@ def _mock_gc_query(
         gc.query = MagicMock(side_effect=return_values)
     else:
         gc.query = MagicMock(return_value=[])
-    return gc
+    return _answer_domain_state(gc)
 
 
 def _mock_gc_tx(
@@ -91,7 +119,7 @@ def _mock_gc_tx(
         yield session
 
     gc.session = _session_ctx
-    return gc, tx
+    return _answer_domain_state(gc), tx
 
 
 @contextmanager

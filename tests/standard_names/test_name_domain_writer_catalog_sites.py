@@ -138,6 +138,92 @@ def test_write_standard_names_leaves_the_domain_to_the_one_writer(
     assert set(settled["edge_domains"]) == set(settled["source_domains"])
 
 
+class _ProxyClient:
+    """A graph client that is not a :class:`GraphClient`.
+
+    A proxy, subclass or wrapper a caller hands in must reach the domain
+    writer exactly as the concrete class does: a client accepted by the call
+    path that silently skips the write drops a name's domain.
+    """
+
+    def __init__(self, inner: Any) -> None:
+        self._inner = inner
+
+    def __enter__(self) -> _ProxyClient:
+        return self
+
+    def __exit__(self, *exc: object) -> bool:
+        return False
+
+    def query(self, cypher: str, **params: Any) -> Any:
+        return self._inner.query(cypher, **params)
+
+    def session(self) -> Any:
+        return self._inner.session()
+
+
+class _ServicesBehindAProxy:
+    """The bound services with a client that is not a GraphClient."""
+
+    def __init__(self, services: Any, client: Any) -> None:
+        self._services = services
+        self._client = client
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._services, name)
+
+    def GraphClient(self) -> Any:
+        return self._client
+
+
+def test_persist_refined_name_writes_the_domain_for_a_client_that_is_not_a_graph_client(
+    disposable_neo4j_empty: str,
+) -> None:
+    """A proxy client gets the domain written, not a skipped write."""
+    from imas_codex.graph.client import GraphClient
+    from imas_codex.standard_names import graph_store  # noqa: F401 (binds services)
+    from imas_codex.standard_names.graph_store.graph_foundation import (
+        services_for_call,
+    )
+    from imas_codex.standard_names.graph_store.graph_refinement import (
+        persist_refined_name,
+    )
+
+    old = _uid("old_proxy")
+    new = _uid("new_proxy")
+    with GraphClient() as real:
+        _plant_name_with_dd_source(real, old, "dd:proxy/path", dd_domain="equilibrium")
+        real.query(
+            """
+            MATCH (sn:StandardName {id: $id})
+            SET sn.name_stage = 'refining',
+                sn.physics_domain = 'transport',
+                sn.domain_decision_candidates = ['equilibrium', 'transport'],
+                sn.domain_decision_choice = 'equilibrium',
+                sn.domain_decision_probability = 0.9,
+                sn.domain_decision_model = 'test/model',
+                sn.domain_decision_at = '2026-01-01T00:00:00+00:00'
+            """,
+            id=old,
+        )
+        services = _ServicesBehindAProxy(services_for_call(), _ProxyClient(real))
+        assert not isinstance(services.GraphClient(), GraphClient)
+
+        persist_refined_name(
+            old_name=old,
+            new_name=new,
+            description="Test quantity",
+            services=services,
+        )
+        settled = _domain_state(real, new)
+
+    assert settled["physics_domain"] == "equilibrium", (
+        "the domain write was skipped for a client that is not a GraphClient"
+    )
+    assert set(settled["source_domains"]) == {"equilibrium"}
+    assert set(settled["edge_domains"]) == set(settled["source_domains"])
+
+
 def test_persist_refined_name_carries_the_stored_decision_through_the_writer(
     disposable_neo4j_empty: str,
 ) -> None:
