@@ -1,0 +1,47 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-27T22:39:14.630Z",
+  "dispatched_at": "2026-10-27T22:31:07Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_lineage.py",
+      "id": "f457a568344",
+      "line": 27,
+      "severity": "non-blocking",
+      "text": "the `_stored_domain_decisions` docstring still says a name with no stored choice maps to None and the return annotation is `DomainDecision | None`, but the function now always returns an undecided decision, so the documented contract contradicts the code every caller reads."
+    },
+    {
+      "file": "imas_codex/standard_names/domain_decision.py",
+      "id": "f0e4d2c7e04",
+      "line": 458,
+      "severity": "non-blocking",
+      "text": "the negative half of the new branch, where several source domains must stay unset and undecided, has no test, so widening `len(source_domains) == 1` to `>= 1` would pick one of several domains and every added test would still pass."
+    },
+    {
+      "file": "tests/standard_names/test_name_domain_followups.py",
+      "id": "fe1a5800c3f",
+      "line": 29,
+      "severity": "non-blocking",
+      "text": "`_domain_state` and `_plant_name_with_dd_source` are identical to the copies at tests/standard_names/test_name_domain_writer_catalog_sites.py:66 and :32, duplicating an owner instead of extending it; folded to the tests node that owns the test-double consolidation."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's in-scope goal is to fix review items 1, 2, 3, 4 and 7 at their cause; the diff changes imas_codex/standard_names/domain_decision.py:458, graph_lineage.py:53, graph_refinement.py:693 and worker_refine_names.py:733 and corrects docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-route-catalog-sites.html:67.\nVERDICT done_when: the done_when gate is tests/standard_names/ on default markers with -n 8 from separate base and head archive trees plus a -m graph arm; the manifest records those runs and their logs in gate/.\nVERDICT write_paths: the node declared twelve write paths in its manifest; every path in the diff (eight files) is inside that list, and no file the node did not declare was touched.\nVERDICT manifest: read; it states the base arm at 62aa4003e gave 93 failed / 8408 passed and the head arm at 77b839073 gave 71 failed / 8433 passed with zero added failure ids, and names suite_base.log, suite_head.log, graph_head.log and negative_control.log.\nVERDICT diff: read commit by commit against 62aa4003e; 77b839073 carries the production fixes and the new test file, and 4841d2b47 adds only the evidence fragment.\nCALL_SITES: imas_codex/standard_names/graph_store/graph_catalog.py:_write_standard_name_edges, imas_codex/standard_names/graph_store/graph_lineage.py:_write_standard_name_edges, imas_codex/standard_names/graph_store/graph_lineage.py:_materialize_derived_parent_rows, imas_codex/standard_names/graph_store/graph_lineage.py:_materialize_derived_parent_rows_batched, imas_codex/standard_names/graph_store/graph_foundation.py:write_standard_names_from_manifest, imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py:_write_composed_name_domains, imas_codex/standard_names/graph_store/graph_refinement.py:persist_refined_name\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/domain_decision.py:458 fills an undecided null scalar from a single agreeing source domain, so write_standard_names leaves the scalar, source set and edges in agreement without the follow-up.\nSCORE evidence: 17\nJUSTIFICATION evidence: gate/suite_base.log:11 and gate/suite_head.log:11 carry the completion lines at their named revisions, and gate/negative_control.log shows all four new tests failing at main for the intended reasons on a real disposable graph.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff is inside the twelve write paths the reviewed manifest declares, including the catalog-sites fragment correction at docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-route-catalog-sites.html:67.\nSCORE durability: 15\nJUSTIFICATION durability: tests/standard_names/test_name_domain_followups.py:112 and :150 redden at main, but the several-source-domains half of the new branch at domain_decision.py:458 has no test.\nSCORE fit: 16\nJUSTIFICATION fit: the change follows the surrounding idiom, but graph_lineage.py:27 still documents a name with no stored choice as mapping to None after the code stopped doing that.\nSCORE reuse: 5\nJUSTIFICATION reuse: the production change reuses the existing undecided constructor, but tests/standard_names/test_name_domain_followups.py:29 duplicates the helper already owned at tests/standard_names/test_name_domain_writer_catalog_sites.py:66 rather than extending it.\nFINDING imas_codex/standard_names/graph_store/graph_lineage.py:27 non-blocking: the `_stored_domain_decisions` docstring still says a name with no stored choice maps to None and the return annotation is `DomainDecision | None`, but the function now always returns an undecided decision, so the documented contract contradicts the code every caller reads.\nFINDING imas_codex/standard_names/domain_decision.py:458 non-blocking: the negative half of the new branch, where several source domains must stay unset and undecided, has no test, so widening `len(source_domains) == 1` to `>= 1` would pick one of several domains and every added test would still pass.\nFINDING tests/standard_names/test_name_domain_followups.py:29 non-blocking: `_domain_state` and `_plant_name_with_dd_source` are identical to the copies at tests/standard_names/test_name_domain_writer_catalog_sites.py:66 and :32, duplicating an owner instead of extending it; folded to the tests node that owns the test-double consolidation.\n",
+  "review_run_id": "r-20261027T223005310804-review-of-scg-name-domain-followups-product-4841d2b47cae",
+  "reviewed_base_sha": "62aa4003e7455dc7fb295f198039f695894a17dd",
+  "reviewed_head_sha": "4841d2b47cae53cd2ce5c414889a8f03f28cac2e",
+  "reviewed_run_id": "r-20261027T220250269472-scg-name-domain-followups-product",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T22:40:04.416944+00:00",
+  "total": 91
+}
