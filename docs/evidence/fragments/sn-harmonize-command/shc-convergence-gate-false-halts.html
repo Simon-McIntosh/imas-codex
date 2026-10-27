@@ -78,8 +78,9 @@ name-axis drift on 2 name(s) in a docs-only campaign: electrostatic_potential_at
   </p>
   <p>
     Planning also stops offering such members to a docs-only batch.
-    <code>plan_family_applies</code> now reads the members' name stages and
-    splits them: only <code>accepted</code> members enter the batch list, and
+    <code>plan_family_applies</code> now reads the members' name stages,
+    through the campaign's own member read rather than a second query that
+    could drift from it, and splits them: only <code>accepted</code> members enter the batch list, and
     the rest are carried in the plan under <code>skipped</code> with their
     stage. Nothing the campaign measures can name a skipped member, because it
     never enters a batch, so the plan is the only place the name survives — and
@@ -89,7 +90,9 @@ name-axis drift on 2 name(s) in a docs-only campaign: electrostatic_potential_at
     summary under <code>skipped</code>. A stage the read cannot answer for is
     treated as eligible — an absent answer is not evidence that the member is
     excluded, and dropping it silently would be the same defect in the other
-    direction.
+    direction. Such a member then enters a batch with no inherited row, so a
+    non-accepted stage after the drain counts as drift rather than as an
+    inherited state nobody read.
   </p>
 
   <h3 id="shc-convergence-gate-cause-count">The second halt was true: the cascade refused the document</h3>
