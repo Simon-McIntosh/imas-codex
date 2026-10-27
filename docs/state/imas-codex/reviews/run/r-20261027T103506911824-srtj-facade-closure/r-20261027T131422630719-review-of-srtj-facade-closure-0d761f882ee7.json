@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "completed_at": "2026-10-27T13:59:37.714Z",
   "dispatched_at": "2026-10-27T13:49:32Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the gained commits change no importable module, as the reviewer confirmed",
+      "recorded_at": "2026-10-27T14:04:03.822943+00:00"
+    }
+  },
   "findings": [
     {
       "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T103506911824-srtj-facade-closure/logs/fresh-imports.log",
