@@ -1225,23 +1225,20 @@ def reconcile_family_reverse_links(
     }
 
 
-_NAME_STAGE_QUERY = """
-UNWIND $ids AS sid
-MATCH (sn:StandardName {id: sid})
-RETURN sn.id AS id, coalesce(sn.name_stage, '') AS name_stage
-"""
-
-
 def _name_stages(gc: Any, ids: Sequence[str]) -> dict[str, str]:
     """Return the stored name stage of each live name in *ids*.
 
     A family's member rows carry the documentation columns but not the name
     stage, and the stage decides whether the documentation pools can claim a
-    member at all, so the planner reads it once for the whole roster.
+    member at all, so the planner reads it once for the whole roster. The read
+    is the campaign's own member read, so the stage a plan splits on is the
+    same column the gate later measures.
     """
+    from imas_codex.standard_names.campaign import default_fetch_refreshed
+
     if not ids:
         return {}
-    rows = gc.query(_NAME_STAGE_QUERY, ids=list(ids)) or []
+    rows = default_fetch_refreshed(gc, ids)
     return {str(row.get("id")): str(row.get("name_stage") or "") for row in rows}
 
 

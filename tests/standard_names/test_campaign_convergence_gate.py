@@ -192,46 +192,118 @@ def test_unchanged_non_accepted_stage_is_not_drift():
     assert outcome.accepted == 0
 
 
-def test_apply_reports_each_skipped_member_with_its_stage(caplog):
-    """The apply names each skipped member and its stage in the outcome."""
-    plan = [
-        {
-            "physical_base": "electrostatic_potential",
-            "invariant": ["electrostatic_potential", "", "", "", ""],
-            "anchor": None,
-            "members": [
-                "electrostatic_potential",
-                "electrostatic_potential_at_wall",
-            ],
-            "docs_eligible": ["electrostatic_potential"],
-            "skipped": [
-                {"id": "electrostatic_potential_at_wall", "name_stage": "reviewed"}
-            ],
-            "n": 2,
-            "group_signature": "sig",
-            "harmonized": False,
-            "decision": "deferred",
-            "batches": [],
-            "planned_calls": 0,
-            "member_scores": {},
-        }
+def test_member_with_no_pre_drain_row_is_drift():
+    """A member the campaign never read before the drain is its own drift.
+
+    The gate excuses a non-accepted stage only when the pre-drain read shows
+    the batch inherited it. With no pre-drain row there is no inherited state
+    to excuse, so the stage the drain left is the batch's own.
+    """
+    after = [_row("unread_before", name_stage="reviewed", docs_stage="pending")]
+
+    outcome = measure_batch(
+        after,
+        ["unread_before"],
+        batch_index=1,
+        prior_rows=[],
+    )
+    assert outcome.name_drift == ["unread_before"]
+    assert outcome.touched == 0
+
+
+class _FamilyGraph:
+    """A client stub that answers the campaign's member read from fixtures."""
+
+    def __init__(self, rows: list[dict]) -> None:
+        self.rows = rows
+
+    def query(self, cypher: str, **params: object) -> list[dict]:
+        ids = set(params.get("ids") or [])
+        return [dict(row) for row in self.rows if row["id"] in ids]
+
+
+def _family_member(sid: str, *, name_stage: str, docs_stage: str) -> dict:
+    return {
+        "id": sid,
+        "physical_base": "electrostatic_potential",
+        "physics_domain": "equilibrium",
+        "description": f"{sid} description",
+        "documentation": f"{sid} documentation",
+        "docs_stage": docs_stage,
+        "reviewer_score_docs": 0.9,
+        "name_stage": name_stage,
+        "harmonized_group_signature": None,
+        "harmonized_anchor": None,
+        "links": [],
+        "has_dd_source": True,
+    }
+
+
+def test_planner_skip_reaches_the_apply_summary(monkeypatch, caplog):
+    """A non-accepted member the planner skips is named by the apply.
+
+    The skip is produced by the planner reading the name stage from the graph,
+    not by a hand-written plan, and the apply's log line and returned summary
+    both name the member with the stage it carried.
+    """
+    from types import SimpleNamespace
+
+    from imas_codex.standard_names import harmonize
+    from imas_codex.standard_names.families import PATTERN_INVARIANT_SEGMENTS
+
+    anchor = "electrostatic_potential"
+    member = "electrostatic_potential_at_wall"
+    rows = [
+        _family_member(anchor, name_stage="accepted", docs_stage="accepted"),
+        _family_member(member, name_stage="reviewed", docs_stage="pending"),
     ]
+    graph = _FamilyGraph(rows)
+    monkeypatch.setattr(
+        harmonize,
+        "fetch_pattern_families",
+        lambda gc, **_kw: [
+            {
+                "physical_base": "electrostatic_potential",
+                "invariant": ["" for _ in PATTERN_INVARIANT_SEGMENTS],
+                "n": 2,
+                "members": rows,
+            }
+        ],
+    )
+
+    plans = harmonize.plan_family_applies(graph, min_size=1)
+
+    assert plans[0]["decision"] == "apply"
+    assert plans[0]["docs_eligible"] == [anchor]
+    assert plans[0]["skipped"] == [{"id": member, "name_stage": "reviewed"}]
+
+    class _HaltedRunner:
+        def run(self, **_kwargs: object):
+            return SimpleNamespace(halted=True)
+
+    monkeypatch.setattr(harmonize, "_record_family_anchor", lambda *a, **k: None)
+    monkeypatch.setattr(harmonize, "_family_docs_scores", lambda gc, ids: {})
+    monkeypatch.setattr(
+        harmonize, "refuse_recommended_members", lambda gc, targets, **k: {}
+    )
 
     logger_name = "imas_codex.standard_names.harmonize"
     with caplog.at_level(logging.INFO, logger=logger_name):
-        summary = apply_families(object(), plan=plan, drain_fn=None)
+        summary = harmonize.apply_families(
+            graph,
+            plan=plans,
+            drain_fn=lambda *a, **k: None,
+            runner_factory=lambda spec: _HaltedRunner(),
+        )
 
     assert summary["skipped"] == [
         {
             "physical_base": "electrostatic_potential",
-            "id": "electrostatic_potential_at_wall",
+            "id": member,
             "name_stage": "reviewed",
         }
     ]
     assert summary["applied"][0]["skipped"] == [
-        {"id": "electrostatic_potential_at_wall", "name_stage": "reviewed"}
+        {"id": member, "name_stage": "reviewed"}
     ]
-    assert (
-        "member electrostatic_potential_at_wall skipped (name_stage=reviewed)"
-        in caplog.text
-    )
+    assert f"member {member} skipped (name_stage=reviewed)" in caplog.text

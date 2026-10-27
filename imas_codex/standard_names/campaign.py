@@ -620,9 +620,11 @@ def measure_batch(
 
     A batch id that is absent after the drain, or whose name stage *moved*
     between the two reads and did not land on ``accepted``, counts as
-    name-axis drift.  A member that was already outside ``accepted`` before the
-    drain and is still there is skipped rather than reported: a docs-only
-    campaign never writes the name axis, so an unchanged stage is not its doing.
+    name-axis drift, and so does a non-accepted stage for a member with no
+    pre-drain row: the campaign cannot have inherited a state it never read.
+    A member whose pre-drain row shows it was already outside ``accepted`` and
+    is still there is skipped rather than reported: a docs-only campaign never
+    writes the name axis, so an unchanged stage is not its doing.
 
     A member's documentation counts as accepted only when the drain left it at
     ``accepted``.  A document held at ``reviewed`` is not accepted whatever its
@@ -654,7 +656,13 @@ def measure_batch(
             continue
         stage = row.get("name_stage") or ""
         prior = prior_by_id.get(sid)
-        if prior is not None:
+        if prior is None:
+            # No pre-drain row was read for this member, so the campaign
+            # inherited no state to blame: a non-accepted stage is its own.
+            if stage != "accepted":
+                drift.append(sid)
+                continue
+        else:
             # Only a stage the batch itself moved can be its drift: an
             # inherited non-accepted stage is skipped, and moving into
             # accepted is the batch succeeding on the name axis.
