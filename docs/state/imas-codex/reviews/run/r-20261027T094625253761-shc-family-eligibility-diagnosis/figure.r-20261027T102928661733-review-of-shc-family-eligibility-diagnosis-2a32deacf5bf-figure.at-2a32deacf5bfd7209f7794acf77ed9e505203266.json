@@ -1,0 +1,48 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-27T10:40:12.254Z",
+  "dispatched_at": "2026-10-27T10:32:22Z",
+  "figures_reviewed": [
+    {
+      "alt_text_present": true,
+      "caption": "docs/evidence/fragments/sn-harmonize-command/shc-family-eligibility-diagnosis.html",
+      "rendered_png": "image-0.png",
+      "rendered_size_px": [
+        1400,
+        720
+      ],
+      "repo_path": "docs/figures/sn-harmonize-command/shc-family-eligibility-diagnosis/eligibility-chain.svg"
+    }
+  ],
+  "findings": [
+    {
+      "file": "docs/figures/sn-harmonize-command/shc-family-eligibility-diagnosis/eligibility-chain.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The whole right-hand column \u2014 the heading 'batch 2 \u2014 the other four members', the subhead 'reached only once batch 1 converges', the four member lines with their docs/name-stage statuses, and the closing note 'the last two need name-axis work first' \u2014 is drawn in #929292 on white at a measured 3.11:1 contrast, below the 4.5:1 that text at this size (~15 px) needs. It reads on a white screen but fades on a projector or a dim display, and this box is the only place in the figure that names the four batch-2 members and their stages, so the faintest text carries information the left column does not repeat. A darker grey (around #6b6b6b, 5.7:1) would keep the de-emphasis without costing legibility."
+    }
+  ],
+  "project": "imas-codex",
+  "read_only": true,
+  "review_run_id": "r-20261027T102928661733-review-of-shc-family-eligibility-diagnosis-2a32deacf5bf-figure",
+  "reviewed_base_sha": "6c0c4cfe2b0aa823c028629890b0b3ec830975ff",
+  "reviewed_head_sha": "2a32deacf5bfd7209f7794acf77ed9e505203266",
+  "reviewed_run_brief": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T094625253761-shc-family-eligibility-diagnosis/brief.md",
+  "reviewed_run_id": "r-20261027T094625253761-shc-family-eligibility-diagnosis",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "contrast": "fail \u2014 the right-hand column is #929292 on white (3.11:1 measured on the rendered PNG), under the 4.5:1 normal-size text needs. Body text elsewhere measures well above it: the left column's title at #1a1a1a (18.9:1), its subtext at #4a4a4a (8.8:1), and the red-box subtext at #7a1c16 on #fdeceb (8.9:1).",
+    "data_ink": "pass \u2014 every mark carries information. There is no chart area to weigh against furniture: the boxes are the data, the arrows are the ordering, and the two red-outlined steps are the failure path the figure exists to show. The pale red fill on those three boxes is a semantic highlight of the halt, not decoration.",
+    "decoration": "pass \u2014 no gradient, no shadow, no background wash, no themed background; the only fill is the uniform pale red on the three halted steps and the only border styles are a solid grey rectangle, a solid red rectangle and a dashed grey rectangle, each marking a different class. Rendered raster has 170 distinct colours, essentially all from text antialiasing.",
+    "label_collision": "pass \u2014 no label is clipped or overlapping. Ink spans x=59 to x=1340 within a 1400 px canvas, so nothing runs off either edge; every text line sits inside its own box with clearance; the two subtext lines inside each red box stay within their outline; and no label touches an arrow or another label's box.",
+    "legibility": "pass \u2014 the column layout and the top-to-bottom arrow chain read at a glance: five steps on the left each naming one call site with its file:line, the two failure steps outlined in red, and the unreached batch-2 members fenced into a dashed box on the right. The right column's grey is faint but still legible; recorded as a contrast finding, not a legibility failure.",
+    "table_form": "pass \u2014 the figure is a chain of calls with two branches, not a grid of values; the four batch-2 members are listed as a two-field enumeration inside a diagram box, and the run's fuller per-member read is already published as a table in the fragment beside the figure."
+  },
+  "schema": "reckon.review-record/1",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T10:42:11.863190+00:00",
+  "total": null,
+  "verdict": "One figure, judged from its rendered PNG at 1400x720. The drawing does the job it is captioned for: the left column carries the anchor batch from family enumeration through the pin, the reset early return, the unscoped claim and the convergence halt, and the right column names the four members the halt strands. One non-blocking defect: the right column's grey text is the figure's faintest element at 3.11:1, and it is the only place those four members and their stages appear."
+}

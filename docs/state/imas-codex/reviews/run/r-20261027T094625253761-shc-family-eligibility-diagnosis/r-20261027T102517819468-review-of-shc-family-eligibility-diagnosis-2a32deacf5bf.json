@@ -1,0 +1,80 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run records baseline_suite and after_suite as not run because the node changes no product source or test, so there is no gate-log pair to derive added failures from. The derived figure is zero added failures over zero compared runs, not a measured green.",
+  "call_sites": [
+    "imas_codex/standard_names/harmonize.py:1266",
+    "imas_codex/standard_names/harmonize.py:703",
+    "imas_codex/standard_names/campaign.py:1026",
+    "imas_codex/standard_names/graph_store/graph_docs_persistence.py:410",
+    "imas_codex/standard_names/graph_store/graph_docs_persistence.py:418",
+    "imas_codex/standard_names/graph_store/graph_cost_and_claims.py:329",
+    "imas_codex/standard_names/loop.py:771"
+  ],
+  "call_sites_emission": "sites",
+  "completed_at": "",
+  "dispatched_at": "2026-10-27T10:29:14Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-family-eligibility-diagnosis.json",
+      "line": "1",
+      "severity": "non-blocking",
+      "summary": "The JSON carries no classification, fix or failing-test field, although the done_when requires the html AND its JSON to hold the classification and, for case (a), the fix with its test; the machine-readable artifact therefore answers half the brief and a reader taking the JSON alone finds per-member predicates without a verdict. Fold into the node that implements the reset fix, which must re-run this measurement anyway."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T094625253761-shc-family-eligibility-diagnosis/logs/gate.log",
+      "line": "1",
+      "severity": "non-blocking",
+      "summary": "The recorded gate log names revision 46a127882, the node's first commit, while the node landed at 2a32deacf twenty minutes later, so the deterministic-uuid change and the rewritten JSON are covered by no gate run and the promotion receipt will fill from a log that predates the head. Re-run the check at the head."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-family-eligibility-diagnosis-run.py",
+      "line": "378",
+      "severity": "non-blocking",
+      "summary": "guards records graph_writes 0, llm_calls 0 and spend_usd 0.0 as hardcoded literals rather than as measurements, so the zero cannot distinguish a run that wrote from one that did not; that the queries are read-only MATCH/RETURN is what actually establishes the guard, and it is visible in the file."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-family-eligibility-diagnosis-run.py",
+      "line": "408",
+      "severity": "non-blocking",
+      "summary": "The assertion that the anchor is excluded by the reset step's eligibility runs that query over all five members and returns two eligible, so the batch-level eligible == 0 the diagnosis turns on is measured nowhere in the gate; it rests on anchor_gated_batches, which I confirmed at campaign.py:500-514 and harmonize.py:1266 but which the gate never evaluates."
+    }
+  ],
+  "findings_note": "Findings are recorded with the severity each states; none is blocking.",
+  "item_verdicts": {
+    "call_sites": "The landed change is evidence and a figure only, so the sites examined are the production code its diagnosis describes: harmonize.py:1266, harmonize.py:703-709, campaign.py:1026, graph_docs_persistence.py:410 and 418-423, graph_cost_and_claims.py:329, loop.py:771.",
+    "diff": "Read commit by commit from 6c0c4cfe2a to 2a32deacf: four files added (291-line html, 220-line json, 475-line run.py, one SVG) and a seven-line determinism fix to the fresh-scope uuid; I rendered the SVG at 1400x720 and inspected it, and no label is clipped or overlapping.",
+    "done_when": "The done_when asks for each member's excluding predicate with file, line and query result, the classification, and for (a) the fix plus the test that would fail without it; the html holds all four and the JSON holds the per-member predicates and query results but carries no classification, fix or test.",
+    "goal": "The goal is to find the predicate that keeps the electrostatic-potential family from receiving harmonize work; the fragment names a first excluding predicate for all five members and identifies docs_claim:scope_run_id at imas_codex/standard_names/graph_store/graph_cost_and_claims.py:329 for the anchor, with the upstream early return at graph_docs_persistence.py:410 confirmed in code.",
+    "manifest": "Read; it states the gate command, its log path, the classification, the anchor's excluding predicate, and reports baseline_suite and after_suite as not run because the node changes no product source.",
+    "write_paths": "Read the four declared paths from the source prompt (html, json, run.py, figure directory); every path in both commits is inside them and nothing else was written."
+  },
+  "justifications": {
+    "durability": "The gate at shc-family-eligibility-diagnosis-run.py:392-453 reddens if the live graph moves, but nothing asserts the early return at graph_docs_persistence.py:410, so a fix landing there leaves every assertion green while the fragment still declares the defect.",
+    "evidence": "The gate at shc-family-eligibility-diagnosis-run.py:382-459 asserts 17 conditions and its log records EXIT=0, but the log header names revision 46a127882 while the node landed at 2a32deacf, and the batch-level zero the diagnosis turns on is read from code rather than measured.",
+    "fit": "The fragment follows the repository's evidence trio and figure conventions, uses a project-absolute img src, and introduces no plan label or version suffix in any name.",
+    "goal_fidelity": "docs/evidence/fragments/sn-harmonize-command/shc-family-eligibility-diagnosis.html:36-45 names each member's first excluding predicate and traces the anchor's to the anchor-gated first batchn and the early return at imas_codex/standard_names/graph_store/graph_docs_persistence.py:410, which I confirmed precedes the scope stamp at lines 418-423.",
+    "reuse": "No read-only per-predicate eligibility evaluator exists in imas_codex/standard_names \u2014 a capability search over that tree for eligibility helpers returns only write-claim owners \u2014 and the transcription at shc-family-eligibility-diagnosis-run.py:44-95 is guarded against the owning source by inspect.getsource.",
+    "scope_discipline": "Both commits touch only the four declared write paths (the html, the json, the run.py and the figure directory) and no product source, as the diff front to back shows."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to find the predicate that keeps the electrostatic-potential family from receiving harmonize work; docs/evidence/fragments/sn-harmonize-command/shc-family-eligibility-diagnosis.html:36-45 names a first excluding predicate for all five members and puts the anchor's at docs_claim:scope_run_id, imas_codex/standard_names/graph_store/graph_cost_and_claims.py:329, with the upstream early return at graph_docs_persistence.py:410.\nVERDICT done_when: the done_when asks for each member's excluding predicate with file, line and query result, the classification, and for (a) the fix plus the fix's failing test; the html holds all four and the JSON holds the per-member predicates and query results but no classification, fix or test.\nVERDICT write_paths: read the four declared paths (html, json, run.py, figure directory); every path in both commits is inside them and nothing else was written.\nVERDICT manifest: read; it records the gate command, its log path, the classification, the anchor's excluding predicate, and reports baseline_suite and after_suite as not run because the node changes no product source.\nVERDICT diff: read commit by commit from 6c0c4cfe2a to 2a32deacf; four files added and a seven-line determinism fix to the fresh-scope uuid, all inside scope, and the SVG rendered at 1400x720 shows no clipped or overlapping label.\nCALL_SITES: imas_codex/standard_names/harmonize.py:1266, imas_codex/standard_names/harmonize.py:703, imas_codex/standard_names/campaign.py:1026, imas_codex/standard_names/graph_store/graph_docs_persistence.py:410, imas_codex/standard_names/graph_store/graph_docs_persistence.py:418, imas_codex/standard_names/graph_store/graph_cost_and_claims.py:329, imas_codex/standard_names/loop.py:771\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: html:36-45 traces the anchor to graph_docs_persistence.py:410, which precedes the scope stamp at 418-423.\nSCORE evidence: 13\nJUSTIFICATION evidence: the gate at shc-family-eligibility-diagnosis-run.py:382-459 records EXIT=0, but gate.log:1 names revision 46a127882 while the head is 2a32deacf.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: both commits touch only the four declared paths and no product source.\nSCORE durability: 9\nJUSTIFICATION durability: nothing in shc-family-eligibility-diagnosis-run.py:392-453 asserts the early return at graph_docs_persistence.py:410, so a fix landing there leaves every assertion green.\nSCORE fit: 18\nJUSTIFICATION fit: the fragment follows the evidence trio and figure conventions with a project-absolute img src and no plan label in any name.\nSCORE reuse: 20\nJUSTIFICATION reuse: no read-only per-predicate eligibility evaluator exists in imas_codex/standard_names, and the transcription at shc-family-eligibility-diagnosis-run.py:44-95 is guarded by inspect.getsource against the owning module.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-family-eligibility-diagnosis.json:1 non-blocking: the JSON carries no classification, fix or failing-test field although the done_when requires the html and its JSON to hold them, so the machine-readable artifact answers half the brief.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T094625253761-shc-family-eligibility-diagnosis/logs/gate.log:1 non-blocking: the recorded gate names revision 46a127882 while the node landed at 2a32deacf, so the head has no recorded verdict.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-family-eligibility-diagnosis-run.py:378 non-blocking: guards records graph_writes, llm_calls and spend_usd as hardcoded literals rather than as measurements, so the zero cannot distinguish a run that wrote from one that did not.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-family-eligibility-diagnosis-run.py:408 non-blocking: the reset-eligibility assertion runs over all five members and returns two, so the batch-level zero the diagnosis turns on is measured nowhere in the gate and rests on anchor_gated_batches at campaign.py:500-514.\n",
+  "review_run_id": "r-20261027T102517819468-review-of-shc-family-eligibility-diagnosis-2a32deacf5bf",
+  "reviewed_base_sha": "6c0c4cfe2b0aa823c028629890b0b3ec830975ff",
+  "reviewed_head_sha": "2a32deacf5bfd7209f7794acf77ed9e505203266",
+  "reviewed_run_brief": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T094625253761-shc-family-eligibility-diagnosis/brief.md",
+  "reviewed_run_id": "r-20261027T094625253761-shc-family-eligibility-diagnosis",
+  "schema": "reckon.review-record/1",
+  "scores": {
+    "durability": 9,
+    "evidence": 13,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T10:42:51.152826+00:00",
+  "total": 97
+}
