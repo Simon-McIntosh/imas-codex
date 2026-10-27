@@ -659,6 +659,26 @@ def _seed_attachment(
     return source_node_id
 
 
+def _seed_surviving_producer(
+    scope: _GraphFixtureScope, *, sn_id: str, name_stage: str = "drafted"
+) -> str:
+    """Leave a name a second, consistent producer so a detach is not stranded.
+
+    ``reconcile_attachment_consistency`` holds a rejected attachment when it is
+    the only producer its name has, because detaching it would leave a live name
+    with no source. A test that exercises the detach path therefore has to leave
+    one producer standing.
+    """
+    return _seed_attachment(
+        scope,
+        dd_path=scope.path("camera_ir/channel/camera/up/z"),
+        sn_id=sn_id,
+        name_stage=name_stage,
+        dd_unit="m",
+        sn_unit="m",
+    )
+
+
 @pytest.mark.graph
 def test_graph_scope_cleans_partial_setup_without_hiding_failure(_gc):
     """An interrupted multi-query setup preserves its error and leaves no nodes."""
@@ -723,6 +743,7 @@ def test_reconcile_detaches_and_reroutes(_gc, _clean):
     dd_path = _clean.path("summary/boundary/strike_point_inner_z/value")
     sn_id = _clean.uid("z_image_up_unit_vector_of_camera")
     source_node_id = _seed_attachment(_clean, dd_path=dd_path, sn_id=sn_id)
+    _seed_surviving_producer(_clean, sn_id=sn_id)
 
     result = reconcile_attachment_consistency(_ScopedClient(_gc, _clean.prefix))
 
@@ -751,7 +772,10 @@ def test_reconcile_detaches_and_reroutes(_gc, _clean):
     assert r["mirror"] is None, "scalar mirror must be cleared with the edge"
     assert r["status"] == "extracted", "source must return to the generate pool"
     assert r["attempts"] == 0, "attempt budget must reset for the fresh compose"
-    assert not r["paths"], "source_paths projection must drop the detached path"
+    assert r["paths"] == ["dd:" + _clean.path("camera_ir/channel/camera/up/z")], (
+        "source_paths projection must drop the detached path and keep the "
+        "surviving producer's path"
+    )
 
 
 @pytest.mark.graph
@@ -766,6 +790,7 @@ def test_source_backing_a_good_name_keeps_its_status(_gc, _clean):
     bad_name = _clean.uid("z_image_up_unit_vector_of_camera")
     good_name = _clean.uid("vertical_coordinate_of_inner_strike_point")
     source_node_id = _seed_attachment(_clean, dd_path=bad_path, sn_id=bad_name)
+    _seed_surviving_producer(_clean, sn_id=bad_name)
     # Same source also produces a name the guard accepts.
     _clean.track("StandardName", good_name)
     _gc.query(
@@ -833,6 +858,7 @@ def test_reconcile_keeps_history(_gc, _clean):
     dd_path = _clean.path("summary/boundary/strike_point_inner_z/value")
     sn_id = _clean.uid("z_image_up_unit_vector_of_camera")
     _seed_attachment(_clean, dd_path=dd_path, sn_id=sn_id)
+    _seed_surviving_producer(_clean, sn_id=sn_id)
 
     reconcile_attachment_consistency(_ScopedClient(_gc, _clean.prefix))
 
@@ -869,6 +895,7 @@ def test_reconcile_is_idempotent(_gc, _clean):
     dd_path = _clean.path("summary/boundary/strike_point_inner_z/value")
     sn_id = _clean.uid("z_image_up_unit_vector_of_camera")
     _seed_attachment(_clean, dd_path=dd_path, sn_id=sn_id)
+    _seed_surviving_producer(_clean, sn_id=sn_id)
 
     first = reconcile_attachment_consistency(_ScopedClient(_gc, _clean.prefix))
     assert first.detached == 1
@@ -908,6 +935,7 @@ def test_accepted_attachment_survives_without_the_flag(_gc, _clean):
     dd_path = _clean.path("summary/boundary/strike_point_inner_z/value")
     sn_id = _clean.uid("z_image_up_unit_vector_of_camera")
     _seed_attachment(_clean, dd_path=dd_path, sn_id=sn_id, name_stage="accepted")
+    _seed_surviving_producer(_clean, sn_id=sn_id, name_stage="accepted")
 
     guarded = reconcile_attachment_consistency(_ScopedClient(_gc, _clean.prefix))
     assert guarded.skipped_protected == 1
@@ -3212,13 +3240,21 @@ def test_gate_survives_a_graph_failure() -> None:
 
 @pytest.mark.graph
 def test_orphaned_name_is_reported(_gc, _clean):
-    """A name whose only source was wrong is flagged, not auto-superseded."""
+    """A name whose only source was wrong is held and reported, not orphaned.
+
+    Detaching the only producer would leave a live name sourceless and abort the
+    whole apply, so the pass leaves the attachment in place and names it on the
+    operator worklist instead of creating the orphan it would then have to fix.
+    """
     dd_path = _clean.path("summary/boundary/strike_point_inner_z/value")
     sn_id = _clean.uid("z_image_up_unit_vector_of_camera")
     _seed_attachment(_clean, dd_path=dd_path, sn_id=sn_id)
 
     result = reconcile_attachment_consistency(_ScopedClient(_gc, _clean.prefix))
-    assert result.names_orphaned == [sn_id]
+    assert result.skipped_stranding == 1
+    assert [v.sn_id for v in result.held_stranding] == [sn_id]
+    assert result.detached == 0, "the last producer is never detached"
+    assert result.names_orphaned == [], "a held attachment leaves no orphan"
 
     still_there = _gc.query(
         "MATCH (sn:StandardName {id: $sn}) RETURN sn.name_stage AS stage", sn=sn_id
