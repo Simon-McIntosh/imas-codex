@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="297">
+<meta name="plan-version" content="298">
 <meta name="plan-modified" content="2026-10-27">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -1211,6 +1211,9 @@ without re-deriving it is visible.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261027T074017702314-review-of-srtj-graph-tier-parallel-fixtures-480a43910ee2" data-who="reckon-build" data-when="2026-10-27T07:50:41.500Z">
     <div class="r-comment-body"><p>independent review of r-20261026T204209966088-srtj-graph-tier-parallel-fixtures at 480a43910ee21d5456dc581c781ca04dd107309b from base 18daf78f53e50cad8a8a2b3375600498d48561bb: total 98/120, six scores recorded, two non-blocking findings, no blocking finding.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261026T204209966088-srtj-graph-tier-parallel-fixtures" data-who="reckon-build" data-when="2026-10-27T07:39:17Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/sn-review-through-jev/srtj-graph-tier-parallel-fixtures.html — all standard-names graph tests route disposable; both head graph arms agree on 59 failing IDs versus 48 base, with 0 fixture-data and 21 product IDs added, 0 project-URI refusals and 0 startup timeouts.</p></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-s7-lead-ruling-audit-panel" data-who="lead" data-when="2026-10-27T07:20:00Z">
     <div class="r-comment-body"><p>Lead ruling, "Keep quorum as audit panel". §7 deletes the quorum as a deciding path: its persisting cycle, the review seats only that path uses, and the fallback that sends items Jev could not judge to it. Those items go to the single chat reviewer instead. The quorum stays only as the 5% panel audit's non-deciding panel, which runs through <code>panel_audit.quorum_without_persisting</code>, so the drift measure the switch kept is unchanged. §7 waits on §6, because the forwarder retirement and the product repairs §6 still owes touch the same worker and review modules.</p></div>
