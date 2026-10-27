@@ -1033,9 +1033,6 @@ def persist_refined_name(
                         description=description,
                         kind=kind,
                         unit=unit,
-                        physics_domain=physics_domain,
-                        source_domains=source_domains
-                        or ([physics_domain] if physics_domain else []),
                         tags=tags or [],
                         model=model,
                         reason=reason,
@@ -1278,9 +1275,6 @@ def persist_refined_name(
                         description=description,
                         kind=kind,
                         unit=unit,
-                        physics_domain=physics_domain,
-                        source_domains=source_domains
-                        or ([physics_domain] if physics_domain else []),
                         tags=tags or [],
                         model=model,
                         reason=reason,
@@ -1408,23 +1402,20 @@ def persist_refined_name(
                 domain=_correction_domain,
                 reason=preflight_row.get("predecessor_correction_reason") or "",
             )
-        from imas_codex.graph.client import GraphClient as _GraphClient
-
-        if isinstance(gc, _GraphClient):
-            _dd.write_name_domain(
-                gc,
-                new_name,
-                _decision,
-                correction=_correction,
-                fallback_domain=preflight_row.get("predecessor_physics_domain")
-                or physics_domain,
+        if not callable(getattr(gc, "query", None)):
+            raise TypeError(
+                f"persist_refined_name cannot write {new_name}'s domain: "
+                f"{type(gc).__name__} offers no query interface, so the scalar, "
+                "the source domains and the domain edges would be dropped"
             )
-        else:
-            logger.debug(
-                "persist_refined_name: no live graph, leaving %s's domain to "
-                "the one writer's later pass",
-                new_name,
-            )
+        _dd.write_name_domain(
+            gc,
+            new_name,
+            _decision,
+            correction=_correction,
+            fallback_domain=preflight_row.get("predecessor_physics_domain")
+            or physics_domain,
+        )
 
     if result:
         row = dict(result[0])
