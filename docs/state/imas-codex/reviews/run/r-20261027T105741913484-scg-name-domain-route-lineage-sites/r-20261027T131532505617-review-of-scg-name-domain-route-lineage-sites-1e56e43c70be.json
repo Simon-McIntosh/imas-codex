@@ -1,0 +1,54 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-27T14:07:20.720Z",
+  "dispatched_at": "2026-10-27T13:50:59Z",
+  "evidence": {
+    "after_failure_count": 103,
+    "after_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T105741913484-scg-name-domain-route-lineage-sites/gate-head2.log",
+    "baseline_failure_count": 103,
+    "baseline_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T105741913484-scg-name-domain-route-lineage-sites/gate-base.log",
+    "derivation": "failure ids read from the FAILED lines of each log's short test summary; the after set and the baseline set are equal, so added_failure_ids is empty"
+  },
+  "findings": [
+    "tests/standard_names/test_name_domain_writer_lineage_sites.py:87 blocking: the brief and the run's done_when require one disposable-graph test per routed path in this file, each failing when its site is reverted; the file holds exactly one test, test_catalog_edit_correction_writes_through_the_one_writer, so the three graph_lineage paths (_write_standard_name_edges at graph_lineage.py:1028, _materialize_derived_parent_rows at graph_lineage.py:1568 and _materialize_derived_parent_rows_batched at graph_lineage.py:1672) have no disposable-graph coverage and no demonstrated revert failure, leaving the done_when's first clause unmet.",
+    "tests/standard_names/test_reclassify_domain_edge.py:88 non-blocking: `assert set(graph.domain_edges) == set(graph.source_domains)` compares two fields the fake records from the same writer parameters (domain_decision.py:449 passes `source_domains=edge_domains`), so the assertion is true whatever the production code does and survives the regression it appears to guard.",
+    "imas_codex/standard_names/graph_store/graph_foundation.py:330 non-blocking: the StandardNameChange row is now committed by its own statement before write_name_domain runs, so a failing domain write leaves a reclassify_domain change recorded while the domain has not moved, although the function docstring at graph_foundation.py:255 still says the reassignment is atomic; the old single statement carried both.",
+    "imas_codex/standard_names/graph_store/graph_lineage.py:68 non-blocking: `_undecided_domain_decision` re-implements `domain_decision._undecided` (domain_decision.py:227), the owning module's constructor for exactly this value, so the same DomainDecision shape is built in two places with no shared owner.",
+    "manifest.md:11 non-blocking: the recorded suite arms do not describe one run \u2014 the manifest's `tests:` line names the first head arm's command (`--basetemp=...gate-basetemp-head`, the run at 0342cde4 that added 16 ids) while `after_suite` cites gate-head2.log at dd5794b76, whose header command differs, and `after_suite` names revision dd5794b76 rather than the reviewed head 1e56e43c7, which is the docs-only commit after the gate."
+  ],
+  "item_verdicts": {
+    "call_sites": "graph_catalog.py:574 and signed_manifest.py:398 call _write_standard_name_edges; signed_manifest.py:7973 calls _materialize_derived_parent_rows; cli/sn.py:8680 calls reclassify_standard_name_domain; _materialize_derived_parent_rows_batched has no production caller and is reached only from tests.",
+    "diff": "read commit by commit against 970cdb0d9; five commits, eight files: the routing in graph_foundation.py and graph_lineage.py, one new test file, four pre-existing test files updated for the writer, and the evidence fragment.",
+    "done_when": "the done_when requires per-path disposable-graph tests in tests/standard_names/test_name_domain_writer_lineage_sites.py that each fail when its site is reverted, plus an added-failure count of zero; the gate logs give base 103 and head 103 failure ids with identical sets, so zero added, but the test file holds one test (line 87) covering one of the four routed paths.",
+    "goal": "the goal is to route the lineage-side graph-store domain writes through write_name_domain; all four StandardName domain-write sites in the five modules now call it (graph_foundation.py:330, graph_lineage.py:1028, graph_lineage.py:1568, graph_lineage.py:1672), and the sites left alone write StandardNameSource or only read the scalar.",
+    "manifest": "read; it records the baseline and after suite arms with log paths and EXIT lines, the negative control (EXIT=1, one failure on the correction slot), the graph-marked path test (EXIT=0) and status complete.",
+    "write_paths": "the run pointer declares twelve write paths; all nine paths in the diff are inside them, including the four pre-existing test files that the routing required."
+  },
+  "justifications": {
+    "durability": "Only tests/standard_names/test_name_domain_writer_lineage_sites.py:87 is a disposable-graph guard that fails on revert; the other three routed paths are held only by mock-graph fakes that fail incidentally (a KeyError or an unmodelled-statement assertion) rather than by asserting the domain/source/edge agreement.",
+    "evidence": "The base and after suite logs both report 103 failure ids with identical sets (added 0, removed 0) and both reach their summary line with an EXIT line, though the manifest's `tests:` line describes a different head arm than the after_suite it cites.",
+    "fit": "The changes follow the surrounding style, ruff check --no-cache reports no finding on any of the seven changed Python files, and the added names (_stored_domain_decisions, _undecided_domain_decision) carry no plan or ticket identifier.",
+    "goal_fidelity": "All four StandardName domain-write sites in the five assigned modules call write_name_domain (graph_lineage.py:1028, 1568, 1672 and graph_foundation.py:330), with the derived-parent scalar fallback kept and recorded as a gap in the evidence fragment.",
+    "reuse": "Every routed call extends the existing owner write_name_domain instead of forking a writer, but graph_lineage.py:68 duplicates domain_decision.py:227 rather than extending the owner's constructor.",
+    "scope_discipline": "Every path in the five-commit diff is inside the twelve write paths the run pointer declares, and no file outside them was touched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to route the lineage-side graph-store domain writes through write_name_domain; graph_foundation.py:330 and graph_lineage.py:1028/1568/1672 call it and no direct StandardName domain write remains in the five modules.\nVERDICT done_when: per-path disposable-graph tests in tests/standard_names/test_name_domain_writer_lineage_sites.py are required; the file holds one test at line 87 for one of four paths, though the added-failure count is 0 (base 103, head 103).\nVERDICT write_paths: all nine changed paths are inside the twelve write paths the run pointer declares.\nVERDICT manifest: read; the two suite arms, the negative control and the graph-marked path test are recorded with log paths and EXIT lines.\nVERDICT diff: five commits against 970cdb0d9; eight files, all inside scope, the routing plus its tests plus the evidence fragment.\nCALL_SITES: imas_codex/standard_names/graph_store/graph_catalog.py:574, imas_codex/standard_names/signed_manifest.py:398, imas_codex/standard_names/signed_manifest.py:7973, imas_codex/cli/sn.py:8680",
+  "review_run_id": "r-20261027T131532505617-review-of-scg-name-domain-route-lineage-sites-1e56e43c70be",
+  "reviewed_base_sha": "970cdb0d918702642a71601496ac4683a300b0c5",
+  "reviewed_head_sha": "1e56e43c70be083ea604e469a8db94e6b3038233",
+  "reviewed_run_id": "r-20261027T105741913484-scg-name-domain-route-lineage-sites",
+  "scores": {
+    "durability": 10,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 14,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T14:09:37.561536+00:00",
+  "total": 93
+}
