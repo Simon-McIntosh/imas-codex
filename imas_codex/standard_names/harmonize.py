@@ -1937,6 +1937,7 @@ __all__ = [
     "measure_doc_call_cost",
     "DocCallCostEstimate",
     "plan_family_applies",
+    "skipped_members",
     "apply_families",
     "finalize_families",
     "HarmonizeFinalizeError",
