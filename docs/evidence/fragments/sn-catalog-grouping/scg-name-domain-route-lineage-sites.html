@@ -1,0 +1,107 @@
+<h2 id="scg-name-domain-route-lineage-sites">The lineage half of the graph store writes a name's domain one way</h2>
+
+<p>The graph-store modules that persist lineage &mdash; the catalog-edit
+reclassification, the structural edge pass and the two derived-parent
+materializers &mdash; each set a standard name's <code>physics_domain</code>,
+its <code>source_domains</code> or its <code>HAS_PHYSICS_DOMAIN</code> edges on
+its own. This node routes every <code>StandardName</code> domain write in those
+modules through <code>domain_decision.write_name_domain</code>, which sets the
+three together in one transaction.</p>
+
+<h3 id="scg-name-domain-route-lineage-sites-before">Sites before</h3>
+
+<table>
+  <thead>
+    <tr><th>File</th><th>Function</th><th>What it wrote directly</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>graph_foundation.py</code></td>
+      <td><code>reclassify_standard_name_domain</code></td>
+      <td>one statement deleting the name's domain edges, then
+      <code>SET name.physics_domain</code>, <code>SET name.source_domains =
+      [$domain]</code> and one <code>MERGE (name)-[:HAS_PHYSICS_DOMAIN]-&gt;</code>.
+      The chosen domain became the source set, and every other source domain
+      was discarded.</td>
+    </tr>
+    <tr>
+      <td><code>graph_lineage.py</code></td>
+      <td><code>_write_standard_name_edges</code></td>
+      <td>a cohort-wide <code>UNWIND</code> that merged a
+      <code>HAS_PHYSICS_DOMAIN</code> edge for the payload's
+      <code>source_domains</code> plus its scalar, never deleting a stale edge,
+      so the edges could exceed the source set.</td>
+    </tr>
+    <tr>
+      <td><code>graph_lineage.py</code></td>
+      <td><code>_materialize_derived_parent_rows</code> (single)</td>
+      <td>the materializer set <code>parent.physics_domain</code> to its
+      children's most frequent domain and <code>parent.source_domains</code> to
+      their union, and wrote no domain edge at all.</td>
+    </tr>
+    <tr>
+      <td><code>graph_lineage.py</code></td>
+      <td><code>_materialize_derived_parent_rows_batched</code></td>
+      <td>the cohort-wide
+      <code>STRUCTURAL_CLOSURE_BATCH_MATERIALIZE</code> query did the same two
+      <code>SET</code>s for every parent in the batch.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="scg-name-domain-route-lineage-sites-after">Sites after</h3>
+
+<ul>
+  <li><strong>Catalog edit.</strong> <code>reclassify_*</code> records the
+  domain as a <code>reclassify_domain</code> <code>StandardNameChange</code> and
+  hands it to the writer as a <code>DomainCorrection</code> carrying its reason.
+  The scalar becomes the correction; <code>source_domains</code> stays the
+  name's DD sources' domains; the edges become exactly that set.</li>
+  <li><strong>Structural edge pass.</strong> The edge pass reads the cohort's
+  stored decisions in one query and calls the writer once per name the graph
+  holds, so a name's edges are rewritten to its source set instead of merged
+  into it. A name with no stored decision is written undecided and keeps its
+  current domain.</li>
+  <li><strong>Derived parents, single and batched.</strong> Both materializers
+  keep the children-derived scalar, drop their <code>source_domains</code>
+  <code>SET</code>, and hand each materialized parent to the writer, which sets <code>source_domains</code>
+  (children's union, computed from the graph) and writes one edge per entry. A
+  parent whose stored Jev decision exists takes that decision.</li>
+</ul>
+
+<h3 id="scg-name-domain-route-lineage-sites-gap">The recorded gap</h3>
+
+<p>A derived parent has no Jev decision of its own today: the Choice is asked of
+composed names, not of the parents their structure implies. Where no stored
+decision exists the materializer's children's-most-frequent rule still supplies
+the scalar and the writer keeps it, so the current rule survives unchanged. The
+writer is therefore authoritative for the source set and the edges on every
+path, and for the scalar wherever a decision or correction exists. Deciding
+derived parents through Jev is not part of this node and is recorded here rather
+than guessed at.</p>
+
+<h3 id="scg-name-domain-route-lineage-sites-left">Left alone, and why</h3>
+
+<ul>
+  <li><code>graph_source_bindings.py</code>
+  (<code>merge_standard_name_sources</code>) and the materializers'
+  <code>sns.physics_domain</code> assignment write a
+  <code>StandardNameSource</code>, not a <code>StandardName</code>. A source's
+  domain is an input to a name's decision, not the decision.</li>
+  <li><code>graph_cost_and_claims.py</code> and
+  <code>graph_parent_lifecycle.py</code> read <code>physics_domain</code> as a
+  claim scope or a filter and write none.</li>
+  <li><code>graph_foundation.py</code>'s <code>_scalar_domain</code> is a read
+  helper.</li>
+</ul>
+
+<h3 id="scg-name-domain-route-lineage-sites-evidence">Evidence</h3>
+
+<p>The path test
+<code>tests/standard_names/test_name_domain_writer_lineage_sites.py</code>
+plants a name whose DD source carries <code>equilibrium</code>, runs
+<code>reclassify_*</code> to <code>magnetic_field_diagnostics</code> on a
+disposable graph, and reads all three back: the scalar is the correction, the
+source set and the edges are <code>{equilibrium}</code>. Reverted to the direct
+write the same test fails, because the source set and the edge both become
+<code>magnetic_field_diagnostics</code>.</p>
