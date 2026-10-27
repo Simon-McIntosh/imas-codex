@@ -1,0 +1,58 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": "imas_codex/standard_names/domain_decision.py:407, imas_codex/standard_names/graph_store/graph_lineage.py:1408, imas_codex/standard_names/graph_store/graph_lineage.py:1580",
+  "completed_at": "2026-10-27T22:57:44.930Z",
+  "dispatched_at": "2026-10-27T22:47:28Z",
+  "evidence": {
+    "after_arm_revision": "49c09268dd0040249dc1b72acab92a259240d4b1",
+    "after_failure_count": 101,
+    "after_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T161504979153-scg-name-domain-single-writer-check/logs/suite-head.log",
+    "after_passed": 8407,
+    "baseline_failure_count": 101,
+    "baseline_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T161504979153-scg-name-domain-single-writer-check/logs/suite-base.log",
+    "baseline_passed": 8397,
+    "derivation": "failure ids read from the FAILED lines of each log; base 101 ids and head 101 ids, the head set identical to the base set (comm -13 empty), and both logs reach their summary line and carry a bare EXIT=1, so added_failure_ids is empty",
+    "head_revision": "87991e82ca7ae1f09fc2afcd30050138351a49dc",
+    "negative_control_graph_store_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T161504979153-scg-name-domain-single-writer-check/logs/negative-control-graph-store.log",
+    "negative_control_other_module_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T161504979153-scg-name-domain-single-writer-check/logs/negative-control-other-module.log"
+  },
+  "findings": [
+    "tests/standard_names/test_name_domain_single_writer.py:82 non-blocking: EXEMPT_SITES permits two direct StandardName.physics_domain SETs in imas_codex/standard_names/graph_store/graph_lineage.py, which the brief's rule says the check must refuse, so the goal's headline invariant holds only by recorded exemption; the guard reports these rather than preventing them, and retiring them belongs to the derived-parent rule in the followups node.",
+    "tests/standard_names/test_name_domain_single_writer.py:122 non-blocking: _clauses/_CLAUSE_RE duplicate the clause-level mutation reader owned by imas_codex/cli/sn.py:46 (_cypher_mutation_clause), which also strips string literals and comments, and _cypher_literals/_node_labels at :110/:137 duplicate imas_codex/graph/cypher_property_check.py (_python_strings, _NODE_BINDING_RE); the new copy extends neither owner and does not strip a commented-out or quoted Cypher clause, so a commented-out `SET sn.physics_domain` would be read as a live write.",
+    "tests/standard_names/test_name_domain_single_writer.py:91 non-blocking: both EXEMPT_SITES reasons end 'edits a module outside this test's write scope', which records the dispatch's write scope in source rather than the mechanism that keeps the exemption, against the repository rule that comments and strings that the table exposes to a reader must stand without dispatch context."
+  ],
+  "item_verdicts": {
+    "diff": "read commit by commit from 62aa4003e to 87991e82c: four commits over two files; 479c2c46c adds the guard, 49c09268d and 9403ae5b7 add and then correct the evidence fragment's figures, and 87991e82c is ruff formatting plus a trailing newline in the test file.",
+    "done_when": "the done_when asks for a committed check that passes at head and fails on both planted writes, plus a fragment listing every allowed site and the controls; the fragment does that, the head log records 10 passed for the guard, and both planted-write logs record 2 failed with EXIT=1 on each of the two shapes.",
+    "goal": "the goal is that no graph-store module writes a StandardName's physics_domain, source_domains or HAS_PHYSICS_DOMAIN edge outside write_name_domain; tests/standard_names/test_name_domain_single_writer.py refuses each shape outside the writer's call graph, but two direct scalar SETs in imas_codex/standard_names/graph_store/graph_lineage.py (lines 1532 and the batched twin) are exempted in EXEMPT_SITES rather than refused, so the headline invariant holds only by recorded exemption.",
+    "manifest": "read; status complete, four commits, both suite arms recorded as JSON with completed true, failure id lists and log paths, negative_control_log naming the graph-store control, and the two residual graph_lineage writes disclosed under outside_scope rather than hidden.",
+    "write_paths": "the source brief declares tests/standard_names/test_name_domain_single_writer.py and docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-single-writer-check.html; git diff --stat against 62aa4003e shows exactly those two files, 543 insertions and no deletions."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_name_domain_single_writer.py:383 and :397 fail when a direct write appears or when a recorded exemption goes stale, and both are shown red in negative-control-graph-store.log and negative-control-other-module.log (2 failed, EXIT=1) against a head arm where the same two ids pass.",
+    "evidence": "suite-base.log and suite-head.log both carry a summary line and EXIT=1, and recomputing the FAILED-line sets gives 101 against 101 with an empty difference, though the head arm ran at 49c09268d and the only post-format guard run recorded in the manifest has no log.",
+    "fit": "the guard follows the standard-names test idiom of tests/standard_names/test_review_deciding_paths_retired.py and its names describe the mechanism, but the EXEMPT_SITES reasons at lines 91 and 101 cite the dispatch's write scope rather than a code-level reason.",
+    "goal_fidelity": "tests/standard_names/test_name_domain_single_writer.py:383 refuses a StandardName domain or edge write outside write_name_domain and its callees, but EXEMPT_SITES at line 82 keeps two direct parent.physics_domain SETs in graph_lineage.py, so the rule the brief states does not hold for those two sites.",
+    "reuse": "tests/standard_names/test_name_domain_single_writer.py:122 re-implements clause splitting and mutation detection that imas_codex/cli/sn.py:46 already owns, and :110/:137 re-implement the Cypher-literal and alias-label extraction owned by imas_codex/graph/cypher_property_check.py, extending neither.",
+    "scope_discipline": "git diff --stat 62aa4003e..87991e82c reports only tests/standard_names/test_name_domain_single_writer.py and the evidence fragment, which are exactly the two declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is that no standard-names module writes a StandardName's domain outside write_name_domain; tests/standard_names/test_name_domain_single_writer.py:383 refuses each declared shape outside the writer's call graph, but EXEMPT_SITES at :82 keeps two direct parent.physics_domain SETs in imas_codex/standard_names/graph_store/graph_lineage.py, so the invariant holds only by recorded exemption.\nVERDICT done_when: the done_when asks for a committed check that passes at head and fails on both planted writes plus a fragment listing every allowed site and the controls; the fragment does both, the guard records 10 passed, and logs/negative-control-graph-store.log and logs/negative-control-other-module.log each record 2 failed with EXIT=1.\nVERDICT write_paths: the brief declares tests/standard_names/test_name_domain_single_writer.py and docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-single-writer-check.html; git diff --stat 62aa4003e..87991e82c reports exactly those two files, 543 insertions.\nVERDICT manifest: read; status complete with both suite arms as JSON carrying completed true, the 101 failure ids and their log paths, negative_control_log named, and the two residual graph_lineage writes disclosed under outside_scope.\nVERDICT diff: read commit by commit against 62aa4003e; four commits over two files - the guard, two evidence-fragment commits, and a formatter-only head commit that changes no assertion.\nCALL_SITES: imas_codex/standard_names/domain_decision.py:407, imas_codex/standard_names/graph_store/graph_lineage.py:1408, imas_codex/standard_names/graph_store/graph_lineage.py:1580\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: tests/standard_names/test_name_domain_single_writer.py:383 refuses a StandardName domain or edge write outside write_name_domain and its callees, but EXEMPT_SITES at :82 keeps two direct parent.physics_domain SETs in graph_lineage.py.\nSCORE evidence: 17\nJUSTIFICATION evidence: suite-base.log and suite-head.log both reach their summary line with EXIT=1 and their FAILED-line id sets differ by zero (101 against 101), though the head arm ran at 49c09268d and the post-format guard run has no log.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 62aa4003e..87991e82c reports only tests/standard_names/test_name_domain_single_writer.py and the evidence fragment, the two declared write paths.\nSCORE durability: 18\nJUSTIFICATION durability: tests/standard_names/test_name_domain_single_writer.py:383 and :397 redden in both negative-control logs (2 failed, EXIT=1) on ids the head arm passes, so the guard fails on a new direct write and on a stale exemption.\nSCORE fit: 17\nJUSTIFICATION fit: the guard follows the standard-names static-test idiom, but the EXEMPT_SITES reasons at lines 91 and 101 cite the dispatch's write scope rather than a code-level reason.\nSCORE reuse: 5\nJUSTIFICATION reuse: tests/standard_names/test_name_domain_single_writer.py:122 re-implements clause splitting owned by imas_codex/cli/sn.py:46 and :110/:137 re-implement literal and alias extraction owned by imas_codex/graph/cypher_property_check.py, extending neither.\nFINDING tests/standard_names/test_name_domain_single_writer.py:82 non-blocking: EXEMPT_SITES permits two direct StandardName.physics_domain SETs in imas_codex/standard_names/graph_store/graph_lineage.py that the brief's rule says to refuse, so the goal's headline invariant holds only by recorded exemption.\nFINDING tests/standard_names/test_name_domain_single_writer.py:122 non-blocking: _clauses/_CLAUSE_RE duplicate imas_codex/cli/sn.py:46 (_cypher_mutation_clause), which also strips literals and comments, and _cypher_literals/_node_labels at :110/:137 duplicate imas_codex/graph/cypher_property_check.py, so a commented-out SET would be read as a live write and the two readers can drift.\nFINDING tests/standard_names/test_name_domain_single_writer.py:91 non-blocking: both EXEMPT_SITES reasons cite the dispatch's write scope rather than the mechanism, recording plan context in source that will be meaningless once the node lands.",
+  "review_run_id": "r-20261027T224606254209-review-of-scg-name-domain-single-writer-check-87991e82ca7a",
+  "reviewed_base_sha": "62aa4003e7455dc7fb295f198039f695894a17dd",
+  "reviewed_head_sha": "87991e82ca7ae1f09fc2afcd30050138351a49dc",
+  "reviewed_run_id": "r-20261027T161504979153-scg-name-domain-single-writer-check",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 15,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T22:59:39.859126+00:00",
+  "total": 92
+}
