@@ -1,0 +1,78 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": "imas_codex/standard_names/edit.py:3401, imas_codex/standard_names/worker_tasks/worker_refine_names.py:252",
+  "completed_at": "2026-10-27T14:59:40.032Z",
+  "dispatched_at": "2026-10-27T14:47:59Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T105324872200-scg-name-domain-route-catalog-sites/manifest.md",
+      "line": 19,
+      "severity": "blocking",
+      "text": "after_suite records the default-marker head arm as completed with 71 failed / 8412 passed at revision 386af6310, but the log it cites, logs/gate-head2-default.log, stops at 77% with no summary line and no EXIT= line and its own header command is '-n 4 --basetemp=/dev/shm/39486-fleet-1291586/bt-f1', not the '-n 8 --basetemp=.../bt-h2d' the record states. The done-when's 'zero added failure ids' is therefore evidenced on the graph arm only; the default-marker run must be re-run at the head and its log recorded."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T105324872200-scg-name-domain-route-catalog-sites/manifest.md",
+      "line": 16,
+      "severity": "blocking",
+      "text": "negative_control_log ends at '1 failed, 2 deselected' with no bare EXIT= line, so reckon crew check --manifest reports that whether the control run failed is unknown and refuses the record; the control's substance is sound (the log's AssertionError shows physics_domain None with the isinstance gate restored) and only the exit-status line is missing."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T105324872200-scg-name-domain-route-catalog-sites/manifest.md",
+      "line": 25,
+      "severity": "blocking",
+      "text": "reckon crew check --manifest names nine changed paths outside the write scope and the blockers field requests a grant for six; tests/standard_names/test_edit_engine.py, tests/standard_names/test_refine_source_cohort_gate.py and tests/standard_names/test_graph_edge_writers.py are out of scope and unnamed, so a coordinator granting what the manifest asks for would still leave three files unauthorised."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T105324872200-scg-name-domain-route-catalog-sites/manifest.md",
+      "line": 22,
+      "severity": "non-blocking",
+      "text": "artifacts cites logs/proxy.log as the head run of the path tests (3 passed), and no such file exists in the run's logs directory; the only path-test log present, logs/path-tests.log, predates the third test at revision 0ba067cc6 (2 passed)."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T105324872200-scg-name-domain-route-catalog-sites/manifest.md",
+      "line": 21,
+      "severity": "non-blocking",
+      "text": "after_graph_suite records revision 386af6310 while the log it cites, logs/gate-head2-graph.log, opens '== head a436958fd ==' and carries no command line near its head, which reckon crew check --manifest also reports; the difference is docs-only in content but the record names a revision the log does not prove."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_refinement.py",
+      "line": 1405,
+      "severity": "non-blocking",
+      "text": "The query-interface capability check is written inline and duplicates the identical predicate already at imas_codex/standard_names/promote.py:1048 rather than sharing a named predicate; a later change to what counts as a writable client has two sites to keep in step."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "Two production call sites reach the changed function and were opened: imas_codex/standard_names/edit.py:3401 and imas_codex/standard_names/worker_tasks/worker_refine_names.py:252.",
+    "diff": "Read commit by commit: de609213c replaces the isinstance gate with a callable query check and drops the dead physics_domain/source_domains parameters, a436958fd answers the writer's state read in nine mock clients and adds the proxy path test, 386af6310 records the change and the gate figures in the evidence fragment.",
+    "done_when": "The done-when asks for zero added failure ids on the whole tests/standard_names suite in both marker sets plus per-path tests that fail on revert; the graph arm is recorded and readable (59 failed at head against 60 at base), but the default-marker head arm has no completed log at logs/gate-head2-default.log.",
+    "goal": "The node goal is that every StandardName domain write reachable from the graph-store catalog modules goes through write_name_domain; the increment closes the last gate that could skip it, at graph_refinement.py:1405-1420, and removes the two dead parameter pairs from that function's statements.",
+    "manifest": "Read; it discloses six out-of-scope test files under blockers (manifest.md:25), records both gate arms as completed (manifest.md:19-21), and cites logs/proxy.log under artifacts (manifest.md:22), which does not exist on disk.",
+    "write_paths": "The source brief fences seven paths; the increment touches graph_refinement.py, tests/standard_names/test_name_domain_writer_catalog_sites.py and the evidence fragment inside that fence and eight further test files outside it."
+  },
+  "justifications": {
+    "durability": "logs/negative-control-isinstance.log shows the added assertion failing with physics_domain None when the isinstance gate is restored, so test_name_domain_writer_catalog_sites.py:222 is a guard rather than a restatement of its input; the edge and source-domain assertions at :225-226 read the graph's HAS_PHYSICS_DOMAIN edges against the node's property, two independent reads.",
+    "evidence": "The head default-marker arm is unreadable: logs/gate-head2-default.log stops at 77% with no summary line and no EXIT= line and its own command is -n 4 with basetemp bt-f1, while manifest.md:19 records completed true, 71 failed/8412 passed and a -n 8 bt-h2d command; reckon crew check --manifest reports the same truncation and the missing EXIT on the negative control, and the only readable head arm is -m graph at a436958fd (59 failed against base 60, zero added).",
+    "fit": "The capability check at graph_refinement.py:1405 repeats the inline idiom already used at imas_codex/standard_names/promote.py:1048, and the raise happens after tx.commit() at graph_refinement.py:1362 so a bad client leaves a committed successor with no domain and only the exception as the signal.",
+    "goal_fidelity": "The three commits since d5c451ae do what they claim: graph_refinement.py:1405-1420 replaces the isinstance gate with a capability check and calls write_name_domain for every client, the TypeError path refuses rather than skips, and no call in the function passes physics_domain or source_domains to a statement any more.",
+    "reuse": "The change extends the owner imas_codex/standard_names/domain_decision.py:409 (fallback_domain at :413) rather than forking a second writer; the only capability it re-expresses is the query-interface predicate already written inline at promote.py:1048, with no shared owner to extend.",
+    "scope_discipline": "reckon crew check --manifest names nine changed paths outside the fence (test_atomic_refined_name_persistence.py, test_edit_engine.py, test_graph_edge_writers.py, test_minted_name_carries_a_catalog_status.py, test_persist_stages.py, test_refine_name_chain.py, test_refine_source_cohort_gate.py, test_snrun_async_counters.py, test_supersession.py) while manifest.md:25 requests a grant for six of them."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261027T142847652689-review-of-scg-name-domain-route-catalog-sites-386af63104c1",
+  "reviewed_base_sha": "d5c451ae6674dfce029c18cfcc9acf62c25cc435",
+  "reviewed_head_sha": "386af63104c1c938dffb9bffd8d2d82d74d3d599",
+  "reviewed_run_id": "r-20261027T105324872200-scg-name-domain-route-catalog-sites",
+  "scores": {
+    "durability": 18,
+    "evidence": 8,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 17,
+    "scope_discipline": 7
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T15:02:36.463405+00:00",
+  "total": 86
+}
