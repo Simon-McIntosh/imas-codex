@@ -17,6 +17,13 @@
     "imas_codex/standard_names/campaign.py:1045"
   ],
   "completed_at": "2026-10-27T17:59:53.805Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "shc-convergence-gate-false-halts",
+      "recorded_at": "2026-10-27T18:02:25.571978+00:00"
+    }
+  },
   "dispatched_at": "2026-10-27T17:46:01Z",
   "findings": [
     {
