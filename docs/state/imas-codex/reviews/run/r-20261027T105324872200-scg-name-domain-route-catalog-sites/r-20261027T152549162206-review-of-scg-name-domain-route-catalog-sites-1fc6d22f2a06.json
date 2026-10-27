@@ -1,0 +1,77 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": "imas_codex/standard_names/edit.py:3401, imas_codex/standard_names/worker_tasks/worker_refine_names.py:718, imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py:1943, imas_codex/standard_names/graph_store/graph_catalog.py:2208",
+  "completed_at": "2026-10-27T16:03:24.041Z",
+  "dispatched_at": "2026-10-27T15:46:19Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_refinement.py",
+      "line": 693,
+      "severity": "non-blocking",
+      "text": "source_domains is still a parameter of persist_refined_name and is now dead: no statement binds it and nothing reads it, so a caller that passes it (worker_tasks/worker_refine_names.py:733) has its source-domain set silently discarded instead of refused, when the writer recomputes source domains from the migrated sources; remove the parameter and its caller argument so the drop is visible in the signature rather than in the lost value."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_refinement.py",
+      "line": 1414,
+      "severity": "non-blocking",
+      "text": "The successor's domain write runs after tx.commit() and outside the transaction, so a failure inside write_name_domain leaves a committed successor with no physics_domain -- the half-written rename the capability check was moved up to prevent, still reachable through the writer's own failure; the successor row for write_name_domain to find is the reason the transaction has to commit first, so the residue is a design tradeoff worth naming rather than a site to change here."
+    },
+    {
+      "file": "tests/standard_names/test_graph_edge_writers.py",
+      "line": 1,
+      "severity": "blocking",
+      "text": "This path is changed by 203a79c84 (its two HAS_PHYSICS_DOMAIN edge assertions are inverted) and is not in the reviewed run's live node.write_paths, so the landed diff writes outside the recorded fence; the worker discloses the gap at manifest.md:26 and the coordinator must add this path to node.write_paths before the node lands, or the promotion check will read the commit as out-of-scope."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-route-catalog-sites.html",
+      "line": 62,
+      "severity": "non-blocking",
+      "text": "The fragment calls graph_claim_scope.py 'filters and projections only ... No write, no change', but graph_claim_scope.py:845 writes physics_domain onto StandardNameSource nodes (from src.physics_domain at :845 and from the name's own scalar at :820); the brief asks that html say which sites write a domain on a node other than a StandardName, so the entry understates the module's writes and should name the StandardNameSource field."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T105324872200-scg-name-domain-route-catalog-sites/logs/gate-base-default.log",
+      "line": 3,
+      "severity": "non-blocking",
+      "text": "The base arm's '# module' header names the head worktree's graph_catalog.py, not the base tree, so the log read literally claims base tests ran against head source; the opposite is the case here (base-only test_physics_domain_uses_coalesce passes, which head source would redden), but the evidence does not state what was imported and a later reader cannot distinguish the two before running that check."
+    },
+    {
+      "file": "tests/standard_names/test_domain_decision.py",
+      "line": 38,
+      "severity": "non-blocking",
+      "text": "The new _answer_domain_state helper is copy-pasted into seven test files (test_atomic_refined_name_persistence.py, test_minted_name_carries_a_catalog_status.py, test_persist_stages.py, test_refine_name_chain.py, test_snrun_async_counters.py, test_supersession.py, test_edit_engine.py) when this module already owns the same state row builder at _row :38; lift it to tests/standard_names/conftest.py so an eighth copy does not rediscover the writer's read a fourth way."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit: 78a2bbd50 deletes the promote block, b2e3d7753/de609213c route the rename's successor through the writer and replace the isinstance gate with a capability check, 203a79c84/d5ac1a5a6 rewrite the catalog invariants, a436958fd answers the writer's state read in the mock clients, and 60e1cf54d moves the capability check above the transaction; 1fc6d22f2 is docs-only (fragment).",
+    "done_when": "The done_when asks for per-path disposable-graph tests that fail on revert, and zero added failure ids against main; four such tests exist and two negative controls show the relights (logs/negative-control.log, logs/negative-control-isinstance.log), and both marker sets are recorded with readable base and evidence; the recovery of the earlier unreadable default-marker arm is confirmed by the EXIT=1 and summary line of logs/gate-head-default-final.log.",
+    "goal": "The goal is to route the catalog-side graph-store domain writes through write_name_domain; graph_catalog.py:487-497 now withholds the domain pair from the structural pass and the promote SET is deleted, graph_refinement.py:1385-1421 routes the successor's domain through the writer, and the derived-parent writers named by the brief are outside the module fence, recorded as a gap at manifest.md:25.",
+    "manifest": "Read; it records the final gate arms with their logs and EXIT lines (manifest.md:19-22), the negative control at logs/negative-control-isinstance.log with EXIT=1 (manifest.md:17-18), the retried fixtures under retry_failures/retry_failures with attribution to the mock fixtures rather than code under test (manifest.md:9), and the one remaining record blocker at manifest.md:26.",
+    "write_paths": "The live record grants 17 paths; the diff touches 15, of which tests/standard_names/test_graph_edge_writers.py is not granted (manifest.md:26 says so), and the other nine extra test files are granted by the review thread although the delivered brief listed seven paths."
+  },
+  "justifications": {
+    "durability": "Each routed path has a disposable-graph test whose assertion is a post-write graph read (test_name_domain_writer_catalog_sites.py:121-127, :290-296), not a restatement of its input, and the two mutations recorded at negative-control.log and negative-control-isinstance.log each darken the intended id; the rewritten invariant at test_metadata_invariants.py:163-211 asserts the absence of the physics_domain/source_domains/HAS_PHYSICS_DOMAIN tokens, which a reintroduced SET reddens, and both mutations are shown doing so at logs/negative-control-no-domain-set.log and logs/negative-control-domain-edge-feed.log.",
+    "evidence": "The gate logs are readable receipts: gate-head-default-final.log ends '71 failed, 8412 passed, 11 skipped' + EXIT=1 and gate-base-default.log '73 failed, 8409 passed, 11 skipped' + EXIT=1, and recomputing set(after)-set(base) from the manifest's own baseline_suite/after_suite yields no added id on either arm; the base logs' line-3 '# module' names the head worktree rather than the base tree, so the base arm's source is inferable (its base-only test test_physics_domain_uses_coalesce passes, which head source would fail) but is not stated.",
+    "fit": "The change follows the surrounding idiom and its naming, but persist_refined_name still accepts source_domains (graph_refinement.py:693) and silently ignores it, so a caller at worker_tasks/worker_refinement.py:733 hands over a set that no longer reaches the graph and gets no signal that it was dropped.",
+    "goal_fidelity": "Both StandardName domain sites in the fenced modules are routed or deleted: graph_catalog.py:346-434 (promote block, now deleted) and graph_refinement.py:1414 (_dd.write_name_domain carries the predecessor's stored decision with fallback_domain), and graph_claim_scope/graph_audits carried only reads, so every StandardName domain write the node could reach now goes through the one writer.",
+    "reuse": "The production addition extends the existing owner rather than forking it (fallback_domain added to domain_decision.write_name_domain at :413), but the new test helper _answer_domain_state is pasted into seven files when tests/standard_names/test_domain_decision.py:38 already owns a state-row builder (_row) that answers the same read.",
+    "scope_discipline": "Every path in the 15-file diff is inside node.write_paths except tests/standard_names/test_graph_edge_writers.py, which the live record omits (the worker lists it in its own orientation and discloses the omission at manifest.md:26); the remaining 14 changed paths are the ten granted tests plus the three code/fragment paths."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261027T152549162206-review-of-scg-name-domain-route-catalog-sites-1fc6d22f2a06",
+  "reviewed_base_sha": "e2fee62a40098b8f4765457502d400a719093b7a",
+  "reviewed_head_sha": "1fc6d22f2a06e1919eed89a3505b29f3be6d24be",
+  "reviewed_run_id": "r-20261027T105324872200-scg-name-domain-route-catalog-sites",
+  "scores": {
+    "durability": 19,
+    "evidence": 14,
+    "fit": 15,
+    "goal_fidelity": 19,
+    "reuse": 16,
+    "scope_discipline": 14
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T16:04:58.764096+00:00",
+  "total": 97
+}
