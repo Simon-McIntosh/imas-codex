@@ -115,7 +115,46 @@ writer's.</p>
 <code>-n 8</code>, from separate <code>git archive</code> trees each with its
 own <code>--basetemp</code>:</p>
 
-<!-- GATE-FIGURES -->
+<table>
+  <thead>
+    <tr><th>Arm</th><th>Revision</th><th>Summary</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>base</td>
+      <td><code>43ae5712c</code></td>
+      <td>103 failed, 8381 passed, 15 skipped, <code>EXIT=1</code></td>
+    </tr>
+    <tr>
+      <td>head</td>
+      <td><code>89251bb66</code></td>
+      <td>102 failed, 8383 passed, 15 skipped, <code>EXIT=1</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>One added failure id</strong>:
+<code>test_facade_closure.py::test_service_bridge_resolves_only_wired_names</code>.</p>
+
+<p>It is a seam failure the two halves create together, and neither creates
+alone. The catalog half deleted the promote-on-higher-rank block, which was
+<code>graph_catalog</code>'s only reader of <code>services._ensure_list</code>.
+The lineage half removed the inline domain reads that also used it. The facade
+closure invariant asserts that <code>graph_ops._WIRED_SERVICE_NAMES</code> is
+exactly the set of service attributes the <code>graph_store</code> modules
+read, and <code>_ensure_list</code> is still listed there while nothing reads
+it. Deleting that one element of the frozenset makes the test pass; measured in
+a scratch copy of the head tree:</p>
+
+<pre><code>$ pytest tests/standard_names/test_facade_closure.py::test_service_bridge_resolves_only_wired_names
+1 passed, 1 warning in 7.48s</code></pre>
+
+<p>That file, <code>imas_codex/standard_names/graph_ops.py</code>, lies outside
+this node's write fence, so the line is not changed here; the delta the merge
+adds against <code>main</code> is that one failure id until it is. The same run
+carries two ids the head arm no longer fails:
+<code>test_snrun_async_counters.py::TestGenerateDocsBumpsEnriched::test_generate_docs_bumps_enriched</code>
+and <code>::TestNoRunIdNoBump::test_no_run_id_skips_bump</code>.</p>
 
 <h3 id="scg-name-domain-routing-reconcile-outside">Outside this node</h3>
 
