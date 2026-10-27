@@ -13,6 +13,11 @@
       "kind": "exempted",
       "reason": "hygiene of a one-shot evidence runner whose run is finished; the recorded outcome is read from the apply's JSON summary and the gate logs",
       "recorded_at": "2026-10-27T10:04:51.193618+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "hygiene of a one-shot evidence runner whose run is finished; the recorded outcome is read from the apply's JSON summary and the gate logs",
+      "recorded_at": "2026-10-27T10:04:57.650793+00:00"
     }
   },
   "findings": [
