@@ -40,6 +40,7 @@ from unittest.mock import AsyncMock, MagicMock, call, patch
 
 import pytest
 
+from imas_codex.standard_names.graph_store import owner_module_path
 from imas_codex.standard_names.orphan_sweep import (
     _orphan_sweep_tick,
     run_orphan_sweep_loop,
@@ -749,7 +750,6 @@ async def test_run_loop_periodic(_gc, _clean_test_nodes):
 # mutating maintenance writer is still skipped.  A bounded drain keeps its
 # lease heartbeat alongside the sweep.
 
-_SN_GO = "imas_codex.standard_names.graph_ops"
 _SN_LOOP = "imas_codex.standard_names.loop"
 
 # Graph-wide mutation writers the bypass flag must keep quiet.  Each is
@@ -773,6 +773,10 @@ _MAINTENANCE_WRITER_MODULES: dict[str, str] = {
     "restamp_harmonized_families": "imas_codex.standard_names.harmonize",
     "refresh_drifted_sources": "imas_codex.standard_names.source_refresh",
 }
+
+
+def _maintenance_owner_path(name: str) -> str:
+    return _MAINTENANCE_WRITER_MODULES.get(name) or owner_module_path(name)
 
 
 def _loop_graph_context() -> tuple[MagicMock, MagicMock]:
@@ -908,7 +912,7 @@ async def _drive_run_sn_pools(
         writers = {
             name: stack.enter_context(
                 patch(
-                    f"{_MAINTENANCE_WRITER_MODULES.get(name, _SN_GO)}.{name}",
+                    f"{_maintenance_owner_path(name)}.{name}",
                     return_value=default,
                 )
             )

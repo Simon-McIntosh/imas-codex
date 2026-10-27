@@ -251,9 +251,9 @@ class TestDocsPoolsEditScopeScoreGate:
         ],
     )
     def test_edits_only_drops_score_gate(self, claim_name):
-        import imas_codex.standard_names.graph_ops as graph_ops
+        from imas_codex.standard_names.graph_store import resolve_owned_name
 
-        claim = getattr(graph_ops, claim_name)
+        claim = resolve_owned_name(claim_name)
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(return_value=[])
 
@@ -276,9 +276,9 @@ class TestDocsPoolsEditScopeScoreGate:
         ],
     )
     def test_default_keeps_score_gate(self, claim_name):
-        import imas_codex.standard_names.graph_ops as graph_ops
+        from imas_codex.standard_names.graph_store import resolve_owned_name
 
-        claim = getattr(graph_ops, claim_name)
+        claim = resolve_owned_name(claim_name)
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(return_value=[])
 

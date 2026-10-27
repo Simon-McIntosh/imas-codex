@@ -10,7 +10,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from imas_codex.standard_names.graph_store import (
+    graph_claim_release as _owning_graph_claim_release,
     graph_cost_and_claims as _owning_graph_cost_and_claims,
+    resolve_owned_name,
 )
 from imas_codex.standard_names.models import DDGapEvidence
 from imas_codex.standard_names.worker_tasks import (
@@ -406,16 +408,18 @@ def test_extraction_refuses_multiple_unit_edges_deterministically(
 
 @pytest.mark.parametrize("axis", ["name", "docs"])
 def test_review_claim_projects_authoritative_dd_bindings(axis: str) -> None:
-    from imas_codex.standard_names import graph_ops
-
     claim_name = f"claim_review_{axis}_batch"
     with (
         patch.object(
             _owning_graph_cost_and_claims, "_claim_sn_atomic", return_value=[]
         ) as claim,
-        patch.object(graph_ops, f"_verify_{axis}_claim_winners", return_value=[]),
+        patch.object(
+            _owning_graph_claim_release,
+            f"_verify_{axis}_claim_winners",
+            return_value=[],
+        ),
     ):
-        getattr(graph_ops, claim_name)(batch_size=1)
+        resolve_owned_name(claim_name)(batch_size=1)
 
     projection = claim.call_args.kwargs["extra_return_fields"]
     assert "PRODUCED_NAME" in projection
@@ -538,7 +542,7 @@ async def test_review_writer_requires_successful_owned_transition(
         )
         stack.enter_context(
             patch(
-                f"imas_codex.standard_names.graph_ops.{persist_name}",
+                f"imas_codex.standard_names.graph_store.graph_review_persistence.{persist_name}",
                 return_value=transition,
             )
         )

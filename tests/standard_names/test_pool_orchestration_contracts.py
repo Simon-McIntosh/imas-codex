@@ -30,6 +30,7 @@ from __future__ import annotations
 import asyncio
 import threading
 import uuid
+from contextlib import ExitStack, contextmanager
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -37,7 +38,18 @@ import pytest
 
 from imas_codex.standard_names.attachment_audit import AttachmentAuditResult
 from imas_codex.standard_names.budget import BudgetManager
+from imas_codex.standard_names.graph_store import owner_module_path
 from imas_codex.standard_names.pools import PoolSpec, pool_loop
+
+
+@contextmanager
+def _patch_owned(**replacements):
+    with ExitStack() as stack:
+        for name, replacement in replacements.items():
+            stack.enter_context(
+                patch(f"{owner_module_path(name)}.{name}", new=replacement)
+            )
+        yield
 
 
 @pytest.fixture(autouse=True)
@@ -1235,7 +1247,6 @@ class TestRunSnPoolsFinalizePopulatesCounters:
         from pool total_processed values."""
         from imas_codex.standard_names.attachment_audit import AttachmentAuditResult
 
-        _GO = "imas_codex.standard_names.graph_ops"
         _AA = "imas_codex.standard_names.attachment_audit"
         _BM = "imas_codex.standard_names.budget.BudgetManager"
 
@@ -1269,8 +1280,7 @@ class TestRunSnPoolsFinalizePopulatesCounters:
         _mock_gc_ctx.__exit__ = MagicMock(return_value=False)
 
         with (
-            patch.multiple(
-                _GO,
+            _patch_owned(
                 reconcile_standard_name_sources=MagicMock(return_value={}),
                 reconcile_vocab_gaps=MagicMock(return_value={}),
                 revive_unit_skipped_sources=MagicMock(

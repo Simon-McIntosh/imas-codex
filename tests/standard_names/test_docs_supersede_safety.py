@@ -73,9 +73,9 @@ class TestClaimFiltersExcludeSuperseded:
         """The seed Cypher WHERE clause must contain a guard against
         superseded/exhausted name_stage so that terminal-state nodes
         are never claimed."""
-        import imas_codex.standard_names.graph_ops as go
+        from imas_codex.standard_names.graph_store import resolve_owned_name
 
-        func = getattr(go, func_name)
+        func = resolve_owned_name(func_name)
 
         gc, tx = _mock_gc_tx()
         # Seed returns empty — we only care about the generated Cypher.

@@ -9,6 +9,9 @@ from unittest.mock import patch
 from click.testing import CliRunner
 
 from imas_codex.cli.sn import sn
+from imas_codex.standard_names.graph_store import (
+    owner_module_path as _owner_module_path,
+)
 
 
 def test_dry_run_prints_plan_without_writes_claims_or_llm_calls() -> None:
@@ -78,9 +81,7 @@ def test_dry_run_prints_plan_without_writes_claims_or_llm_calls() -> None:
             patch("imas_codex.discovery.base.llm.call_llm_structured")
         )
         claims = [
-            stack.enter_context(
-                patch(f"imas_codex.standard_names.graph_ops.{claim_name}")
-            )
+            stack.enter_context(patch(f"{_owner_module_path(claim_name)}.{claim_name}"))
             for claim_name in claim_names
         ]
 

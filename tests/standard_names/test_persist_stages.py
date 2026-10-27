@@ -198,10 +198,10 @@ def test_review_stage_decision(
     The mock supplies the current chain depth; the function computes the
     target stage; we assert it matches the documented value.
     """
-    from imas_codex.standard_names import graph_ops
+    from imas_codex.standard_names.graph_store import resolve_owned_name
     from imas_codex.standard_names.review import holds
 
-    fn = getattr(graph_ops, fn_name)
+    fn = resolve_owned_name(fn_name)
 
     if fn_name == "persist_reviewed_docs":
         # The docs preflight and final write share one claim-locked transaction.

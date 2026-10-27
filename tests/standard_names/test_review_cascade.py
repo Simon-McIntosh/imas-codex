@@ -16,6 +16,7 @@ from imas_codex.standard_names.graph_store import (
     graph_foundation as _owning_graph_foundation,
     graph_refinement as _owning_graph_refinement,
     graph_review_persistence as _owning_graph_review_persistence,
+    resolve_owned_name,
 )
 from imas_codex.standard_names.review import cascade
 from imas_codex.standard_names.review.cascade import (
@@ -528,7 +529,7 @@ def test_consumer_predicates_agree_with_rubric_route(
     monkeypatch.setattr(
         _owning_graph_doc_links, "_doc_link_mismatches", lambda *_args: []
     )
-    stage = getattr(graph_ops, "persist_reviewed_" + axis)(
+    stage = resolve_owned_name("persist_reviewed_" + axis)(
         sn_id="temperature",
         claim_token="token",
         score=score,
@@ -546,7 +547,7 @@ def test_consumer_predicates_agree_with_rubric_route(
         return []
 
     monkeypatch.setattr(_owning_graph_cost_and_claims, "_claim_sn_atomic", claim)
-    getattr(graph_ops, "claim_refine_" + axis + "_batch")(min_score=min_score)
+    resolve_owned_name("claim_refine_" + axis + "_batch")(min_score=min_score)
     comparator = re.search(
         rf"sn\.reviewer_score_{axis}\s*(<|>=)\s*\$min_score",
         captured["eligibility_where"],

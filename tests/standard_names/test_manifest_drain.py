@@ -499,7 +499,6 @@ def test_pre_loop_cleanup_does_not_mask_the_primary_failure(
 @pytest.mark.asyncio
 async def test_in_loop_cleanup_does_not_mask_the_primary_failure() -> None:
     from tests.standard_names.test_scoped_global_maintenance import (
-        _GO,
         _LOOP,
         _graph_context,
         _maintenance_mocks,
@@ -508,8 +507,14 @@ async def test_in_loop_cleanup_does_not_mask_the_primary_failure() -> None:
     graph_context, _ = _graph_context()
     with ExitStack() as stack:
         _maintenance_mocks(stack)
-        stack.enter_context(patch(f"{_GO}.create_sn_run_open"))
-        stack.enter_context(patch(f"{_GO}.finalize_sn_run"))
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.graph_store.graph_audits.create_sn_run_open"
+            )
+        )
+        stack.enter_context(
+            patch("imas_codex.standard_names.graph_store.graph_audits.finalize_sn_run")
+        )
         stack.enter_context(
             patch(
                 "imas_codex.standard_names.ledger.find_provenance_orphans",
@@ -529,8 +534,17 @@ async def test_in_loop_cleanup_does_not_mask_the_primary_failure() -> None:
                 return_value=[],
             )
         )
-        stack.enter_context(patch(f"{_GO}.persist_outcome_snapshot", return_value={}))
-        stack.enter_context(patch(f"{_GO}.reset_persist_outcomes"))
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.graph_store.graph_source_bindings.persist_outcome_snapshot",
+                return_value={},
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.graph_store.graph_source_bindings.reset_persist_outcomes"
+            )
+        )
         stack.enter_context(patch(f"{_LOOP}._build_pool_specs", return_value=[]))
         stack.enter_context(
             patch(
@@ -563,7 +577,7 @@ async def test_in_loop_cleanup_does_not_mask_the_primary_failure() -> None:
         )
         finalize = stack.enter_context(
             patch(
-                f"{_GO}.finalize_manifest_drain_scope",
+                "imas_codex.standard_names.graph_store.graph_claim_scope.finalize_manifest_drain_scope",
                 side_effect=RuntimeError("cleanup failure"),
             )
         )

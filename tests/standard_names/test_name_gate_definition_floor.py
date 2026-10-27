@@ -22,7 +22,6 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from imas_codex.standard_names import workers
 from imas_codex.standard_names.audits import semantic_similarity_check
 from imas_codex.standard_names.defaults import SEMANTIC_SIM_CRITICAL
 from imas_codex.standard_names.worker_tasks import worker_review_names
@@ -35,7 +34,7 @@ def semantic_gate_name_text(name: str) -> str:
     substitution fails these tests individually instead of collapsing the
     file into one collection error.
     """
-    builder = getattr(workers, "semantic_gate_name_text", None)
+    builder = getattr(worker_review_names, "semantic_gate_name_text", None)
     assert builder is not None, (
         "the review gate no longer builds its name-side text through a "
         "vocabulary definition lookup"
@@ -45,7 +44,7 @@ def semantic_gate_name_text(name: str) -> str:
 
 def closed_vocabulary_definitions() -> dict[str, str]:
     """Resolve the token-to-definition mapping, or fail naming what is gone."""
-    loader = getattr(workers, "_closed_vocabulary_definitions", None)
+    loader = getattr(worker_review_names, "_closed_vocabulary_definitions", None)
     assert loader is not None, (
         "the closed vocabulary's token definitions are no longer read"
     )
@@ -124,7 +123,9 @@ def test_the_gate_call_site_builds_its_text_through_the_lookup() -> None:
     the forwarder delegates and names neither the builder nor the gate, so a
     read of it would pass whatever the implementation did.
     """
-    co_names = worker_review_names.process_review_name_batch.__code__.co_names
+    co_names = (
+        worker_review_names.process_review_name_batch.__wrapped__.__code__.co_names
+    )
 
     assert "semantic_gate_name_text" in co_names
 

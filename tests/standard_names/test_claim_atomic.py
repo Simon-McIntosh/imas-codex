@@ -356,7 +356,7 @@ class TestAtomicClaimRandomOrder:
             "removed: claim_compose_seed_and_expand and claim_regen_seed_and_expand"
             " are linear-path symbols that never landed"
         )
-        import imas_codex.standard_names.graph_ops as ops
+        from imas_codex.standard_names.graph_store import resolve_owned_name
 
         fns = [
             ("claim_compose_seed_and_expand", {}),
@@ -371,7 +371,7 @@ class TestAtomicClaimRandomOrder:
             tx.run = MagicMock(return_value=[])  # empty seed
 
             with _patch_gc(gc):
-                getattr(ops, fn_name)(batch_size=1, **extra_kwargs)
+                resolve_owned_name(fn_name)(batch_size=1, **extra_kwargs)
 
             seed_cypher = tx.run.call_args_list[0].args[0]
             assert "ORDER BY rand()" in seed_cypher, (

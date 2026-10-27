@@ -35,10 +35,12 @@ ROUTED_FUNCTIONS: dict[str, tuple[str, ...]] = {
         "_graph_node_to_entry_dict",
         "_candidate_physics_domains",
     ),
-    "imas_codex.standard_names.workers": (
+    "imas_codex.standard_names.worker_tasks.worker_compose_and_validate": (
         "compose_worker",
-        "compose_batch",
         "consolidate_worker",
+    ),
+    "imas_codex.standard_names.worker_tasks.worker_compose_batches": ("compose_batch",),
+    "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment": (
         "_write_composed_name_domains",
     ),
 }
@@ -84,13 +86,19 @@ def test_routed_module_calls_no_selector(module_name: str) -> None:
 def test_compose_sets_domains_through_the_one_writer() -> None:
     """A composed name's domain is set by the one writer, not carried in."""
     helper = _function_source(
-        "imas_codex.standard_names.workers", "_write_composed_name_domains"
+        "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment",
+        "_write_composed_name_domains",
     )
     assert ONE_WRITER in helper, (
         f"the compose domain path must set the name's domain by calling {ONE_WRITER}"
     )
     for caller in ("compose_worker", "compose_batch"):
-        source = _function_source("imas_codex.standard_names.workers", caller)
+        module = (
+            "imas_codex.standard_names.worker_tasks.worker_compose_batches"
+            if caller == "compose_batch"
+            else "imas_codex.standard_names.worker_tasks.worker_compose_and_validate"
+        )
+        source = _function_source(module, caller)
         assert "_write_composed_name_domains" in source, (
             f"{caller} must hand its persisted names to the one writer"
         )

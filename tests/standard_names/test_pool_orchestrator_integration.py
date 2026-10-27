@@ -15,7 +15,7 @@ from __future__ import annotations
 import asyncio
 import json
 import time
-from contextlib import ExitStack
+from contextlib import ExitStack, contextmanager
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -24,10 +24,20 @@ import pytest
 # (imas_codex.standard_names.graph_ops) because loop.py uses deferred
 # imports (inside function bodies).
 from imas_codex.standard_names.attachment_audit import AttachmentAuditResult
+from imas_codex.standard_names.graph_store import owner_module_path
 
-_GO = "imas_codex.standard_names.graph_ops"
 _AA = "imas_codex.standard_names.attachment_audit"
 _DGO = "imas_codex.graph.dd_graph_ops"
+
+
+@contextmanager
+def _patch_owned(**replacements):
+    with ExitStack() as stack:
+        for name, replacement in replacements.items():
+            stack.enter_context(
+                patch(f"{owner_module_path(name)}.{name}", new=replacement)
+            )
+        yield
 
 
 @pytest.fixture(autouse=True)
@@ -197,8 +207,7 @@ class TestReconcileRunsBeforePools:
                 "imas_codex.standard_names.graph_store.graph_audits.reconcile_standard_name_sources",
                 side_effect=_reconcile_spy,
             ),
-            patch.multiple(
-                _GO,
+            _patch_owned(
                 reconcile_provenance=MagicMock(return_value={}),
                 reconcile_grammar_segments=MagicMock(return_value={}),
                 reconcile_catalog_status=MagicMock(return_value={}),
@@ -490,8 +499,7 @@ class TestFinalizeWithCorrectStatus:
                 "imas_codex.standard_names.graph_store.graph_audits.reconcile_standard_name_sources",
                 return_value={"relinked": 0, "stale_marked": 0, "revived": 0},
             ),
-            patch.multiple(
-                _GO,
+            _patch_owned(
                 reconcile_vocab_gaps=MagicMock(return_value={}),
                 revive_unit_skipped_sources=MagicMock(
                     return_value={"checked": 0, "revived": 0}
@@ -608,8 +616,7 @@ class TestFinalizeWithCorrectStatus:
                 "imas_codex.standard_names.graph_store.graph_audits.reconcile_standard_name_sources",
                 return_value={"relinked": 0, "stale_marked": 0, "revived": 0},
             ),
-            patch.multiple(
-                _GO,
+            _patch_owned(
                 reconcile_vocab_gaps=MagicMock(return_value={}),
                 revive_unit_skipped_sources=MagicMock(
                     return_value={"checked": 0, "revived": 0}
