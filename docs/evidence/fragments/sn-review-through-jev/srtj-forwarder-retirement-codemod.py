@@ -172,7 +172,27 @@ def rewrite(
                             )
                         )
         elif isinstance(node, ast.JoinedStr):
-            if len(node.values) >= 2 and isinstance(node.values[0], ast.FormattedValue):
+            if (
+                len(node.values) == 2
+                and isinstance(node.values[0], ast.Constant)
+                and node.values[0].value == f"{BASE}.graph_ops."
+                and isinstance(node.values[1], ast.FormattedValue)
+                and isinstance(node.values[1].value, ast.Name)
+            ):
+                name = node.values[1].value.id
+                additions.add(
+                    f"from {BASE}.graph_store import owner_module_path as _owner_module_path"
+                )
+                edits.append(
+                    (
+                        *span(lines, node),
+                        f'f"{{_owner_module_path({name})}}.{{{name}}}"',
+                        "dynamic_patch_strings",
+                    )
+                )
+            elif len(node.values) >= 2 and isinstance(
+                node.values[0], ast.FormattedValue
+            ):
                 expression = node.values[0].value
                 first = node.values[1]
                 if isinstance(expression, ast.Name) and isinstance(first, ast.Constant):
