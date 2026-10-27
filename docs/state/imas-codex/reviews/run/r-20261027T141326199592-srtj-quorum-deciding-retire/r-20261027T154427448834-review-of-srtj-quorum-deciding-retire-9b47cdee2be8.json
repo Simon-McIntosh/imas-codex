@@ -1,0 +1,112 @@
+{
+  "added_failure_count": 1,
+  "added_failure_ids": [
+    "tests/standard_names/test_cascade_deciding_axes.py::test_names_deciding_leaves_documentation_with_the_incumbent[docs-False]"
+  ],
+  "assertion_analysis": {
+    "tests/standard_names/test_panel_audit_sample.py:570": "fails if either construction site stops passing partial(_persisting_chat_review, **kwargs) unwrapped, which is the one shape the audit's structural seam accepts",
+    "tests/standard_names/test_review_deciding_paths_retired.py:111": "fails if a review seat is registered as a model section resolvable through get_model; logs/negative-control.log:91 shows it red on a registered sn-reviewer section",
+    "tests/standard_names/test_review_deciding_paths_retired.py:131": "fails if quorum_without_persisting stops rebinding the persisting partial to the cycle runner, in which case the audit would run the writer it must not run",
+    "tests/standard_names/test_review_deciding_paths_retired.py:37": "fails if _persisting_quorum_cycles is redefined on worker_review_names, re-exported through _OWNERS_BY_MODULE, or present in the module source; reinstating the function reddens it, as logs/negative-control.log:9 shows",
+    "tests/standard_names/test_review_deciding_paths_retired.py:80": "fails if _chat_seat is removed or the cascade passes the configured chain through, because seats_seen would then hold three seats; logs/negative-control.log:37 shows it red on exactly that reinstatement",
+    "tests/standard_names/test_review_deciding_paths_retired.py:90": "fails if the single-seat precondition is removed from _persisting_chat_review, because the call would then reach the cycle runner instead of raising"
+  },
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/standard_names/loop.py:890",
+    "imas_codex/standard_names/loop.py:945",
+    "imas_codex/standard_names/worker_tasks/worker_review_names.py:1316",
+    "imas_codex/standard_names/worker_tasks/worker_review_docs.py:855",
+    "imas_codex/standard_names/review/cascade.py:675"
+  ],
+  "completed_at": "2026-10-27T16:34:11.565Z",
+  "dispatched_at": "2026-10-27T16:19:03Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_review_cascade.py",
+      "line": 611,
+      "severity": "blocking",
+      "text": "blocking: this file is not in the node's declared write grant (the manifest's orientation_write_paths and its own blockers entry both say so) and 36 lines of it were changed in 6ff64b2d3; a worker editing outside its exclusive scope is the one thing the fence exists to prevent, and the change is only admissibly landed if the coordinator extends the grant to this path. The edit itself reads as correct - it renames the stub to the chat reviewer and narrows three assertions from two seats to one, matching cascade.py:469 - so the repair is a fence extension, not a revert."
+    },
+    {
+      "file": "tests/standard_names/test_cascade_deciding_axes.py",
+      "line": 141,
+      "severity": "blocking",
+      "text": "blocking: the head arm adds exactly this failure id (logs/suite-head.log:2192 line list against logs/suite-base.log:2192, zero removed) because the shadow-mode fallback now narrows the chain to one seat at cascade.py:469 while this assertion still expects [[\"primary\", \"secondary\"]]; the node's own done_when says the gate adds zero failure ids, so this has to be repaired in this file before the node can land, and it is outside the node's fence so the repair needs its owner."
+    },
+    {
+      "file": "tests/standard_names/test_review_deciding_paths_retired.py",
+      "line": 120,
+      "severity": "non-blocking",
+      "text": "non-blocking: the loop asserts set(get_model_source_models(source)) <= seats where seats is the union of the same two calls, so both sides move together and the assertion holds whatever the resolver returns; it cannot fail on any change to the code it claims to guard and should either be removed or replaced by a check against an independent expectation."
+    },
+    {
+      "file": "tests/standard_names/test_review_deciding_paths_retired.py",
+      "line": 49,
+      "severity": "non-blocking",
+      "text": "non-blocking: test_the_retained_runner_persists_nothing asserts only that two function names appear in the module's AST; it stays green if _run_rd_quorum_cycles starts writing canonical rows, which is the property the test's name and docstring claim to pin, so it protects nothing about persistence."
+    },
+    {
+      "file": "tests/standard_names/test_review_deciding_paths_retired.py",
+      "line": 83,
+      "severity": "non-blocking",
+      "text": "non-blocking: stored == [(\"temperature\", \"unjudged\")] compares against the literal the test's own store_unjudged stub appended, so it only proves the stub ran once; it says nothing about the item, axis or reason the code under test passed, and the independent assertion on this path is seats_seen at line 80."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-quorum-deciding-retire.html",
+      "line": 62,
+      "severity": "non-blocking",
+      "text": "non-blocking: row d7 sits in the table headed \"Deleted paths, with line counts\" and lists _chat_seat with 5 lines, but _chat_seat is added by this node (cascade.py:448), not deleted; the deletion accounting the fragment's done_when asks for is therefore overstated by one added symbol and reads as if five lines were removed."
+    },
+    {
+      "file": "manifest.md",
+      "line": 22,
+      "severity": "non-blocking",
+      "text": "non-blocking: baseline_suite.failure_ids carries the prose placeholder \"see log: 95 ids, listed in the run directory as base failure set\" instead of the ids, and after_suite carries only the single added id rather than its 96; the failure delta is reproducible only by re-parsing both logs, which is what this review had to do to derive added_failure_ids."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "Five production call sites reach the change: imas_codex/standard_names/loop.py:890 and :945 dispatch the two pool batches, worker_review_names.py:1316 and worker_review_docs.py:855 pass partial(_persisting_chat_review, ...) into cascade.adjudicate_review, and cascade.py:675 hands that same reviewer to panel_audit.quorum_without_persisting for the non-persisting audit; the node's own test files were excluded from this count.",
+    "diff": "Read commit by commit from 137eb8fd4 to 9b47cdee2: 18575cce1 renames the persisting wrapper and rewrites both call sites plus panel_audit's structural recognition, 6ff64b2d3 adds _chat_seat and _chat_then_unjudged and narrows every cascade call to one seat, 0928c62a2 and 9b47cdee2 add only the evidence fragment; the two at-head commits add no production code, and the gate ran at 6ff64b2d3 so the 29 evidence lines are outside the measured revision.",
+    "done_when": "The done_when asks for the whole tests/standard_names/ suite at base and head with zero added failure ids, and a test per deleted path that fails when it is restored; the manifest records both arms with logs and the suite arrives at 96 failed at head against 95 at base, so the zero-added measure is missed by exactly one id, and the three assertion restorations are recorded in logs/negative-control.log with a failing id at lines 6, 30 and 84 and an EXIT=1 at lines 25, 53 and 107.",
+    "goal": "The node goal is to delete the quorum as a deciding path while keeping it as the audit panel; worker_review_names.py:824 now defines _persisting_chat_review, which refuses more than one seat at :837, cascade.py:453 replaces _incumbent_then_unjudged with _chat_then_unjudged and cascade.py:469 feeds it _chat_seat, and panel_audit.py:111 keeps recognising the persisting partial so the non-persisting cycle runner still serves the audit.",
+    "manifest": "Read in full; it records status complete, four commits, both arm commands with log paths and EXIT=1, the 95-to-96 failure counts, the one added id attributed to a file outside the fence, the three negative-control mutations with the inadmissible first form of mutation 3 declared, and both the fence overrun and the remaining failure under blockers; its baseline_suite.failure_ids field is prose rather than ids.",
+    "write_paths": "The declared grant is worker_review_names.py, worker_review_docs.py, worker_tasks/__init__.py, review/cascade.py, review/panel_audit.py, settings.py, pyproject.toml, the eleven named test files and the evidence fragment; git diff --stat 137eb8fd4..9b47cdee2 lists ten paths, nine of which are inside the grant and tests/standard_names/test_review_cascade.py which is not."
+  },
+  "justifications": {
+    "durability": "logs/negative-control.log:6, :30 and :84 show three separate mutations each reddening the assertion that names its deleted path, with EXIT=1 at :25, :53 and :107, so those three are real guards, while the added seat test carries a tautology at test_review_deciding_paths_retired.py:120 and the retained-runner test at :49 cannot fail on the persistence it claims.",
+    "evidence": "logs/suite-base.log:2192 and logs/suite-head.log:2192 record 95 and 96 failures with EXIT=1 beside them, and re-deriving the id delta from those two logs reproduces exactly the one added id the manifest names with zero removed, but the done_when's zero-added measure is unmet and the gate ran at 6ff64b2d3 rather than the reviewed head 9b47cdee2.",
+    "fit": "The added symbols are named for their mechanism - _chat_seat (cascade.py:448), _chat_then_unjudged (cascade.py:453), _persisting_chat_review (worker_review_names.py:824) - carry no plan, phase or ticket labels, and follow the surrounding async-helper idiom, though the new test file ends without a trailing newline.",
+    "goal_fidelity": "cascade.py:453 and :469 make every unjudged and shadow path call the reviewer with _chat_seat(models) while worker_review_names.py:837 refuses a multi-seat call, so no quorum verdict can decide or persist a review, and panel_audit.py:111 keeps the audit's non-persisting seam intact; the seats were kept rather than deleted only because the coordinator's resume advice said to keep them and record that as outside_scope.",
+    "reuse": "_chat_seat (cascade.py:448) narrows an existing configured chain rather than forking one, and a search over imas_codex/standard_names for an existing head-of-chain helper found only the inline canonical-model idiom at review/pipeline.py:1132 and review/state.py:50, which own no such capability, so the 5-line helper is the first owner; _persisting_chat_review wraps the existing _run_rd_quorum_cycles instead of reimplementing it.",
+    "scope_discipline": "tests/standard_names/test_review_cascade.py:611 is outside the declared grant and was edited in 6ff64b2d3, which the node declares itself under blockers rather than leaving for a reader to find."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the brief's delete-list is the persisting quorum runner, its export, every call site letting a quorum verdict decide or persist, and the incumbent-first fallback; worker_review_names.py:824 is now _persisting_chat_review and refuses more than one seat at :837, cascade.py:453 replaces _incumbent_then_unjudged with _chat_then_unjudged, and panel_audit.py:111 keeps the non-persisting runner the audit uses.\nVERDICT done_when: the brief's Tests and Gate sections ask for the whole tests/standard_names/ suite at base and head adding zero failure ids, plus one assertion per deleted path that fails when it is restored; the manifest records both arms with logs at 95 failed base and 96 failed head, so the zero-added measure is missed by one id, and logs/negative-control.log records three restorations each reddening its assertion with EXIT=1.\nVERDICT write_paths: the grant is the five production modules, the eleven named test files and the evidence fragment; of the ten paths in git diff --stat 137eb8fd4..9b47cdee2, nine are inside it and tests/standard_names/test_review_cascade.py is outside, which the manifest declares under blockers.\nVERDICT manifest: read; it records complete status, four commits, both gate commands with their logs and EXIT=1, the 95-to-96 counts, the one added id attributed outside the fence, the three negative-control mutations with mutation 3's inadmissible first form declared, and two blockers; its baseline_suite.failure_ids is a prose placeholder rather than the 95 ids.\nVERDICT diff: read commit by commit from 137eb8fd4 to 9b47cdee2; 18575cce1 renames the persisting wrapper and rewrites the two call sites and the audit seam, 6ff64b2d3 adds _chat_seat and _chat_then_unjudged and narrows every cascade call to one seat, 0928c62a2 and 9b47cdee2 add only the evidence fragment (29 lines), and no production code lands after the gated revision 6ff64b2d3.\nCALL_SITES: imas_codex/standard_names/loop.py:890, imas_codex/standard_names/loop.py:945, imas_codex/standard_names/worker_tasks/worker_review_names.py:1316, imas_codex/standard_names/worker_tasks/worker_review_docs.py:855, imas_codex/standard_names/review/cascade.py:675\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: cascade.py:469 and :806 pass _chat_seat(models) to every fallback call and worker_review_names.py:837 refuses a multi-seat call, so no quorum verdict can decide or persist a review, while panel_audit.py:111 keeps the audit's non-persisting runner.\nSCORE evidence: 14\nJUSTIFICATION evidence: logs/suite-base.log:2192 and logs/suite-head.log:2192 record 95 and 96 failures with EXIT=1 beside them and the re-derived id delta is exactly the one added id, but the zero-added measure is unmet and the gate ran at 6ff64b2d3, not the reviewed head 9b47cdee2.\nSCORE scope_discipline: 6\nJUSTIFICATION scope_discipline: tests/standard_names/test_review_cascade.py:611 is outside the declared grant and was edited in 6ff64b2d3, a fence overrun the node declares itself under blockers.\nSCORE durability: 16\nJUSTIFICATION durability: logs/negative-control.log:6, :30 and :84 show three mutations each reddening its named assertion with EXIT=1 at :25, :53 and :107, but the seat test carries a tautology at test_review_deciding_paths_retired.py:120 and the retained-runner test at :49 cannot fail on its claim.\nSCORE fit: 18\nJUSTIFICATION fit: the added names _chat_seat (cascade.py:448), _chat_then_unjudged (cascade.py:453) and _persisting_chat_review (worker_review_names.py:824) are mechanism-named with no plan or ticket labels and follow the module's async-helper idiom.\nSCORE reuse: 17\nJUSTIFICATION reuse: _chat_seat (cascade.py:448) narrows an existing chain, and a search over imas_codex/standard_names for a head-of-chain helper found only the inline canonical-model idiom at review/pipeline.py:1132 and review/state.py:50, which own no such capability.\nFINDING tests/standard_names/test_review_cascade.py:611 blocking: this file is outside the node's write grant and 36 lines of it changed in 6ff64b2d3; the edit reads as correct but landing it needs the coordinator to extend the grant to this path.\nFINDING tests/standard_names/test_cascade_deciding_axes.py:141 blocking: the head arm adds exactly this id because the shadow-mode fallback now narrows to one seat at cascade.py:469 while the assertion still expects the chain, so the done_when's zero-added measure is unmet and the repair needs the file's owner.\nFINDING tests/standard_names/test_review_deciding_paths_retired.py:120 non-blocking: the subset loop compares each resolver call against the union of the same two calls, so it holds whatever the code does and guards nothing.\nFINDING tests/standard_names/test_review_deciding_paths_retired.py:49 non-blocking: test_the_retained_runner_persists_nothing asserts only that two names exist in the AST, so it stays green if the runner begins writing canonical rows.\nFINDING tests/standard_names/test_review_deciding_paths_retired.py:83 non-blocking: the stored comparison is satisfied by the literal the test's own stub appends, so it proves only that the stub ran once.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-quorum-deciding-retire.html:62 non-blocking: row d7 lists the added _chat_seat in the table of deleted paths, overstating the deletion accounting by one added symbol.\nFINDING manifest.md:22 non-blocking: baseline_suite.failure_ids is a prose placeholder and after_suite lists only the added id, so the failure delta is reproducible only by re-parsing both logs.\n",
+  "review_run_id": "r-20261027T154427448834-review-of-srtj-quorum-deciding-retire-9b47cdee2be8",
+  "reviewed_base_sha": "137eb8fd480a7dcd988c3808c31766e317f1b9d8",
+  "reviewed_commits": [
+    "18575cce1",
+    "0928c62a2",
+    "6ff64b2d3",
+    "9b47cdee2"
+  ],
+  "reviewed_head_sha": "9b47cdee2be868f6e725a784c531329a387949f7",
+  "reviewed_run_id": "r-20261027T141326199592-srtj-quorum-deciding-retire",
+  "scores": {
+    "durability": 16,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 17,
+    "scope_discipline": 6
+  },
+  "self_comparison_assertions": [
+    "tests/standard_names/test_review_deciding_paths_retired.py:120 - set(get_model_source_models(source)) <= union of the same two calls, true by construction",
+    "tests/standard_names/test_review_deciding_paths_retired.py:83 - compares against the tuple the test's own stub appended"
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T16:35:47.180438+00:00",
+  "total": 89
+}
