@@ -1,0 +1,98 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_basis": "derived from the reviewed run's manifest: baseline_suite (revision 43ae5712c9e7c1fc0b20866834743ddad55664c4, logs/gate-base-final.log, completed true, exit 1, 7 failure ids, last line EXIT=1) subtracted from after_suite (revision b8ddd58a36f5c0cc66e8e9ba4e5af8eb2495fd35, logs/gate-head-final.log, completed true, exit 1, 1 failure id, last line EXIT=1); the single head id is present in the base set, so added_failure_count is 0 and added_failure_ids is empty. The head arm ran at b8ddd58a3; git diff --stat b8ddd58a3 a0cb037dd shows the only changes after it are the evidence fragment.",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": {
+    "tests/standard_names/test_campaign_convergence_gate.py:121": "fails if a stage the batch moved off accepted stops counting as drift",
+    "tests/standard_names/test_campaign_convergence_gate.py:153": "fails if a reviewed document scoring above the floor is counted accepted",
+    "tests/standard_names/test_campaign_convergence_gate.py:184": "fails if the gate returns to an absolute post-drain stage check",
+    "tests/standard_names/test_campaign_convergence_gate.py:202": "fails if a member with no pre-drain row has its non-accepted stage excused",
+    "tests/standard_names/test_campaign_convergence_gate.py:281": "fails if the planner stops reading the name stage or the apply stops naming a skipped member",
+    "tests/standard_names/test_campaign_convergence_gate.py:89": "fails if extracted planning keeps a reviewed member eligible or if measure_batch reports an inherited unchanged stage as drift"
+  },
+  "call_site_count": 7,
+  "call_sites": [
+    "imas_codex/standard_names/campaign.py:1062",
+    "imas_codex/standard_names/campaign.py:1086",
+    "imas_codex/standard_names/harmonize.py:1328",
+    "imas_codex/standard_names/harmonize.py:1516",
+    "imas_codex/standard_names/harmonize.py:1818",
+    "imas_codex/cli/sn.py:6184",
+    "imas_codex/cli/sn.py:6264"
+  ],
+  "completed_at": "2026-10-27T21:33:33.716Z",
+  "dispatched_at": "2026-10-27T21:20:41Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/campaign.py",
+      "line": "616",
+      "severity": "non-blocking",
+      "text": "non-blocking: the measure_batch docstring still lists `reviewer_score_docs` among the columns refreshed_rows must carry, but _REFRESH_QUERY at campaign.py:711-719 never selects it and nothing reads it since score-based acceptance was removed, so the docstring describes a contract the gate does not have."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T163841250238-shc-convergence-gate-false-halts/manifest.md",
+      "line": "17",
+      "severity": "non-blocking",
+      "text": "non-blocking: the gate ran 21 test files but three files that import campaign or harmonize are absent from it \u2014 tests/standard_names/test_harmonize_finalize.py, tests/standard_names/test_harmonize_reverse_links.py and tests/standard_names/test_quarantine_reason.py \u2014 against the brief's 'every test file that imports campaign or harmonize'; the first two drive plan_family_applies and apply_families, the functions this change alters, and I ran all three at head (25 passed) so no regression is masked, but the recorded gate is a subset of the set the brief names."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T163841250238-shc-convergence-gate-false-halts/manifest.md",
+      "line": "13",
+      "severity": "non-blocking",
+      "text": "non-blocking: the commits list holds 11 of the 12 commits between 43ae5712c and a0cb037dd, omitting 6a52f5140, so the manifest's own account of the change does not cover the whole range it landed."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "Seven production call sites examined: CampaignRunner.run reads the inherited state and calls measure_batch, plan_family_applies reaches both harmonize and finalize paths, apply_families reports skips, and sn harmonize drives the plan and apply.",
+    "diff": "Read all 12 commits; four carry the gate and planner change, two add the skipped-member reporter, and six touch only the evidence fragment, with the two commits after the gated revision b8ddd58a3 changing only the fragment.",
+    "done_when": "The measure asks for both causes in the fragment, change-based drift, skipped non-accepted members, a fixed acceptance count, three tests failing on main and zero added failure ids; the fragment records both causes with the two ReviewHold ids and the judged clause, the arms record 7 failed/230 passed at base against 1 failed/236 passed at head, the negative control shows 6 of 6 new tests failing on main, and the acceptance bullet is answered as a diagnosis rather than a fix.",
+    "goal": "The node goal is to stop the harmonize convergence gate halting on state a docs-only campaign did not cause and to report skipped members; campaign.py:657-676 and :1062 implement change-based drift, harmonize.py:1328-1346 splits the plan, and :1818-1826 reports each skipped member with its stage.",
+    "manifest": "Read in full; both arms are readable with EXIT lines, the head-arm receipt the prior review called unreadable is repaired, but the gate omitted three importing test files and the commits list omits 6a52f5140.",
+    "write_paths": "The grant is campaign.py, harmonize.py, test_campaign.py, test_campaign_convergence_gate.py and the evidence fragment; git diff --stat 43ae5712c..a0cb037dd lists exactly those five paths."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_campaign_convergence_gate.py:150-165 reddens when the absolute stage check is restored (logs-drift-guard-mutation.log) and :178-200 reddens when score-based acceptance returns (logs-pinned-truth-mutation.log), and :201-215 is proven red at 5d71b99d8 (logs/gate-prior-head-new-test.log), so each guard names the change that would break it.",
+    "evidence": "both arms are readable and reconcilable (logs/gate-base-final.log 7 failed/230 passed, logs/gate-head-final.log 1 failed/236 passed, each ending EXIT=1), but the run omitted three importing test files from the gate its brief named (manifest.md:17).",
+    "fit": "harmonize.py:1228-1280 adds mechanism-named symbols with no plan or ticket labels and follows the module's lazy-import idiom, though campaign.py:616 still advertises a reviewer_score_docs column the read never returns.",
+    "goal_fidelity": "campaign.py:659-676 and harmonize.py:1328-1346 make the drift halt depend on a stage the batch moved and keep non-accepted members out of the plan, while the brief's acceptance-count bullet is deliberately left unchanged as a recorded true halt at campaign.py:679-682.",
+    "reuse": "harmonize.py:1241 now reads through campaign.py's own default_fetch_refreshed owner rather than a second query, and a search of imas_codex/standard_names for a member-eligibility split found no owner before this one.",
+    "scope_discipline": "`git diff --stat 43ae5712c..a0cb037dd` lists exactly the five declared write paths and nothing outside them."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The node goal is to stop the harmonize convergence gate halting on state a docs-only campaign did not cause and to report skipped members; imas_codex/standard_names/campaign.py:657-676 now marks drift only when a name stage moved between the pre-drain read (:1062) and the post-drain read and did not land on accepted, imas_codex/standard_names/harmonize.py:1328 splits non-name-accepted members out of the batch, and :1818-1826 reports them with their stage.\nVERDICT done_when: The done-when asks for both causes in the fragment, change-based drift, skipped non-accepted members, a fixed acceptance count, three tests failing on main and zero added failure ids; the fragment records both causes with the two ReviewHold ids and the judged clause (docs/evidence/fragments/sn-harmonize-command/shc-convergence-gate-false-halts.html), the two git-archive arms record 7 failed/230 passed at base against 1 failed/236 passed at head (logs/gate-base-final.log, logs/gate-head-final.log), the negative control shows 6 of 6 new tests failing on main (logs-negative-control.log), and the acceptance clause is answered by a recorded diagnosis that the 1/2 refusal is true rather than by a code change, which leaves the brief's third bullet answered as a diagnosis (fragment:112-168) rather than as a fix.\nVERDICT write_paths: The grant is imas_codex/standard_names/campaign.py, imas_codex/standard_names/harmonize.py, tests/standard_names/test_campaign.py, tests/standard_names/test_campaign_convergence_gate.py and the evidence fragment; `git diff --stat 43ae5712c..a0cb037dd` lists exactly those five paths (735 insertions, 13 deletions) and nothing else.\nVERDICT manifest: Read in full; it records status complete, both arms as JSON with commands, log paths, EXIT and failure ids, 0 added ids, the pre-existing prose-hold failure re-run at base in isolation, and the head-arm gate log now ends with a bare EXIT=1 (the prior review's blocking unreadable-receipt finding is repaired) \u2014 but the gate ran 21 files while three tests that import campaign/harmonize are absent (FINDING below), and the commits list omits 6a52f5140 (:13).\nVERDICT diff: Read all 12 commits from 43ae5712c to a0cb037dd; 0754e8725/50e14d581/5d319309d/b8ddd58a3 carry the inherited-versus-post-drain comparison and the stamped-acceptance rule, a3c8bc485/5d71b99d8 add and export the skipped-member reporter, 0a8311e98/67ef0c7aa/311e243fc/a0cb037dd and 6a52f5140/369ccb212 touch only the evidence fragment, and the two commits after the gated revision b8ddd58a3 change only the fragment, so the gate measured the source under review.\nCALL_SITES: imas_codex/standard_names/campaign.py:1062, imas_codex/standard_names/campaign.py:1086, imas_codex/standard_names/harmonize.py:1328, imas_codex/standard_names/harmonize.py:1516, imas_codex/standard_names/harmonize.py:1818, imas_codex/cli/sn.py:6184, imas_codex/cli/sn.py:6264\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: campaign.py:659-676 and harmonize.py:1328-1346 make the drift halt depend on a stage the batch moved and keep non-accepted members out of the plan, while the brief's acceptance-count bullet is deliberately left unchanged as a recorded true halt at campaign.py:679-682.\nSCORE evidence: 14\nJUSTIFICATION evidence: both arms are readable and reconcilable (logs/gate-base-final.log 7 failed/230 passed, logs/gate-head-final.log 1 failed/236 passed, each ending EXIT=1), but the run omitted three importing test files from the gate its brief named (manifest.md:17).\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: `git diff --stat 43ae5712c..a0cb037dd` lists exactly the five declared write paths and nothing outside them.\nSCORE durability: 19\nJUSTIFICATION durability: tests/standard_names/test_campaign_convergence_gate.py:150-165 reddens when the absolute stage check is restored (logs-drift-guard-mutation.log) and :178-200 reddens when score-based acceptance returns (logs-pinned-truth-mutation.log), and :201-215 is proven red at 5d71b99d8 (logs/gate-prior-head-new-test.log), so each guard names the change that would break it.\nSCORE fit: 17\nJUSTIFICATION fit: harmonize.py:1228-1280 adds mechanism-named symbols with no plan or ticket labels and follows the module's lazy-import idiom, though campaign.py:616 still advertises a reviewer_score_docs column the read never returns.\nSCORE reuse: 20\nJUSTIFICATION reuse: harmonize.py:1241 now reads through campaign.py's own default_fetch_refreshed owner rather than a second query, and a search of imas_codex/standard_names for a member-eligibility split found no owner before this one.\nFINDING imas_codex/standard_names/campaign.py:616 non-blocking: the measure_batch docstring still lists `reviewer_score_docs` among the columns refreshed_rows must carry, but _REFRESH_QUERY at campaign.py:711-719 never selects it and nothing reads it since score-based acceptance was removed, so the docstring describes a contract the gate does not have.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T163841250238-shc-convergence-gate-false-halts/manifest.md:17 non-blocking: the gate ran 21 test files but three files that import campaign or harmonize are absent from it \u2014 tests/standard_names/test_harmonize_finalize.py, tests/standard_names/test_harmonize_reverse_links.py and tests/standard_names/test_quarantine_reason.py \u2014 against the brief's 'every test file that imports campaign or harmonize'; the first two drive plan_family_applies and apply_families, the functions this change alters, and I ran all three at head (25 passed) so no regression is masked, but the recorded gate is a subset of the set the brief names.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T163841250238-shc-convergence-gate-false-halts/manifest.md:13 non-blocking: the commits list holds 11 of the 12 commits between 43ae5712c and a0cb037dd, omitting 6a52f5140, so the manifest's own account of the change does not cover the whole range it landed.",
+  "review_run_id": "r-20261027T211941808596-review-of-shc-convergence-gate-false-halts-a0cb037dd95b",
+  "reviewed_base_sha": "43ae5712c9e7c1fc0b20866834743ddad55664c4",
+  "reviewed_commits": [
+    "0754e8725",
+    "50e14d581",
+    "6a52f5140",
+    "5d319309d",
+    "369ccb212",
+    "0a8311e98",
+    "a3c8bc485",
+    "67ef0c7aa",
+    "5d71b99d8",
+    "b8ddd58a3",
+    "311e243fc",
+    "a0cb037dd"
+  ],
+  "reviewed_head_sha": "a0cb037dd95baa989782394175258bbbd2421de2",
+  "reviewed_run_id": "r-20261027T163841250238-shc-convergence-gate-false-halts",
+  "scores": {
+    "durability": 19,
+    "evidence": 14,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertion_note": "No added assertion compares a value against the same variable the test passed in; the fixture-stage echoes in test_campaign_convergence_gate.py:281-290 are a graph-read round-trip whose expected lists name members the code must independently exclude.",
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T21:35:31.937672+00:00",
+  "total": 107
+}
