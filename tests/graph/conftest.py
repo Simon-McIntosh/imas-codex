@@ -360,13 +360,29 @@ def _call_name(node: ast.Call) -> str | None:
 _CYPHER_METHODS = frozenset({"query", "run", "execute_query", "execute_write"})
 
 
-def _writer_facts(source: str) -> tuple[bool, bool]:
-    """Return ``(writes, bare_client)`` for one test function's source."""
+def _module_functions(source: str) -> dict[str, ast.AST]:
+    """Top-level functions defined in one module, by name.
+
+    A test that delegates its write to a helper in the same file would
+    otherwise read as a reader: the write is one call away.
+    """
     try:
         tree = ast.parse(source)
     except SyntaxError:
-        return False, False
+        return {}
+    return {
+        node.name: node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
+    }
 
+
+def _scan_calls(
+    tree: ast.AST,
+    local: dict[str, ast.AST],
+    seen: frozenset[str] = frozenset(),
+) -> tuple[bool, bool]:
+    """Return ``(writes, bare_client)`` for one function body."""
     writes = False
     bare_client = False
     for node in ast.walk(tree):
@@ -377,7 +393,7 @@ def _writer_facts(source: str) -> tuple[bool, bool]:
             continue
         if name.startswith(_WRITE_CALL_PREFIXES):
             writes = True
-        if name in _CYPHER_METHODS and node.args:
+        elif name in _CYPHER_METHODS and node.args:
             first = node.args[0]
             if (
                 isinstance(first, ast.Constant)
@@ -385,15 +401,50 @@ def _writer_facts(source: str) -> tuple[bool, bool]:
                 and _WRITE_CYPHER.search(first.value)
             ):
                 writes = True
-        if name == "GraphClient":
+        elif name == "GraphClient":
             has_uri = any(kw.arg == "uri" for kw in node.keywords) or node.args
             if not has_uri:
                 bare_client = True
+        elif name in local and name not in seen:
+            helper_writes, helper_bare = _scan_calls(local[name], local, seen | {name})
+            writes = writes or helper_writes
+            bare_client = bare_client or helper_bare
     return writes, bare_client
+
+
+def _writer_facts(source: str, module_source: str = "") -> tuple[bool, bool]:
+    """Return ``(writes, bare_client)`` for one test function's source.
+
+    Calls to functions defined at the top level of the same module are
+    followed, so a test whose only statement is ``_seed_nodes(client)`` is
+    recognised as the writer that helper makes it.
+    """
+    try:
+        tree = ast.parse(source)
+    except SyntaxError:
+        return False, False
+    local = _module_functions(module_source or source)
+    return _scan_calls(tree, local)
+
+
+# What this guard cannot see, and why the refusal is still worth having:
+#
+# * a write that happens inside an imported helper from another module, or
+#   inside a fixture body — only the test function and the top-level functions
+#   of its own file are read;
+# * Cypher assembled at runtime (a keyword built from a variable) or sent
+#   through a method outside ``_CYPHER_METHODS``;
+# * a client obtained inside a helper from the environment rather than passed
+#   in, when the test itself never names ``GraphClient``;
+# * a write reached through a class method or a callable value.
+#
+# Each of those is visible to a reader of the test; the guard is the backstop
+# for the ordinary shape, where a test builds a client and writes through it.
 
 
 def pytest_collection_modifyitems(config, items):  # noqa: ARG001
     """Refuse a graph writer that is not routed to the disposable graph."""
+    module_sources: dict[str, str] = {}
     offenders: list[str] = []
     for item in items:
         if not item.get_closest_marker("graph"):
@@ -407,7 +458,19 @@ def pytest_collection_modifyitems(config, items):  # noqa: ARG001
             source = inspect.getsource(item.obj)
         except (OSError, TypeError):
             continue
-        writes, bare_client = _writer_facts(source)
+        module_source = ""
+        try:
+            module_path = inspect.getsourcefile(item.obj) or ""
+        except TypeError:
+            module_path = ""
+        if module_path:
+            if module_path not in module_sources:
+                try:
+                    module_sources[module_path] = Path(module_path).read_text()
+                except OSError:
+                    module_sources[module_path] = ""
+            module_source = module_sources[module_path]
+        writes, bare_client = _writer_facts(source, module_source)
         if not writes:
             continue
         if bare_client or (fixturenames & _BARE_CLIENT_FIXTURES):
@@ -416,6 +479,5 @@ def pytest_collection_modifyitems(config, items):  # noqa: ARG001
     if offenders:
         raise pytest.UsageError(
             "graph-marked tests that write must run on the disposable graph "
-            "(request the 'disposable_graph' fixture): "
-            + ", ".join(sorted(offenders))
+            "(request the 'disposable_graph' fixture): " + ", ".join(sorted(offenders))
         )
