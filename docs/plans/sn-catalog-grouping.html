@@ -25,7 +25,7 @@
   <title>Group Names By What They Share | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="134">
+<meta name="plan-version" content="135">
 <meta name="plan-modified" content="2026-10-27">
 <meta name="plan-commits" content="58ad9b1a4e61408b2da7c9e8232bcb6bccb21c1f,38f0a7336ce3b86ab37ebf5cb353a00363c32274,5c666533b9b786ec14259e85d0a6eb42cae1125c,17f084e2d28d7145d9288c8a5a542d03a7519f4a,aea797386d61d8b3703afbad957f4ff707ea9fab,c5e94c099ff238c7925e506686016698bdb04b64,178cfa68ba0e7aae45c0b76ea3ccc0511eb8c07d,02a113fb8754bf9a57a279726afbdf1d85fc57f8">
 </head>
@@ -661,6 +661,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261027T105741913484-scg-name-domain-route-lineage-sites" data-who="reckon-build" data-when="2026-10-27T14:56:33Z">
     <div class="r-comment-body"><p>Route the lineage-side StandardName domain writes through write_name_domain: `sn reclassify` records its domain as a DomainCorrection, and the structural edge pass plus both derived-parent materializers write source_domains and the HAS_PHYSICS_DOMAIN edges through the same writer; the batch materializer now selects its rows by the properties they carry instead of by a query count, the catalog-edit path test fails when reverted to a direct write (EXIT=1, 1 failed), and the suite gate adds zero failure ids.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261027T105324872200-scg-name-domain-route-catalog-sites" data-who="reckon-build" data-when="2026-10-27T15:24:10Z">
+    <div class="r-comment-body"><p>§3 — every StandardName domain write reachable from graph_catalog and graph_refinement goes through write_name_domain, and a rename writes its successor&#x27;s domain for every client the call path accepts, refusing an unwritable client before the rename commits rather than skipping or leaving a half-written successor; both gate arms add 0 failure ids (default head 71 failed/8412 passed against base 73/8409, graph head 59/312 against base 60/306).</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261014T182748718064-review-of-scg-domain-precedence-0faae66faa2c" data-who="reckon-build" data-when="2026-10-14T18:38:07.927Z">
     <div class="r-comment-body"><p>review of run r-20261014T180703200185-scg-domain-precedence (head 0faae66faa2ccd151b485115b287dd21cb5a16ff, base bc5acb919a70b460a3aed4d8cfa28ec73bdc1b85) stored as a parsed six-dimension record — goal_fidelity 19, evidence 17, scope_discipline 20, durability 16, fit 18, reuse 17, total 107; one follow-on finding (the chat prompt's category list is not reordered by the precedence it claims to follow)</p></div>
