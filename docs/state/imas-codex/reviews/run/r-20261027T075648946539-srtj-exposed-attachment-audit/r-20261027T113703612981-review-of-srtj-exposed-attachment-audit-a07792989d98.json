@@ -1,0 +1,67 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/standard_names/loop.py:1400",
+    "imas_codex/standard_names/loop.py:2058",
+    "imas_codex/standard_names/provenance_rebuild.py:535",
+    "imas_codex/cli/sn.py:7561"
+  ],
+  "completed_at": "2026-10-27T11:55:41.221Z",
+  "dispatched_at": "2026-10-27T11:41:42Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T075648946539-srtj-exposed-attachment-audit/manifest.md",
+      "line": 16,
+      "severity": "non-blocking",
+      "text": "non-blocking: the manifest's `tests:` line records `--basetemp=.../headfile-mcintos-EngJ` while the cited gate_head_graph_file.log header records `--basetemp=.../headfile2-mcintos-2Eqf`, so the command promotion would re-run is not the literal command that produced the log it cites; the log is still a valid receipt, only the replay path drifts."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-exposed-attachment-audit.html",
+      "line": 12,
+      "severity": "non-blocking",
+      "text": "non-blocking: the fragment says 93e04a526 'touched attachment_audit.py alone', but that commit also added tests/standard_names/test_attachment_stranding_hold.py (174 lines); the sentence means no other product module, and as written it reads as a narrower change than landed."
+    },
+    {
+      "file": "tests/standard_names/test_attachment_audit.py",
+      "line": 3254,
+      "severity": "non-blocking",
+      "text": "non-blocking: the corrected test_orphaned_name_is_reported now asserts skipped_stranding/held_stranding, the same held-not-detached contract already covered by tests/standard_names/test_attachment_stranding_hold.py:111; the overlap was unavoidable given the brief's ban on weakening assertions, but two tests now guard one behaviour and the second adds no new failure mode."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit: 209cd30cc is the product fix plus the test correction, a07792989 is the fragment alone; 64 insertions, 3 deletions, no file outside scope, and `git diff 209cd30cc a07792989 -- imas_codex/ tests/` is empty so the code read is the head read.",
+    "done_when": "The done_when names the nine passing ids, zero added failure ids, and the fragment; gate_base_graph_file.log fails exactly those nine, the recomputed suite delta is zero, and docs/evidence/fragments/sn-review-through-jev/srtj-exposed-attachment-audit.html:1-19 records the per-id verdicts.",
+    "goal": "The goal is 'the 9 tests that now reach attachment_audit.py pass, or say why they cannot'; gate_head_graph_file.log records all nine passing at head and the fragment records a verdict for each.",
+    "manifest": "The manifest reports status complete, commits 209cd30cc and a07792989, and the same gate results the logs carry, but its `tests:` line records a basetemp (headfile-mcintos-EngJ) that is not the one in the cited log header (headfile2-mcintos-2Eqf).",
+    "write_paths": "The declared scope is attachment_audit.py, test_attachment_audit.py and the evidence fragment; `git diff --stat e2fee62a4 a07792989` shows exactly those three and nothing else."
+  },
+  "justifications": {
+    "durability": "The three terminal-recovery assertions redden under the declared mutation (negative_control.log: 3 failed, the same three ids), and the six corrected tests redden on the pre-correction contract because the base arm records them failing; the one weaker assertion, test_attachment_audit.py:774, compares the product's source_paths projection against a path the fixture itself seeded, so it detects a retained detached path but cannot detect a wrong-but-present surviving path is not what it claims.",
+    "evidence": "Every done_when clause is measured in a log I re-read: gate_base_graph_file.log fails exactly the nine listed ids, gate_head_graph_file.log passes the file, gate_head_default_file.log passes 76, and the suite delta recomputed from suite_baseline_main.log (97) and suite_after_head.log (73) is zero added ids; the manifest's recorded gate command carries a scratch basetemp (headfile-mcintos-EngJ) the log header does not (headfile2-mcintos-2Eqf).",
+    "fit": "The added helper tests/standard_names/test_attachment_audit.py:662 follows the existing `_seed_attachment` idiom at :610 and the fix at attachment_audit.py:1650 sits beside the adjacent source_paths filter, naming no plan or ticket; the four-line comment at :1644-1649 is longer than the file's usual one-liner but states the invariant that makes the exclusion right.",
+    "goal_fidelity": "The goal asks the nine tests to pass or to be explained; docs/evidence/fragments/sn-review-through-jev/srtj-exposed-attachment-audit.html:4-12 gives a per-id verdict (three product defect, six stale test) and gate_head_graph_file.log records 20 passed at EXIT=0 with every one of the nine among them.",
+    "reuse": "The added `_seed_surviving_producer` extends the capability owner, delegating to `_seed_attachment` at tests/standard_names/test_attachment_audit.py:610 rather than re-seeding inline, and a search for other producer-seeding helpers across tests/ and imas_codex/ found none; the corrected orphan test duplicates coverage already owned by tests/standard_names/test_attachment_stranding_hold.py:111, which costs the one point.",
+    "scope_discipline": "All three changed paths in `git diff e2fee62a4 a07792989` \u2014 imas_codex/standard_names/attachment_audit.py, tests/standard_names/test_attachment_audit.py, docs/evidence/fragments/sn-review-through-jev/srtj-exposed-attachment-audit.html \u2014 are inside the declared write scope, and the diff adds nothing the goal does not imply."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is that the nine tests reaching attachment_audit.py pass or say why they cannot; gate_head_graph_file.log:all records 20 passed at EXIT=0 and every one of the nine is among them, so no explanation was owed.\nVERDICT done_when: the done_when names the nine ids, zero added failure ids and the evidence fragment; gate_base_graph_file.log fails exactly those nine ids in the order the brief lists them, the delta recomputed from suite_baseline_main.log (97) against suite_after_head.log (73) is zero added ids, and the fragment records a verdict per id.\nVERDICT write_paths: the three declared paths are attachment_audit.py, test_attachment_audit.py and the evidence fragment; `git diff --stat e2fee62a4 a07792989` shows exactly those three files and nothing else.\nVERDICT manifest: read in full; it reports complete with the same numbers the logs carry, and its declared gate command differs from the cited log header only in the scratch basetemp path.\nVERDICT diff: read commit by commit from e2fee62a4: 209cd30cc adds the product fix at attachment_audit.py:1650 and the test corrections, a07792989 adds the fragment; 64 insertions and 3 deletions, all inside scope.\nCALL_SITES: imas_codex/standard_names/loop.py:1400, imas_codex/standard_names/loop.py:2058, imas_codex/standard_names/provenance_rebuild.py:535, imas_codex/cli/sn.py:7561\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: gate_head_graph_file.log records all nine ids passing at head and docs/evidence/fragments/sn-review-through-jev/srtj-exposed-attachment-audit.html:4-12 names a verdict for each.\nSCORE evidence: 18\nJUSTIFICATION evidence: the suite delta recomputed from suite_baseline_main.log and suite_after_head.log is zero added ids, but the manifest's `tests:` line records a basetemp the cited log header does not carry.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: `git diff --stat e2fee62a4 a07792989` lists only the three declared write paths.\nSCORE durability: 18\nJUSTIFICATION durability: negative_control.log reddens the three terminal ids when the product fix at attachment_audit.py:1650 is reverted, while tests/standard_names/test_attachment_audit.py:774 asserts a projection against a path the fixture itself seeded.\nSCORE fit: 17\nJUSTIFICATION fit: tests/standard_names/test_attachment_audit.py:662 follows the `_seed_attachment` idiom at :610 and attachment_audit.py:1650 sits beside the adjacent source_paths filter, with a four-line comment at :1644-1649 where the file's style is terser.\nSCORE reuse: 19\nJUSTIFICATION reuse: `_seed_surviving_producer` delegates to tests/standard_names/test_attachment_audit.py:610 and no other seeding owner exists in the repository, though the corrected orphan test at :3254 duplicates coverage held by tests/standard_names/test_attachment_stranding_*hold.py:111.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T075648946539-srtj-exposed-attachment-audit/manifest.md:16 non-blocking: the recorded gate command's basetemp is not the one in the cited log header.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-exposed-attachment-audit.html:12 non-blocking: 93e04a526 also added a test file, so 'attachment_audit.py alone' understates it.\nFINDING tests/standard_names/test_attachment_audit.py:3254 non-blocking: the corrected orphan test duplicates the hold-contract coverage of test_attachment_stranding_hold.py:111.\n",
+  "review_run_id": "r-20261027T113703612981-review-of-srtj-exposed-attachment-audit-a07792989d98",
+  "reviewed_base_sha": "e2fee62a40098b8f4765457502d400a719093b7a",
+  "reviewed_head_sha": "a07792989d9800bf3a6602f264de8d6b2311c4d9",
+  "reviewed_run_id": "r-20261027T075648946539-srtj-exposed-attachment-audit",
+  "rubric": "landed-node",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T11:57:43.167151+00:00",
+  "total": 111
+}
