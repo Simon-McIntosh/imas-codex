@@ -88,15 +88,15 @@ def quorum_without_persisting(
 ) -> Callable[..., Awaitable[Any]]:
     """*incumbent* with its record write removed, or a refusal.
 
-    The deciding path hands the cascade a callable that persists the quorum's
-    review rows before returning them. An audit must read the panel's verdict
-    without those rows: they are canonical, so they reach
-    ``update_review_aggregates`` and change the audited item's score, which is
+    The cascade hands the audit the chat reviewer it falls back to, which
+    persists its one review row before returning it. An audit must read the
+    panel's verdict without that row: it is canonical, so it reaches
+    ``update_review_aggregates`` and changes the audited item's score, which is
     the outcome the audit exists not to touch.
 
     The persisting wrapper is recognised structurally: a
-    :func:`functools.partial` of ``workers._persisting_quorum_cycles`` carrying
-    the quorum's keyword arguments is rebound to the cycle runner, which keeps
+    :func:`functools.partial` of ``workers._persisting_chat_review`` carrying
+    the reviewer's keyword arguments is rebound to the cycle runner, which keeps
     every argument and drops only the write. A callable that declares itself
     non-persisting with a true ``non_persisting`` attribute — how a test stub
     says so — is returned unchanged. Anything else cannot be proven free of the
@@ -111,7 +111,7 @@ def quorum_without_persisting(
     keywords = getattr(incumbent, "keywords", None)
     if (
         isinstance(incumbent, functools.partial)
-        and incumbent.func is _owning_worker_review_names._persisting_quorum_cycles
+        and incumbent.func is _owning_worker_review_names._persisting_chat_review
         and keywords
     ):
         return functools.partial(

@@ -328,7 +328,7 @@ async def test_audit_runs_the_quorum_without_persisting_its_rows(monkeypatch):
     monkeypatch.setattr(panel_audit, "panel_audit_rate", lambda: 1.0)
 
     incumbent = partial(
-        _owning_worker_review_names._persisting_quorum_cycles,
+        _owning_worker_review_names._persisting_chat_review,
         sn_id="temperature",
         review_axis="name",
         phase="review_name",
@@ -518,12 +518,12 @@ def _nested_persisting_partials(source: str) -> list:
         and node.func.id == "partial"
         and node.args
         and isinstance(node.args[0], ast.Name)
-        and node.args[0].id == "_persisting_quorum_cycles"
+        and node.args[0].id == "_persisting_chat_review"
     ]
 
 
 def _is_persisting_partial(node) -> bool:
-    """Whether this expression is exactly ``partial(_persisting_quorum_cycles, …)``.
+    """Whether this expression is exactly ``partial(_persisting_chat_review, …)``.
 
     A decorator or a further ``partial`` layer makes this false, which is the
     case the audit's seam refuses.
@@ -536,7 +536,7 @@ def _is_persisting_partial(node) -> bool:
         and node.func.id == "partial"
         and bool(node.args)
         and isinstance(node.args[0], ast.Name)
-        and node.args[0].id == "_persisting_quorum_cycles"
+        and node.args[0].id == "_persisting_chat_review"
         and bool(node.keywords)
     )
 
@@ -554,7 +554,7 @@ def test_the_site_guard_rejects_a_wrapped_partial():
         "        'name',\n"
         "        item,\n"
         "        models,\n"
-        "        _traced(partial(_persisting_quorum_cycles, sn_id=item['id'])),\n"
+        "        _traced(partial(_persisting_chat_review, sn_id=item['id'])),\n"
         "    )\n"
     )
     assert len(_nested_persisting_partials(wrapped)) == 1, (
@@ -572,7 +572,7 @@ def test_every_quorum_construction_site_builds_the_recognised_partial():
     """A call site that stops building this exact partial must fail here.
 
     The audit recognises the persisting wrapper by what it is: a partial of
-    ``_persisting_quorum_cycles`` carrying the quorum's arguments. A decorator
+    ``_persisting_chat_review`` carrying the quorum's arguments. A decorator
     or a further partial layer around it at either construction site would
     leave the audit unable to prove the callable writes no canonical rows, and
     the audit refuses such a callable — so the loss of the seam is caught here
@@ -583,12 +583,12 @@ def test_every_quorum_construction_site_builds_the_recognised_partial():
 
     sites = _quorum_incumbent_arguments()
     assert len(sites) == 2, (
-        "both quorum call sites must build partial(_persisting_quorum_cycles, "
+        "both quorum call sites must build partial(_persisting_chat_review, "
         f"**kwargs); found {len(sites)}"
     )
     for site in sites:
         assert _is_persisting_partial(site), (
-            "each quorum call site must pass partial(_persisting_quorum_cycles, "
+            "each quorum call site must pass partial(_persisting_chat_review, "
             "**kwargs) as the incumbent argument itself: a decorator or a "
             "further partial layer breaks the audit's seam, which is read by "
             f"the partial's keywords; found {ast.dump(site) if site else None}"
