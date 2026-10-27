@@ -9,11 +9,61 @@ import logging
 from collections import Counter, defaultdict
 from typing import Any
 
+from imas_codex.standard_names.domain_decision import (
+    DomainDecision,
+    _undecided,
+    write_name_domain,
+)
 from imas_codex.standard_names.signed_manifest import apply_signed_manifest
 
 from . import graph_foundation as foundation
 
 logger = logging.getLogger(__name__)
+
+
+def _stored_domain_decisions(
+    gc: Any, sn_ids: list[str]
+) -> dict[str, DomainDecision | None]:
+    """The stored decisions for these names, keyed by every name the graph holds.
+
+    A name the graph holds with no stored choice maps to ``None``: it has no
+    decision to route through, so its current value is kept and the gap is
+    recorded by the caller. A name the graph does not hold is absent, so a
+    caller writing a batch never asks the one writer about a node that is not
+    there.
+    """
+    if not sn_ids:
+        return {}
+    rows = gc.query(
+        """
+        UNWIND $ids AS id
+        MATCH (sn:StandardName {id: id})
+        RETURN sn.id AS id,
+               sn.domain_decision_candidates AS candidates,
+               sn.domain_decision_choice AS choice,
+               sn.domain_decision_probability AS probability,
+               sn.domain_decision_model AS model,
+               sn.domain_decision_at AS decided_at
+        """,
+        ids=list(sn_ids),
+    )
+    decided: dict[str, DomainDecision | None] = {}
+    for row in rows:
+        choice = row.get("choice")
+        if not choice:
+            decided[str(row["id"])] = None
+            continue
+        decided[str(row["id"])] = DomainDecision(
+            name=str(row["id"]),
+            candidates=tuple(row.get("candidates") or ()),
+            choice=str(choice),
+            probability=row.get("probability"),
+            model=row.get("model"),
+            decided_at=row.get("decided_at")
+            if isinstance(row.get("decided_at"), str)
+            else None,
+        )
+    return decided
 
 
 def get_source_name_mapping(*, rich: bool = False, services: Any) -> dict[str, dict]:
@@ -958,21 +1008,18 @@ def _write_standard_name_edges(
             "\n            UNWIND $batch AS b\n            MATCH (sn:StandardName {id: b.sn_id})\n            MERGE (c:IMASSemanticCluster {id: b.cluster_id})\n            MERGE (sn)-[:IN_CLUSTER]->(c)\n            ",
             batch=cluster_batch,
         )
+    name_ids = [str(n["id"]) for n in names if n.get("id")]
     domain_batch = []
-    for n in names:
-        if not n.get("id"):
-            continue
-        domains: set[str] = set(services._ensure_list(n.get("source_domains")))
-        primary = services._scalar_domain(n.get("physics_domain"))
-        if primary:
-            domains.add(primary)
-        for d in domains:
-            domain_batch.append({"sn_id": n["id"], "domain_id": d})
-    if domain_batch:
-        gc.query(
-            "\n            UNWIND $batch AS b\n            MATCH (sn:StandardName {id: b.sn_id})\n            MERGE (d:PhysicsDomain {id: b.domain_id})\n            MERGE (sn)-[:HAS_PHYSICS_DOMAIN]->(d)\n            ",
-            batch=domain_batch,
+    for sn_id, stored in _stored_domain_decisions(gc, name_ids).items():
+        write_name_domain(
+            gc,
+            sn_id,
+            stored
+            or _undecided(
+                sn_id, (), "no stored Jev decision; the name keeps its current domain"
+            ),
         )
+        domain_batch.append({"sn_id": sn_id})
     candidate_name_ids = {n["id"] for n in names if n.get("id")}
     for batch in (co_batch, he_batch, pred_batch):
         for row in batch:
@@ -1482,7 +1529,7 @@ def _materialize_derived_parent_rows(
         parent_scope = (
             "WITH parent, authorized_children" if bootstrap_missing else "WITH parent"
         )
-        materialize_cypher = "\n            __PARENT_MATCH__\n            SET parent.name_stage = CASE\n                    // Already name-reviewed → stays accepted (idempotent).\n                    WHEN parent.reviewer_score_name IS NOT NULL THEN 'accepted'\n                    // Unreviewed but review-ready (real description + embedding)\n                    // → route through REVIEW_NAME before it can earn docs.\n                    WHEN trim(coalesce(parent.description, '')) <> ''\n                         AND parent.description <> $description\n                         AND parent.embedding IS NOT NULL THEN 'drafted'\n                    // Unreviewed with only the placeholder description → hold at\n                    // accepted; the docs gate (reviewer_score_name IS NOT NULL)\n                    // keeps it out of docs until enrichment + review fill it in.\n                    ELSE 'accepted'\n                END,\n                parent.docs_stage = coalesce(parent.docs_stage, 'pending'),\n                parent.validation_status = coalesce(parent.validation_status, 'valid'),\n                parent.origin = 'derived',\n                parent.kind = $kind,\n                parent.unit = coalesce($unit, parent.unit),\n                parent.cocos_transformation_type = $cocos_transformation_type,\n                parent.cocos = CASE\n                    WHEN $cocos_transformation_type IS NULL THEN null\n                    ELSE parent.cocos\n                END,\n                parent.physics_domain =\n                    coalesce($physics_domain, parent.physics_domain),\n                parent.source_domains = CASE\n                    WHEN $source_domains IS NOT NULL AND size($source_domains) > 0\n                    THEN $source_domains ELSE parent.source_domains\n                END,\n                parent.description = CASE\n                    WHEN trim(coalesce(parent.description, '')) = ''\n                    THEN $description\n                    ELSE parent.description\n                END,\n                parent.needs_composition = null,\n                parent.chain_length = coalesce(parent.chain_length, 0),\n                parent.docs_chain_length = coalesce(parent.docs_chain_length, 0),\n                parent.physical_base =\n                    coalesce($physical_base, parent.physical_base),\n                parent.geometric_base =\n                    coalesce($geometric_base, parent.geometric_base),\n                parent.subject =\n                    coalesce($subject, parent.subject),\n                parent.transformation =\n                    coalesce($transformation, parent.transformation),\n                parent.component =\n                    coalesce($component, parent.component),\n                parent.coordinate =\n                    coalesce($coordinate, parent.coordinate),\n                parent.position =\n                    coalesce($position, parent.position),\n                parent.process =\n                    coalesce($process, parent.process),\n                parent.device =\n                    coalesce($device, parent.device),\n                parent.region =\n                    coalesce($region, parent.region),\n                parent.aggregation =\n                    coalesce($aggregation, parent.aggregation),\n                parent.orbit =\n                    coalesce($orbit, parent.orbit),\n                parent.population =\n                    coalesce($population, parent.population),\n                parent.object =\n                    coalesce($object, parent.object),\n                parent.geometry =\n                    coalesce($geometry, parent.geometry),\n                parent.is_geometric_coordinate =\n                    coalesce(parent.is_geometric_coordinate,\n                             $is_geometric_coordinate),\n                parent.status = coalesce(parent.status, 'draft')\n            __PARENT_SCOPE__\n            CALL (parent) {\n                OPTIONAL MATCH (parent)-[stored_cocos:HAS_COCOS]->(:COCOS)\n                WITH collect(stored_cocos) AS stored_cocos_edges\n                FOREACH (stored_cocos IN CASE\n                    WHEN $cocos_transformation_type IS NULL\n                    THEN stored_cocos_edges ELSE []\n                END | DELETE stored_cocos)\n                RETURN size(stored_cocos_edges) AS stored_cocos_edge_count\n            }\n            __PARENT_SCOPE__\n            MERGE (sns:StandardNameSource {id: $source_node_id})\n            ON CREATE SET sns.created_at = datetime(),\n                          sns.attempt_count = 0\n            SET sns.status = 'composed',\n                sns.source_type = $source_type,\n                sns.source_id = $source_id,\n                sns.batch_key = coalesce(sns.batch_key, $batch_key),\n                sns.description = CASE\n                    WHEN trim(coalesce(sns.description, '')) = ''\n                    THEN parent.description\n                    ELSE sns.description\n                END,\n                sns.physics_domain = coalesce(parent.physics_domain, sns.physics_domain),\n                sns.composed_at = coalesce(sns.composed_at, datetime()),\n                sns.produced_sn_id = parent.id,\n                sns.claimed_at = null,\n                sns.claim_token = null\n            MERGE (sns)-[:PRODUCED_NAME]->(parent)\n            ".replace(
+        materialize_cypher = "\n            __PARENT_MATCH__\n            SET parent.name_stage = CASE\n                    // Already name-reviewed → stays accepted (idempotent).\n                    WHEN parent.reviewer_score_name IS NOT NULL THEN 'accepted'\n                    // Unreviewed but review-ready (real description + embedding)\n                    // → route through REVIEW_NAME before it can earn docs.\n                    WHEN trim(coalesce(parent.description, '')) <> ''\n                         AND parent.description <> $description\n                         AND parent.embedding IS NOT NULL THEN 'drafted'\n                    // Unreviewed with only the placeholder description → hold at\n                    // accepted; the docs gate (reviewer_score_name IS NOT NULL)\n                    // keeps it out of docs until enrichment + review fill it in.\n                    ELSE 'accepted'\n                END,\n                parent.docs_stage = coalesce(parent.docs_stage, 'pending'),\n                parent.validation_status = coalesce(parent.validation_status, 'valid'),\n                parent.origin = 'derived',\n                parent.kind = $kind,\n                parent.unit = coalesce($unit, parent.unit),\n                parent.cocos_transformation_type = $cocos_transformation_type,\n                parent.cocos = CASE\n                    WHEN $cocos_transformation_type IS NULL THEN null\n                    ELSE parent.cocos\n                END,\n                parent.physics_domain =\n                    coalesce($physics_domain, parent.physics_domain),\n                parent.description = CASE\n                    WHEN trim(coalesce(parent.description, '')) = ''\n                    THEN $description\n                    ELSE parent.description\n                END,\n                parent.needs_composition = null,\n                parent.chain_length = coalesce(parent.chain_length, 0),\n                parent.docs_chain_length = coalesce(parent.docs_chain_length, 0),\n                parent.physical_base =\n                    coalesce($physical_base, parent.physical_base),\n                parent.geometric_base =\n                    coalesce($geometric_base, parent.geometric_base),\n                parent.subject =\n                    coalesce($subject, parent.subject),\n                parent.transformation =\n                    coalesce($transformation, parent.transformation),\n                parent.component =\n                    coalesce($component, parent.component),\n                parent.coordinate =\n                    coalesce($coordinate, parent.coordinate),\n                parent.position =\n                    coalesce($position, parent.position),\n                parent.process =\n                    coalesce($process, parent.process),\n                parent.device =\n                    coalesce($device, parent.device),\n                parent.region =\n                    coalesce($region, parent.region),\n                parent.aggregation =\n                    coalesce($aggregation, parent.aggregation),\n                parent.orbit =\n                    coalesce($orbit, parent.orbit),\n                parent.population =\n                    coalesce($population, parent.population),\n                parent.object =\n                    coalesce($object, parent.object),\n                parent.geometry =\n                    coalesce($geometry, parent.geometry),\n                parent.is_geometric_coordinate =\n                    coalesce(parent.is_geometric_coordinate,\n                             $is_geometric_coordinate),\n                parent.status = coalesce(parent.status, 'draft')\n            __PARENT_SCOPE__\n            CALL (parent) {\n                OPTIONAL MATCH (parent)-[stored_cocos:HAS_COCOS]->(:COCOS)\n                WITH collect(stored_cocos) AS stored_cocos_edges\n                FOREACH (stored_cocos IN CASE\n                    WHEN $cocos_transformation_type IS NULL\n                    THEN stored_cocos_edges ELSE []\n                END | DELETE stored_cocos)\n                RETURN size(stored_cocos_edges) AS stored_cocos_edge_count\n            }\n            __PARENT_SCOPE__\n            MERGE (sns:StandardNameSource {id: $source_node_id})\n            ON CREATE SET sns.created_at = datetime(),\n                          sns.attempt_count = 0\n            SET sns.status = 'composed',\n                sns.source_type = $source_type,\n                sns.source_id = $source_id,\n                sns.batch_key = coalesce(sns.batch_key, $batch_key),\n                sns.description = CASE\n                    WHEN trim(coalesce(sns.description, '')) = ''\n                    THEN parent.description\n                    ELSE sns.description\n                END,\n                sns.physics_domain = coalesce(parent.physics_domain, sns.physics_domain),\n                sns.composed_at = coalesce(sns.composed_at, datetime()),\n                sns.produced_sn_id = parent.id,\n                sns.claimed_at = null,\n                sns.claim_token = null\n            MERGE (sns)-[:PRODUCED_NAME]->(parent)\n            ".replace(
             "__PARENT_MATCH__", parent_match
         ).replace("__PARENT_SCOPE__", parent_scope)
         if bootstrap_missing:
@@ -1501,6 +1548,19 @@ def _materialize_derived_parent_rows(
                 "\n                MATCH (sn:StandardName {id: $parent_id})\n                WHERE EXISTS { MATCH (:StandardName)-[:HAS_PARENT]->(sn) }\n                OPTIONAL MATCH (sn)-[r:HAS_UNIT]->(:Unit)\n                DELETE r\n                WITH sn\n                MERGE (u:Unit {id: $unit})\n                MERGE (sn)-[:HAS_UNIT]->(u)\n                ",
                 parent_id=parent_id,
                 unit=unit,
+            )
+        stored = _stored_domain_decisions(gc, [parent_id])
+        if parent_id in stored:
+            write_name_domain(
+                gc,
+                parent_id,
+                stored[parent_id]
+                or _undecided(
+                    parent_id,
+                    source_domains,
+                    "a derived parent has no stored Jev decision; it keeps the "
+                    "domain its children give it",
+                ),
             )
         seeded += 1
     return seeded
@@ -1529,16 +1589,20 @@ def _materialize_derived_parent_rows_batched(
     prepared_count = services._materialize_derived_parent_rows(capture, parents)
     if prepared_count != len(parents):
         raise RuntimeError("authorized derived-parent materialization row was dropped")
-    if len(capture.calls) != 2 * prepared_count:
+    prepared_rows = [
+        dict(call["params"])
+        for call in capture.calls
+        if "source_node_id" in call["params"]
+    ]
+    if len(prepared_rows) != prepared_count:
         raise RuntimeError("derived-parent materialization preparation is incomplete")
     rows = []
-    for index in range(0, len(capture.calls), 2):
-        properties = dict(capture.calls[index]["params"])
+    for properties in prepared_rows:
         parent_id = str(properties["parent_id"])
         properties["event"] = (event_by_parent or {}).get(parent_id)
         rows.append(properties)
     materialized = gc.query(
-        "\n        // STRUCTURAL_CLOSURE_BATCH_MATERIALIZE\n        UNWIND $rows AS row\n        MATCH (parent:StandardName {id: row.parent_id})\n        WHERE EXISTS { MATCH (:StandardName)-[:HAS_PARENT]->(parent) }\n        SET parent.updated_at = datetime(), parent.name_stage = CASE\n                WHEN parent.reviewer_score_name IS NOT NULL THEN 'accepted'\n                WHEN trim(coalesce(parent.description, '')) <> ''\n                     AND parent.description <> row.description\n                     AND parent.embedding IS NOT NULL THEN 'drafted'\n                ELSE 'accepted'\n            END,\n            parent.docs_stage = coalesce(parent.docs_stage, 'pending'),\n            parent.validation_status = coalesce(parent.validation_status, 'valid'),\n            parent.origin = 'derived',\n            parent.kind = row.kind,\n            parent.unit = coalesce(row.unit, parent.unit),\n            parent.cocos_transformation_type = row.cocos_transformation_type,\n            parent.cocos = CASE\n                WHEN row.cocos_transformation_type IS NULL THEN null\n                ELSE parent.cocos\n            END,\n            parent.physics_domain =\n                coalesce(row.physics_domain, parent.physics_domain),\n            parent.source_domains = CASE\n                WHEN row.source_domains IS NOT NULL AND size(row.source_domains) > 0\n                THEN row.source_domains ELSE parent.source_domains\n            END,\n            parent.description = CASE\n                WHEN trim(coalesce(parent.description, '')) = ''\n                THEN row.description ELSE parent.description\n            END,\n            parent.needs_composition = null,\n            parent.chain_length = coalesce(parent.chain_length, 0),\n            parent.docs_chain_length = coalesce(parent.docs_chain_length, 0),\n            parent.physical_base = coalesce(row.physical_base, parent.physical_base),\n            parent.geometric_base = coalesce(row.geometric_base, parent.geometric_base),\n            parent.subject = coalesce(row.subject, parent.subject),\n            parent.transformation = coalesce(row.transformation, parent.transformation),\n            parent.component = coalesce(row.component, parent.component),\n            parent.coordinate = coalesce(row.coordinate, parent.coordinate),\n            parent.position = coalesce(row.position, parent.position),\n            parent.process = coalesce(row.process, parent.process),\n            parent.device = coalesce(row.device, parent.device),\n            parent.region = coalesce(row.region, parent.region),\n            parent.aggregation = coalesce(row.aggregation, parent.aggregation),\n            parent.orbit = coalesce(row.orbit, parent.orbit),\n            parent.population = coalesce(row.population, parent.population),\n            parent.object = coalesce(row.object, parent.object),\n            parent.geometry = coalesce(row.geometry, parent.geometry),\n            parent.is_geometric_coordinate =\n                coalesce(parent.is_geometric_coordinate,\n                         row.is_geometric_coordinate),\n            parent.status = coalesce(parent.status, 'draft')\n        WITH parent, row\n        CALL (parent, row) {\n            OPTIONAL MATCH (parent)-[stored_cocos:HAS_COCOS]->(:COCOS)\n            WITH collect(stored_cocos) AS stored_cocos_edges\n            FOREACH (stored_cocos IN CASE\n                WHEN row.cocos_transformation_type IS NULL\n                THEN stored_cocos_edges ELSE []\n            END | DELETE stored_cocos)\n            RETURN size(stored_cocos_edges) AS stored_cocos_edge_count\n        }\n        MERGE (source:StandardNameSource {id: row.source_node_id})\n          ON CREATE SET source.created_at = datetime(), source.attempt_count = 0\n        SET source.status = 'composed',\n            source.source_type = row.source_type,\n            source.source_id = row.source_id,\n            source.batch_key = coalesce(source.batch_key, row.batch_key),\n            source.description = CASE\n                WHEN trim(coalesce(source.description, '')) = ''\n                THEN parent.description ELSE source.description\n            END,\n            source.physics_domain =\n                coalesce(parent.physics_domain, source.physics_domain),\n            source.composed_at = coalesce(source.composed_at, datetime()),\n            source.produced_sn_id = parent.id,\n            source.claimed_at = null,\n            source.claim_token = null\n        MERGE (source)-[:PRODUCED_NAME]->(parent)\n        FOREACH (_ IN CASE WHEN row.event IS NULL THEN [] ELSE [1] END |\n          CREATE (change:StandardNameChange)\n          SET change = row.event\n          CREATE (parent)-[:HAS_INTERNAL_CHANGE]->(change)\n        )\n        WITH parent, row\n        OPTIONAL MATCH (parent)-[internal_change:HAS_INTERNAL_CHANGE]->\n                       (change:StandardNameChange {id: row.event.id})\n        RETURN collect(DISTINCT parent.id) AS ids,\n               collect(DISTINCT change.id) AS event_ids,\n               collect(DISTINCT CASE\n                   WHEN change IS NULL THEN null\n                   ELSE {event_id: change.id, parent_id: parent.id}\n               END) AS event_links,\n               count(DISTINCT change) AS event_count,\n               count(DISTINCT internal_change) AS event_link_count\n        ",
+        "\n        // STRUCTURAL_CLOSURE_BATCH_MATERIALIZE\n        UNWIND $rows AS row\n        MATCH (parent:StandardName {id: row.parent_id})\n        WHERE EXISTS { MATCH (:StandardName)-[:HAS_PARENT]->(parent) }\n        SET parent.updated_at = datetime(), parent.name_stage = CASE\n                WHEN parent.reviewer_score_name IS NOT NULL THEN 'accepted'\n                WHEN trim(coalesce(parent.description, '')) <> ''\n                     AND parent.description <> row.description\n                     AND parent.embedding IS NOT NULL THEN 'drafted'\n                ELSE 'accepted'\n            END,\n            parent.docs_stage = coalesce(parent.docs_stage, 'pending'),\n            parent.validation_status = coalesce(parent.validation_status, 'valid'),\n            parent.origin = 'derived',\n            parent.kind = row.kind,\n            parent.unit = coalesce(row.unit, parent.unit),\n            parent.cocos_transformation_type = row.cocos_transformation_type,\n            parent.cocos = CASE\n                WHEN row.cocos_transformation_type IS NULL THEN null\n                ELSE parent.cocos\n            END,\n            parent.physics_domain =\n                    coalesce(row.physics_domain, parent.physics_domain),\n            parent.description = CASE\n                WHEN trim(coalesce(parent.description, '')) = ''\n                THEN row.description ELSE parent.description\n            END,\n            parent.needs_composition = null,\n            parent.chain_length = coalesce(parent.chain_length, 0),\n            parent.docs_chain_length = coalesce(parent.docs_chain_length, 0),\n            parent.physical_base = coalesce(row.physical_base, parent.physical_base),\n            parent.geometric_base = coalesce(row.geometric_base, parent.geometric_base),\n            parent.subject = coalesce(row.subject, parent.subject),\n            parent.transformation = coalesce(row.transformation, parent.transformation),\n            parent.component = coalesce(row.component, parent.component),\n            parent.coordinate = coalesce(row.coordinate, parent.coordinate),\n            parent.position = coalesce(row.position, parent.position),\n            parent.process = coalesce(row.process, parent.process),\n            parent.device = coalesce(row.device, parent.device),\n            parent.region = coalesce(row.region, parent.region),\n            parent.aggregation = coalesce(row.aggregation, parent.aggregation),\n            parent.orbit = coalesce(row.orbit, parent.orbit),\n            parent.population = coalesce(row.population, parent.population),\n            parent.object = coalesce(row.object, parent.object),\n            parent.geometry = coalesce(row.geometry, parent.geometry),\n            parent.is_geometric_coordinate =\n                coalesce(parent.is_geometric_coordinate,\n                         row.is_geometric_coordinate),\n            parent.status = coalesce(parent.status, 'draft')\n        WITH parent, row\n        CALL (parent, row) {\n            OPTIONAL MATCH (parent)-[stored_cocos:HAS_COCOS]->(:COCOS)\n            WITH collect(stored_cocos) AS stored_cocos_edges\n            FOREACH (stored_cocos IN CASE\n                WHEN row.cocos_transformation_type IS NULL\n                THEN stored_cocos_edges ELSE []\n            END | DELETE stored_cocos)\n            RETURN size(stored_cocos_edges) AS stored_cocos_edge_count\n        }\n        MERGE (source:StandardNameSource {id: row.source_node_id})\n          ON CREATE SET source.created_at = datetime(), source.attempt_count = 0\n        SET source.status = 'composed',\n            source.source_type = row.source_type,\n            source.source_id = row.source_id,\n            source.batch_key = coalesce(source.batch_key, row.batch_key),\n            source.description = CASE\n                WHEN trim(coalesce(source.description, '')) = ''\n                THEN parent.description ELSE source.description\n            END,\n            source.physics_domain =\n                coalesce(parent.physics_domain, source.physics_domain),\n            source.composed_at = coalesce(source.composed_at, datetime()),\n            source.produced_sn_id = parent.id,\n            source.claimed_at = null,\n            source.claim_token = null\n        MERGE (source)-[:PRODUCED_NAME]->(parent)\n        FOREACH (_ IN CASE WHEN row.event IS NULL THEN [] ELSE [1] END |\n          CREATE (change:StandardNameChange)\n          SET change = row.event\n          CREATE (parent)-[:HAS_INTERNAL_CHANGE]->(change)\n        )\n        WITH parent, row\n        OPTIONAL MATCH (parent)-[internal_change:HAS_INTERNAL_CHANGE]->\n                       (change:StandardNameChange {id: row.event.id})\n        RETURN collect(DISTINCT parent.id) AS ids,\n               collect(DISTINCT change.id) AS event_ids,\n               collect(DISTINCT CASE\n                   WHEN change IS NULL THEN null\n                   ELSE {event_id: change.id, parent_id: parent.id}\n               END) AS event_links,\n               count(DISTINCT change) AS event_count,\n               count(DISTINCT internal_change) AS event_link_count\n        ",
         rows=rows,
     )
     linked_units = gc.query(
@@ -1586,6 +1650,22 @@ def _materialize_derived_parent_rows_batched(
         or (event_link_count != len(expected_event_links))
     ):
         raise RuntimeError("batched derived-parent materialization cardinality changed")
+    stored_by_parent = _stored_domain_decisions(gc, sorted(expected))
+    for row in rows:
+        parent_id = str(row["parent_id"])
+        if parent_id not in stored_by_parent:
+            continue
+        write_name_domain(
+            gc,
+            parent_id,
+            stored_by_parent[parent_id]
+            or _undecided(
+                parent_id,
+                row.get("source_domains") or (),
+                "a derived parent has no stored Jev decision; it keeps the "
+                "domain its children give it",
+            ),
+        )
     return len(expected)
 
 

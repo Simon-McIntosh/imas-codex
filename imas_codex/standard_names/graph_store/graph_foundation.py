@@ -253,7 +253,13 @@ def reclassify_standard_name_domain(
     reason: str,
     dry_run: bool = False,
 ) -> dict[str, Any]:
-    """Reassign one name's domain property and relationship atomically."""
+    """Reassign one name's domain property and relationship atomically.
+
+    The domain write is one statement, so the property, the source set and
+    the edges move together or not at all. The change record is written
+    afterwards, so a failed domain write records no change for a domain
+    that did not move.
+    """
     from imas_codex.core.physics_domain import PhysicsDomain
 
     name = (name or "").strip()
@@ -262,6 +268,12 @@ def reclassify_standard_name_domain(
         return {"ok": False, "reason": "a standard name is required"}
     if not reason:
         return {"ok": False, "reason": "--reason is mandatory for a domain move"}
+    from imas_codex.standard_names.domain_decision import (
+        DomainCorrection,
+        DomainDecision,
+        write_name_domain,
+    )
+
     try:
         target_domain = PhysicsDomain(domain).value
     except ValueError:
@@ -296,20 +308,26 @@ def reclassify_standard_name_domain(
             result["noop"] = before["domain"] == target_domain
             return result
 
+        write_name_domain(
+            gc,
+            name,
+            DomainDecision(
+                name=name,
+                candidates=(),
+                choice=None,
+                probability=None,
+                model=None,
+                decided_at=None,
+                undecided_reason="a recorded correction names the domain",
+            ),
+            correction=DomainCorrection(domain=target_domain, reason=reason),
+        )
         change_id = f"sn-change:{uuid.uuid4()}"
         mutation = list(
             gc.query(
                 """
                 MATCH (name:StandardName {id: $id})
-                OPTIONAL MATCH (name)-[old_domain:HAS_PHYSICS_DOMAIN]->
-                               (:PhysicsDomain)
-                DELETE old_domain
-                WITH DISTINCT name
-                SET name.physics_domain = $domain,
-                    name.source_domains = [$domain],
-                    name.updated_at = datetime()
-                MERGE (domain:PhysicsDomain {id: $domain})
-                MERGE (name)-[:HAS_PHYSICS_DOMAIN]->(domain)
+                SET name.updated_at = datetime()
                 CREATE (change:StandardNameChange {
                   id: $change_id, from_name: name.id, to_name: name.id,
                   operation: 'reclassify_domain', reason: $reason,
@@ -320,7 +338,6 @@ def reclassify_standard_name_domain(
                 RETURN name.id AS id
                 """,
                 id=name,
-                domain=target_domain,
                 change_id=change_id,
                 reason=reason,
                 changed_at=datetime.now(UTC).isoformat(),
