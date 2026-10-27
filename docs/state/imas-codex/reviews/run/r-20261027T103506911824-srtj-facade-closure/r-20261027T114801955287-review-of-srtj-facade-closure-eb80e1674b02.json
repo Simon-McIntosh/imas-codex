@@ -1,0 +1,65 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-27T12:36:08.173Z",
+  "dispatched_at": "2026-10-27T12:17:49Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_facade_closure.py",
+      "line": 158,
+      "severity": "non-blocking",
+      "text": "_import_aliases follows only relative imports whose module starts with graph_store/worker_tasks, so a forwarder that imports its callee by absolute path (from imas_codex.standard_names.graph_store.graph_catalog import write_standard_names as _impl; return _impl(...)) is not matched, although absolute imports are the dominant spelling in this repository (imas_codex/standard_names/workers.py:15 uses them), so the forwarder guard misses a forwarder in a spelling the codebase uses."
+    },
+    {
+      "file": "tests/standard_names/test_facade_closure.py",
+      "line": 32,
+      "severity": "non-blocking",
+      "text": "_owner_modules derives its module set from _OWNERS_BY_MODULE itself, so a store module absent from the map is never scanned, and test_owner_map_covers_every_public_definition therefore cannot report that module's missing public symbols although its docstring claims every store module is covered."
+    },
+    {
+      "file": "tests/standard_names/test_graph_ops.py",
+      "line": 39,
+      "severity": "non-blocking",
+      "text": "_delegated_name is defined a second time here and diverges from the copy at tests/standard_names/test_facade_closure.py:166: this one neither follows import aliases nor filters local import statements, so the two guards for one property disagree and the weaker copy is blind to the aliased shape the node was fixing."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-facade-closure.html",
+      "line": 26,
+      "severity": "non-blocking",
+      "text": "The evidence table states the bridge serves the 186 collaborators, but _WIRED_SERVICE_NAMES holds 187 entries after f1f266a54 added __file__; the correction paragraph explains the addition and leaves the posted count stale by one."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T103506911824-srtj-facade-closure/manifest.md",
+      "line": 17,
+      "severity": "non-blocking",
+      "text": "The reviewed manifest's baseline_suite and after_suite record the command with a literal $TMPDIR inside --basetemp, so the recorded command is not the absolute command that ran, and a re-run expands it from the ambient environment and can place the basetemp elsewhere."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read all four commits against 5c1df22d1: f9da74934 adds the wired roster, both refusing __getattr__ paths and five closure tests; 0a2370613 adds alias-aware forwarder detection; f1f266a54 adds __file__ to the roster; eb80e1674 is docs-only; 687 insertions, nothing outside scope.",
+    "done_when": "The done_when requires the three properties tested with each control firing and the whole tests/standard_names and tests/graph gate to add no failure id; the reviewed manifest records 111 base ids and the same 111 at head, which I re-derived from logs/gate-base.log and logs/gate-head-rerun.log with an empty set difference.",
+    "goal": "The node goal is that a moved symbol is reachable only from its owner; imas_codex/standard_names/graph_ops.py:28 declares the wired roster, :239 restricts _Wired_Services.__getattr__ to it, and :248 refuses every other name while naming the owning module.",
+    "manifest": "Read the reviewed manifest: status complete, commits f9da74934, 0a2370613, f1f266a54, eb80e1674, a paired gate at head f1f266a54 with the same 111 ids, three negative-control logs each EXIT=1, and a 25-module fresh-import EXIT=0.",
+    "write_paths": "The brief declares six write paths; every path in diff 5c1df22d1..eb80e1674 (imas_codex/standard_names/graph_ops.py, tests/standard_names/test_graph_ops.py, tests/standard_names/test_facade_closure.py, docs/evidence/fragments/sn-review-through-jev/srtj-facade-closure.html) lies inside them, and workers.py and graph_store/__init__.py were declared but left unchanged."
+  },
+  "measurement_note": "This record was rewritten by another process after I first stored it; I preserved that copy at r-20261027T114801955287-review-of-srtj-facade-closure/evidence/external-record-observed.json and re-stored this authored version after re-verifying every finding.",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is that a moved symbol is reachable only from its owner; imas_codex/standard_names/graph_ops.py:28 declares the wired roster, :239 restricts _Graph_Services.__getattr__ to it, and :248 refuses every other name while naming the owning module.\nVERDICT done_when: the done_when requires the three properties tested with each control firing and the whole tests/standard_names and tests/graph gate to add no failure id; the reviewed manifest records 111 base ids and the same 111 at head.\nVERDICT write_paths: the brief declares six write paths and every path in diff 5c1df22d1..eb80e1674 is inside them.\nVERDICT manifest: read; complete, four commits, paired gate at f1f266a54 with the same 111 ids, three EXIT=1 controls, 25-module fresh import EXIT=0.\nVERDICT diff: read commit by commit; four files, 687 insertions, all in scope, tail commit docs-only.\nCALL_SITES: imas_codex/standard_names/graph_store/graph_audits.py, imas_codex/standard_names/graph_store/graph_foundation.py:83, imas_codex/standard_names/cascade.py:473\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/graph_ops.py:239 is restricted to the :28 roster and :248 refuses with _closure_message at :221.\nSCORE evidence: 18\nJUSTIFICATION evidence: the reviewed gate logs at logs/gate-base.log and logs/gate-head-rerun.log carry 111 and 111 ids whose FAILED-line set difference I computed as empty.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the four files in the diff against 5c1df22d1 are each named in brief.md's write scope.\nSCORE durability: 15\nJUSTIFICATION durability: three negative controls at logs/negative-control-blanket-bridge.log each turn a named test red, but tests/standard_names/test_facade_closure.py:158 misses absolute-import aliased forwarders and :32 derives its module set from the map it checks.\nSCORE fit: 18\nJUSTIFICATION fit: imas_codex/standard_names/graph_ops.py:221-251 follows the module's composition-root idiom and the four commits carry no banned names or attribution.\nSCORE reuse: 13\nJUSTIFICATION reuse: tests/standard_names/test_graph_ops.py:39 forks _delegated_name from the copy at tests/standard_names/test_facade_closure.py:166 and the two copies diverge.\n",
+  "review_run_id": "r-20261027T114801955287-review-of-srtj-facade-closure-eb80e1674b02",
+  "reviewed_base_sha": "5c1df22d1f4ea27341e62f3e3fb4c9aa07e0f854",
+  "reviewed_head_sha": "eb80e1674b0244a1f20dfe4e950f4ab149ad5948",
+  "reviewed_run_id": "r-20261027T103506911824-srtj-facade-closure",
+  "rubric": "code",
+  "scores": {
+    "durability": 15,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 13,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T12:36:41.331380+00:00",
+  "total": 101
+}
