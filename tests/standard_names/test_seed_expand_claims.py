@@ -794,9 +794,9 @@ class TestRetryOnDeadlockApplied:
         ],
     )
     def test_has_wrapped(self, fn_name: str):
-        import imas_codex.standard_names.graph_ops as ops
+        from imas_codex.standard_names.graph_store import resolve_owned_name
 
-        fn = getattr(ops, fn_name)
+        fn = resolve_owned_name(fn_name)
         assert hasattr(fn, "__wrapped__"), (
             f"{fn_name} missing __wrapped__ — @retry_on_deadlock not applied"
         )
@@ -821,13 +821,13 @@ class TestEmptyPoolReturnsEmpty:
         ],
     )
     def test_empty(self, fn_name: str):
-        import imas_codex.standard_names.graph_ops as ops
+        from imas_codex.standard_names.graph_store import resolve_owned_name
 
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(return_value=[])  # seed returns nothing
 
         with _patch_gc(gc):
-            fn = getattr(ops, fn_name)
+            fn = resolve_owned_name(fn_name)
             result = fn(batch_size=5)
 
         assert result == []
