@@ -1,0 +1,68 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-27T16:29:45.990Z",
+  "dispatched_at": "2026-10-27T16:15:57Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-remeasure-run.py",
+      "line": "747",
+      "severity": "non-blocking",
+      "summary": "verify() compares cost run ids against pool run ids that record_cost copied from the same entry run_ids that select_runs set from pool_ids, and line 737 compares run_ids_source against the identical constant select_runs wrote, so neither fails on a code regression; only the summary-scope-id intersection at :757 is an independent source."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-remeasure-run.py",
+      "line": "732",
+      "severity": "non-blocking",
+      "summary": "if scope.get('outside_roster') passes when scope_check is absent, so a record carrying no out-of-family comparison clears the gate whose done-when requires that comparison."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-remeasure-run.py",
+      "line": "802",
+      "severity": "non-blocking",
+      "summary": "verify() asserts only that the convergence element id exists, so a fragment reading Converged yes on an unstamped family would pass; line 826 prints the verdict from stamped alone, disagreeing with render()'s definition at :522 which also requires no below-threshold, fallen or unscored member."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-remeasure-run.py",
+      "line": "790",
+      "severity": "non-blocking",
+      "summary": "below_ref is computed and counted at :828 but never compared against the fragment, so the done-when clause that members below 0.85 are named is unasserted; it passes today only because the fragment names none."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-remeasure-run.py",
+      "line": "106",
+      "severity": "non-blocking",
+      "summary": "roster_check records positive_control_match_count but never compares it to POSITIVE_CONTROL_EXPECTED, so a roster search that read nothing would still set valid_non_west true and the fragment would claim a real absence on an empty search; the sibling enforced this with a raise."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-remeasure-run.py",
+      "line": "204",
+      "severity": "non-blocking",
+      "summary": "fixture() asserts only below_threshold naming and is never invoked by verify, so it guards the library docs_score_regressions rather than the inline a<b comparison render() and verify() actually use; the sibling also asserted the fell list and that an unchanged column reported nothing."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-remeasure.json",
+      "line": "39",
+      "severity": "non-blocking",
+      "summary": "halted is false and halt_reasons null while the embedded summary at line 138 says halted true with two reasons, because FAMILY_STATUS matches nothing in the wrapped apply log and record_apply reads that regex rather than entry result; the fragment is correct only through its summary fallback."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to re-measure the non-WEST locus family electrostatic_potential now that its batch can be claimed; docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-remeasure.json records 17 calls, USD 0.260322 of a USD 4.00 cap over 999 s and every member's before/after documentation score, so the goal is met.\nVERDICT done_when: the done_when requires the html and json written by shc-locus-converge-remeasure-run.py with a log ending in a real EXIT=; the gate is that script's verify subcommand, recorded in logs/verify-head.log as a printed EXIT=0, and it asserts the spend cap, the out-of-family list, before/after score presence, the held-detach count and the fragment's convergence-verdict element.\nVERDICT write_paths: read the manifest's four declared paths; the diff touches exactly three files, all inside them (the html, json and run.py), and the declared figures directory was not written.\nVERDICT manifest: read; it reports status complete, names the verify command and its log, lists both negative-control logs, and records the family unstamped with 0.260322 spent and 0 names outside the roster, matching the artefacts; line 15 packs two paths into negative_control_log where the manifest contract asks for the bare path.\nVERDICT diff: read commit by commit against 137eb8fd4 (65f02d901 adds runner and record, 2b5c8bcd8 records the apply, 3bcbe3c30 repairs cost provenance, eaa7fbdc7 repairs held dedupe); 1311 insertions across three files, nothing else changed.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-remeasure.html:3-6 reports the measured spend, calls, per-member scores and convergence verdict the goal asks for.\nSCORE evidence: 13\nJUSTIFICATION evidence: the verify gate at shc-locus-converge-remeasure-run.py:713-833 exits 0 in logs/verify-head.log, but it never asserts that members below 0.85 are named, nor that an out-of-family comparison exists (line 732 passes on an absent scope_check).\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff adds only shc-locus-converge-remeasure.html, .json and -run.py, all inside the four declared write paths, with no product source touched.\nSCORE durability: 12\nJUSTIFICATION durability: the held-attachment dedupe at shc-locus-converge-remeasure-run.py:768-773 reddens on the pre-repair record (logs/neg-control-held.log EXIT=1), but the provenance guard at :747 and :737 compares values the same code wrote from one variable.\nSCORE fit: 15\nJUSTIFICATION fit: the runner follows the sibling docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-measure-run.py idiom and imports its library owners, but keeps the plan label in the NODE constant at :35 and a section reference in its docstring at :17.\nSCORE reuse: 9\nJUSTIFICATION reuse: shc-locus-converge-remeasure-run.py:1-890 is a copy-and-extend of the existing shc-locus-converge-measure-run.py (880 lines, same SEED, HELD_ATTACHMENT regex and roster_check) rather than a parameterisation of it.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-remeasure-run.py:747 non-blocking: verify() compares cost run ids against pool run ids that record_cost copied from the same entry run_ids that select_runs set from pool_ids, and line 737 compares run_ids_source against the identical constant select_runs wrote, so neither fails on a code regression; only the summary-scope-id intersection at :757 is an independent source.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-remeasure-run.py:732 non-blocking: if scope.get('outside_roster') passes when scope_check is absent, so a record carrying no out-of-family comparison clears the gate whose done-when requires that comparison.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-remeasure-run.py:802 non-blocking: verify() asserts only that the convergence element id exists, so a fragment reading Converged yes on an unstamped family would pass; line 826 prints the verdict from stamped alone, disagreeing with render()'s definition at :522 which also requires no below-threshold, fallen or unscored member.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-remeasure-run.py:790 non-blocking: below_ref is computed and counted at :828 but never compared against the fragment, so the done-when clause that members below 0.85 are named is unasserted; it passes today only because the fragment names none.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-remeasure-run.py:106 non-blocking: roster_check records positive_control_match_count but never compares it to POSITIVE_CONTROL_EXPECTED, so a roster search that read nothing would still set valid_non_west true and the fragment would claim a real absence on an empty search; the sibling enforced this with a raise.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-remeasure-run.py:204 non-blocking: fixture() asserts only below_threshold naming and is never invoked by verify, so it guards the library docs_score_regressions rather than the inline a<b comparison render() and verify() actually use; the sibling also asserted the fell list and that an unchanged column reported nothing.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-remeasure.json:39 non-blocking: halted is false and halt_reasons null while the embedded summary at line 138 says halted true with two reasons, because FAMILY_STATUS matches nothing in the wrapped apply log and record_apply reads that regex rather than entry result; the fragment is correct only through its summary fallback.\n",
+  "review_run_id": "r-20261027T154156186346-review-of-shc-locus-converge-remeasure-eaa7fbdc7a07",
+  "reviewed_base_sha": "137eb8fd480a7dcd988c3808c31766e317f1b9d8",
+  "reviewed_head_sha": "eaa7fbdc7a077d0647d66188f729bd4c6eec4100",
+  "reviewed_run_id": "r-20261027T132248464167-shc-locus-converge-remeasure",
+  "scores": {
+    "durability": 12,
+    "evidence": 13,
+    "fit": 15,
+    "goal_fidelity": 18,
+    "reuse": 9,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T16:29:17.820889+00:00",
+  "total": 87
+}
