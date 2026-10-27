@@ -1259,8 +1259,10 @@ def _split_name_accepted(
     eligible: list[str] = []
     skipped: list[dict[str, str]] = []
     for mid in member_ids:
-        stage = stages.get(mid) or ""
-        if stage == "accepted":
+        # A stage the read could not answer for is not evidence of anything, so
+        # the member is planned as before rather than silently dropped.
+        stage = stages.get(mid)
+        if stage is None or stage == "" or stage == "accepted":
             eligible.append(mid)
         else:
             skipped.append({"id": mid, "name_stage": stage})

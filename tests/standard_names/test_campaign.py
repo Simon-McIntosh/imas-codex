@@ -424,9 +424,19 @@ class TestMeasureBatch:
                 "documentation": "y",
             },
         ]
-        # "missing" is in the batch but absent from refreshed rows → drift.
+        # "drifted" was accepted before the drain and is superseded after it →
+        # drift. "missing" is in the batch but absent from refreshed rows →
+        # drift.
+        inherited = [
+            {"id": "ok", "name_stage": "accepted", "docs_stage": "accepted"},
+            {"id": "reintro", "name_stage": "accepted", "docs_stage": "accepted"},
+            {"id": "drifted", "name_stage": "accepted", "docs_stage": "accepted"},
+        ]
         outcome = measure_batch(
-            refreshed, ["ok", "reintro", "drifted", "missing"], batch_index=2
+            refreshed,
+            ["ok", "reintro", "drifted", "missing"],
+            batch_index=2,
+            prior_rows=inherited,
         )
         assert outcome.batch_index == 2
         assert outcome.requested == 4
@@ -594,6 +604,10 @@ class _RunnerHarness:
         # ids whose fresh deterministic audit finds a genuine defect.
         self.defective: set[str] = set()
         self._batch_calls = 0
+        # A batch is read twice: once for the state it inherits, once after
+        # the drain. The inherited read peeks, so the post-drain read still
+        # serves this batch's rows.
+        self._read_after_drain = False
 
     def mark_fn(self, batch, dry_run=False):
         self.events.append(f"mark:{','.join(batch)}")
@@ -615,6 +629,10 @@ class _RunnerHarness:
     def fetch_refreshed_fn(self, gc, batch):
         self.events.append(f"fetch:{','.join(batch)}")
         idx = self._batch_calls
+        if not self._read_after_drain:
+            self._read_after_drain = True
+            return self._refreshed_by_batch[idx]
+        self._read_after_drain = False
         self._batch_calls += 1
         return self._refreshed_by_batch[idx]
 
@@ -725,9 +743,11 @@ class TestCampaignRunner:
             record_change_fn=harness.record_change_fn,
             cost_fn=harness.cost_fn,
         )
-        # clear before mark, mark before drain, drain before fetch/measure,
+        # the batch's inherited read comes before anything touches it, then
+        # clear before mark, mark before drain, drain before measure, and
         # revalidate before record.
         assert harness.events == [
+            "fetch:a",
             "clear:a",
             "mark:a",
             "drain:run-1:10.0",
@@ -932,6 +952,7 @@ class TestCampaignRunner:
             cost_fn=harness.cost_fn,
         )
         assert harness.events == [
+            "fetch:a",
             "clear:a",
             "mark:a",
             "drain:run-1:10.0",
