@@ -27,6 +27,7 @@ from .graph_store import (
 #: compared against it by the facade-closure test.
 _WIRED_SERVICE_NAMES: frozenset[str] = frozenset(
     {
+        "__file__",
         "Any",
         "DerivedParentCleanupRefusal",
         "ExactNameScopeConflict",

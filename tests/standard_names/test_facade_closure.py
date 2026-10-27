@@ -256,11 +256,6 @@ def test_service_bridge_resolves_only_wired_names() -> None:
     requested: set[str] = set()
     for path in store.glob("*.py"):
         requested |= _service_attributes_read(str(path))
-    requested = {
-        name
-        for name in requested
-        if not (name.startswith("__") and name.endswith("__"))
-    }
     assert requested == set(graph_ops._WIRED_SERVICE_NAMES)
 
     services = graph_foundation.get_services()
