@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="312">
+<meta name="plan-version" content="313">
 <meta name="plan-modified" content="2026-10-27">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -1256,6 +1256,9 @@ without re-deriving it is visible.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261027T075847653576-srtj-exposed-source-invariant" data-who="reckon-build" data-when="2026-10-27T13:09:05Z">
     <div class="r-comment-body"><p>source_invariant.py now counts a status-less StandardNameSource as a live producer (coalesce on the stale test), and the signed stale-source detach fixture seeds the surviving producer each preserved target really holds; the 5 graph ids that failed at base 970cdb0d9 (5 failed, 8 passed) all pass at head 2375383a2 (13 passed, EXIT=0), with zero added failure ids across the whole tests/standard_names default suite against base.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261027T131422630719-review-of-srtj-facade-closure-0d761f882ee7" data-who="reckon-build" data-when="2026-10-27T13:59:37.714Z">
+    <div class="r-comment-body"><p>independent review of run r-20261027T103506911824-srtj-facade-closure over the commits it gained since review at eb80e1674, read against base eb80e1674b0244a1f20dfe4e950f4ab149ad5948 and head 0d761f882ee7833a19452db84abccfc36ac73a72; two commits touch only tests/standard_names/test_facade_closure.py, tests/standard_names/test_graph_ops.py and docs/evidence/fragments/sn-review-through-jev/srtj-facade-closure.html; scores goal_fidelity 19, evidence 18, scope_discipline 20, durability 19, fit 19, reuse 20 (total 115/120), zero added failure ids, one non-blocking finding and no blocking finding</p></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-s7-lead-ruling-audit-panel" data-who="lead" data-when="2026-10-27T07:20:00Z">
     <div class="r-comment-body"><p>Lead ruling, "Keep quorum as audit panel". §7 deletes the quorum as a deciding path: its persisting cycle, the review seats only that path uses, and the fallback that sends items Jev could not judge to it. Those items go to the single chat reviewer instead. The quorum stays only as the 5% panel audit's non-deciding panel, which runs through <code>panel_audit.quorum_without_persisting</code>, so the drift measure the switch kept is unchanged. §7 waits on §6, because the forwarder retirement and the product repairs §6 still owes touch the same worker and review modules.</p></div>

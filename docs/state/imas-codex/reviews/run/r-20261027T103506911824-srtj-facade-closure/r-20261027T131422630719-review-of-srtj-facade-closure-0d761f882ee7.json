@@ -1,0 +1,40 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-27T13:59:37.714Z",
+  "dispatched_at": "2026-10-27T13:49:32Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T103506911824-srtj-facade-closure/logs/fresh-imports.log",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "The log's header names revision eb80e1674, not the gated head 01a2a0a00 or the reviewed head 0d761f882, while the reviewed manifest presents it as the head fresh-import evidence; the result still stands because the gained commits change no importable module, but a reader reconciling the record against the log finds a different revision."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read both gained commits against eb80e1674: 01a2a0a00 rewrites the module-set enumeration, the alias reader and the shared delegation detector across the two test files; 0d761f882 is docs-only and corrects the roster count 186 to 187.",
+    "done_when": "The done_when asks for each property tested with its control firing and a paired whole-suite gate adding zero failure ids; logs/gate-base-final.log and logs/gate-head-final.log record 111/9016 and 111/9022 with an empty failure-id set difference, and the fragment records both new controls at docs/evidence/fragments/sn-review-through-jev/srtj-facade-closure.html:102-111.",
+    "goal": "The reviewed node's goal is that a moved symbol is reachable only from its owner; the gained commits close the two guard blind spots, with tests/standard_names/test_facade_closure.py:172 reading the owner package out of either import spelling and :32 enumerating graph_store/*.py from the directory rather than from the map it checks.",
+    "manifest": "Read the reviewed manifest: status complete, commits f9da74934..0d761f882, baseline_suite and after_suite both completed true with 111 ids each, five EXIT=1 controls, test_logs naming gate-base-final.log, gate-head-final.log and fresh-imports.log.",
+    "write_paths": "The reviewed brief declares six write paths; diff eb80e1674..0d761f882 touches only tests/standard_names/test_facade_closure.py, tests/standard_names/test_graph_ops.py and docs/evidence/fragments/sn-review-through-jev/srtj-facade-closure.html, all inside them, and no production module was modified."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the reviewed node's goal is that a moved symbol is reachable only from its owner, and the gained commits close the review gaps in that goal's guards: tests/standard_names/test_facade_closure.py:172 reads the owner package out of either import spelling and tests/standard_names/test_facade_closure.py:32 enumerates graph_store/*.py from the directory rather than from the map it checks.\nVERDICT done_when: the done_when requires each property tested with its control firing, a paired tests/standard_names + tests/graph gate adding zero failure ids, and the evidence fragment recording changes and controls; logs/gate-base-final.log and logs/gate-head-final.log record 111/9016 and 111/9022 with an empty failure-id set difference, and the fragment names both controls at docs/evidence/fragments/sn-review-through-jev/srtj-facade-closure.html:102-111.\nVERDICT write_paths: the reviewed brief declares six write paths; diff eb80e1674..0d761f882 touches only tests/standard_names/test_facade_closure.py, tests/standard_names/test_graph_ops.py and docs/evidence/fragments/sn-review-through-jev/srtj-facade-closure.html, all inside them, and no production module was modified.\nVERDICT manifest: read the reviewed manifest; status complete, commits f9da74934..0d761f882, baseline_suite and after_suite both completed true with 111 failure ids each, five negative-control logs each ending EXIT=1, and test_logs naming gate-base-final.log, gate-head-final.log and fresh-imports.log.\nVERDICT diff: read both gained commits against eb80e1674: 01a2a0a00 replaces the map-derived module set with _store_modules() over graph_store/*.py, adds the unmapped-module assertion at test_facade_closure.py:255, teaches _import_aliases the absolute spelling at :160-188, and consolidates the delegation detector into _delegating_functions at :191 while test_graph_ops.py:32 delegates to it; 0d761f882 is docs-only and corrects 186 to 187.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: tests/standard_names/test_facade_closure.py:255 now fails on a store module the map omits and :199 resolves an absolute-import alias, closing both ways the retired facade escaped the earlier guards.\nSCORE evidence: 18\nJUSTIFICATION evidence: the gate receipts are logs/gate-base-final.log and logs/gate-head-final.log, whose own summary lines read 111 failed/9016 passed and 111 failed/9022 passed with an empty failure-id set difference I recomputed from the manifest's baseline_suite and after_suite blocks.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: diff eb80e1674..0d761f882 touches only the three files named in the goal, and the production modules the guards read (imas_codex/standard_names/graph_ops.py, graph_store/__init__.py) are unmodified.\nSCORE durability: 19\nJUSTIFICATION durability: tests/standard_names/test_facade_closure.py:350 reddens if _owner_package_module stops recognising the absolute spelling, and logs/negative-control-absolute-import-forwarder.log and logs/negative-control-unmapped-module.log show both live guards failing for the two reintroduced defects.\nSCORE fit: 19\nJUSTIFICATION fit: the new helpers at tests/standard_names/test_facade_closure.py:32-201 are descriptive and plan-free, and importing a sibling test helper at tests/standard_names/test_graph_ops.py:17 matches the cross-test import idiom already used at tests/graph/conftest.py:237.\nSCORE reuse: 20\nJUSTIFICATION reuse: tests/standard_names/test_graph_ops.py:39's forked _delegated_name is deleted and both guards now extend the single owner at tests/standard_names/test_facade_closure.py:191; no other AST delegation detector exists in tests/ or imas_codex/.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T103506911824-srtj-facade-closure/logs/fresh-imports.log:1 non-blocking: the log's header names revision eb80e1674, not the gated head 01a2a0a00 or the reviewed head 0d761f882, while the reviewed manifest presents it as the head fresh-import evidence; the result still stands because the gained commits change no importable module, but a reader reconciling the record against the log finds a different revision.\n",
+  "review_run_id": "r-20261027T131422630719-review-of-srtj-facade-closure-0d761f882ee7",
+  "reviewed_base_sha": "eb80e1674b0244a1f20dfe4e950f4ab149ad5948",
+  "reviewed_head_sha": "0d761f882ee7833a19452db84abccfc36ac73a72",
+  "reviewed_run_id": "r-20261027T103506911824-srtj-facade-closure",
+  "rubric": "code",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T14:00:26.072039+00:00",
+  "total": 115
+}
