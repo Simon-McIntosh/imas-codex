@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "completed_at": "2026-10-27T12:36:08.173Z",
   "dispatched_at": "2026-10-27T12:17:49Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "srtj-facade-closure",
+      "recorded_at": "2026-10-27T12:38:06.522004+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/standard_names/test_facade_closure.py",
