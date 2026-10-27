@@ -816,7 +816,7 @@ async def process_review_docs_batch(
         "_documentation_contradiction_note"
     )
     _persist_dd_gap_evidence = _worker_dependency("_persist_dd_gap_evidence")
-    _persisting_quorum_cycles = _worker_dependency("_persisting_quorum_cycles")
+    _persisting_chat_review = _worker_dependency("_persisting_chat_review")
     _release_docs_review_claim = _worker_dependency("_release_docs_review_claim")
     _review_dd_source_bindings = _worker_dependency("_review_dd_source_bindings")
     prepare_docs_review_request = _worker_dependency("prepare_docs_review_request")
@@ -857,7 +857,7 @@ async def process_review_docs_batch(
                 request.get("veto_item", item),
                 request["models"],
                 partial(
-                    _persisting_quorum_cycles,
+                    _persisting_chat_review,
                     sn_id=sn_id,
                     review_axis="docs",
                     response_model=request["response_model"],

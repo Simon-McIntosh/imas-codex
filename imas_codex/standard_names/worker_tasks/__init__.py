@@ -253,7 +253,7 @@ _OWNERS_BY_MODULE = {
         "_DOCS_GEN_PARENT_CHILDREN_QUERY",
         "_closed_vocabulary_definitions",
         "_enrich_name_review_items",
-        "_persisting_quorum_cycles",
+        "_persisting_chat_review",
         "_quorum_incomplete_deferrals",
         "_record_quorum_incomplete",
         "_review_source_binding_sort_key",

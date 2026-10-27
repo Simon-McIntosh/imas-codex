@@ -8,7 +8,8 @@ unchanged; the refusal travels as a documentation review hold, not as a lowered
 score. The same mapping handles explicit consumer min_score values.
 Thresholds and name-score weights are fitted on frozen calibration judgments.
 Every Jev judgment is stored as a noncanonical review with no scalar score;
-only the explicit deciding switch may replace the incumbent.
+the explicit deciding switch makes it the decision, and an item Jev could not
+judge falls to the one chat reviewer rather than to a quorum.
 """
 
 from __future__ import annotations
@@ -144,8 +145,8 @@ def deciding_enabled(axis: str) -> bool:
 
     ``[sn-review].cascade-deciding`` accepts ``true`` (both axes), ``false``
     (neither) or a list of axes drawn from ``name`` and ``docs`` (Jev decides
-    those, the incumbent keeps the rest). Any other value is refused, so a
-    typo cannot silently leave an axis deciding or shadowing.
+    those, the chat reviewer keeps the rest). Any other value is refused, so a
+    typo cannot silently leave an axis deciding or falling back.
     """
     from imas_codex.settings import _get_section
 
@@ -444,21 +445,28 @@ async def _store_unjudged(
         )
 
 
-async def _incumbent_then_unjudged(
+def _chat_seat(models: Sequence[str]) -> list[str]:
+    """The chat reviewer runs a single seat: the head of the configured chain."""
+    return list(models)[:1]
+
+
+async def _chat_then_unjudged(
     item: Mapping[str, Any],
     axis: str,
     models: Sequence[str],
-    incumbent: Callable[..., Awaitable[dict[str, Any] | None]],
+    chat_reviewer: Callable[..., Awaitable[dict[str, Any] | None]],
     model: str,
     reason: str,
 ) -> dict[str, Any] | None:
-    """Run the incumbent, then record the unjudged row beside what it wrote.
+    """Run the one chat reviewer, then record the unjudged row beside what it wrote.
 
-    A shadow row describes a candidate the incumbent has reviewed, so it is
-    written only after the incumbent's own reviews are persisted; an incumbent
-    that produced no reviews reports that with ``None`` and takes no row.
+    An item Jev could not judge takes no route, so it falls to the cascade's
+    single chat reviewer rather than to a quorum. A shadow row describes a
+    candidate the chat reviewer has reviewed, so it is written only after that
+    reviewer's own row is persisted; a reviewer that produced no review reports
+    that with ``None`` and takes no row.
     """
-    result = await incumbent(models=models)
+    result = await chat_reviewer(models=_chat_seat(models))
     if result is None:
         return None
     await _store_unjudged(item, axis, model, reason)
@@ -630,7 +638,7 @@ async def _run_panel_audit(
     axis: str,
     item: Mapping[str, Any],
     models: Sequence[str],
-    incumbent: Callable[..., Awaitable[dict[str, Any] | None]],
+    chat_reviewer: Callable[..., Awaitable[dict[str, Any] | None]],
     route: CascadeRoute,
     *,
     mgr: Any,
@@ -672,7 +680,7 @@ async def _run_panel_audit(
         await _audit_skipped(item, axis, route.route, reason)
         return
     try:
-        panel_result = await panel_audit.quorum_without_persisting(incumbent)(
+        panel_result = await panel_audit.quorum_without_persisting(chat_reviewer)(
             models=models
         )
     except Exception as exc:
@@ -698,16 +706,17 @@ async def adjudicate_review(
     axis: str,
     item: Mapping[str, Any],
     models: Sequence[str],
-    incumbent: Callable[..., Awaitable[dict[str, Any] | None]],
+    chat_reviewer: Callable[..., Awaitable[dict[str, Any] | None]],
     *,
     mgr: Any,
 ) -> dict[str, Any] | None:
-    """Record a Jev route, then use the incumbent unless deciding is enabled.
+    """Record a Jev route and decide from it; the chat reviewer is the fallback.
 
-    The incumbent is expected to persist its own review rows before it returns,
-    so the route row lands after them and the incumbent's stored rows are
-    unchanged. An incumbent that produced no reviews returns ``None`` and takes
-    no route row: there is no reviewed candidate to route.
+    ``chat_reviewer`` is the cascade's one chat reviewer, done as a single seat:
+    it is called only when Jev could not judge the item (an absent decisions key,
+    a refused lease or a failed judgment), and it persists its own review row
+    before returning. A chat reviewer that produced no review returns ``None``
+    and takes no route row: there is no reviewed candidate to route.
     """
     from imas_codex.discovery.base.judgment import (
         decisions_key_absent_reason,
@@ -718,11 +727,11 @@ async def adjudicate_review(
 
     model = "sn-judge:unavailable"
     if not decisions_key_present():
-        return await _incumbent_then_unjudged(
+        return await _chat_then_unjudged(
             item,
             axis,
             models,
-            incumbent,
+            chat_reviewer,
             model,
             decisions_key_absent_reason() or "decisions key not set",
         )
@@ -738,8 +747,8 @@ async def adjudicate_review(
         else:
             reason = None
     if reason is not None:
-        return await _incumbent_then_unjudged(
-            item, axis, models, incumbent, model, reason
+        return await _chat_then_unjudged(
+            item, axis, models, chat_reviewer, model, reason
         )
     try:
         if axis == "name":
@@ -760,8 +769,8 @@ async def adjudicate_review(
         )
     except Exception as exc:
         logger.exception("Jev cascade judgment unavailable for %s", item.get("id"))
-        return await _incumbent_then_unjudged(
-            item, axis, models, incumbent, model, f"{type(exc).__name__}: {exc}"
+        return await _chat_then_unjudged(
+            item, axis, models, chat_reviewer, model, f"{type(exc).__name__}: {exc}"
         )
     finally:
         try:
@@ -788,11 +797,13 @@ async def adjudicate_review(
                 "Jev cascade holds could not be reconciled for %s", item.get("id")
             )
         try:
-            await _run_panel_audit(axis, item, models, incumbent, route, mgr=mgr)
+            await _run_panel_audit(axis, item, models, chat_reviewer, route, mgr=mgr)
         except Exception:
             logger.exception("panel audit failed for %s", item.get("id"))
         return _direct_result(route, model, spent, item, axis)
-    result = await incumbent(models=models)
+    # Jev judged the item, so no unjudged row applies: the axis is in shadow
+    # mode, and the chat reviewer produces the row the route is recorded beside.
+    result = await chat_reviewer(models=_chat_seat(models))
     if result is None:
         return None
     try:
