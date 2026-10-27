@@ -1,0 +1,72 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "imas_codex/standard_names/edit.py:3401",
+    "imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py:1943",
+    "imas_codex/standard_names/worker_tasks/worker_compose_and_validate.py:964",
+    "imas_codex/standard_names/worker_tasks/worker_compose_batches.py:1070",
+    "imas_codex/standard_names/graph_store/graph_catalog.py:2208"
+  ],
+  "completed_at": "2026-10-27T13:42:07.075Z",
+  "dispatched_at": "2026-10-27T13:30:50Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_metadata_invariants.py",
+      "line": 163,
+      "severity": "blocking",
+      "text": "Outside the node's declared write scope: prompt.txt:137-145 fences seven paths and does not grant this file or tests/standard_names/test_graph_edge_writers.py:360, yet both are rewritten in the diff. The edits are necessary (the old assertions pin the domain write this node removes, and leaving them adds three failure ids), so the repair is a coordinator scope extension, not a revert; until it is granted the record check refuses the run on changed_paths."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_refinement.py",
+      "line": 1393,
+      "severity": "non-blocking",
+      "text": "The successor's domain write is gated on isinstance(gc, GraphClient), so any caller-supplied client that is a proxy, subclass or wrapper \u2014 the shape services injection exists to allow \u2014 silently skips physics_domain, source_domains and the HAS_PHYSICS_DOMAIN edges, logging only at debug level; production currently reaches it with a real GraphClient so nothing is lost today."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_refinement.py",
+      "line": 1036,
+      "severity": "non-blocking",
+      "text": "physics_domain and source_domains are still passed as Cypher parameters to two statements (line 1036 and line 1281) whose SET clauses this commit removed; no query in the module references $physics_domain or $source_domains any more, so the values are computed and discarded and a reader cannot tell the parameters are dead without grepping the Cypher."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T105324872200-scg-name-domain-route-catalog-sites/logs/gate-base-default.log",
+      "line": 3,
+      "severity": "non-blocking",
+      "text": "The base arm's header records '# module' as the worktree's graph_catalog.py rather than the base-tree module it imported; the arm's own result contradicts it \u2014 base-tree's test_has_physics_domain_edge_emitted and test_physics_domain_uses_coalesce pass, which head code would fail, and 73 failed/8409 passed is head's 8410 minus only the one added non-graph test \u2014 so the measurement stands but its recorded provenance does not."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "Five production call sites reach the change and were opened: edit.py:3401 into persist_refined_name, worker_extraction_and_enrichment.py:1943 into write_name_domain, worker_compose_and_validate.py:964 and worker_compose_batches.py:1070 into the composed-domain pass, and graph_catalog.py:2208 into write_standard_names.",
+    "diff": "Read commit by commit across seven commits (78a2bbd50 to d5c451ae6): graph_catalog.py loses 88 lines of promote-on-higher-rank promotion and withholds the domain pair from the structural edge pass, graph_refinement.py drops the successor's two SET fields and adds the post-commit writer call, and the last commit d5c451ae6 is the evidence fragment only.",
+    "done_when": "The done-when asks for zero added failure ids and per-path tests that fail on revert; the worker ran the whole tests/standard_names suite in both marker sets at base and head and the FAILED id sets match exactly.",
+    "goal": "The goal is that the catalog-side graph-store domain writes route through write_name_domain; graph_catalog.py lost its promote-on-higher-rank block and graph_refinement.py:1376-1420 routes the successor's domain through the one writer.",
+    "manifest": "Read the manifest; it states 73 failed/8410 passed default and 60/309 graph at head against 73/8409 and 60/306 at base, names each log, and its blockers field concedes the two out-of-scope test files.",
+    "write_paths": "Read prompt.txt:137-145; the diff stays inside the fence for five of seven changed files and breaches it for test_metadata_invariants.py and test_graph_edge_writers.py."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_name_domain_writer_catalog_sites.py:118 asserts the planted name carries no physics_domain after write_standard_names and :175 asserts 'equilibrium' rather than the predecessor's 'transport'; the recorded negative control (logs/negative-control.log) reverts the refine site and reddens exactly that id, and two mutations redden tests/standard_names/test_metadata_invariants.py:163.",
+    "evidence": "Both gate arms ran at base and head with logs whose last line is EXIT=1 (logs/gate-base-default.log, logs/gate-head-default.log, logs/gate-base-graph.log, logs/gate-head-graph.log); the FAILED id sets are identical, 73/73 default and 60/60 graph, so the added-failure count is 0; one deduction for the base-arm log header naming the worktree module.",
+    "fit": "The routed code follows the surrounding style of domain_decision.py:409-470, but graph_refinement.py:1393 gates a production write on isinstance(gc, GraphClient) and graph_refinement.py:1036 still supplies Cypher parameters no statement references.",
+    "goal_fidelity": "A grep of the four head modules (graph_catalog.py:487-499, graph_refinement.py:1376-1420, graph_claim_scope.py, graph_audits.py) finds no StandardName domain SET left; the two former writers are deleted or routed through domain_decision.write_name_domain, and the derived-parent gap is recorded as outside scope rather than guessed.",
+    "reuse": "The change extends the existing owner, imas_codex/standard_names/domain_decision.py:409, adding fallback_domain to it rather than forking a second writer, and deletes the divergent maybe_promote_domain/merge_source_domains selection at graph_catalog's call site.",
+    "scope_discipline": "Seven paths are declared in prompt.txt:137-145 and seven files changed, of which tests/standard_names/test_metadata_invariants.py and tests/standard_names/test_graph_edge_writers.py are outside the fence, disclosed in the manifest's blockers field."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261027T125905829606-review-of-scg-name-domain-route-catalog-sites-d5c451ae6674",
+  "reviewed_base_sha": "e2fee62a40098b8f4765457502d400a719093b7a",
+  "reviewed_head_sha": "d5c451ae6674dfce029c18cfcc9acf62c25cc435",
+  "reviewed_run_id": "r-20261027T105324872200-scg-name-domain-route-catalog-sites",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 7
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T13:43:23.635829+00:00",
+  "total": 96
+}
