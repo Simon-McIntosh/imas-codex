@@ -160,11 +160,69 @@ class TestWriteCypherInvariants:
         for stmt in has_cocos:
             assert "MATCH (c:COCOS" in stmt, "HAS_COCOS must use MATCH, not MERGE"
 
-    def test_physics_domain_uses_coalesce(self, cypher_statements: list[str]) -> None:
-        """physics_domain SET must use coalesce to avoid overwriting with NULL."""
-        # physics_domain may be SET in the main MERGE or a dedicated follow-up query
+    def test_domain_is_written_only_through_the_one_writer(
+        self, cypher_statements: list[str]
+    ) -> None:
+        """write_standard_names must not set a name's domain at all.
+
+        The domain used to be SET here behind ``coalesce`` so a null payload
+        could not clobber it. A stored value that must be preserved is not the
+        contract any more: ``domain_decision.write_name_domain`` owns
+        ``physics_domain``, ``source_domains`` and the ``HAS_PHYSICS_DOMAIN``
+        edges, and writes the three together. So the stronger property holds —
+        no statement from this path touches any of them, and a reintroduced
+        domain SET here fails this test rather than quietly competing with the
+        writer.
+        """
         all_cypher = "\n".join(cypher_statements)
-        assert "coalesce(" in all_cypher and "physics_domain" in all_cypher
+        for token in ("physics_domain", "source_domains", "HAS_PHYSICS_DOMAIN"):
+            assert token not in all_cypher, (
+                f"write_standard_names' Cypher writes {token}; the one writer "
+                "owns a name's domain, source domains and domain edges"
+            )
+
+    def test_the_one_writer_sets_domain_sources_and_edges(self) -> None:
+        """The writer this path defers to sets all three, not a subset."""
+        from imas_codex.standard_names.domain_decision import (
+            DomainDecision,
+            write_name_domain,
+        )
+
+        class RecordingClient:
+            def __init__(self) -> None:
+                self.statements: list[str] = []
+
+            def query(self, cypher: str, **params: object) -> list[dict[str, object]]:
+                self.statements.append(cypher)
+                if len(self.statements) == 1:
+                    return [
+                        {
+                            "physics_domain": None,
+                            "own_domains": ["equilibrium"],
+                            "child_ids": [],
+                            "child_dd_domains": [],
+                            "child_stored_domains": [],
+                        }
+                    ]
+                return []
+
+        gc = RecordingClient()
+        write_name_domain(
+            gc,
+            "a_name_the_test_never_persists",
+            DomainDecision(
+                name="a_name_the_test_never_persists",
+                candidates=("equilibrium",),
+                choice="equilibrium",
+                probability=0.9,
+                model="test/model",
+                decided_at="2026-01-01T00:00:00+00:00",
+            ),
+        )
+        written = "\n".join(gc.statements[1:])
+        assert "physics_domain" in written
+        assert "source_domains" in written
+        assert "HAS_PHYSICS_DOMAIN" in written
 
     def test_cocos_transformation_type_uses_coalesce(
         self, cypher_statements: list[str]

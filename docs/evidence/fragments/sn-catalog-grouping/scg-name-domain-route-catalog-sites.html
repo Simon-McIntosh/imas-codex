@@ -1,0 +1,168 @@
+<h2 id="scg-name-domain-route-catalog-sites">The catalog-side domain writers route through the one writer</h2>
+
+<p>After the graph-store split, two modules on the catalog side of
+<code>imas_codex/standard_names/graph_store/</code> set a
+<code>StandardName</code>'s domain themselves. Each now leaves the domain to
+<code>imas_codex.standard_names.domain_decision.write_name_domain</code>, which
+sets <code>physics_domain</code>, <code>source_domains</code> and one
+<code>HAS_PHYSICS_DOMAIN</code> edge per entry of <code>source_domains</code> in
+one transaction.</p>
+
+<h3 id="scg-name-domain-route-catalog-sites-sites">Sites, before and after</h3>
+
+<table>
+  <tr><th>Site</th><th>Before</th><th>After</th></tr>
+  <tr>
+    <td><code>graph_catalog.write_standard_names</code>, the
+      promote-on-higher-rank block (was <code>graph_catalog.py:348-434</code>)</td>
+    <td>Read each node's scalar and <code>source_domains</code>, merged the
+      incoming payload domains with <code>merge_source_domains</code>, chose a
+      scalar with <code>maybe_promote_domain</code>, then wrote both back with
+      <code>SET sn.physics_domain = coalesce(...), sn.source_domains =
+      coalesce(...)</code>. No edges.</td>
+    <td>Deleted. The write path no longer sets a domain at all; the composing
+      path already hands every persisted winner to
+      <code>write_name_domain</code>. A payload domain is ignored, which the
+      test pins.</td>
+  </tr>
+  <tr>
+    <td><code>graph_refinement.persist_refined_name</code>, successor
+      provisioning (was <code>graph_refinement.py:917-918</code>)</td>
+    <td>Wrote <code>new.physics_domain = $physics_domain</code> and
+      <code>new.source_domains = $source_domains</code> from the caller (the
+      <code>sn edit</code> rename passes the predecessor's scalar), with no
+      edge writer.</td>
+    <td>The provision writes neither field. After the transaction commits, the
+      successor's domain is written by <code>write_name_domain</code>: its
+      stored Jev decision when the predecessor carries one, the predecessor's
+      scalar otherwise (undecided, with that reason recorded), a carried
+      correction only when the rename preserves meaning, and the edges from the
+      migrated sources.</td>
+  <tr>
+    <td><code>graph_catalog.write_standard_names</code>, the structural edge
+      pass it delegates to <code>graph_lineage._write_standard_name_edges</code></td>
+    <td>The pass was handed the batch as-is, and its
+      <code>HAS_PHYSICS_DOMAIN</code> branch minted an edge per entry of the
+      payload's <code>physics_domain</code> and <code>source_domains</code> —
+      edges the one writer never saw, and which it could therefore never
+      withdraw.</td>
+    <td>The batch is handed on with those two fields removed, so the pass mints
+      no domain edge. The domain, its source domains and its edges are written
+      together by <code>write_name_domain</code>, which deletes the edges it
+      replaces.</td>
+  </tr>
+</table>
+
+<h3 id="scg-name-domain-route-catalog-sites-reads">Read-only sites, verified and left alone</h3>
+
+<ul>
+  <li><code>graph_audits.py</code> — <code>physics_domain</code> appears only in
+      a filter (<code>n.physics_domain = $domain</code>) and in the domain
+      census' projections. No write, no change.</li>
+  <li><code>graph_claim_scope.py</code> — filters and projections only
+      (<code>n.physics_domain = $domain_filter</code>,
+      <code>s.physics_domain AS physics_domain</code>). No write, no change.</li>
+</ul>
+
+<h3 id="scg-name-domain-route-catalog-sites-gap">One writer contract change and one gap</h3>
+
+<p><code>write_name_domain</code> gained an optional <code>fallback_domain</code>.
+A successor minted by a rename holds no scalar, so "an undecided name keeps its
+current value" had nothing to keep; the fallback seeds it from the predecessor
+without the caller writing the property itself.</p>
+
+<p>The derived-parent rule the brief names is not in these four modules. Its
+writers — <code>_materialize_derived_parent_rows</code>,
+<code>_bootstrap_missing_derived_parent_targets</code>,
+<code>_validate_derived_parent_identity</code> and the
+<code>parent.source_domains = CASE</code> promotion beside them — live in
+<code>graph_lineage.py</code>, outside this node's fence, so they are recorded
+outside scope rather than changed here.</p>
+
+<h3 id="scg-name-domain-route-catalog-sites-evidence">Evidence</h3>
+
+<ul>
+  <li>Path tests
+      (<code>tests/standard_names/test_name_domain_writer_catalog_sites.py</code>,
+      four disposable-graph tests): green at the head revision,
+      <code>4 passed, EXIT=0</code>. Two run a routed path each and assert the
+      scalar, <code>source_domains</code> and the edges agree; one drives the
+      rename through a client that is not a <code>GraphClient</code>; one gives
+      it a client that cannot write at all.</li>
+  <li>Negative control: reverting the <code>persist_refined_name</code> site to a
+      direct <code>physics_domain</code> write gives
+      <code>1 failed, 1 passed</code> with <code>EXIT=1</code>; the failing id is
+      <code>test_persist_refined_name_carries_the_stored_decision_through_the_writer</code>.
+      The catalog site's test is unaffected, as it exercises the other path.</li>
+  <li>Proxy-client test
+      (<code>test_persist_refined_name_writes_the_domain_for_a_client_that_is_not_a_graph_client</code>):
+      drives the client register with a wrapper that forwards
+      <code>query</code> and <code>session</code> and is deliberately not a
+      <code>GraphClient</code>, and asserts the successor's scalar,
+      <code>source_domains</code> and edges were written.</li>
+  <li>Gate, default markers at head and base with <code>-n 8</code>: head
+      <code>71 failed, 8412 passed, 11 skipped</code> against base
+      <code>73 failed, 8409 passed, 11 skipped</code>; the added-failure count
+      is <strong>0</strong>.</li>
+  <li>Gate, <code>-m graph</code> at head and base with <code>-n 8</code>: head
+      <code>59 failed, 312 passed, 19 skipped</code> against base
+      <code>60 failed, 306 passed, 20 skipped</code>; the added-failure count is
+      <strong>0</strong> and every path test passes at the head.</li>
+  <li>Negative control on the client check: with the old
+      <code>isinstance(gc, GraphClient)</code> gate restored in place of the
+      capability check, the unwritable-client test fails
+      (<code>1 failed, 1 passed, EXIT=1</code>): the gate skips instead of
+      refusing.</li>
+</ul>
+
+<h3 id="scg-name-domain-route-catalog-sites-invariant">The invariant that guarded the old write</h3>
+
+<p><code>TestWriteCypherInvariants::test_physics_domain_uses_coalesce</code>
+asserted that <code>coalesce(</code> and <code>physics_domain</code> co-occurred
+in this path's Cypher, so a null payload could not clobber a stored domain. A
+value that must be preserved is not the contract any more, so the test now
+asserts the stronger property: the catalog write's Cypher carries no
+<code>physics_domain</code> and no <code>source_domains</code>, its structural
+edge pass mints no <code>HAS_PHYSICS_DOMAIN</code> edge, and a companion
+assertion drives <code>write_name_domain</code> through a recording client so
+the deferral names a real destination that sets all three. Two mutations were
+applied and each darkened exactly that test:
+
+<table>
+  <tr><th>Mutation applied</th><th>Result</th></tr>
+  <tr>
+    <td>A <code>physics_domain</code> SET reintroduced into
+      <code>write_standard_names</code>, behind <code>coalesce</code>:
+      <code>SET sn.physics_domain = coalesce(b.physics_domain,
+      sn.physics_domain)</code></td>
+    <td><code>test_domain_is_written_only_through_the_one_writer</code> failed
+      on the <code>physics_domain</code> token; <code>1 failed, 7 passed</code>,
+      <code>EXIT=1</code>.</td>
+  </tr>
+  <tr>
+    <td>The structural edge pass handed the batch as-is again, so it mints
+      <code>HAS_PHYSICS_DOMAIN</code> from the payload</td>
+    <td>The same test failed on the edge token;
+      <code>1 failed, 7 passed</code>, <code>EXIT=1</code>.</td>
+  </tr>
+</table>
+<h3 id="scg-name-domain-route-catalog-sites-client">The write does not depend on the client's class</h3>
+
+<p>The successor's domain write sat behind <code>isinstance(gc, GraphClient)</code>.
+A proxy, subclass or wrapper a caller handed in therefore skipped
+<code>physics_domain</code>, <code>source_domains</code> and the edges with only a
+debug log — a dropped domain behind a message nobody reads. The branch is now a
+capability check: any client the call path accepts reaches
+<code>write_name_domain</code>, and a client that offers no <code>query</code>
+raises <code>TypeError</code> naming what would have been lost rather than
+skipping.</p>
+
+<p>The check runs where the client is acquired, before the rename transaction
+opens. It used to sit after <code>tx.commit()</code>, so an unsupported client
+left a committed successor with no domain — a half-written rename that the
+refusal came too late to prevent. The unwritable-client test asserts both halves:
+the <em>TypeError</em> and the absent successor.</p>
+
+<p>Two statements in the same function still bound <code>physics_domain</code>
+and <code>source_domains</code> as Cypher parameters after the provision stopped
+setting those properties. The parameters are gone from both.</p>

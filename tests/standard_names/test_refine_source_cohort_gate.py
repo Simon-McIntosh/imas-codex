@@ -52,6 +52,17 @@ def test_empty_authoritative_source_cohort_refuses_successor() -> None:
 
     transaction.run.side_effect = run
     graph = MagicMock()
+    # The domain writer reads the successor's state; this successor is
+    # unsourced, so it has no own domains and no children.
+    graph.query.return_value = [
+        {
+            "physics_domain": None,
+            "own_domains": [],
+            "child_ids": [],
+            "child_dd_domains": [],
+            "child_stored_domains": [],
+        }
+    ]
     graph.__enter__.return_value = graph
     graph.__exit__.return_value = False
     session = MagicMock()
@@ -145,6 +156,17 @@ def _run_with_empty_cohort(row: dict[str, object]):
 
     transaction.run.side_effect = run
     graph = MagicMock()
+    # The domain writer reads the successor's state; this successor is
+    # unsourced, so it has no own domains and no children.
+    graph.query.return_value = [
+        {
+            "physics_domain": None,
+            "own_domains": [],
+            "child_ids": [],
+            "child_dd_domains": [],
+            "child_stored_domains": [],
+        }
+    ]
     graph.__enter__.return_value = graph
     graph.__exit__.return_value = False
     session = MagicMock()

@@ -10,7 +10,7 @@ Edge types covered:
   HAS_PREDECESSOR — from the ``deprecates`` field
   HAS_SUCCESSOR   — reserved for signed supersede mutations
   IN_CLUSTER      — from the ``primary_cluster_id`` field
-  HAS_PHYSICS_DOMAIN — from the ``physics_domain`` field
+  HAS_PHYSICS_DOMAIN — the one domain writer's, never a payload's
 """
 
 from __future__ import annotations
@@ -390,13 +390,14 @@ class TestEndpointAuthority:
         )
 
         endpoint_merge = re.compile(r"MERGE\s*\([^)]*:StandardName")
+        # HAS_PHYSICS_DOMAIN is absent by construction: this path mints no
+        # domain edge, the one writer owns it.
         for relation in (
             "HAS_PARENT",
             "HAS_ERROR",
             "HAS_LOCUS",
             "HAS_PREDECESSOR",
             "IN_CLUSTER",
-            "HAS_PHYSICS_DOMAIN",
         ):
             relation_writes = [
                 cypher for cypher in _cyphers(mock_gc) if relation in cypher
@@ -841,21 +842,27 @@ class TestInClusterEdgeFromPrimaryCluster:
 
 
 # ---------------------------------------------------------------------------
-# HAS_PHYSICS_DOMAIN from physics_domain scalar
+# HAS_PHYSICS_DOMAIN belongs to the one domain writer
 # ---------------------------------------------------------------------------
 
 
 class TestHasPhysicsDomainEdge:
-    """Write StandardName with ``physics_domain='equilibrium'``
-    → HAS_PHYSICS_DOMAIN edge to singleton PhysicsDomain {id:'equilibrium'}.
+    """A payload ``physics_domain`` must not reach the graph from this path.
+
+    The domain, its source domains and its ``HAS_PHYSICS_DOMAIN`` edges are
+    written together by ``domain_decision.write_name_domain``, which also
+    removes the edges it replaces. The structural tail pass applies that writer
+    once per name in its batch, reading the name's stored decision and its DD
+    sources, so a payload domain can neither mint an edge here nor survive as a
+    scalar the writer never saw.
     """
 
-    def test_has_physics_domain_edge_emitted(self) -> None:
+    def test_domain_edge_emitted(self) -> None:
         names = [
             {
                 "id": "plasma_current",
                 "unit": "A",
-                "physics_domain": "equilibrium",
+                "physics_domain": "transport",
             }
         ]
         mock_gc = _make_mock_gc({"plasma_current": ["equilibrium"]})
@@ -863,12 +870,14 @@ class TestHasPhysicsDomainEdge:
 
         assert any("HAS_PHYSICS_DOMAIN" in c for c in _cyphers(mock_gc))
 
-    def test_has_physics_domain_batch(self) -> None:
+    def test_domain_edges_come_from_the_sources_once(self) -> None:
+        """One application, and its edges are the name's, not the payload's."""
         names = [
             {
                 "id": "plasma_current",
                 "unit": "A",
-                "physics_domain": "equilibrium",
+                "physics_domain": "transport",
+                "source_domains": ["equilibrium", "transport"],
             }
         ]
         mock_gc = _make_mock_gc({"plasma_current": ["equilibrium"]})
@@ -879,7 +888,7 @@ class TestHasPhysicsDomainEdge:
             for invocation in mock_gc.query.call_args_list
             if "HAS_PHYSICS_DOMAIN" in invocation[0][0]
         ]
-        assert writes
+        assert len(writes) == 1, "a written name's domain is applied exactly once"
         assert any(
             invocation[1]["sn_id"] == "plasma_current"
             and invocation[1]["edge_domains"] == ["equilibrium"]
