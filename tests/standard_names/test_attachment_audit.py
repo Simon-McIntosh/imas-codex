@@ -441,20 +441,22 @@ def test_as_dict_reports_name_level_defects() -> None:
 
 
 @pytest.fixture()
-def _gc():
+def _gc(disposable_neo4j_uri: str, monkeypatch):
     from imas_codex.graph.client import GraphClient
-    from imas_codex.settings import get_graph_uri
+    from imas_codex.standard_names import dd_resolutions
+    from tests.standard_names.conftest import SyntheticDDResolutionReader
+    from tests.standard_names.dd_resolution_test_data import (
+        SYNTHETIC_GRAPH_RESOLUTION_ROWS,
+    )
 
-    uri = os.environ.get("IMAS_CODEX_TEST_NEO4J_URI")
-    if not uri:
-        pytest.skip("IMAS_CODEX_TEST_NEO4J_URI is not configured")
-    if os.environ.get("IMAS_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
-        pytest.fail("attachment graph tests require an ephemeral graph")
-    project_uri = os.environ.get("IMAS_CODEX_TEST_PROJECT_NEO4J_URI") or get_graph_uri()
-    if uri == project_uri:
-        pytest.fail("attachment graph tests refuse the configured project graph")
+    monkeypatch.setattr(
+        dd_resolutions,
+        "dd_resolution_graph_reader",
+        lambda: SyntheticDDResolutionReader(SYNTHETIC_GRAPH_RESOLUTION_ROWS),
+    )
+
     client = GraphClient(
-        uri=uri,
+        uri=disposable_neo4j_uri,
         username="neo4j",
         password="",
         graph_name="ephemeral-attachment-audit",
@@ -3043,14 +3045,13 @@ def test_terminal_recovery_graph_races_roll_back_complete_cohort(
 
 
 @pytest.mark.graph
-def test_terminal_recovery_graph_fixture_refuses_production_uri() -> None:
-    from imas_codex.settings import get_graph_uri
-
-    test_uri = os.environ["IMAS_CODEX_TEST_NEO4J_URI"]
-    project_uri = os.environ.get("IMAS_CODEX_TEST_PROJECT_NEO4J_URI") or get_graph_uri()
+def test_terminal_recovery_graph_fixture_refuses_production_uri(
+    disposable_neo4j_uri: str,
+) -> None:
+    from tests.standard_names.conftest import project_graph_uris
 
     assert os.environ["IMAS_CODEX_TEST_NEO4J_EPHEMERAL"] == "1"
-    assert test_uri != project_uri
+    assert disposable_neo4j_uri.rstrip("/") not in project_graph_uris()
 
 
 # ---------------------------------------------------------------------------

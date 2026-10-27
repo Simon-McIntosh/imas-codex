@@ -43,14 +43,16 @@ _HELD_KIND = "change_in_electron_temperature"
 
 
 @pytest.fixture()
-def _gc():
-    try:
-        from imas_codex.graph.client import GraphClient
+def _gc(disposable_neo4j_uri: str):
+    from imas_codex.graph.client import GraphClient
 
-        client = GraphClient()
-        client.get_stats()
-    except Exception as exc:  # pragma: no cover - env-dependent
-        pytest.skip(f"Neo4j not available: {exc}")
+    client = GraphClient(
+        uri=disposable_neo4j_uri,
+        username="neo4j",
+        password="",
+        graph_name="sourceless-name-recovery-tests",
+    )
+    client.get_stats()
     yield client
     client.close()
 
@@ -166,9 +168,7 @@ def test_lapsed_detachment_is_reattached(_gc, _clean):
     """
     from imas_codex.standard_names.graph_ops import reconcile_sourceless_pipeline_names
 
-    name_id, source_id = _brokered(
-        _gc, name_stage="accepted", name_kind=_LAPSED_KIND
-    )
+    name_id, source_id = _brokered(_gc, name_stage="accepted", name_kind=_LAPSED_KIND)
     before = _census(_gc)
 
     result = reconcile_sourceless_pipeline_names(gc=_gc)
@@ -230,9 +230,7 @@ def test_reattach_is_idempotent(_gc, _clean):
     """A second pass after a re-pair matches nothing and adds no edge."""
     from imas_codex.standard_names.graph_ops import reconcile_sourceless_pipeline_names
 
-    name_id, _source_id = _brokered(
-        _gc, name_stage="accepted", name_kind=_LAPSED_KIND
-    )
+    name_id, _source_id = _brokered(_gc, name_stage="accepted", name_kind=_LAPSED_KIND)
     reconcile_sourceless_pipeline_names(gc=_gc)
     result = reconcile_sourceless_pipeline_names(gc=_gc)
 
@@ -246,9 +244,7 @@ def test_runs_from_startup_reviewable_reconcile(_gc, _clean):
     """The healing fires from the startup wiring, not only the focused call."""
     from imas_codex.standard_names.graph_ops import reconcile_reviewable_name_stage
 
-    name_id, _source_id = _brokered(
-        _gc, name_stage="reviewed", name_kind=_LAPSED_KIND
-    )
+    name_id, _source_id = _brokered(_gc, name_stage="reviewed", name_kind=_LAPSED_KIND)
 
     reconcile_reviewable_name_stage(gc=_gc)
 

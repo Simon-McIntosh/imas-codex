@@ -15,12 +15,48 @@ import pytest
 from imas_codex.standard_names.sources.dd import _apply_unit_overrides
 
 
+@pytest.fixture
+def _signal_container_graph(seed_dd_resolutions):
+    from imas_codex.graph.client import GraphClient
+
+    seed_dd_resolutions([{"path": "synthetic_ids/signal/value", "effective": "A"}])
+    paths = ("magnetics/ip", "magnetics/rogowski_coil/current")
+    with GraphClient() as graph:
+        graph.query(
+            """
+            MATCH (version:DDVersion {id: '4.1.1'})
+            SET version.is_current = true
+            MERGE (ids:IDS {id: 'magnetics'})
+            WITH ids
+            UNWIND $paths AS path
+            MERGE (signal:IMASNode {id: path})
+            SET signal.node_category = 'quantity',
+                signal.data_type = 'STRUCTURE',
+                signal.description = 'Measured magnetic current',
+                signal.documentation = 'Magnetic current signal container.',
+                signal.physics_domain = 'magnetics',
+                signal.unit = 'A'
+            MERGE (signal)-[:IN_IDS]->(ids)
+            MERGE (data:IMASNode {id: path + '/data'})
+            SET data.node_category = 'data', data.data_type = 'FLT_1D'
+            MERGE (data)-[:HAS_PARENT]->(signal)
+            """,
+            paths=list(paths),
+        )
+    yield
+    with GraphClient() as graph:
+        graph.query(
+            "MATCH (node:IMASNode) WHERE node.id IN $paths DETACH DELETE node",
+            paths=[item for path in paths for item in (path, path + "/data")],
+        )
+
+
 @pytest.mark.graph
 class TestSignalSignatureAdmission:
     """STRUCTURE/STRUCT_ARRAY signal nodes (a `/data` child quantity,
     no quantity child) are admitted as SN sources despite the leaf invariant."""
 
-    def test_signal_structs_admitted(self) -> None:
+    def test_signal_structs_admitted(self, _signal_container_graph) -> None:
         from imas_codex.standard_names.sources.dd import extract_dd_candidates
 
         batches = extract_dd_candidates(

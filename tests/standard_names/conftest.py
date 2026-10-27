@@ -11,18 +11,110 @@ Stages map to worker pool names: ``'generate_name'``, ``'review_name'``,
 from __future__ import annotations
 
 import dataclasses
+import json
 import os
+import signal
 import socket
 import subprocess
 import sys
 import tempfile
 import time
+import uuid
 from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 from unittest.mock import patch
 
 import pytest
+
+
+@pytest.fixture
+def seed_dd_resolutions(disposable_neo4j_uri):
+    """Install exact DD bridges for one test, then remove every seeded node."""
+    from imas_codex.graph.client import GraphClient
+
+    token = uuid.uuid4().hex
+
+    def seed(rows):
+        records = [
+            {
+                **row,
+                "id": f"test-resolution:{token}:{row['path']}",
+                "gap_id": f"test-gap:{token}:{row['path']}",
+                "published_value": json.dumps(row.get("published", "m")),
+                "effective_value": json.dumps(row["effective"]),
+            }
+            for row in rows
+        ]
+        with GraphClient() as graph:
+            graph.query(
+                """
+                UNWIND $records AS row
+                MERGE (source:IMASNode {id: row.path})
+                  ON CREATE SET source.test_seed = $token
+                SET source.unit = row.effective
+                MERGE (unit:Unit {id: row.effective})
+                  ON CREATE SET unit.test_seed = $token
+                MERGE (source)-[:HAS_UNIT]->(unit)
+                MERGE (version:DDVersion {id: '4.1.1'})
+                  ON CREATE SET version.test_seed = $token
+                MERGE (gap:DDGap {id: row.gap_id})
+                  ON CREATE SET gap.test_seed = $token
+                SET gap.kind = coalesce(row.gap_kind, 'unit_defect'),
+                    gap.status = 'flagged'
+                CREATE (resolution:DDResolution {id: row.id})
+                SET resolution.test_seed = $token,
+                    resolution.path = row.path,
+                    resolution.dd_version = '4.1.1',
+                    resolution.field = 'unit',
+                    resolution.published_kind = 'string',
+                    resolution.published_value = row.published_value,
+                    resolution.effective_kind = 'string',
+                    resolution.effective_value = row.effective_value,
+                    resolution.reason = 'Deterministic test authority',
+                    resolution.recorded_by = 'test fixture',
+                    resolution.recorded_at = datetime('2026-08-19T00:00:00Z'),
+                    resolution.upstream_reference = coalesce(row.upstream, 'none-yet'),
+                    resolution.upstream_commit_reference = row.commit,
+                    resolution.retiring_release = 'none-yet',
+                    resolution.status = 'active'
+                MERGE (source)-[:BRIDGED_BY]->(resolution)
+                MERGE (resolution)-[:EVIDENCED_BY]->(gap)
+                MERGE (resolution)-[:FOR_DD_VERSION]->(version)
+                """,
+                records=records,
+                token=token,
+            )
+
+    yield seed
+    with GraphClient() as graph:
+        graph.query(
+            "MATCH (node) WHERE node.test_seed = $token DETACH DELETE node", token=token
+        )
+
+
+def pytest_collection_modifyitems(items):
+    """Keep shared-graph startup outside the test call timeout."""
+    for item in items:
+        if (
+            "disposable_neo4j_uri" not in item.fixturenames
+            and item.get_closest_marker("graph") is None
+        ):
+            continue
+        existing = item.get_closest_marker("timeout")
+        args = (
+            existing.args
+            if existing
+            else (
+                float(
+                    item.config.getoption("timeout") or item.config.getini("timeout")
+                ),
+            )
+        )
+        kwargs = dict(existing.kwargs) if existing else {}
+        kwargs["func_only"] = True
+        item.add_marker(pytest.mark.timeout(*args, **kwargs), append=False)
+
 
 # ---------------------------------------------------------------------------
 # Structural guard — block live GraphClient connections in default-tier tests
@@ -370,6 +462,9 @@ def _free_port_pair() -> tuple[int, int]:
             sock.close()
 
 
+_DISPOSABLE_STARTUP_TIMEOUT_SECONDS = 240.0
+
+
 def _start_empty_neo4j():
     """Start one empty Neo4j through the module that owns the lifecycle.
 
@@ -383,6 +478,17 @@ def _start_empty_neo4j():
     directory = tempfile.TemporaryDirectory(prefix="disposable-neo4j-", dir=scratch)
     root = Path(directory.name)
     bolt_port, http_port = _free_port_pair()
+
+    def _startup_expired(_signum, _frame):
+        raise TimeoutError(
+            "disposable Neo4j startup exceeded "
+            f"{_DISPOSABLE_STARTUP_TIMEOUT_SECONDS:g} seconds"
+        )
+
+    previous_handler = signal.signal(signal.SIGALRM, _startup_expired)
+    previous_timer = signal.setitimer(
+        signal.ITIMER_REAL, _DISPOSABLE_STARTUP_TIMEOUT_SECONDS
+    )
     try:
         process, log = temp_neo4j.start_temp_neo4j(
             root, bolt_port, http_port, load_dump=False
@@ -390,6 +496,9 @@ def _start_empty_neo4j():
     except BaseException:
         directory.cleanup()
         raise
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, *previous_timer)
+        signal.signal(signal.SIGALRM, previous_handler)
     return directory, process, log, bolt_port
 
 
@@ -493,9 +602,8 @@ def disposable_neo4j_uri() -> Iterator[str]:
     project graph's resolved address and the run fails if they are the same, so
     no test here can write to the shared live graph.
 
-    For a test's duration both ``NEO4J_URI`` and ``IMAS_CODEX_TEST_NEO4J_URI``
-    name this endpoint, so a bare ``GraphClient()`` and an explicitly-addressed
-    one in the same test reach the same instance.
+    Autouse fixtures below point graph clients at this endpoint for graph-marked
+    tests and explicit users. Other tests in the worker retain their own URI.
     """
     configured = os.environ.get("IMAS_CODEX_TEST_NEO4J_URI")
     directory = process = log = None
@@ -539,6 +647,11 @@ def disposable_neo4j_uri() -> Iterator[str]:
                 f"disposable endpoint {uri}"
             )
         _wipe(uri)
+        for key, value in previous.items():
+            if value is None:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = value
         yield uri
     finally:
         for key, value in previous.items():
@@ -570,11 +683,80 @@ def disposable_neo4j_uri() -> Iterator[str]:
             )
 
 
+@pytest.fixture(scope="module", autouse=True)
+def _module_disposable_graph_environment(
+    request: pytest.FixtureRequest,
+) -> Iterator[None]:
+    """Bind graph modules before their module-scoped graph clients are built."""
+    graph_items = any(
+        item.get_closest_marker("graph") is not None and item.path == request.node.path
+        for item in request.session.items
+    )
+    if not graph_items:
+        yield
+        return
+
+    uri = request.getfixturevalue("disposable_neo4j_uri")
+    previous = {key: os.environ.get(key) for key in _DISPOSABLE_ENV}
+    os.environ.update(
+        {
+            "NEO4J_URI": uri,
+            "NEO4J_PASSWORD": "",
+            "IMAS_CODEX_TEST_NEO4J_URI": uri,
+            "IMAS_CODEX_TEST_NEO4J_EPHEMERAL": "1",
+        }
+    )
+    try:
+        yield
+    finally:
+        for key, value in previous.items():
+            if value is None:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = value
+
+
+@pytest.fixture(autouse=True)
+def _disposable_graph_environment(request: pytest.FixtureRequest) -> Iterator[None]:
+    """Bind graph-marked tests and explicit fixture users to the empty graph."""
+    if (
+        "disposable_neo4j_uri" not in request.fixturenames
+        and request.node.get_closest_marker("graph") is None
+    ):
+        yield
+        return
+
+    uri = request.getfixturevalue("disposable_neo4j_uri")
+    previous = {key: os.environ.get(key) for key in _DISPOSABLE_ENV}
+    os.environ.update(
+        {
+            "NEO4J_URI": uri,
+            "NEO4J_PASSWORD": "",
+            "IMAS_CODEX_TEST_NEO4J_URI": uri,
+            "IMAS_CODEX_TEST_NEO4J_EPHEMERAL": "1",
+        }
+    )
+    try:
+        yield
+    finally:
+        for key, value in previous.items():
+            if value is None:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = value
+
+
 @pytest.fixture()
 def disposable_neo4j_empty(disposable_neo4j_uri: str) -> str:
     """The shared endpoint, holding no nodes when the test starts."""
     _wipe(disposable_neo4j_uri)
     return disposable_neo4j_uri
+
+
+@pytest.fixture()
+def disposable_neo4j(disposable_neo4j_uri: str) -> tuple[str, str]:
+    """The shared endpoint in the URI/password shape used by graph clients."""
+    return disposable_neo4j_uri, neo4j_test_password()
 
 
 # ---------------------------------------------------------------------------

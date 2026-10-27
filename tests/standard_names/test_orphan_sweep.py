@@ -344,15 +344,17 @@ _TEST_ID_PREFIX = "orphan_sweep_test__"
 
 
 @pytest.fixture()
-def _gc():
-    """Function-scoped GraphClient; skip if Neo4j is unreachable."""
-    try:
-        from imas_codex.graph.client import GraphClient
+def _gc(disposable_neo4j_uri: str):
+    """Function-scoped client bound to the shared disposable graph."""
+    from imas_codex.graph.client import GraphClient
 
-        client = GraphClient()
-        client.get_stats()
-    except Exception as exc:
-        pytest.skip(f"Neo4j not available: {exc}")
+    client = GraphClient(
+        uri=disposable_neo4j_uri,
+        username="neo4j",
+        password="",
+        graph_name="orphan-sweep-tests",
+    )
+    client.get_stats()
 
     yield client
     client.close()
@@ -464,7 +466,6 @@ def _fetch_source(gc, source_id: str) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# I1. test_sweep_reverts_stale_refining_name
 # ---------------------------------------------------------------------------
 
 
@@ -486,7 +487,6 @@ def test_sweep_reverts_stale_refining_name(_gc, _clean_test_nodes):
 
 
 # ---------------------------------------------------------------------------
-# I2. test_sweep_skips_fresh_refining_name
 # ---------------------------------------------------------------------------
 
 
@@ -505,7 +505,6 @@ def test_sweep_skips_fresh_refining_name(_gc, _clean_test_nodes):
 
 
 # ---------------------------------------------------------------------------
-# I3. test_sweep_reverts_stale_refining_docs
 # ---------------------------------------------------------------------------
 
 
@@ -527,7 +526,6 @@ def test_sweep_reverts_stale_refining_docs(_gc, _clean_test_nodes):
 
 
 # ---------------------------------------------------------------------------
-# I4. test_sweep_skips_fresh_refining_docs
 # ---------------------------------------------------------------------------
 
 
@@ -570,7 +568,6 @@ def test_sweep_reverts_unclaimed_refining_docs(_gc, _clean_test_nodes):
 
 
 # ---------------------------------------------------------------------------
-# I5. test_sweep_reverts_stale_source_token
 # ---------------------------------------------------------------------------
 
 
@@ -591,7 +588,6 @@ def test_sweep_reverts_stale_source_token(_gc, _clean_test_nodes):
 
 
 # ---------------------------------------------------------------------------
-# I6. test_sweep_skips_fresh_source_token
 # ---------------------------------------------------------------------------
 
 
@@ -609,7 +605,6 @@ def test_sweep_skips_fresh_source_token(_gc, _clean_test_nodes):
 
 
 # ---------------------------------------------------------------------------
-# I7. test_sweep_atomic_clear
 # ---------------------------------------------------------------------------
 
 
@@ -633,7 +628,6 @@ def test_sweep_atomic_clear(_gc, _clean_test_nodes):
 
 
 # ---------------------------------------------------------------------------
-# I8. test_sweep_no_op_when_clean
 # ---------------------------------------------------------------------------
 
 
@@ -656,7 +650,6 @@ def test_sweep_no_op_when_clean(_gc, _clean_test_nodes):
 
 
 # ---------------------------------------------------------------------------
-# I9. test_sweep_count_returns_correctly
 # ---------------------------------------------------------------------------
 
 
@@ -686,7 +679,6 @@ def test_sweep_count_returns_correctly(_gc, _clean_test_nodes):
 
 
 # ---------------------------------------------------------------------------
-# I10. test_run_loop_respects_stop_event
 # ---------------------------------------------------------------------------
 
 
@@ -710,7 +702,6 @@ async def test_run_loop_respects_stop_event(_gc, _clean_test_nodes):
 
 
 # ---------------------------------------------------------------------------
-# I11. test_run_loop_periodic
 # ---------------------------------------------------------------------------
 
 

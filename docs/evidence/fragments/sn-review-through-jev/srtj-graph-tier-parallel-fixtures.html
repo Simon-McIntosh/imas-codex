@@ -1,0 +1,301 @@
+<article id="srtj-graph-tier-parallel-fixtures-record">
+<h2 id="srtj-graph-tier-parallel-fixtures-title">Disposable graph fixture migration and parallel gate</h2>
+
+<h3 id="srtj-graph-tier-parallel-fixtures-change">Change</h3>
+<p>All 30 named test modules now depend on the shared disposable Neo4j fixture. The local starters and their self-comparing project-URI guards are gone. <code>rg -l 'resolve_neo4j|get_graph_uri' tests/standard_names -g 'test_*.py'</code> returns no test module; <code>resolve_neo4j</code> occurs under that test tree only in <code>conftest.py</code>. The shared fixture still refuses either resolved spelling of the project graph, and its 240-second startup deadline is separate from the 30-second test-call timeout.</p>
+<p>At the environment-isolation checkpoint, the session fixture restored graph environment variables before yielding, and a function fixture applied the disposable endpoint to explicit fixture users. A regression test verified this restoration. The later autouse expansion for every graph-marked test is measured in the final section below. In a two-test probe, the subsequent read-only project graph test saw 51 DD-resolution rows, whereas a prior head arm had raised <code>DDResolutionManifestInvalid: DD resolution graph authority is empty</code>. The existing test expects 37 rows and still fails on that live count. Two disposable test fixtures also gained the existing synthetic DD authority reader: the two focused tests that previously failed at the empty-authority check passed. Product failures remain visible.</p>
+
+<h3 id="srtj-graph-tier-parallel-fixtures-gates">Archived suite arms</h3>
+<p>Base revision <code>18daf78f53e50cad8a8a2b3375600498d48561bb</code> and the measured head revisions were extracted with <code>git archive</code>, furnished with the five generated files, and run with separate basetemps under node-local scratch. The complete logs and a per-test classification are in <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261026T204209966088-srtj-graph-tier-parallel-fixtures/</code>.</p>
+<table><thead><tr><th>Arm</th><th>Revision</th><th>Pytest summary</th><th>Project-URI refusal lines</th></tr></thead><tbody>
+<tr><td id="srtj-graph-tier-parallel-fixtures-base-graph">base graph</td><td><code>18daf78</code></td><td>44 failed, 152 passed, 171 skipped, 17 errors; EXIT=1</td><td>2</td></tr>
+<tr><td id="srtj-graph-tier-parallel-fixtures-head-graph-first">migrated head graph, first</td><td><code>fe636b9</code></td><td>78 failed, 286 passed, 20 skipped, 0 errors; EXIT=1</td><td>0</td></tr>
+<tr><td id="srtj-graph-tier-parallel-fixtures-head-graph-second">migrated head graph, second</td><td><code>fe636b9</code></td><td>78 failed, 285 passed, 21 skipped, 0 errors; EXIT=1</td><td>0</td></tr>
+<tr><td id="srtj-graph-tier-parallel-fixtures-head-graph-isolated">environment-isolated head graph</td><td><code>a96d74b</code></td><td>80 failed, 295 passed, 10 skipped, 0 errors; EXIT=1</td><td>0</td></tr>
+<tr><td id="srtj-graph-tier-parallel-fixtures-base-default">base default</td><td><code>18daf78</code></td><td>95 failed, 8323 passed, 9 skipped; EXIT=1</td><td>not applicable</td></tr>
+<tr><td id="srtj-graph-tier-parallel-fixtures-head-default">head default</td><td><code>a96d74b</code></td><td>95 failed, 8324 passed, 9 skipped; EXIT=1; zero added failure IDs</td><td>not applicable</td></tr>
+</tbody></table>
+<p>The project-URI scan finds two refusals in the fresh base graph log and one in the negative-control log, so zero in the head logs is a checked absence. The negative control points the shared fixture at the resolved project URI and gets <code>Failed: refusing to run against the project graph URI</code> before any wipe; EXIT=1. Neither migrated head graph run had a startup timeout. Their failure-ID sets differed by two IDs despite equal totals. The isolated head has one complete arm only.</p>
+
+<h3 id="srtj-graph-tier-parallel-fixtures-classification">Head-only failure classification</h3>
+<p>Against the fresh base graph arm, the isolated head arm has 42 added failing IDs. The run-directory <code>head-only-classification.json</code> assigns every one to one class: 23 fixture or isolation defects and 19 newly reached product failures. Of the 23, ten were missing synthetic DD authority in the attachment-audit and unbound-source fixtures; both representative failures passed after the fixture repair. Thirteen remain in four ungranted modules whose graph fixtures use bare <code>GraphClient()</code>: <code>test_source_revival.py</code> (5), <code>test_sourceless_name_recovery.py</code> (3), <code>test_unit_edge_reconcile.py</code> (4), and <code>test_orphan_sweep.py</code> (1). Their endpoint and shared-state behavior needs a separate repair. This count belongs to revision <code>a96d74b</code>; the last synthetic-authority commit has focused checks only.</p>
+<table><thead><tr><th>Product failure IDs</th><th>Product function and observed line</th><th>Observed failure</th></tr></thead><tbody>
+<tr><td>5 attachment reconciliation assertions</td><td><code>attachment_audit.py</code>, <code>reconcile_attachment_consistency</code>, hold at line 1271</td><td>returns zero detachments or no orphan after rejecting the attachment; a focused run reproduced <code>detached == 0</code></td></tr>
+<tr><td>3 terminal recovery tests</td><td><code>attachment_audit.py</code>, <code>recover_terminal_attachments</code>, line 2371</td><td><code>TerminalAttachmentRecoveryConflict: terminal recovery postflight proof did not hold</code>; reproduced after synthetic fixture repair</td></tr>
+<tr><td>1 error-sibling replay test</td><td><code>signed_manifest.py</code>, <code>_replay</code>, line 4379</td><td><code>SignedManifestConflict: signed-manifest receipt cohort is incomplete</code></td></tr>
+<tr><td>6 lifecycleless-stub tests</td><td><code>signed_manifest.py</code>, <code>_apply_lifecycleless_stub_reconcile</code>, line 8013</td><td><code>LifecyclelessStubConflict: stub deletion cardinality changed before mutation</code></td></tr>
+<tr><td>4 signed stale-source tests</td><td><code>source_invariant.py</code>, <code>require_producing_sources</code>, line 85</td><td><code>MissingStandardNameSource: live standard name has no PRODUCED_NAME source</code></td></tr>
+</tbody></table>
+
+<h3 id="srtj-graph-tier-parallel-fixtures-open">Earlier open gate condition</h3>
+<p>At revision <code>356a91553d287c04919e38f8fbf4e56aebe87047</code>, other graph test modules outside this node's write grant constructed bare <code>GraphClient()</code> instances in graph fixtures and run Cypher writes. With no disposable fixture active, those clients can resolve the project graph. Further full graph arms at the final revision were held because the requested gate conflicts with the no-live-graph-write constraint until those tests are routed safely. That revision had focused disposable-graph verification, not two complete graph arms. At that point, the graph gate and 13 fixture cases were open; the 19 product cases are repair inputs outside this node's product-write scope.</p>
+<h3 id="srtj-graph-tier-parallel-fixtures-bare-client-audit">Remaining bare-client graph tests</h3>
+<p>The resumed attempt migrated <code>test_source_revival.py</code>, <code>test_sourceless_name_recovery.py</code>, <code>test_unit_edge_reconcile.py</code>, and <code>test_orphan_sweep.py</code> to explicit shared disposable URIs. A source scan and a read-only pytest collection then examined graph-marked tests in <code>tests/standard_names/</code> and <code>tests/graph/</code> before any test rerun. The collection found 744 graph tests. Exact bare <code>GraphClient()</code> reachability without the shared fixture found 157 tests in 42 other files: 92 tests in 26 files can mutate the graph, and 65 tests in 16 files are read-only. The audit sees a known writer, <code>test_contested_lifecycle.py</code>'s <code>MERGE</code>, and a known reader, <code>test_dd_search.py</code>'s search queries. At that checkpoint, the full graph arm remained withheld because these 26 writing files were outside this node's write grant.</p>
+<p>The table classifies the reached graph tests in each file. "Writes" includes setup and cleanup Cypher, product write calls, and writes inside a transaction that later rolls back. The exact test IDs and per-test verdicts follow the table and are also preserved in <code>bare-client-audit.json</code> under the run directory. The module-level DD-content probe in <code>test_seed_live_graph.py</code> uses a bare client only for a read during marker evaluation; it is not a fixture or test-body constructor and is recorded separately in the audit file.</p>
+<table><thead><tr><th>File</th><th>Reached graph tests</th><th>Writes</th><th>Source evidence</th></tr></thead><tbody>
+<tr><td><code>tests/graph/test_code_reference_links.py</code></td><td>1</td><td>yes</td><td><code>line 51: CREATE (:IDS {id: $ids_id}), (:IMASNode {id: $imas_id}), (:FacilitySignal {id: $signal_id, facility_id: &#x27;jt-60sa&#x27;, data_</code></td></tr>
+<tr><td><code>tests/graph/test_dd_search.py</code></td><td>18</td><td>no</td><td><code>read-only MATCH/RETURN, EXPLAIN, or dry_run path in reached test/fixture</code></td></tr>
+<tr><td><code>tests/graph/test_dd_unit_correction_reconcile.py</code></td><td>5</td><td>yes</td><td><code>line 64: MERGE (n:IMASNode {id: $path}) SET n.unit = $unit, n.node_category = &#x27;quantity&#x27;, n.lifecycle_status = &#x27;active&#x27; MERGE (u:</code></td></tr>
+<tr><td><code>tests/graph/test_refresh_physics_domains.py</code></td><td>1</td><td>no</td><td><code>read-only MATCH/RETURN, EXPLAIN, or dry_run path in reached test/fixture</code></td></tr>
+<tr><td><code>tests/graph/test_sn_edge_integrity.py</code></td><td>6</td><td>no</td><td><code>read-only MATCH/RETURN, EXPLAIN, or dry_run path in reached test/fixture</code></td></tr>
+<tr><td><code>tests/graph/test_sn_graph.py</code></td><td>10</td><td>no</td><td><code>read-only MATCH/RETURN, EXPLAIN, or dry_run path in reached test/fixture</code></td></tr>
+<tr><td><code>tests/standard_names/test_ancestor_grounding.py</code></td><td>1</td><td>no</td><td><code>read-only MATCH/RETURN, EXPLAIN, or dry_run path in reached test/fixture</code></td></tr>
+<tr><td><code>tests/standard_names/test_approval_unwind_restores_approval_properties.py</code></td><td>1</td><td>yes</td><td><code>line 82: CREATE (sn:StandardName {id: $id, name: $id, name_stage: &#x27;accepted&#x27;, docs_stage: &#x27;accepted&#x27;, status: &#x27;draft&#x27;, validation</code></td></tr>
+<tr><td><code>tests/standard_names/test_clear_atomicity_graph.py</code></td><td>1</td><td>yes</td><td><code>line 87: MERGE (n:IMASNode {id: $id}) SET n.description = &#x27;clear-atomicity test path&#x27;</code></td></tr>
+<tr><td><code>tests/standard_names/test_contested_lifecycle.py</code></td><td>7</td><td>yes</td><td><code>line 43: MERGE (n:StandardName {id: $id}) SET n += $props</code></td></tr>
+<tr><td><code>tests/standard_names/test_cost_integration.py</code></td><td>8</td><td>yes</td><td><code>line 52: MATCH (n {run_id: $rid}) DETACH DELETE n</code></td></tr>
+<tr><td><code>tests/standard_names/test_dd_resolution_graph.py</code></td><td>2</td><td>no</td><td><code>read-only MATCH/RETURN, EXPLAIN, or dry_run path in reached test/fixture</code></td></tr>
+<tr><td><code>tests/standard_names/test_deletion_snapshot_routes.py</code></td><td>2</td><td>yes</td><td><code>line 75: CREATE (parent:StandardName { id: $parent_id, transformation: &#x27;difference&#x27;, aggregation: &#x27;total&#x27;, subject: &#x27;neutral&#x27;, ph</code></td></tr>
+<tr><td><code>tests/standard_names/test_docs_lifecycle.py</code></td><td>10</td><td>yes</td><td><code>line 107: MERGE (sn:StandardName {id: $id}) SET sn.name_stage = &#x27;accepted&#x27;, sn.docs_stage = &#x27;pending&#x27;, sn.chain_length = 0, sn.doc</code></td></tr>
+<tr><td><code>tests/standard_names/test_e2e_exhaustion.py</code></td><td>5</td><td>yes</td><td><code>line 95: MERGE (sns:StandardNameSource {id: $id}) SET sns.status = &#x27;extracted&#x27;, sns.source_type = &#x27;dd&#x27;, sns.source_id = &#x27;test/pat</code></td></tr>
+<tr><td><code>tests/standard_names/test_e2e_rotation.py</code></td><td>3</td><td>yes</td><td><code>line 156: MERGE (sns:StandardNameSource {id: $id}) SET sns.status = &#x27;extracted&#x27;, sns.source_type = &#x27;dd&#x27;, sns.source_id = &#x27;test/pat</code></td></tr>
+<tr><td><code>tests/standard_names/test_edit_inline_review.py</code></td><td>2</td><td>yes</td><td><code>line 538: MERGE (sn:StandardName {id: $id}) SET sn.name = $id, sn.description = &#x27;synthetic inline-review successor&#x27;, sn.name_stage</code></td></tr>
+<tr><td><code>tests/standard_names/test_edit_scope_run.py</code></td><td>1</td><td>yes</td><td><code>line 378: MERGE (o:StandardName {id: $open_id}) SET o.name = &#x27;editscope_open_name&#x27;, o.description = &#x27;synthetic edit-scope open suc</code></td></tr>
+<tr><td><code>tests/standard_names/test_exact_reset_parent_cleanup_graph.py</code></td><td>2</td><td>yes</td><td><code>line 96: CREATE (parent:StandardName { id: $parent_id, transformation: &#x27;difference&#x27;, aggregation: &#x27;total&#x27;, subject: &#x27;neutral&#x27;, ph</code></td></tr>
+<tr><td><code>tests/standard_names/test_export_additive.py</code></td><td>2</td><td>yes</td><td><code>line 30: MATCH (n) WHERE n.id STARTS WITH $p DETACH DELETE n</code></td></tr>
+<tr><td><code>tests/standard_names/test_fit_artifact_reconcile.py</code></td><td>1</td><td>yes</td><td><code>line 41: MATCH (node:IMASNode) WHERE node.id CONTAINS $marker DETACH DELETE node</code></td></tr>
+<tr><td><code>tests/standard_names/test_focus_reseed.py</code></td><td>5</td><td>yes</td><td><code>line 32: MATCH (n) WHERE n.id CONTAINS $p DETACH DELETE n</code></td></tr>
+<tr><td><code>tests/standard_names/test_focus_scope.py</code></td><td>3</td><td>yes</td><td><code>line 35: MATCH (n:StandardName) WHERE n.id STARTS WITH $p DETACH DELETE n</code></td></tr>
+<tr><td><code>tests/standard_names/test_grammar_segment_reconcile.py</code></td><td>1</td><td>no</td><td><code>read-only MATCH/RETURN, EXPLAIN, or dry_run path in reached test/fixture</code></td></tr>
+<tr><td><code>tests/standard_names/test_house_style_checks.py</code></td><td>1</td><td>no</td><td><code>read-only MATCH/RETURN, EXPLAIN, or dry_run path in reached test/fixture</code></td></tr>
+<tr><td><code>tests/standard_names/test_metadata_invariants.py</code></td><td>1</td><td>no</td><td><code>read-only MATCH/RETURN, EXPLAIN, or dry_run path in reached test/fixture</code></td></tr>
+<tr><td><code>tests/standard_names/test_mint_sets_status.py</code></td><td>1</td><td>yes</td><td><code>line 58: MATCH (sn:StandardName {id: $id}) SET sn.status = &#x27;active&#x27;</code></td></tr>
+<tr><td><code>tests/standard_names/test_minting.py</code></td><td>2</td><td>yes</td><td><code>line 144: MATCH (n) WHERE n.id STARTS WITH $name_prefix OR n.id STARTS WITH $source_prefix DETACH DELETE n</code></td></tr>
+<tr><td><code>tests/standard_names/test_name_existence_check.py</code></td><td>2</td><td>no</td><td><code>read-only MATCH/RETURN, EXPLAIN, or dry_run path in reached test/fixture</code></td></tr>
+<tr><td><code>tests/standard_names/test_name_lifecycle.py</code></td><td>11</td><td>yes</td><td><code>line 106: MERGE (sns:StandardNameSource {id: $id}) SET sns.status = &#x27;extracted&#x27;, sns.source_type = &#x27;dd&#x27;, sns.source_id = &#x27;test/pat</code></td></tr>
+<tr><td><code>tests/standard_names/test_no_stuck_idle.py</code></td><td>1</td><td>yes</td><td><code>line 112: MERGE (sn:StandardName {id: $id}) SET sn.name_stage = $stage, sn.docs_stage = &#x27;pending&#x27;, sn.chain_length = 3, sn.docs_ch</code></td></tr>
+<tr><td><code>tests/standard_names/test_provenance_ledger.py</code></td><td>1</td><td>no</td><td><code>read-only MATCH/RETURN, EXPLAIN, or dry_run path in reached test/fixture</code></td></tr>
+<tr><td><code>tests/standard_names/test_reconcile_descriptionless.py</code></td><td>7</td><td>yes</td><td><code>line 74: MERGE (sn:StandardName {id: $name_id}) SET sn.name_stage = $name_stage, sn.description = $description, sn.validation_sta</code></td></tr>
+<tr><td><code>tests/standard_names/test_rescore_terminal_status.py</code></td><td>1</td><td>no</td><td><code>read-only MATCH/RETURN, EXPLAIN, or dry_run path in reached test/fixture</code></td></tr>
+<tr><td><code>tests/standard_names/test_review_release.py</code></td><td>1</td><td>yes</td><td><code>line 1033: MATCH (n) WHERE n.id STARTS WITH $p DETACH DELETE n</code></td></tr>
+<tr><td><code>tests/standard_names/test_reviewable_name_stage.py</code></td><td>9</td><td>yes</td><td><code>line 81: MERGE (sn:StandardName {id: $id}) SET sn.name_stage = $name_stage, sn.origin = $origin, sn.validation_status = $validati</code></td></tr>
+<tr><td><code>tests/standard_names/test_search_facility_smoke.py</code></td><td>1</td><td>no</td><td><code>read-only MATCH/RETURN, EXPLAIN, or dry_run path in reached test/fixture</code></td></tr>
+<tr><td><code>tests/standard_names/test_skeleton_placeholder_cleanup_graph.py</code></td><td>1</td><td>yes</td><td><code>line 58: MATCH (change:StandardNameChange) WHERE change.from_name IN $name_ids OR change.to_name IN $name_ids DETACH DELETE chang</code></td></tr>
+<tr><td><code>tests/standard_names/test_sn_status_integrity.py</code></td><td>1</td><td>yes</td><td><code>write through product call or variable Cypher in test body</code></td></tr>
+<tr><td><code>tests/standard_names/test_supersession_preflight_graph.py</code></td><td>3</td><td>no</td><td><code>read-only MATCH/RETURN, EXPLAIN, or dry_run path in reached test/fixture</code></td></tr>
+<tr><td><code>tests/standard_names/test_target_load_unit_resolution.py</code></td><td>1</td><td>no</td><td><code>read-only MATCH/RETURN, EXPLAIN, or dry_run path in reached test/fixture</code></td></tr>
+<tr><td><code>tests/standard_names/test_vector_semantics.py</code></td><td>14</td><td>no</td><td><code>read-only MATCH/RETURN, EXPLAIN, or dry_run path in reached test/fixture</code></td></tr>
+</tbody></table>
+<details><summary>All 157 graph test IDs and write verdicts</summary>
+<table><thead><tr><th>Test ID</th><th>Writes</th></tr></thead><tbody>
+<tr><td><code>tests/graph/test_code_reference_links.py::test_real_code_reference_links_and_missing_count_guard</code></td><td>yes</td></tr>
+<tr><td><code>tests/graph/test_dd_search.py::test_returns_nonempty_list</code></td><td>no</td></tr>
+<tr><td><code>tests/graph/test_dd_search.py::test_hit_has_expected_keys</code></td><td>no</td></tr>
+<tr><td><code>tests/graph/test_dd_search.py::test_hits_are_searchhit_instances</code></td><td>no</td></tr>
+<tr><td><code>tests/graph/test_dd_search.py::test_scores_are_positive_and_sorted</code></td><td>no</td></tr>
+<tr><td><code>tests/graph/test_dd_search.py::test_ids_filter_restricts_results</code></td><td>no</td></tr>
+<tr><td><code>tests/graph/test_dd_search.py::test_k_limits_results</code></td><td>no</td></tr>
+<tr><td><code>tests/graph/test_dd_search.py::test_empty_query_returns_empty</code></td><td>no</td></tr>
+<tr><td><code>tests/graph/test_dd_search.py::TestRelatedDdSearchBasic::test_returns_result_object</code></td><td>no</td></tr>
+<tr><td><code>tests/graph/test_dd_search.py::TestRelatedDdSearchBasic::test_hits_are_related_path_hit_instances</code></td><td>no</td></tr>
+<tr><td><code>tests/graph/test_dd_search.py::TestRelatedDdSearchBasic::test_total_connections_matches_hits</code></td><td>no</td></tr>
+<tr><td><code>tests/graph/test_dd_search.py::TestRelatedDdSearchBasic::test_sections_groups_by_type</code></td><td>no</td></tr>
+<tr><td><code>tests/graph/test_dd_search.py::TestRelatedDdSearchBasic::test_hits_exclude_same_ids</code></td><td>no</td></tr>
+<tr><td><code>tests/graph/test_dd_search.py::TestRelatedDdSearchFilters::test_relationship_type_filter</code></td><td>no</td></tr>
+<tr><td><code>tests/graph/test_dd_search.py::TestRelatedDdSearchFilters::test_max_results_limits</code></td><td>no</td></tr>
+<tr><td><code>tests/graph/test_dd_search.py::TestRelatedDdSearchFilters::test_nonexistent_path_returns_empty</code></td><td>no</td></tr>
+<tr><td><code>tests/graph/test_dd_search.py::TestRelatedDdSearchMcpCompat::test_mcp_dict_has_expected_keys</code></td><td>no</td></tr>
+<tr><td><code>tests/graph/test_dd_search.py::TestRelatedDdSearchMcpCompat::test_mcp_dict_section_keys</code></td><td>no</td></tr>
+<tr><td><code>tests/graph/test_dd_search.py::TestRelatedDdSearchMcpCompat::test_mcp_dict_cluster_entry_shape</code></td><td>no</td></tr>
+<tr><td><code>tests/graph/test_dd_unit_correction_reconcile.py::test_stored_self_contradiction_is_realigned</code></td><td>yes</td></tr>
+<tr><td><code>tests/graph/test_dd_unit_correction_reconcile.py::test_suppression_only_path_is_untouched</code></td><td>yes</td></tr>
+<tr><td><code>tests/graph/test_dd_unit_correction_reconcile.py::test_reconcile_is_idempotent</code></td><td>yes</td></tr>
+<tr><td><code>tests/graph/test_dd_unit_correction_reconcile.py::test_already_correct_node_is_not_rewritten</code></td><td>yes</td></tr>
+<tr><td><code>tests/graph/test_dd_unit_correction_reconcile.py::test_no_live_dd_node_contradicts_the_registry</code></td><td>no</td></tr>
+<tr><td><code>tests/graph/test_refresh_physics_domains.py::test_dry_run_reads_the_ruled_ids_nodes_from_the_graph</code></td><td>no</td></tr>
+<tr><td><code>tests/graph/test_sn_edge_integrity.py::TestStandardNameEdgeIntegrity::test_at_most_one_has_unit_edge_per_name</code></td><td>no</td></tr>
+<tr><td><code>tests/graph/test_sn_edge_integrity.py::TestStandardNameEdgeIntegrity::test_live_name_with_unit_property_has_unit_edge</code></td><td>no</td></tr>
+<tr><td><code>tests/graph/test_sn_edge_integrity.py::TestStandardNameEdgeIntegrity::test_source_paths_scalar_consistent_with_edges</code></td><td>no</td></tr>
+<tr><td><code>tests/graph/test_sn_edge_integrity.py::TestStandardNameEdgeIntegrity::test_childful_parent_has_provenance_source</code></td><td>no</td></tr>
+<tr><td><code>tests/graph/test_sn_edge_integrity.py::TestStandardNameEdgeIntegrity::test_dd_edge_is_complete_provenance_projection</code></td><td>no</td></tr>
+<tr><td><code>tests/graph/test_sn_edge_integrity.py::TestStandardNameEdgeIntegrity::test_dd_attachment_unit_agrees_with_name</code></td><td>no</td></tr>
+<tr><td><code>tests/graph/test_sn_graph.py::TestStandardNameGraph::test_quarantine_rate</code></td><td>no</td></tr>
+<tr><td><code>tests/graph/test_sn_graph.py::TestStandardNameGraph::test_description_coverage</code></td><td>no</td></tr>
+<tr><td><code>tests/graph/test_sn_graph.py::TestStandardNameGraph::test_cocos_dependent_names_linked</code></td><td>no</td></tr>
+<tr><td><code>tests/graph/test_sn_graph.py::TestStandardNameGraph::test_documentation_length_median</code></td><td>no</td></tr>
+<tr><td><code>tests/graph/test_sn_graph.py::TestStandardNameGraph::test_name_reviewer_score_mean</code></td><td>no</td></tr>
+<tr><td><code>tests/graph/test_sn_graph.py::TestStandardNameGraph::test_docs_reviewer_score_mean</code></td><td>no</td></tr>
+<tr><td><code>tests/graph/test_sn_graph.py::TestStandardNameGraph::test_no_pulse_schedule_reference_sources</code></td><td>no</td></tr>
+<tr><td><code>tests/graph/test_sn_graph.py::TestStandardNameGraph::test_no_coefficient_names</code></td><td>no</td></tr>
+<tr><td><code>tests/graph/test_sn_graph.py::TestStandardNameGraph::test_no_diamagnetic_component_names</code></td><td>no</td></tr>
+<tr><td><code>tests/graph/test_sn_graph.py::TestStandardNameGraph::test_no_coordinate_prefix_errors</code></td><td>no</td></tr>
+<tr><td><code>tests/standard_names/test_ancestor_grounding.py::test_enrich_for_docs_gen_surfaces_pedestal_top_ancestor_live</code></td><td>no</td></tr>
+<tr><td><code>tests/standard_names/test_approval_unwind_restores_approval_properties.py::test_undo_approval_restores_every_property_the_approval_wrote</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_clear_atomicity_graph.py::test_scoped_clear_orphan_guard_and_survivor_review</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_contested_lifecycle.py::test_approval_auto_approves_untouched_batch</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_contested_lifecycle.py::test_approval_edited_name_excluded_from_auto_approve</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_contested_lifecycle.py::test_approval_edited_fail_contests</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_contested_lifecycle.py::test_override_approve_and_revert</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_contested_lifecycle.py::test_resolution_noop_on_non_contested</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_contested_lifecycle.py::test_contested_child_not_live_for_enrich</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_contested_lifecycle.py::test_undo_approval_demotes_and_reverts</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_cost_integration.py::TestIdempotentDoubleCharge::test_idempotent_double_charge_creates_one_row</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_cost_integration.py::TestPerNameApportionment::test_per_name_apportionment_correct</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_cost_integration.py::TestPerPhaseAggregation::test_per_phase_aggregation</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_cost_integration.py::TestAggregateMatchesBudgetManager::test_aggregate_spend_matches_budget_manager_pending</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_cost_integration.py::TestDrainBarrier::test_drain_barrier_on_shutdown_writes_all_pending</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_cost_integration.py::TestSNRunPreCreated::test_loop_pre_creates_sn_run_at_start</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_cost_integration.py::TestFinalizeDrainFailure::test_finalize_sn_run_marks_cost_is_exact_false_on_drain_failure</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_cost_integration.py::TestForRunEdge::test_llm_cost_has_for_run_edge</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_dd_resolution_graph.py::test_live_ionisation_potential_cohort_has_exact_edges_and_units</code></td><td>no</td></tr>
+<tr><td><code>tests/standard_names/test_dd_resolution_graph.py::test_live_exclusion_census_is_read_only_and_matches_exact_release</code></td><td>no</td></tr>
+<tr><td><code>tests/standard_names/test_deletion_snapshot_routes.py::test_exact_reset_scaffold_leaves_a_deletion_snapshot</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_deletion_snapshot_routes.py::test_purge_standard_names_leaves_a_deletion_snapshot</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_docs_lifecycle.py::test_full_docs_acceptance_path</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_docs_lifecycle.py::test_docs_rotation_to_acceptance</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_docs_lifecycle.py::test_docs_exhaustion_path</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_docs_lifecycle.py::test_docs_escalation_at_final_attempt</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_docs_lifecycle.py::test_generate_docs_gates_on_name_accepted</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_docs_lifecycle.py::test_revisions_preserve_full_history</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_docs_lifecycle.py::test_chain_history_walks_revisions</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_docs_lifecycle.py::test_docs_acceptance_overrides_chain_length_at_cap</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_docs_lifecycle.py::test_docs_orphan_sweep_recovers_stuck_refining</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_docs_lifecycle.py::test_concurrent_review_docs_does_not_double_advance</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_e2e_exhaustion.py::test_e2e_name_exhausted_blocks_docs_pipeline</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_e2e_exhaustion.py::test_e2e_docs_exhausted_keeps_name_accepted</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_e2e_exhaustion.py::test_e2e_acceptance_at_cap_overrides_exhaustion</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_e2e_exhaustion.py::test_e2e_exhausted_excluded_from_orphan_recovery</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_e2e_exhaustion.py::test_e2e_partial_pipeline_then_exhaustion</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_e2e_rotation.py::test_e2e_full_rotation_to_acceptance</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_e2e_rotation.py::test_e2e_immediate_acceptance_no_rotation</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_e2e_rotation.py::test_e2e_name_rotates_then_docs_rotates</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_edit_inline_review.py::test_inline_review_lands_successor_accepted</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_edit_inline_review.py::test_inline_review_below_threshold_stays_unaccepted</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_edit_scope_run.py::test_edits_only_claims_only_open_edit</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_exact_reset_parent_cleanup_graph.py::test_exact_reset_reaps_only_newly_orphaned_null_lifecycle_scaffold</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_exact_reset_parent_cleanup_graph.py::test_exact_reset_reaps_normalized_parent_and_preserves_owned_neighbors</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_export_additive.py::test_batch_export_is_additive</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_export_additive.py::test_batch_export_is_deterministic</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_fit_artifact_reconcile.py::test_reconcile_changes_only_constraint_fit_leaves</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_focus_reseed.py::test_partition_splits_accepted_from_gap</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_focus_reseed.py::test_partition_preserves_input_order</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_focus_reseed.py::test_focus_gap_only_leaves_accepted_untouched</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_focus_reseed.py::test_focus_seeds_new_sources_with_default_dd_version</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_focus_reseed.py::test_focus_reseed_restages_accepted</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_focus_scope.py::test_cleanup_removes_fixture_names_and_sources</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_focus_scope.py::test_no_reset_binds_run_id_and_preserves_stage</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_focus_scope.py::test_reset_restages_to_pending_and_clears_score</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_grammar_segment_reconcile.py::test_reconcile_grammar_segments_idempotent_and_no_drift</code></td><td>no</td></tr>
+<tr><td><code>tests/standard_names/test_house_style_checks.py::test_live_roster_census_records_per_class_counts</code></td><td>no</td></tr>
+<tr><td><code>tests/standard_names/test_metadata_invariants.py::TestStandardNameKindEnum::test_kind_enum_no_unknown_values</code></td><td>no</td></tr>
+<tr><td><code>tests/standard_names/test_mint_sets_status.py::test_batch_mint_sets_draft_and_remint_preserves_active_status</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_minting.py::test_mint_cleanup_removes_fixture_sources</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_minting.py::test_mint_live_closure</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_name_existence_check.py::test_every_identity_a_capped_scan_drops_is_reported_present</code></td><td>no</td></tr>
+<tr><td><code>tests/standard_names/test_name_existence_check.py::test_live_verdicts_survive_a_pool_limit_far_below_the_population</code></td><td>no</td></tr>
+<tr><td><code>tests/standard_names/test_name_lifecycle.py::test_full_acceptance_path</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_name_lifecycle.py::test_rotation_to_acceptance</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_name_lifecycle.py::test_exhaustion_path</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_name_lifecycle.py::test_escalation_at_final_attempt</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_name_lifecycle.py::test_acceptance_overrides_chain_length_at_cap</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_name_lifecycle.py::test_edge_migration_idempotent</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_name_lifecycle.py::test_refined_name_inherits_unit_and_cluster_edges</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_name_lifecycle.py::test_chain_history_walks_full_chain</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_name_lifecycle.py::test_orphan_sweep_recovers_stuck_refining</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_name_lifecycle.py::test_token_clobber_prevented_under_race</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_name_lifecycle.py::test_concurrent_review_does_not_double_advance</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_no_stuck_idle.py::test_pipeline_does_not_spin_when_all_work_complete</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_provenance_ledger.py::test_live_source_loss_probe_matches_independent_count</code></td><td>no</td></tr>
+<tr><td><code>tests/standard_names/test_reconcile_descriptionless.py::test_reconcile_reopens_descriptionless_drafted_name</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_reconcile_descriptionless.py::test_reconcile_leaves_a_described_drafted_name_untouched</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_reconcile_descriptionless.py::test_reconcile_is_idempotent_over_a_reopened_name</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_reconcile_descriptionless.py::test_startup_reconcile_performs_the_repair</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_reconcile_descriptionless.py::test_reconcile_does_not_advance_a_descriptionless_pending_name</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_reconcile_descriptionless.py::test_finalize_refuses_to_draft_a_name_with_no_description</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_reconcile_descriptionless.py::test_finalize_still_drafts_a_name_that_carries_prose</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_rescore_terminal_status.py::test_rescore_eligibility_statement_plans_on_server</code></td><td>no</td></tr>
+<tr><td><code>tests/standard_names/test_review_release.py::test_review_release_projects_terminal_name_from_sources</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_reviewable_name_stage.py::test_refine_into_pending_placeholder_advances_to_drafted</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_reviewable_name_stage.py::test_refine_into_derived_parent_placeholder_stays_pending</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_reviewable_name_stage.py::test_refine_into_new_name_is_drafted</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_reviewable_name_stage.py::test_refine_into_accepted_name_is_not_demoted</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_reviewable_name_stage.py::test_refined_successor_inherits_predecessor_run_id</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_reviewable_name_stage.py::test_reconcile_advances_stranded_pipeline_name</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_reviewable_name_stage.py::test_reconcile_skips_derived_parent</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_reviewable_name_stage.py::test_reconcile_skips_quarantined</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_reviewable_name_stage.py::test_reconcile_is_idempotent</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_search_facility_smoke.py::TestLiveGraphSmoke::test_segment_filter_returns_results_on_live_graph</code></td><td>no</td></tr>
+<tr><td><code>tests/standard_names/test_skeleton_placeholder_cleanup_graph.py::test_write_sweeps_only_its_unowned_placeholder_endpoints</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_sn_status_integrity.py::test_superseded_sn_not_counted_as_orphan</code></td><td>yes</td></tr>
+<tr><td><code>tests/standard_names/test_supersession_preflight_graph.py::test_preflight_statement_executes_and_returns_its_contract</code></td><td>no</td></tr>
+<tr><td><code>tests/standard_names/test_supersession_preflight_graph.py::test_a_dd_path_anchoring_several_sources_yields_one_recomposed_source</code></td><td>no</td></tr>
+<tr><td><code>tests/standard_names/test_supersession_preflight_graph.py::test_no_live_binding_would_roll_back_its_own_generate_batch</code></td><td>no</td></tr>
+<tr><td><code>tests/standard_names/test_target_load_unit_resolution.py::test_live_target_load_cohort_has_exact_edges_and_units</code></td><td>no</td></tr>
+<tr><td><code>tests/standard_names/test_vector_semantics.py::test_sn_semantic_search_surfaces_expected_concept[electron_density]</code></td><td>no</td></tr>
+<tr><td><code>tests/standard_names/test_vector_semantics.py::test_sn_semantic_search_surfaces_expected_concept[safety_factor]</code></td><td>no</td></tr>
+<tr><td><code>tests/standard_names/test_vector_semantics.py::test_sn_semantic_search_surfaces_expected_concept[plasma_current]</code></td><td>no</td></tr>
+<tr><td><code>tests/standard_names/test_vector_semantics.py::test_sn_semantic_search_surfaces_expected_concept[parallel_current_density]</code></td><td>no</td></tr>
+<tr><td><code>tests/standard_names/test_vector_semantics.py::test_sn_semantic_search_surfaces_expected_concept[magnetic_axis]</code></td><td>no</td></tr>
+<tr><td><code>tests/standard_names/test_vector_semantics.py::test_sn_semantic_search_domain_coherence[electron_density]</code></td><td>no</td></tr>
+<tr><td><code>tests/standard_names/test_vector_semantics.py::test_sn_semantic_search_domain_coherence[safety_factor]</code></td><td>no</td></tr>
+<tr><td><code>tests/standard_names/test_vector_semantics.py::test_sn_semantic_search_domain_coherence[plasma_current]</code></td><td>no</td></tr>
+<tr><td><code>tests/standard_names/test_vector_semantics.py::test_sn_semantic_search_domain_coherence[parallel_current_density]</code></td><td>no</td></tr>
+<tr><td><code>tests/standard_names/test_vector_semantics.py::test_sn_semantic_search_domain_coherence[magnetic_axis]</code></td><td>no</td></tr>
+<tr><td><code>tests/standard_names/test_vector_semantics.py::test_cluster_membership_groups_sns_semantically</code></td><td>no</td></tr>
+<tr><td><code>tests/standard_names/test_vector_semantics.py::test_standard_name_source_embeddings_group_by_producer</code></td><td>no</td></tr>
+<tr><td><code>tests/standard_names/test_vector_semantics.py::test_mcp_search_standard_names_returns_coherent_results</code></td><td>no</td></tr>
+<tr><td><code>tests/standard_names/test_vector_semantics.py::test_cluster_labels_match_member_sns</code></td><td>no</td></tr>
+</tbody></table></details>
+<p>One file mixes outcomes: <code>tests/graph/test_dd_unit_correction_reconcile.py::test_no_live_dd_node_contradicts_the_registry</code> only reads, while its other four reached graph tests write through setup or cleanup. The prior 19 product failures remain a separate repair input; this resumed attempt did not rerun the graph gate or claim a new failure delta.</p>
+<p id="srtj-graph-tier-parallel-fixtures-focused-four">After the audit, a focused <code>pytest -m graph -n 4</code> arm selecting only the four newly migrated modules completed with <strong>36 passed, 5 warnings, EXIT=0</strong> in 73.89 seconds. All 13 fixture-failure IDs previously observed in these files occur in that selection; the whole selection passed. This verifies the four explicit disposable endpoints without executing any of the 26 ungranted writing files. It is not a replacement for the blocked full graph arm.</p>
+
+<section id="srtj-graph-tier-parallel-fixtures-autouse-gate">
+<h3>All marked standard-name graph tests use the disposable fixture</h3>
+<p>The committed bare-client regression <code>test_bare_graph_client_uses_disposable_endpoint</code> opened <code>GraphClient()</code> without URI arguments, queried <code>RETURN 1</code> on the disposable instance, and asserted its URI differs from the resolved project addresses: <strong>1 passed, EXIT=0</strong>. A renewed collection audit found <strong>92 graph-marked writing test IDs</strong>: all <strong>87</strong> under <code>tests/standard_names/</code> have both module and function disposable autouse fixtures in their closure; the remaining <strong>5</strong> are in <code>tests/graph/</code>, outside this package and write grant. The positive control was <code>test_minting.py::test_mint_cleanup_removes_fixture_sources</code>, a known writer present in the collection. The two outside-scope files are <code>tests/graph/test_code_reference_links.py</code> (one writer) and <code>tests/graph/test_dd_unit_correction_reconcile.py</code> (four writers); neither was routed here.</p>
+<p>Three graph arms used separate <code>git archive</code> trees, the five generated files, the checkout credential link, and separate basetemps. The first archive probes lacked that credential link; the root collection preflight exited 5 before any test code and xdist reported a worker crash. The link made the preflight positive control return <code>True</code>, <code>EXIT=0</code>. Those incomplete probes are excluded from the comparison. A redundant marker-selection workaround was removed after this diagnosis; pytest owns marker selection.</p>
+<table><thead><tr><th>Arm</th><th>Revision</th><th>Receipt</th><th>Failure IDs</th></tr></thead><tbody>
+<tr><td>Base</td><td><code>18daf78f53e50cad8a8a2b3375600498d48561bb</code></td><td>43 failed, 152 passed, 184 skipped, 5 errors in 304.99s; EXIT=1</td><td>48</td></tr>
+<tr><td>Head 1</td><td><code>b096ad5597a8137ff3115faa4dd9a85bb4131286</code></td><td>73 failed, 294 passed, 19 skipped, 0 errors in 242.39s; EXIT=1</td><td>73</td></tr>
+<tr><td>Head 2</td><td><code>b096ad5597a8137ff3115faa4dd9a85bb4131286</code></td><td>73 failed, 293 passed, 20 skipped, 0 errors in 201.27s; EXIT=1</td><td>73</td></tr>
+</tbody></table>
+<p>The head failure-ID sets agree exactly. Both head arms report <strong>zero project-graph URI refusals, zero disposable startup timeouts, and zero setup errors</strong>. Against this matched base, <strong>34</strong> failure IDs were added: <strong>13 fixture-data cases</strong> and <strong>21 product cases</strong>. The prior default-marker comparison remained 95 failing IDs at both base and head; this resumed graph-only measure did not rerun it.</p>
+<h4 id="srtj-graph-tier-parallel-fixtures-fixture-cases">Fixture-data cases requiring test-file scope</h4>
+<p>These tests previously read populated live graph state or DD authority. Under the requested empty disposable graph they now reach assertions or the DD authority loader with no seeded data. Their seven files are outside this worker's write grant; the failures remain visible until each test seeds its expected state.</p>
+<table><thead><tr><th>Test file</th><th>Added IDs</th><th>Observed missing fixture data</th></tr></thead><tbody>
+<tr><td><code>tests/standard_names/test_ancestor_grounding.py</code></td><td>2</td><td>empty disposable graph has no accepted DD-sourced name or ancestor lineage</td></tr>
+<tr><td><code>tests/standard_names/test_dd_resolution_consumers.py</code></td><td>5</td><td>empty disposable graph has no DD resolution authority</td></tr>
+<tr><td><code>tests/standard_names/test_dd_resolution_graph.py</code></td><td>2</td><td>empty disposable graph has no published DD resolution cohort</td></tr>
+<tr><td><code>tests/standard_names/test_dd_sources.py</code></td><td>1</td><td>empty disposable graph has no magnetics source path</td></tr>
+<tr><td><code>tests/standard_names/test_docs_lifecycle.py</code></td><td>1</td><td>empty disposable graph has no DD resolution authority for docs refinement</td></tr>
+<tr><td><code>tests/standard_names/test_house_style_checks.py</code></td><td>1</td><td>empty disposable graph has no live roster census</td></tr>
+<tr><td><code>tests/standard_names/test_target_load_unit_resolution.py</code></td><td>1</td><td>empty disposable graph has no target-load DD cohort</td></tr>
+</tbody></table>
+<h4 id="srtj-graph-tier-parallel-fixtures-product-cases">Product failures for a separate repair node</h4>
+<p>The 21 cases below reached product code; they remain enabled. The earlier 19 cases are carried forward from the previous completed head/base comparison, joined by an attachment hold result and a source-invariant refusal in this run. Each row names the product file, function, and error line.</p>
+<table><thead><tr><th>Test ID</th><th>Product location</th><th>Observed failure</th></tr></thead><tbody>
+<tr><td><code>tests/standard_names/test_attachment_audit.py::test_accepted_attachment_survives_without_the_flag</code></td><td><code>imas_codex/standard_names/attachment_audit.py:1271</code> reconcile_attachment_consistency</td><td>result/graph assertion mismatch after last-source hold</td></tr>
+<tr><td><code>tests/standard_names/test_attachment_audit.py::test_orphaned_name_is_reported</code></td><td><code>imas_codex/standard_names/attachment_audit.py:1271</code> reconcile_attachment_consistency</td><td>result/graph assertion mismatch after last-source hold</td></tr>
+<tr><td><code>tests/standard_names/test_attachment_audit.py::test_reconcile_detaches_and_reroutes</code></td><td><code>imas_codex/standard_names/attachment_audit.py:1271</code> reconcile_attachment_consistency</td><td>result/graph assertion mismatch after last-source hold</td></tr>
+<tr><td><code>tests/standard_names/test_attachment_audit.py::test_reconcile_is_idempotent</code></td><td><code>imas_codex/standard_names/attachment_audit.py:1271</code> reconcile_attachment_consistency</td><td>result/graph assertion mismatch after last-source hold</td></tr>
+<tr><td><code>tests/standard_names/test_attachment_audit.py::test_reconcile_keeps_history</code></td><td><code>imas_codex/standard_names/attachment_audit.py:1271</code> reconcile_attachment_consistency</td><td>result/graph assertion mismatch after last-source hold</td></tr>
+<tr><td><code>tests/standard_names/test_attachment_audit.py::test_source_backing_a_good_name_keeps_its_status</code></td><td><code>imas_codex/standard_names/attachment_audit.py:1271</code> reconcile_attachment_consistency</td><td>one attachment held instead of detached; result.detached 0 vs 1</td></tr>
+<tr><td><code>tests/standard_names/test_attachment_audit.py::test_terminal_recovery_graph_mixed_unique_and_shared_targets</code></td><td><code>imas_codex/standard_names/attachment_audit.py:2371</code> recover_terminal_attachments</td><td>TerminalAttachmentRecoveryConflict: terminal recovery postflight proof did not hold</td></tr>
+<tr><td><code>tests/standard_names/test_attachment_audit.py::test_terminal_recovery_graph_shared_target_is_atomic_and_idempotent[2]</code></td><td><code>imas_codex/standard_names/attachment_audit.py:2371</code> recover_terminal_attachments</td><td>TerminalAttachmentRecoveryConflict: terminal recovery postflight proof did not hold</td></tr>
+<tr><td><code>tests/standard_names/test_attachment_audit.py::test_terminal_recovery_graph_shared_target_is_atomic_and_idempotent[6]</code></td><td><code>imas_codex/standard_names/attachment_audit.py:2371</code> recover_terminal_attachments</td><td>TerminalAttachmentRecoveryConflict: terminal recovery postflight proof did not hold</td></tr>
+<tr><td><code>tests/standard_names/test_error_sibling_reconcile_graph.py::test_replay_after_quarantine_is_measured_write_free</code></td><td><code>imas_codex/standard_names/signed_manifest.py:4379</code> _replay</td><td>SignedManifestConflict: signed-manifest receipt cohort is incomplete</td></tr>
+<tr><td><code>tests/standard_names/test_reconcile_lifecycleless_stubs.py::test_authoritative_sibling_deletes_spurious_stub_and_repairs_scalar</code></td><td><code>imas_codex/standard_names/signed_manifest.py:8013</code> _apply_lifecycleless_stub_reconcile</td><td>LifecyclelessStubConflict: stub deletion cardinality changed before mutation</td></tr>
+<tr><td><code>tests/standard_names/test_reconcile_lifecycleless_stubs.py::test_binding_change_between_manifest_and_cas_rolls_back</code></td><td><code>imas_codex/standard_names/signed_manifest.py:8013</code> _apply_lifecycleless_stub_reconcile</td><td>LifecyclelessStubConflict: stub deletion cardinality changed before mutation</td></tr>
+<tr><td><code>tests/standard_names/test_reconcile_lifecycleless_stubs.py::test_late_failure_rolls_back_materialized_parent</code></td><td><code>imas_codex/standard_names/signed_manifest.py:8013</code> _apply_lifecycleless_stub_reconcile</td><td>LifecyclelessStubConflict: stub deletion cardinality changed before mutation</td></tr>
+<tr><td><code>tests/standard_names/test_reconcile_lifecycleless_stubs.py::test_new_incident_edge_invalidates_preview_hash</code></td><td><code>imas_codex/standard_names/signed_manifest.py:8013</code> _apply_lifecycleless_stub_reconcile</td><td>LifecyclelessStubConflict: stub deletion cardinality changed before mutation</td></tr>
+<tr><td><code>tests/standard_names/test_reconcile_lifecycleless_stubs.py::test_new_producer_between_scalar_cas_and_deletion_rolls_back</code></td><td><code>imas_codex/standard_names/signed_manifest.py:8013</code> _apply_lifecycleless_stub_reconcile</td><td>LifecyclelessStubConflict: stub deletion cardinality changed before mutation</td></tr>
+<tr><td><code>tests/standard_names/test_reconcile_lifecycleless_stubs.py::test_transactional_dry_run_hash_apply_and_replay</code></td><td><code>imas_codex/standard_names/signed_manifest.py:8013</code> _apply_lifecycleless_stub_reconcile</td><td>LifecyclelessStubConflict: stub deletion cardinality changed before mutation</td></tr>
+<tr><td><code>tests/standard_names/test_stale_source_detach.py::test_complete_signed_admission_cohort_applies_and_replays_without_writes</code></td><td><code>imas_codex/standard_names/source_invariant.py:85</code> require_producing_sources</td><td>MissingStandardNameSource: live standard name has no PRODUCED_NAME source</td></tr>
+<tr><td><code>tests/standard_names/test_stale_source_detach.py::test_each_widened_signed_shape_releases_its_complete_source_closure[derived-source]</code></td><td><code>imas_codex/standard_names/source_invariant.py:85</code> require_producing_sources</td><td>MissingStandardNameSource: live standard name has no PRODUCED_NAME source</td></tr>
+<tr><td><code>tests/standard_names/test_stale_source_detach.py::test_each_widened_signed_shape_releases_its_complete_source_closure[multi-binding-dd]</code></td><td><code>imas_codex/standard_names/source_invariant.py:85</code> require_producing_sources</td><td>MissingStandardNameSource: live standard name has no PRODUCED_NAME source</td></tr>
+<tr><td><code>tests/standard_names/test_stale_source_detach.py::test_each_widened_signed_shape_releases_its_complete_source_closure[scalar-mismatch]</code></td><td><code>imas_codex/standard_names/source_invariant.py:85</code> require_producing_sources</td><td>MissingStandardNameSource: live standard name has no PRODUCED_NAME source</td></tr>
+<tr><td><code>tests/standard_names/test_writers_carry_sources.py::test_real_invariant_allows_one_source</code></td><td><code>imas_codex/standard_names/source_invariant.py:85</code> require_producing_sources</td><td>MissingStandardNameSource despite seeded PRODUCED_NAME relation</td></tr>
+</tbody></table>
+</section>
+<section id="srtj-graph-tier-parallel-fixtures-seeded-fixtures">
+<h3>Deterministic data on the disposable graph</h3>
+<p>The seven test files in the fixture-data table above gained local seeds for the exact state their assertions read: pedestal-top DD lineage and its accepted name, 37 typed DD resolution bridges including the four named consumer paths, the 14 ionisation and two target-load bridges, the 16 exclusion shells, two magnetics signal containers, one docs-refinement authority row, and 220 frozen-roster names. The common resolution seed writer removes its tagged graph nodes after each test. The assertion bodies and disposable routing remain in place. The earlier failure reproduced as <code>DDResolutionManifestInvalid: DD resolution graph authority is empty</code>, <code>roster resolution saw 0 of 220 names</code>, and empty ancestor context; the focused graph check then passed 22 tests, and the corrected signal-container test passed separately (both EXIT=0).</p>
+<p>The final graph arms ran at commit <code>e78f946a0b248bf606981c8877e7c4be31ec87e4</code> from one clean <code>git archive</code> tree containing the five generated files and checkout credential link. Each arm used its own basetemp. Their logs are <code>head-seeded-graph-1.log</code> and <code>head-seeded-graph-2.log</code> under the run directory named above; the comparison base remains <code>base-autouse-graph.log</code>.</p>
+<table><thead><tr><th>Arm</th><th>Pytest summary</th><th>Failing IDs</th><th>Project URI refusals</th><th>Startup timeouts</th></tr></thead><tbody>
+<tr><td>Recorded base</td><td>43 failed, 152 passed, 184 skipped, 5 errors in 304.99s; EXIT=1</td><td>48</td><td>separate negative control below</td><td>0</td></tr>
+<tr><td>Seeded head 1</td><td>59 failed, 307 passed, 20 skipped in 227.82s; EXIT=1</td><td>59</td><td>0</td><td>0</td></tr>
+<tr><td>Seeded head 2</td><td>59 failed, 307 passed, 20 skipped in 189.54s; EXIT=1</td><td>59</td><td>0</td><td>0</td></tr>
+</tbody></table>
+<p>The two head failure-ID sets agree exactly. Both add the same <strong>21</strong> IDs against the recorded base: <strong>0 fixture or isolation defects</strong> and <strong>21 product failures</strong>. The product table immediately above lists every test ID with its product file, function, and observed error line. All 13 earlier fixture-data IDs cleared. The project-URI refusal remains proven by <code>negative-control-committed.log</code>: a declared mutation pointed the shared fixture at the resolved project graph, and the test failed before a graph write (EXIT=1). A final source scan finds <code>resolve_neo4j</code> only in <code>tests/standard_names/conftest.py</code>.</p>
+<p>The five writing tests in <code>tests/graph/</code> remain outside this package and this node: one in <code>test_code_reference_links.py</code> and four in <code>test_dd_unit_correction_reconcile.py</code>. Their directory owns a different conftest, so they are a separate routing task; no test in that directory ran in these standard-names arms.</p>
+</section>
+</article>

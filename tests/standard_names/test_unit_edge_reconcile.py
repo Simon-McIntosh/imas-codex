@@ -31,14 +31,16 @@ _PREFIX = "test_unit_edge_reconcile__"
 
 
 @pytest.fixture()
-def _gc():
-    try:
-        from imas_codex.graph.client import GraphClient
+def _gc(disposable_neo4j_uri: str):
+    from imas_codex.graph.client import GraphClient
 
-        client = GraphClient()
-        client.get_stats()
-    except Exception as exc:  # pragma: no cover - env-dependent
-        pytest.skip(f"Neo4j not available: {exc}")
+    client = GraphClient(
+        uri=disposable_neo4j_uri,
+        username="neo4j",
+        password="",
+        graph_name="unit-edge-reconcile-tests",
+    )
+    client.get_stats()
     yield client
     client.close()
 
