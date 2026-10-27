@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="296">
+<meta name="plan-version" content="297">
 <meta name="plan-modified" content="2026-10-27">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -1208,6 +1208,9 @@ without re-deriving it is visible.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-s6-lead-ruling-forwarder-codemod" data-who="lead" data-when="2026-10-27T07:25:00Z">
     <div class="r-comment-body"><p>Lead decision on the transitional forwarders: "full retirement by codemod". Workers run in isolated worktrees and this repository has one orchestrating session, so concurrent edits are not a concern. <code>srtj-forwarder-retirement</code> repoints all 344 files that reach a moved symbol through <code>graph_ops</code> or <code>workers</code>, 47 of them product modules and 297 tests. It writes a codemod driven by the split design's symbol map, retargets each patch to where the code under test looks the name up, and deletes the forwarders. Both whole-suite gates must add zero failure ids. The nine <code>globals()</code>-bound signed-manifest names stay until the lead's open question on them is settled. The node waits for <code>srtj-graph-tier-parallel-fixtures</code>, which holds test files the codemod rewrites.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261027T074017702314-review-of-srtj-graph-tier-parallel-fixtures-480a43910ee2" data-who="reckon-build" data-when="2026-10-27T07:50:41.500Z">
+    <div class="r-comment-body"><p>independent review of r-20261026T204209966088-srtj-graph-tier-parallel-fixtures at 480a43910ee21d5456dc581c781ca04dd107309b from base 18daf78f53e50cad8a8a2b3375600498d48561bb: total 98/120, six scores recorded, two non-blocking findings, no blocking finding.</p></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-s7-lead-ruling-audit-panel" data-who="lead" data-when="2026-10-27T07:20:00Z">
     <div class="r-comment-body"><p>Lead ruling, "Keep quorum as audit panel". §7 deletes the quorum as a deciding path: its persisting cycle, the review seats only that path uses, and the fallback that sends items Jev could not judge to it. Those items go to the single chat reviewer instead. The quorum stays only as the 5% panel audit's non-deciding panel, which runs through <code>panel_audit.quorum_without_persisting</code>, so the drift measure the switch kept is unchanged. §7 waits on §6, because the forwarder retirement and the product repairs §6 still owes touch the same worker and review modules.</p></div>

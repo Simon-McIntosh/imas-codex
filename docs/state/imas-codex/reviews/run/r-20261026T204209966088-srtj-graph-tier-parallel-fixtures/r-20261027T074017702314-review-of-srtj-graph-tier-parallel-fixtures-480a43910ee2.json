@@ -1,0 +1,85 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 21,
+  "added_failure_ids": [
+    "tests/standard_names/test_attachment_audit.py::test_accepted_attachment_survives_without_the_flag",
+    "tests/standard_names/test_attachment_audit.py::test_orphaned_name_is_reported",
+    "tests/standard_names/test_attachment_audit.py::test_reconcile_detaches_and_reroutes",
+    "tests/standard_names/test_attachment_audit.py::test_reconcile_is_idempotent",
+    "tests/standard_names/test_attachment_audit.py::test_reconcile_keeps_history",
+    "tests/standard_names/test_attachment_audit.py::test_source_backing_a_good_name_keeps_its_status",
+    "tests/standard_names/test_attachment_audit.py::test_terminal_recovery_graph_mixed_unique_and_shared_targets",
+    "tests/standard_names/test_attachment_audit.py::test_terminal_recovery_graph_shared_target_is_atomic_and_idempotent[2]",
+    "tests/standard_names/test_attachment_audit.py::test_terminal_recovery_graph_shared_target_is_atomic_and_idempotent[6]",
+    "tests/standard_names/test_error_sibling_reconcile_graph.py::test_replay_after_quarantine_is_measured_write_free",
+    "tests/standard_names/test_reconcile_lifecycleless_stubs.py::test_authoritative_sibling_deletes_spurious_stub_and_repairs_scalar",
+    "tests/standard_names/test_reconcile_lifecycleless_stubs.py::test_binding_change_between_manifest_and_cas_rolls_back",
+    "tests/standard_names/test_reconcile_lifecycleless_stubs.py::test_late_failure_rolls_back_materialized_parent",
+    "tests/standard_names/test_reconcile_lifecycleless_stubs.py::test_new_incident_edge_invalidates_preview_hash",
+    "tests/standard_names/test_reconcile_lifecycleless_stubs.py::test_new_producer_between_scalar_cas_and_deletion_rolls_back",
+    "tests/standard_names/test_reconcile_lifecycleless_stubs.py::test_transactional_dry_run_hash_apply_and_replay",
+    "tests/standard_names/test_stale_source_detach.py::test_complete_signed_admission_cohort_applies_and_replays_without_writes",
+    "tests/standard_names/test_stale_source_detach.py::test_each_widened_signed_shape_releases_its_complete_source_closure[derived-source]",
+    "tests/standard_names/test_stale_source_detach.py::test_each_widened_signed_shape_releases_its_complete_source_closure[multi-binding-dd]",
+    "tests/standard_names/test_stale_source_detach.py::test_each_widened_signed_shape_releases_its_complete_source_closure[scalar-mismatch]",
+    "tests/standard_names/test_writers_carry_sources.py::test_real_invariant_allows_one_source"
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-27T07:50:41.500Z",
+  "dispatched_at": "2026-10-27T07:41:45Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_source_refresh.py",
+      "line": "575",
+      "severity": "non-blocking",
+      "text": "non-blocking: the test captures `before` after the autouse _disposable_graph_environment (conftest.py:720) has already set NEO4J_URI/NEO4J_PASSWORD/IMAS_CODEX_TEST_NEO4J_URI, so comparing the environment to itself passes even if disposable_neo4j_uri regressed to setting those variables before its yield; the guard cannot fail on the regression it names."
+    },
+    {
+      "file": "tests/standard_names/conftest.py",
+      "line": "32",
+      "severity": "non-blocking",
+      "text": "non-blocking: seed_dd_resolutions duplicates the capability SyntheticDDResolutionReader (conftest.py:203) and SYNTHETIC_GRAPH_RESOLUTION_ROWS (dd_resolution_test_data.py:8) already own for supplying deterministic DD resolution authority; it is a complementary graph-writing layer only if that distinction is documented at the owner."
+    }
+  ],
+  "gate_sources": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261026T204209966088-srtj-graph-tier-parallel-fixtures/head-seeded-graph-2.log",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261026T204209966088-srtj-graph-tier-parallel-fixtures/base-autouse-graph.log"
+  },
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified no production call site: the change is confined to tests/standard_names and a docs evidence fragment.",
+    "diff": "read all 19 commits from 18daf78f to 480a43910; the change deletes the per-module disposable fixtures and project-URI guards across tests/standard_names, adds an autouse env-binding layer plus seed_dd_resolutions and two regression tests, and adds the evidence fragment; no imas_codex/ production file changes.",
+    "done_when": "the effective done-when (resume-4-advice.txt) asks for the fixture-data failure class at 0 and two agreeing head graph arms; /home/ITER/mcintos/.config/reckon/crew/runs/r-20261026T204209966088-srtj-graph-tier-parallel-fixtures/head-seeded-graph-1.log and head-seeded-graph-2.log each end '59 failed, 307 passed, 20 skipped' with identical failing-ID sets, and seeded-head-only-classification.json reports 0 fixture/isolation IDs.",
+    "goal": "the node's goal is every disposable-Neo4j test routed through the shared fixture with a bounded startup; tests/standard_names/conftest.py:719-745 now binds every graph-marked test and explicit fixture user to disposable_neo4j_uri, and tests/standard_names/conftest.py:465-500 gives _start_empty_neo4j its own 240 s SIGALRM bound outside the test-call timeout.",
+    "manifest": "read; it records commits 2903a517..480a43910, baseline_suite (48 IDs, base-autouse-graph.log) and after_suite (59 IDs, head-seeded-graph-2.log), the 21 product IDs, the negative_control_log, and status complete.",
+    "write_paths": "the dispatch fence names 17 paths and four resume advices extend scope to 16+4+7 modules; every one of the 44 changed paths is inside that union, with no file changed outside it."
+  },
+  "justifications": {
+    "durability": "test_disposable_startup_has_an_independent_deadline (test_source_refresh.py:555) and test_bare_graph_client_uses_disposable_endpoint (:583) redden on the regressions they name, but test_disposable_session_setup_preserves_other_test_endpoint (:572-579) compares the environment to itself after the autouse fixture set it.",
+    "evidence": "baseline_suite and after_suite are complete logs ending EXIT=1 (48 vs 59 failing IDs, added 21), but the default arm the done-when also names was last measured at a96d74b, not at the final head e78f946.",
+    "fit": "conftest.py:686-745 follows the existing fixture idiom and the new names (seed_dd_resolutions, _disposable_graph_environment) are mechanism names with no plan labels.",
+    "goal_fidelity": "tests/standard_names/conftest.py:719-745 redirects graph-marked clients, and git grep resolve_neo4j at 480a4391 finds it only in tests/standard_names/conftest.py.",
+    "reuse": "seed_dd_resolutions (conftest.py:32) adds a second DD-authority mechanism beside the pre-existing SyntheticDDResolutionReader (conftest.py:203, present at 18daf78f as :111) rather than extending that owner.",
+    "scope_discipline": "git diff 18daf78f..480a4391 changes only paths in the dispatch fence or a resume advice's explicit extension; no imas_codex/ or tests/graph/ file is touched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is every disposable-Neo4j test routed through the shared fixture with a bounded startup; tests/standard_names/conftest.py:719-745 now binds every graph-marked test and explicit fixture user to disposable_neo4j_uri, and tests/standard_names/conftest.py:465-500 gives _start_empty_neo4j its own 240 s SIGALRM bound outside the test-call timeout.\nVERDICT done_when: the effective done-when (resume-4-advice.txt) asks for the fixture-data failure class at 0 and two agreeing head graph arms; /home/ITER/mcintos/.config/reckon/crew/runs/r-20261026T204209966088-srtj-graph-tier-parallel-fixtures/head-seeded-graph-1.log and head-seeded-graph-2.log each end '59 failed, 307 passed, 20 skipped' with identical failing-ID sets, and seeded-head-only-classification.json reports 0 fixture/isolation IDs.\nVERDICT write_paths: the dispatch fence names 17 paths and four resume advices extend scope to 16+4+7 modules; every one of the 44 changed paths is inside that union, with no file changed outside it.\nVERDICT manifest: read; it records commits 2903a517..480a43910, baseline_suite (48 IDs, base-autouse-graph.log) and after_suite (59 IDs, head-seeded-graph-2.log), the 21 product IDs, the negative_control_log, and status complete.\nVERDICT diff: read all 19 commits from 18daf78f to 480a43910; the change deletes the per-module disposable fixtures and project-URI guards across tests/standard_names, adds an autouse env-binding layer plus seed_dd_resolutions and two regression tests, and adds the evidence fragment; no imas_codex/ production file changes.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: tests/standard_names/conftest.py:719-745 redirects graph-marked clients, and git grep resolve_neo4j at 480a4391 finds it only in tests/standard_names/conftest.py.\nSCORE evidence: 16\nJUSTIFICATION evidence: baseline_suite and after_suite are complete logs ending EXIT=1 (48 vs 59 failing IDs, added 21), but the default arm the done-when also names was last measured at a96d74b, not at the final head e78f946.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff 18daf78f..480a4391 changes only paths in the dispatch fence or a resume advice's explicit extension; no imas_codex/ or tests/graph/ file is touched.\nSCORE durability: 15\nJUSTIFICATION durability: test_disposable_startup_has_an_independent_deadline (test_source_refresh.py:555) and test_bare_graph_client_uses_disposable_endpoint (:583) redden on the regressions they name, but test_disposable_session_setup_preserves_other_test_endpoint (:572-579) compares the environment to itself after the autouse fixture set it.\nSCORE fit: 17\nJUSTIFICATION fit: conftest.py:686-745 follows the existing fixture idiom and the new names (seed_dd_resolutions, _disposable_graph_environment) are mechanism names with no plan labels.\nSCORE reuse: 13\nJUSTIFICATION reuse: seed_dd_resolutions (conftest.py:32) adds a second DD-authority mechanism beside the pre-existing SyntheticDDResolutionReader (conftest.py:203, present at 18daf78f as :111) rather than extending that owner.\nFINDING tests/standard_names/test_source_refresh.py:575 non-blocking: the test captures `before` after the autouse _disposable_graph_environment (conftest.py:720) has already set NEO4J_URI/NEO4J_PASSWORD/IMAS_CODEX_TEST_NEO4J_URI, so comparing the environment to itself passes even if disposable_neo4j_uri regressed to setting those variables before its yield; the guard cannot fail on the regression it names.\nFINDING tests/standard_names/conftest.py:32 non-blocking: seed_dd_resolutions duplicates the capability SyntheticDDResolutionReader (conftest.py:203) and SYNTHETIC_GRAPH_RESOLUTION_ROWS (dd_resolution_test_data.py:8) already own for supplying deterministic DD resolution authority; it is a complementary graph-writing layer only if that distinction is documented at the owner.",
+  "review_run_id": "r-20261027T074017702314-review-of-srtj-graph-tier-parallel-fixtures-480a43910ee2",
+  "reviewed_base_sha": "18daf78f53e50cad8a8a2b3375600498d48561bb",
+  "reviewed_head_sha": "480a43910ee21d5456dc581c781ca04dd107309b",
+  "reviewed_run_id": "r-20261026T204209966088-srtj-graph-tier-parallel-fixtures",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 13,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T07:49:47.033040+00:00",
+  "total": 98
+}
