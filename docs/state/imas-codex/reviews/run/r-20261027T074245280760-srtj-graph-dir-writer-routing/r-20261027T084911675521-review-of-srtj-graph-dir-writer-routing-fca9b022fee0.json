@@ -1,0 +1,59 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-27T08:56:12.062Z",
+  "dispatched_at": "2026-10-27T08:50:25Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-review-through-jev/srtj-graph-dir-writer-routing.html",
+      "line": "17",
+      "severity": "non-blocking",
+      "text": "non-blocking: the gate paragraphs name head 004d9f1e5 while the reviewed head is fca9b022f; the intervening commit changes only this file, so no test outcome can differ, but a reader comparing the receipt's revision against the promoted commit sees a mismatch."
+    },
+    {
+      "file": "tests/graph/conftest.py",
+      "line": "469",
+      "severity": "non-blocking",
+      "text": "non-blocking: Path(module_path).read_text() takes the locale encoding while every module under tests/graph, conftest.py included, is UTF-8; under a non-UTF-8 locale it raises UnicodeDecodeError, which the surrounding except clause does not catch, so collection would crash instead of refusing \u2014 pass encoding=\"utf-8\" as tests/standard_names/source_scan.py:46 does."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none: the change is test collection infrastructure; pytest's collector invokes tests/graph/conftest.py:pytest_collection_modifyitems on every run under tests/graph/, and no module under imas_codex/ imports tests/conftest or the guard.",
+    "diff": "read commit by commit from aecc88921 to fca9b022f: 004d9f1e5 adds same-file helper following plus eight guard tests, fca9b022f rewrites only the evidence fragment, and no file outside the three named paths is touched (+213/-12).",
+    "done_when": "the done_when asks for both gate arms, zero added failure ids and logged controls; logs/base-graph.log and logs/head-graph.log each open with their revision and literal command and end in a bare EXIT=1, and logs/base-graph.ids and logs/head-graph.ids compare as identical sorted 18-id sets, so added and removed are both 0.",
+    "goal": "the source node's goal is to route the five graph-marked writers in tests/graph onto a disposable Neo4j and keep the hazard from returning; the two gained commits extend the guard at tests/graph/conftest.py:380 and cover its decisions at tests/graph/test_graph_writer_guard.py:90-131 without altering that routing.",
+    "manifest": "read at the reviewed run directory; status reads complete and it lists the five commits ending fca9b022f, both gate arms with their log paths, the writers probe at EXIT=0, the negative control naming the project URI, and the retry its project-graph outage caused.",
+    "write_paths": "the declared write paths are tests/graph/conftest.py, the two writer test files, tests/conftest.py only if the shared fixture moved, and the evidence fragment; the gained diff touches tests/graph/conftest.py, tests/graph/test_graph_writer_guard.py and the fragment, and leaves tests/conftest.py untouched."
+  },
+  "justifications": {
+    "durability": "each test at tests/graph/test_graph_writer_guard.py:90-131 names a condition that reddens it \u2014 dropping the same-file branch at tests/graph/conftest.py:412 leaves the delegating writer reading writes=False and fails :95, and rescanning every string constant fails :109 \u2014 though the recursion bound at :383 and the empty-module fallback at :419 carry no test.",
+    "evidence": "logs/base-graph.log and logs/head-graph.log each carry a revision-and-command header and a bare EXIT=1 over identical 18-id failure sets, and I re-ran tests/graph/test_graph_writer_guard.py at fca9b022f in a scratch tree (8 passed); but both arms were made at 004d9f1e5 and the base arm deselects the five writers, so neither arm is the reviewed head nor the same test set.",
+    "fit": "the added helpers follow the mechanism-comment style of the guard they extend at tests/graph/conftest.py:363-440 and carry no plan, ticket or author identifiers, but :469 calls read_text() with no encoding where the sibling scanner tests/standard_names/source_scan.py:46 names utf-8.",
+    "goal_fidelity": "tests/graph/conftest.py:380 _scan_calls follows a call to a same-file helper, so the delegating writer the previous review found escaping now reads writes=True and is refused, and nothing else about the node's routing changes.",
+    "reuse": "a search of tests/ and imas_codex/ for an existing same-file call follower or a shared fake-item helper found none \u2014 tests/test_environment_precedence.py:10 _collected_item is a Mock-based helper local to its file with no shared owner \u2014 so _module_functions and _scan_calls extend the existing guard rather than fork an owned capability.",
+    "scope_discipline": "every path in the gained diff \u2014 tests/graph/conftest.py, tests/graph/test_graph_writer_guard.py and docs/evidence/fragments/sn-review-through-jev/srtj-graph-dir-writer-routing.html \u2014 is inside the manifest's declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source node's goal is to route the five graph-marked writers in tests/graph onto a disposable Neo4j and keep the hazard from returning; the two gained commits extend the guard at tests/graph/conftest.py:380 and cover its decisions at tests/graph/test_graph_writer_guard.py:90-131 without altering that routing.\nVERDICT done_when: the done_when asks for both gate arms, zero added failure ids and logged controls; logs/base-graph.log and logs/head-graph.log each open with their revision and literal command and end in a bare EXIT=1, and logs/base-graph.ids and logs/head-graph.ids compare as identical sorted 18-id sets, so added and removed are both 0.\nVERDICT write_paths: the declared write paths are tests/graph/conftest.py, the two writer test files, tests/conftest.py only if the shared fixture moved, and the evidence fragment; the gained diff touches tests/graph/conftest.py, tests/graph/test_graph_writer_guard.py and the fragment, and leaves tests/conftest.py untouched.\nVERDICT manifest: read at the reviewed run directory; status reads complete and it lists the five commits ending fca9b022f, both gate arms with their log paths, the writers probe at EXIT=0, the negative control naming the project URI, and the retry its project-graph outage caused.\nVERDICT diff: read commit by commit from aecc88921 to fca9b022f: 004d9f1e5 adds same-file helper following plus eight guard tests, fca9b022f rewrites only the evidence fragment, and no file outside the three named paths is touched (+213/-12).\nVERDICT call_sites: none: the change is test collection infrastructure; pytest's collector invokes tests/graph/conftest.py:pytest_collection_modifyitems on every run under tests/graph/, and no module under imas_codex/ imports tests/conftest or the guard.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: tests/graph/conftest.py:380 _scan_calls follows a call to a same-file helper, so the delegating writer the previous review found escaping now reads writes=True and is refused, and nothing else about the node's routing changes.\nSCORE evidence: 17\nJUSTIFICATION evidence: logs/base-graph.log and logs/head-graph.log each carry a revision-and-command header and a bare EXIT=1 over identical 18-id failure sets, and I re-ran tests/graph/test_graph_writer_guard.py at fca9b022f in a scratch tree (8 passed); but both arms were made at 004d9f1e5 and the base arm deselects the five writers, so neither arm is the reviewed head nor the same test set.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the gained diff \u2014 tests/graph/conftest.py, tests/graph/test_graph_writer_guard.py and docs/evidence/fragments/sn-review-through-jev/srtj-graph-dir-writer-routing.html \u2014 is inside the manifest's declared write paths.\nSCORE durability: 18\nJUSTIFICATION durability: each test at tests/graph/test_graph_writer_guard.py:90-131 names a condition that reddens it \u2014 dropping the same-file branch at tests/graph/conftest.py:412 leaves the delegating writer reading writes=False and fails :95, and rescanning every string constant fails :109 \u2014 though the recursion bound at :383 and the empty-module fallback at :419 carry no test.\nSCORE fit: 18\nJUSTIFICATION fit: the added helpers follow the mechanism-comment style of the guard they extend at tests/graph/conftest.py:363-440 and carry no plan, ticket or author identifiers, but :469 calls read_text() with no encoding where the sibling scanner tests/standard_names/source_scan.py:46 names utf-8.\nSCORE reuse: 20\nJUSTIFICATION reuse: a search of tests/ and imas_codex/ for an existing same-file call follower or a shared fake-item helper found none \u2014 tests/test_environment_precedence.py:10 _collected_item is a Mock-based helper local to its file with no shared owner \u2014 so _module_functions and _scan_calls extend the existing guard rather than fork an owned capability.\nFINDING docs/evidence/fragments/sn-review-through-jev/srtj-graph-dir-writer-routing.html:17 non-blocking: the gate paragraphs name head 004d9f1e5 while the reviewed head is fca9b022f; the intervening commit changes only this file, so no test outcome can differ, but a reader comparing the receipt's revision against the promoted commit sees a mismatch.\nFINDING tests/graph/conftest.py:469 non-blocking: Path(module_path).read_text() takes the locale encoding while every module under tests/graph, conftest.py included, is UTF-8; under a non-UTF-8 locale it raises UnicodeDecodeError, which the surrounding except clause does not catch, so collection would crash instead of refusing \u2014 pass encoding=\"utf-8\" as tests/standard_names/source_scan.py:46 does.\n",
+  "review_run_id": "r-20261027T084911675521-review-of-srtj-graph-dir-writer-routing-fca9b022fee0",
+  "reviewed_base_sha": "aecc88921a54f45fff6bfcfa5085dc2497f465df",
+  "reviewed_head_sha": "fca9b022fee0b88062b062ba944ad1257779dcd5",
+  "reviewed_run_id": "r-20261027T074245280760-srtj-graph-dir-writer-routing",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T08:58:23.644701+00:00",
+  "total": 113
+}
