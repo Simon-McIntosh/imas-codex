@@ -6,7 +6,7 @@ import functools
 import inspect
 import json
 import logging
-from collections import Counter
+from collections import Counter, defaultdict
 from typing import Any
 
 from imas_codex.standard_names.signed_manifest import apply_signed_manifest
@@ -126,7 +126,7 @@ def fetch_low_score_sources(
         "sn.reviewer_score_name < $min_score",
         "coalesce(sn.regen_count, 0) < 1",
     ]
-    params: dict[str, services.Any] = {"min_score": float(min_score)}
+    params: dict[str, Any] = {"min_score": float(min_score)}
     if domain:
         where_clauses.append("sn.physics_domain = $domain")
         params["domain"] = domain
@@ -140,17 +140,17 @@ def fetch_low_score_sources(
         params["limit"] = int(limit)
     with services.GraphClient() as gc:
         rows = list(gc.query(query, **params))
-    by_source: dict[str, dict[str, services.Any]] = {}
+    by_source: dict[str, dict[str, Any]] = {}
     order: list[str] = []
     for row in rows:
         sid = row.get("source_id")
         if not sid:
             continue
         scores_json = row.get("reviewer_scores_json")
-        scores: dict[str, services.Any] | None = None
+        scores: dict[str, Any] | None = None
         if scores_json:
             try:
-                scores = services.json.loads(scores_json)
+                scores = json.loads(scores_json)
             except (TypeError, ValueError):
                 scores = None
         feedback = {
@@ -236,16 +236,16 @@ def fetch_review_feedback_for_sources(
             "\n            UNWIND $ids AS source_id\n            MATCH (src {id: source_id})\n            CALL {\n                WITH src\n                MATCH (src)-[:PRODUCED_NAME]->(sn:StandardName)\n                RETURN sn\n              UNION\n                WITH src\n                MATCH (src)-[:HAS_STANDARD_NAME]->(sn:StandardName)\n                RETURN sn\n            }\n            WITH source_id, sn\n            WHERE sn.reviewer_score_name IS NOT NULL\n               OR coalesce(sn.edit_mode, '') <> ''\n            RETURN source_id AS source_id,\n                   sn.id AS previous_name,\n                   sn.description AS previous_description,\n                   sn.documentation AS previous_documentation,\n                   sn.reviewer_score_name AS reviewer_score,\n                   sn.review_tier AS review_tier,\n                   sn.reviewer_comments_name AS reviewer_comments,\n                   sn.reviewer_scores_name AS reviewer_scores_json,\n                   sn.reviewer_suggested_name AS reviewer_suggested_name,\n                   sn.reviewer_suggestion_justification_name\n                       AS reviewer_suggestion_justification,\n                   sn.validation_status AS validation_status,\n                   sn.edit_mode AS edit_mode,\n                   sn.name_hint AS name_hint,\n                   sn.docs_hint AS docs_hint,\n                   sn.edit_reason AS edit_reason,\n                   sn.edit_origin AS edit_origin\n            ",
             ids=ids,
         )
-    mapping: dict[str, dict[str, services.Any]] = {}
+    mapping: dict[str, dict[str, Any]] = {}
     for row in rows:
         sid = row.get("source_id")
         if not sid:
             continue
         scores_json = row.get("reviewer_scores_json")
-        scores_dict: dict[str, services.Any] | None = None
+        scores_dict: dict[str, Any] | None = None
         if scores_json:
             try:
-                scores_dict = services.json.loads(scores_json)
+                scores_dict = json.loads(scores_json)
             except (TypeError, ValueError):
                 scores_dict = None
         new_entry = {
@@ -316,18 +316,18 @@ def fetch_reviewer_history_for_sources(
             "\n            UNWIND $ids AS source_id\n            MATCH (src {id: source_id})-[:HAS_STANDARD_NAME]->(sn:StandardName)\n                  -[:HAS_REVIEW]->(r:StandardNameReview)\n            RETURN source_id,\n                   sn.id AS sn_id,\n                   r.score AS score,\n                   r.comments AS full_comment,\n                   r.model AS model,\n                   r.reviewed_at AS ts\n            ORDER BY source_id, ts DESC\n            ",
             ids=ids,
         )
-    by_source: dict[str, list[dict[str, services.Any]]] = services.defaultdict(list)
+    by_source: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for row in rows:
         sid = row.get("source_id")
         if sid:
             by_source[sid].append(row)
-    mapping: dict[str, dict[str, services.Any]] = {}
+    mapping: dict[str, dict[str, Any]] = {}
     for sid, reviews in by_source.items():
         if not reviews:
             continue
         latest = reviews[0]
         comment_text = latest.get("full_comment") or ""
-        history: dict[str, services.Any] = {
+        history: dict[str, Any] = {
             "latest": {
                 "score": latest.get("score"),
                 "comment": comment_text[:800],
@@ -406,16 +406,16 @@ def fetch_docs_review_feedback_for_standard_names(
             "\n            UNWIND $ids AS sn_id\n            MATCH (sn:StandardName {id: sn_id})\n            WHERE sn.reviewer_score_docs IS NOT NULL\n            RETURN sn_id AS sn_id,\n                   sn.reviewer_score_docs AS reviewer_score,\n                   sn.reviewer_comments_docs AS reviewer_comments,\n                   sn.reviewer_scores_docs AS reviewer_scores_json,\n                   sn.validation_issues AS validation_issues\n            ",
             ids=ids,
         )
-    mapping: dict[str, dict[str, services.Any]] = {}
+    mapping: dict[str, dict[str, Any]] = {}
     for row in rows:
         sid = row.get("sn_id")
         if not sid:
             continue
         scores_json = row.get("reviewer_scores_json")
-        scores_dict: dict[str, services.Any] | None = None
+        scores_dict: dict[str, Any] | None = None
         if scores_json:
             try:
-                scores_dict = services.json.loads(scores_json)
+                scores_dict = json.loads(scores_json)
             except (TypeError, ValueError):
                 scores_dict = None
         issues = row.get("validation_issues")
@@ -494,7 +494,7 @@ def _filter_admissible_parents(
             batch_children.setdefault(e["to_name"], set()).add(e["from_name"])
     graph_axes: dict[str, set[str]] = {t: set() for t in targets}
     graph_children: dict[str, set[str]] = {t: set() for t in targets}
-    shadow_info: dict[str, dict[str, services.Any]] = {}
+    shadow_info: dict[str, dict[str, Any]] = {}
     legacy_protected: set[str] = set()
     try:
         rows = list(
@@ -607,7 +607,7 @@ def _filter_admissible_parents(
             return (True, f"clause B: vector-like ({len(combined)} axes)")
         return (False, result.reason)
 
-    kept: list[dict[str, services.Any]] = []
+    kept: list[dict[str, Any]] = []
     dropped_count = 0
     dropped_targets: set[str] = set()
     for e in co_batch:
@@ -673,7 +673,7 @@ def _bootstrap_missing_derived_parent_targets(
     """
     remaining = set(missing_parent_ids)
     materialized: set[str] = set()
-    edges_by_parent: dict[str, list[dict[str, services.Any]]] = {}
+    edges_by_parent: dict[str, list[dict[str, Any]]] = {}
     for edge in parent_edges:
         if edge["to_name"] in remaining:
             edges_by_parent.setdefault(edge["to_name"], []).append(edge)
@@ -693,7 +693,7 @@ def _bootstrap_missing_derived_parent_targets(
                 pairs=pairs,
             )
         )
-        by_parent: dict[str, list[dict[str, services.Any]]] = {}
+        by_parent: dict[str, list[dict[str, Any]]] = {}
         for row in child_rows:
             by_parent.setdefault(str(row["parent_id"]), []).append(dict(row))
         progressed = False
@@ -808,9 +808,9 @@ def _write_standard_name_edges(
     """
     from imas_codex.standard_names.derivation import derive_edges
 
-    co_batch: list[dict[str, services.Any]] = []
-    he_batch: list[dict[str, services.Any]] = []
-    geo_batch: list[dict[str, services.Any]] = []
+    co_batch: list[dict[str, Any]] = []
+    he_batch: list[dict[str, Any]] = []
+    geo_batch: list[dict[str, Any]] = []
     pending = [n["id"] for n in names if n.get("id")]
     processed: set[str] = set()
     while pending:
@@ -1122,7 +1122,7 @@ def _rewire_has_parent_off_superseded(gc: Any, *, services: Any) -> int:
             "\n            MATCH (child:StandardName)-[:HAS_PARENT]->(old:StandardName)\n            WHERE old.name_stage = 'superseded'\n            RETURN DISTINCT child.id AS child_id\n            "
         )
     )
-    authorized_parent_edges: list[dict[str, services.Any]] = []
+    authorized_parent_edges: list[dict[str, Any]] = []
     for row in child_rows:
         child_id = row.get("child_id")
         if not child_id:
@@ -1439,7 +1439,7 @@ def _materialize_derived_parent_rows(
             physics_domain = None
             source_domains = []
         grammar_fields = services._parse_parent_grammar(parent_id)
-        props: dict[str, services.Any] = {
+        props: dict[str, Any] = {
             "parent_id": parent_id,
             "unit": unit,
             "cocos_transformation_type": cocos,
@@ -2037,7 +2037,7 @@ def _spurious_stub_binding_authority(
     services: Any,
 ) -> list[dict[str, Any]]:
     """Return accepted-sibling authority only for the complete producer set."""
-    authorities: list[dict[str, services.Any]] = []
+    authorities: list[dict[str, Any]] = []
     for source in dd_sources:
         bindings = sorted(set(source.get("expected_bindings") or ()))
         targets = [dict(target) for target in source.get("binding_targets") or ()]
@@ -2094,7 +2094,7 @@ def _partition_lifecycleless_stub_rows(
     services: Any,
 ) -> dict[str, list[dict[str, Any]]]:
     """Partition a fresh lifecycle-less cohort without inventing authority."""
-    partitions: dict[str, list[dict[str, services.Any]]] = {
+    partitions: dict[str, list[dict[str, Any]]] = {
         "materialize-as-derived-parent": [],
         "delete-as-dead-link-stub": [],
         "rebind-source": [],
