@@ -25,7 +25,7 @@
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="192">
+<meta name="plan-version" content="193">
 <meta name="plan-modified" content="2026-10-27">
 </head>
 <body>
@@ -734,7 +734,10 @@
     <div class="r-comment-body"><p>The loop half of the scoped drift refresh is tested and fails closed (merge <code>068ffd097</code>, review 111). Before refreshing source drift, a scoped run reads the names it owns. If that read fails with a connection fault, the refresh is skipped with a logged reason; the repository's <code>is_infrastructure_error</code> decides which faults those are, covering an expired session, a lock timeout and a database that needs a restart. Before this fix such a fault aborted the run or swept the graph. Any other error still raises, including the test suite's live-graph guard. New tests fail when the loop drops its scope or swallows that guard. The fix took two review rounds: the first narrowed the handler but missed <code>SessionExpired</code> and <code>TransientError</code>.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261027T094307893669-review-of-shc-locus-converge-measure-39039fcdf922" data-who="reckon-build" data-when="2026-10-27T09:56:39.873Z">
-    <div class="r-comment-body"><p>reviewed r-20261027T090206246189-shc-locus-converge-measure at 39039fcdf against base 6c0c4cfe2: the evidence fragment and its runner land what the node was asked to measure (0 calls, USD 0.0000 of 4.00, family did not converge), scope is clean, and four non-blocking findings are recorded — a stamped/applied conflation on the unexercised human-summary path, two done-when conditions the gate does not assert, a dead duplicated expression, and duplication of the sibling runner that the node&#x27;s fence prevented it from extending.</p></div>
+    <div class="r-comment-body"><p>reviewed r-20261027T090206246189-shc-locus-converge-measure at 39039fcdf against base 6c0c4cfe2: the evidence fragment and its runner land what the node was asked to measure (0 calls, USD 0.0000 of 4.00, family did not converge), scope is clean, and four non-blocking findings are recorded — a stamped/applied conflation on the unexercised human-summary path, two done-when conditions the gate does not assert, a dead duplicated expression, and duplication of the sibling runner that the node's fence prevented it from extending.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261027T090206246189-shc-locus-converge-measure" data-who="reckon-build" data-when="2026-10-27T09:42:09.219Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-measure.html records the locus family re-measure: the apply made 0 LLM calls and spent USD 0.00 of the USD 4.00 cap, the family did not converge (electrostatic_potential 0.849 unchanged, two members unscored, none fell), and 0 names were touched outside the roster.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-close-s5" data-who="reckon-build" data-when="2026-10-13T14:50:00Z">
     <div class="r-comment-body"><p>§5 closed. The harmonize report counts a link as dead only when no standard name in the graph carries its target, which removes the boundary-density family's 19 false dead links (reviewed head <code>73bbd94ba</code>, review 99/120). Its two reuse follow-ons go into the §<!-- -->7 node: call <code>get_existing_standard_names</code> and drop the scope-only fallback. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s5-report-graph-links">evidence</a></p></div>
