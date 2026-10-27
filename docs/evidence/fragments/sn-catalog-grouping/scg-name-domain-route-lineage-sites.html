@@ -63,6 +63,11 @@ one transaction.</p>
   holds, so a name's edges are rewritten to its source set instead of merged
   into it. A name with no stored decision is written undecided and keeps its
   current domain.</li>
+  <li><strong>Change record ordering.</strong> The domain write runs first and
+  the <code>StandardNameChange</code> row is recorded after it succeeds, so a
+  failed domain write records no change for a domain that did not move. The two
+  are separate statements and the docstring says the domain write is the atomic
+  one, rather than claiming one transaction across both.</li>
   <li><strong>Derived parents, single and batched.</strong> Both materializers
   keep the children-derived scalar, drop their <code>source_domains</code>
   <code>SET</code>, and hand each materialized parent to the writer, which sets
@@ -99,21 +104,109 @@ than guessed at.</p>
 
 <h3 id="scg-name-domain-route-lineage-sites-evidence">Evidence</h3>
 
-<p>The path test
-<code>tests/standard_names/test_name_domain_writer_lineage_sites.py</code>
-plants a name whose DD source carries <code>equilibrium</code>, runs
-<code>reclassify_*</code> to <code>magnetic_field_diagnostics</code> on a
-disposable graph, and reads all three back: the scalar is the correction, the
-source set and the edges are <code>{equilibrium}</code>. Reverted to the direct
-write the same test fails, because the correction slot is never recorded.</p>
+<p><code>tests/standard_names/test_name_domain_writer_lineage_sites.py</code>
+carries one disposable-graph test per routed path. Each plants the state that
+makes its own site's write visible, then reads the scalar, the source set and the
+edge set back from the graph.</p>
 
-<p>The suite gate ran <code>tests/standard_names/ -m 'not slow' -n 8</code>,
-which covers the default tier and the <code>graph</code>-marked tier in one
-selection, from separate <code>git archive</code> trees under the run
-directory with a per-arm <code>--basetemp</code>. Base (<code>970cdb0d9</code>)
-reports 103 failed ids; head (<code>dd5794b76</code>) reports 103 &mdash; zero
-added and zero removed. The graph-marked path test runs green at head under
-<code>-m graph</code> against the repo's disposable Neo4j fixture.</p>
+<table>
+  <thead>
+    <tr><th>Path</th><th>Test</th><th>What it plants, and asserts</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>reclassify_standard_name_domain</code></td>
+      <td><code>test_catalog_edit_correction_writes_through_the_one_writer</code></td>
+      <td>a name whose DD source carries <code>equilibrium</code>, reclassified
+      to <code>magnetic_field_diagnostics</code>: the scalar is the correction,
+      the source set and the edges are <code>{equilibrium}</code>.</td>
+    </tr>
+    <tr>
+      <td><code>_write_standard_name_edges</code></td>
+      <td><code>test_edge_pass_writes_the_domain_through_the_one_writer</code></td>
+      <td>a name already carrying a stale <code>general</code> edge and a source
+      in <code>equilibrium</code>: the edge set is <code>{equilibrium}</code>, so
+      an implementation that merged into the existing edges instead of replacing
+      them would leave the stale edge and fail.</td>
+    </tr>
+    <tr>
+      <td><code>_materialize_derived_parent_rows</code></td>
+      <td><code>test_single_materializer_writes_the_domain_through_the_one_writer</code></td>
+      <td>a derived parent whose child carries a <code>transport</code> source
+      and which has no domain edge at all: the parent's source set and edges
+      become <code>{transport}</code>.</td>
+    </tr>
+    <tr>
+      <td><code>_materialize_derived_parent_rows_batched</code></td>
+      <td><code>test_batched_materializer_writes_the_domain_through_the_one_writer</code></td>
+      <td>the same parent through the batched materializer, asserting the same
+      three values.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Negative control.</strong> In a scratch copy of the tree, the module
+was run once per routed site, each arm reverting only its own site to the inline
+write it replaced. All three arms go red on the assertion that site governs:</p>
+
+<pre>
+# revision: 36a28b5ba  arms: each routed site reverted to its inline write
+--- arm: edge pass            exit 1
+E   AssertionError: assert {'general'} == {'equilibrium'}       (line 192)
+--- arm: single materializer  exit 1
+E   AssertionError: assert set() == {'transport'}               (line 219)
+--- arm: batched materializer exit 1
+E   AssertionError: assert set() == {'transport'}               (line 247)
+</pre>
+
+<p>The edge-pass arm fails because the inline pass merges edges and never deletes
+the stale <code>general</code> one; the two materializer arms fail because the
+inline write sets no domain edge at all. A test that stayed green under all three
+negatives would prove nothing about the routing.</p>
+
+<p><strong>Suite gate at the reviewed head.</strong> Both arms run
+<code>tests/standard_names/</code> from separate <code>git archive</code> trees
+under the run directory, each with a per-arm <code>--basetemp</code>: one
+selection for the default tier (<code>-m 'not slow and not graph' -n 8</code>)
+and one for the graph tier (<code>-m 'graph and not slow' -n 4</code>) against
+the disposable Neo4j fixture. Base is <code>970cdb0d9</code> and head is
+<code>36a28b5ba</code>; both trees carry the same generated models and neither
+links <code>.env</code>, so no arm reaches the live graph.</p>
+
+<table>
+  <thead>
+    <tr><th>Arm</th><th>Base</th><th>Head</th><th>Added</th><th>Removed</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>default markers</td>
+      <td>73 failed / 8409 passed / 11 skipped</td>
+      <td>73 failed / 8409 passed / 11 skipped</td>
+      <td>0</td><td>0</td></tr>
+    <tr>
+      <td><code>graph and not slow</code></td>
+      <td>60 failed / 307 passed / 19 skipped</td>
+      <td>60 failed / 310 passed / 20 skipped</td>
+      <td>0</td><td>0</td></tr>
+  </tbody>
+</table>
+
+<p>The comparison is on id sets, not counts: every base failure id is present at
+head and every head id is present at base, in both arms. In the graph arm the
+pass count rises by three &mdash; the new edge-pass test and the two new
+materializer tests &mdash; and running the module alone reports
+<code>4 passed</code>, so all four path tests execute and pass. The one extra
+skip is a collection-time skip elsewhere in the graph tier, not one of this
+node's tests.</p>
+
+<p>Two further review findings changed the code and belong in this record.
+<code>graph_lineage.py</code>'s private <code>_undecided_domain_decision</code>
+duplicated <code>domain_decision._undecided</code>; it is deleted and all three
+call sites use the owner, which also restores the argument order the duplicate
+had inverted. And <code>test_reclassify_domain_edge.py</code> compared two fields
+its fake recorded from the same parameters, so the comparison held whatever the
+production code did; it now asserts a source set and an edge set the seeded graph
+implies, read independently of the parameters the test passes in.</p>
 
 <h3 id="scg-name-domain-route-lineage-sites-added">The sixteen ids the routing first added</h3>
 
