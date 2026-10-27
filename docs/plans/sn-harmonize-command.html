@@ -25,8 +25,8 @@
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="201">
-<meta name="plan-modified" content="2026-10-27">
+<meta name="plan-version" content="202">
+<meta name="plan-modified" content="2026-10-28">
 </head>
 <body>
   <main class="plan-doc">
@@ -762,6 +762,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261027T132248464167-shc-locus-converge-remeasure" data-who="reckon-build" data-when="2026-10-27T15:37:39Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-remeasure.html — the scoped apply claimed its family and made 17 calls for USD 0.260322 of the USD 4.00 cap over 999 s; electrostatic_potential rose 0.849 to 0.9521, the anchor and floating names went from unscored to 0.9516 and 0.9590, electrostatic_potential_at_wall stayed 0.8625. The family halted on documentation acceptance (1 of 2 touched) and name-axis drift on two names, so it is unstamped and electrostatic_potential_at_outboard_midplane is unscored: the family did not converge, and 0 names outside the roster were paid for.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-s4-locus-remeasure-and-gate" data-who="reckon-build" data-when="2026-10-28T00:05:00Z">
+    <div class="r-comment-body"><p>The locus family was re-measured on the fixed cascade (merge <code>690c8f899</code>, review 99). The apply made 17 calls for USD 0.26 of a USD 4.00 cap:</p><ul><li><code>electrostatic_potential</code> rose from 0.849 to 0.952;</li><li>the anchor and floating names went from unscored to 0.952 and 0.959;</li><li><code>electrostatic_potential_at_wall</code> held at 0.863.</li></ul><p>The family halted for two reasons, and the convergence gate fix (merge <code>ed8ec36b1</code>, review 107) showed that one of them was false. The gate counted members a docs-only campaign never touched as name-axis drift. It now measures drift as a name-stage change between the reads before and after the drain, plans batches over name-accepted members only, and reports each skipped member with its stage.</p><p>The acceptance halt was real. <code>electrostatic_potential</code> is held at <code>reviewed</code> by a Jev contradiction veto, and a held doc is not accepted whatever it scored. The fragment quotes the veto's clause and the judge's answer, so the next step decides whether that veto was right. §4 stays open.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-close-s5" data-who="reckon-build" data-when="2026-10-13T14:50:00Z">
     <div class="r-comment-body"><p>§5 closed. The harmonize report counts a link as dead only when no standard name in the graph carries its target, which removes the boundary-density family's 19 false dead links (reviewed head <code>73bbd94ba</code>, review 99/120). Its two reuse follow-ons go into the §<!-- -->7 node: call <code>get_existing_standard_names</code> and drop the scope-only fallback. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s5-report-graph-links">evidence</a></p></div>

@@ -21,8 +21,8 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="246">
-<meta name="plan-modified" content="2026-10-27">
+<meta name="plan-version" content="247">
+<meta name="plan-modified" content="2026-10-28">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -897,7 +897,10 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
     <div class="r-comment-body"><p>COCOS label loss cause is the unscoped stale-label clear in phase_build, dated to the 2026-10-15 11:43 IDS-sharded build wave in which edge_profiles finished last; the fix scopes that clear to the build's IDS units, its labelled and 3.x-declared paths, and to builds carrying a label-declaring version. Review scores goal_fidelity 18, evidence 18, scope_discipline 20, durability 15, fit 19, reuse 20; zero added failure ids; four non-blocking findings, the load-bearing one being that no test asserts the clear still clears.</p></div>
 </div>
 <div class="r-comment" data-section="s39" data-id="c-run-r-20261027T211706188247-sib-dd-cocos-labels-cause" data-who="reckon-build" data-when="2026-10-27T21:39:13.847Z">
-    <div class="r-comment-body"><p>COCOS labels were deleted by an unscoped stale-label clear in phase_build (each IDS-scoped shard nulled every other shard&#x27;s labels; surviving set dated to the 2026-10-15 11:43 shard wave, edge_profiles finishing last); the clear is now scoped to the build&#x27;s IDS units and to versions that can declare labels, three disposable-graph tests fail at base and pass at head, and a full rebuild should restore 617 labels (22 of the 24 labelled holdout paths).</p></div>
+    <div class="r-comment-body"><p>COCOS labels were deleted by an unscoped stale-label clear in phase_build (each IDS-scoped shard nulled every other shard's labels; surviving set dated to the 2026-10-15 11:43 shard wave, edge_profiles finishing last); the clear is now scoped to the build's IDS units and to versions that can declare labels, three disposable-graph tests fail at base and pass at head, and a full rebuild should restore 617 labels (22 of the 24 labelled holdout paths).</p></div>
+</div>
+<div class="r-comment" data-section="s39" data-id="c-s39-cause-landed" data-who="reckon-build" data-when="2026-10-28T00:05:00Z">
+    <div class="r-comment-body"><p>The cause is found and fixed (merge <code>6d3a8ff29</code>, review 110). The DD build's stale-label clear was unscoped. In the IDS-sharded <code>imas-codex imas dd build --ids …</code> wave of 2026-10-15 11:43, each shard nulled every COCOS label outside its own shard. <code>edge_profiles</code> finished last, so only its labels survived: 9 of 617, and 2 of the 24 holdout paths. The earliest scoped invocation in the log is 2026-06-18, so 2026-10-15 is the last loss rather than the first.</p><p>The clear is now scoped to the build's IDS units and spares any label the newest in-scope 3.x version declares. Three disposable-graph tests fail on <code>main</code> and pass at head. <code>sib-dd-cocos-labels-restore</code> is running one full unsharded rebuild to restore the 617 labels, with the holdout test unmodified.</p><p>The review's follow-ons: a test that the clear still removes a label the DD dropped, a test of the 4.x-only branch, and a figure of the shard wave.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
