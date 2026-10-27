@@ -10,6 +10,13 @@
   ],
   "completed_at": "2026-10-27T11:55:41.221Z",
   "dispatched_at": "2026-10-27T11:41:42Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "evidence wording or an unavoidable test overlap given the ban on weakening assertions; the fix and its guard stand",
+      "recorded_at": "2026-10-27T12:01:01.516344+00:00"
+    }
+  },
   "findings": [
     {
       "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T075648946539-srtj-exposed-attachment-audit/manifest.md",
