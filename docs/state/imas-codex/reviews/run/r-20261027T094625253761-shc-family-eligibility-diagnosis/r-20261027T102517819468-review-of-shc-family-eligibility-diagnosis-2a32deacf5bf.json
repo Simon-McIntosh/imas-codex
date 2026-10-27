@@ -21,6 +21,13 @@
     }
   },
   "dispatched_at": "2026-10-27T10:29:14Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the finding carries no text",
+      "recorded_at": "2026-10-27T10:48:04.717766+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-harmonize-command/shc-family-eligibility-diagnosis.json",
