@@ -25,7 +25,7 @@
   <title>sn harmonize: Apply the House Style Family by Family | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="198">
+<meta name="plan-version" content="199">
 <meta name="plan-modified" content="2026-10-27">
 </head>
 <body>
@@ -753,6 +753,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261027T121810775263-review-of-shc-docs-reset-scope-stamp-f46dc2dde339" data-who="reckon-build" data-when="2026-10-27T13:18:51.038Z">
     <div class="r-comment-body"><p>The scoped docs reset stamp landed correctly with all 6 dimensions scored, added_failure_count 0, and one non-blocking finding on the gate revision recorded in the source manifest.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261027T104901661767-shc-docs-reset-scope-stamp" data-who="reckon-build" data-when="2026-10-27T12:15:00.740Z">
+    <div class="r-comment-body"><p>A scoped docs reset now stamps its batch even when it resets nothing, so an anchor already at docs_stage pending is claimable by its run: 3 new disposable-graph tests pass, the declared mutation fails the scoped one, and the base/head gate adds 0 failure ids.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-close-s5" data-who="reckon-build" data-when="2026-10-13T14:50:00Z">
     <div class="r-comment-body"><p>§5 closed. The harmonize report counts a link as dead only when no standard name in the graph carries its target, which removes the boundary-density family's 19 false dead links (reviewed head <code>73bbd94ba</code>, review 99/120). Its two reuse follow-ons go into the §<!-- -->7 node: call <code>get_existing_standard_names</code> and drop the scope-only fallback. <a href="/imas-codex/evidence/archive/sn-harmonize-command-landed.html#s5-report-graph-links">evidence</a></p></div>
