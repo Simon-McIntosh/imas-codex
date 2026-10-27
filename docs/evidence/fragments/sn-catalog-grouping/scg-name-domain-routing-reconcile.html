@@ -72,7 +72,8 @@ the write runs, so the test's post-conditions held because
 <pre><code>parse('test_domain_route__catalog_ab12', strict=True)
   ParseError: name 'test_domain_route__catalog_ab12' is not a valid grammar name</code></pre>
 
-<p>The merged test drives <code>electron_temperature</code> instead.</p>
+<p>The merged test drives <code>electron_temperature</code> instead, and the
+once-per-name test on this page drives <code>ion_temperature</code>.</p>
 
 <h3 id="scg-name-domain-routing-reconcile-evidence">Evidence</h3>
 
@@ -122,22 +123,27 @@ own <code>--basetemp</code>:</p>
   <tbody>
     <tr>
       <td>base</td>
-      <td><code>43ae5712c</code></td>
-      <td>103 failed, 8381 passed, 15 skipped, <code>EXIT=1</code></td>
+      <td><code>af4cc0719</code> (main at gate time)</td>
+      <td>95 failed, 8391 passed, 12 skipped, <code>EXIT=1</code></td>
     </tr>
     <tr>
       <td>head</td>
-      <td><code>89251bb66</code></td>
-      <td>102 failed, 8383 passed, 15 skipped, <code>EXIT=1</code></td>
+      <td><code>156043788</code>, tree <code>6911687b1</code></td>
+      <td>93 failed, 8394 passed, 12 skipped, <code>EXIT=1</code></td>
     </tr>
   </tbody>
 </table>
 
-<p><strong>One added failure id</strong>:
-<code>test_facade_closure.py::test_service_bridge_resolves_only_wired_names</code>.</p>
+<p><strong>No failure id is added.</strong> The two ids the head no longer fails
+are both in <code>test_snrun_async_counters.py</code>:
+<code>TestGenerateDocsBumpsEnriched::test_generate_docs_bumps_enriched</code> and
+<code>::TestNoRunIdNoBump::test_no_run_id_skips_bump</code>.</p>
 
-<p>It is a seam failure the two halves create together, and neither creates
-alone. The catalog half deleted the promote-on-higher-rank block, which was
+<p>The first gate, run against the dispatch base <code>43ae5712c</code>, added
+exactly one id: <code>test_facade_closure.py::test_service_bridge_resolves_only_wired_names</code>.
+It is a seam failure the two halves create together and neither creates alone.</p>
+
+<p>The catalog half deleted the promote-on-higher-rank block, which was
 <code>graph_catalog</code>'s only reader of <code>services._ensure_list</code>.
 The lineage half removed the inline domain reads that also used it. The facade
 closure invariant asserts that <code>graph_ops._WIRED_SERVICE_NAMES</code> is
@@ -149,12 +155,27 @@ a scratch copy of the head tree:</p>
 <pre><code>$ pytest tests/standard_names/test_facade_closure.py::test_service_bridge_resolves_only_wired_names
 1 passed, 1 warning in 7.48s</code></pre>
 
-<p>That file, <code>imas_codex/standard_names/graph_ops.py</code>, lies outside
-this node's write fence, so the line is not changed here; the delta the merge
-adds against <code>main</code> is that one failure id until it is. The same run
-carries two ids the head arm no longer fails:
-<code>test_snrun_async_counters.py::TestGenerateDocsBumpsEnriched::test_generate_docs_bumps_enriched</code>
-and <code>::TestNoRunIdNoBump::test_no_run_id_skips_bump</code>.</p>
+<p>The element is gone from <code>_WIRED_SERVICE_NAMES</code> in
+<code>imas_codex/standard_names/graph_ops.py</code>, changed here at
+<code>8ef8d6518</code>, and
+<code>test_facade_closure.py</code> now reports <code>6 passed</code>. Neither
+arm of the gate on this page carries that id.</p>
+
+<h3 id="scg-name-domain-routing-reconcile-baseline">Why this base arm differs from an earlier reading</h3>
+
+<p>The dispatch base <code>43ae5712c</code> measured 103 failed, 8381 passed,
+15 skipped. <code>af4cc0719</code>, main at gate time, measures 95. The fifteen
+commits between them retire the review quorum's deciding path: they repair nine
+ids, all in <code>test_review_cascade.py</code>, and introduce one,
+<code>test_docs_holdout_set.py::test_docs_holdout_physics_authority_matches_dd_path_bindings</code>.</p>
+
+<p>A reading of 73 on main does not come from those landings: the ids it differs
+by were already failing at <code>43ae5712c</code> and still fail here. Part of
+the gap is this node's environment, and it is measurable: the CLI tests fail
+inside the worker's fence with <code>OSError(30, 'Read-only file system')</code>,
+the CLI's own log directory being unwritable there. That covers all fourteen
+ids in <code>test_cli_export.py</code> and most of <code>test_export_*</code>,
+whatever main contains. The rest of the gap is not classified here.</p>
 
 <h3 id="scg-name-domain-routing-reconcile-outside">Outside this node</h3>
 
