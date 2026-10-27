@@ -198,7 +198,9 @@ def measure() -> dict:
     from imas_codex.standard_names.families import fetch_pattern_families
 
     transcribed = verify_transcriptions()
-    fresh_scope = str(uuid.uuid4())
+    # Stands for the uuid a new apply mints under its scope; fixed rather than
+    # random so repeated runs produce a byte-identical artifact.
+    fresh_scope = str(uuid.uuid5(uuid.NAMESPACE_DNS, f"{NODE_ID}/scope"))
     with GraphClient() as gc:
         families = fetch_pattern_families(gc, seeds=[ANCHOR_SEED])
         family = next(
