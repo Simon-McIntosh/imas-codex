@@ -42,6 +42,8 @@ class _BatchCapture:
 
     def query(self, cypher: str, **params: Any) -> list[dict[str, Any]]:
         self.calls.append({"cypher": cypher, "params": params})
+        if "UNWIND $ids AS id" in " ".join(cypher.split()):
+            return []
         ids = [row["parent_id"] for row in params["rows"]]
         if "STRUCTURAL_CLOSURE_BATCH_MATERIALIZE" in cypher:
             return [

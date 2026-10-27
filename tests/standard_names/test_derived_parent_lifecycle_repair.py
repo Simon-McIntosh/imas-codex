@@ -253,6 +253,28 @@ class _StatefulDerivedParentGraph:
         if "MATCH (dr:DocsRevision)" in cypher and "DETACH DELETE dr" in cypher:
             return [{"n": 0}]
 
+        # The one domain writer: a stored-decision read, then a state read, then
+        # one statement setting the scalar, the source set and the edges.
+        if "UNWIND $ids AS id" in " ".join(cypher.split()):
+            return []
+
+        if "RETURN sn.physics_domain AS physics_domain" in cypher:
+            return [
+                {
+                    "physics_domain": self.parent.get("physics_domain"),
+                    "own_domains": [],
+                    "child_ids": [f"child_{i}" for i in range(len(self.child_domains))],
+                    "child_dd_domains": list(self.child_domains),
+                    "child_stored_domains": [],
+                }
+            ]
+
+        if "sn.physics_domain = $physics_domain" in cypher:
+            self.parent["physics_domain"] = kwargs["physics_domain"]
+            self.parent["source_domains"] = list(kwargs["source_domains"])
+            self.parent["domain_edges"] = sorted(kwargs["edge_domains"])
+            return [{"sn_id": kwargs["sn_id"]}]
+
         raise AssertionError(f"Unexpected query: {cypher}")
 
     @contextmanager

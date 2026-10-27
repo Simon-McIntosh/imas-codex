@@ -38,13 +38,43 @@ imas_sn = pytest.importorskip("imas_standard_names")
 # ---------------------------------------------------------------------------
 
 
-def _make_mock_gc() -> MagicMock:
-    """Return a fresh MagicMock for GraphClient."""
+def _make_mock_gc(name_domains: dict[str, list[str]] | None = None) -> MagicMock:
+    """Return a fresh MagicMock for GraphClient.
+
+    ``name_domains`` models the domain writer's view of the graph: the domains the
+    name's DD sources carry, which its source set and domain edges are derived
+    from. Every name the callers write is present in the graph and carries no
+    stored Jev decision, so the writer runs undecided for each.
+    """
+    domains = name_domains or {}
     gc = MagicMock()
 
     def _query(cypher: str, **params):
         if "STANDARD_NAME_EDGE_IDENTITY_DISCOVERY" in cypher:
             return [{"id": name_id} for name_id in params["ids"]]
+        if "sn.domain_decision_choice AS choice" in cypher:
+            return [
+                {
+                    "id": name_id,
+                    "candidates": None,
+                    "choice": None,
+                    "probability": None,
+                    "model": None,
+                    "decided_at": None,
+                }
+                for name_id in params["ids"]
+            ]
+        if "RETURN sn.physics_domain AS physics_domain" in cypher:
+            own = list(domains.get(params["sn_id"], []))
+            return [
+                {
+                    "physics_domain": own[0] if own else None,
+                    "own_domains": own,
+                    "child_ids": [],
+                    "child_dd_domains": [],
+                    "child_stored_domains": [],
+                }
+            ]
         return []
 
     gc.query = MagicMock(side_effect=_query)
@@ -523,6 +553,16 @@ class TestEndpointAuthority:
         graph.__exit__.return_value = None
 
         def _query(cypher: str, **params):
+            if "RETURN sn.physics_domain AS physics_domain" in cypher:
+                return [
+                    {
+                        "physics_domain": "transport",
+                        "own_domains": ["transport"],
+                        "child_ids": [],
+                        "child_dd_domains": [],
+                        "child_stored_domains": [],
+                    }
+                ]
             if "RETURN sn.id AS id" in cypher and "EDGE_IDENTITY" not in cypher:
                 return [{"id": "maximum_of_electron_temperature"}]
             if "STANDARD_NAME_EDGE_IDENTITY_DISCOVERY" in cypher:
@@ -818,7 +858,7 @@ class TestHasPhysicsDomainEdge:
                 "physics_domain": "equilibrium",
             }
         ]
-        mock_gc = _make_mock_gc()
+        mock_gc = _make_mock_gc({"plasma_current": ["equilibrium"]})
         _call_write(names, mock_gc)
 
         assert any("HAS_PHYSICS_DOMAIN" in c for c in _cyphers(mock_gc))
@@ -831,20 +871,31 @@ class TestHasPhysicsDomainEdge:
                 "physics_domain": "equilibrium",
             }
         ]
-        mock_gc = _make_mock_gc()
+        mock_gc = _make_mock_gc({"plasma_current": ["equilibrium"]})
         _call_write(names, mock_gc)
 
-        batch = _batch_for(mock_gc, "HAS_PHYSICS_DOMAIN")
-        assert batch is not None
+        writes = [
+            invocation
+            for invocation in mock_gc.query.call_args_list
+            if "HAS_PHYSICS_DOMAIN" in invocation[0][0]
+        ]
+        assert writes
         assert any(
-            b["sn_id"] == "plasma_current" and b["domain_id"] == "equilibrium"
-            for b in batch
+            invocation[1]["sn_id"] == "plasma_current"
+            and invocation[1]["edge_domains"] == ["equilibrium"]
+            for invocation in writes
         )
 
     def test_no_has_physics_domain_when_absent(self) -> None:
-        """No HAS_PHYSICS_DOMAIN Cypher when physics_domain is absent."""
+        """No domain edge is created for a name with no source domain."""
         names = [{"id": "plasma_current", "unit": "A"}]
         mock_gc = _make_mock_gc()
         _call_write(names, mock_gc)
 
-        assert not any("HAS_PHYSICS_DOMAIN" in c for c in _cyphers(mock_gc))
+        writes = [
+            invocation
+            for invocation in mock_gc.query.call_args_list
+            if "HAS_PHYSICS_DOMAIN" in invocation[0][0]
+        ]
+        assert writes
+        assert all(not invocation[1]["edge_domains"] for invocation in writes)

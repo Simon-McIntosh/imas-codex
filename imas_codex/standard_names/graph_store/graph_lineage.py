@@ -1603,11 +1603,15 @@ def _materialize_derived_parent_rows_batched(
     prepared_count = services._materialize_derived_parent_rows(capture, parents)
     if prepared_count != len(parents):
         raise RuntimeError("authorized derived-parent materialization row was dropped")
-    if len(capture.calls) != 2 * prepared_count:
+    prepared_rows = [
+        dict(call["params"])
+        for call in capture.calls
+        if "source_node_id" in call["params"]
+    ]
+    if len(prepared_rows) != prepared_count:
         raise RuntimeError("derived-parent materialization preparation is incomplete")
     rows = []
-    for index in range(0, len(capture.calls), 2):
-        properties = dict(capture.calls[index]["params"])
+    for properties in prepared_rows:
         parent_id = str(properties["parent_id"])
         properties["event"] = (event_by_parent or {}).get(parent_id)
         rows.append(properties)
