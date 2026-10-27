@@ -3,8 +3,14 @@
 A docs-only campaign never writes the name axis. A member that was already
 outside ``accepted`` when the batch was planned cannot be claimed by the
 documentation pools, so its stage is the same after the drain as before it.
-Reading the absolute post-drain stage reported that member as drift and as an
-acceptance failure, halting a family on state the campaign did not cause.
+Reading the absolute post-documentation stage reported that member as drift,
+halting a family on state the campaign did not cause. Its documentation was
+never touched either, so it does not enter the acceptance rate at all.
+
+The third clause below is the opposite guarantee: a document the cascade holds
+at ``reviewed`` is not accepted, whatever the review scored it. A pinned
+assertion keeps that true, so a later change cannot reintroduce score-based
+acceptance and let the gate pass a document the cascade refused.
 
 The fixtures carry the shape of the electrostatic-potential family re-measure:
 two members whose name stage is ``reviewed`` and never moves, and two whose
@@ -19,8 +25,7 @@ from imas_codex.standard_names.campaign import (
     evaluate_convergence,
     measure_batch,
 )
-
-ACCEPT_SCORE = 0.85
+from imas_codex.standard_names.defaults import DEFAULT_MIN_SCORE
 
 
 def _row(sid: str, *, name_stage: str, docs_stage: str, score: float | None = None):
@@ -115,11 +120,9 @@ def test_member_outside_accepted_before_the_drain_is_skipped_not_drift():
         eligible,
         batch_index=1,
         prior_rows=_INHERITED,
-        accept_score=ACCEPT_SCORE,
     )
     assert outcome.name_drift == []
     assert outcome.touched == 2
-    assert outcome.accepted == 2
 
 
 def test_member_the_drain_moves_out_of_accepted_still_halts():
@@ -134,7 +137,6 @@ def test_member_the_drain_moves_out_of_accepted_still_halts():
         ["moved_away"],
         batch_index=0,
         prior_rows=inherited,
-        accept_score=ACCEPT_SCORE,
     )
     assert outcome.name_drift == ["moved_away"]
     assert outcome.touched == 0
@@ -145,47 +147,22 @@ def test_member_the_drain_moves_out_of_accepted_still_halts():
     assert any("drift" in reason for reason in reasons)
 
 
-def test_acceptance_count_follows_the_docs_the_drain_wrote():
-    """The count reads the stages and scores the drain wrote, not absolutes."""
+def test_a_held_review_is_not_accepted_however_it_scored():
+    """A held document is not accepted, whatever the review scored it.
+
+    The contradiction veto holds a document at ``reviewed`` for a refinement
+    round on purpose. Counting a held review at or above the acceptance score
+    would let the gate pass a document the cascade refused, which lowers the
+    acceptance bar in effect.
+    """
     members = ["electrostatic_potential", "floating_electrostatic_potential"]
+    held = next(row for row in _AFTER if row["id"] == "electrostatic_potential")
+    assert held["docs_stage"] == "reviewed"
+    assert held["reviewer_score_docs"] >= DEFAULT_MIN_SCORE
 
-    outcome = measure_batch(
-        _AFTER,
-        members,
-        batch_index=1,
-        prior_rows=_INHERITED,
-        accept_score=ACCEPT_SCORE,
-    )
+    outcome = measure_batch(_AFTER, members, batch_index=1, prior_rows=_INHERITED)
     assert outcome.touched == 2
-    assert outcome.accepted == 2
-    assert outcome.score_accepted == ["electrostatic_potential"]
+    assert outcome.accepted == 1
     converged, reasons = evaluate_convergence(outcome, ConvergenceThresholds())
-    assert converged, reasons
-
-    # A doc the drain left below the threshold is still an acceptance failure.
-    below = [
-        _row(
-            "electrostatic_potential",
-            name_stage="accepted",
-            docs_stage="reviewed",
-            score=0.7421,
-        ),
-        _row(
-            "floating_electrostatic_potential",
-            name_stage="accepted",
-            docs_stage="accepted",
-            score=0.9590,
-        ),
-    ]
-    failed = measure_batch(
-        below,
-        members,
-        batch_index=1,
-        prior_rows=_INHERITED,
-        accept_score=ACCEPT_SCORE,
-    )
-    assert failed.touched == 2
-    assert failed.accepted == 1
-    halted, halt_reasons = evaluate_convergence(failed, ConvergenceThresholds())
-    assert not halted
-    assert any("docs acceptance" in reason for reason in halt_reasons)
+    assert not converged
+    assert "docs acceptance 50.00% < 90.00% (1/2 touched)" in reasons
