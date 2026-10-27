@@ -10,7 +10,7 @@ Edge types covered:
   HAS_PREDECESSOR — from the ``deprecates`` field
   HAS_SUCCESSOR   — reserved for signed supersede mutations
   IN_CLUSTER      — from the ``primary_cluster_id`` field
-  HAS_PHYSICS_DOMAIN — from the ``physics_domain`` field
+  HAS_PHYSICS_DOMAIN — the one domain writer's, never this path's
 """
 
 from __future__ import annotations
@@ -360,13 +360,14 @@ class TestEndpointAuthority:
         )
 
         endpoint_merge = re.compile(r"MERGE\s*\([^)]*:StandardName")
+        # HAS_PHYSICS_DOMAIN is absent by construction: this path mints no
+        # domain edge, the one writer owns it.
         for relation in (
             "HAS_PARENT",
             "HAS_ERROR",
             "HAS_LOCUS",
             "HAS_PREDECESSOR",
             "IN_CLUSTER",
-            "HAS_PHYSICS_DOMAIN",
         ):
             relation_writes = [
                 cypher for cypher in _cyphers(mock_gc) if relation in cypher
@@ -801,16 +802,21 @@ class TestInClusterEdgeFromPrimaryCluster:
 
 
 # ---------------------------------------------------------------------------
-# HAS_PHYSICS_DOMAIN from physics_domain scalar
+# HAS_PHYSICS_DOMAIN is the one writer's, not this path's
 # ---------------------------------------------------------------------------
 
 
 class TestHasPhysicsDomainEdge:
-    """Write StandardName with ``physics_domain='equilibrium'``
-    → HAS_PHYSICS_DOMAIN edge to singleton PhysicsDomain {id:'equilibrium'}.
+    """A payload ``physics_domain`` must not reach the graph from this path.
+
+    The domain, its source domains and its ``HAS_PHYSICS_DOMAIN`` edges are
+    written together by ``domain_decision.write_name_domain``, which also
+    removes the edges it replaces. Edges minted here from a payload domain
+    would survive beside the writer's and could never be withdrawn, so the
+    structural tail pass is given the batch without the domain fields.
     """
 
-    def test_has_physics_domain_edge_emitted(self) -> None:
+    def test_no_domain_edge_emitted(self) -> None:
         names = [
             {
                 "id": "plasma_current",
@@ -821,25 +827,21 @@ class TestHasPhysicsDomainEdge:
         mock_gc = _make_mock_gc()
         _call_write(names, mock_gc)
 
-        assert any("HAS_PHYSICS_DOMAIN" in c for c in _cyphers(mock_gc))
+        assert not any("HAS_PHYSICS_DOMAIN" in c for c in _cyphers(mock_gc))
 
-    def test_has_physics_domain_batch(self) -> None:
+    def test_no_domain_edge_batch(self) -> None:
         names = [
             {
                 "id": "plasma_current",
                 "unit": "A",
                 "physics_domain": "equilibrium",
+                "source_domains": ["equilibrium", "transport"],
             }
         ]
         mock_gc = _make_mock_gc()
         _call_write(names, mock_gc)
 
-        batch = _batch_for(mock_gc, "HAS_PHYSICS_DOMAIN")
-        assert batch is not None
-        assert any(
-            b["sn_id"] == "plasma_current" and b["domain_id"] == "equilibrium"
-            for b in batch
-        )
+        assert _batch_for(mock_gc, "HAS_PHYSICS_DOMAIN") is None
 
     def test_no_has_physics_domain_when_absent(self) -> None:
         """No HAS_PHYSICS_DOMAIN Cypher when physics_domain is absent."""
