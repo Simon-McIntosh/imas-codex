@@ -1,0 +1,64 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own arms: negative-control-before.log (revision 2c08526b6) 1 failed (test_docs_holdout_physics_authority_matches_dd_path_bindings, EXIT=1); gate-after.log 1 passed EXIT=0; gate-after-resume.log 1 passed EXIT=0. Nothing fails in either after arm that the baseline did not, so the added set is empty.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-27T23:40:39.061Z",
+  "dispatched_at": "2026-10-27T23:30:26Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-dd-cocos-labels-restore.html",
+      "line": "26",
+      "severity": "non-blocking",
+      "text": "the record presents $0.9546 as spend 'within the coordinator's USD 2.00 ceiling for the resume', but the node's own done_when required that no paid LLM call be made and its brief set budget USD 0, so the $0.42 spent in the first build ran under no authorized budget and the clause is not satisfied as written; the coordinator's later resume advice authorizes the USD 2.00 ceiling, so the deviation is disclosed and supervised rather than concealed."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-dd-cocos-labels-restore.html",
+      "line": "72",
+      "severity": "non-blocking",
+      "text": "the record quotes the CLI summary's '0 cluster nodes' verbatim while the same run logs 'Merging 3025 cluster nodes' at imas_dd_dd.log:34010 and leaves 2201 clusters in the graph, because that field reads stats['clusters_created'] at imas_codex/cli/imas_dd.py:598 and the merge phase creates through another path, so a reader taking the quoted line at face value believes no clusters were touched."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-dd-cocos-labels-restore.html",
+      "line": "185",
+      "severity": "non-blocking",
+      "text": "the record states the per-call cost=$ lines are 'the only record of this spend', but the same log records 'Build metadata: duration=619s, enrich=$13.9424, refine=$17.2729, total=$31.2153' at imas_dd_dd.log:34043 and again at 34167, so a reader reconciling spend meets an unexplained figure 30x the quoted total; the record should say the metadata line is cumulative build metadata, not this run's spend."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "none - a docs fragment is not reachable from runtime code; the CLI and labeler it describes were read for the spend and cluster findings.",
+    "diff": "two commits, one new 190-line fragment; the 24-row holdout table reconciles exactly with after.json on path, frozen label, graph label and source.",
+    "done_when": "five of six done_when conditions are asserted and recorded; the sixth, 'no paid LLM call was made', is contradicted by the log's cost=$ lines totalling $0.9546.",
+    "goal": "the goal is restore-the-labels via one unsharded DD build; the fragment at :14-27 records 9 -> 574 labelled IMASNodes and 24/24 holdout, and my re-run of the named gate at the head passed.",
+    "manifest": "read; records tests, test_logs, negative_control_log and the census artefacts; not armed, so no baseline_suite/after_suite blocks, and added failures were derived from its gate logs.",
+    "write_paths": "the single declared path is the single path in the diff; measurement artefacts sit in the run directory outside the repository."
+  },
+  "justifications": {
+    "durability": "no assertion is added by this change; the guard is the pre-existing test_docs_holdout_physics_authority_matches_dd_path_bindings, marked requires_graph, and the fragment's figures are themselves unguarded.",
+    "evidence": "the gate at sib-dd-cocos-labels-restore.html:121-127 compares against the independent frozen authority, not against a value the test supplied, and negative-control-before.log shows it red before the rebuild, but the record's spend claim contradicts one done_when clause and the cluster census exists only in the session transcript.",
+    "fit": "the fragment repeats the meta and id conventions of docs/evidence/fragments/sn-integrity-backlog/sib-dd-cocos-labels-cause.html:1-9, and both commit messages carry a body with no trailer or plan label.",
+    "goal_fidelity": "docs/evidence/fragments/sn-integrity-backlog/sib-dd-cocos-labels-restore.html:14 states the 9 -> 574 restoration and the 24/24 holdout result, and the live gate I re-ran at 7e4df054e confirms it holds now.",
+    "reuse": "the landed change adds no definition; the census scripts use benchmark_reference.load_docs_holdout and GraphClient, and a capability search found no existing COCOS label census to fork.",
+    "scope_discipline": "git diff --stat 2c08526b6 7e4df054e shows one added file, the declared write path, and no other path changed."
+  },
+  "notes": "Reviewed at head 7e4df054e in the detached worktree of run r-20261027T224629438202-sib-dd-cocos-labels-restore. I independently re-ran the single gate the review may re-run (the holdout authority test) at that head against the live graph: 1 passed, EXIT=0, log at r-20261027T232931669393-review-of-sib-dd-cocos-labels-restore-7e4df054e448/review-gate.log. No other suite was run. Census reconciliation (fragment table vs after.json) and the CLI-log cost and summary reads were read-only.",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is the restoration of the live graph's COCOS labels with one full unsharded DD build; the landed record docs/evidence/fragments/sn-integrity-backlog/sib-dd-cocos-labels-restore.html:14-27 reports 9 -> 574 labelled IMASNodes with all 24 holdout paths on their frozen labels, and I re-ran the named gate at the head (1 passed, EXIT=0), so the restoration is present in the live graph.\nVERDICT done_when: the done_when names six conditions; five are asserted (holdout labels, the unmodified authority test, unchanged property counts in before.json/after.json, the invocation and log path, the recorded census), but the sixth, 'no paid LLM call was made', is contradicted by the cost=$ lines of ~/.local/share/imas-codex/logs/imas_dd_dd.log at 34019/34026/34033 and 34134/34141/34148/34155, which total $0.9546.\nVERDICT write_paths: docs/evidence/fragments/sn-integrity-backlog/sib-dd-cocos-labels-restore.html is the single declared path and the single path in the diff; the census scripts and JSON artefacts live in the run directory, outside the repository.\nVERDICT manifest: read; status complete, tests names the single holdout test, test_logs names gate-after.log and gate-after-resume.log, negative_control_log names negative-control-before.log, and artifacts records the before/after counts, declared-set comparison and cluster table; it carries no baseline_suite/after_suite blocks because the node is not armed (its write path holds no test file), so added failures were derived from its three gate logs instead.\nVERDICT diff: read both commits against base 2c08526b6; 679d183b5 and 7e4df054e add one new 190-line fragment and nothing else, each with a conventional subject and a body and no AI trailer; I reconciled the fragment's 24-row holdout table against after.json and all 24 rows match on path, frozen label, graph label and source.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-integrity-backlog/sib-dd-cocos-labels-restore.html:14 states the 9 -> 574 restoration and the 24/24 holdout result, and the live gate I re-ran at 7e4df054e confirms it holds now.\nSCORE evidence: 14\nJUSTIFICATION evidence: the gate at docs/evidence/fragments/sn-integrity-backlog/sib-dd-cocos-labels-restore.html:121-127 compares against the independent frozen authority, not against a value the test supplied, and negative-control-before.log shows it red before the rebuild, but the record's own spend claim contradicts one done_when clause and the cluster census exists only in the session transcript.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 2c08526b6 7e4df054e shows one added file, the declared write path, and no other path changed.\nSCORE durability: 14\nJUSTIFICATION durability: no assertion is added by this change; the guard is the pre-existing tests/standard_names/test_docs_holdout_set.py::test_docs_holdout_physics_authority_matches_dd_path_bindings, which is marked requires_graph and reddens only where a live graph is present, and the fragment's figures are themselves unguarded.\nSCORE fit: 18\nJUSTIFICATION fit: the fragment repeats the head, meta and id conventions of its sibling docs/evidence/fragments/sn-integrity-backlog/sib-dd-cocos-labels-cause.html:1-9, and both commit messages carry a body with no trailer or plan label.\nSCORE reuse: 20\nJUSTIFICATION reuse: the landed change adds no definition; the census scripts use imas_codex/standard_names/benchmark_reference.py:load_docs_holdout and imas_codex/graph/client.py:GraphClient, and a capability search of imas_codex/cli and grep for cocos_label_source found no existing COCOS label census the node forked.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-dd-cocos-labels-restore.html:26 non-blocking: the record presents $0.9546 as spend within the coordinator's USD 2.00 ceiling for the resume, but the node's own done_when required that no paid LLM call be made and its brief set budget USD 0, so the $0.42 spent in the first build ran under no authorized budget and the clause is not satisfied as written; the coordinator's later resume advice authorizes the USD 2.00 ceiling, so the deviation is disclosed and supervised rather than concealed.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-dd-cocos-labels-restore.html:72 non-blocking: the record quotes the CLI summary's 0 cluster nodes verbatim while the same run logs Merging 3025 cluster nodes at imas_dd_dd.log:34010 and leaves 2201 clusters in the graph, because that field reads stats clusters_created at imas_codex/cli/imas_dd.py:598 and the merge phase creates through another path, so a reader taking the quoted line at face value believes no clusters were touched.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-dd-cocos-labels-restore.html:185 non-blocking: the record states the per-call cost lines are the only record of this spend, but the same log records Build metadata: duration=619s, enrich=$13.9424, refine=$17.2729, total=$31.2153 at imas_dd_dd.log:34043 and again at 34167, so a reader reconciling spend meets an unexplained figure 30x the quoted total; the record should say the metadata line is cumulative build metadata, not this run's spend.",
+  "review_run_id": "r-20261027T232931669393-review-of-sib-dd-cocos-labels-restore-7e4df054e448",
+  "reviewed_base_sha": "2c08526b6b04471f3fa87938988640efa201509b",
+  "reviewed_head_sha": "7e4df054e448ba76db712ca92b4317b044b6a353",
+  "reviewed_run_id": "r-20261027T224629438202-sib-dd-cocos-labels-restore",
+  "scores": {
+    "durability": 14,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T23:42:47.063650+00:00",
+  "total": 103
+}
