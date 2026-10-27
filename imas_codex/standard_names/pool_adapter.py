@@ -44,7 +44,9 @@ async def run_explicit_paths(
         on_worker_status: Optional callback for progress display updates.
     """
     from imas_codex.standard_names.budget import BudgetManager
-    from imas_codex.standard_names.workers import compose_batch
+    from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+        compose_batch,
+    )
 
     paths = []
     if not paths and not state.source:
@@ -112,7 +114,7 @@ async def _seed_explicit_paths(
     """
     from imas_codex.graph.client import GraphClient
     from imas_codex.settings import get_dd_version
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
         claim_explicit_standard_name_sources,
         merge_standard_name_sources,
     )
@@ -230,10 +232,12 @@ async def _seed_from_source(state: Any) -> list[dict[str, Any]]:
     and returns enriched batch items.
     """
     from imas_codex.settings import get_dd_version
-    from imas_codex.standard_names.graph_ops import (
-        claim_explicit_standard_name_sources,
+    from imas_codex.standard_names.graph_store.graph_claim_scope import (
         get_existing_standard_names,
         get_named_source_ids,
+    )
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        claim_explicit_standard_name_sources,
         merge_standard_name_sources,
     )
     from imas_codex.standard_names.sources.dd import extract_dd_candidates

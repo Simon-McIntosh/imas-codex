@@ -40,14 +40,18 @@ from imas_codex.standard_names.attachment_audit import (
     audit_attachments,
     reconcile_attachment_consistency,
 )
-from imas_codex.standard_names.graph_ops import (
-    classify_orphan_parent_source_candidates,
-    find_orphan_parent_source_candidates,
-    normalize_derived_parent_lifecycle,
-    reconcile_orphan_parent_sources,
+from imas_codex.standard_names.graph_store.graph_audits import (
     reconcile_standard_name_sources,
+)
+from imas_codex.standard_names.graph_store.graph_lineage import (
+    normalize_derived_parent_lifecycle,
     rederive_structural_edges,
     seed_parent_sources,
+)
+from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
+    classify_orphan_parent_source_candidates,
+    find_orphan_parent_source_candidates,
+    reconcile_orphan_parent_sources,
     structural_accept_derived_parents,
 )
 from imas_codex.standard_names.ledger import (

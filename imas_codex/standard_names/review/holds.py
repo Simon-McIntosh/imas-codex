@@ -192,8 +192,10 @@ def _promote_if_eligible(client: Any, name_id: str, axis: str) -> None:
     """
     if axis != "docs":
         return
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_audits import (
         PROMOTE_STRANDED_DOCS_WHERE,
+    )
+    from imas_codex.standard_names.graph_store.graph_catalog import (
         docs_review_eligibility_params,
     )
 

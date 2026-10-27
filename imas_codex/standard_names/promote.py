@@ -44,10 +44,12 @@ import yaml
 from imas_codex.graph.client import GraphClient
 from imas_codex.standard_names.defaults import DEFAULT_MIN_SCORE
 from imas_codex.standard_names.edit import apply_edit
-from imas_codex.standard_names.graph_ops import (
+from imas_codex.standard_names.graph_store.graph_refinement import (
+    stage_docs_for_rescore,
+)
+from imas_codex.standard_names.graph_store.graph_review_persistence import (
     persist_reviewed_docs,
     persist_reviewed_name,
-    stage_docs_for_rescore,
 )
 
 logger = logging.getLogger(__name__)

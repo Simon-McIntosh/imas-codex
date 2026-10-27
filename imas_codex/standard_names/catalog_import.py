@@ -269,7 +269,7 @@ def _grammar_decomposition(name: str) -> dict[str, str | None]:
     and ``validation_diagnostics_json`` — the same dict the persist path
     writes (single extraction authority).
     """
-    from imas_codex.standard_names.graph_ops import _parse_grammar
+    from imas_codex.standard_names.graph_store.graph_foundation import _parse_grammar
 
     return _parse_grammar(name)
 
@@ -312,7 +312,9 @@ def _entry_to_graph_dict(
     # Descriptions are plain Unicode text — strip any LaTeX/math markup that a
     # stale catalog YAML carries so it is not compared verbatim against the
     # graph. documentation keeps LaTeX.
-    from imas_codex.standard_names.workers import normalize_description_text
+    from imas_codex.standard_names.worker_tasks.worker_common import (
+        normalize_description_text,
+    )
 
     result: dict[str, Any] = {
         "id": entry.name,

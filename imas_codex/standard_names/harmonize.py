@@ -549,7 +549,9 @@ def _domain_scoped_finding(name_id: str) -> str | None:
 #: owner opens its own. Bounded either way: the read names its row set.
 def known_name_ids(gc: Any | None) -> set[str]:
     """Every ``StandardName`` id the graph holds, for dead-link resolution."""
-    from imas_codex.standard_names.graph_ops import get_existing_standard_names
+    from imas_codex.standard_names.graph_store.graph_claim_scope import (
+        get_existing_standard_names,
+    )
 
     return get_existing_standard_names(gc)
 
@@ -698,7 +700,9 @@ def mark_members_for_regen(
     """
     import uuid
 
-    from imas_codex.standard_names.graph_ops import reset_standard_name_docs
+    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+        reset_standard_name_docs,
+    )
 
     run_id = str(uuid.uuid4())
     out = reset_standard_name_docs(
@@ -723,7 +727,9 @@ def stamp_harmonized(
 
     Returns ``{"stamped": n, "deferred": m}``.
     """
-    from imas_codex.standard_names.graph_ops import stamp_harmonized_families
+    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+        stamp_harmonized_families,
+    )
 
     resolved_gc, own_gc = _resolve_gc(gc)
     families: list[dict[str, Any]] = []
@@ -1070,7 +1076,9 @@ def reconcile_family_reverse_links(
 
     Returns ``{"members", "added", "removed", "written", "protected"}``.
     """
-    from imas_codex.standard_names.graph_ops import write_enrichment_results
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        write_enrichment_results,
+    )
 
     members = sorted({mid for mid in member_ids if mid})
     if not members:
@@ -1349,7 +1357,9 @@ def _family_docs_scores(gc: Any, member_ids: list[str]) -> dict[str, float | Non
 
 def _stamp_applied_family(gc: Any, anchor_id: str) -> bool:
     """Re-read a converged family and stamp its current group signature."""
-    from imas_codex.standard_names.graph_ops import stamp_harmonized_families
+    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+        stamp_harmonized_families,
+    )
 
     families = fetch_pattern_families(gc, seeds=[anchor_id])
     if not families:
@@ -1865,7 +1875,9 @@ def restamp_harmonized_families(gc: Any | None = None) -> dict[str, int]:
 
     Returns ``{"restamped": n, "unchanged": m, "not_ready": k}``.
     """
-    from imas_codex.standard_names.graph_ops import stamp_harmonized_families
+    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+        stamp_harmonized_families,
+    )
 
     resolved_gc, own_gc = _resolve_gc(gc)
     try:

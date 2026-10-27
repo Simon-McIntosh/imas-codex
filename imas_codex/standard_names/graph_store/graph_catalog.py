@@ -438,7 +438,9 @@ def write_standard_names(
         signal_names = [n for n in names if "signals" in (n.get("source_types") or [])]
 
         if dd_names:
-            from imas_codex.standard_names.workers import _is_attachment_consistent
+            from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+                _is_attachment_consistent,
+            )
 
             pairing_rows = write_gc.query(
                 """

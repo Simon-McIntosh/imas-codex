@@ -586,7 +586,7 @@ def _fetch_candidates(
     approved corpus is fetched (the normal RC export).
     """
     from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_catalog import (
         docs_review_eligibility_params,
         docs_review_eligibility_where,
     )
@@ -656,7 +656,7 @@ def _fetch_export_population(
     exclusion ledger.
     """
     from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_catalog import (
         docs_review_eligibility_params,
         docs_review_eligibility_where,
         docs_review_property_coverage,
@@ -3026,7 +3026,7 @@ def run_export(
     )
 
     from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_supersession import (
         classify_sourceless_standard_names,
     )
 

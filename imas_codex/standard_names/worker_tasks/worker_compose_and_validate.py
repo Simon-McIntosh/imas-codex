@@ -897,7 +897,9 @@ async def compose_worker(
         if candidates:
             from datetime import UTC, datetime
 
-            from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+            from imas_codex.standard_names.graph_store.graph_catalog import (
+                persist_generated_name_batch,
+            )
 
             # Pro-rata per-candidate cost/token attribution.  One LLM
             # batch call produces N candidates; divide cost and tokens
@@ -1419,7 +1421,7 @@ async def drain_validation_backlog(
     stamps, without composing or reviewing anything. Returns
     ``{"validated": n, "quarantined": m}``.
     """
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_catalog_reset import (
         claim_names_for_validation,
         mark_names_validated,
         release_validation_claims,
@@ -1529,7 +1531,7 @@ async def drain_validation_for_ids(
     ``{"validated": n, "quarantined": m, "requarantined_ids": [...],
     "cleared_ids": [...]}``.
     """
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_catalog_reset import (
         mark_names_validated,
         release_validation_claims,
     )
@@ -1608,7 +1610,7 @@ async def validate_worker(
         state.validate_phase.mark_done()
         return
 
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_catalog_reset import (
         claim_names_for_validation,
         mark_names_validated,
         release_validation_claims,
@@ -1758,7 +1760,7 @@ async def consolidate_worker(
         return
 
     from imas_codex.standard_names.consolidation import consolidate_candidates
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_catalog_reset import (
         get_validated_names,
         mark_names_consolidated,
     )
@@ -1846,7 +1848,7 @@ async def persist_worker(
         state.persist_phase.mark_done()
         return
 
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_catalog_reset import (
         claim_names_for_embedding,
         mark_names_embedded,
         release_embedding_claims,

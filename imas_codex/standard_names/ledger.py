@@ -48,7 +48,9 @@ _REATTACH_DESYNCS = f"""
 
 def find_provenance_orphans(*, gc: GraphClient | None = None) -> list[dict[str, Any]]:
     """Return live source-loss names, including exhausted names. Read-only."""
-    from imas_codex.standard_names.graph_ops import classify_sourceless_standard_names
+    from imas_codex.standard_names.graph_store.graph_supersession import (
+        classify_sourceless_standard_names,
+    )
 
     owns = gc is None
     gc = gc or GraphClient()

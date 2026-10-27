@@ -100,11 +100,11 @@ from imas_codex.standard_names.cascade import (
     parent_segment_of_child,
     rename_cascade,
 )
-from imas_codex.standard_names.graph_ops import (
+from imas_codex.standard_names.graph_store.graph_docs_persistence import (
     persist_refined_docs,
-    persist_refined_name,
     reset_standard_name_docs,
 )
+from imas_codex.standard_names.graph_store.graph_refinement import persist_refined_name
 from imas_codex.standard_names.kind_derivation import derive_kind
 
 #: name_stage values eligible for a direct rename (superseded is handled
@@ -665,7 +665,9 @@ def _stamp_successor_validation(
     predicate requires ``validation_status='valid'``, so a quarantined name is
     never claimed for review and never scored.
     """
-    from imas_codex.standard_names.workers import validate_name_candidate
+    from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+        validate_name_candidate,
+    )
 
     entry = {
         "id": successor,
@@ -2432,7 +2434,9 @@ def _fold_guard_reason(
             for projection in backing.get("projections") or []
         }
     )
-    from imas_codex.standard_names.workers import _is_attachment_consistent
+    from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+        _is_attachment_consistent,
+    )
 
     backings = _fold_backing_map(snapshot)
     for source in old_sources:
@@ -3999,7 +4003,9 @@ def rescore_name(
     :class:`InlineReviewOutcome` or ``None`` when not reviewed). On refusal,
     ``ok`` is ``False`` with a ``reason``.
     """
-    from imas_codex.standard_names.graph_ops import stage_name_for_rescore
+    from imas_codex.standard_names.graph_store.graph_claim_release import (
+        stage_name_for_rescore,
+    )
 
     run_id = f"sn-rescore-{datetime.now(UTC).strftime('%Y%m%dT%H%M%SZ')}"
     staged = stage_name_for_rescore(sn_id, run_id=run_id, dry_run=dry_run)
@@ -4022,7 +4028,7 @@ def rescore_name(
     result["validation"] = validation
     requarantined = set(validation.get("requarantined_ids") or ())
     if sn_id in requarantined or int(validation.get("quarantined", 0) or 0) > 0:
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_claim_release import (
             restore_name_after_failed_rescore,
         )
 
@@ -4511,6 +4517,8 @@ def restage_accepted_names_for_review(
 def _run_rescore_validation(sn_id: str) -> dict[str, Any]:
     """Run the LLM-free admission gate for one freshly staged rescore."""
     from imas_codex.cli.utils import run_async
-    from imas_codex.standard_names.workers import drain_validation_for_ids
+    from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+        drain_validation_for_ids,
+    )
 
     return run_async(drain_validation_for_ids([sn_id]))

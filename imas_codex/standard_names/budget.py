@@ -825,7 +825,9 @@ class BudgetManager:
         ``asyncio.to_thread`` with a per-attempt timeout so a wedged
         Neo4j connection cannot block the writer loop indefinitely.
         """
-        from imas_codex.standard_names.graph_ops import record_llm_cost
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            record_llm_cost,
+        )
 
         last_exc: Exception | None = None
         for attempt in range(_WRITER_MAX_RETRIES):
@@ -1346,7 +1348,7 @@ class BudgetManager:
         now = time.monotonic()
         if force_refresh or (now - self._graph_total_ts) > self._graph_cache_ttl:
             try:
-                from imas_codex.standard_names.graph_ops import (
+                from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
                     aggregate_spend_for_run,
                 )
 

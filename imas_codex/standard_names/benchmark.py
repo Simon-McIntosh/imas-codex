@@ -578,7 +578,7 @@ async def score_with_reviewer(
                 if _first_src:
                     try:
                         from imas_codex.graph.client import GraphClient
-                        from imas_codex.standard_names.workers import (
+                        from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
                             _enrich_dd_path_context,
                         )
 
@@ -1647,7 +1647,7 @@ async def _run_model(
             # exactly as production does. Any rerank spend is booked to this
             # model result's compose cost.
             if config.comparator_block:
-                from imas_codex.standard_names.workers import (
+                from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
                     _collect_nearby_name_comparators,
                     _rerank_comparators_for_compose,
                 )

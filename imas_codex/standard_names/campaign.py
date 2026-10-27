@@ -798,7 +798,9 @@ def _run_scoped_validation_drain(ids: Sequence[str]) -> dict[str, Any]:
     machinery at import time.
     """
     from imas_codex.cli.utils import run_async
-    from imas_codex.standard_names.workers import drain_validation_for_ids
+    from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+        drain_validation_for_ids,
+    )
 
     return run_async(drain_validation_for_ids(ids))
 

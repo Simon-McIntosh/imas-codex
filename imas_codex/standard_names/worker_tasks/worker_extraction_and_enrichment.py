@@ -46,7 +46,7 @@ async def extract_worker(
                 pass
 
     def _run() -> list:
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_claim_scope import (
             get_existing_standard_names,
             get_named_source_ids,
         )
@@ -55,7 +55,9 @@ async def extract_worker(
         _on_status("loading existing names…")
         existing = get_existing_standard_names()
         if state.is_regen_mode() and state.source == "dd":
-            from imas_codex.standard_names.graph_ops import fetch_low_score_sources
+            from imas_codex.standard_names.graph_store.graph_lineage import (
+                fetch_low_score_sources,
+            )
             from imas_codex.standard_names.sources.dd import extract_specific_paths
 
             _on_status(f"loading sources below reviewer_score={state.min_score}…")
@@ -132,7 +134,9 @@ async def extract_worker(
         use_rich = False
 
         def _get_mapping():
-            from imas_codex.standard_names.graph_ops import get_source_name_mapping
+            from imas_codex.standard_names.graph_store.graph_lineage import (
+                get_source_name_mapping,
+            )
 
             return get_source_name_mapping(rich=use_rich)
 
@@ -148,7 +152,7 @@ async def extract_worker(
             wlog.info("Injected previous_name context for %d items", injected)
 
     def _get_feedback():
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_lineage import (
             fetch_review_feedback_for_sources,
         )
 
@@ -172,7 +176,7 @@ async def extract_worker(
         wlog.info("Injected review_feedback for %d items", fb_injected)
 
     def _get_reviewer_history():
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_lineage import (
             fetch_reviewer_history_for_sources,
         )
 
@@ -196,7 +200,9 @@ async def extract_worker(
         wlog.info("Injected reviewer_history for %d items", hist_injected)
     if not state.dry_run and batches:
         from imas_codex.settings import get_dd_version
-        from imas_codex.standard_names.graph_ops import merge_standard_name_sources
+        from imas_codex.standard_names.graph_store.graph_source_bindings import (
+            merge_standard_name_sources,
+        )
 
         _dd_ver = get_dd_version()
         sources = []
@@ -709,7 +715,9 @@ def _mark_vocab_gap_sources(
     they will be reclaimed on the next ``sn run`` and retried in a
     different (possibly smaller) batch.
     """
-    from imas_codex.standard_names.graph_ops import persist_claimed_source_outcomes
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        persist_claimed_source_outcomes,
+    )
 
     single_source = len(batch) == 1
     reason = "vocab_gap_compose" if single_source else "vocab_gap_batch"
@@ -1439,7 +1447,9 @@ def _process_attachments_core(
         )
         counts["rejected"] += len(accepted)
         return counts
-    from imas_codex.standard_names.graph_ops import persist_claimed_attachments
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        persist_claimed_attachments,
+    )
 
     fenced_batch = []
     for attachment in accepted:
@@ -1569,7 +1579,9 @@ def _persist_claimed_skips(
     detail: str | None = None,
 ) -> list[str]:
     """Persist skips only for exact source-claim winners."""
-    from imas_codex.standard_names.graph_ops import persist_claimed_source_outcomes
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        persist_claimed_source_outcomes,
+    )
 
     outcomes = []
     for source_id in skipped_ids:
@@ -1597,7 +1609,9 @@ def _consume_claimed_vocab_gaps(
     return_winner_ids: bool = False,
 ) -> list[dict[str, Any]] | tuple[list[dict[str, Any]], list[str]]:
     """Persist vocabulary gaps while consuming their exact source claims."""
-    from imas_codex.standard_names.graph_ops import persist_claimed_vocab_gaps
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        persist_claimed_vocab_gaps,
+    )
     from imas_codex.standard_names.segments import is_actionable_gap, is_open_segment
 
     outcomes = []

@@ -204,10 +204,12 @@ def _production_enrich_items(items: list[dict[str, Any]]) -> list[dict[str, Any]
     """Run the same graph enrichment used by the production docs worker."""
     from imas_codex.graph.client import GraphClient
     from imas_codex.settings import get_dd_version
-    from imas_codex.standard_names.workers import (
-        _DOCS_GEN_COCOS_PARAMS_QUERY,
+    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
         _enrich_for_docs_gen,
         _nearby_names_for_docs_gen,
+    )
+    from imas_codex.standard_names.worker_tasks.worker_review_names import (
+        _DOCS_GEN_COCOS_PARAMS_QUERY,
     )
 
     with GraphClient() as gc:
