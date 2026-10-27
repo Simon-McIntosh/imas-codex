@@ -1,0 +1,220 @@
+{
+  "family": {
+    "invariant": [
+      "electrostatic_potential",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "members": [
+      "electrostatic_potential",
+      "electrostatic_potential_at_langmuir_probe_position",
+      "electrostatic_potential_at_outboard_midplane",
+      "electrostatic_potential_at_wall",
+      "floating_electrostatic_potential"
+    ],
+    "n": 5,
+    "physical_base": "electrostatic_potential"
+  },
+  "guards": {
+    "graph_writes": 0,
+    "llm_calls": 0,
+    "spend_usd": 0.0
+  },
+  "members": {
+    "electrostatic_potential": {
+      "claimable_under_fresh_scope": false,
+      "claimable_unscoped": false,
+      "claimed": false,
+      "composed_sources": 4,
+      "docs_stage": "reviewed",
+      "first_excluding_predicate": {
+        "detail": "docs_stage='reviewed' (claim requires 'pending')",
+        "predicate": "docs_claim:docs_stage",
+        "where": "imas_codex/standard_names/graph_store/graph_docs_persistence.py:54"
+      },
+      "id": "electrostatic_potential",
+      "name_stage": "accepted",
+      "pinned_anchor": "electrostatic_potential_at_langmuir_probe_position",
+      "reset_eligible": true,
+      "reviewer_score_docs": 0.849,
+      "reviewer_score_name": 0.9125,
+      "run_id": "08fd6942-d8ff-40b4-8a5e-8eed3bc17b74",
+      "scope_stampable": false,
+      "validation_status": "valid"
+    },
+    "electrostatic_potential_at_langmuir_probe_position": {
+      "claimable_under_fresh_scope": false,
+      "claimable_unscoped": true,
+      "claimed": false,
+      "composed_sources": 1,
+      "docs_stage": "pending",
+      "first_excluding_predicate": {
+        "detail": "a scoped drain binds $scope_run_id to the uuid this apply just minted; the node carries 'a9486267-d207-42ec-a157-144acd2d3c6e' \u2014 and the reset step never stamped the new scope because its eligibility count was 0 for this batch",
+        "predicate": "docs_claim:scope_run_id",
+        "where": "imas_codex/standard_names/graph_store/graph_cost_and_claims.py:329"
+      },
+      "id": "electrostatic_potential_at_langmuir_probe_position",
+      "name_stage": "accepted",
+      "pinned_anchor": "electrostatic_potential_at_langmuir_probe_position",
+      "reset_eligible": false,
+      "reviewer_score_docs": null,
+      "reviewer_score_name": 0.99375,
+      "run_id": "a9486267-d207-42ec-a157-144acd2d3c6e",
+      "scope_stampable": true,
+      "validation_status": "valid"
+    },
+    "electrostatic_potential_at_outboard_midplane": {
+      "claimable_under_fresh_scope": false,
+      "claimable_unscoped": false,
+      "claimed": false,
+      "composed_sources": 0,
+      "docs_stage": "pending",
+      "first_excluding_predicate": {
+        "detail": "name_stage='reviewed' (claim requires 'accepted')",
+        "predicate": "docs_claim:name_stage",
+        "where": "imas_codex/standard_names/graph_store/graph_docs_persistence.py:54"
+      },
+      "id": "electrostatic_potential_at_outboard_midplane",
+      "name_stage": "reviewed",
+      "pinned_anchor": "electrostatic_potential_at_langmuir_probe_position",
+      "reset_eligible": false,
+      "reviewer_score_docs": null,
+      "reviewer_score_name": 0.6125,
+      "run_id": null,
+      "scope_stampable": false,
+      "validation_status": "valid"
+    },
+    "electrostatic_potential_at_wall": {
+      "claimable_under_fresh_scope": false,
+      "claimable_unscoped": false,
+      "claimed": false,
+      "composed_sources": 0,
+      "docs_stage": "accepted",
+      "first_excluding_predicate": {
+        "detail": "name_stage='reviewed' (claim requires 'accepted')",
+        "predicate": "docs_claim:name_stage",
+        "where": "imas_codex/standard_names/graph_store/graph_docs_persistence.py:54"
+      },
+      "id": "electrostatic_potential_at_wall",
+      "name_stage": "reviewed",
+      "pinned_anchor": "electrostatic_potential_at_langmuir_probe_position",
+      "reset_eligible": false,
+      "reviewer_score_docs": 0.8625,
+      "reviewer_score_name": 0.825,
+      "run_id": null,
+      "scope_stampable": false,
+      "validation_status": "valid"
+    },
+    "floating_electrostatic_potential": {
+      "claimable_under_fresh_scope": false,
+      "claimable_unscoped": false,
+      "claimed": false,
+      "composed_sources": 0,
+      "docs_stage": "accepted",
+      "first_excluding_predicate": {
+        "detail": "docs_stage='accepted' (claim requires 'pending')",
+        "predicate": "docs_claim:docs_stage",
+        "where": "imas_codex/standard_names/graph_store/graph_docs_persistence.py:54"
+      },
+      "id": "floating_electrostatic_potential",
+      "name_stage": "accepted",
+      "pinned_anchor": "electrostatic_potential_at_langmuir_probe_position",
+      "reset_eligible": true,
+      "reviewer_score_docs": 0.9375,
+      "reviewer_score_name": 0.96875,
+      "run_id": "981af813-f129-4743-97cd-8db13c589a71",
+      "scope_stampable": false,
+      "validation_status": "valid"
+    }
+  },
+  "node": "shc-family-eligibility-diagnosis",
+  "predicates": {
+    "docs_claim_core": {
+      "file": "imas_codex/standard_names/graph_store/graph_docs_persistence.py",
+      "line": 54,
+      "matched": [
+        "electrostatic_potential_at_langmuir_probe_position"
+      ]
+    },
+    "docs_claim_scoped_fresh_scope": {
+      "file": "imas_codex/standard_names/graph_store/graph_cost_and_claims.py",
+      "line": 329,
+      "matched": [],
+      "scope_run_id": "407c577d-76e8-5752-9aeb-2fd02c7c2006"
+    },
+    "docs_claim_scoped_own_run_id": {
+      "by_member": {
+        "electrostatic_potential": [],
+        "electrostatic_potential_at_langmuir_probe_position": [
+          "electrostatic_potential_at_langmuir_probe_position"
+        ],
+        "electrostatic_potential_at_outboard_midplane": [],
+        "electrostatic_potential_at_wall": [],
+        "floating_electrostatic_potential": []
+      },
+      "file": "imas_codex/standard_names/graph_store/graph_cost_and_claims.py",
+      "line": 329,
+      "note": "positive control: the same claim, scoped to the run id the node already carries"
+    },
+    "reset_eligibility": {
+      "excluded": [
+        "electrostatic_potential_at_langmuir_probe_position",
+        "electrostatic_potential_at_outboard_midplane",
+        "electrostatic_potential_at_wall"
+      ],
+      "file": "imas_codex/standard_names/graph_store/graph_docs_persistence.py",
+      "line": 406,
+      "matched": [
+        "electrostatic_potential",
+        "floating_electrostatic_potential"
+      ]
+    },
+    "reset_scope_stamp": {
+      "file": "imas_codex/standard_names/graph_store/graph_docs_persistence.py",
+      "line": 420,
+      "matched": [
+        "electrostatic_potential_at_langmuir_probe_position"
+      ],
+      "note": "this query is skipped when reset eligibility is 0"
+    },
+    "review_claim_core": {
+      "file": "imas_codex/standard_names/graph_store/graph_review_persistence.py",
+      "line": 689,
+      "matched": []
+    },
+    "review_claim_scoped_fresh_scope": {
+      "file": "imas_codex/standard_names/graph_store/graph_cost_and_claims.py",
+      "line": 329,
+      "matched": [],
+      "scope_run_id": "407c577d-76e8-5752-9aeb-2fd02c7c2006"
+    }
+  },
+  "scope": {
+    "by_member_run_id": {
+      "electrostatic_potential": [
+        "electrostatic_potential"
+      ],
+      "electrostatic_potential_at_langmuir_probe_position": [
+        "electrostatic_potential_at_langmuir_probe_position"
+      ],
+      "electrostatic_potential_at_outboard_midplane": [],
+      "electrostatic_potential_at_wall": [],
+      "floating_electrostatic_potential": [
+        "floating_electrostatic_potential"
+      ]
+    },
+    "fresh_scope_ids": [],
+    "scope_run_id_used": "407c577d-76e8-5752-9aeb-2fd02c7c2006"
+  },
+  "transcription_verified": {
+    "claim_scope_clause": true,
+    "docs_claim_core": true,
+    "family_exclusion": true,
+    "reset_eligibility": true,
+    "reset_scope_stamp": true,
+    "review_claim_core": true,
+    "scope_name_ids": true
+  }
+}

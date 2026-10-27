@@ -1,0 +1,291 @@
+<section>
+  <h2 id="shc-family-eligibility-diagnosis">Why the electrostatic-potential family yields no harmonize work</h2>
+  <p id="shc-family-eligibility-diagnosis-summary">
+    Every member of the non-WEST locus family <code>electrostatic_potential</code> was read against the predicates the
+    harmonize apply passes on its way to the docs pools, read-only on the live graph. The family holds
+    <strong>five</strong> members and its anchor is genuinely docs-eligible — <code>name_stage = 'accepted'</code>,
+    <code>docs_stage = 'pending'</code>, <code>reviewer_score_name = 0.99375</code>, an unclaimed node with a composed
+    source — yet the apply made zero LLM calls and moved nothing.
+  </p>
+  <p id="shc-family-eligibility-diagnosis-verdict">
+    The cause is <strong>(a), a predicate that wrongly excludes an eligible member</strong>. The anchor batch contains
+    exactly one name and that name is already at <code>docs_stage = 'pending'</code>, so
+    <code>reset_standard_name_docs</code> counts zero eligible, returns at
+    <code>graph_docs_persistence.py:410</code>, and never reaches its own scope-stamping query at lines 418-423 — the
+    query written precisely to bind an already-pending name to the run's scope. The drain then claims with
+    <code>AND sn.run_id = $scope_run_id</code> against a uuid no node carries, and claims nothing.
+  </p>
+
+  <h3 id="shc-family-eligibility-diagnosis-chain">The chain, and where it stops</h3>
+  <ol id="shc-family-eligibility-diagnosis-chain-list">
+    <li>
+      <strong>Family enumeration</strong> — <code>families.py:1098</code>, the only stage filter on a family member
+      (<code>coalesce(m.name_stage, '') &lt;&gt; $superseded</code>). Admits the invariant family
+      <code>('electrostatic_potential','','','','')</code> with <strong>n = 5</strong>. Members at
+      <code>name_stage = 'reviewed'</code> are admitted here and only surface as ineligible at the claim.
+    </li>
+    <li>
+      <strong>Anchor selection</strong> — <code>select_anchor</code> would pick
+      <code>floating_electrostatic_potential</code> (accepted, <code>reviewer_score_docs = 0.9375</code>, the highest in
+      the family). <code>resolve_family_anchor</code> (<code>harmonize.py:940-943</code>) instead overrides it with the
+      recorded <code>harmonized_anchor</code> pin, which all five members carry as
+      <code>electrostatic_potential_at_langmuir_probe_position</code>. The stamp that releases the pin is only written on
+      convergence, so a family that cannot converge never reranks — the pin and the failure reinforce each other.
+    </li>
+    <li>
+      <strong>Anchor batch</strong> — <code>anchor_gated_batches</code> places the anchor alone in batch 1
+      (<code>campaign.py:1026-1032</code>); the other four members wait in batch 2.
+    </li>
+    <li>
+      <strong>Reset and scope binding</strong> — <code>reset_standard_name_docs</code>
+      (<code>graph_docs_persistence.py:406-423</code>). <em>This is the stop.</em> Its eligibility requires
+      <code>docs_stage IN ['accepted','exhausted','reviewed','drafted']</code>; the anchor is <code>pending</code>, so
+      <code>eligible = 0</code> and the function returns at line 410. The scope-stamp query at lines 418-423, whose
+      predicate does match the anchor (<code>accepted</code> + <code>pending</code>), is never issued.
+    </li>
+    <li>
+      <strong>generate_docs claim</strong> — <code>graph_docs_persistence.py:53-56</code> carries no scope clause of its
+      own; the claim layer ANDs <code>AND sn.run_id = $scope_run_id</code>
+      (<code>graph_cost_and_claims.py:329</code>, wired from <code>loop.py:771-773</code>). With the fresh uuid never
+      stamped, the claim matches nothing.
+    </li>
+    <li>
+      <strong>review_docs claim</strong> — <code>graph_review_persistence.py:688-694</code> requires
+      <code>docs_stage = 'drafted'</code> plus the same scope clause. Nothing can be drafted, so this pool is idle.
+    </li>
+    <li>
+      <strong>Scoped name set</strong> — <code>_scope_name_ids</code> (<code>loop.py:331-393</code>) reads
+      <code>sn.run_id = $rid</code> or a <code>StandardNameSource.run_id = $rid</code> producing edge. For a fresh uuid it
+      returns <strong>0 ids</strong>; for each member's own carried run id it returns exactly that member. The read is
+      sound — it is empty because nothing was bound.
+    </li>
+    <li>
+      <strong>Convergence gate</strong> — <code>campaign.py:1098-1103</code> halts the family on the first
+      non-converged batch, so batch 2 is never marked or drained.
+    </li>
+  </ol>
+  <figure id="shc-family-eligibility-diagnosis-figure">
+    <img src="/imas-codex/figures/sn-harmonize-command/shc-family-eligibility-diagnosis/eligibility-chain.svg"
+         alt="Batch 1 runs family enumeration, the anchor pin, the reset step and the scoped claim; the reset step returns early and the scoped claim matches nothing, halting the family before batch 2 is reached.">
+    <figcaption>
+      The anchor batch on the left runs to its halt. The reset step's early return leaves the anchor unbound, so the
+      scoped claim matches nothing and the convergence gate stops the family before its other four members are marked.
+      Those four are reachable only once batch 1 converges.
+    </figcaption>
+  </figure>
+
+  <h3 id="shc-family-eligibility-diagnosis-members">Per-member verdict</h3>
+  <p id="shc-family-eligibility-diagnosis-members-body">
+    Each row is a live read of one family member against the predicates, in the order the apply reaches them.
+    <code>reset</code> is the reset step's eligibility; <code>stamp</code> is its scope-stamping query (run only when
+    <code>reset</code> is non-zero); <code>claim</code> is the generate_docs WHERE in
+    <code>graph_docs_persistence.py:53-56</code>; <code>fresh</code> is that same claim with
+    <code>$scope_run_id</code> bound to a freshly minted uuid that no node carries (the JSON records the value).
+  </p>
+  <table id="shc-family-eligibility-diagnosis-member-table">
+    <thead>
+      <tr>
+        <th>member</th>
+        <th>name_stage</th>
+        <th>docs_stage</th>
+        <th>name score</th>
+        <th>docs score</th>
+        <th>composed srcs</th>
+        <th>reset</th>
+        <th>stamp</th>
+        <th>claim</th>
+        <th>fresh</th>
+        <th>first excluding predicate</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>electrostatic_potential</code></td>
+        <td>accepted</td>
+        <td>reviewed</td>
+        <td>0.9125</td>
+        <td>0.8490</td>
+        <td>4</td>
+        <td>yes</td>
+        <td>no</td>
+        <td>no</td>
+        <td>no</td>
+        <td>
+          <code>docs_claim:docs_stage</code> at
+          <code>graph_docs_persistence.py:54</code> — requires <code>'pending'</code>, has <code>'reviewed'</code>.
+          The reset <em>would</em> accept this member and rebind it; batch 2 never runs.
+        </td>
+      </tr>
+      <tr>
+        <td><code>electrostatic_potential_at_langmuir_probe_position</code><br>(anchor)</td>
+        <td>accepted</td>
+        <td>pending</td>
+        <td>0.99375</td>
+        <td>—</td>
+        <td>1</td>
+        <td>no</td>
+        <td>yes</td>
+        <td>yes</td>
+        <td>no</td>
+        <td>
+          <code>docs_claim:scope_run_id</code> at
+          <code>graph_cost_and_claims.py:329</code> — carries
+          <code>a9486267-d207-42ec-a157-144acd2d3c6e</code>; the apply minted a fresh uuid. Eligible but unbound:
+          <strong>the defect</strong>.
+        </td>
+      </tr>
+      <tr>
+        <td><code>electrostatic_potential_at_outboard_midplane</code></td>
+        <td>reviewed</td>
+        <td>pending</td>
+        <td>0.6125</td>
+        <td>—</td>
+        <td>0</td>
+        <td>no</td>
+        <td>no</td>
+        <td>no</td>
+        <td>no</td>
+        <td>
+          <code>docs_claim:name_stage</code> at
+          <code>graph_docs_persistence.py:54</code> — requires <code>'accepted'</code>, has <code>'reviewed'</code> at
+          0.6125. Name-axis work outstanding.
+        </td>
+      </tr>
+      <tr>
+        <td><code>electrostatic_potential_at_wall</code></td>
+        <td>reviewed</td>
+        <td>accepted</td>
+        <td>0.825</td>
+        <td>0.8625</td>
+        <td>0</td>
+        <td>no</td>
+        <td>no</td>
+        <td>no</td>
+        <td>no</td>
+        <td>
+          <code>docs_claim:name_stage</code> at
+          <code>graph_docs_persistence.py:54</code> — requires <code>'accepted'</code>, has <code>'reviewed'</code> at
+          0.825.
+        </td>
+      </tr>
+      <tr>
+        <td><code>floating_electrostatic_potential</code></td>
+        <td>accepted</td>
+        <td>accepted</td>
+        <td>0.96875</td>
+        <td>0.9375</td>
+        <td>0</td>
+        <td>yes</td>
+        <td>no</td>
+        <td>no</td>
+        <td>no</td>
+        <td>
+          <code>docs_claim:docs_stage</code> at
+          <code>graph_docs_persistence.py:54</code> — requires <code>'pending'</code>, has <code>'accepted'</code>.
+          The reset would rebind it; batch 2 never runs.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <p id="shc-family-eligibility-diagnosis-anchor-note">
+    The anchor is not excluded for any substantive reason. It is <code>accepted</code>, <code>pending</code>, unclaimed,
+    <code>validation_status = 'valid'</code>, carries a composed producing source, and scores 0.99375 on the name axis —
+    above the 0.85 floor the claim would apply if the scope clause were absent. Its <code>run_id</code> is
+    <code>a9486267-d207-42ec-a157-144acd2d3c6e</code>, left behind by an earlier run. The reset step's stamping query
+    matches it; the function returns before running it. An earlier harmonize had also reset this name from
+    <code>docs_stage = 'accepted'</code> at <code>reviewer_score_docs = 0.9437</code>, and that reset is what makes the
+    strand permanent: this apply refuses to regenerate it because it is already pending, and the early return is the
+    reason it is also unbound. The family's strongest member is held by the same predicate twice over.
+  </p>
+
+  <h3 id="shc-family-eligibility-diagnosis-classification">Classification</h3>
+  <p id="shc-family-eligibility-diagnosis-classification-body">
+    <strong>(a) a predicate that wrongly excludes an eligible member.</strong> The anchor satisfies every substantive
+    eligibility condition — <code>name_stage = 'accepted'</code>, <code>docs_stage = 'pending'</code>,
+    <code>reviewer_score_name = 0.99375</code>, <code>validation_status = 'valid'</code>, unclaimed, with a composed
+    producing source — and it passes the generate_docs claim outright when the scope clause is not applied
+    (<code>docs_claim_core</code> matches it). It is unclaimable only because <code>AND sn.run_id = $scope_run_id</code>
+    is checked against a uuid that <code>mark_members_for_regen</code> minted (<code>harmonize.py:703-709</code> returns
+    one unconditionally) and that no node ever received.
+  </p>
+  <p id="shc-family-eligibility-diagnosis-classification-members">
+    The other four members are <em>not</em> the cause of the zero-call drain, but they set the family's ceiling.
+    <code>..._at_outboard_midplane</code> and <code>..._at_wall</code> are at <code>name_stage = 'reviewed'</code>, so no
+    docs pool can claim them until name-axis work completes. <code>electrostatic_potential</code> (0.849) and
+    <code>floating_electrostatic_potential</code> (0.9375, and the family's best docs score) sit at stages the reset step
+    accepts, so both would be recovered by batch 2. Only the anchor is blocked at batch 1 by the defect; the other four
+    are simply starved by the halt. This is a property of the family, not a second defect, and it does not make the
+    family the wrong choice under (b): its anchor is eligible and four of five members are recoverable once the anchor
+    batch drains.
+  </p>
+
+  <h3 id="shc-family-eligibility-diagnosis-fix">What a fix needs</h3>
+  <p id="shc-family-eligibility-diagnosis-fix-body">
+    One change, in <code>imas_codex/standard_names/graph_store/graph_docs_persistence.py</code>, in
+    <code>reset_standard_name_docs</code>. The early return at line 410 conflates two different outcomes — "nothing to
+    reset" and "nothing to stamp" — and the scope stamp is the second, in scope for a scoped run regardless of the
+    first. Split it, and give <code>reset</code> a default so line 424 no longer indexes an unbound <code>result</code>:
+  </p>
+  <pre id="shc-family-eligibility-diagnosis-fix-code"><code>        if dry_run:
+            return {"eligible": eligible, "reset": 0}
+        reset = 0
+        if eligible:
+            result = gc.query(
+                eligibility + "…",          # unchanged
+                sn_ids=sn_ids,
+                run_id=run_id,
+            )
+            reset = result[0]["reset"] if result else 0
+        if run_id:
+            gc.query(
+                "…AND coalesce(sn.docs_stage, 'pending') = 'pending'…",   # unchanged
+                sn_ids=sn_ids,
+                run_id=run_id,
+            )
+    logger.info(
+        "reset_standard_name_docs: %d/%d reset to docs pending (run_id=%s)",
+        reset, len(sn_ids), run_id,
+    )
+    return {"eligible": eligible, "reset": reset}</code></pre>
+  <p id="shc-family-eligibility-diagnosis-fix-why">
+    Nothing else moves: the reset query, the stamp query and the empty-<code>sn_ids</code> guard are all unchanged.
+    The docstring at lines 391-392 ("names already <code>pending</code> … are skipped — they regenerate anyway") stays
+    true for the reset count and becomes true under a scope only because the stamp now runs. A scoped run with zero
+    reset names is exactly the anchor-batch case this node measured.
+  </p>
+  <p id="shc-family-eligibility-diagnosis-fix-test">
+    <strong>The test that would fail without the fix.</strong> Add
+    <code>test_reset_stamps_scope_on_an_already_pending_name</code> in
+    <code>tests/standard_names/test_docs_revision_snapshots.py</code>, beside the existing
+    <code>test_empty_reset_is_a_graph_free_no_op</code>. Its fake graph answers <code>{"eligible": 0}</code> to the count
+    query and records every Cypher string it is asked to run; the test asserts the stamp query
+    (<code>coalesce(sn.docs_stage, 'pending') = 'pending'</code>) is issued with
+    <code>params["run_id"] == "scoped-docs-refresh"</code>. It fails today at line 411, before that query is reached.
+    The existing <code>_CollisionGraph</code> already asserts the same invariant on the <code>eligible = 1</code> path
+    (lines 135-137), so the new case is its <code>eligible = 0</code> twin and needs no new harness.
+  </p>
+
+  <h3 id="shc-family-eligibility-diagnosis-consequence">Consequence for the convergence measure</h3>
+  <p id="shc-family-eligibility-diagnosis-consequence-body">
+    This family stays the right choice for the locus arm. Its anchor is eligible, four of five members are recoverable
+    once the drain works, and the failure is a defect in shared machinery rather than a property of the family, so
+    fixing it should be measured on the same family the defect was found on. With the fix, batch 1 would stamp and
+    drain the anchor (one docs generation + one docs review), then batch 2 would reset and drain
+    <code>electrostatic_potential</code> and <code>floating_electrostatic_potential</code>. The two <code>name_stage = 'reviewed'</code> members remain outside a docs
+    drain until name-axis review completes, so the family's docs convergence should be read as a measure over its
+    reclaimable members, not as an all-five stamp. That arithmetic belongs to the convergence node; this node records
+    only which members a working drain would reach.
+  </p>
+
+  <h3 id="shc-family-eligibility-diagnosis-provenance">How this was measured</h3>
+  <p id="shc-family-eligibility-diagnosis-provenance-body">
+    Every predicate above was transcribed into
+    <code>docs/evidence/fragments/sn-harmonize-command/shc-family-eligibility-diagnosis-run.py</code> and each
+    transcription is asserted present in the function's own source via <code>inspect.getsource</code> before the query
+    runs, so a predicate cannot drift from the code it claims to measure; all seven verified true on this run. The
+    scoped claim carries a positive control: the same query matches the anchor under the run id the node already
+    carries, and matches nothing under the fresh uuid — so the empty result is the binding, not a malformed query. The
+    run opened the graph read-only, issued no write, made no LLM call and spent nothing; those guards are recorded in
+    the JSON beside the per-member results.
+  </p>
+</section>
