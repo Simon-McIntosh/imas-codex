@@ -10,6 +10,13 @@
   ],
   "completed_at": "2026-10-27T13:18:51.038Z",
   "dispatched_at": "2026-10-27T13:05:12Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the intervening commit changes only the evidence page",
+      "recorded_at": "2026-10-27T13:22:25.637044+00:00"
+    }
+  },
   "findings": [
     {
       "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T104901661767-shc-docs-reset-scope-stamp/manifest.md",
