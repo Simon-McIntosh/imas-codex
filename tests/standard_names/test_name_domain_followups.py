@@ -91,9 +91,7 @@ def test_several_source_domains_stay_unset_and_undecided(
 
     sn_id = "electron_temperature"
     with GraphClient() as gc:
-        plant_name_with_dd_source(
-            gc, sn_id, "dd:multi/one", dd_domain="equilibrium"
-        )
+        plant_name_with_dd_source(gc, sn_id, "dd:multi/one", dd_domain="equilibrium")
         plant_name_with_dd_source(
             gc, sn_id, "dd:multi/two", dd_domain="core_plasma_physics"
         )
@@ -147,7 +145,9 @@ def test_an_undecided_stored_decision_keeps_its_candidates(
             candidates=candidates,
         )
         stored = _stored_domain_decisions(gc, [sn_id])[sn_id]
-        assert stored is not None, "the graph holds the name, so it is not absent"
+        assert not stored.decided, (
+            "a stored decision carrying no choice must read undecided"
+        )
         assert not stored.candidates == (), (
             "the stored decision lost the candidates it was made among"
         )

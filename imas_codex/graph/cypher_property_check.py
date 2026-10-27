@@ -11,7 +11,7 @@ from pathlib import Path
 
 from imas_codex.graph.schema import GraphSchema
 
-_NODE_BINDING_RE = re.compile(
+NODE_BINDING_RE = re.compile(
     r"\(\s*(?P<alias>[A-Za-z_]\w*)\s*:\s*`?(?P<label>[A-Za-z_]\w*)`?"
 )
 _PROPERTY_RE = re.compile(
@@ -291,7 +291,7 @@ def _has_cypher_context(
     parents: dict[ast.AST, ast.AST],
 ) -> bool:
     """Return whether a string is used as, or visibly contains, Cypher."""
-    if _CYPHER_KEYWORD_RE.search(text) or _NODE_BINDING_RE.search(text):
+    if _CYPHER_KEYWORD_RE.search(text) or NODE_BINDING_RE.search(text):
         return True
     current = node
     for _ in range(6):
@@ -309,8 +309,16 @@ def _has_cypher_context(
     return False
 
 
-def _python_strings(path: Path) -> Iterable[tuple[ast.AST, str]]:
-    """Yield relevant Python string nodes and their static text."""
+def python_cypher_strings(
+    path: Path, *, require_property: bool = True
+) -> Iterable[tuple[ast.AST, str]]:
+    """Yield relevant Python string nodes and their static text.
+
+    ``require_property`` keeps only strings that reference an ``alias.property``
+    path, which is what the declared-property audit needs. A caller that must
+    see every statement — including one whose only mutation is a relationship —
+    passes ``False``.
+    """
     source = path.read_text(encoding="utf-8")
     tree = ast.parse(source, filename=str(path))
     parents = {
@@ -324,7 +332,7 @@ def _python_strings(path: Path) -> Iterable[tuple[ast.AST, str]]:
         ):
             continue
         text = _string_value(node)
-        if text is None or not _PROPERTY_RE.search(text):
+        if text is None or (require_property and not _PROPERTY_RE.search(text)):
             continue
         if _has_cypher_context(node, text, parents):
             yield node, text
@@ -375,9 +383,9 @@ def audit_cypher_properties(
     checked = 0
 
     for path in _source_paths(source_root):
-        for node, text in _python_strings(path):
+        for node, text in python_cypher_strings(path):
             bindings: dict[str, set[str]] = {}
-            for match in _NODE_BINDING_RE.finditer(text):
+            for match in NODE_BINDING_RE.finditer(text):
                 bindings.setdefault(match["alias"], set()).add(match["label"])
 
             for match in _PROPERTY_RE.finditer(text):
@@ -564,7 +572,7 @@ def _next_top_level_keyword(text: str, start: int) -> int | None:
     return None
 
 
-def _cypher_set_blocks(text: str) -> Iterable[tuple[int, int, int]]:
+def cypher_set_blocks(text: str) -> Iterable[tuple[int, int, int]]:
     """Yield (set_keyword_start, body_start, body_end) for each SET clause."""
     set_positions = [m.start() for m in re.finditer(r"\bSET\b", text)]
     for pos in set_positions:
@@ -591,18 +599,18 @@ def audit_standard_name_touch(root: Path | str) -> tuple[StandardNameTouchFindin
     """
     findings: list[StandardNameTouchFinding] = []
     for path in _source_paths(Path(root)):
-        for node, text in _python_strings(path):
+        for node, text in python_cypher_strings(path):
             if "StandardName" not in text or not re.search(r"\bSET\b", text):
                 continue
             bindings: dict[str, set[str]] = {}
-            for match in _NODE_BINDING_RE.finditer(text):
+            for match in NODE_BINDING_RE.finditer(text):
                 bindings.setdefault(match["alias"], set()).add(match["label"])
             sn_aliases = {
                 alias for alias, labels in bindings.items() if "StandardName" in labels
             }
             if not sn_aliases:
                 continue
-            blocks = list(_cypher_set_blocks(text))
+            blocks = list(cypher_set_blocks(text))
             line_base = int(getattr(node, "lineno", 1))
             for alias in sorted(sn_aliases):
                 prop_re = re.compile(rf"\b{re.escape(alias)}\.(\w+)\s*=")

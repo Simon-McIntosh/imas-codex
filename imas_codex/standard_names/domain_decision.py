@@ -56,6 +56,8 @@ __all__ = [
     "build_state",
     "candidate_domains",
     "decide_domain",
+    "derived_parent_domain_decision",
+    "dominant_domain",
     "ids_domain_map",
     "option_text",
     "undecided",
@@ -409,6 +411,45 @@ def _expected_source_domains(row: Mapping[str, Any]) -> frozenset[str]:
     for entry in row.get("child_stored_domains") or []:
         union |= {d for d in (entry or []) if d}
     return frozenset(union)
+
+
+def dominant_domain(domains: Sequence[str]) -> str | None:
+    """The domain most of these carry, ties broken by name; ``None`` if none do."""
+    counts = Counter(domain for domain in domains if domain)
+    if not counts:
+        return None
+    most = max(counts.values())
+    return sorted(domain for domain, n in counts.items() if n == most)[0]
+
+
+def derived_parent_domain_decision(
+    decision: DomainDecision,
+    child_domains: Sequence[str],
+) -> DomainDecision:
+    """The decision a derived parent carries: its stored choice, else its children's.
+
+    A derived parent has no sources of its own, so its domain is the one its
+    children carry. A stored choice wins, because a settled decision outranks
+    an inherited one. Otherwise the domain the most children hold becomes the
+    parent's choice, ties broken by name so the same child set always yields
+    the same parent. A parent whose children carry no domain at all keeps the
+    scalar it holds and stays undecided, so a decision is never invented where
+    there is nothing to inherit.
+    """
+    if decision.decided:
+        return decision
+    counts = Counter(domain for domain in child_domains if domain)
+    chosen = dominant_domain(child_domains)
+    if chosen is None:
+        return decision
+    return DomainDecision(
+        name=decision.name,
+        candidates=tuple(sorted(counts)),
+        choice=chosen,
+        probability=counts[chosen] / sum(counts.values()),
+        model="derived-parent-majority",
+        decided_at=None,
+    )
 
 
 def write_name_domain(
