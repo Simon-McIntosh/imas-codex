@@ -1,0 +1,106 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": [
+    {
+      "assertion": "reviewer_calls == [[\"primary\"]]",
+      "fails_when": "The docs shadow fallback passes the whole ['primary','secondary'] chain to the chat reviewer instead of _chat_seat's head; mutation C (full chain from _chat_seat) is recorded as failing an equivalent assertion.",
+      "file": "tests/standard_names/test_cascade_deciding_axes.py",
+      "line": 145
+    },
+    {
+      "assertion": "written == []",
+      "fails_when": "_run_rd_quorum_cycles calls graph_catalog.write_reviews; mutation B demonstrated this id failing.",
+      "file": "tests/standard_names/test_review_deciding_paths_retired.py",
+      "line": 118
+    },
+    {
+      "assertion": "len(result[\"records\"]) == 2",
+      "fails_when": "the runner returns other than one record per configured seat; weaker than the independent written == [] but still falsifiable on record count.",
+      "file": "tests/standard_names/test_review_deciding_paths_retired.py",
+      "line": 116
+    },
+    {
+      "assertion": "stored == [(item, 'name', 'sn-judge:unavailable', 'no decision key on this host')]",
+      "fails_when": "the fallback stores a different item/axis/judge/reason; mutations C and D (full-chain fallback, generic reason) each redden it.",
+      "file": "tests/standard_names/test_review_deciding_paths_retired.py",
+      "line": 172
+    },
+    {
+      "assertion": "set(get_model_source_models(source)) == declared",
+      "fails_when": "the resolver's chain diverges from the seats pyproject.toml declares, e.g. a section silently loses its profile seats; mutation A demonstrated this.",
+      "file": "tests/standard_names/test_review_deciding_paths_retired.py",
+      "line": 209
+    }
+  ],
+  "call_site_count": 6,
+  "call_sites": [
+    "imas_codex/standard_names/review/cascade.py:697 adjudicate_review",
+    "imas_codex/standard_names/review/cascade.py:448 _chat_seat",
+    "imas_codex/standard_names/worker_tasks/worker_review_names.py:314 _run_rd_quorum_cycles",
+    "imas_codex/standard_names/worker_tasks/worker_review_names.py:824 _persisting_chat_review",
+    "imas_codex/standard_names/review/panel_audit.py:86 quorum_without_persisting",
+    "imas_codex/settings.py:491 get_model_source_models"
+  ],
+  "completed_at": "2026-10-27T17:40:07.556Z",
+  "dispatched_at": "2026-10-27T17:17:02Z",
+  "findings": [
+    {
+      "file": "manifest.md",
+      "line": 22,
+      "severity": "non-blocking",
+      "text": "non-blocking: test_logs names logs/negative-control-tests.log as the receipt for the four repair mutations (A-D) that make the repaired assertions falsifiable, and the evidence fragment says each mutation's run is recorded there, but that log contains only mutation D. Mutations A (shorten the names chain, FAILED test_no_review_seat_resolves_outside_the_chat_reviewer_and_audit_panel), B (write canonical rows inside _run_rd_quorum_cycles, FAILED test_the_retained_runner_persists_nothing) and C (_chat_seat returns the full chain, FAILED test_an_unjudged_item_reaches_the_single_chat_reviewer) exist only in the session transcript (harness .../630dea4f-...jsonl tool results), not in the named log, so the durable receipt for the close-the-same-variable repair is one of four. The controls did fire; three are not durably filed."
+    },
+    {
+      "file": "tests/standard_names/test_review_deciding_paths_retired.py",
+      "line": 70,
+      "severity": "non-blocking",
+      "text": "non-blocking: the added modules-local doubles _FakeScores/_FakeReviewItem/_FakeBatch duplicate the same three classes already defined at tests/standard_names/test_rd_quorum_integrity.py:65-83 with a different signature; they are module-local test fixtures and the repo already repeats such doubles across test modules, so this is not a production capability fork, but importing the sibling owner would keep one shape."
+    },
+    {
+      "file": "tests/standard_names/test_review_deciding_paths_retired.py",
+      "line": 25,
+      "severity": "non-blocking",
+      "text": "non-blocking: _NAMES_DIMS repeats the rubric dimension tuple that imas_codex/standard_names/review/checks.py exposes as NAME_DIMENSIONS; a drift in the real tuple would silently weaken the two-cycle drive in test_the_retained_runner_persists_nothing because the disagreement path it exercises is built from the copy."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit: 78e12a857 narrows test_cascade_deciding_axes.py's shadowed-docs expectation from ['primary','secondary'] to ['primary'] and names the stub chat_reviewer; 62c18bf78 rewrites three tests in test_review_deciding_paths_retired.py to read independent expectations (seat set from pyproject.toml via tomllib, the retained runner driven for real with the graph writer patched, the unjudged shadow row asserted on item/axis/judge/reason) and adds the fake doubles; 3218855d3 edits only the fragment, moving _chat_seat from the deletions table to an Added section and recording the zero-delta gate.",
+    "done_when": "The node's done_when is zero added failure ids across the whole tests/standard_names/ suite at base and head, a test per deleted path that fails when restored, and an evidence fragment listing deletions with line counts. The manifest records base 137eb8fd4 '73 failed, 8415 passed, 11 skipped' and head 62c18bf78 '73 failed, 8414 passed, 11 skipped'; I re-derived both failure sets from logs/suite-base.log and logs/suite-head.log and they are identical (73 ids, zero added, zero removed), so the measure is met. The fragment at 3218855d3 records that zero delta and lists the deletions.",
+    "goal": "The node goal is to retire the review quorum as a deciding path while keeping it as the non-deciding audit panel; this increment's own goal is to make the tests that pin that shape independently falsifiable and to re-record the gate. The landed diff at 3218855d3 does exactly that: cascade.py:448 defines _chat_seat (read at the reviewed head), _run_rd_quorum_cycles stays non-persisting, and the three changed files carry the repaired assertions plus the evidence fragment.",
+    "manifest": "Read manifest.md: it reports status complete, commits 18575cce1..3218855d3, baseline_suite 73 failed at 137eb8fd4 with a full failure_id list, after_suite 73 failed at 62c18bf78 with a full failure_id list, gate_delta added 0 / removed 0, and evidence_inputs; the after_suite revision is 62c18bf78, not the reviewed head 3218855d3, but 3218855d3 changes only the evidence fragment, so the gate still describes the landed code.",
+    "write_paths": "The declared paths are the run manifest's orientation_write_paths plus the coordinator's orientation_note extension of test_review_cascade.py and test_cascade_deciding_axes.py. The increment's git diff 9b47cdee2..3218855d3 touches only docs/evidence/fragments/sn-review-through-jev/srtj-quorum-deciding-retire.html, tests/standard_names/test_cascade_deciding_axes.py and tests/standard_names/test_review_deciding_paths_retired.py. Every one is in the grant or the note's extension."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_review_deciding_paths_retired.py:209 asserts set(get_model_source_models(source)) == _seats_declared_in_pyproject() and :118 asserts written == [], so shortening the chain or restoring a write reddens; :172 asserts the four-field shadow row.",
+    "evidence": "The suite delta is recorded in logs/suite-base.log and logs/suite-head.log with completion totals and a bare EXIT=1 line, but the named repair-round control log logs/negative-control-tests.log carries only mutation D of the four the manifest claims.",
+    "fit": "The new helpers in tests/standard_names/test_review_deciding_paths_retired.py:37 and the docstrings at :11 follow the surrounding test conventions and name no plan or ticket.",
+    "goal_fidelity": "tests/standard_names/test_review_deciding_paths_retired.py:84 drives worker_review_names._run_rd_quorum_cycles and asserts its records are handed back with zero writes, which is the non-deciding property the goal keeps.",
+    "reuse": "tests/standard_names/test_review_deciding_paths_retired.py:37 reads pyproject.toml directly on purpose, and its fakes at :70 mirror tests/standard_names/test_rd_quorum_integrity.py:65-83 rather than importing them; no production mechanism is re-implemented.",
+    "scope_discipline": "git diff --stat 9b47cdee2..3218855d3 lists exactly the three granted paths and no production file."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: read the run brief and the landed cascade at 3218855d3; the increment repairs the tests that pin the retired deciding path and re-records the gate, matching the node goal.\nVERDICT done_when: re-derived the failure sets from logs/suite-base.log and logs/suite-head.log; both are 73 ids, identical set-for-set, so zero added.\nVERDICT write_paths: git diff --stat 9b47cdee2..3218855d3 lists only the three granted paths.\nVERDICT manifest: read; status complete, full baseline_suite/after_suite failure_id lists, gate_delta zero; the head arm ran at 62c18bf78 (docs-only commit follows).\nVERDICT diff: read three commits; test_cascade_deciding_axes.py expects one chat seat, test_review_deciding_paths_retired.py makes three tests independent, the fragment gains an Added section for _chat_seat and records the zero-delta gate.\nCALL_SITES: imas_codex/standard_names/review/cascade.py:697 adjudicate_review, imas_codex/standard_names/review/cascade.py:448 _chat_seat, imas_codex/standard_names/worker_tasks/worker_review_names.py:314 _run_rd_quorum_cycles, imas_codex/standard_names/worker_tasks/worker_review_names.py:824 _persisting_chat_review, imas_codex/standard_names/review/panel_audit.py:86 quorum_without_persisting, imas_codex/settings.py:491 get_model_source_models\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: test_review_deciding_paths_retired.py:84 drives _run_rd_quorum_cycles and asserts zero writes, the non-deciding property the goal keeps.\nSCORE evidence: 16\nJUSTIFICATION evidence: suite logs are complete with EXIT=1, but logs/negative-control-tests.log holds only mutation D of the four the manifest names.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every path in the increment diff is inside the declared grant plus the orientation_note extension.\nSCORE durability: 18\nJUSTIFICATION durability: test_review_deciding_paths_retired.py:209 compares the resolver to pyproject.toml and :118 asserts written == [], each shown to fail under a restored path.\nSCORE fit: 18\nJUSTIFICATION fit: the new helpers and docstrings at test_review_deciding_paths_retired.py:37-58 follow the surrounding test conventions and carry no plan labels.\nSCORE reuse: 15\nJUSTIFICATION reuse: _seats_declared_in_pyproject at :37 is a deliberate independent read, but _NAMES_DIMS and the three doubles mirror existing definitions.\nFINDING manifest.md:22 non-blocking: the repair-round control log named in the manifest carries only one of four claimed mutations.\nFINDING tests/standard_names/test_review_deciding_paths_retired.py:70 non-blocking: the three fake doubles mirror tests/standard_names/test_rd_quorum_integrity.py:65-83.\nFINDING tests/standard_names/test_review_deciding_paths_retired.py:25 non-blocking: _NAMES_DIMS copies checks.NAME_DIMENSIONS rather than importing it.\n",
+  "review_run_id": "r-20261027T171507917263-review-of-srtj-quorum-deciding-retire-3218855d3ddc",
+  "reviewed_base_sha": "9b47cdee2be868f6e725a784c531329a387949f7",
+  "reviewed_commits": [
+    "78e12a857",
+    "62c18bf78",
+    "3218855d3"
+  ],
+  "reviewed_head_sha": "3218855d3ddc58511c400b4b18c23019848089e9",
+  "reviewed_run_id": "r-20261027T141326199592-srtj-quorum-deciding-retire",
+  "scores": {
+    "durability": 18,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 15,
+    "scope_discipline": 18
+  },
+  "self_comparison_assertion_note": "No added assertion compares a value against the same variable the test supplied: the seat expectation is read from pyproject.toml, the write expectation is captured from a patched writer, and the shadow-row tuple is compared to literals for judge and reason while item and axis are propagation checks (they fail if the code passes anything else).",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T17:45:00+00:00",
+  "total": 103
+}
