@@ -17,64 +17,17 @@ fixture nodes, so they measure the write path rather than a shared state.
 from __future__ import annotations
 
 import inspect
-from typing import Any
 
 import pytest
+
+from tests.standard_names.conftest import (
+    domain_state,
+    plant_name_with_dd_source,
+)
 
 pytestmark = [pytest.mark.timeout(180)]
 
 _DD_DOMAIN = "equilibrium"
-
-
-def _domain_state(gc: Any, sn_id: str) -> dict[str, Any]:
-    rows = list(
-        gc.query(
-            """
-            MATCH (sn:StandardName {id: $id})
-            OPTIONAL MATCH (sn)-[:HAS_PHYSICS_DOMAIN]->(d:PhysicsDomain)
-            RETURN sn.physics_domain AS physics_domain,
-                   sn.source_domains AS source_domains,
-                   [x IN collect(DISTINCT d.id) WHERE x IS NOT NULL]
-                     AS edge_domains
-            """,
-            id=sn_id,
-        )
-    )
-    row = dict(rows[0])
-    row["source_domains"] = row["source_domains"] or []
-    return row
-
-
-def _plant_name_with_dd_source(gc: Any, sn_id: str, dd_id: str) -> None:
-    """A drafted name produced by one source bound to one classified DD path."""
-    gc.query(
-        """
-        MERGE (sn:StandardName {id: $sn_id})
-        SET sn.name_stage = 'drafted', sn.origin = 'pipeline',
-            sn.validation_status = 'valid', sn.chain_length = 0,
-            sn.docs_stage = 'pending', sn.docs_chain_length = 0,
-            sn.description = 'Test quantity', sn.kind = 'scalar', sn.unit = 'eV'
-        """,
-        sn_id=sn_id,
-    )
-    gc.query(
-        """
-        MATCH (sn:StandardName {id: $sn_id})
-        MERGE (dd:IMASNode {id: $dd_id})
-        SET dd.physics_domain = $dd_domain
-        MERGE (src:StandardNameSource {id: $src_id})
-        SET src.status = 'composed', src.source_type = 'dd',
-            src.source_id = $dd_id, src.description = 'A test quantity',
-            src.produced_sn_id = $sn_id,
-            src.claimed_at = null, src.claim_token = null
-        MERGE (src)-[:PRODUCED_NAME]->(sn)
-        MERGE (src)-[:FROM_DD_PATH]->(dd)
-        """,
-        sn_id=sn_id,
-        dd_id=dd_id,
-        dd_domain=_DD_DOMAIN,
-        src_id=f"src:{dd_id}",
-    )
 
 
 @pytest.mark.graph
@@ -95,7 +48,7 @@ def test_write_standard_names_alone_leaves_an_undecided_name_whole(
 
     sn_id = "electron_temperature"
     with GraphClient() as gc:
-        _plant_name_with_dd_source(gc, sn_id, "dd:followups/path")
+        plant_name_with_dd_source(gc, sn_id, "dd:followups/path")
         write_standard_names(
             [
                 {
@@ -107,7 +60,7 @@ def test_write_standard_names_alone_leaves_an_undecided_name_whole(
             ],
             gc=gc,
         )
-        settled = _domain_state(gc, sn_id)
+        settled = domain_state(gc, sn_id)
 
     assert settled["physics_domain"] == _DD_DOMAIN, (
         "a name written through write_standard_names alone carried no domain"
@@ -117,6 +70,53 @@ def test_write_standard_names_alone_leaves_an_undecided_name_whole(
     assert settled["physics_domain"] in settled["source_domains"], (
         "the scalar disagrees with the source set it was written beside"
     )
+
+
+@pytest.mark.graph
+def test_several_source_domains_stay_unset_and_undecided(
+    disposable_neo4j_empty: str,
+) -> None:
+    """Two source domains are an ambiguity; the scalar stays unset.
+
+    The derived single-domain rule must not fire when the sources disagree:
+    with the condition widened to ``>= 1`` a name holding several source
+    domains would take one of them arbitrarily, so this test's scalar
+    assertion is what holds the boundary.
+    """
+    from imas_codex.graph.client import GraphClient
+    from imas_codex.standard_names import graph_store  # noqa: F401 (binds services)
+    from imas_codex.standard_names.graph_store.graph_catalog import (
+        write_standard_names,
+    )
+
+    sn_id = "electron_temperature"
+    with GraphClient() as gc:
+        plant_name_with_dd_source(
+            gc, sn_id, "dd:multi/one", dd_domain="equilibrium"
+        )
+        plant_name_with_dd_source(
+            gc, sn_id, "dd:multi/two", dd_domain="core_plasma_physics"
+        )
+        write_standard_names(
+            [
+                {
+                    "id": sn_id,
+                    "source_types": ["dd"],
+                    "physics_domain": ["transport"],
+                    "name_stage": "drafted",
+                }
+            ],
+            gc=gc,
+        )
+        settled = domain_state(gc, sn_id)
+
+    expected = {"equilibrium", "core_plasma_physics"}
+    assert settled["physics_domain"] is None, (
+        "several source domains were collapsed onto one; the choice that "
+        "settles the ambiguity was never made"
+    )
+    assert set(settled["source_domains"]) == expected
+    assert set(settled["edge_domains"]) == expected
 
 
 @pytest.mark.graph
@@ -134,7 +134,7 @@ def test_an_undecided_stored_decision_keeps_its_candidates(
     sn_id = "electron_temperature"
     candidates = ["equilibrium", "core_plasma_physics", "general"]
     with GraphClient() as gc:
-        _plant_name_with_dd_source(gc, sn_id, "dd:followups/candidates")
+        plant_name_with_dd_source(gc, sn_id, "dd:followups/candidates")
         gc.query(
             """
             MATCH (sn:StandardName {id: $id})

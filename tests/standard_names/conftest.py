@@ -23,7 +23,7 @@ import uuid
 from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -757,6 +757,95 @@ def disposable_neo4j_empty(disposable_neo4j_uri: str) -> str:
 def disposable_neo4j(disposable_neo4j_uri: str) -> tuple[str, str]:
     """The shared endpoint in the URI/password shape used by graph clients."""
     return disposable_neo4j_uri, neo4j_test_password()
+
+
+# ---------------------------------------------------------------------------
+# Domain-writer helpers shared by every test that plants or reads a name's
+# physics domain. They live here once so a change to the write path's shape is
+# reflected in one place rather than in each suite's private copy.
+# ---------------------------------------------------------------------------
+
+
+def domain_state(gc: Any, sn_id: str) -> dict[str, Any]:
+    """A name's scalar, its stored source set and its writable domain edges."""
+    rows = list(
+        gc.query(
+            """
+            MATCH (sn:StandardName {id: $id})
+            OPTIONAL MATCH (sn)-[:HAS_PHYSICS_DOMAIN]->(d:PhysicsDomain)
+            RETURN sn.physics_domain AS physics_domain,
+                   sn.source_domains AS source_domains,
+                   [x IN collect(DISTINCT d.id) WHERE x IS NOT NULL]
+                     AS edge_domains
+            """,
+            id=sn_id,
+        )
+    )
+    row = dict(rows[0])
+    row["source_domains"] = row["source_domains"] or []
+    return row
+
+
+def plant_name_with_dd_source(
+    gc: Any, sn_id: str, dd_id: str, *, dd_domain: str = "equilibrium"
+) -> None:
+    """A drafted name produced by one source bound to one classified DD path."""
+    gc.query(
+        """
+        MERGE (sn:StandardName {id: $sn_id})
+        SET sn.name_stage = 'drafted', sn.origin = 'pipeline',
+            sn.validation_status = 'valid', sn.chain_length = 0,
+            sn.docs_stage = 'pending', sn.docs_chain_length = 0,
+            sn.description = 'Test quantity', sn.kind = 'scalar', sn.unit = 'eV'
+        """,
+        sn_id=sn_id,
+    )
+    gc.query(
+        """
+        MATCH (sn:StandardName {id: $sn_id})
+        MERGE (dd:IMASNode {id: $dd_id})
+        SET dd.physics_domain = $dd_domain
+        MERGE (src:StandardNameSource {id: $src_id})
+        SET src.status = 'composed', src.source_type = 'dd',
+            src.source_id = $dd_id, src.description = 'A test quantity',
+            src.produced_sn_id = $sn_id,
+            src.claimed_at = null, src.claim_token = null
+        MERGE (src)-[:PRODUCED_NAME]->(sn)
+        MERGE (src)-[:FROM_DD_PATH]->(dd)
+        """,
+        sn_id=sn_id,
+        dd_id=dd_id,
+        dd_domain=dd_domain,
+        src_id=f"src:{dd_id}",
+    )
+
+
+def answer_domain_state(gc: Any) -> Any:
+    """Let a mock client answer the domain writer's state read.
+
+    ``persist_refined_name`` hands the successor to ``write_name_domain``,
+    which reads the name's stored physics domain, its own domains and its
+    children before writing. A mock that answers every query with nothing
+    cannot answer that read, so it returns an unsourced, childless successor
+    for it and defers every other query to the client's own behaviour.
+    """
+    inner = gc.query
+
+    def _query(cypher, **params):
+        if "AS child_stored_domains" in cypher:
+            return [
+                {
+                    "physics_domain": None,
+                    "own_domains": [],
+                    "child_ids": [],
+                    "child_dd_domains": [],
+                    "child_stored_domains": [],
+                }
+            ]
+        return inner(cypher, **params)
+
+    gc.query = MagicMock(side_effect=_query)
+    return gc
 
 
 # ---------------------------------------------------------------------------

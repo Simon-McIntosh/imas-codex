@@ -20,6 +20,11 @@ from typing import Any
 
 import pytest
 
+from tests.standard_names.conftest import (
+    domain_state,
+    plant_name_with_dd_source,
+)
+
 pytestmark = [pytest.mark.graph, pytest.mark.timeout(180)]
 
 _PREFIX = "test_domain_route__"
@@ -27,59 +32,6 @@ _PREFIX = "test_domain_route__"
 
 def _uid(tag: str) -> str:
     return f"{_PREFIX}{tag}_{uuid.uuid4().hex[:8]}"
-
-
-def _plant_name_with_dd_source(
-    gc: Any, sn_id: str, dd_id: str, *, dd_domain: str
-) -> None:
-    """A name produced by one source bound to one DD path carrying a domain."""
-    gc.query(
-        """
-        MERGE (sn:StandardName {id: $sn_id})
-        SET sn.name_stage = 'drafted', sn.origin = 'pipeline',
-            sn.validation_status = 'valid', sn.chain_length = 0,
-            sn.docs_stage = 'pending', sn.docs_chain_length = 0,
-            sn.description = 'Test quantity', sn.kind = 'scalar', sn.unit = 'eV'
-        """,
-        sn_id=sn_id,
-    )
-    gc.query(
-        """
-        MATCH (sn:StandardName {id: $sn_id})
-        MERGE (dd:IMASNode {id: $dd_id})
-        SET dd.physics_domain = $dd_domain
-        MERGE (src:StandardNameSource {id: $src_id})
-        SET src.status = 'composed', src.source_type = 'dd',
-            src.source_id = $dd_id, src.description = 'A test quantity',
-            src.produced_sn_id = $sn_id,
-            src.claimed_at = null, src.claim_token = null
-        MERGE (src)-[:PRODUCED_NAME]->(sn)
-        MERGE (src)-[:FROM_DD_PATH]->(dd)
-        """,
-        sn_id=sn_id,
-        dd_id=dd_id,
-        dd_domain=dd_domain,
-        src_id=f"src:{dd_id}",
-    )
-
-
-def _domain_state(gc: Any, sn_id: str) -> dict[str, Any]:
-    rows = list(
-        gc.query(
-            """
-            MATCH (sn:StandardName {id: $id})
-            OPTIONAL MATCH (sn)-[:HAS_PHYSICS_DOMAIN]->(d:PhysicsDomain)
-            RETURN sn.physics_domain AS physics_domain,
-                   sn.source_domains AS source_domains,
-                   [x IN collect(DISTINCT d.id) WHERE x IS NOT NULL]
-                     AS edge_domains
-            """,
-            id=sn_id,
-        )
-    )
-    row = dict(rows[0])
-    row["source_domains"] = row["source_domains"] or []
-    return row
 
 
 def test_write_standard_names_leaves_the_domain_to_the_one_writer(
@@ -97,7 +49,7 @@ def test_write_standard_names_leaves_the_domain_to_the_one_writer(
     # write and the test would then measure nothing.
     sn_id = "electron_temperature"
     with GraphClient() as gc:
-        _plant_name_with_dd_source(
+        plant_name_with_dd_source(
             gc, sn_id, "dd:catalog/path", dd_domain="equilibrium"
         )
         write_standard_names(
@@ -111,7 +63,7 @@ def test_write_standard_names_leaves_the_domain_to_the_one_writer(
             ],
             gc=gc,
         )
-        settled = _domain_state(gc, sn_id)
+        settled = domain_state(gc, sn_id)
 
     assert settled["physics_domain"] == "equilibrium", (
         "write_standard_names wrote the payload domain instead of the domain "
@@ -175,7 +127,7 @@ def test_persist_refined_name_writes_the_domain_for_a_client_that_is_not_a_graph
     old = _uid("old_proxy")
     new = _uid("new_proxy")
     with GraphClient() as real:
-        _plant_name_with_dd_source(real, old, "dd:proxy/path", dd_domain="equilibrium")
+        plant_name_with_dd_source(real, old, "dd:proxy/path", dd_domain="equilibrium")
         real.query(
             """
             MATCH (sn:StandardName {id: $id})
@@ -198,7 +150,7 @@ def test_persist_refined_name_writes_the_domain_for_a_client_that_is_not_a_graph
             description="Test quantity",
             services=services,
         )
-        settled = _domain_state(real, new)
+        settled = domain_state(real, new)
 
     assert settled["physics_domain"] == "equilibrium", (
         "the domain write was skipped for a client that is not a GraphClient"
@@ -239,7 +191,7 @@ def test_persist_refined_name_refuses_an_unwritable_client_before_it_commits(
     old = _uid("old_unwritable")
     new = _uid("new_unwritable")
     with GraphClient() as real:
-        _plant_name_with_dd_source(
+        plant_name_with_dd_source(
             real, old, "dd:unwritable/path", dd_domain="equilibrium"
         )
         real.query(
@@ -279,7 +231,7 @@ def test_persist_refined_name_carries_the_stored_decision_through_the_writer(
     old = _uid("old")
     new = _uid("new")
     with GraphClient() as gc:
-        _plant_name_with_dd_source(gc, old, "dd:refine/path", dd_domain="equilibrium")
+        plant_name_with_dd_source(gc, old, "dd:refine/path", dd_domain="equilibrium")
         gc.query(
             """
             MATCH (sn:StandardName {id: $id})
@@ -298,7 +250,7 @@ def test_persist_refined_name_carries_the_stored_decision_through_the_writer(
             new_name=new,
             description="Test quantity",
         )
-        settled = _domain_state(gc, new)
+        settled = domain_state(gc, new)
 
     assert settled["physics_domain"] == "equilibrium"
     assert set(settled["source_domains"]) == {"equilibrium"}
