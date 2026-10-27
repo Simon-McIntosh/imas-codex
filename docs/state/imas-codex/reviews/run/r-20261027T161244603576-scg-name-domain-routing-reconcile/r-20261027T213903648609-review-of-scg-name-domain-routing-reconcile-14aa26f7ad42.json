@@ -1,0 +1,103 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own gate logs, not from its manifest. logs/gate_base_suite.log holds 95 lines beginning 'FAILED ' at revision af4cc0719 and logs/gate_head_suite.log 93 at 9025c0d8b; comm -13 over the sorted failure-id sets (logs/base_failids.txt, logs/head_failids.txt) is empty, so the landed head adds no failure id. The two ids the head no longer fails are both in tests/standard_names/test_snrun_async_counters.py (TestGenerateDocsBumpsEnriched::test_generate_docs_bumps_enriched and TestNoRunIdNoBump::test_no_run_id_skips_bump).",
+  "base_log_revision": "af4cc071959d88e44e3afa4103550cdba7811206",
+  "call_sites": [
+    "imas_codex/standard_names/graph_store/graph_catalog.py:write_standard_names",
+    "imas_codex/standard_names/graph_store/graph_catalog.py:upsert_standard_names",
+    "imas_codex/standard_names/graph_store/graph_catalog.py:persist_generated_name_batch",
+    "imas_codex/standard_names/graph_store/graph_lineage.py:_write_standard_name_edges",
+    "imas_codex/standard_names/graph_store/graph_lineage.py:rederive_structural_edges",
+    "imas_codex/standard_names/graph_store/graph_refinement.py:persist_refined_name",
+    "imas_codex/standard_names/graph_store/graph_foundation.py:set_standard_name_domain",
+    "imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py:_write_composed_name_domains",
+    "imas_codex/standard_names/domain_decision.py:write_name_domain"
+  ],
+  "completed_at": "2026-10-27T21:53:11.334Z",
+  "dispatched_at": "2026-10-27T21:40:04Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/graph_ops.py",
+      "line": 88,
+      "severity": "non-blocking",
+      "text": "8ef8d6518 edits this file, which the dispatch FENCE-SCOPE does not name, deleting _ensure_list from _WIRED_SERVICE_NAMES; the deletion is required to keep test_facade_closure green once both halves drop its readers, but an out-of-scope product edit lands on a fence that named only graph_store modules, domain_decision.py, four test files and the fragment."
+    },
+    {
+      "file": "tests/standard_names/test_name_domain_writer_catalog_sites.py",
+      "line": 116,
+      "severity": "non-blocking",
+      "text": "The branch's own test asserts that a name written through write_standard_names with a payload physics_domain and no stored decision ends with physics_domain None while source_domains and HAS_PHYSICS_DOMAIN edges are set, so the three disagree until worker_extraction_and_enrichment._write_composed_name_domains runs; a caller that writes names without that follow-up leaves the name without the domain the goal says it must still end with."
+    },
+    {
+      "file": "tests/standard_names/test_graph_edge_writers.py",
+      "line": 631,
+      "severity": "non-blocking",
+      "text": "test_bootstrap_transaction_rolls_back_partial_parent fails in the required five-file -m graph gate at the landed code head (logs/graph_focused_final.log: 1 failed, 9 passed, EXIT=1); the manifest attributes it to cross-file parallel state and cites an earlier four-file run that passed, but logs/graph_focused_head.log ran the same five files and failed the same id, so the attribution and the cited green arm are not in the record, and the test shares disposable_neo4j's session-wide endpoint with the branch's disposable_neo4j_empty users, one of which wipes it."
+    },
+    {
+      "file": "runs/r-20261027T161244603576-scg-name-domain-routing-reconcile/manifest.md",
+      "line": 46,
+      "severity": "non-blocking",
+      "text": "baseline_suite.command and after_suite.command carry the placeholders '<git-archive tree>' and '<T>/bt-base' instead of the literal command, and the manifest tests: lines carry '<tree>' and '<T>', so the suite gate cannot be re-run from the record itself (the logs' own '# command:' headers do carry it)."
+    },
+    {
+      "file": "runs/r-20261027T161244603576-scg-name-domain-routing-reconcile/manifest.md",
+      "line": 5,
+      "severity": "non-blocking",
+      "text": "orientation_granted_paths lists imas_codex/standard_names/graph_ops.py and tests/recording_graph_client.py, which are not the dispatch's declared write paths, so the manifest's own scope record disagrees with the fence it was dispatched under."
+    },
+    {
+      "file": "tests/standard_names/test_metadata_invariants.py",
+      "line": 191,
+      "severity": "non-blocking",
+      "text": "test_the_one_writer_sets_domain_sources_and_edges defines a local RecordingClient double beside the repository's tests/recording_graph_client.py::RecordingGraphClient, which exists so a capture change need not be repeated per suite; the landed change would have extended the owner instead."
+    }
+  ],
+  "gate_base_sha": "af4cc071959d88e44e3afa4103550cdba7811206",
+  "head_log_revision": "9025c0d8b9c8512e0d01d532107138c4d28a477c",
+  "item_verdicts": {
+    "diff": "Read commit by commit from 43ae5712c to 14aa26f7a (branch divergence from main at af4cc0719): 1bfcb1bce resolves the test_graph_edge_writers.py conflict and withholds the domain pair from the tail pass, 89251bb66 and 9025c0d8b add and broaden the reconciling test, 8ef8d6518 deletes one facade element, and 156043788/14aa26f7a are main merges and the evidence fragment.",
+    "done_when": "The done_when asks for a concluded merge, one writer application per catalog-path name, a committed test that fails under both reverts, zero added default-suite failure ids, and a fragment stating the owner; the merge is concluded at 156043788 with conflict resolution at 1bfcb1bce, tests/standard_names/test_name_domain_routing_reconcile.py:167-224 asserts one application and one domain write, and both negative controls are logged red (neg_arm_catalog.log, neg_arm_lineage.log, both EXIT=1).",
+    "goal": "The goal is to land the catalog half of the catalog-side domain routing on top of the landed lineage half so each written name gets exactly one domain-writer application; imas_codex/standard_names/graph_store/graph_catalog.py:487-503 withholds physics_domain and source_domains from the batch it hands the structural tail pass, and graph_store/graph_lineage.py:1011-1022 applies domain_decision.write_name_domain once per name the graph holds, so a catalog-written name is applied exactly once.",
+    "manifest": "Read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T161244603576-scg-name-domain-routing-reconcile/manifest.md; it records status complete, base af4cc0719 95 failed/8391 passed against head 9025c0d8b 93 failed/8402 passed with comm -13 empty, five cited logs, and two retry_failures attributed to its own scaffolding.",
+    "write_paths": "The dispatch fence names four test files, graph_store/graph_catalog.py, graph_store/graph_lineage.py, graph_store/graph_refinement.py, domain_decision.py and the reconcile fragment; the authored diff stays inside them except imas_codex/standard_names/graph_ops.py:88, where 8ef8d6518 deletes the _ensure_list entry from _WIRED_SERVICE_NAMES, one line outside the fence that closes the facade-closure seam the two halves create."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_name_domain_routing_reconcile.py:213 fails on a second writer (2 writes) and :207-211 fails on zero applications, both demonstrated by neg_arm_catalog.log and neg_arm_lineage.log.",
+    "evidence": "gate_base_suite.log and gate_head_suite.log reproduce the zero-added measure (95 vs 93 FAILED lines, comm -13 empty), but the required five-file -m graph gate at the landed code head is red (logs/graph_focused_final.log: 1 failed, 9 passed, EXIT=1).",
+    "fit": "The added module and helpers follow the surrounding test idiom and carry no plan, stage or ticket identifier, e.g. tests/standard_names/test_name_domain_routing_reconcile.py:33-53.",
+    "goal_fidelity": "imas_codex/standard_names/graph_store/graph_catalog.py:487-503 removes the promote block and withholds physics_domain/source_domains, so graph_lineage.py:1014 is the sole application for a catalog-written name.",
+    "reuse": "The new test subclasses tests/recording_graph_client.py:16 through _ForwardingRecorder and imports _domain_state from tests/standard_names/test_name_domain_writer_catalog_sites.py:44 rather than copying it.",
+    "scope_discipline": "Every authored path is inside the dispatch fence except imas_codex/standard_names/graph_ops.py:88, a one-line deletion made outside it and reported in the manifest and fragment."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to land the catalog half of the domain routing on top of the landed lineage half so each written name gets exactly one application of domain_decision.write_name_domain; imas_codex/standard_names/graph_store/graph_catalog.py:487-503 withholds the domain pair and graph_store/graph_lineage.py:1011-1022 applies the writer once per name.\nVERDICT done_when: the done_when asks for a concluded merge, exactly one writer application, a committed test that fails under both reverts, zero added failure ids and a fragment naming the owner; all are present, with neg_arm_catalog.log and neg_arm_lineage.log both EXIT=1 and comm -13 over the two suite failure-id lists empty.\nVERDICT write_paths: the dispatch fence names four test files, graph_catalog.py, graph_lineage.py, graph_refinement.py, domain_decision.py and the fragment; the authored diff stays inside them except the one-line deletion at imas_codex/standard_names/graph_ops.py:88.\nVERDICT manifest: read; it states status complete, base af4cc0719 95 failed/8391 passed against head 9025c0d8b 93 failed/8402 passed, and cites five logs.\nVERDICT diff: read commit by commit from 43ae5712c to 14aa26f7a; the node authored the conflict resolution at 1bfcb1bce, the withholding of the domain pair, the new test, the broadened detector and the fragment, and merged main at 156043788.\nCALL_SITES: imas_codex/standard_names/graph_store/graph_catalog.py:write_standard_names, imas_codex/standard_names/graph_store/graph_catalog.py:upsert_standard_names, imas_codex/standard_names/graph_store/graph_catalog.py:persist_generated_name_batch, imas_codex/standard_names/graph_store/graph_lineage.py:_write_standard_name_edges, imas_codex/standard_names/graph_store/graph_lineage.py:rederive_structural_edges, imas_codex/standard_names/graph_store/graph_refinement.py:persist_refined_name, imas_codex/standard_names/graph_store/graph_foundation.py:set_standard_name_domain, imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py:_write_composed_name_domains, imas_codex/standard_names/domain_decision.py:write_name_domain\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/graph_store/graph_catalog.py:487-503 removes the promote block and withholds physics_domain/source_domains, so graph_lineage.py:1014 is the sole application for a catalog-written name.\nSCORE evidence: 15\nJUSTIFICATION evidence: gate_base_suite.log and gate_head_suite.log reproduce the zero-added measure (95 vs 93 FAILED lines, comm -13 empty), but the required five-file -m graph gate at the landed code head is red (logs/graph_focused_final.log: 1 failed, 9 passed, EXIT=1).\nSCORE scope_discipline: 15\nJUSTIFICATION scope_discipline: every authored path is inside the dispatch fence except imas_codex/standard_names/graph_ops.py:88, a one-line deletion made outside it and reported in the manifest and fragment.\nSCORE durability: 18\nJUSTIFICATION durability: tests/standard_names/test_name_domain_routing_reconcile.py:213 fails on a second writer and :207-211 fails on zero applications, both demonstrated by neg_arm_catalog.log and neg_arm_lineage.log.\nSCORE fit: 18\nJUSTIFICATION fit: the added module and helpers follow the surrounding test idiom and carry no plan, stage or ticket identifier, e.g. tests/standard_names/test_name_domain_routing_reconcile.py:33-53.\nSCORE reuse: 17\nJUSTIFICATION reuse: the new test subclasses tests/recording_graph_client.py:16 through _ForwardingRecorder and imports _domain_state from tests/standard_names/test_name_domain_writer_catalog_sites.py:44 rather than copying it.\nFINDING imas_codex/standard_names/graph_ops.py:88 non-blocking: 8ef8d6518 edits a file the dispatch FENCE-SCOPE does not name, deleting _ensure_list from _WIRED_SERVICE_NAMES to keep the facade closure green after both halves drop its readers.\nFINDING tests/standard_names/test_name_domain_writer_catalog_sites.py:116 non-blocking: the branch's own test asserts a catalog-written name with a payload domain and no stored decision ends with physics_domain None while source_domains and edges are set, so the three disagree until _write_composed_name_domains runs.\nFINDING tests/standard_names/test_graph_edge_writers.py:631 non-blocking: the required five-file -m graph gate is red at the landed code head, and the manifest's attribution to cross-file parallel state is unverified: logs/graph_focused_head.log ran the same five files and failed the same id.\nFINDING runs/r-20261027T161244603576-scg-name-domain-routing-reconcile/manifest.md:46 non-blocking: baseline_suite.command and after_suite.command carry '<git-archive tree>' and '<T>/bt-base' placeholders instead of the literal command, so the suite gate cannot be re-run from the record.\nFINDING runs/r-20261027T161244603576-scg-name-domain-routing-reconcile/manifest.md:5 non-blocking: orientation_granted_paths lists graph_ops.py and tests/recording_graph_client.py, which are not the dispatch's declared write paths, so the manifest's scope record disagrees with its fence.\nFINDING tests/standard_names/test_metadata_invariants.py:191 non-blocking: test_the_one_writer_sets_domain_sources_and_edges defines a local RecordingClient double beside tests/recording_graph_client.py::RecordingGraphClient, which exists to be extended rather than copied.\n",
+  "review_run_id": "r-20261027T213903648609-review-of-scg-name-domain-routing-reconcile-14aa26f7ad42",
+  "reviewed_base_sha": "43ae5712c9e7c1fc0b20866834743ddad55664c4",
+  "reviewed_commits": [
+    "14aa26f7ad425dd1ee1bf71df66c4660d4a515d8",
+    "9025c0d8b9c8512e0d01d532107138c4d28a477c",
+    "15604378807725551a9119b40d7e16e1868abe41",
+    "8ef8d6518e090a8fe78ed39e80e4cf74c44b727b",
+    "28605ed6b759ac7c823b4fb1631f269be35b16f6",
+    "2625cdd3e",
+    "89251bb66",
+    "1bfcb1bcef5c9013e5296eca5befbab42f723be6"
+  ],
+  "reviewed_head_sha": "14aa26f7ad425dd1ee1bf71df66c4660d4a515d8",
+  "reviewed_run_id": "r-20261027T161244603576-scg-name-domain-routing-reconcile",
+  "scores": {
+    "durability": 18,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 17,
+    "scope_discipline": 15
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T22:20:00Z",
+  "total": 101,
+  "worktree_note": "The reviewed worktree is not at the reviewed head in this session; the diff, files and logs were read from the shared object store with git show and git diff at 14aa26f7ad425dd1ee1bf71df66c4660d4a515d8 and its merge-base with main af4cc071959d88e44e3afa4103550cdba7811206. The reviewed run's manifest records the worktree clean at 9025c0d8b, one docs-only commit below the reviewed head."
+}
