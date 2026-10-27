@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-27T08:17:08.621Z",
+  "dispatched_at": "2026-10-27T08:12:42Z",
+  "findings": [
+    {
+      "file": "tests/graph/conftest.py",
+      "line": "395",
+      "severity": "non-blocking",
+      "text": "non-blocking: the collection guard is committed but no test exercises it, so a regression of the hook itself reddens nothing; logs/guard-refusal.log is a manual --collect-only run over test_zz_planted_graph_writer.py, which is not in the landed tree, so the demonstration is not repeatable by a later reader."
+    },
+    {
+      "file": "tests/graph/conftest.py",
+      "line": "407",
+      "severity": "non-blocking",
+      "text": "non-blocking: the guard reads only inspect.getsource(item.obj), the test function body, so a writer that delegates its write to a non-write-prefixed helper (populate, apply_rows) while holding a bare client escapes; the detector is a name-and-AST heuristic and misses indirection."
+    },
+    {
+      "file": "logs/guard-refusal.log",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the log header names revision 4eb9902b6 and repeats the head-graph command while its body is a planted-writer collect-only run, so a reader who trusts the header reads the wrong revision and command for that evidence."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit from base 6e9edb8bf to head aecc88921; three commits, four files, +314/-20, all inside the declared scope.",
+    "done_when": "the done_when asks for both gate arms, zero added failure ids and logged controls; the manifest names both arms and the control, and logs/base-graph.ids and logs/head-graph.ids are byte-identical at 18 failures each.",
+    "goal": "the node goal is to route the five graph-marked writers in tests/graph to a disposable Neo4j and stop the hazard returning; tests/graph/conftest.py:269 defines disposable_graph and :395 defines the collection guard, and the two writer files request the fixture.",
+    "manifest": "read at the reviewed run directory; status complete, four changed paths, the gate command, five log paths, the baseline and after arms, and the negative control naming the project URI are all recorded.",
+    "write_paths": "the declared scope was tests/graph/conftest.py, the two writer files, tests/conftest.py only if the fixture moved, and the evidence fragment; the diff touches the first three plus the fragment and never tests/conftest.py."
+  },
+  "justifications": {
+    "durability": "a writer that loses its disposable fixture is refused at tests/graph/conftest.py:395, but no committed test exercises the hook itself, so deleting _writer_facts or the UsageError reddens nothing.",
+    "evidence": "logs/base-graph.log and logs/head-graph.log each end in a bare EXIT= line and report 18 failed, and their id files are identical, so the zero added failures is measured; but the base arm deselects the five writers, so the two arms are not the same test set, and logs/guard-refusal.log carries a copied head-graph header naming revision 4eb9902b6 above a different command.",
+    "fit": "the fixture and guard follow the mechanism-comment style of the surrounding tests/graph/conftest.py fixtures and carry no plan, ticket or author identifiers.",
+    "goal_fidelity": "every writer test now takes disposable_graph or _disposable_gc (tests/graph/test_code_reference_links.py:28, tests/graph/test_dd_unit_correction_reconcile.py:178) and the guard at tests/graph/conftest.py:395 refuses a writer without it.",
+    "reuse": "tests/graph/conftest.py:222 imports _start_empty_neo4j, _detach_store_removal, _wipe and refuse_project_graph from tests/standard_names/conftest.py:468,537,515,432, and the reconcile fixture reuses SyntheticDDResolutionReader, adding no second starter.",
+    "scope_discipline": "every path in the diff is inside the manifest's declared write paths and tests/conftest.py, the one shared file the scope allowed, was left untouched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to route the five graph-marked writers in tests/graph to a disposable Neo4j and stop the hazard returning; tests/graph/conftest.py:269 defines disposable_graph and :395 defines the collection guard, and the two writer files request the fixture.\nVERDICT done_when: the done_when asks for both gate arms, zero added failure ids and logged controls; the manifest names both arms and the control, and logs/base-graph.ids and logs/head-graph.ids are byte-identical at 18 failures each.\nVERDICT write_paths: the declared scope was tests/graph/conftest.py, the two writer files, tests/conftest.py only if the fixture moved, and the evidence fragment; the diff touches the first three plus the fragment and never tests/conftest.py.\nVERDICT manifest: read at the reviewed run directory; status complete, four changed paths, the gate command, five log paths, the baseline and after arms, and the negative control naming the project URI are all recorded.\nVERDICT diff: read commit by commit from base 6e9edb8bf to head aecc88921; three commits, four files, +314/-20, all inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: every writer test now takes disposable_graph or _disposable_gc (tests/graph/test_code_reference_links.py:28, tests/graph/test_dd_unit_correction_reconcile.py:178) and the guard at tests/graph/conftest.py:395 refuses a writer without it.\nSCORE evidence: 17\nJUSTIFICATION evidence: logs/base-graph.log and logs/head-graph.log each end in a bare EXIT= line and report 18 failed, and their id files are identical, so the zero added failures is measured; but the base arm deselects the five writers, so the two arms are not the same test set, and logs/guard-refusal.log carries a copied head-graph header naming revision 4eb9902b6 above a different command.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff is inside the manifest's declared write paths and tests/conftest.py, the one shared file the scope allowed, was left untouched.\nSCORE durability: 13\nJUSTIFICATION durability: a writer that loses its disposable fixture is refused at tests/graph/conftest.py:395, but no committed test exercises the hook itself, so deleting _writer_facts or the UsageError reddens nothing.\nSCORE fit: 18\nJUSTIFICATION fit: the fixture and guard follow the mechanism-comment style of the surrounding tests/graph/conftest.py fixtures and carry no plan, ticket or author identifiers.\nSCORE reuse: 20\nJUSTIFICATION reuse: tests/graph/conftest.py:222 imports _start_empty_neo4j, _detach_store_removal, _wipe and refuse_project_graph from tests/standard_names/conftest.py:468,537,515,432, and the reconcile fixture reuses SyntheticDDResolutionReader, adding no second starter.\nFINDING tests/graph/conftest.py:395 non-blocking: the collection guard is committed but no test exercises it, so a regression of the hook itself reddens nothing; logs/guard-refusal.log is a manual --collect-only run over test_zz_planted_graph_writer.py, which is not in the landed tree, so the demonstration is not repeatable by a later reader.\nFINDING tests/graph/conftest.py:407 non-blocking: the guard reads only inspect.getsource(item.obj), the test function body, so a writer that delegates its write to a non-write-prefixed helper (populate, apply_rows) while holding a bare client escapes; the detector is a name-and-AST heuristic and misses indirection.\nFINDING logs/guard-refusal.log:1 non-blocking: the log header names revision 4eb9902b6 and repeats the head-graph command while its body is a planted-writer collect-only run, so a reader who trusts the header reads the wrong revision and command for that evidence.",
+  "review_run_id": "r-20261027T081122285759-review-of-srtj-graph-dir-writer-routing-aecc88921a54",
+  "reviewed_base_sha": "6e9edb8bf46c3b4c0e247dda143986b7c3e94372",
+  "reviewed_head_sha": "aecc88921a54f45fff6bfcfa5085dc2497f465df",
+  "reviewed_run_id": "r-20261027T074245280760-srtj-graph-dir-writer-routing",
+  "scores": {
+    "durability": 13,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T08:19:03.204826+00:00",
+  "total": 108
+}
