@@ -16,6 +16,29 @@ from imas_codex.standard_names.dd_resolutions import (
 )
 
 
+@pytest.fixture
+def _resolution_authority(seed_dd_resolutions):
+    observed = (
+        ("camera_ir/channel/camera/direction/x", "m", "1"),
+        (
+            "wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/state/incident/values",
+            "W",
+            "W.m^-2",
+        ),
+        ("edge_profiles/ggd/ion/state/ionisation_potential", "e", "eV"),
+        ("equilibrium/time_slice/constraints/pressure/reconstructed", "N.m^-2", "Pa"),
+    )
+    rows = [
+        {"path": path, "published": published, "effective": effective}
+        for path, published, effective in observed
+    ]
+    rows.extend(
+        {"path": f"synthetic_ids/resolution/{index}", "effective": "1"}
+        for index in range(33)
+    )
+    seed_dd_resolutions(rows)
+
+
 @pytest.mark.parametrize(
     ("path", "effective"),
     [
@@ -29,7 +52,9 @@ from imas_codex.standard_names.dd_resolutions import (
     ],
 )
 @pytest.mark.graph
-def test_live_graph_authority_returns_effective_unit(path: str, effective: str) -> None:
+def test_live_graph_authority_returns_effective_unit(
+    path: str, effective: str, _resolution_authority
+) -> None:
     result = resolve_dd_field(
         path=path,
         dd_version="4.1.1",
@@ -42,7 +67,7 @@ def test_live_graph_authority_returns_effective_unit(path: str, effective: str) 
 
 
 @pytest.mark.graph
-def test_live_graph_authority_is_complete() -> None:
+def test_live_graph_authority_is_complete(_resolution_authority) -> None:
     manifest = load_dd_resolution_manifest()
     assert len(manifest.resolutions) == 37
     assert (
@@ -184,7 +209,9 @@ def test_source_refresh_persists_published_bridge_provenance(monkeypatch) -> Non
 
 
 @pytest.mark.graph
-def test_consumer_boundaries_call_typed_authority(monkeypatch) -> None:
+def test_consumer_boundaries_call_typed_authority(
+    monkeypatch, _resolution_authority
+) -> None:
     from imas_codex.standard_names import release_notes, source_refresh
     from imas_codex.standard_names.sources import dd as dd_source
     from imas_codex.standard_names.workers import _is_attachment_consistent

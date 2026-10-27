@@ -92,6 +92,11 @@ def _clean(_gc):
     _wipe()
 
 
+@pytest.fixture()
+def _docs_resolution_authority(seed_dd_resolutions):
+    seed_dd_resolutions([{"path": "synthetic_ids/docs/value", "effective": "eV"}])
+
+
 # ---------------------------------------------------------------------------
 # Graph helpers (create / fetch / manipulate)
 # ---------------------------------------------------------------------------
@@ -446,7 +451,9 @@ def test_docs_exhaustion_path(_gc, _clean):
 
 @pytest.mark.graph
 @pytest.mark.integration
-def test_docs_escalation_at_final_attempt(_gc, _clean, mock_llm):
+def test_docs_escalation_at_final_attempt(
+    _gc, _clean, mock_llm, _docs_resolution_authority
+):
     """process_refine_docs_batch uses DEFAULT_ESCALATION_MODEL at docs_chain_length=2."""
     from imas_codex.standard_names.models import RefinedDocs
     from imas_codex.standard_names.workers import process_refine_docs_batch

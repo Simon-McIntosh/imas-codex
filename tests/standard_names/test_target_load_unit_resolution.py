@@ -47,6 +47,16 @@ def _existing_target_load(path: str) -> DDResolutionRecord:
     )
 
 
+@pytest.fixture
+def _target_load_graph(seed_dd_resolutions):
+    seed_dd_resolutions(
+        [
+            {"path": path, "published": "W", "effective": "W.m^-2"}
+            for path in TARGET_LOAD_RESOLUTION_PATHS
+        ]
+    )
+
+
 def test_target_load_cohort_is_exactly_the_two_wall_paths() -> None:
     assert set(TARGET_LOAD_RESOLUTION_PATHS) == {
         "wall/global_quantities/power_density_inner_target_max",
@@ -111,7 +121,7 @@ def test_cohort_builder_refuses_conflicting_existing_authority() -> None:
 
 
 @pytest.mark.graph
-def test_live_target_load_cohort_has_exact_edges_and_units() -> None:
+def test_live_target_load_cohort_has_exact_edges_and_units(_target_load_graph) -> None:
     """The registered resolution must survive: both wall paths stay W.m^-2.
 
     This is the regression gate for the rename-unit-authority agreement: if

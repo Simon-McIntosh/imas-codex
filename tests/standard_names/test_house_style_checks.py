@@ -39,6 +39,32 @@ _BERYLLIUM = "flux_surface_averaged_beryllium_density_at_plasma_boundary"
 _CANONICAL_OPENING = "Number density of argon ions on the last closed flux surface."
 
 
+@pytest.fixture
+def _roster_graph(disposable_neo4j_uri):
+    from pathlib import Path
+
+    from imas_codex.graph.client import GraphClient
+    from imas_codex.standard_names.sources_manifest import load_names_file
+
+    roster = Path(
+        "imas_codex/standard_names/manifests/reviews/"
+        "v0.4.0rc7+west-task-2e.sn_names.yaml"
+    )
+    names = load_names_file(roster)
+    with GraphClient() as graph:
+        graph.query(
+            """
+            UNWIND $names AS name
+            MERGE (sn:StandardName {id: name})
+            ON CREATE SET sn.test_roster_seed = true
+            """,
+            names=names,
+        )
+    yield
+    with GraphClient() as graph:
+        graph.query("MATCH (sn:StandardName {test_roster_seed: true}) DETACH DELETE sn")
+
+
 def _documentation(equation: str, *, opening: str = _CANONICAL_OPENING) -> str:
     return (
         f"{opening}\n\n"
@@ -151,7 +177,7 @@ def test_house_style_findings_read_the_selected_entries() -> None:
 
 @pytest.mark.graph
 @pytest.mark.timeout(600)
-def test_live_roster_census_records_per_class_counts() -> None:
+def test_live_roster_census_records_per_class_counts(_roster_graph) -> None:
     from pathlib import Path
 
     from imas_standard_names.grammar.terms import load_conventions

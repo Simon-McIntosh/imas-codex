@@ -47,6 +47,60 @@ _RETAINED_CHARGE_PATHS = tuple(
 )
 
 
+@pytest.fixture
+def _ionisation_graph(seed_dd_resolutions):
+    seed_dd_resolutions(
+        [
+            {
+                "path": path,
+                "published": "e",
+                "effective": "eV",
+                "gap_kind": "self_contradiction",
+                "upstream": "https://github.com/iterorganization/IMAS-Data-Dictionary/pull/280",
+                "commit": "commits:30a5ddd4b7037b9f93a8f00f7837809403349d99",
+            }
+            for path in IONISATION_POTENTIAL_RESOLUTION_PATHS
+        ]
+    )
+
+
+@pytest.fixture
+def _exclusion_graph(seed_dd_resolutions):
+    from imas_codex.graph.client import GraphClient
+
+    seed_dd_resolutions([{"path": "synthetic_ids/exclusion/value", "effective": "1"}])
+    rows = [
+        {"path": path, "unit": "", "status": "active"}
+        for path in _PRESENT_UNITLESS_INDEX_PATHS
+    ]
+    rows += [
+        {"path": path, "unit": "", "status": "removed"}
+        for path in _ABSENT_ERROR_INDEX_PATHS
+    ]
+    rows += [
+        {"path": path, "unit": "e", "status": "active"}
+        for path in _RETAINED_CHARGE_PATHS
+    ]
+    with GraphClient() as graph:
+        graph.query(
+            """
+            UNWIND $rows AS row
+            MERGE (node:IMASNode {id: row.path})
+            SET node.unit = row.unit, node.lifecycle_status = row.status
+            FOREACH (_ IN CASE WHEN row.unit = 'e' THEN [1] ELSE [] END |
+                MERGE (unit:Unit {id: 'e'})
+                MERGE (node)-[:HAS_UNIT]->(unit))
+            """,
+            rows=rows,
+        )
+    yield
+    with GraphClient() as graph:
+        graph.query(
+            "MATCH (node:IMASNode) WHERE node.id IN $paths DETACH DELETE node",
+            paths=[row["path"] for row in rows],
+        )
+
+
 def test_schema_declares_resolution_provenance_and_surviving_gates() -> None:
     schema = yaml.safe_load(Path("imas_codex/schemas/standard_name.yaml").read_text())
     assert "DDResolutionStateChange" not in schema["classes"]
@@ -288,7 +342,9 @@ def test_graph_port_classifies_effective_replay_as_unchanged() -> None:
 
 
 @pytest.mark.graph
-def test_live_ionisation_potential_cohort_has_exact_edges_and_units() -> None:
+def test_live_ionisation_potential_cohort_has_exact_edges_and_units(
+    _ionisation_graph,
+) -> None:
     from imas_codex.graph.client import GraphClient
 
     with GraphClient() as graph:
@@ -321,7 +377,9 @@ def test_live_ionisation_potential_cohort_has_exact_edges_and_units() -> None:
 
 
 @pytest.mark.graph
-def test_live_exclusion_census_is_read_only_and_matches_exact_release() -> None:
+def test_live_exclusion_census_is_read_only_and_matches_exact_release(
+    _exclusion_graph,
+) -> None:
     from imas_codex.graph.client import GraphClient
     from imas_codex.graph.dd_lifecycle import dd_path_index
 

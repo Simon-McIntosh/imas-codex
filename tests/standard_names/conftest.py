@@ -11,6 +11,7 @@ Stages map to worker pool names: ``'generate_name'``, ``'review_name'``,
 from __future__ import annotations
 
 import dataclasses
+import json
 import os
 import signal
 import socket
@@ -18,12 +19,78 @@ import subprocess
 import sys
 import tempfile
 import time
+import uuid
 from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 from unittest.mock import patch
 
 import pytest
+
+
+@pytest.fixture
+def seed_dd_resolutions(disposable_neo4j_uri):
+    """Install exact DD bridges for one test, then remove every seeded node."""
+    from imas_codex.graph.client import GraphClient
+
+    token = uuid.uuid4().hex
+
+    def seed(rows):
+        records = [
+            {
+                **row,
+                "id": f"test-resolution:{token}:{row['path']}",
+                "gap_id": f"test-gap:{token}:{row['path']}",
+                "published_value": json.dumps(row.get("published", "m")),
+                "effective_value": json.dumps(row["effective"]),
+            }
+            for row in rows
+        ]
+        with GraphClient() as graph:
+            graph.query(
+                """
+                UNWIND $records AS row
+                MERGE (source:IMASNode {id: row.path})
+                  ON CREATE SET source.test_seed = $token
+                SET source.unit = row.effective
+                MERGE (unit:Unit {id: row.effective})
+                  ON CREATE SET unit.test_seed = $token
+                MERGE (source)-[:HAS_UNIT]->(unit)
+                MERGE (version:DDVersion {id: '4.1.1'})
+                  ON CREATE SET version.test_seed = $token
+                MERGE (gap:DDGap {id: row.gap_id})
+                  ON CREATE SET gap.test_seed = $token
+                SET gap.kind = coalesce(row.gap_kind, 'unit_defect'),
+                    gap.status = 'flagged'
+                CREATE (resolution:DDResolution {id: row.id})
+                SET resolution.test_seed = $token,
+                    resolution.path = row.path,
+                    resolution.dd_version = '4.1.1',
+                    resolution.field = 'unit',
+                    resolution.published_kind = 'string',
+                    resolution.published_value = row.published_value,
+                    resolution.effective_kind = 'string',
+                    resolution.effective_value = row.effective_value,
+                    resolution.reason = 'Deterministic test authority',
+                    resolution.recorded_by = 'test fixture',
+                    resolution.recorded_at = datetime('2026-08-19T00:00:00Z'),
+                    resolution.upstream_reference = coalesce(row.upstream, 'none-yet'),
+                    resolution.upstream_commit_reference = row.commit,
+                    resolution.retiring_release = 'none-yet',
+                    resolution.status = 'active'
+                MERGE (source)-[:BRIDGED_BY]->(resolution)
+                MERGE (resolution)-[:EVIDENCED_BY]->(gap)
+                MERGE (resolution)-[:FOR_DD_VERSION]->(version)
+                """,
+                records=records,
+                token=token,
+            )
+
+    yield seed
+    with GraphClient() as graph:
+        graph.query(
+            "MATCH (node) WHERE node.test_seed = $token DETACH DELETE node", token=token
+        )
 
 
 def pytest_collection_modifyitems(items):
