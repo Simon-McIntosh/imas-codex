@@ -64,12 +64,18 @@ from imas_codex.standard_names.review.holds import (
 from imas_codex.standard_names.signed_manifest import apply_signed_manifest
 
 # Wire graph-domain calls through the entrypoint at runtime.
-from .graph_store import graph_foundation as _graph_foundation
+from .graph_store import (
+    graph_foundation as _graph_foundation,
+    resolve_owned_name as _resolve_owned_graph_name,
+)
 
 
 class _GraphServices:
     def __getattr__(self, name: str) -> Any:
-        return globals()[name]
+        try:
+            return _resolve_owned_graph_name(name)
+        except AttributeError:
+            return globals()[name]
 
 
 _graph_foundation.wire_services(_GraphServices())

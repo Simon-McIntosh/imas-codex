@@ -60,7 +60,8 @@ from imas_codex.standard_names.review.holds import (
 )
 from imas_codex.standard_names.signed_manifest import apply_signed_manifest
 
-_services: Any | None = None
+_UNINITIALIZED_SERVICES = object()
+_services: Any = _UNINITIALIZED_SERVICES
 
 
 def wire_services(services: Any) -> None:
@@ -71,9 +72,17 @@ def wire_services(services: Any) -> None:
 
 def get_services() -> Any:
     """Return wired collaborators or explain a missing composition root."""
-    if _services is None:
+    if _services is _UNINITIALIZED_SERVICES or _services is None:
         raise RuntimeError("Graph services are not wired; import graph_ops first")
     return _services
+
+
+def services_for_call() -> Any:
+    """Wire the composition root on first direct call, then return its services."""
+    if _services is _UNINITIALIZED_SERVICES:
+        from imas_codex.standard_names import graph_ops  # noqa: F401
+
+    return get_services()
 
 
 logger = logging.getLogger(__name__)
