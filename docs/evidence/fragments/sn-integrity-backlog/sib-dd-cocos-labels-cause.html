@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-dd-cocos-labels-cause">
+<title>The DD build cleared every COCOS label its IDS shard did not re-derive</title>
+</head>
+<body>
+<main>
+<h1 id="sib-dd-cocos-labels-cause-title">The DD build cleared every COCOS label its IDS shard did not re-derive</h1>
+
+<p id="sib-dd-cocos-labels-cause-summary">
+The live graph holds <strong>9</strong> labelled <code>IMASNode</code>s out of 61,366
+(6 <code>cocos_label_source='xml'</code>, 3 <code>'inferred_sign_flip'</code>),
+against 623 fields the 3.42.2 DD declares with
+<code>cocos_label_transformation</code>. The loss is not in extraction: the labels
+come from the DD, and the 4.x line dropped the attribute while the 3.x line still
+declares it. The loss is a <strong>delete</strong> in <code>phase_build</code>. The
+stale-label pass nulls <code>cocos_transformation_type</code> on
+<em>every</em> <code>IMASNode</code> whose id is not in the current build's
+<code>latest_labeled | backfilled_paths</code>, with no scope filter at all. DD builds
+are run sharded by IDS — the log records
+<code>ids_filter=['gyrokinetics_local'] scoped run</code>,
+<code>ids_filter=['camera_ir', 'camera_visible', …] scoped run</code> and nine more in
+one minute — so each shard's build cleared every other shard's labels, and the
+last shard to finish decided what survived.
+</p>
+
+<h2 id="sib-dd-cocos-labels-cause-date">Date and the invocation that lost them</h2>
+<p>
+<code>~/.local/share/imas-codex/logs/imas_dd_dd.log</code> (times are host-local,
+Europe/Paris, UTC+2). The last DD build wave ran <strong>2026-10-15
+11:42:43&#8202;–&#8202;11:54:15</strong>; the scoped shards inside it are logged at
+11:43:45 (<code>core_instant_changes, plasma_sources, spectrometer_x_ray_crystal</code>),
+11:43:51 (<code>camera_ir, camera_visible, charge_exchange, hard_x_rays, pf_active,
+reflectometer_fluctuation, soft_x_rays, spectrometer_uv</code>), 11:43:54
+(<code>bolometer, core_sources, ece, langmuir_probes, mhd, radiation, runaway_electrons</code>)
+and 11:43:55&#8202;/&#8202;56 (<code>edge_profiles</code>). The shard run immediately
+before, at 11:38, shows the same pattern. The last shard to finish was
+<strong><code>edge_profiles</code> at 11:43:56</strong>, and the surviving labels are
+exactly that shard's: both labelled holdout paths that survive
+(<code>edge_profiles/profiles_1d/{grid/psi,q}</code>) belong to <code>edge_profiles</code>,
+and none of the other 22 do.
+</p>
+<p>
+The invocation is therefore an IDS-scoped <code>imas-codex imas dd build --ids …</code>
+of the 2026-10-15 11:43 wave — each member of that wave cleared the labels of
+every IDS it was not given. The earliest such scoped invocation in this log is
+2026-06-18 16:26:56 (<code>ids_filter=['equilibrium']</code>), so the deletion
+predates 2026-10-15; that day's wave is the one whose surviving set the graph
+now carries. No build has run since: the log's last entries (2026-10-16 13:06 and
+13:14) are <code>dd refresh-domains --dry-run</code>, which writes nothing.
+</p>
+
+<h2 id="sib-dd-cocos-labels-cause-repro">Reproduction on a disposable graph</h2>
+<p>
+Three tests drive the real <code>phase_build</code> against an empty Neo4j
+(<code>disposable_graph</code>), each with a 3.x version that declares the label
+and a 4.x version that does not. At base (<code>058c6a1e1</code>, log
+<code>negative-control-base.log</code>) all three fail:
+</p>
+<ul>
+<li><code>test_full_sharded_build_keeps_every_shards_labels</code> —
+<em>the equilibrium shard's forward-ported label was cleared</em>; the only label
+left was the second shard's.</li>
+<li><code>test_scoped_build_leaves_out_of_scope_labels_intact</code> —
+<em>a scoped build cleared a label outside its scope</em> (<code>assert None ==
+'psi_like'</code>).</li>
+<li><code>test_full_rebuild_is_idempotent_on_labels</code> —
+<em>a 3.x-declared label was cleared although a version in the build declares it</em>.</li>
+</ul>
+<p>
+At head (<code>45eb2442d</code>, log <code>head-arm.log</code>) the same three
+tests pass, <code>EXIT=0</code>.
+</p>
+
+<h2 id="sib-dd-cocos-labels-cause-fix">The fix</h2>
+<p>
+<code>phase_build</code> now scopes the clear to what the build examined: it
+matches only nodes whose IDS unit is in the build's <code>version_data</code>,
+excludes paths the newest in-scope 3.x version declares a label for
+(<code>_reference_cocos_labels</code>, shared with the forward-port backfill), and
+refuses to clear <code>xml</code> or <code>inferred_forward</code> labels at all
+when no label-declaring version is in scope (an incremental
+<code>--from-version</code> run starting after the 3.x line). A label can now
+leave the graph only when a build covering its path, and a version that could
+declare it, shows the DD no longer declares it.
+</p>
+
+<h2 id="sib-dd-cocos-labels-cause-restore">Expected restoration</h2>
+<p>
+Read-only measurement against the live graph
+(<code>measure_restore.py</code>, log <code>measure.log</code>): 3.42.2 declares
+<strong>623</strong> fields with <code>cocos_label_transformation</code>; all 623
+exist as <code>IMASNode</code>s; <strong>617</strong> are currently unlabelled and
+would be restored (the other 6 already carry the same label — zero disagreements).
+The 24 labelled holdout paths and the label each should carry:
+</p>
+<table id="sib-dd-cocos-labels-cause-holdout">
+<thead><tr><th>DD path</th><th>Label (frozen holdout)</th><th>Graph now</th></tr></thead>
+<tbody>
+<tr><td><code>core_profiles/profiles_1d/q</code></td><td>q_like</td><td><strong>null — lost</strong></td></tr>
+<tr><td><code>core_sources/source/profiles_1d/grid/psi</code></td><td>psi_like</td><td><strong>null — lost</strong></td></tr>
+<tr><td><code>disruption/profiles_1d/grid/psi</code></td><td>psi_like</td><td><strong>null — lost</strong></td></tr>
+<tr><td><code>distribution_sources/source/profiles_1d/grid/psi</code></td><td>psi_like</td><td><strong>null — lost</strong></td></tr>
+<tr><td><code>distributions/distribution/profiles_1d/grid/psi</code></td><td>psi_like</td><td><strong>null — lost</strong></td></tr>
+<tr><td><code>edge_profiles/profiles_1d/grid/psi</code></td><td>psi_like</td><td>psi_like</td></tr>
+<tr><td><code>edge_profiles/profiles_1d/q</code></td><td>q_like</td><td>q_like</td></tr>
+<tr><td><code>equilibrium/time_slice/ggd/psi/values</code></td><td>psi_like</td><td><strong>null — lost</strong></td></tr>
+<tr><td><code>equilibrium/time_slice/profiles_1d/q</code></td><td>q_like</td><td><strong>null — lost</strong></td></tr>
+<tr><td><code>equilibrium/time_slice/profiles_2d/psi</code></td><td>psi_like</td><td><strong>null — lost</strong></td></tr>
+<tr><td><code>magnetics/b_field_phi_probe/field</code></td><td>one_like</td><td><strong>null — lost</strong></td></tr>
+<tr><td><code>magnetics/b_field_pol_probe/field</code></td><td>one_like</td><td><strong>null — lost</strong></td></tr>
+<tr><td><code>mhd/ggd/psi/values</code></td><td>psi_like</td><td><strong>null — lost</strong></td></tr>
+<tr><td><code>plasma_profiles/ggd/psi/values</code></td><td>psi_like</td><td><strong>null — lost</strong></td></tr>
+<tr><td><code>plasma_profiles/profiles_1d/grid/psi</code></td><td>psi_like</td><td><strong>null — lost</strong></td></tr>
+<tr><td><code>plasma_profiles/profiles_1d/q</code></td><td>q_like</td><td><strong>null — lost</strong></td></tr>
+<tr><td><code>plasma_transport/model/profiles_1d/grid_d/psi</code></td><td>psi_like</td><td><strong>null — lost</strong></td></tr>
+<tr><td><code>plasma_transport/model/profiles_1d/grid_flux/psi</code></td><td>psi_like</td><td><strong>null — lost</strong></td></tr>
+<tr><td><code>plasma_transport/model/profiles_1d/grid_v/psi</code></td><td>psi_like</td><td><strong>null — lost</strong></td></tr>
+<tr><td><code>runaway_electrons/profiles_1d/grid/psi</code></td><td>psi_like</td><td><strong>null — lost</strong></td></tr>
+<tr><td><code>transport_solver_numerics/solver_1d/grid/psi</code></td><td>psi_like</td><td><strong>null — lost</strong></td></tr>
+<tr><td><code>wall/description_ggd/ggd/psi/values</code></td><td>psi_like</td><td><strong>null — lost</strong></td></tr>
+<tr><td><code>waves/coherent_wave/profiles_1d/grid/psi</code></td><td>psi_like</td><td><strong>null — lost</strong></td></tr>
+<tr><td><code>waves/coherent_wave/profiles_2d/grid/psi</code></td><td>psi_like</td><td><strong>null — lost</strong></td></tr>
+</tbody>
+</table>
+<p>
+22 of the 24 are lost. Both survivors are <code>edge_profiles</code> paths, which
+is the signature of the last shard being <code>edge_profiles</code>. The failing
+test <code>tests/standard_names/test_docs_holdout_set.py::test_docs_holdout_physics_authority_matches_dd_path_bindings</code>
+(<code>assert 'one_like' == None</code>) is this defect and needs no change: the
+test is correct, and a full rebuild of the DD graph restores the authority it
+reads.
+</p>
+
+<h2 id="sib-dd-cocos-labels-cause-gate">Gate</h2>
+<p>
+<code>tests/graph/</code> on default markers, base <code>058c6a1e1</code> and head
+<code>45eb2442d</code>, each with its own <code>--basetemp</code>: both arms
+<strong>3 failed, 646 passed</strong> with the <em>same</em> three failure ids
+(<code>test_cypher_property_check::test_repository_cypher_literals_have_declared_properties</code>,
+<code>test_dd_path_domain_upsert::test_path_upsert_keeps_classified_domain_and_defaults_unclassified_path</code>,
+<code>test_updated_at_coverage::test_standard_name_package_matches_updated_at_debt_baseline</code>).
+Zero added failure ids. The DD-build graph tests under <code>-m graph</code> on the
+disposable Neo4j: 3 passed, <code>EXIT=0</code>.
+</p>
+</body>
+</html>
