@@ -233,6 +233,8 @@ def main() -> int:
     parser.add_argument("--apply", action="store_true")
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--scope-manifest", type=Path)
+    parser.add_argument("--only", choices=("product", "tests"))
+    parser.add_argument("--exclude", action="append", default=[])
     args = parser.parse_args()
     mapping, stale = owners()
     allowed: set[str] = set()
@@ -249,6 +251,11 @@ def main() -> int:
     ).splitlines()
     if args.scope_manifest:
         paths = [name for name in paths if name in allowed]
+    if args.only == "product":
+        paths = [name for name in paths if name.startswith("imas_codex/")]
+    elif args.only == "tests":
+        paths = [name for name in paths if name.startswith("tests/")]
+    paths = [name for name in paths if name not in args.exclude]
     totals: Counter[str] = Counter()
     changed: list[str] = []
     for name in paths:
