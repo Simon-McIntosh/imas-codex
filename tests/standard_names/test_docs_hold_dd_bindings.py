@@ -16,6 +16,9 @@ import pytest
 
 from imas_codex.standard_names import workers
 from imas_codex.standard_names.review import pipeline
+from imas_codex.standard_names.worker_tasks import (
+    worker_review_docs as _owning_worker_review_docs,
+)
 
 DD_PATH = "equilibrium/time_slice/profiles_1d/psi"
 
@@ -43,7 +46,12 @@ async def test_derived_only_binding_is_not_held():
             }
         ],
     )
-    assert await workers._documentation_contradiction_note(item, MagicMock()) is None
+    assert (
+        await _owning_worker_review_docs._documentation_contradiction_note(
+            item, MagicMock()
+        )
+        is None
+    )
 
 
 @pytest.mark.asyncio
@@ -58,7 +66,12 @@ async def test_manual_only_binding_is_not_held():
             }
         ],
     )
-    assert await workers._documentation_contradiction_note(item, MagicMock()) is None
+    assert (
+        await _owning_worker_review_docs._documentation_contradiction_note(
+            item, MagicMock()
+        )
+        is None
+    )
 
 
 @pytest.mark.asyncio
@@ -68,29 +81,40 @@ async def test_dd_binding_without_fetched_text_is_held():
             {"id": "src-dd-1", "source_type": "dd", "dd_path": f"dd:{DD_PATH}"}
         ],
     )
-    note = await workers._documentation_contradiction_note(item, MagicMock())
+    note = await _owning_worker_review_docs._documentation_contradiction_note(
+        item, MagicMock()
+    )
     assert note == f"DD source text unavailable at {DD_PATH}"
 
 
 @pytest.mark.asyncio
 async def test_dd_source_path_without_binding_is_held():
     item = _item(source_paths=[f"dd:{DD_PATH}"])
-    note = await workers._documentation_contradiction_note(item, MagicMock())
+    note = await _owning_worker_review_docs._documentation_contradiction_note(
+        item, MagicMock()
+    )
     assert note == f"DD source text unavailable at {DD_PATH}"
 
 
 @pytest.mark.asyncio
 async def test_facility_only_source_path_is_not_held():
     item = _item(source_paths=["tcv:ip/measured"])
-    assert await workers._documentation_contradiction_note(item, MagicMock()) is None
+    assert (
+        await _owning_worker_review_docs._documentation_contradiction_note(
+            item, MagicMock()
+        )
+        is None
+    )
 
 
 @pytest.mark.asyncio
 async def test_normalised_dd_source_path_still_holds():
     """A prepared item keeps its DD hold through the source-path rewrite."""
     item = _item(source_paths=["dd:equilibrium/time_slice/profiles_1d/j_tor"])
-    workers._set_docs_review_dd_source_paths(item)
-    note = await workers._documentation_contradiction_note(item, MagicMock())
+    _owning_worker_review_docs._set_docs_review_dd_source_paths(item)
+    note = await _owning_worker_review_docs._documentation_contradiction_note(
+        item, MagicMock()
+    )
     assert (
         note == "DD source text unavailable at equilibrium/time_slice/profiles_1d/j_tor"
     )
@@ -99,8 +123,13 @@ async def test_normalised_dd_source_path_still_holds():
 @pytest.mark.asyncio
 async def test_normalised_facility_source_path_is_not_held():
     item = _item(source_paths=["tcv:ip/measured"])
-    workers._set_docs_review_dd_source_paths(item)
-    assert await workers._documentation_contradiction_note(item, MagicMock()) is None
+    _owning_worker_review_docs._set_docs_review_dd_source_paths(item)
+    assert (
+        await _owning_worker_review_docs._documentation_contradiction_note(
+            item, MagicMock()
+        )
+        is None
+    )
 
 
 @pytest.mark.asyncio
@@ -115,7 +144,9 @@ async def test_facility_path_with_dd_binding_holds_only_the_dd_path():
             }
         ],
     )
-    note = await workers._documentation_contradiction_note(item, MagicMock())
+    note = await _owning_worker_review_docs._documentation_contradiction_note(
+        item, MagicMock()
+    )
     assert (
         note == "DD source text unavailable at equilibrium/time_slice/profiles_1d/j_tor"
     )
@@ -128,7 +159,9 @@ async def test_dd_prefixed_binding_source_id_is_held():
             {"id": "src-x", "source_type": "derived", "source_id": f"dd:{DD_PATH}"}
         ],
     )
-    note = await workers._documentation_contradiction_note(item, MagicMock())
+    note = await _owning_worker_review_docs._documentation_contradiction_note(
+        item, MagicMock()
+    )
     assert note == "DD source text unavailable; claim comparison could not run"
 
 
@@ -148,8 +181,8 @@ async def test_veto_request_holds_a_dd_source_path_with_missing_text(monkeypatch
         id="poloidal_flux_at_axis",
         source_paths=["dd:equilibrium/time_slice/profiles_1d/j_tor"],
     )
-    request = await workers.prepare_docs_review_request(item)
-    note = await workers._documentation_contradiction_note(
+    request = await _owning_worker_review_docs.prepare_docs_review_request(item)
+    note = await _owning_worker_review_docs._documentation_contradiction_note(
         request["veto_item"], MagicMock()
     )
     assert (
@@ -161,9 +194,9 @@ async def test_veto_request_holds_a_dd_source_path_with_missing_text(monkeypatch
 async def test_veto_request_does_not_hold_a_facility_only_item(monkeypatch):
     monkeypatch.setattr(pipeline, "_fetch_review_dd_context", lambda names: None)
     item = _item(source_paths=["tcv:ip/measured"])
-    request = await workers.prepare_docs_review_request(item)
+    request = await _owning_worker_review_docs.prepare_docs_review_request(item)
     assert (
-        await workers._documentation_contradiction_note(
+        await _owning_worker_review_docs._documentation_contradiction_note(
             request["veto_item"], MagicMock()
         )
         is None
@@ -171,15 +204,19 @@ async def test_veto_request_does_not_hold_a_facility_only_item(monkeypatch):
 
 
 def test_hold_predicate_reads_only_dd_sources():
-    assert not workers._has_dd_source_reference(
+    assert not _owning_worker_review_docs._has_dd_source_reference(
         _item(source_bindings=[{"source_type": "derived", "source_id": "derived:x"}])
     )
-    assert not workers._has_dd_source_reference(
+    assert not _owning_worker_review_docs._has_dd_source_reference(
         _item(source_bindings=[{"source_type": "manual", "source_id": "MANUAL-17"}])
     )
-    assert workers._has_dd_source_reference(
+    assert _owning_worker_review_docs._has_dd_source_reference(
         _item(source_bindings=[{"source_type": "dd", "dd_path": f"dd:{DD_PATH}"}])
     )
-    assert workers._has_dd_source_reference(_item(source_paths=[f"dd:{DD_PATH}"]))
-    assert not workers._has_dd_source_reference(_item())
-    assert not workers._has_dd_source_reference(_item(source_paths=["tcv:ip/measured"]))
+    assert _owning_worker_review_docs._has_dd_source_reference(
+        _item(source_paths=[f"dd:{DD_PATH}"])
+    )
+    assert not _owning_worker_review_docs._has_dd_source_reference(_item())
+    assert not _owning_worker_review_docs._has_dd_source_reference(
+        _item(source_paths=["tcv:ip/measured"])
+    )

@@ -18,7 +18,9 @@ from click.testing import CliRunner
 
 from imas_codex.cli.sn import sn
 from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.graph_ops import partition_focus_by_accepted
+from imas_codex.standard_names.graph_store.graph_claim_scope import (
+    partition_focus_by_accepted,
+)
 
 PREFIX = "__focusreseedtest__"
 ACCEPTED_PATH = f"{PREFIX}/accepted_leaf"
@@ -87,7 +89,7 @@ def _stub_seed(monkeypatch):
     ``name_stage``) runs via a direct query and stays real.
     """
     monkeypatch.setattr(
-        "imas_codex.standard_names.graph_ops.merge_standard_name_sources",
+        "imas_codex.standard_names.graph_store.graph_source_bindings.merge_standard_name_sources",
         lambda sources, force=False, default_dd_version=None: len(sources),
     )
 
@@ -170,7 +172,7 @@ def test_focus_seeds_new_sources_with_default_dd_version(
         return len(sources)
 
     monkeypatch.setattr(
-        "imas_codex.standard_names.graph_ops.merge_standard_name_sources",
+        "imas_codex.standard_names.graph_store.graph_source_bindings.merge_standard_name_sources",
         _capture,
     )
 

@@ -1,6 +1,6 @@
 """Tests for Greek word→symbol normalization of description prose."""
 
-from imas_codex.standard_names.workers import (
+from imas_codex.standard_names.worker_tasks.worker_common import (
     normalize_description_notation,
     normalize_description_text,
 )

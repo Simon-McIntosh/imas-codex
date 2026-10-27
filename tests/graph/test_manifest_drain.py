@@ -15,20 +15,33 @@ from imas_codex.standard_names import graph_ops
 from imas_codex.standard_names.defaults import (
     DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
 )
-from imas_codex.standard_names.graph_ops import (
+from imas_codex.standard_names.graph_store import (
+    graph_claim_scope as _owning_graph_claim_scope,
+)
+from imas_codex.standard_names.graph_store.graph_claim_scope import (
     ManifestDrainConflict,
     build_manifest_drain_plan,
-    claim_enrich_parents_batch,
-    claim_generate_docs_batch,
-    claim_generate_name_batch,
     claim_manifest_drain_scope,
-    claim_refine_docs_batch,
-    claim_refine_name_batch,
-    claim_review_docs_batch,
-    claim_review_name_batch,
     clear_manifest_drain_scope,
     prepare_manifest_drain_scope,
     release_manifest_drain_claims,
+)
+from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+    claim_generate_name_batch,
+    claim_review_name_batch,
+)
+from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+    claim_generate_docs_batch,
+    claim_refine_docs_batch,
+)
+from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
+    claim_enrich_parents_batch,
+)
+from imas_codex.standard_names.graph_store.graph_refinement import (
+    claim_refine_name_batch,
+)
+from imas_codex.standard_names.graph_store.graph_review_persistence import (
+    claim_review_docs_batch,
 )
 from imas_codex.standard_names.orphan_sweep import recover_manifest_drain_scope
 
@@ -802,7 +815,7 @@ def test_authority_drift_between_plan_and_cas_rolls_back(
     monkeypatch, ephemeral_driver, graph_case, mutation: str
 ) -> None:
     path = graph_case["good"]
-    original_lock = graph_ops._lock_manifest_drain_authority
+    original_lock = _owning_graph_claim_scope._lock_manifest_drain_authority
 
     def mutate_then_lock(gc, paths):
         with ephemeral_driver.session() as session:
@@ -860,7 +873,9 @@ def test_authority_drift_between_plan_and_cas_rolls_back(
                 ).consume()
         original_lock(gc, paths)
 
-    monkeypatch.setattr(graph_ops, "_lock_manifest_drain_authority", mutate_then_lock)
+    monkeypatch.setattr(
+        _owning_graph_claim_scope, "_lock_manifest_drain_authority", mutate_then_lock
+    )
     with _client() as gc, pytest.raises(ManifestDrainConflict):
         claim_manifest_drain_scope(
             [path],
@@ -911,7 +926,7 @@ def test_pinned_source_drift_between_plan_and_cas_rolls_back(
         )
         clear_manifest_drain_scope(initial_scope, gc=gc)
 
-    original_lock = graph_ops._lock_manifest_drain_authority
+    original_lock = _owning_graph_claim_scope._lock_manifest_drain_authority
 
     def mutate_then_lock(gc, paths):
         with ephemeral_driver.session() as session:
@@ -923,7 +938,9 @@ def test_pinned_source_drift_between_plan_and_cas_rolls_back(
             ).consume()
         original_lock(gc, paths)
 
-    monkeypatch.setattr(graph_ops, "_lock_manifest_drain_authority", mutate_then_lock)
+    monkeypatch.setattr(
+        _owning_graph_claim_scope, "_lock_manifest_drain_authority", mutate_then_lock
+    )
     with _client() as gc, pytest.raises(ManifestDrainConflict):
         claim_manifest_drain_scope(
             [path],

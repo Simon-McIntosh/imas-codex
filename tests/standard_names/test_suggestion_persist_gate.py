@@ -6,6 +6,10 @@ import json
 from unittest.mock import MagicMock, patch
 
 from imas_codex.standard_names import graph_ops
+from imas_codex.standard_names.graph_store import (
+    graph_catalog as _owning_graph_catalog,
+    graph_foundation as _owning_graph_foundation,
+)
 
 
 def _review_record(
@@ -82,10 +86,10 @@ def test_write_reviews_clears_only_non_distinct_or_unparseable_suggestions() -> 
     graph = MagicMock()
     graph.query.return_value = []
 
-    with patch.object(graph_ops, "GraphClient") as graph_client:
+    with patch.object(_owning_graph_foundation, "GraphClient") as graph_client:
         graph_client.return_value.__enter__.return_value = graph
         graph_client.return_value.__exit__.return_value = False
-        result = graph_ops.write_reviews(records, skip_cost=True)
+        result = _owning_graph_catalog.write_reviews(records, skip_cost=True)
 
     write_call = next(
         call

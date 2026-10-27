@@ -33,7 +33,9 @@ import uuid
 
 import pytest
 
-from imas_codex.standard_names.graph_ops import clear_standard_names
+from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+    clear_standard_names,
+)
 
 _TEST_ID_PREFIX = "__cleartest__"
 

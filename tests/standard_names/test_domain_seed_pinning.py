@@ -39,10 +39,11 @@ def seed_capture(monkeypatch):
         return len(sources)
 
     monkeypatch.setattr(
-        "imas_codex.standard_names.graph_ops.merge_standard_name_sources", _merge
+        "imas_codex.standard_names.graph_store.graph_source_bindings.merge_standard_name_sources",
+        _merge,
     )
     monkeypatch.setattr(
-        "imas_codex.standard_names.graph_ops.get_existing_standard_names",
+        "imas_codex.standard_names.graph_store.graph_claim_scope.get_existing_standard_names",
         lambda *a, **k: set(),
     )
     return calls

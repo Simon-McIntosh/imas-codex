@@ -11,13 +11,13 @@ import pytest
 from click.testing import CliRunner
 
 from imas_codex.cli.sn import _compute_pool_progress, _run_sn_cmd, sn_run
-from imas_codex.standard_names.graph_ops import (
+from imas_codex.standard_names.graph_store.graph_claim_scope import (
     MANIFEST_DRAIN_DISPOSITIONS,
-    _claim_sn_atomic,
     canonicalize_manifest_drain_paths,
     classify_manifest_drain_item,
     finalize_manifest_drain_scope,
 )
+from imas_codex.standard_names.graph_store.graph_cost_and_claims import _claim_sn_atomic
 
 
 @pytest.fixture(autouse=True)
@@ -216,7 +216,8 @@ def test_scoped_review_restage_is_atomic_in_seed_expand_and_readback(
     client.__exit__.return_value = False
     client.session = session_context
     monkeypatch.setattr(
-        "imas_codex.standard_names.graph_ops.GraphClient", lambda: client
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        lambda: client,
     )
 
     items = _claim_sn_atomic(
@@ -262,12 +263,13 @@ def test_dry_run_stops_before_every_mutator(monkeypatch, tmp_path: Path) -> None
     ]
     monkeypatch.setattr("imas_codex.settings.get_dd_version", lambda: "4.1.0")
     monkeypatch.setattr(
-        "imas_codex.standard_names.graph_ops.build_manifest_drain_plan",
+        "imas_codex.standard_names.graph_store.graph_claim_scope.build_manifest_drain_plan",
         lambda paths, **kwargs: plan,
     )
     forbidden = MagicMock(side_effect=AssertionError("dry run crossed write boundary"))
     monkeypatch.setattr(
-        "imas_codex.standard_names.graph_ops.claim_manifest_drain_scope", forbidden
+        "imas_codex.standard_names.graph_store.graph_claim_scope.claim_manifest_drain_scope",
+        forbidden,
     )
     monkeypatch.setattr("imas_codex.cli.sn._require_embed_ready", forbidden)
 
@@ -307,7 +309,8 @@ def test_dry_run_propagates_selected_reviewer_profile(
 
     monkeypatch.setattr("imas_codex.settings.get_dd_version", lambda: "4.1.0")
     monkeypatch.setattr(
-        "imas_codex.standard_names.graph_ops.build_manifest_drain_plan", build_plan
+        "imas_codex.standard_names.graph_store.graph_claim_scope.build_manifest_drain_plan",
+        build_plan,
     )
 
     result = CliRunner().invoke(
@@ -349,7 +352,7 @@ def test_live_drain_explicit_default_replaces_stale_profile(
     monkeypatch.setenv("IMAS_CODEX_SN_REVIEW_PROFILE", "quality-cost-balanced")
     monkeypatch.setattr("imas_codex.settings.get_dd_version", lambda: "4.1.0")
     monkeypatch.setattr(
-        "imas_codex.standard_names.graph_ops.prepare_manifest_drain_scope",
+        "imas_codex.standard_names.graph_store.graph_claim_scope.prepare_manifest_drain_scope",
         lambda paths, **kwargs: ("owned-scope", [item]),
     )
 
@@ -361,7 +364,7 @@ def test_live_drain_explicit_default_replaces_stale_profile(
 
     monkeypatch.setattr("imas_codex.cli.sn._run_sn_cmd", run)
     monkeypatch.setattr(
-        "imas_codex.standard_names.graph_ops.clear_manifest_drain_scope",
+        "imas_codex.standard_names.graph_store.graph_claim_scope.clear_manifest_drain_scope",
         MagicMock(return_value={"sources": 1, "names": 0}),
     )
 
@@ -404,14 +407,15 @@ def test_live_operator_reports_owned_scope_and_cleans_it(
         return "owned-scope", [item]
 
     monkeypatch.setattr(
-        "imas_codex.standard_names.graph_ops.prepare_manifest_drain_scope",
+        "imas_codex.standard_names.graph_store.graph_claim_scope.prepare_manifest_drain_scope",
         prepare_scope,
     )
     run = MagicMock(return_value={"drain_report": [item]})
     clear = MagicMock(return_value={"sources": 1, "names": 0})
     monkeypatch.setattr("imas_codex.cli.sn._run_sn_cmd", run)
     monkeypatch.setattr(
-        "imas_codex.standard_names.graph_ops.clear_manifest_drain_scope", clear
+        "imas_codex.standard_names.graph_store.graph_claim_scope.clear_manifest_drain_scope",
+        clear,
     )
 
     result = CliRunner().invoke(sn_run, ["--drain-batch", str(manifest)])
@@ -472,7 +476,7 @@ def test_pre_loop_cleanup_does_not_mask_the_primary_failure(
     )
     monkeypatch.setattr("imas_codex.settings.get_dd_version", lambda: "4.1.0")
     monkeypatch.setattr(
-        "imas_codex.standard_names.graph_ops.prepare_manifest_drain_scope",
+        "imas_codex.standard_names.graph_store.graph_claim_scope.prepare_manifest_drain_scope",
         lambda paths, **kwargs: ("owned-scope", [item]),
     )
     monkeypatch.setattr(
@@ -480,7 +484,7 @@ def test_pre_loop_cleanup_does_not_mask_the_primary_failure(
         MagicMock(side_effect=RuntimeError("primary failure")),
     )
     monkeypatch.setattr(
-        "imas_codex.standard_names.graph_ops.clear_manifest_drain_scope",
+        "imas_codex.standard_names.graph_store.graph_claim_scope.clear_manifest_drain_scope",
         MagicMock(side_effect=RuntimeError("cleanup failure")),
     )
 
@@ -583,11 +587,11 @@ async def test_in_loop_cleanup_does_not_mask_the_primary_failure() -> None:
 
 def test_scope_finalization_preserves_primary_cleanup_failure(monkeypatch) -> None:
     monkeypatch.setattr(
-        "imas_codex.standard_names.graph_ops.release_manifest_drain_claims",
+        "imas_codex.standard_names.graph_store.graph_claim_scope.release_manifest_drain_claims",
         MagicMock(side_effect=RuntimeError("release failure")),
     )
     monkeypatch.setattr(
-        "imas_codex.standard_names.graph_ops.clear_manifest_drain_scope",
+        "imas_codex.standard_names.graph_store.graph_claim_scope.clear_manifest_drain_scope",
         MagicMock(side_effect=RuntimeError("clear failure")),
     )
 
@@ -601,15 +605,15 @@ def test_scope_finalization_preserves_primary_cleanup_failure(monkeypatch) -> No
 
 def test_scope_finalization_surfaces_clear_failure_after_success(monkeypatch) -> None:
     monkeypatch.setattr(
-        "imas_codex.standard_names.graph_ops.release_manifest_drain_claims",
+        "imas_codex.standard_names.graph_store.graph_claim_scope.release_manifest_drain_claims",
         MagicMock(return_value={"sources": 0, "names": 0}),
     )
     monkeypatch.setattr(
-        "imas_codex.standard_names.graph_ops.build_manifest_drain_plan",
+        "imas_codex.standard_names.graph_store.graph_claim_scope.build_manifest_drain_plan",
         MagicMock(return_value=[]),
     )
     monkeypatch.setattr(
-        "imas_codex.standard_names.graph_ops.clear_manifest_drain_scope",
+        "imas_codex.standard_names.graph_store.graph_claim_scope.clear_manifest_drain_scope",
         MagicMock(side_effect=RuntimeError("clear failure")),
     )
 

@@ -12,7 +12,7 @@ from imas_codex.standard_names.attachment_audit import (
     AttachmentPairingGuardResult,
     AttachmentVerdict,
 )
-from imas_codex.standard_names.graph_ops import (
+from imas_codex.standard_names.graph_store.graph_refinement import (
     RefinedNamePersistenceRefusal,
     RefinedNamePersistenceRefusalReason,
     persist_refined_name,
@@ -149,7 +149,10 @@ def _persistence_boundary(
     )
     graph = _graph(transaction)
     with (
-        patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=graph),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            return_value=graph,
+        ),
         patch(
             "imas_codex.standard_names.attachment_audit.guard_source_pairings",
             return_value=guard_result,
@@ -164,7 +167,7 @@ def _persistence_boundary(
             "record_standard_name_change",
             return_value="sn-change:test",
         ) as record,
-        patch("imas_codex.standard_names.graph_ops.bump_sn_run_counter"),
+        patch("imas_codex.standard_names.graph_store.graph_audits.bump_sn_run_counter"),
     ):
         yield transaction, guard, retarget, record
 
@@ -269,7 +272,10 @@ def test_predecessor_compare_and_set_loss_has_no_mutation() -> None:
     transaction.run.side_effect = run
     graph = _graph(transaction)
     with (
-        patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=graph),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            return_value=graph,
+        ),
         patch(
             "imas_codex.standard_names.provenance_lifecycle.record_standard_name_change"
         ) as record,
@@ -322,7 +328,7 @@ def test_open_edit_propagation_uses_only_the_atomic_transaction() -> None:
     admitted = AttachmentPairingGuardResult(("dd:path/a",), ())
     with (
         patch(
-            "imas_codex.standard_names.graph_ops.GraphClient",
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=graph,
         ) as graph_client,
         patch(
@@ -339,7 +345,7 @@ def test_open_edit_propagation_uses_only_the_atomic_transaction() -> None:
             "record_standard_name_change",
             return_value="sn-change:edit",
         ) as record,
-        patch("imas_codex.standard_names.graph_ops.bump_sn_run_counter"),
+        patch("imas_codex.standard_names.graph_store.graph_audits.bump_sn_run_counter"),
     ):
         _persist(
             edit_mode=None,
@@ -365,7 +371,10 @@ def test_edit_state_race_fails_the_finalization_fence_and_rolls_back() -> None:
     graph = _graph(transaction)
     admitted = AttachmentPairingGuardResult(("dd:path/a",), ())
     with (
-        patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=graph),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            return_value=graph,
+        ),
         patch(
             "imas_codex.standard_names.attachment_audit.guard_source_pairings",
             return_value=admitted,
@@ -462,7 +471,7 @@ def test_transient_retry_rolls_back_first_event_and_commits_one() -> None:
 
     with (
         patch(
-            "imas_codex.standard_names.graph_ops.GraphClient",
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
             side_effect=graphs,
         ),
         patch(
@@ -480,7 +489,7 @@ def test_transient_retry_rolls_back_first_event_and_commits_one() -> None:
             side_effect=record,
         ),
         patch("imas_codex.discovery.base.claims.time.sleep"),
-        patch("imas_codex.standard_names.graph_ops.bump_sn_run_counter"),
+        patch("imas_codex.standard_names.graph_store.graph_audits.bump_sn_run_counter"),
     ):
         _persist()
 

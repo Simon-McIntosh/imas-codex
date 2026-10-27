@@ -183,7 +183,9 @@ class TestStaleGuidanceStripped:
         """The grammar-retry helper does not claim physical_base is open."""
         import inspect
 
-        from imas_codex.standard_names.workers import _grammar_retry
+        from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+            _grammar_retry,
+        )
 
         src = inspect.getsource(_grammar_retry)
         assert "open vocabulary" not in src, (

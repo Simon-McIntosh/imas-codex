@@ -71,7 +71,7 @@ def _client() -> MagicMock:
 
 
 def test_each_row_lands_in_exactly_one_bucket() -> None:
-    from imas_codex.standard_names.graph_ops import triage_vocab_gaps
+    from imas_codex.standard_names.graph_store.graph_audits import triage_vocab_gaps
 
     res = triage_vocab_gaps(_client(), stale_before=STALE_BEFORE, dry_run=True)
     assert res["checked"] == len(ROWS)
@@ -87,14 +87,14 @@ def test_each_row_lands_in_exactly_one_bucket() -> None:
 
 def test_reuse_verdict_outranks_staleness() -> None:
     """A mechanically-resolved token is reuse even when last seen in June."""
-    from imas_codex.standard_names.graph_ops import triage_vocab_gaps
+    from imas_codex.standard_names.graph_store.graph_audits import triage_vocab_gaps
 
     res = triage_vocab_gaps(_client(), stale_before=STALE_BEFORE, dry_run=True)
     assert [r["token"] for r in res["genuine"]] == ["detection_efficiency"]
 
 
 def test_genuine_list_carries_rotation_inputs() -> None:
-    from imas_codex.standard_names.graph_ops import triage_vocab_gaps
+    from imas_codex.standard_names.graph_store.graph_audits import triage_vocab_gaps
 
     res = triage_vocab_gaps(_client(), stale_before=STALE_BEFORE, dry_run=True)
     entry = res["genuine"][0]
@@ -103,7 +103,7 @@ def test_genuine_list_carries_rotation_inputs() -> None:
 
 
 def test_dry_run_writes_nothing() -> None:
-    from imas_codex.standard_names.graph_ops import triage_vocab_gaps
+    from imas_codex.standard_names.graph_store.graph_audits import triage_vocab_gaps
 
     gc = _client()
     triage_vocab_gaps(gc, stale_before=STALE_BEFORE, dry_run=True)
@@ -111,7 +111,7 @@ def test_dry_run_writes_nothing() -> None:
 
 
 def test_write_stamps_every_node_with_its_bucket() -> None:
-    from imas_codex.standard_names.graph_ops import triage_vocab_gaps
+    from imas_codex.standard_names.graph_store.graph_audits import triage_vocab_gaps
 
     gc = _client()
     triage_vocab_gaps(gc, stale_before=STALE_BEFORE, dry_run=False)

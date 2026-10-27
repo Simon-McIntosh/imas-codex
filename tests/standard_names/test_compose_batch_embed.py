@@ -128,7 +128,7 @@ class TestHybridSearchNeighboursBatch:
                 return_value=[mock_hit],
             ) as mock_search,  # noqa: F841
         ):
-            from imas_codex.standard_names.workers import (
+            from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
                 _hybrid_search_neighbours_batch,
             )
 
@@ -165,7 +165,7 @@ class TestHybridSearchNeighboursBatch:
                 return_value=[],
             ),
         ):
-            from imas_codex.standard_names.workers import (
+            from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
                 _hybrid_search_neighbours_batch,
             )
 
@@ -179,7 +179,7 @@ class TestHybridSearchNeighboursBatch:
 
     def test_empty_items_returns_empty(self) -> None:
         """Empty items list returns empty results."""
-        from imas_codex.standard_names.workers import (
+        from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
             _hybrid_search_neighbours_batch,
         )
 

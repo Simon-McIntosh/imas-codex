@@ -15,6 +15,15 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from imas_codex.standard_names.graph_store import (
+    graph_cost_and_claims as _owning_graph_cost_and_claims,
+    graph_lineage as _owning_graph_lineage,
+    graph_refinement as _owning_graph_refinement,
+)
+from imas_codex.standard_names.worker_tasks import (
+    worker_review_names as _owning_worker_review_names,
+)
+
 
 def _is_materializer_statement(cypher: str) -> bool:
     """Recognise the derived-parent materializer write by the fields it sets.
@@ -131,7 +140,7 @@ def test_seed_parent_sources_creates_source():
     gc.__enter__ = MagicMock(return_value=gc)
     gc.__exit__ = MagicMock(return_value=False)
 
-    from imas_codex.standard_names.graph_ops import seed_parent_sources
+    from imas_codex.standard_names.graph_store.graph_lineage import seed_parent_sources
 
     count = seed_parent_sources(gc)
     assert count == 1
@@ -150,7 +159,7 @@ def test_seed_parent_sources_no_parents():
     gc.__enter__ = MagicMock(return_value=gc)
     gc.__exit__ = MagicMock(return_value=False)
 
-    from imas_codex.standard_names.graph_ops import seed_parent_sources
+    from imas_codex.standard_names.graph_store.graph_lineage import seed_parent_sources
 
     count = seed_parent_sources(gc)
     assert count == 0
@@ -169,7 +178,7 @@ def test_seed_parent_sources_skips_incomplete_children():
     gc.__enter__ = MagicMock(return_value=gc)
     gc.__exit__ = MagicMock(return_value=False)
 
-    from imas_codex.standard_names.graph_ops import seed_parent_sources
+    from imas_codex.standard_names.graph_store.graph_lineage import seed_parent_sources
 
     count = seed_parent_sources(gc)
     assert count == 0
@@ -259,7 +268,7 @@ def test_seed_parent_sources_picks_up_placeholder_without_flag():
     gc.__enter__ = MagicMock(return_value=gc)
     gc.__exit__ = MagicMock(return_value=False)
 
-    from imas_codex.standard_names.graph_ops import seed_parent_sources
+    from imas_codex.standard_names.graph_store.graph_lineage import seed_parent_sources
 
     assert seed_parent_sources(gc) == 1
     # The selection query MUST NOT depend on the needs_composition flag.
@@ -308,7 +317,7 @@ def test_seed_parent_sources_routes_derived_through_review():
     gc.__enter__ = MagicMock(return_value=gc)
     gc.__exit__ = MagicMock(return_value=False)
 
-    from imas_codex.standard_names.graph_ops import seed_parent_sources
+    from imas_codex.standard_names.graph_store.graph_lineage import seed_parent_sources
 
     assert seed_parent_sources(gc) == 1
     write_query = next(q for q in captured_sets if _is_materializer_statement(q))
@@ -349,7 +358,7 @@ def test_seed_parent_sources_keeps_seedable_operator_gate() -> None:
 
     from imas_codex.standard_names import graph_ops
 
-    src = inspect.getsource(graph_ops._query_seedable_derived_parents)
+    src = inspect.getsource(_owning_graph_lineage._query_seedable_derived_parents)
     assert "comp.operator_kind IN" in src
     assert "['projection', 'coordinate', 'unary_postfix']" in src, (
         "seed_parent_sources must stay narrow; qualifier/locus legacy "
@@ -368,7 +377,7 @@ def test_refine_name_claim_skips_derived_origin(monkeypatch: pytest.MonkeyPatch)
     """
     from imas_codex.standard_names import graph_ops
 
-    predicate = graph_ops.REFINE_NAME_ELIGIBILITY_WHERE
+    predicate = _owning_graph_refinement.REFINE_NAME_ELIGIBILITY_WHERE
     assert "coalesce(sn.origin, '') <> 'derived'" in predicate, (
         "Use scalar compare to exclude origin='derived'."
     )
@@ -379,8 +388,10 @@ def test_refine_name_claim_skips_derived_origin(monkeypatch: pytest.MonkeyPatch)
         captured.update(kwargs)
         return []
 
-    monkeypatch.setattr(graph_ops, "_claim_sn_atomic", _capture_claim)
-    assert graph_ops.claim_refine_name_batch() == []
+    monkeypatch.setattr(
+        _owning_graph_cost_and_claims, "_claim_sn_atomic", _capture_claim
+    )
+    assert _owning_graph_refinement.claim_refine_name_batch() == []
     assert captured["eligibility_where"] == predicate
 
 
@@ -397,7 +408,7 @@ def test_review_name_claim_excludes_derived_parents(
     """
     from imas_codex.standard_names import graph_ops
 
-    predicate = graph_ops.REVIEW_NAME_ELIGIBILITY_WHERE
+    predicate = _owning_graph_cost_and_claims.REVIEW_NAME_ELIGIBILITY_WHERE
     assert "coalesce(sn.origin, '') <> 'derived'" in predicate, (
         "claim_review_name_batch must exclude origin='derived' — derived parents "
         "skip REVIEW_NAME and are accepted structurally from their children."
@@ -413,8 +424,10 @@ def test_review_name_claim_excludes_derived_parents(
         captured.update(kwargs)
         return []
 
-    monkeypatch.setattr(graph_ops, "_claim_sn_atomic", _capture_claim)
-    assert graph_ops.claim_review_name_batch() == []
+    monkeypatch.setattr(
+        _owning_graph_cost_and_claims, "_claim_sn_atomic", _capture_claim
+    )
+    assert _owning_graph_cost_and_claims.claim_review_name_batch() == []
     assert captured["eligibility_where"] == predicate
 
 
@@ -429,7 +442,7 @@ def test_review_name_worker_skips_semantic_sim_for_derived():
 
     from imas_codex.standard_names import workers
 
-    src = inspect.getsource(workers.process_review_name_batch)
+    src = inspect.getsource(_owning_worker_review_names.process_review_name_batch)
     assert 'item.get("origin") == "derived"' in src, (
         "review_name_pool_process must branch on origin='derived' "
         "before computing semantic_similarity_check."
@@ -527,7 +540,7 @@ def test_seed_parent_sources_writes_honest_placeholder_description():
     gc.__enter__ = MagicMock(return_value=gc)
     gc.__exit__ = MagicMock(return_value=False)
 
-    from imas_codex.standard_names.graph_ops import seed_parent_sources
+    from imas_codex.standard_names.graph_store.graph_lineage import seed_parent_sources
 
     assert seed_parent_sources(gc) == 1
     write = next(
@@ -611,7 +624,7 @@ def test_persist_refined_name_migrates_component_of_edges():
 
     from imas_codex.standard_names import graph_ops
 
-    src = inspect.getsource(graph_ops.persist_refined_name)
+    src = inspect.getsource(_owning_graph_refinement.persist_refined_name)
     # The migration block must be present in the Cypher.
     assert "HAS_PARENT]->(old)" in src, (
         "persist_refined_name Cypher must locate inbound HAS_PARENT "
@@ -637,7 +650,7 @@ def test_rederive_structural_edges_migrates_off_superseded():
 
     from imas_codex.standard_names import graph_ops
 
-    src = inspect.getsource(graph_ops._rewire_has_parent_off_superseded)
+    src = inspect.getsource(_owning_graph_lineage._rewire_has_parent_off_superseded)
     assert "REFINED_FROM" in src, (
         "Migration must walk REFINED_FROM* to find the live successor."
     )
@@ -683,7 +696,7 @@ def test_seed_parent_sources_skips_heterogeneous_units():
     gc.__enter__ = MagicMock(return_value=gc)
     gc.__exit__ = MagicMock(return_value=False)
 
-    from imas_codex.standard_names.graph_ops import seed_parent_sources
+    from imas_codex.standard_names.graph_store.graph_lineage import seed_parent_sources
 
     count = seed_parent_sources(gc)
     assert count == 0  # Skipped due to unit mismatch
@@ -726,7 +739,7 @@ def test_seed_parent_sources_rejects_unitless_normalization_peel():
         }
     )
 
-    from imas_codex.standard_names.graph_ops import seed_parent_sources
+    from imas_codex.standard_names.graph_store.graph_lineage import seed_parent_sources
 
     count = seed_parent_sources(gc)
     assert count == 0
@@ -755,7 +768,7 @@ def test_seed_parent_sources_keeps_unit_between_normalized_names():
         }
     )
 
-    from imas_codex.standard_names.graph_ops import seed_parent_sources
+    from imas_codex.standard_names.graph_store.graph_lineage import seed_parent_sources
 
     count = seed_parent_sources(gc)
     assert count == 1
@@ -791,7 +804,9 @@ def test_repair_normalization_peel_parent_units_scoping():
 
 def test_docs_enrich_parent_context():
     """Child SN gets parent description and documentation."""
-    from imas_codex.standard_names.workers import _enrich_for_docs_gen
+    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+        _enrich_for_docs_gen,
+    )
 
     parent_data = {
         "name": "magnetic_field",
@@ -810,7 +825,9 @@ def test_docs_enrich_parent_context():
 
 def test_docs_enrich_child_context():
     """Parent SN gets list of child components."""
-    from imas_codex.standard_names.workers import _enrich_for_docs_gen
+    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+        _enrich_for_docs_gen,
+    )
 
     children = [
         {
@@ -835,7 +852,9 @@ def test_docs_enrich_child_context():
 
 def test_docs_enrich_child_components_axis_ordered():
     """Child components sorted by right-handed axis convention (R, φ, Z)."""
-    from imas_codex.standard_names.workers import _enrich_for_docs_gen
+    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+        _enrich_for_docs_gen,
+    )
 
     # Return children in WRONG order: vertical before toroidal
     children = [

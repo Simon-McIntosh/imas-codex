@@ -8,7 +8,16 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from imas_codex.standard_names import workers
+from imas_codex.standard_names.graph_store import (
+    graph_catalog as _owning_graph_catalog,
+    graph_review_persistence as _owning_graph_review_persistence,
+)
 from imas_codex.standard_names.review import cascade, holds, jev_review
+from imas_codex.standard_names.worker_tasks import (
+    worker_common as _owning_worker_common,
+    worker_review_docs as _owning_worker_review_docs,
+    worker_review_names as _owning_worker_review_names,
+)
 
 
 class _HoldRecorder:
@@ -143,23 +152,31 @@ def test_claim_verdict_controls_acceptance(answer, expected_stage):
     manager = MagicMock()
     manager.run_id = "run"
     with (
-        patch.object(workers, "prepare_docs_review_request", prepare),
-        patch.object(workers, "_run_rd_quorum_cycles", review),
+        patch.object(
+            _owning_worker_review_docs, "prepare_docs_review_request", prepare
+        ),
+        patch.object(_owning_worker_review_names, "_run_rd_quorum_cycles", review),
         patch.object(cascade, "adjudicate_review", review),
         patch.object(holds, "raise_hold", hold_records.raise_hold),
         patch.object(
             holds, "clear_holds_not_raised", hold_records.clear_holds_not_raised
         ),
-        patch.object(workers, "_review_dd_source_bindings", return_value={}),
-        patch.object(workers, "_persist_dd_gap_evidence"),
+        patch.object(
+            _owning_worker_common, "_review_dd_source_bindings", return_value={}
+        ),
+        patch.object(_owning_worker_common, "_persist_dd_gap_evidence"),
         patch.object(jev_review, "decide_batch", decide),
-        patch.object(graph_ops, "write_reviews"),
-        patch.object(graph_ops, "update_review_aggregates"),
-        patch.object(graph_ops, "persist_reviewed_docs", persist),
+        patch.object(_owning_graph_catalog, "write_reviews"),
+        patch.object(_owning_graph_catalog, "update_review_aggregates"),
+        patch.object(
+            _owning_graph_review_persistence, "persist_reviewed_docs", persist
+        ),
     ):
         assert (
             asyncio.run(
-                workers.process_review_docs_batch([item], manager, asyncio.Event())
+                _owning_worker_review_docs.process_review_docs_batch(
+                    [item], manager, asyncio.Event()
+                )
             )
             == 1
         )
@@ -294,32 +311,42 @@ def test_second_bound_dd_source_can_hold_documentation():
             "imas_codex.settings.get_sn_review_docs_models", return_value=["test/model"]
         ),
         patch.object(workers, "model_provider_exposure", return_value=0.001),
-        patch.object(workers, "_load_docs_review_examples", return_value=[]),
-        patch.object(workers, "_run_rd_quorum_cycles", review),
+        patch.object(
+            _owning_worker_review_docs, "_load_docs_review_examples", return_value=[]
+        ),
+        patch.object(_owning_worker_review_names, "_run_rd_quorum_cycles", review),
         patch.object(cascade, "adjudicate_review", review),
         patch.object(holds, "raise_hold", hold_records.raise_hold),
         patch.object(
             holds, "clear_holds_not_raised", hold_records.clear_holds_not_raised
         ),
-        patch.object(workers, "_review_dd_source_bindings", return_value={}),
-        patch.object(workers, "_persist_dd_gap_evidence"),
-        patch("imas_codex.standard_names.workers._enrich_batch_items"),
+        patch.object(
+            _owning_worker_common, "_review_dd_source_bindings", return_value={}
+        ),
+        patch.object(_owning_worker_common, "_persist_dd_gap_evidence"),
         patch(
-            "imas_codex.standard_names.workers._hybrid_search_neighbours_batch",
+            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_batch_items"
+        ),
+        patch(
+            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours_batch",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.workers._related_path_neighbours",
+            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._related_path_neighbours",
             return_value=[],
         ),
         patch.object(jev_review, "decide_batch", decide),
-        patch.object(graph_ops, "write_reviews"),
-        patch.object(graph_ops, "update_review_aggregates"),
-        patch.object(graph_ops, "persist_reviewed_docs", persist),
+        patch.object(_owning_graph_catalog, "write_reviews"),
+        patch.object(_owning_graph_catalog, "update_review_aggregates"),
+        patch.object(
+            _owning_graph_review_persistence, "persist_reviewed_docs", persist
+        ),
     ):
         assert (
             asyncio.run(
-                workers.process_review_docs_batch([item], manager, asyncio.Event())
+                _owning_worker_review_docs.process_review_docs_batch(
+                    [item], manager, asyncio.Event()
+                )
             )
             == 1
         )
@@ -388,20 +415,36 @@ def test_stale_docs_claim_cannot_change_winning_holds() -> None:
     manager.run_id = "run"
     persist = MagicMock(return_value="")
     with (
-        patch.object(workers, "prepare_docs_review_request", prepare),
+        patch.object(
+            _owning_worker_review_docs, "prepare_docs_review_request", prepare
+        ),
         patch.object(cascade, "adjudicate_review", review),
-        patch.object(workers, "_documentation_conformance_note", return_value=None),
-        patch.object(workers, "_documentation_banned_prose_note", prose_note),
-        patch.object(workers, "_documentation_contradiction_note", contradiction_note),
+        patch.object(
+            _owning_worker_review_docs,
+            "_documentation_conformance_note",
+            return_value=None,
+        ),
+        patch.object(
+            _owning_worker_review_docs, "_documentation_banned_prose_note", prose_note
+        ),
+        patch.object(
+            _owning_worker_review_docs,
+            "_documentation_contradiction_note",
+            contradiction_note,
+        ),
         patch.object(holds, "raise_hold", hold_records.raise_hold),
         patch.object(
             holds, "clear_holds_not_raised", hold_records.clear_holds_not_raised
         ),
-        patch.object(graph_ops, "persist_reviewed_docs", persist),
-        patch.object(graph_ops, "update_review_aggregates"),
+        patch.object(
+            _owning_graph_review_persistence, "persist_reviewed_docs", persist
+        ),
+        patch.object(_owning_graph_catalog, "update_review_aggregates"),
     ):
         processed = asyncio.run(
-            workers.process_review_docs_batch([item], manager, asyncio.Event())
+            _owning_worker_review_docs.process_review_docs_batch(
+                [item], manager, asyncio.Event()
+            )
         )
 
     assert processed == 0

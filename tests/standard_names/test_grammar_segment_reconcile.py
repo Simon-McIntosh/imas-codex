@@ -13,11 +13,11 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.graph_ops import (
-    _GRAMMAR_SEGMENT_COLUMNS,
-    _parse_grammar,
+from imas_codex.standard_names.graph_store.graph_audits import (
     reconcile_grammar_segments,
 )
+from imas_codex.standard_names.graph_store.graph_catalog import _GRAMMAR_SEGMENT_COLUMNS
+from imas_codex.standard_names.graph_store.graph_foundation import _parse_grammar
 
 
 def test_reconcile_grammar_segments_returns_count():
@@ -39,7 +39,10 @@ def test_drifted_segments_are_written_back_to_the_parse():
     graph_client = MagicMock()
     graph_client.return_value.__enter__.return_value = graph
 
-    with patch("imas_codex.standard_names.graph_ops.GraphClient", graph_client):
+    with patch(
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        graph_client,
+    ):
         result = reconcile_grammar_segments()
 
     assert result == {"names_realigned": 1}
@@ -60,7 +63,10 @@ def test_aligned_segments_are_left_alone():
     graph_client = MagicMock()
     graph_client.return_value.__enter__.return_value = graph
 
-    with patch("imas_codex.standard_names.graph_ops.GraphClient", graph_client):
+    with patch(
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        graph_client,
+    ):
         result = reconcile_grammar_segments()
 
     assert result == {"names_realigned": 0}
@@ -77,7 +83,10 @@ def test_unparseable_names_keep_their_stored_segments():
     graph_client = MagicMock()
     graph_client.return_value.__enter__.return_value = graph
 
-    with patch("imas_codex.standard_names.graph_ops.GraphClient", graph_client):
+    with patch(
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        graph_client,
+    ):
         result = reconcile_grammar_segments()
 
     assert result == {"names_realigned": 0}

@@ -6,6 +6,11 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from imas_codex.standard_names.graph_store import (
+    graph_catalog_reset as _owning_graph_catalog_reset,
+    graph_foundation as _owning_graph_foundation,
+)
+
 
 @pytest.fixture(autouse=True)
 def _no_approved_names():
@@ -23,7 +28,9 @@ def _queries(gc: MagicMock) -> list[str]:
 
 def test_derived_parent_delete_records_change_atomically() -> None:
     """A structural placeholder deletion writes a complete recovery receipt."""
-    from imas_codex.standard_names.graph_ops import _delete_derived_parent_nodes
+    from imas_codex.standard_names.graph_store.graph_lineage import (
+        _delete_derived_parent_nodes,
+    )
 
     gc = MagicMock()
 
@@ -61,7 +68,7 @@ def test_derived_parent_delete_records_change_atomically() -> None:
 
 def test_skeleton_delete_records_change_atomically() -> None:
     """Placeholder cleanup keeps a durable explanation after the node is gone."""
-    from imas_codex.standard_names.graph_ops import write_standard_names
+    from imas_codex.standard_names.graph_store.graph_catalog import write_standard_names
 
     main = MagicMock()
     main.__enter__.return_value = main
@@ -86,7 +93,7 @@ def test_skeleton_delete_records_change_atomically() -> None:
     sweep.query.side_effect = sweep_query
 
     with patch(
-        "imas_codex.standard_names.graph_ops.GraphClient",
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
         side_effect=[main, sweep],
     ):
         write_standard_names(
@@ -127,8 +134,10 @@ def test_scoped_clear_records_each_deletion_in_same_statement() -> None:
         return []
 
     gc.query.side_effect = query
-    with patch.object(graph_ops, "GraphClient", return_value=gc):
-        graph_ops.clear_standard_names(path_allowlist=["equilibrium/a"])
+    with patch.object(_owning_graph_foundation, "GraphClient", return_value=gc):
+        _owning_graph_catalog_reset.clear_standard_names(
+            path_allowlist=["equilibrium/a"]
+        )
 
     delete_query = next(q for q in _queries(gc) if "DETACH DELETE sn" in q)
     assert "DELETE rel" in delete_query
@@ -150,8 +159,8 @@ def test_subsystem_clear_ledgers_names_but_preserves_change_rows() -> None:
     gc.__enter__.return_value = gc
     gc.query.return_value = [{"n": 1}]
 
-    with patch.object(graph_ops, "GraphClient", return_value=gc):
-        graph_ops.clear_sn_subsystem()
+    with patch.object(_owning_graph_foundation, "GraphClient", return_value=gc):
+        _owning_graph_catalog_reset.clear_sn_subsystem()
 
     name_delete = next(
         call for call in gc.query.call_args_list if "DETACH DELETE sn" in call.args[0]

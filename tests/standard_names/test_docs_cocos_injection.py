@@ -46,7 +46,9 @@ def _make_gc(*, cocos_label: str | None = None) -> MagicMock:
 
 def test_cocos_parameter_lookup_uses_schema_relationship():
     """Convention parameters are read through the schema-owned relationship."""
-    from imas_codex.standard_names.workers import _DOCS_GEN_COCOS_PARAMS_QUERY
+    from imas_codex.standard_names.worker_tasks.worker_review_names import (
+        _DOCS_GEN_COCOS_PARAMS_QUERY,
+    )
 
     query = " ".join(_DOCS_GEN_COCOS_PARAMS_QUERY.split())
     assert "(dv:DDVersion {id: $ver})-[:HAS_COCOS]->(c:COCOS)" in query
@@ -55,7 +57,9 @@ def test_cocos_parameter_lookup_uses_schema_relationship():
 
 def test_cocos_label_injected():
     """When SN has cocos_transformation_type, it appears on item."""
-    from imas_codex.standard_names.workers import _enrich_for_docs_gen
+    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+        _enrich_for_docs_gen,
+    )
 
     items = [{"id": "poloidal_flux"}]
     gc = _make_gc(cocos_label="psi_like")
@@ -65,7 +69,9 @@ def test_cocos_label_injected():
 
 def test_cocos_guidance_rendered_with_params():
     """When cocos_params are provided, guidance is rendered."""
-    from imas_codex.standard_names.workers import _enrich_for_docs_gen
+    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+        _enrich_for_docs_gen,
+    )
 
     items = [{"id": "poloidal_flux"}]
     gc = _make_gc(cocos_label="psi_like")
@@ -85,7 +91,9 @@ def test_cocos_guidance_rendered_with_params():
 
 def test_no_cocos_when_label_null():
     """When SN has no cocos_transformation_type, cocos_label is not set."""
-    from imas_codex.standard_names.workers import _enrich_for_docs_gen
+    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+        _enrich_for_docs_gen,
+    )
 
     items = [{"id": "electron_temperature"}]
     gc = _make_gc(cocos_label=None)
@@ -96,7 +104,9 @@ def test_no_cocos_when_label_null():
 
 def test_no_cocos_guidance_without_params():
     """When cocos_params not provided, only label is set (no guidance)."""
-    from imas_codex.standard_names.workers import _enrich_for_docs_gen
+    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+        _enrich_for_docs_gen,
+    )
 
     items = [{"id": "poloidal_flux"}]
     gc = _make_gc(cocos_label="psi_like")

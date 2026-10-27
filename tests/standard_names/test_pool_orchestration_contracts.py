@@ -55,19 +55,49 @@ def _stub_parent_lifecycle_startup():
     """Stub the graph-backed derived-parent startup sweeps of run_sn_pools."""
     _go = "imas_codex.standard_names.graph_ops"
     with (
-        patch(f"{_go}.reconcile_vocab_gaps", return_value={}),
-        patch(f"{_go}.reconcile_source_status_liveness", return_value={}),
-        patch(f"{_go}.retire_unreachable_hint_edits", return_value=0),
-        patch(f"{_go}.reconcile_catalog_status", return_value={}),
-        patch(f"{_go}.rederive_structural_edges", return_value={}),
-        patch(f"{_go}.seed_parent_sources", return_value=0),
-        patch(f"{_go}.normalize_derived_parent_lifecycle", return_value=0),
-        patch(f"{_go}.structural_accept_derived_parents", return_value=0),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_audits.reconcile_vocab_gaps",
+            return_value={},
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_audits.reconcile_source_status_liveness",
+            return_value={},
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_audits.retire_unreachable_hint_edits",
+            return_value=0,
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_audits.reconcile_catalog_status",
+            return_value={},
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_lineage.rederive_structural_edges",
+            return_value={},
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_lineage.seed_parent_sources",
+            return_value=0,
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_lineage.normalize_derived_parent_lifecycle",
+            return_value=0,
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_parent_lifecycle.structural_accept_derived_parents",
+            return_value=0,
+        ),
         # Always-on stranded-reviewed promotion builds its own GraphClient;
         # stub it so the startup path stays graph-free.
-        patch(f"{_go}.promote_stranded_reviewed", return_value={"name": 0, "docs": 0}),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_audits.promote_stranded_reviewed",
+            return_value={"name": 0, "docs": 0},
+        ),
         # Always-on orphaned-SNRun sweep builds its own GraphClient; stub it.
-        patch(f"{_go}.mark_orphaned_standard_name_runs_stale", return_value=0),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_audits.mark_orphaned_standard_name_runs_stale",
+            return_value=0,
+        ),
         # The retroactive attachment re-validation opens its own GraphClient;
         # stub it so the startup path stays graph-free.
         patch(
@@ -120,7 +150,7 @@ def _mock_gc() -> MagicMock:
 
 def _patch_gc(mock_gc: MagicMock):
     return patch(
-        "imas_codex.standard_names.graph_ops.GraphClient",
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
         return_value=mock_gc,
     )
 
@@ -173,7 +203,9 @@ class TestClaimReturnScalarPhysicsDomain:
     # ── claim_enrich ──────────────────────────────────────────────────
 
     def test_claim_enrich_returns_scalar_physics_domain(self) -> None:
-        from imas_codex.standard_names.graph_ops import claim_enrich_seed_and_expand
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            claim_enrich_seed_and_expand,
+        )
 
         result = self._run_sn_claim(
             claim_enrich_seed_and_expand,
@@ -203,7 +235,7 @@ class TestClaimReturnScalarPhysicsDomain:
     # ── claim_review_names ────────────────────────────────────────────
 
     def test_claim_review_names_returns_scalar_physics_domain(self) -> None:
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
             claim_review_names_seed_and_expand,
         )
 
@@ -236,7 +268,7 @@ class TestClaimReturnScalarPhysicsDomain:
     # ── claim_review_docs ─────────────────────────────────────────────
 
     def test_claim_review_docs_returns_scalar_physics_domain(self) -> None:
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_review_persistence import (
             claim_review_docs_batch,
         )
 
@@ -270,7 +302,7 @@ class TestClaimReturnScalarPhysicsDomain:
     # ── claim_refine_name ─────────────────────────────────────────────
 
     def test_claim_refine_name_returns_scalar_physics_domain(self) -> None:
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_refinement import (
             claim_refine_name_batch,
         )
 
@@ -314,7 +346,7 @@ class TestClaimReturnScalarPhysicsDomain:
         The seed query returns imas.physics_domain directly: head(coalesce(...))
         would treat the scalar as a list and raise.
         """
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
             claim_generate_name_batch,
         )
 
@@ -364,7 +396,7 @@ class TestClaimReturnScalarPhysicsDomain:
         raising: 'Expected String("equilibrium") to be a list' — so the
         comparison must be `imas.physics_domain = $fallback_domain`.
         """
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
             claim_generate_name_batch,
         )
 
@@ -760,7 +792,9 @@ class TestSkeletonSweepNoUseAfterClose:
 
     def test_sweep_does_not_raise_after_close(self) -> None:
         """The sweep must execute inside its own GraphClient context."""
-        from imas_codex.standard_names.graph_ops import write_standard_names
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            write_standard_names,
+        )
 
         gc_main, gc_sweep = self._make_gc_sequence()
         call_count = 0
@@ -771,7 +805,7 @@ class TestSkeletonSweepNoUseAfterClose:
             return gc_main if call_count == 1 else gc_sweep
 
         with patch(
-            "imas_codex.standard_names.graph_ops.GraphClient",
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
             side_effect=gc_factory,
         ):
             # Must not raise RuntimeError: GraphClient is closed
@@ -781,7 +815,9 @@ class TestSkeletonSweepNoUseAfterClose:
 
     def test_sweep_returns_count(self) -> None:
         """The function returns the number of names written (not swept)."""
-        from imas_codex.standard_names.graph_ops import write_standard_names
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            write_standard_names,
+        )
 
         gc_main, gc_sweep = self._make_gc_sequence()
         call_count = 0
@@ -792,7 +828,7 @@ class TestSkeletonSweepNoUseAfterClose:
             return gc_main if call_count == 1 else gc_sweep
 
         with patch(
-            "imas_codex.standard_names.graph_ops.GraphClient",
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
             side_effect=gc_factory,
         ):
             result = write_standard_names([self._make_minimal_name()])
@@ -802,7 +838,9 @@ class TestSkeletonSweepNoUseAfterClose:
 
     def test_sweep_query_called_on_open_client(self) -> None:
         """The sweep gc.query() must be called while the sweep client is open."""
-        from imas_codex.standard_names.graph_ops import write_standard_names
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            write_standard_names,
+        )
 
         gc_main, gc_sweep = self._make_gc_sequence()
         sweep_query_called_while_open: list[bool] = []
@@ -833,7 +871,7 @@ class TestSkeletonSweepNoUseAfterClose:
             return gc_main if call_count == 1 else gc_sweep
 
         with patch(
-            "imas_codex.standard_names.graph_ops.GraphClient",
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
             side_effect=gc_factory,
         ):
             write_standard_names([self._make_minimal_name()])
@@ -1268,13 +1306,30 @@ class TestRunSnPoolsFinalizePopulatesCounters:
                 new_callable=AsyncMock,
                 return_value=fake_health_map,
             ),
-            patch(f"{_GO}.create_sn_run_open"),
-            patch(f"{_GO}.finalize_sn_run"),
-            patch(f"{_GO}.release_all_orphan_claims", return_value={"sn": 0, "sns": 0}),
-            patch(f"{_GO}.rederive_structural_edges", return_value={}),
-            patch(f"{_GO}.seed_parent_sources", return_value=0),
-            patch(f"{_GO}.normalize_derived_parent_lifecycle", return_value=0),
-            patch(f"{_GO}.resolve_doc_links", return_value={}),
+            patch(
+                "imas_codex.standard_names.graph_store.graph_audits.create_sn_run_open"
+            ),
+            patch("imas_codex.standard_names.graph_store.graph_audits.finalize_sn_run"),
+            patch(
+                "imas_codex.standard_names.graph_store.graph_parent_lifecycle.release_all_orphan_claims",
+                return_value={"sn": 0, "sns": 0},
+            ),
+            patch(
+                "imas_codex.standard_names.graph_store.graph_lineage.rederive_structural_edges",
+                return_value={},
+            ),
+            patch(
+                "imas_codex.standard_names.graph_store.graph_lineage.seed_parent_sources",
+                return_value=0,
+            ),
+            patch(
+                "imas_codex.standard_names.graph_store.graph_lineage.normalize_derived_parent_lifecycle",
+                return_value=0,
+            ),
+            patch(
+                "imas_codex.standard_names.graph_store.graph_doc_links.resolve_doc_links",
+                return_value={},
+            ),
             # Mock the always-on source-drift refresh: it builds its own
             # GraphClient at the source_refresh binding site (not interceptable
             # by the graph.client patch below once that module is imported), so
@@ -1319,10 +1374,12 @@ class TestReleaseAllOrphanClaims:
         )
 
         with patch(
-            "imas_codex.standard_names.graph_ops.GraphClient",
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=gc,
         ):
-            from imas_codex.standard_names.graph_ops import release_all_orphan_claims
+            from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
+                release_all_orphan_claims,
+            )
 
             result = release_all_orphan_claims()
 
@@ -1342,10 +1399,12 @@ class TestReleaseAllOrphanClaims:
         gc.query = MagicMock(return_value=[{"released": 0}])
 
         with patch(
-            "imas_codex.standard_names.graph_ops.GraphClient",
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=gc,
         ):
-            from imas_codex.standard_names.graph_ops import release_all_orphan_claims
+            from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
+                release_all_orphan_claims,
+            )
 
             result = release_all_orphan_claims()
 

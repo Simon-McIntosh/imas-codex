@@ -7,6 +7,14 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from imas_codex.standard_names.graph_store import (
+    graph_audits as _owning_graph_audits,
+    graph_catalog as _owning_graph_catalog,
+    graph_doc_links as _owning_graph_doc_links,
+    graph_foundation as _owning_graph_foundation,
+    graph_review_persistence as _owning_graph_review_persistence,
+)
+
 
 def _graph_client(responses: list[list[dict[str, Any]]]) -> MagicMock:
     client = MagicMock()
@@ -33,19 +41,19 @@ def test_normalization_failure_refuses_docs_acceptance() -> None:
     client.session.return_value.__enter__.return_value.begin_transaction.return_value = transaction
 
     with (
-        patch.object(graph_ops, "GraphClient", return_value=client),
+        patch.object(_owning_graph_foundation, "GraphClient", return_value=client),
         patch.object(holds, "clear_holds_not_raised", return_value=0),
-        patch.object(graph_ops, "docs_accepted", return_value=True),
+        patch.object(_owning_graph_foundation, "docs_accepted", return_value=True),
         patch.object(
-            graph_ops,
+            _owning_graph_doc_links,
             "_normalize_bare_doc_links",
             side_effect=RuntimeError("name authority unavailable"),
         ),
-        patch.object(graph_ops, "write_reviews"),
-        patch.object(graph_ops, "bump_sn_run_counter"),
+        patch.object(_owning_graph_catalog, "write_reviews"),
+        patch.object(_owning_graph_audits, "bump_sn_run_counter"),
         pytest.raises(RuntimeError, match="name authority unavailable"),
     ):
-        graph_ops.persist_reviewed_docs(
+        _owning_graph_review_persistence.persist_reviewed_docs(
             sn_id="area_at_plasma_boundary",
             claim_token="claim-token",
             score=0.95,
@@ -86,8 +94,8 @@ def test_accept_normalizer_uses_shared_reference_parser() -> None:
     )
     parser = MagicMock(wraps=find_name_references)
 
-    with patch.object(graph_ops, "find_name_references", parser):
-        updated = graph_ops._normalize_bare_doc_links(
+    with patch.object(_owning_graph_foundation, "find_name_references", parser):
+        updated = _owning_graph_doc_links._normalize_bare_doc_links(
             client, sn_id="area_at_plasma_boundary"
         )
 

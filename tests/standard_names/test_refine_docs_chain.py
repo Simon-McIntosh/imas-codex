@@ -22,7 +22,7 @@ import pytest
 # Shared helpers
 # =============================================================================
 
-_GC_PATH = "imas_codex.standard_names.graph_ops.GraphClient"
+_GC_PATH = "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
 _CHAIN_HISTORY_PATH = "imas_codex.standard_names.chain_history.docs_chain_history"
 
 
@@ -74,7 +74,10 @@ def _patch_docs_chain_history(return_value=None):
 @contextmanager
 def _no_open_holds():
     """The score-only claim fixtures carry no review vetoes."""
-    with patch("imas_codex.standard_names.graph_ops.open_holds", return_value=[]):
+    with patch(
+        "imas_codex.standard_names.graph_store.graph_foundation.open_holds",
+        return_value=[],
+    ):
         yield
 
 
@@ -120,7 +123,7 @@ class TestClaimRefineDocsEligible:
 
     def test_claim_eligibility(self):
         """docs_stage='reviewed' + score < min_score + chain < cap → claimable."""
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
             claim_refine_docs_batch,
         )
 
@@ -167,7 +170,7 @@ class TestClaimRefineDocsEligible:
 
     def test_claim_excludes_chain_at_cap(self):
         """docs_chain_length >= rotation_cap → not claimed."""
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
             claim_refine_docs_batch,
         )
 
@@ -186,7 +189,7 @@ class TestClaimRefineDocsEligible:
 
     def test_claim_enriches_chain_history(self):
         """Each claimed item gets docs_chain_history from docs_chain_history()."""
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
             claim_refine_docs_batch,
         )
 
@@ -247,7 +250,9 @@ class TestPersistRefinedDocs:
 
     def test_persist_creates_revision_node(self):
         """After persist, DocsRevision node is created with snapshot of OLD state."""
-        from imas_codex.standard_names.graph_ops import persist_refined_docs
+        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+            persist_refined_docs,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(
@@ -290,7 +295,9 @@ class TestPersistRefinedDocs:
 
     def test_persist_links_revision(self):
         """Cypher creates (sn)-[:DOCS_REVISION_OF]->(rev) edge."""
-        from imas_codex.standard_names.graph_ops import persist_refined_docs
+        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+            persist_refined_docs,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(
@@ -314,7 +321,9 @@ class TestPersistRefinedDocs:
 
     def test_persist_advances_stage(self):
         """docs_stage='refining' → 'drafted', docs_chain_length increments."""
-        from imas_codex.standard_names.graph_ops import persist_refined_docs
+        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+            persist_refined_docs,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(
@@ -341,7 +350,9 @@ class TestPersistRefinedDocs:
 
     def test_persist_writes_new_docs(self):
         """SN gets new description and documentation values."""
-        from imas_codex.standard_names.graph_ops import persist_refined_docs
+        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+            persist_refined_docs,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(
@@ -366,7 +377,9 @@ class TestPersistRefinedDocs:
 
     def test_persist_clears_reviewer_docs_on_sn(self):
         """reviewer_*_docs fields on the SN are cleared after persist."""
-        from imas_codex.standard_names.graph_ops import persist_refined_docs
+        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+            persist_refined_docs,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(
@@ -393,7 +406,9 @@ class TestPersistRefinedDocs:
 
     def test_persist_token_mismatch_no_op(self):
         """Wrong token → no DocsRevision created, SN unchanged."""
-        from imas_codex.standard_names.graph_ops import persist_refined_docs
+        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+            persist_refined_docs,
+        )
 
         gc, tx = _mock_gc_tx()
         # Empty result = token didn't match
@@ -415,7 +430,9 @@ class TestPersistRefinedDocs:
 
     def test_persist_stage_mismatch_no_op(self):
         """docs_stage != 'refining' → no-op (verified in WHERE clause)."""
-        from imas_codex.standard_names.graph_ops import persist_refined_docs
+        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+            persist_refined_docs,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(return_value=[])
@@ -438,7 +455,9 @@ class TestPersistRefinedDocs:
 
     def test_persist_idempotent_revision_id(self):
         """Deterministic revision id via MERGE; same persist twice → no duplicate."""
-        from imas_codex.standard_names.graph_ops import persist_refined_docs
+        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+            persist_refined_docs,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(
@@ -472,7 +491,7 @@ class TestReleaseRefineDocs:
 
     def test_release_reverts_refining(self):
         """release_refine_docs_claims reverts docs_stage='refining' → 'reviewed'."""
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
             release_refine_docs_claims,
         )
 
@@ -492,7 +511,7 @@ class TestReleaseRefineDocs:
 
     def test_failed_release_reverts_refining(self):
         """LLM error → docs_stage reverts to 'reviewed', claim_token cleared."""
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
             release_refine_docs_failed_claims,
         )
 
@@ -513,7 +532,7 @@ class TestReleaseRefineDocs:
 
     def test_release_empty_ids_no_op(self):
         """Empty sn_ids → returns 0, no query issued."""
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
             release_refine_docs_claims,
         )
 
@@ -630,7 +649,9 @@ class TestRefineDocsRoundTrip:
 
     def test_round_trip(self):
         """persist → assert revision created → assert state coherent."""
-        from imas_codex.standard_names.graph_ops import persist_refined_docs
+        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+            persist_refined_docs,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(
@@ -693,7 +714,7 @@ class TestProcessRefineDocsBatch:
     async def test_worker_calls_persist(self):
         """Worker calls persist_refined_docs for each item."""
         from imas_codex.standard_names.models import RefinedDocs
-        from imas_codex.standard_names.workers import (
+        from imas_codex.standard_names.worker_tasks.worker_refine_docs import (
             process_refine_docs_batch,
         )
 
@@ -724,7 +745,7 @@ class TestProcessRefineDocsBatch:
                 return_value="model-x",
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.persist_refined_docs",
+                "imas_codex.standard_names.graph_store.graph_docs_persistence.persist_refined_docs",
                 return_value={
                     "docs_chain_length": 1,
                     "revision_id": "electron_temperature#rev-0",
@@ -739,7 +760,7 @@ class TestProcessRefineDocsBatch:
     @pytest.mark.asyncio
     async def test_worker_releases_on_failure(self):
         """Worker calls release_refine_docs_failed_claims on error."""
-        from imas_codex.standard_names.workers import (
+        from imas_codex.standard_names.worker_tasks.worker_refine_docs import (
             process_refine_docs_batch,
         )
 
@@ -763,7 +784,7 @@ class TestProcessRefineDocsBatch:
                 return_value="model-x",
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.release_refine_docs_failed_claims",
+                "imas_codex.standard_names.graph_store.graph_docs_persistence.release_refine_docs_failed_claims",
                 return_value=1,
             ) as mock_release,
         ):

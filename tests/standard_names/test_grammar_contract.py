@@ -125,7 +125,7 @@ def test_build_compose_context_has_isn_keys():
 
 def test_extract_segments_physical_vector_component():
     """Verify extraction of component + physical_base from a vector projection."""
-    from imas_codex.standard_names.graph_ops import _parse_grammar
+    from imas_codex.standard_names.graph_store.graph_foundation import _parse_grammar
 
     result = _parse_grammar("toroidal_magnetic_field")
     assert result["physical_base"] == "magnetic_field"
@@ -144,7 +144,7 @@ def test_extract_segments_bare_generic_base_is_rejected():
     ``_write_grammar_decomposition``. No separate flag is stored; the name
     is quarantined at validate time.
     """
-    from imas_codex.standard_names.graph_ops import _parse_grammar
+    from imas_codex.standard_names.graph_store.graph_foundation import _parse_grammar
 
     result = _parse_grammar("pressure")
     assert "grammar_parse_fallback" not in result
@@ -155,7 +155,7 @@ def test_extract_segments_bare_generic_base_is_rejected():
 
 def test_extract_segments_unparseable_name():
     """Unparseable names get version but null segment fields (no flag)."""
-    from imas_codex.standard_names.graph_ops import _parse_grammar
+    from imas_codex.standard_names.graph_store.graph_foundation import _parse_grammar
 
     result = _parse_grammar("nonexistent_gibberish_xyzzy")
     assert result["grammar_parse_version"] is not None
@@ -167,7 +167,7 @@ def test_extract_segments_unparseable_name():
 
 def test_extract_segments_parseable_compound():
     """Parseable compound names extract subject + physical_base via Pydantic enrichment."""
-    from imas_codex.standard_names.graph_ops import _parse_grammar
+    from imas_codex.standard_names.graph_store.graph_foundation import _parse_grammar
 
     result = _parse_grammar("electron_temperature")
     assert result["physical_base"] == "temperature"
@@ -177,7 +177,7 @@ def test_extract_segments_parseable_compound():
 
 def test_extract_segments_all_keys_present():
     """All bare segment keys must be present even on parse failure."""
-    from imas_codex.standard_names.graph_ops import _parse_grammar
+    from imas_codex.standard_names.graph_store.graph_foundation import _parse_grammar
 
     result = _parse_grammar("nonexistent_gibberish_xyzzy")
     expected_keys = {
@@ -204,7 +204,7 @@ def test_extract_segments_all_keys_present():
 
 def test_extract_segments_new_single_token_modifiers():
     """aggregation / orbit / population are extracted from the pydantic model."""
-    from imas_codex.standard_names.graph_ops import _parse_grammar
+    from imas_codex.standard_names.graph_store.graph_foundation import _parse_grammar
 
     result = _parse_grammar("total_trapped_fast_ion_energy")
     assert result["aggregation"] == "total"
@@ -226,7 +226,7 @@ def _decomposition_write(name: str) -> tuple[bool, dict | None]:
     """
     from unittest.mock import MagicMock
 
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_catalog import (
         _GRAMMAR_SEGMENT_COLUMNS,
         _write_grammar_decomposition,
     )
@@ -264,8 +264,10 @@ def test_persist_and_decomposition_parity(name: str, expect_rejected: bool):
     """
     from imas_standard_names import parse
 
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_catalog import (
         _GRAMMAR_SEGMENT_COLUMNS,
+    )
+    from imas_codex.standard_names.graph_store.graph_foundation import (
         _parse_grammar,
         _segments_from_ir,
     )
@@ -304,7 +306,9 @@ def test_write_standard_names_persists_grammar_segments():
     mock_gc.query = MagicMock(return_value=[])
 
     with (
-        patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC,
+        patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as MockGC,
         patch(
             "imas_codex.standard_names.protection._fetch_catalog_edit_names",
             return_value=set(),
@@ -312,7 +316,9 @@ def test_write_standard_names_persists_grammar_segments():
     ):
         MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
         MockGC.return_value.__exit__ = MagicMock(return_value=False)
-        from imas_codex.standard_names.graph_ops import write_standard_names
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            write_standard_names,
+        )
 
         write_standard_names(
             [
@@ -364,10 +370,14 @@ def test_write_standard_names_batch_includes_grammar_segments():
     mock_gc = MagicMock()
     mock_gc.query = MagicMock(return_value=[])
 
-    with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+    with patch(
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+    ) as MockGC:
         MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
         MockGC.return_value.__exit__ = MagicMock(return_value=False)
-        from imas_codex.standard_names.graph_ops import write_standard_names
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            write_standard_names,
+        )
 
         write_standard_names(
             [

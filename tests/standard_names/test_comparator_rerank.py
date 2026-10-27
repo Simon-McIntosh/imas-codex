@@ -16,11 +16,13 @@ import pytest
 from imas_codex.discovery.base import judgment
 from imas_codex.standard_names import budget as budget_module
 from imas_codex.standard_names.budget import BudgetManager
-from imas_codex.standard_names.workers import (
+from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+    compose_worker,
+)
+from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
     _rerank_comparators_for_compose,
     _rerank_comparators_for_worker,
     _reranked_nearby_comparators,
-    compose_worker,
 )
 
 _SWITCH = "IMAS_CODEX_SN_COMPOSE_RERANK_COMPARATORS"

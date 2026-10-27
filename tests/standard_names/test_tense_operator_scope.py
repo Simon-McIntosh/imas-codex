@@ -9,7 +9,9 @@ that difference. See ``test_attachment_guard.py`` for the lexical tense rule
 covering everything except this operator-scope distinction.
 """
 
-from imas_codex.standard_names.workers import _is_attachment_consistent
+from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+    _is_attachment_consistent,
+)
 
 
 def test_binary_scoped_temporal_operand_accepts_matching_power_path() -> None:

@@ -23,10 +23,16 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from imas_codex.standard_names.graph_store import (
+    graph_foundation as _owning_graph_foundation,
+)
+
 # ─── Module paths ─────────────────────────────────────────────────────────────
 
-_GC_PATH = "imas_codex.standard_names.graph_ops.GraphClient"
-_WRITE_REVIEWS_PATH = "imas_codex.standard_names.graph_ops.write_reviews"
+_GC_PATH = "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+_WRITE_REVIEWS_PATH = (
+    "imas_codex.standard_names.graph_store.graph_catalog.write_reviews"
+)
 
 # ─── Production defaults (must match imas_codex/standard_names/defaults.py) ──
 
@@ -227,7 +233,7 @@ def test_review_stage_decision(
         _no_write_reviews(),
         patch.object(holds, "clear_holds_not_raised", return_value=0),
         patch.object(
-            graph_ops,
+            _owning_graph_foundation,
             "docs_accepted",
             side_effect=lambda judged, minimum, _name, **_kwargs: judged >= minimum,
         ),
@@ -250,7 +256,9 @@ def test_review_stage_decision(
 
 def test_review_stage_token_mismatch_is_noop() -> None:
     """An empty claim read returns an empty string without writing."""
-    from imas_codex.standard_names.graph_ops import persist_reviewed_name
+    from imas_codex.standard_names.graph_store.graph_review_persistence import (
+        persist_reviewed_name,
+    )
 
     # An empty read simulates a wrong token or wrong stage.
     gc = _mock_gc_query(return_values=[[]])
@@ -280,7 +288,9 @@ class TestComposeNameStageDrafted:
 
     def test_name_stage_drafted(self) -> None:
         """Cypher SET includes name_stage = 'drafted'."""
-        from imas_codex.standard_names.graph_ops import _finalize_generated_name_stage
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            _finalize_generated_name_stage,
+        )
 
         gc, tx = _mock_gc_tx()
         with _patch_gc(gc):
@@ -293,7 +303,9 @@ class TestComposeNameStageDrafted:
 
     def test_docs_stage_pending(self) -> None:
         """Cypher SET includes docs_stage = 'pending'."""
-        from imas_codex.standard_names.graph_ops import _finalize_generated_name_stage
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            _finalize_generated_name_stage,
+        )
 
         gc, tx = _mock_gc_tx()
         with _patch_gc(gc):
@@ -306,7 +318,9 @@ class TestComposeNameStageDrafted:
 
     def test_chain_length_zero(self) -> None:
         """Cypher initializes missing chain length without resetting it."""
-        from imas_codex.standard_names.graph_ops import _finalize_generated_name_stage
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            _finalize_generated_name_stage,
+        )
 
         gc, tx = _mock_gc_tx()
         with _patch_gc(gc):
@@ -319,7 +333,9 @@ class TestComposeNameStageDrafted:
 
     def test_single_transaction_committed(self) -> None:
         """All stage updates land in a single committed transaction."""
-        from imas_codex.standard_names.graph_ops import _finalize_generated_name_stage
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            _finalize_generated_name_stage,
+        )
 
         gc, tx = _mock_gc_tx()
         with _patch_gc(gc):
@@ -345,7 +361,9 @@ class TestGenerateDocsPendingToDrafted:
 
     def test_returns_drafted_on_success(self) -> None:
         """Returns 'drafted' when the token + name_stage='accepted' gate passes."""
-        from imas_codex.standard_names.graph_ops import persist_generated_docs
+        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+            persist_generated_docs,
+        )
 
         gc = _mock_gc_query(return_values=[[{"docs_stage": "drafted"}], None])
         with _patch_gc(gc):
@@ -361,7 +379,9 @@ class TestGenerateDocsPendingToDrafted:
 
     def test_cypher_gates_on_name_stage_accepted(self) -> None:
         """WHERE clause in Cypher requires name_stage = 'accepted' (cross-pipeline gate)."""
-        from imas_codex.standard_names.graph_ops import persist_generated_docs
+        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+            persist_generated_docs,
+        )
 
         gc = _mock_gc_query(return_values=[[{"docs_stage": "drafted"}], None])
         with _patch_gc(gc):
@@ -378,7 +398,9 @@ class TestGenerateDocsPendingToDrafted:
 
     def test_cypher_sets_docs_stage_drafted(self) -> None:
         """Cypher SET includes docs_stage = 'drafted'."""
-        from imas_codex.standard_names.graph_ops import persist_generated_docs
+        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+            persist_generated_docs,
+        )
 
         gc = _mock_gc_query(return_values=[[{"docs_stage": "drafted"}], None])
         with _patch_gc(gc):
@@ -399,7 +421,9 @@ class TestGenerateDocsPendingToDrafted:
         This is the cross-pipeline enforcement: generate_docs only runs after
         name review is complete.
         """
-        from imas_codex.standard_names.graph_ops import persist_generated_docs
+        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+            persist_generated_docs,
+        )
 
         gc = _mock_gc_query(return_values=[[]])  # empty → gate not satisfied
         with _patch_gc(gc):
@@ -448,7 +472,9 @@ class TestRefineNameStageMachine:
         tx_run_return: list[dict[str, Any]] | None = None,
         old_chain_length: int = 1,
     ) -> tuple[dict[str, Any], MagicMock]:
-        from imas_codex.standard_names.graph_ops import persist_refined_name
+        from imas_codex.standard_names.graph_store.graph_refinement import (
+            persist_refined_name,
+        )
 
         default_return = [{"new_name": "refined_test_sn", "old_name": "test_sn"}]
         gc, tx = _mock_gc_tx(
@@ -549,7 +575,9 @@ class TestRefineDocsStageMachine:
         self,
         tx_run_return: list[dict[str, Any]] | None = None,
     ) -> tuple[dict[str, Any], MagicMock]:
-        from imas_codex.standard_names.graph_ops import persist_refined_docs
+        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+            persist_refined_docs,
+        )
 
         default_return = [{"docs_chain_length": 2, "revision_id": "test_sn#rev-1"}]
         gc, tx = _mock_gc_tx(

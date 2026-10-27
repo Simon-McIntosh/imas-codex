@@ -24,8 +24,10 @@ import pytest
 
 from imas_codex.standard_names.edit import EditPlan, apply_edit
 
-_GC_PATH = "imas_codex.standard_names.graph_ops.GraphClient"
-_WRITE_REVIEWS_PATH = "imas_codex.standard_names.graph_ops.write_reviews"
+_GC_PATH = "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+_WRITE_REVIEWS_PATH = (
+    "imas_codex.standard_names.graph_store.graph_catalog.write_reviews"
+)
 
 _DEFAULT_NODE_FIELDS: dict[str, Any] = {
     "name_stage": None,
@@ -233,7 +235,9 @@ class FakeGraph:
         if "// EDIT_CHECK_COLLISION" in cypher:
             sn_id = params["id"]
             if sn_id not in self.nodes:
-                return [{"n": 0, "occupant_stage": None, "occupant_has_successor": False}]
+                return [
+                    {"n": 0, "occupant_stage": None, "occupant_has_successor": False}
+                ]
             return [
                 {
                     "n": 1,
@@ -1433,7 +1437,9 @@ class TestStrandedRename:
 
 class TestEditLifecycle:
     def test_open_to_applied_on_accept(self) -> None:
-        from imas_codex.standard_names.graph_ops import persist_reviewed_name
+        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+            persist_reviewed_name,
+        )
 
         fake = FakeGraph()
         fake.add_node(
@@ -1458,7 +1464,9 @@ class TestEditLifecycle:
         assert fake.nodes["toroidal_plasma_current"]["edit_status"] == "applied"
 
     def test_open_to_exhausted_on_cap(self) -> None:
-        from imas_codex.standard_names.graph_ops import persist_reviewed_name
+        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+            persist_reviewed_name,
+        )
 
         fake = FakeGraph()
         fake.add_node(
@@ -1484,7 +1492,9 @@ class TestEditLifecycle:
         assert fake.nodes["toroidal_plasma_current"]["edit_status"] == "exhausted"
 
     def test_open_stays_open_on_reviewed(self) -> None:
-        from imas_codex.standard_names.graph_ops import persist_reviewed_name
+        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+            persist_reviewed_name,
+        )
 
         fake = FakeGraph()
         fake.add_node(
@@ -1511,7 +1521,9 @@ class TestEditLifecycle:
 
     def test_non_edit_node_untouched(self) -> None:
         """A regular (non-edit) drafted name's edit_status stays None."""
-        from imas_codex.standard_names.graph_ops import persist_reviewed_name
+        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+            persist_reviewed_name,
+        )
 
         fake = FakeGraph()
         fake.add_node(
@@ -1542,7 +1554,9 @@ class TestRefineRotationPropagation:
     def test_open_edit_fields_propagate_across_refine(self) -> None:
         """A normal pipeline refine call (no edit kwargs) copies the open
         edit fields from predecessor to successor."""
-        from imas_codex.standard_names.graph_ops import persist_refined_name
+        from imas_codex.standard_names.graph_store.graph_refinement import (
+            persist_refined_name,
+        )
 
         fake = FakeGraph()
         fake.add_node(
@@ -1572,7 +1586,9 @@ class TestRefineRotationPropagation:
         assert new_node["edit_requested_at"] == "2026-01-01T00:00:00+00:00"
 
     def test_closed_edit_does_not_propagate(self) -> None:
-        from imas_codex.standard_names.graph_ops import persist_refined_name
+        from imas_codex.standard_names.graph_store.graph_refinement import (
+            persist_refined_name,
+        )
 
         fake = FakeGraph()
         fake.add_node(
@@ -1595,7 +1611,9 @@ class TestRefineRotationPropagation:
         assert new_node["edit_status"] is None
 
     def test_explicit_edit_kwargs_are_not_overridden_by_propagation(self) -> None:
-        from imas_codex.standard_names.graph_ops import persist_refined_name
+        from imas_codex.standard_names.graph_store.graph_refinement import (
+            persist_refined_name,
+        )
 
         fake = FakeGraph()
         fake.add_node(
@@ -2002,7 +2020,9 @@ class TestRenameCascadeProtections:
     def test_acceptance_cascade_honours_recorded_include_accepted(self) -> None:
         """Accepting the root rename cascades the accepted descendant only
         because include_accepted was recorded True at edit time."""
-        from imas_codex.standard_names.graph_ops import persist_reviewed_name
+        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+            persist_reviewed_name,
+        )
 
         fake = FakeGraph()
         fake.add_node(
@@ -2040,7 +2060,9 @@ class TestRenameCascadeProtections:
         makes the cascade preflight conflict — so the acceptance is refused
         atomically (nothing accepted, nothing renamed) rather than landing a
         grammar-inconsistent half-cascade with the accepted child stranded."""
-        from imas_codex.standard_names.graph_ops import persist_reviewed_name
+        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+            persist_reviewed_name,
+        )
 
         fake = FakeGraph()
         fake.add_node(
@@ -2079,7 +2101,9 @@ class TestRenameCascadeProtections:
         assert issues and any("edit_cascade" in v for v in issues)
 
     def test_old_root_fallback_collision_refuses_acceptance(self) -> None:
-        from imas_codex.standard_names.graph_ops import persist_reviewed_name
+        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+            persist_reviewed_name,
+        )
 
         fake = self._stale_fallback_graph()
         fake.add_node(
@@ -2107,7 +2131,9 @@ class TestRenameCascadeProtections:
         assert fake.edges_by_child["ion_temperature"][0]["parent_id"] == "temperature"
 
     def test_old_root_fallback_grammar_failure_refuses_acceptance(self) -> None:
-        from imas_codex.standard_names.graph_ops import persist_reviewed_name
+        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+            persist_reviewed_name,
+        )
 
         fake = self._stale_fallback_graph()
         fake.edges_by_child["ion_temperature"][0]["operator"] = "not_a_grammar_token"

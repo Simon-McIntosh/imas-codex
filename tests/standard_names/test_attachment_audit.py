@@ -39,6 +39,9 @@ from imas_codex.standard_names.attachment_audit import (
     audit_attachments,
     reconcile_attachment_consistency,
 )
+from imas_codex.standard_names.graph_store import (
+    graph_refinement as _owning_graph_refinement,
+)
 
 _FIXTURE_ID_STEM = "test_attach_audit__"
 _TERMINAL_RETRY_METADATA = frozenset(
@@ -1042,7 +1045,7 @@ def test_refine_successor_migration_is_gated() -> None:
 
     from imas_codex.standard_names import graph_ops
 
-    src = inspect.getsource(graph_ops.persist_refined_name)
+    src = inspect.getsource(_owning_graph_refinement.persist_refined_name)
     assert "REFINE_ATOMIC_PREFLIGHT" in src
     assert "guard_source_pairings(" in src
     assert "query_handle, new_name, candidate_source_ids" in src
@@ -1266,7 +1269,9 @@ class _OrdinaryRetryPersistenceClient:
 
 
 def test_ordinary_retry_omits_terminal_recovery_metadata() -> None:
-    from imas_codex.standard_names.graph_ops import retry_failed_sources
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        retry_failed_sources,
+    )
 
     client = _OrdinaryRetryPersistenceClient()
 

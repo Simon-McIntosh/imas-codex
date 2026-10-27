@@ -9,6 +9,11 @@ import pytest
 
 from imas_codex.graph.client import GraphClient
 from imas_codex.standard_names import graph_ops
+from imas_codex.standard_names.graph_store import (
+    graph_audits as _owning_graph_audits,
+    graph_docs_persistence as _owning_graph_docs_persistence,
+    graph_review_persistence as _owning_graph_review_persistence,
+)
 from imas_codex.standard_names.review import holds
 
 pytestmark = [pytest.mark.graph, pytest.mark.timeout(180)]
@@ -35,7 +40,7 @@ def planted_name(disposable_neo4j_empty: str) -> Iterator[str]:
 
 
 def _review(name_id: str, score: float = 0.875) -> str:
-    stage = graph_ops.persist_reviewed_docs(
+    stage = _owning_graph_review_persistence.persist_reviewed_docs(
         sn_id=name_id,
         claim_token="token",
         score=score,
@@ -169,12 +174,14 @@ def test_stranded_promotion_respects_docs_holds(planted_name: str) -> None:
         )
         assert graph.query("MATCH (sn:StandardName) RETURN count(sn) AS n")[0]["n"] == 2
 
-    assert graph_ops.promote_stranded_reviewed(min_score=0.85, dry_run=True) == {
+    assert _owning_graph_audits.promote_stranded_reviewed(
+        min_score=0.85, dry_run=True
+    ) == {
         "name": 0,
         "docs": 1,
     }
     assert _state(planted_name) == {"stage": "reviewed", "score": 0.875}
-    assert graph_ops.promote_stranded_reviewed(min_score=0.85) == {
+    assert _owning_graph_audits.promote_stranded_reviewed(min_score=0.85) == {
         "name": 0,
         "docs": 1,
     }
@@ -194,7 +201,7 @@ def test_stale_claim_cannot_raise_or_clear_review_holds(planted_name: str) -> No
             """,
             id=planted_name,
         )
-    stale = graph_ops.persist_reviewed_docs(
+    stale = _owning_graph_review_persistence.persist_reviewed_docs(
         sn_id=planted_name,
         claim_token="stale",
         claim_seq=1,
@@ -221,7 +228,7 @@ def test_stale_claim_cannot_raise_or_clear_review_holds(planted_name: str) -> No
         winner_hold["id"]
     ]
 
-    valid = graph_ops.persist_reviewed_docs(
+    valid = _owning_graph_review_persistence.persist_reviewed_docs(
         sn_id=planted_name,
         claim_token="winner",
         claim_seq=2,
@@ -275,7 +282,9 @@ def test_different_finding_raises_new_hold(planted_name: str) -> None:
 def test_refine_claims_passing_score_with_open_hold(planted_name: str) -> None:
     _raise(planted_name)
     _review(planted_name)
-    items = graph_ops.claim_refine_docs_batch(batch_size=1, min_score=0.85)
+    items = _owning_graph_docs_persistence.claim_refine_docs_batch(
+        batch_size=1, min_score=0.85
+    )
     assert [item["id"] for item in items] == [planted_name]
     assert _state(planted_name) == {"stage": "refining", "score": 0.875}
 
@@ -287,7 +296,12 @@ def test_refine_does_not_claim_passing_score_without_hold(planted_name: str) -> 
             "MATCH (sn:StandardName {id: $id}) SET sn.docs_stage = 'reviewed'",
             id=planted_name,
         )
-    assert graph_ops.claim_refine_docs_batch(batch_size=1, min_score=0.85) == []
+    assert (
+        _owning_graph_docs_persistence.claim_refine_docs_batch(
+            batch_size=1, min_score=0.85
+        )
+        == []
+    )
     assert _state(planted_name) == {"stage": "reviewed", "score": 0.875}
 
 
@@ -633,6 +647,6 @@ def test_dismissal_does_not_accept_a_document_without_a_winning_review(
 def test_refiner_input_contains_open_hold_finding(planted_name: str) -> None:
     _raise(planted_name, "The source specifies flux-surface averaging")
     _review(planted_name)
-    item = graph_ops.claim_refine_docs_batch(batch_size=1)[0]
+    item = _owning_graph_docs_persistence.claim_refine_docs_batch(batch_size=1)[0]
     comments = item["prior_docs_reviews"][-1]["reviewer_comments_per_dim"]
     assert "The source specifies flux-surface averaging" in comments.values()

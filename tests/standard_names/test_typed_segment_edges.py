@@ -22,7 +22,7 @@ import pytest
 def _mock_version_resolver():
     """Return a fixed token version so _write_segment_edges proceeds."""
     with patch(
-        "imas_codex.standard_names.graph_ops._resolve_grammar_token_version",
+        "imas_codex.standard_names.graph_store.graph_catalog._resolve_grammar_token_version",
         return_value="0.7.0rc31",
     ):
         yield
@@ -47,7 +47,7 @@ def _mock_synced_segments():
         }
     )
     with patch(
-        "imas_codex.standard_names.graph_ops._resolve_synced_segments",
+        "imas_codex.standard_names.graph_store.graph_catalog._resolve_synced_segments",
         return_value=_all_segments,
     ):
         yield
@@ -103,7 +103,9 @@ class TestTypedEdgeCypherPresent:
 
     def test_has_physical_base_clause_in_cypher(self, mock_gc: MagicMock) -> None:
         """HAS_PHYSICAL_BASE FOREACH clause must be present in the MERGE query."""
-        from imas_codex.standard_names.graph_ops import _write_segment_edges
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            _write_segment_edges,
+        )
 
         mock_gc.query.side_effect = [
             [],
@@ -119,7 +121,9 @@ class TestTypedEdgeCypherPresent:
 
     def test_has_subject_clause_in_cypher(self, mock_gc: MagicMock) -> None:
         """HAS_SUBJECT FOREACH clause must be present in the MERGE query."""
-        from imas_codex.standard_names.graph_ops import _write_segment_edges
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            _write_segment_edges,
+        )
 
         mock_gc.query.side_effect = [[], [], []]
         _write_segment_edges(mock_gc, ["electron_temperature"])
@@ -130,7 +134,9 @@ class TestTypedEdgeCypherPresent:
 
     def test_all_ten_typed_edges_in_cypher(self, mock_gc: MagicMock) -> None:
         """All 10 typed edge labels must appear in the MERGE query Cypher."""
-        from imas_codex.standard_names.graph_ops import _write_segment_edges
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            _write_segment_edges,
+        )
 
         mock_gc.query.side_effect = [[], [], []]
         _write_segment_edges(mock_gc, ["electron_temperature"])
@@ -168,7 +174,9 @@ class TestTypedEdgeIdempotency:
 
     def test_delete_covers_all_typed_labels(self, mock_gc: MagicMock) -> None:
         """The DELETE query must include all 10 typed edge labels plus HAS_SEGMENT."""
-        from imas_codex.standard_names.graph_ops import _write_segment_edges
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            _write_segment_edges,
+        )
 
         mock_gc.query.side_effect = [[], [], []]
         _write_segment_edges(mock_gc, ["electron_temperature"])
@@ -196,7 +204,9 @@ class TestTypedEdgeIdempotency:
 
     def test_delete_before_merge(self, mock_gc: MagicMock) -> None:
         """DELETE must execute before the MERGE/FOREACH query."""
-        from imas_codex.standard_names.graph_ops import _write_segment_edges
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            _write_segment_edges,
+        )
 
         mock_gc.query.side_effect = [[], [], []]
         _write_segment_edges(mock_gc, ["electron_temperature"])
@@ -227,7 +237,9 @@ class TestTypedEdgeSegmentGuards:
 
     def test_physical_base_guard_in_cypher(self, mock_gc: MagicMock) -> None:
         """HAS_PHYSICAL_BASE FOREACH must guard on segment = 'physical_base'."""
-        from imas_codex.standard_names.graph_ops import _write_segment_edges
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            _write_segment_edges,
+        )
 
         mock_gc.query.side_effect = [[], [], []]
         _write_segment_edges(mock_gc, ["electron_temperature"])
@@ -240,7 +252,9 @@ class TestTypedEdgeSegmentGuards:
 
     def test_transformation_guard_in_cypher(self, mock_gc: MagicMock) -> None:
         """HAS_TRANSFORMATION FOREACH must guard on segment = 'transformation'."""
-        from imas_codex.standard_names.graph_ops import _write_segment_edges
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            _write_segment_edges,
+        )
 
         mock_gc.query.side_effect = [[], [], []]
         _write_segment_edges(mock_gc, ["electron_temperature"])
@@ -255,7 +269,9 @@ class TestTypedEdgeSegmentGuards:
     ) -> None:
         """poloidal_electron_temperature should include a coordinate token in edges_param
         (ISN grammar classifies 'poloidal' as coordinate for this name)."""
-        from imas_codex.standard_names.graph_ops import _write_segment_edges
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            _write_segment_edges,
+        )
 
         mock_gc.query.side_effect = [[], [], []]
         _write_segment_edges(mock_gc, ["poloidal_electron_temperature"])
@@ -277,7 +293,9 @@ class TestTypedEdgeSegmentGuards:
         """When OPTIONAL MATCH returns no token (token-miss), the FOREACH guards
         on ``t IS NOT NULL`` prevent edge creation — but the query still returns
         matched=False without error."""
-        from imas_codex.standard_names.graph_ops import _write_segment_edges
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            _write_segment_edges,
+        )
 
         # Simulate token-miss: MERGE returns matched=False for all tokens
         mock_gc.query.side_effect = [

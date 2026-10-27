@@ -56,7 +56,9 @@ def _patch_gc(gc: Any):
 
 def test_enrich_populates_source_paths():
     """source_paths are stripped of dd: prefix and stored on item."""
-    from imas_codex.standard_names.workers import _enrich_for_docs_gen
+    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+        _enrich_for_docs_gen,
+    )
 
     gc = _mock_gc(
         query_side_effect=[
@@ -88,8 +90,14 @@ def test_enrich_populates_source_paths():
 
     # Patch _search_nearby_names and _related_path_neighbours to avoid graph I/O
     with (
-        patch(f"{_WORKERS_MOD}._search_nearby_names", return_value=[]),
-        patch(f"{_WORKERS_MOD}._related_path_neighbours", return_value=[]),
+        patch(
+            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._search_nearby_names",
+            return_value=[],
+        ),
+        patch(
+            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._related_path_neighbours",
+            return_value=[],
+        ),
     ):
         _enrich_for_docs_gen(gc, [item])
 
@@ -101,7 +109,9 @@ def test_enrich_populates_source_paths():
 
 def test_enrich_populates_dd_source_docs_and_aliases():
     """dd_source_docs and dd_aliases are populated from linked IMASNodes."""
-    from imas_codex.standard_names.workers import _enrich_for_docs_gen
+    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+        _enrich_for_docs_gen,
+    )
 
     gc = _mock_gc(
         query_side_effect=[
@@ -130,8 +140,14 @@ def test_enrich_populates_dd_source_docs_and_aliases():
     }
 
     with (
-        patch(f"{_WORKERS_MOD}._search_nearby_names", return_value=[]),
-        patch(f"{_WORKERS_MOD}._related_path_neighbours", return_value=[]),
+        patch(
+            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._search_nearby_names",
+            return_value=[],
+        ),
+        patch(
+            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._related_path_neighbours",
+            return_value=[],
+        ),
     ):
         _enrich_for_docs_gen(gc, [item])
 
@@ -145,7 +161,9 @@ def test_enrich_populates_dd_source_docs_and_aliases():
 
 def test_enrich_populates_nearest_peers():
     """nearest_peers are populated when _search_nearby_names returns results."""
-    from imas_codex.standard_names.workers import _enrich_for_docs_gen
+    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+        _enrich_for_docs_gen,
+    )
 
     gc = _mock_gc(
         query_side_effect=[
@@ -168,7 +186,10 @@ def test_enrich_populates_nearest_peers():
         "description": "Electron temperature",
     }
 
-    with patch(f"{_WORKERS_MOD}._search_nearby_names", return_value=peers_mock):
+    with patch(
+        "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._search_nearby_names",
+        return_value=peers_mock,
+    ):
         _enrich_for_docs_gen(gc, [item])
 
     assert "nearest_peers" in item, "nearest_peers should be populated"
@@ -177,7 +198,9 @@ def test_enrich_populates_nearest_peers():
 
 def test_enrich_skips_item_with_no_id():
     """Items without an id key are silently skipped."""
-    from imas_codex.standard_names.workers import _enrich_for_docs_gen
+    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+        _enrich_for_docs_gen,
+    )
 
     gc = _mock_gc()
     item: dict[str, Any] = {"description": "orphan item"}
@@ -190,13 +213,18 @@ def test_enrich_skips_item_with_no_id():
 
 def test_enrich_handles_empty_graph_result():
     """Empty graph result leaves item without enrichment keys (no crash)."""
-    from imas_codex.standard_names.workers import _enrich_for_docs_gen
+    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+        _enrich_for_docs_gen,
+    )
 
     gc = _mock_gc(query_side_effect=[[]])  # empty result set
 
     item: dict[str, Any] = {"id": "missing_sn", "description": "some description"}
 
-    with patch(f"{_WORKERS_MOD}._search_nearby_names", return_value=[]):
+    with patch(
+        "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._search_nearby_names",
+        return_value=[],
+    ):
         _enrich_for_docs_gen(gc, [item])
 
     assert "source_paths" not in item
@@ -205,7 +233,9 @@ def test_enrich_handles_empty_graph_result():
 
 def test_enrich_excludes_self_from_nearest_peers():
     """The SN being enriched must not appear in nearest_peers."""
-    from imas_codex.standard_names.workers import _enrich_for_docs_gen
+    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+        _enrich_for_docs_gen,
+    )
 
     gc = _mock_gc(query_side_effect=[[{"source_paths": [], "dd_nodes": []}]])
 
@@ -216,7 +246,10 @@ def test_enrich_excludes_self_from_nearest_peers():
 
     item: dict[str, Any] = {"id": "electron_temperature", "description": "Te"}
 
-    with patch(f"{_WORKERS_MOD}._search_nearby_names", return_value=peers_mock):
+    with patch(
+        "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._search_nearby_names",
+        return_value=peers_mock,
+    ):
         _enrich_for_docs_gen(gc, [item])
 
     peer_tags = [p["tag"] for p in item.get("nearest_peers", [])]
@@ -231,7 +264,9 @@ def test_enrich_excludes_self_from_nearest_peers():
 
 def test_nearby_names_returns_accepted_sns():
     """_nearby_names_for_docs_gen returns list of dicts from the graph."""
-    from imas_codex.standard_names.workers import _nearby_names_for_docs_gen
+    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+        _nearby_names_for_docs_gen,
+    )
 
     gc = _mock_gc(
         query_side_effect=[
@@ -258,7 +293,9 @@ def test_nearby_names_returns_accepted_sns():
 
 def test_nearby_names_excludes_batch_items():
     """Items in the batch are not included in nearby_existing_names."""
-    from imas_codex.standard_names.workers import _nearby_names_for_docs_gen
+    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+        _nearby_names_for_docs_gen,
+    )
 
     gc = _mock_gc(
         query_side_effect=[

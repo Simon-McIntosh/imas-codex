@@ -1,4 +1,6 @@
-from imas_codex.standard_names.graph_ops import fetch_manifest_source_release_rows
+from imas_codex.standard_names.graph_store.graph_audits import (
+    fetch_manifest_source_release_rows,
+)
 
 
 def test_manifest_source_projection_transcribes_recorded_causes() -> None:

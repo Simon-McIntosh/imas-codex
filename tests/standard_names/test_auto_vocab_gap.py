@@ -20,7 +20,7 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.standard_names.workers import (
+from imas_codex.standard_names.worker_tasks.worker_common import (
     _auto_detect_physical_base_gaps,
     _load_known_physical_bases,
 )

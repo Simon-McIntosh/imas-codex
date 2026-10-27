@@ -19,6 +19,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from imas_codex.standard_names.attachment_audit import AttachmentAuditResult
+from imas_codex.standard_names.graph_store import (
+    owner_module_path as _owner_module_path,
+)
 
 _GO = "imas_codex.standard_names.graph_ops"
 _LOOP = "imas_codex.standard_names.loop"
@@ -61,7 +64,9 @@ def _maintenance_mocks(stack: ExitStack) -> None:
         "resolve_doc_links": {},
     }
     for name, result in specs.items():
-        stack.enter_context(patch(f"{_GO}.{name}", return_value=result))
+        stack.enter_context(
+            patch(f"{_owner_module_path(name)}.{name}", return_value=result)
+        )
     stack.enter_context(
         patch(
             "imas_codex.graph.dd_graph_ops.reconcile_dd_unit_corrections",
@@ -112,11 +117,17 @@ async def test_pool_loop_passes_active_run_id_to_attachment_reconcile() -> None:
                 return_value=AttachmentAuditResult(),
             )
         )
-        stack.enter_context(patch(f"{_GO}.create_sn_run_open"))
-        stack.enter_context(patch(f"{_GO}.finalize_sn_run"))
         stack.enter_context(
             patch(
-                f"{_GO}.scoped_terminal_residue",
+                "imas_codex.standard_names.graph_store.graph_audits.create_sn_run_open"
+            )
+        )
+        stack.enter_context(
+            patch("imas_codex.standard_names.graph_store.graph_audits.finalize_sn_run")
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.graph_store.graph_parent_lifecycle.scoped_terminal_residue",
                 return_value={"total": 0, "names": [], "sources": []},
             )
         )
@@ -139,8 +150,17 @@ async def test_pool_loop_passes_active_run_id_to_attachment_reconcile() -> None:
                 return_value=[],
             )
         )
-        stack.enter_context(patch(f"{_GO}.persist_outcome_snapshot", return_value={}))
-        stack.enter_context(patch(f"{_GO}.reset_persist_outcomes"))
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.graph_store.graph_source_bindings.persist_outcome_snapshot",
+                return_value={},
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.graph_store.graph_source_bindings.reset_persist_outcomes"
+            )
+        )
         stack.enter_context(patch(f"{_LOOP}._build_pool_specs", return_value=[]))
         stack.enter_context(
             patch(
@@ -164,8 +184,7 @@ async def test_pool_loop_passes_active_run_id_to_attachment_reconcile() -> None:
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.budget.BudgetManager."
-                "_get_total_spent_sync",
+                "imas_codex.standard_names.budget.BudgetManager._get_total_spent_sync",
                 return_value=0.0,
             )
         )
@@ -222,9 +241,7 @@ def test_provenance_rebuild_passes_run_id_to_attachment_reconcile() -> None:
         patch.object(pr, "find_semantic_source_invariant_violations", return_value=[]),
     ):
         explicit_run_id = "provenance-rebuild:pinned-test-run"
-        summary = pr.rebuild_provenance(
-            gc=gc, recovery_map={}, run_id=explicit_run_id
-        )
+        summary = pr.rebuild_provenance(gc=gc, recovery_map={}, run_id=explicit_run_id)
 
     attach_mock.assert_called_once()
     assert attach_mock.call_args.kwargs["run_id"] == explicit_run_id

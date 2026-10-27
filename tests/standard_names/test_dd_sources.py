@@ -104,7 +104,7 @@ class TestApplyUnitOverrides:
             },
         ]
         with patch(
-            "imas_codex.standard_names.graph_ops.write_skipped_sources"
+            "imas_codex.standard_names.graph_store.graph_source_bindings.write_skipped_sources"
         ) as mock_write:
             mock_write.return_value = 1
             kept = _apply_unit_overrides(rows, write_skipped=True)
@@ -133,7 +133,7 @@ class TestApplyUnitOverrides:
             }
         ]
         with patch(
-            "imas_codex.standard_names.graph_ops.write_skipped_sources"
+            "imas_codex.standard_names.graph_store.graph_source_bindings.write_skipped_sources"
         ) as mock_write:
             kept = _apply_unit_overrides(rows, write_skipped=True)
             mock_write.assert_not_called()
@@ -148,7 +148,7 @@ class TestApplyUnitOverrides:
             }
         ]
         with patch(
-            "imas_codex.standard_names.graph_ops.write_skipped_sources"
+            "imas_codex.standard_names.graph_store.graph_source_bindings.write_skipped_sources"
         ) as mock_write:
             kept = _apply_unit_overrides(rows, write_skipped=False)
             mock_write.assert_not_called()
@@ -196,7 +196,7 @@ class TestApplyUnitOverrides:
             },
         ]
         with patch(
-            "imas_codex.standard_names.graph_ops.write_skipped_sources"
+            "imas_codex.standard_names.graph_store.graph_source_bindings.write_skipped_sources"
         ) as mock_write:
             mock_write.return_value = 1
             kept = _apply_unit_overrides(rows, write_skipped=True)
@@ -230,7 +230,7 @@ class TestApplyUnitOverridesErrorHandling:
             }
         ]
         with patch(
-            "imas_codex.standard_names.graph_ops.write_skipped_sources",
+            "imas_codex.standard_names.graph_store.graph_source_bindings.write_skipped_sources",
             side_effect=RuntimeError("neo4j unreachable"),
         ):
             import logging as _logging
@@ -311,7 +311,7 @@ class TestUnparseableUnitCatchAll:
             }
         ]
         with patch(
-            "imas_codex.standard_names.graph_ops.write_skipped_sources"
+            "imas_codex.standard_names.graph_store.graph_source_bindings.write_skipped_sources"
         ) as mock_write:
             mock_write.return_value = 1
             _apply_unit_overrides(rows, write_skipped=True)

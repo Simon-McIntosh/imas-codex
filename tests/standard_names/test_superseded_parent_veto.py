@@ -5,7 +5,9 @@ from unittest.mock import patch
 import pytest
 
 from imas_codex.standard_names.derivation import DerivedEdge
-from imas_codex.standard_names.graph_ops import _filter_admissible_parents
+from imas_codex.standard_names.graph_store.graph_lineage import (
+    _filter_admissible_parents,
+)
 from imas_codex.standard_names.parents import superseded_parent_names
 from imas_codex.standard_names.signed_manifest import _apply_structural_edge_reconcile
 

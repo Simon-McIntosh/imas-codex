@@ -7,7 +7,9 @@ from typing import Any
 import pytest
 
 from imas_codex.standard_names.export import _graph_node_to_entry_dict
-from imas_codex.standard_names.graph_ops import reconcile_standard_name_kinds
+from imas_codex.standard_names.graph_store.graph_audits import (
+    reconcile_standard_name_kinds,
+)
 
 _STALE_TENSOR_NAMES = (
     "flux_surface_averaged_square_of_toroidal_flux_coordinate_gradient_magnitude",

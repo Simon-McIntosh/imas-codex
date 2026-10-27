@@ -53,7 +53,7 @@ def test_retirement_is_list_scoped_and_ledgered_atomically() -> None:
 
 def test_parent_source_reconcile_refuses_inadmissible_scaffold() -> None:
     """Provenance recovery must not legitimize an invalid structural parent."""
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
         reconcile_orphan_parent_sources,
     )
     from imas_codex.standard_names.parents import AdmissionResult
@@ -61,7 +61,7 @@ def test_parent_source_reconcile_refuses_inadmissible_scaffold() -> None:
     gc = MagicMock()
     with (
         patch(
-            "imas_codex.standard_names.graph_ops.find_orphan_parent_source_candidates",
+            "imas_codex.standard_names.graph_store.graph_parent_lifecycle.find_orphan_parent_source_candidates",
             return_value=[
                 {
                     "parent_id": "line_integrated_impurity_ion_velocity",

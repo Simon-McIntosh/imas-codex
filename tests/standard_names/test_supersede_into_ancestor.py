@@ -13,7 +13,11 @@ from neo4j import GraphDatabase
 
 from imas_codex.graph.client import GraphClient
 from imas_codex.standard_names import graph_ops
-from imas_codex.standard_names.graph_ops import (
+from imas_codex.standard_names.graph_store import (
+    graph_audits as _owning_graph_audits,
+    graph_supersession as _owning_graph_supersession,
+)
+from imas_codex.standard_names.graph_store.graph_supersession import (
     SupersedeIntoAncestorConflict,
     supersede_into_ancestor,
 )
@@ -252,10 +256,12 @@ def test_absent_upstream_stale_source_detaches_and_stays_stale(
         )
 
         assert applied["sources_stale_detached"] == 1
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as graph_client:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as graph_client:
             graph_client.return_value.__enter__.return_value = client
             graph_client.return_value.__exit__.return_value = False
-            reconciliation = graph_ops.reconcile_standard_name_sources("dd")
+            reconciliation = _owning_graph_audits.reconcile_standard_name_sources("dd")
         assert reconciliation == {"stale_marked": 0, "revived": 0, "relinked": 0}
         assert client.query(
             "MATCH (source:StandardNameSource {id: $source}), "
@@ -463,7 +469,7 @@ def test_concurrent_authority_drift_invalidates_apply(
             reason="same physical quantity",
             gc=client,
         )
-        original_lock = graph_ops._lock_ancestor_supersession_authority
+        original_lock = _owning_graph_supersession._lock_ancestor_supersession_authority
 
         def drift_then_lock(query_handle, manifest):
             concurrent.query(
@@ -479,8 +485,7 @@ def test_concurrent_authority_drift_invalidates_apply(
 
         with (
             patch(
-                "imas_codex.standard_names.graph_ops."
-                "_lock_ancestor_supersession_authority",
+                "imas_codex.standard_names.graph_store.graph_supersession._lock_ancestor_supersession_authority",
                 side_effect=drift_then_lock,
             ),
             pytest.raises(

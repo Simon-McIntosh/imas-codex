@@ -68,7 +68,7 @@ def _mock_gc():
 def _patch_gc(mock_gc):
     """Return a ``patch`` context manager for GraphClient."""
     return patch(
-        "imas_codex.standard_names.graph_ops.GraphClient",
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
         return_value=mock_gc,
     )
 
@@ -111,7 +111,7 @@ class TestSeedIsRandom:
     def test_compose_seed_is_random(self):
         """claim_generate_name_batch sends ORDER BY rand() and passes
         through whichever seed the graph returns."""
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
             claim_generate_name_batch,
         )
 
@@ -146,7 +146,7 @@ class TestSeedIsRandom:
             with (
                 _patch_gc(gc),
                 patch(
-                    "imas_codex.standard_names.graph_ops._verify_source_claim_winners",
+                    "imas_codex.standard_names.graph_store.graph_claim_release._verify_source_claim_winners",
                     side_effect=lambda items, **_kwargs: items,
                 ),
             ):
@@ -163,7 +163,7 @@ class TestSeedIsRandom:
 
     def test_sn_seed_is_random(self):
         """StandardName-based claims use ORDER BY rand()."""
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
             claim_enrich_seed_and_expand,
         )
 
@@ -206,7 +206,7 @@ class TestBatchIsCoherent:
     """Returned batch items all share the seed's (cluster_id, unit)."""
 
     def test_enrich_batch_coherent(self):
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
             claim_enrich_seed_and_expand,
         )
 
@@ -258,7 +258,7 @@ class TestFallbackToPhysicsDomain:
     """When seed has no cluster_id, expand uses (physics_domain, unit)."""
 
     def test_fallback_domain(self):
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
             claim_review_names_seed_and_expand,
         )
 
@@ -314,7 +314,7 @@ class TestReviewExcludesLowScore:
     """review_names claim with min_score=0.5 excludes reviewer_score<0.5."""
 
     def test_review_names_eligibility(self):
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
             claim_review_names_seed_and_expand,
         )
 
@@ -370,7 +370,7 @@ class TestRefineNameEligibility:
     """Refine-name claim requires name_stage = 'reviewed'."""
 
     def test_refine_name_excludes_unreviewed_names(self):
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_refinement import (
             claim_refine_name_batch,
         )
 
@@ -405,7 +405,7 @@ class TestRefineNameEligibility:
         with (
             _patch_gc(gc),
             patch(
-                "imas_codex.standard_names.graph_ops._verify_name_claim_winners",
+                "imas_codex.standard_names.graph_store.graph_claim_release._verify_name_claim_winners",
                 side_effect=lambda items, **_kwargs: items,
             ),
             patch(
@@ -438,9 +438,11 @@ class TestReviewAndRefineDisjoint:
         refine_name requires name_stage = 'reviewed'.
         Same-name overlap is structurally impossible.
         """
-        from imas_codex.standard_names.graph_ops import (
-            claim_refine_name_batch,
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
             claim_review_names_seed_and_expand,
+        )
+        from imas_codex.standard_names.graph_store.graph_refinement import (
+            claim_refine_name_batch,
         )
 
         # ── review_names claim ──
@@ -543,7 +545,7 @@ class TestClaimTokenTwoStep:
         return gc, tx
 
     def test_compose_two_step(self):
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
             claim_generate_name_batch,
         )
 
@@ -574,7 +576,9 @@ class TestClaimTokenTwoStep:
 
     def test_compose_seed_and_expand_increment_sequence(self):
         """Both source-claim writes fence legacy rows with a monotonic sequence."""
-        from imas_codex.standard_names.graph_ops import claim_generate_name_batch
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            claim_generate_name_batch,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(
@@ -603,7 +607,7 @@ class TestClaimTokenTwoStep:
         with (
             _patch_gc(gc),
             patch(
-                "imas_codex.standard_names.graph_ops._verify_source_claim_winners",
+                "imas_codex.standard_names.graph_store.graph_claim_release._verify_source_claim_winners",
                 side_effect=lambda items: items,
             ),
         ):
@@ -647,7 +651,9 @@ class TestClaimTokenTwoStep:
         ],
     )
     def test_compose_expansion_paths_recheck_after_lock(self, seed):
-        from imas_codex.standard_names.graph_ops import claim_generate_name_batch
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            claim_generate_name_batch,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(
@@ -669,7 +675,7 @@ class TestClaimTokenTwoStep:
         with (
             _patch_gc(gc),
             patch(
-                "imas_codex.standard_names.graph_ops._verify_source_claim_winners",
+                "imas_codex.standard_names.graph_store.graph_claim_release._verify_source_claim_winners",
                 side_effect=lambda items: items,
             ),
         ):
@@ -684,7 +690,7 @@ class TestClaimTokenTwoStep:
         assert "WITH sns ORDER BY sns.id" in query
 
     def test_enrich_two_step(self):
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
             claim_enrich_seed_and_expand,
         )
 
@@ -711,7 +717,7 @@ class TestClaimTokenTwoStep:
         )
 
     def test_review_names_two_step(self):
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
             claim_review_names_seed_and_expand,
         )
 
@@ -739,7 +745,7 @@ class TestClaimTokenTwoStep:
         )
 
     def test_refine_name_two_step(self):
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_refinement import (
             claim_refine_name_batch,
         )
 

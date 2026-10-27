@@ -51,7 +51,10 @@ async def test_priority_scope_replaces_caller_scope_in_priority_pass() -> None:
             {"id": "sn-1", "claim_token": "tok", "source_type": "dd", "source_id": "p"}
         ]
 
-    with patch(f"{_GO}.claim_generate_docs_batch", side_effect=_claim):
+    with patch(
+        "imas_codex.standard_names.graph_store.graph_docs_persistence.claim_generate_docs_batch",
+        side_effect=_claim,
+    ):
         specs = _docs_specs()
         result = await specs["generate_docs"].claim()
 
@@ -75,7 +78,10 @@ async def test_empty_priority_pass_falls_back_to_caller_scope() -> None:
             {"id": "sn-9", "claim_token": "tok", "source_type": "dd", "source_id": "q"}
         ]
 
-    with patch(f"{_GO}.claim_generate_docs_batch", side_effect=_claim):
+    with patch(
+        "imas_codex.standard_names.graph_store.graph_docs_persistence.claim_generate_docs_batch",
+        side_effect=_claim,
+    ):
         specs = _docs_specs()
         result = await specs["generate_docs"].claim()
 
@@ -95,7 +101,10 @@ async def test_review_docs_priority_scope_replaces_caller_scope() -> None:
             {"id": "sn-2", "claim_token": "tok", "source_type": "dd", "source_id": "r"}
         ]
 
-    with patch(f"{_GO}.claim_review_docs_batch", side_effect=_claim):
+    with patch(
+        "imas_codex.standard_names.graph_store.graph_review_persistence.claim_review_docs_batch",
+        side_effect=_claim,
+    ):
         specs = _docs_specs()
         result = await specs["review_docs"].claim()
 

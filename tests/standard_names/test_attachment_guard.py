@@ -2,7 +2,9 @@
 
 import pytest
 
-from imas_codex.standard_names.workers import _is_attachment_consistent
+from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+    _is_attachment_consistent,
+)
 
 
 @pytest.mark.parametrize(
@@ -125,7 +127,9 @@ def test_public_parser_ir_exposes_time_change_semantics(sn_name: str) -> None:
     """ISN semantics apply across direct, nested, binary, and qualifier IR."""
     from imas_standard_names import parse
 
-    from imas_codex.standard_names.workers import _ir_denotes_time_change
+    from imas_codex.standard_names.worker_tasks.worker_common import (
+        _ir_denotes_time_change,
+    )
 
     assert _ir_denotes_time_change(parse(sn_name, strict=True).ir)
 
@@ -141,7 +145,9 @@ def test_public_parser_ir_exposes_time_change_semantics(sn_name: str) -> None:
 def test_public_parser_ir_rejects_non_time_operator_semantics(sn_name: str) -> None:
     from imas_standard_names import parse
 
-    from imas_codex.standard_names.workers import _ir_denotes_time_change
+    from imas_codex.standard_names.worker_tasks.worker_common import (
+        _ir_denotes_time_change,
+    )
 
     assert not _ir_denotes_time_change(parse(sn_name, strict=True).ir)
 

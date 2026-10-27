@@ -18,6 +18,9 @@ import pytest
 from imas_codex.discovery.base import llm
 from imas_codex.settings import get_openrouter_pricing
 from imas_codex.standard_names import workers
+from imas_codex.standard_names.worker_tasks import (
+    worker_review_docs as _owning_worker_review_docs,
+)
 
 LIVE_GPT6_SEATS = (
     "openrouter/openai/gpt-6.1-sol",
@@ -105,7 +108,7 @@ def test_docs_review_escalator_accepts_rotated_breaker():
         "source_bindings": [],
         "source_paths": [],
     }
-    prepared = asyncio.run(workers.prepare_docs_review_request(item))
+    prepared = asyncio.run(_owning_worker_review_docs.prepare_docs_review_request(item))
     breaker = prepared["models"][2]
     assert breaker == "openrouter/openai/gpt-6.1-sol"
     assert prepared["escalation_input_token_bound"] > 0

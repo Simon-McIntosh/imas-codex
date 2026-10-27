@@ -35,6 +35,9 @@ import pytest
 from click.testing import CliRunner
 
 from imas_codex.standard_names.families import PATTERN_INVARIANT_SEGMENTS
+from imas_codex.standard_names.graph_store import (
+    graph_docs_persistence as _owning_graph_docs_persistence,
+)
 
 _ANCHOR = "base_at_axis"
 _MEMBERS = ["base_at_boundary", "base_of_probe"]
@@ -237,9 +240,13 @@ def _apply(gc: _FamilyGraph, harness: _ApplyHarness, *, thresholds: Any = None):
 def _install_docs_pipeline(monkeypatch: Any, pipeline: _DocsPipeline) -> None:
     from imas_codex.standard_names import graph_ops
 
-    monkeypatch.setattr(graph_ops, "reset_standard_name_docs", pipeline.reset)
     monkeypatch.setattr(
-        graph_ops, "stamp_harmonized_families", lambda families: len(families)
+        _owning_graph_docs_persistence, "reset_standard_name_docs", pipeline.reset
+    )
+    monkeypatch.setattr(
+        _owning_graph_docs_persistence,
+        "stamp_harmonized_families",
+        lambda families: len(families),
     )
 
 

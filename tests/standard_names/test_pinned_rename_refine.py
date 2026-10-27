@@ -20,6 +20,15 @@ from typing import Any
 from unittest.mock import MagicMock, patch
 
 from imas_codex.standard_names import graph_ops
+from imas_codex.standard_names.graph_store import (
+    graph_claim_release as _owning_graph_claim_release,
+    graph_cost_and_claims as _owning_graph_cost_and_claims,
+    graph_foundation as _owning_graph_foundation,
+    graph_refinement as _owning_graph_refinement,
+)
+from imas_codex.standard_names.worker_tasks import (
+    worker_compose_and_validate as _owning_worker_compose_and_validate,
+)
 
 
 class _NodeGraph:
@@ -133,8 +142,8 @@ class _NodeGraph:
 
 def _resubmit(node: dict[str, Any], token: str, cap: int = 4):
     fake = _NodeGraph(node)
-    with patch.object(graph_ops, "GraphClient", return_value=fake):
-        return graph_ops.resubmit_pinned_rename_for_review(
+    with patch.object(_owning_graph_foundation, "GraphClient", return_value=fake):
+        return _owning_graph_claim_release.resubmit_pinned_rename_for_review(
             sn_id=node["id"], token=token, rotation_cap=cap
         )
 
@@ -143,8 +152,8 @@ def _stage_rescore(
     node: dict[str, Any], run_id: str | None = None, dry_run: bool = False
 ):
     fake = _NodeGraph(node)
-    with patch.object(graph_ops, "GraphClient", return_value=fake):
-        return graph_ops.stage_name_for_rescore(
+    with patch.object(_owning_graph_foundation, "GraphClient", return_value=fake):
+        return _owning_graph_claim_release.stage_name_for_rescore(
             node["id"], run_id=run_id, dry_run=dry_run
         )
 
@@ -219,8 +228,8 @@ class TestStageNameForRescore:
 
     def test_refuses_missing(self) -> None:
         fake = _NodeGraph({})
-        with patch.object(graph_ops, "GraphClient", return_value=fake):
-            res = graph_ops.stage_name_for_rescore("missing")
+        with patch.object(_owning_graph_foundation, "GraphClient", return_value=fake):
+            res = _owning_graph_claim_release.stage_name_for_rescore("missing")
         assert res["ok"] is False and "not found" in res["reason"]
 
     def test_dry_run_does_not_write(self) -> None:
@@ -232,8 +241,8 @@ class TestStageNameForRescore:
     def test_atomic_transition_race_loss_is_refused(self) -> None:
         node = {"id": "n", "name_stage": "reviewed"}
         fake = _NodeGraph(node, lose_rescore_transition=True)
-        with patch.object(graph_ops, "GraphClient", return_value=fake):
-            result = graph_ops.stage_name_for_rescore("n", run_id="r")
+        with patch.object(_owning_graph_foundation, "GraphClient", return_value=fake):
+            result = _owning_graph_claim_release.stage_name_for_rescore("n", run_id="r")
         assert result["ok"] is False
         assert "name_stage='accepted'" in result["reason"]
         assert node["name_stage"] == "accepted"
@@ -283,7 +292,9 @@ class TestStageNameForRescore:
         _stage_rescore(node, run_id="r")
         fake = _NodeGraph(node)
         with patch("imas_codex.graph.client.GraphClient", return_value=fake):
-            token, items = workers.claim_ids_for_validation(["n"], 1)
+            token, items = _owning_worker_compose_and_validate.claim_ids_for_validation(
+                ["n"], 1
+            )
         assert token
         assert [item["id"] for item in items] == ["n"]
         assert node["claim_token"] == token
@@ -298,7 +309,7 @@ class TestRescoreNameOrchestrator:
 
         with (
             patch.object(
-                graph_ops,
+                _owning_graph_claim_release,
                 "stage_name_for_rescore",
                 return_value={
                     "ok": True,
@@ -342,7 +353,7 @@ class TestRescoreNameOrchestrator:
         )
         with (
             patch.object(
-                graph_ops,
+                _owning_graph_claim_release,
                 "stage_name_for_rescore",
                 return_value={
                     "ok": True,
@@ -383,7 +394,7 @@ class TestRescoreNameOrchestrator:
         order: list[str] = []
         with (
             patch.object(
-                graph_ops,
+                _owning_graph_claim_release,
                 "stage_name_for_rescore",
                 return_value={"ok": True, "prior_stage": "reviewed"},
             ),
@@ -436,7 +447,7 @@ class TestRescoreNameOrchestrator:
 
         fake = _NodeGraph(node)
         with (
-            patch.object(graph_ops, "GraphClient", return_value=fake),
+            patch.object(_owning_graph_foundation, "GraphClient", return_value=fake),
             patch.object(
                 edit_mod,
                 "_run_rescore_validation",
@@ -461,7 +472,7 @@ class TestRescoreNameOrchestrator:
         from imas_codex.standard_names import edit as edit_mod
 
         with patch.object(
-            graph_ops,
+            _owning_graph_claim_release,
             "stage_name_for_rescore",
             return_value={"ok": False, "reason": "name 'n' not found"},
         ):
@@ -474,7 +485,7 @@ class TestRescoreNameOrchestrator:
         node = {"id": "n", "name_stage": "reviewed"}
         fake = _NodeGraph(node, lose_rescore_transition=True)
         with (
-            patch.object(graph_ops, "GraphClient", return_value=fake),
+            patch.object(_owning_graph_foundation, "GraphClient", return_value=fake),
             patch.object(edit_mod, "_run_rescore_validation") as mock_validation,
             patch.object(edit_mod, "_run_scoped_pipeline") as mock_pipeline,
         ):
@@ -497,10 +508,18 @@ class TestRefineClaimExcludesCappedPinnedRenames:
             return []
 
         with (
-            patch.object(graph_ops, "_claim_sn_atomic", side_effect=_fake_claim),
-            patch.object(graph_ops, "_verify_name_claim_winners", return_value=[]),
+            patch.object(
+                _owning_graph_cost_and_claims,
+                "_claim_sn_atomic",
+                side_effect=_fake_claim,
+            ),
+            patch.object(
+                _owning_graph_claim_release,
+                "_verify_name_claim_winners",
+                return_value=[],
+            ),
         ):
-            graph_ops.claim_refine_name_batch()
+            _owning_graph_refinement.claim_refine_name_batch()
 
         where = captured["where"]
         assert "coalesce(sn.edit_mode, '') = 'rename'" in where

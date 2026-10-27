@@ -156,7 +156,9 @@ class TestGrammarRetryChargeEvent:
         # Mock acall_fn that returns an LLMResult-like object
         from pydantic import BaseModel, Field
 
-        from imas_codex.standard_names.workers import _grammar_retry
+        from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+            _grammar_retry,
+        )
 
         class _GrammarRetryResponse(BaseModel):
             revised_name: str = "electron_temperature"
@@ -201,7 +203,9 @@ class TestGrammarRetryChargeEvent:
     @pytest.mark.asyncio
     async def test_grammar_retry_returns_zero_on_failure(self):
         """On exception, _grammar_retry returns (None, 0.0, 0, 0)."""
-        from imas_codex.standard_names.workers import _grammar_retry
+        from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+            _grammar_retry,
+        )
 
         async def mock_acall(**kwargs):
             raise RuntimeError("LLM failure")

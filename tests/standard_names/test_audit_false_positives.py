@@ -12,7 +12,9 @@ from imas_codex.standard_names.audits import (
     name_description_consistency_check,
     name_unit_consistency_check,
 )
-from imas_codex.standard_names.workers import validate_name_candidate
+from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+    validate_name_candidate,
+)
 
 _SPECTRAL_IDENTITIES = (
     "perturbed_electrostatic_potential_imaginary_part",
@@ -92,7 +94,7 @@ def test_locus_owner_is_not_a_second_subject() -> None:
 
 def _admission_status(candidate: dict[str, str]) -> tuple[str, list[str]]:
     with patch(
-        "imas_codex.standard_names.workers._validate_via_isn",
+        "imas_codex.standard_names.worker_tasks.worker_compose_and_validate._validate_via_isn",
         return_value=([], {"pydantic": {"passed": True}}),
     ):
         issues, _summary, status = validate_name_candidate(candidate)

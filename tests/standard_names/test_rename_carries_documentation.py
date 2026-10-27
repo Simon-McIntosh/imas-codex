@@ -21,7 +21,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-_GC_PATH = "imas_codex.standard_names.graph_ops.GraphClient"
+_GC_PATH = "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
 
 # Measured live pairs. The re-rendered spellings are from the cohort a
 # rendering-rule migration minted; the meaning-changing ones are refinements
@@ -75,7 +75,7 @@ def _capture_persist(
     The preflight cannot commit against a mock, so it refuses — the statement
     it issued and the parameters bound to it are what these tests read.
     """
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_refinement import (
         RefinedNamePersistenceRefusal,
         persist_refined_name,
     )
@@ -100,7 +100,9 @@ def _capture_persist(
 
 def _successful_persist_with_assertion() -> tuple[MagicMock, MagicMock]:
     """Run the persistence path far enough to observe both change receipts."""
-    from imas_codex.standard_names.graph_ops import persist_refined_name
+    from imas_codex.standard_names.graph_store.graph_refinement import (
+        persist_refined_name,
+    )
 
     old_name, new_name = QUALIFIER_ADDITION
     tx = MagicMock()
@@ -134,7 +136,7 @@ def _successful_persist_with_assertion() -> tuple[MagicMock, MagicMock]:
             return_value=0,
         ),
         patch(record_path, return_value="sn-change:recorded") as record_change,
-        patch("imas_codex.standard_names.graph_ops.bump_sn_run_counter"),
+        patch("imas_codex.standard_names.graph_store.graph_audits.bump_sn_run_counter"),
     ):
         persist_refined_name(
             old_name=old_name,
@@ -157,19 +159,25 @@ class TestTheGrammarDecidesWhetherTheMeaningMoved:
 
     @pytest.mark.parametrize(("old", "new"), RERENDERED)
     def test_a_re_rendering_preserves_meaning(self, old: str, new: str):
-        from imas_codex.standard_names.graph_ops import rename_preserves_meaning
+        from imas_codex.standard_names.graph_store.graph_refinement import (
+            rename_preserves_meaning,
+        )
 
         assert rename_preserves_meaning(old, new) is True
 
     @pytest.mark.parametrize(("old", "new"), REMEANT)
     def test_a_different_quantity_does_not(self, old: str, new: str):
-        from imas_codex.standard_names.graph_ops import rename_preserves_meaning
+        from imas_codex.standard_names.graph_store.graph_refinement import (
+            rename_preserves_meaning,
+        )
 
         assert rename_preserves_meaning(old, new) is False
 
     def test_an_unparseable_spelling_answers_no(self):
         """Absence of evidence is not evidence of sameness."""
-        from imas_codex.standard_names.graph_ops import rename_preserves_meaning
+        from imas_codex.standard_names.graph_store.graph_refinement import (
+            rename_preserves_meaning,
+        )
 
         assert rename_preserves_meaning("beta", "!!! not a name !!!") is False
         assert rename_preserves_meaning("!!! not a name !!!", "beta") is False
@@ -183,12 +191,16 @@ class TestExplicitMeaningAuthority:
         self,
         pair: tuple[str, str],
     ):
-        from imas_codex.standard_names.graph_ops import rename_preserves_meaning
+        from imas_codex.standard_names.graph_store.graph_refinement import (
+            rename_preserves_meaning,
+        )
 
         assert rename_preserves_meaning(*pair) is False
 
     def test_the_measured_qualifier_addition_needs_explicit_authority(self):
-        from imas_codex.standard_names.graph_ops import rename_preserves_meaning
+        from imas_codex.standard_names.graph_store.graph_refinement import (
+            rename_preserves_meaning,
+        )
 
         assert (
             rename_preserves_meaning(
@@ -217,7 +229,9 @@ class TestExplicitMeaningAuthority:
         asserted_by: str | None,
         message: str,
     ):
-        from imas_codex.standard_names.graph_ops import rename_preserves_meaning
+        from imas_codex.standard_names.graph_store.graph_refinement import (
+            rename_preserves_meaning,
+        )
 
         with pytest.raises(ValueError, match=message):
             rename_preserves_meaning(
@@ -325,7 +339,7 @@ class TestAnExistingRenameCanReceiveItsAcceptedDocument:
     """The post-rename repair is atomic, attributed, and idempotent."""
 
     def test_the_repair_writes_only_the_docs_axis_and_a_receipt(self):
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_refinement import (
             carry_accepted_documentation_across_rename,
         )
 
@@ -400,7 +414,7 @@ class TestAnExistingRenameCanReceiveItsAcceptedDocument:
         asserted_by: str,
         message: str,
     ):
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_refinement import (
             carry_accepted_documentation_across_rename,
         )
 

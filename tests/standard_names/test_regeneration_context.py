@@ -4,6 +4,11 @@ from __future__ import annotations
 
 import pytest
 
+from imas_codex.standard_names.graph_store import (
+    graph_foundation as _owning_graph_foundation,
+    graph_lineage as _owning_graph_lineage,
+)
+
 
 class TestGetSourceNameMapping:
     """Tests for get_source_name_mapping graph query."""
@@ -39,8 +44,8 @@ class TestGetSourceNameMapping:
             def __exit__(self, *args):
                 pass
 
-        monkeypatch.setattr(graph_ops, "GraphClient", lambda: MockGC())
-        mapping = graph_ops.get_source_name_mapping()
+        monkeypatch.setattr(_owning_graph_foundation, "GraphClient", lambda: MockGC())
+        mapping = _owning_graph_lineage.get_source_name_mapping()
 
         assert len(mapping) == 2
         assert (
@@ -83,8 +88,8 @@ class TestGetSourceNameMapping:
             def __exit__(self, *args):
                 pass
 
-        monkeypatch.setattr(graph_ops, "GraphClient", lambda: MockGC())
-        mapping = graph_ops.get_source_name_mapping()
+        monkeypatch.setattr(_owning_graph_foundation, "GraphClient", lambda: MockGC())
+        mapping = _owning_graph_lineage.get_source_name_mapping()
 
         assert (
             mapping["equilibrium/time_slice/profiles_1d/psi"]["name"] == "accepted_name"
@@ -104,8 +109,8 @@ class TestGetSourceNameMapping:
             def __exit__(self, *args):
                 pass
 
-        monkeypatch.setattr(graph_ops, "GraphClient", lambda: MockGC())
-        assert graph_ops.get_source_name_mapping() == {}
+        monkeypatch.setattr(_owning_graph_foundation, "GraphClient", lambda: MockGC())
+        assert _owning_graph_lineage.get_source_name_mapping() == {}
 
 
 class TestComposePromptPreviousName:

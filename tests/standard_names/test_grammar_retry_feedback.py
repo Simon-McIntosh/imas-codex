@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names.workers import (
+from imas_codex.standard_names.worker_tasks.worker_common import (
     _build_grammar_retry_reason,
     _grammar_round_trip_failures,
 )

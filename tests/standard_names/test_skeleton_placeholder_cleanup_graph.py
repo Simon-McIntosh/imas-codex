@@ -9,7 +9,7 @@ from unittest.mock import patch
 import pytest
 
 from imas_codex.standard_names.derivation import DerivedEdge
-from imas_codex.standard_names.graph_ops import write_standard_names
+from imas_codex.standard_names.graph_store.graph_catalog import write_standard_names
 
 pytestmark = pytest.mark.graph
 
@@ -196,11 +196,11 @@ def test_write_sweeps_only_its_unowned_placeholder_endpoints(_graph) -> None:
             ),
             patch("imas_standard_names.grammar.compose", side_effect=lambda ir: ir),
             patch(
-                "imas_codex.standard_names.graph_ops._parse_grammar",
+                "imas_codex.standard_names.graph_store.graph_foundation._parse_grammar",
                 return_value={},
             ),
             patch(
-                "imas_codex.standard_names.graph_ops._write_grammar_decomposition",
+                "imas_codex.standard_names.graph_store.graph_catalog._write_grammar_decomposition",
                 return_value=[],
             ),
             patch(
@@ -208,7 +208,7 @@ def test_write_sweeps_only_its_unowned_placeholder_endpoints(_graph) -> None:
                 side_effect=lambda name: edges.get(name, []),
             ),
             patch(
-                "imas_codex.standard_names.graph_ops._filter_admissible_parents",
+                "imas_codex.standard_names.graph_store.graph_lineage._filter_admissible_parents",
                 side_effect=lambda batch, _client, **_kwargs: batch,
             ),
         ):

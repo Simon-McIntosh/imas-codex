@@ -73,10 +73,12 @@ def _call_write_reviews(records: list[dict]) -> tuple[int, list]:
     mock_gc = MagicMock()
     mock_gc.query = MagicMock(return_value=[])
 
-    with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+    with patch(
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+    ) as MockGC:
         MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
         MockGC.return_value.__exit__ = MagicMock(return_value=False)
-        from imas_codex.standard_names.graph_ops import write_reviews
+        from imas_codex.standard_names.graph_store.graph_catalog import write_reviews
 
         result = write_reviews(records)
 

@@ -8,7 +8,7 @@ import pytest
 
 
 def test_derived_parent_identity_rejects_bare_state_without_subject() -> None:
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_lineage import (
         _validate_derived_parent_identity,
     )
 
@@ -26,7 +26,9 @@ def test_derived_parent_identity_rejects_bare_state_without_subject() -> None:
 
 
 def test_reviewed_unit_repair_is_ledgered_and_updates_edge() -> None:
-    from imas_codex.standard_names.graph_ops import stamp_standard_name_units
+    from imas_codex.standard_names.graph_store.graph_lineage import (
+        stamp_standard_name_units,
+    )
 
     gc = MagicMock()
     gc.query.side_effect = [
@@ -52,7 +54,9 @@ def test_reviewed_unit_repair_is_ledgered_and_updates_edge() -> None:
 
 
 def test_reviewed_unit_repair_refuses_missing_target_before_write() -> None:
-    from imas_codex.standard_names.graph_ops import stamp_standard_name_units
+    from imas_codex.standard_names.graph_store.graph_lineage import (
+        stamp_standard_name_units,
+    )
 
     gc = MagicMock()
     gc.query.return_value = [{"id": "particle_energy"}]
@@ -71,7 +75,9 @@ def test_reviewed_unit_repair_refuses_missing_target_before_write() -> None:
 
 
 def test_reviewed_unit_repair_requires_reason() -> None:
-    from imas_codex.standard_names.graph_ops import stamp_standard_name_units
+    from imas_codex.standard_names.graph_store.graph_lineage import (
+        stamp_standard_name_units,
+    )
 
     with pytest.raises(ValueError, match="reason"):
         stamp_standard_name_units(

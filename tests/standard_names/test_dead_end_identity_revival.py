@@ -44,7 +44,9 @@ def test_composed_dead_end_identity_is_revived_for_review(
     name: str, prior_stage: str
 ) -> None:
     """All four observed dead-end spellings enter the bindable path."""
-    from imas_codex.standard_names.graph_ops import _lock_claimed_name_bindings
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        _lock_claimed_name_bindings,
+    )
 
     graph = MagicMock()
     graph.query.return_value = [
@@ -59,7 +61,7 @@ def test_composed_dead_end_identity_is_revived_for_review(
     ]
 
     with patch(
-        "imas_codex.standard_names.graph_ops._guard_existing_target_pairings",
+        "imas_codex.standard_names.graph_store.graph_source_bindings._guard_existing_target_pairings",
         return_value={},
     ):
         result = _lock_claimed_name_bindings(
@@ -92,7 +94,9 @@ def test_composed_dead_end_identity_is_revived_for_review(
 
 def test_live_successor_keeps_retired_identity_non_bindable() -> None:
     """An occupied spelling remains retired when its chain has a live answer."""
-    from imas_codex.standard_names.graph_ops import _lock_claimed_name_bindings
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        _lock_claimed_name_bindings,
+    )
 
     graph = MagicMock()
 
@@ -112,7 +116,7 @@ def test_live_successor_keeps_retired_identity_non_bindable() -> None:
 
     graph.query.side_effect = _query
     with patch(
-        "imas_codex.standard_names.graph_ops._guard_existing_target_pairings",
+        "imas_codex.standard_names.graph_store.graph_source_bindings._guard_existing_target_pairings",
         return_value={},
     ):
         result = _lock_claimed_name_bindings(
@@ -132,7 +136,9 @@ def test_live_successor_keeps_retired_identity_non_bindable() -> None:
 
 def test_non_composition_binding_cannot_revive_retired_identity() -> None:
     """Attachment reuse never gains the composition-only revival authority."""
-    from imas_codex.standard_names.graph_ops import _lock_claimed_name_bindings
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        _lock_claimed_name_bindings,
+    )
 
     graph = MagicMock()
     graph.query.return_value = [
@@ -147,7 +153,7 @@ def test_non_composition_binding_cannot_revive_retired_identity() -> None:
     ]
 
     with patch(
-        "imas_codex.standard_names.graph_ops._guard_existing_target_pairings",
+        "imas_codex.standard_names.graph_store.graph_source_bindings._guard_existing_target_pairings",
         return_value={},
     ):
         result = _lock_claimed_name_bindings(

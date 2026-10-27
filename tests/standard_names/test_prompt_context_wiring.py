@@ -28,7 +28,9 @@ def test_enrich_batch_items_injects_hybrid_neighbours():
     # Verify the function signature accepts the expected args
     import inspect
 
-    from imas_codex.standard_names.workers import _hybrid_search_neighbours
+    from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+        _hybrid_search_neighbours,
+    )
 
     sig = inspect.signature(_hybrid_search_neighbours)
     assert "gc" in sig.parameters
@@ -42,7 +44,9 @@ def test_enrich_batch_items_injects_related_neighbours():
     """related_neighbours are injected per-item when related paths found."""
     import inspect
 
-    from imas_codex.standard_names.workers import _related_path_neighbours
+    from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+        _related_path_neighbours,
+    )
 
     sig = inspect.signature(_related_path_neighbours)
     assert "gc" in sig.parameters
@@ -52,7 +56,9 @@ def test_enrich_batch_items_injects_related_neighbours():
 
 def test_enrich_batch_items_populates_all_context_keys():
     """_enrich_batch_items populates hybrid, related, error, and identifier keys."""
-    from imas_codex.standard_names.workers import _enrich_batch_items
+    from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+        _enrich_batch_items,
+    )
 
     # Build a mock GraphClient that returns data for all four channels
     mock_gc = MagicMock()
@@ -122,11 +128,11 @@ def test_enrich_batch_items_populates_all_context_keys():
     with (
         patch("imas_codex.graph.client.GraphClient") as MockGC,
         patch(
-            "imas_codex.standard_names.workers._hybrid_search_neighbours_batch",
+            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours_batch",
             return_value=[mock_hybrid],
         ),
         patch(
-            "imas_codex.standard_names.workers._related_path_neighbours",
+            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._related_path_neighbours",
             return_value=mock_related,
         ),
     ):
@@ -157,7 +163,9 @@ async def test_compose_context_has_scored_examples_key():
     receives. A missing assignment anywhere on that path fails here, whatever
     module the batch processor lives in.
     """
-    from imas_codex.standard_names.workers import compose_batch
+    from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+        compose_batch,
+    )
 
     scored_examples = [{"name": "electron_temperature", "comments": "scored"}]
     batch = [
@@ -182,7 +190,7 @@ async def test_compose_context_has_scored_examples_key():
 
     with (
         patch(
-            "imas_codex.standard_names.graph_ops._verify_source_claim_winners",
+            "imas_codex.standard_names.graph_store.graph_claim_release._verify_source_claim_winners",
             side_effect=lambda items: items,
         ),
         patch("imas_codex.settings.get_model", return_value="test-compose"),
@@ -277,11 +285,11 @@ def test_review_dd_context_injects_neighbours():
     with (
         patch("imas_codex.graph.client.GraphClient") as MockGC,
         patch(
-            "imas_codex.standard_names.workers._hybrid_search_neighbours_batch",
+            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours_batch",
             return_value=[mock_hybrid],
         ),
         patch(
-            "imas_codex.standard_names.workers._related_path_neighbours",
+            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._related_path_neighbours",
             return_value=mock_related,
         ),
     ):
@@ -306,7 +314,10 @@ def test_review_dd_context_injects_neighbours():
 def test_retry_accessors_return_configured_defaults():
     """Retry tunables are accessible via settings and workers."""
     from imas_codex.settings import get_sn_retry_attempts, get_sn_retry_k_expansion
-    from imas_codex.standard_names.workers import _retry_attempts, _retry_k_expansion
+    from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+        _retry_attempts,
+        _retry_k_expansion,
+    )
 
     # Settings and worker accessors agree
     assert _retry_attempts() == get_sn_retry_attempts()

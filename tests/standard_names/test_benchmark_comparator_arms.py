@@ -83,7 +83,7 @@ async def test_block_on_prompt_carries_the_neighbour() -> None:
     config = BenchmarkConfig(models=["test"], comparator_block=True)
 
     with patch(
-        "imas_codex.standard_names.workers._collect_nearby_name_comparators",
+        "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._collect_nearby_name_comparators",
         return_value=list(_NEIGHBOURS),
     ):
         prompt = await _capture_prompt(config)
@@ -106,7 +106,7 @@ async def test_rerank_switch_reorders_the_carried_block() -> None:
 
     with (
         patch(
-            "imas_codex.standard_names.workers._collect_nearby_name_comparators",
+            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._collect_nearby_name_comparators",
             return_value=list(_NEIGHBOURS),
         ),
         patch(
@@ -118,7 +118,7 @@ async def test_rerank_switch_reorders_the_carried_block() -> None:
 
     with (
         patch(
-            "imas_codex.standard_names.workers._collect_nearby_name_comparators",
+            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._collect_nearby_name_comparators",
             return_value=list(_NEIGHBOURS),
         ),
         patch(

@@ -129,7 +129,9 @@ def test_prior_version_bridge_is_converged_without_being_applied() -> None:
 
 
 def test_attachment_refuses_published_value_on_active_graph_bridge(monkeypatch) -> None:
-    from imas_codex.standard_names.workers import _is_attachment_consistent
+    from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+        _is_attachment_consistent,
+    )
     from tests.standard_names.dd_resolution_test_data import (
         SYNTHETIC_ACTIVE_DIRECTION_ROW,
         load_synthetic_resolution_authority,
@@ -214,7 +216,9 @@ def test_consumer_boundaries_call_typed_authority(
 ) -> None:
     from imas_codex.standard_names import release_notes, source_refresh
     from imas_codex.standard_names.sources import dd as dd_source
-    from imas_codex.standard_names.workers import _is_attachment_consistent
+    from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+        _is_attachment_consistent,
+    )
 
     calls: list[str] = []
     original_rows: Callable = dd_resolutions.resolve_dd_rows

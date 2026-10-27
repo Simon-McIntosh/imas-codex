@@ -588,12 +588,16 @@ def _fake_scoped_pool(_gc, mock_llm, *, accept: bool):
     on the live graph — the substance of an inline review, minus the pool
     harness the unit tests already cover.
     """
-    from imas_codex.standard_names.graph_ops import claim_review_name_batch
+    from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        claim_review_name_batch,
+    )
     from imas_codex.standard_names.models import (
         StandardNameQualityReviewNameOnly,
         StandardNameQualityScoreNameOnly,
     )
-    from imas_codex.standard_names.workers import process_review_name_batch
+    from imas_codex.standard_names.worker_tasks.worker_review_names import (
+        process_review_name_batch,
+    )
 
     if accept:
         scores = StandardNameQualityScoreNameOnly(

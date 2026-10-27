@@ -12,7 +12,12 @@ import pytest
 
 from imas_codex.graph.client import GraphClient
 from imas_codex.standard_names import graph_ops
-from imas_codex.standard_names.graph_ops import stage_name_for_rescore
+from imas_codex.standard_names.graph_store import (
+    graph_claim_release as _owning_graph_claim_release,
+)
+from imas_codex.standard_names.graph_store.graph_claim_release import (
+    stage_name_for_rescore,
+)
 
 
 class _GuardedGraph:
@@ -77,7 +82,10 @@ class _GuardedGraph:
 def test_terminal_status_is_refused_without_mutation(status: str) -> None:
     graph = _GuardedGraph(stage="exhausted", status=status)
     before = graph.node.copy()
-    with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=graph):
+    with patch(
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        return_value=graph,
+    ):
         result = stage_name_for_rescore("plasma_current")
 
     assert not result["ok"]
@@ -90,7 +98,10 @@ def test_terminal_status_is_refused_without_mutation(status: str) -> None:
 
 def test_draft_status_still_rescores() -> None:
     graph = _GuardedGraph(stage="exhausted", status="draft")
-    with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=graph):
+    with patch(
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        return_value=graph,
+    ):
         result = stage_name_for_rescore("plasma_current", run_id="review-run")
 
     assert result["ok"]
@@ -103,7 +114,10 @@ def test_draft_status_still_rescores() -> None:
 
 def test_superseded_stage_names_signed_transition_and_existing_successor() -> None:
     graph = _GuardedGraph(stage="superseded", status="draft", successor="replacement")
-    with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=graph):
+    with patch(
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        return_value=graph,
+    ):
         result = stage_name_for_rescore("plasma_current")
 
     assert not result["ok"]
@@ -117,7 +131,7 @@ def test_rescore_eligibility_statement_plans_on_server() -> None:
     with GraphClient() as graph, graph.session() as session:
         plan = (
             session.run(
-                "EXPLAIN " + graph_ops.RESCORE_ELIGIBILITY_QUERY,
+                "EXPLAIN " + _owning_graph_claim_release.RESCORE_ELIGIBILITY_QUERY,
                 id="volume_averaged_electron_number_density_over_scrape_off_layer",
                 run_id=None,
                 dry_run=True,

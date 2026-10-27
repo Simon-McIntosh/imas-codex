@@ -54,7 +54,9 @@ def test_schema_declares_source_hint_lifecycle() -> None:
     ["", "equilibrium/*/psi", "equilibrium/[ab]/psi", "signals:tcv:x"],
 )
 def test_source_hint_requires_one_exact_dd_path(path: str) -> None:
-    from imas_codex.standard_names.graph_ops import set_source_compose_hint
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        set_source_compose_hint,
+    )
 
     gc = MagicMock()
     with pytest.raises(ValueError, match="exact DD path"):
@@ -76,14 +78,18 @@ def test_source_hint_text_is_nonblank_and_bounded(
     reason: str,
     message: str,
 ) -> None:
-    from imas_codex.standard_names.graph_ops import set_source_compose_hint
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        set_source_compose_hint,
+    )
 
     with pytest.raises(ValueError, match=message):
         set_source_compose_hint(_PATH, hint=hint, reason=reason, gc=MagicMock())
 
 
 def test_source_hint_dry_run_is_nonmutating_and_exact() -> None:
-    from imas_codex.standard_names.graph_ops import set_source_compose_hint
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        set_source_compose_hint,
+    )
 
     gc = MagicMock()
     gc.query.return_value = [_decision()]
@@ -108,7 +114,9 @@ def test_source_hint_dry_run_is_nonmutating_and_exact() -> None:
 
 
 def test_source_hint_cas_sets_only_steering_fields() -> None:
-    from imas_codex.standard_names.graph_ops import set_source_compose_hint
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        set_source_compose_hint,
+    )
 
     gc = MagicMock()
     gc.query.side_effect = [
@@ -139,7 +147,9 @@ def test_source_hint_cas_sets_only_steering_fields() -> None:
 
 
 def test_source_hint_replace_reopens_and_clears_consumption_time() -> None:
-    from imas_codex.standard_names.graph_ops import set_source_compose_hint
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        set_source_compose_hint,
+    )
 
     gc = MagicMock()
     gc.query.side_effect = [
@@ -172,7 +182,9 @@ def test_source_hint_replace_reopens_and_clears_consumption_time() -> None:
     ],
 )
 def test_source_hint_refusals_never_write(decision: str) -> None:
-    from imas_codex.standard_names.graph_ops import set_source_compose_hint
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        set_source_compose_hint,
+    )
 
     gc = MagicMock()
     gc.query.return_value = [_decision(decision)]
@@ -185,7 +197,9 @@ def test_source_hint_refusals_never_write(decision: str) -> None:
 
 
 def test_source_hint_claim_turnover_loses_cas() -> None:
-    from imas_codex.standard_names.graph_ops import set_source_compose_hint
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        set_source_compose_hint,
+    )
 
     gc = MagicMock()
     gc.query.side_effect = [
@@ -201,7 +215,9 @@ def test_source_hint_claim_turnover_loses_cas() -> None:
 
 
 def test_source_hint_unclassified_cas_loss_is_explicit() -> None:
-    from imas_codex.standard_names.graph_ops import set_source_compose_hint
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        set_source_compose_hint,
+    )
 
     gc = MagicMock()
     gc.query.side_effect = [[_decision()], [], [_decision()]]
@@ -212,7 +228,9 @@ def test_source_hint_unclassified_cas_loss_is_explicit() -> None:
 
 
 def test_source_hint_decision_query_has_every_cas_refusal() -> None:
-    from imas_codex.standard_names.graph_ops import _source_compose_hint_decision
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        _source_compose_hint_decision,
+    )
 
     gc = MagicMock()
     gc.query.return_value = [_decision()]
@@ -236,7 +254,7 @@ def test_source_hint_cli_success_dry_run_replace_and_refusal() -> None:
     runner = CliRunner()
     base = ["source-hint", _PATH, "--hint", _HINT, "--reason", _REASON]
     with patch(
-        "imas_codex.standard_names.graph_ops.set_source_compose_hint",
+        "imas_codex.standard_names.graph_store.graph_source_bindings.set_source_compose_hint",
         return_value={
             "source_id": _SOURCE_ID,
             "eligible": True,
@@ -249,7 +267,7 @@ def test_source_hint_cli_success_dry_run_replace_and_refusal() -> None:
     assert f"set: {_SOURCE_ID}" in applied.output
 
     with patch(
-        "imas_codex.standard_names.graph_ops.set_source_compose_hint",
+        "imas_codex.standard_names.graph_store.graph_source_bindings.set_source_compose_hint",
         return_value={
             "source_id": _SOURCE_ID,
             "eligible": True,
@@ -269,7 +287,7 @@ def test_source_hint_cli_success_dry_run_replace_and_refusal() -> None:
     )
 
     with patch(
-        "imas_codex.standard_names.graph_ops.set_source_compose_hint",
+        "imas_codex.standard_names.graph_store.graph_source_bindings.set_source_compose_hint",
         return_value={
             "source_id": _SOURCE_ID,
             "eligible": False,
@@ -283,7 +301,9 @@ def test_source_hint_cli_success_dry_run_replace_and_refusal() -> None:
 
 
 def test_claim_readback_returns_both_source_and_name_steering() -> None:
-    from imas_codex.standard_names.graph_ops import claim_generate_name_batch
+    from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        claim_generate_name_batch,
+    )
 
     tx = MagicMock()
     tx.closed = False
@@ -321,9 +341,12 @@ def test_claim_readback_returns_both_source_and_name_steering() -> None:
     gc.session.return_value.__enter__.return_value = session
     gc.session.return_value.__exit__.return_value = False
     with (
-        patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=gc),
         patch(
-            "imas_codex.standard_names.graph_ops._verify_source_claim_winners",
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            return_value=gc,
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_claim_release._verify_source_claim_winners",
             side_effect=lambda items: items,
         ),
     ):
@@ -408,7 +431,9 @@ def test_source_hint_prompt_is_conditional_and_non_authoritative() -> None:
 @pytest.mark.asyncio
 async def test_pooled_compose_delivers_source_and_name_steering_to_prompt() -> None:
     from imas_codex.llm.prompt_loader import render_prompt as real_render
-    from imas_codex.standard_names.workers import compose_batch
+    from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+        compose_batch,
+    )
 
     batch = [
         {
@@ -449,7 +474,7 @@ async def test_pooled_compose_delivers_source_and_name_steering_to_prompt() -> N
     manager.reserve.return_value = lease
     with (
         patch(
-            "imas_codex.standard_names.graph_ops._verify_source_claim_winners",
+            "imas_codex.standard_names.graph_store.graph_claim_release._verify_source_claim_winners",
             side_effect=lambda items, **_kwargs: items,
         ),
         patch(
@@ -469,12 +494,16 @@ async def test_pooled_compose_delivers_source_and_name_steering_to_prompt() -> N
             return_value=[],
         ),
         patch("imas_codex.graph.client.GraphClient", return_value=graph),
-        patch("imas_codex.standard_names.workers._enrich_batch_items"),
         patch(
-            "imas_codex.standard_names.workers._search_nearby_names", return_value=[]
+            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_batch_items"
         ),
         patch(
-            "imas_codex.standard_names.workers._enrich_ids_context", return_value=None
+            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._search_nearby_names",
+            return_value=[],
+        ),
+        patch(
+            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_ids_context",
+            return_value=None,
         ),
         patch("imas_codex.llm.prompt_loader.render_prompt", side_effect=_render),
         patch(
@@ -496,11 +525,13 @@ async def test_pooled_compose_delivers_source_and_name_steering_to_prompt() -> N
 
 
 def test_only_successful_binding_queries_consume_open_hints() -> None:
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_catalog import (
+        persist_generated_name_winners,
+    )
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
         _lock_claimed_name_bindings,
         persist_claimed_attachments,
         persist_claimed_source_outcomes,
-        persist_generated_name_winners,
         retry_failed_sources,
     )
 

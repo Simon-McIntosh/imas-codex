@@ -60,10 +60,15 @@ class TestReviewerScoreIsAxisScoped:
     def test_name_writer_does_not_set_sn_reviewer_score(self) -> None:
         """write_name_review_results maps reviewer_score → reviewer_score_name,
         never writes a generic ``sn.reviewer_score`` property."""
-        from imas_codex.standard_names.graph_ops import write_name_review_results
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            write_name_review_results,
+        )
 
         mock_gc, cm = _mock_graph_client()
-        with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=cm):
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            return_value=cm,
+        ):
             write_name_review_results([_review_entry()])
 
         assert mock_gc.query.called
@@ -77,7 +82,9 @@ class TestReviewerScoreIsAxisScoped:
     def test_docs_writer_does_not_set_sn_reviewer_score(self) -> None:
         """write_docs_review_results maps reviewer_score → reviewer_score_docs,
         never writes a generic ``sn.reviewer_score`` property."""
-        from imas_codex.standard_names.graph_ops import write_docs_review_results
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            write_docs_review_results,
+        )
 
         mock_gc, cm = _mock_graph_client()
         # First call: gate check returns reviewed_name_at as non-null
@@ -88,7 +95,10 @@ class TestReviewerScoreIsAxisScoped:
                 [],
             ]
         )
-        with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=cm):
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            return_value=cm,
+        ):
             write_docs_review_results([_review_entry()])
 
         assert mock_gc.query.call_count >= 2
@@ -99,10 +109,15 @@ class TestReviewerScoreIsAxisScoped:
 
     def test_batch_dict_carries_reviewer_score_name_key(self) -> None:
         """The batch dict sent to Cypher must use reviewer_score_name, not reviewer_score."""
-        from imas_codex.standard_names.graph_ops import write_name_review_results
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            write_name_review_results,
+        )
 
         mock_gc, cm = _mock_graph_client()
-        with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=cm):
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            return_value=cm,
+        ):
             write_name_review_results([_review_entry(reviewer_score=0.9)])
 
         batch = mock_gc.query.call_args[1]["batch"]
@@ -158,10 +173,15 @@ class TestPerNameReviewCost:
 
     def test_name_writer_includes_cost_in_set_clause(self) -> None:
         """Cypher SET must include llm_cost_review_name accumulation."""
-        from imas_codex.standard_names.graph_ops import write_name_review_results
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            write_name_review_results,
+        )
 
         mock_gc, cm = _mock_graph_client()
-        with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=cm):
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            return_value=cm,
+        ):
             write_name_review_results([_review_entry(llm_cost=0.005)])
 
         cypher = mock_gc.query.call_args[0][0]
@@ -174,14 +194,19 @@ class TestPerNameReviewCost:
 
     def test_name_writer_cost_defaults_to_zero(self) -> None:
         """When no llm_cost key, batch dict defaults to 0.0."""
-        from imas_codex.standard_names.graph_ops import write_name_review_results
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            write_name_review_results,
+        )
 
         mock_gc, cm = _mock_graph_client()
         entry = _review_entry()
         # No llm_cost key
         assert "llm_cost" not in entry
 
-        with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=cm):
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            return_value=cm,
+        ):
             write_name_review_results([entry])
 
         batch = mock_gc.query.call_args[1]["batch"]
@@ -189,7 +214,9 @@ class TestPerNameReviewCost:
 
     def test_docs_writer_includes_cost_in_set_clause(self) -> None:
         """Docs-axis writer also propagates per-name cost."""
-        from imas_codex.standard_names.graph_ops import write_docs_review_results
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            write_docs_review_results,
+        )
 
         mock_gc, cm = _mock_graph_client()
         mock_gc.query = MagicMock(
@@ -199,7 +226,10 @@ class TestPerNameReviewCost:
             ]
         )
 
-        with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=cm):
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            return_value=cm,
+        ):
             write_docs_review_results([_review_entry(llm_cost=0.01)])
 
         # Second call is the SET
@@ -211,7 +241,7 @@ class TestPerNameReviewCost:
 
     def test_write_reviews_skip_cost_prevents_accumulation(self) -> None:
         """write_reviews(skip_cost=True) must NOT run the SN cost query."""
-        from imas_codex.standard_names.graph_ops import write_reviews
+        from imas_codex.standard_names.graph_store.graph_catalog import write_reviews
 
         mock_gc, cm = _mock_graph_client()
         records = [
@@ -229,7 +259,10 @@ class TestPerNameReviewCost:
             },
         ]
 
-        with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=cm):
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            return_value=cm,
+        ):
             write_reviews(records, skip_cost=True)
 
         # Only 1 query call (MERGE StandardNameReview nodes), not 2 (no cost accumulation)
@@ -241,7 +274,7 @@ class TestPerNameReviewCost:
 
     def test_write_reviews_default_does_accumulate_cost(self) -> None:
         """write_reviews() without skip_cost runs the cost accumulation."""
-        from imas_codex.standard_names.graph_ops import write_reviews
+        from imas_codex.standard_names.graph_store.graph_catalog import write_reviews
 
         mock_gc, cm = _mock_graph_client()
         records = [
@@ -260,7 +293,10 @@ class TestPerNameReviewCost:
             },
         ]
 
-        with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=cm):
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            return_value=cm,
+        ):
             write_reviews(records, skip_cost=False)
 
         # Should be 2 calls: MERGE StandardNameReview + cost accumulation

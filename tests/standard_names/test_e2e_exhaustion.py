@@ -21,11 +21,15 @@ import uuid
 
 import pytest
 
-from imas_codex.standard_names.graph_ops import (
+from imas_codex.standard_names.graph_store.graph_docs_persistence import (
     claim_generate_docs_batch,
-    claim_refine_name_batch,
     persist_refined_docs,
+)
+from imas_codex.standard_names.graph_store.graph_refinement import (
+    claim_refine_name_batch,
     persist_refined_name,
+)
+from imas_codex.standard_names.graph_store.graph_review_persistence import (
     persist_reviewed_docs,
     persist_reviewed_name,
 )
@@ -290,7 +294,9 @@ def _refine_name(gc, old_sn: str, new_sn: str, old_chain: int) -> None:
 
 
 def _generate_docs(gc, sn_id: str) -> None:
-    from imas_codex.standard_names.graph_ops import persist_generated_docs
+    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+        persist_generated_docs,
+    )
 
     tok = f"tok-gd-{uuid.uuid4().hex[:8]}"
     _set_claim(gc, sn_id, tok)
@@ -503,7 +509,9 @@ def test_e2e_docs_exhausted_keeps_name_accepted(_gc, _clean):
     )
 
     # Exhausted SN must not be claimed by refine_docs (docs_stage != 'reviewed')
-    from imas_codex.standard_names.graph_ops import claim_refine_docs_batch
+    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+        claim_refine_docs_batch,
+    )
 
     claimed_refine = claim_refine_docs_batch(batch_size=50)
     claimed_refine_ids = {item["id"] for item in claimed_refine}
@@ -512,7 +520,9 @@ def test_e2e_docs_exhausted_keeps_name_accepted(_gc, _clean):
     )
 
     # review_docs must NOT claim this SN (docs_stage='exhausted', not 'drafted')
-    from imas_codex.standard_names.graph_ops import claim_review_docs_batch
+    from imas_codex.standard_names.graph_store.graph_review_persistence import (
+        claim_review_docs_batch,
+    )
 
     claimed_review = claim_review_docs_batch(batch_size=50)
     claimed_review_ids = {item["id"] for item in claimed_review}

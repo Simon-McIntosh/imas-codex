@@ -132,7 +132,9 @@ class _GraphClient:
 
 def _claim_concurrently(state: _SourceState, count: int) -> list[list[dict[str, Any]]]:
     """Run *count* synchronized claimers against one shared source."""
-    from imas_codex.standard_names.graph_ops import claim_generate_name_batch
+    from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        claim_generate_name_batch,
+    )
 
     barrier = threading.Barrier(count)
     results: list[list[dict[str, Any]]] = []
@@ -150,10 +152,10 @@ def _claim_concurrently(state: _SourceState, count: int) -> list[list[dict[str, 
 
     with (
         patch(
-            "imas_codex.standard_names.graph_ops.GraphClient",
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
             side_effect=lambda: _GraphClient(state, barrier),
         ),
-        patch("imas_codex.standard_names.graph_ops.time.sleep"),
+        patch("imas_codex.standard_names.graph_store.graph_foundation.time.sleep"),
     ):
         threads = [threading.Thread(target=_claim) for _ in range(count)]
         for thread in threads:

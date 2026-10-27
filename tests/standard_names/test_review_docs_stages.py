@@ -21,11 +21,16 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from imas_codex.standard_names.graph_store import (
+    graph_catalog as _owning_graph_catalog,
+    graph_docs_persistence as _owning_graph_docs_persistence,
+)
+
 # =============================================================================
 # Shared helpers / paths
 # =============================================================================
 
-_GC_PATH = "imas_codex.standard_names.graph_ops.GraphClient"
+_GC_PATH = "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
 
 
 def _mock_gc_query(return_values: list[list[dict]] | None = None):
@@ -93,7 +98,9 @@ class TestClaimOnlyDraftedDocs:
 
     def test_claim_only_drafted_docs(self):
         """The claim WHERE clause gates on docs_stage='drafted'."""
-        from imas_codex.standard_names.graph_ops import _claim_sn_atomic
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            _claim_sn_atomic,
+        )
 
         captured: list[str] = []
 
@@ -106,10 +113,10 @@ class TestClaimOnlyDraftedDocs:
             return []
 
         with patch(
-            "imas_codex.standard_names.graph_ops._claim_sn_atomic",
+            "imas_codex.standard_names.graph_store.graph_cost_and_claims._claim_sn_atomic",
             side_effect=_fake_claim_sn_atomic,
         ):
-            from imas_codex.standard_names.graph_ops import (
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
                 claim_review_docs_batch,
             )
 
@@ -129,10 +136,10 @@ class TestClaimOnlyDraftedDocs:
             return []
 
         with patch(
-            "imas_codex.standard_names.graph_ops._claim_sn_atomic",
+            "imas_codex.standard_names.graph_store.graph_cost_and_claims._claim_sn_atomic",
             side_effect=_fake_claim_sn_atomic,
         ):
-            from imas_codex.standard_names.graph_ops import (
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
                 claim_review_docs_batch,
             )
 
@@ -159,10 +166,10 @@ class TestClaimSkipsPendingDocs:
             return []
 
         with patch(
-            "imas_codex.standard_names.graph_ops._claim_sn_atomic",
+            "imas_codex.standard_names.graph_store.graph_cost_and_claims._claim_sn_atomic",
             side_effect=_fake_claim_sn_atomic,
         ):
-            from imas_codex.standard_names.graph_ops import (
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
                 claim_review_docs_batch,
             )
 
@@ -186,19 +193,19 @@ def test_docs_shortfall_blocks_refine_claim() -> None:
         return []
 
     with patch(
-        "imas_codex.standard_names.graph_ops._claim_sn_atomic",
+        "imas_codex.standard_names.graph_store.graph_cost_and_claims._claim_sn_atomic",
         side_effect=_fake_claim_sn_atomic,
     ):
         from imas_codex.standard_names import graph_ops
 
-        graph_ops.claim_refine_docs_batch()
+        _owning_graph_docs_persistence.claim_refine_docs_batch()
 
     assert captured
     eligibility_where, query_params = captured[0]
-    assert graph_ops.docs_review_eligibility_where() in eligibility_where
+    assert _owning_graph_catalog.docs_review_eligibility_where() in eligibility_where
     assert "sn.docs_review_resolution_method IS NOT NULL" not in eligibility_where
     assert "sn.docs_review_quorum_shortfall IS NULL" in eligibility_where
-    for key, value in graph_ops.docs_review_eligibility_params().items():
+    for key, value in _owning_graph_catalog.docs_review_eligibility_params().items():
         assert query_params[key] == value
 
 
@@ -219,7 +226,9 @@ class TestVerifyDocsClaimWinners:
 
     def test_drops_items_whose_token_lost(self):
         """Only nodes still holding our token survive verification."""
-        from imas_codex.standard_names.graph_ops import _verify_docs_claim_winners
+        from imas_codex.standard_names.graph_store.graph_claim_release import (
+            _verify_docs_claim_winners,
+        )
 
         items = [
             {"id": "won_a", "claim_token": "tok-1"},
@@ -243,7 +252,9 @@ class TestVerifyDocsClaimWinners:
 
     def test_no_query_when_all_survive_is_still_correct(self):
         """When every claimed node wins, all items are returned unchanged."""
-        from imas_codex.standard_names.graph_ops import _verify_docs_claim_winners
+        from imas_codex.standard_names.graph_store.graph_claim_release import (
+            _verify_docs_claim_winners,
+        )
 
         items = [
             {"id": "a", "claim_token": "tok-2"},
@@ -258,7 +269,9 @@ class TestVerifyDocsClaimWinners:
 
     def test_empty_items_short_circuit(self):
         """Empty claim list returns immediately without a graph round-trip."""
-        from imas_codex.standard_names.graph_ops import _verify_docs_claim_winners
+        from imas_codex.standard_names.graph_store.graph_claim_release import (
+            _verify_docs_claim_winners,
+        )
 
         gc = _mock_gc_query(return_values=[])
         with _patch_gc(gc):
@@ -279,7 +292,9 @@ class TestPersistReviewedDocsConcurrentWinNoOp:
         )
 
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_docs
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_docs,
+            )
 
             result = persist_reviewed_docs(
                 sn_id="electron_temperature",
@@ -314,7 +329,9 @@ class TestPersistToAccepted:
         )
 
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_docs
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_docs,
+            )
 
             result = persist_reviewed_docs(
                 sn_id="electron_temperature",
@@ -344,7 +361,9 @@ class TestPersistToReviewedLowScore:
         )
 
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_docs
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_docs,
+            )
 
             result = persist_reviewed_docs(
                 sn_id="test_name",
@@ -377,7 +396,9 @@ class TestPersistToExhaustedAtCap:
         )
 
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_docs
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_docs,
+            )
 
             result = persist_reviewed_docs(
                 sn_id="test_name",
@@ -406,7 +427,9 @@ class TestPersistToExhaustedAtCap:
         )
 
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_docs
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_docs,
+            )
 
             result = persist_reviewed_docs(
                 sn_id="test_name",
@@ -433,7 +456,9 @@ class TestPersistToReviewedBelowCap:
         )
 
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_docs
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_docs,
+            )
 
             result = persist_reviewed_docs(
                 sn_id="test_name",
@@ -460,7 +485,9 @@ class TestAcceptOverridesChainLengthAtCap:
         )
 
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_docs
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_docs,
+            )
 
             result = persist_reviewed_docs(
                 sn_id="test_name",
@@ -502,7 +529,9 @@ def test_docs_acceptance_requires_canonical_quorum_authority(
     )
 
     with _patch_gc(gc):
-        from imas_codex.standard_names.graph_ops import persist_reviewed_docs
+        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+            persist_reviewed_docs,
+        )
 
         result = persist_reviewed_docs(
             sn_id="test_name",
@@ -533,7 +562,9 @@ def test_fresh_docs_quorum_clears_a_prior_shortfall() -> None:
         ]
     )
     with _patch_gc(gc):
-        from imas_codex.standard_names.graph_ops import persist_reviewed_docs
+        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+            persist_reviewed_docs,
+        )
 
         result = persist_reviewed_docs(
             sn_id="test_name",
@@ -559,7 +590,9 @@ def test_missing_authority_preserves_exhaustion_but_blocks_refinement() -> None:
         ]
     )
     with _patch_gc(gc):
-        from imas_codex.standard_names.graph_ops import persist_reviewed_docs
+        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+            persist_reviewed_docs,
+        )
 
         result = persist_reviewed_docs(
             sn_id="test_name",
@@ -582,7 +615,9 @@ class TestPersistTokenMismatchNoOp:
         gc = _mock_gc_query(return_values=[[]])
 
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_docs
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_docs,
+            )
 
             result = persist_reviewed_docs(
                 sn_id="test_name",
@@ -611,7 +646,9 @@ class TestPersistWritesReviewerDocsFields:
         )
 
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_docs
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_docs,
+            )
 
             persist_reviewed_docs(
                 sn_id="electron_temperature",
@@ -668,7 +705,9 @@ class TestPersistDoesNotChangeNameFields:
         )
 
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_docs
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_docs,
+            )
 
             persist_reviewed_docs(
                 sn_id="electron_temperature",
@@ -708,7 +747,9 @@ class TestExactDocsRescoreStaging:
             ]
         )
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import stage_docs_for_rescore
+            from imas_codex.standard_names.graph_store.graph_refinement import (
+                stage_docs_for_rescore,
+            )
 
             result = stage_docs_for_rescore("test_name", run_id="exact-docs-run")
 
@@ -747,7 +788,9 @@ class TestExactDocsRescoreStaging:
             ]
         )
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import stage_docs_for_rescore
+            from imas_codex.standard_names.graph_store.graph_refinement import (
+                stage_docs_for_rescore,
+            )
 
             result = stage_docs_for_rescore("test_name", run_id="exact-docs-run")
 
@@ -758,7 +801,9 @@ class TestExactDocsRescoreStaging:
     def test_empty_scope_is_refused_without_graph_access(self) -> None:
         gc = _mock_gc_query()
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import stage_docs_for_rescore
+            from imas_codex.standard_names.graph_store.graph_refinement import (
+                stage_docs_for_rescore,
+            )
 
             result = stage_docs_for_rescore("test_name", run_id="  ")
 
@@ -776,7 +821,7 @@ class TestFailedReleaseKeepsDrafted:
         """A docs failure must never predicate or mutate the name lifecycle."""
         gc = _mock_gc_query(return_values=[[{"released": 1}]])
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import (
+            from imas_codex.standard_names.graph_store.graph_claim_release import (
                 release_review_docs_failed_claims,
             )
 
@@ -814,11 +859,13 @@ class TestFailedReleaseKeepsDrafted:
                 return_value="Review.",
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.release_review_docs_failed_claims",
+                "imas_codex.standard_names.graph_store.graph_claim_release.release_review_docs_failed_claims",
                 side_effect=_fake_release,
             ),
         ):
-            from imas_codex.standard_names.workers import process_review_docs_batch
+            from imas_codex.standard_names.worker_tasks.worker_review_docs import (
+                process_review_docs_batch,
+            )
 
             items = [_make_docs_item(claim_token="tok-failed")]
             mgr = _mock_budget_manager()
@@ -868,10 +915,10 @@ class TestWorkerStreamsPerItemDocs:
                 return_value=["openrouter/test/model"],
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.write_reviews",
+                "imas_codex.standard_names.graph_store.graph_catalog.write_reviews",
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.persist_reviewed_docs",
+                "imas_codex.standard_names.graph_store.graph_review_persistence.persist_reviewed_docs",
                 return_value="accepted",
             ),
             patch(
@@ -879,7 +926,9 @@ class TestWorkerStreamsPerItemDocs:
                 return_value="documentation quality review.",
             ),
         ):
-            from imas_codex.standard_names.workers import process_review_docs_batch
+            from imas_codex.standard_names.worker_tasks.worker_review_docs import (
+                process_review_docs_batch,
+            )
 
             result = asyncio.run(
                 process_review_docs_batch(

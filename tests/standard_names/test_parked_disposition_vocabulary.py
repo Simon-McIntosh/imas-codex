@@ -29,6 +29,9 @@ from typing import Any
 import pytest
 
 from imas_codex.standard_names import graph_ops
+from imas_codex.standard_names.graph_store import (
+    graph_source_bindings as _owning_graph_source_bindings,
+)
 
 # One representative input per branch of classify_parked_source, keyed by the
 # disposition that branch is written to return. The ordering follows the
@@ -48,8 +51,8 @@ BRANCH_CASES: dict[str, dict[str, Any]] = {
 
 def test_every_branch_returns_a_declared_disposition() -> None:
     """Each branch's value is a member of the frozen disposition set."""
-    classify = graph_ops.classify_parked_source
-    members = graph_ops.CAP_PARKED_DISPOSITIONS
+    classify = _owning_graph_source_bindings.classify_parked_source
+    members = _owning_graph_source_bindings.CAP_PARKED_DISPOSITIONS
     undeclared = {
         branch: disposition
         for branch, evidence in BRANCH_CASES.items()
@@ -64,10 +67,10 @@ def test_every_branch_returns_a_declared_disposition() -> None:
 def test_the_representative_inputs_cover_the_whole_declared_set() -> None:
     """Every declared disposition is actually reachable, so the set has no dead member."""
     reached = {
-        graph_ops.classify_parked_source(dict(evidence))
+        _owning_graph_source_bindings.classify_parked_source(dict(evidence))
         for evidence in BRANCH_CASES.values()
     }
-    assert reached == set(graph_ops.CAP_PARKED_DISPOSITIONS)
+    assert reached == set(_owning_graph_source_bindings.CAP_PARKED_DISPOSITIONS)
 
 
 # One case per adjacent pair of branches, keyed by the precedence it pins. Each
@@ -108,7 +111,7 @@ def test_the_earlier_signal_of_an_adjacent_pair_wins(
     expected: str, evidence: dict[str, Any]
 ) -> None:
     """Two branches are true at once; the classifier resolves the earlier one."""
-    returned = graph_ops.classify_parked_source(dict(evidence))
+    returned = _owning_graph_source_bindings.classify_parked_source(dict(evidence))
     assert returned == expected, (
         f"combined evidence {evidence} classified as {returned!r}, "
         f"but the pinned precedence is {expected!r}"

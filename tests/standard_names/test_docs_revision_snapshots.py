@@ -7,6 +7,10 @@ from typing import Any
 import pytest
 
 from imas_codex.standard_names import graph_ops
+from imas_codex.standard_names.graph_store import (
+    graph_docs_persistence as _owning_graph_docs_persistence,
+    graph_foundation as _owning_graph_foundation,
+)
 
 _COLLISION_SHAPES = (
     (
@@ -141,18 +145,20 @@ def test_empty_reset_is_a_graph_free_no_op(monkeypatch) -> None:
     def unexpected_graph_client() -> None:
         raise AssertionError("an empty reset must not open the graph")
 
-    monkeypatch.setattr(graph_ops, "GraphClient", unexpected_graph_client)
+    monkeypatch.setattr(
+        _owning_graph_foundation, "GraphClient", unexpected_graph_client
+    )
 
-    assert graph_ops.reset_standard_name_docs(sn_ids=[]) == {
+    assert _owning_graph_docs_persistence.reset_standard_name_docs(sn_ids=[]) == {
         "eligible": 0,
         "reset": 0,
     }
 
 
 def test_dry_run_reports_eligibility_without_writing(monkeypatch) -> None:
-    monkeypatch.setattr(graph_ops, "GraphClient", _DryRunGraph)
+    monkeypatch.setattr(_owning_graph_foundation, "GraphClient", _DryRunGraph)
 
-    assert graph_ops.reset_standard_name_docs(
+    assert _owning_graph_docs_persistence.reset_standard_name_docs(
         sn_ids=["electron_temperature"], dry_run=True
     ) == {"eligible": 1, "reset": 0}
 
@@ -175,9 +181,9 @@ def test_reset_appends_after_existing_revision_ids(
         expected_revision_id,
         expected_chain,
     )
-    monkeypatch.setattr(graph_ops, "GraphClient", lambda: graph)
+    monkeypatch.setattr(_owning_graph_foundation, "GraphClient", lambda: graph)
 
-    result = graph_ops.reset_standard_name_docs(
+    result = _owning_graph_docs_persistence.reset_standard_name_docs(
         sn_ids=[identity], run_id="scoped-docs-refresh"
     )
 

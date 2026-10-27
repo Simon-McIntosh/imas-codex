@@ -12,7 +12,9 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.standard_names.workers import _enrich_docs_review_dd_context
+from imas_codex.standard_names.worker_tasks.worker_review_docs import (
+    _enrich_docs_review_dd_context,
+)
 
 
 @pytest.mark.parametrize("source_paths", [[], None])
@@ -39,7 +41,9 @@ def test_first_bound_source_still_supplies_the_dd_context() -> None:
 
     with (
         patch("imas_codex.graph.client.GraphClient"),
-        patch("imas_codex.standard_names.workers._enrich_dd_path_context") as enrich,
+        patch(
+            "imas_codex.standard_names.worker_tasks.worker_generate_docs._enrich_dd_path_context"
+        ) as enrich,
     ):
         _enrich_docs_review_dd_context(item)
 

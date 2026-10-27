@@ -4,9 +4,11 @@ from __future__ import annotations
 
 from typing import Any
 
-from imas_codex.standard_names.graph_ops import (
-    persist_reviewed_name,
+from imas_codex.standard_names.graph_store.graph_claim_release import (
     stage_name_for_rescore,
+)
+from imas_codex.standard_names.graph_store.graph_review_persistence import (
+    persist_reviewed_name,
 )
 from tests.standard_names.test_edit_engine import FakeGraph, _patched_graph
 

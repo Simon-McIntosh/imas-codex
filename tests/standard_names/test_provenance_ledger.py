@@ -10,6 +10,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from imas_codex.standard_names.graph_store import graph_audits as _owning_graph_audits
+
 
 def _captured_query(gc: MagicMock) -> str:
     call = gc.query.call_args
@@ -38,7 +40,7 @@ def test_find_provenance_orphans_reports_three_source_loss_populations():
         },
     ]
     with patch(
-        "imas_codex.standard_names.graph_ops.classify_sourceless_standard_names",
+        "imas_codex.standard_names.graph_store.graph_supersession.classify_sourceless_standard_names",
         return_value=rows,
     ) as audit:
         orphans = find_provenance_orphans(gc=gc)
@@ -71,7 +73,7 @@ def test_find_provenance_orphans_uses_population_not_stage(
 
     gc = MagicMock()
     with patch(
-        "imas_codex.standard_names.graph_ops.classify_sourceless_standard_names",
+        "imas_codex.standard_names.graph_store.graph_supersession.classify_sourceless_standard_names",
         return_value=[
             {"id": "candidate", "name_stage": stage, "population": population}
         ],
@@ -116,16 +118,18 @@ def test_reconcile_provenance_reports_edges_reattached():
     from imas_codex.standard_names import graph_ops
 
     with (
-        patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC,
         patch(
-            "imas_codex.standard_names.graph_ops.reattach_produced_name_edges",
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as MockGC,
+        patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.reattach_produced_name_edges",
             return_value=7,
         ) as m_reattach,
     ):
         mock_gc = MockGC.return_value.__enter__.return_value
         # existing two passes: scalars_cleared=2, orphan_sources_deleted=1
         mock_gc.query.side_effect = [[{"n": 2}], [{"n": 1}]]
-        result = graph_ops.reconcile_provenance()
+        result = _owning_graph_audits.reconcile_provenance()
 
     assert m_reattach.called
     assert result["edges_reattached"] == 7
@@ -147,7 +151,9 @@ def test_reconcile_provenance_reports_edges_reattached():
 @pytest.mark.graph
 def test_live_source_loss_probe_matches_independent_count():
     from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.graph_ops import classify_sourceless_standard_names
+    from imas_codex.standard_names.graph_store.graph_supersession import (
+        classify_sourceless_standard_names,
+    )
     from imas_codex.standard_names.ledger import find_provenance_orphans
 
     with GraphClient() as gc:

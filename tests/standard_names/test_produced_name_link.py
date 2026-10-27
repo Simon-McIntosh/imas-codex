@@ -126,7 +126,9 @@ class TestProducedNameLinkPrefix:
         """Verify the actual graph_ops code has the same prefix logic."""
         import inspect
 
-        from imas_codex.standard_names.graph_ops import persist_generated_name_winners
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            persist_generated_name_winners,
+        )
 
         source = inspect.getsource(persist_generated_name_winners)
         assert "source_types" in source

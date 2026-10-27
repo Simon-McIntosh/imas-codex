@@ -53,7 +53,7 @@ def test_release_refine_claim_default_emits_json_dry_run() -> None:
         "manifest_sha256": "a" * 64,
     }
     with patch(
-        "imas_codex.standard_names.graph_ops.release_stranded_refine_claim",
+        "imas_codex.standard_names.graph_store.graph_claim_release.release_stranded_refine_claim",
         return_value=receipt,
     ) as release:
         result = CliRunner().invoke(

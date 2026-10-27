@@ -20,6 +20,11 @@ import pytest
 
 from imas_codex.cli.sn import _compute_pool_pending
 from imas_codex.standard_names import graph_ops
+from imas_codex.standard_names.graph_store import (
+    graph_claim_release as _owning_graph_claim_release,
+    graph_cost_and_claims as _owning_graph_cost_and_claims,
+    graph_docs_persistence as _owning_graph_docs_persistence,
+)
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -206,7 +211,7 @@ class TestQueryStructure:
         pending = self._normalized_cypher(
             self._pending_clause(self._get_query_string(), "review_name")
         )
-        canonical = graph_ops.REVIEW_NAME_ELIGIBILITY_WHERE.replace(
+        canonical = _owning_graph_cost_and_claims.REVIEW_NAME_ELIGIBILITY_WHERE.replace(
             " AND NOT (sn.name_stage IN ['superseded', 'exhausted', 'contested'])",
             "",
         ).replace(" AND ($facility IS NULL OR sn.facility = $facility)", "")
@@ -222,13 +227,17 @@ class TestQueryStructure:
             captured["eligibility_where"] = str(kwargs["eligibility_where"])
             return []
 
-        monkeypatch.setattr(graph_ops, "_claim_sn_atomic", capture_claim)
         monkeypatch.setattr(
-            graph_ops,
+            _owning_graph_cost_and_claims, "_claim_sn_atomic", capture_claim
+        )
+        monkeypatch.setattr(
+            _owning_graph_claim_release,
             "_verify_docs_claim_winners",
             lambda items, *, eligible_stage: items,
         )
-        graph_ops.claim_refine_docs_batch(scope_run_id="exact-scope")
+        _owning_graph_docs_persistence.claim_refine_docs_batch(
+            scope_run_id="exact-scope"
+        )
         pending = self._normalized_cypher(
             self._pending_clause(
                 self._get_query_string(scope_run_id="exact-scope"), "refine_docs"

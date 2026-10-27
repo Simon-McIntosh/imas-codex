@@ -10,7 +10,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.graph_ops import (
+from imas_codex.standard_names.graph_store.graph_catalog import (
     write_docs_review_results,
     write_name_review_results,
 )
@@ -50,7 +50,10 @@ def _capture_cypher_params():
 class TestAxisIsolationNameMode:
     def test_name_mode_sets_name_axis_only(self) -> None:
         mock_gc, cm = _capture_cypher_params()
-        with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=cm):
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            return_value=cm,
+        ):
             write_name_review_results([_review_entry()])
 
         assert mock_gc.query.called
@@ -77,7 +80,10 @@ class TestAxisIsolationNameMode:
     def test_name_mode_does_not_write_shared_slots(self) -> None:
         """Shared aggregate slots have been removed — name writer must not touch them."""
         mock_gc, cm = _capture_cypher_params()
-        with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=cm):
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            return_value=cm,
+        ):
             write_name_review_results([_review_entry()])
 
         cypher = mock_gc.query.call_args[0][0]
@@ -105,7 +111,10 @@ class TestAxisIsolationDocsMode:
                 [],
             ]
         )
-        with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=cm):
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            return_value=cm,
+        ):
             write_docs_review_results([_review_entry()])
 
         # Second call is the SET statement we care about
@@ -136,7 +145,10 @@ class TestAxisIsolationDocsMode:
                 [],
             ]
         )
-        with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=cm):
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            return_value=cm,
+        ):
             write_docs_review_results([_review_entry()])
 
         cypher = mock_gc.query.call_args_list[1][0][0]

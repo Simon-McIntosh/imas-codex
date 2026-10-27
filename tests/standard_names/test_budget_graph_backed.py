@@ -77,7 +77,7 @@ class TestChargeEventEnqueuesToWriter:
         assert abs(mgr.spent - 2.0) < 1e-9
 
         with patch(
-            "imas_codex.standard_names.graph_ops.record_llm_cost",
+            "imas_codex.standard_names.graph_store.graph_cost_and_claims.record_llm_cost",
             mock_record,
         ):
             success = await mgr.drain_pending()
@@ -274,7 +274,7 @@ class TestDrainPendingSuccess:
         lease.charge_event(2.0, _make_event())
 
         with patch(
-            "imas_codex.standard_names.graph_ops.record_llm_cost",
+            "imas_codex.standard_names.graph_store.graph_cost_and_claims.record_llm_cost",
             mock_record,
         ):
             success = await mgr.drain_pending()
@@ -305,7 +305,7 @@ class TestDrainPendingFailure:
         lease.charge_event(1.0, _make_event())
 
         with patch(
-            "imas_codex.standard_names.graph_ops.record_llm_cost",
+            "imas_codex.standard_names.graph_store.graph_cost_and_claims.record_llm_cost",
             side_effect=RuntimeError("Neo4j unreachable"),
         ):
             success = await mgr.drain_pending()
@@ -325,7 +325,7 @@ class TestDrainPendingFailure:
         lease.charge_event(1.0, _make_event())
 
         with patch(
-            "imas_codex.standard_names.graph_ops.record_llm_cost",
+            "imas_codex.standard_names.graph_store.graph_cost_and_claims.record_llm_cost",
             side_effect=RuntimeError("Neo4j unreachable"),
         ):
             with pytest.raises(RuntimeError, match="cost_is_exact"):
@@ -356,7 +356,7 @@ class TestDrainPendingFailure:
         lease.charge_event(2.0, _make_event(phase="enrich"))
 
         with patch(
-            "imas_codex.standard_names.graph_ops.record_llm_cost",
+            "imas_codex.standard_names.graph_store.graph_cost_and_claims.record_llm_cost",
             side_effect=mock_record,
         ):
             success = await mgr.drain_pending()
@@ -396,7 +396,7 @@ class TestWriterRetries:
         lease.charge_event(1.0, _make_event())
 
         with patch(
-            "imas_codex.standard_names.graph_ops.record_llm_cost",
+            "imas_codex.standard_names.graph_store.graph_cost_and_claims.record_llm_cost",
             side_effect=mock_record,
         ):
             success = await mgr.drain_pending()
@@ -425,7 +425,7 @@ class TestGetTotalSpent:
 
         # Mock the graph aggregate to return $3.00 (previously flushed)
         with patch(
-            "imas_codex.standard_names.graph_ops.aggregate_spend_for_run",
+            "imas_codex.standard_names.graph_store.graph_cost_and_claims.aggregate_spend_for_run",
             return_value=3.0,
         ):
             total = await mgr.get_total_spent(force_refresh=True)
@@ -457,7 +457,7 @@ class TestGetTotalSpent:
         mgr = BudgetManager(total_budget=10.0, run_id="run-cache")
 
         with patch(
-            "imas_codex.standard_names.graph_ops.aggregate_spend_for_run",
+            "imas_codex.standard_names.graph_store.graph_cost_and_claims.aggregate_spend_for_run",
             side_effect=mock_aggregate,
         ):
             # First call fetches

@@ -1231,8 +1231,9 @@ class TestExactStructuralReconciliation:
             {"id": "alpha", "exists": True},
             {"id": "beta", "exists": True},
         ]
-        graph_ops_module = "imas_codex.standard_names.graph_ops"
-        with patch(f"{graph_ops_module}._write_standard_name_edges") as writer:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_lineage._write_standard_name_edges"
+        ) as writer:
             count = reconcile_structural_edges_for_standard_names(
                 gc, ["alpha", "beta", "alpha"]
             )
@@ -1249,8 +1250,9 @@ class TestExactStructuralReconciliation:
 
         gc = Mock()
         gc.query.return_value = [{"id": "present", "exists": True}]
-        graph_ops_module = "imas_codex.standard_names.graph_ops"
-        with patch(f"{graph_ops_module}._write_standard_name_edges") as writer:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_lineage._write_standard_name_edges"
+        ) as writer:
             with pytest.raises(ValueError, match="missing StandardName ids"):
                 reconcile_structural_edges_for_standard_names(
                     gc, ["present", "missing"]

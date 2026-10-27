@@ -2,7 +2,7 @@
 
 from unittest.mock import MagicMock
 
-from imas_codex.standard_names.graph_ops import reconcile_catalog_status
+from imas_codex.standard_names.graph_store.graph_audits import reconcile_catalog_status
 
 
 def test_reconcile_revived_status_requires_a_matching_fold_receipt() -> None:

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names.graph_ops import _normalize_pool
+from imas_codex.standard_names.graph_store.graph_cost_and_claims import _normalize_pool
 
 
 class TestNormalizePool:

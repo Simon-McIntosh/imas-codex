@@ -23,11 +23,15 @@ from unittest.mock import AsyncMock, MagicMock, call, patch
 
 import pytest
 
+from imas_codex.standard_names.worker_tasks import (
+    worker_common as _owning_worker_common,
+)
+
 # =============================================================================
 # Path constants
 # =============================================================================
 
-_GC_PATH = "imas_codex.standard_names.graph_ops.GraphClient"
+_GC_PATH = "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
 _CHAIN_HISTORY_PATH = "imas_codex.standard_names.chain_history.name_chain_history"
 _TOKEN_A = "aaaaaaaa-0000-0000-0000-000000000001"
 _TOKEN_B = "bbbbbbbb-0000-0000-0000-000000000002"
@@ -160,7 +164,7 @@ def _make_docs_item(
 
 def test_claim_only_when_name_accepted():
     """SN with name_stage='reviewed' is NOT claimed; accepted+pending IS claimed."""
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
         claim_generate_docs_batch,
     )
 
@@ -184,7 +188,7 @@ def test_claim_only_when_name_accepted():
 
 def test_claim_eligible_accepted_pending():
     """SN with name_stage='accepted', docs_stage='pending' IS claimed."""
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
         claim_generate_docs_batch,
     )
 
@@ -204,7 +208,7 @@ def test_claim_eligible_accepted_pending():
 
 def test_claim_skips_already_drafted_docs():
     """SN with docs_stage='drafted' is NOT returned even if name_stage='accepted'."""
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
         claim_generate_docs_batch,
     )
 
@@ -229,7 +233,7 @@ def test_claim_skips_already_drafted_docs():
 
 def test_claim_includes_reviewer_feedback():
     """Claimed items include reviewer_score_name and reviewer_comments_name."""
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
         claim_generate_docs_batch,
     )
 
@@ -258,7 +262,9 @@ def test_claim_includes_reviewer_feedback():
 
 def test_persist_writes_docs_fields():
     """persist_generated_docs writes description, documentation, docs_stage='drafted', etc."""
-    from imas_codex.standard_names.graph_ops import persist_generated_docs
+    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+        persist_generated_docs,
+    )
 
     gc = _make_gc_query(return_value=[{"docs_stage": "drafted"}])
     with _patch_gc(gc):
@@ -294,7 +300,9 @@ def test_persist_writes_docs_fields():
 
 def test_persist_does_not_change_name_fields():
     """persist_generated_docs Cypher must NOT SET name, kind, unit, or name_stage."""
-    from imas_codex.standard_names.graph_ops import persist_generated_docs
+    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+        persist_generated_docs,
+    )
 
     gc = _make_gc_query(return_value=[{"docs_stage": "drafted"}])
     with _patch_gc(gc):
@@ -324,7 +332,9 @@ def test_persist_does_not_change_name_fields():
 
 def test_persist_token_mismatch_no_op():
     """Wrong token → ValueError raised (no node matched)."""
-    from imas_codex.standard_names.graph_ops import persist_generated_docs
+    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+        persist_generated_docs,
+    )
 
     # Simulate empty result from Cypher (token didn't match)
     gc = _make_gc_query(return_value=[])
@@ -346,7 +356,7 @@ def test_persist_token_mismatch_no_op():
 
 def test_failed_release_clears_token():
     """release_generate_docs_failed_claims clears claim_token; docs_stage stays 'pending'."""
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
         release_generate_docs_failed_claims,
     )
 
@@ -374,7 +384,7 @@ def test_failed_release_clears_token():
 
 def test_failed_release_token_verification():
     """release_generate_docs_failed_claims only releases matching token."""
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
         release_generate_docs_failed_claims,
     )
 
@@ -443,7 +453,9 @@ def test_worker_renders_reviewer_feedback():
 async def test_worker_uses_docs_model():
     """process_generate_docs_batch uses get_model('sn-docs'), not a reasoning model."""
     from imas_codex.standard_names.models import GeneratedDocs
-    from imas_codex.standard_names.workers import process_generate_docs_batch
+    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+        process_generate_docs_batch,
+    )
 
     mgr = MagicMock()
     mgr.reserve = MagicMock(return_value=MagicMock())
@@ -476,7 +488,7 @@ async def test_worker_uses_docs_model():
             side_effect=_fake_acall,
         ),
         patch(
-            "imas_codex.standard_names.graph_ops.GraphClient",
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
         ),
         patch(
             "asyncio.to_thread",
@@ -500,7 +512,9 @@ async def test_worker_uses_docs_model():
 async def test_worker_streams_per_item():
     """process_generate_docs_batch logs per-item progress (name + desc preview)."""
     from imas_codex.standard_names.models import GeneratedDocs
-    from imas_codex.standard_names.workers import process_generate_docs_batch
+    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+        process_generate_docs_batch,
+    )
 
     expected_desc = "Electron kinetic temperature in the plasma."
 
@@ -531,8 +545,8 @@ async def test_worker_streams_per_item():
     handler = _Capture()
     import imas_codex.standard_names.workers as _workers_mod
 
-    _workers_mod.logger.addHandler(handler)
-    _workers_mod.logger.setLevel(logging.DEBUG)
+    _owning_worker_common.logger.addHandler(handler)
+    _owning_worker_common.logger.setLevel(logging.DEBUG)
 
     try:
         with (
@@ -551,7 +565,7 @@ async def test_worker_streams_per_item():
         ):
             processed = await process_generate_docs_batch([item], mgr, stop)
     finally:
-        _workers_mod.logger.removeHandler(handler)
+        _owning_worker_common.logger.removeHandler(handler)
 
     assert processed == 1
     # At least one log message should reference the item name and description preview
@@ -567,7 +581,9 @@ async def test_worker_streams_per_item():
 
 def test_release_generate_docs_claims_correct_token():
     """release_generate_docs_claims with correct token returns count."""
-    from imas_codex.standard_names.graph_ops import release_generate_docs_claims
+    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+        release_generate_docs_claims,
+    )
 
     gc = _make_gc_query(return_value=[{"released": 2}])
     with _patch_gc(gc):
@@ -584,7 +600,9 @@ def test_release_generate_docs_claims_correct_token():
 
 def test_release_generate_docs_claims_empty_ids():
     """release_generate_docs_claims with empty list returns 0 without querying."""
-    from imas_codex.standard_names.graph_ops import release_generate_docs_claims
+    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+        release_generate_docs_claims,
+    )
 
     gc = _make_gc_query()
     with _patch_gc(gc):

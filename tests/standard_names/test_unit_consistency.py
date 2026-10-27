@@ -114,10 +114,14 @@ class TestCypherUsesHasUnit:
         mock_gc.query = MagicMock(return_value=[])
 
         names = [{"id": "electron_pressure", "unit": "eV", "source_types": ["dd"]}]
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
-            from imas_codex.standard_names.graph_ops import write_standard_names
+            from imas_codex.standard_names.graph_store.graph_catalog import (
+                write_standard_names,
+            )
 
             write_standard_names(names)
 
@@ -133,10 +137,14 @@ class TestCypherUsesHasUnit:
         mock_gc.query = MagicMock(return_value=[])
 
         names = [{"id": "electron_pressure", "unit": "eV", "source_types": ["dd"]}]
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
-            from imas_codex.standard_names.graph_ops import write_standard_names
+            from imas_codex.standard_names.graph_store.graph_catalog import (
+                write_standard_names,
+            )
 
             write_standard_names(names)
 
@@ -158,10 +166,14 @@ class TestCypherUsesHasUnit:
         mock_gc.query = MagicMock(return_value=[])
 
         names = [{"id": "electron_pressure", "unit": "eV", "source_types": ["dd"]}]
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
-            from imas_codex.standard_names.graph_ops import write_standard_names
+            from imas_codex.standard_names.graph_store.graph_catalog import (
+                write_standard_names,
+            )
 
             write_standard_names(names)
 
@@ -181,10 +193,14 @@ class TestCypherUsesHasUnit:
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[{"n": 1}])
 
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
-            from imas_codex.standard_names.graph_ops import reset_standard_names
+            from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+                reset_standard_names,
+            )
 
             reset_standard_names(from_stage="drafted")
 

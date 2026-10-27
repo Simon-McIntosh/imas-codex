@@ -143,7 +143,7 @@ class TestRevisedNamePreservesOriginalId:
             }
         ]
 
-        from imas_codex.standard_names.graph_ops import _ensure_json
+        from imas_codex.standard_names.graph_store.graph_foundation import _ensure_json
 
         # Replicate the batch-building logic from write_name_review_results
         batch = [

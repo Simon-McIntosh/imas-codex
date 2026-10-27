@@ -27,7 +27,7 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.standard_names.graph_ops import (
+from imas_codex.standard_names.graph_store.graph_catalog import (
     ReviewDimensionVoidRefused,
     plan_review_dimension_void,
     update_review_aggregates,
@@ -152,7 +152,10 @@ def _void(gc, dimension="grammar", **kwargs):
     kwargs.setdefault("actor", "catalog-editor")
     kwargs.setdefault("reason", REASON)
     kwargs.setdefault("grammar_signature", SIGNATURE)
-    with patch("imas_codex.standard_names.graph_ops.GraphClient", lambda *a, **k: gc):
+    with patch(
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        lambda *a, **k: gc,
+    ):
         return void_review_dimension(REVIEW_ID, dimension, gc=gc, **kwargs)
 
 
@@ -264,12 +267,13 @@ def test_the_reason_is_the_callers_and_the_signature_is_an_observation():
 def test_signature_is_captured_at_void_time_when_the_caller_omits_it(monkeypatch):
     """An omitted signature is observed from the environment, not left null."""
     monkeypatch.setattr(
-        "imas_codex.standard_names.graph_ops.isn_vocabulary_signature",
+        "imas_codex.standard_names.graph_store.graph_audits.isn_vocabulary_signature",
         lambda: "observed-at-void-time",
     )
     gc = FakeGraph([_review()])
     monkeypatch.setattr(
-        "imas_codex.standard_names.graph_ops.GraphClient", lambda *a, **k: gc
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        lambda *a, **k: gc,
     )
     void_review_dimension(
         REVIEW_ID,
@@ -291,7 +295,8 @@ def test_update_review_aggregates_follows_the_void(monkeypatch):
     second = _review("electron_temperature:name:group-a:1", cycle_index=1)
     gc = FakeGraph([_review(), second])
     monkeypatch.setattr(
-        "imas_codex.standard_names.graph_ops.GraphClient", lambda *a, **k: gc
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        lambda *a, **k: gc,
     )
 
     update_review_aggregates([SN_ID])

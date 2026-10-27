@@ -1407,7 +1407,9 @@ class TestOperatorUnitConsistency:
     def test_full_admission_clears_contextual_false_positives(self):
         from unittest.mock import patch
 
-        from imas_codex.standard_names.workers import validate_name_candidate
+        from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+            validate_name_candidate,
+        )
 
         entry = {
             "id": self._POWER_BALANCE,
@@ -1416,7 +1418,7 @@ class TestOperatorUnitConsistency:
             "documentation": "",
         }
         with patch(
-            "imas_codex.standard_names.workers._validate_via_isn",
+            "imas_codex.standard_names.worker_tasks.worker_compose_and_validate._validate_via_isn",
             return_value=([], {}),
         ):
             issues, _layers, status = validate_name_candidate(entry)
@@ -1427,7 +1429,9 @@ class TestOperatorUnitConsistency:
     def test_full_admission_still_quarantines_wrong_unit(self):
         from unittest.mock import patch
 
-        from imas_codex.standard_names.workers import validate_name_candidate
+        from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+            validate_name_candidate,
+        )
 
         entry = {
             "id": self._POWER_BALANCE,
@@ -1436,7 +1440,7 @@ class TestOperatorUnitConsistency:
             "documentation": "",
         }
         with patch(
-            "imas_codex.standard_names.workers._validate_via_isn",
+            "imas_codex.standard_names.worker_tasks.worker_compose_and_validate._validate_via_isn",
             return_value=([], {}),
         ):
             issues, _layers, status = validate_name_candidate(entry)
@@ -2706,7 +2710,9 @@ class TestCanonicalLocusCheck:
         assert issues == []
 
     def test_power_at_separatrix_passes_complete_candidate_validation(self):
-        from imas_codex.standard_names.workers import validate_name_candidate
+        from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+            validate_name_candidate,
+        )
 
         issues, layers, status = validate_name_candidate(
             {
@@ -2812,7 +2818,9 @@ class TestCanonicalLocusCheck:
     )
     def test_every_published_locus_alias_is_flagged(self, alias, canonical, relation):
         from imas_codex.standard_names.audits import canonical_locus_check
-        from imas_codex.standard_names.workers import validate_name_candidate
+        from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+            validate_name_candidate,
+        )
 
         name = f"electron_temperature_{relation}_{alias}"
         issues = canonical_locus_check({"id": name})
@@ -2896,7 +2904,9 @@ class TestAttachmentStateResolution:
         ],
     )
     def test_state_resolution_consistency(self, source_id, sn_name, expected_ok):
-        from imas_codex.standard_names.workers import _is_attachment_consistent
+        from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+            _is_attachment_consistent,
+        )
 
         ok, reason = _is_attachment_consistent(source_id, sn_name)
         assert ok is expected_ok, reason

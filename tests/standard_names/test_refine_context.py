@@ -25,7 +25,7 @@ import pytest
 # Constants
 # ---------------------------------------------------------------------------
 
-_GC_PATH = "imas_codex.standard_names.graph_ops.GraphClient"
+_GC_PATH = "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
 # claim_refine_name_batch does a local import so patch the source symbol
 _CHAIN_HIST_PATH = "imas_codex.standard_names.chain_history.name_chain_history"
 
@@ -166,7 +166,9 @@ class TestClaimRefineChainHistory:
 
     def test_chain_history_is_populated(self):
         """Returned item carries chain_history matching name_chain_history output."""
-        from imas_codex.standard_names.graph_ops import claim_refine_name_batch
+        from imas_codex.standard_names.graph_store.graph_refinement import (
+            claim_refine_name_batch,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(
@@ -187,7 +189,9 @@ class TestClaimRefineChainHistory:
 
     def test_chain_history_entry_has_per_dim_comments(self):
         """Ancestor entry in chain_history exposes reviewer_comments_per_dim dict."""
-        from imas_codex.standard_names.graph_ops import claim_refine_name_batch
+        from imas_codex.standard_names.graph_store.graph_refinement import (
+            claim_refine_name_batch,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(
@@ -207,7 +211,9 @@ class TestClaimRefineChainHistory:
 
     def test_chain_history_entry_has_reviewer_score(self):
         """Ancestor entry in chain_history exposes a numeric reviewer_score."""
-        from imas_codex.standard_names.graph_ops import claim_refine_name_batch
+        from imas_codex.standard_names.graph_store.graph_refinement import (
+            claim_refine_name_batch,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(
@@ -235,7 +241,9 @@ class TestClaimRefineChainHistory:
         Expected: prior_reviews = [A's review, B's review] (oldest first).
         Actual:   key is absent; only chain_history (ancestors) is returned.
         """
-        from imas_codex.standard_names.graph_ops import claim_refine_name_batch
+        from imas_codex.standard_names.graph_store.graph_refinement import (
+            claim_refine_name_batch,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(

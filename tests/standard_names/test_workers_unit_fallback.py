@@ -2,7 +2,7 @@
 
 from unittest.mock import MagicMock, patch
 
-from imas_codex.standard_names.workers import (
+from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
     _DD_CONTEXT_QUERY,
     _enrich_batch_items,
 )

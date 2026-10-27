@@ -7,7 +7,9 @@ import json
 
 def test_validate_via_isn_well_formed():
     """Well-formed entry produces no pydantic errors."""
-    from imas_codex.standard_names.workers import _validate_via_isn
+    from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+        _validate_via_isn,
+    )
 
     entry = {
         "id": "electron_temperature",
@@ -25,7 +27,9 @@ def test_validate_via_isn_well_formed():
 
 def test_validate_via_isn_bad_name():
     """Double-underscore name triggers pydantic validation error."""
-    from imas_codex.standard_names.workers import _validate_via_isn
+    from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+        _validate_via_isn,
+    )
 
     entry = {
         "id": "bad__name",
@@ -41,7 +45,9 @@ def test_validate_via_isn_bad_name():
 
 def test_validate_via_isn_empty_entry():
     """Nearly-empty entry doesn't crash; summary structure is intact."""
-    from imas_codex.standard_names.workers import _validate_via_isn
+    from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+        _validate_via_isn,
+    )
 
     entry = {"unit": "m"}  # unit required for non-metadata kind
     issues, summary = _validate_via_isn(entry)
@@ -53,7 +59,9 @@ def test_validate_via_isn_empty_entry():
 
 def test_validate_via_isn_returns_json_serializable_summary():
     """Layer summary can be JSON-serialized."""
-    from imas_codex.standard_names.workers import _validate_via_isn
+    from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+        _validate_via_isn,
+    )
 
     entry = {
         "id": "plasma_current",
@@ -71,7 +79,9 @@ def test_validate_via_isn_returns_json_serializable_summary():
 
 def test_validate_via_isn_description_quality():
     """Description quality issues are captured in layer 3."""
-    from imas_codex.standard_names.workers import _validate_via_isn
+    from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+        _validate_via_isn,
+    )
 
     entry = {
         "id": "electron_temperature",

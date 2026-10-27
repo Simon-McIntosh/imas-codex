@@ -16,11 +16,15 @@ import pytest
 from click.testing import CliRunner
 
 from imas_codex.standard_names import graph_ops
-from imas_codex.standard_names.graph_ops import (
-    _GRAMMAR_SEGMENT_COLUMNS,
-    _parse_grammar,
+from imas_codex.standard_names.graph_store import (
+    graph_audits as _owning_graph_audits,
+    graph_foundation as _owning_graph_foundation,
+)
+from imas_codex.standard_names.graph_store.graph_audits import (
     realign_grammar_segments_for_name,
 )
+from imas_codex.standard_names.graph_store.graph_catalog import _GRAMMAR_SEGMENT_COLUMNS
+from imas_codex.standard_names.graph_store.graph_foundation import _parse_grammar
 
 #: A name whose stored ``physical_base`` has drifted from its own id parse.
 DRIFTED_NAME = "electron_density"
@@ -65,7 +69,7 @@ def _stored(**overrides: Any) -> dict[str, Any]:
 
 
 def _install(monkeypatch: pytest.MonkeyPatch, graph: _Graph) -> None:
-    monkeypatch.setattr(graph_ops, "GraphClient", lambda: graph)
+    monkeypatch.setattr(_owning_graph_foundation, "GraphClient", lambda: graph)
 
 
 def test_the_route_takes_one_name_and_reports_its_drift_under_dry_run(
@@ -130,7 +134,7 @@ def test_the_whole_graph_sweep_is_gated_to_live_names() -> None:
     """The sweep quarantines tombstones: only a live name is read for repair."""
     import inspect
 
-    source = inspect.getsource(graph_ops.reconcile_grammar_segments)
+    source = inspect.getsource(_owning_graph_audits.reconcile_grammar_segments)
     assert "LIVE_NAME" in source
     assert "MATCH (sn:StandardName) WHERE" in source
 
@@ -176,12 +180,14 @@ def test_the_sweep_leaves_a_superseded_identity_untouched_while_the_scoped_route
 ) -> None:
     """Quarantine: the sweep skips a tombstone; the name-scoped route reaches it."""
     graph = _StagedGraph(stage="superseded", row=_stored(physical_base="rate"))
-    monkeypatch.setattr(graph_ops, "GraphClient", lambda: graph)
+    monkeypatch.setattr(_owning_graph_foundation, "GraphClient", lambda: graph)
     monkeypatch.setattr(
-        graph_ops, "reconcile_standard_name_kinds", lambda: {"kinds_realigned": 0}
+        _owning_graph_audits,
+        "reconcile_standard_name_kinds",
+        lambda: {"kinds_realigned": 0},
     )
 
-    sweep_result = graph_ops.reconcile_grammar_segments()
+    sweep_result = _owning_graph_audits.reconcile_grammar_segments()
 
     assert sweep_result == {"names_realigned": 0}
     assert graph.sweep_writes == []
@@ -273,7 +279,9 @@ def test_cli_route_passes_the_name_and_dry_run_and_prints_the_drift(
             "noop": False,
         }
 
-    monkeypatch.setattr(graph_ops, "realign_grammar_segments_for_name", _route)
+    monkeypatch.setattr(
+        _owning_graph_audits, "realign_grammar_segments_for_name", _route
+    )
 
     result = CliRunner().invoke(sn, ["realign-segments", DRIFTED_NAME, "--dry-run"])
 
@@ -291,7 +299,7 @@ def test_cli_route_surfaces_a_refusal_as_a_usage_error(
     from imas_codex.cli.sn import sn
 
     monkeypatch.setattr(
-        graph_ops,
+        _owning_graph_audits,
         "realign_grammar_segments_for_name",
         lambda name, *, dry_run=False: {"ok": False, "reason": "not found"},
     )
@@ -309,7 +317,7 @@ def test_cli_route_reports_the_aligned_base_on_a_noop(
     from imas_codex.cli.sn import sn
 
     monkeypatch.setattr(
-        graph_ops,
+        _owning_graph_audits,
         "realign_grammar_segments_for_name",
         lambda name, *, dry_run=False: {
             "ok": True,

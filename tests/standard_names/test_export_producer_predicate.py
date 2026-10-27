@@ -89,7 +89,7 @@ def _run_fixture_export(staging_dir: Path, population: list[dict]):
         # audit's pre-population refusal is exercised on a planted graph.
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.graph_ops.classify_sourceless_standard_names",
+                "imas_codex.standard_names.graph_store.graph_supersession.classify_sourceless_standard_names",
                 return_value=[],
             )
         )

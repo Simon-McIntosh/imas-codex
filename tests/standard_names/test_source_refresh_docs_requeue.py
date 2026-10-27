@@ -11,6 +11,9 @@ import pytest
 
 from imas_codex.graph.client import GraphClient
 from imas_codex.standard_names import graph_ops, loop, source_refresh
+from imas_codex.standard_names.graph_store import (
+    graph_docs_persistence as _owning_graph_docs_persistence,
+)
 
 
 class _RefreshGraph:
@@ -92,12 +95,12 @@ async def test_drift_refresh_is_claimable_by_docs_pool_in_same_run(
 
     with (
         patch(
-            "imas_codex.standard_names.graph_ops.claim_generate_docs_batch",
+            "imas_codex.standard_names.graph_store.graph_docs_persistence.claim_generate_docs_batch",
             side_effect=claim_generate_docs_batch,
         ),
         patch("imas_codex.settings.get_pool_replicas", return_value=1),
         patch(
-            "imas_codex.standard_names.workers.process_generate_docs_batch",
+            "imas_codex.standard_names.worker_tasks.worker_generate_docs.process_generate_docs_batch",
             new_callable=AsyncMock,
         ),
     ):
@@ -173,8 +176,8 @@ def _write_docs(kind: str, *, token: str = "claim") -> object:
         "model": "test-model",
     }
     if kind == "generated":
-        return graph_ops.persist_generated_docs(**common)
-    return graph_ops.persist_refined_docs(
+        return _owning_graph_docs_persistence.persist_generated_docs(**common)
+    return _owning_graph_docs_persistence.persist_refined_docs(
         **common,
         current_description="Original description.",
         current_documentation="Original documentation.",

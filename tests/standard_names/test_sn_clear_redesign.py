@@ -15,6 +15,10 @@ from unittest.mock import MagicMock, patch
 from click.testing import CliRunner
 
 from imas_codex.cli.sn import sn
+from imas_codex.standard_names.graph_store import (
+    graph_catalog_reset as _owning_graph_catalog_reset,
+    graph_foundation as _owning_graph_foundation,
+)
 
 
 class TestSnClearHelp:
@@ -133,8 +137,10 @@ class TestClearSnSubsystemLabels:
         fake_gc.__exit__.return_value = None
         fake_gc.query = MagicMock(return_value=[{"n": 0}])
 
-        with patch.object(graph_ops, "GraphClient", return_value=fake_gc):
-            result = graph_ops.clear_sn_subsystem(dry_run=True)
+        with patch.object(
+            _owning_graph_foundation, "GraphClient", return_value=fake_gc
+        ):
+            result = _owning_graph_catalog_reset.clear_sn_subsystem(dry_run=True)
 
         assert set(result.keys()) == self._EXPECTED_LABELS
         # Must not touch grammar labels.
@@ -148,8 +154,10 @@ class TestClearSnSubsystemLabels:
         fake_gc.__exit__.return_value = None
         fake_gc.query = MagicMock(return_value=[{"n": 0}])
 
-        with patch.object(graph_ops, "GraphClient", return_value=fake_gc):
-            graph_ops.clear_sn_subsystem(dry_run=True)
+        with patch.object(
+            _owning_graph_foundation, "GraphClient", return_value=fake_gc
+        ):
+            _owning_graph_catalog_reset.clear_sn_subsystem(dry_run=True)
 
         queries = [call.args[0] for call in fake_gc.query.call_args_list]
         assert not any("DETACH DELETE" in q for q in queries)
@@ -171,8 +179,10 @@ class TestClearSnSubsystemLabels:
 
         fake_gc.query = MagicMock(side_effect=_query)
 
-        with patch.object(graph_ops, "GraphClient", return_value=fake_gc):
-            graph_ops.clear_sn_subsystem(dry_run=False)
+        with patch.object(
+            _owning_graph_foundation, "GraphClient", return_value=fake_gc
+        ):
+            _owning_graph_catalog_reset.clear_sn_subsystem(dry_run=False)
 
         queries = [call.args[0] for call in fake_gc.query.call_args_list]
         detach_deletes = [q for q in queries if "DETACH DELETE" in q]
@@ -205,12 +215,12 @@ class TestClearSnSubsystemLabels:
         fake_gc.query = MagicMock(return_value=[{"n": 0}])
 
         with (
-            patch.object(graph_ops, "GraphClient", return_value=fake_gc),
+            patch.object(_owning_graph_foundation, "GraphClient", return_value=fake_gc),
             patch(
                 "imas_codex.standard_names.grammar_sync.sync_isn_grammar_to_graph"
             ) as mock_sync,
         ):
-            graph_ops.clear_sn_subsystem(dry_run=False)
+            _owning_graph_catalog_reset.clear_sn_subsystem(dry_run=False)
 
         mock_sync.assert_not_called()
 
@@ -225,7 +235,9 @@ class TestClearCliReseed:
         def _fake_clear(*, dry_run: bool):
             return {"StandardName": preview_count}
 
-        return patch.object(graph_ops, "clear_sn_subsystem", side_effect=_fake_clear)
+        return patch.object(
+            _owning_graph_catalog_reset, "clear_sn_subsystem", side_effect=_fake_clear
+        )
 
     def test_clear_reseeds_grammar_by_default(self):
         runner = CliRunner()
@@ -271,8 +283,10 @@ class TestClearCliReseed:
         fake_gc.__exit__.return_value = None
         fake_gc.query = MagicMock(return_value=[{"n": 0}])
 
-        with patch.object(graph_ops, "GraphClient", return_value=fake_gc):
-            graph_ops.clear_sn_subsystem(dry_run=False)
+        with patch.object(
+            _owning_graph_foundation, "GraphClient", return_value=fake_gc
+        ):
+            _owning_graph_catalog_reset.clear_sn_subsystem(dry_run=False)
 
         queries = [call.args[0] for call in fake_gc.query.call_args_list]
         review_idx = next(

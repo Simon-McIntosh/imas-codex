@@ -11,11 +11,11 @@ from __future__ import annotations
 import logging
 from unittest.mock import MagicMock, patch
 
-from imas_codex.standard_names.graph_ops import (
+from imas_codex.standard_names.graph_store.graph_source_bindings import (
     mark_sources_attached,
     mark_sources_composed,
 )
-from imas_codex.standard_names.workers import (
+from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
     _update_sources_after_attach,
     _update_sources_after_compose,
 )
@@ -115,7 +115,9 @@ class TestGraphOpsHelpers:
     """Cover the token-verified ``mark_sources_(composed|attached)`` helpers."""
 
     def test_mark_sources_composed_cypher_invariants(self) -> None:
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:  # noqa: N806
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as MockGC:  # noqa: N806
             MockGC.return_value.__enter__.return_value.query.return_value = [
                 {"affected": 2}
             ]
@@ -133,7 +135,9 @@ class TestGraphOpsHelpers:
         assert "sns.claim_seq = $claim_seq" in cypher
 
     def test_mark_sources_attached_cypher_invariants(self) -> None:
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:  # noqa: N806
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as MockGC:  # noqa: N806
             MockGC.return_value.__enter__.return_value.query.return_value = [
                 {"affected": 1}
             ]

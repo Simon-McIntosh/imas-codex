@@ -19,7 +19,9 @@ import pytest
 
 def _mock_gc_ctx():
     """Return a (patcher, mock_gc) that patches GraphClient as context manager."""
-    patcher = patch("imas_codex.standard_names.graph_ops.GraphClient")
+    patcher = patch(
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+    )
     MockGC = patcher.start()
     mock_gc = MagicMock()
     MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -40,7 +42,9 @@ class TestCreateSNRunOpen:
     def test_creates_with_started_status(self):
         patcher, mock_gc = _mock_gc_ctx()
         try:
-            from imas_codex.standard_names.graph_ops import create_sn_run_open
+            from imas_codex.standard_names.graph_store.graph_audits import (
+                create_sn_run_open,
+            )
 
             create_sn_run_open(
                 _RUN_ID,
@@ -74,7 +78,9 @@ class TestFinalizeSNRun:
         patcher, mock_gc = _mock_gc_ctx()
         mock_gc.query.return_value = [{"id": _RUN_ID}]
         try:
-            from imas_codex.standard_names.graph_ops import finalize_sn_run
+            from imas_codex.standard_names.graph_store.graph_audits import (
+                finalize_sn_run,
+            )
 
             finalize_sn_run(
                 _RUN_ID,
@@ -110,7 +116,9 @@ class TestFinalizeSNRun:
         try:
             import logging
 
-            from imas_codex.standard_names.graph_ops import finalize_sn_run
+            from imas_codex.standard_names.graph_store.graph_audits import (
+                finalize_sn_run,
+            )
 
             with caplog.at_level(logging.WARNING):
                 finalize_sn_run(
@@ -134,7 +142,9 @@ class TestRecordLLMCost:
         patcher, mock_gc = _mock_gc_ctx()
         mock_gc.query.return_value = []
         try:
-            from imas_codex.standard_names.graph_ops import record_llm_cost
+            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+                record_llm_cost,
+            )
 
             id1 = record_llm_cost(
                 run_id=_RUN_ID,
@@ -168,7 +178,9 @@ class TestRecordLLMCost:
         # First call succeeds, second raises ConstraintError
         mock_gc.query.side_effect = [[], ConstraintError("duplicate")]
         try:
-            from imas_codex.standard_names.graph_ops import record_llm_cost
+            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+                record_llm_cost,
+            )
 
             # First call
             record_llm_cost(
@@ -199,7 +211,9 @@ class TestRecordLLMCost:
         patcher, mock_gc = _mock_gc_ctx()
         mock_gc.query.side_effect = RuntimeError("boom")
         try:
-            from imas_codex.standard_names.graph_ops import record_llm_cost
+            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+                record_llm_cost,
+            )
 
             with pytest.raises(RuntimeError, match="boom"):
                 record_llm_cost(
@@ -219,7 +233,9 @@ class TestRecordLLMCost:
         patcher, mock_gc = _mock_gc_ctx()
         mock_gc.query.return_value = []
         try:
-            from imas_codex.standard_names.graph_ops import record_llm_cost
+            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+                record_llm_cost,
+            )
 
             record_llm_cost(
                 run_id=_RUN_ID,
@@ -243,7 +259,9 @@ class TestRecordLLMCost:
         patcher, mock_gc = _mock_gc_ctx()
         mock_gc.query.return_value = []
         try:
-            from imas_codex.standard_names.graph_ops import record_llm_cost
+            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+                record_llm_cost,
+            )
 
             spend_id = record_llm_cost(
                 run_id=_RUN_ID,
@@ -272,7 +290,9 @@ class TestAggregateSpendForRun:
         patcher, mock_gc = _mock_gc_ctx()
         mock_gc.query.return_value = [{"total": 1.5}]
         try:
-            from imas_codex.standard_names.graph_ops import aggregate_spend_for_run
+            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+                aggregate_spend_for_run,
+            )
 
             total = aggregate_spend_for_run(_RUN_ID)
             assert total == 1.5
@@ -287,7 +307,9 @@ class TestAggregateSpendForRun:
         patcher, mock_gc = _mock_gc_ctx()
         mock_gc.query.return_value = [{"total": 0.0}]
         try:
-            from imas_codex.standard_names.graph_ops import aggregate_spend_for_run
+            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+                aggregate_spend_for_run,
+            )
 
             assert aggregate_spend_for_run("nonexistent") == 0.0
         finally:
@@ -307,7 +329,9 @@ class TestAggregateSpendPerPhase:
             {"phase": "generate", "total": 1.23},
         ]
         try:
-            from imas_codex.standard_names.graph_ops import aggregate_spend_per_phase
+            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+                aggregate_spend_per_phase,
+            )
 
             result = aggregate_spend_per_phase(_RUN_ID)
             assert result == {"enrich": 0.45, "generate": 1.23}
@@ -416,7 +440,9 @@ class TestAggregateCallsPerPhaseForwarder:
         patcher, mock_gc = _mock_gc_ctx()
         mock_gc.query.side_effect = graph.query
         try:
-            from imas_codex.standard_names.graph_ops import aggregate_calls_per_phase
+            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+                aggregate_calls_per_phase,
+            )
 
             result = aggregate_calls_per_phase(_RUN_ID)
 
@@ -431,7 +457,9 @@ class TestAggregateCallsPerPhaseForwarder:
         patcher, mock_gc = _mock_gc_ctx()
         mock_gc.query.side_effect = graph.query
         try:
-            from imas_codex.standard_names.graph_ops import aggregate_calls_per_phase
+            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+                aggregate_calls_per_phase,
+            )
 
             assert aggregate_calls_per_phase(_RUN_ID) == {}
         finally:
@@ -452,7 +480,9 @@ class TestAggregateSpendPerName:
             {"sn_id": "b", "apportioned": 0.50},
         ]
         try:
-            from imas_codex.standard_names.graph_ops import aggregate_spend_per_name
+            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+                aggregate_spend_per_name,
+            )
 
             result = aggregate_spend_per_name(_RUN_ID)
             assert result == {"a": 0.50, "b": 0.50}
@@ -469,7 +499,9 @@ class TestAggregateSpendPerName:
         patcher, mock_gc = _mock_gc_ctx()
         mock_gc.query.return_value = []
         try:
-            from imas_codex.standard_names.graph_ops import aggregate_spend_per_name
+            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+                aggregate_spend_per_name,
+            )
 
             result = aggregate_spend_per_name(_RUN_ID)
             assert result == {}
@@ -513,7 +545,9 @@ class TestUpdateSNPerPhaseCosts:
             [{"id": "plasma_current"}],
         ]
         try:
-            from imas_codex.standard_names.graph_ops import update_sn_per_phase_costs
+            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+                update_sn_per_phase_costs,
+            )
 
             count = update_sn_per_phase_costs(_RUN_ID)
             assert count == 2
@@ -547,7 +581,9 @@ class TestUpdateSNPerPhaseCosts:
         patcher, mock_gc = _mock_gc_ctx()
         mock_gc.query.return_value = []
         try:
-            from imas_codex.standard_names.graph_ops import update_sn_per_phase_costs
+            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+                update_sn_per_phase_costs,
+            )
 
             assert update_sn_per_phase_costs(_RUN_ID) == 0
         finally:

@@ -8,6 +8,10 @@ import pytest
 from click.testing import CliRunner
 
 from imas_codex.standard_names import graph_ops, harmonize
+from imas_codex.standard_names.graph_store import (
+    graph_docs_persistence as _owning_graph_docs_persistence,
+    graph_source_bindings as _owning_graph_source_bindings,
+)
 from tests.standard_names.test_harmonize_reverse_links import (
     _ANCHOR,
     _BOUNDARY,
@@ -26,7 +30,9 @@ def _fixture(monkeypatch: Any) -> _LinkGraph:
     monkeypatch.setattr(graph_client, "GraphClient", lambda *a, **k: graph)
     monkeypatch.setattr(protection, "_frozen_roster_requests", lambda *_a: {})
     monkeypatch.setattr(
-        graph_ops, "write_enrichment_results", graph.write_enrichment_results
+        _owning_graph_source_bindings,
+        "write_enrichment_results",
+        graph.write_enrichment_results,
     )
 
     def stamp(families: list[dict[str, Any]]) -> int:
@@ -37,7 +43,9 @@ def _fixture(monkeypatch: Any) -> _LinkGraph:
                 ]
         return len(families)
 
-    monkeypatch.setattr(graph_ops, "stamp_harmonized_families", stamp)
+    monkeypatch.setattr(
+        _owning_graph_docs_persistence, "stamp_harmonized_families", stamp
+    )
     monkeypatch.setattr(harmonize, "_clear_family_anchor", lambda *_a: None)
     return graph
 
@@ -143,7 +151,9 @@ def test_stamp_readback_requires_every_member_current_signature(
             graph.node(member_id)["harmonized_group_signature"] = family["signature"]
         return 1
 
-    monkeypatch.setattr(graph_ops, "stamp_harmonized_families", incomplete_stamp)
+    monkeypatch.setattr(
+        _owning_graph_docs_persistence, "stamp_harmonized_families", incomplete_stamp
+    )
 
     with pytest.raises(harmonize.HarmonizeFinalizeError) as exc:
         harmonize.finalize_families(graph, seeds=[_ANCHOR])

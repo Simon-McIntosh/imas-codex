@@ -804,15 +804,28 @@ async def _drive_run_sn_pools(
     """
     graph_ctx, _ = _loop_graph_context()
     with ExitStack() as stack:
-        stack.enter_context(patch(f"{_SN_GO}.create_sn_run_open"))
-        stack.enter_context(patch(f"{_SN_GO}.finalize_sn_run"))
-        stack.enter_context(
-            patch(f"{_SN_GO}.persist_outcome_snapshot", return_value={})
-        )
-        stack.enter_context(patch(f"{_SN_GO}.reset_persist_outcomes"))
         stack.enter_context(
             patch(
-                f"{_SN_GO}.scoped_terminal_residue",
+                "imas_codex.standard_names.graph_store.graph_audits.create_sn_run_open"
+            )
+        )
+        stack.enter_context(
+            patch("imas_codex.standard_names.graph_store.graph_audits.finalize_sn_run")
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.graph_store.graph_source_bindings.persist_outcome_snapshot",
+                return_value={},
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.graph_store.graph_source_bindings.reset_persist_outcomes"
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.graph_store.graph_parent_lifecycle.scoped_terminal_residue",
                 return_value={"total": 0, "names": [], "sources": []},
             )
         )
@@ -887,7 +900,10 @@ async def _drive_run_sn_pools(
                 )
             )
             stack.enter_context(
-                patch(f"{_SN_GO}.finalize_manifest_drain_scope", return_value={})
+                patch(
+                    "imas_codex.standard_names.graph_store.graph_claim_scope.finalize_manifest_drain_scope",
+                    return_value={},
+                )
             )
         writers = {
             name: stack.enter_context(

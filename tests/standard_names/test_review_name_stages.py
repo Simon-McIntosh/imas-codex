@@ -22,11 +22,16 @@ from unittest.mock import MagicMock, call, patch
 
 import pytest
 
+from imas_codex.standard_names.graph_store import (
+    graph_cost_and_claims as _owning_graph_cost_and_claims,
+    graph_refinement as _owning_graph_refinement,
+)
+
 # =============================================================================
 # Shared helpers / paths
 # =============================================================================
 
-_GC_PATH = "imas_codex.standard_names.graph_ops.GraphClient"
+_GC_PATH = "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
 
 
 def _mock_gc_query(return_values: list[list[dict]] | None = None):
@@ -94,7 +99,9 @@ class TestClaimOnlyDrafted:
 
     def test_claim_only_drafted(self):
         """The claim WHERE clause gates on name_stage='drafted'."""
-        from imas_codex.standard_names.graph_ops import _claim_sn_atomic
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            _claim_sn_atomic,
+        )
 
         captured: list[str] = []
 
@@ -107,10 +114,10 @@ class TestClaimOnlyDrafted:
             return []
 
         with patch(
-            "imas_codex.standard_names.graph_ops._claim_sn_atomic",
+            "imas_codex.standard_names.graph_store.graph_cost_and_claims._claim_sn_atomic",
             side_effect=_fake_claim_sn_atomic,
         ):
-            from imas_codex.standard_names.graph_ops import (
+            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
                 claim_review_name_batch,
             )
 
@@ -134,10 +141,10 @@ class TestClaimOnlyDrafted:
             return []
 
         with patch(
-            "imas_codex.standard_names.graph_ops._claim_sn_atomic",
+            "imas_codex.standard_names.graph_store.graph_cost_and_claims._claim_sn_atomic",
             side_effect=_fake_claim_sn_atomic,
         ):
-            from imas_codex.standard_names.graph_ops import (
+            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
                 claim_review_name_batch,
             )
 
@@ -160,10 +167,12 @@ class TestClaimOnlyDrafted:
             return []
 
         with patch(
-            "imas_codex.standard_names.graph_ops._claim_sn_atomic",
+            "imas_codex.standard_names.graph_store.graph_cost_and_claims._claim_sn_atomic",
             side_effect=_fake_claim_sn_atomic,
         ):
-            from imas_codex.standard_names.graph_ops import claim_review_name_batch
+            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+                claim_review_name_batch,
+            )
 
             claim_review_name_batch(batch_size=5)
 
@@ -179,10 +188,10 @@ class TestClaimOnlyDrafted:
             return []
 
         with patch(
-            "imas_codex.standard_names.graph_ops._claim_sn_atomic",
+            "imas_codex.standard_names.graph_store.graph_cost_and_claims._claim_sn_atomic",
             side_effect=_fake_claim_sn_atomic,
         ):
-            from imas_codex.standard_names.graph_ops import (
+            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
                 claim_review_name_batch,
             )
 
@@ -211,7 +220,9 @@ class TestPersistToAccepted:
         )
 
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_name,
+            )
 
             result = persist_reviewed_name(
                 sn_id="electron_temperature",
@@ -239,7 +250,9 @@ class TestPersistToAccepted:
         )
 
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_name,
+            )
 
             persist_reviewed_name(
                 sn_id="electron_temperature",
@@ -268,7 +281,9 @@ class TestPersistToReviewed:
         )
 
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_name,
+            )
 
             result = persist_reviewed_name(
                 sn_id="test_name",
@@ -291,7 +306,9 @@ class TestPersistToReviewed:
         )
 
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_name,
+            )
 
             result = persist_reviewed_name(
                 sn_id="test_name",
@@ -322,7 +339,9 @@ class TestPersistToExhausted:
         )
 
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_name,
+            )
 
             result = persist_reviewed_name(
                 sn_id="test_name",
@@ -350,7 +369,9 @@ class TestPersistToExhausted:
         )
 
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_name,
+            )
 
             result = persist_reviewed_name(
                 sn_id="test_name",
@@ -373,7 +394,9 @@ class TestPersistToExhausted:
         )
 
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_name,
+            )
 
             result = persist_reviewed_name(
                 sn_id="test_name",
@@ -402,7 +425,9 @@ class TestScoreCanonicalPolicy:
         """score=0.9 → 'accepted' (score wins)."""
         gc = _mock_gc_query(return_values=[[{"chain_length": 0}], [{"id": "x"}]])
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_name,
+            )
 
             result = persist_reviewed_name(
                 sn_id="time",
@@ -420,7 +445,9 @@ class TestScoreCanonicalPolicy:
         """verdict='reject' with score>=min_score still promotes (rubric is canonical)."""
         gc = _mock_gc_query(return_values=[[{"chain_length": 0}], [{"id": "x"}]])
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_name,
+            )
 
             result = persist_reviewed_name(
                 sn_id="x",
@@ -438,7 +465,9 @@ class TestScoreCanonicalPolicy:
         """score>=min_score at chain_length>=cap-1 → accepted (not exhausted)."""
         gc = _mock_gc_query(return_values=[[{"chain_length": 2}], [{"id": "x"}]])
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_name,
+            )
 
             result = persist_reviewed_name(
                 sn_id="x",
@@ -460,7 +489,9 @@ class TestPersistTokenMismatch:
         gc = _mock_gc_query(return_values=[[]])
 
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_name,
+            )
 
             result = persist_reviewed_name(
                 sn_id="test_name",
@@ -489,7 +520,9 @@ class TestVerifyNameClaimWinners:
 
     def test_drops_items_whose_token_lost(self):
         """Only nodes still holding our token survive verification."""
-        from imas_codex.standard_names.graph_ops import _verify_name_claim_winners
+        from imas_codex.standard_names.graph_store.graph_claim_release import (
+            _verify_name_claim_winners,
+        )
 
         items = [
             {"id": "won_a", "claim_token": "tok-1"},
@@ -514,7 +547,9 @@ class TestVerifyNameClaimWinners:
 
     def test_no_query_when_all_survive_is_still_correct(self):
         """When every claimed node wins, all items are returned unchanged."""
-        from imas_codex.standard_names.graph_ops import _verify_name_claim_winners
+        from imas_codex.standard_names.graph_store.graph_claim_release import (
+            _verify_name_claim_winners,
+        )
 
         items = [
             {"id": "a", "claim_token": "tok-2"},
@@ -529,7 +564,9 @@ class TestVerifyNameClaimWinners:
 
     def test_empty_items_short_circuit(self):
         """Empty claim list returns immediately without a graph round-trip."""
-        from imas_codex.standard_names.graph_ops import _verify_name_claim_winners
+        from imas_codex.standard_names.graph_store.graph_claim_release import (
+            _verify_name_claim_winners,
+        )
 
         gc = _mock_gc_query(return_values=[])
         with _patch_gc(gc):
@@ -547,7 +584,9 @@ class TestVerifySourceClaimWinners:
 
     def test_drops_sources_whose_token_lost(self):
         """Only sources still holding our token at status='extracted' survive."""
-        from imas_codex.standard_names.graph_ops import _verify_source_claim_winners
+        from imas_codex.standard_names.graph_store.graph_claim_release import (
+            _verify_source_claim_winners,
+        )
 
         items = [
             {"id": "dd:a/path", "claim_token": "tok-9", "claim_seq": 1},
@@ -576,7 +615,9 @@ class TestVerifySourceClaimWinners:
 
     def test_all_survive_unchanged(self):
         """When every claimed source wins, all items return unchanged."""
-        from imas_codex.standard_names.graph_ops import _verify_source_claim_winners
+        from imas_codex.standard_names.graph_store.graph_claim_release import (
+            _verify_source_claim_winners,
+        )
 
         items = [
             {"id": "dd:a", "claim_token": "tok-x", "claim_seq": 2},
@@ -598,7 +639,9 @@ class TestVerifySourceClaimWinners:
 
     def test_exact_sequence_fences_delayed_duplicate(self):
         """A token match is insufficient when a newer claim sequence won."""
-        from imas_codex.standard_names.graph_ops import _verify_source_claim_winners
+        from imas_codex.standard_names.graph_store.graph_claim_release import (
+            _verify_source_claim_winners,
+        )
 
         items = [
             {"id": "dd:a", "claim_token": "tok-x", "claim_seq": 4},
@@ -620,7 +663,9 @@ class TestVerifySourceClaimWinners:
 
     def test_missing_sequence_is_not_authorized(self):
         """A source with no exact sequence cannot authorize paid work."""
-        from imas_codex.standard_names.graph_ops import _verify_source_claim_winners
+        from imas_codex.standard_names.graph_store.graph_claim_release import (
+            _verify_source_claim_winners,
+        )
 
         items = [{"id": "dd:a", "claim_token": "tok-x", "claim_seq": None}]
         gc = _mock_gc_query(return_values=[])
@@ -633,7 +678,9 @@ class TestVerifySourceClaimWinners:
 
     def test_missing_token_is_not_authorized(self):
         """A sequence without its exact token cannot authorize paid work."""
-        from imas_codex.standard_names.graph_ops import _verify_source_claim_winners
+        from imas_codex.standard_names.graph_store.graph_claim_release import (
+            _verify_source_claim_winners,
+        )
 
         items = [{"id": "dd:a", "claim_token": None, "claim_seq": 3}]
         gc = _mock_gc_query(return_values=[])
@@ -646,7 +693,9 @@ class TestVerifySourceClaimWinners:
 
     def test_empty_items_short_circuit(self):
         """Empty claim list returns immediately without a graph round-trip."""
-        from imas_codex.standard_names.graph_ops import _verify_source_claim_winners
+        from imas_codex.standard_names.graph_store.graph_claim_release import (
+            _verify_source_claim_winners,
+        )
 
         gc = _mock_gc_query(return_values=[])
         with _patch_gc(gc):
@@ -667,7 +716,9 @@ class TestPersistReviewedNameConcurrentWinNoOp:
         )
 
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_name,
+            )
 
             result = persist_reviewed_name(
                 sn_id="electron_temperature",
@@ -696,10 +747,12 @@ class TestPersistReviewedNameConcurrentWinNoOp:
         with (
             _patch_gc(gc),
             patch(
-                "imas_codex.standard_names.graph_ops.write_reviews"
+                "imas_codex.standard_names.graph_store.graph_catalog.write_reviews"
             ) as mock_write_reviews,
         ):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_name,
+            )
 
             result = persist_reviewed_name(
                 sn_id="electron_temperature",
@@ -725,7 +778,9 @@ class TestPersistWritesReviewerFields:
         )
 
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_name,
+            )
 
             persist_reviewed_name(
                 sn_id="electron_temperature",
@@ -776,7 +831,9 @@ class TestMinScoreThreshold:
         """score == min_score with verdict='accept' → 'accepted'."""
         gc = _mock_gc_query(return_values=[[{"chain_length": 0}], [{"id": "x"}]])
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_name,
+            )
 
             result = persist_reviewed_name(
                 sn_id="x",
@@ -794,7 +851,9 @@ class TestMinScoreThreshold:
         """score < min_score with verdict='accept' → stage depends on chain_length."""
         gc = _mock_gc_query(return_values=[[{"chain_length": 0}], [{"id": "x"}]])
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_name,
+            )
 
             result = persist_reviewed_name(
                 sn_id="x",
@@ -811,7 +870,9 @@ class TestMinScoreThreshold:
         """score < min_score at chain_length=rotation_cap → 'exhausted'."""
         gc = _mock_gc_query(return_values=[[{"chain_length": 3}], [{"id": "x"}], []])
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_name,
+            )
 
             result = persist_reviewed_name(
                 sn_id="x",
@@ -854,10 +915,10 @@ class TestWorkerUsesCanonicalModel:
                 return_value=["openrouter/test/review-model"],
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.write_reviews",
+                "imas_codex.standard_names.graph_store.graph_catalog.write_reviews",
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.persist_reviewed_name",
+                "imas_codex.standard_names.graph_store.graph_review_persistence.persist_reviewed_name",
                 return_value="accepted",
             ),
             patch(
@@ -865,7 +926,9 @@ class TestWorkerUsesCanonicalModel:
                 return_value="Review this name.",
             ),
         ):
-            from imas_codex.standard_names.workers import process_review_name_batch
+            from imas_codex.standard_names.worker_tasks.worker_review_names import (
+                process_review_name_batch,
+            )
 
             items = [_make_reviewed_item()]
             mgr = _mock_budget_manager()
@@ -909,10 +972,10 @@ class TestWorkerUsesCanonicalModel:
                 return_value=["openrouter/test/model"],
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.write_reviews",
+                "imas_codex.standard_names.graph_store.graph_catalog.write_reviews",
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.persist_reviewed_name",
+                "imas_codex.standard_names.graph_store.graph_review_persistence.persist_reviewed_name",
                 return_value="accepted",
             ),
             patch(
@@ -920,7 +983,9 @@ class TestWorkerUsesCanonicalModel:
                 return_value="Review.",
             ),
         ):
-            from imas_codex.standard_names.workers import process_review_name_batch
+            from imas_codex.standard_names.worker_tasks.worker_review_names import (
+                process_review_name_batch,
+            )
 
             result = asyncio.run(
                 process_review_name_batch(
@@ -952,11 +1017,13 @@ class TestFailedReleaseRevertsTo:
                 return_value="Review.",
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.release_review_names_failed_claims",
+                "imas_codex.standard_names.graph_store.graph_claim_release.release_review_names_failed_claims",
                 side_effect=_fake_release,
             ),
         ):
-            from imas_codex.standard_names.workers import process_review_name_batch
+            from imas_codex.standard_names.worker_tasks.worker_review_names import (
+                process_review_name_batch,
+            )
 
             items = [_make_reviewed_item(claim_token="tok-failed")]
             mgr = _mock_budget_manager()
@@ -992,11 +1059,13 @@ class TestQuarantinedSkipsLLM:
                 return_value=["openrouter/test/review-model"],
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.persist_reviewed_name",
+                "imas_codex.standard_names.graph_store.graph_review_persistence.persist_reviewed_name",
                 side_effect=_fake_persist,
             ),
         ):
-            from imas_codex.standard_names.workers import process_review_name_batch
+            from imas_codex.standard_names.worker_tasks.worker_review_names import (
+                process_review_name_batch,
+            )
 
             items = [
                 _make_reviewed_item(
@@ -1043,10 +1112,10 @@ class TestQuarantinedSkipsLLM:
                 return_value=["openrouter/test/review-model"],
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.write_reviews",
+                "imas_codex.standard_names.graph_store.graph_catalog.write_reviews",
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.persist_reviewed_name",
+                "imas_codex.standard_names.graph_store.graph_review_persistence.persist_reviewed_name",
                 return_value="accepted",
             ),
             patch(
@@ -1054,7 +1123,9 @@ class TestQuarantinedSkipsLLM:
                 return_value="Review this name.",
             ),
         ):
-            from imas_codex.standard_names.workers import process_review_name_batch
+            from imas_codex.standard_names.worker_tasks.worker_review_names import (
+                process_review_name_batch,
+            )
 
             items = [_make_reviewed_item(validation_status="valid")]
             mgr = _mock_budget_manager()
@@ -1078,10 +1149,12 @@ class TestPersistWritesReviewNode:
         with (
             _patch_gc(gc),
             patch(
-                "imas_codex.standard_names.graph_ops.write_reviews"
+                "imas_codex.standard_names.graph_store.graph_catalog.write_reviews"
             ) as mock_write_reviews,
         ):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_name,
+            )
 
             persist_reviewed_name(
                 sn_id="electron_temperature",
@@ -1135,10 +1208,12 @@ class TestPersistWritesReviewNode:
         with (
             _patch_gc(gc),
             patch(
-                "imas_codex.standard_names.graph_ops.write_reviews"
+                "imas_codex.standard_names.graph_store.graph_catalog.write_reviews"
             ) as mock_write_reviews,
         ):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_docs
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_docs,
+            )
 
             persist_reviewed_docs(
                 sn_id="electron_temperature",
@@ -1169,11 +1244,13 @@ class TestPersistWritesReviewNode:
         with (
             _patch_gc(gc),
             patch(
-                "imas_codex.standard_names.graph_ops.write_reviews",
+                "imas_codex.standard_names.graph_store.graph_catalog.write_reviews",
                 side_effect=RuntimeError("graph down"),
             ),
         ):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_name,
+            )
 
             new_stage = persist_reviewed_name(
                 sn_id="x",
@@ -1215,7 +1292,9 @@ class TestQuorumGatedAcceptance:
         gc = self._accepting_gc()
 
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_name,
+            )
 
             result = persist_reviewed_name(
                 sn_id="x",
@@ -1235,7 +1314,9 @@ class TestQuorumGatedAcceptance:
         gc = self._accepting_gc()
 
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_name,
+            )
 
             result = persist_reviewed_name(
                 sn_id="x",
@@ -1255,7 +1336,9 @@ class TestQuorumGatedAcceptance:
         gc = self._accepting_gc()
 
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_name,
+            )
 
             persist_reviewed_name(
                 sn_id="x",
@@ -1279,7 +1362,9 @@ class TestQuorumGatedAcceptance:
         gc = self._accepting_gc()
 
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_name,
+            )
 
             result = persist_reviewed_name(
                 sn_id="x",
@@ -1300,7 +1385,9 @@ class TestQuorumGatedAcceptance:
         gc = self._accepting_gc()
 
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_name,
+            )
 
             result = persist_reviewed_name(
                 sn_id="x",
@@ -1320,7 +1407,9 @@ class TestQuorumGatedAcceptance:
         gc = self._accepting_gc()
 
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_name,
+            )
 
             result = persist_reviewed_name(
                 sn_id="x",
@@ -1340,7 +1429,9 @@ class TestQuorumGatedAcceptance:
         gc = self._accepting_gc()
 
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_name,
+            )
 
             result = persist_reviewed_name(
                 sn_id="x",
@@ -1360,7 +1451,9 @@ class TestQuorumGatedAcceptance:
         gc = self._accepting_gc()
 
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_name,
+            )
 
             result = persist_reviewed_name(
                 sn_id="x",
@@ -1378,7 +1471,9 @@ class TestQuorumGatedAcceptance:
         gc = self._accepting_gc()
 
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_name,
+            )
 
             result = persist_reviewed_name(
                 sn_id="x",
@@ -1402,7 +1497,9 @@ class TestQuorumGatedAcceptance:
         gc = self._accepting_gc()
 
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_name,
+            )
 
             result = persist_reviewed_name(
                 sn_id="x",
@@ -1423,7 +1520,9 @@ class TestQuorumGatedAcceptance:
         gc = self._accepting_gc()
 
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_name,
+            )
 
             result = persist_reviewed_name(
                 sn_id="x",
@@ -1461,7 +1560,9 @@ class TestQuorumGatedRefineRouting:
         gc = _mock_gc_query(return_values=[[{"chain_length": 0}], [{"id": "x"}]])
 
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_name,
+            )
 
             result = persist_reviewed_name(
                 sn_id="x",
@@ -1485,7 +1586,7 @@ class TestQuorumGatedRefineRouting:
         """The canonical eligibility predicate excludes a marked name."""
         from imas_codex.standard_names import graph_ops
 
-        predicate = graph_ops.REFINE_NAME_ELIGIBILITY_WHERE
+        predicate = _owning_graph_refinement.REFINE_NAME_ELIGIBILITY_WHERE
         assert "sn.review_quorum_shortfall IS NULL" in predicate
 
         captured: dict = {}
@@ -1494,9 +1595,11 @@ class TestQuorumGatedRefineRouting:
             captured.update(kwargs)
             return []
 
-        monkeypatch.setattr(graph_ops, "_claim_sn_atomic", _capture_claim)
+        monkeypatch.setattr(
+            _owning_graph_cost_and_claims, "_claim_sn_atomic", _capture_claim
+        )
 
-        assert graph_ops.claim_refine_name_batch() == []
+        assert _owning_graph_refinement.claim_refine_name_batch() == []
         assert captured["eligibility_where"] == predicate
 
     def test_rescore_is_the_recovery_path(self):
@@ -1509,7 +1612,9 @@ class TestQuorumGatedRefineRouting:
         gc = _mock_gc_query(return_values=[[{"chain_length": 0}], [{"id": "x"}]])
 
         with _patch_gc(gc):
-            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+            from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                persist_reviewed_name,
+            )
 
             persist_reviewed_name(
                 sn_id="x",

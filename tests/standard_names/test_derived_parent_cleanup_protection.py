@@ -8,6 +8,10 @@ from unittest.mock import MagicMock
 import pytest
 
 from imas_codex.standard_names import graph_ops, protection, provenance_lifecycle
+from imas_codex.standard_names.graph_store import (
+    graph_foundation as _owning_graph_foundation,
+    graph_lineage as _owning_graph_lineage,
+)
 from tests.standard_names.source_scan import graph_source_text
 
 
@@ -45,10 +49,10 @@ def test_structural_cleanup_refuses_the_whole_oversized_batch() -> None:
     candidates = [f"parent_{index}" for index in range(81)]
 
     with pytest.raises(
-        graph_ops.DerivedParentCleanupRefusal,
+        _owning_graph_foundation.DerivedParentCleanupRefusal,
         match="81 candidate identities exceeds the 80-identity ceiling",
     ):
-        graph_ops._delete_derived_parent_nodes(gc, candidates)
+        _owning_graph_lineage._delete_derived_parent_nodes(gc, candidates)
 
     gc.query.assert_not_called()
 
@@ -57,7 +61,7 @@ def test_structural_delete_requires_placeholder_and_keeps_recovery_material() ->
     gc = MagicMock()
     gc.query.side_effect = [[{"linked": 0}], [], [{"deleted": 1}]]
 
-    assert graph_ops._delete_derived_parent_nodes(gc, ["parent_name"]) == 1
+    assert _owning_graph_lineage._delete_derived_parent_nodes(gc, ["parent_name"]) == 1
 
     statement = gc.query.call_args_list[-1].args[0]
     assert "WHERE sn.needs_composition = true" in statement

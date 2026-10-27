@@ -7,7 +7,16 @@ from unittest.mock import MagicMock, patch
 
 from imas_codex.standard_names import prose_adjudicator, workers
 from imas_codex.standard_names.campaign import measure_batch
+from imas_codex.standard_names.graph_store import (
+    graph_catalog as _owning_graph_catalog,
+    graph_review_persistence as _owning_graph_review_persistence,
+)
 from imas_codex.standard_names.prose_policy import banned_prose_findings
+from imas_codex.standard_names.worker_tasks import (
+    worker_common as _owning_worker_common,
+    worker_review_docs as _owning_worker_review_docs,
+    worker_review_names as _owning_worker_review_names,
+)
 
 
 def _review(
@@ -76,19 +85,27 @@ def _review(
     manager = MagicMock()
     manager.run_id = "run"
     with (
-        patch.object(workers, "prepare_docs_review_request", prepare),
-        patch.object(workers, "_run_rd_quorum_cycles", review),
-        patch.object(workers, "_review_dd_source_bindings", return_value={}),
-        patch.object(workers, "_persist_dd_gap_evidence"),
-        patch.object(graph_ops, "write_reviews"),
-        patch.object(graph_ops, "update_review_aggregates"),
-        patch.object(graph_ops, "persist_reviewed_docs", persist),
+        patch.object(
+            _owning_worker_review_docs, "prepare_docs_review_request", prepare
+        ),
+        patch.object(_owning_worker_review_names, "_run_rd_quorum_cycles", review),
+        patch.object(
+            _owning_worker_common, "_review_dd_source_bindings", return_value={}
+        ),
+        patch.object(_owning_worker_common, "_persist_dd_gap_evidence"),
+        patch.object(_owning_graph_catalog, "write_reviews"),
+        patch.object(_owning_graph_catalog, "update_review_aggregates"),
+        patch.object(
+            _owning_graph_review_persistence, "persist_reviewed_docs", persist
+        ),
         patch.object(prose_adjudicator, "_adjudicate_one", adjudicate),
         patch("imas_codex.settings.get_model", return_value="test/model"),
         patch("imas_codex.settings.get_reasoning_effort", return_value="low"),
     ):
         processed = asyncio.run(
-            workers.process_review_docs_batch([item], manager, asyncio.Event())
+            _owning_worker_review_docs.process_review_docs_batch(
+                [item], manager, asyncio.Event()
+            )
         )
     assert processed == 1
     return persisted_stage[0], persisted, adjudications

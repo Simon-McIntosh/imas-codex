@@ -15,7 +15,7 @@ from imas_codex.graph.client import GraphClient as RealGraphClient
 def test_stale_structural_sources_are_not_rebound(
     disposable_neo4j: tuple[str, str],
 ) -> None:
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
         reconcile_orphan_parent_sources,
         reconcile_orphan_parent_sources_batched,
     )

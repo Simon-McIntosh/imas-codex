@@ -23,7 +23,9 @@ from imas_codex.standard_names.review.audits import (
     answer_quarantine_question,
     run_all_audits,
 )
-from imas_codex.standard_names.workers import _is_quarantined
+from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+    _is_quarantined,
+)
 
 
 def test_each_single_question_is_answered_once() -> None:

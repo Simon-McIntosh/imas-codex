@@ -12,6 +12,11 @@ from imas_codex.standard_names import (
     promote,
     signed_manifest,
 )
+from imas_codex.standard_names.graph_store import (
+    graph_catalog_reset as _owning_graph_catalog_reset,
+    graph_claim_release as _owning_graph_claim_release,
+    graph_foundation as _owning_graph_foundation,
+)
 
 
 class RecordingGraph:
@@ -112,7 +117,7 @@ def test_edit_validation_already_pairs_status_and_reason() -> None:
     issues = ["grammar: invalid canonical name"]
 
     with patch(
-        "imas_codex.standard_names.workers.validate_name_candidate",
+        "imas_codex.standard_names.worker_tasks.worker_compose_and_validate.validate_name_candidate",
         return_value=(issues, {}, "quarantined"),
     ):
         edit._stamp_successor_validation(
@@ -176,8 +181,8 @@ def test_signed_orphan_direct_write_records_the_canonical_reason() -> None:
 def test_terminal_refine_quarantine_records_the_canonical_reason() -> None:
     graph = RecordingGraph()
 
-    with patch.object(graph_ops, "GraphClient", return_value=graph):
-        stage = graph_ops.stop_refine_name_attempt(
+    with patch.object(_owning_graph_foundation, "GraphClient", return_value=graph):
+        stage = _owning_graph_claim_release.stop_refine_name_attempt(
             sn_id="candidate_name",
             token="claim-token",
             reason="grammar_invalid",
@@ -196,8 +201,8 @@ def test_validation_worker_already_pairs_status_and_reason() -> None:
     graph = RecordingGraph()
     issues = ["grammar: invalid canonical name"]
 
-    with patch.object(graph_ops, "GraphClient", return_value=graph):
-        graph_ops.mark_names_validated(
+    with patch.object(_owning_graph_foundation, "GraphClient", return_value=graph):
+        _owning_graph_catalog_reset.mark_names_validated(
             "claim-token",
             [
                 {

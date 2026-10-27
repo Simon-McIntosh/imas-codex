@@ -45,7 +45,7 @@ def _mock_gc_tx():
 
 def _patch_gc(mock_gc):
     return patch(
-        "imas_codex.standard_names.graph_ops.GraphClient",
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
         return_value=mock_gc,
     )
 
@@ -61,7 +61,9 @@ class TestParentDocsPriority:
     def test_seed_query_contains_priority_ordering(self):
         """The seed Cypher emitted by claim_generate_docs_batch must include
         priority-based ORDER BY so parents are picked before children."""
-        from imas_codex.standard_names.graph_ops import claim_generate_docs_batch
+        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+            claim_generate_docs_batch,
+        )
 
         gc, tx = _mock_gc_tx()
 
@@ -96,7 +98,9 @@ class TestParentDocsPriority:
     def test_priority_ordering_parents_before_children(self):
         """Verify that the priority expression assigns 0 to parents and 1 to
         leaf nodes, and that ORDER BY sorts ASC (parents first)."""
-        from imas_codex.standard_names.graph_ops import claim_generate_docs_batch
+        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+            claim_generate_docs_batch,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(return_value=[])
@@ -142,7 +146,9 @@ class TestChildProceedsWhenParentUnclaimed:
     def test_escape_hatch_present_in_seed_query(self):
         """The seed query must contain a NOT EXISTS block that checks
         parent.claimed_at IS NOT NULL — only blocking actively-claimed parents."""
-        from imas_codex.standard_names.graph_ops import claim_generate_docs_batch
+        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+            claim_generate_docs_batch,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(return_value=[])
@@ -170,7 +176,9 @@ class TestChildProceedsWhenParentUnclaimed:
     def test_escape_hatch_targets_docs_stage_pending(self):
         """The escape hatch must also verify that the parent's docs_stage is
         'pending' — so children aren't blocked by parents in other stages."""
-        from imas_codex.standard_names.graph_ops import claim_generate_docs_batch
+        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+            claim_generate_docs_batch,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(return_value=[])
@@ -197,7 +205,9 @@ class TestChildProceedsWhenParentUnclaimed:
     def test_default_claim_unaffected(self):
         """Other claim functions that do not pass seed_extra_where must not
         be affected — the default seed query should use ORDER BY rand()."""
-        from imas_codex.standard_names.graph_ops import _claim_sn_atomic
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            _claim_sn_atomic,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(return_value=[])

@@ -120,10 +120,10 @@ def test_signals_reset_preflights_before_reset_mutation() -> None:
             side_effect=click.ClickException("embed down"),
         ),
         patch(
-            "imas_codex.standard_names.graph_ops.clear_standard_names"
+            "imas_codex.standard_names.graph_store.graph_catalog_reset.clear_standard_names"
         ) as clear_names,
         patch(
-            "imas_codex.standard_names.graph_ops.reset_standard_names"
+            "imas_codex.standard_names.graph_store.graph_catalog_reset.reset_standard_names"
         ) as reset_names,
     ):
         result = runner.invoke(

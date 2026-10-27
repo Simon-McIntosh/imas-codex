@@ -29,7 +29,9 @@ import pytest
 
 class TestNormalizerStripsLatex:
     def _norm(self, text: str) -> str:
-        from imas_codex.standard_names.workers import normalize_description_text
+        from imas_codex.standard_names.worker_tasks.worker_common import (
+            normalize_description_text,
+        )
 
         return normalize_description_text(text)
 
@@ -192,7 +194,9 @@ class TestDescriptionLatexGate:
         assert any("audit:description_notation_check:" in i for i in issues)
 
     def test_is_quarantined_on_latex_description(self) -> None:
-        from imas_codex.standard_names.workers import _is_quarantined
+        from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+            _is_quarantined,
+        )
 
         issue = "audit:description_notation_check: description contains math markup"
         assert _is_quarantined([issue], {}) is True

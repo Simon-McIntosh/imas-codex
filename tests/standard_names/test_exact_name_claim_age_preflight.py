@@ -15,7 +15,7 @@ from __future__ import annotations
 import pytest
 
 from imas_codex.standard_names.defaults import DEFAULT_ORPHAN_SWEEP_TIMEOUT_S
-from imas_codex.standard_names.graph_ops import (
+from imas_codex.standard_names.graph_store.graph_claim_scope import (
     _EXACT_NAME_SCOPE_PREFLIGHT_QUERY,
     _EXACT_NAME_SCOPE_STAMP_QUERY,
     ExactNameScopeConflict,
@@ -220,9 +220,7 @@ class TestScopeEndToEnd:
     def test_queries_source_the_sweep_threshold(self) -> None:
         """Both queries carry the sweep's orphan timeout, not a restated number."""
         transaction = _FakeTransaction([_preflight_row("alpha")], stamped_ids=["alpha"])
-        scope_exact_standard_names(
-            ["alpha"], "scope-run", gc=_FakeClient(transaction)
-        )
+        scope_exact_standard_names(["alpha"], "scope-run", gc=_FakeClient(transaction))
 
         assert len(transaction.calls) == 2
         for _query, params in transaction.calls:
@@ -231,9 +229,7 @@ class TestScopeEndToEnd:
     def test_stamp_clears_the_stale_claim(self) -> None:
         """The stamp write nulls the reclaimed claim, not just the run id."""
         transaction = _FakeTransaction([_preflight_row("alpha")], stamped_ids=["alpha"])
-        scope_exact_standard_names(
-            ["alpha"], "scope-run", gc=_FakeClient(transaction)
-        )
+        scope_exact_standard_names(["alpha"], "scope-run", gc=_FakeClient(transaction))
 
         stamp_query = transaction.calls[1][0]
         assert "name.claimed_at = null" in stamp_query

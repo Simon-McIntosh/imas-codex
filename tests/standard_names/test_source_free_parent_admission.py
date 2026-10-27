@@ -14,6 +14,9 @@ from typing import Any
 from unittest.mock import MagicMock
 
 import imas_codex.standard_names.graph_ops as graph_ops
+from imas_codex.standard_names.graph_store import (
+    graph_parent_lifecycle as _owning_graph_parent_lifecycle,
+)
 
 _SELECT_MARKER = "live_child_count"
 _SNAPSHOT_MARKER = "parent_element_id"
@@ -100,7 +103,7 @@ class _RecordingGraph:
 
 def test_source_free_structural_parent_takes_the_source_free_route() -> None:
     assert (
-        graph_ops._structural_accept_route(
+        _owning_graph_parent_lifecycle._structural_accept_route(
             origin=None, producer_count=0, live_child_count=3
         )
         == "source_free"
@@ -109,7 +112,7 @@ def test_source_free_structural_parent_takes_the_source_free_route() -> None:
 
 def test_a_live_producing_source_leaves_the_name_reviewable() -> None:
     assert (
-        graph_ops._structural_accept_route(
+        _owning_graph_parent_lifecycle._structural_accept_route(
             origin=None, producer_count=1, live_child_count=3
         )
         is None
@@ -118,7 +121,7 @@ def test_a_live_producing_source_leaves_the_name_reviewable() -> None:
 
 def test_a_stamped_derived_parent_keeps_its_existing_route() -> None:
     assert (
-        graph_ops._structural_accept_route(
+        _owning_graph_parent_lifecycle._structural_accept_route(
             origin="derived", producer_count=1, live_child_count=2
         )
         == "derived"
@@ -127,13 +130,13 @@ def test_a_stamped_derived_parent_keeps_its_existing_route() -> None:
 
 def test_a_childless_name_has_no_route_by_either_rule() -> None:
     assert (
-        graph_ops._structural_accept_route(
+        _owning_graph_parent_lifecycle._structural_accept_route(
             origin=None, producer_count=0, live_child_count=0
         )
         is None
     )
     assert (
-        graph_ops._structural_accept_route(
+        _owning_graph_parent_lifecycle._structural_accept_route(
             origin="derived", producer_count=0, live_child_count=0
         )
         is None
@@ -143,7 +146,7 @@ def test_a_childless_name_has_no_route_by_either_rule() -> None:
 def test_an_authored_name_is_never_admitted_structurally() -> None:
     for origin in ("pipeline", "catalog_edit", "deterministic"):
         assert (
-            graph_ops._structural_accept_route(
+            _owning_graph_parent_lifecycle._structural_accept_route(
                 origin=origin, producer_count=0, live_child_count=4
             )
             is None
@@ -159,7 +162,7 @@ def test_source_free_parent_with_children_reaches_accepted() -> None:
         {"beta": _snapshot("beta", "poloidal_beta", "toroidal_beta", origin=None)},
     )
 
-    promoted = graph_ops.structural_accept_derived_parents(gc)
+    promoted = _owning_graph_parent_lifecycle.structural_accept_derived_parents(gc)
 
     assert promoted == 1
     assert len(gc.persists) == 1
@@ -177,7 +180,7 @@ def test_the_same_parent_with_a_producing_source_is_refused_unwritten() -> None:
         {"beta": _snapshot("beta", "poloidal_beta", "toroidal_beta", origin=None)},
     )
 
-    promoted = graph_ops.structural_accept_derived_parents(gc)
+    promoted = _owning_graph_parent_lifecycle.structural_accept_derived_parents(gc)
 
     assert promoted == 0
     assert gc.persists == []
@@ -197,7 +200,7 @@ def test_a_name_that_is_no_parent_at_all_is_refused_unwritten() -> None:
         {},
     )
 
-    promoted = graph_ops.structural_accept_derived_parents(gc)
+    promoted = _owning_graph_parent_lifecycle.structural_accept_derived_parents(gc)
 
     assert promoted == 0
     assert gc.persists == []
@@ -210,10 +213,10 @@ def test_a_source_path_no_edge_backs_is_cleared_by_the_promotion() -> None:
         {"beta": _snapshot("beta", "poloidal_beta", origin=None)},
     )
 
-    graph_ops.structural_accept_derived_parents(gc)
+    _owning_graph_parent_lifecycle.structural_accept_derived_parents(gc)
 
     updates = gc.persists[0]["parent_updates"]
-    for scalar in graph_ops._UNBACKED_SOURCE_PATH_SCALARS:
+    for scalar in _owning_graph_parent_lifecycle._UNBACKED_SOURCE_PATH_SCALARS:
         assert scalar in updates
         assert updates[scalar] is None
 
@@ -232,7 +235,7 @@ def test_a_stamped_derived_parent_keeps_its_source_scalars() -> None:
         },
     )
 
-    promoted = graph_ops.structural_accept_derived_parents(gc)
+    promoted = _owning_graph_parent_lifecycle.structural_accept_derived_parents(gc)
 
     assert promoted == 1
     updates = gc.persists[0]["parent_updates"]
@@ -246,14 +249,14 @@ def test_a_stamped_derived_parent_keeps_its_source_scalars() -> None:
 
 
 def test_the_write_rechecks_that_no_source_produces_the_parent() -> None:
-    record = graph_ops._structural_authority_record(
+    record = _owning_graph_parent_lifecycle._structural_authority_record(
         _snapshot("beta", "poloidal_beta", "toroidal_beta", origin=None),
         accepting=True,
     )
     gc = MagicMock()
     gc.query.return_value = [{"name_stage": "accepted", "authority_id": record["id"]}]
 
-    assert graph_ops._persist_structural_authority(
+    assert _owning_graph_parent_lifecycle._persist_structural_authority(
         gc,
         record,
         parent_updates={"name_stage": "accepted"},
@@ -283,8 +286,8 @@ def test_a_source_attached_mid_flight_costs_the_promotion() -> None:
 
     raised = False
     try:
-        graph_ops.structural_accept_derived_parents(gc)
-    except graph_ops.StructuralAuthorityConflict:
+        _owning_graph_parent_lifecycle.structural_accept_derived_parents(gc)
+    except _owning_graph_parent_lifecycle.StructuralAuthorityConflict:
         raised = True
     assert raised
 
@@ -295,7 +298,7 @@ def test_a_source_attached_mid_flight_costs_the_promotion() -> None:
 def test_the_selection_admits_an_absent_origin_and_requires_a_child() -> None:
     gc = _RecordingGraph([], {})
 
-    graph_ops.structural_accept_derived_parents(gc)
+    _owning_graph_parent_lifecycle.structural_accept_derived_parents(gc)
 
     cypher = gc.selection_cypher
     assert "sn.origin = 'derived' OR sn.origin IS NULL" in cypher

@@ -72,28 +72,36 @@ class TestIsQuarantined:
     """Test the _is_quarantined helper that gates valid vs quarantined."""
 
     def test_clean_entry_not_quarantined(self) -> None:
-        from imas_codex.standard_names.workers import _is_quarantined
+        from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+            _is_quarantined,
+        )
 
         issues: list[str] = []
         summary = {"pydantic": {"passed": True, "error_count": 0}}
         assert _is_quarantined(issues, summary) is False
 
     def test_parse_error_quarantined(self) -> None:
-        from imas_codex.standard_names.workers import _is_quarantined
+        from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+            _is_quarantined,
+        )
 
         issues = ["parse_error: grammar round-trip failed for bad_name"]
         summary = {"pydantic": {"passed": True, "error_count": 0}}
         assert _is_quarantined(issues, summary) is True
 
     def test_grammar_ambiguity_quarantined(self) -> None:
-        from imas_codex.standard_names.workers import _is_quarantined
+        from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+            _is_quarantined,
+        )
 
         issues = ["grammar:ambiguity:component_coordinate_overlap: some_name"]
         summary = {"pydantic": {"passed": True, "error_count": 0}}
         assert _is_quarantined(issues, summary) is True
 
     def test_pydantic_failure_quarantined(self) -> None:
-        from imas_codex.standard_names.workers import _is_quarantined
+        from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+            _is_quarantined,
+        )
 
         issues = ["[pydantic:name] bad name format"]
         summary = {"pydantic": {"passed": False, "error_count": 1}}
@@ -101,7 +109,9 @@ class TestIsQuarantined:
 
     def test_semantic_issues_not_quarantined(self) -> None:
         """Semantic warnings are advisory — NOT critical."""
-        from imas_codex.standard_names.workers import _is_quarantined
+        from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+            _is_quarantined,
+        )
 
         issues = ["[semantic] description mentions path fragment"]
         summary = {"pydantic": {"passed": True, "error_count": 0}}
@@ -109,7 +119,9 @@ class TestIsQuarantined:
 
     def test_description_issues_not_quarantined(self) -> None:
         """Description quality hints are advisory — NOT critical."""
-        from imas_codex.standard_names.workers import _is_quarantined
+        from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+            _is_quarantined,
+        )
 
         issues = ["[description] too short"]
         summary = {"pydantic": {"passed": True, "error_count": 0}}
@@ -118,7 +130,9 @@ class TestIsQuarantined:
     def test_isn_semantic_error_quarantined(self) -> None:
         """An ISN semantic ERROR (catalog-blocking at publish) must quarantine —
         else the name slips into the export set and blocks the ISNC release."""
-        from imas_codex.standard_names.workers import _is_quarantined
+        from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+            _is_quarantined,
+        )
 
         issues = [
             "[semantic] coordinate: ERROR - geometric quantity 'coordinate' "
@@ -128,7 +142,9 @@ class TestIsQuarantined:
         assert _is_quarantined(issues, summary) is True
 
     def test_isn_structural_error_quarantined(self) -> None:
-        from imas_codex.standard_names.workers import _is_quarantined
+        from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+            _is_quarantined,
+        )
 
         issues = ["[structural] foo: ERROR - mode number without a base quantity"]
         summary = {"pydantic": {"passed": True, "error_count": 0}}
@@ -136,7 +152,9 @@ class TestIsQuarantined:
 
     def test_isn_semantic_warning_not_quarantined(self) -> None:
         """WARNING/INFO-level ISN semantic issues stay advisory."""
-        from imas_codex.standard_names.workers import _is_quarantined
+        from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+            _is_quarantined,
+        )
 
         issues = [
             "[semantic] foo: WARNING - documentation references non-existent "
@@ -147,13 +165,17 @@ class TestIsQuarantined:
 
     def test_empty_summary_not_quarantined(self) -> None:
         """Missing pydantic key defaults to passed."""
-        from imas_codex.standard_names.workers import _is_quarantined
+        from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+            _is_quarantined,
+        )
 
         assert _is_quarantined([], {}) is False
 
     def test_multiple_issues_parse_error_wins(self) -> None:
         """If any critical issue is present, quarantine."""
-        from imas_codex.standard_names.workers import _is_quarantined
+        from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+            _is_quarantined,
+        )
 
         issues = [
             "[semantic] minor issue",
@@ -176,10 +198,14 @@ class TestMarkNamesValidated:
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[{"marked": 2}])
 
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
-            from imas_codex.standard_names.graph_ops import mark_names_validated
+            from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+                mark_names_validated,
+            )
 
             results = [
                 {
@@ -212,10 +238,14 @@ class TestMarkNamesValidated:
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[{"marked": 1}])
 
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
-            from imas_codex.standard_names.graph_ops import mark_names_validated
+            from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+                mark_names_validated,
+            )
 
             results = [
                 {
@@ -244,10 +274,14 @@ class TestWriteStandardNamesValidationStatus:
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[])
 
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
-            from imas_codex.standard_names.graph_ops import write_standard_names
+            from imas_codex.standard_names.graph_store.graph_catalog import (
+                write_standard_names,
+            )
 
             write_standard_names(
                 [
@@ -276,10 +310,14 @@ class TestWriteStandardNamesValidationStatus:
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[])
 
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
-            from imas_codex.standard_names.graph_ops import write_standard_names
+            from imas_codex.standard_names.graph_store.graph_catalog import (
+                write_standard_names,
+            )
 
             write_standard_names(
                 [
@@ -313,10 +351,14 @@ class TestWriteStandardNamesValidationStatus:
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[])
 
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
-            from imas_codex.standard_names.graph_ops import write_standard_names
+            from imas_codex.standard_names.graph_store.graph_catalog import (
+                write_standard_names,
+            )
 
             write_standard_names(
                 [
@@ -356,10 +398,14 @@ class TestDownstreamValidationFilters:
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[])
 
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
-            from imas_codex.standard_names.graph_ops import get_validated_names
+            from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+                get_validated_names,
+            )
 
             get_validated_names()
 

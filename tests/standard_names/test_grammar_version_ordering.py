@@ -9,7 +9,9 @@ from imas_codex.standard_names.grammar_query import (
     select_grammar_version,
 )
 from imas_codex.standard_names.grammar_sync import _grammar_context_token_rows
-from imas_codex.standard_names.graph_ops import _resolve_grammar_token_version
+from imas_codex.standard_names.graph_store.graph_catalog import (
+    _resolve_grammar_token_version,
+)
 
 
 def test_release_candidate_versions_are_ordered_numerically() -> None:

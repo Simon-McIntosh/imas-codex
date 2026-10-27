@@ -30,10 +30,12 @@ from imas_codex.standard_names.attachment_audit import (
     AttachmentPairingGuardResult,
     AttachmentVerdict,
 )
-from imas_codex.standard_names.graph_ops import supersede_prior_source_names
+from imas_codex.standard_names.graph_store.graph_supersession import (
+    supersede_prior_source_names,
+)
 
 # graph_ops binds GraphClient at module import time, so patch that namespace.
-_GC_PATH = "imas_codex.standard_names.graph_ops.GraphClient"
+_GC_PATH = "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
 
 _TRIGGER = "dd:spectrometer_x_ray_crystal/channel/lines_of_sight_second_point/r"
 _TRIGGER_PATH = "spectrometer_x_ray_crystal/channel/lines_of_sight_second_point/r"

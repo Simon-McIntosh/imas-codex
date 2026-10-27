@@ -38,24 +38,48 @@ _ONE_BATCH = [
 def _stub_parent_lifecycle_startup():
     """Keep graph-backed startup maintenance inside the test mock boundary."""
     startup_patches = (
-        patch(f"{_GO}.reconcile_vocab_gaps", return_value={}),
         patch(
-            f"{_GO}.revive_unit_skipped_sources",
+            "imas_codex.standard_names.graph_store.graph_audits.reconcile_vocab_gaps",
+            return_value={},
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_audits.revive_unit_skipped_sources",
             return_value={"checked": 0, "revived": 0},
         ),
         patch(
-            f"{_GO}.retry_vocab_gap_sources_on_grammar_change",
+            "imas_codex.standard_names.graph_store.graph_audits.retry_vocab_gap_sources_on_grammar_change",
             return_value={"checked": 0, "revived": 0},
         ),
-        patch(f"{_GO}.reconcile_provenance", return_value={}),
-        patch(f"{_GO}.reconcile_source_status_liveness", return_value={}),
-        patch(f"{_GO}.retire_unreachable_hint_edits", return_value=0),
-        patch(f"{_GO}.reconcile_grammar_segments", return_value={}),
-        patch(f"{_GO}.reconcile_catalog_status", return_value={}),
-        patch(f"{_GO}.reconcile_reviewable_name_stage", return_value={}),
-        patch(f"{_GO}.reconcile_standard_name_cocos_links", return_value={}),
         patch(
-            f"{_GO}.reconcile_standard_name_unit_edges",
+            "imas_codex.standard_names.graph_store.graph_audits.reconcile_provenance",
+            return_value={},
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_audits.reconcile_source_status_liveness",
+            return_value={},
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_audits.retire_unreachable_hint_edits",
+            return_value=0,
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_audits.reconcile_grammar_segments",
+            return_value={},
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_audits.reconcile_catalog_status",
+            return_value={},
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_audits.reconcile_reviewable_name_stage",
+            return_value={},
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_audits.reconcile_standard_name_cocos_links",
+            return_value={},
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_audits.reconcile_standard_name_unit_edges",
             return_value={
                 "names_realigned": 0,
                 "edges_dropped": 0,
@@ -63,20 +87,41 @@ def _stub_parent_lifecycle_startup():
             },
         ),
         patch(
-            f"{_GO}.reconcile_standard_name_dd_edges",
+            "imas_codex.standard_names.graph_store.graph_audits.reconcile_standard_name_dd_edges",
             return_value={"edges_created": 0, "pairs_dropped": 0},
         ),
         patch(
-            f"{_GO}.reconcile_standard_name_source_paths",
+            "imas_codex.standard_names.graph_store.graph_audits.reconcile_standard_name_source_paths",
             return_value={"names_reconciled": 0},
         ),
-        patch(f"{_GO}.rederive_structural_edges", return_value={}),
-        patch(f"{_GO}.seed_parent_sources", return_value=0),
-        patch(f"{_GO}.normalize_derived_parent_lifecycle", return_value=0),
-        patch(f"{_GO}.structural_accept_derived_parents", return_value=0),
-        patch(f"{_GO}.reconcile_orphan_parent_sources", return_value=0),
-        patch(f"{_GO}.promote_stranded_reviewed", return_value={"name": 0, "docs": 0}),
-        patch(f"{_GO}.mark_orphaned_standard_name_runs_stale", return_value=0),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_lineage.rederive_structural_edges",
+            return_value={},
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_lineage.seed_parent_sources",
+            return_value=0,
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_lineage.normalize_derived_parent_lifecycle",
+            return_value=0,
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_parent_lifecycle.structural_accept_derived_parents",
+            return_value=0,
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_parent_lifecycle.reconcile_orphan_parent_sources",
+            return_value=0,
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_audits.promote_stranded_reviewed",
+            return_value={"name": 0, "docs": 0},
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_audits.mark_orphaned_standard_name_runs_stale",
+            return_value=0,
+        ),
         patch(f"{_AA}.reconcile_attachment_consistency", return_value=MagicMock()),
         patch(f"{_DGO}.reconcile_dd_unit_corrections", return_value={}),
         patch(
@@ -150,32 +195,62 @@ def _run_scaffold_patches():
     """The graph/budget/finalize scaffolding run_sn_pools needs to stay local."""
     return (
         patch(
-            f"{_GO}.reconcile_standard_name_sources",
+            "imas_codex.standard_names.graph_store.graph_audits.reconcile_standard_name_sources",
             return_value={"relinked": 0, "stale_marked": 0, "revived": 0},
         ),
-        patch(f"{_GO}.create_sn_run_open"),
-        patch(f"{_GO}.finalize_sn_run"),
-        patch(f"{_GO}.release_all_orphan_claims", return_value={"sn": 0, "sns": 0}),
-        patch(f"{_GO}.rederive_structural_edges", return_value={}),
-        patch(f"{_GO}.seed_parent_sources", return_value=0),
-        patch(f"{_GO}.normalize_derived_parent_lifecycle", return_value=0),
-        patch(f"{_GO}.resolve_doc_links", return_value={}),
+        patch("imas_codex.standard_names.graph_store.graph_audits.create_sn_run_open"),
+        patch("imas_codex.standard_names.graph_store.graph_audits.finalize_sn_run"),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_parent_lifecycle.release_all_orphan_claims",
+            return_value={"sn": 0, "sns": 0},
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_lineage.rederive_structural_edges",
+            return_value={},
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_lineage.seed_parent_sources",
+            return_value=0,
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_lineage.normalize_derived_parent_lifecycle",
+            return_value=0,
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_doc_links.resolve_doc_links",
+            return_value={},
+        ),
         patch(f"{_BM}.start", new_callable=AsyncMock),
         patch(f"{_BM}.drain_pending", new_callable=AsyncMock, return_value=True),
         patch(f"{_BM}.get_total_spent", new_callable=AsyncMock, return_value=0.0),
         patch(
-            f"{_GO}.claim_generate_name_batch",
+            "imas_codex.standard_names.graph_store.graph_cost_and_claims.claim_generate_name_batch",
             side_effect=_claim_once_then_empty(),
         ),
-        patch(f"{_GO}.claim_generate_docs_batch", return_value=[]),
         patch(
-            f"{_GO}.claim_review_name_batch",
+            "imas_codex.standard_names.graph_store.graph_docs_persistence.claim_generate_docs_batch",
+            return_value=[],
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_cost_and_claims.claim_review_name_batch",
             side_effect=_claim_once_then_empty(),
         ),
-        patch(f"{_GO}.claim_review_docs_batch", return_value=[]),
-        patch(f"{_GO}.claim_refine_name_batch", return_value=[]),
-        patch(f"{_GO}.claim_refine_docs_batch", return_value=[]),
-        patch(f"{_GO}.claim_enrich_parents_batch", return_value=[]),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_review_persistence.claim_review_docs_batch",
+            return_value=[],
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_refinement.claim_refine_name_batch",
+            return_value=[],
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_docs_persistence.claim_refine_docs_batch",
+            return_value=[],
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_parent_lifecycle.claim_enrich_parents_batch",
+            return_value=[],
+        ),
         patch(
             "imas_codex.standard_names.source_refresh.refresh_drifted_sources",
             return_value={},
@@ -203,7 +278,7 @@ async def _drive_run():
             stack.enter_context(p)
         stack.enter_context(
             patch(
-                f"{_WK}.process_generate_name_batch",
+                "imas_codex.standard_names.worker_tasks.worker_compose_batches.process_generate_name_batch",
                 side_effect=ConnectionError(
                     "Failed to connect to http://localhost:18800/v1: "
                     "[Errno 111] Connection refused"
@@ -211,23 +286,41 @@ async def _drive_run():
             )
         )
         review_process = stack.enter_context(
-            patch(f"{_WK}.process_review_name_batch", new_callable=AsyncMock)
+            patch(
+                "imas_codex.standard_names.worker_tasks.worker_review_names.process_review_name_batch",
+                new_callable=AsyncMock,
+            )
         )
         review_process.return_value = 1
         stack.enter_context(
-            patch(f"{_WK}.process_generate_docs_batch", new_callable=AsyncMock)
+            patch(
+                "imas_codex.standard_names.worker_tasks.worker_generate_docs.process_generate_docs_batch",
+                new_callable=AsyncMock,
+            )
         )
         stack.enter_context(
-            patch(f"{_WK}.process_review_docs_batch", new_callable=AsyncMock)
+            patch(
+                "imas_codex.standard_names.worker_tasks.worker_review_docs.process_review_docs_batch",
+                new_callable=AsyncMock,
+            )
         )
         stack.enter_context(
-            patch(f"{_WK}.process_refine_name_batch", new_callable=AsyncMock)
+            patch(
+                "imas_codex.standard_names.worker_tasks.worker_refine_names.process_refine_name_batch",
+                new_callable=AsyncMock,
+            )
         )
         stack.enter_context(
-            patch(f"{_WK}.process_refine_docs_batch", new_callable=AsyncMock)
+            patch(
+                "imas_codex.standard_names.worker_tasks.worker_refine_docs.process_refine_docs_batch",
+                new_callable=AsyncMock,
+            )
         )
         stack.enter_context(
-            patch(f"{_WK}.process_enrich_parents_batch", new_callable=AsyncMock)
+            patch(
+                "imas_codex.standard_names.worker_tasks.worker_enrich_parents.process_enrich_parents_batch",
+                new_callable=AsyncMock,
+            )
         )
 
         summary = await run_sn_pools(cost_limit=5.0, loop_state=recorder)

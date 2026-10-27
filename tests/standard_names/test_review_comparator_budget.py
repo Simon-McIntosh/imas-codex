@@ -200,7 +200,7 @@ def test_over_supplied_channel_is_closed_at_the_terminal_bound(monkeypatch) -> N
         for index in range(40)
     ]
     monkeypatch.setattr(
-        "imas_codex.standard_names.workers._collect_nearby_name_comparators",
+        "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._collect_nearby_name_comparators",
         lambda _items, **_kwargs: list(over_supplied),
     )
     monkeypatch.setattr(

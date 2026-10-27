@@ -57,7 +57,7 @@ def test_dry_run_prints_plan_without_writes_claims_or_llm_calls() -> None:
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.graph_ops.get_existing_standard_names",
+                "imas_codex.standard_names.graph_store.graph_claim_scope.get_existing_standard_names",
                 return_value=set(),
             )
         )

@@ -18,9 +18,12 @@ from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch
 
 from imas_codex.standard_names import graph_ops
-from imas_codex.standard_names.graph_ops import (
+from imas_codex.standard_names.graph_store import (
+    graph_foundation as _owning_graph_foundation,
+)
+from imas_codex.standard_names.graph_store.graph_audits import refresh_name_claims
+from imas_codex.standard_names.graph_store.graph_foundation import (
     _CLAIM_TIMEOUT_SECONDS,
-    refresh_name_claims,
 )
 
 TTL = timedelta(seconds=_CLAIM_TIMEOUT_SECONDS)
@@ -72,13 +75,13 @@ def _reclaimable(node: dict, now: datetime, ttl: timedelta = TTL) -> bool:
 
 
 def _patch_gc(fake: _FakeGraph):
-    return patch.object(graph_ops, "GraphClient", return_value=fake)
+    return patch.object(_owning_graph_foundation, "GraphClient", return_value=fake)
 
 
 class TestRefreshShape:
     def test_returns_zero_without_hitting_graph_when_empty(self) -> None:
         gc = MagicMock()
-        with patch.object(graph_ops, "GraphClient", return_value=gc):
+        with patch.object(_owning_graph_foundation, "GraphClient", return_value=gc):
             assert refresh_name_claims([], "tok") == 0
             assert refresh_name_claims(["a"], "") == 0
         gc.query.assert_not_called()

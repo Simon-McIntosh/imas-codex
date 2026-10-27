@@ -210,12 +210,16 @@ class TestWriteEdgesAdmissionIntegration:
         """A child whose only parent is a bare-base name produces no write."""
         from unittest.mock import MagicMock, patch
 
-        from imas_codex.standard_names.graph_ops import write_standard_names
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            write_standard_names,
+        )
 
         gc = MagicMock()
         gc.query = MagicMock(return_value=[])
 
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
             with (
@@ -224,7 +228,7 @@ class TestWriteEdgesAdmissionIntegration:
                     side_effect=lambda n, **kw: (n, []),
                 ),
                 patch(
-                    "imas_codex.standard_names.graph_ops._write_grammar_decomposition",
+                    "imas_codex.standard_names.graph_store.graph_catalog._write_grammar_decomposition",
                     return_value=[],
                 ),
             ):
@@ -253,12 +257,16 @@ class TestWriteEdgesAdmissionIntegration:
         """A child whose parent passes Clause A produces a write."""
         from unittest.mock import MagicMock, patch
 
-        from imas_codex.standard_names.graph_ops import write_standard_names
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            write_standard_names,
+        )
 
         gc = MagicMock()
         gc.query = MagicMock(return_value=[])
 
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
             with (
@@ -267,7 +275,7 @@ class TestWriteEdgesAdmissionIntegration:
                     side_effect=lambda n, **kw: (n, []),
                 ),
                 patch(
-                    "imas_codex.standard_names.graph_ops._write_grammar_decomposition",
+                    "imas_codex.standard_names.graph_store.graph_catalog._write_grammar_decomposition",
                     return_value=[],
                 ),
             ):
@@ -451,7 +459,9 @@ class TestFilterAdmissibleParentsShadowVeto:
         return gc
 
     def test_shadow_edge_dropped(self):
-        from imas_codex.standard_names.graph_ops import _filter_admissible_parents
+        from imas_codex.standard_names.graph_store.graph_lineage import (
+            _filter_admissible_parents,
+        )
 
         # The bulk probe reports: parent has exactly one child
         # (major_radius_of_divertor_target), sourced from the divertor path,
@@ -493,7 +503,9 @@ class TestFilterAdmissibleParentsShadowVeto:
         the first HAS_PARENT edge. The batch source probe must not confuse this
         public-IR projection with a duplicate semantic shadow.
         """
-        from imas_codex.standard_names.graph_ops import _filter_admissible_parents
+        from imas_codex.standard_names.graph_store.graph_lineage import (
+            _filter_admissible_parents,
+        )
 
         gc = self._probe_rows([])
 
@@ -552,7 +564,9 @@ class TestFilterAdmissibleParentsShadowVeto:
 
     def test_semantically_invalid_parent_cannot_be_rederived(self):
         """Full structural rebuilds cannot recreate an invalid state parent."""
-        from imas_codex.standard_names.graph_ops import _filter_admissible_parents
+        from imas_codex.standard_names.graph_store.graph_lineage import (
+            _filter_admissible_parents,
+        )
 
         target = "internal_state_momentum_source"
         gc = self._probe_rows([])
@@ -592,7 +606,9 @@ class TestFilterAdmissibleParentsShadowVeto:
         assert kept == []
 
     def test_shared_parent_edge_kept(self):
-        from imas_codex.standard_names.graph_ops import _filter_admissible_parents
+        from imas_codex.standard_names.graph_store.graph_lineage import (
+            _filter_admissible_parents,
+        )
 
         # 'pressure' is a bare base, but here it groups TWO children
         # (electron_pressure + ion_pressure). The probe reports >1 child so the

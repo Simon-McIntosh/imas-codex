@@ -81,11 +81,11 @@ def _patch_sn_status(name_stage_rows=None, docs_stage_rows=None, **kw):
     return (
         patch("imas_codex.graph.client.GraphClient", gc_cls),
         patch(
-            "imas_codex.standard_names.graph_ops.get_standard_name_source_stats",
+            "imas_codex.standard_names.graph_store.graph_audits.get_standard_name_source_stats",
             return_value={},
         ),
         patch(
-            "imas_codex.standard_names.graph_ops.get_skipped_source_counts",
+            "imas_codex.standard_names.graph_store.graph_source_bindings.get_skipped_source_counts",
             return_value={},
         ),
     )

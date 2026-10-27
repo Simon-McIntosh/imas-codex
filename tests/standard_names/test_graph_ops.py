@@ -48,7 +48,9 @@ class TestWriteStandardNames:
     def _call_write(self, names: list[dict], mock_gc: MagicMock) -> int:
         """Call write_standard_names with a mocked GraphClient."""
         with (
-            patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC,
+            patch(
+                "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            ) as MockGC,
             patch(
                 "imas_codex.standard_names.protection._fetch_catalog_edit_names",
                 return_value=set(),
@@ -56,7 +58,9 @@ class TestWriteStandardNames:
         ):
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
-            from imas_codex.standard_names.graph_ops import write_standard_names
+            from imas_codex.standard_names.graph_store.graph_catalog import (
+                write_standard_names,
+            )
 
             return write_standard_names(names)
 
@@ -112,7 +116,9 @@ class TestWriteStandardNames:
 
     def test_write_empty_returns_zero(self) -> None:
         """Empty list should return 0 without touching the graph."""
-        from imas_codex.standard_names.graph_ops import write_standard_names
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            write_standard_names,
+        )
 
         result = write_standard_names([])
         assert result == 0
@@ -135,9 +141,7 @@ class TestWriteStandardNames:
         assert "MEASURES" not in dd_cypher  # Old relationship name must not appear
         assert "IMASNode" in dd_cypher
 
-    def test_signal_relationship_created(
-        self, valid_domain_names: list[dict]
-    ) -> None:
+    def test_signal_relationship_created(self, valid_domain_names: list[dict]) -> None:
         """Signal-sourced names should create (FacilitySignal)-[:HAS_STANDARD_NAME]->(StandardName)."""
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[])
@@ -270,7 +274,9 @@ class TestWriteStandardNames:
 
     def test_grammar_gate_all_invalid_returns_zero(self) -> None:
         """If all names fail parse, write_standard_names returns 0."""
-        from imas_codex.standard_names.graph_ops import write_standard_names
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            write_standard_names,
+        )
 
         names = [
             {
@@ -297,11 +303,15 @@ class TestGetExistingStandardNames:
             ]
         )
 
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
 
-            from imas_codex.standard_names.graph_ops import get_existing_standard_names
+            from imas_codex.standard_names.graph_store.graph_claim_scope import (
+                get_existing_standard_names,
+            )
 
             result = get_existing_standard_names()
 
@@ -320,10 +330,14 @@ class TestResetStandardNames:
     """Test reset_standard_names query logic."""
 
     def _call_reset(self, mock_gc: MagicMock, **kwargs) -> int:
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
-            from imas_codex.standard_names.graph_ops import reset_standard_names
+            from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+                reset_standard_names,
+            )
 
             return reset_standard_names(**kwargs)
 
@@ -439,10 +453,14 @@ class TestClearStandardNames:
     """Test clear_standard_names deletion logic."""
 
     def _call_clear(self, mock_gc: MagicMock, **kwargs) -> int:
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
-            from imas_codex.standard_names.graph_ops import clear_standard_names
+            from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+                clear_standard_names,
+            )
 
             return clear_standard_names(**kwargs)
 
@@ -602,7 +620,7 @@ class TestCocosScalarDefaulting:
 
     def test_safe_scalar_gets_one_like(self) -> None:
         """A scalar with a safe unit and no prior COCOS type gets ``one_like``."""
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_catalog import (
             SAFE_SCALAR_COCOS_UNITS,
             persist_generated_name_batch,
         )
@@ -621,9 +639,13 @@ class TestCocosScalarDefaulting:
         ]
 
         with (
-            patch("imas_codex.standard_names.graph_ops.write_standard_names") as mock_w,
+            patch(
+                "imas_codex.standard_names.graph_store.graph_catalog.write_standard_names"
+            ) as mock_w,
             patch("imas_codex.embeddings.description.embed_descriptions_batch"),
-            patch("imas_codex.standard_names.graph_ops._finalize_generated_name_stage"),
+            patch(
+                "imas_codex.standard_names.graph_store.graph_catalog._finalize_generated_name_stage"
+            ),
         ):
             mock_w.return_value = 1
             persist_generated_name_batch(candidates, compose_model="test/model")
@@ -632,7 +654,9 @@ class TestCocosScalarDefaulting:
 
     def test_existing_cocos_type_not_overridden(self) -> None:
         """A scalar with an existing (non-one_like) COCOS type keeps it."""
-        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            persist_generated_name_batch,
+        )
 
         candidates = [
             {
@@ -644,9 +668,13 @@ class TestCocosScalarDefaulting:
         ]
 
         with (
-            patch("imas_codex.standard_names.graph_ops.write_standard_names") as mock_w,
+            patch(
+                "imas_codex.standard_names.graph_store.graph_catalog.write_standard_names"
+            ) as mock_w,
             patch("imas_codex.embeddings.description.embed_descriptions_batch"),
-            patch("imas_codex.standard_names.graph_ops._finalize_generated_name_stage"),
+            patch(
+                "imas_codex.standard_names.graph_store.graph_catalog._finalize_generated_name_stage"
+            ),
         ):
             mock_w.return_value = 1
             persist_generated_name_batch(candidates, compose_model="test/model")
@@ -662,7 +690,9 @@ class TestCocosScalarDefaulting:
         it here so the test exercises the post-derivation ``kind="vector"``
         branch rather than the name-structure heuristic.
         """
-        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            persist_generated_name_batch,
+        )
 
         candidates = [
             {
@@ -674,13 +704,17 @@ class TestCocosScalarDefaulting:
         ]
 
         with (
-            patch("imas_codex.standard_names.graph_ops.write_standard_names") as mock_w,
+            patch(
+                "imas_codex.standard_names.graph_store.graph_catalog.write_standard_names"
+            ) as mock_w,
             patch(
                 "imas_codex.standard_names.kind_derivation.derive_kind",
                 return_value="vector",
             ),
             patch("imas_codex.embeddings.description.embed_descriptions_batch"),
-            patch("imas_codex.standard_names.graph_ops._finalize_generated_name_stage"),
+            patch(
+                "imas_codex.standard_names.graph_store.graph_catalog._finalize_generated_name_stage"
+            ),
         ):
             mock_w.return_value = 1
             persist_generated_name_batch(candidates, compose_model="test/model")
@@ -689,7 +723,9 @@ class TestCocosScalarDefaulting:
 
     def test_unsafe_unit_not_defaulted(self) -> None:
         """A scalar with an unsafe unit (Wb, T, A) does NOT get defaulted."""
-        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            persist_generated_name_batch,
+        )
 
         for unsafe_unit in ("Wb", "T", "A"):
             candidates = [
@@ -703,11 +739,11 @@ class TestCocosScalarDefaulting:
 
             with (
                 patch(
-                    "imas_codex.standard_names.graph_ops.write_standard_names"
+                    "imas_codex.standard_names.graph_store.graph_catalog.write_standard_names"
                 ) as mock_w,
                 patch("imas_codex.embeddings.description.embed_descriptions_batch"),
                 patch(
-                    "imas_codex.standard_names.graph_ops._finalize_generated_name_stage"
+                    "imas_codex.standard_names.graph_store.graph_catalog._finalize_generated_name_stage"
                 ),
             ):
                 mock_w.return_value = 1
@@ -725,10 +761,14 @@ class TestResetStandardNamesFilters:
         """Call reset_standard_names with a mocked GraphClient."""
         # Return count > 0 from count query so reset runs, then 0 for remainder
         mock_gc.query = MagicMock(side_effect=lambda cypher, **kw: [{"n": 5}])
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
-            from imas_codex.standard_names.graph_ops import reset_standard_names
+            from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+                reset_standard_names,
+            )
 
             return reset_standard_names(**kwargs)
 
@@ -818,10 +858,14 @@ class TestClearStandardNamesFilters:
     def _call_clear(self, mock_gc: MagicMock, **kwargs) -> int:
         """Call clear_standard_names with a mocked GraphClient."""
         mock_gc.query = MagicMock(side_effect=lambda cypher, **kw: [{"n": 3}])
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
-            from imas_codex.standard_names.graph_ops import clear_standard_names
+            from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+                clear_standard_names,
+            )
 
             return clear_standard_names(**kwargs)
 
@@ -861,10 +905,14 @@ class TestWriteSkippedSources:
     """Test write_skipped_sources Cypher structure and behavior."""
 
     def _call_write(self, records: list[dict], mock_gc: MagicMock) -> int:
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
-            from imas_codex.standard_names.graph_ops import write_skipped_sources
+            from imas_codex.standard_names.graph_store.graph_source_bindings import (
+                write_skipped_sources,
+            )
 
             return write_skipped_sources(records)
 
@@ -955,10 +1003,14 @@ class TestListSkippedSources:
     """Test list_skipped_sources filtering."""
 
     def _call(self, mock_gc: MagicMock, **kwargs) -> list[dict]:
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
-            from imas_codex.standard_names.graph_ops import list_skipped_sources
+            from imas_codex.standard_names.graph_store.graph_source_bindings import (
+                list_skipped_sources,
+            )
 
             return list_skipped_sources(**kwargs)
 
@@ -985,10 +1037,12 @@ class TestGetSkippedSourceCounts:
     """Test get_skipped_source_counts aggregation."""
 
     def _call(self, mock_gc: MagicMock, **kwargs) -> dict[str, int]:
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
-            from imas_codex.standard_names.graph_ops import (
+            from imas_codex.standard_names.graph_store.graph_source_bindings import (
                 get_skipped_source_counts,
             )
 

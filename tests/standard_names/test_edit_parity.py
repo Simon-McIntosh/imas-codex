@@ -17,7 +17,9 @@ from __future__ import annotations
 import pytest
 
 from imas_codex.standard_names.edit import apply_edit
-from imas_codex.standard_names.workers import validate_name_candidate
+from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+    validate_name_candidate,
+)
 from tests.standard_names.test_edit_engine import FakeGraph, _patched_graph
 
 # =============================================================================
@@ -194,7 +196,9 @@ class TestRenameParity:
         """The quarantined successor rides the review gate exactly like a
         quarantined pipeline candidate: the review worker persists a 0.0
         score, which cannot reach the acceptance threshold."""
-        from imas_codex.standard_names.graph_ops import persist_reviewed_name
+        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+            persist_reviewed_name,
+        )
 
         fake = FakeGraph()
         fake.add_node(

@@ -49,7 +49,7 @@ def _mock_gc_tx():
 
 def _patch_gc(mock_gc):
     return patch(
-        "imas_codex.standard_names.graph_ops.GraphClient",
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
         return_value=mock_gc,
     )
 
@@ -65,7 +65,9 @@ class TestAtomicClaimSetsTokenAndStage:
     def test_stage_transition_in_seed_query(self):
         """When stage_field='name_stage' and to_stage='refining', the
         seed SET clause includes ``sn.name_stage = $to_stage``."""
-        from imas_codex.standard_names.graph_ops import _claim_sn_atomic
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            _claim_sn_atomic,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(
@@ -120,7 +122,9 @@ class TestAtomicClaimSetsTokenAndStage:
         a write, so this test proves the absence of a write rather than
         the absence of the column name.
         """
-        from imas_codex.standard_names.graph_ops import _claim_sn_atomic
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            _claim_sn_atomic,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(
@@ -164,7 +168,9 @@ class TestAtomicClaimFiltersByFromStage:
     """The eligibility_where clause is applied correctly."""
 
     def test_eligibility_in_seed_query(self):
-        from imas_codex.standard_names.graph_ops import _claim_sn_atomic
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            _claim_sn_atomic,
+        )
 
         gc, tx = _mock_gc_tx()
         # Seed returns nothing — no eligible items
@@ -203,7 +209,7 @@ class TestAtomicClaimReturnsExpandedPayload:
 
     def test_payload_keys_enrich(self):
         """claim_enrich_seed_and_expand returns standard SN payload + enriched_at."""
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
             claim_enrich_seed_and_expand,
         )
 
@@ -249,7 +255,7 @@ class TestAtomicClaimReturnsExpandedPayload:
 
     def test_payload_keys_refine_name(self):
         """claim_refine_name_batch returns SN payload + refine-specific fields."""
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_refinement import (
             claim_refine_name_batch,
         )
 
@@ -310,7 +316,9 @@ class TestAtomicClaimRandomOrder:
     """Seed query contains ORDER BY rand()."""
 
     def test_order_by_rand_in_atomic_primitive(self):
-        from imas_codex.standard_names.graph_ops import _claim_sn_atomic
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            _claim_sn_atomic,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(
@@ -382,7 +390,9 @@ class TestAtomicClaimNoPartialState:
     def test_transient_error_rolls_back(self):
         """Simulate TransientError after seed succeeds but before read-back.
         The transaction must NOT commit."""
-        from imas_codex.standard_names.graph_ops import _claim_sn_atomic
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            _claim_sn_atomic,
+        )
 
         gc, tx = _mock_gc_tx()
 
@@ -418,7 +428,7 @@ class TestAtomicClaimNoPartialState:
     def test_retry_decorator_creates_new_token(self):
         """When @retry_on_deadlock retries a caller, a new token is generated
         for the next attempt."""
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
             claim_enrich_seed_and_expand,
         )
 
@@ -483,7 +493,7 @@ class TestAtomicClaimNoPartialState:
         tokens_seen.clear()
 
         with patch(
-            "imas_codex.standard_names.graph_ops.GraphClient",
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
             side_effect=[gc1, gc2],
         ):
             result = claim_enrich_seed_and_expand(batch_size=1)
@@ -503,7 +513,9 @@ class TestAtomicClaimCommitCalledOnSuccess:
     """The transaction is committed when all steps succeed."""
 
     def test_commit_after_successful_claim(self):
-        from imas_codex.standard_names.graph_ops import _claim_sn_atomic
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            _claim_sn_atomic,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(
@@ -535,7 +547,9 @@ class TestAtomicClaimCommitCalledOnSuccess:
 
     def test_no_commit_on_empty_seed(self):
         """Empty seed → tx.close() without commit."""
-        from imas_codex.standard_names.graph_ops import _claim_sn_atomic
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            _claim_sn_atomic,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(return_value=[])
@@ -561,7 +575,9 @@ class TestStageTransitionInExpandQueries:
     """Stage SET clause appears in expand queries too, not just seed."""
 
     def test_expand_includes_stage_set(self):
-        from imas_codex.standard_names.graph_ops import _claim_sn_atomic
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            _claim_sn_atomic,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(

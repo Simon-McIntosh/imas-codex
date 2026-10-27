@@ -4,6 +4,12 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
+from imas_codex.standard_names.graph_store import (
+    graph_catalog as _owning_graph_catalog,
+    graph_foundation as _owning_graph_foundation,
+    graph_lineage as _owning_graph_lineage,
+)
+
 
 def _name() -> dict:
     return {
@@ -46,19 +52,23 @@ def _write_with_candidates(candidate_ids: set[str]):
 
     graph_clients = [main, sweep] if candidate_ids else [main]
     with (
-        patch.object(graph_ops, "GraphClient", side_effect=graph_clients) as client,
+        patch.object(
+            _owning_graph_foundation, "GraphClient", side_effect=graph_clients
+        ) as client,
         patch(
             "imas_codex.standard_names.protection.filter_protected",
             side_effect=lambda names, **_kwargs: (names, []),
         ),
-        patch.object(graph_ops, "_write_grammar_decomposition", return_value=[]),
         patch.object(
-            graph_ops,
+            _owning_graph_catalog, "_write_grammar_decomposition", return_value=[]
+        ),
+        patch.object(
+            _owning_graph_lineage,
             "_write_standard_name_edges",
             return_value=candidate_ids,
         ),
     ):
-        assert graph_ops.write_standard_names([_name()]) == 1
+        assert _owning_graph_catalog.write_standard_names([_name()]) == 1
     return client, main, sweep
 
 
@@ -102,7 +112,9 @@ def test_durable_and_source_backed_names_are_excluded() -> None:
 
 def test_edge_writer_reports_every_standard_name_merge_endpoint() -> None:
     from imas_codex.standard_names.derivation import DerivedEdge
-    from imas_codex.standard_names.graph_ops import _write_standard_name_edges
+    from imas_codex.standard_names.graph_store.graph_lineage import (
+        _write_standard_name_edges,
+    )
 
     edges = {
         "written_name": [
@@ -137,7 +149,7 @@ def test_edge_writer_reports_every_standard_name_merge_endpoint() -> None:
             side_effect=lambda name: edges.get(name, []),
         ),
         patch(
-            "imas_codex.standard_names.graph_ops._filter_admissible_parents",
+            "imas_codex.standard_names.graph_store.graph_lineage._filter_admissible_parents",
             side_effect=lambda batch, _graph, **_kwargs: batch,
         ),
     ):

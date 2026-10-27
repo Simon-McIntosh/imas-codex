@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names.graph_ops import (
+from imas_codex.standard_names.graph_store.graph_claim_scope import (
     _EXACT_NAME_SCOPE_STAMP_QUERY,
     ExactNameScopeConflict,
     _exact_name_scope_refusals,
