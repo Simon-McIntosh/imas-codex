@@ -1,0 +1,88 @@
+<section id="srtj-forwarder-retirement" data-reckon="landing-fragment">
+  <h3 id="srtj-forwarder-retirement-title">Facade retirement measurement</h3>
+  <p id="srtj-forwarder-retirement-state">The graph facade was reduced to its
+  composition root and nine preserved apply bindings. The worker facade remains
+  transitional because three files assigned to a concurrent node still import
+  moved names and that node also owns <code>workers.py</code>. The requested zero
+  added-failure gate has not been met.</p>
+
+  <table id="srtj-forwarder-retirement-rewrites">
+    <caption>Exact AST-span rewrites in granted paths</caption>
+    <thead><tr><th>Kind</th><th>Count</th></tr></thead>
+    <tbody>
+      <tr><td>Imports</td><td>1,424</td></tr>
+      <tr><td>Module attributes</td><td>282</td></tr>
+      <tr><td>Literal patch strings</td><td>728</td></tr>
+      <tr><td>Object patches</td><td>231</td></tr>
+      <tr><td>Built patch strings</td><td>239</td></tr>
+      <tr><td>Computed patch strings</td><td>3</td></tr>
+      <tr><th>Total</th><th>2,907 in 328 files</th></tr>
+    </tbody>
+  </table>
+  <p id="srtj-forwarder-retirement-map">The split inventory was checked against
+  live module attributes before use. It contains 28 stale owner entries: five for
+  graph operations and 23 for workers. The codemod's baseline found 2,959 mapped
+  references in 358 Python files, including 27 outside the write grant. The
+  scoped final check found 10 moved imports in
+  <code>review/cascade.py</code>, <code>worker_review_docs.py</code> and
+  <code>worker_review_names.py</code>; the worker facade still defines 135
+  forwarder functions and 47 moved value aliases.</p>
+
+  <table id="srtj-forwarder-retirement-patches">
+    <caption>Named patch lookup sites</caption>
+    <thead><tr><th>Owner</th><th>Retargeted names</th></tr></thead>
+    <tbody>
+      <tr><td><code>graph_refinement</code></td><td><code>rename_preserves_meaning</code>,
+      <code>_meaning_preservation_assertion</code></td></tr>
+      <tr><td><code>graph_source_bindings</code></td><td><code>persist_outcome_snapshot</code>,
+      <code>reset_persist_outcomes</code>, <code>write_enrichment_results</code>,
+      <code>merge_standard_name_sources</code></td></tr>
+    </tbody>
+  </table>
+  <p id="srtj-forwarder-retirement-positive-check">The graph operation,
+  pool wiring and package boundary selection passed 101 tests after retargeting.
+  An added test refuses a graph facade function whose docstring identifies it as
+  a forwarder. Restoring <code>write_reviews</code> made that test fail, and the
+  codemod named the restored forwarder in its check output. The mutation was
+  removed afterward.</p>
+
+  <table id="srtj-forwarder-retirement-sizes">
+    <caption>Facade source size, bytes</caption>
+    <thead><tr><th>File</th><th>Orientation base</th><th>After</th><th>Change</th></tr></thead>
+    <tbody>
+      <tr><td><code>graph_ops.py</code></td><td>168,672</td><td>5,518</td><td>−163,154</td></tr>
+      <tr><td><code>workers.py</code></td><td>67,488</td><td>67,488</td><td>0</td></tr>
+    </tbody>
+  </table>
+  <p id="srtj-forwarder-retirement-deletions">Immediately before forwarder
+  deletion, <code>graph_ops.py</code> was 168,833 bytes after intermediate
+  service-wiring edits. All 315 graph facade
+  <code>Forward to</code> functions and its transitional value aliases were
+  removed. Only service wiring and the nine names below remain. No worker
+  forwarder was removed while its file was concurrently assigned.</p>
+  <ul id="srtj-forwarder-retirement-exceptions">
+    <li><code>reconcile_structural_edges_for_standard_names</code></li>
+    <li><code>repair_normalization_peel_parent_units</code></li>
+    <li><code>reconcile_lifecycleless_standard_name_stubs</code></li>
+    <li><code>reconcile_error_siblings</code></li>
+    <li><code>apply_adjudicated_source_dispositions</code></li>
+    <li><code>repair_scalar_projection_mismatches</code></li>
+    <li><code>retire_ineligible_standard_name_sources</code></li>
+    <li><code>retire_signed_dual_authority_targets</code></li>
+    <li><code>retire_signed_provenance_orphans</code></li>
+  </ul>
+
+  <p id="srtj-forwarder-retirement-gates">Archived default-marker arms ran
+  <code>tests/standard_names/</code>, <code>tests/graph/</code>,
+  <code>tests/cli/</code> and <code>tests/core/</code> with eight pytest workers.
+  The orientation base completed with 117 failures, 10,423 passes and 14 skips.
+  The initial head completed with 285 failures, 10,255 passes and 14 skips:
+  168 failure IDs were added. A later focused repair of callable mock handling
+  passed 49 of 50 selected tests; the remaining ID is also in the base failure
+  set. The full default arm has not been rerun after that repair. Both archived
+  graph-marker arms exited 3 before a summary when an xdist worker crashed, so
+  they cannot establish an added-failure count. The two named direct checks,
+  the package import boundary and Cypher property check, were also run; the
+  latter passed in the earlier 33-test selection. No LLM call or paid request
+  was made; recorded spend is USD 0.</p>
+</section>
