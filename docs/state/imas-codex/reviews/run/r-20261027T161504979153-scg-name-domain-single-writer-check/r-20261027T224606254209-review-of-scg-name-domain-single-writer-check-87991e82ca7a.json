@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "call_sites": "imas_codex/standard_names/domain_decision.py:407, imas_codex/standard_names/graph_store/graph_lineage.py:1408, imas_codex/standard_names/graph_store/graph_lineage.py:1580",
   "completed_at": "2026-10-27T22:57:44.930Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "scg-name-domain-exempt-writes",
+      "recorded_at": "2026-10-27T23:00:22.658422+00:00"
+    }
+  },
   "dispatched_at": "2026-10-27T22:47:28Z",
   "evidence": {
     "after_arm_revision": "49c09268dd0040249dc1b72acab92a259240d4b1",
