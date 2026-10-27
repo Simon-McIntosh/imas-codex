@@ -1,0 +1,63 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "imas_codex/standard_names/graph_ops.py:24",
+    "imas_codex/standard_names/worker_tasks/__init__.py:17",
+    "imas_codex/cli/sn.py:592",
+    "imas_codex/standard_names/loop.py:411",
+    "imas_codex/standard_names/pools.py:1"
+  ],
+  "completed_at": "2026-10-27T10:24:01.877Z",
+  "dispatched_at": "2026-10-27T10:08:11Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_rerank_label_sheet.py:28",
+      "severity": "blocking",
+      "text": "A committed change to a gated test file the dispatch did not grant is carried with the node, and the manifest reports status complete while its blockers field records the write-time audit refusing this path twice."
+    },
+    {
+      "file": "scripts/backfill_sn_segments.py:37",
+      "severity": "non-blocking",
+      "text": "Two scripts and tests/standard_names/test_vocabulary_definitions.py:9 are also outside the declared fence; the manifest lists the scripts only inside evidence_inputs.ungranted_scripts and omits the vocabulary test from outside_scope."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_store/__init__.py:583",
+      "severity": "non-blocking",
+      "text": "_OWNER_BY_NAME is a 501-entry hand-written symbol-to-owner map with no check binding it to the modules or to srtj-graph-ops-split-design.json, so the next move makes resolve_owned_name raise AttributeError at a call site rather than at a check."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_ops.py:24",
+      "severity": "non-blocking",
+      "text": "_GraphServices.__getattr__ resolves every moved name dynamically, so graph_ops.<moved symbol> still succeeds after the retirement and a caller drifting back is caught by no test, only by the codemod run by hand."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T075451851106-srtj-forwarder-retirement/manifest.md:24",
+      "severity": "non-blocking",
+      "text": "artifacts.default_base_summary, default_head_summary and graph_base_exit describe superseded runs and disagree with the final gate logs the record cites."
+    },
+    {
+      "file": "tests/standard_names/test_graph_ops.py:29",
+      "severity": "non-blocking",
+      "text": "The added guard selects forwarders by the docstring prefix 'Forward to ', so a reintroduced forwarder described otherwise, or reintroduced in workers.py, passes unnoticed."
+    }
+  ],
+  "project": "imas-codex",
+  "review": "VERDICT goal: the goal is to retire the graph_ops and workers forwarders by repointing callers at the owning module; imas_codex/standard_names/graph_ops.py at b35f4ba is 5,518 bytes holding only _GraphServices wiring plus the nine globals()-bound signed applies, imas_codex/standard_names/workers.py is 1,262 bytes holding only _worker_dependency, and my own run of the codemod --check on a scratch tree at b35f4ba reported files 0, references 0, forwarders 0, value_aliases 0.\nVERDICT done_when: the done_when asks for the codemod check at 0, the forwarders deleted apart from nine, and zero added failure IDs on the default and graph tiers; docs/evidence/fragments/sn-review-through-jev/srtj-forwarder-retirement.html records the rewrite counts by kind (2,921), the retargeted patch sites, the deleted forwarders (315 graph, 135 worker, 47 value aliases) and the nine exceptions, and I recomputed the added-failure sets from the gate logs' own FAILED lines as 0 for both tiers.\nVERDICT write_paths: I read the 364 unique paths in the dispatch's orientation_write_paths; 345 of the 349 changed paths are inside them, and scripts/backfill_grammar_decomposition.py, scripts/backfill_sn_segments.py, tests/standard_names/test_rerank_label_sheet.py:28 and tests/standard_names/test_vocabulary_definitions.py:9 are not.\nVERDICT manifest: read in full; it states status complete, both suite arms with 101/101 failures and 0 added, the graph tier at 60/60 with 0 added, the negative-control log, and it records under outside_scope and blockers only tests/standard_names/test_rerank_label_sheet.py despite four out-of-fence paths, and its artefacts block quotes summary lines that do not match the final logs it cites.\nVERDICT diff: read commit by commit from 1c3939665d2dee08cc0b609d31a102cf6915ff82 to b35f4ba98ae1b7551a02e17af4444a3ee46e82e2; 19 commits, 349 files, +7,995/-8,889, dominated by mechanical import and patch-path retargeting in the 344 referencing files, with the substantive additions being the codemod, the evidence fragment, the owner registry in graph_store/__init__.py and the single new guard test.\nCALL_SITES: imas_codex/standard_names/graph_ops.py:24, imas_codex/standard_names/worker_tasks/__init__.py:17, imas_codex/cli/sn.py:592, imas_codex/standard_names/loop.py:411, imas_codex/standard_names/pools.py:1\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: graph_ops.py:28 and worker_tasks/__init__.py:17 still answer any moved name through resolve_owned_name, so a facade reference keeps working at runtime even though every static reference was repointed.\nSCORE evidence: 15\nJUSTIFICATION evidence: default-base-final.log and default-head-final.log each carry 101 FAILED lines with an empty set difference and EXIT=1, and graph-base-resume.log and graph-head-final.log each carry 60, but the manifest's artefacts block at manifest.md:24 quotes 117/285 failures and graph_base_exit 3 from superseded runs the cited logs do not contain.\nSCORE scope_discipline: 9\nJUSTIFICATION scope_discipline: scripts/backfill_sn_segments.py:37, scripts/backfill_grammar_decomposition.py:23, tests/standard_names/test_vocabulary_definitions.py:9 and tests/standard_names/test_rerank_label_sheet.py:28 are committed outside the declared write paths.\nSCORE durability: 12\nJUSTIFICATION durability: tests/standard_names/test_graph_ops.py:29 reddens on a reinstated forwarder as negative-control.log shows (assert ['write_reviews'] == []), but it matches only functions whose docstring begins 'Forward to ', covers graph_ops alone with no worker equivalent, and the codemod check that also catches value aliases runs by hand rather than in the suite.\nSCORE fit: 14\nJUSTIFICATION fit: imas_codex/standard_names/graph_store/__init__.py:583 follows the package idiom and names nothing the naming rules forbid, but resolve_owned_name introduces a second hand-maintained symbol-to-module table beside the split-design JSON the codemod treats as authoritative.\nSCORE reuse: 11\nJUSTIFICATION reuse: graph_store/__init__.py:583-597 duplicates an ownership map that docs/evidence/fragments/sn-review-through-jev/srtj-graph-ops-split-design.json already supplies, and tests/standard_names/test_pool_orchestration_contracts.py:46 and test_pool_orchestrator_integration.py:34 define the same _patch_owned helper twice with no shared owner.\nFINDING tests/standard_names/test_rerank_label_sheet.py:28 blocking: a committed change to a gated test file that the dispatch did not grant is still carried with the node, and the manifest reports status complete while its own blockers field records the write-time audit refusing this path twice, so promotion would take an out-of-fence test change on a record that says the audit failed.\nFINDING scripts/backfill_sn_segments.py:37 non-blocking: two scripts and tests/standard_names/test_vocabulary_definitions.py:9 are also outside the declared fence, and the manifest records the scripts only inside evidence_inputs.ungranted_scripts and does not mention the vocabulary test at all, so a reader of outside_scope sees one of four.\nFINDING imas_codex/standard_names/graph_store/__init__.py:583 non-blocking: _OWNER_BY_NAME is a 501-entry hand-written symbol-to-owner map whose counterparts in srtj-graph-ops-split-design.json are validated against live modules by the codemod; nothing validates this copy, so the next symbol move makes resolve_owned_name raise AttributeError at the call site instead of at a check. The 501 entries do resolve today, verified by parsing each owner module at b35f4ba.\nFINDING imas_codex/standard_names/graph_ops.py:24 non-blocking: _GraphServices.__getattr__ resolves every moved name dynamically, so `graph_ops.<moved symbol>` still succeeds after the retirement and a caller drifting back to the facade would be caught by no test, only by running the codemod by hand.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T075451851106-srtj-forwarder-retirement/manifest.md:24 non-blocking: artifacts.default_base_summary (117 failed, 10423 passed), default_head_summary (285 failed, 10255 passed) and graph_base_exit (3) describe superseded runs, not the final logs the record cites at default-base-final.log (101 failed, 10442 passed EXIT=1) and graph-base-resume.log, so a metric quoted beside a log disagrees with it.\nFINDING tests/standard_names/test_graph_ops.py:29 non-blocking: the added guard selects forwarders by the docstring prefix 'Forward to ', so a reintroduced forwarder described any other way, or reintroduced in workers.py, passes the suite unnoticed.",
+  "review_run_id": "r-20261027T100605982141-review-of-srtj-forwarder-retirement-b35f4ba98ae1",
+  "reviewed_base_sha": "1c3939665d2dee08cc0b609d31a102cf6915ff82",
+  "reviewed_head_sha": "b35f4ba98ae1b7551a02e17af4444a3ee46e82e2",
+  "reviewed_run_id": "r-20261027T075451851106-srtj-forwarder-retirement",
+  "scores": {
+    "durability": 12,
+    "evidence": 15,
+    "fit": 14,
+    "goal_fidelity": 17,
+    "reuse": 11,
+    "scope_discipline": 9
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-27T10:21:14.000Z",
+  "total": 78
+}
