@@ -267,6 +267,8 @@ def main() -> int:
     paths = subprocess.check_output(
         ["git", "ls-files", "*.py"], cwd=ROOT, text=True
     ).splitlines()
+    # Evidence runners describe historical revisions and are immutable records.
+    paths = [name for name in paths if not name.startswith("docs/evidence/")]
     if args.scope_manifest:
         paths = [name for name in paths if name in allowed]
     if args.only == "product":
