@@ -12,6 +12,11 @@
       "kind": "exempted",
       "reason": "the intervening commit changes only the evidence page; no test outcome differs",
       "recorded_at": "2026-10-27T08:58:34.021676+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "srtj-forwarder-retirement",
+      "recorded_at": "2026-10-27T08:58:36.275073+00:00"
     }
   },
   "findings": [
