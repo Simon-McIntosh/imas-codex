@@ -914,8 +914,6 @@ def persist_refined_name(
                           new.description       = $description,
                           new.kind              = $kind,
                           new.unit              = $unit,
-                          new.physics_domain    = $physics_domain,
-                          new.source_domains    = $source_domains,
                           new.tags              = $tags,
                           new.model             = $model,
                           new.created_at        = datetime(),
@@ -982,6 +980,20 @@ def persist_refined_name(
                         WHERE (source)-[:PRODUCED_NAME]->(old)
                            OR source.produced_sn_id = old.id
                         RETURN old.id AS old_name, new.id AS new_name,
+                               old.physics_domain AS predecessor_physics_domain,
+                               old.domain_decision_candidates
+                                 AS predecessor_decision_candidates,
+                               old.domain_decision_choice
+                                 AS predecessor_decision_choice,
+                               old.domain_decision_probability
+                                 AS predecessor_decision_probability,
+                               old.domain_decision_model
+                                 AS predecessor_decision_model,
+                               old.domain_decision_at
+                                 AS predecessor_decision_at,
+                               old.domain_correction AS predecessor_correction,
+                               old.domain_correction_reason
+                                 AS predecessor_correction_reason,
                                [source_id IN collect(DISTINCT source.id)
                                 WHERE source_id IS NOT NULL] AS source_ids,
                                old.edit_mode AS source_edit_mode,
@@ -1021,9 +1033,6 @@ def persist_refined_name(
                         description=description,
                         kind=kind,
                         unit=unit,
-                        physics_domain=physics_domain,
-                        source_domains=source_domains
-                        or ([physics_domain] if physics_domain else []),
                         tags=tags or [],
                         model=model,
                         reason=reason,
@@ -1266,9 +1275,6 @@ def persist_refined_name(
                         description=description,
                         kind=kind,
                         unit=unit,
-                        physics_domain=physics_domain,
-                        source_domains=source_domains
-                        or ([physics_domain] if physics_domain else []),
                         tags=tags or [],
                         model=model,
                         reason=reason,
@@ -1361,6 +1367,49 @@ def persist_refined_name(
                 with suppress(Exception):
                     tx.rollback()
                 raise
+
+        # The successor's domain comes from the one writer, never from this
+        # function: it carries the predecessor's stored Jev decision, keeps the
+        # predecessor's scalar when none exists, and writes source_domains and
+        # the HAS_PHYSICS_DOMAIN edges from the migrated sources beside it.
+        from imas_codex.standard_names import domain_decision as _dd
+
+        _candidates = tuple(preflight_row.get("predecessor_decision_candidates") or ())
+        _choice = preflight_row.get("predecessor_decision_choice")
+        _correction_domain = preflight_row.get("predecessor_correction")
+        if _choice and _choice in _candidates:
+            _decision = _dd.DomainDecision(
+                name=new_name,
+                candidates=_candidates,
+                choice=_choice,
+                probability=preflight_row.get("predecessor_decision_probability"),
+                model=preflight_row.get("predecessor_decision_model"),
+                decided_at=preflight_row.get("predecessor_decision_at"),
+            )
+        else:
+            _decision = _dd.DomainDecision(
+                name=new_name,
+                candidates=_candidates,
+                choice=None,
+                probability=None,
+                model=None,
+                decided_at=None,
+                undecided_reason=("the predecessor carries no stored domain decision"),
+            )
+        _correction = None
+        if _correction_domain and meaning_preserved:
+            _correction = _dd.DomainCorrection(
+                domain=_correction_domain,
+                reason=preflight_row.get("predecessor_correction_reason") or "",
+            )
+        _dd.write_name_domain(
+            gc,
+            new_name,
+            _decision,
+            correction=_correction,
+            fallback_domain=preflight_row.get("predecessor_physics_domain")
+            or physics_domain,
+        )
 
     if result:
         row = dict(result[0])
