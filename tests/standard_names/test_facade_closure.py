@@ -148,12 +148,28 @@ def _worker_task_names() -> set[str]:
     return names
 
 
+def _import_aliases(tree: ast.Module) -> dict[str, str]:
+    """Map a local import alias to the symbol it brings in."""
+    aliases: dict[str, str] = {}
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.ImportFrom):
+            continue
+        module = (node.module or "").lstrip(".")
+        if not module.startswith(("graph_store", "worker_tasks")):
+            continue
+        for imported in node.names:
+            alias = imported.asname or imported.name
+            aliases[alias] = imported.name
+    return aliases
+
+
 def _delegated_name(node: ast.FunctionDef | ast.AsyncFunctionDef) -> str | None:
     """Return the symbol a function body only returns a call to, if any."""
     body = [
         statement
         for statement in node.body
-        if not (
+        if not isinstance(statement, (ast.Import, ast.ImportFrom))
+        and not (
             isinstance(statement, ast.Expr)
             and isinstance(statement.value, ast.Constant)
             and isinstance(statement.value.value, str)
@@ -265,10 +281,15 @@ def test_facades_define_no_delegating_forwarder() -> None:
     delegating_targets = set(_moved_callables()) | _worker_task_names()
     forwarders: list[str] = []
     for facade in (graph_ops, workers):
-        tree = ast.walk(ast.parse(Path(facade.__file__).read_text()))
+        module = ast.parse(Path(facade.__file__).read_text())
+        aliases = _import_aliases(module)
+        tree = ast.walk(module)
         for node in tree:
             if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 continue
-            if _delegated_name(node) in delegating_targets:
+            delegated = _delegated_name(node)
+            if delegated in delegating_targets or (
+                aliases.get(delegated) in delegating_targets
+            ):
                 forwarders.append(f"{facade.__name__}.{node.name}")
     assert forwarders == []
