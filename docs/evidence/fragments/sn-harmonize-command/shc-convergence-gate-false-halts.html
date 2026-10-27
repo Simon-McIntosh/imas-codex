@@ -1,0 +1,265 @@
+<section>
+  <h2 id="shc-convergence-gate-false-halts">The convergence gate halted the locus family on one false reason and one true refusal</h2>
+  <p id="shc-convergence-gate-false-halts-summary">
+    The <code>electrostatic_potential</code> re-measure
+    (<code>67a45b57-d1ad-48f7-b904-f273e7fac30f</code> and
+    <code>c1560b3c-54c7-4a28-b40b-075d97b17acd</code>) spent USD 0.2603 over
+    17 <code>LLMCost</code> calls and then refused to converge on two reasons.
+    Only the first is a defect in the gate. The name axis was never written —
+    it is a docs-only campaign — so the two names the drift clause reported
+    carry the stage they already had. The gate now compares the state a batch
+    inherited against the state it left, and members already outside
+    <code>accepted</code> are skipped at planning with their stage named.
+    The second reason is <strong>true</strong> and stands: the member batch
+    accepted 1 of its 2 touched documents because the cascade refused one of
+    them. The section below records which veto held it, the clause the veto was
+    raised on, and the judge's answer, so a later node can decide whether that
+    refusal was right. Acceptance still means
+    <code>docs_stage == "accepted"</code> and nothing else — a held document is
+    not accepted however it scored — and no threshold moved.
+  </p>
+
+  <h3 id="shc-convergence-gate-halt-quoted">The halt, quoted from the recorded state</h3>
+  <p>
+    Both lines are read from
+    <code>docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-remeasure.json</code>,
+    <code>phases.after.summary.halt_reasons</code>, with
+    <code>batches_run: 2</code> of <code>summary.batches_total: 2</code>:
+  </p>
+  <pre><code>docs acceptance 50.00% &lt; 90.00% (1/2 touched)
+name-axis drift on 2 name(s) in a docs-only campaign: electrostatic_potential_at_outboard_midplane, electrostatic_potential_at_wall</code></pre>
+  <p>
+    The same record carries <code>touched_names: [electrostatic_potential,
+    electrostatic_potential_at_langmuir_probe_position,
+    floating_electrostatic_potential]</code> and
+    <code>total_touched: 3, total_accepted: 2</code>, and the after-phase
+    <code>member_status</code> gives every name's stage:
+  </p>
+  <table>
+    <thead>
+      <tr><th>name</th><th>name_stage</th><th>docs_stage</th><th>review score</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>electrostatic_potential</code></td><td>accepted</td><td>reviewed</td><td>0.9521</td></tr>
+      <tr><td><code>floating_electrostatic_potential</code></td><td>accepted</td><td>accepted</td><td>0.9590</td></tr>
+      <tr><td><code>electrostatic_potential_at_langmuir_probe_position</code> (anchor)</td><td>accepted</td><td>accepted</td><td>0.9516</td></tr>
+      <tr><td><code>electrostatic_potential_at_outboard_midplane</code></td><td>reviewed</td><td>pending</td><td>—</td></tr>
+      <tr><td><code>electrostatic_potential_at_wall</code></td><td>reviewed</td><td>accepted</td><td>0.8625</td></tr>
+    </tbody>
+  </table>
+
+  <h3 id="shc-convergence-gate-cause-drift">Cause 1: the drift clause read an absolute stage</h3>
+  <p>
+    <code>measure_batch</code> (<code>imas_codex/standard_names/campaign.py</code>)
+    walked the batch's member ids and appended a name to
+    <code>BatchOutcome.name_drift</code> whenever the refreshed row was missing,
+    or whenever its <code>name_stage</code> was anything other than
+    <code>accepted</code>. That is a test of absolute post-drain state. A
+    docs-only campaign never writes the name axis (the invariant on the run
+    lists the family's five names with their stage fields untouched), so a
+    member that was already outside <code>accepted</code> when the family was
+    planned could only ever be reported as drift. Both names the halt named —
+    <code>electrostatic_potential_at_outboard_midplane</code> and
+    <code>electrostatic_potential_at_wall</code> — were at
+    <code>reviewed</code> before the drain and at <code>reviewed</code> after
+    it. Neither is in <code>touched_names</code>: the campaign wrote no
+    documentation for either, because neither could be claimed.
+  </p>
+  <p>
+    The clause now asks whether the name's stage <em>moved</em>. The runner
+    reads the batch's member rows once before anything in the batch touches
+    them and passes that read to <code>measure_batch</code> as
+    <code>prior_rows</code>; a name is drift when its post-drain stage differs
+    from the inherited one and the new stage is not <code>accepted</code>. A
+    name with no inherited row, or absent from the post-drain read, is still
+    drift, because the gate cannot otherwise distinguish an unreadable name
+    from an untouched one. A name the batch itself moves out of
+    <code>accepted</code> still halts.
+  </p>
+  <p>
+    Planning also stops offering such members to a docs-only batch.
+    <code>plan_family_applies</code> now reads the members' name stages,
+    through the campaign's own member read rather than a second query that
+    could drift from it, and splits them: only <code>accepted</code> members enter the batch list, and
+    the rest are carried in the plan under <code>skipped</code> with their
+    stage. Nothing the campaign measures can name a skipped member, because it
+    never enters a batch, so the plan is the only place the name survives — and
+    a plan nobody prints reaches no reader. <code>apply_families</code>
+    therefore logs one line per skipped member, naming it and its stage, and
+    <code>skipped_members</code> flattens each plan's entries into the returned
+    summary under <code>skipped</code>. A stage the read cannot answer for is
+    treated as eligible — an absent answer is not evidence that the member is
+    excluded, and dropping it silently would be the same defect in the other
+    direction. Such a member then enters a batch with no inherited row, so a
+    non-accepted stage after the drain counts as drift rather than as an
+    inherited state nobody read.
+  </p>
+
+  <h3 id="shc-convergence-gate-cause-count">The second halt was true: the cascade refused the document</h3>
+  <p>
+    The halt's <code>(1/2 touched)</code> is the member batch:
+    <code>electrostatic_potential</code> and
+    <code>floating_electrostatic_potential</code> were touched, one was counted
+    accepted. The family totals of 2 of 3 include the anchor batch, which
+    carried <code>electrostatic_potential_at_langmuir_probe_position</code> at
+    1 of 1. So the member counted touched-and-not-accepted is
+    <code>electrostatic_potential</code>, the family's base, and the reason is a
+    refusal rather than a miscount: its document was held at
+    <code>reviewed</code> by the Jev contradiction cascade.
+  </p>
+  <p>
+    Two <code>ReviewHold</code> nodes on that name record the refusal, both
+    raised during the run and both still <code>status: open</code>:
+  </p>
+  <table>
+    <thead><tr><th>hold</th><th>kind</th><th>raised_by</th><th>raised_at</th></tr></thead>
+    <tbody>
+      <tr><td><code>94153d565d603f927ac91bb0c70c4c5fdb6acdc121bed472f5eaf559627db710</code></td><td><code>cascade_contradiction</code></td><td><code>jev-cascade</code></td><td>2026-10-27T14:40:27.974Z</td></tr>
+      <tr><td><code>cc06569bdaa42d1853c25a42fe8dc51a8f2a477cc0d80f625bd74c99954e6e83</code></td><td><code>documentation_contradiction</code></td><td><code>jev-contradiction</code></td><td>2026-10-27T14:40:38Z</td></tr>
+    </tbody>
+  </table>
+  <p>
+    The run's docs review row for that name
+    (<code>StandardNameReview
+    id&#58;electrostatic_potential:typesafe-jev-1-13:2026-10-27T14:40:27.605277+00:00</code>,
+    axis <code>docs</code>) carries the clause and the answer. The clause is
+    <code>claim_contradicts_source</code>, asked as <em>“Which conflict, if
+    any, does this claim have with its DD source definition?”</em> The judge
+    <code>typesafe/jev-1.13</code> answered with <code>choice</code>
+    <code>contradicts</code> (probability 0.72 against a 0.3 cutoff, veto
+    criterion <code>choice=contradicts or probability&gt;=cutoff</code>), on
+    this evidence:
+  </p>
+  <pre><code>contradicts source: This quantity is the electrostatic potential in the plasma
+or at a plasma-facing surface, relative to a chosen electrical reference.; The
+general quantity is not restricted to the core, edge, scrape-off layer, or a
+particular surface.; It encompasses local values and explicitly identified
+magnetic-flux-surface averages; averaging is not implicit in the unqualified
+quantity.</code></pre>
+  <p>
+    The same row routed the document to <code>refine</code> with
+    <code>failed_checks: ["claim_contradicts_source"]</code>, a rubric total of
+    <strong>0.8046</strong> and a decision score of <strong>0.9521</strong>.
+    That split is the whole question for a later node: the judged quality is
+    above the 0.85 floor, so a reader may reasonably ask whether the DD
+    documentation for
+    <code>core_profiles/profiles_1d/phi_potential</code> and
+    <code>edge_profiles/profiles_1d/phi_potential</code> — whose own text says
+    “Electrostatic potential, averaged on the magnetic flux surface” — really
+    contradicts a general definition that explicitly disclaims implicit
+    averaging. That is a judgement about the source text, not about this gate,
+    and it is left open here.
+  </p>
+  <p>
+    <strong>The gate's reading.</strong> A held document is not accepted. The
+    veto did not promote the document; counting a held review as accepted
+    because of a score would let the gate pass a document the cascade refused,
+    which in effect lowers the acceptance bar below the one the cascade
+    applies. So <code>measure_batch</code> reads
+    <code>docs_stage == "accepted"</code> exactly, and the member batch's 1 of 2
+    is a true halt for as long as the hold stands. If the hold is wrong, the
+    repair belongs to the veto and the document, not to the convergence gate.
+  </p>
+  <h3 id="shc-convergence-gate-tests">The six tests, and what they fail against</h3>
+  <p>
+    <code>tests/standard_names/test_campaign_convergence_gate.py</code> carries
+    the locus family's shape: two names whose stage is <code>reviewed</code> in
+    both reads, one name accepted at the stage, and one held at
+    <code>reviewed</code> by a refinement at 0.9521.
+  </p>
+  <table>
+    <thead><tr><th>test</th><th>what it holds</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>test_member_outside_accepted_before_the_drain_is_skipped_not_drift</code></td>
+        <td>the two <code>reviewed</code> members are split out at planning with their stage, and <code>measure_batch</code> over the eligible pair yields no drift and 2 touched — the two the batch could claim, of which one is accepted at the stage and one is the held document the acceptance row below covers</td>
+      </tr>
+      <tr>
+        <td><code>test_member_the_drain_moves_out_of_accepted_still_halts</code></td>
+        <td>a name accepted before the drain and <code>reviewed</code> after it is drift, 0 touched, and the run does not converge</td>
+      </tr>
+      <tr>
+        <td><code>test_unchanged_non_accepted_stage_is_not_drift</code></td>
+        <td>the behavioural guard on the inherited comparison: one member whose
+        stage is <code>reviewed</code> in both reads reports no drift, 0
+        touched and 0 accepted; replacing the comparison with the absolute
+        post-drain check fails this test and nothing else</td>
+      </tr>
+      <tr>
+        <td><code>test_member_with_no_pre_drain_row_is_drift</code></td>
+        <td>a member with no pre-drain row whose post-drain stage is
+        <code>reviewed</code> is drift, 0 touched: the campaign cannot have
+        inherited a state it never read. The test fails against the code
+        before this fix and passes after it</td>
+      </tr>
+      <tr>
+        <td><code>test_planner_skip_reaches_the_apply_summary</code></td>
+        <td>drives <code>plan_family_applies</code> against a fixture graph
+        whose member reads back <code>reviewed</code>: the planner puts that
+        member under <code>skipped</code> with its stage, and the apply over
+        that plan both logs <code>member … skipped
+        (name_stage=reviewed)</code> and returns the member, its family and
+        its stage under <code>skipped</code></td>
+      </tr>
+      <tr>
+        <td><code>test_a_held_review_is_not_accepted_however_it_scored</code></td>
+        <td>the locus case: the held document scores 0.9521, above
+        <code>DEFAULT_MIN_SCORE</code>, is counted not accepted, and the batch
+        halts at <code>docs acceptance 50.00% &lt; 90.00% (1/2 touched)</code>.
+        This is the pinned truth — score-based acceptance anywhere in
+        <code>measure_batch</code> makes it fail at 2/2.</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    <strong>Negative control:</strong> all six run against
+    <code>main</code>'s <code>campaign.py</code> from a <code>git archive</code>
+    tree of <code>43ae5712c</code> and fail there — six failures, exit 1, with
+    <code>module.__file__</code> naming the archive tree's module. The log is
+    kept with the run.
+  </p>
+  <p>
+    <strong>The pinned truth is checked by mutation.</strong> Re-adding
+    score-based acceptance to this head's <code>measure_batch</code> — a
+    <code>reviewed</code> document scored at or above 0.85 counting as accepted
+    — makes exactly one test fail,
+    <code>test_a_held_review_is_not_accepted_however_it_scored</code>, while
+    the other five pass. The mutation log is kept with the run.
+  </p>
+  <p>
+    <strong>Stated scope.</strong> The repaired first reason changes the gate's
+    meaning; the second is reported and left standing. Nothing here decides
+    whether the veto on <code>electrostatic_potential</code> was right, and
+    nothing in this node edits the document, the hold, or the DD sources the
+    cascade compared it against.
+  </p>
+
+  <h3 id="shc-convergence-gate-gate">The two-arm gate</h3>
+  <p>
+    Both arms are <code>git archive</code> trees with their own
+    <code>--basetemp</code>: base at <code>43ae5712c</code>, head at
+    <code>b8ddd58a3</code>. Each ran the 22 test files that cover
+    <code>campaign</code> and <code>harmonize</code>, under default markers
+    (slow and graph deselected). The new test file is carried into the base
+    tree so both arms run the same file set.
+  </p>
+  <table>
+    <thead><tr><th>arm</th><th>result</th><th>failure ids</th></tr></thead>
+    <tbody>
+      <tr><td>base <code>43ae5712c</code></td><td>7 failed, 230 passed, 12 deselected, 130 s</td><td>all six tests above, plus <code>test_prose_hold_before_accept.py::test_estimator_recipe_is_held_and_sent_to_refinement</code></td></tr>
+      <tr><td>head <code>b8ddd58a3</code></td><td>1 failed, 236 passed, 12 deselected, 128 s</td><td><code>test_prose_hold_before_accept.py::test_estimator_recipe_is_held_and_sent_to_refinement</code></td></tr>
+    </tbody>
+  </table>
+  <p>
+    <strong>Zero failure ids added.</strong> The residual failure is identical
+    on both arms and also fails in a base archive tree run in isolation, so it
+    is not this node's; it is reported to the coordinator rather than triaged
+    or repaired here, because the file it exercises is outside this node's
+    write scope.
+  </p>
+  <p>
+    The fix spends no model call and writes no graph row: the gate is pure
+    function of the two reads the runner already makes, and the added reads are
+    one indexed lookup over the family roster.
+  </p>
+</section>

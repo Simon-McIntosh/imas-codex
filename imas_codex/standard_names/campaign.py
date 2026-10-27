@@ -601,20 +601,36 @@ def evaluate_convergence(
 
 
 def measure_batch(
-    refreshed_rows: list[dict[str, Any]],
+    refreshed_rows: Sequence[dict[str, Any]],
     batch_ids: Sequence[str],
     *,
     batch_index: int,
     cost: float = 0.0,
     adjudicate: Callable[[Sequence[tuple[str, str, dict[str, int]]]], list[bool]]
     | None = None,
+    prior_rows: Sequence[dict[str, Any]] | None = None,
 ) -> BatchOutcome:
     """Compute a :class:`BatchOutcome` from post-drain graph rows — pure.
 
     ``refreshed_rows`` needs ``id``, ``name_stage``, ``docs_stage``,
-    ``description`` and ``documentation`` for each still-present member.  A
-    batch id absent from the rows, or present with a non-accepted name stage,
-    counts as name-axis drift.
+    ``description``, ``documentation`` and ``reviewer_score_docs`` for each
+    still-present member.  ``prior_rows`` is the same read taken before the
+    batch was drained, so the gate can tell a state the batch produced from one
+    it inherited.
+
+    A batch id that is absent after the drain, or whose name stage *moved*
+    between the two reads and did not land on ``accepted``, counts as
+    name-axis drift, and so does a non-accepted stage for a member with no
+    pre-drain row: the campaign cannot have inherited a state it never read.
+    A member whose pre-drain row shows it was already outside ``accepted`` and
+    is still there is skipped rather than reported: a docs-only campaign never
+    writes the name axis, so an unchanged stage is not its doing.
+
+    A member's documentation counts as accepted only when the drain left it at
+    ``accepted``.  A document held at ``reviewed`` is not accepted whatever its
+    review scored: a contradiction veto holds it for a further refinement round,
+    and counting a held document as accepted would let the gate pass one the
+    cascade refused.
 
     The banned-prose grep is a cheap, over-inclusive pre-filter.  A doc it flags
     is a *candidate* reintroduction; when ``adjudicate`` is supplied, the flagged
@@ -626,6 +642,7 @@ def measure_batch(
     every grep flag counts as reintroduction (grep-only fallback).
     """
     by_id = {r["id"]: r for r in refreshed_rows}
+    prior_by_id = {r["id"]: r for r in (prior_rows or [])}
     accepted = 0
     accepted_ids: set[str] = set()
     flagged: list[tuple[str, str, dict[str, int]]] = []
@@ -637,11 +654,30 @@ def measure_batch(
         if row is None:
             drift.append(sid)
             continue
-        if (row.get("name_stage") or "") != "accepted":
-            drift.append(sid)
+        stage = row.get("name_stage") or ""
+        prior = prior_by_id.get(sid)
+        if prior is None:
+            # No pre-drain row was read for this member, so the campaign
+            # inherited no state to blame: a non-accepted stage is its own.
+            if stage != "accepted":
+                drift.append(sid)
+                continue
+        else:
+            # Only a stage the batch itself moved can be its drift: an
+            # inherited non-accepted stage is skipped, and moving into
+            # accepted is the batch succeeding on the name axis.
+            prior_stage = prior.get("name_stage") or ""
+            if stage != prior_stage and stage != "accepted":
+                drift.append(sid)
+                continue
+        if stage != "accepted":
+            # Either the batch moved the name axis and did not land on
+            # accepted (drift, above), or the stage was inherited unchanged and
+            # is none of this batch's doing.
             continue
         touched += 1
-        if (row.get("docs_stage") or "") == "accepted":
+        docs_stage = row.get("docs_stage") or ""
+        if docs_stage == "accepted":
             accepted += 1
             accepted_ids.add(sid)
         text = f"{row.get('description') or ''}\n{row.get('documentation') or ''}"
@@ -1020,6 +1056,11 @@ class CampaignRunner:
                 result.resume_from = index
                 break
 
+            # 0. Read the state this batch inherits, before anything below
+            #    touches it. The convergence gate compares against this read,
+            #    so a stage nobody moved cannot be reported as the batch's.
+            inherited = fetch_refreshed_fn(gc, batch)
+
             # 1. Lift audit quarantine so the docs pools can claim these names.
             clear_quarantine_fn(gc, batch)
 
@@ -1048,6 +1089,7 @@ class CampaignRunner:
                 batch_index=index,
                 cost=cost,
                 adjudicate=adjudicate_prose_fn,
+                prior_rows=inherited,
             )
 
             touched_ids = [r["id"] for r in refreshed]
