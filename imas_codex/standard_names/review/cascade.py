@@ -445,6 +445,11 @@ async def _store_unjudged(
         )
 
 
+def _chat_seat(models: Sequence[str]) -> list[str]:
+    """The chat reviewer runs a single seat: the head of the configured chain."""
+    return list(models)[:1]
+
+
 async def _chat_then_unjudged(
     item: Mapping[str, Any],
     axis: str,
@@ -461,7 +466,7 @@ async def _chat_then_unjudged(
     reviewer's own row is persisted; a reviewer that produced no review reports
     that with ``None`` and takes no row.
     """
-    result = await chat_reviewer(models=list(models)[:1])
+    result = await chat_reviewer(models=_chat_seat(models))
     if result is None:
         return None
     await _store_unjudged(item, axis, model, reason)
@@ -796,9 +801,9 @@ async def adjudicate_review(
         except Exception:
             logger.exception("panel audit failed for %s", item.get("id"))
         return _direct_result(route, model, spent, item, axis)
-    result = await _chat_then_unjudged(
-        item, axis, models, chat_reviewer, model, "deciding disabled for this axis"
-    )
+    # Jev judged the item, so no unjudged row applies: the axis is in shadow
+    # mode, and the chat reviewer produces the row the route is recorded beside.
+    result = await chat_reviewer(models=_chat_seat(models))
     if result is None:
         return None
     try:
