@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="298">
+<meta name="plan-version" content="299">
 <meta name="plan-modified" content="2026-10-27">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -1214,6 +1214,9 @@ without re-deriving it is visible.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261026T204209966088-srtj-graph-tier-parallel-fixtures" data-who="reckon-build" data-when="2026-10-27T07:39:17Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/sn-review-through-jev/srtj-graph-tier-parallel-fixtures.html — all standard-names graph tests route disposable; both head graph arms agree on 59 failing IDs versus 48 base, with 0 fixture-data and 21 product IDs added, 0 project-URI refusals and 0 startup timeouts.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-s6-graph-tier-disposable" data-who="reckon-build" data-when="2026-10-27T08:00:00Z">
+    <div class="r-comment-body"><p>The whole standard-names graph tier now runs on the disposable Neo4j (merge <code>9ad6d1c5d</code>, review 98). One autouse hook applies the shared fixture to every graph-marked test, and the 30 per-module starters and guards are gone. A bare <code>GraphClient()</code> in a graph test therefore resolves to the disposable instance. Before this, 87 writing tests could reach the project graph whenever no disposable fixture happened to be active. Seven tests that read live state now seed their own data. Two head runs agree on 59 failing ids against 48 at base, with zero project-graph refusals and zero startup timeouts.</p><p>The 21 added failures are tests that used to skip, or to error on their own guards, and now reach product code. They stay visible: 9 in <code>attachment_audit.py</code>, 7 in <code>signed_manifest.py</code> and 5 in <code>source_invariant.py</code>. Each gets a repair node (<code>srtj-exposed-attachment-audit</code>, <code>srtj-exposed-signed-manifest</code>, <code>srtj-exposed-source-invariant</code>), which decides per test whether the product or the never-run test is wrong. The nodes wait on the forwarder codemod, now running, which rewrites these files. <code>srtj-graph-dir-writer-routing</code> gives the five <code>tests/graph/</code> writers the same protection, plus a collection guard.</p></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-s7-lead-ruling-audit-panel" data-who="lead" data-when="2026-10-27T07:20:00Z">
     <div class="r-comment-body"><p>Lead ruling, "Keep quorum as audit panel". §7 deletes the quorum as a deciding path: its persisting cycle, the review seats only that path uses, and the fallback that sends items Jev could not judge to it. Those items go to the single chat reviewer instead. The quorum stays only as the 5% panel audit's non-deciding panel, which runs through <code>panel_audit.quorum_without_persisting</code>, so the drift measure the switch kept is unchanged. §7 waits on §6, because the forwarder retirement and the product repairs §6 still owes touch the same worker and review modules.</p></div>
