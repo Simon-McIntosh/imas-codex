@@ -34,6 +34,7 @@ _PREFIX = "test_dd_unit_correction__"
 
 @pytest.fixture()
 def _gc():
+    """A client on the live graph, for the drift invariant that reads it."""
     try:
         from imas_codex.graph.client import GraphClient
 
@@ -46,10 +47,43 @@ def _gc():
 
 
 @pytest.fixture()
-def _clean(_gc):
+def _disposable_gc(disposable_graph, monkeypatch):
+    """A client on the empty test graph the reconcile writers must use.
+
+    The reconcile asks ``resolve_dd_unit``, which consults the DD-resolution
+    authority before it rewrites a corrected pair. That authority is a property
+    of the DD version rather than of a graph, so an empty instance carries none
+    and the lookup raises "authority is empty". Serve the synthetic authority
+    the mock tier uses: it is nonempty and mentions none of the registry paths,
+    so the correction under test still applies.
+    """
+    from imas_codex.graph.client import GraphClient
+    from imas_codex.standard_names import dd_resolutions
+    from tests.standard_names.conftest import SyntheticDDResolutionReader
+    from tests.standard_names.dd_resolution_test_data import (
+        SYNTHETIC_GRAPH_RESOLUTION_ROWS,
+    )
+
+    monkeypatch.setattr(
+        dd_resolutions,
+        "dd_resolution_graph_reader",
+        lambda: SyntheticDDResolutionReader(SYNTHETIC_GRAPH_RESOLUTION_ROWS),
+    )
+
+    client = GraphClient()
+    try:
+        client.get_stats()
+    except Exception as exc:  # pragma: no cover - env-dependent
+        pytest.skip(f"disposable Neo4j not available: {exc}")
+    yield client
+    client.close()
+
+
+@pytest.fixture()
+def _clean(_disposable_gc):
     def _wipe() -> None:
         for label in ("IMASNode", "Unit"):
-            _gc.query(
+            _disposable_gc.query(
                 f"MATCH (n:{label}) WHERE n.id CONTAINS $p DETACH DELETE n",
                 p=_PREFIX,
             )
@@ -141,53 +175,57 @@ def test_reconcile_reports_zero_without_candidates():
 
 
 @pytest.mark.graph
-def test_stored_self_contradiction_is_realigned(_gc, _clean):
+@pytest.mark.timeout(300)
+def test_stored_self_contradiction_is_realigned(_disposable_gc, _clean):
     """A stored node carrying the wrong facet's unit is corrected in place."""
     from imas_codex.graph.dd_graph_ops import reconcile_dd_unit_corrections
 
     # A synthetic path under the same registry glob as the real defect.
-    path = _node(_gc, f"{_PREFIX}ids/channel/position/psi", "W")
+    path = _node(_disposable_gc, f"{_PREFIX}ids/channel/position/psi", "W")
 
-    result = reconcile_dd_unit_corrections(_gc)
+    result = reconcile_dd_unit_corrections(_disposable_gc)
 
-    scalar, edges = _stored(_gc, path)
+    scalar, edges = _stored(_disposable_gc, path)
     assert scalar == "Wb"
     assert edges == ["Wb"]
     assert result["corrected"] >= 1
 
 
 @pytest.mark.graph
-def test_suppression_only_path_is_untouched(_gc, _clean):
+@pytest.mark.timeout(300)
+def test_suppression_only_path_is_untouched(_disposable_gc, _clean):
     """A node under a suppression-only entry keeps its declared unit."""
     from imas_codex.graph.dd_graph_ops import reconcile_dd_unit_corrections
 
-    path = _node(_gc, f"{_PREFIX}core_profiles/profiles_1d/ion/z_ion", "e")
-    reconcile_dd_unit_corrections(_gc)
-    scalar, edges = _stored(_gc, path)
+    path = _node(_disposable_gc, f"{_PREFIX}core_profiles/profiles_1d/ion/z_ion", "e")
+    reconcile_dd_unit_corrections(_disposable_gc)
+    scalar, edges = _stored(_disposable_gc, path)
     assert scalar == "e"
     assert edges == ["e"]
 
 
 @pytest.mark.graph
-def test_reconcile_is_idempotent(_gc, _clean):
+@pytest.mark.timeout(300)
+def test_reconcile_is_idempotent(_disposable_gc, _clean):
     """A second pass corrects nothing, so it is safe on every run."""
     from imas_codex.graph.dd_graph_ops import reconcile_dd_unit_corrections
 
-    _node(_gc, f"{_PREFIX}ids/channel/position/psi", "W")
-    first = reconcile_dd_unit_corrections(_gc)
+    _node(_disposable_gc, f"{_PREFIX}ids/channel/position/psi", "W")
+    first = reconcile_dd_unit_corrections(_disposable_gc)
     assert first["corrected"] >= 1
-    second = reconcile_dd_unit_corrections(_gc)
+    second = reconcile_dd_unit_corrections(_disposable_gc)
     assert second["corrected"] == 0
 
 
 @pytest.mark.graph
-def test_already_correct_node_is_not_rewritten(_gc, _clean):
+@pytest.mark.timeout(300)
+def test_already_correct_node_is_not_rewritten(_disposable_gc, _clean):
     """The facet that already declares the right unit is left alone."""
     from imas_codex.graph.dd_graph_ops import reconcile_dd_unit_corrections
 
-    path = _node(_gc, f"{_PREFIX}ids/beam/position/psi", "Wb")
-    reconcile_dd_unit_corrections(_gc)
-    scalar, edges = _stored(_gc, path)
+    path = _node(_disposable_gc, f"{_PREFIX}ids/beam/position/psi", "Wb")
+    reconcile_dd_unit_corrections(_disposable_gc)
+    scalar, edges = _stored(_disposable_gc, path)
     assert scalar == "Wb"
     assert edges == ["Wb"]
 
