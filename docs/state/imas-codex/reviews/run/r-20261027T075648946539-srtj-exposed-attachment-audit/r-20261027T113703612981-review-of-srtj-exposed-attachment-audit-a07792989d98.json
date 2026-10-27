@@ -20,6 +20,11 @@
       "kind": "exempted",
       "reason": "evidence wording or an unavoidable test overlap given the ban on weakening assertions; the fix and its guard stand",
       "recorded_at": "2026-10-27T12:01:11.195802+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "evidence wording or an unavoidable test overlap given the ban on weakening assertions; the fix and its guard stand",
+      "recorded_at": "2026-10-27T12:01:25.120042+00:00"
     }
   },
   "findings": [
