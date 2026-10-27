@@ -10,6 +10,10 @@ import pytest
 import yaml
 from click.testing import CliRunner
 
+from imas_codex.standard_names.worker_tasks import (
+    worker_compose_batches as _owning_worker_compose_batches,
+)
+
 
 def test_source_retry_schema_is_auditable() -> None:
     """The retry event and source relationship are declared in LinkML."""
@@ -31,7 +35,9 @@ def test_source_retry_schema_is_auditable() -> None:
 
 def test_retry_failed_sources_records_event_before_reset() -> None:
     """Terminal and extracted-at-cap sources receive durable retry events."""
-    from imas_codex.standard_names.graph_ops import retry_failed_sources
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        retry_failed_sources,
+    )
 
     gc = MagicMock()
     gc.query.side_effect = [
@@ -76,7 +82,9 @@ def test_retry_failed_sources_records_event_before_reset() -> None:
 
 def test_retry_failed_sources_dry_run_never_mutates() -> None:
     """A dry run reports eligibility without writing an event or source state."""
-    from imas_codex.standard_names.graph_ops import retry_failed_sources
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        retry_failed_sources,
+    )
 
     gc = MagicMock()
     gc.query.return_value = [
@@ -99,7 +107,9 @@ def test_retry_failed_sources_dry_run_never_mutates() -> None:
 
 def test_retry_skipped_sources_is_fenced_and_context_neutral() -> None:
     """Skipped recovery is audited, claim-fenced, and source-context neutral."""
-    from imas_codex.standard_names.graph_ops import retry_skipped_sources
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        retry_skipped_sources,
+    )
 
     gc = MagicMock()
     gc.query.side_effect = [
@@ -187,14 +197,18 @@ def test_skipped_recovery_error_without_classification(
     source: dict[str, str | None], expected: str | None
 ) -> None:
     """Absent classifications preserve only substantive errors, without debris."""
-    from imas_codex.standard_names.graph_ops import _skipped_recovery_error
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        _skipped_recovery_error,
+    )
 
     assert _skipped_recovery_error(source) == expected
 
 
 def test_retry_skipped_sources_dry_run_has_exact_eligibility_cardinality() -> None:
     """Dry-run counts only exact, still-eligible skipped source paths."""
-    from imas_codex.standard_names.graph_ops import retry_skipped_sources
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        retry_skipped_sources,
+    )
 
     gc = MagicMock()
     gc.query.return_value = [
@@ -235,7 +249,9 @@ def test_retry_skipped_sources_dry_run_has_exact_eligibility_cardinality() -> No
 
 def test_retry_skipped_sources_reports_compare_and_set_refusal() -> None:
     """A source that changes after selection is refused without collateral writes."""
-    from imas_codex.standard_names.graph_ops import retry_skipped_sources
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        retry_skipped_sources,
+    )
 
     gc = MagicMock()
     gc.query.side_effect = [
@@ -278,7 +294,7 @@ def test_retry_cli_reports_dry_run_eligibility() -> None:
         "dry_run": True,
     }
     with patch(
-        "imas_codex.standard_names.graph_ops.retry_failed_sources",
+        "imas_codex.standard_names.graph_store.graph_source_bindings.retry_failed_sources",
         return_value=result_payload,
     ) as retry:
         result = CliRunner().invoke(
@@ -316,7 +332,7 @@ def test_retry_cli_dispatches_exact_skipped_dry_run() -> None:
         "dry_run": True,
     }
     with patch(
-        "imas_codex.standard_names.graph_ops.retry_skipped_sources",
+        "imas_codex.standard_names.graph_store.graph_source_bindings.retry_skipped_sources",
         return_value=result_payload,
     ) as retry:
         result = CliRunner().invoke(
@@ -378,7 +394,9 @@ def test_run_retry_skipped_help_is_selection_only() -> None:
 
 def test_source_status_reconcile_repairs_both_liveness_directions() -> None:
     """Live mappings advance stale mirrors and dead mappings re-enter compose."""
-    from imas_codex.standard_names.graph_ops import reconcile_source_status_liveness
+    from imas_codex.standard_names.graph_store.graph_audits import (
+        reconcile_source_status_liveness,
+    )
 
     gc = MagicMock()
     gc.query.side_effect = [
@@ -442,7 +460,9 @@ def test_source_status_reconcile_repairs_both_liveness_directions() -> None:
 
 def test_source_status_reconcile_is_idempotent_when_no_residue_matches() -> None:
     """A clean graph reports zero changes on every lifecycle repair path."""
-    from imas_codex.standard_names.graph_ops import reconcile_source_status_liveness
+    from imas_codex.standard_names.graph_store.graph_audits import (
+        reconcile_source_status_liveness,
+    )
 
     gc = MagicMock()
     gc.query.side_effect = [
@@ -465,7 +485,9 @@ def test_source_status_reconcile_is_idempotent_when_no_residue_matches() -> None
 
 def test_terminal_name_hints_are_retired() -> None:
     """Startup cleanup closes historical open edits no name pool can consume."""
-    from imas_codex.standard_names.graph_ops import retire_unreachable_hint_edits
+    from imas_codex.standard_names.graph_store.graph_audits import (
+        retire_unreachable_hint_edits,
+    )
 
     gc = MagicMock()
     gc.query.return_value = [{"n": 9}]
@@ -502,7 +524,7 @@ def test_name_hint_refuses_terminal_target(stage: str) -> None:
 
 def test_orphaned_run_sweep_falls_back_to_started_at() -> None:
     """A heartbeat-less run remains age-testable through its start timestamp."""
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_audits import (
         mark_orphaned_standard_name_runs_stale,
     )
 
@@ -510,7 +532,10 @@ def test_orphaned_run_sweep_falls_back_to_started_at() -> None:
     gc.__enter__.return_value = gc
     gc.query.return_value = [{"id": "stale-run"}]
 
-    with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=gc):
+    with patch(
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        return_value=gc,
+    ):
         assert mark_orphaned_standard_name_runs_stale(max_age_hours=1.0) == 1
 
     query = gc.query.call_args.args[0]
@@ -519,7 +544,9 @@ def test_orphaned_run_sweep_falls_back_to_started_at() -> None:
 
 def test_pending_counts_mirror_review_and_edit_scope() -> None:
     """The aggregate counter applies claim eligibility and edits-only scope."""
-    from imas_codex.standard_names.graph_ops import pool_pending_counts
+    from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
+        pool_pending_counts,
+    )
 
     row = {
         "generate_name": 0,
@@ -588,8 +615,8 @@ async def test_generate_processor_forwards_compose_model() -> None:
     from imas_codex.standard_names import workers
 
     compose = AsyncMock(return_value=1)
-    with patch.object(workers, "compose_batch", new=compose):
-        result = await workers.process_generate_name_batch(
+    with patch.object(_owning_worker_compose_batches, "compose_batch", new=compose):
+        result = await _owning_worker_compose_batches.process_generate_name_batch(
             [{"id": "dd:path"}],
             MagicMock(),
             asyncio.Event(),
@@ -607,7 +634,9 @@ async def test_pool_spec_carries_compose_model_to_processor() -> None:
 
     processor = AsyncMock(return_value=1)
     with (
-        patch.object(workers, "process_generate_name_batch", new=processor),
+        patch.object(
+            _owning_worker_compose_batches, "process_generate_name_batch", new=processor
+        ),
         patch("imas_codex.settings.get_pool_replicas", return_value=1),
     ):
         specs = loop._build_pool_specs(

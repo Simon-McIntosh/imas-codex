@@ -66,7 +66,9 @@ def _enrich_name_review_items(
     _name_review_source_context_limit = _worker_dependency(
         "_NAME_REVIEW_SOURCE_CONTEXT_LIMIT"
     )
-    from imas_codex.standard_names.graph_ops import strict_review_grammar_context
+    from imas_codex.standard_names.graph_store.graph_foundation import (
+        strict_review_grammar_context,
+    )
 
     stubs: list[dict[str, Any]] = []
     owners: list[dict[str, Any]] = []
@@ -830,7 +832,7 @@ async def _persisting_quorum_cycles(
     run_rd_quorum_cycles = _worker_dependency("_run_rd_quorum_cycles")
     result = await run_rd_quorum_cycles(**kwargs)
     if result is not None:
-        from imas_codex.standard_names.graph_ops import write_reviews
+        from imas_codex.standard_names.graph_store.graph_catalog import write_reviews
 
         await asyncio.to_thread(write_reviews, result["records"])
     return result
@@ -928,10 +930,14 @@ async def process_review_name_batch(
         DEFAULT_MIN_SCORE,
         DEFAULT_REFINE_ROTATIONS,
     )
-    from imas_codex.standard_names.graph_ops import (
-        persist_reviewed_name,
-        release_review_names_failed_claims,
+    from imas_codex.standard_names.graph_store.graph_catalog import (
         update_review_aggregates,
+    )
+    from imas_codex.standard_names.graph_store.graph_claim_release import (
+        release_review_names_failed_claims,
+    )
+    from imas_codex.standard_names.graph_store.graph_review_persistence import (
+        persist_reviewed_name,
     )
     from imas_codex.standard_names.models import (
         StandardNameQualityReviewNameOnlyBatch,
@@ -1080,7 +1086,9 @@ async def process_review_name_batch(
                     sn_id,
                     desc_sim,
                 )
-                from imas_codex.standard_names.graph_ops import mark_for_refine_docs
+                from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+                    mark_for_refine_docs,
+                )
 
                 try:
                     mark_for_refine_docs(

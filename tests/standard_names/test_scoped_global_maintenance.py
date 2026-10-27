@@ -12,6 +12,9 @@ from click.testing import CliRunner
 
 from imas_codex.cli.sn import sn
 from imas_codex.standard_names.attachment_audit import AttachmentAuditResult
+from imas_codex.standard_names.graph_store import (
+    owner_module_path as _owner_module_path,
+)
 
 _GO = "imas_codex.standard_names.graph_ops"
 _LOOP = "imas_codex.standard_names.loop"
@@ -72,7 +75,9 @@ def _maintenance_mocks(stack: ExitStack) -> dict[str, MagicMock]:
         "resolve_doc_links": {},
     }
     mocks = {
-        name: stack.enter_context(patch(f"{_GO}.{name}", return_value=result))
+        name: stack.enter_context(
+            patch(f"{_owner_module_path(name)}.{name}", return_value=result)
+        )
         for name, result in specs.items()
     }
     mocks["reconcile_dd_unit_corrections"] = stack.enter_context(
@@ -152,11 +157,17 @@ async def _run_loop(
         maintenance = _maintenance_mocks(stack)
         if catalog_status is not None:
             maintenance["reconcile_catalog_status"].return_value = catalog_status
-        create_run = stack.enter_context(patch(f"{_GO}.create_sn_run_open"))
-        finalize_run = stack.enter_context(patch(f"{_GO}.finalize_sn_run"))
+        create_run = stack.enter_context(
+            patch(
+                "imas_codex.standard_names.graph_store.graph_audits.create_sn_run_open"
+            )
+        )
+        finalize_run = stack.enter_context(
+            patch("imas_codex.standard_names.graph_store.graph_audits.finalize_sn_run")
+        )
         terminal_probe = stack.enter_context(
             patch(
-                f"{_GO}.scoped_terminal_residue",
+                "imas_codex.standard_names.graph_store.graph_parent_lifecycle.scoped_terminal_residue",
                 return_value=terminal_residue
                 or {"total": 0, "names": [], "sources": []},
             )
@@ -180,8 +191,17 @@ async def _run_loop(
                 return_value=[],
             )
         )
-        stack.enter_context(patch(f"{_GO}.persist_outcome_snapshot", return_value={}))
-        stack.enter_context(patch(f"{_GO}.reset_persist_outcomes"))
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.graph_store.graph_source_bindings.persist_outcome_snapshot",
+                return_value={},
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.graph_store.graph_source_bindings.reset_persist_outcomes"
+            )
+        )
         build_specs = stack.enter_context(
             patch(f"{_LOOP}._build_pool_specs", return_value=[])
         )
@@ -311,10 +331,19 @@ async def test_scoped_idle_completion_refuses_transient_claim_residue() -> None:
     graph_context, _ = _graph_context()
     with ExitStack() as stack:
         maintenance = _maintenance_mocks(stack)
-        stack.enter_context(patch(f"{_GO}.create_sn_run_open"))
-        finalize_run = stack.enter_context(patch(f"{_GO}.finalize_sn_run"))
         stack.enter_context(
-            patch(f"{_GO}.scoped_terminal_residue", return_value=residue)
+            patch(
+                "imas_codex.standard_names.graph_store.graph_audits.create_sn_run_open"
+            )
+        )
+        finalize_run = stack.enter_context(
+            patch("imas_codex.standard_names.graph_store.graph_audits.finalize_sn_run")
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.graph_store.graph_parent_lifecycle.scoped_terminal_residue",
+                return_value=residue,
+            )
         )
         stack.enter_context(
             patch(
@@ -334,8 +363,17 @@ async def test_scoped_idle_completion_refuses_transient_claim_residue() -> None:
                 return_value=[],
             )
         )
-        stack.enter_context(patch(f"{_GO}.persist_outcome_snapshot", return_value={}))
-        stack.enter_context(patch(f"{_GO}.reset_persist_outcomes"))
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.graph_store.graph_source_bindings.persist_outcome_snapshot",
+                return_value={},
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.graph_store.graph_source_bindings.reset_persist_outcomes"
+            )
+        )
         stack.enter_context(patch(f"{_LOOP}._build_pool_specs", return_value=[]))
 
         async def idle_run(*args, **kwargs):
@@ -532,11 +570,16 @@ def test_focused_bypass_seeds_exact_scope_without_global_run_id_clear() -> None:
         patch("imas_codex.cli.sn._run_sn_cmd", return_value={}) as run_cmd,
         patch("imas_codex.graph.client.GraphClient", return_value=graph_context),
         patch(
-            f"{_GO}.partition_focus_by_accepted",
+            "imas_codex.standard_names.graph_store.graph_claim_scope.partition_focus_by_accepted",
             return_value=([focus_path], []),
         ),
-        patch(f"{_GO}.merge_standard_name_sources", return_value=1) as merge_sources,
-        patch(f"{_GO}.scope_focus_names") as scope_names,
+        patch(
+            "imas_codex.standard_names.graph_store.graph_source_bindings.merge_standard_name_sources",
+            return_value=1,
+        ) as merge_sources,
+        patch(
+            "imas_codex.standard_names.graph_store.graph_claim_scope.scope_focus_names"
+        ) as scope_names,
         patch("imas_codex.settings.get_dd_version", return_value="4.0.0"),
     ):
         result = CliRunner().invoke(

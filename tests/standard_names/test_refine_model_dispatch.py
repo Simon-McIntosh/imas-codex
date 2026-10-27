@@ -18,6 +18,10 @@ from __future__ import annotations
 import pytest
 
 from imas_codex import settings
+from imas_codex.standard_names.worker_tasks import (
+    worker_refine_docs as _owning_worker_refine_docs,
+    worker_refine_names as _owning_worker_refine_names,
+)
 
 # ─── Section registration ────────────────────────────────────────────
 
@@ -87,7 +91,7 @@ def test_refine_name_worker_imports_refine_section() -> None:
 
     from imas_codex.standard_names import workers
 
-    src = inspect.getsource(workers.process_refine_name_batch)
+    src = inspect.getsource(_owning_worker_refine_names.process_refine_name_batch)
     assert 'get_model("sn-refine")' in src, (
         "process_refine_name_batch must dispatch via get_model('refine'); "
         "see commit history for E3 acceptance-rate audit."
@@ -106,6 +110,6 @@ def test_refine_docs_worker_imports_refine_section() -> None:
 
     from imas_codex.standard_names import workers
 
-    src = inspect.getsource(workers.process_refine_docs_batch)
+    src = inspect.getsource(_owning_worker_refine_docs.process_refine_docs_batch)
     assert 'get_model("sn-refine")' in src
     assert 'get_model("sn-compose")' not in src

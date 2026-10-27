@@ -51,17 +51,25 @@ async def test_scoped_run_drains_newly_described_accepted_name() -> None:
     with (
         patch(f"{_LOOP}._build_pool_specs", return_value=[]),
         patch("imas_codex.standard_names.pools.run_pools", side_effect=idle_run),
-        patch(f"{_GO}.create_sn_run_open"),
-        patch(f"{_GO}.finalize_sn_run"),
-        patch(f"{_GO}.persist_outcome_snapshot", return_value={}),
-        patch(f"{_GO}.reset_persist_outcomes"),
+        patch("imas_codex.standard_names.graph_store.graph_audits.create_sn_run_open"),
+        patch("imas_codex.standard_names.graph_store.graph_audits.finalize_sn_run"),
         patch(
-            f"{_GO}.scoped_terminal_residue",
+            "imas_codex.standard_names.graph_store.graph_source_bindings.persist_outcome_snapshot",
+            return_value={},
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_source_bindings.reset_persist_outcomes"
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_parent_lifecycle.scoped_terminal_residue",
             return_value={"total": 0, "names": [], "sources": []},
         ),
-        patch(f"{_GO}.claim_embed_batch", claim),
         patch(
-            "imas_codex.standard_names.workers.process_embed_batch",
+            "imas_codex.standard_names.graph_store.graph_refinement.claim_embed_batch",
+            claim,
+        ),
+        patch(
+            "imas_codex.standard_names.worker_tasks.worker_refine_docs.process_embed_batch",
             new=AsyncMock(side_effect=process),
         ) as process_mock,
         patch(
@@ -108,10 +116,16 @@ async def test_scoped_run_refuses_partial_embedding_drain() -> None:
     release = MagicMock(return_value=1)
 
     with (
-        patch(f"{_GO}.claim_embed_batch", return_value=[item]),
-        patch(f"{_GO}.release_embed_claims", release),
         patch(
-            "imas_codex.standard_names.workers.process_embed_batch",
+            "imas_codex.standard_names.graph_store.graph_refinement.claim_embed_batch",
+            return_value=[item],
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_refinement.release_embed_claims",
+            release,
+        ),
+        patch(
+            "imas_codex.standard_names.worker_tasks.worker_refine_docs.process_embed_batch",
             new=AsyncMock(return_value=0),
         ),
     ):

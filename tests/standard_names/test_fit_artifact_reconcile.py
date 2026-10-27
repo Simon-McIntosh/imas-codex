@@ -6,7 +6,9 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.standard_names.graph_ops import reconcile_constraint_fit_artifacts
+from imas_codex.standard_names.graph_store.graph_audits import (
+    reconcile_constraint_fit_artifacts,
+)
 
 _TEST_PATH_MARKER = "test_fit_reconcile"
 _TEST_PATH_ROOT = f"equilibrium/time_slice/constraints/{_TEST_PATH_MARKER}"

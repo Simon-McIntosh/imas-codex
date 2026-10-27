@@ -40,6 +40,7 @@ from unittest.mock import AsyncMock, MagicMock, call, patch
 
 import pytest
 
+from imas_codex.standard_names.graph_store import owner_module_path
 from imas_codex.standard_names.orphan_sweep import (
     _orphan_sweep_tick,
     run_orphan_sweep_loop,
@@ -749,7 +750,6 @@ async def test_run_loop_periodic(_gc, _clean_test_nodes):
 # mutating maintenance writer is still skipped.  A bounded drain keeps its
 # lease heartbeat alongside the sweep.
 
-_SN_GO = "imas_codex.standard_names.graph_ops"
 _SN_LOOP = "imas_codex.standard_names.loop"
 
 # Graph-wide mutation writers the bypass flag must keep quiet.  Each is
@@ -773,6 +773,10 @@ _MAINTENANCE_WRITER_MODULES: dict[str, str] = {
     "restamp_harmonized_families": "imas_codex.standard_names.harmonize",
     "refresh_drifted_sources": "imas_codex.standard_names.source_refresh",
 }
+
+
+def _maintenance_owner_path(name: str) -> str:
+    return _MAINTENANCE_WRITER_MODULES.get(name) or owner_module_path(name)
 
 
 def _loop_graph_context() -> tuple[MagicMock, MagicMock]:
@@ -804,15 +808,28 @@ async def _drive_run_sn_pools(
     """
     graph_ctx, _ = _loop_graph_context()
     with ExitStack() as stack:
-        stack.enter_context(patch(f"{_SN_GO}.create_sn_run_open"))
-        stack.enter_context(patch(f"{_SN_GO}.finalize_sn_run"))
-        stack.enter_context(
-            patch(f"{_SN_GO}.persist_outcome_snapshot", return_value={})
-        )
-        stack.enter_context(patch(f"{_SN_GO}.reset_persist_outcomes"))
         stack.enter_context(
             patch(
-                f"{_SN_GO}.scoped_terminal_residue",
+                "imas_codex.standard_names.graph_store.graph_audits.create_sn_run_open"
+            )
+        )
+        stack.enter_context(
+            patch("imas_codex.standard_names.graph_store.graph_audits.finalize_sn_run")
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.graph_store.graph_source_bindings.persist_outcome_snapshot",
+                return_value={},
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.graph_store.graph_source_bindings.reset_persist_outcomes"
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.graph_store.graph_parent_lifecycle.scoped_terminal_residue",
                 return_value={"total": 0, "names": [], "sources": []},
             )
         )
@@ -887,12 +904,15 @@ async def _drive_run_sn_pools(
                 )
             )
             stack.enter_context(
-                patch(f"{_SN_GO}.finalize_manifest_drain_scope", return_value={})
+                patch(
+                    "imas_codex.standard_names.graph_store.graph_claim_scope.finalize_manifest_drain_scope",
+                    return_value={},
+                )
             )
         writers = {
             name: stack.enter_context(
                 patch(
-                    f"{_MAINTENANCE_WRITER_MODULES.get(name, _SN_GO)}.{name}",
+                    f"{_maintenance_owner_path(name)}.{name}",
                     return_value=default,
                 )
             )

@@ -2550,7 +2550,9 @@ def reconcile_standard_name_dd_edges(gc: Any | None = None) -> dict[str, int]:
     Returns dict: {edges_created, pairs_dropped}.
     """
     from imas_codex.core.node_categories import SN_SOURCE_CATEGORIES
-    from imas_codex.standard_names.workers import _is_attachment_consistent
+    from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+        _is_attachment_consistent,
+    )
 
     own = gc is None
     client = foundation.get_services().GraphClient() if own else gc

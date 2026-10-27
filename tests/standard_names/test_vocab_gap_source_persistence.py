@@ -15,7 +15,14 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.workers import _consume_claimed_vocab_gaps
+from imas_codex.standard_names.graph_store import (
+    graph_catalog_reset as _owning_graph_catalog_reset,
+    graph_foundation as _owning_graph_foundation,
+    graph_source_bindings as _owning_graph_source_bindings,
+)
+from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+    _consume_claimed_vocab_gaps,
+)
 
 
 def _run_marker(gaps, *, actionable_tokens, open_segments=()):
@@ -32,7 +39,7 @@ def _run_marker(gaps, *, actionable_tokens, open_segments=()):
 
     with (
         patch(
-            "imas_codex.standard_names.graph_ops.persist_claimed_vocab_gaps",
+            "imas_codex.standard_names.graph_store.graph_source_bindings.persist_claimed_vocab_gaps",
             side_effect=lambda _gaps, outcomes, **_kwargs: [
                 item["sns_id"] for item in outcomes
             ],
@@ -137,15 +144,17 @@ def test_gap_writer_failure_rolls_back_source_outcome():
         }
     ]
     with (
-        patch.object(graph_ops, "GraphClient", return_value=gc),
+        patch.object(_owning_graph_foundation, "GraphClient", return_value=gc),
         patch.object(
-            graph_ops,
+            _owning_graph_catalog_reset,
             "write_vocab_gaps",
             side_effect=RuntimeError("gap write failed"),
         ) as writer,
         pytest.raises(RuntimeError, match="gap write failed"),
     ):
-        graph_ops.persist_claimed_vocab_gaps(gaps, outcomes, source_type="dd")
+        _owning_graph_source_bindings.persist_claimed_vocab_gaps(
+            gaps, outcomes, source_type="dd"
+        )
 
     writer.assert_called_once()
     assert writer.call_args.kwargs["gc"]._transaction is tx
@@ -174,14 +183,14 @@ def test_write_vocab_gaps_links_source_to_node():
         }
     ]
     with (
-        patch.object(graph_ops, "GraphClient", return_value=gc),
+        patch.object(_owning_graph_foundation, "GraphClient", return_value=gc),
         patch("imas_codex.standard_names.segments.is_valid_segment", return_value=True),
         patch(
             "imas_codex.standard_names.segments.classify_gap",
             return_value=("absent", []),
         ),
     ):
-        graph_ops.write_vocab_gaps(gaps, "dd")
+        _owning_graph_catalog_reset.write_vocab_gaps(gaps, "dd")
 
     queries = " || ".join(c.args[0] for c in gc.query.call_args_list)
     # A StandardNameSource-anchored MERGE onto the VocabGap must be issued.

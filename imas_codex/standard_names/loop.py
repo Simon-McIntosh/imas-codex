@@ -408,11 +408,13 @@ async def _drain_scoped_standard_name_embeddings(
     empty claim batch look like complete coverage.
     """
     from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_refinement import (
         claim_embed_batch,
         release_embed_claims,
     )
-    from imas_codex.standard_names.workers import process_embed_batch
+    from imas_codex.standard_names.worker_tasks.worker_refine_docs import (
+        process_embed_batch,
+    )
 
     written_total = 0
     drain_stop_event = asyncio.Event()
@@ -544,36 +546,60 @@ def _build_pool_specs(
         REVIEW_DOCS_BACKLOG_CAP,
         REVIEW_NAME_BACKLOG_CAP,
     )
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_audits import (
         _CLAIM_HEARTBEAT_SECONDS,
-        claim_enrich_parents_batch,
-        claim_generate_docs_batch,
-        claim_generate_name_batch,
-        claim_refine_docs_batch,
-        claim_refine_name_batch,
-        claim_review_docs_batch,
-        claim_review_name_batch,
         refresh_name_claims,
-        release_enrich_parents_claims,
-        release_generate_docs_claims,
+    )
+    from imas_codex.standard_names.graph_store.graph_claim_release import (
         release_generate_name_claims,
-        release_refine_docs_claims,
         release_refine_name_claims,
         release_review_docs_claims,
         release_review_names_claims,
+    )
+    from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        claim_generate_name_batch,
+        claim_review_name_batch,
+    )
+    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+        claim_generate_docs_batch,
+        claim_refine_docs_batch,
+        release_generate_docs_claims,
+        release_refine_docs_claims,
+    )
+    from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
+        claim_enrich_parents_batch,
+        release_enrich_parents_claims,
+    )
+    from imas_codex.standard_names.graph_store.graph_refinement import (
+        claim_refine_name_batch,
+    )
+    from imas_codex.standard_names.graph_store.graph_review_persistence import (
+        claim_review_docs_batch,
     )
     from imas_codex.standard_names.pools import (
         POOL_NAMES,
         PoolSpec,
         standard_name_pool_predicates,
     )
-    from imas_codex.standard_names.workers import (
-        process_enrich_parents_batch,
-        process_generate_docs_batch,
+    from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
         process_generate_name_batch,
+    )
+    from imas_codex.standard_names.worker_tasks.worker_enrich_parents import (
+        process_enrich_parents_batch,
+    )
+    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+        process_generate_docs_batch,
+    )
+    from imas_codex.standard_names.worker_tasks.worker_refine_docs import (
         process_refine_docs_batch,
+    )
+    from imas_codex.standard_names.worker_tasks.worker_refine_names import (
         process_refine_name_batch,
+    )
+    from imas_codex.standard_names.worker_tasks.worker_review_docs import (
         process_review_docs_batch,
+    )
+    from imas_codex.standard_names.worker_tasks.worker_review_names import (
         process_review_name_batch,
     )
 
@@ -1122,8 +1148,10 @@ async def _seed_domain_sources(
     if source != "dd":
         return 0
 
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_claim_scope import (
         get_existing_standard_names,
+    )
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
         merge_standard_name_sources,
     )
     from imas_codex.standard_names.sources.dd import extract_dd_candidates
@@ -1299,7 +1327,9 @@ async def preview_sn_pools(
         )
     selected_domains = [domain for domain in selected_domains if domain != "mixed"]
 
-    from imas_codex.standard_names.graph_ops import get_existing_standard_names
+    from imas_codex.standard_names.graph_store.graph_claim_scope import (
+        get_existing_standard_names,
+    )
     from imas_codex.standard_names.sources.dd import extract_dd_candidates
 
     existing = await asyncio.to_thread(get_existing_standard_names)
@@ -1561,7 +1591,7 @@ async def run_sn_pools(
     # promotion) — just the two self-healing projections. The full maintenance
     # suite is `--only reconcile`; this is the one-shot edge backfill.
     if attach_only:
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_audits import (
             reconcile_standard_name_dd_edges,
             reconcile_standard_name_source_paths,
         )
@@ -1617,7 +1647,7 @@ async def run_sn_pools(
 
     # Pre-create the SNRun node so LLMCost → FOR_RUN edges have a target.
     from imas_codex.settings import get_pool_replicas
-    from imas_codex.standard_names.graph_ops import create_sn_run_open
+    from imas_codex.standard_names.graph_store.graph_audits import create_sn_run_open
     from imas_codex.standard_names.run_invocation import capture_run_invocation
 
     # Record how the run was asked to work alongside what it does, so an empty
@@ -1716,7 +1746,7 @@ async def run_sn_pools(
         return await asyncio.to_thread(fn, *args, **kwargs)
 
     try:
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_audits import (
             mark_orphaned_standard_name_runs_stale,
         )
 
@@ -1769,7 +1799,7 @@ async def run_sn_pools(
             )
         # ── Reconcile-once-at-startup ─────────────────────────────
         # Must complete BEFORE any pool issues its first claim.
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_audits import (
             reconcile_standard_name_sources,
         )
 
@@ -1786,7 +1816,9 @@ async def run_sn_pools(
         )
 
         # ── Reconcile VocabGap nodes against current ISN vocab ────────
-        from imas_codex.standard_names.graph_ops import reconcile_vocab_gaps
+        from imas_codex.standard_names.graph_store.graph_audits import (
+            reconcile_vocab_gaps,
+        )
 
         vg_result = await _global_maintenance_call(reconcile_vocab_gaps, default={})
         if vg_result.get("checked", 0) > 0:
@@ -1813,7 +1845,9 @@ async def run_sn_pools(
         # A unit skip records the unit resolver as it stood at extraction; a
         # resolver fix (dimensionless is a unit, count pseudo-units, canonical
         # symbol order) does not lift it. Re-ask the extractor's own question.
-        from imas_codex.standard_names.graph_ops import revive_unit_skipped_sources
+        from imas_codex.standard_names.graph_store.graph_audits import (
+            revive_unit_skipped_sources,
+        )
 
         unit_result = await _global_maintenance_call(
             revive_unit_skipped_sources, default={}
@@ -1830,7 +1864,7 @@ async def run_sn_pools(
         # exact token it asked for appears — but the request is often the wrong
         # spelling of a capability the vocabulary now expresses another way. Give
         # each parked source one retry per vocabulary change instead.
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_audits import (
             retry_vocab_gap_sources_on_grammar_change,
         )
 
@@ -1852,7 +1886,7 @@ async def run_sn_pools(
         # scaffolding. Idempotent, provenance-only. Then surface the ledger
         # orphan count (live names with no PRODUCED_NAME source) — the invariant
         # the ledger must hold; a non-zero count is silent provenance loss.
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_audits import (
             reconcile_grammar_segments,
             reconcile_provenance,
             reconcile_source_status_liveness,
@@ -1918,7 +1952,7 @@ async def run_sn_pools(
         # successor at write time; this heals any name already stranded and is
         # an idempotent net. Runs BEFORE the pools so the review pool sees the
         # advanced names the same run.
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_audits import (
             reconcile_catalog_status,
             reconcile_reviewable_name_stage,
         )
@@ -1949,7 +1983,7 @@ async def run_sn_pools(
         # (current DD version's — DDv4 → COCOS 17). Sets the cocos integer and
         # HAS_COCOS edge for any COCOS-dependent name missing it, across all
         # origins. Idempotent; no-op once the invariant holds.
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_audits import (
             reconcile_standard_name_cocos_links,
         )
 
@@ -1989,7 +2023,7 @@ async def run_sn_pools(
         # dimensionality — and the attachment guard below compares dimensionality,
         # so an ambiguous name admits sources of either. Runs FIRST of the
         # structural passes for that reason. Idempotent.
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_audits import (
             reconcile_standard_name_unit_edges,
         )
 
@@ -2033,7 +2067,7 @@ async def run_sn_pools(
         # units_agree; unit-disagreeing pairs are dropped and logged to the
         # unit-curation triage. Runs BEFORE the source_paths reconcile so the
         # scalar picks up the new edges the same run. Idempotent.
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_audits import (
             reconcile_standard_name_dd_edges,
         )
 
@@ -2053,7 +2087,7 @@ async def run_sn_pools(
         # Materialize the denormalised source_paths scalar from live edges, so a
         # remapped/pruned/refined mapping can't leave the scalar stale (no other
         # path reconciles it). Edges are the source of truth; idempotent.
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_audits import (
             reconcile_standard_name_source_paths,
         )
 
@@ -2175,7 +2209,9 @@ async def run_sn_pools(
         # No-op when nothing is stranded. Names carrying an unapplied edit
         # (edit_status='open') are left for the normal accept path so their
         # rename / descendant cascade still applies.
-        from imas_codex.standard_names.graph_ops import promote_stranded_reviewed
+        from imas_codex.standard_names.graph_store.graph_audits import (
+            promote_stranded_reviewed,
+        )
 
         _promote_min = min_score if min_score is not None else DEFAULT_MIN_SCORE
         promoted = await _global_maintenance_call(
@@ -2260,10 +2296,12 @@ async def run_sn_pools(
         # Both classes leave parents structurally inaccessible to the
         # pipeline until the edges are re-derived. Idempotent (MERGE)
         # and fast (~1s for ~200 SNs) so safe to run on every loop.
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_lineage import (
             normalize_derived_parent_lifecycle,
             rederive_structural_edges,
             seed_parent_sources,
+        )
+        from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
             structural_accept_derived_parents,
         )
 
@@ -2312,7 +2350,7 @@ async def run_sn_pools(
         # accept the parent but write no PRODUCED_NAME source, stranding it as a
         # ledger orphan. Runs after acceptance so same-run parents are covered;
         # idempotent and self-healing.
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
             reconcile_orphan_parent_sources,
         )
 
@@ -2439,7 +2477,7 @@ async def run_sn_pools(
         # reflects real spend even when the run is interrupted or crashes
         # before ``finalize_sn_run`` runs.
         async def _cost_spent_sync_loop() -> None:
-            from imas_codex.standard_names.graph_ops import (
+            from imas_codex.standard_names.graph_store.graph_audits import (
                 update_sn_run_progress,
             )
 
@@ -2550,7 +2588,7 @@ async def run_sn_pools(
         # the tripwire threshold so a regressed run is visible in the summary
         # rather than hiding inside an inflated ``processed`` count.
         try:
-            from imas_codex.standard_names.graph_ops import (
+            from imas_codex.standard_names.graph_store.graph_source_bindings import (
                 persist_outcome_snapshot,
                 reset_persist_outcomes,
             )
@@ -2749,7 +2787,9 @@ async def run_sn_pools(
         if summary.stop_reason in {"completed", "no_eligible_work"} and (
             scope_run_id or drain_scope_id
         ):
-            from imas_codex.standard_names.graph_ops import scoped_terminal_residue
+            from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
+                scoped_terminal_residue,
+            )
 
             try:
                 terminal_residue = await asyncio.to_thread(
@@ -2796,7 +2836,7 @@ async def run_sn_pools(
                 await drain_heartbeat_task
 
         if drain_scope_id:
-            from imas_codex.standard_names.graph_ops import (
+            from imas_codex.standard_names.graph_store.graph_claim_scope import (
                 finalize_manifest_drain_scope,
             )
 
@@ -2828,7 +2868,9 @@ async def run_sn_pools(
 
         # Release any orphaned claims left by batches in flight at shutdown.
         try:
-            from imas_codex.standard_names.graph_ops import release_all_orphan_claims
+            from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
+                release_all_orphan_claims,
+            )
 
             orphan_counts = await asyncio.wait_for(
                 _global_maintenance_call(
@@ -2862,10 +2904,12 @@ async def run_sn_pools(
         FIXUP_TIMEOUT = 30.0
         if not reconcile_only:
             try:
-                from imas_codex.standard_names.graph_ops import (
+                from imas_codex.standard_names.graph_store.graph_lineage import (
                     normalize_derived_parent_lifecycle,
-                    reconcile_orphan_parent_sources,
                     rederive_structural_edges,
+                )
+                from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
+                    reconcile_orphan_parent_sources,
                 )
 
                 await _global_maintenance_call(
@@ -2894,7 +2938,9 @@ async def run_sn_pools(
                 )
 
         try:
-            from imas_codex.standard_names.graph_ops import resolve_doc_links
+            from imas_codex.standard_names.graph_store.graph_doc_links import (
+                resolve_doc_links,
+            )
 
             _link_stats = await asyncio.wait_for(
                 _global_maintenance_call(resolve_doc_links, default={}),
@@ -3055,7 +3101,7 @@ async def run_sn_pools(
         # converts the open ``status='running'`` row into a closed run
         # — must run on every exit path (clean, budget-exhausted,
         # idle-exhausted, SIGINT, or task cancellation).
-        from imas_codex.standard_names.graph_ops import finalize_sn_run
+        from imas_codex.standard_names.graph_store.graph_audits import finalize_sn_run
 
         try:
             await asyncio.wait_for(

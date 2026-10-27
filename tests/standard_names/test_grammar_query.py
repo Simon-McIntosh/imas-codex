@@ -72,7 +72,9 @@ def test_state_segment_is_tiered_and_decomposed() -> None:
     """The state segment (charge_state/internal_state) is a subject-refinement
     modifier — tiered like population (Tier 2) and captured as a grammar
     decomposition column."""
-    from imas_codex.standard_names.graph_ops import _GRAMMAR_SEGMENT_COLUMNS
+    from imas_codex.standard_names.graph_store.graph_catalog import (
+        _GRAMMAR_SEGMENT_COLUMNS,
+    )
 
     assert tier_of("state") == 2
     assert "state" in _GRAMMAR_SEGMENT_COLUMNS
@@ -86,7 +88,9 @@ def test_tier_and_column_segments_are_real_isn_segments() -> None:
     is codex policy and some segments intentionally carry no search weight."""
     from imas_standard_names.grammar.model import StandardName
 
-    from imas_codex.standard_names.graph_ops import _GRAMMAR_SEGMENT_COLUMNS
+    from imas_codex.standard_names.graph_store.graph_catalog import (
+        _GRAMMAR_SEGMENT_COLUMNS,
+    )
 
     # StandardName.model_fields is the authoritative segment universe — every
     # segment a name can carry, including the operator-slot segments

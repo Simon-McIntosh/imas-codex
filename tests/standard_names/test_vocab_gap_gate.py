@@ -61,11 +61,13 @@ class TestVocabGapClassification:
                 },
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.GraphClient",
+                "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
                 return_value=mock_gc_instance,
             ),
         ):
-            from imas_codex.standard_names.graph_ops import write_vocab_gaps
+            from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+                write_vocab_gaps,
+            )
 
             write_vocab_gaps(gaps, "dd", skip_segment_filter=True)
 

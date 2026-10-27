@@ -55,7 +55,7 @@ async def process_enrich_parents_batch(
     from imas_codex.settings import get_model, get_reasoning_effort
     from imas_codex.standard_names.budget import LLMCostEvent
     from imas_codex.standard_names.context import build_compose_context
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
         fetch_derived_parent_children,
         persist_enriched_parent,
         release_enrich_parents_claims,

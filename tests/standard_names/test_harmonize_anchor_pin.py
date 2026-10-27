@@ -25,6 +25,10 @@ import importlib
 from typing import Any
 
 from imas_codex.standard_names.families import PATTERN_INVARIANT_SEGMENTS
+from imas_codex.standard_names.graph_store import (
+    graph_claim_scope as _owning_graph_claim_scope,
+    graph_docs_persistence as _owning_graph_docs_persistence,
+)
 
 _ANCHOR = "base_at_axis"
 _OUTSCORER = "base_at_boundary"
@@ -112,7 +116,9 @@ def test_stamped_family_releases_the_anchor_and_selects_normally(
     from imas_codex.standard_names import graph_ops
 
     monkeypatch.setattr(
-        graph_ops, "stamp_harmonized_families", lambda families: len(families)
+        _owning_graph_docs_persistence,
+        "stamp_harmonized_families",
+        lambda families: len(families),
     )
     harmonize = _harmonize()
     nodes = [
@@ -193,7 +199,7 @@ def test_the_report_names_the_anchor_the_apply_would_use(
     ]
     _family_read(monkeypatch, nodes)
     monkeypatch.setattr(
-        graph_ops,
+        _owning_graph_claim_scope,
         "get_existing_standard_names",
         lambda gc=None: {n["id"] for n in nodes},
     )
@@ -219,7 +225,7 @@ def test_report_without_a_client_counts_an_out_of_scope_link_live(
     nodes = [linked, _node(_OUTSCORER, "accepted", 0.8)]
     _family_read(monkeypatch, nodes)
     monkeypatch.setattr(
-        graph_ops,
+        _owning_graph_claim_scope,
         "get_existing_standard_names",
         lambda gc=None: {target} | {n["id"] for n in nodes},
     )
@@ -256,7 +262,9 @@ def test_the_report_reads_the_all_name_set_through_the_owner(
         seen.append(gc)
         return {"only_name"}
 
-    monkeypatch.setattr(graph_ops, "get_existing_standard_names", _owner)
+    monkeypatch.setattr(
+        _owning_graph_claim_scope, "get_existing_standard_names", _owner
+    )
 
     assert harmonize.known_name_ids(client) == {"only_name"}
     assert seen == [client], "the caller's client must reach the owner"

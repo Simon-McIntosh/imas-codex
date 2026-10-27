@@ -12,7 +12,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.graph_ops import (
+from imas_codex.standard_names.graph_store.graph_supersession import (
     classify_sourceless_standard_names,
     supersede_exhausted_standard_name_orphans,
 )
@@ -340,7 +340,7 @@ def _run_export_with_audit(
     fetch = MagicMock(return_value=population)
     with (
         patch(
-            "imas_codex.standard_names.graph_ops.classify_sourceless_standard_names",
+            "imas_codex.standard_names.graph_store.graph_supersession.classify_sourceless_standard_names",
             return_value=audit_rows,
         ),
         patch("imas_codex.standard_names.export._fetch_export_population", fetch),

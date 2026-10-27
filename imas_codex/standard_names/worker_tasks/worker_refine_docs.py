@@ -54,8 +54,10 @@ async def process_refine_docs_batch(
         DEFAULT_ESCALATION_MODEL,
         DEFAULT_REFINE_ROTATIONS,
     )
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_claim_release import (
         _mark_refine_docs_exhausted,
+    )
+    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
         persist_refined_docs,
         release_refine_docs_failed_claims,
     )
@@ -402,7 +404,7 @@ async def process_embed_batch(
     No LLM cost — uses embedding server only.  Does not charge budget.
     """
     from imas_codex.embeddings.description import embed_descriptions_batch
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_refinement import (
         _compute_embed_hash,
         persist_embed_batch,
     )

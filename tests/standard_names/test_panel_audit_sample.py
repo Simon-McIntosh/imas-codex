@@ -7,7 +7,14 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from imas_codex.standard_names.graph_store import (
+    graph_catalog as _owning_graph_catalog,
+    graph_foundation as _owning_graph_foundation,
+)
 from imas_codex.standard_names.review import cascade, panel_audit
+from imas_codex.standard_names.worker_tasks import (
+    worker_review_names as _owning_worker_review_names,
+)
 
 _JEV_DECISION_SCORE = 0.9
 _PANEL_SCORE = 0.2
@@ -221,8 +228,8 @@ async def test_audit_row_is_excluded_from_the_review_aggregates(monkeypatch):
     from imas_codex.standard_names import graph_ops
 
     graph = _AggregateGraph()
-    monkeypatch.setattr(graph_ops, "GraphClient", lambda: graph)
-    assert graph_ops.update_review_aggregates(["temperature"]) == 1
+    monkeypatch.setattr(_owning_graph_foundation, "GraphClient", lambda: graph)
+    assert _owning_graph_catalog.update_review_aggregates(["temperature"]) == 1
     before = graph.aggregate
 
     capture, incumbent, _routes = _install_cascade(
@@ -254,7 +261,7 @@ async def test_audit_row_is_excluded_from_the_review_aggregates(monkeypatch):
         mgr=_Manager(),
     )
     assert len(capture.rows) == 1
-    assert graph_ops.update_review_aggregates(["temperature"]) == 1
+    assert _owning_graph_catalog.update_review_aggregates(["temperature"]) == 1
     assert graph.aggregate == before == (2, 0.45, False)
 
 
@@ -300,8 +307,10 @@ async def test_audit_runs_the_quorum_without_persisting_its_rows(monkeypatch):
             "canonical_model": "rd-primary",
         }
 
-    monkeypatch.setattr(workers, "_run_rd_quorum_cycles", cycles)
-    monkeypatch.setattr(graph_ops, "write_reviews", lambda rows: written.extend(rows))
+    monkeypatch.setattr(_owning_worker_review_names, "_run_rd_quorum_cycles", cycles)
+    monkeypatch.setattr(
+        _owning_graph_catalog, "write_reviews", lambda rows: written.extend(rows)
+    )
 
     async def judgment(_item, _model):
         return _route("name"), {}, 0.0
@@ -319,7 +328,7 @@ async def test_audit_runs_the_quorum_without_persisting_its_rows(monkeypatch):
     monkeypatch.setattr(panel_audit, "panel_audit_rate", lambda: 1.0)
 
     incumbent = partial(
-        workers._persisting_quorum_cycles,
+        _owning_worker_review_names._persisting_quorum_cycles,
         sn_id="temperature",
         review_axis="name",
         phase="review_name",
@@ -338,8 +347,8 @@ async def test_audit_runs_the_quorum_without_persisting_its_rows(monkeypatch):
 
     graph = _AggregateGraph()
     graph.reviews.extend(written)
-    monkeypatch.setattr(graph_ops, "GraphClient", lambda: graph)
-    assert graph_ops.update_review_aggregates(["temperature"]) == 1
+    monkeypatch.setattr(_owning_graph_foundation, "GraphClient", lambda: graph)
+    assert _owning_graph_catalog.update_review_aggregates(["temperature"]) == 1
     assert graph.aggregate == (2, 0.45, False)
 
 
@@ -649,7 +658,7 @@ async def test_audit_row_carries_the_group_id_its_own_cycle_rows_carry(
     async def stub_call(**_kwargs):
         return _Batch(_ReviewItem(0.44)), 0.0, (0, 0)
 
-    result = await workers._run_rd_quorum_cycles(
+    result = await _owning_worker_review_names._run_rd_quorum_cycles(
         sn_id="temperature",
         review_axis="name",
         response_model=object,
@@ -736,7 +745,7 @@ def test_the_real_writer_stores_the_audit_row_and_the_aggregate_ignores_it(
 ):
     """The audit row on a real graph, written unstubbed and read back whole."""
     from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_catalog import (
         update_review_aggregates,
         write_reviews,
     )

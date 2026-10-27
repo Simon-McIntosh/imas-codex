@@ -15,6 +15,10 @@ from imas_codex.graph.dd_lifecycle import (
     dd_path_index,
     reconcile_node_lifecycle,
 )
+from imas_codex.standard_names.graph_store import (
+    graph_audits as _owning_graph_audits,
+    graph_claim_scope as _owning_graph_claim_scope,
+)
 
 
 class TestDDPathIndex:
@@ -77,7 +81,7 @@ class TestExtractionGate:
 
         from imas_codex.standard_names import graph_ops
 
-        src = inspect.getsource(graph_ops.get_extraction_candidates_dd)
+        src = inspect.getsource(_owning_graph_claim_scope.get_extraction_candidates_dd)
         assert "coalesce(n.lifecycle_status, '') <> 'removed'" in src
 
     def test_domain_seed_sweep_gates_removed(self):
@@ -99,9 +103,9 @@ class TestReconcileSourcesGate:
 
         from imas_codex.standard_names import graph_ops
 
-        src = inspect.getsource(graph_ops.reconcile_standard_name_sources)
-        upstream_present = graph_ops._standard_name_source_upstream_present_cypher(
-            "sns"
+        src = inspect.getsource(_owning_graph_audits.reconcile_standard_name_sources)
+        upstream_present = (
+            _owning_graph_audits._standard_name_source_upstream_present_cypher("sns")
         )
         assert '_standard_name_source_upstream_present_cypher("sns")' in src
         assert "OR NOT (" in src, "stale step must negate upstream presence"

@@ -110,7 +110,7 @@ def test_nothing_to_realign_writes_nothing():
     """
     from unittest.mock import MagicMock
 
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_audits import (
         reconcile_standard_name_unit_edges,
     )
 
@@ -129,7 +129,7 @@ def test_nothing_to_realign_writes_nothing():
 @pytest.mark.graph
 def test_stale_second_unit_edge_is_dropped(_gc, _clean):
     """A name carrying two units keeps only the one its scalar declares."""
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_audits import (
         reconcile_standard_name_unit_edges,
     )
 
@@ -152,7 +152,7 @@ def test_terminal_stage_is_realigned_too(_gc, _clean):
     structural: a name has one unit whatever its stage, and a terminal name is
     precisely the case nothing else can heal.
     """
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_audits import (
         reconcile_standard_name_unit_edges,
     )
 
@@ -168,7 +168,7 @@ def test_edge_disagreeing_with_the_scalar_is_replaced(_gc, _clean):
     The scalar is authoritative: it is what the exports and the attachment
     guard's dimensionality rule read.
     """
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_audits import (
         reconcile_standard_name_unit_edges,
     )
 
@@ -181,7 +181,7 @@ def test_edge_disagreeing_with_the_scalar_is_replaced(_gc, _clean):
 @pytest.mark.graph
 def test_correct_name_is_untouched_and_pass_is_idempotent(_gc, _clean):
     """A name already holding the invariant is not rewritten, twice over."""
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_audits import (
         reconcile_standard_name_unit_edges,
     )
 
@@ -204,7 +204,7 @@ def test_name_without_a_unit_scalar_is_left_alone(_gc, _clean):
     Stripping its edge would destroy the only unit information it has; a name
     awaiting a unit is not a cardinality violation.
     """
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_audits import (
         reconcile_standard_name_unit_edges,
     )
 

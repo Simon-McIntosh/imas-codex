@@ -13,12 +13,14 @@ from neo4j import GraphDatabase
 
 from imas_codex.graph.client import GraphClient as RealGraphClient
 from imas_codex.standard_names.graph_ops import (
+    reconcile_lifecycleless_standard_name_stubs,
+)
+from imas_codex.standard_names.graph_store.graph_lineage import (
     LifecyclelessStubConflict,
     _delete_derived_parent_nodes,
     _lifecycleless_stub_manifest,
     _partition_lifecycleless_stub_rows,
     _reconcile_spurious_stub_source_scalars,
-    reconcile_lifecycleless_standard_name_stubs,
 )
 
 
@@ -550,7 +552,7 @@ def test_late_failure_rolls_back_materialized_parent(
         preview = reconcile_lifecycleless_standard_name_stubs(gc=client)
         with (
             patch(
-                "imas_codex.standard_names.graph_ops._delete_derived_parent_nodes",
+                "imas_codex.standard_names.graph_store.graph_lineage._delete_derived_parent_nodes",
                 side_effect=RuntimeError("injected late failure"),
             ),
             pytest.raises(RuntimeError, match="injected late failure"),
@@ -817,8 +819,7 @@ def test_binding_change_between_manifest_and_cas_rolls_back(
 
         with (
             patch(
-                "imas_codex.standard_names.graph_ops."
-                "_reconcile_spurious_stub_source_scalars",
+                "imas_codex.standard_names.graph_store.graph_lineage._reconcile_spurious_stub_source_scalars",
                 side_effect=add_binding_then_reconcile,
             ),
             pytest.raises(
@@ -900,7 +901,7 @@ def test_new_producer_between_scalar_cas_and_deletion_rolls_back(
 
         with (
             patch(
-                "imas_codex.standard_names.graph_ops._delete_derived_parent_nodes",
+                "imas_codex.standard_names.graph_store.graph_lineage._delete_derived_parent_nodes",
                 side_effect=inject_producer_then_delete,
             ),
             pytest.raises(

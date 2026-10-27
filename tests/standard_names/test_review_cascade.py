@@ -9,10 +9,24 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from imas_codex.standard_names.graph_store import (
+    graph_catalog as _owning_graph_catalog,
+    graph_cost_and_claims as _owning_graph_cost_and_claims,
+    graph_doc_links as _owning_graph_doc_links,
+    graph_foundation as _owning_graph_foundation,
+    graph_refinement as _owning_graph_refinement,
+    graph_review_persistence as _owning_graph_review_persistence,
+    resolve_owned_name,
+)
 from imas_codex.standard_names.review import cascade
 from imas_codex.standard_names.review.cascade import (
     route_docs,
     route_name,
+)
+from imas_codex.standard_names.worker_tasks import (
+    worker_extraction_and_enrichment as _owning_worker_extraction_and_enrichment,
+    worker_refine_names as _owning_worker_refine_names,
+    worker_review_docs as _owning_worker_review_docs,
 )
 
 _CALIBRATION_SHA256 = "4e47220f157edee78fc6b0c1c98994606fce42be6a620a68f9f09980eccba428"
@@ -104,13 +118,13 @@ def test_shadow_jev_row_does_not_change_review_aggregates(monkeypatch, shadow_sc
     from imas_codex.standard_names import graph_ops
 
     graph = _AggregateGraph()
-    monkeypatch.setattr(graph_ops, "GraphClient", lambda: graph)
-    assert graph_ops.update_review_aggregates(["temperature"]) == 1
+    monkeypatch.setattr(_owning_graph_foundation, "GraphClient", lambda: graph)
+    assert _owning_graph_catalog.update_review_aggregates(["temperature"]) == 1
     incumbent_aggregate = graph.aggregate
     graph.reviews.append(
         {"judge_kind": "jev", "is_canonical": False, "score": shadow_score}
     )
-    assert graph_ops.update_review_aggregates(["temperature"]) == 1
+    assert _owning_graph_catalog.update_review_aggregates(["temperature"]) == 1
     assert graph.aggregate == incumbent_aggregate == (2, 0.45, False)
 
 
@@ -121,7 +135,9 @@ async def test_shadow_review_record_is_noncanonical(monkeypatch):
     from imas_codex.standard_names import graph_ops
 
     stored = []
-    monkeypatch.setattr(graph_ops, "write_reviews", lambda rows: stored.extend(rows))
+    monkeypatch.setattr(
+        _owning_graph_catalog, "write_reviews", lambda rows: stored.extend(rows)
+    )
     await cascade._store_route(
         {"id": "temperature"},
         "name",
@@ -206,7 +222,7 @@ async def test_contradiction_note_uses_named_reason(monkeypatch):
             "claim_answers": [{"choice": "contradicts"}],
         },
     )
-    note = await workers._documentation_contradiction_note(
+    note = await _owning_worker_review_docs._documentation_contradiction_note(
         {
             "id": "temperature",
             "dd_source_docs": [
@@ -508,10 +524,12 @@ def test_consumer_predicates_agree_with_rubric_route(
             return self._answer(statement)
 
     gc = _PersistGraph(open_rows)
-    monkeypatch.setattr(graph_ops, "GraphClient", lambda: gc)
-    monkeypatch.setattr(graph_ops, "write_reviews", lambda _rows: None)
-    monkeypatch.setattr(graph_ops, "_doc_link_mismatches", lambda *_args: [])
-    stage = getattr(graph_ops, "persist_reviewed_" + axis)(
+    monkeypatch.setattr(_owning_graph_foundation, "GraphClient", lambda: gc)
+    monkeypatch.setattr(_owning_graph_catalog, "write_reviews", lambda _rows: None)
+    monkeypatch.setattr(
+        _owning_graph_doc_links, "_doc_link_mismatches", lambda *_args: []
+    )
+    stage = resolve_owned_name("persist_reviewed_" + axis)(
         sn_id="temperature",
         claim_token="token",
         score=score,
@@ -528,8 +546,8 @@ def test_consumer_predicates_agree_with_rubric_route(
         captured.update(kwargs)
         return []
 
-    monkeypatch.setattr(graph_ops, "_claim_sn_atomic", claim)
-    getattr(graph_ops, "claim_refine_" + axis + "_batch")(min_score=min_score)
+    monkeypatch.setattr(_owning_graph_cost_and_claims, "_claim_sn_atomic", claim)
+    resolve_owned_name("claim_refine_" + axis + "_batch")(min_score=min_score)
     comparator = re.search(
         rf"sn\.reviewer_score_{axis}\s*(<|>=)\s*\$min_score",
         captured["eligibility_where"],
@@ -751,8 +769,8 @@ def test_deciding_result_reaches_name_stage(monkeypatch, route, expected_stage):
     gc = MagicMock()
     gc.__enter__.return_value = gc
     gc.query.side_effect = [[{"chain_length": 0}], [{"id": "temperature"}]]
-    monkeypatch.setattr(graph_ops, "GraphClient", lambda: gc)
-    monkeypatch.setattr(graph_ops, "write_reviews", lambda _rows: None)
+    monkeypatch.setattr(_owning_graph_foundation, "GraphClient", lambda: gc)
+    monkeypatch.setattr(_owning_graph_catalog, "write_reviews", lambda _rows: None)
     decision = cascade._direct_result(
         _decision(
             route, 0.9, ("advisory_alias_collapsed",) if route == "refine" else ()
@@ -762,7 +780,7 @@ def test_deciding_result_reaches_name_stage(monkeypatch, route, expected_stage):
         {"id": "temperature"},
         "name",
     )
-    stage = graph_ops.persist_reviewed_name(
+    stage = _owning_graph_review_persistence.persist_reviewed_name(
         sn_id="temperature",
         claim_token="token",
         score=decision["winning_score"],
@@ -777,7 +795,7 @@ def test_deciding_result_reaches_name_stage(monkeypatch, route, expected_stage):
     if route == "refine":
         assert (
             "sn.review_quorum_shortfall IS NULL"
-            in graph_ops.REFINE_NAME_ELIGIBILITY_WHERE
+            in _owning_graph_refinement.REFINE_NAME_ELIGIBILITY_WHERE
         )
 
 
@@ -853,13 +871,13 @@ async def test_unjudged_shadow_row_preserves_incumbent_and_aggregate(
             return None if failure == "lease" else MagicMock()
 
     monkeypatch.setattr(settings, "get_model", lambda _seat: "judge-model")
-    monkeypatch.setattr(graph_ops, "GraphClient", lambda: graph)
-    monkeypatch.setattr(graph_ops, "write_reviews", write_reviews)
+    monkeypatch.setattr(_owning_graph_foundation, "GraphClient", lambda: graph)
+    monkeypatch.setattr(_owning_graph_catalog, "write_reviews", write_reviews)
     monkeypatch.setattr(
         cascade, "_name_judgment" if axis == "name" else "_docs_judgment", fail_judgment
     )
     monkeypatch.setattr(cascade, "deciding_enabled", lambda _axis: False)
-    graph_ops.update_review_aggregates(["temperature"])
+    _owning_graph_catalog.update_review_aggregates(["temperature"])
     before = graph.aggregate
     result = await cascade.adjudicate_review(
         axis,
@@ -878,7 +896,7 @@ async def test_unjudged_shadow_row_preserves_incumbent_and_aggregate(
     reason = json.loads(row["comments"])["failure_reason"]
     assert ("lease" if failure == "lease" else "Jev unavailable") in reason
     assert "unjudged" not in cascade._calibration()[axis]["route_shares"]
-    graph_ops.update_review_aggregates(["temperature"])
+    _owning_graph_catalog.update_review_aggregates(["temperature"])
     assert graph.aggregate == before == (2, 0.45, False)
 
 
@@ -972,12 +990,18 @@ async def test_refine_worker_receives_named_checks(monkeypatch):
     monkeypatch.setattr("imas_codex.discovery.base.llm.acall_llm_structured", llm)
     monkeypatch.setattr("imas_codex.graph.client.GraphClient", lambda: gc)
     monkeypatch.setattr("imas_codex.settings.get_model", lambda _seat: "mock")
-    monkeypatch.setattr(workers, "_hybrid_search_neighbours", lambda *_args: [])
     monkeypatch.setattr(
-        "imas_codex.standard_names.graph_ops.persist_refined_name",
+        _owning_worker_extraction_and_enrichment,
+        "_hybrid_search_neighbours",
+        lambda *_args: [],
+    )
+    monkeypatch.setattr(
+        "imas_codex.standard_names.graph_store.graph_refinement.persist_refined_name",
         lambda **_kwargs: {"new_name": "new_name", "old_name": "test_name"},
     )
-    await workers.process_refine_name_batch([item], manager, asyncio.Event())
+    await _owning_worker_refine_names.process_refine_name_batch(
+        [item], manager, asyncio.Event()
+    )
     assert context["failed_checks"][0]["id"] == "source_fidelity_unsupported_qualifier"
     assert set(trigger_calls[0]) == {"checks", "check_results", "check_threshold"}
     assert (
@@ -1029,7 +1053,9 @@ async def test_shadow_row_is_written_after_the_incumbents_rows(monkeypatch):
     monkeypatch.setattr(cascade, "_name_judgment", judgment)
     monkeypatch.setattr(cascade, "deciding_enabled", lambda _axis: False)
     monkeypatch.setattr(
-        graph_ops, "write_reviews", lambda rows, **_: writes.append(list(rows))
+        _owning_graph_catalog,
+        "write_reviews",
+        lambda rows, **_: writes.append(list(rows)),
     )
     result = await cascade.adjudicate_review(
         "name",
@@ -1062,7 +1088,9 @@ async def test_failed_incumbent_cycle_writes_no_shadow_row(monkeypatch):
     monkeypatch.setattr(cascade, "_name_judgment", judgment)
     monkeypatch.setattr(cascade, "deciding_enabled", lambda _axis: False)
     monkeypatch.setattr(
-        graph_ops, "write_reviews", lambda rows, **_: writes.append(list(rows))
+        _owning_graph_catalog,
+        "write_reviews",
+        lambda rows, **_: writes.append(list(rows)),
     )
     result = await cascade.adjudicate_review(
         "name",

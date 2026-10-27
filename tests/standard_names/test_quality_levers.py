@@ -239,7 +239,9 @@ class TestGrammarRetry:
         """Successful retry returns a revised name."""
         from pydantic import BaseModel, Field
 
-        from imas_codex.standard_names.workers import _grammar_retry
+        from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+            _grammar_retry,
+        )
 
         class MockResponse:
             revised_name = "electron_temperature"
@@ -259,7 +261,9 @@ class TestGrammarRetry:
     @pytest.mark.asyncio
     async def test_retry_returns_none_on_failure(self):
         """Failed retry returns None."""
-        from imas_codex.standard_names.workers import _grammar_retry
+        from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+            _grammar_retry,
+        )
 
         async def mock_acall(*args, **kwargs):
             raise Exception("LLM error")

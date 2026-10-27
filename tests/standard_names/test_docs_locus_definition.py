@@ -20,6 +20,10 @@ from imas_codex.standard_names.docs_gates import (
     conformance_findings,
     locus_definition_sentence,
 )
+from imas_codex.standard_names.worker_tasks import (
+    worker_generate_docs as _owning_worker_generate_docs,
+    worker_review_docs as _owning_worker_review_docs,
+)
 
 _SUBJECT_ELONGATION = "elongation_of_plasma_boundary"
 _SUBJECT_MINOR_RADIUS = "minor_radius_of_plasma_boundary"
@@ -29,7 +33,9 @@ _BASE_DOCUMENT = "The model describes the plasma boundary for this quantity."
 
 def _rendered(name: str, documentation: str) -> str:
     conventions = conventions_context_for(name)
-    return workers._documentation_with_registry_form(name, documentation, conventions)
+    return _owning_worker_generate_docs._documentation_with_registry_form(
+        name, documentation, conventions
+    )
 
 
 def _locus_sentence(concept: object) -> str:
@@ -75,7 +81,7 @@ def test_departing_locus_sentence_is_refined_rather_than_accepted() -> None:
     classes = {finding.finding_class for finding in findings}
     assert HouseStyleFindingClass.LOCUS_DEFINITION in classes
 
-    note = workers._documentation_conformance_note(
+    note = _owning_worker_review_docs._documentation_conformance_note(
         {"id": _SUBJECT_ELONGATION, "description": "", "documentation": documentation}
     )
     assert note is not None
@@ -86,7 +92,7 @@ def test_departing_locus_sentence_is_refined_rather_than_accepted() -> None:
 def test_carried_registry_definition_is_accepted(subject: str) -> None:
     documentation = f"The model describes {subject.replace('_', ' ')}."
     conventions = conventions_context_for(subject)
-    written = workers._documentation_with_registry_form(
+    written = _owning_worker_generate_docs._documentation_with_registry_form(
         subject, documentation, conventions
     )
 
@@ -180,7 +186,7 @@ def test_forbidden_locus_variant_is_refined_rather_than_accepted() -> None:
     classes = {finding.finding_class for finding in findings}
     assert HouseStyleFindingClass.FORBIDDEN_LOCUS_GLOSS in classes
 
-    note = workers._documentation_conformance_note(
+    note = _owning_worker_review_docs._documentation_conformance_note(
         {"id": _SUBJECT_ELONGATION, "description": "", "documentation": documentation}
     )
     assert note is not None

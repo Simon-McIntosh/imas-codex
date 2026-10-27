@@ -10,6 +10,11 @@ import pytest
 
 from imas_codex.cli.sn import _require_terminal_drain
 from imas_codex.standard_names import graph_ops, loop
+from imas_codex.standard_names.graph_store import (
+    graph_catalog_reset as _owning_graph_catalog_reset,
+    graph_foundation as _owning_graph_foundation,
+    graph_source_bindings as _owning_graph_source_bindings,
+)
 
 
 def _vocab_gap_write_boundary() -> tuple[MagicMock, MagicMock]:
@@ -59,11 +64,11 @@ def test_vocab_gap_status_refuses_an_omitted_reason() -> None:
     client, transaction = _vocab_gap_write_boundary()
 
     with (
-        patch.object(graph_ops, "GraphClient", return_value=client),
-        patch.object(graph_ops, "write_vocab_gaps", return_value=1),
+        patch.object(_owning_graph_foundation, "GraphClient", return_value=client),
+        patch.object(_owning_graph_catalog_reset, "write_vocab_gaps", return_value=1),
         pytest.raises(ValueError, match="non-empty reason"),
     ):
-        graph_ops.persist_claimed_vocab_gaps(
+        _owning_graph_source_bindings.persist_claimed_vocab_gaps(
             [_gap(reason=None)],
             [_outcome()],
             source_type="dd",
@@ -77,10 +82,10 @@ def test_vocab_gap_status_records_the_missing_vocabulary() -> None:
     client, transaction = _vocab_gap_write_boundary()
 
     with (
-        patch.object(graph_ops, "GraphClient", return_value=client),
-        patch.object(graph_ops, "write_vocab_gaps", return_value=1),
+        patch.object(_owning_graph_foundation, "GraphClient", return_value=client),
+        patch.object(_owning_graph_catalog_reset, "write_vocab_gaps", return_value=1),
     ):
-        assert graph_ops.persist_claimed_vocab_gaps(
+        assert _owning_graph_source_bindings.persist_claimed_vocab_gaps(
             [_gap(reason="the public grammar has no token for this carrier")],
             [_outcome()],
             source_type="dd",

@@ -7,6 +7,9 @@ from typing import Any
 import pytest
 
 from imas_codex.standard_names import graph_ops
+from imas_codex.standard_names.graph_store import (
+    graph_foundation as _owning_graph_foundation,
+)
 
 
 class _Graph:
@@ -41,9 +44,9 @@ def test_reclassify_writes_property_and_edge_in_one_statement(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     graph = _Graph()
-    monkeypatch.setattr(graph_ops, "GraphClient", lambda: graph)
+    monkeypatch.setattr(_owning_graph_foundation, "GraphClient", lambda: graph)
 
-    result = graph_ops.reclassify_standard_name_domain(
+    result = _owning_graph_foundation.reclassify_standard_name_domain(
         "plasma_current",
         "magnetic_field_diagnostics",
         reason="The signal measures plasma current.",
@@ -59,10 +62,10 @@ def test_failed_edge_write_rolls_back_property(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     graph = _Graph(fail_mutation=True)
-    monkeypatch.setattr(graph_ops, "GraphClient", lambda: graph)
+    monkeypatch.setattr(_owning_graph_foundation, "GraphClient", lambda: graph)
 
     with pytest.raises(RuntimeError, match="edge write failed"):
-        graph_ops.reclassify_standard_name_domain(
+        _owning_graph_foundation.reclassify_standard_name_domain(
             "plasma_current",
             "magnetic_field_diagnostics",
             reason="The signal measures plasma current.",

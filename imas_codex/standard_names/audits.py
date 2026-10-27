@@ -1265,8 +1265,7 @@ def synonym_check(
             else f"candidate unit={candidate.get('unit')}, existing unit={existing.get('unit')}"
         )
         issues.append(
-            f"audit:synonym_check: cosine={cosine:.3f} with existing "
-            f"'{name}' ({units})"
+            f"audit:synonym_check: cosine={cosine:.3f} with existing '{name}' ({units})"
         )
     return issues
 
@@ -4273,9 +4272,9 @@ def repair_invariant_sign_convention_documents(
     recorded in the receipt and cannot enter the mutation cohort.
     """
     from imas_codex.graph.client import GraphClient  # noqa: PLC0415
-    from imas_codex.standard_names.graph_ops import (  # noqa: PLC0415
+    from imas_codex.standard_names.graph_store.graph_foundation import _TransactionQuery
+    from imas_codex.standard_names.graph_store.graph_review_persistence import (
         _authority_payload_hash,
-        _TransactionQuery,
     )
 
     requested = sorted(set(name_ids))
@@ -4608,7 +4607,7 @@ def _cocos_transformation_repair_authority(
     expected_after: str,
     reason: str,
 ) -> dict[str, Any]:
-    from imas_codex.standard_names.graph_ops import (  # noqa: PLC0415
+    from imas_codex.standard_names.graph_store.graph_lineage import (
         _eligible_derived_parent_unit_children,
     )
 
@@ -4736,9 +4735,9 @@ def repair_structural_cocos_transformation_metadata(
     re-derives the same manifest, and changes only the transformation scalar.
     """
     from imas_codex.graph.client import GraphClient  # noqa: PLC0415
-    from imas_codex.standard_names.graph_ops import (  # noqa: PLC0415
+    from imas_codex.standard_names.graph_store.graph_foundation import _TransactionQuery
+    from imas_codex.standard_names.graph_store.graph_review_persistence import (
         _authority_payload_hash,
-        _TransactionQuery,
     )
 
     if not name_id.strip():

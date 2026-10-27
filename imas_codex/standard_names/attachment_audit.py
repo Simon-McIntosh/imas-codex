@@ -752,7 +752,7 @@ def _locus_documentation_confirms_device(
     """
     if not dd_documentation:
         return None
-    from imas_codex.standard_names.workers import (
+    from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
         _HARDWARE_LOCUS_WORDS,
         _content_tokens,
         _name_locus_token,
@@ -805,7 +805,9 @@ def _attachment_consistency(
     unchanged — this is a narrowing of one specific rule, not a general override.
     """
     from imas_codex.standard_names.audits import resolve_retired_operator_spellings
-    from imas_codex.standard_names.workers import _is_attachment_consistent
+    from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+        _is_attachment_consistent,
+    )
 
     resolved_name = resolve_retired_operator_spellings(sn_name)
     ok, reason = _is_attachment_consistent(
@@ -2734,7 +2736,9 @@ def attach_one_source(
 
     Returns ``{"ok": bool, ...}``; never raises on a refusal.
     """
-    from imas_codex.standard_names.graph_ops import _STABLE_BINDING_NAME_STAGES
+    from imas_codex.standard_names.graph_store.graph_foundation import (
+        _STABLE_BINDING_NAME_STAGES,
+    )
 
     own = gc is None
     if own:

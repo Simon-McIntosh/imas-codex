@@ -7,6 +7,9 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import imas_codex.standard_names.graph_ops as graph_ops
+from imas_codex.standard_names.graph_store import (
+    graph_parent_lifecycle as _owning_graph_parent_lifecycle,
+)
 
 
 def _snapshot(parent_id: str, *child_ids: str) -> dict:
@@ -36,10 +39,10 @@ def _snapshot(parent_id: str, *child_ids: str) -> dict:
 
 
 def test_authority_signature_covers_exact_ordered_child_rows() -> None:
-    first = graph_ops._structural_authority_record(
+    first = _owning_graph_parent_lifecycle._structural_authority_record(
         _snapshot("parent", "child-a", "child-b"), accepting=False
     )
-    changed = graph_ops._structural_authority_record(
+    changed = _owning_graph_parent_lifecycle._structural_authority_record(
         _snapshot("parent", "child-a", "child-c"), accepting=False
     )
 
@@ -50,13 +53,13 @@ def test_authority_signature_covers_exact_ordered_child_rows() -> None:
 
 
 def test_accept_and_authority_are_one_guarded_graph_statement() -> None:
-    record = graph_ops._structural_authority_record(
+    record = _owning_graph_parent_lifecycle._structural_authority_record(
         _snapshot("parent", "child-a", "child-b"), accepting=True
     )
     gc = MagicMock()
     gc.query.return_value = [{"name_stage": "accepted", "authority_id": record["id"]}]
 
-    assert graph_ops._persist_structural_authority(
+    assert _owning_graph_parent_lifecycle._persist_structural_authority(
         gc,
         record,
         parent_updates={"name_stage": "accepted"},
@@ -78,7 +81,7 @@ def test_accept_and_authority_are_one_guarded_graph_statement() -> None:
 
 
 def test_authority_write_result_is_unique_by_authority_not_source_row() -> None:
-    record = graph_ops._structural_authority_record(
+    record = _owning_graph_parent_lifecycle._structural_authority_record(
         _snapshot("parent", "child-a"), accepting=False
     )
     gc = MagicMock()
@@ -88,7 +91,7 @@ def test_authority_write_result_is_unique_by_authority_not_source_row() -> None:
     }
     gc.query.return_value = [duplicate_receipt, duplicate_receipt]
 
-    assert graph_ops._persist_structural_authority(gc, record)
+    assert _owning_graph_parent_lifecycle._persist_structural_authority(gc, record)
 
     cypher = gc.query.call_args.args[0]
     assert "RETURN DISTINCT parent.name_stage" in cypher
@@ -110,18 +113,22 @@ def test_backfill_names_every_write_and_second_run_writes_nothing(
 
     with (
         patch.object(
-            graph_ops,
+            _owning_graph_parent_lifecycle,
             "_structural_authority_snapshot",
             side_effect=lambda _gc, sn_id: snapshots[sn_id],
         ),
         patch.object(
-            graph_ops, "_persist_structural_authority", return_value=True
+            _owning_graph_parent_lifecycle,
+            "_persist_structural_authority",
+            return_value=True,
         ) as persist,
     ):
-        first = graph_ops.backfill_structural_name_authorities(
+        first = _owning_graph_parent_lifecycle.backfill_structural_name_authorities(
             receipt_path=receipt_path, gc=client
         )
-        second = graph_ops.backfill_structural_name_authorities(gc=client)
+        second = _owning_graph_parent_lifecycle.backfill_structural_name_authorities(
+            gc=client
+        )
 
     assert first["lacking_authority_before"] == 2
     assert first["eligible_before"] == 1

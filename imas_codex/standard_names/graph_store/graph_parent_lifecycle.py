@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 import logging
 from pathlib import Path
 from typing import Any
@@ -421,13 +423,13 @@ class StructuralAuthorityConflict(RuntimeError):
 
 def _structural_authority_identities(*, services: Any) -> tuple[str, str]:
     """Return immutable identities for the executing code and schema bytes."""
-    code_identity = services.hashlib.sha256(
+    code_identity = hashlib.sha256(
         services.Path(services.__file__).read_bytes()
     ).hexdigest()
     schema_path = (
         services.Path(services.__file__).parents[1] / "schemas" / "standard_name.yaml"
     )
-    schema_identity = services.hashlib.sha256(schema_path.read_bytes()).hexdigest()
+    schema_identity = hashlib.sha256(schema_path.read_bytes()).hexdigest()
     return code_identity, schema_identity
 
 
@@ -529,7 +531,7 @@ def _structural_authority_record(
             "order": 0,
             "kind": "add_relationship",
             "participant_id": participants[0]["id"],
-            "arguments": services.json.dumps(
+            "arguments": json.dumps(
                 {
                     "relationship": "HAS_STRUCTURAL_AUTHORITY",
                     "child_relationship": "ENTAILED_FROM_CHILD",
@@ -546,7 +548,7 @@ def _structural_authority_record(
                 "order": 1,
                 "kind": "set_properties",
                 "participant_id": participants[0]["id"],
-                "arguments": services.json.dumps(
+                "arguments": json.dumps(
                     {"name_stage": "accepted"},
                     sort_keys=True,
                     separators=(",", ":"),
@@ -1072,7 +1074,7 @@ def backfill_structural_name_authorities(
         if receipt_path is not None:
             receipt_path.parent.mkdir(parents=True, exist_ok=True)
             receipt_path.write_text(
-                services.json.dumps(receipt, sort_keys=True, indent=2) + "\n",
+                json.dumps(receipt, sort_keys=True, indent=2) + "\n",
                 encoding="utf-8",
             )
         return receipt

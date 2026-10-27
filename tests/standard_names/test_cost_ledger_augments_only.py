@@ -10,6 +10,10 @@ from typing import Any
 from unittest.mock import patch
 
 from imas_codex.standard_names import graph_ops
+from imas_codex.standard_names.graph_store import (
+    graph_catalog_reset as _owning_graph_catalog_reset,
+    graph_foundation as _owning_graph_foundation,
+)
 
 _COST_BINDING = re.compile(r"\(\s*([A-Za-z_]\w*)\s*:\s*LLMCost\b")
 _DELETED_BINDING = re.compile(
@@ -122,8 +126,8 @@ def test_unscoped_clear_preserves_cost_count_and_spend_while_resetting_state() -
     state = _GraphState()
     ledger_before = state.ledger_snapshot
 
-    with patch.object(graph_ops, "GraphClient", return_value=state):
-        deleted = graph_ops.clear_standard_names()
+    with patch.object(_owning_graph_foundation, "GraphClient", return_value=state):
+        deleted = _owning_graph_catalog_reset.clear_standard_names()
 
     assert deleted == 1
     assert state.ledger_snapshot == ledger_before
@@ -141,8 +145,8 @@ def test_subsystem_clear_preserves_cost_count_and_spend_while_wiping_state() -> 
     state = _GraphState()
     ledger_before = state.ledger_snapshot
 
-    with patch.object(graph_ops, "GraphClient", return_value=state):
-        deleted = graph_ops.clear_sn_subsystem()
+    with patch.object(_owning_graph_foundation, "GraphClient", return_value=state):
+        deleted = _owning_graph_catalog_reset.clear_sn_subsystem()
 
     assert state.ledger_snapshot == ledger_before
     assert set(deleted) == set(state.pipeline_rows)

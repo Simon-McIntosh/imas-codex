@@ -9,6 +9,9 @@ from typing import Any
 import pytest
 
 from imas_codex.standard_names import graph_ops
+from imas_codex.standard_names.graph_store import (
+    graph_claim_release as _owning_graph_claim_release,
+)
 
 
 class _RefineClaimTransaction:
@@ -142,7 +145,7 @@ def _claim_state() -> dict[str, Any]:
 
 
 def _dry_run(transaction: _RefineClaimTransaction) -> dict[str, Any]:
-    return graph_ops.release_stranded_refine_claim(
+    return _owning_graph_claim_release.release_stranded_refine_claim(
         "electron_temperature",
         claim_token="exact-claim-token",
         expected_stage="refining",
@@ -187,7 +190,7 @@ def test_apply_preserves_every_nonrelease_projection() -> None:
     dry = _dry_run(_RefineClaimTransaction(_claim_state()))
     transaction = _RefineClaimTransaction(_claim_state())
 
-    receipt = graph_ops.release_stranded_refine_claim(
+    receipt = _owning_graph_claim_release.release_stranded_refine_claim(
         "electron_temperature",
         claim_token="exact-claim-token",
         expected_stage="refining",
@@ -239,7 +242,7 @@ def test_dry_run_refuses_wrong_claim_authority(field: str, value: str) -> None:
     kwargs[field] = value
     if field == "expected_stage":
         with pytest.raises(ValueError, match="expected_stage must be 'refining'"):
-            graph_ops.release_stranded_refine_claim(
+            _owning_graph_claim_release.release_stranded_refine_claim(
                 "electron_temperature",
                 apply=False,
                 gc=_RefineClaimGraph(_RefineClaimTransaction(_claim_state())),
@@ -247,7 +250,7 @@ def test_dry_run_refuses_wrong_claim_authority(field: str, value: str) -> None:
             )
         return
 
-    receipt = graph_ops.release_stranded_refine_claim(
+    receipt = _owning_graph_claim_release.release_stranded_refine_claim(
         "electron_temperature",
         apply=False,
         gc=_RefineClaimGraph(_RefineClaimTransaction(_claim_state())),
@@ -263,8 +266,10 @@ def test_apply_refuses_hash_drift_and_rolls_back() -> None:
     drifted = _claim_state()
     drifted["standard_name"]["documentation"] = "drifted documentation"
     transaction = _RefineClaimTransaction(drifted)
-    with pytest.raises(graph_ops.RefineClaimReleaseConflict, match="manifest"):
-        graph_ops.release_stranded_refine_claim(
+    with pytest.raises(
+        _owning_graph_claim_release.RefineClaimReleaseConflict, match="manifest"
+    ):
+        _owning_graph_claim_release.release_stranded_refine_claim(
             "electron_temperature",
             claim_token="exact-claim-token",
             expected_stage="refining",
@@ -282,7 +287,9 @@ def test_multiple_current_source_bindings_are_refused() -> None:
     ambiguous["source_bindings"][0]["bound_names"].append({"id": "other_name"})
     transaction = _RefineClaimTransaction(ambiguous)
 
-    with pytest.raises(graph_ops.RefineClaimReleaseConflict, match="exactly one"):
+    with pytest.raises(
+        _owning_graph_claim_release.RefineClaimReleaseConflict, match="exactly one"
+    ):
         _dry_run(transaction)
     assert transaction.rolled_back is True
     assert transaction.state == ambiguous
@@ -293,8 +300,10 @@ def test_apply_refuses_collateral_and_rolls_back() -> None:
     transaction = _RefineClaimTransaction(_claim_state())
     transaction.mutate_collateral = True
 
-    with pytest.raises(graph_ops.RefineClaimReleaseConflict, match="collateral"):
-        graph_ops.release_stranded_refine_claim(
+    with pytest.raises(
+        _owning_graph_claim_release.RefineClaimReleaseConflict, match="collateral"
+    ):
+        _owning_graph_claim_release.release_stranded_refine_claim(
             "electron_temperature",
             claim_token="exact-claim-token",
             expected_stage="refining",
@@ -311,7 +320,7 @@ def test_recovery_is_idempotent_and_cannot_reuse_manifest() -> None:
     dry = _dry_run(_RefineClaimTransaction(_claim_state()))
     transaction = _RefineClaimTransaction(_claim_state())
     graph = _RefineClaimGraph(transaction)
-    graph_ops.release_stranded_refine_claim(
+    _owning_graph_claim_release.release_stranded_refine_claim(
         "electron_temperature",
         claim_token="exact-claim-token",
         expected_stage="refining",
@@ -325,8 +334,10 @@ def test_recovery_is_idempotent_and_cannot_reuse_manifest() -> None:
     no_change = _dry_run(released)
     assert no_change["eligible"] is False
     assert no_change["changed"] == 0
-    with pytest.raises(graph_ops.RefineClaimReleaseConflict, match="eligible"):
-        graph_ops.release_stranded_refine_claim(
+    with pytest.raises(
+        _owning_graph_claim_release.RefineClaimReleaseConflict, match="eligible"
+    ):
+        _owning_graph_claim_release.release_stranded_refine_claim(
             "electron_temperature",
             claim_token="exact-claim-token",
             expected_stage="refining",

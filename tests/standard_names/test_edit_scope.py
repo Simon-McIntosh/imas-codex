@@ -297,7 +297,9 @@ class TestAcceptanceCascadeApplication:
         fake.add_edge("ion_temperature", "density", "ion", "qualifier")
 
     def test_acceptance_applies_descendant_renames_atomically(self) -> None:
-        from imas_codex.standard_names.graph_ops import persist_reviewed_name
+        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+            persist_reviewed_name,
+        )
 
         fake = FakeGraph()
         self._drafted_subtree_edit(fake)
@@ -326,7 +328,9 @@ class TestAcceptanceCascadeApplication:
         acceptance time refuses the acceptance itself — the root is NOT
         accepted and NOTHING is renamed (full rollback, nothing persisted).
         """
-        from imas_codex.standard_names.graph_ops import persist_reviewed_name
+        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+            persist_reviewed_name,
+        )
 
         fake = FakeGraph()
         self._drafted_subtree_edit(fake)

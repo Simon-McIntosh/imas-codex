@@ -26,6 +26,9 @@ import pytest
 from click.testing import CliRunner
 
 from imas_codex.standard_names.families import PATTERN_INVARIANT_SEGMENTS
+from imas_codex.standard_names.graph_store import (
+    graph_foundation as _owning_graph_foundation,
+)
 
 #: The family's anchor member id.
 _ANCHOR = "base_at_axis"
@@ -477,7 +480,7 @@ def test_cli_apply_wires_a_measuring_cost_fn(monkeypatch: Any) -> None:
     graph = _RecordedCostGraph(_family_nodes(), [], run_spend={f"scope-{_ANCHOR}": 2.5})
     _install_graph(monkeypatch, graph)
     # ``aggregate_spend_for_run`` resolves GraphClient from its own module.
-    monkeypatch.setattr(graph_ops, "GraphClient", lambda *a, **k: graph)
+    monkeypatch.setattr(_owning_graph_foundation, "GraphClient", lambda *a, **k: graph)
 
     from imas_codex.standard_names import harmonize
 

@@ -22,19 +22,25 @@ def _no_approved_names():
 
 
 def _call_write(names: list[dict], mock_gc: MagicMock) -> int:
-    with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+    with patch(
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+    ) as MockGC:
         MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
         MockGC.return_value.__exit__ = MagicMock(return_value=False)
-        from imas_codex.standard_names.graph_ops import write_standard_names
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            write_standard_names,
+        )
 
         return write_standard_names(names)
 
 
 def _call_write_reviews(reviews: list[dict], mock_gc: MagicMock) -> int:
-    with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+    with patch(
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+    ) as MockGC:
         MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
         MockGC.return_value.__exit__ = MagicMock(return_value=False)
-        from imas_codex.standard_names.graph_ops import write_reviews
+        from imas_codex.standard_names.graph_store.graph_catalog import write_reviews
 
         return write_reviews(reviews)
 

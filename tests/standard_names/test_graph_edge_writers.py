@@ -25,6 +25,10 @@ from neo4j import GraphDatabase
 from neo4j.exceptions import ClientError
 
 from imas_codex.graph.client import GraphClient as RealGraphClient
+from imas_codex.standard_names.graph_store import (
+    graph_foundation as _owning_graph_foundation,
+    graph_lineage as _owning_graph_lineage,
+)
 
 imas_sn = pytest.importorskip("imas_standard_names")
 
@@ -49,7 +53,9 @@ def _make_mock_gc() -> MagicMock:
 
 def _call_write(names: list[dict], mock_gc: MagicMock) -> int:
     """Invoke ``write_standard_names`` with a mocked GraphClient."""
-    with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+    with patch(
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+    ) as MockGC:
         MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
         MockGC.return_value.__exit__ = MagicMock(return_value=False)
         # Patch protection and segment edges to keep tests focused
@@ -59,11 +65,13 @@ def _call_write(names: list[dict], mock_gc: MagicMock) -> int:
                 side_effect=lambda n, **kw: (n, []),
             ),
             patch(
-                "imas_codex.standard_names.graph_ops._write_grammar_decomposition",
+                "imas_codex.standard_names.graph_store.graph_catalog._write_grammar_decomposition",
                 return_value=[],
             ),
         ):
-            from imas_codex.standard_names.graph_ops import write_standard_names
+            from imas_codex.standard_names.graph_store.graph_catalog import (
+                write_standard_names,
+            )
 
             return write_standard_names(names)
 
@@ -367,7 +375,9 @@ class TestEndpointAuthority:
             assert all(not endpoint_merge.search(cypher) for cypher in relation_writes)
 
     def test_missing_admitted_parent_uses_full_materializer_before_edge(self) -> None:
-        from imas_codex.standard_names.graph_ops import _write_standard_name_edges
+        from imas_codex.standard_names.graph_store.graph_lineage import (
+            _write_standard_name_edges,
+        )
 
         graph = MagicMock()
 
@@ -430,7 +440,9 @@ class TestEndpointAuthority:
 
     def test_rejected_intermediate_cannot_emit_locus_or_mint_identity(self) -> None:
         from imas_codex.standard_names.derivation import DerivedEdge
-        from imas_codex.standard_names.graph_ops import _write_standard_name_edges
+        from imas_codex.standard_names.graph_store.graph_lineage import (
+            _write_standard_name_edges,
+        )
 
         graph = _make_mock_gc()
         edges = {
@@ -457,7 +469,7 @@ class TestEndpointAuthority:
                 side_effect=lambda name: edges.get(name, []),
             ),
             patch(
-                "imas_codex.standard_names.graph_ops._filter_admissible_parents",
+                "imas_codex.standard_names.graph_store.graph_lineage._filter_admissible_parents",
                 return_value=[],
             ),
         ):
@@ -472,7 +484,9 @@ class TestEndpointAuthority:
     def test_failure_before_edge_persistence_leaves_no_partial_endpoint_write(
         self,
     ) -> None:
-        from imas_codex.standard_names.graph_ops import _write_standard_name_edges
+        from imas_codex.standard_names.graph_store.graph_lineage import (
+            _write_standard_name_edges,
+        )
 
         graph = MagicMock()
         discovered = False
@@ -540,17 +554,19 @@ class TestEndpointAuthority:
 
         graph.query = MagicMock(side_effect=_query)
         with (
-            patch.object(graph_ops, "GraphClient", return_value=graph),
+            patch.object(_owning_graph_foundation, "GraphClient", return_value=graph),
             patch.object(
-                graph_ops,
+                _owning_graph_lineage,
                 "_filter_admissible_parents",
                 side_effect=lambda rows, *_args, **_kwargs: rows,
             ),
             patch.object(
-                graph_ops, "_rewire_has_parent_off_superseded", return_value=0
+                _owning_graph_lineage,
+                "_rewire_has_parent_off_superseded",
+                return_value=0,
             ),
         ):
-            assert graph_ops.rederive_structural_edges()["processed"] == 1
+            assert _owning_graph_lineage.rederive_structural_edges()["processed"] == 1
 
         bootstrap_index = next(
             index
@@ -575,7 +591,9 @@ class TestEndpointAuthority:
 def test_bootstrap_transaction_rolls_back_partial_parent(
     disposable_neo4j: tuple[str, str],
 ) -> None:
-    from imas_codex.standard_names.graph_ops import _materialize_derived_parent_rows
+    from imas_codex.standard_names.graph_store.graph_lineage import (
+        _materialize_derived_parent_rows,
+    )
 
     uri, password = disposable_neo4j
     child_id = "maximum_of_electron_temperature"

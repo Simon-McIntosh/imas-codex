@@ -78,7 +78,9 @@ class _FakeCand:
 
 
 def test_canonicalizer_collapses_drifted_estimators():
-    from imas_codex.standard_names.workers import provenance_canonical_names
+    from imas_codex.standard_names.worker_tasks.worker_common import (
+        provenance_canonical_names,
+    )
 
     cands = [
         _FakeCand(
@@ -97,7 +99,9 @@ def test_canonicalizer_collapses_drifted_estimators():
 
 
 def test_canonicalizer_noop_when_estimators_agree():
-    from imas_codex.standard_names.workers import provenance_canonical_names
+    from imas_codex.standard_names.worker_tasks.worker_common import (
+        provenance_canonical_names,
+    )
 
     cands = [
         _FakeCand("equilibrium/time_slice/constraints/ip/measured", "plasma_current"),
@@ -110,7 +114,9 @@ def test_canonicalizer_noop_when_estimators_agree():
 
 
 def test_canonicalizer_ignores_non_provenance_candidates():
-    from imas_codex.standard_names.workers import provenance_canonical_names
+    from imas_codex.standard_names.worker_tasks.worker_common import (
+        provenance_canonical_names,
+    )
 
     cands = [
         _FakeCand(

@@ -25,7 +25,9 @@ _RUN_ID = "run-async-counter-test"
 
 def _mock_gc_ctx():
     """Return (patcher, mock_gc) that patches GraphClient as context manager."""
-    patcher = patch("imas_codex.standard_names.graph_ops.GraphClient")
+    patcher = patch(
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+    )
     MockGC = patcher.start()
     mock_gc = MagicMock()
     MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -67,7 +69,9 @@ class TestGenerateNameBumpsComposed:
 
     def test_single_batch_bumps_composed(self):
         """Verify bump_sn_run_counter is called with correct counter and delta."""
-        from imas_codex.standard_names.graph_ops import bump_sn_run_counter
+        from imas_codex.standard_names.graph_store.graph_audits import (
+            bump_sn_run_counter,
+        )
 
         patcher, mock_gc = _mock_gc_ctx()
         try:
@@ -93,7 +97,9 @@ class TestAccumulation:
     def test_two_bumps_accumulate(self):
         patcher, mock_gc = _mock_gc_ctx()
         try:
-            from imas_codex.standard_names.graph_ops import bump_sn_run_counter
+            from imas_codex.standard_names.graph_store.graph_audits import (
+                bump_sn_run_counter,
+            )
 
             bump_sn_run_counter(_RUN_ID, "names_composed", delta=2)
             bump_sn_run_counter(_RUN_ID, "names_composed", delta=5)
@@ -123,8 +129,12 @@ class TestReviewNameBumpsReviewed:
                 [{"id": "electron_temperature"}],  # SET committed (one row)
                 [],
             ]
-            with patch("imas_codex.standard_names.graph_ops.write_reviews"):
-                from imas_codex.standard_names.graph_ops import persist_reviewed_name
+            with patch(
+                "imas_codex.standard_names.graph_store.graph_catalog.write_reviews"
+            ):
+                from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                    persist_reviewed_name,
+                )
 
                 persist_reviewed_name(
                     sn_id="electron_temperature",
@@ -172,7 +182,9 @@ class TestRefineNameBumpsRegenerated:
             mock_gc.session.return_value.__exit__ = MagicMock(return_value=False)
             mock_gc.query.return_value = []
 
-            from imas_codex.standard_names.graph_ops import persist_refined_name
+            from imas_codex.standard_names.graph_store.graph_refinement import (
+                persist_refined_name,
+            )
 
             persist_refined_name(
                 old_name="electron_temperature",
@@ -202,7 +214,9 @@ class TestGenerateDocsBumpsEnriched:
         try:
             mock_gc.query.return_value = [{"docs_stage": "drafted"}]
 
-            from imas_codex.standard_names.graph_ops import persist_generated_docs
+            from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+                persist_generated_docs,
+            )
 
             persist_generated_docs(
                 sn_id="electron_temperature",
@@ -237,8 +251,12 @@ class TestReviewDocsBumpsReviewed:
                 [{"id": "electron_temperature"}],  # SET committed (one row)
                 [],
             ]
-            with patch("imas_codex.standard_names.graph_ops.write_reviews"):
-                from imas_codex.standard_names.graph_ops import persist_reviewed_docs
+            with patch(
+                "imas_codex.standard_names.graph_store.graph_catalog.write_reviews"
+            ):
+                from imas_codex.standard_names.graph_store.graph_review_persistence import (
+                    persist_reviewed_docs,
+                )
 
                 persist_reviewed_docs(
                     sn_id="electron_temperature",
@@ -282,7 +300,9 @@ class TestRefineDocsBumpsRegenerated:
             mock_gc.session.return_value.__exit__ = MagicMock(return_value=False)
             mock_gc.query.return_value = []
 
-            from imas_codex.standard_names.graph_ops import persist_refined_docs
+            from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+                persist_refined_docs,
+            )
 
             persist_refined_docs(
                 sn_id="electron_temperature",
@@ -316,7 +336,9 @@ class TestNoRunIdNoBump:
         try:
             mock_gc.query.return_value = [{"docs_stage": "drafted"}]
 
-            from imas_codex.standard_names.graph_ops import persist_generated_docs
+            from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+                persist_generated_docs,
+            )
 
             persist_generated_docs(
                 sn_id="electron_temperature",
@@ -343,7 +365,9 @@ class TestBumpSNRunCounter:
     def test_bump_issues_correct_cypher(self):
         patcher, mock_gc = _mock_gc_ctx()
         try:
-            from imas_codex.standard_names.graph_ops import bump_sn_run_counter
+            from imas_codex.standard_names.graph_store.graph_audits import (
+                bump_sn_run_counter,
+            )
 
             bump_sn_run_counter(_RUN_ID, "names_composed", delta=5)
 
@@ -361,7 +385,9 @@ class TestBumpSNRunCounter:
     def test_bump_rejects_unknown_counter(self):
         patcher, mock_gc = _mock_gc_ctx()
         try:
-            from imas_codex.standard_names.graph_ops import bump_sn_run_counter
+            from imas_codex.standard_names.graph_store.graph_audits import (
+                bump_sn_run_counter,
+            )
 
             bump_sn_run_counter(_RUN_ID, "unknown_counter", delta=1)
             assert not mock_gc.query.called
@@ -371,7 +397,9 @@ class TestBumpSNRunCounter:
     def test_bump_skips_zero_delta(self):
         patcher, mock_gc = _mock_gc_ctx()
         try:
-            from imas_codex.standard_names.graph_ops import bump_sn_run_counter
+            from imas_codex.standard_names.graph_store.graph_audits import (
+                bump_sn_run_counter,
+            )
 
             bump_sn_run_counter(_RUN_ID, "names_composed", delta=0)
             assert not mock_gc.query.called
@@ -381,7 +409,9 @@ class TestBumpSNRunCounter:
     def test_bump_skips_none_run_id(self):
         patcher, mock_gc = _mock_gc_ctx()
         try:
-            from imas_codex.standard_names.graph_ops import bump_sn_run_counter
+            from imas_codex.standard_names.graph_store.graph_audits import (
+                bump_sn_run_counter,
+            )
 
             bump_sn_run_counter(None, "names_composed", delta=3)
             assert not mock_gc.query.called
@@ -394,7 +424,9 @@ class TestBumpSNRunCounter:
         try:
             mock_gc.query.side_effect = RuntimeError("Neo4j down")
 
-            from imas_codex.standard_names.graph_ops import bump_sn_run_counter
+            from imas_codex.standard_names.graph_store.graph_audits import (
+                bump_sn_run_counter,
+            )
 
             # Should NOT raise
             bump_sn_run_counter(_RUN_ID, "names_composed", delta=1)
@@ -413,7 +445,9 @@ class TestConcurrentBumps:
     def test_concurrent_bumps_all_fire(self):
         patcher, mock_gc = _mock_gc_ctx()
         try:
-            from imas_codex.standard_names.graph_ops import bump_sn_run_counter
+            from imas_codex.standard_names.graph_store.graph_audits import (
+                bump_sn_run_counter,
+            )
 
             n_threads = 10
             barrier = threading.Barrier(n_threads)
@@ -446,7 +480,9 @@ class TestPersistSignatures:
     def test_persist_generated_name_batch_accepts_run_id(self):
         import inspect
 
-        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            persist_generated_name_batch,
+        )
 
         sig = inspect.signature(persist_generated_name_batch)
         assert "run_id" in sig.parameters
@@ -454,7 +490,9 @@ class TestPersistSignatures:
     def test_persist_reviewed_name_accepts_run_id(self):
         import inspect
 
-        from imas_codex.standard_names.graph_ops import persist_reviewed_name
+        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+            persist_reviewed_name,
+        )
 
         sig = inspect.signature(persist_reviewed_name)
         assert "run_id" in sig.parameters
@@ -462,7 +500,9 @@ class TestPersistSignatures:
     def test_persist_reviewed_docs_accepts_run_id(self):
         import inspect
 
-        from imas_codex.standard_names.graph_ops import persist_reviewed_docs
+        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+            persist_reviewed_docs,
+        )
 
         sig = inspect.signature(persist_reviewed_docs)
         assert "run_id" in sig.parameters
@@ -470,7 +510,9 @@ class TestPersistSignatures:
     def test_persist_refined_name_accepts_run_id(self):
         import inspect
 
-        from imas_codex.standard_names.graph_ops import persist_refined_name
+        from imas_codex.standard_names.graph_store.graph_refinement import (
+            persist_refined_name,
+        )
 
         sig = inspect.signature(persist_refined_name)
         assert "run_id" in sig.parameters
@@ -478,7 +520,9 @@ class TestPersistSignatures:
     def test_persist_refined_docs_accepts_run_id(self):
         import inspect
 
-        from imas_codex.standard_names.graph_ops import persist_refined_docs
+        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+            persist_refined_docs,
+        )
 
         sig = inspect.signature(persist_refined_docs)
         assert "run_id" in sig.parameters
@@ -486,7 +530,9 @@ class TestPersistSignatures:
     def test_persist_generated_docs_accepts_run_id(self):
         import inspect
 
-        from imas_codex.standard_names.graph_ops import persist_generated_docs
+        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+            persist_generated_docs,
+        )
 
         sig = inspect.signature(persist_generated_docs)
         assert "run_id" in sig.parameters

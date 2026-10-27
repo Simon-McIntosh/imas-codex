@@ -36,6 +36,9 @@ from imas_codex.standard_names.grammar_adapter import (
     compose_canonical_ir,
     parse_canonical_name,
 )
+from imas_codex.standard_names.graph_store import (
+    graph_parent_lifecycle as _owning_graph_parent_lifecycle,
+)
 
 
 @dataclass(frozen=True)
@@ -418,7 +421,6 @@ def recompute_parent_kind(name: str, gc: _TopologyProbe) -> str:
 
 def _replay_described_parent_authorities(gc: _TopologyProbe) -> dict[str, Any]:
     """Authorize accepted, described parents grounded by accepted children."""
-    from imas_codex.standard_names import graph_ops
     from imas_codex.standard_names.defaults import (
         DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
     )
@@ -476,7 +478,9 @@ def _replay_described_parent_authorities(gc: _TopologyProbe) -> dict[str, Any]:
             )
             continue
 
-        snapshot = graph_ops._structural_authority_snapshot(gc, parent_id)
+        snapshot = _owning_graph_parent_lifecycle._structural_authority_snapshot(
+            gc, parent_id
+        )
         if snapshot is None:
             refused.append(
                 {
@@ -534,13 +538,15 @@ def _replay_described_parent_authorities(gc: _TopologyProbe) -> dict[str, Any]:
             )
             continue
 
-        record = graph_ops._structural_authority_record(snapshot, accepting=False)
-        if not graph_ops._persist_structural_authority(
+        record = _owning_graph_parent_lifecycle._structural_authority_record(
+            snapshot, accepting=False
+        )
+        if not _owning_graph_parent_lifecycle._persist_structural_authority(
             gc,
             record,
             parent_updates={},
         ):
-            raise graph_ops.StructuralAuthorityConflict(
+            raise _owning_graph_parent_lifecycle.StructuralAuthorityConflict(
                 f"derived parent {parent_id!r} changed before authority replay"
             )
         replayed.append(
@@ -583,7 +589,7 @@ def replay_described_parent_authorities(
         return _replay_described_parent_authorities(gc)
 
     from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.graph_ops import _TransactionQuery
+    from imas_codex.standard_names.graph_store.graph_foundation import _TransactionQuery
 
     with GraphClient() as client, client.session() as session:
         transaction = session.begin_transaction()

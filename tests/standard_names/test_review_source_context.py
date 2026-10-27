@@ -9,6 +9,14 @@ from unittest.mock import patch
 import pytest
 
 from imas_codex.llm.prompt_loader import render_prompt
+from imas_codex.standard_names.graph_store import (
+    graph_claim_release as _owning_graph_claim_release,
+    graph_cost_and_claims as _owning_graph_cost_and_claims,
+)
+from imas_codex.standard_names.worker_tasks import (
+    worker_extraction_and_enrichment as _owning_worker_extraction_and_enrichment,
+    worker_review_names as _owning_worker_review_names,
+)
 
 ISOTOPE_RATIO = (
     "ratio_of_neutral_density_of_isotope_to_difference_of_total_neutral_density"
@@ -219,10 +227,14 @@ def test_review_claim_projects_exact_pinned_source_bindings() -> None:
     from imas_codex.standard_names import graph_ops
 
     with (
-        patch.object(graph_ops, "_claim_sn_atomic", return_value=[]) as claim,
-        patch.object(graph_ops, "_verify_name_claim_winners", return_value=[]),
+        patch.object(
+            _owning_graph_cost_and_claims, "_claim_sn_atomic", return_value=[]
+        ) as claim,
+        patch.object(
+            _owning_graph_claim_release, "_verify_name_claim_winners", return_value=[]
+        ),
     ):
-        graph_ops.claim_review_name_batch(batch_size=3)
+        _owning_graph_cost_and_claims.claim_review_name_batch(batch_size=3)
 
     projection = claim.call_args.kwargs["extra_return_fields"]
     assert "PRODUCED_NAME" in projection
@@ -236,7 +248,9 @@ def test_review_claim_projects_exact_pinned_source_bindings() -> None:
 
 def test_strict_review_context_preserves_recursive_isotope_ratio() -> None:
     """The lossless adapter exposes full fields and nested operator scope."""
-    from imas_codex.standard_names.graph_ops import strict_review_grammar_context
+    from imas_codex.standard_names.graph_store.graph_foundation import (
+        strict_review_grammar_context,
+    )
 
     context = strict_review_grammar_context(ISOTOPE_RATIO)
     projection = {
@@ -268,8 +282,12 @@ def test_review_enrichment_keeps_pins_and_reuses_compose_context() -> None:
         ]
         stubs[0]["parent_description"] = "Current graph enrichment."
 
-    with patch.object(workers, "_enrich_batch_items", side_effect=enrich) as canonical:
-        workers._enrich_name_review_items([item])
+    with patch.object(
+        _owning_worker_extraction_and_enrichment,
+        "_enrich_batch_items",
+        side_effect=enrich,
+    ) as canonical:
+        _owning_worker_review_names._enrich_name_review_items([item])
 
     canonical.assert_called_once()
     assert item["source_id"] == SOURCE_PATH
@@ -333,8 +351,12 @@ def test_semantic_cluster_neighbors_never_expand_source_authority() -> None:
             }
         ]
 
-    with patch.object(workers, "_enrich_batch_items", side_effect=enrich):
-        workers._enrich_name_review_items([item])
+    with patch.object(
+        _owning_worker_extraction_and_enrichment,
+        "_enrich_batch_items",
+        side_effect=enrich,
+    ):
+        _owning_worker_review_names._enrich_name_review_items([item])
 
     assert item["source_paths"] == [outline_path]
     assert "cross_ids_paths" not in item
@@ -441,8 +463,12 @@ def test_multi_source_review_prompt_renders_complete_context_deterministically()
             }
         )
 
-    with patch.object(workers, "_enrich_batch_items", side_effect=enrich):
-        workers._enrich_name_review_items([item])
+    with patch.object(
+        _owning_worker_extraction_and_enrichment,
+        "_enrich_batch_items",
+        side_effect=enrich,
+    ):
+        _owning_worker_review_names._enrich_name_review_items([item])
 
     context = {
         "items": [item],
@@ -512,8 +538,12 @@ def test_unpinned_source_context_is_explicitly_non_authoritative() -> None:
 
     item = _review_item()
     item["source_bindings"][0]["dd_snapshot_pinned"] = False
-    with patch.object(workers, "_enrich_batch_items", return_value=None):
-        workers._enrich_name_review_items([item])
+    with patch.object(
+        _owning_worker_extraction_and_enrichment,
+        "_enrich_batch_items",
+        return_value=None,
+    ):
+        _owning_worker_review_names._enrich_name_review_items([item])
 
     context = {
         "items": [item],
@@ -539,7 +569,9 @@ def test_unpinned_source_context_is_explicitly_non_authoritative() -> None:
 @pytest.mark.asyncio
 async def test_authoritative_escalation_alone_receives_both_critiques() -> None:
     """Blind reviewers stay independent and the escalator sees both critiques."""
-    from imas_codex.standard_names.workers import _run_rd_quorum_cycles
+    from imas_codex.standard_names.worker_tasks.worker_review_names import (
+        _run_rd_quorum_cycles,
+    )
 
     calls: list[dict] = []
     scores = [

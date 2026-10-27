@@ -397,7 +397,7 @@ async def _store_route(
     *,
     reason: str | None = None,
 ) -> None:
-    from imas_codex.standard_names.graph_ops import write_reviews
+    from imas_codex.standard_names.graph_store.graph_catalog import write_reviews
     from imas_codex.standard_names.review.pipeline import _build_review_record
 
     record = _build_review_record(

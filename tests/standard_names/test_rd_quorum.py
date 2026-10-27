@@ -957,7 +957,9 @@ class TestUpdateReviewAggregates:
 
     def test_empty_ids_returns_zero(self):
         """Empty id list short-circuits without hitting the graph."""
-        from imas_codex.standard_names.graph_ops import update_review_aggregates
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            update_review_aggregates,
+        )
 
         assert update_review_aggregates([]) == 0
 
@@ -965,7 +967,9 @@ class TestUpdateReviewAggregates:
         """Returns the number of rows the GC query returns."""
         from unittest.mock import MagicMock, patch
 
-        from imas_codex.standard_names.graph_ops import update_review_aggregates
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            update_review_aggregates,
+        )
 
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(
@@ -975,7 +979,10 @@ class TestUpdateReviewAggregates:
         cm.__enter__ = MagicMock(return_value=mock_gc)
         cm.__exit__ = MagicMock(return_value=False)
 
-        with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=cm):
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            return_value=cm,
+        ):
             count = update_review_aggregates(["electron_temperature", "plasma_current"])
 
         assert count == 2
@@ -989,7 +996,9 @@ class TestUpdateReviewAggregates:
         """Custom threshold is forwarded to the Cypher query."""
         from unittest.mock import MagicMock, patch
 
-        from imas_codex.standard_names.graph_ops import update_review_aggregates
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            update_review_aggregates,
+        )
 
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[{"id": "electron_temperature"}])
@@ -997,7 +1006,10 @@ class TestUpdateReviewAggregates:
         cm.__enter__ = MagicMock(return_value=mock_gc)
         cm.__exit__ = MagicMock(return_value=False)
 
-        with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=cm):
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            return_value=cm,
+        ):
             update_review_aggregates(["electron_temperature"], threshold=0.3)
 
         kwargs = mock_gc.query.call_args[1]

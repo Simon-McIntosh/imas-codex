@@ -41,7 +41,9 @@ class TestConstantNodeTypeExtraction:
         """Legacy graph_ops extraction also accepts constant node_type."""
         import inspect
 
-        from imas_codex.standard_names.graph_ops import get_extraction_candidates_dd
+        from imas_codex.standard_names.graph_store.graph_claim_scope import (
+            get_extraction_candidates_dd,
+        )
 
         src = inspect.getsource(get_extraction_candidates_dd)
         assert "constant" in src, (

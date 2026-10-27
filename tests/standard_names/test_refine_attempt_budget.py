@@ -18,7 +18,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-_GC_PATH = "imas_codex.standard_names.graph_ops.GraphClient"
+_GC_PATH = "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
 _GC_WORKERS_PATH = "imas_codex.graph.client.GraphClient"
 
 
@@ -70,7 +70,9 @@ class TestBudgetIsChargedOnTheClaim:
     """Every verified claim spends a rotation before any model call."""
 
     def test_charge_is_fenced_on_the_claim_and_returns_the_attempt_number(self):
-        from imas_codex.standard_names.graph_ops import _charge_refine_name_attempts
+        from imas_codex.standard_names.graph_store.graph_refinement import (
+            _charge_refine_name_attempts,
+        )
 
         gc = _mock_gc([{"id": "a", "refine_attempts": 2}])
         with _patch_gc(gc):
@@ -89,7 +91,9 @@ class TestBudgetIsChargedOnTheClaim:
         )
 
     def test_uncharged_claim_is_dropped_before_the_model_call(self):
-        from imas_codex.standard_names.graph_ops import _charge_refine_name_attempts
+        from imas_codex.standard_names.graph_store.graph_refinement import (
+            _charge_refine_name_attempts,
+        )
 
         gc = _mock_gc([])
         with _patch_gc(gc):
@@ -98,7 +102,9 @@ class TestBudgetIsChargedOnTheClaim:
         assert items == []
 
     def test_one_query_per_claim_token(self):
-        from imas_codex.standard_names.graph_ops import _charge_refine_name_attempts
+        from imas_codex.standard_names.graph_store.graph_refinement import (
+            _charge_refine_name_attempts,
+        )
 
         gc = _mock_gc(
             [
@@ -122,7 +128,7 @@ class TestEligibilityReadsTheBudget:
     """The claim predicate gates on rotations spent, not on lineage depth."""
 
     def test_predicate_gates_on_the_attempt_counter(self):
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_refinement import (
             REFINE_NAME_ATTEMPTS_SPENT,
             REFINE_NAME_ELIGIBILITY_WHERE,
         )
@@ -140,7 +146,7 @@ class TestBudgetFollowsTheLineage:
     """A successor inherits the rotations its predecessor spent."""
 
     def test_successor_inherits_the_predecessor_count(self):
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_refinement import (
             RefinedNamePersistenceRefusal,
             persist_refined_name,
         )
@@ -182,7 +188,9 @@ class TestExhaustionIsDecidedByTheBudget:
         [(0, "reviewed"), (2, "reviewed"), (3, "exhausted"), (4, "exhausted")],
     )
     def test_stage_follows_the_rotations_spent(self, attempts: int, expected: str):
-        from imas_codex.standard_names.graph_ops import persist_reviewed_name
+        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+            persist_reviewed_name,
+        )
 
         read_row = {
             "chain_length": 0,
@@ -229,7 +237,9 @@ class TestDecidedConflictsDoNotSpendTheRest:
         ],
     )
     def test_terminal_reasons_park_regardless_of_remaining_budget(self, reason: str):
-        from imas_codex.standard_names.graph_ops import stop_refine_name_attempt
+        from imas_codex.standard_names.graph_store.graph_claim_release import (
+            stop_refine_name_attempt,
+        )
 
         gc = _mock_gc([{"stage": "exhausted"}])
         with _patch_gc(gc):
@@ -238,7 +248,9 @@ class TestDecidedConflictsDoNotSpendTheRest:
         assert gc.query.call_args.kwargs["terminal"] is True
 
     def test_transient_failure_keeps_the_remaining_budget(self):
-        from imas_codex.standard_names.graph_ops import stop_refine_name_attempt
+        from imas_codex.standard_names.graph_store.graph_claim_release import (
+            stop_refine_name_attempt,
+        )
 
         gc = _mock_gc([{"stage": "reviewed"}])
         with _patch_gc(gc):
@@ -247,7 +259,9 @@ class TestDecidedConflictsDoNotSpendTheRest:
         assert gc.query.call_args.kwargs["terminal"] is False
 
     def test_the_reason_is_queryable_and_names_the_occupied_identity(self):
-        from imas_codex.standard_names.graph_ops import stop_refine_name_attempt
+        from imas_codex.standard_names.graph_store.graph_claim_release import (
+            stop_refine_name_attempt,
+        )
 
         gc = _mock_gc([{"stage": "exhausted"}])
         with _patch_gc(gc):
@@ -266,7 +280,9 @@ class TestDecidedConflictsDoNotSpendTheRest:
 
     def test_spent_budget_parks_with_its_own_reason(self):
         """A stop that is not itself decided still parks at the cap."""
-        from imas_codex.standard_names.graph_ops import stop_refine_name_attempt
+        from imas_codex.standard_names.graph_store.graph_claim_release import (
+            stop_refine_name_attempt,
+        )
 
         gc = _mock_gc([{"stage": "exhausted"}])
         with _patch_gc(gc):
@@ -295,7 +311,9 @@ class TestEscalationFiresOnTheLastRotation:
         self, attempts: int, escalates: bool
     ):
         from imas_codex.standard_names.defaults import DEFAULT_ESCALATION_MODEL
-        from imas_codex.standard_names.workers import process_refine_name_batch
+        from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+            process_refine_name_batch,
+        )
 
         # chain_length stays 0 throughout: nothing this name proposed has ever
         # persisted, which is exactly when the lineage-depth test never fired.
@@ -312,12 +330,12 @@ class TestEscalationFiresOnTheLastRotation:
             ),
             patch("imas_codex.llm.prompt_loader.render_prompt", return_value="prompt"),
             patch(
-                "imas_codex.standard_names.workers._hybrid_search_neighbours",
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours",
                 return_value=[],
             ),
             patch("imas_codex.settings.get_model", return_value="refine-seat"),
             patch(
-                "imas_codex.standard_names.graph_ops.stop_refine_name_attempt",
+                "imas_codex.standard_names.graph_store.graph_claim_release.stop_refine_name_attempt",
                 return_value="reviewed",
             ),
             patch(_GC_WORKERS_PATH, return_value=_mock_gc()),
@@ -333,7 +351,9 @@ class TestEscalationFiresOnTheLastRotation:
 
     @pytest.mark.asyncio
     async def test_attempt_number_and_prior_reason_are_logged(self, caplog):
-        from imas_codex.standard_names.workers import process_refine_name_batch
+        from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+            process_refine_name_batch,
+        )
 
         item = _refine_item(refine_attempts=2, refine_stop_reason="transient_failure")
 
@@ -344,12 +364,12 @@ class TestEscalationFiresOnTheLastRotation:
             ),
             patch("imas_codex.llm.prompt_loader.render_prompt", return_value="prompt"),
             patch(
-                "imas_codex.standard_names.workers._hybrid_search_neighbours",
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours",
                 return_value=[],
             ),
             patch("imas_codex.settings.get_model", return_value="refine-seat"),
             patch(
-                "imas_codex.standard_names.graph_ops.stop_refine_name_attempt",
+                "imas_codex.standard_names.graph_store.graph_claim_release.stop_refine_name_attempt",
                 return_value="reviewed",
             ),
             patch(_GC_WORKERS_PATH, return_value=_mock_gc()),
@@ -367,7 +387,9 @@ class TestRecoveryRules:
     """Who gets the rotations back, and who does not."""
 
     def test_rescore_clears_the_diagnosis_but_not_the_rotations(self):
-        from imas_codex.standard_names.graph_ops import stage_name_for_rescore
+        from imas_codex.standard_names.graph_store.graph_claim_release import (
+            stage_name_for_rescore,
+        )
 
         gc = _mock_gc([{"prior_stage": "exhausted"}])
         with _patch_gc(gc):
@@ -410,7 +432,9 @@ class TestAttachmentRefusalOfARefineProduct:
     async def test_attachment_rejection_counts_the_attempt_and_stays_retryable(
         self,
     ):
-        from imas_codex.standard_names.workers import process_refine_name_batch
+        from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+            process_refine_name_batch,
+        )
 
         # persist_refined_name runs the pairing guard over the sources it would
         # migrate and rolls the rename back when they contradict the successor.
@@ -432,12 +456,12 @@ class TestAttachmentRefusalOfARefineProduct:
             ),
             patch("imas_codex.llm.prompt_loader.render_prompt", return_value="prompt"),
             patch(
-                "imas_codex.standard_names.workers._hybrid_search_neighbours",
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours",
                 return_value=[],
             ),
             patch("imas_codex.settings.get_model", return_value="refine-seat"),
             patch(
-                "imas_codex.standard_names.workers._compose_refined_candidate_name",
+                "imas_codex.standard_names.worker_tasks.worker_refine_names._compose_refined_candidate_name",
                 return_value="radial_outline_of_poloidal_field_coil",
             ),
             patch(
@@ -445,11 +469,11 @@ class TestAttachmentRefusalOfARefineProduct:
                 return_value=None,
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.persist_refined_name",
+                "imas_codex.standard_names.graph_store.graph_refinement.persist_refined_name",
                 side_effect=rejection,
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.stop_refine_name_attempt",
+                "imas_codex.standard_names.graph_store.graph_claim_release.stop_refine_name_attempt",
                 return_value="reviewed",
             ) as mock_stop,
             patch(_GC_WORKERS_PATH, return_value=_mock_gc()),

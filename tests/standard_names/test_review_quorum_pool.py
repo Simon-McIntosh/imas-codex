@@ -78,14 +78,14 @@ def _patch_common(
     """Yield a single ``patch.multiple``-style context for review-pool tests."""
 
     persist_target = (
-        "imas_codex.standard_names.graph_ops.persist_reviewed_name"
+        "imas_codex.standard_names.graph_store.graph_review_persistence.persist_reviewed_name"
         if review_axis == "name"
-        else "imas_codex.standard_names.graph_ops.persist_reviewed_docs"
+        else "imas_codex.standard_names.graph_store.graph_review_persistence.persist_reviewed_docs"
     )
     release_target = (
-        "imas_codex.standard_names.graph_ops.release_review_names_failed_claims"
+        "imas_codex.standard_names.graph_store.graph_claim_release.release_review_names_failed_claims"
         if review_axis == "name"
-        else "imas_codex.standard_names.graph_ops.release_review_docs_failed_claims"
+        else "imas_codex.standard_names.graph_store.graph_claim_release.release_review_docs_failed_claims"
     )
     models_getter = (
         "imas_codex.settings.get_sn_review_names_models"
@@ -134,11 +134,11 @@ def _patch_common(
         patch(persist_target, side_effect=_capture_persist),
         patch(release_target),
         patch(
-            "imas_codex.standard_names.graph_ops.write_reviews",
+            "imas_codex.standard_names.graph_store.graph_catalog.write_reviews",
             side_effect=_capture_write_reviews,
         ),
         patch(
-            "imas_codex.standard_names.graph_ops.update_review_aggregates",
+            "imas_codex.standard_names.graph_store.graph_catalog.update_review_aggregates",
         ),
     ]
 
@@ -160,7 +160,9 @@ def _names_item() -> dict[str, Any]:
 @pytest.mark.asyncio
 async def test_names_two_models_agreement_writes_two_cycles() -> None:
     """2 models, agreement → 2 cycle records, ``quorum_consensus`` on c1."""
-    from imas_codex.standard_names.workers import process_review_name_batch
+    from imas_codex.standard_names.worker_tasks.worker_review_names import (
+        process_review_name_batch,
+    )
 
     captured: dict[str, Any] = {}
     mgr, lease = _mock_budget_manager()
@@ -200,7 +202,9 @@ async def test_names_two_models_agreement_writes_two_cycles() -> None:
 @pytest.mark.asyncio
 async def test_names_two_models_disagreement_no_escalator_marks_max_cycles() -> None:
     """2 models, big per-dim disagreement → ``max_cycles_reached`` on c1."""
-    from imas_codex.standard_names.workers import process_review_name_batch
+    from imas_codex.standard_names.worker_tasks.worker_review_names import (
+        process_review_name_batch,
+    )
 
     captured: dict[str, Any] = {}
     mgr, _ = _mock_budget_manager()
@@ -234,7 +238,9 @@ async def test_names_two_models_disagreement_no_escalator_marks_max_cycles() -> 
 @pytest.mark.asyncio
 async def test_names_three_models_disagreement_runs_escalator() -> None:
     """3 models, big disagreement c0/c1 → cycle 2 runs, ``authoritative_escalation``."""
-    from imas_codex.standard_names.workers import process_review_name_batch
+    from imas_codex.standard_names.worker_tasks.worker_review_names import (
+        process_review_name_batch,
+    )
 
     captured: dict[str, Any] = {}
     mgr, _ = _mock_budget_manager()
@@ -280,7 +286,9 @@ async def test_names_three_models_disagreement_runs_escalator() -> None:
 @pytest.mark.asyncio
 async def test_names_three_models_agreement_skips_cycle_two() -> None:
     """3 models, agreement → only 2 LLM calls; no escalator; ``quorum_consensus``."""
-    from imas_codex.standard_names.workers import process_review_name_batch
+    from imas_codex.standard_names.worker_tasks.worker_review_names import (
+        process_review_name_batch,
+    )
 
     captured: dict[str, Any] = {}
     mgr, _ = _mock_budget_manager()
@@ -318,7 +326,9 @@ async def test_names_batch_response_is_unwrapped() -> None:
     Pydantic validation failed with ``source_id Field required`` on every
     cycle-1 (gpt-5.4) call, leaving ZERO secondary reviews in the graph.
     """
-    from imas_codex.standard_names.workers import process_review_name_batch
+    from imas_codex.standard_names.worker_tasks.worker_review_names import (
+        process_review_name_batch,
+    )
 
     captured: dict[str, Any] = {}
     mgr, _ = _mock_budget_manager()
@@ -364,7 +374,9 @@ async def test_names_empty_reviews_batch_is_a_failed_cycle() -> None:
     into refine/exhausted. The cycle must instead return None so the claim is
     released and the name stays 'drafted' (retryable), with NO review written.
     """
-    from imas_codex.standard_names.workers import process_review_name_batch
+    from imas_codex.standard_names.worker_tasks.worker_review_names import (
+        process_review_name_batch,
+    )
 
     captured: dict[str, Any] = {}
     mgr, _ = _mock_budget_manager()
@@ -397,7 +409,9 @@ async def test_names_empty_reviews_batch_is_a_failed_cycle() -> None:
 @pytest.mark.asyncio
 async def test_names_single_model_chain_uses_single_review() -> None:
     """1-model chain → 1 cycle, ``single_review`` resolution method."""
-    from imas_codex.standard_names.workers import process_review_name_batch
+    from imas_codex.standard_names.worker_tasks.worker_review_names import (
+        process_review_name_batch,
+    )
 
     captured: dict[str, Any] = {}
     mgr, _ = _mock_budget_manager()
@@ -431,7 +445,9 @@ async def test_names_single_model_chain_uses_single_review() -> None:
 @pytest.mark.asyncio
 async def test_names_quarantined_item_skips_llm() -> None:
     """Quarantined name → no LLM calls, persist via fast-path with score=0."""
-    from imas_codex.standard_names.workers import process_review_name_batch
+    from imas_codex.standard_names.worker_tasks.worker_review_names import (
+        process_review_name_batch,
+    )
 
     captured: dict[str, Any] = {}
     mgr, _ = _mock_budget_manager()
@@ -482,7 +498,9 @@ def _docs_item() -> dict[str, Any]:
 
 @pytest.mark.asyncio
 async def test_docs_two_models_agreement_writes_two_cycles() -> None:
-    from imas_codex.standard_names.workers import process_review_docs_batch
+    from imas_codex.standard_names.worker_tasks.worker_review_docs import (
+        process_review_docs_batch,
+    )
 
     captured: dict[str, Any] = {}
     mgr, lease = _mock_budget_manager()
@@ -523,7 +541,9 @@ async def test_docs_two_models_agreement_writes_two_cycles() -> None:
 
 @pytest.mark.asyncio
 async def test_docs_three_models_disagreement_runs_escalator() -> None:
-    from imas_codex.standard_names.workers import process_review_docs_batch
+    from imas_codex.standard_names.worker_tasks.worker_review_docs import (
+        process_review_docs_batch,
+    )
 
     captured: dict[str, Any] = {}
     mgr, _ = _mock_budget_manager()
@@ -578,7 +598,9 @@ async def test_docs_three_models_disagreement_runs_escalator() -> None:
 @pytest.mark.asyncio
 async def test_derived_parent_docs_use_the_complete_reviewer_chain() -> None:
     """Parent-specific prose keeps its rubric but not a reduced authority."""
-    from imas_codex.standard_names.workers import process_review_docs_batch
+    from imas_codex.standard_names.worker_tasks.worker_review_docs import (
+        process_review_docs_batch,
+    )
 
     captured: dict[str, Any] = {}
     mgr, _ = _mock_budget_manager()

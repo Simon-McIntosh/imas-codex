@@ -18,7 +18,9 @@ import pytest
 
 pytest.importorskip("imas_standard_names")
 
-from imas_codex.standard_names.graph_ops import _write_grammar_decomposition
+from imas_codex.standard_names.graph_store.graph_catalog import (
+    _write_grammar_decomposition,
+)
 
 
 def _mock_gc_with_token_version(version: str | None = "0.7.0") -> MagicMock:
@@ -42,7 +44,7 @@ def test_columns_always_set_when_parser_succeeds() -> None:
     """`_write_grammar_decomposition` writes bare-name columns from parser output."""
     gc = _mock_gc_with_token_version("0.7.0")
     with patch(
-        "imas_codex.standard_names.graph_ops._resolve_grammar_token_version",
+        "imas_codex.standard_names.graph_store.graph_catalog._resolve_grammar_token_version",
         return_value="0.7.0",
     ):
         gaps = _write_grammar_decomposition(gc, ["electron_temperature"])
@@ -63,7 +65,7 @@ def test_columns_cleared_when_parser_narrowed() -> None:
     """Re-writing with a name that has no `component` writes None for that column."""
     gc = _mock_gc_with_token_version("0.7.0")
     with patch(
-        "imas_codex.standard_names.graph_ops._resolve_grammar_token_version",
+        "imas_codex.standard_names.graph_store.graph_catalog._resolve_grammar_token_version",
         return_value="0.7.0",
     ):
         # First call: name with `component=x`
@@ -96,7 +98,7 @@ def test_parser_error_clears_columns_without_flag() -> None:
 
     with (
         patch(
-            "imas_codex.standard_names.graph_ops._resolve_grammar_token_version",
+            "imas_codex.standard_names.graph_store.graph_catalog._resolve_grammar_token_version",
             return_value="0.7.0",
         ),
         patch("imas_standard_names.grammar.parse_standard_name", side_effect=_boom),
@@ -119,7 +121,7 @@ def test_open_vocab_physical_base_populates_column_with_no_edge() -> None:
     from the parser output (open-vocab capture)."""
     gc = _mock_gc_with_token_version(None)
     with patch(
-        "imas_codex.standard_names.graph_ops._resolve_grammar_token_version",
+        "imas_codex.standard_names.graph_store.graph_catalog._resolve_grammar_token_version",
         return_value=None,
     ):
         _write_grammar_decomposition(gc, ["electron_temperature"])
@@ -142,7 +144,7 @@ def test_idempotent_on_repeated_calls() -> None:
     """Calling twice on the same name yields identical column SETs."""
     gc = _mock_gc_with_token_version("0.7.0")
     with patch(
-        "imas_codex.standard_names.graph_ops._resolve_grammar_token_version",
+        "imas_codex.standard_names.graph_store.graph_catalog._resolve_grammar_token_version",
         return_value="0.7.0",
     ):
         _write_grammar_decomposition(gc, ["electron_temperature"])

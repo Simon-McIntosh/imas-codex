@@ -84,7 +84,7 @@ class TestQualifySources:
             _row("core_instant_changes/change/density"),
         ]
         with patch(
-            "imas_codex.standard_names.graph_ops.write_skipped_sources",
+            "imas_codex.standard_names.graph_store.graph_source_bindings.write_skipped_sources",
             return_value=1,
         ) as mock_write:
             result = _qualify_sources(rows, write_skipped=True)

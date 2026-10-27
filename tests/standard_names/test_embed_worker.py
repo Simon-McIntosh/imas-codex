@@ -12,7 +12,9 @@ import pytest
 
 def test_compute_embed_hash_deterministic():
     """Hash is deterministic for the same input."""
-    from imas_codex.standard_names.graph_ops import _compute_embed_hash
+    from imas_codex.standard_names.graph_store.graph_refinement import (
+        _compute_embed_hash,
+    )
 
     h1 = _compute_embed_hash("electron_temperature", "Temperature of electrons")
     h2 = _compute_embed_hash("electron_temperature", "Temperature of electrons")
@@ -22,7 +24,9 @@ def test_compute_embed_hash_deterministic():
 
 def test_compute_embed_hash_differs_on_change():
     """Hash changes when description changes."""
-    from imas_codex.standard_names.graph_ops import _compute_embed_hash
+    from imas_codex.standard_names.graph_store.graph_refinement import (
+        _compute_embed_hash,
+    )
 
     h1 = _compute_embed_hash("electron_temperature", "Temperature of electrons")
     h2 = _compute_embed_hash("electron_temperature", "Electron thermal energy")
@@ -31,7 +35,9 @@ def test_compute_embed_hash_differs_on_change():
 
 def test_compute_embed_hash_name_only():
     """Hash works when description is None."""
-    from imas_codex.standard_names.graph_ops import _compute_embed_hash
+    from imas_codex.standard_names.graph_store.graph_refinement import (
+        _compute_embed_hash,
+    )
 
     h = _compute_embed_hash("electron_temperature", None)
     assert len(h) == 16
@@ -45,7 +51,7 @@ def test_compute_embed_hash_name_only():
 
 def test_claim_embed_batch_mock():
     """claim_embed_batch issues correct Cypher and returns items."""
-    from imas_codex.standard_names.graph_ops import claim_embed_batch
+    from imas_codex.standard_names.graph_store.graph_refinement import claim_embed_batch
 
     mock_gc = MagicMock()
     # First call: SET claim fields (no return needed)
@@ -59,7 +65,10 @@ def test_claim_embed_batch_mock():
     mock_gc.__enter__ = MagicMock(return_value=mock_gc)
     mock_gc.__exit__ = MagicMock(return_value=False)
 
-    with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=mock_gc):
+    with patch(
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        return_value=mock_gc,
+    ):
         items = claim_embed_batch(limit=10)
 
     assert len(items) == 1
@@ -73,7 +82,9 @@ def test_claim_embed_batch_mock():
 @pytest.mark.asyncio
 async def test_process_embed_batch_mock():
     """process_embed_batch embeds items and persists results."""
-    from imas_codex.standard_names.workers import process_embed_batch
+    from imas_codex.standard_names.worker_tasks.worker_refine_docs import (
+        process_embed_batch,
+    )
 
     items = [
         {"id": "electron_temperature", "description": "T_e", "claim_token": "tok"},
@@ -92,7 +103,7 @@ async def test_process_embed_batch_mock():
             side_effect=fake_embed,
         ),
         patch(
-            "imas_codex.standard_names.graph_ops.persist_embed_batch",
+            "imas_codex.standard_names.graph_store.graph_refinement.persist_embed_batch",
             return_value=2,
         ) as mock_persist,
     ):
@@ -117,7 +128,9 @@ async def test_process_embed_batch_mock():
 @pytest.mark.asyncio
 async def test_process_embed_batch_stops_on_event():
     """process_embed_batch returns 0 when stop_event is set."""
-    from imas_codex.standard_names.workers import process_embed_batch
+    from imas_codex.standard_names.worker_tasks.worker_refine_docs import (
+        process_embed_batch,
+    )
 
     items = [{"id": "foo", "description": "bar", "claim_token": "tok"}]
     mgr = MagicMock()
@@ -133,7 +146,9 @@ async def test_process_embed_batch_stops_on_event():
 
 def test_persist_generated_docs_clears_hash():
     """persist_generated_docs clears embed_text_hash so embed worker picks it up."""
-    from imas_codex.standard_names.graph_ops import persist_generated_docs
+    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+        persist_generated_docs,
+    )
 
     mock_gc = MagicMock()
     mock_gc.query.side_effect = [
@@ -146,9 +161,12 @@ def test_persist_generated_docs_clears_hash():
     mock_gc.__exit__ = MagicMock(return_value=False)
 
     with (
-        patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=mock_gc),
         patch(
-            "imas_codex.standard_names.graph_ops.bump_sn_run_counter",
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            return_value=mock_gc,
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_audits.bump_sn_run_counter",
         ),
     ):
         result = persist_generated_docs(

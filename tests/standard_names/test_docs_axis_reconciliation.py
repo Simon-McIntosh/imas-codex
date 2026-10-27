@@ -16,7 +16,12 @@ from __future__ import annotations
 from unittest.mock import patch
 
 from imas_codex.standard_names import graph_ops
-from imas_codex.standard_names.graph_ops import reconcile_docs_axis_from_reviews
+from imas_codex.standard_names.graph_store import (
+    graph_foundation as _owning_graph_foundation,
+)
+from imas_codex.standard_names.graph_store.graph_audits import (
+    reconcile_docs_axis_from_reviews,
+)
 
 
 class _FakeDocsAxisGraph:
@@ -73,7 +78,7 @@ class _FakeDocsAxisGraph:
 
 def _run(nodes, *, dry_run: bool, ids: list[str] | None = None):
     fake = _FakeDocsAxisGraph(nodes)
-    with patch.object(graph_ops, "GraphClient", return_value=fake):
+    with patch.object(_owning_graph_foundation, "GraphClient", return_value=fake):
         result = reconcile_docs_axis_from_reviews(dry_run=dry_run, ids=ids, gc=None)
     return result
 

@@ -20,7 +20,9 @@ from unittest.mock import MagicMock, patch
 
 class TestProcessAttachmentsCore:
     def test_empty_input_returns_zero_counts(self) -> None:
-        from imas_codex.standard_names.workers import _process_attachments_core
+        from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+            _process_attachments_core,
+        )
 
         wlog = logging.getLogger("test")
         out = _process_attachments_core([], wlog)
@@ -29,14 +31,16 @@ class TestProcessAttachmentsCore:
     def test_inconsistent_tense_rejected(self) -> None:
         """Attachment whose source_id implies a different tense than the SN
         target gets rejected and never reaches the graph layer."""
-        from imas_codex.standard_names.workers import _process_attachments_core
+        from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+            _process_attachments_core,
+        )
 
         wlog = logging.getLogger("test")
 
         # ``_is_attachment_consistent`` is the gate; mock it to reject all.
         with (
             patch(
-                "imas_codex.standard_names.workers._is_attachment_consistent",
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._is_attachment_consistent",
                 return_value=(False, "tense_mismatch"),
             ),
             patch(
@@ -55,16 +59,18 @@ class TestProcessAttachmentsCore:
         assert not mock_gc.called
 
     def test_accepted_writes_with_exact_source_fence(self) -> None:
-        from imas_codex.standard_names.workers import _process_attachments_core
+        from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+            _process_attachments_core,
+        )
 
         wlog = logging.getLogger("test")
         with (
             patch(
-                "imas_codex.standard_names.workers._is_attachment_consistent",
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._is_attachment_consistent",
                 return_value=(True, ""),
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.persist_claimed_attachments",
+                "imas_codex.standard_names.graph_store.graph_source_bindings.persist_claimed_attachments",
                 return_value=["dd:equilibrium/x"],
             ) as persist,
         ):
@@ -92,7 +98,9 @@ class TestProcessAttachmentsCore:
         assert item["claim_seq"] == 4
 
     def test_accepted_without_source_fence_is_rejected(self) -> None:
-        from imas_codex.standard_names.workers import _process_attachments_core
+        from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+            _process_attachments_core,
+        )
 
         attach = SimpleNamespace(
             source_id="equilibrium/x",
@@ -100,7 +108,7 @@ class TestProcessAttachmentsCore:
             reason="duplicate",
         )
         with patch(
-            "imas_codex.standard_names.workers._is_attachment_consistent",
+            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._is_attachment_consistent",
             return_value=(True, ""),
         ):
             out = _process_attachments_core([attach], logging.getLogger("test"))
@@ -115,7 +123,9 @@ class TestProcessAttachmentsCore:
 
 class TestUpdateSourcesAfterSkip:
     def test_empty_list_is_noop(self) -> None:
-        from imas_codex.standard_names.workers import _update_sources_after_skip
+        from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+            _update_sources_after_skip,
+        )
 
         wlog = logging.getLogger("test")
         with patch("imas_codex.graph.client.GraphClient") as mock_gc:
@@ -123,7 +133,9 @@ class TestUpdateSourcesAfterSkip:
         assert not mock_gc.called
 
     def test_dd_source_ids_without_fences_are_ignored(self) -> None:
-        from imas_codex.standard_names.workers import _update_sources_after_skip
+        from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+            _update_sources_after_skip,
+        )
 
         wlog = logging.getLogger("test")
         with patch("imas_codex.graph.client.GraphClient") as mock_gc:
@@ -132,7 +144,9 @@ class TestUpdateSourcesAfterSkip:
         assert not mock_gc.called
 
     def test_signal_source_ids_without_fences_are_ignored(self) -> None:
-        from imas_codex.standard_names.workers import _update_sources_after_skip
+        from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+            _update_sources_after_skip,
+        )
 
         wlog = logging.getLogger("test")
         with patch("imas_codex.graph.client.GraphClient") as mock_gc:
@@ -141,7 +155,9 @@ class TestUpdateSourcesAfterSkip:
 
     def test_graph_failure_swallowed(self) -> None:
         """A graph error must not propagate (best-effort cleanup)."""
-        from imas_codex.standard_names.workers import _update_sources_after_skip
+        from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+            _update_sources_after_skip,
+        )
 
         wlog = MagicMock()
         with patch("imas_codex.graph.client.GraphClient") as mock_gc:
@@ -160,7 +176,9 @@ class TestUpdateSourcesAfterSkip:
 
 class TestSearchReferenceExemplars:
     def test_empty_descriptions_returns_empty(self) -> None:
-        from imas_codex.standard_names.workers import _search_reference_exemplars
+        from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+            _search_reference_exemplars,
+        )
 
         out = _search_reference_exemplars(
             [{"path": "a"}, {"path": "b"}],  # no descriptions
@@ -169,7 +187,9 @@ class TestSearchReferenceExemplars:
         assert out == []
 
     def test_synthesises_query_from_first_three_items(self) -> None:
-        from imas_codex.standard_names.workers import _search_reference_exemplars
+        from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+            _search_reference_exemplars,
+        )
 
         items = [
             {"description": "alpha", "existing_name": "ex_a"},
@@ -197,7 +217,9 @@ class TestSearchReferenceExemplars:
         assert call_args.kwargs["k"] == 5
 
     def test_search_failure_returns_empty(self) -> None:
-        from imas_codex.standard_names.workers import _search_reference_exemplars
+        from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+            _search_reference_exemplars,
+        )
 
         with patch(
             "imas_codex.standard_names.search.search_standard_names_with_documentation",
@@ -207,7 +229,9 @@ class TestSearchReferenceExemplars:
         assert out == []
 
     def test_no_existing_name_passes_none_exclude(self) -> None:
-        from imas_codex.standard_names.workers import _search_reference_exemplars
+        from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+            _search_reference_exemplars,
+        )
 
         with patch(
             "imas_codex.standard_names.search.search_standard_names_with_documentation",

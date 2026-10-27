@@ -18,13 +18,13 @@ from __future__ import annotations
 from unittest.mock import patch
 
 from imas_codex.standard_names.attachment_audit import AttachmentPairingGuardResult
-from imas_codex.standard_names.graph_ops import (
-    persist_refined_name,
+from imas_codex.standard_names.graph_store.graph_refinement import persist_refined_name
+from imas_codex.standard_names.graph_store.graph_supersession import (
     supersede_prior_source_names,
 )
 
 # graph_ops binds GraphClient at module import time, so patch that namespace.
-_GC_PATH = "imas_codex.standard_names.graph_ops.GraphClient"
+_GC_PATH = "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
 
 
 class TestSupersedePriorSourceNamesRecording:

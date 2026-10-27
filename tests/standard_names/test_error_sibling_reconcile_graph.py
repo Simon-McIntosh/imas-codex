@@ -10,6 +10,9 @@ import pytest
 
 from imas_codex.graph.client import GraphClient
 from imas_codex.standard_names import graph_ops
+from imas_codex.standard_names.graph_store import (
+    graph_foundation as _owning_graph_foundation,
+)
 
 _ERROR_MODEL = "deterministic:dd_error_modifier"
 _ORPHAN_REASON = "orphaned error sibling (parent name deleted)"
@@ -52,7 +55,9 @@ def _run_reconcile(endpoint: tuple[str, str]) -> dict[str, int]:
             graph_name="error-sibling-reconciliation-run",
         )
 
-    with patch.object(graph_ops, "GraphClient", side_effect=client_factory):
+    with patch.object(
+        _owning_graph_foundation, "GraphClient", side_effect=client_factory
+    ):
         return graph_ops.reconcile_error_siblings()
 
 

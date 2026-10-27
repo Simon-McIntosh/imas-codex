@@ -378,7 +378,7 @@ def identity_state_groups(
     from imas_codex.standard_names.defaults import (
         DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
     )
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_catalog import (
         docs_review_eligibility_params,
         docs_review_eligibility_where,
     )
@@ -1415,7 +1415,7 @@ async def run_pools(
     # is visible here rather than silently degrading name acceptance to a
     # single model. Reset the tally afterwards so it does not leak across runs.
     try:
-        from imas_codex.standard_names.workers import (
+        from imas_codex.standard_names.worker_tasks.worker_review_names import (
             quorum_incomplete_snapshot,
             reset_quorum_incomplete,
         )

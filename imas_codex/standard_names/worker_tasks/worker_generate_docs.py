@@ -701,7 +701,7 @@ async def process_generate_docs_batch(
     from imas_codex.llm.prompt_loader import render_prompt
     from imas_codex.settings import get_model, get_reasoning_effort
     from imas_codex.standard_names.budget import LLMCostEvent
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
         persist_generated_docs,
         release_generate_docs_failed_claims,
     )

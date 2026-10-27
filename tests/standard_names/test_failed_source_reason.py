@@ -15,6 +15,11 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from imas_codex.standard_names import graph_ops
+from imas_codex.standard_names.graph_store import (
+    graph_catalog_reset as _owning_graph_catalog_reset,
+    graph_foundation as _owning_graph_foundation,
+    graph_source_bindings as _owning_graph_source_bindings,
+)
 
 REASONLESS = [None, "", "   ", "\n\t "]
 
@@ -71,10 +76,12 @@ def test_claimed_outcome_refuses_a_failed_status_without_a_reason(
     client = _outcome_client()
 
     with (
-        patch.object(graph_ops, "GraphClient", return_value=client),
+        patch.object(_owning_graph_foundation, "GraphClient", return_value=client),
         pytest.raises(ValueError, match="non-empty reason"),
     ):
-        graph_ops.persist_claimed_source_outcomes([_failed_outcome(reason)])
+        _owning_graph_source_bindings.persist_claimed_source_outcomes(
+            [_failed_outcome(reason)]
+        )
 
     client.query.assert_not_called()
 
@@ -83,10 +90,12 @@ def test_claimed_outcome_refuses_a_failed_status_with_no_error_key() -> None:
     client = _outcome_client()
 
     with (
-        patch.object(graph_ops, "GraphClient", return_value=client),
+        patch.object(_owning_graph_foundation, "GraphClient", return_value=client),
         pytest.raises(ValueError, match="non-empty reason"),
     ):
-        graph_ops.persist_claimed_source_outcomes([_failed_outcome(None, omit=True)])
+        _owning_graph_source_bindings.persist_claimed_source_outcomes(
+            [_failed_outcome(None, omit=True)]
+        )
 
     client.query.assert_not_called()
 
@@ -95,10 +104,10 @@ def test_claimed_outcome_carries_a_stated_failure_reason_to_the_write() -> None:
     client = _outcome_client()
     reason = "candidate pre-validation failed (unit disagreement): wall_radius"
 
-    with patch.object(graph_ops, "GraphClient", return_value=client):
-        assert graph_ops.persist_claimed_source_outcomes([_failed_outcome(reason)]) == [
-            "dd:wall/outline/r"
-        ]
+    with patch.object(_owning_graph_foundation, "GraphClient", return_value=client):
+        assert _owning_graph_source_bindings.persist_claimed_source_outcomes(
+            [_failed_outcome(reason)]
+        ) == ["dd:wall/outline/r"]
 
     persisted = client.query.call_args.kwargs["batch"][0]
     assert persisted["status"] == "failed"
@@ -108,8 +117,8 @@ def test_claimed_outcome_carries_a_stated_failure_reason_to_the_write() -> None:
 def test_claimed_outcome_trims_the_stated_failure_reason() -> None:
     client = _outcome_client()
 
-    with patch.object(graph_ops, "GraphClient", return_value=client):
-        graph_ops.persist_claimed_source_outcomes(
+    with patch.object(_owning_graph_foundation, "GraphClient", return_value=client):
+        _owning_graph_source_bindings.persist_claimed_source_outcomes(
             [_failed_outcome("  compose returned no candidate  ")]
         )
 
@@ -125,8 +134,8 @@ def test_a_non_terminal_outcome_still_needs_no_reason() -> None:
         "skip_reason": "not_a_quantity",
     }
 
-    with patch.object(graph_ops, "GraphClient", return_value=client):
-        graph_ops.persist_claimed_source_outcomes([outcome])
+    with patch.object(_owning_graph_foundation, "GraphClient", return_value=client):
+        _owning_graph_source_bindings.persist_claimed_source_outcomes([outcome])
 
     client.query.assert_called_once()
 
@@ -138,11 +147,11 @@ def test_gap_writeback_refuses_a_failed_status_without_a_reason(
     client, transaction = _gap_client()
 
     with (
-        patch.object(graph_ops, "GraphClient", return_value=client),
-        patch.object(graph_ops, "write_vocab_gaps", return_value=1),
+        patch.object(_owning_graph_foundation, "GraphClient", return_value=client),
+        patch.object(_owning_graph_catalog_reset, "write_vocab_gaps", return_value=1),
         pytest.raises(ValueError, match="non-empty reason"),
     ):
-        graph_ops.persist_claimed_vocab_gaps(
+        _owning_graph_source_bindings.persist_claimed_vocab_gaps(
             [],
             [_failed_outcome(reason)],
             source_type="dd",
@@ -157,10 +166,10 @@ def test_gap_writeback_carries_a_stated_failure_reason_to_the_write() -> None:
     reason = "compose batch of 4 failed vocabulary validation"
 
     with (
-        patch.object(graph_ops, "GraphClient", return_value=client),
-        patch.object(graph_ops, "write_vocab_gaps", return_value=1),
+        patch.object(_owning_graph_foundation, "GraphClient", return_value=client),
+        patch.object(_owning_graph_catalog_reset, "write_vocab_gaps", return_value=1),
     ):
-        assert graph_ops.persist_claimed_vocab_gaps(
+        assert _owning_graph_source_bindings.persist_claimed_vocab_gaps(
             [],
             [_failed_outcome(reason)],
             source_type="dd",
@@ -176,10 +185,12 @@ def test_retry_budget_exhaustion_refuses_an_empty_reason(reason: Any) -> None:
     client = _outcome_client()
 
     with (
-        patch.object(graph_ops, "GraphClient", return_value=client),
+        patch.object(_owning_graph_foundation, "GraphClient", return_value=client),
         pytest.raises(ValueError, match="non-empty reason"),
     ):
-        graph_ops.mark_sources_failed("winner", ["dd:wall/outline/r"], reason)
+        _owning_graph_source_bindings.mark_sources_failed(
+            "winner", ["dd:wall/outline/r"], reason
+        )
 
     client.query.assert_not_called()
 
@@ -189,9 +200,9 @@ def test_retry_budget_exhaustion_records_a_stated_reason() -> None:
     gc = client.__enter__.return_value
     gc.query.return_value = [{"affected": 1}]
 
-    with patch.object(graph_ops, "GraphClient", return_value=client):
+    with patch.object(_owning_graph_foundation, "GraphClient", return_value=client):
         assert (
-            graph_ops.mark_sources_failed(
+            _owning_graph_source_bindings.mark_sources_failed(
                 "winner", ["dd:wall/outline/r"], "  model timed out  "
             )
             == 1

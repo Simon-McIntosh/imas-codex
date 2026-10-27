@@ -21,6 +21,7 @@ import pytest
 
 from imas_codex.standard_names import graph_ops
 from imas_codex.standard_names.export import _fetch_candidates
+from imas_codex.standard_names.graph_store import graph_catalog as _owning_graph_catalog
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -338,13 +339,13 @@ class TestQuorumShortfallIsNotExportable:
 
     def test_full_export_requires_docs_quorum_authority(self) -> None:
         cypher = self._capture_cypher()
-        assert graph_ops.docs_review_eligibility_where() in cypher
+        assert _owning_graph_catalog.docs_review_eligibility_where() in cypher
         assert "sn.docs_review_resolution_method IS NOT NULL" not in cypher
         assert "sn.docs_review_quorum_shortfall IS NULL" in cypher
 
     def test_batch_export_requires_docs_quorum_authority(self) -> None:
         cypher = self._capture_cypher(batch=["sn_a"])
-        assert graph_ops.docs_review_eligibility_where() in cypher
+        assert _owning_graph_catalog.docs_review_eligibility_where() in cypher
         assert "sn.docs_review_resolution_method IS NOT NULL" not in cypher
         assert "sn.docs_review_quorum_shortfall IS NULL" in cypher
 

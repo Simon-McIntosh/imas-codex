@@ -5,11 +5,13 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 from imas_codex.standard_names.export import _run_gate_b
-from imas_codex.standard_names.graph_ops import (
-    _parse_grammar,
+from imas_codex.standard_names.graph_store.graph_catalog import (
     _write_grammar_decomposition,
-    _write_standard_name_edges,
     write_standard_names,
+)
+from imas_codex.standard_names.graph_store.graph_foundation import _parse_grammar
+from imas_codex.standard_names.graph_store.graph_lineage import (
+    _write_standard_name_edges,
 )
 
 INVERSE_SQUARE_RADIUS = "flux_surface_averaged_inverse_of_square_of_major_radius"
@@ -136,7 +138,7 @@ def test_graph_writer_expands_complete_unary_operator_order() -> None:
     gc.query.return_value = []
 
     with patch(
-        "imas_codex.standard_names.graph_ops._filter_admissible_parents",
+        "imas_codex.standard_names.graph_store.graph_lineage._filter_admissible_parents",
         side_effect=lambda batch, _gc, **_kwargs: batch,
     ):
         _write_standard_name_edges(gc, [{"id": INVERSE_SQUARE_RADIUS}])
@@ -160,7 +162,7 @@ def test_graph_writer_expands_postfix_operator_in_authored_position() -> None:
     gc.query.return_value = []
 
     with patch(
-        "imas_codex.standard_names.graph_ops._filter_admissible_parents",
+        "imas_codex.standard_names.graph_store.graph_lineage._filter_admissible_parents",
         side_effect=lambda batch, _gc, **_kwargs: batch,
     ):
         _write_standard_name_edges(gc, [{"id": SQUARE_FIELD_MAGNITUDE}])
@@ -178,7 +180,7 @@ def test_graph_writer_expands_both_binary_operand_trees() -> None:
     gc.query.return_value = []
 
     with patch(
-        "imas_codex.standard_names.graph_ops._filter_admissible_parents",
+        "imas_codex.standard_names.graph_store.graph_lineage._filter_admissible_parents",
         side_effect=lambda batch, _gc, **_kwargs: batch,
     ):
         _write_standard_name_edges(gc, [{"id": GRADIENT_FIELD_RATIO}])
@@ -262,13 +264,15 @@ def test_graph_write_gate_accepts_ordered_tree() -> None:
     gc.query.return_value = []
 
     with (
-        patch("imas_codex.standard_names.graph_ops.GraphClient") as graph_client,
+        patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as graph_client,
         patch(
             "imas_codex.standard_names.protection.filter_protected",
             side_effect=lambda names, **_kwargs: (names, []),
         ),
         patch(
-            "imas_codex.standard_names.graph_ops._filter_admissible_parents",
+            "imas_codex.standard_names.graph_store.graph_lineage._filter_admissible_parents",
             side_effect=lambda batch, _gc, **_kwargs: batch,
         ),
     ):

@@ -45,7 +45,7 @@ async def test_drain_timeout_proceeds():
 
     with (
         patch(
-            "imas_codex.standard_names.graph_ops.record_llm_cost",
+            "imas_codex.standard_names.graph_store.graph_cost_and_claims.record_llm_cost",
             side_effect=_wedged_record,
         ),
         patch("imas_codex.standard_names.budget._WRITER_CALL_TIMEOUT", 60.0),

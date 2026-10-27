@@ -427,7 +427,9 @@ def apply_vocab_gap_adjudications(
         )
 
     if grammar_signature is None:
-        from imas_codex.standard_names.graph_ops import isn_vocabulary_signature
+        from imas_codex.standard_names.graph_store.graph_audits import (
+            isn_vocabulary_signature,
+        )
 
         grammar_signature = isn_vocabulary_signature()
     if not grammar_signature:
@@ -616,7 +618,9 @@ def reset_vocab_gap_adjudications(
     if not grammar_signature or not actor or not reason:
         raise ValueError("signature, actor, and reset reason must be nonempty")
     if current_grammar_signature is None:
-        from imas_codex.standard_names.graph_ops import isn_vocabulary_signature
+        from imas_codex.standard_names.graph_store.graph_audits import (
+            isn_vocabulary_signature,
+        )
 
         current_grammar_signature = isn_vocabulary_signature()
     if not current_grammar_signature:

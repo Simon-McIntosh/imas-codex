@@ -34,9 +34,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from imas_codex.discovery.base.llm import acall_llm_structured, get_model_limits
-from imas_codex.standard_names.workers import (
-    _run_rd_quorum_cycles,
+from imas_codex.standard_names.worker_tasks.worker_review_docs import (
     process_review_docs_batch,
+)
+from imas_codex.standard_names.worker_tasks.worker_review_names import (
+    _run_rd_quorum_cycles,
     quorum_incomplete_snapshot,
     reset_quorum_incomplete,
 )
@@ -403,19 +405,21 @@ class TestDeferredReviewReleasesClaim:
                 return_value="Review.",
             ),
             patch(
-                "imas_codex.standard_names.workers._run_rd_quorum_cycles",
+                "imas_codex.standard_names.worker_tasks.worker_review_names._run_rd_quorum_cycles",
                 new=AsyncMock(return_value=None),
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.release_review_docs_failed_claims",
+                "imas_codex.standard_names.graph_store.graph_claim_release.release_review_docs_failed_claims",
                 side_effect=_fake_release,
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.persist_reviewed_docs",
+                "imas_codex.standard_names.graph_store.graph_review_persistence.persist_reviewed_docs",
                 side_effect=_fake_persist,
             ),
         ):
-            from imas_codex.standard_names.workers import process_review_docs_batch
+            from imas_codex.standard_names.worker_tasks.worker_review_docs import (
+                process_review_docs_batch,
+            )
 
             items = [_make_docs_item(claim_token="tok-defer")]
             result = asyncio.run(

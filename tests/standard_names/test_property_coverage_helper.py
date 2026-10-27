@@ -8,7 +8,7 @@ from typing import Any
 import pytest
 
 from imas_codex.graph.schema import GraphSchema
-from imas_codex.standard_names import graph_ops
+from imas_codex.standard_names.graph_store.graph_catalog import property_coverage
 
 SCHEMA_PATH = (
     Path(__file__).resolve().parents[2]
@@ -43,12 +43,7 @@ def _review_axis_slot(schema: GraphSchema) -> tuple[str, str]:
 
 
 def _property_coverage(*args: Any, **kwargs: Any) -> dict[str, int]:
-    helper = getattr(graph_ops, "property_coverage", None)
-    assert callable(helper), (
-        "fail-closed property coverage is not implemented: "
-        "graph_ops.property_coverage is missing"
-    )
-    return helper(*args, **kwargs)
+    return property_coverage(*args, **kwargs)
 
 
 def test_property_coverage_reports_candidates_and_populated_property_together() -> None:

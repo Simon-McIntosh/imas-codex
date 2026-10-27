@@ -676,7 +676,9 @@ def _fetch_review_derived_children(names: list[dict]) -> None:
     Modifies items in-place, adding ``derived_children`` and
     ``derived_parent_note``.
     """
-    from imas_codex.standard_names.graph_ops import fetch_derived_parent_children
+    from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
+        fetch_derived_parent_children,
+    )
 
     parent_ids = [
         n.get("id", "") for n in names if (n.get("origin") == "derived") and n.get("id")
@@ -716,7 +718,7 @@ def _fetch_review_dd_context(names: list[dict]) -> None:
     ``nearest_peers``, and ``related_neighbours``.
     """
     from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.workers import (
+    from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
         _enrich_batch_items,
         _hybrid_search_neighbours_batch,
         _related_path_neighbours,
@@ -1572,7 +1574,7 @@ async def persist_review_worker(state: StandardNameReviewState, **_kwargs: Any) 
     5. Update aggregates (review_count, review_mean_score, review_disagreement).
     """
     from imas_codex.cli.logging import WorkerLogAdapter
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_catalog import (
         update_review_aggregates,
         write_docs_review_results,
         write_name_review_results,
@@ -2508,7 +2510,7 @@ def _persist_review_records_sync(records: list[dict]) -> int:
     Used via ``asyncio.to_thread()`` to persist each cycle's records
     immediately after the LLM call completes — ensures crash-safety.
     """
-    from imas_codex.standard_names.graph_ops import write_reviews
+    from imas_codex.standard_names.graph_store.graph_catalog import write_reviews
 
     return write_reviews(records)
 
@@ -2609,7 +2611,7 @@ async def _review_batch_core(
         get_sn_review_docs_models,
         get_sn_review_names_models,
     )
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_catalog import (
         update_review_aggregates,
         write_docs_review_results,
         write_name_review_results,

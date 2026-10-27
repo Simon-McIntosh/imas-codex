@@ -7,7 +7,7 @@ import inspect
 import pytest
 from imas_standard_names.grammar import parser as isn_parser
 
-from imas_codex.standard_names.graph_ops import (
+from imas_codex.standard_names.graph_store.graph_refinement import (
     persist_refined_name,
     rename_preserves_meaning,
 )

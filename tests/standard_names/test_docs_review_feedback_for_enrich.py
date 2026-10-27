@@ -15,7 +15,7 @@ import pytest
 
 def test_fetch_docs_review_feedback_returns_full_payload():
     """Happy path: SN with docs review returns score + comments + per-dim."""
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_lineage import (
         fetch_docs_review_feedback_for_standard_names,
     )
 
@@ -38,7 +38,8 @@ def test_fetch_docs_review_feedback_returns_full_payload():
     fake_client.query = MagicMock(return_value=fake_rows)
 
     with patch(
-        "imas_codex.standard_names.graph_ops.GraphClient", return_value=fake_client
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        return_value=fake_client,
     ):
         result = fetch_docs_review_feedback_for_standard_names(["electron_temperature"])
 
@@ -52,7 +53,7 @@ def test_fetch_docs_review_feedback_returns_full_payload():
 
 def test_fetch_docs_review_feedback_omits_unreviewed():
     """Cold-start: SNs with reviewer_score_docs IS NULL are not in graph results."""
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_lineage import (
         fetch_docs_review_feedback_for_standard_names,
     )
 
@@ -62,7 +63,8 @@ def test_fetch_docs_review_feedback_omits_unreviewed():
     fake_client.query = MagicMock(return_value=[])  # graph filter on NOT NULL
 
     with patch(
-        "imas_codex.standard_names.graph_ops.GraphClient", return_value=fake_client
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        return_value=fake_client,
     ):
         result = fetch_docs_review_feedback_for_standard_names(["never_reviewed_sn"])
 
@@ -71,7 +73,7 @@ def test_fetch_docs_review_feedback_omits_unreviewed():
 
 def test_fetch_docs_review_feedback_handles_empty_input():
     """No graph call when input is None or empty."""
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_lineage import (
         fetch_docs_review_feedback_for_standard_names,
     )
 
@@ -82,7 +84,7 @@ def test_fetch_docs_review_feedback_handles_empty_input():
 
 def test_fetch_docs_review_feedback_handles_malformed_scores_json():
     """Bad JSON in reviewer_scores_docs must not crash — fall back to None."""
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_lineage import (
         fetch_docs_review_feedback_for_standard_names,
     )
 
@@ -102,7 +104,8 @@ def test_fetch_docs_review_feedback_handles_malformed_scores_json():
     fake_client.query = MagicMock(return_value=fake_rows)
 
     with patch(
-        "imas_codex.standard_names.graph_ops.GraphClient", return_value=fake_client
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        return_value=fake_client,
     ):
         result = fetch_docs_review_feedback_for_standard_names(["ion_density"])
 

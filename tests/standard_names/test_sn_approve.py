@@ -397,16 +397,16 @@ class TestRunApprovalContestPath:
             patch(f"{APPROVAL}.persist_reviewed_docs", return_value="reviewed"),
             patch(f"{APPROVAL}.stage_docs_for_rescore", return_value={"ok": True}),
             patch(
-                "imas_codex.standard_names.graph_ops.claim_refine_name_batch"
+                "imas_codex.standard_names.graph_store.graph_refinement.claim_refine_name_batch"
             ) as m_rn,
             patch(
-                "imas_codex.standard_names.graph_ops.claim_refine_docs_batch"
+                "imas_codex.standard_names.graph_store.graph_docs_persistence.claim_refine_docs_batch"
             ) as m_rd,
             patch(
-                "imas_codex.standard_names.workers.process_refine_name_batch"
+                "imas_codex.standard_names.worker_tasks.worker_refine_names.process_refine_name_batch"
             ) as m_prn,
             patch(
-                "imas_codex.standard_names.workers.process_refine_docs_batch"
+                "imas_codex.standard_names.worker_tasks.worker_refine_docs.process_refine_docs_batch"
             ) as m_prd,
         ):
             report = run_approval(isnc_dir="/x", base_ref="b", threshold=0.85, gc=gc)

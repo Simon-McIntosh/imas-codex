@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
-from imas_codex.standard_names.graph_ops import _doc_link_mismatches
+from imas_codex.standard_names.graph_store.graph_doc_links import _doc_link_mismatches
 from imas_codex.standard_names.harmonize import (
     assemble_family,
     group_signature,
@@ -100,7 +100,7 @@ def test_restamp_skips_unchanged_and_not_ready():
         return len(families)
 
     with patch(
-        "imas_codex.standard_names.graph_ops.stamp_harmonized_families",
+        "imas_codex.standard_names.graph_store.graph_docs_persistence.stamp_harmonized_families",
         side_effect=_fake_stamp,
     ):
         out = restamp_harmonized_families(gc=_FamiliesGC(rows))
@@ -112,7 +112,7 @@ def test_restamp_skips_unchanged_and_not_ready():
 
 def test_restamp_noop_on_empty_graph():
     with patch(
-        "imas_codex.standard_names.graph_ops.stamp_harmonized_families",
+        "imas_codex.standard_names.graph_store.graph_docs_persistence.stamp_harmonized_families",
         side_effect=AssertionError("must not be called"),
     ):
         out = restamp_harmonized_families(gc=_FamiliesGC([]))
@@ -136,7 +136,7 @@ def test_restamp_omits_locus_ancestry_without_documentation_write():
     ]
 
     with patch(
-        "imas_codex.standard_names.graph_ops.stamp_harmonized_families",
+        "imas_codex.standard_names.graph_store.graph_docs_persistence.stamp_harmonized_families",
         side_effect=AssertionError("locus ancestry must not be restamped"),
     ):
         out = restamp_harmonized_families(gc=_FamiliesGC(rows))
@@ -163,7 +163,7 @@ def test_restamp_keeps_safe_family_and_carries_no_source_migration_manifest():
         return len(families)
 
     with patch(
-        "imas_codex.standard_names.graph_ops.stamp_harmonized_families",
+        "imas_codex.standard_names.graph_store.graph_docs_persistence.stamp_harmonized_families",
         side_effect=_fake_stamp,
     ):
         out = restamp_harmonized_families(gc=_FamiliesGC(rows))

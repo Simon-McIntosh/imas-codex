@@ -24,7 +24,7 @@ import pytest
 # Shared helpers
 # =============================================================================
 
-_GC_PATH = "imas_codex.standard_names.graph_ops.GraphClient"
+_GC_PATH = "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
 # workers.py uses function-local imports, so patch at the source module.
 _GC_WORKERS_PATH = "imas_codex.graph.client.GraphClient"
 _CHAIN_HISTORY_PATH = "imas_codex.standard_names.chain_history.name_chain_history"
@@ -121,7 +121,7 @@ class TestClaimRefinesEligibleSN:
     """claim_refine_name_batch selects reviewed + low-score + chain < cap."""
 
     def test_claim_refines_eligible_sn(self):
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_refinement import (
             claim_refine_name_batch,
         )
 
@@ -164,7 +164,7 @@ class TestClaimRefinesEligibleSN:
 
     def test_claim_skips_at_chain_cap(self):
         """Items at or above rotation_cap are excluded by WHERE clause."""
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_refinement import (
             claim_refine_name_batch,
         )
 
@@ -183,7 +183,7 @@ class TestClaimRefinesEligibleSN:
 
     def test_claim_enriches_chain_history(self):
         """Each claimed item gets chain_history from name_chain_history()."""
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_refinement import (
             claim_refine_name_batch,
         )
 
@@ -227,7 +227,9 @@ class TestPersistCreatesNewNode:
     """persist_refined_name creates a new SN node with new identity."""
 
     def test_persist_creates_new_node_with_new_id(self):
-        from imas_codex.standard_names.graph_ops import persist_refined_name
+        from imas_codex.standard_names.graph_store.graph_refinement import (
+            persist_refined_name,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run.return_value = [
@@ -266,7 +268,9 @@ class TestPersistCypherContent:
         return call.kwargs
 
     def test_cypher_contains_refined_from(self):
-        from imas_codex.standard_names.graph_ops import persist_refined_name
+        from imas_codex.standard_names.graph_store.graph_refinement import (
+            persist_refined_name,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run.return_value = [{"new_name": "new", "old_name": "old"}]
@@ -290,7 +294,9 @@ class TestPersistCypherContent:
         still-open steer is carried forward to the successor, so leaving the
         terminal predecessor 'open' orphans the edit. The Cypher reconciles it
         to 'applied' in the same write that supersedes it."""
-        from imas_codex.standard_names.graph_ops import persist_refined_name
+        from imas_codex.standard_names.graph_store.graph_refinement import (
+            persist_refined_name,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run.return_value = [{"new_name": "new", "old_name": "old"}]
@@ -315,7 +321,9 @@ class TestPersistCypherContent:
         ``produced_sn_id`` scalar must be repointed too — otherwise the scalar
         keeps naming the superseded predecessor (a latent edge/scalar desync).
         """
-        from imas_codex.standard_names.graph_ops import persist_refined_name
+        from imas_codex.standard_names.graph_store.graph_refinement import (
+            persist_refined_name,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run.return_value = [{"new_name": "new", "old_name": "old"}]
@@ -335,7 +343,9 @@ class TestPersistCypherContent:
         )
 
     def test_chain_length_incremented(self):
-        from imas_codex.standard_names.graph_ops import persist_refined_name
+        from imas_codex.standard_names.graph_store.graph_refinement import (
+            persist_refined_name,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run.return_value = [{"new_name": "new", "old_name": "old"}]
@@ -352,7 +362,9 @@ class TestPersistCypherContent:
         assert kwargs["new_chain_length"] == 3
 
     def test_escalation_sets_timestamp(self):
-        from imas_codex.standard_names.graph_ops import persist_refined_name
+        from imas_codex.standard_names.graph_store.graph_refinement import (
+            persist_refined_name,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run.return_value = [{"new_name": "new", "old_name": "old"}]
@@ -370,7 +382,9 @@ class TestPersistCypherContent:
         assert "refine_name_escalated_at" in cypher
 
     def test_no_escalation_no_timestamp(self):
-        from imas_codex.standard_names.graph_ops import persist_refined_name
+        from imas_codex.standard_names.graph_store.graph_refinement import (
+            persist_refined_name,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run.return_value = [{"new_name": "new", "old_name": "old"}]
@@ -388,7 +402,9 @@ class TestPersistCypherContent:
         assert "refine_name_escalated_at" not in cypher
 
     def test_old_sn_marked_superseded(self):
-        from imas_codex.standard_names.graph_ops import persist_refined_name
+        from imas_codex.standard_names.graph_store.graph_refinement import (
+            persist_refined_name,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run.return_value = [{"new_name": "new", "old_name": "old"}]
@@ -409,7 +425,9 @@ class TestPersistCypherContent:
 
     def test_grammar_fields_removed(self):
         """grammar_fields parameter was removed in IR segment migration."""
-        from imas_codex.standard_names.graph_ops import persist_refined_name
+        from imas_codex.standard_names.graph_store.graph_refinement import (
+            persist_refined_name,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run.return_value = [{"new_name": "new", "old_name": "old"}]
@@ -423,7 +441,9 @@ class TestPersistCypherContent:
 
     def test_persist_idempotent_merge(self):
         """MERGE semantics mean re-calling persist doesn't fail."""
-        from imas_codex.standard_names.graph_ops import persist_refined_name
+        from imas_codex.standard_names.graph_store.graph_refinement import (
+            persist_refined_name,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run.return_value = [{"new_name": "new", "old_name": "old"}]
@@ -453,7 +473,7 @@ class TestPersistCypherContent:
         """
         import pytest
 
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_refinement import (
             RefinedNamePersistenceRefusal,
             RefinedNamePersistenceRefusalReason,
             persist_refined_name,
@@ -504,7 +524,9 @@ class TestStopRefineNameAttempt:
     """A failed attempt is closed with its reason and the right next stage."""
 
     def test_recoverable_failure_returns_the_name_to_review(self):
-        from imas_codex.standard_names.graph_ops import stop_refine_name_attempt
+        from imas_codex.standard_names.graph_store.graph_claim_release import (
+            stop_refine_name_attempt,
+        )
 
         gc = _mock_gc_query()
         gc.query = MagicMock(return_value=[{"stage": "reviewed"}])
@@ -522,7 +544,9 @@ class TestStopRefineNameAttempt:
         assert gc.query.call_args.kwargs["terminal"] is False
 
     def test_collision_is_terminal_and_records_the_occupied_identity(self):
-        from imas_codex.standard_names.graph_ops import stop_refine_name_attempt
+        from imas_codex.standard_names.graph_store.graph_claim_release import (
+            stop_refine_name_attempt,
+        )
 
         gc = _mock_gc_query()
         gc.query = MagicMock(return_value=[{"stage": "exhausted"}])
@@ -540,7 +564,9 @@ class TestStopRefineNameAttempt:
         assert gc.query.call_args.kwargs["collision_name"] == "b"
 
     def test_write_is_fenced_on_the_active_claim(self):
-        from imas_codex.standard_names.graph_ops import stop_refine_name_attempt
+        from imas_codex.standard_names.graph_store.graph_claim_release import (
+            stop_refine_name_attempt,
+        )
 
         gc = _mock_gc_query()
         gc.query = MagicMock(return_value=[])
@@ -560,7 +586,9 @@ class TestRefineTerminalClaimFence:
     """Deterministic termination is fenced by the exact active claim token."""
 
     def test_stale_token_does_not_mutate_current_claim(self):
-        from imas_codex.standard_names.graph_ops import stop_refine_name_attempt
+        from imas_codex.standard_names.graph_store.graph_claim_release import (
+            stop_refine_name_attempt,
+        )
 
         state = {
             "name_stage": "refining",
@@ -597,7 +625,9 @@ class TestRefineTerminalClaimFence:
         }
 
     def test_terminal_query_preserves_identity_provenance_and_counters(self):
-        from imas_codex.standard_names.graph_ops import stop_refine_name_attempt
+        from imas_codex.standard_names.graph_store.graph_claim_release import (
+            stop_refine_name_attempt,
+        )
 
         gc = _mock_gc_query()
         gc.query = MagicMock(return_value=[])
@@ -639,7 +669,9 @@ class TestReleaseRefineNameClaims:
     """release_refine_name_claims reverts refining → reviewed by id list."""
 
     def test_release_reverts_refining_stage(self):
-        from imas_codex.standard_names.graph_ops import release_refine_name_claims
+        from imas_codex.standard_names.graph_store.graph_claim_release import (
+            release_refine_name_claims,
+        )
 
         gc = _mock_gc_query()
         gc.query = MagicMock(return_value=[{"released": 2}])
@@ -676,7 +708,9 @@ class TestProcessCallsEscalationModel:
     @pytest.mark.asyncio
     async def test_process_calls_escalation_model(self):
         from imas_codex.standard_names.models import RefinedName
-        from imas_codex.standard_names.workers import process_refine_name_batch
+        from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+            process_refine_name_batch,
+        )
 
         item = _make_refine_item(chain_length=2)  # cap=3, so cap-1=2 → escalate
 
@@ -701,14 +735,14 @@ class TestProcessCallsEscalationModel:
                 return_value="prompt text",
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.persist_refined_name",
+                "imas_codex.standard_names.graph_store.graph_refinement.persist_refined_name",
                 return_value={
                     "new_name": "electron_temperature_core",
                     "old_name": "test_name",
                 },
             ),
             patch(
-                "imas_codex.standard_names.workers._hybrid_search_neighbours",
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours",
                 return_value=[],
             ),
             patch(
@@ -733,7 +767,9 @@ class TestProcessCallsEscalationModel:
     @pytest.mark.asyncio
     async def test_process_uses_default_model_below_cap(self):
         from imas_codex.standard_names.models import RefinedName
-        from imas_codex.standard_names.workers import process_refine_name_batch
+        from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+            process_refine_name_batch,
+        )
 
         item = _make_refine_item(chain_length=0)  # Below cap-1 → no escalation
 
@@ -758,14 +794,14 @@ class TestProcessCallsEscalationModel:
                 return_value="prompt text",
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.persist_refined_name",
+                "imas_codex.standard_names.graph_store.graph_refinement.persist_refined_name",
                 return_value={
                     "new_name": "electron_temperature_v2",
                     "old_name": "test_name",
                 },
             ),
             patch(
-                "imas_codex.standard_names.workers._hybrid_search_neighbours",
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours",
                 return_value=[],
             ),
             patch(
@@ -796,7 +832,9 @@ class TestPinnedRenameShortCircuit:
 
     @pytest.mark.asyncio
     async def test_pinned_rename_resubmits_without_llm(self):
-        from imas_codex.standard_names.workers import process_refine_name_batch
+        from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+            process_refine_name_batch,
+        )
 
         item = _make_refine_item(
             sn_id="second_local_tangential_coordinate_of_bragg_crystal",
@@ -811,13 +849,13 @@ class TestPinnedRenameShortCircuit:
                 "imas_codex.discovery.base.llm.acall_llm_structured",
             ) as mock_llm,
             patch(
-                "imas_codex.standard_names.graph_ops.persist_refined_name",
+                "imas_codex.standard_names.graph_store.graph_refinement.persist_refined_name",
             ) as mock_persist,
             patch(
-                "imas_codex.standard_names.graph_ops.stop_refine_name_attempt",
+                "imas_codex.standard_names.graph_store.graph_claim_release.stop_refine_name_attempt",
             ) as mock_stop,
             patch(
-                "imas_codex.standard_names.graph_ops.resubmit_pinned_rename_for_review",
+                "imas_codex.standard_names.graph_store.graph_claim_release.resubmit_pinned_rename_for_review",
                 return_value="resubmitted",
             ) as mock_resubmit,
             patch(
@@ -843,7 +881,9 @@ class TestProcessReleasesOnFailure:
 
     @pytest.mark.asyncio
     async def test_releases_claim_on_llm_failure(self):
-        from imas_codex.standard_names.workers import process_refine_name_batch
+        from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+            process_refine_name_batch,
+        )
 
         item = _make_refine_item()
 
@@ -857,7 +897,7 @@ class TestProcessReleasesOnFailure:
                 return_value="prompt text",
             ),
             patch(
-                "imas_codex.standard_names.workers._hybrid_search_neighbours",
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours",
                 return_value=[],
             ),
             patch(
@@ -865,7 +905,7 @@ class TestProcessReleasesOnFailure:
                 return_value="default-model",
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.stop_refine_name_attempt",
+                "imas_codex.standard_names.graph_store.graph_claim_release.stop_refine_name_attempt",
                 return_value="reviewed",
             ) as mock_stop,
             patch(
@@ -889,7 +929,9 @@ class TestProcessReleasesOnFailure:
 
     @pytest.mark.asyncio
     async def test_exact_id_collision_emits_both_ids_and_releases_claim(self, caplog):
-        from imas_codex.standard_names.workers import process_refine_name_batch
+        from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+            process_refine_name_batch,
+        )
 
         item = _make_refine_item(sn_id="radial_outline_of_passive_loop")
         refined = MagicMock()
@@ -912,12 +954,12 @@ class TestProcessReleasesOnFailure:
                 return_value="prompt text",
             ),
             patch(
-                "imas_codex.standard_names.workers._hybrid_search_neighbours",
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours",
                 return_value=[],
             ),
             patch("imas_codex.settings.get_model", return_value="default-model"),
             patch(
-                "imas_codex.standard_names.workers._compose_refined_candidate_name",
+                "imas_codex.standard_names.worker_tasks.worker_refine_names._compose_refined_candidate_name",
                 return_value="radial_outline_of_conductor_cross_section",
             ),
             patch(
@@ -925,10 +967,10 @@ class TestProcessReleasesOnFailure:
                 return_value="radial_outline_of_conductor_cross_section",
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.persist_refined_name"
+                "imas_codex.standard_names.graph_store.graph_refinement.persist_refined_name"
             ) as mock_persist,
             patch(
-                "imas_codex.standard_names.graph_ops.stop_refine_name_attempt",
+                "imas_codex.standard_names.graph_store.graph_claim_release.stop_refine_name_attempt",
                 return_value="exhausted",
             ) as mock_stop,
             patch(_GC_WORKERS_PATH, return_value=_mock_worker_gc()),
@@ -966,11 +1008,13 @@ class TestProcessReleasesOnFailure:
 
     @pytest.mark.asyncio
     async def test_proven_claim_loss_is_distinct_from_successor_refusal(self, caplog):
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_refinement import (
             RefinedNamePersistenceRefusal,
             RefinedNamePersistenceRefusalReason,
         )
-        from imas_codex.standard_names.workers import process_refine_name_batch
+        from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+            process_refine_name_batch,
+        )
 
         item = _make_refine_item()
         refined = MagicMock()
@@ -998,12 +1042,12 @@ class TestProcessReleasesOnFailure:
                 return_value="prompt text",
             ),
             patch(
-                "imas_codex.standard_names.workers._hybrid_search_neighbours",
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours",
                 return_value=[],
             ),
             patch("imas_codex.settings.get_model", return_value="default-model"),
             patch(
-                "imas_codex.standard_names.workers._compose_refined_candidate_name",
+                "imas_codex.standard_names.worker_tasks.worker_refine_names._compose_refined_candidate_name",
                 return_value="electron_temperature",
             ),
             patch(
@@ -1011,11 +1055,11 @@ class TestProcessReleasesOnFailure:
                 return_value=None,
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.persist_refined_name",
+                "imas_codex.standard_names.graph_store.graph_refinement.persist_refined_name",
                 side_effect=refusal,
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.stop_refine_name_attempt",
+                "imas_codex.standard_names.graph_store.graph_claim_release.stop_refine_name_attempt",
                 return_value="",
             ) as mock_stop,
             patch(_GC_WORKERS_PATH, return_value=_mock_worker_gc()),
@@ -1042,7 +1086,9 @@ class TestProcessReleasesOnFailure:
         from imas_standard_names import ParseError
 
         from imas_codex.discovery.base.llm import LLMResult
-        from imas_codex.standard_names.workers import process_refine_name_batch
+        from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+            process_refine_name_batch,
+        )
 
         class CandidateWithInvalidComposition:
             description = "A candidate definition"
@@ -1078,15 +1124,15 @@ class TestProcessReleasesOnFailure:
                 return_value="prompt text",
             ),
             patch(
-                "imas_codex.standard_names.workers._hybrid_search_neighbours",
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours",
                 return_value=[],
             ),
             patch("imas_codex.settings.get_model", return_value="default-model"),
             patch(
-                "imas_codex.standard_names.graph_ops.persist_refined_name"
+                "imas_codex.standard_names.graph_store.graph_refinement.persist_refined_name"
             ) as mock_persist,
             patch(
-                "imas_codex.standard_names.graph_ops.stop_refine_name_attempt",
+                "imas_codex.standard_names.graph_store.graph_claim_release.stop_refine_name_attempt",
                 return_value="exhausted",
             ) as mock_stop,
             patch(_GC_WORKERS_PATH, return_value=_mock_worker_gc()),
@@ -1120,7 +1166,9 @@ class TestProcessReleasesOnFailure:
     @pytest.mark.asyncio
     async def test_billed_structured_failure_charges_telemetry_once(self):
         from imas_codex.discovery.base.llm import LLMStructuredCallError
-        from imas_codex.standard_names.workers import process_refine_name_batch
+        from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+            process_refine_name_batch,
+        )
 
         item = _make_refine_item()
         failure = LLMStructuredCallError(
@@ -1143,12 +1191,12 @@ class TestProcessReleasesOnFailure:
                 return_value="prompt text",
             ),
             patch(
-                "imas_codex.standard_names.workers._hybrid_search_neighbours",
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours",
                 return_value=[],
             ),
             patch("imas_codex.settings.get_model", return_value="default-model"),
             patch(
-                "imas_codex.standard_names.graph_ops.stop_refine_name_attempt",
+                "imas_codex.standard_names.graph_store.graph_claim_release.stop_refine_name_attempt",
                 return_value="exhausted",
             ) as mock_stop,
             patch(_GC_WORKERS_PATH, return_value=_mock_worker_gc()),
@@ -1172,7 +1220,9 @@ class TestProcessReleasesOnFailure:
     @pytest.mark.asyncio
     async def test_provider_budget_error_charges_prior_responses_then_propagates(self):
         from imas_codex.discovery.base.llm import ProviderBudgetExhausted
-        from imas_codex.standard_names.workers import process_refine_name_batch
+        from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+            process_refine_name_batch,
+        )
 
         item = _make_refine_item()
         failure = ProviderBudgetExhausted(
@@ -1195,12 +1245,12 @@ class TestProcessReleasesOnFailure:
                 return_value="prompt text",
             ),
             patch(
-                "imas_codex.standard_names.workers._hybrid_search_neighbours",
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours",
                 return_value=[],
             ),
             patch("imas_codex.settings.get_model", return_value="default-model"),
             patch(
-                "imas_codex.standard_names.graph_ops.stop_refine_name_attempt"
+                "imas_codex.standard_names.graph_store.graph_claim_release.stop_refine_name_attempt"
             ) as mock_stop,
             patch(_GC_WORKERS_PATH, return_value=_mock_worker_gc()),
         ):
@@ -1223,7 +1273,9 @@ class TestProcessReleasesOnFailure:
     @pytest.mark.asyncio
     async def test_pre_response_provider_budget_error_does_not_charge(self):
         from imas_codex.discovery.base.llm import ProviderBudgetExhausted
-        from imas_codex.standard_names.workers import process_refine_name_batch
+        from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+            process_refine_name_batch,
+        )
 
         item = _make_refine_item()
         failure = ProviderBudgetExhausted("provider budget exhausted")
@@ -1238,7 +1290,7 @@ class TestProcessReleasesOnFailure:
                 return_value="prompt text",
             ),
             patch(
-                "imas_codex.standard_names.workers._hybrid_search_neighbours",
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours",
                 return_value=[],
             ),
             patch("imas_codex.settings.get_model", return_value="default-model"),
@@ -1258,7 +1310,9 @@ class TestProcessStopEvent:
 
     @pytest.mark.asyncio
     async def test_stops_when_event_set(self):
-        from imas_codex.standard_names.workers import process_refine_name_batch
+        from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+            process_refine_name_batch,
+        )
 
         items = [_make_refine_item(sn_id=f"name_{i}") for i in range(5)]
 
@@ -1291,9 +1345,11 @@ class TestRoundTripPersistRelease:
     """Persist followed by release doesn't error (Cypher structure valid)."""
 
     def test_persist_then_release_no_error(self):
-        from imas_codex.standard_names.graph_ops import (
-            persist_refined_name,
+        from imas_codex.standard_names.graph_store.graph_claim_release import (
             release_refine_name_claims,
+        )
+        from imas_codex.standard_names.graph_store.graph_refinement import (
+            persist_refined_name,
         )
 
         gc, tx = _mock_gc_tx()
@@ -1320,7 +1376,9 @@ class TestPersistWithEdgeMigration:
     """Verify edge migration Cypher patterns in persist."""
 
     def test_produced_name_migration(self):
-        from imas_codex.standard_names.graph_ops import persist_refined_name
+        from imas_codex.standard_names.graph_store.graph_refinement import (
+            persist_refined_name,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run.return_value = [{"new_name": "new", "old_name": "old"}]
@@ -1352,7 +1410,9 @@ class TestPromptRendering:
     @pytest.mark.asyncio
     async def test_prompt_context_keys(self):
         from imas_codex.standard_names.models import RefinedName
-        from imas_codex.standard_names.workers import process_refine_name_batch
+        from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+            process_refine_name_batch,
+        )
 
         item = _make_refine_item()
 
@@ -1381,11 +1441,11 @@ class TestPromptRendering:
                 side_effect=_capture_render,
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.persist_refined_name",
+                "imas_codex.standard_names.graph_store.graph_refinement.persist_refined_name",
                 return_value={"new_name": "new_name", "old_name": "test_name"},
             ),
             patch(
-                "imas_codex.standard_names.workers._hybrid_search_neighbours",
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours",
                 return_value=[],
             ),
             patch(

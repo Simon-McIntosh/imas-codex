@@ -26,6 +26,14 @@ import pytest
 from imas_codex.standard_names.defaults import (
     DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER as PLACEHOLDER,
 )
+from imas_codex.standard_names.graph_store import (
+    graph_cost_and_claims as _owning_graph_cost_and_claims,
+    graph_foundation as _owning_graph_foundation,
+    graph_parent_lifecycle as _owning_graph_parent_lifecycle,
+)
+from imas_codex.standard_names.worker_tasks import (
+    worker_enrich_parents as _owning_worker_enrich_parents,
+)
 
 
 def _mock_budget_manager() -> MagicMock:
@@ -65,8 +73,12 @@ class TestVerifyEnrichParentsClaimWinners:
             {"id": "won_c", "claim_token": "tok-1"},
         ]
         gc = _verify_gc([{"id": "won_a"}, {"id": "won_c"}])
-        with patch.object(g, "GraphClient", return_value=gc):
-            survivors = g._verify_enrich_parents_claim_winners(items)
+        with patch.object(_owning_graph_foundation, "GraphClient", return_value=gc):
+            survivors = (
+                _owning_graph_parent_lifecycle._verify_enrich_parents_claim_winners(
+                    items
+                )
+            )
 
         assert [it["id"] for it in survivors] == ["won_a", "won_c"]
         cypher = gc.query.call_args_list[0][0][0]
@@ -80,15 +92,23 @@ class TestVerifyEnrichParentsClaimWinners:
 
         items = [{"id": "a", "claim_token": "t"}, {"id": "b", "claim_token": "t"}]
         gc = _verify_gc([{"id": "a"}, {"id": "b"}])
-        with patch.object(g, "GraphClient", return_value=gc):
-            assert g._verify_enrich_parents_claim_winners(items) == items
+        with patch.object(_owning_graph_foundation, "GraphClient", return_value=gc):
+            assert (
+                _owning_graph_parent_lifecycle._verify_enrich_parents_claim_winners(
+                    items
+                )
+                == items
+            )
 
     def test_empty_items_short_circuit(self):
         import imas_codex.standard_names.graph_ops as g
 
         gc = _verify_gc([])
-        with patch.object(g, "GraphClient", return_value=gc):
-            assert g._verify_enrich_parents_claim_winners([]) == []
+        with patch.object(_owning_graph_foundation, "GraphClient", return_value=gc):
+            assert (
+                _owning_graph_parent_lifecycle._verify_enrich_parents_claim_winners([])
+                == []
+            )
         gc.query.assert_not_called()
 
 
@@ -109,8 +129,10 @@ def test_claim_eligibility_predicate():
         captured["extra"] = kwargs.get("extra_return_fields", "")
         return []
 
-    with patch.object(g, "_claim_sn_atomic", side_effect=_fake_claim):
-        g.claim_enrich_parents_batch(batch_size=5)
+    with patch.object(
+        _owning_graph_cost_and_claims, "_claim_sn_atomic", side_effect=_fake_claim
+    ):
+        _owning_graph_parent_lifecycle.claim_enrich_parents_batch(batch_size=5)
 
     where = captured["where"]
     assert "sn.origin = 'derived'" in where
@@ -187,8 +209,8 @@ def test_persist_accepts_structurally():
     import imas_codex.standard_names.graph_ops as g
 
     gc = _persist_gc("accepted")
-    with patch.object(g, "GraphClient", return_value=gc):
-        stage = g.persist_enriched_parent(
+    with patch.object(_owning_graph_foundation, "GraphClient", return_value=gc):
+        stage = _owning_graph_parent_lifecycle.persist_enriched_parent(
             sn_id="magnetic_field",
             claim_token="tok",
             description="The vector magnetic field.",
@@ -221,8 +243,8 @@ def test_persist_noop_when_node_unmatched():
     import imas_codex.standard_names.graph_ops as g
 
     gc = _persist_gc(None)  # The child-closure snapshot matched nothing.
-    with patch.object(g, "GraphClient", return_value=gc):
-        stage = g.persist_enriched_parent(
+    with patch.object(_owning_graph_foundation, "GraphClient", return_value=gc):
+        stage = _owning_graph_parent_lifecycle.persist_enriched_parent(
             sn_id="ghost",
             claim_token="tok",
             description="x" * 20,
@@ -256,20 +278,24 @@ async def test_worker_skips_and_releases_childless_parent():
 
     with (
         patch(
-            "imas_codex.standard_names.graph_ops.fetch_derived_parent_children",
+            "imas_codex.standard_names.graph_store.graph_parent_lifecycle.fetch_derived_parent_children",
             return_value={"orphan_parent": []},
         ),
         patch(
-            "imas_codex.standard_names.graph_ops.release_enrich_parents_claims",
+            "imas_codex.standard_names.graph_store.graph_parent_lifecycle.release_enrich_parents_claims",
             side_effect=_release,
         ),
         patch(
             "imas_codex.standard_names.context.build_compose_context",
             return_value={},
         ),
-        patch("imas_codex.standard_names.graph_ops.persist_enriched_parent") as persist,
+        patch(
+            "imas_codex.standard_names.graph_store.graph_parent_lifecycle.persist_enriched_parent"
+        ) as persist,
     ):
-        count = await w.process_enrich_parents_batch(items, mgr, stop)
+        count = await _owning_worker_enrich_parents.process_enrich_parents_batch(
+            items, mgr, stop
+        )
 
     assert count == 0
     assert released.get("ids") == ["orphan_parent"]
@@ -322,7 +348,7 @@ async def test_worker_enriches_parent_with_children():
 
     with (
         patch(
-            "imas_codex.standard_names.graph_ops.fetch_derived_parent_children",
+            "imas_codex.standard_names.graph_store.graph_parent_lifecycle.fetch_derived_parent_children",
             return_value=children,
         ),
         patch(
@@ -338,11 +364,13 @@ async def test_worker_enriches_parent_with_children():
             return_value=[0.1, 0.2, 0.3],
         ),
         patch(
-            "imas_codex.standard_names.graph_ops.persist_enriched_parent",
+            "imas_codex.standard_names.graph_store.graph_parent_lifecycle.persist_enriched_parent",
             side_effect=_persist,
         ),
     ):
-        count = await w.process_enrich_parents_batch(items, mgr, stop)
+        count = await _owning_worker_enrich_parents.process_enrich_parents_batch(
+            items, mgr, stop
+        )
 
     assert count == 1
     assert persisted["sn_id"] == "magnetic_field"

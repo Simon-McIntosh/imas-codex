@@ -34,6 +34,10 @@ from __future__ import annotations
 from typing import Any
 
 from imas_codex.standard_names.families import PATTERN_INVARIANT_SEGMENTS
+from imas_codex.standard_names.graph_store import (
+    graph_docs_persistence as _owning_graph_docs_persistence,
+    graph_source_bindings as _owning_graph_source_bindings,
+)
 
 _ANCHOR = "base_at_axis"
 _BOUNDARY = "base_at_boundary"
@@ -248,10 +252,14 @@ def _apply(graph: _LinkGraph, monkeypatch: Any) -> dict[str, Any]:
     from imas_codex.standard_names import graph_ops, harmonize
 
     monkeypatch.setattr(
-        graph_ops, "write_enrichment_results", graph.write_enrichment_results
+        _owning_graph_source_bindings,
+        "write_enrichment_results",
+        graph.write_enrichment_results,
     )
     monkeypatch.setattr(
-        graph_ops, "stamp_harmonized_families", lambda families: len(families)
+        _owning_graph_docs_persistence,
+        "stamp_harmonized_families",
+        lambda families: len(families),
     )
     # ``filter_protected`` reaches the graph for the approved-name set through
     # its own client, so the stub answers that read too.
@@ -359,7 +367,9 @@ def test_a_catalog_edited_member_is_reported_not_silently_skipped(
 
     graph = _LinkGraph(_family_nodes(probe_stage="approved"))
     monkeypatch.setattr(
-        graph_ops, "write_enrichment_results", graph.write_enrichment_results
+        _owning_graph_source_bindings,
+        "write_enrichment_results",
+        graph.write_enrichment_results,
     )
     monkeypatch.setattr(graph_client, "GraphClient", lambda *a, **k: graph)
 

@@ -241,13 +241,15 @@ async def process_refine_name_batch(
     from imas_codex.standard_names.fanout.trigger import (
         check_results_from_failed_checks,
     )
-    from imas_codex.standard_names.graph_ops import (
-        RefinedNamePersistenceRefusal,
-        RefinedNamePersistenceRefusalReason,
-        bump_sn_run_counter,
-        persist_refined_name,
+    from imas_codex.standard_names.graph_store.graph_audits import bump_sn_run_counter
+    from imas_codex.standard_names.graph_store.graph_claim_release import (
         resubmit_pinned_rename_for_review,
         stop_refine_name_attempt,
+    )
+    from imas_codex.standard_names.graph_store.graph_refinement import (
+        RefinedNamePersistenceRefusal,
+        RefinedNamePersistenceRefusalReason,
+        persist_refined_name,
     )
     from imas_codex.standard_names.models import RefinedName
 

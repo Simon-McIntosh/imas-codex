@@ -65,10 +65,12 @@ class TestComposeCostAccumulation:
         mock_gc.query = MagicMock(return_value=[])
 
         with patch(
-            "imas_codex.standard_names.graph_ops.GraphClient",
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=_make_gc_context(mock_gc),
         ):
-            from imas_codex.standard_names.graph_ops import write_standard_names
+            from imas_codex.standard_names.graph_store.graph_catalog import (
+                write_standard_names,
+            )
 
             write_standard_names(names)
 
@@ -196,10 +198,12 @@ class TestReviewCostPropagation:
         ]
 
         with patch(
-            "imas_codex.standard_names.graph_ops.GraphClient",
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=_make_gc_context(mock_gc),
         ):
-            from imas_codex.standard_names.graph_ops import write_reviews
+            from imas_codex.standard_names.graph_store.graph_catalog import (
+                write_reviews,
+            )
 
             write_reviews(records)
 
@@ -242,10 +246,12 @@ class TestReviewCostPropagation:
         ]
 
         with patch(
-            "imas_codex.standard_names.graph_ops.GraphClient",
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=_make_gc_context(mock_gc),
         ):
-            from imas_codex.standard_names.graph_ops import write_reviews
+            from imas_codex.standard_names.graph_store.graph_catalog import (
+                write_reviews,
+            )
 
             write_reviews(records)
 
@@ -287,10 +293,12 @@ class TestClearWipesCosts:
         )
 
         with patch(
-            "imas_codex.standard_names.graph_ops.GraphClient",
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=_make_gc_context(mock_gc),
         ):
-            from imas_codex.standard_names.graph_ops import clear_sn_subsystem
+            from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+                clear_sn_subsystem,
+            )
 
             clear_sn_subsystem(dry_run=False)
 

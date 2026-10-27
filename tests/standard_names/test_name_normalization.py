@@ -2,7 +2,7 @@
 
 import pytest
 
-from imas_codex.standard_names.graph_ops import normalize_name_id
+from imas_codex.standard_names.graph_store.graph_foundation import normalize_name_id
 
 
 class TestNormalizeNameId:

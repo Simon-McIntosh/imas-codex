@@ -24,7 +24,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.graph_ops import (
+from imas_codex.standard_names.graph_store.graph_claim_release import (
     release_enrich_claims,
     release_enrich_failed_claims,
     release_generate_name_claims,
@@ -54,7 +54,10 @@ def _make_gc(released: int) -> MagicMock:
 
 @contextmanager
 def _patch_gc(gc: MagicMock):
-    with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=gc):
+    with patch(
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        return_value=gc,
+    ):
         yield gc
 
 

@@ -37,10 +37,12 @@ from imas_codex.standard_names.defaults import (
     DEFAULT_ESCALATION_MODEL,
     DEFAULT_REFINE_ROTATIONS,
 )
-from imas_codex.standard_names.graph_ops import (
+from imas_codex.standard_names.graph_store.graph_docs_persistence import (
     claim_generate_docs_batch,
     persist_generated_docs,
     persist_refined_docs,
+)
+from imas_codex.standard_names.graph_store.graph_review_persistence import (
     persist_reviewed_docs,
 )
 from imas_codex.standard_names.orphan_sweep import _orphan_sweep_tick
@@ -456,7 +458,9 @@ def test_docs_escalation_at_final_attempt(
 ):
     """process_refine_docs_batch uses DEFAULT_ESCALATION_MODEL at docs_chain_length=2."""
     from imas_codex.standard_names.models import RefinedDocs
-    from imas_codex.standard_names.workers import process_refine_docs_batch
+    from imas_codex.standard_names.worker_tasks.worker_refine_docs import (
+        process_refine_docs_batch,
+    )
 
     sn_id = _uid("esc_docs")
     token = f"tok-esc-{uuid.uuid4().hex[:8]}"

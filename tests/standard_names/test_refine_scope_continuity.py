@@ -10,6 +10,10 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from imas_codex.standard_names.fanout.config import FanoutSettings
+from imas_codex.standard_names.graph_store import (
+    graph_claim_release as _owning_graph_claim_release,
+    graph_refinement as _owning_graph_refinement,
+)
 
 
 class _GraphClient:
@@ -104,11 +108,11 @@ def _worker_dependencies(candidate_names: list[str], persist_calls: list[dict]):
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.workers._hybrid_search_neighbours",
+            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.workers._enrich_dd_path_context",
+            "imas_codex.standard_names.worker_tasks.worker_generate_docs._enrich_dd_path_context",
             return_value=None,
         ),
         patch(
@@ -125,17 +129,21 @@ def _worker_dependencies(candidate_names: list[str], persist_calls: list[dict]):
             return_value=1.0,
         ),
         patch(
-            "imas_codex.standard_names.graph_ops.persist_refined_name",
+            "imas_codex.standard_names.graph_store.graph_refinement.persist_refined_name",
             side_effect=_persist,
         ),
-        patch("imas_codex.standard_names.graph_ops.bump_sn_run_counter") as bump,
+        patch(
+            "imas_codex.standard_names.graph_store.graph_audits.bump_sn_run_counter"
+        ) as bump,
     ):
         yield bump
 
 
 @pytest.mark.asyncio
 async def test_focused_scope_survives_multiple_refine_rotations() -> None:
-    from imas_codex.standard_names.workers import process_refine_name_batch
+    from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+        process_refine_name_batch,
+    )
 
     scope = "source-focus-scope"
     audit = "audit-run"
@@ -167,7 +175,9 @@ async def test_focused_scope_survives_multiple_refine_rotations() -> None:
 
 @pytest.mark.asyncio
 async def test_focused_refine_keeps_audit_counter_separate() -> None:
-    from imas_codex.standard_names.workers import process_refine_name_batch
+    from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+        process_refine_name_batch,
+    )
 
     calls: list[dict] = []
     manager = _manager("audit-run")
@@ -187,7 +197,9 @@ async def test_focused_refine_keeps_audit_counter_separate() -> None:
 
 @pytest.mark.asyncio
 async def test_unscoped_refine_retains_audit_run_behavior() -> None:
-    from imas_codex.standard_names.workers import process_refine_name_batch
+    from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+        process_refine_name_batch,
+    )
 
     calls: list[dict] = []
     manager = _manager("audit-run")
@@ -202,7 +214,9 @@ async def test_unscoped_refine_retains_audit_run_behavior() -> None:
 
 @pytest.mark.asyncio
 async def test_unscoped_refine_ignores_one_historical_scope() -> None:
-    from imas_codex.standard_names.workers import process_refine_name_batch
+    from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+        process_refine_name_batch,
+    )
 
     calls: list[dict] = []
     manager = _manager("audit-run")
@@ -219,7 +233,9 @@ async def test_unscoped_refine_ignores_one_historical_scope() -> None:
 
 @pytest.mark.asyncio
 async def test_unscoped_refine_ignores_mixed_historical_scopes() -> None:
-    from imas_codex.standard_names.workers import process_refine_name_batch
+    from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+        process_refine_name_batch,
+    )
 
     calls: list[dict] = []
     manager = _manager("audit-run")
@@ -244,7 +260,9 @@ async def test_unscoped_refine_ignores_mixed_historical_scopes() -> None:
 
 @pytest.mark.asyncio
 async def test_pinned_rename_restage_keeps_existing_focused_scope() -> None:
-    from imas_codex.standard_names.workers import process_refine_name_batch
+    from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+        process_refine_name_batch,
+    )
 
     scope = "source-focus-scope"
     item = _item("radial_coordinate", scope)
@@ -253,7 +271,7 @@ async def test_pinned_rename_restage_keeps_existing_focused_scope() -> None:
     with (
         _worker_dependencies(["unused"], calls),
         patch(
-            "imas_codex.standard_names.graph_ops.resubmit_pinned_rename_for_review",
+            "imas_codex.standard_names.graph_store.graph_claim_release.resubmit_pinned_rename_for_review",
             return_value="resubmitted",
         ) as resubmit,
     ):
@@ -283,7 +301,7 @@ async def test_pinned_rename_restage_keeps_existing_focused_scope() -> None:
 async def test_inconsistent_focused_metadata_refuses_before_persistence(
     scope_metadata: str | None,
 ) -> None:
-    from imas_codex.standard_names.workers import (
+    from imas_codex.standard_names.worker_tasks.worker_refine_names import (
         RefineScopeContinuityError,
         process_refine_name_batch,
     )
@@ -315,7 +333,7 @@ async def test_pool_adapter_passes_explicit_refine_scope() -> None:
 
     with (
         patch(
-            "imas_codex.standard_names.workers.process_refine_name_batch",
+            "imas_codex.standard_names.worker_tasks.worker_refine_names.process_refine_name_batch",
             side_effect=_process,
         ),
         patch("imas_codex.settings.get_pool_replicas", return_value=1),
@@ -366,9 +384,12 @@ def test_atomic_claim_returns_canonical_scope_identity() -> None:
 
     graph.session = _session
     with (
-        patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=graph),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            return_value=graph,
+        ),
         patch.object(
-            graph_ops,
+            _owning_graph_claim_release,
             "_verify_name_claim_winners",
             side_effect=lambda items, **_kwargs: items,
         ),
@@ -377,7 +398,7 @@ def test_atomic_claim_returns_canonical_scope_identity() -> None:
             return_value=[],
         ),
     ):
-        claimed = graph_ops.claim_refine_name_batch(batch_size=1)
+        claimed = _owning_graph_refinement.claim_refine_name_batch(batch_size=1)
 
     readback_query = transaction.run.call_args_list[1].args[0]
     assert "sn.run_id AS scope_run_id" in readback_query
@@ -387,7 +408,9 @@ def test_atomic_claim_returns_canonical_scope_identity() -> None:
 
 @pytest.mark.asyncio
 async def test_focused_successor_remains_claimable_by_same_scope() -> None:
-    from imas_codex.standard_names.workers import process_refine_name_batch
+    from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+        process_refine_name_batch,
+    )
 
     scope = "source-focus-scope"
     calls: list[dict] = []

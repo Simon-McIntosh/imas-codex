@@ -23,6 +23,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from imas_codex.standard_names.budget import BudgetManager
+from imas_codex.standard_names.graph_store import (
+    owner_module_path as _owner_module_path,
+)
 
 # =====================================================================
 # Helpers
@@ -129,7 +132,7 @@ class TestPoolIdsKwarg:
 
         # Patch BEFORE building specs so the closure captures the mock
         with patch(
-            f"{_GO}.release_generate_name_claims",
+            "imas_codex.standard_names.graph_store.graph_claim_release.release_generate_name_claims",
             return_value=2,
         ) as mock_release:
             specs = _build_specs()
@@ -161,7 +164,7 @@ class TestPoolIdsKwarg:
 
         for pool_name, release_fn_name in sn_pools.items():
             with patch(
-                f"{_GO}.{release_fn_name}",
+                f"{_owner_module_path(release_fn_name)}.{release_fn_name}",
                 return_value=1,
             ) as mock_release:
                 specs = _build_specs()
@@ -200,7 +203,9 @@ class TestPendingCountsQuery:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
 
-            from imas_codex.standard_names.graph_ops import pool_pending_counts
+            from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
+                pool_pending_counts,
+            )
 
             counts = pool_pending_counts(min_score=0.75, rotation_cap=3)
 
@@ -228,7 +233,9 @@ class TestPendingCountsQuery:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
 
-            from imas_codex.standard_names.graph_ops import pool_pending_counts
+            from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
+                pool_pending_counts,
+            )
 
             counts = pool_pending_counts()
 
@@ -258,7 +265,9 @@ class TestPendingCountsSingleQuery:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
 
-            from imas_codex.standard_names.graph_ops import pool_pending_counts
+            from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
+                pool_pending_counts,
+            )
 
             pool_pending_counts(min_score=0.75, rotation_cap=3)
 
@@ -285,7 +294,7 @@ class TestThrottlePausesGenerateName:
 
         # generate_name's throttled claim should return None
         with patch(
-            f"{_GO}.claim_generate_name_batch",
+            "imas_codex.standard_names.graph_store.graph_cost_and_claims.claim_generate_name_batch",
             return_value=[{"id": "x", "claim_token": "t"}],
         ):
             result = await specs_by_name["generate_name"].claim()
@@ -316,7 +325,7 @@ class TestThrottlePausesGenerateDocs:
         specs_by_name["review_docs"].health.pending_count = REVIEW_DOCS_BACKLOG_CAP + 1
 
         with patch(
-            f"{_GO}.claim_generate_docs_batch",
+            "imas_codex.standard_names.graph_store.graph_docs_persistence.claim_generate_docs_batch",
             return_value=[{"id": "x", "claim_token": "t"}],
         ):
             result = await specs_by_name["generate_docs"].claim()
@@ -340,7 +349,7 @@ class TestThrottleAllowsBelowCap:
         fake_items = [{"id": "src-1", "claim_token": "tok"}]
         # Patch BEFORE building specs so the closure captures the mock
         with patch(
-            f"{_GO}.claim_generate_name_batch",
+            "imas_codex.standard_names.graph_store.graph_cost_and_claims.claim_generate_name_batch",
             return_value=fake_items,
         ):
             specs = _build_specs()
@@ -366,7 +375,7 @@ class TestThrottleAllowsBelowCap:
         fake_items = [{"id": "src-1", "claim_token": "tok"}]
         # Patch BEFORE building specs so the closure captures the mock
         with patch(
-            f"{_GO}.claim_generate_name_batch",
+            "imas_codex.standard_names.graph_store.graph_cost_and_claims.claim_generate_name_batch",
             return_value=fake_items,
         ):
             specs = _build_specs()
@@ -393,7 +402,7 @@ class TestThrottleAllowsBelowCap:
         specs_by_name["review_name"].health.pending_count = REVIEW_NAME_BACKLOG_CAP + 10
 
         with patch(
-            f"{_GO}.claim_refine_name_batch",
+            "imas_codex.standard_names.graph_store.graph_refinement.claim_refine_name_batch",
             return_value=[{"id": "sn-1", "claim_token": "t"}],
         ):
             result = await specs_by_name["refine_name"].claim()
@@ -410,7 +419,7 @@ class TestThrottleAllowsBelowCap:
         specs_by_name["review_docs"].health.pending_count = REVIEW_DOCS_BACKLOG_CAP + 5
 
         with patch(
-            f"{_GO}.claim_refine_docs_batch",
+            "imas_codex.standard_names.graph_store.graph_docs_persistence.claim_refine_docs_batch",
             return_value=[{"id": "sn-2", "claim_token": "t"}],
         ):
             result = await specs_by_name["refine_docs"].claim()

@@ -1,0 +1,127 @@
+<section id="srtj-forwarder-retirement" data-reckon="landing-fragment">
+  <h3 id="srtj-forwarder-retirement-title">Facade retirement measurement</h3>
+  <p id="srtj-forwarder-retirement-state">Both facades now contain only
+  composition-root wiring and the nine preserved signed apply bindings. The
+  codemod excludes revision-bound evidence runners and its live-tree check
+  reports zero remaining moved references, forwarders or value aliases. The
+  final default-marker and graph-marker gates add zero failure IDs.</p>
+
+  <table id="srtj-forwarder-retirement-rewrites">
+    <caption>Exact AST-span rewrites in granted paths</caption>
+    <thead><tr><th>Kind</th><th>Count</th></tr></thead>
+    <tbody>
+      <tr><td>Imports</td><td>1,436</td></tr>
+      <tr><td>Module attributes</td><td>283</td></tr>
+      <tr><td>Literal patch strings</td><td>728</td></tr>
+      <tr><td>Object patches</td><td>231</td></tr>
+      <tr><td>Built patch strings</td><td>239</td></tr>
+      <tr><td>Computed patch strings</td><td>3</td></tr>
+      <tr><td>Runtime-built patch strings</td><td>1</td></tr>
+      <tr><th>Total</th><th>2,921 exact rewrites</th></tr>
+    </tbody>
+  </table>
+  <p id="srtj-forwarder-retirement-map">The split inventory was checked
+  against live owner-module attributes before rewriting. It contains 28 stale
+  owner entries: five for graph operations and 23 for workers. After all live
+  callers were retargeted, the codemod reported zero remaining references,
+  zero forwarder functions and zero value aliases. Dynamic lookups and patch
+  targets were additionally moved to the owner or the service lookup site.</p>
+
+  <table id="srtj-forwarder-retirement-patches">
+    <caption>Named patch lookup sites</caption>
+    <thead><tr><th>Owner</th><th>Retargeted names</th></tr></thead>
+    <tbody>
+      <tr><td><code>graph_refinement</code></td><td><code>rename_preserves_meaning</code>,
+      <code>_meaning_preservation_assertion</code></td></tr>
+      <tr><td><code>graph_source_bindings</code></td><td><code>persist_outcome_snapshot</code>,
+      <code>reset_persist_outcomes</code>, <code>write_enrichment_results</code>,
+      <code>merge_standard_name_sources</code></td></tr>
+      <tr><td><code>graph_claim_release</code></td><td>
+      <code>_verify_name_claim_winners</code> and
+      <code>_verify_docs_claim_winners</code> in the axis-parameterized claim test</td></tr>
+      <tr><td><code>graph_review_persistence</code></td><td>
+      <code>persist_reviewed_name</code> and
+      <code>persist_reviewed_docs</code> in the axis-parameterized writer test</td></tr>
+      <tr><td><code>graph_store</code> owner lookup</td><td>Parameterized
+      claim, persist and orchestrator-maintenance patches resolve each name to
+      its owner at execution time.</td></tr>
+    </tbody>
+  </table>
+  <p id="srtj-forwarder-retirement-positive-check">The graph operation,
+  pool wiring and package boundary selection passed 101 tests after retargeting.
+  An added test refuses a graph facade function whose docstring identifies it as
+  a forwarder. Restoring <code>write_reviews</code> made that test fail, and the
+  codemod named the restored forwarder in its check output. The mutation was
+  removed afterward.</p>
+
+  <table id="srtj-forwarder-retirement-sizes">
+    <caption>Facade source size, bytes</caption>
+    <thead><tr><th>File</th><th>Orientation base</th><th>After</th><th>Change</th></tr></thead>
+    <tbody>
+      <tr><td><code>graph_ops.py</code></td><td>168,672</td><td>5,518</td><td>−163,154</td></tr>
+      <tr><td><code>workers.py</code></td><td>67,488</td><td>1,262</td><td>−66,226</td></tr>
+    </tbody>
+  </table>
+  <p id="srtj-forwarder-retirement-deletions">All 315 graph facade
+  forwarder functions and its transitional value aliases were removed. All
+  135 worker facade forwarder functions, 47 value aliases and their
+  <code>__wrapped__</code> bindings were removed. The graph composition root
+  retains only service wiring and the nine names below.</p>
+  <ul id="srtj-forwarder-retirement-exceptions">
+    <li><code>reconcile_structural_edges_for_standard_names</code></li>
+    <li><code>repair_normalization_peel_parent_units</code></li>
+    <li><code>reconcile_lifecycleless_standard_name_stubs</code></li>
+    <li><code>reconcile_error_siblings</code></li>
+    <li><code>apply_adjudicated_source_dispositions</code></li>
+    <li><code>repair_scalar_projection_mismatches</code></li>
+    <li><code>retire_ineligible_standard_name_sources</code></li>
+    <li><code>retire_signed_dual_authority_targets</code></li>
+    <li><code>retire_signed_provenance_orphans</code></li>
+  </ul>
+
+  <p id="srtj-forwarder-retirement-gates">Archived default-marker arms ran
+  <code>tests/standard_names/</code>, <code>tests/graph/</code>,
+  <code>tests/cli/</code> and <code>tests/core/</code> with eight pytest workers.
+  An initial head added 168 failure IDs; a later head added 76 before the
+  dynamic patch corrections. The final paired archive run completed with 101
+  failure IDs on base and the same 101 on head, adding zero. The held-out
+  documentation authority test failed on both arms with the same live-graph
+  <code>one_like</code> versus <code>None</code> mismatch. The graph-tier internal error was an
+  xdist worker crash during execution, after collection; explicit
+  <code>--dist=loadfile</code> schedules only the 386 graph-selected tests.
+  The paired archived graph arms completed with 60 failure IDs each, adding
+  zero. A fresh interpreter imported all 27 modules across both owner packages
+  and facades; the Cypher property and package-boundary selection passed all
+  33 tests. No LLM call or paid request was made; spend is USD 0.</p>
+  <details id="srtj-forwarder-retirement-excluded-runners">
+    <summary>24 historical evidence runners excluded from the live rewrite</summary>
+    <p>These scripts record runs at past revisions. Their imports are preserved;
+    they will no longer run against main.</p>
+    <ul>
+    <li><code>docs/evidence/fragments/sn-harmonize-command/shc-locus-remeasure-rerun-run.py</code></li>
+    <li><code>docs/evidence/fragments/sn-harmonize-command/shc-locus-remeasure-run.py</code></li>
+    <li><code>docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py</code></li>
+    <li><code>docs/evidence/fragments/sn-integrity-backlog/sib-apply-recovery-unbind-run.py</code></li>
+    <li><code>docs/evidence/fragments/sn-integrity-backlog/sib-live-sourceless-sheet-run.py</code></li>
+    <li><code>docs/evidence/fragments/sn-integrity-backlog/sib-restore-lineage-sources-run.py</code></li>
+    <li><code>docs/evidence/fragments/sn-integrity-backlog/sib-restore-recorded-sources-run.py</code></li>
+    <li><code>docs/evidence/fragments/sn-integrity-backlog/sib-restore-searched-sources-run.py</code></li>
+    <li><code>docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-swap-apply-run.py</code></li>
+    <li><code>docs/evidence/fragments/sn-integrity-backlog/sib-settle-held-search-hits-run.py</code></li>
+    <li><code>docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py</code></li>
+    <li><code>docs/evidence/fragments/sn-integrity-backlog/sib-stale-source-census-run.py</code></li>
+    <li><code>docs/evidence/fragments/sn-review-through-jev/srtj-contradiction-veto-hold-run.py</code></li>
+    <li><code>docs/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-apply-run.py</code></li>
+    <li><code>docs/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-repair-dryrun.py</code></li>
+    <li><code>docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-measure-run.py</code></li>
+    <li><code>docs/evidence/fragments/sn-review-through-jev/srtj-evidence-supply-run.py</code></li>
+    <li><code>docs/evidence/fragments/sn-review-through-jev/srtj-jev-name-evidence-measure-run.py</code></li>
+    <li><code>docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-held-cause-run.py</code></li>
+    <li><code>docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-acceptance-large-run.py</code></li>
+    <li><code>docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-acceptance-rerun-run.py</code></li>
+    <li><code>docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-held-out-acceptance-run.py</code></li>
+    <li><code>docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-label-sheet-run.py</code></li>
+    <li><code>docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py</code></li>
+    </ul>
+  </details>
+</section>

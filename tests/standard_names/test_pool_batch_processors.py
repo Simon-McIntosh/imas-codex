@@ -22,7 +22,7 @@ import pytest
 @pytest.fixture(autouse=True)
 def _preserve_claimed_source_batches():
     with patch(
-        "imas_codex.standard_names.graph_ops._verify_source_claim_winners",
+        "imas_codex.standard_names.graph_store.graph_claim_release._verify_source_claim_winners",
         side_effect=lambda items, **_kwargs: items,
     ):
         yield
@@ -208,15 +208,19 @@ def _mock_review_llm_result(items: list[dict]) -> Any:
 # The set of patches shared across compose/regen tests.
 _COMPOSE_PATCHES = {
     "imas_codex.standard_names.context.build_compose_context": lambda: {},
-    "imas_codex.standard_names.workers._enrich_batch_items": lambda items: None,
-    "imas_codex.standard_names.workers._search_nearby_names": lambda *a, **k: [],
-    "imas_codex.standard_names.workers._enrich_ids_context": lambda *a, **k: None,
+    "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_batch_items": lambda items: (
+        None
+    ),
+    "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._search_nearby_names": lambda *a, **k: [],
+    "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_ids_context": lambda *a, **k: (
+        None
+    ),
     "imas_codex.llm.prompt_loader.render_prompt": lambda *a, **k: "mock prompt",
     "imas_codex.standard_names.context.build_domain_vocabulary_preseed": lambda d: (
         f"vocab:{d}" if d else ""
     ),
     "imas_codex.standard_names.review.themes.extract_reviewer_themes": lambda *a, **k: [],
-    "imas_codex.standard_names.graph_ops.persist_generated_name_batch": lambda *a, **k: (
+    "imas_codex.standard_names.graph_store.graph_catalog.persist_generated_name_batch": lambda *a, **k: (
         len(a[0]) if a else 0
     ),
 }
@@ -238,7 +242,9 @@ class TestComposeDomainContextFromBatch:
         assert the prompt includes all distinct domains via
         build_domain_vocabulary_preseed being called for each domain.
         """
-        from imas_codex.standard_names.workers import process_generate_name_batch
+        from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+            process_generate_name_batch,
+        )
 
         items = _make_batch_items(
             4,
@@ -260,15 +266,15 @@ class TestComposeDomainContextFromBatch:
                 return_value={},
             ),
             patch(
-                "imas_codex.standard_names.workers._enrich_batch_items",
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_batch_items",
                 side_effect=lambda items: None,
             ),
             patch(
-                "imas_codex.standard_names.workers._search_nearby_names",
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._search_nearby_names",
                 return_value=[],
             ),
             patch(
-                "imas_codex.standard_names.workers._enrich_ids_context",
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_ids_context",
                 return_value=None,
             ),
             patch(
@@ -284,7 +290,7 @@ class TestComposeDomainContextFromBatch:
                 return_value=[],
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.persist_generated_name_batch",
+                "imas_codex.standard_names.graph_store.graph_catalog.persist_generated_name_batch",
                 return_value=4,
             ),
             patch(
@@ -320,7 +326,9 @@ class TestComposeStopEvent:
     @pytest.mark.asyncio
     async def test_compose_stop_event_short_circuits(self) -> None:
         """Set stop_event before the LLM call; assert function returns 0."""
-        from imas_codex.standard_names.workers import process_generate_name_batch
+        from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+            process_generate_name_batch,
+        )
 
         items = _make_batch_items(3)
         mgr = _mock_budget_manager()
@@ -343,15 +351,15 @@ class TestComposeStopEvent:
                 return_value={},
             ),
             patch(
-                "imas_codex.standard_names.workers._enrich_batch_items",
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_batch_items",
                 side_effect=lambda items: None,
             ),
             patch(
-                "imas_codex.standard_names.workers._search_nearby_names",
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._search_nearby_names",
                 return_value=[],
             ),
             patch(
-                "imas_codex.standard_names.workers._enrich_ids_context",
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_ids_context",
                 return_value=None,
             ),
             patch(
@@ -465,7 +473,7 @@ class TestReviewNamesProcessesBatch:
                 return_value=None,
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.write_name_review_results",
+                "imas_codex.standard_names.graph_store.graph_catalog.write_name_review_results",
                 return_value=3,
             ),
             patch(
@@ -473,7 +481,7 @@ class TestReviewNamesProcessesBatch:
                 return_value=3,
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.update_review_aggregates",
+                "imas_codex.standard_names.graph_store.graph_catalog.update_review_aggregates",
             ),
             patch(
                 "imas_codex.graph.client.GraphClient",
@@ -563,7 +571,7 @@ class TestReviewDocsIndependent:
                 return_value=None,
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.write_docs_review_results",
+                "imas_codex.standard_names.graph_store.graph_catalog.write_docs_review_results",
                 return_value=2,
             ),
             patch(
@@ -571,7 +579,7 @@ class TestReviewDocsIndependent:
                 return_value=2,
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.update_review_aggregates",
+                "imas_codex.standard_names.graph_store.graph_catalog.update_review_aggregates",
             ),
             patch(
                 "imas_codex.graph.client.GraphClient",
@@ -592,7 +600,9 @@ class TestBatchProcessorReleasesClaimsOnException:
     @pytest.mark.asyncio
     async def test_batch_processor_releases_claims_on_exception(self) -> None:
         """Raise from mock LLM; assert lease.release_unused was called."""
-        from imas_codex.standard_names.workers import process_generate_name_batch
+        from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+            process_generate_name_batch,
+        )
 
         items = _make_batch_items(2)
         mgr = _mock_budget_manager()
@@ -604,15 +614,15 @@ class TestBatchProcessorReleasesClaimsOnException:
                 return_value={},
             ),
             patch(
-                "imas_codex.standard_names.workers._enrich_batch_items",
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_batch_items",
                 side_effect=lambda items: None,
             ),
             patch(
-                "imas_codex.standard_names.workers._search_nearby_names",
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._search_nearby_names",
                 return_value=[],
             ),
             patch(
-                "imas_codex.standard_names.workers._enrich_ids_context",
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_ids_context",
                 return_value=None,
             ),
             patch(
@@ -732,7 +742,9 @@ class TestOnEventPayloadsNotTruncated:
     @pytest.mark.asyncio
     async def test_review_name_comment_not_clipped(self) -> None:
         """process_review_name_batch emits the full comment in on_event."""
-        from imas_codex.standard_names.workers import process_review_name_batch
+        from imas_codex.standard_names.worker_tasks.worker_review_names import (
+            process_review_name_batch,
+        )
 
         items = [
             {
@@ -767,14 +779,14 @@ class TestOnEventPayloadsNotTruncated:
                 return_value={},
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.write_reviews",
+                "imas_codex.standard_names.graph_store.graph_catalog.write_reviews",
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.persist_reviewed_name",
+                "imas_codex.standard_names.graph_store.graph_review_persistence.persist_reviewed_name",
                 return_value="accepted",
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.release_review_names_failed_claims",
+                "imas_codex.standard_names.graph_store.graph_claim_release.release_review_names_failed_claims",
             ),
         ):
             await process_review_name_batch(items, mgr, stop, on_event=events.append)
@@ -790,7 +802,9 @@ class TestOnEventPayloadsNotTruncated:
     @pytest.mark.asyncio
     async def test_review_docs_comment_not_clipped(self) -> None:
         """process_review_docs_batch emits the full comment in on_event."""
-        from imas_codex.standard_names.workers import process_review_docs_batch
+        from imas_codex.standard_names.worker_tasks.worker_review_docs import (
+            process_review_docs_batch,
+        )
 
         items = [
             {
@@ -829,14 +843,14 @@ class TestOnEventPayloadsNotTruncated:
                 return_value={},
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.write_reviews",
+                "imas_codex.standard_names.graph_store.graph_catalog.write_reviews",
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.persist_reviewed_docs",
+                "imas_codex.standard_names.graph_store.graph_review_persistence.persist_reviewed_docs",
                 return_value="accepted",
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.release_review_docs_failed_claims",
+                "imas_codex.standard_names.graph_store.graph_claim_release.release_review_docs_failed_claims",
             ),
         ):
             await process_review_docs_batch(items, mgr, stop, on_event=events.append)
@@ -903,7 +917,9 @@ class TestRefineGrammarFailureNotCrashLoop:
 
     @pytest.mark.asyncio
     async def test_refine_name_grammar_failure_exhausts_not_reloops(self) -> None:
-        from imas_codex.standard_names.workers import process_refine_name_batch
+        from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+            process_refine_name_batch,
+        )
 
         items = [
             {
@@ -942,15 +958,15 @@ class TestRefineGrammarFailureNotCrashLoop:
             ),
             patch("imas_codex.graph.client.GraphClient"),
             patch(
-                "imas_codex.standard_names.workers._hybrid_search_neighbours",
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours",
                 return_value=[],
             ),
             patch(
-                "imas_codex.standard_names.workers._enrich_dd_path_context",
+                "imas_codex.standard_names.worker_tasks.worker_generate_docs._enrich_dd_path_context",
                 return_value=None,
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.stop_refine_name_attempt",
+                "imas_codex.standard_names.graph_store.graph_claim_release.stop_refine_name_attempt",
                 return_value="exhausted",
             ) as mock_stop,
         ):
@@ -976,7 +992,9 @@ class TestRefineGrammarFailureNotCrashLoop:
         from pydantic import ValidationError
 
         from imas_codex.standard_names.models import RefinedDocs
-        from imas_codex.standard_names.workers import process_refine_docs_batch
+        from imas_codex.standard_names.worker_tasks.worker_refine_docs import (
+            process_refine_docs_batch,
+        )
 
         # A RefinedDocs schema violation (description below the 10-char min).
         try:
@@ -1017,10 +1035,10 @@ class TestRefineGrammarFailureNotCrashLoop:
             ),
             patch("imas_codex.graph.client.GraphClient"),
             patch(
-                "imas_codex.standard_names.graph_ops._mark_refine_docs_exhausted",
+                "imas_codex.standard_names.graph_store.graph_claim_release._mark_refine_docs_exhausted",
             ) as mock_exhaust,
             patch(
-                "imas_codex.standard_names.graph_ops.release_refine_docs_failed_claims",
+                "imas_codex.standard_names.graph_store.graph_docs_persistence.release_refine_docs_failed_claims",
             ) as mock_release,
         ):
             processed = await process_refine_docs_batch(

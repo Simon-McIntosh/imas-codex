@@ -40,11 +40,19 @@ from imas_codex.standard_names.models import (
     StandardNameQualityScoreDocs,
     StandardNameQualityScoreNameOnly,
 )
-from imas_codex.standard_names.workers import (
+from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
     process_generate_docs_batch,
+)
+from imas_codex.standard_names.worker_tasks.worker_refine_docs import (
     process_refine_docs_batch,
+)
+from imas_codex.standard_names.worker_tasks.worker_refine_names import (
     process_refine_name_batch,
+)
+from imas_codex.standard_names.worker_tasks.worker_review_docs import (
     process_review_docs_batch,
+)
+from imas_codex.standard_names.worker_tasks.worker_review_names import (
     process_review_name_batch,
 )
 

@@ -13,7 +13,9 @@ from imas_codex.standard_names.provenance_lifecycle import (
 
 
 def test_dd_projection_reconcile_uses_full_attachment_guard() -> None:
-    from imas_codex.standard_names.graph_ops import reconcile_standard_name_dd_edges
+    from imas_codex.standard_names.graph_store.graph_audits import (
+        reconcile_standard_name_dd_edges,
+    )
 
     gc = MagicMock()
     gc.query.side_effect = [

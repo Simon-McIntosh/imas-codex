@@ -75,12 +75,16 @@ class TestRetryConstants:
     """Retry tunables resolve via settings accessors."""
 
     def test_retry_attempts_is_one(self) -> None:
-        from imas_codex.standard_names.workers import _retry_attempts
+        from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+            _retry_attempts,
+        )
 
         assert _retry_attempts() == 1
 
     def test_retry_k_expansion_is_twelve(self) -> None:
-        from imas_codex.standard_names.workers import _retry_k_expansion
+        from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+            _retry_k_expansion,
+        )
 
         assert _retry_k_expansion() == 12
 
@@ -92,7 +96,9 @@ class TestHybridSearchKParameter:
         """Default search_k should be 10."""
         import inspect
 
-        from imas_codex.standard_names.workers import _hybrid_search_neighbours
+        from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+            _hybrid_search_neighbours,
+        )
 
         sig = inspect.signature(_hybrid_search_neighbours)
         assert sig.parameters["search_k"].default == 10

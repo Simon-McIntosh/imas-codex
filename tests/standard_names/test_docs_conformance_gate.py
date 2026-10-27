@@ -26,6 +26,15 @@ from imas_codex.standard_names.docs_gates import (
     HouseStyleFindingClass,
     conformance_findings,
 )
+from imas_codex.standard_names.graph_store import (
+    graph_catalog as _owning_graph_catalog,
+    graph_review_persistence as _owning_graph_review_persistence,
+)
+from imas_codex.standard_names.worker_tasks import (
+    worker_common as _owning_worker_common,
+    worker_review_docs as _owning_worker_review_docs,
+    worker_review_names as _owning_worker_review_names,
+)
 
 _AVERAGED = "flux_surface_averaged_argon_density_at_plasma_boundary"
 _UNTEMPLATED = "magnetic_field"
@@ -104,16 +113,24 @@ def _review(name: str, documentation: str, *, score: float = 1.0) -> dict[str, A
         return _quorum(score)
 
     with (
-        patch.object(workers, "prepare_docs_review_request", prepare),
-        patch.object(workers, "_run_rd_quorum_cycles", quorum),
-        patch.object(workers, "_review_dd_source_bindings", return_value={}),
-        patch.object(workers, "_persist_dd_gap_evidence"),
-        patch.object(graph_ops, "write_reviews"),
-        patch.object(graph_ops, "update_review_aggregates"),
-        patch.object(graph_ops, "persist_reviewed_docs", persist),
+        patch.object(
+            _owning_worker_review_docs, "prepare_docs_review_request", prepare
+        ),
+        patch.object(_owning_worker_review_names, "_run_rd_quorum_cycles", quorum),
+        patch.object(
+            _owning_worker_common, "_review_dd_source_bindings", return_value={}
+        ),
+        patch.object(_owning_worker_common, "_persist_dd_gap_evidence"),
+        patch.object(_owning_graph_catalog, "write_reviews"),
+        patch.object(_owning_graph_catalog, "update_review_aggregates"),
+        patch.object(
+            _owning_graph_review_persistence, "persist_reviewed_docs", persist
+        ),
     ):
         processed = asyncio.run(
-            workers.process_review_docs_batch([item], manager, asyncio.Event())
+            _owning_worker_review_docs.process_review_docs_batch(
+                [item], manager, asyncio.Event()
+            )
         )
 
     assert processed == 1

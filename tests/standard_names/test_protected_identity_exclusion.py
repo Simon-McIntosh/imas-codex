@@ -8,6 +8,11 @@ from unittest.mock import MagicMock, call, patch
 import pytest
 
 from imas_codex.standard_names import graph_ops, protection
+from imas_codex.standard_names.graph_store import (
+    graph_catalog as _owning_graph_catalog,
+    graph_foundation as _owning_graph_foundation,
+    graph_lineage as _owning_graph_lineage,
+)
 
 
 class _SkeletonCleanupGraph:
@@ -80,9 +85,11 @@ def _write_with_skeleton_candidates(
         ], protected_ids
 
     with (
-        patch.object(graph_ops, "_write_grammar_decomposition", return_value=[]),
         patch.object(
-            graph_ops,
+            _owning_graph_catalog, "_write_grammar_decomposition", return_value=[]
+        ),
+        patch.object(
+            _owning_graph_lineage,
             "_write_standard_name_edges",
             return_value=candidate_ids,
         ),
@@ -92,7 +99,7 @@ def _write_with_skeleton_candidates(
             side_effect=filter_protected,
         ),
     ):
-        result = graph_ops.write_standard_names(
+        result = _owning_graph_catalog.write_standard_names(
             [_composed_name(composed_id)],
             gc=graph,
         )
@@ -132,7 +139,7 @@ def _graph_with_protected_parent() -> MagicMock:
 def test_structural_candidate_selector_excludes_protected_identity() -> None:
     gc = _graph_with_protected_parent()
 
-    assert graph_ops._query_derived_parents_for_admission_cleanup(gc) == [
+    assert _owning_graph_lineage._query_derived_parents_for_admission_cleanup(gc) == [
         "unspent_structural_parent"
     ]
 
@@ -141,10 +148,10 @@ def test_direct_structural_delete_still_refuses_protected_identity() -> None:
     gc = _graph_with_protected_parent()
 
     with pytest.raises(
-        graph_ops.DerivedParentCleanupRefusal,
+        _owning_graph_foundation.DerivedParentCleanupRefusal,
         match=r"ion_power_density.*recorded_llm_spend_usd=0.25",
     ) as raised:
-        graph_ops._delete_derived_parent_nodes(gc, ["ion_power_density"])
+        _owning_graph_lineage._delete_derived_parent_nodes(gc, ["ion_power_density"])
 
     assert isinstance(raised.value.__cause__, protection.ProtectedDeletionError)
     assert not any(
@@ -181,24 +188,26 @@ def test_childless_selector_excludes_protected_before_structural_delete() -> Non
 
     gc.query.side_effect = query
     with (
-        patch.object(graph_ops, "_query_seedable_derived_parents", return_value=[]),
         patch.object(
-            graph_ops,
+            _owning_graph_lineage, "_query_seedable_derived_parents", return_value=[]
+        ),
+        patch.object(
+            _owning_graph_lineage,
             "_query_legacy_repairable_derived_parents",
             return_value=[],
         ),
         patch.object(
-            graph_ops,
+            _owning_graph_lineage,
             "_query_derived_parents_for_admission_cleanup",
             return_value=[],
         ),
         patch.object(
-            graph_ops,
+            _owning_graph_lineage,
             "_delete_derived_parent_nodes",
             side_effect=[0, 1],
         ) as delete_nodes,
     ):
-        changed = graph_ops.normalize_derived_parent_lifecycle(gc)
+        changed = _owning_graph_lineage.normalize_derived_parent_lifecycle(gc)
 
     assert changed == 1
     assert delete_nodes.call_args_list == [

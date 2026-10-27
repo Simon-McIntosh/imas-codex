@@ -97,9 +97,12 @@ class _ReviewGraph:
 
 
 def _write_records(records: list[dict], graph: _ReviewGraph) -> None:
-    from imas_codex.standard_names.graph_ops import write_reviews
+    from imas_codex.standard_names.graph_store.graph_catalog import write_reviews
 
-    with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=graph):
+    with patch(
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        return_value=graph,
+    ):
         write_reviews(records)
 
 
@@ -227,7 +230,9 @@ class TestAcceptScoreSelection:
         return review, logging.LoggerAdapter(logging.getLogger("shadow-test"), {})
 
     def _scored(self, *, shadow: bool) -> tuple[dict, _ReviewGraph]:
-        from imas_codex.standard_names.graph_ops import write_name_review_results
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            write_name_review_results,
+        )
         from imas_codex.standard_names.review.pipeline import (
             _match_reviews_to_entries,
         )
@@ -239,7 +244,8 @@ class TestAcceptScoreSelection:
         review, wlog = self._review(shadow=persisted)
         scored, _, _ = _match_reviews_to_entries([review], [_item()], wlog)
         with patch(
-            "imas_codex.standard_names.graph_ops.GraphClient", return_value=graph
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+            return_value=graph,
         ):
             write_name_review_results(scored)
         return scored[0], graph

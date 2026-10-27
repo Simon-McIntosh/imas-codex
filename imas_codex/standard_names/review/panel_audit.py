@@ -39,6 +39,10 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
 
+from imas_codex.standard_names.worker_tasks import (
+    worker_review_names as _owning_worker_review_names,
+)
+
 logger = logging.getLogger(__name__)
 
 _SAMPLE_DOMAIN = b"sn-review:panel-audit:v1"
@@ -100,7 +104,6 @@ def quorum_without_persisting(
     naming it rather than run: running it could write the very rows the audit
     exists to avoid, and the caller records the refusal as a skipped audit.
     """
-    from imas_codex.standard_names import workers
 
     if getattr(incumbent, NON_PERSISTING_ATTRIBUTE, False) is True:
         return incumbent
@@ -108,10 +111,12 @@ def quorum_without_persisting(
     keywords = getattr(incumbent, "keywords", None)
     if (
         isinstance(incumbent, functools.partial)
-        and incumbent.func is workers._persisting_quorum_cycles
+        and incumbent.func is _owning_worker_review_names._persisting_quorum_cycles
         and keywords
     ):
-        return functools.partial(workers._run_rd_quorum_cycles, **keywords)
+        return functools.partial(
+            _owning_worker_review_names._run_rd_quorum_cycles, **keywords
+        )
     raise UnrecognisedIncumbent(
         "the audit cannot prove this incumbent writes no canonical review "
         f"rows, so it will not run it: {incumbent!r}"
@@ -210,7 +215,7 @@ async def store_panel_audit(
     row still lands, carrying the reason, so a gap in the sample is visible
     rather than absent.
     """
-    from imas_codex.standard_names.graph_ops import write_reviews
+    from imas_codex.standard_names.graph_store.graph_catalog import write_reviews
 
     record = _audit_record(
         item,

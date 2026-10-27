@@ -40,7 +40,9 @@ _NO_CHILDREN: list = []
 
 def test_t12_base_quantity_context_injection():
     """When a StandardName has a HAS_PARENT parent, base_quantity is injected."""
-    from imas_codex.standard_names.workers import _enrich_for_docs_gen
+    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+        _enrich_for_docs_gen,
+    )
 
     gc = _make_gc(
         [
@@ -75,7 +77,9 @@ def test_t12_base_quantity_context_injection():
 
 def test_t12_base_quantity_not_injected_without_parent():
     """When there is no HAS_PARENT parent, base_quantity is not added."""
-    from imas_codex.standard_names.workers import _enrich_for_docs_gen
+    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+        _enrich_for_docs_gen,
+    )
 
     gc = _make_gc(
         [
@@ -101,7 +105,9 @@ def test_t12_base_quantity_not_injected_without_parent():
 
 def test_t13_derivative_siblings_populated():
     """Sibling derivatives sharing the same parent are listed in derivative_context."""
-    from imas_codex.standard_names.workers import _enrich_for_docs_gen
+    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+        _enrich_for_docs_gen,
+    )
 
     gc = _make_gc(
         [
@@ -135,7 +141,9 @@ def test_t13_derivative_siblings_populated():
 
 def test_t13_null_siblings_filtered():
     """Null entries returned by Cypher collect() are filtered from siblings."""
-    from imas_codex.standard_names.workers import _enrich_for_docs_gen
+    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+        _enrich_for_docs_gen,
+    )
 
     gc = _make_gc(
         [
@@ -163,7 +171,9 @@ def test_t13_null_siblings_filtered():
 
 def test_t13_no_derivative_context_for_unknown_name():
     """Names not in DD_DERIVATIVE_MAP get base_quantity but not derivative_context."""
-    from imas_codex.standard_names.workers import _enrich_for_docs_gen
+    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+        _enrich_for_docs_gen,
+    )
 
     gc = _make_gc(
         [
@@ -222,7 +232,9 @@ def test_t14_all_map_entries_are_2_tuples():
 
 def test_t14_derivative_context_numerator_denominator():
     """_enrich_for_docs_gen sets correct numerator/denominator from DD_DERIVATIVE_MAP."""
-    from imas_codex.standard_names.workers import _enrich_for_docs_gen
+    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+        _enrich_for_docs_gen,
+    )
 
     gc = _make_gc(
         [

@@ -515,7 +515,9 @@ def test_binary_derivation_reads_real_operands_not_placeholder_base() -> None:
 
 
 def test_ordered_metric_name_does_not_enter_grammar_retry() -> None:
-    from imas_codex.standard_names.workers import _grammar_round_trip_failures
+    from imas_codex.standard_names.worker_tasks.worker_common import (
+        _grammar_round_trip_failures,
+    )
 
     class Candidate:
         source_id = "metric"

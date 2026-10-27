@@ -4,7 +4,7 @@ import ast
 
 import pytest
 
-from imas_codex.standard_names.workers import (
+from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
     _NEARBY_COMPARATOR_HARD_CEILING,
     _collect_nearby_name_comparators,
 )

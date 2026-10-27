@@ -21,7 +21,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-_GC = "imas_codex.standard_names.graph_ops.GraphClient"
+_GC = "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
 
 
 def _committed_graph(node_id: str, winner_token: str, winner_seq: int):
@@ -49,7 +49,9 @@ class TestVerifierClosesRace:
 
     @pytest.mark.parametrize("n", [2, 5, 20])
     def test_exactly_one_paid_call_proceeds(self, n: int):
-        from imas_codex.standard_names.graph_ops import _verify_docs_claim_winners
+        from imas_codex.standard_names.graph_store.graph_claim_release import (
+            _verify_docs_claim_winners,
+        )
 
         node = "perturbed_particle_energy"
         # The lock-serialised claim burst commits in order; the LAST committer
@@ -71,7 +73,9 @@ class TestVerifierClosesRace:
         assert survivors == 1, f"{survivors} racers passed verify — expected 1"
 
     def test_names_axis_uses_same_mechanism(self):
-        from imas_codex.standard_names.graph_ops import _verify_name_claim_winners
+        from imas_codex.standard_names.graph_store.graph_claim_release import (
+            _verify_name_claim_winners,
+        )
 
         node = "n"
         survivors = 0
@@ -87,7 +91,9 @@ class TestVerifierClosesRace:
     def test_seq_mismatch_drops_even_when_token_matches(self):
         """Defensive: our token is on the node but a higher committed seq means
         a later claim superseded us — we must NOT proceed."""
-        from imas_codex.standard_names.graph_ops import _verify_docs_claim_winners
+        from imas_codex.standard_names.graph_store.graph_claim_release import (
+            _verify_docs_claim_winners,
+        )
 
         gc = MagicMock()
         gc.__enter__ = MagicMock(return_value=gc)
@@ -102,7 +108,9 @@ class TestVerifierClosesRace:
         assert kept == []
 
     def test_matching_seq_survives(self):
-        from imas_codex.standard_names.graph_ops import _verify_docs_claim_winners
+        from imas_codex.standard_names.graph_store.graph_claim_release import (
+            _verify_docs_claim_winners,
+        )
 
         gc = MagicMock()
         gc.__enter__ = MagicMock(return_value=gc)
@@ -119,7 +127,9 @@ class TestVerifierClosesRace:
     def test_missing_claim_seq_falls_back_to_token_only(self):
         """Legacy claims / mocked readbacks without claim_seq keep the prior
         token-only behaviour (never over-drop on missing data)."""
-        from imas_codex.standard_names.graph_ops import _verify_docs_claim_winners
+        from imas_codex.standard_names.graph_store.graph_claim_release import (
+            _verify_docs_claim_winners,
+        )
 
         gc = MagicMock()
         gc.__enter__ = MagicMock(return_value=gc)
@@ -134,7 +144,9 @@ class TestVerifierClosesRace:
         assert [it["id"] for it in kept] == ["x"]
 
     def test_empty_batch_short_circuits(self):
-        from imas_codex.standard_names.graph_ops import _verify_docs_claim_winners
+        from imas_codex.standard_names.graph_store.graph_claim_release import (
+            _verify_docs_claim_winners,
+        )
 
         assert _verify_docs_claim_winners([], eligible_stage="refining") == []
 
@@ -143,7 +155,9 @@ class TestSeedStampsClaimSeq:
     """The shared seed must emit a monotonic claim_seq for the verifier."""
 
     def test_seed_and_readback_cypher_carry_claim_seq(self):
-        from imas_codex.standard_names.graph_ops import _claim_sn_atomic
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            _claim_sn_atomic,
+        )
 
         gc = MagicMock()
         gc.__enter__ = MagicMock(return_value=gc)
@@ -194,7 +208,7 @@ class TestPersistOutcomeTripwire:
     """The wasted-paid-call ledger feeding the run-summary tripwire."""
 
     def test_records_attempts_and_waste(self):
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_source_bindings import (
             _record_persist_outcome,
             persist_outcome_snapshot,
             reset_persist_outcomes,
@@ -217,7 +231,7 @@ class TestPersistOutcomeTripwire:
         assert persist_outcome_snapshot(run) == {}
 
     def test_runs_are_isolated(self):
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_source_bindings import (
             _record_persist_outcome,
             persist_outcome_snapshot,
             reset_persist_outcomes,

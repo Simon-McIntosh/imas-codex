@@ -25,7 +25,7 @@ from pydantic import ValidationError
 
 from imas_codex.standard_names.models import GrammarSegments
 from imas_codex.standard_names.segments import classify_gap, describe_gap, ordinal_form
-from imas_codex.standard_names.workers import normalize_spelling
+from imas_codex.standard_names.worker_tasks.worker_common import normalize_spelling
 
 
 def _name(seg: GrammarSegments) -> str:

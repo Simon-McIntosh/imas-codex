@@ -345,7 +345,9 @@ class TestPipelineWiring:
             {"id": "electron_temperature", "source_id": "a"},
         ]
 
-        from imas_codex.standard_names.workers import validate_worker
+        from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+            validate_worker,
+        )
 
         asyncio.run(validate_worker(state))
         assert state.validate_phase.done

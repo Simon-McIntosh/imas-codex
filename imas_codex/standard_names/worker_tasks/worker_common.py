@@ -931,7 +931,9 @@ def _withhold_binding_conflicted_sources(
     ]
     if not remaining:
         return []
-    from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+    from imas_codex.standard_names.graph_store.graph_catalog import (
+        persist_generated_name_batch,
+    )
 
     return persist_generated_name_batch(
         remaining,
@@ -975,8 +977,10 @@ def _persist_description_checked_candidates(
     path. A source with any descriptionless proposal is entirely deferred so
     duplicate proposals cannot race the release with a richer sibling.
     """
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_catalog import (
         persist_generated_name_batch,
+    )
+    from imas_codex.standard_names.graph_store.graph_claim_release import (
         release_generate_name_failed_claims,
     )
 
@@ -1070,7 +1074,9 @@ def _mark_source_prevalidation_failed(
     claim_seq: int | None = None,
 ) -> bool:
     """Persist a terminal pre-validation failure with actionable diagnostics."""
-    from imas_codex.standard_names.graph_ops import persist_claimed_source_outcomes
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        persist_claimed_source_outcomes,
+    )
 
     error = f"candidate pre-validation failed ({reason}): {candidate_name}"
     if not claim_token or claim_seq is None:
@@ -1481,7 +1487,9 @@ def _active_editorial_gap_guidance(
         for gap in vocab_gaps
     ]
     try:
-        from imas_codex.standard_names.graph_ops import fetch_vocab_gap_adjudications
+        from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+            fetch_vocab_gap_adjudications,
+        )
         from imas_codex.standard_names.vocab_adjudication import (
             editorial_retry_guidance,
         )

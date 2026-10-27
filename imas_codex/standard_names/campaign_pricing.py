@@ -362,7 +362,9 @@ def _prepare_name_requests(
         _build_enum_lists,
         build_compose_context,
     )
-    from imas_codex.standard_names.workers import _enrich_name_review_items
+    from imas_codex.standard_names.worker_tasks.worker_review_names import (
+        _enrich_name_review_items,
+    )
 
     items = [dict(item) for item in cohort]
     _enrich_name_review_items(items)

@@ -6,11 +6,15 @@ from typing import Any
 from unittest.mock import MagicMock, patch
 
 from imas_codex.standard_names.export import _classify_export_population
-from imas_codex.standard_names.graph_ops import (
+from imas_codex.standard_names.graph_store.graph_audits import reconcile_catalog_status
+from imas_codex.standard_names.graph_store.graph_catalog_reset import (
     mark_names_validated,
-    persist_reviewed_name,
-    reconcile_catalog_status,
+)
+from imas_codex.standard_names.graph_store.graph_claim_release import (
     stop_refine_name_attempt,
+)
+from imas_codex.standard_names.graph_store.graph_review_persistence import (
+    persist_reviewed_name,
 )
 
 
@@ -217,7 +221,10 @@ def test_reconcile_does_not_turn_exhaustion_into_validation_failure() -> None:
 def test_validation_failure_writer_keeps_quarantine_and_issues() -> None:
     graph = _context_graph([{"marked": 1}])
 
-    with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=graph):
+    with patch(
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        return_value=graph,
+    ):
         assert (
             mark_names_validated(
                 "validation-token",
@@ -307,7 +314,10 @@ def test_review_exhaustion_does_not_quarantine_at_the_stage_write() -> None:
         [{"id": "electron_temperature"}],
     )
 
-    with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=graph):
+    with patch(
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        return_value=graph,
+    ):
         stage = persist_reviewed_name(
             sn_id="electron_temperature",
             claim_token="claim-token",
@@ -328,7 +338,10 @@ def test_review_exhaustion_does_not_quarantine_at_the_stage_write() -> None:
 def test_stopped_refinement_does_not_quarantine_when_it_exhausts() -> None:
     graph = _context_graph([{"stage": "exhausted"}])
 
-    with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=graph):
+    with patch(
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        return_value=graph,
+    ):
         stage = stop_refine_name_attempt(
             sn_id="electron_temperature",
             token="claim-token",

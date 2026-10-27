@@ -821,7 +821,9 @@ def test_manifest_sources_reconcile_emitted_excluded_and_non_nameable(
 
 
 def test_manifest_source_projection_follows_superseded_identity() -> None:
-    from imas_codex.standard_names.graph_ops import fetch_manifest_source_release_rows
+    from imas_codex.standard_names.graph_store.graph_audits import (
+        fetch_manifest_source_release_rows,
+    )
 
     class _ProjectionClient:
         def __init__(self):

@@ -193,7 +193,9 @@ def test_contested_child_not_live_for_enrich(clean):
     from imas_codex.standard_names.defaults import (
         DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
     )
-    from imas_codex.standard_names.graph_ops import claim_enrich_parents_batch
+    from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
+        claim_enrich_parents_batch,
+    )
 
     parent = f"{PREFIX}_parent"
     child = f"{PREFIX}_child"

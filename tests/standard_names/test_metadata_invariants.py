@@ -68,10 +68,14 @@ def _get_write_cypher(sample_names: list[dict]) -> list[str]:
     mock_gc = MagicMock()
     mock_gc.query = MagicMock(return_value=[])
 
-    with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+    with patch(
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+    ) as MockGC:
         MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
         MockGC.return_value.__exit__ = MagicMock(return_value=False)
-        from imas_codex.standard_names.graph_ops import write_standard_names
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            write_standard_names,
+        )
 
         write_standard_names(sample_names)
 
@@ -194,11 +198,17 @@ class TestWriteCypherInvariants:
 
         import logging
 
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
-            with patch("imas_codex.standard_names.graph_ops.logger") as mock_logger:
-                from imas_codex.standard_names.graph_ops import write_standard_names
+            with patch(
+                "imas_codex.standard_names.graph_store.graph_foundation.logger"
+            ) as mock_logger:
+                from imas_codex.standard_names.graph_store.graph_catalog import (
+                    write_standard_names,
+                )
 
                 write_standard_names(names)
 
@@ -217,10 +227,14 @@ class TestWriteCypherInvariants:
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[])
 
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
-            from imas_codex.standard_names.graph_ops import write_standard_names
+            from imas_codex.standard_names.graph_store.graph_catalog import (
+                write_standard_names,
+            )
 
             write_standard_names(valid_domain_names)
 
@@ -256,8 +270,10 @@ class TestGrammarParsing:
 
     def test_parse_grammar_keys(self) -> None:
         """_parse_grammar returns the two metadata fields plus every bare segment column."""
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_catalog import (
             _GRAMMAR_SEGMENT_COLUMNS,
+        )
+        from imas_codex.standard_names.graph_store.graph_foundation import (
             _parse_grammar,
         )
 
@@ -277,7 +293,9 @@ class TestGrammarParsing:
         """When imas_standard_names is unavailable, metadata fields are None."""
         import unittest.mock
 
-        from imas_codex.standard_names.graph_ops import _parse_grammar
+        from imas_codex.standard_names.graph_store.graph_foundation import (
+            _parse_grammar,
+        )
 
         with unittest.mock.patch.dict("sys.modules", {"imas_standard_names": None}):
             result = _parse_grammar("electron_temperature")
@@ -412,10 +430,12 @@ class TestNormalizeStoredKinds:
             ]
         )
 
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
-            from imas_codex.standard_names.graph_ops import (
+            from imas_codex.standard_names.graph_store.graph_audits import (
                 normalize_stored_standard_name_kinds,
             )
 
@@ -438,10 +458,12 @@ class TestNormalizeStoredKinds:
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[])  # read returns nothing
 
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
-            from imas_codex.standard_names.graph_ops import (
+            from imas_codex.standard_names.graph_store.graph_audits import (
                 normalize_stored_standard_name_kinds,
             )
 
@@ -530,10 +552,14 @@ class TestWritePathRelationships:
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[])
 
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
-            from imas_codex.standard_names.graph_ops import write_standard_names
+            from imas_codex.standard_names.graph_store.graph_catalog import (
+                write_standard_names,
+            )
 
             write_standard_names(valid_domain_names)
 

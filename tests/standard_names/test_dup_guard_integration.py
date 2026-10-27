@@ -17,7 +17,9 @@ import pytest
 
 from imas_codex.standard_names.budget import BudgetManager, LLMCostEvent
 from imas_codex.standard_names.fanout.config import FanoutSettings
-from imas_codex.standard_names.workers import process_refine_name_batch
+from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+    process_refine_name_batch,
+)
 
 
 class _NullGraphClient:
@@ -93,7 +95,7 @@ def patched(monkeypatch: pytest.MonkeyPatch):
 
     # Hybrid neighbours search returns nothing.
     monkeypatch.setattr(
-        "imas_codex.standard_names.workers._hybrid_search_neighbours",
+        "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours",
         lambda gc, path: [],
     )
 
@@ -129,10 +131,11 @@ def patched(monkeypatch: pytest.MonkeyPatch):
         return "exhausted" if collision_name else "reviewed"
 
     monkeypatch.setattr(
-        "imas_codex.standard_names.graph_ops.persist_refined_name", _persist
+        "imas_codex.standard_names.graph_store.graph_refinement.persist_refined_name",
+        _persist,
     )
     monkeypatch.setattr(
-        "imas_codex.standard_names.graph_ops.stop_refine_name_attempt",
+        "imas_codex.standard_names.graph_store.graph_claim_release.stop_refine_name_attempt",
         _stop,
     )
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import logging
 from typing import Any
 
@@ -241,7 +242,7 @@ def claim_refine_docs_batch(
         + f") AND coalesce(sn.docs_chain_length, 0) < $rotation_cap AND NOT (sn.name_stage IN ['superseded', 'exhausted', 'contested']) AND {services.docs_review_eligibility_where()} AND sn.docs_review_quorum_shortfall IS NULL"
         + score_gate
     )
-    query_params: dict[str, services.Any] = {
+    query_params: dict[str, Any] = {
         "min_score": min_score,
         "rotation_cap": rotation_cap,
         **services.docs_review_eligibility_params(),
@@ -264,12 +265,10 @@ def claim_refine_docs_batch(
         item["docs_chain_history"] = docs_chain_history(item["id"], limit=5)
         raw = item.get("reviewer_comments_per_dim_docs") or "{}"
         try:
-            per_dim: dict = (
-                services.json.loads(raw) if isinstance(raw, str) else raw or {}
-            )
+            per_dim: dict = json.loads(raw) if isinstance(raw, str) else raw or {}
         except (ValueError, TypeError):
             per_dim = {}
-        current_review: dict[str, services.Any] = {
+        current_review: dict[str, Any] = {
             "model": item.get("docs_model", "unknown"),
             "reviewer_score": item.get("reviewer_score_docs"),
             "reviewer_comments_per_dim": per_dim,

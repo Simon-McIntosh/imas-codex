@@ -147,15 +147,15 @@ def _patch_compose_deps():
         ),
         # Enrichment
         patch(
-            "imas_codex.standard_names.workers._enrich_batch_items",
+            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_batch_items",
             side_effect=lambda items: None,
         ),
         patch(
-            "imas_codex.standard_names.workers._search_nearby_names",
+            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._search_nearby_names",
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.workers._enrich_ids_context",
+            "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_ids_context",
             return_value=None,
         ),
         patch(
@@ -174,11 +174,11 @@ def _patch_compose_deps():
         patch("imas_codex.graph.client.GraphClient", return_value=mock_gc),
         # Persist
         patch(
-            "imas_codex.standard_names.graph_ops.persist_generated_name_batch",
+            "imas_codex.standard_names.graph_store.graph_catalog.persist_generated_name_batch",
             return_value=1,
         ),
         patch(
-            "imas_codex.standard_names.graph_ops._verify_source_claim_winners",
+            "imas_codex.standard_names.graph_store.graph_claim_release._verify_source_claim_winners",
             side_effect=lambda items, **_kwargs: items,
         ),
         # Audits
@@ -188,7 +188,7 @@ def _patch_compose_deps():
         ),
         # Misc
         patch(
-            "imas_codex.standard_names.workers._auto_detect_physical_base_gaps",
+            "imas_codex.standard_names.worker_tasks.worker_common._auto_detect_physical_base_gaps",
             return_value=[],
         ),
     ]
@@ -209,7 +209,9 @@ class TestPoolComposeRetry:
     @pytest.mark.asyncio
     async def test_all_pass_no_retry(self, _patch_compose_deps) -> None:
         """When all candidates parse on first try, no retry occurs."""
-        from imas_codex.standard_names.workers import compose_batch
+        from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+            compose_batch,
+        )
 
         good_result = _FakeBatchResult(
             [
@@ -227,7 +229,10 @@ class TestPoolComposeRetry:
 
         with (
             patch("imas_codex.discovery.base.llm.acall_llm_structured", mock_llm),
-            patch("imas_codex.standard_names.workers._retry_attempts", return_value=1),
+            patch(
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._retry_attempts",
+                return_value=1,
+            ),
         ):
             batch = [_make_batch_item()]
             stop = asyncio.Event()
@@ -241,7 +246,9 @@ class TestPoolComposeRetry:
         self, _patch_compose_deps
     ) -> None:
         """Events and counts describe only the committed claim winner."""
-        from imas_codex.standard_names.workers import compose_batch
+        from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+            compose_batch,
+        )
 
         first_path = "equilibrium/time_slice/profiles_1d/psi"
         second_path = "equilibrium/time_slice/profiles_1d/q"
@@ -260,9 +267,12 @@ class TestPoolComposeRetry:
         events: list[dict[str, Any]] = []
         with (
             patch("imas_codex.discovery.base.llm.acall_llm_structured", mock_llm),
-            patch("imas_codex.standard_names.workers._retry_attempts", return_value=1),
             patch(
-                "imas_codex.standard_names.graph_ops.persist_generated_name_batch",
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._retry_attempts",
+                return_value=1,
+            ),
+            patch(
+                "imas_codex.standard_names.graph_store.graph_catalog.persist_generated_name_batch",
                 return_value=[f"dd:{first_path}"],
             ),
         ):
@@ -281,7 +291,9 @@ class TestPoolComposeRetry:
         """Grammar failure on first attempt triggers re-enrich + re-LLM."""
         import sys
 
-        from imas_codex.standard_names.workers import compose_batch
+        from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+            compose_batch,
+        )
 
         _PARSEABLE_BAD = "xyzzy_garbage_invalid_token"
         bad_result = _FakeBatchResult(
@@ -333,7 +345,10 @@ class TestPoolComposeRetry:
 
         with (
             patch("imas_codex.discovery.base.llm.acall_llm_structured", mock_llm),
-            patch("imas_codex.standard_names.workers._retry_attempts", return_value=1),
+            patch(
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._retry_attempts",
+                return_value=1,
+            ),
             patch("asyncio.to_thread", patched_to_thread),
             patch.dict(
                 sys.modules,
@@ -353,7 +368,9 @@ class TestPoolComposeRetry:
         """Exhausted batch retries fall through to the per-candidate retry."""
         import sys
 
-        from imas_codex.standard_names.workers import compose_batch
+        from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+            compose_batch,
+        )
 
         # Use a snake_case name that passes pre-validation but fails grammar
         _PARSEABLE_BAD = "xyzzy_garbage_invalid_token"
@@ -396,9 +413,12 @@ class TestPoolComposeRetry:
 
         with (
             patch("imas_codex.discovery.base.llm.acall_llm_structured", mock_llm),
-            patch("imas_codex.standard_names.workers._retry_attempts", return_value=1),
             patch(
-                "imas_codex.standard_names.workers._grammar_retry",
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._retry_attempts",
+                return_value=1,
+            ),
+            patch(
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._grammar_retry",
                 mock_grammar_retry,
             ),
             patch.dict(
@@ -420,7 +440,9 @@ class TestPoolComposeRetry:
     @pytest.mark.asyncio
     async def test_retry_disabled_when_zero(self, _patch_compose_deps) -> None:
         """retry_attempts=0 disables the retry loop entirely."""
-        from imas_codex.standard_names.workers import compose_batch
+        from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+            compose_batch,
+        )
 
         bad_result = _FakeBatchResult(
             [
@@ -437,9 +459,12 @@ class TestPoolComposeRetry:
 
         with (
             patch("imas_codex.discovery.base.llm.acall_llm_structured", mock_llm),
-            patch("imas_codex.standard_names.workers._retry_attempts", return_value=0),
             patch(
-                "imas_codex.standard_names.workers._grammar_retry",
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._retry_attempts",
+                return_value=0,
+            ),
+            patch(
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._grammar_retry",
                 AsyncMock(return_value=(None, 0.0, 0, 0)),
             ),
         ):
@@ -453,7 +478,9 @@ class TestPoolComposeRetry:
     @pytest.mark.asyncio
     async def test_budget_reserves_for_retries(self, _patch_compose_deps) -> None:
         """Budget reservation accounts for retry_attempts."""
-        from imas_codex.standard_names.workers import compose_batch
+        from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+            compose_batch,
+        )
 
         good_result = _FakeBatchResult(
             [
@@ -466,7 +493,10 @@ class TestPoolComposeRetry:
 
         with (
             patch("imas_codex.discovery.base.llm.acall_llm_structured", mock_llm),
-            patch("imas_codex.standard_names.workers._retry_attempts", return_value=2),
+            patch(
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._retry_attempts",
+                return_value=2,
+            ),
         ):
             batch = [_make_batch_item()]
             stop = asyncio.Event()
@@ -492,7 +522,9 @@ class TestPoolComposeRetry:
         exits on the reason that actually stopped it.
         """
         from imas_codex.standard_names.budget import BudgetExceeded
-        from imas_codex.standard_names.workers import compose_batch
+        from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+            compose_batch,
+        )
 
         class _UnfundableBudgetManager(_FakeBudgetManager):
             def reserve(self, amount, phase=""):
@@ -507,7 +539,10 @@ class TestPoolComposeRetry:
 
         with (
             patch("imas_codex.discovery.base.llm.acall_llm_structured", mock_llm),
-            patch("imas_codex.standard_names.workers._retry_attempts", return_value=1),
+            patch(
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._retry_attempts",
+                return_value=1,
+            ),
             pytest.raises(BudgetExceeded, match="no reservable provider exposure"),
         ):
             await compose_batch(

@@ -14,6 +14,10 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 from imas_codex.standard_names import graph_ops
+from imas_codex.standard_names.graph_store import (
+    graph_foundation as _owning_graph_foundation,
+    graph_lineage as _owning_graph_lineage,
+)
 
 PROTECTED_PARENT = "protected_parent"
 PROTECTED_CHILD = "superseded_child_of_protected"
@@ -36,10 +40,7 @@ def _scripted_graph(*, dead_pairs: list[tuple[str, str]]) -> MagicMock:
         if "RETURN sn.id AS id" in cypher and "EDGE_IDENTITY" not in cypher:
             return [{"id": "electron_temperature"}]
         if "RETURN c.id AS child, p.id AS parent" in cypher:
-            return [
-                {"child": child, "parent": parent}
-                for child, parent in dead_pairs
-            ]
+            return [{"child": child, "parent": parent} for child, parent in dead_pairs]
         if "RETURN count(r)" in cypher:
             return [{"n": len(dead_pairs)}]
         return []
@@ -71,9 +72,9 @@ def _drive_rederive(
     answer that exactly *protected_parents* carry durable authority.
     """
     with (
-        patch.object(graph_ops, "GraphClient", return_value=graph),
+        patch.object(_owning_graph_foundation, "GraphClient", return_value=graph),
         patch(
-            "imas_codex.standard_names.graph_ops.automatic_deletion_protections",
+            "imas_codex.standard_names.graph_store.graph_foundation.automatic_deletion_protections",
             side_effect=lambda _gc, name_ids: {
                 name_id: "unchanged_ratification"
                 for name_id in name_ids
@@ -82,11 +83,13 @@ def _drive_rederive(
             create=True,
         ) as consult_protection,
         patch.object(
-            graph_ops, "_write_standard_name_edges", return_value=set()
+            _owning_graph_lineage, "_write_standard_name_edges", return_value=set()
         ),
-        patch.object(graph_ops, "_rewire_has_parent_off_superseded", return_value=0),
+        patch.object(
+            _owning_graph_lineage, "_rewire_has_parent_off_superseded", return_value=0
+        ),
     ):
-        result = graph_ops.rederive_structural_edges()
+        result = _owning_graph_lineage.rederive_structural_edges()
     return result, consult_protection
 
 

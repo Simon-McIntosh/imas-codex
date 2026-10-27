@@ -207,14 +207,32 @@ async def test_pipeline_does_not_spin_when_all_work_complete(_gc, _clean) -> Non
         return await _orig_run_pools(*args, **kwargs)  # type: ignore[arg-type]
 
     with (
-        patch(f"{_GO}.claim_generate_name_batch", return_value=[]),
-        patch(f"{_GO}.claim_review_name_batch", return_value=[]),
-        patch(f"{_GO}.claim_refine_name_batch", return_value=[]),
-        patch(f"{_GO}.claim_generate_docs_batch", return_value=[]),
-        patch(f"{_GO}.claim_review_docs_batch", return_value=[]),
-        patch(f"{_GO}.claim_refine_docs_batch", return_value=[]),
         patch(
-            f"{_GO}.reconcile_standard_name_sources",
+            "imas_codex.standard_names.graph_store.graph_cost_and_claims.claim_generate_name_batch",
+            return_value=[],
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_cost_and_claims.claim_review_name_batch",
+            return_value=[],
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_refinement.claim_refine_name_batch",
+            return_value=[],
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_docs_persistence.claim_generate_docs_batch",
+            return_value=[],
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_review_persistence.claim_review_docs_batch",
+            return_value=[],
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_docs_persistence.claim_refine_docs_batch",
+            return_value=[],
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_audits.reconcile_standard_name_sources",
             return_value={"relinked": 0, "stale_marked": 0, "revived": 0},
         ),
         patch(

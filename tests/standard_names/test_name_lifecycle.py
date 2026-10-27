@@ -38,11 +38,15 @@ from imas_codex.standard_names.defaults import (
     DEFAULT_ESCALATION_MODEL,
     DEFAULT_REFINE_ROTATIONS,
 )
-from imas_codex.standard_names.graph_ops import (
+from imas_codex.standard_names.graph_store.graph_catalog import (
     _finalize_generated_name_stage,
-    persist_refined_name,
-    persist_reviewed_name,
+)
+from imas_codex.standard_names.graph_store.graph_claim_release import (
     release_review_names_failed_claims,
+)
+from imas_codex.standard_names.graph_store.graph_refinement import persist_refined_name
+from imas_codex.standard_names.graph_store.graph_review_persistence import (
+    persist_reviewed_name,
 )
 from imas_codex.standard_names.orphan_sweep import _orphan_sweep_tick
 
@@ -503,7 +507,9 @@ def test_escalation_at_final_attempt(_gc, _clean, mock_llm):
     the LLM was invoked with the escalation model.
     """
     from imas_codex.standard_names.models import GrammarSegments, RefinedName
-    from imas_codex.standard_names.workers import process_refine_name_batch
+    from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+        process_refine_name_batch,
+    )
 
     sn_old = _uid("esc_old")
     token = f"tok-esc-{uuid.uuid4().hex[:8]}"

@@ -8,13 +8,15 @@ and the ISN derivation of the shape-parameter and rate-natured base sets.
 
 import pytest
 
-from imas_codex.standard_names.workers import (
-    _is_attachment_consistent,
+from imas_codex.standard_names.worker_tasks.worker_common import (
     _name_denotes_rate,
     _name_denotes_state,
     _rate_natured_bases,
     _shape_parameter_bases,
     _state_resolution_tokens,
+)
+from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+    _is_attachment_consistent,
 )
 
 # ---------------------------------------------------------------------------

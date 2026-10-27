@@ -8,6 +8,12 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 from imas_codex.standard_names import graph_ops
+from imas_codex.standard_names.graph_store import (
+    graph_catalog as _owning_graph_catalog,
+    graph_cost_and_claims as _owning_graph_cost_and_claims,
+    graph_refinement as _owning_graph_refinement,
+    graph_review_persistence as _owning_graph_review_persistence,
+)
 
 _METHOD = "semantic_similarity_gate"
 _MODEL_IDENTITY = "(semantic_similarity_gate)"
@@ -43,25 +49,33 @@ def test_similarity_method_is_declared_without_expanding_winning_authority() -> 
     schema_path = (
         Path(__file__).parents[2] / "imas_codex" / "schemas" / "standard_name.yaml"
     )
-    graph_ops._winning_review_resolution_methods.cache_clear()
+    _owning_graph_catalog._winning_review_resolution_methods.cache_clear()
 
-    assert graph_ops._winning_review_resolution_methods(schema_path) == _WINNING_METHODS
-    assert _METHOD in graph_ops._non_winning_review_resolution_methods()
+    assert (
+        _owning_graph_catalog._winning_review_resolution_methods(schema_path)
+        == _WINNING_METHODS
+    )
+    assert _METHOD in _owning_graph_catalog._non_winning_review_resolution_methods()
 
 
 def test_similarity_method_keeps_acceptance_and_refine_claims_closed() -> None:
-    shortfall = graph_ops._quorum_admits_acceptance(_METHOD, reviewer_chain_size=None)
+    shortfall = _owning_graph_review_persistence._quorum_admits_acceptance(
+        _METHOD, reviewer_chain_size=None
+    )
 
     assert shortfall is not None
     assert _METHOD in shortfall
-    assert _METHOD not in graph_ops.QUORATE_RESOLUTION_METHODS
+    assert _METHOD not in _owning_graph_cost_and_claims.QUORATE_RESOLUTION_METHODS
     assert (
-        "sn.review_quorum_shortfall IS NULL" in graph_ops.REFINE_NAME_ELIGIBILITY_WHERE
+        "sn.review_quorum_shortfall IS NULL"
+        in _owning_graph_refinement.REFINE_NAME_ELIGIBILITY_WHERE
     )
 
 
 def test_similarity_gate_persists_only_the_measured_dimension() -> None:
-    from imas_codex.standard_names.workers import process_review_name_batch
+    from imas_codex.standard_names.worker_tasks.worker_review_names import (
+        process_review_name_batch,
+    )
 
     persist = MagicMock(return_value="reviewed")
     with (
@@ -70,14 +84,14 @@ def test_similarity_gate_persists_only_the_measured_dimension() -> None:
             return_value=["unused-reviewer"],
         ),
         patch(
-            "imas_codex.standard_names.workers._enrich_name_review_items",
+            "imas_codex.standard_names.worker_tasks.worker_review_names._enrich_name_review_items",
         ),
         patch(
             "imas_codex.standard_names.audits.semantic_similarity_check",
             return_value=(0.20, []),
         ),
         patch(
-            "imas_codex.standard_names.graph_ops.persist_reviewed_name",
+            "imas_codex.standard_names.graph_store.graph_review_persistence.persist_reviewed_name",
             persist,
         ),
         patch(
@@ -108,7 +122,7 @@ def test_similarity_gate_persists_only_the_measured_dimension() -> None:
 
 
 def test_similarity_gate_backfill_uses_model_identity_and_is_idempotent() -> None:
-    from imas_codex.standard_names.workers import (
+    from imas_codex.standard_names.worker_tasks.worker_common import (
         backfill_semantic_similarity_gate_resolution_method,
     )
 

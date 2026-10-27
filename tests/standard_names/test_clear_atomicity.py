@@ -17,6 +17,11 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
+from imas_codex.standard_names.graph_store import (
+    graph_catalog_reset as _owning_graph_catalog_reset,
+    graph_foundation as _owning_graph_foundation,
+)
+
 
 def _make_gc(count: int = 5) -> MagicMock:
     gc = MagicMock()
@@ -35,8 +40,8 @@ def _make_gc(count: int = 5) -> MagicMock:
 def _call(gc: MagicMock, **kwargs):
     from imas_codex.standard_names import graph_ops
 
-    with patch.object(graph_ops, "GraphClient", return_value=gc):
-        return graph_ops.clear_standard_names(**kwargs)
+    with patch.object(_owning_graph_foundation, "GraphClient", return_value=gc):
+        return _owning_graph_catalog_reset.clear_standard_names(**kwargs)
 
 
 def _delete_sn_queries(gc: MagicMock) -> list[str]:

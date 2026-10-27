@@ -6,6 +6,10 @@ mocked where needed.
 
 from __future__ import annotations
 
+from imas_codex.standard_names.graph_store import (
+    graph_parent_lifecycle as _owning_graph_parent_lifecycle,
+)
+
 # =============================================================================
 # 1. Embedding preflight
 # =============================================================================
@@ -1003,7 +1007,9 @@ def test_fetch_review_derived_children_only_enriches_derived(monkeypatch):
             ]
         }
 
-    monkeypatch.setattr(graph_ops, "fetch_derived_parent_children", _fake_fetch)
+    monkeypatch.setattr(
+        _owning_graph_parent_lifecycle, "fetch_derived_parent_children", _fake_fetch
+    )
 
     names = [
         {"id": "internal_state_energy_flux", "origin": "derived"},
@@ -1029,7 +1035,9 @@ def test_fetch_review_derived_children_noop_without_derived(monkeypatch):
     def _boom(parent_ids):  # pragma: no cover - must not run
         raise AssertionError("fetch should not be called without derived parents")
 
-    monkeypatch.setattr(graph_ops, "fetch_derived_parent_children", _boom)
+    monkeypatch.setattr(
+        _owning_graph_parent_lifecycle, "fetch_derived_parent_children", _boom
+    )
     names = [{"id": "electron_temperature", "origin": "pipeline"}]
     pipeline._fetch_review_derived_children(names)
     assert "derived_children" not in names[0]

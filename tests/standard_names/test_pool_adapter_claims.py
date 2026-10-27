@@ -31,11 +31,11 @@ async def test_explicit_paths_return_only_claim_winners_with_fences() -> None:
 
     with (
         patch(
-            "imas_codex.standard_names.graph_ops.merge_standard_name_sources",
+            "imas_codex.standard_names.graph_store.graph_source_bindings.merge_standard_name_sources",
             return_value=2,
         ),
         patch(
-            "imas_codex.standard_names.graph_ops.claim_explicit_standard_name_sources",
+            "imas_codex.standard_names.graph_store.graph_source_bindings.claim_explicit_standard_name_sources",
             return_value=[
                 {
                     "id": f"dd:{winner}",
@@ -67,11 +67,11 @@ async def test_explicit_paths_without_claim_winner_skip_graph_reads() -> None:
 
     with (
         patch(
-            "imas_codex.standard_names.graph_ops.merge_standard_name_sources",
+            "imas_codex.standard_names.graph_store.graph_source_bindings.merge_standard_name_sources",
             return_value=1,
         ),
         patch(
-            "imas_codex.standard_names.graph_ops.claim_explicit_standard_name_sources",
+            "imas_codex.standard_names.graph_store.graph_source_bindings.claim_explicit_standard_name_sources",
             return_value=[],
         ),
         patch("imas_codex.graph.client.GraphClient") as graph_client,

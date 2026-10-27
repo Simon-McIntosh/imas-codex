@@ -30,10 +30,15 @@ from unittest.mock import patch
 import pytest
 
 from imas_codex.standard_names.attachment_audit import AttachmentPairingGuardResult
-from imas_codex.standard_names.graph_ops import supersede_prior_source_names
+from imas_codex.standard_names.graph_store.graph_supersession import (
+    supersede_prior_source_names,
+)
 from imas_codex.standard_names.provenance_lifecycle import (
     SourceBindingConflictError,
     SourceRetiredSuccessorConflictError,
+)
+from imas_codex.standard_names.worker_tasks import (
+    worker_common as _owning_worker_common,
 )
 
 _DD_PATH = "dd:example/predicted_path"
@@ -217,15 +222,15 @@ def test_compose_persist_withholds_a_dual_bound_source_without_spending_an_attem
     with (
         caplog.at_level("WARNING"),
         patch(
-            "imas_codex.standard_names.graph_ops.persist_generated_name_batch",
+            "imas_codex.standard_names.graph_store.graph_catalog.persist_generated_name_batch",
             side_effect=conflict,
         ),
         patch(
-            "imas_codex.standard_names.graph_ops.release_generate_name_failed_claims",
+            "imas_codex.standard_names.graph_store.graph_claim_release.release_generate_name_failed_claims",
             side_effect=_release,
         ),
     ):
-        result = workers._persist_description_checked_candidates(
+        result = _owning_worker_common._persist_description_checked_candidates(
             candidates,
             source_type="dd",
             phase="generate_name",
@@ -290,15 +295,15 @@ def test_compose_persist_withholds_a_retired_successor_without_spending_an_attem
     with (
         caplog.at_level("WARNING"),
         patch(
-            "imas_codex.standard_names.graph_ops.persist_generated_name_batch",
+            "imas_codex.standard_names.graph_store.graph_catalog.persist_generated_name_batch",
             side_effect=conflict,
         ),
         patch(
-            "imas_codex.standard_names.graph_ops.release_generate_name_failed_claims",
+            "imas_codex.standard_names.graph_store.graph_claim_release.release_generate_name_failed_claims",
             side_effect=_release,
         ),
     ):
-        result = workers._persist_description_checked_candidates(
+        result = _owning_worker_common._persist_description_checked_candidates(
             candidates,
             source_type="dd",
             phase="generate_name",

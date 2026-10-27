@@ -6,7 +6,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 from imas_codex.standard_names.models import StandardNameComposeBatch
-from imas_codex.standard_names.workers import (
+from imas_codex.standard_names.worker_tasks.worker_common import (
     _filter_persist_candidates_to_claimed_sources,
     _mark_source_prevalidation_failed,
     _sanitize_compose_result_sources,
@@ -129,7 +129,7 @@ def test_deterministic_sibling_without_own_claim_is_deferred() -> None:
 
 def test_prevalidation_failure_records_durable_diagnostics() -> None:
     with patch(
-        "imas_codex.standard_names.graph_ops.persist_claimed_source_outcomes",
+        "imas_codex.standard_names.graph_store.graph_source_bindings.persist_claimed_source_outcomes",
         return_value=["dd:equilibrium/time_slice/profiles_1d/gm6"],
     ) as persist:
         result = _mark_source_prevalidation_failed(
@@ -152,7 +152,7 @@ def test_prevalidation_failure_records_durable_diagnostics() -> None:
 
 def test_prevalidation_failure_without_complete_fence_is_noop() -> None:
     with patch(
-        "imas_codex.standard_names.graph_ops.persist_claimed_source_outcomes"
+        "imas_codex.standard_names.graph_store.graph_source_bindings.persist_claimed_source_outcomes"
     ) as persist:
         result = _mark_source_prevalidation_failed(
             "equilibrium/time_slice/profiles_1d/gm6",
@@ -168,9 +168,13 @@ def test_prevalidation_failure_without_complete_fence_is_noop() -> None:
 
 
 def test_source_outcome_without_complete_fence_does_not_open_graph() -> None:
-    from imas_codex.standard_names.graph_ops import persist_claimed_source_outcomes
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        persist_claimed_source_outcomes,
+    )
 
-    with patch("imas_codex.standard_names.graph_ops.GraphClient") as graph_client:
+    with patch(
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+    ) as graph_client:
         winners = persist_claimed_source_outcomes(
             [
                 {

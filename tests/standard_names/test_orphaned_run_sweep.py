@@ -16,6 +16,10 @@ from typing import Any
 from unittest.mock import patch
 
 from imas_codex.standard_names import graph_ops
+from imas_codex.standard_names.graph_store import (
+    graph_audits as _owning_graph_audits,
+    graph_foundation as _owning_graph_foundation,
+)
 
 
 class _CapturingGraph:
@@ -38,8 +42,8 @@ class _CapturingGraph:
 
 def _run(result: list[dict[str, Any]], **kwargs: Any):
     fake = _CapturingGraph(result)
-    with patch.object(graph_ops, "GraphClient", return_value=fake):
-        marked = graph_ops.mark_orphaned_standard_name_runs_stale(**kwargs)
+    with patch.object(_owning_graph_foundation, "GraphClient", return_value=fake):
+        marked = _owning_graph_audits.mark_orphaned_standard_name_runs_stale(**kwargs)
     return marked, fake
 
 

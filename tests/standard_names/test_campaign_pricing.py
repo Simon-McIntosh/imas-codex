@@ -14,6 +14,9 @@ from imas_codex.standard_names.campaign_pricing import (
     project_name_review_campaign,
     project_name_review_campaign_range,
 )
+from imas_codex.standard_names.worker_tasks import (
+    worker_review_names as _owning_worker_review_names,
+)
 
 _MODEL_COSTS = {
     "review-primary": 0.01,
@@ -220,7 +223,9 @@ def test_review_request_renders_production_source_and_neighbour_context(
         "same_base_neighbours": [],
         "same_path_neighbours": [],
     }
-    monkeypatch.setattr(workers, "_enrich_name_review_items", _production_enrichment)
+    monkeypatch.setattr(
+        _owning_worker_review_names, "_enrich_name_review_items", _production_enrichment
+    )
     monkeypatch.setattr(
         campaign_pricing,
         "_load_review_context",

@@ -298,7 +298,7 @@ def build_neighborhood_context(
         return []
     batch_ids = {n.get("id", "") for n in batch_names}
 
-    from imas_codex.standard_names.workers import (
+    from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
         _NEARBY_COMPARATOR_HARD_CEILING,
         _collect_nearby_name_comparators,
     )
@@ -379,9 +379,7 @@ def build_neighborhood_context(
         next_indices.append(next_index)
 
     if len(unit_anchored) < unit_cap:
-        for matches, next_index in zip(
-            matches_by_candidate, next_indices, strict=True
-        ):
+        for matches, next_index in zip(matches_by_candidate, next_indices, strict=True):
             for match in matches[next_index:]:
                 if len(unit_anchored) >= unit_cap:
                     break

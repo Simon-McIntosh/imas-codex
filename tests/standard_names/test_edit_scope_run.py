@@ -35,6 +35,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from imas_codex.standard_names import loop as loop_mod
+from imas_codex.standard_names.graph_store import (
+    graph_cost_and_claims as _owning_graph_cost_and_claims,
+)
 
 _EDIT_FRAGMENT = "coalesce(sn.edit_status, '') = 'open'"
 _TEST_ID_PREFIX = "__editscopetest__"
@@ -72,7 +75,7 @@ def _mock_gc_tx():
 
 def _patch_graph_ops_gc(mock_gc):
     return patch(
-        "imas_codex.standard_names.graph_ops.GraphClient",
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
         return_value=mock_gc,
     )
 
@@ -85,7 +88,9 @@ def _patch_graph_ops_gc(mock_gc):
 class TestClaimAtomicEditScope:
     def test_edits_only_adds_where_clause(self):
         """edits_only=True → seed Cypher contains the edit_status='open' filter."""
-        from imas_codex.standard_names.graph_ops import _claim_sn_atomic
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            _claim_sn_atomic,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(return_value=[])  # no eligible seed → early return
@@ -106,7 +111,9 @@ class TestClaimAtomicEditScope:
 
     def test_edits_only_propagates_to_expand(self):
         """The edit_status filter appears in the expand Cypher too (cluster branch)."""
-        from imas_codex.standard_names.graph_ops import _claim_sn_atomic
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            _claim_sn_atomic,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(
@@ -146,7 +153,9 @@ class TestClaimAtomicEditScope:
 
     def test_edits_only_combines_with_scope_run_id(self):
         """Both predicates AND together when edits_only and scope_run_id are set."""
-        from imas_codex.standard_names.graph_ops import _claim_sn_atomic
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            _claim_sn_atomic,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(return_value=[])
@@ -166,7 +175,9 @@ class TestClaimAtomicEditScope:
 
     def test_default_has_no_edit_filter(self):
         """edits_only defaults to False → no edit_status fragment (backward compat)."""
-        from imas_codex.standard_names.graph_ops import _claim_sn_atomic
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            _claim_sn_atomic,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(return_value=[])
@@ -190,7 +201,9 @@ class TestClaimAtomicEditScope:
 class TestReviewNameEditScope:
     def test_review_name_edits_only_adds_fragment(self):
         """claim_review_name_batch(edits_only=True) composes the fragment."""
-        from imas_codex.standard_names.graph_ops import claim_review_name_batch
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            claim_review_name_batch,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(return_value=[])  # nothing eligible
@@ -206,7 +219,9 @@ class TestReviewNameEditScope:
 
     def test_review_name_default_no_fragment(self):
         """A plain claim_review_name_batch() call carries no edit_status filter."""
-        from imas_codex.standard_names.graph_ops import claim_review_name_batch
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            claim_review_name_batch,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(return_value=[])
@@ -236,9 +251,9 @@ class TestDocsPoolsEditScopeScoreGate:
         ],
     )
     def test_edits_only_drops_score_gate(self, claim_name):
-        import imas_codex.standard_names.graph_ops as graph_ops
+        from imas_codex.standard_names.graph_store import resolve_owned_name
 
-        claim = getattr(graph_ops, claim_name)
+        claim = resolve_owned_name(claim_name)
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(return_value=[])
 
@@ -261,9 +276,9 @@ class TestDocsPoolsEditScopeScoreGate:
         ],
     )
     def test_default_keeps_score_gate(self, claim_name):
-        import imas_codex.standard_names.graph_ops as graph_ops
+        from imas_codex.standard_names.graph_store import resolve_owned_name
 
-        claim = getattr(graph_ops, claim_name)
+        claim = resolve_owned_name(claim_name)
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(return_value=[])
 
@@ -299,7 +314,9 @@ class TestScopeKwargsThreading:
             captured.update(kw)
             return []
 
-        with patch.object(graph_ops, "claim_review_name_batch", _fake_claim):
+        with patch.object(
+            _owning_graph_cost_and_claims, "claim_review_name_batch", _fake_claim
+        ):
             specs = loop_mod._build_pool_specs(
                 MagicMock(),
                 asyncio.Event(),
@@ -366,7 +383,9 @@ def test_edits_only_claims_only_open_edit(_gc, _clean_test_nodes):
     nodes, never on a real edit successor (a live migration may leave many
     real ``edit_status='open'`` names in the graph).
     """
-    from imas_codex.standard_names.graph_ops import claim_review_name_batch
+    from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        claim_review_name_batch,
+    )
 
     open_id = f"{_TEST_ID_PREFIX}open"
     plain_id = f"{_TEST_ID_PREFIX}plain"

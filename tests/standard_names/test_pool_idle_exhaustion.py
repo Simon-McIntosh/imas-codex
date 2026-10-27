@@ -521,7 +521,9 @@ def test_scoped_terminal_residue_reports_transient_claims() -> None:
     """A refining claim remains terminally visible despite zero pending work."""
     from unittest.mock import MagicMock, patch
 
-    from imas_codex.standard_names.graph_ops import scoped_terminal_residue
+    from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
+        scoped_terminal_residue,
+    )
 
     gc = MagicMock()
     gc.__enter__.return_value = gc
@@ -543,7 +545,10 @@ def test_scoped_terminal_residue_reports_transient_claims() -> None:
         }
     ]
 
-    with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=gc):
+    with patch(
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        return_value=gc,
+    ):
         residue = scoped_terminal_residue(scope_run_id="bounded-run")
 
     assert residue["total"] == 1

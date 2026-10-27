@@ -132,15 +132,21 @@ class TestWriteVocabGaps:
         self, gaps: list[dict], mock_gc: MagicMock, source_type: str = "dd"
     ) -> int:
         """Call write_vocab_gaps with a mocked GraphClient."""
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
-            from imas_codex.standard_names.graph_ops import write_vocab_gaps
+            from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+                write_vocab_gaps,
+            )
 
             return write_vocab_gaps(gaps, source_type=source_type)
 
     def test_empty_returns_zero(self):
-        from imas_codex.standard_names.graph_ops import write_vocab_gaps
+        from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+            write_vocab_gaps,
+        )
 
         assert write_vocab_gaps([]) == 0
 
@@ -448,19 +454,23 @@ class TestPersistBatchTokenMissGaps:
         ]
 
         with (
-            patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC,
             patch(
-                "imas_codex.standard_names.graph_ops._write_grammar_decomposition",
+                "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            ) as MockGC,
+            patch(
+                "imas_codex.standard_names.graph_store.graph_catalog._write_grammar_decomposition",
                 return_value=token_miss_gaps,
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.write_vocab_gaps"
+                "imas_codex.standard_names.graph_store.graph_catalog_reset.write_vocab_gaps"
             ) as mock_write_vg,
         ):
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
 
-            from imas_codex.standard_names.graph_ops import write_standard_names
+            from imas_codex.standard_names.graph_store.graph_catalog import (
+                write_standard_names,
+            )
 
             write_standard_names(names)
 
@@ -491,19 +501,23 @@ class TestPersistBatchTokenMissGaps:
         ]
 
         with (
-            patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC,
             patch(
-                "imas_codex.standard_names.graph_ops._write_grammar_decomposition",
+                "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            ) as MockGC,
+            patch(
+                "imas_codex.standard_names.graph_store.graph_catalog._write_grammar_decomposition",
                 return_value=[],
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.write_vocab_gaps"
+                "imas_codex.standard_names.graph_store.graph_catalog_reset.write_vocab_gaps"
             ) as mock_write_vg,
         ):
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
 
-            from imas_codex.standard_names.graph_ops import write_standard_names
+            from imas_codex.standard_names.graph_store.graph_catalog import (
+                write_standard_names,
+            )
 
             write_standard_names(names)
 
@@ -532,19 +546,23 @@ class TestPersistBatchTokenMissGaps:
         ]
 
         with (
-            patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC,
             patch(
-                "imas_codex.standard_names.graph_ops._write_grammar_decomposition",
+                "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            ) as MockGC,
+            patch(
+                "imas_codex.standard_names.graph_store.graph_catalog._write_grammar_decomposition",
                 return_value=token_miss_gaps,
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.write_vocab_gaps"
+                "imas_codex.standard_names.graph_store.graph_catalog_reset.write_vocab_gaps"
             ) as mock_write_vg,
         ):
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
 
-            from imas_codex.standard_names.graph_ops import write_standard_names
+            from imas_codex.standard_names.graph_store.graph_catalog import (
+                write_standard_names,
+            )
 
             write_standard_names(names)
 
@@ -563,7 +581,9 @@ class TestResolveGrammarTokenVersion:
 
     def test_exact_version_match(self):
         """Returns ISN version when GrammarToken nodes exist for it."""
-        from imas_codex.standard_names.graph_ops import _resolve_grammar_token_version
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            _resolve_grammar_token_version,
+        )
 
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[{"t.version": "0.7.0rc16"}])
@@ -573,7 +593,9 @@ class TestResolveGrammarTokenVersion:
 
     def test_fallback_to_latest(self):
         """Falls back to latest available version when exact doesn't exist."""
-        from imas_codex.standard_names.graph_ops import _resolve_grammar_token_version
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            _resolve_grammar_token_version,
+        )
 
         mock_gc = MagicMock()
 
@@ -585,7 +607,9 @@ class TestResolveGrammarTokenVersion:
 
     def test_no_grammar_tokens(self):
         """Returns None when no GrammarToken nodes exist at all."""
-        from imas_codex.standard_names.graph_ops import _resolve_grammar_token_version
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            _resolve_grammar_token_version,
+        )
 
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[])
@@ -608,10 +632,12 @@ class TestWriteSegmentEdgesVersionFallback:
         mock_gc = MagicMock()
 
         with patch(
-            "imas_codex.standard_names.graph_ops._resolve_grammar_token_version",
+            "imas_codex.standard_names.graph_store.graph_catalog._resolve_grammar_token_version",
             return_value=None,
         ):
-            from imas_codex.standard_names.graph_ops import _write_grammar_decomposition
+            from imas_codex.standard_names.graph_store.graph_catalog import (
+                _write_grammar_decomposition,
+            )
 
             gaps = _write_grammar_decomposition(mock_gc, ["electron_temperature"])
 
@@ -643,11 +669,11 @@ class TestWriteSegmentEdgesVersionFallback:
         )
         with (
             patch(
-                "imas_codex.standard_names.graph_ops._resolve_grammar_token_version",
+                "imas_codex.standard_names.graph_store.graph_catalog._resolve_grammar_token_version",
                 return_value="0.7.0rc14",
             ),
             patch(
-                "imas_codex.standard_names.graph_ops._resolve_synced_segments",
+                "imas_codex.standard_names.graph_store.graph_catalog._resolve_synced_segments",
                 return_value=_all_segs,
             ),
             patch("imas_standard_names.grammar.parse_standard_name") as mock_parse,
@@ -661,7 +687,9 @@ class TestWriteSegmentEdgesVersionFallback:
             mock_spec.token = "electron"
             mock_specs.return_value = [mock_spec]
 
-            from imas_codex.standard_names.graph_ops import _write_grammar_decomposition
+            from imas_codex.standard_names.graph_store.graph_catalog import (
+                _write_grammar_decomposition,
+            )
 
             gaps = _write_grammar_decomposition(mock_gc, ["electron_temperature"])
 
@@ -752,10 +780,14 @@ class TestOpenSegmentFilter:
             },
         ]
 
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
-            from imas_codex.standard_names.graph_ops import write_vocab_gaps
+            from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+                write_vocab_gaps,
+            )
 
             written = write_vocab_gaps(gaps, source_type="dd")
 
@@ -788,10 +820,14 @@ class TestOpenSegmentFilter:
             },
         ]
 
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
-            from imas_codex.standard_names.graph_ops import write_vocab_gaps
+            from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+                write_vocab_gaps,
+            )
 
             written = write_vocab_gaps(gaps, source_type="dd")
 
@@ -810,7 +846,9 @@ class TestLoadKnownPhysicalBases:
     """Verify _load_known_physical_bases returns expected tokens."""
 
     def test_returns_nonempty_frozenset(self):
-        from imas_codex.standard_names.workers import _load_known_physical_bases
+        from imas_codex.standard_names.worker_tasks.worker_common import (
+            _load_known_physical_bases,
+        )
 
         bases = _load_known_physical_bases()
         assert isinstance(bases, frozenset)
@@ -821,7 +859,9 @@ class TestLoadKnownPhysicalBases:
         ["pressure", "density", "velocity", "temperature", "current", "wavelength"],
     )
     def test_contains_key_tokens(self, token):
-        from imas_codex.standard_names.workers import _load_known_physical_bases
+        from imas_codex.standard_names.worker_tasks.worker_common import (
+            _load_known_physical_bases,
+        )
 
         bases = _load_known_physical_bases()
         assert token in bases, (
@@ -1099,7 +1139,9 @@ class TestAutoDetectLexicalCompoundBases:
     """Compose auto-detection must not emit gaps for self-resolving bases."""
 
     def test_default_path_skips_lexical_compounds(self):
-        from imas_codex.standard_names.workers import _auto_detect_physical_base_gaps
+        from imas_codex.standard_names.worker_tasks.worker_common import (
+            _auto_detect_physical_base_gaps,
+        )
 
         candidates = [
             {"id": "internal_inductance", "source_id": "dd:equilibrium/li_3"},
@@ -1110,7 +1152,9 @@ class TestAutoDetectLexicalCompoundBases:
         assert _auto_detect_physical_base_gaps(candidates) == []
 
     def test_default_path_still_flags_genuine_gap(self):
-        from imas_codex.standard_names.workers import _auto_detect_physical_base_gaps
+        from imas_codex.standard_names.worker_tasks.worker_common import (
+            _auto_detect_physical_base_gaps,
+        )
 
         # 'poloidal_current_function' is rejected by the parser → real gap.
         candidates = [
@@ -1128,7 +1172,9 @@ class TestAutoDetectLexicalCompoundBases:
 
     def test_explicit_known_bases_stays_strict(self):
         """An explicit known_bases override is authoritative (no parser hatch)."""
-        from imas_codex.standard_names.workers import _auto_detect_physical_base_gaps
+        from imas_codex.standard_names.worker_tasks.worker_common import (
+            _auto_detect_physical_base_gaps,
+        )
 
         candidates = [
             {"id": "internal_inductance", "source_id": "dd:equilibrium/li_3"},
@@ -1142,7 +1188,9 @@ class TestWriteVocabGapsInvalidSegment:
 
     def test_invalid_segment_skipped(self):
         """Gaps with a bogus segment name should not be written."""
-        from imas_codex.standard_names.graph_ops import write_vocab_gaps
+        from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+            write_vocab_gaps,
+        )
 
         gaps = [
             {
@@ -1152,7 +1200,9 @@ class TestWriteVocabGapsInvalidSegment:
                 "reason": "test",
             }
         ]
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as mock_gc_cls:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as mock_gc_cls:
             mock_gc = MagicMock()
             mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
             mock_gc_cls.return_value.__exit__ = MagicMock(return_value=False)
@@ -1162,7 +1212,9 @@ class TestWriteVocabGapsInvalidSegment:
 
     def test_false_positive_skipped(self):
         """Gaps where token exists in reported segment should be skipped."""
-        from imas_codex.standard_names.graph_ops import write_vocab_gaps
+        from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+            write_vocab_gaps,
+        )
 
         # "maximum" moved to the operator class in the finalized grammar;
         # "effective" is a genuine qualifier token.
@@ -1174,7 +1226,9 @@ class TestWriteVocabGapsInvalidSegment:
                 "reason": "test",
             }
         ]
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as mock_gc_cls:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as mock_gc_cls:
             mock_gc = MagicMock()
             mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
             mock_gc_cls.return_value.__exit__ = MagicMock(return_value=False)
@@ -1188,7 +1242,9 @@ class TestReconcileVocabGaps:
 
     def test_deletes_false_positive(self):
         """Gap where token now exists in reported segment → deleted."""
-        from imas_codex.standard_names.graph_ops import reconcile_vocab_gaps
+        from imas_codex.standard_names.graph_store.graph_audits import (
+            reconcile_vocab_gaps,
+        )
 
         # "maximum" moved to the operator class in the finalized grammar;
         # "effective" is a genuine qualifier token.
@@ -1200,7 +1256,9 @@ class TestReconcileVocabGaps:
                 "category": "absent",
             }
         ]
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as mock_gc_cls:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as mock_gc_cls:
             mock_gc = MagicMock()
             mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
             mock_gc_cls.return_value.__exit__ = MagicMock(return_value=False)
@@ -1217,7 +1275,9 @@ class TestReconcileVocabGaps:
 
     def test_preserves_genuine_absent_gap(self):
         """Genuinely absent token → preserved."""
-        from imas_codex.standard_names.graph_ops import reconcile_vocab_gaps
+        from imas_codex.standard_names.graph_store.graph_audits import (
+            reconcile_vocab_gaps,
+        )
 
         fake_gaps = [
             {
@@ -1227,7 +1287,9 @@ class TestReconcileVocabGaps:
                 "category": "absent",
             }
         ]
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as mock_gc_cls:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as mock_gc_cls:
             mock_gc = MagicMock()
             mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
             mock_gc_cls.return_value.__exit__ = MagicMock(return_value=False)
@@ -1240,7 +1302,9 @@ class TestReconcileVocabGaps:
 
     def test_reclassifies_wrong_slot(self):
         """Token that appeared in a different segment → reclassified."""
-        from imas_codex.standard_names.graph_ops import reconcile_vocab_gaps
+        from imas_codex.standard_names.graph_store.graph_audits import (
+            reconcile_vocab_gaps,
+        )
 
         fake_gaps = [
             {
@@ -1250,7 +1314,9 @@ class TestReconcileVocabGaps:
                 "category": "absent",  # was absent, should be wrong_slot
             }
         ]
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as mock_gc_cls:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as mock_gc_cls:
             mock_gc = MagicMock()
             mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
             mock_gc_cls.return_value.__exit__ = MagicMock(return_value=False)
@@ -1267,7 +1333,9 @@ class TestReconcileVocabGaps:
 
     def test_isn_unavailable_skips(self):
         """When ISN is unavailable, reconcile skips gracefully."""
-        from imas_codex.standard_names.graph_ops import reconcile_vocab_gaps
+        from imas_codex.standard_names.graph_store.graph_audits import (
+            reconcile_vocab_gaps,
+        )
 
         with patch(
             "imas_codex.standard_names.segments._load_segment_token_map",
@@ -1285,9 +1353,13 @@ class TestReconcileVocabGaps:
 
     def test_empty_graph(self):
         """No VocabGap nodes → quick return."""
-        from imas_codex.standard_names.graph_ops import reconcile_vocab_gaps
+        from imas_codex.standard_names.graph_store.graph_audits import (
+            reconcile_vocab_gaps,
+        )
 
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as mock_gc_cls:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as mock_gc_cls:
             mock_gc = MagicMock()
             mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
             mock_gc_cls.return_value.__exit__ = MagicMock(return_value=False)
@@ -1497,7 +1569,9 @@ class TestReconcileVocabGapSourceReset:
 
     def test_sources_reset_when_gaps_resolved(self):
         """Sources whose entity has no remaining gap edge → 'extracted'."""
-        from imas_codex.standard_names.graph_ops import reconcile_vocab_gaps
+        from imas_codex.standard_names.graph_store.graph_audits import (
+            reconcile_vocab_gaps,
+        )
 
         # "maximum" moved to the operator class in the finalized grammar;
         # "effective" is a genuine qualifier token.
@@ -1509,7 +1583,9 @@ class TestReconcileVocabGapSourceReset:
                 "category": "absent",
             }
         ]
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as mock_gc_cls:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as mock_gc_cls:
             mock_gc = MagicMock()
             mock_gc_cls.return_value.__enter__ = MagicMock(return_value=mock_gc)
             mock_gc_cls.return_value.__exit__ = MagicMock(return_value=False)

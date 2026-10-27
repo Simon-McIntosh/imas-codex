@@ -981,7 +981,7 @@ class SN6PoolDisplay(BaseProgressDisplay):
         projected: float | None = None
         stalled = False
         try:
-            from imas_codex.standard_names.graph_ops import (
+            from imas_codex.standard_names.graph_store.graph_claim_scope import (
                 query_historical_cpi,
                 query_pipeline_buckets,
             )

@@ -10,6 +10,10 @@ from neo4j import GraphDatabase
 
 from imas_codex.graph.client import GraphClient
 from imas_codex.standard_names.attachment_audit import _find_orphaned_names
+from imas_codex.standard_names.graph_store import (
+    graph_catalog as _owning_graph_catalog,
+    graph_lineage as _owning_graph_lineage,
+)
 from imas_codex.standard_names.source_invariant import (
     MissingStandardNameSource,
     require_producing_sources,
@@ -99,7 +103,7 @@ def test_real_invariant_allows_one_source(source_graph: GraphClient) -> None:
 def test_real_name_creation_rolls_back_without_source(
     source_graph: GraphClient,
 ) -> None:
-    from imas_codex.standard_names.graph_ops import write_standard_names
+    from imas_codex.standard_names.graph_store.graph_catalog import write_standard_names
 
     with pytest.raises(MissingStandardNameSource, match="electron_temperature"):
         write_standard_names([{"id": "electron_temperature"}], gc=source_graph)
@@ -135,7 +139,9 @@ def test_rename_refuses_a_sourceless_predecessor(stage: str) -> None:
 
 
 def test_rename_transaction_rolls_back_an_unbound_successor() -> None:
-    from imas_codex.standard_names.graph_ops import persist_refined_name
+    from imas_codex.standard_names.graph_store.graph_refinement import (
+        persist_refined_name,
+    )
     from tests.standard_names.test_edit_engine import FakeGraph, _patched_graph
 
     class SourcelessGraph(FakeGraph):
@@ -177,11 +183,17 @@ def test_name_creation_refuses_an_unbound_identity() -> None:
             "imas_codex.standard_names.protection._fetch_catalog_edit_names",
             return_value=set(),
         ),
-        patch.object(graph_ops, "_write_grammar_decomposition", return_value=[]),
-        patch.object(graph_ops, "_write_standard_name_edges", return_value=[]),
+        patch.object(
+            _owning_graph_catalog, "_write_grammar_decomposition", return_value=[]
+        ),
+        patch.object(
+            _owning_graph_lineage, "_write_standard_name_edges", return_value=[]
+        ),
         pytest.raises(MissingStandardNameSource),
     ):
-        graph_ops.write_standard_names([{"id": "electron_temperature"}], gc=graph)
+        _owning_graph_catalog.write_standard_names(
+            [{"id": "electron_temperature"}], gc=graph
+        )
 
 
 def test_consistency_reconciliation_refuses_last_source_removal() -> None:

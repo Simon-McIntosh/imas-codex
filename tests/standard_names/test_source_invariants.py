@@ -67,10 +67,14 @@ def _call_merge(sources, mock_gc, *, force=False):
         return final_result
 
     mock_gc.query.side_effect = _query
-    with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+    with patch(
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+    ) as MockGC:
         MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
         MockGC.return_value.__exit__ = MagicMock(return_value=False)
-        from imas_codex.standard_names.graph_ops import merge_standard_name_sources
+        from imas_codex.standard_names.graph_store.graph_source_bindings import (
+            merge_standard_name_sources,
+        )
 
         return merge_standard_name_sources(sources, force=force)
 
@@ -86,16 +90,20 @@ def _call_reconcile(
         [{"count": relinked}],  # third query: re-link
     ]
     with (
-        patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC,
         patch(
-            "imas_codex.standard_names.graph_ops.mark_sources_stale"
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as MockGC,
+        patch(
+            "imas_codex.standard_names.graph_store.graph_source_bindings.mark_sources_stale"
         ) as mock_mark_stale,
     ):
         MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
         MockGC.return_value.__exit__ = MagicMock(return_value=False)
         mock_mark_stale.return_value = len(stale_ids or [])
 
-        from imas_codex.standard_names.graph_ops import reconcile_standard_name_sources
+        from imas_codex.standard_names.graph_store.graph_audits import (
+            reconcile_standard_name_sources,
+        )
 
         result = reconcile_standard_name_sources(source_type)
     return result, mock_mark_stale
@@ -288,12 +296,16 @@ class TestReconcileMarksStale:
             [{"count": 0}],
         ]
         with (
-            patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC,
-            patch("imas_codex.standard_names.graph_ops.mark_sources_stale"),
+            patch(
+                "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+            ) as MockGC,
+            patch(
+                "imas_codex.standard_names.graph_store.graph_source_bindings.mark_sources_stale"
+            ),
         ):
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
-            from imas_codex.standard_names.graph_ops import (
+            from imas_codex.standard_names.graph_store.graph_audits import (
                 reconcile_standard_name_sources,
             )
 

@@ -62,7 +62,7 @@ async def test_write_single_timeout_then_succeed():
     # Use a short timeout for test speed
     with (
         patch(
-            "imas_codex.standard_names.graph_ops.record_llm_cost",
+            "imas_codex.standard_names.graph_store.graph_cost_and_claims.record_llm_cost",
             side_effect=_mock_record,
         ),
         patch("imas_codex.standard_names.budget._WRITER_CALL_TIMEOUT", 1.0),
@@ -97,7 +97,7 @@ async def test_write_single_always_fails():
 
     await mgr.start()
     with patch(
-        "imas_codex.standard_names.graph_ops.record_llm_cost",
+        "imas_codex.standard_names.graph_store.graph_cost_and_claims.record_llm_cost",
         side_effect=_mock_record,
     ):
         lease = mgr.reserve(1.0, phase="test")
@@ -139,7 +139,7 @@ async def test_writer_crash_recreation():
 
     # First enqueue — should detect dead writer and recreate
     with patch(
-        "imas_codex.standard_names.graph_ops.record_llm_cost",
+        "imas_codex.standard_names.graph_store.graph_cost_and_claims.record_llm_cost",
     ):
         mgr._enqueue_write(0.001, _EVENT, 0.0)
 
@@ -152,7 +152,7 @@ async def test_writer_crash_recreation():
 
     # Second enqueue should NOT trigger recreation (writer is alive)
     with patch(
-        "imas_codex.standard_names.graph_ops.record_llm_cost",
+        "imas_codex.standard_names.graph_store.graph_cost_and_claims.record_llm_cost",
     ):
         mgr._enqueue_write(0.001, _EVENT, 0.0)
 

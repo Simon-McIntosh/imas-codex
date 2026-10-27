@@ -32,7 +32,7 @@ AUDIT_WALK_QUESTION = (
     "Which deterministic checks fire for the fields the caller supplied?"
 )
 QUARANTINE_QUESTION = "Is this name quarantined?"
-QUARANTINE_AUTHORITY = "imas_codex.standard_names.workers.validate_name_candidate"
+QUARANTINE_AUTHORITY = "imas_codex.standard_names.worker_tasks.worker_compose_and_validate.validate_name_candidate"
 
 
 class QuarantineVerdictNotAnswered(RuntimeError):

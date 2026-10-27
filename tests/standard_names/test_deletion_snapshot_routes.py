@@ -18,7 +18,9 @@ import uuid
 import pytest
 
 from imas_codex.graph.sn_cleanup import purge_standard_names
-from imas_codex.standard_names.graph_ops import clear_standard_names
+from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+    clear_standard_names,
+)
 
 _PREFIX = "__delsnapshotroute__"
 

@@ -1871,7 +1871,7 @@ def run_review_release(
 
     manifest_sources: list[dict[str, Any]] | None = None
     if kind == "sn_sources":
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_audits import (
             fetch_manifest_source_release_rows,
         )
 

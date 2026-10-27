@@ -16,12 +16,14 @@ import re
 import pytest
 
 from imas_codex.standard_names.models import GrammarSegments, StandardNameCandidate
-from imas_codex.standard_names.workers import (
+from imas_codex.standard_names.worker_tasks.worker_common import (
     _inject_shape_parameter_surface,
-    _is_attachment_consistent,
     _shape_parameter_bases,
     _shape_parameter_surface,
     normalize_spelling,
+)
+from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+    _is_attachment_consistent,
 )
 from tests.standard_names.source_scan import worker_sources
 
@@ -126,7 +128,9 @@ def test_closed_set_membership():
     Resolved against the live ISN vocabulary — a token ISN retires drops out and
     is reported by ``shape_parameter_base_drift`` instead of silently persisting.
     """
-    from imas_codex.standard_names.workers import shape_parameter_base_drift
+    from imas_codex.standard_names.worker_tasks.worker_common import (
+        shape_parameter_base_drift,
+    )
 
     assert not shape_parameter_base_drift(), (
         "ISN's physical_base vocabulary no longer registers every "

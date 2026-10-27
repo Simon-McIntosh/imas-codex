@@ -4,7 +4,7 @@ from typing import Any
 
 import pytest
 
-from imas_codex.standard_names.graph_ops import (
+from imas_codex.standard_names.graph_store.graph_lineage import (
     _materialize_derived_parent_rows,
     _materialize_derived_parent_rows_batched,
     _ParentMaterializationCapture,

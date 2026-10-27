@@ -28,7 +28,9 @@ _RUN_ID = "run-telemetry-test-001"
 
 def _mock_gc_ctx():
     """Return a (patcher, mock_gc) that patches GraphClient as context manager."""
-    patcher = patch("imas_codex.standard_names.graph_ops.GraphClient")
+    patcher = patch(
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+    )
     MockGC = patcher.start()
     mock_gc = MagicMock()
     MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
@@ -48,7 +50,9 @@ class TestLLMCostPersistence:
         """record_llm_cost should CREATE an LLMCost node and MERGE a FOR_RUN edge."""
         patcher, mock_gc = _mock_gc_ctx()
         try:
-            from imas_codex.standard_names.graph_ops import record_llm_cost
+            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+                record_llm_cost,
+            )
 
             spend_id = record_llm_cost(
                 run_id=_RUN_ID,
@@ -97,7 +101,9 @@ class TestLLMCostPersistence:
         """record_llm_cost should refuse model='test-model' by default."""
         patcher, mock_gc = _mock_gc_ctx()
         try:
-            from imas_codex.standard_names.graph_ops import record_llm_cost
+            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+                record_llm_cost,
+            )
 
             spend_id = record_llm_cost(
                 run_id=_RUN_ID,
@@ -129,7 +135,9 @@ class TestCreateSNRunRaises:
         try:
             mock_gc.create_nodes.side_effect = RuntimeError("Connection refused")
 
-            from imas_codex.standard_names.graph_ops import create_sn_run_open
+            from imas_codex.standard_names.graph_store.graph_audits import (
+                create_sn_run_open,
+            )
 
             with pytest.raises(RuntimeError, match="Connection refused"):
                 create_sn_run_open(
@@ -153,7 +161,9 @@ class TestCreateTelemetryFields:
         """create_sn_run_open should set cost_total=0, events_total=0."""
         patcher, mock_gc = _mock_gc_ctx()
         try:
-            from imas_codex.standard_names.graph_ops import create_sn_run_open
+            from imas_codex.standard_names.graph_store.graph_audits import (
+                create_sn_run_open,
+            )
 
             create_sn_run_open(
                 _RUN_ID,
@@ -204,7 +214,9 @@ class TestStoppedAtPopulation:
                 [{"id": _RUN_ID}],  # SET
             ]
 
-            from imas_codex.standard_names.graph_ops import finalize_sn_run
+            from imas_codex.standard_names.graph_store.graph_audits import (
+                finalize_sn_run,
+            )
 
             finalize_sn_run(
                 _RUN_ID,
@@ -263,7 +275,9 @@ class TestCostConsistency:
         try:
             mock_gc.query.return_value = [{"total": 3.456}]
 
-            from imas_codex.standard_names.graph_ops import aggregate_spend_for_run
+            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+                aggregate_spend_for_run,
+            )
 
             total = aggregate_spend_for_run(_RUN_ID)
             assert abs(total - 3.456) < 0.001

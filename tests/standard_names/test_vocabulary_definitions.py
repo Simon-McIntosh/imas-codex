@@ -6,7 +6,10 @@ from types import SimpleNamespace
 
 import pytest
 
-from imas_codex.standard_names import segment_selection, vocabulary_definitions, workers
+from imas_codex.standard_names import segment_selection, vocabulary_definitions
+from imas_codex.standard_names.worker_tasks import (
+    worker_review_names as _owning_worker_review_names,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -88,5 +91,8 @@ def test_review_gate_uses_the_owner(monkeypatch: pytest.MonkeyPatch) -> None:
 
     monkeypatch.setattr(vocabulary_definitions, "vocabulary_definitions", sentinel)
 
-    assert workers.semantic_gate_name_text("beta") == "Sentinel meaning"
+    assert (
+        _owning_worker_review_names.semantic_gate_name_text("beta")
+        == "Sentinel meaning"
+    )
     assert calls == [False]

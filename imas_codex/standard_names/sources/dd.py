@@ -205,7 +205,9 @@ def _qualify_sources(
 
     if write_skipped and skip_records:
         try:
-            from imas_codex.standard_names.graph_ops import write_skipped_sources
+            from imas_codex.standard_names.graph_store.graph_source_bindings import (
+                write_skipped_sources,
+            )
 
             written = write_skipped_sources(skip_records)
             logger.info("Recorded %d disqualified DD sources", written)
@@ -294,7 +296,9 @@ def _apply_unit_overrides(
 
     if write_skipped and skip_records:
         try:
-            from imas_codex.standard_names.graph_ops import write_skipped_sources
+            from imas_codex.standard_names.graph_store.graph_source_bindings import (
+                write_skipped_sources,
+            )
 
             written = write_skipped_sources(skip_records)
             logger.info(

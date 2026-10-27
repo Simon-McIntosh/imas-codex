@@ -12,6 +12,11 @@ import pytest
 import yaml
 from pydantic import ValidationError
 
+from imas_codex.standard_names.graph_store import (
+    graph_catalog_reset as _owning_graph_catalog_reset,
+    graph_foundation as _owning_graph_foundation,
+)
+
 
 class _Transaction:
     def __init__(
@@ -652,7 +657,7 @@ def test_observation_write_preserves_editorial_and_dedup_state() -> None:
         }
     ]
     with (
-        patch.object(graph_ops, "GraphClient", return_value=gc),
+        patch.object(_owning_graph_foundation, "GraphClient", return_value=gc),
         patch(
             "imas_codex.standard_names.segments.is_valid_segment",
             return_value=True,
@@ -662,7 +667,7 @@ def test_observation_write_preserves_editorial_and_dedup_state() -> None:
             return_value=("absent", []),
         ),
     ):
-        graph_ops.write_vocab_gaps(gaps)
+        _owning_graph_catalog_reset.write_vocab_gaps(gaps)
 
     merge_call = next(
         call for call in gc.query.call_args_list if "MERGE (vg:VocabGap" in call.args[0]
@@ -683,7 +688,9 @@ def test_observation_write_preserves_editorial_and_dedup_state() -> None:
 
 
 def test_compose_stamp_never_erases_a_settled_decision() -> None:
-    from imas_codex.standard_names.workers import _stamp_dedup_decision
+    from imas_codex.standard_names.worker_tasks.worker_common import (
+        _stamp_dedup_decision,
+    )
 
     gaps = [
         {
@@ -719,7 +726,7 @@ def test_batch_observations_cannot_downgrade_mechanical_reuse() -> None:
         },
     ]
     with (
-        patch.object(graph_ops, "GraphClient", return_value=gc),
+        patch.object(_owning_graph_foundation, "GraphClient", return_value=gc),
         patch(
             "imas_codex.standard_names.segments.is_valid_segment",
             return_value=True,
@@ -729,7 +736,7 @@ def test_batch_observations_cannot_downgrade_mechanical_reuse() -> None:
             return_value=("absent", []),
         ),
     ):
-        graph_ops.write_vocab_gaps(gaps)
+        _owning_graph_catalog_reset.write_vocab_gaps(gaps)
 
     merge_call = next(
         call for call in gc.query.call_args_list if "MERGE (vg:VocabGap" in call.args[0]
@@ -738,7 +745,7 @@ def test_batch_observations_cannot_downgrade_mechanical_reuse() -> None:
 
 
 def test_editorial_lookup_includes_an_observed_empty_token() -> None:
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_catalog_reset import (
         fetch_vocab_gap_adjudications,
     )
 
@@ -812,7 +819,7 @@ def test_explicit_signature_reset_deactivates_without_erasing_decision() -> None
 
 
 def test_active_editorial_decisions_project_into_triage() -> None:
-    from imas_codex.standard_names.graph_ops import triage_vocab_gaps
+    from imas_codex.standard_names.graph_store.graph_audits import triage_vocab_gaps
 
     gc = MagicMock()
     gc.query.return_value = [

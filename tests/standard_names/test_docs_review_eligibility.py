@@ -15,6 +15,13 @@ from imas_codex.standard_names.export import (
     _fetch_candidates,
     _fetch_export_population,
 )
+from imas_codex.standard_names.graph_store import (
+    graph_audits as _owning_graph_audits,
+    graph_catalog as _owning_graph_catalog,
+    graph_cost_and_claims as _owning_graph_cost_and_claims,
+    graph_docs_persistence as _owning_graph_docs_persistence,
+    graph_foundation as _owning_graph_foundation,
+)
 
 
 class _Graph:
@@ -34,9 +41,9 @@ class _Graph:
 
 
 def _assert_shared_eligibility(cypher: str, params: dict) -> None:
-    assert graph_ops.docs_review_eligibility_where() in cypher
+    assert _owning_graph_catalog.docs_review_eligibility_where() in cypher
     assert "docs_review_resolution_method IS NOT NULL" not in cypher
-    expected = graph_ops.docs_review_eligibility_params()
+    expected = _owning_graph_catalog.docs_review_eligibility_params()
     assert {key: params[key] for key in expected} == expected
     assert "semantic_similarity_gate" in params["docs_review_non_winning_methods"]
 
@@ -48,7 +55,7 @@ def _schema_resolution_methods() -> set[str]:
 
 
 def test_winning_methods_are_derived_from_schema() -> None:
-    params = graph_ops.docs_review_eligibility_params()
+    params = _owning_graph_catalog.docs_review_eligibility_params()
 
     assert (
         set(params["docs_review_winning_methods"])
@@ -69,7 +76,9 @@ def test_export_gate_and_population_use_shared_traversal() -> None:
     population_graph = _Graph()
     with (
         patch("imas_codex.graph.client.GraphClient", return_value=population_graph),
-        patch.object(graph_ops, "docs_review_property_coverage", return_value={}),
+        patch.object(
+            _owning_graph_catalog, "docs_review_property_coverage", return_value={}
+        ),
     ):
         assert _fetch_export_population() == []
     query, params = population_graph.calls[0]
@@ -151,8 +160,12 @@ def test_pending_count_and_claim_use_the_same_atomic_predicate() -> None:
         captured.update(kwargs)
         return []
 
-    with patch.object(graph_ops, "_claim_sn_atomic", side_effect=fake_claim):
-        assert graph_ops.claim_refine_docs_batch(min_score=0.85) == []
+    with patch.object(
+        _owning_graph_cost_and_claims, "_claim_sn_atomic", side_effect=fake_claim
+    ):
+        assert (
+            _owning_graph_docs_persistence.claim_refine_docs_batch(min_score=0.85) == []
+        )
 
     _assert_shared_eligibility(captured["eligibility_where"], captured["query_params"])
     assert captured["stage_field"] == "docs_stage"
@@ -161,8 +174,8 @@ def test_pending_count_and_claim_use_the_same_atomic_predicate() -> None:
 
 def test_stranded_promotion_uses_shared_traversal() -> None:
     graph = _Graph([[{"n": 0}], [{"n": 0}]])
-    with patch.object(graph_ops, "GraphClient", return_value=graph):
-        assert graph_ops.promote_stranded_reviewed(dry_run=True) == {
+    with patch.object(_owning_graph_foundation, "GraphClient", return_value=graph):
+        assert _owning_graph_audits.promote_stranded_reviewed(dry_run=True) == {
             "name": 0,
             "docs": 0,
         }
@@ -181,15 +194,19 @@ def test_property_coverage_requires_plural_axis_and_every_filtered_property() ->
         "docs_axis": 2,
     }
     graph = _Graph([[complete]])
-    with patch.object(graph_ops, "GraphClient", return_value=graph):
-        assert graph_ops.docs_review_property_coverage() == complete
+    with patch.object(_owning_graph_foundation, "GraphClient", return_value=graph):
+        assert _owning_graph_catalog.docs_review_property_coverage() == complete
     query = graph.calls[0][0]
     assert "['name', 'docs']" in query
     assert "review.review_axis = 'docs'" in query
 
     missing_method = {**complete, "method_covered": 0}
     with (
-        patch.object(graph_ops, "GraphClient", return_value=_Graph([[missing_method]])),
+        patch.object(
+            _owning_graph_foundation,
+            "GraphClient",
+            return_value=_Graph([[missing_method]]),
+        ),
         pytest.raises(RuntimeError, match="method_covered"),
     ):
-        graph_ops.docs_review_property_coverage()
+        _owning_graph_catalog.docs_review_property_coverage()

@@ -395,7 +395,7 @@ def test_rejected_derived_parent_remains_in_unresolved_classification():
 
 def test_non_derived_parent_bypasses_structural_admission_gate() -> None:
     """Pipeline refinement parents retain structural provenance recovery."""
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
         reconcile_orphan_parent_sources,
     )
     from imas_codex.standard_names.parents import AdmissionResult
@@ -405,7 +405,7 @@ def test_non_derived_parent_bypasses_structural_admission_gate() -> None:
     gc.query.return_value = []
     with (
         patch(
-            "imas_codex.standard_names.graph_ops.find_orphan_parent_source_candidates",
+            "imas_codex.standard_names.graph_store.graph_parent_lifecycle.find_orphan_parent_source_candidates",
             return_value=[
                 {
                     "parent_id": parent_id,
@@ -437,7 +437,7 @@ def test_non_derived_parent_bypasses_structural_admission_gate() -> None:
 
 def test_parent_source_reconcile_keeps_dd_identity_with_the_child() -> None:
     """Structural sources stay distinct even when every parent shares one leaf."""
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
         reconcile_orphan_parent_sources,
     )
     from imas_codex.standard_names.parents import AdmissionResult

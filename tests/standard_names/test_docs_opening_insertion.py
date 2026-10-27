@@ -10,6 +10,10 @@ import pytest
 
 from imas_codex.standard_names import workers
 from imas_codex.standard_names.models import GeneratedDocs, RefinedDocs
+from imas_codex.standard_names.worker_tasks import (
+    worker_generate_docs as _owning_worker_generate_docs,
+    worker_refine_docs as _owning_worker_refine_docs,
+)
 
 _AVERAGED = "flux_surface_averaged_argon_density_at_plasma_boundary"
 _CANONICAL_AVERAGE = (
@@ -53,16 +57,24 @@ def _persisted_documentation(name: str, documentation: str, writer: str) -> str:
             "imas_codex.standard_names.example_loader.load_compose_examples",
             return_value=[],
         ),
-        patch("imas_codex.standard_names.graph_ops.persist_generated_docs", persist),
-        patch("imas_codex.standard_names.graph_ops.persist_refined_docs", persist),
-        patch.object(workers, "_enrich_for_docs_gen"),
-        patch.object(workers, "_nearby_names_for_docs_gen", return_value=[]),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_docs_persistence.persist_generated_docs",
+            persist,
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_docs_persistence.persist_refined_docs",
+            persist,
+        ),
+        patch.object(_owning_worker_generate_docs, "_enrich_for_docs_gen"),
+        patch.object(
+            _owning_worker_generate_docs, "_nearby_names_for_docs_gen", return_value=[]
+        ),
         patch.object(workers, "model_provider_exposure", return_value=0.0),
     ):
         operation = (
-            workers.process_generate_docs_batch
+            _owning_worker_generate_docs.process_generate_docs_batch
             if writer == "generate"
-            else workers.process_refine_docs_batch
+            else _owning_worker_refine_docs.process_refine_docs_batch
         )
         assert asyncio.run(operation([item], manager, asyncio.Event())) == 1
     persist.assert_called_once()

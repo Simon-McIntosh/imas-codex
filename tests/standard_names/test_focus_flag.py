@@ -55,7 +55,7 @@ def _mock_gc_tx():
 def _patch_graph_ops_gc(mock_gc):
     """Patch GraphClient as used inside graph_ops module."""
     return patch(
-        "imas_codex.standard_names.graph_ops.GraphClient",
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
         return_value=mock_gc,
     )
 
@@ -99,7 +99,7 @@ def _invoke_focus(*focus_args: str, extra_args: list[str] | None = None):
         patch("imas_codex.cli.sn._run_sn_cmd", side_effect=_fake_loop_cmd),
         patch("imas_codex.graph.client.GraphClient", return_value=gc_mock),
         patch(
-            "imas_codex.standard_names.graph_ops.merge_standard_name_sources",
+            "imas_codex.standard_names.graph_store.graph_source_bindings.merge_standard_name_sources",
             side_effect=_fake_merge,
         ),
     ):
@@ -184,7 +184,9 @@ class TestScopeRunIdFiltersClaims:
 
     def test_scope_run_id_adds_where_clause(self):
         """When scope_run_id is set, the seed Cypher contains run_id filter."""
-        from imas_codex.standard_names.graph_ops import _claim_sn_atomic
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            _claim_sn_atomic,
+        )
 
         gc, tx = _mock_gc_tx()
         # Seed returns one item; no expand (no cluster/unit keys).
@@ -228,7 +230,9 @@ class TestScopeRunIdFiltersClaims:
 
     def test_no_scope_run_id_no_where_clause(self):
         """When scope_run_id is None, the seed Cypher has no run_id filter."""
-        from imas_codex.standard_names.graph_ops import _claim_sn_atomic
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            _claim_sn_atomic,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(
@@ -267,7 +271,9 @@ class TestScopeRunIdFiltersClaims:
 
     def test_scope_run_id_propagates_to_expand_branches(self):
         """scope_run_id filter appears in the expand Cypher when cluster is set."""
-        from imas_codex.standard_names.graph_ops import _claim_sn_atomic
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            _claim_sn_atomic,
+        )
 
         gc, tx = _mock_gc_tx()
         # Seed returns item with cluster key; triggers cluster-only expand branch.
@@ -317,7 +323,9 @@ class TestScopeRunIdFiltersClaims:
 
     def test_exact_docs_review_claim_forwards_scope_to_seed_and_expansion(self):
         """An admitted docs row cannot expand into an unrelated drafted row."""
-        from imas_codex.standard_names.graph_ops import claim_review_docs_batch
+        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+            claim_review_docs_batch,
+        )
 
         captured: dict = {}
 
@@ -334,11 +342,11 @@ class TestScopeRunIdFiltersClaims:
 
         with (
             patch(
-                "imas_codex.standard_names.graph_ops._claim_sn_atomic",
+                "imas_codex.standard_names.graph_store.graph_cost_and_claims._claim_sn_atomic",
                 side_effect=_claim,
             ),
             patch(
-                "imas_codex.standard_names.graph_ops._verify_docs_claim_winners",
+                "imas_codex.standard_names.graph_store.graph_claim_release._verify_docs_claim_winners",
                 side_effect=lambda items, **_kwargs: items,
             ),
         ):
@@ -362,7 +370,9 @@ class TestScopeRunIdFiltersGenerateNameClaims:
 
     def test_scope_run_id_adds_sns_where_clause(self):
         """When scope_run_id is set, seed Cypher includes sns.run_id filter."""
-        from imas_codex.standard_names.graph_ops import claim_generate_name_batch
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            claim_generate_name_batch,
+        )
 
         gc, tx = _mock_gc_tx()
         # Seed returns nothing — no eligible sources.
@@ -383,7 +393,9 @@ class TestScopeRunIdFiltersGenerateNameClaims:
 
     def test_no_scope_run_id_no_sns_where_clause(self):
         """When scope_run_id is None, no sns.run_id filter in seed Cypher."""
-        from imas_codex.standard_names.graph_ops import claim_generate_name_batch
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            claim_generate_name_batch,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(return_value=[])
@@ -419,7 +431,7 @@ class TestFocusRoutingSeedsAndStamps:
             patch("imas_codex.cli.sn._auto_sync_grammar"),
             patch("imas_codex.graph.client.GraphClient", return_value=gc_mock),
             patch(
-                "imas_codex.standard_names.graph_ops.merge_standard_name_sources",
+                "imas_codex.standard_names.graph_store.graph_source_bindings.merge_standard_name_sources",
                 return_value=1,
             ),
         ):
@@ -459,7 +471,7 @@ class TestFocusRoutingSeedsAndStamps:
             patch("imas_codex.cli.sn._auto_sync_grammar"),
             patch("imas_codex.graph.client.GraphClient", return_value=gc_mock),
             patch(
-                "imas_codex.standard_names.graph_ops.merge_standard_name_sources",
+                "imas_codex.standard_names.graph_store.graph_source_bindings.merge_standard_name_sources",
                 side_effect=_fake_merge,
             ),
         ):
@@ -502,7 +514,7 @@ class TestFocusRoutingSeedsAndStamps:
             ),
             patch("imas_codex.graph.client.GraphClient", return_value=gc_mock),
             patch(
-                "imas_codex.standard_names.graph_ops.merge_standard_name_sources",
+                "imas_codex.standard_names.graph_store.graph_source_bindings.merge_standard_name_sources",
                 return_value=1,
             ),
         ):
@@ -597,7 +609,9 @@ class TestBackwardCompatNoFocus:
 
     def test_claim_sn_atomic_no_scope_default(self):
         """_claim_sn_atomic defaults to scope_run_id=None — no run_id filter."""
-        from imas_codex.standard_names.graph_ops import _claim_sn_atomic
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            _claim_sn_atomic,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(return_value=[])
@@ -616,7 +630,9 @@ class TestBackwardCompatNoFocus:
 
     def test_claim_generate_name_batch_no_scope_default(self):
         """claim_generate_name_batch defaults to scope_run_id=None — no SNS filter."""
-        from imas_codex.standard_names.graph_ops import claim_generate_name_batch
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            claim_generate_name_batch,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run = MagicMock(return_value=[])

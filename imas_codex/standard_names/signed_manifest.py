@@ -366,7 +366,9 @@ class _ArchiveReconstructionAuthority:
 
 def _apply_structural_edge_reconcile(gc: Any, name_ids: list[str]) -> int:
     """Reconcile the canonical structural edges for an exact name partition."""
-    from imas_codex.standard_names.graph_ops import _write_standard_name_edges
+    from imas_codex.standard_names.graph_store.graph_lineage import (
+        _write_standard_name_edges,
+    )
 
     requested = list(dict.fromkeys(name_ids))
     if any(not name_id for name_id in requested):
@@ -5149,11 +5151,13 @@ def _apply_dual_authority_retirement(
     gc: Any | None,
 ) -> dict[str, Any]:
     """Run the closed source-release and target-supersession program."""
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_review_persistence import (
+        _authority_payload_hash,
+    )
+    from imas_codex.standard_names.graph_store.graph_supersession import (
         SIGNED_DUAL_AUTHORITY_RETIREMENT_RECEIPT_SCHEMA,
         SignedDualAuthorityRetirementConflict,
         SignedSourceDispositionConflict,
-        _authority_payload_hash,
         _lock_signed_source_disposition_authority,
         _signed_dual_authority_change_id,
         _signed_dual_authority_retirement_manifest,
@@ -5528,14 +5532,16 @@ def _apply_catalog_source_dispositions(
     gc: Any | None = None,
 ) -> dict[str, Any]:
     """Apply signed one-survivor source dispositions under exact graph CAS."""
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_foundation import _TransactionQuery
+    from imas_codex.standard_names.graph_store.graph_review_persistence import (
+        _authority_payload_hash,
+    )
+    from imas_codex.standard_names.graph_store.graph_supersession import (
         SIGNED_SOURCE_DISPOSITION_RECEIPT_SCHEMA,
         SignedSourceDispositionConflict,
-        _authority_payload_hash,
         _lock_signed_source_disposition_authority,
         _signed_source_disposition_counts,
         _signed_source_disposition_execution_authority,
-        _TransactionQuery,
         _validate_signed_source_adjudication,
         _validate_structural_legitimacy_authority,
     )
@@ -6106,8 +6112,10 @@ def _apply_ineligible_source_retirement(
     lose their final producing source are returned for the orphan workflow and
     are never superseded here.
     """
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_review_persistence import (
         _authority_payload_hash,
+    )
+    from imas_codex.standard_names.graph_store.graph_supersession import (
         _lock_scalar_selected_dedup_authority,
     )
 
@@ -7484,15 +7492,17 @@ def _apply_semantic_mirror_repair(
     gc: Any | None = None,
 ) -> dict[str, Any]:
     """Repair scalar and upstream projections from sole live-edge authority."""
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_foundation import _TransactionQuery
+    from imas_codex.standard_names.graph_store.graph_review_persistence import (
+        _authority_payload_hash,
+    )
+    from imas_codex.standard_names.graph_store.graph_supersession import (
         _PROJECTED_SEMANTIC_SOURCE_TYPES,
         SEMANTIC_MIRROR_REPAIR_RECEIPT_SCHEMA,
         SemanticMirrorRepairConflict,
-        _authority_payload_hash,
         _lock_semantic_mirror_repair_authority,
         _semantic_mirror_repair_authority,
         _semantic_mirror_repair_counts,
-        _TransactionQuery,
     )
 
     requested = sorted(set(source_ids))
@@ -7795,17 +7805,19 @@ def _apply_lifecycleless_stub_reconcile(
     gc: Any | None = None,
 ) -> dict[str, Any]:
     """Reconcile one hash-bound lifecycle-less StandardName cohort atomically."""
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_lineage import (
         _LIFECYCLELESS_STUB_LOCK_QUERY,
         _READ_LIFECYCLELESS_STUBS_QUERY,
         LIFECYCLELESS_STUB_RECEIPT_SCHEMA,
         LifecyclelessStubConflict,
-        _authority_payload_hash,
         _delete_derived_parent_nodes,
         _lifecycleless_stub_manifest,
         _materialize_derived_parent_rows,
         _partition_lifecycleless_stub_rows,
         _reconcile_spurious_stub_source_scalars,
+    )
+    from imas_codex.standard_names.graph_store.graph_review_persistence import (
+        _authority_payload_hash,
     )
 
     if apply and not manifest_sha256:

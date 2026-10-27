@@ -31,8 +31,11 @@ def _run_reconcile(read_rows: list[dict]) -> list[dict] | None:
     mock_gc = MagicMock()
     mock_gc.query = MagicMock(side_effect=fake_query)
 
-    with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=mock_gc):
-        from imas_codex.standard_names.graph_ops import (
+    with patch(
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        return_value=mock_gc,
+    ):
+        from imas_codex.standard_names.graph_store.graph_audits import (
             reconcile_standard_name_source_paths,
         )
 

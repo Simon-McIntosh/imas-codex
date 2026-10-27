@@ -289,7 +289,9 @@ class TestReconcileErrorSiblings:
             ]
         )
 
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
 
@@ -323,7 +325,9 @@ class TestReconcileErrorSiblings:
             ]
         )
 
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
 
@@ -338,7 +342,9 @@ class TestReconcileErrorSiblings:
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(return_value=[])
 
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as MockGC:
             MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
             MockGC.return_value.__exit__ = MagicMock(return_value=False)
 

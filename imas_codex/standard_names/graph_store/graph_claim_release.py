@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 import logging
 from typing import Any
 
@@ -494,7 +496,7 @@ def _sorted_refine_claim_projection(values: Any, *, services: Any) -> list[Any]:
     normalized = [services._authority_json_value(value) for value in values or []]
     return sorted(
         normalized,
-        key=lambda value: services.json.dumps(
+        key=lambda value: json.dumps(
             value, sort_keys=True, separators=(",", ":"), ensure_ascii=False
         ),
     )
@@ -521,12 +523,8 @@ def _project_refine_claim_release_state(
             "drain_claim_scope_id": properties.get("drain_claim_scope_id"),
         },
         "content_hashes": {
-            "description_sha256": services.hashlib.sha256(
-                description.encode()
-            ).hexdigest(),
-            "documentation_sha256": services.hashlib.sha256(
-                documentation.encode()
-            ).hexdigest(),
+            "description_sha256": hashlib.sha256(description.encode()).hexdigest(),
+            "documentation_sha256": hashlib.sha256(documentation.encode()).hexdigest(),
             "combined_sha256": services._authority_payload_hash(
                 {
                     "description": description,
@@ -562,10 +560,8 @@ def _project_refine_claim_release_state(
 def _predicted_refine_claim_release_state(
     before: dict[str, Any], *, services: Any
 ) -> dict[str, Any]:
-    predicted = services.json.loads(
-        services.json.dumps(
-            before, sort_keys=True, separators=(",", ":"), ensure_ascii=False
-        )
+    predicted = json.loads(
+        json.dumps(before, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
     )
     predicted["name_stage"] = "reviewed"
     predicted["claim"] = {"token": None, "claimed_at": None}

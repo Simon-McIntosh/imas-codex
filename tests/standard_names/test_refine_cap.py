@@ -92,7 +92,9 @@ class TestRefineCapForwarding:
         """Bucket C query should use chain_length, not regen_count."""
         import inspect
 
-        from imas_codex.standard_names.graph_ops import query_pipeline_buckets
+        from imas_codex.standard_names.graph_store.graph_claim_scope import (
+            query_pipeline_buckets,
+        )
 
         source = inspect.getsource(query_pipeline_buckets)
         assert "chain_length" in source
@@ -100,7 +102,9 @@ class TestRefineCapForwarding:
 
     def test_normalize_pool_idempotent(self):
         """_normalize_pool is idempotent for canonical pool names."""
-        from imas_codex.standard_names.graph_ops import _normalize_pool
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            _normalize_pool,
+        )
 
         for canonical in [
             "compose",

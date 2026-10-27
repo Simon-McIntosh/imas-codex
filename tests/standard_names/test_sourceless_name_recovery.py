@@ -166,7 +166,9 @@ def test_lapsed_detachment_is_reattached(_gc, _clean):
     the provenance edge, the source's produced state, the ``source_paths``
     entry and (via provenance) the DD-side projection, and the census falls.
     """
-    from imas_codex.standard_names.graph_ops import reconcile_sourceless_pipeline_names
+    from imas_codex.standard_names.graph_store.graph_audits import (
+        reconcile_sourceless_pipeline_names,
+    )
 
     name_id, source_id = _brokered(_gc, name_stage="accepted", name_kind=_LAPSED_KIND)
     before = _census(_gc)
@@ -206,7 +208,9 @@ def test_reason_that_still_holds_is_surfaced_and_left(_gc, _clean):
     a blocker and leaves the detached source untouched — the census is
     unchanged.
     """
-    from imas_codex.standard_names.graph_ops import reconcile_sourceless_pipeline_names
+    from imas_codex.standard_names.graph_store.graph_audits import (
+        reconcile_sourceless_pipeline_names,
+    )
 
     name_id, source_id = _brokered(_gc, name_stage="accepted", name_kind=_HELD_KIND)
     before = _census(_gc)
@@ -228,7 +232,9 @@ def test_reason_that_still_holds_is_surfaced_and_left(_gc, _clean):
 @pytest.mark.graph
 def test_reattach_is_idempotent(_gc, _clean):
     """A second pass after a re-pair matches nothing and adds no edge."""
-    from imas_codex.standard_names.graph_ops import reconcile_sourceless_pipeline_names
+    from imas_codex.standard_names.graph_store.graph_audits import (
+        reconcile_sourceless_pipeline_names,
+    )
 
     name_id, _source_id = _brokered(_gc, name_stage="accepted", name_kind=_LAPSED_KIND)
     reconcile_sourceless_pipeline_names(gc=_gc)
@@ -242,7 +248,9 @@ def test_reattach_is_idempotent(_gc, _clean):
 @pytest.mark.graph
 def test_runs_from_startup_reviewable_reconcile(_gc, _clean):
     """The healing fires from the startup wiring, not only the focused call."""
-    from imas_codex.standard_names.graph_ops import reconcile_reviewable_name_stage
+    from imas_codex.standard_names.graph_store.graph_audits import (
+        reconcile_reviewable_name_stage,
+    )
 
     name_id, _source_id = _brokered(_gc, name_stage="reviewed", name_kind=_LAPSED_KIND)
 

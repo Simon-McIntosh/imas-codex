@@ -144,8 +144,10 @@ def _orphan_sweep_tick(*, timeout_s: int) -> dict[str, int]:
         ``{"name_refining": n, "docs_refining": n, "stale_token_sn": n,
         "stale_token_source": n, "compose_attempt_cap": n}``
     """
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
         _MAX_COMPOSE_CLAIM_ATTEMPTS,
+    )
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
         record_dispositions_for_undisposed_parks,
     )
 
@@ -213,7 +215,9 @@ async def run_orphan_sweep_loop(
 
         # Seed parent component sources for newly tagged parents
         try:
-            from imas_codex.standard_names.graph_ops import seed_parent_sources
+            from imas_codex.standard_names.graph_store.graph_lineage import (
+                seed_parent_sources,
+            )
 
             parent_count = await asyncio.to_thread(seed_parent_sources)
             if parent_count:

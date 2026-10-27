@@ -18,7 +18,10 @@ from __future__ import annotations
 from unittest.mock import patch
 
 from imas_codex.standard_names import graph_ops
-from imas_codex.standard_names.graph_ops import promote_stranded_reviewed
+from imas_codex.standard_names.graph_store import (
+    graph_foundation as _owning_graph_foundation,
+)
+from imas_codex.standard_names.graph_store.graph_audits import promote_stranded_reviewed
 
 
 class _FakeGraph:
@@ -69,7 +72,7 @@ class _FakeGraph:
 
 def _run(nodes: list[dict], min_score: float = 0.7, dry_run: bool = False):
     fake = _FakeGraph(nodes)
-    with patch.object(graph_ops, "GraphClient", return_value=fake):
+    with patch.object(_owning_graph_foundation, "GraphClient", return_value=fake):
         return promote_stranded_reviewed(min_score, dry_run=dry_run)
 
 
@@ -233,7 +236,9 @@ class TestQuorumShortfallIsHonoured:
         starts and its maintenance pass sees a 'reviewed' name whose score
         clears the bar. It must leave it alone.
         """
-        from imas_codex.standard_names.graph_ops import persist_reviewed_name
+        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+            persist_reviewed_name,
+        )
 
         gc_calls: list[dict] = []
 
@@ -250,7 +255,9 @@ class TestQuorumShortfallIsHonoured:
                     return [{"id": params["id"]}]
                 return [{"chain_length": 0}]
 
-        with patch.object(graph_ops, "GraphClient", return_value=_Recorder()):
+        with patch.object(
+            _owning_graph_foundation, "GraphClient", return_value=_Recorder()
+        ):
             stage = persist_reviewed_name(
                 sn_id="radial_coordinate_of_shunt",
                 claim_token="tok",
@@ -292,7 +299,9 @@ class TestFakeMirrorsProduction:
     def test_every_production_name_clause_is_consulted_by_the_fake(self) -> None:
         import re
 
-        from imas_codex.standard_names.graph_ops import PROMOTE_STRANDED_NAME_WHERE
+        from imas_codex.standard_names.graph_store.graph_audits import (
+            PROMOTE_STRANDED_NAME_WHERE,
+        )
 
         referenced = set(re.findall(r"sn\.(\w+)", PROMOTE_STRANDED_NAME_WHERE))
 
@@ -332,7 +341,9 @@ class TestFakeMirrorsProduction:
     def test_every_production_docs_clause_is_consulted_by_the_fake(self) -> None:
         import re
 
-        from imas_codex.standard_names.graph_ops import PROMOTE_STRANDED_DOCS_WHERE
+        from imas_codex.standard_names.graph_store.graph_audits import (
+            PROMOTE_STRANDED_DOCS_WHERE,
+        )
 
         referenced = set(re.findall(r"sn\.(\w+)", PROMOTE_STRANDED_DOCS_WHERE))
 

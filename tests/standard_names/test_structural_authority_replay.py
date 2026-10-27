@@ -5,6 +5,9 @@ from __future__ import annotations
 from unittest.mock import patch
 
 from imas_codex.standard_names import graph_ops, parents
+from imas_codex.standard_names.graph_store import (
+    graph_parent_lifecycle as _owning_graph_parent_lifecycle,
+)
 
 
 class _ReplayGraph:
@@ -69,12 +72,12 @@ def test_replay_names_entailing_children_and_refuses_ungrounded_parent() -> None
 
     with (
         patch.object(
-            graph_ops,
+            _owning_graph_parent_lifecycle,
             "_structural_authority_snapshot",
             side_effect=lambda _gc, parent_id: snapshots[parent_id],
         ),
         patch.object(
-            graph_ops,
+            _owning_graph_parent_lifecycle,
             "_persist_structural_authority",
             side_effect=persist,
         ),

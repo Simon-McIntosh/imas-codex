@@ -30,6 +30,9 @@ import pytest
 
 from imas_codex.cli.sn import _compute_pool_progress
 from imas_codex.standard_names import graph_ops
+from imas_codex.standard_names.graph_store import (
+    graph_cost_and_claims as _owning_graph_cost_and_claims,
+)
 
 
 def _eligible_node(**overrides: Any) -> dict[str, Any]:
@@ -193,8 +196,13 @@ def test_review_claim_seed_carries_exactly_the_edits_predicate(
     never emit it."""
     transaction = _RecordingTransaction()
     graph = _RecordingGraph(transaction)
-    with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=graph):
-        graph_ops.claim_review_name_batch(edits_only=edits_only, batch_size=1)
+    with patch(
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        return_value=graph,
+    ):
+        _owning_graph_cost_and_claims.claim_review_name_batch(
+            edits_only=edits_only, batch_size=1
+        )
     seed = transaction.statements[0]
     assert ("coalesce(sn.edit_status, '') = 'open'" in seed) is edits_only
 

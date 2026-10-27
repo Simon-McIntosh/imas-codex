@@ -15,7 +15,7 @@ refine loop.
 
 from __future__ import annotations
 
-from imas_codex.standard_names.workers import (
+from imas_codex.standard_names.worker_tasks.worker_refine_names import (
     RefineCandidateValidationError,
     _is_refine_grammar_failure,
 )

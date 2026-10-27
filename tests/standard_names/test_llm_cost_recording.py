@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names.graph_ops import _normalize_pool
+from imas_codex.standard_names.graph_store.graph_cost_and_claims import _normalize_pool
 
 
 class TestNormalizePool:
@@ -37,7 +37,9 @@ class TestNormalizePool:
 
     def test_canonical_pools_are_six(self):
         """The set of output pool values should be exactly six."""
-        from imas_codex.standard_names.graph_ops import _PHASE_TO_POOL
+        from imas_codex.standard_names.graph_store.graph_foundation import (
+            _PHASE_TO_POOL,
+        )
 
         pools = set(_PHASE_TO_POOL.values())
         assert pools == {

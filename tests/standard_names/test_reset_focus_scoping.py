@@ -26,6 +26,11 @@ import click
 import pytest
 from click.testing import CliRunner
 
+from imas_codex.standard_names.graph_store import (
+    graph_catalog_reset as _owning_graph_catalog_reset,
+    graph_foundation as _owning_graph_foundation,
+)
+
 # ---------------------------------------------------------------------------
 # Helpers — mock GraphClient that returns count/collect rows by query shape
 # ---------------------------------------------------------------------------
@@ -70,8 +75,8 @@ class TestResetStandardNamesPathAllowlist:
     def _call(self, gc: MagicMock, **kwargs):
         from imas_codex.standard_names import graph_ops
 
-        with patch.object(graph_ops, "GraphClient", return_value=gc):
-            return graph_ops.reset_standard_names(**kwargs)
+        with patch.object(_owning_graph_foundation, "GraphClient", return_value=gc):
+            return _owning_graph_catalog_reset.reset_standard_names(**kwargs)
 
     def test_joins_imasnode_with_exact_path_match(self) -> None:
         gc = _make_gc()
@@ -146,8 +151,8 @@ class TestClearStandardNamesPathAllowlist:
     def _call(self, gc: MagicMock, **kwargs):
         from imas_codex.standard_names import graph_ops
 
-        with patch.object(graph_ops, "GraphClient", return_value=gc):
-            return graph_ops.clear_standard_names(**kwargs)
+        with patch.object(_owning_graph_foundation, "GraphClient", return_value=gc):
+            return _owning_graph_catalog_reset.clear_standard_names(**kwargs)
 
     def test_joins_imasnode_with_exact_path_match(self) -> None:
         gc = _make_gc()

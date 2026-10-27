@@ -9,7 +9,16 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
+from imas_codex.standard_names.graph_store import (
+    graph_claim_release as _owning_graph_claim_release,
+    graph_cost_and_claims as _owning_graph_cost_and_claims,
+    resolve_owned_name,
+)
 from imas_codex.standard_names.models import DDGapEvidence
+from imas_codex.standard_names.worker_tasks import (
+    worker_review_docs as _owning_worker_review_docs,
+    worker_review_names as _owning_worker_review_names,
+)
 
 PATH = "equilibrium/time_slice/profiles_1d/electrons/temperature"
 REFERENCE_PATH = "equilibrium/time_slice/profiles_2d/electrons/temperature"
@@ -31,7 +40,9 @@ def _evidence(path: str = PATH, *, reference_path: str | None = None) -> DDGapEv
 
 
 def test_compose_sanitizer_keeps_only_exact_claimed_dd_evidence() -> None:
-    from imas_codex.standard_names.workers import _sanitize_compose_result_sources
+    from imas_codex.standard_names.worker_tasks.worker_common import (
+        _sanitize_compose_result_sources,
+    )
 
     result = SimpleNamespace(
         candidates=[],
@@ -47,7 +58,9 @@ def test_compose_sanitizer_keeps_only_exact_claimed_dd_evidence() -> None:
 
 
 def test_compose_sanitizer_resolves_multiple_dispositions_by_fixed_priority() -> None:
-    from imas_codex.standard_names.workers import _sanitize_compose_result_sources
+    from imas_codex.standard_names.worker_tasks.worker_common import (
+        _sanitize_compose_result_sources,
+    )
 
     source = SimpleNamespace(source_id=PATH, dd_paths=[PATH])
     result = SimpleNamespace(
@@ -67,7 +80,9 @@ def test_compose_sanitizer_resolves_multiple_dispositions_by_fixed_priority() ->
 
 
 def test_reference_evidence_must_also_be_in_claimed_batch() -> None:
-    from imas_codex.standard_names.workers import _sanitize_dd_gap_evidence
+    from imas_codex.standard_names.worker_tasks.worker_common import (
+        _sanitize_dd_gap_evidence,
+    )
 
     evidence = [_evidence(reference_path=REFERENCE_PATH)]
 
@@ -83,7 +98,9 @@ def test_reference_evidence_must_also_be_in_claimed_batch() -> None:
 
 
 def test_persisted_evidence_injects_writer_and_dd_version() -> None:
-    from imas_codex.standard_names.workers import _persist_dd_gap_evidence
+    from imas_codex.standard_names.worker_tasks.worker_common import (
+        _persist_dd_gap_evidence,
+    )
 
     with patch(
         "imas_codex.standard_names.dd_gaps.write_dd_gaps",
@@ -106,7 +123,9 @@ def test_persisted_evidence_injects_writer_and_dd_version() -> None:
 
 
 def test_evidence_writer_failure_isolated_from_pipeline_result() -> None:
-    from imas_codex.standard_names.workers import _persist_dd_gap_evidence
+    from imas_codex.standard_names.worker_tasks.worker_common import (
+        _persist_dd_gap_evidence,
+    )
 
     with patch(
         "imas_codex.standard_names.dd_gaps.write_dd_gaps",
@@ -124,7 +143,9 @@ def test_evidence_writer_failure_isolated_from_pipeline_result() -> None:
 
 
 def test_no_evidence_performs_no_graph_write() -> None:
-    from imas_codex.standard_names.workers import _persist_dd_gap_evidence
+    from imas_codex.standard_names.worker_tasks.worker_common import (
+        _persist_dd_gap_evidence,
+    )
 
     with patch("imas_codex.standard_names.dd_gaps.write_dd_gaps") as write:
         assert (
@@ -237,7 +258,9 @@ def test_attachment_evidence_reports_multiple_unit_edges_deterministically() -> 
 
 @pytest.mark.asyncio
 async def test_review_quorum_collects_evidence_without_changing_score() -> None:
-    from imas_codex.standard_names.workers import _run_rd_quorum_cycles
+    from imas_codex.standard_names.worker_tasks.worker_review_names import (
+        _run_rd_quorum_cycles,
+    )
 
     scores = {"grammar": 18, "semantic": 18, "convention": 18, "completeness": 18}
 
@@ -385,14 +408,18 @@ def test_extraction_refuses_multiple_unit_edges_deterministically(
 
 @pytest.mark.parametrize("axis", ["name", "docs"])
 def test_review_claim_projects_authoritative_dd_bindings(axis: str) -> None:
-    from imas_codex.standard_names import graph_ops
-
     claim_name = f"claim_review_{axis}_batch"
     with (
-        patch.object(graph_ops, "_claim_sn_atomic", return_value=[]) as claim,
-        patch.object(graph_ops, f"_verify_{axis}_claim_winners", return_value=[]),
+        patch.object(
+            _owning_graph_cost_and_claims, "_claim_sn_atomic", return_value=[]
+        ) as claim,
+        patch.object(
+            _owning_graph_claim_release,
+            f"_verify_{axis}_claim_winners",
+            return_value=[],
+        ),
     ):
-        getattr(graph_ops, claim_name)(batch_size=1)
+        resolve_owned_name(claim_name)(batch_size=1)
 
     projection = claim.call_args.kwargs["extra_return_fields"]
     assert "PRODUCED_NAME" in projection
@@ -456,9 +483,9 @@ async def test_review_writer_requires_successful_owned_transition(
     mgr = MagicMock(run_id="test-run")
     mgr.reserve.return_value = MagicMock()
     process = (
-        workers.process_review_name_batch
+        _owning_worker_review_names.process_review_name_batch
         if axis == "name"
-        else workers.process_review_docs_batch
+        else _owning_worker_review_docs.process_review_docs_batch
     )
     persist_name = (
         "persist_reviewed_name" if axis == "name" else "persist_reviewed_docs"
@@ -515,13 +542,17 @@ async def test_review_writer_requires_successful_owned_transition(
         )
         stack.enter_context(
             patch(
-                f"imas_codex.standard_names.graph_ops.{persist_name}",
+                f"imas_codex.standard_names.graph_store.graph_review_persistence.{persist_name}",
                 return_value=transition,
             )
         )
-        stack.enter_context(patch("imas_codex.standard_names.graph_ops.write_reviews"))
         stack.enter_context(
-            patch("imas_codex.standard_names.graph_ops.update_review_aggregates")
+            patch("imas_codex.standard_names.graph_store.graph_catalog.write_reviews")
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.graph_store.graph_catalog.update_review_aggregates"
+            )
         )
         write = stack.enter_context(
             patch(
@@ -587,7 +618,9 @@ def _compose_response(disposition: str) -> object:
 async def test_compose_evidence_follows_each_committed_disposition(
     disposition: str, claim_won: bool
 ) -> None:
-    from imas_codex.standard_names.workers import process_generate_name_batch
+    from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+        process_generate_name_batch,
+    )
 
     batch = [
         {
@@ -632,56 +665,60 @@ async def test_compose_evidence_follows_each_committed_disposition(
             )
         )
         stack.enter_context(
-            patch("imas_codex.standard_names.workers._enrich_batch_items")
+            patch(
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_batch_items"
+            )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.workers._search_nearby_names",
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._search_nearby_names",
                 return_value=[],
             )
         )
         stack.enter_context(
-            patch("imas_codex.standard_names.workers._enrich_ids_context")
+            patch(
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_ids_context"
+            )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.workers._compute_token_reuse_hits",
+                "imas_codex.standard_names.worker_tasks.worker_common._compute_token_reuse_hits",
                 return_value={},
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.workers._active_editorial_gap_guidance",
+                "imas_codex.standard_names.worker_tasks.worker_common._active_editorial_gap_guidance",
                 return_value=("", False),
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.graph_ops._verify_source_claim_winners",
+                "imas_codex.standard_names.graph_store.graph_claim_release._verify_source_claim_winners",
                 return_value=batch,
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.workers.is_well_formed_candidate",
+                "imas_codex.standard_names.worker_tasks.worker_common.is_well_formed_candidate",
                 return_value=(True, None),
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.workers.is_non_nameable_coordinate",
+                "imas_codex.standard_names.worker_tasks.worker_common.is_non_nameable_coordinate",
                 return_value=(False, None),
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.workers._is_attachment_consistent",
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._is_attachment_consistent",
                 return_value=(True, ""),
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.workers._auto_detect_physical_base_gaps",
+                "imas_codex.standard_names.worker_tasks.worker_common._auto_detect_physical_base_gaps",
                 return_value=[],
             )
         )
@@ -693,13 +730,13 @@ async def test_compose_evidence_follows_each_committed_disposition(
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.graph_ops.persist_generated_name_batch",
+                "imas_codex.standard_names.graph_store.graph_catalog.persist_generated_name_batch",
                 return_value=winner_ids,
             )
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.workers._process_attachments_core",
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._process_attachments_core",
                 return_value={
                     "accepted": int(claim_won),
                     "rejected": int(not claim_won),
@@ -709,7 +746,7 @@ async def test_compose_evidence_follows_each_committed_disposition(
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.workers._consume_claimed_vocab_gaps",
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._consume_claimed_vocab_gaps",
                 return_value=(
                     [
                         {
@@ -725,7 +762,7 @@ async def test_compose_evidence_follows_each_committed_disposition(
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.workers._persist_claimed_skips",
+                "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._persist_claimed_skips",
                 return_value=winner_ids,
             )
         )

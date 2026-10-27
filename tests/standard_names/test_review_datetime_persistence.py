@@ -13,6 +13,10 @@ from neo4j.time import DateTime
 
 from imas_codex.graph.client import GraphClient as RealGraphClient
 from imas_codex.standard_names import graph_ops
+from imas_codex.standard_names.graph_store import (
+    graph_catalog as _owning_graph_catalog,
+    graph_foundation as _owning_graph_foundation,
+)
 
 
 def _record(
@@ -67,10 +71,10 @@ def test_write_reviews_converts_iso_parameters_to_neo4j_datetimes(axis: str) -> 
     graph = MagicMock()
     graph.query.return_value = []
 
-    with patch.object(graph_ops, "GraphClient") as graph_client:
+    with patch.object(_owning_graph_foundation, "GraphClient") as graph_client:
         graph_client.return_value.__enter__.return_value = graph
         graph_client.return_value.__exit__.return_value = False
-        assert graph_ops.write_reviews([record]) == 1
+        assert _owning_graph_catalog.write_reviews([record]) == 1
 
     write_call = next(
         call
@@ -126,8 +130,8 @@ def test_name_and_docs_reviews_persist_as_ordered_datetimes(
             "UNWIND $ids AS id CREATE (:StandardName {id: id})",
             ids=standard_name_ids,
         )
-        with patch.object(graph_ops, "GraphClient", side_effect=client):
-            assert graph_ops.write_reviews(records) == 2
+        with patch.object(_owning_graph_foundation, "GraphClient", side_effect=client):
+            assert _owning_graph_catalog.write_reviews(records) == 2
 
         rows = seed_client.query(
             """

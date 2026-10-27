@@ -11,6 +11,11 @@ from unittest.mock import MagicMock, call, patch
 
 import pytest
 
+from imas_codex.standard_names.graph_store import (
+    graph_catalog_reset as _owning_graph_catalog_reset,
+    graph_foundation as _owning_graph_foundation,
+)
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -70,8 +75,10 @@ class TestClearSnSubsystemPreservesLLMCost:
 
         fake_gc = _make_fake_gc({"LLMCost": 3})
 
-        with patch.object(graph_ops, "GraphClient", return_value=fake_gc):
-            result = graph_ops.clear_sn_subsystem(dry_run=True)
+        with patch.object(
+            _owning_graph_foundation, "GraphClient", return_value=fake_gc
+        ):
+            result = _owning_graph_catalog_reset.clear_sn_subsystem(dry_run=True)
 
         assert "LLMCost" not in result
 
@@ -82,8 +89,10 @@ class TestClearSnSubsystemPreservesLLMCost:
         fake_gc = _make_fake_gc(cost_rows=[0.5, 1.25, 2.0])
         before = _ledger_snapshot(fake_gc)
 
-        with patch.object(graph_ops, "GraphClient", return_value=fake_gc):
-            graph_ops.clear_sn_subsystem(dry_run=True)
+        with patch.object(
+            _owning_graph_foundation, "GraphClient", return_value=fake_gc
+        ):
+            _owning_graph_catalog_reset.clear_sn_subsystem(dry_run=True)
 
         assert _ledger_snapshot(fake_gc) == before
 
@@ -103,8 +112,10 @@ class TestClearSnSubsystemPreservesLLMCost:
         )
         before = _ledger_snapshot(fake_gc)
 
-        with patch.object(graph_ops, "GraphClient", return_value=fake_gc):
-            graph_ops.clear_sn_subsystem(dry_run=False)
+        with patch.object(
+            _owning_graph_foundation, "GraphClient", return_value=fake_gc
+        ):
+            _owning_graph_catalog_reset.clear_sn_subsystem(dry_run=False)
 
         queries = [c.args[0] for c in fake_gc.query.call_args_list]
         delete_queries = [q for q in queries if "DETACH DELETE" in q]
@@ -127,8 +138,10 @@ class TestClearSnSubsystemPreservesLLMCost:
         }
         fake_gc = _make_fake_gc(dict.fromkeys(expected, 1))
 
-        with patch.object(graph_ops, "GraphClient", return_value=fake_gc):
-            graph_ops.clear_sn_subsystem(dry_run=False)
+        with patch.object(
+            _owning_graph_foundation, "GraphClient", return_value=fake_gc
+        ):
+            _owning_graph_catalog_reset.clear_sn_subsystem(dry_run=False)
 
         queries = [c.args[0] for c in fake_gc.query.call_args_list]
         delete_queries = [q for q in queries if "DETACH DELETE" in q]
@@ -143,8 +156,10 @@ class TestClearSnSubsystemPreservesLLMCost:
 
         fake_gc = _make_fake_gc({"LLMCost": 10})
 
-        with patch.object(graph_ops, "GraphClient", return_value=fake_gc):
-            graph_ops.clear_sn_subsystem(dry_run=True)
+        with patch.object(
+            _owning_graph_foundation, "GraphClient", return_value=fake_gc
+        ):
+            _owning_graph_catalog_reset.clear_sn_subsystem(dry_run=True)
 
         queries = [c.args[0] for c in fake_gc.query.call_args_list]
         assert not any("DETACH DELETE" in q for q in queries), (
@@ -189,8 +204,10 @@ class TestClearStandardNamesPreservesLLMCost:
         fake_gc = self._make_gc_for_clear_standard_names(sn_count=3)
         before = _ledger_snapshot(fake_gc)
 
-        with patch.object(graph_ops, "GraphClient", return_value=fake_gc):
-            graph_ops.clear_standard_names()
+        with patch.object(
+            _owning_graph_foundation, "GraphClient", return_value=fake_gc
+        ):
+            _owning_graph_catalog_reset.clear_standard_names()
 
         queries = [c.args[0] for c in fake_gc.query.call_args_list]
         assert _ledger_snapshot(fake_gc) == before
@@ -206,8 +223,10 @@ class TestClearStandardNamesPreservesLLMCost:
 
         fake_gc = self._make_gc_for_clear_standard_names(sn_count=2)
 
-        with patch.object(graph_ops, "GraphClient", return_value=fake_gc):
-            graph_ops.clear_standard_names(source_filter="dd")
+        with patch.object(
+            _owning_graph_foundation, "GraphClient", return_value=fake_gc
+        ):
+            _owning_graph_catalog_reset.clear_standard_names(source_filter="dd")
 
         queries = [c.args[0] for c in fake_gc.query.call_args_list]
         assert not any("LLMCost" in q and "DETACH DELETE" in q for q in queries), (
@@ -220,8 +239,10 @@ class TestClearStandardNamesPreservesLLMCost:
 
         fake_gc = self._make_gc_for_clear_standard_names(sn_count=2)
 
-        with patch.object(graph_ops, "GraphClient", return_value=fake_gc):
-            graph_ops.clear_standard_names(stage_filter=["drafted"])
+        with patch.object(
+            _owning_graph_foundation, "GraphClient", return_value=fake_gc
+        ):
+            _owning_graph_catalog_reset.clear_standard_names(stage_filter=["drafted"])
 
         queries = [c.args[0] for c in fake_gc.query.call_args_list]
         assert not any("LLMCost" in q and "DETACH DELETE" in q for q in queries), (
@@ -234,8 +255,10 @@ class TestClearStandardNamesPreservesLLMCost:
 
         fake_gc = self._make_gc_for_clear_standard_names(sn_count=5)
 
-        with patch.object(graph_ops, "GraphClient", return_value=fake_gc):
-            result = graph_ops.clear_standard_names(dry_run=True)
+        with patch.object(
+            _owning_graph_foundation, "GraphClient", return_value=fake_gc
+        ):
+            result = _owning_graph_catalog_reset.clear_standard_names(dry_run=True)
 
         queries = [c.args[0] for c in fake_gc.query.call_args_list]
         assert not any("LLMCost" in q and "DETACH DELETE" in q for q in queries), (
@@ -250,8 +273,10 @@ class TestClearStandardNamesPreservesLLMCost:
 
         fake_gc = self._make_gc_for_clear_standard_names(sn_count=0)
 
-        with patch.object(graph_ops, "GraphClient", return_value=fake_gc):
-            result = graph_ops.clear_standard_names()
+        with patch.object(
+            _owning_graph_foundation, "GraphClient", return_value=fake_gc
+        ):
+            result = _owning_graph_catalog_reset.clear_standard_names()
 
         queries = [c.args[0] for c in fake_gc.query.call_args_list]
         assert not any("DETACH DELETE" in q for q in queries), (
@@ -290,8 +315,10 @@ class TestClearStandardNamesResetsOrphanedSources:
         from imas_codex.standard_names import graph_ops
 
         fake_gc = self._make_gc(sn_count=3)
-        with patch.object(graph_ops, "GraphClient", return_value=fake_gc):
-            graph_ops.clear_standard_names()
+        with patch.object(
+            _owning_graph_foundation, "GraphClient", return_value=fake_gc
+        ):
+            _owning_graph_catalog_reset.clear_standard_names()
 
         queries = [c.args[0] for c in fake_gc.query.call_args_list]
         reset_q = [
@@ -312,8 +339,10 @@ class TestClearStandardNamesResetsOrphanedSources:
         from imas_codex.standard_names import graph_ops
 
         fake_gc = self._make_gc(sn_count=5)
-        with patch.object(graph_ops, "GraphClient", return_value=fake_gc):
-            graph_ops.clear_standard_names(dry_run=True)
+        with patch.object(
+            _owning_graph_foundation, "GraphClient", return_value=fake_gc
+        ):
+            _owning_graph_catalog_reset.clear_standard_names(dry_run=True)
 
         queries = [c.args[0] for c in fake_gc.query.call_args_list]
         assert not any("SET sns.status = 'extracted'" in q for q in queries), (
@@ -324,8 +353,10 @@ class TestClearStandardNamesResetsOrphanedSources:
         from imas_codex.standard_names import graph_ops
 
         fake_gc = self._make_gc(sn_count=0)
-        with patch.object(graph_ops, "GraphClient", return_value=fake_gc):
-            graph_ops.clear_standard_names()
+        with patch.object(
+            _owning_graph_foundation, "GraphClient", return_value=fake_gc
+        ):
+            _owning_graph_catalog_reset.clear_standard_names()
 
         queries = [c.args[0] for c in fake_gc.query.call_args_list]
         assert not any("SET sns.status = 'extracted'" in q for q in queries)

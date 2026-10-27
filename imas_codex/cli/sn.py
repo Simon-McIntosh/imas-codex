@@ -589,10 +589,12 @@ def _compute_pool_progress(
         )
     )
 
-    from imas_codex.standard_names.graph_ops import (
-        REFINE_NAME_ATTEMPTS_SPENT,
+    from imas_codex.standard_names.graph_store.graph_catalog import (
         docs_review_eligibility_params,
         docs_review_eligibility_where,
+    )
+    from imas_codex.standard_names.graph_store.graph_refinement import (
+        REFINE_NAME_ATTEMPTS_SPENT,
     )
 
     refine_attempts_spent = REFINE_NAME_ATTEMPTS_SPENT
@@ -745,7 +747,9 @@ def _compute_pool_progress(
         "drain_scope_id": drain_scope_id,
         **docs_review_eligibility_params(),
     }
-    from imas_codex.standard_names.graph_ops import _MAX_COMPOSE_CLAIM_ATTEMPTS
+    from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        _MAX_COMPOSE_CLAIM_ATTEMPTS,
+    )
 
     params["max_compose_attempts"] = _MAX_COMPOSE_CLAIM_ATTEMPTS
     if domains:
@@ -1013,7 +1017,7 @@ def _run_sn_cmd(
 
         # Cost gauge: graph-backed when available, else returns 0.0
         try:
-            from imas_codex.standard_names.graph_ops import (
+            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
                 aggregate_spend_for_run,
             )
 
@@ -2131,7 +2135,7 @@ def sn_run(
         from collections import Counter
 
         from imas_codex.settings import get_dd_version
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_claim_scope import (
             ManifestDrainConflict,
             build_manifest_drain_plan,
             canonicalize_manifest_drain_paths,
@@ -2416,7 +2420,7 @@ def sn_run(
             "tiers": _tiers,
             "validation_status": _validation_status,
         }
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_catalog_reset import (
             clear_standard_names,
             reset_standard_names,
         )
@@ -2481,7 +2485,7 @@ def sn_run(
     if exact_names:
         import uuid as _uuid
 
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_claim_scope import (
             ExactNameScopeConflict,
             scope_exact_standard_names,
         )
@@ -2535,9 +2539,11 @@ def sn_run(
         import uuid as _uuid
 
         from imas_codex.graph.client import GraphClient
-        from imas_codex.standard_names.graph_ops import (
-            merge_standard_name_sources,
+        from imas_codex.standard_names.graph_store.graph_claim_scope import (
             partition_focus_by_accepted,
+        )
+        from imas_codex.standard_names.graph_store.graph_source_bindings import (
+            merge_standard_name_sources,
         )
 
         scope_run_id = str(_uuid.uuid4())
@@ -2658,7 +2664,9 @@ def sn_run(
         #    re-staging in-flight items churns the hard tail (each pass re-shoots
         #    exhausted names). --reseed opts into the blunt re-stage-to-pending;
         #    targeted resets use --reset-to (handled above, before scope routing).
-        from imas_codex.standard_names.graph_ops import scope_focus_names
+        from imas_codex.standard_names.graph_store.graph_claim_scope import (
+            scope_focus_names,
+        )
 
         with GraphClient() as gc:
             scope_focus_names(sns_ids, scope_run_id, reset=reseed, gc=gc)
@@ -2708,7 +2716,7 @@ def sn_run(
             "validation_status": "quarantined" if retry_quarantined else None,
         }
         source_arg = "dd" if source == "dd" else "signals"
-        from imas_codex.standard_names.graph_ops import (
+        from imas_codex.standard_names.graph_store.graph_catalog_reset import (
             clear_standard_names,
             reset_standard_names,
         )
@@ -2840,7 +2848,9 @@ def sn_run(
         )
 
         from imas_codex.standard_names.campaign import default_audit_revalidate
-        from imas_codex.standard_names.graph_ops import aggregate_spend_for_run
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            aggregate_spend_for_run,
+        )
 
         console.print(
             f"[green]Campaign[/green] ({spec.describe()}): draining "
@@ -2945,7 +2955,9 @@ def sn_run(
     # validation backlog directly — deterministic ISN checks, no LLM cost.
     if only_phase == "validate":
         from imas_codex.cli.utils import run_async
-        from imas_codex.standard_names.workers import drain_validation_backlog
+        from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+            drain_validation_backlog,
+        )
 
         if dry_run:
             console.print("[yellow]--only validate --dry-run:[/yellow] no-op")
@@ -4184,7 +4196,9 @@ def sn_status(family_seed: str | None, show_contested: bool) -> None:
     # StandardNameSource status
     from rich.table import Table
 
-    from imas_codex.standard_names.graph_ops import get_standard_name_source_stats
+    from imas_codex.standard_names.graph_store.graph_audits import (
+        get_standard_name_source_stats,
+    )
 
     source_stats = get_standard_name_source_stats()
     if source_stats:
@@ -4212,7 +4226,9 @@ def sn_status(family_seed: str | None, show_contested: bool) -> None:
 
     # Skipped sources breakdown by reason (DD unit overrides, etc.)
     try:
-        from imas_codex.standard_names.graph_ops import get_skipped_source_counts
+        from imas_codex.standard_names.graph_store.graph_source_bindings import (
+            get_skipped_source_counts,
+        )
 
         skip_counts = get_skipped_source_counts()
     except Exception as exc:  # pragma: no cover — graph connection issues
@@ -5646,7 +5662,9 @@ def sn_clear(
     """
     import datetime
 
-    from imas_codex.standard_names.graph_ops import clear_sn_subsystem
+    from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+        clear_sn_subsystem,
+    )
 
     try:
         preview = clear_sn_subsystem(dry_run=True)
@@ -5674,7 +5692,9 @@ def sn_clear(
         if not no_comment_export and preview.get("StandardNameReview", 0) > 0:
             import pathlib
 
-            from imas_codex.standard_names.graph_ops import export_review_comments
+            from imas_codex.standard_names.graph_store.graph_audits import (
+                export_review_comments,
+            )
 
             ts = datetime.datetime.now(datetime.UTC).strftime("%Y%m%dT%H%M%SZ")
             export_dir = pathlib.Path("research")
@@ -5783,7 +5803,9 @@ def sn_prune(
 
     stage_filter = None if prune_all else ([stage] if stage else None)
 
-    from imas_codex.standard_names.graph_ops import clear_standard_names
+    from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+        clear_standard_names,
+    )
 
     try:
         # Always preview first
@@ -6232,7 +6254,9 @@ def sn_harmonize(
                         )
                 return
 
-            from imas_codex.standard_names.graph_ops import aggregate_spend_for_run
+            from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+                aggregate_spend_for_run,
+            )
 
             _harmonize_drain = _docs_drain_factory(quiet=False)
 
@@ -7569,7 +7593,9 @@ def sn_source_hint(
     dry_run: bool,
 ) -> None:
     """Steer composition of one exact DD source without overriding DD authority."""
-    from imas_codex.standard_names.graph_ops import set_source_compose_hint
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        set_source_compose_hint,
+    )
 
     try:
         result = set_source_compose_hint(
@@ -7636,7 +7662,7 @@ def sn_retry(
     if retry_failed == retry_skipped:
         raise click.UsageError("select exactly one retry mode: --failed or --skipped")
 
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
         retry_failed_sources,
         retry_skipped_sources,
     )
@@ -8386,7 +8412,7 @@ def sn_release_refine_claim(
     """
     import json
 
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_claim_release import (
         RefineClaimReleaseConflict,
         release_stranded_refine_claim,
     )
@@ -8594,7 +8620,7 @@ def sn_realign_segments(standard_name: str, dry_run: bool) -> None:
     Example:
       imas-codex sn realign-segments neutron_rate_due_to_beam_beam_fusion --dry-run
     """
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_audits import (
         realign_grammar_segments_for_name,
     )
 
@@ -8647,7 +8673,9 @@ def sn_reclassify(standard_name: str, domain: str, reason: str, dry_run: bool) -
       imas-codex sn reclassify gyrocenter_frequency --domain transport \\
           --reason "guiding-center orbit dynamics; computational_workflow is a tooling bucket"
     """
-    from imas_codex.standard_names.graph_ops import reclassify_standard_name_domain
+    from imas_codex.standard_names.graph_store.graph_foundation import (
+        reclassify_standard_name_domain,
+    )
 
     result = reclassify_standard_name_domain(
         standard_name, domain, reason=reason, dry_run=dry_run

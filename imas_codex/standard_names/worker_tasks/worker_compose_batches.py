@@ -74,7 +74,9 @@ async def compose_batch(
     # Claims are already verified by claim_generate_name_batch. Re-verify here
     # as well so direct processor callers cannot bypass fencing before a paid
     # compose call.
-    from imas_codex.standard_names.graph_ops import _verify_source_claim_winners
+    from imas_codex.standard_names.graph_store.graph_claim_release import (
+        _verify_source_claim_winners,
+    )
 
     batch = await asyncio.to_thread(_verify_source_claim_winners, batch)
     if not batch:
@@ -1078,7 +1080,7 @@ async def compose_batch(
                         candidates
                     )
                     if auto_gaps:
-                        from imas_codex.standard_names.graph_ops import (
+                        from imas_codex.standard_names.graph_store.graph_catalog_reset import (
                             write_vocab_gaps,
                         )
 

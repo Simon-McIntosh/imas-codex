@@ -10,6 +10,14 @@ from unittest.mock import patch
 import pytest
 
 from imas_codex.standard_names import graph_ops
+from imas_codex.standard_names.graph_store import (
+    graph_catalog as _owning_graph_catalog,
+    graph_cost_and_claims as _owning_graph_cost_and_claims,
+    graph_docs_persistence as _owning_graph_docs_persistence,
+    graph_parent_lifecycle as _owning_graph_parent_lifecycle,
+    graph_refinement as _owning_graph_refinement,
+    graph_review_persistence as _owning_graph_review_persistence,
+)
 from imas_codex.standard_names.promote import (
     mark_catalog_name_approved,
     resolve_contested_override,
@@ -69,8 +77,11 @@ class _ClaimGraph:
 def test_atomic_claim_binds_every_referenced_parameter() -> None:
     transaction = _ClaimTransaction()
     graph = _ClaimGraph(transaction)
-    with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=graph):
-        claimed = graph_ops._claim_sn_atomic(
+    with patch(
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        return_value=graph,
+    ):
+        claimed = _owning_graph_cost_and_claims._claim_sn_atomic(
             eligibility_where="sn.name_stage = 'accepted'",
             query_params={},
             batch_size=1,
@@ -86,12 +97,12 @@ def test_atomic_claim_binds_every_referenced_parameter() -> None:
 @pytest.mark.parametrize(
     "claim",
     [
-        graph_ops.claim_generate_docs_batch,
-        graph_ops.claim_review_docs_batch,
-        graph_ops.claim_refine_docs_batch,
-        graph_ops.claim_review_name_batch,
-        graph_ops.claim_refine_name_batch,
-        graph_ops.claim_enrich_parents_batch,
+        _owning_graph_docs_persistence.claim_generate_docs_batch,
+        _owning_graph_review_persistence.claim_review_docs_batch,
+        _owning_graph_docs_persistence.claim_refine_docs_batch,
+        _owning_graph_cost_and_claims.claim_review_name_batch,
+        _owning_graph_refinement.claim_refine_name_batch,
+        _owning_graph_parent_lifecycle.claim_enrich_parents_batch,
     ],
 )
 def test_standard_name_pool_claims_share_the_frozen_stage_guard(claim: Any) -> None:
@@ -105,14 +116,14 @@ def test_standard_name_pool_claims_share_the_frozen_stage_guard(claim: Any) -> N
         name for name, stage in seeded.items() if stage not in {"approved", "contested"}
     ] == ["accepted_name"]
     assert "_claim_sn_atomic" in inspect.getsource(claim)
-    source = inspect.getsource(graph_ops._claim_sn_atomic)
+    source = inspect.getsource(_owning_graph_cost_and_claims._claim_sn_atomic)
     assert source.count("IN $frozen_name_stages") >= 6
     assert "_PIPELINE_FROZEN_NAME_STAGES" in source
 
 
 def test_generate_name_excludes_sources_bound_to_frozen_names() -> None:
     """The source pool applies the same guard before and after its write lock."""
-    source = inspect.getsource(graph_ops.claim_generate_name_batch)
+    source = inspect.getsource(_owning_graph_cost_and_claims.claim_generate_name_batch)
     assert source.count("MATCH (sns)-[:PRODUCED_NAME]->(frozen:StandardName)") >= 4
     assert source.count("MATCH (sns2)-[:PRODUCED_NAME]->(frozen:StandardName)") >= 2
     assert source.count("frozen.name_stage IN $frozen_name_stages") >= 6
@@ -143,9 +154,12 @@ class _ReviewGraph:
 @pytest.mark.parametrize("stage", ["approved", "contested"])
 def test_review_persistence_and_aggregates_skip_frozen_names(stage: str) -> None:
     graph = _ReviewGraph(stage)
-    with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=graph):
+    with patch(
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        return_value=graph,
+    ):
         assert (
-            graph_ops.persist_reviewed_docs(
+            _owning_graph_review_persistence.persist_reviewed_docs(
                 sn_id=f"{stage}_name",
                 claim_token="claim",
                 score=0.9,
@@ -153,7 +167,7 @@ def test_review_persistence_and_aggregates_skip_frozen_names(stage: str) -> None
             )
             == ""
         )
-        assert graph_ops.update_review_aggregates([f"{stage}_name"]) == 0
+        assert _owning_graph_catalog.update_review_aggregates([f"{stage}_name"]) == 0
     aggregate = graph.statements[-1]
     assert "NOT (coalesce(sn.name_stage, '') IN $frozen_name_stages)" in aggregate
 

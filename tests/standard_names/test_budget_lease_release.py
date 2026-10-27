@@ -40,6 +40,12 @@ from imas_codex.standard_names.models import (
     StandardNameQualityScoreDocs,
     StandardNameQualityScoreNameOnly,
 )
+from imas_codex.standard_names.worker_tasks import (
+    worker_generate_docs as _owning_worker_generate_docs,
+    worker_refine_docs as _owning_worker_refine_docs,
+    worker_review_docs as _owning_worker_review_docs,
+    worker_review_names as _owning_worker_review_names,
+)
 
 # ── Tiny stub item ───────────────────────────────────────────────────────
 
@@ -160,7 +166,9 @@ async def test_generate_docs_releases_lease_on_happy_path():
             new=AsyncMock(return_value=None),
         ),
     ):
-        processed = await workers.process_generate_docs_batch([item], mgr, stop)
+        processed = await _owning_worker_generate_docs.process_generate_docs_batch(
+            [item], mgr, stop
+        )
 
     assert processed == 1
     expected_pool = _INITIAL_BUDGET - _STUB_COST
@@ -210,7 +218,7 @@ async def test_review_name_releases_lease_on_happy_path():
             new=_fake_to_thread,
         ),
     ):
-        await workers.process_review_name_batch([item], mgr, stop)
+        await _owning_worker_review_names.process_review_name_batch([item], mgr, stop)
 
     expected_pool = _INITIAL_BUDGET - _STUB_COST
     assert abs(mgr._pool - expected_pool) < _LEAK_TOLERANCE, (
@@ -251,7 +259,7 @@ async def test_review_docs_releases_lease_on_happy_path():
             new=_fake_to_thread,
         ),
     ):
-        await workers.process_review_docs_batch([item], mgr, stop)
+        await _owning_worker_review_docs.process_review_docs_batch([item], mgr, stop)
 
     expected_pool = _INITIAL_BUDGET - _STUB_COST
     assert abs(mgr._pool - expected_pool) < _LEAK_TOLERANCE, (
@@ -295,7 +303,9 @@ async def test_refine_docs_releases_lease_on_happy_path():
             new=AsyncMock(return_value=None),
         ),
     ):
-        processed = await workers.process_refine_docs_batch([item], mgr, stop)
+        processed = await _owning_worker_refine_docs.process_refine_docs_batch(
+            [item], mgr, stop
+        )
 
     assert processed == 1
     expected_pool = _INITIAL_BUDGET - _STUB_COST

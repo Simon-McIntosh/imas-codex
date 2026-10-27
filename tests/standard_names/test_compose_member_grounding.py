@@ -14,7 +14,10 @@ from contextlib import contextmanager
 from unittest.mock import patch
 
 from imas_codex.standard_names import workers
-from imas_codex.standard_names.workers import (
+from imas_codex.standard_names.worker_tasks import (
+    worker_extraction_and_enrichment as _owning_worker_extraction_and_enrichment,
+)
+from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
     _MAX_MEMBER_DOCS,
     _enrich_batch_items,
 )
@@ -50,7 +53,7 @@ def _patched_graph(member_docs: list[dict]):
     with (
         patch("imas_codex.graph.client.GraphClient", _cm),
         patch.object(
-            workers,
+            _owning_worker_extraction_and_enrichment,
             "_hybrid_search_neighbours_batch",
             side_effect=lambda _gc, tuples: [None] * len(tuples),
         ),

@@ -20,6 +20,11 @@ from unittest.mock import MagicMock
 import pytest
 
 from imas_codex.standard_names.context import conventions_context_for
+from imas_codex.standard_names.worker_tasks import (
+    worker_generate_docs as _owning_worker_generate_docs,
+    worker_refine_docs as _owning_worker_refine_docs,
+    worker_review_docs as _owning_worker_review_docs,
+)
 
 # A name the registry selects several entries for (concepts, notation and a
 # documentation template), so the assertion cannot pass vacuously on an empty
@@ -30,7 +35,7 @@ NAME = "flux_surface_averaged_argon_density_at_plasma_boundary"
 class _StubGraph:
     """Minimal GraphClient stand-in: context manager whose query returns nothing."""
 
-    def __enter__(self) -> "_StubGraph":
+    def __enter__(self) -> _StubGraph:
         return self
 
     def __exit__(self, *exc: object) -> bool:
@@ -94,7 +99,7 @@ async def test_generate_docs_batch_supplies_conventions(
         "chain_history": [],
     }
 
-    await workers.process_generate_docs_batch([item], mgr, stop)
+    await _owning_worker_generate_docs.process_generate_docs_batch([item], mgr, stop)
 
     ctx = _context_for(calls, "sn/generate_docs_user")
     assert ctx["conventions"] == selected
@@ -136,7 +141,7 @@ async def test_prepare_docs_review_request_supplies_conventions(
         "docs_stage": "draft",
     }
 
-    await workers.prepare_docs_review_request(item)
+    await _owning_worker_review_docs.prepare_docs_review_request(item)
 
     ctx = _context_for(calls, "sn/review_docs_user")
     assert ctx["conventions"] == selected
@@ -175,7 +180,7 @@ async def test_refine_docs_batch_supplies_conventions(
         "docs_chain_history": [],
     }
 
-    await workers.process_refine_docs_batch([item], mgr, stop)
+    await _owning_worker_refine_docs.process_refine_docs_batch([item], mgr, stop)
 
     ctx = _context_for(calls, "sn/refine_docs_user")
     assert ctx["conventions"] == selected

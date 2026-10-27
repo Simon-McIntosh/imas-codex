@@ -90,7 +90,7 @@ def test_export_resolves_accepting_docs_review_method_and_keeps_absence_closed(
         )
         stack.enter_context(
             patch(
-                "imas_codex.standard_names.graph_ops.docs_review_property_coverage",
+                "imas_codex.standard_names.graph_store.graph_catalog.docs_review_property_coverage",
                 return_value={},
             )
         )

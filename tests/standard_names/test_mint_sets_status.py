@@ -7,8 +7,8 @@ import pytest
 from imas_codex.graph.client import GraphClient
 from imas_codex.standard_names.graph_ops import (
     reconcile_lifecycleless_standard_name_stubs,
-    write_standard_names,
 )
+from imas_codex.standard_names.graph_store.graph_catalog import write_standard_names
 
 _CANDIDATE_IDENTITIES = (
     "ratio_of_electron_temperature_to_ion_temperature",

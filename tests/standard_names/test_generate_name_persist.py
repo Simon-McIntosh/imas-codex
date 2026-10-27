@@ -98,7 +98,7 @@ def _mock_gc_query():
 
 def _patch_gc(mock_gc):
     return patch(
-        "imas_codex.standard_names.graph_ops.GraphClient",
+        "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
         return_value=mock_gc,
     )
 
@@ -147,7 +147,7 @@ def test_descriptionless_candidate_releases_source_without_persistence(
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """A legacy candidate without prose is released for a clean retry."""
-    from imas_codex.standard_names.workers import (
+    from imas_codex.standard_names.worker_tasks.worker_common import (
         _persist_description_checked_candidates,
     )
 
@@ -156,11 +156,11 @@ def test_descriptionless_candidate_releases_source_without_persistence(
 
     with (
         patch(
-            "imas_codex.standard_names.graph_ops.release_generate_name_failed_claims",
+            "imas_codex.standard_names.graph_store.graph_claim_release.release_generate_name_failed_claims",
             return_value=1,
         ) as release,
         patch(
-            "imas_codex.standard_names.graph_ops.persist_generated_name_batch",
+            "imas_codex.standard_names.graph_store.graph_catalog.persist_generated_name_batch",
         ) as persist,
         caplog.at_level("WARNING"),
     ):
@@ -196,7 +196,9 @@ class TestFinalizeGeneratedNameStage:
 
     def test_single_transaction_committed(self):
         """The finalize step commits in a single transaction."""
-        from imas_codex.standard_names.graph_ops import _finalize_generated_name_stage
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            _finalize_generated_name_stage,
+        )
 
         gc, tx = _mock_gc_tx()
         with _patch_gc(gc):
@@ -215,7 +217,9 @@ class TestFinalizeGeneratedNameStage:
 
     def test_sets_name_stage_drafted(self):
         """The Cypher query sets name_stage = 'drafted'."""
-        from imas_codex.standard_names.graph_ops import _finalize_generated_name_stage
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            _finalize_generated_name_stage,
+        )
 
         gc, tx = _mock_gc_tx()
         with _patch_gc(gc):
@@ -229,7 +233,9 @@ class TestFinalizeGeneratedNameStage:
 
     def test_existing_accepted_name_is_not_demoted(self):
         """Finalize only initializes pending state and preserves later lifecycle."""
-        from imas_codex.standard_names.graph_ops import _finalize_generated_name_stage
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            _finalize_generated_name_stage,
+        )
 
         gc, tx = _mock_gc_tx()
         with _patch_gc(gc):
@@ -261,7 +267,9 @@ class TestFinalizeGeneratedNameStage:
 
     def test_stale_source_fence_precedes_gap_retirement(self):
         """A lost source claim cannot reach relationship retirement."""
-        from imas_codex.standard_names.graph_ops import _finalize_generated_name_stage
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            _finalize_generated_name_stage,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run.side_effect = lambda *_args, **_kwargs: []
@@ -291,7 +299,9 @@ class TestFinalizeGeneratedNameStage:
 
     def test_finalize_batch_carries_exact_source_fence(self):
         """Persistence threads the source token and sequence through one tx."""
-        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            persist_generated_name_batch,
+        )
 
         gc, tx = _mock_gc_tx()
         candidate = _make_candidate()
@@ -300,15 +310,15 @@ class TestFinalizeGeneratedNameStage:
 
         with (
             patch(
-                "imas_codex.standard_names.graph_ops.write_standard_names",
+                "imas_codex.standard_names.graph_store.graph_catalog.write_standard_names",
                 return_value=1,
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.GraphClient",
+                "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
                 return_value=gc,
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.supersede_prior_source_names",
+                "imas_codex.standard_names.graph_store.graph_supersession.supersede_prior_source_names",
                 return_value=0,
             ),
         ):
@@ -320,7 +330,9 @@ class TestFinalizeGeneratedNameStage:
 
     def test_sets_chain_length_zero(self):
         """The Cypher query sets chain_length = 0."""
-        from imas_codex.standard_names.graph_ops import _finalize_generated_name_stage
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            _finalize_generated_name_stage,
+        )
 
         gc, tx = _mock_gc_tx()
         with _patch_gc(gc):
@@ -334,7 +346,9 @@ class TestFinalizeGeneratedNameStage:
 
     def test_sets_docs_stage_pending(self):
         """The Cypher query sets docs_stage = 'pending'."""
-        from imas_codex.standard_names.graph_ops import _finalize_generated_name_stage
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            _finalize_generated_name_stage,
+        )
 
         gc, tx = _mock_gc_tx()
         with _patch_gc(gc):
@@ -348,7 +362,9 @@ class TestFinalizeGeneratedNameStage:
 
     def test_clears_claim_on_source(self):
         """The Cypher query clears claim_token and claimed_at on the source."""
-        from imas_codex.standard_names.graph_ops import _finalize_generated_name_stage
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            _finalize_generated_name_stage,
+        )
 
         gc, tx = _mock_gc_tx()
         with _patch_gc(gc):
@@ -363,7 +379,9 @@ class TestFinalizeGeneratedNameStage:
 
     def test_creates_produced_name_edge(self):
         """The Cypher query creates a PRODUCED_NAME edge."""
-        from imas_codex.standard_names.graph_ops import _finalize_generated_name_stage
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            _finalize_generated_name_stage,
+        )
 
         gc, tx = _mock_gc_tx()
         with _patch_gc(gc):
@@ -377,7 +395,9 @@ class TestFinalizeGeneratedNameStage:
 
     def test_sets_source_status_composed(self):
         """The Cypher query sets the source status to 'composed'."""
-        from imas_codex.standard_names.graph_ops import _finalize_generated_name_stage
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            _finalize_generated_name_stage,
+        )
 
         gc, tx = _mock_gc_tx()
         with _patch_gc(gc):
@@ -391,7 +411,9 @@ class TestFinalizeGeneratedNameStage:
 
     def test_rollback_on_exception(self):
         """If the transaction run raises, close() is called and exception re-raised."""
-        from imas_codex.standard_names.graph_ops import _finalize_generated_name_stage
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            _finalize_generated_name_stage,
+        )
 
         gc, tx = _mock_gc_tx()
         tx.run.side_effect = RuntimeError("neo4j failure")
@@ -407,7 +429,9 @@ class TestFinalizeGeneratedNameStage:
 
     def test_empty_batch_is_noop(self):
         """An empty batch calls no graph operations."""
-        from imas_codex.standard_names.graph_ops import _finalize_generated_name_stage
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            _finalize_generated_name_stage,
+        )
 
         gc, tx = _mock_gc_tx()
         with _patch_gc(gc):
@@ -418,7 +442,7 @@ class TestFinalizeGeneratedNameStage:
 
 
 def test_candidate_stage_reserves_missing_target_under_source_fence() -> None:
-    from imas_codex.standard_names.graph_ops import (
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
         stage_claimed_generated_candidates,
     )
 
@@ -476,7 +500,9 @@ class TestClaimedAttachmentPersistence:
         }
 
     def test_terminal_target_releases_without_attachment_mutation(self) -> None:
-        from imas_codex.standard_names.graph_ops import persist_claimed_attachments
+        from imas_codex.standard_names.graph_store.graph_source_bindings import (
+            persist_claimed_attachments,
+        )
 
         gc, tx = _mock_gc_tx()
 
@@ -509,7 +535,9 @@ class TestClaimedAttachmentPersistence:
         tx.commit.assert_called_once()
 
     def test_accepted_target_attaches_under_same_transaction(self) -> None:
-        from imas_codex.standard_names.graph_ops import persist_claimed_attachments
+        from imas_codex.standard_names.graph_store.graph_source_bindings import (
+            persist_claimed_attachments,
+        )
 
         gc, tx = _mock_gc_tx()
 
@@ -547,16 +575,22 @@ class TestClaimedAttachmentPersistence:
         tx.commit.assert_called_once()
 
     def test_missing_fence_never_opens_graph(self) -> None:
-        from imas_codex.standard_names.graph_ops import persist_claimed_attachments
+        from imas_codex.standard_names.graph_store.graph_source_bindings import (
+            persist_claimed_attachments,
+        )
 
         attachment = self._attachment()
         attachment["claim_token"] = None
-        with patch("imas_codex.standard_names.graph_ops.GraphClient") as graph:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
+        ) as graph:
             assert persist_claimed_attachments([attachment]) == []
         graph.assert_not_called()
 
     def test_final_write_failure_rolls_back_lifecycle_fence(self) -> None:
-        from imas_codex.standard_names.graph_ops import persist_claimed_attachments
+        from imas_codex.standard_names.graph_store.graph_source_bindings import (
+            persist_claimed_attachments,
+        )
 
         gc, tx = _mock_gc_tx()
 
@@ -600,7 +634,7 @@ class TestPersistGeneratedNameBatch:
         gc, tx = _mock_gc_tx()
         self.atomic_tx = tx
         with patch(
-            "imas_codex.standard_names.graph_ops.GraphClient",
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
             return_value=gc,
         ):
             yield
@@ -628,27 +662,29 @@ class TestPersistGeneratedNameBatch:
                 return self._gc.__exit__(*args)
 
         return patch(
-            "imas_codex.standard_names.graph_ops.GraphClient",
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
             side_effect=_SwitchingGC,
         )
 
     def test_persist_calls_finalize_stage(self):
         """persist_generated_name_batch calls _finalize_generated_name_stage."""
-        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            persist_generated_name_batch,
+        )
 
         candidates = [_make_candidate()]
 
         with (
             patch(
-                "imas_codex.standard_names.graph_ops.write_standard_names",
+                "imas_codex.standard_names.graph_store.graph_catalog.write_standard_names",
                 return_value=1,
             ),
             patch(
-                "imas_codex.standard_names.graph_ops._finalize_generated_name_stage",
+                "imas_codex.standard_names.graph_store.graph_catalog._finalize_generated_name_stage",
                 return_value=["dd:core_profiles/profiles_1d/electrons/temperature"],
             ) as mock_finalize,
             patch(
-                "imas_codex.standard_names.graph_ops.supersede_prior_source_names",
+                "imas_codex.standard_names.graph_store.graph_supersession.supersede_prior_source_names",
                 return_value=0,
             ),
             patch(
@@ -668,18 +704,20 @@ class TestPersistGeneratedNameBatch:
 
     def test_persist_sets_name_stage_drafted(self):
         """persist_generated_name_batch triggers name_stage='drafted' on the SN."""
-        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            persist_generated_name_batch,
+        )
 
         gc_tx, tx = _mock_gc_tx()
         candidates = [_make_candidate()]
 
         with (
             patch(
-                "imas_codex.standard_names.graph_ops.write_standard_names",
+                "imas_codex.standard_names.graph_store.graph_catalog.write_standard_names",
                 return_value=1,
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.GraphClient",
+                "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
                 return_value=gc_tx,
             ),
             patch(
@@ -694,18 +732,20 @@ class TestPersistGeneratedNameBatch:
 
     def test_persist_sets_chain_length_zero(self):
         """persist_generated_name_batch sets chain_length=0 on new SN."""
-        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            persist_generated_name_batch,
+        )
 
         gc_tx, tx = _mock_gc_tx()
         candidates = [_make_candidate()]
 
         with (
             patch(
-                "imas_codex.standard_names.graph_ops.write_standard_names",
+                "imas_codex.standard_names.graph_store.graph_catalog.write_standard_names",
                 return_value=1,
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.GraphClient",
+                "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
                 return_value=gc_tx,
             ),
             patch(
@@ -720,18 +760,20 @@ class TestPersistGeneratedNameBatch:
 
     def test_persist_sets_docs_stage_pending(self):
         """persist_generated_name_batch sets docs_stage='pending' on new SN."""
-        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            persist_generated_name_batch,
+        )
 
         gc_tx, tx = _mock_gc_tx()
         candidates = [_make_candidate()]
 
         with (
             patch(
-                "imas_codex.standard_names.graph_ops.write_standard_names",
+                "imas_codex.standard_names.graph_store.graph_catalog.write_standard_names",
                 return_value=1,
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.GraphClient",
+                "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
                 return_value=gc_tx,
             ),
             patch(
@@ -746,18 +788,20 @@ class TestPersistGeneratedNameBatch:
 
     def test_persist_clears_claim_on_source(self):
         """persist_generated_name_batch clears claim_token/claimed_at on source."""
-        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            persist_generated_name_batch,
+        )
 
         gc_tx, tx = _mock_gc_tx()
         candidates = [_make_candidate()]
 
         with (
             patch(
-                "imas_codex.standard_names.graph_ops.write_standard_names",
+                "imas_codex.standard_names.graph_store.graph_catalog.write_standard_names",
                 return_value=1,
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.GraphClient",
+                "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
                 return_value=gc_tx,
             ),
             patch(
@@ -773,18 +817,20 @@ class TestPersistGeneratedNameBatch:
 
     def test_persist_creates_produced_name_edge(self):
         """persist_generated_name_batch creates PRODUCED_NAME edge."""
-        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            persist_generated_name_batch,
+        )
 
         gc_tx, tx = _mock_gc_tx()
         candidates = [_make_candidate()]
 
         with (
             patch(
-                "imas_codex.standard_names.graph_ops.write_standard_names",
+                "imas_codex.standard_names.graph_store.graph_catalog.write_standard_names",
                 return_value=1,
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.GraphClient",
+                "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
                 return_value=gc_tx,
             ),
             patch(
@@ -799,18 +845,20 @@ class TestPersistGeneratedNameBatch:
 
     def test_persist_idempotent_merge_semantics(self):
         """persist_generated_name_batch uses MERGE so re-running is idempotent."""
-        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            persist_generated_name_batch,
+        )
 
         gc_tx, tx = _mock_gc_tx()
         candidates = [_make_candidate()]
 
         with (
             patch(
-                "imas_codex.standard_names.graph_ops.write_standard_names",
+                "imas_codex.standard_names.graph_store.graph_catalog.write_standard_names",
                 return_value=1,
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.GraphClient",
+                "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
                 return_value=gc_tx,
             ),
             patch(
@@ -828,7 +876,9 @@ class TestPersistGeneratedNameBatch:
 
     def test_persist_empty_candidates_returns_zero(self):
         """Empty candidate list returns 0 without touching the graph."""
-        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            persist_generated_name_batch,
+        )
 
         gc_tx, tx = _mock_gc_tx()
 
@@ -839,22 +889,28 @@ class TestPersistGeneratedNameBatch:
         tx.run.assert_not_called()
 
     def test_missing_source_fence_has_no_graph_side_effects(self):
-        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            persist_generated_name_batch,
+        )
 
         candidate = _make_candidate()
         candidate["source_claim_token"] = None
         with (
-            patch("imas_codex.standard_names.graph_ops.write_standard_names") as write,
             patch(
-                "imas_codex.standard_names.graph_ops._finalize_generated_name_stage"
+                "imas_codex.standard_names.graph_store.graph_catalog.write_standard_names"
+            ) as write,
+            patch(
+                "imas_codex.standard_names.graph_store.graph_catalog._finalize_generated_name_stage"
             ) as finalize,
             patch(
-                "imas_codex.standard_names.graph_ops._backfill_cluster_from_sources"
+                "imas_codex.standard_names.graph_store.graph_catalog._backfill_cluster_from_sources"
             ) as backfill,
             patch(
-                "imas_codex.standard_names.graph_ops.supersede_prior_source_names"
+                "imas_codex.standard_names.graph_store.graph_supersession.supersede_prior_source_names"
             ) as supersede,
-            patch("imas_codex.standard_names.graph_ops.bump_sn_run_counter") as counter,
+            patch(
+                "imas_codex.standard_names.graph_store.graph_audits.bump_sn_run_counter"
+            ) as counter,
         ):
             result = persist_generated_name_batch(
                 [candidate], compose_model="test/model"
@@ -869,10 +925,14 @@ class TestPersistGeneratedNameBatch:
 
     def test_claim_turnover_before_lock_has_no_rich_write(self):
         """A claim lost before the tx lock cannot write a candidate."""
-        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            persist_generated_name_batch,
+        )
 
         self.atomic_tx.run.side_effect = lambda _cypher, **_params: []
-        with patch("imas_codex.standard_names.graph_ops.write_standard_names") as write:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_catalog.write_standard_names"
+        ) as write:
             result = persist_generated_name_batch(
                 [_make_candidate()], compose_model="test/model"
             )
@@ -883,7 +943,9 @@ class TestPersistGeneratedNameBatch:
 
     def test_terminal_same_id_releases_source_without_rich_mutation(self):
         """A terminal same-id node is a diagnosed retry, never a success."""
-        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            persist_generated_name_batch,
+        )
 
         candidate = _make_candidate(name="hydrogen_fraction")
 
@@ -905,14 +967,18 @@ class TestPersistGeneratedNameBatch:
 
         self.atomic_tx.run.side_effect = _terminal_collision
         with (
-            patch("imas_codex.standard_names.graph_ops.write_standard_names") as write,
             patch(
-                "imas_codex.standard_names.graph_ops._backfill_cluster_from_sources"
+                "imas_codex.standard_names.graph_store.graph_catalog.write_standard_names"
+            ) as write,
+            patch(
+                "imas_codex.standard_names.graph_store.graph_catalog._backfill_cluster_from_sources"
             ) as backfill,
             patch(
-                "imas_codex.standard_names.graph_ops.supersede_prior_source_names"
+                "imas_codex.standard_names.graph_store.graph_supersession.supersede_prior_source_names"
             ) as supersede,
-            patch("imas_codex.standard_names.graph_ops.bump_sn_run_counter") as counter,
+            patch(
+                "imas_codex.standard_names.graph_store.graph_audits.bump_sn_run_counter"
+            ) as counter,
         ):
             winners = persist_generated_name_batch(
                 [candidate],
@@ -947,7 +1013,9 @@ class TestPersistGeneratedNameBatch:
     @pytest.mark.parametrize("target_stage", ["accepted", "approved"])
     def test_existing_stable_same_id_is_provenance_only(self, target_stage):
         """Catalog-stable same-id reuse cannot rewrite target content."""
-        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            persist_generated_name_batch,
+        )
 
         candidate = _make_candidate()
 
@@ -968,14 +1036,14 @@ class TestPersistGeneratedNameBatch:
         self.atomic_tx.run.side_effect = _accepted_winner
         with (
             patch(
-                "imas_codex.standard_names.graph_ops.write_standard_names",
+                "imas_codex.standard_names.graph_store.graph_catalog.write_standard_names",
                 return_value=[candidate["id"]],
             ) as write,
             patch(
-                "imas_codex.standard_names.graph_ops._backfill_cluster_from_sources"
+                "imas_codex.standard_names.graph_store.graph_catalog._backfill_cluster_from_sources"
             ) as backfill,
             patch(
-                "imas_codex.standard_names.graph_ops.supersede_prior_source_names",
+                "imas_codex.standard_names.graph_store.graph_supersession.supersede_prior_source_names",
                 return_value=0,
             ) as supersede,
         ):
@@ -1037,7 +1105,9 @@ class TestPersistGeneratedNameBatch:
         rich_write_expected,
     ):
         """Both winner modes prune old provisional state before composing once."""
-        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            persist_generated_name_batch,
+        )
 
         candidate = _make_candidate(name="electron_temperature")
 
@@ -1061,12 +1131,14 @@ class TestPersistGeneratedNameBatch:
         self.atomic_tx.run.side_effect = _winner
         with (
             patch(
-                "imas_codex.standard_names.graph_ops.write_standard_names",
+                "imas_codex.standard_names.graph_store.graph_catalog.write_standard_names",
                 return_value=[candidate["id"]],
             ) as write,
-            patch("imas_codex.standard_names.graph_ops._backfill_cluster_from_sources"),
             patch(
-                "imas_codex.standard_names.graph_ops.supersede_prior_source_names",
+                "imas_codex.standard_names.graph_store.graph_catalog._backfill_cluster_from_sources"
+            ),
+            patch(
+                "imas_codex.standard_names.graph_store.graph_supersession.supersede_prior_source_names",
                 return_value=0,
             ),
         ):
@@ -1104,7 +1176,9 @@ class TestPersistGeneratedNameBatch:
 
     def test_terminal_transition_after_rich_write_rolls_back_every_effect(self):
         """A reservation that turns terminal before finalize cannot commit."""
-        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            persist_generated_name_batch,
+        )
 
         candidate = _make_candidate()
 
@@ -1128,11 +1202,11 @@ class TestPersistGeneratedNameBatch:
         self.atomic_tx.run.side_effect = _transition
         with (
             patch(
-                "imas_codex.standard_names.graph_ops.write_standard_names",
+                "imas_codex.standard_names.graph_store.graph_catalog.write_standard_names",
                 return_value=[candidate["id"]],
             ) as write,
             patch(
-                "imas_codex.standard_names.graph_ops._backfill_cluster_from_sources"
+                "imas_codex.standard_names.graph_store.graph_catalog._backfill_cluster_from_sources"
             ) as backfill,
             pytest.raises(RuntimeError, match="source claim changed"),
         ):
@@ -1157,7 +1231,9 @@ class TestPersistGeneratedNameBatch:
 
     def test_reclaimed_collision_cleans_only_stamped_provisional_artifacts(self):
         """A reclaimed source drops stale staging residue, not real history."""
-        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            persist_generated_name_batch,
+        )
 
         candidate = _make_candidate(name="hydrogen_fraction")
 
@@ -1177,7 +1253,9 @@ class TestPersistGeneratedNameBatch:
             ]
 
         self.atomic_tx.run.side_effect = _collision
-        with patch("imas_codex.standard_names.graph_ops.write_standard_names") as write:
+        with patch(
+            "imas_codex.standard_names.graph_store.graph_catalog.write_standard_names"
+        ) as write:
             assert (
                 persist_generated_name_batch(
                     [candidate],
@@ -1210,7 +1288,9 @@ class TestPersistGeneratedNameBatch:
 
     def test_unstamped_projection_and_source_paths_survive_stale_cleanup(self):
         """Provisional ownership never implies ownership of unstamped mirrors."""
-        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            persist_generated_name_batch,
+        )
 
         candidate = _make_candidate(name="hydrogen_fraction")
 
@@ -1248,7 +1328,9 @@ class TestPersistGeneratedNameBatch:
 
     def test_reclaimed_same_candidate_can_reserve_after_owned_orphan_cleanup(self):
         """An exact-owned pending orphan cannot wedge the next source claim."""
-        from imas_codex.standard_names.graph_ops import _lock_claimed_name_bindings
+        from imas_codex.standard_names.graph_store.graph_source_bindings import (
+            _lock_claimed_name_bindings,
+        )
 
         batch = [
             {
@@ -1313,7 +1395,9 @@ class TestPersistGeneratedNameBatch:
 
     def test_cleanup_reaps_multi_edge_owned_target_after_edge_deletion(self):
         """A target-owned stale group is reaped only after every edge is gone."""
-        from imas_codex.standard_names.graph_ops import _lock_claimed_name_bindings
+        from imas_codex.standard_names.graph_store.graph_source_bindings import (
+            _lock_claimed_name_bindings,
+        )
 
         current_source = "dd:core_profiles/electrons/temperature"
         retry_source = "dd:core_profiles/ions/temperature"
@@ -1531,7 +1615,9 @@ class TestPersistGeneratedNameBatch:
 
     def test_rich_write_and_finalize_share_transaction(self):
         """The rich writer and source outcome use the locked transaction."""
-        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            persist_generated_name_batch,
+        )
 
         seen = {}
 
@@ -1550,15 +1636,15 @@ class TestPersistGeneratedNameBatch:
 
         with (
             patch(
-                "imas_codex.standard_names.graph_ops.write_standard_names",
+                "imas_codex.standard_names.graph_store.graph_catalog.write_standard_names",
                 side_effect=_write,
             ),
             patch(
-                "imas_codex.standard_names.graph_ops._backfill_cluster_from_sources",
+                "imas_codex.standard_names.graph_store.graph_catalog._backfill_cluster_from_sources",
                 side_effect=_backfill,
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.supersede_prior_source_names",
+                "imas_codex.standard_names.graph_store.graph_supersession.supersede_prior_source_names",
                 side_effect=_supersede,
             ),
         ):
@@ -1572,24 +1658,28 @@ class TestPersistGeneratedNameBatch:
         self.atomic_tx.commit.assert_called_once()
 
     def test_rich_write_failure_keeps_reservation_unfinalized(self):
-        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            persist_generated_name_batch,
+        )
 
         candidate = _make_candidate()
         with (
             patch(
-                "imas_codex.standard_names.graph_ops.write_standard_names",
+                "imas_codex.standard_names.graph_store.graph_catalog.write_standard_names",
                 side_effect=RuntimeError("rich write failed"),
             ),
             patch(
-                "imas_codex.standard_names.graph_ops._finalize_generated_name_stage"
+                "imas_codex.standard_names.graph_store.graph_catalog._finalize_generated_name_stage"
             ) as finalize,
             patch(
-                "imas_codex.standard_names.graph_ops._backfill_cluster_from_sources"
+                "imas_codex.standard_names.graph_store.graph_catalog._backfill_cluster_from_sources"
             ) as backfill,
             patch(
-                "imas_codex.standard_names.graph_ops.supersede_prior_source_names"
+                "imas_codex.standard_names.graph_store.graph_supersession.supersede_prior_source_names"
             ) as supersede,
-            patch("imas_codex.standard_names.graph_ops.bump_sn_run_counter") as counter,
+            patch(
+                "imas_codex.standard_names.graph_store.graph_audits.bump_sn_run_counter"
+            ) as counter,
         ):
             with pytest.raises(RuntimeError, match="rich write failed"):
                 persist_generated_name_batch([candidate], compose_model="test/model")
@@ -1603,16 +1693,18 @@ class TestPersistGeneratedNameBatch:
 
     def test_post_finalize_failure_rolls_back_gap_retirement(self):
         """A later transactional failure retains gaps with every other write."""
-        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            persist_generated_name_batch,
+        )
 
         candidate = _make_candidate()
         with (
             patch(
-                "imas_codex.standard_names.graph_ops.write_standard_names",
+                "imas_codex.standard_names.graph_store.graph_catalog.write_standard_names",
                 return_value=[candidate["id"]],
             ),
             patch(
-                "imas_codex.standard_names.graph_ops._backfill_cluster_from_sources",
+                "imas_codex.standard_names.graph_store.graph_catalog._backfill_cluster_from_sources",
                 side_effect=RuntimeError("cluster backfill failed"),
             ),
             pytest.raises(RuntimeError, match="cluster backfill failed"),
@@ -1628,7 +1720,9 @@ class TestPersistGeneratedNameBatch:
 
     def test_supersession_failure_rolls_back_generated_successor(self):
         """A fail-closed predecessor migration aborts the whole name write."""
-        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            persist_generated_name_batch,
+        )
 
         candidate = _make_candidate()
 
@@ -1638,15 +1732,19 @@ class TestPersistGeneratedNameBatch:
 
         with (
             patch(
-                "imas_codex.standard_names.graph_ops.write_standard_names",
+                "imas_codex.standard_names.graph_store.graph_catalog.write_standard_names",
                 return_value=[candidate["id"]],
             ),
-            patch("imas_codex.standard_names.graph_ops._backfill_cluster_from_sources"),
             patch(
-                "imas_codex.standard_names.graph_ops.supersede_prior_source_names",
+                "imas_codex.standard_names.graph_store.graph_catalog._backfill_cluster_from_sources"
+            ),
+            patch(
+                "imas_codex.standard_names.graph_store.graph_supersession.supersede_prior_source_names",
                 side_effect=_reject_supersession,
             ),
-            patch("imas_codex.standard_names.graph_ops.bump_sn_run_counter") as counter,
+            patch(
+                "imas_codex.standard_names.graph_store.graph_audits.bump_sn_run_counter"
+            ) as counter,
             pytest.raises(ValueError, match="attachment rejected"),
         ):
             persist_generated_name_batch([candidate], compose_model="test/model")
@@ -1656,19 +1754,21 @@ class TestPersistGeneratedNameBatch:
         counter.assert_not_called()
 
     def test_partial_rich_write_keeps_reservation_unfinalized(self):
-        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            persist_generated_name_batch,
+        )
 
         candidate = _make_candidate()
         with (
             patch(
-                "imas_codex.standard_names.graph_ops.write_standard_names",
+                "imas_codex.standard_names.graph_store.graph_catalog.write_standard_names",
                 return_value=0,
             ),
             patch(
-                "imas_codex.standard_names.graph_ops._finalize_generated_name_stage"
+                "imas_codex.standard_names.graph_store.graph_catalog._finalize_generated_name_stage"
             ) as finalize,
             patch(
-                "imas_codex.standard_names.graph_ops._backfill_cluster_from_sources"
+                "imas_codex.standard_names.graph_store.graph_catalog._backfill_cluster_from_sources"
             ) as backfill,
         ):
             with pytest.raises(RuntimeError, match="rich standard-name write"):
@@ -1681,7 +1781,9 @@ class TestPersistGeneratedNameBatch:
 
     def test_persist_error_sibling_excluded_from_finalize(self):
         """Error-sibling candidates (no source node) are excluded from finalize."""
-        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            persist_generated_name_batch,
+        )
 
         error_sibling = _make_candidate(name="error_sibling", source_id="dd:x/y")
         error_sibling["model"] = "deterministic:dd_error_modifier"
@@ -1690,15 +1792,15 @@ class TestPersistGeneratedNameBatch:
 
         with (
             patch(
-                "imas_codex.standard_names.graph_ops.write_standard_names",
+                "imas_codex.standard_names.graph_store.graph_catalog.write_standard_names",
                 return_value=1,
             ),
             patch(
-                "imas_codex.standard_names.graph_ops._finalize_generated_name_stage",
+                "imas_codex.standard_names.graph_store.graph_catalog._finalize_generated_name_stage",
                 return_value=["dd:core_profiles/profiles_1d/electrons/temperature"],
             ) as mock_finalize,
             patch(
-                "imas_codex.standard_names.graph_ops.supersede_prior_source_names",
+                "imas_codex.standard_names.graph_store.graph_supersession.supersede_prior_source_names",
                 return_value=0,
             ) as mock_supersede,
             patch(
@@ -1804,13 +1906,17 @@ class TestSupersedePriorSourceNames:
     """
 
     def test_empty_pairs_is_noop(self):
-        from imas_codex.standard_names.graph_ops import supersede_prior_source_names
+        from imas_codex.standard_names.graph_store.graph_supersession import (
+            supersede_prior_source_names,
+        )
 
         # No GraphClient is opened when there is nothing to do.
         assert supersede_prior_source_names([]) == 0
 
     def test_pairs_missing_fields_filtered_before_graph(self):
-        from imas_codex.standard_names.graph_ops import supersede_prior_source_names
+        from imas_codex.standard_names.graph_store.graph_supersession import (
+            supersede_prior_source_names,
+        )
 
         # Pairs lacking new_name or source_id are dropped before any
         # GraphClient connection (so this stays a default-tier test).
@@ -1825,7 +1931,9 @@ class TestSupersedePriorSourceNames:
         from imas_codex.standard_names.attachment_audit import (
             AttachmentPairingGuardResult,
         )
-        from imas_codex.standard_names.graph_ops import supersede_prior_source_names
+        from imas_codex.standard_names.graph_store.graph_supersession import (
+            supersede_prior_source_names,
+        )
 
         graph, tx = _supersession_graph([_supersession_preflight()])
         admitted = AttachmentPairingGuardResult(("dd:eq/q_95",), ())
@@ -1874,7 +1982,9 @@ class TestSupersedePriorSourceNames:
         from imas_codex.standard_names.attachment_audit import (
             AttachmentPairingGuardResult,
         )
-        from imas_codex.standard_names.graph_ops import supersede_prior_source_names
+        from imas_codex.standard_names.graph_store.graph_supersession import (
+            supersede_prior_source_names,
+        )
 
         graph, tx = _supersession_graph(
             [_supersession_preflight(old_name="old_name", new_name="new_name")]
@@ -1915,7 +2025,9 @@ class TestSupersedePriorSourceNames:
         """When the regenerated name equals the existing name (same node id),
         the WHERE ``old.id <> pr.new_name`` clause excludes it — nothing is
         superseded."""
-        from imas_codex.standard_names.graph_ops import supersede_prior_source_names
+        from imas_codex.standard_names.graph_store.graph_supersession import (
+            supersede_prior_source_names,
+        )
 
         graph, tx = _supersession_graph(
             [_supersession_preflight(old_name=None, new_name="same_name")]
@@ -1933,7 +2045,9 @@ class TestSupersedePriorSourceNames:
             AttachmentPairingGuardResult,
             AttachmentVerdict,
         )
-        from imas_codex.standard_names.graph_ops import supersede_prior_source_names
+        from imas_codex.standard_names.graph_store.graph_supersession import (
+            supersede_prior_source_names,
+        )
 
         graph, tx = _supersession_graph([_supersession_preflight()])
         rejected = AttachmentVerdict(
@@ -1972,7 +2086,9 @@ class TestSupersedePriorSourceNames:
         from imas_codex.standard_names.attachment_audit import (
             AttachmentPairingGuardResult,
         )
-        from imas_codex.standard_names.graph_ops import supersede_prior_source_names
+        from imas_codex.standard_names.graph_store.graph_supersession import (
+            supersede_prior_source_names,
+        )
 
         source_ids = ["dd:eq/q_95", "dd:eq/q_axis"]
         graph, tx = _supersession_graph(
@@ -2012,7 +2128,9 @@ class TestSupersedePriorSourceNames:
         Models the graph with an in-memory store driven through the real
         ``supersede_prior_source_names`` Cypher contract (mocked execution).
         """
-        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+        from imas_codex.standard_names.graph_store.graph_catalog import (
+            persist_generated_name_batch,
+        )
 
         # Track which names the persist path asked to supersede.
         captured: dict[str, object] = {}
@@ -2033,16 +2151,18 @@ class TestSupersedePriorSourceNames:
         gc, _tx = _mock_gc_tx()
         with (
             patch(
-                "imas_codex.standard_names.graph_ops.write_standard_names",
+                "imas_codex.standard_names.graph_store.graph_catalog.write_standard_names",
                 return_value=1,
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.GraphClient",
+                "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
                 return_value=gc,
             ),
-            patch("imas_codex.standard_names.graph_ops._backfill_cluster_from_sources"),
             patch(
-                "imas_codex.standard_names.graph_ops.supersede_prior_source_names",
+                "imas_codex.standard_names.graph_store.graph_catalog._backfill_cluster_from_sources"
+            ),
+            patch(
+                "imas_codex.standard_names.graph_store.graph_supersession.supersede_prior_source_names",
                 side_effect=_fake_supersede,
             ),
             patch(

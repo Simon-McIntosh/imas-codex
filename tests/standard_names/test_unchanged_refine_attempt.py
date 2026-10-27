@@ -28,12 +28,12 @@ import pytest
 
 GC_PATH = "imas_codex.graph.client.GraphClient"
 LLM_PATH = "imas_codex.discovery.base.llm.acall_llm_structured"
-PERSIST_PATH = "imas_codex.standard_names.graph_ops.persist_refined_name"
-RESUBMIT_PATH = (
-    "imas_codex.standard_names.graph_ops.resubmit_pinned_rename_for_review"
+PERSIST_PATH = (
+    "imas_codex.standard_names.graph_store.graph_refinement.persist_refined_name"
 )
+RESUBMIT_PATH = "imas_codex.standard_names.graph_store.graph_claim_release.resubmit_pinned_rename_for_review"
 PROMPT_PATH = "imas_codex.llm.prompt_loader.render_prompt"
-NEIGHBOURS_PATH = "imas_codex.standard_names.workers._hybrid_search_neighbours"
+NEIGHBOURS_PATH = "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours"
 MODEL_PATH = "imas_codex.settings.get_model"
 
 
@@ -134,7 +134,9 @@ class TestUnchangedResubmissionReturnsTheRotation:
 
     @pytest.mark.asyncio
     async def test_counter_is_left_where_the_claim_found_it(self) -> None:
-        from imas_codex.standard_names.workers import process_refine_name_batch
+        from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+            process_refine_name_batch,
+        )
 
         graph = RotationCounter(charged=1)  # the claim charged 0 -> 1
         events: list[dict[str, Any]] = []
@@ -157,7 +159,9 @@ class TestUnchangedResubmissionReturnsTheRotation:
     @pytest.mark.asyncio
     async def test_a_claim_this_pool_no_longer_holds_is_not_rewritten(self) -> None:
         """The return is fenced on the claim it was charged under."""
-        from imas_codex.standard_names.workers import process_refine_name_batch
+        from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+            process_refine_name_batch,
+        )
 
         graph = RotationCounter(charged=1)
         graph.name_stage = "reviewed"  # a sweep already closed this claim
@@ -176,7 +180,9 @@ class TestRewrittenRefineKeepsItsCharge:
     @pytest.mark.asyncio
     async def test_a_different_spelling_keeps_the_charged_rotation(self) -> None:
         from imas_codex.standard_names.models import RefinedName
-        from imas_codex.standard_names.workers import process_refine_name_batch
+        from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+            process_refine_name_batch,
+        )
 
         graph = RotationCounter(charged=1)
         item = claimed_item(charged=1)  # an ordinary rewrite, no pinned edit
