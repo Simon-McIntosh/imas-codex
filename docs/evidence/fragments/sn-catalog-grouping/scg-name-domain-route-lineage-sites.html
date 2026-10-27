@@ -4,9 +4,10 @@
 reclassification, the structural edge pass and the two derived-parent
 materializers &mdash; each set a standard name's <code>physics_domain</code>,
 its <code>source_domains</code> or its <code>HAS_PHYSICS_DOMAIN</code> edges on
-its own. This node routes every <code>StandardName</code> domain write in those
-modules through <code>domain_decision.write_name_domain</code>, which sets the
-three together in one transaction.</p>
+its <code>StandardName</code> node on its own. This node routes every
+<code>StandardName</code> domain write in those modules through
+<code>domain_decision.write_name_domain</code>, which sets the three together in
+one transaction.</p>
 
 <h3 id="scg-name-domain-route-lineage-sites-before">Sites before</h3>
 
@@ -64,9 +65,10 @@ three together in one transaction.</p>
   current domain.</li>
   <li><strong>Derived parents, single and batched.</strong> Both materializers
   keep the children-derived scalar, drop their <code>source_domains</code>
-  <code>SET</code>, and hand each materialized parent to the writer, which sets <code>source_domains</code>
-  (children's union, computed from the graph) and writes one edge per entry. A
-  parent whose stored Jev decision exists takes that decision.</li>
+  <code>SET</code>, and hand each materialized parent to the writer, which sets
+  <code>source_domains</code> (children's union, computed from the graph) and
+  writes one edge per entry. A parent whose stored Jev decision exists takes
+  that decision.</li>
 </ul>
 
 <h3 id="scg-name-domain-route-lineage-sites-gap">The recorded gap</h3>
@@ -103,20 +105,124 @@ plants a name whose DD source carries <code>equilibrium</code>, runs
 <code>reclassify_*</code> to <code>magnetic_field_diagnostics</code> on a
 disposable graph, and reads all three back: the scalar is the correction, the
 source set and the edges are <code>{equilibrium}</code>. Reverted to the direct
-write the same test fails, because the source set and the edge both become
-<code>magnetic_field_diagnostics</code>.</p>
+write the same test fails, because the correction slot is never recorded.</p>
 
-<p>The suite gate ran <code>tests/standard_names/ -m 'not slow' -n 8</code> from
-separate archive trees. Base (main, <code>970cdb0d9</code>) reports 103 failed
-ids; head (<code>0342cde48</code>) reports 119, so the delta is 16. All 16 are
-pre-existing tests that assert the retired direct writers: the catalog-edit
-<code>SET physics_domain</code> / <code>MERGE</code> cypher
-(<code>test_reclassify_domain_edge.py</code>), the cohort
-<code>UNWIND</code> edge batch and its parameters
-(<code>test_graph_edge_writers.py</code>), the materializer's
-<code>source_domains</code> <code>SET</code>
-(<code>test_cocos_metadata_retraction.py</code>), and mock-graph materializer
-drives whose query stub returns no rows so the routed writer is skipped
-(<code>test_derived_parent_lifecycle_repair.py</code>). Those four files are
-outside this node's write scope; this node's measure is therefore recorded as
-unmet pending a node that may edit them.</p>
+<p>The suite gate ran <code>tests/standard_names/ -m 'not slow' -n 8</code>,
+which covers the default tier and the <code>graph</code>-marked tier in one
+selection, from separate <code>git archive</code> trees under the run
+directory with a per-arm <code>--basetemp</code>. Base (<code>970cdb0d9</code>)
+reports 103 failed ids; head (<code>dd5794b76</code>) reports 103 &mdash; zero
+added and zero removed. The graph-marked path test runs green at head under
+<code>-m graph</code> against the repo's disposable Neo4j fixture.</p>
+
+<h3 id="scg-name-domain-route-lineage-sites-added">The sixteen ids the routing first added</h3>
+
+<p>Every added id asserted the retired direct writer or a shape of the mock that
+only held for it. Each is classified below with what the id guards and what
+changed. No behavioural assertion was weakened: where the id guarded a
+behaviour the routing changed, the product was repaired and the assertion was
+corrected; where it guarded a behaviour that still holds, the assertion was
+rewritten to read that behaviour through the writer's result on the graph, and
+where only the mock could not answer a read the writer now makes, the mock
+learned the read and the assertion is untouched.</p>
+
+<table>
+  <thead>
+    <tr><th>Id</th><th>Class</th><th>What the id guards, and what changed</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>test_reclassify_domain_edge.py</code>:
+      <code>test_reclassify_writes_property_and_edge_in_one_statement</code></td>
+      <td>a</td>
+      <td>Guards that the corrected domain is written together with its edge.
+      Asserted the literal retired cypher (<code>SET name.physics_domain =
+      $domain</code> and its <code>MERGE</code>). Rewritten to assert the same
+      behaviour through the writer: a statement that sets one of the property or
+      the edges without the other is recorded as split and fails, and the
+      property and the edge set agree after the call.</td>
+    </tr>
+    <tr>
+      <td><code>test_reclassify_domain_edge.py</code>:
+      <code>test_failed_edge_write_rolls_back_property</code></td>
+      <td>a</td>
+      <td>Guards that a failed edge write leaves the property as it was.
+      Asserted the retired cypher's failure path. Rewritten so the fake fails
+      the writer's one statement and the property, the edge set and the
+      correction are all unchanged.</td>
+    </tr>
+    <tr>
+      <td><code>test_graph_edge_writers.py</code>:
+      <code>TestHasPhysicsDomainEdge::test_has_physics_domain_edge_emitted</code></td>
+      <td>a</td>
+      <td>Guards that a name with a source domain gets a domain edge. Passed only
+      with the legacy batch cypher present. Rewritten to require the writer
+      statement for the name; the mock now models the name's DD source domain,
+      which is what the edge set is derived from.</td>
+    </tr>
+    <tr>
+      <td><code>test_graph_edge_writers.py</code>:
+      <code>TestHasPhysicsDomainEdge::test_has_physics_domain_batch</code></td>
+      <td>a</td>
+      <td>Guards that the right name is attached to the edge expression. Asserted
+      a <code>batch</code> kwarg of <code>{sn_id, domain_id}</code> that no
+      longer exists. Rewritten to read the writer's own parameters:
+      <code>sn_id</code> is the name and <code>edge_domains</code> is
+      <code>['equilibrium']</code>.</td>
+    </tr>
+    <tr>
+      <td><code>test_graph_edge_writers.py</code>:
+      <code>TestEndpointAuthority::test_secondary_edge_cypher_never_merges_standard_name_endpoints</code></td>
+      <td>a</td>
+      <td>Guards that no secondary-edge writer mints a <code>StandardName</code>
+      endpoint. Unchanged. Its mock answered the factory shape and nothing else,
+      so the writer never ran and the <code>HAS_PHYSICS_DOMAIN</code> check
+      found no writer to inspect; the mock now answers the decision read, and the
+      writer's <code>MATCH (sn:StandardName ...)</code> satisfies the
+      no-endpoint-merge rule the id exists to enforce.</td>
+    </tr>
+    <tr>
+      <td><code>test_graph_edge_writers.py</code>:
+      <code>TestEndpointAuthority::test_structural_rederive_materializes_null_stage_parent_before_reconcile</code></td>
+      <td>a</td>
+      <td>Guards that a null-stage parent is materialized before the edge
+      reconcile. Unchanged. Its mock answered the name lookup and the bootstrap
+      but not the writer's state read, so the routed call raised; the mock now
+      answers it, and the ordering assertion is untouched.</td>
+    </tr>
+    <tr>
+      <td><code>test_cocos_metadata_retraction.py</code>:
+      <code>test_structural_cocos_metadata_is_authoritative[None]</code>,
+      <code>[psi_like]</code></td>
+      <td>b</td>
+      <td>Guards that the structural materializer's COCOS metadata is
+      authoritative. Its COCOS assertions are unchanged. Two things broke: the
+      batch path derived its rows from a fixed two-queries-per-parent
+      preparation pass, which the writer's decision read made three, so it
+      refused the batch &mdash; the product now selects the row-building calls by
+      the properties they carry instead of counting queries; and the test's
+      capture raised on any statement it did not know, so it now answers the
+      decision read with no rows.</td>
+    </tr>
+    <tr>
+      <td><code>test_derived_parent_lifecycle_repair.py</code>, eight ids:
+      <code>test_derived_parent_lifecycle_repair_is_idempotent</code>,
+      <code>test_repaired_parent_is_claimable_for_generate_docs</code>,
+      <code>test_pending_placeholder_repair_does_not_project_common_dd_prefix</code>,
+      <code>test_single_child_parent_materialization_preserves_real_dd_source</code>,
+      <code>test_legacy_accepted_null_docs_repair_uses_derived_source_when_needed</code>,
+      <code>test_legacy_qualifier_locus_parents_repair_scalar_safely[electron_density-edge_kinds0]</code>,
+      <code>[outer_electron_density-edge_kinds1]</code>,
+      <code>[outer_electron_density-edge_kinds2]</code></td>
+      <td>a</td>
+      <td>Guard repair idempotency, claimability for <code>generate_docs</code>,
+      null-stage and single-child materialization and the scalar repair.
+      Unchanged. The file's stateful fake graph raised on any statement it did
+      not model, and the routed path issues three it had never seen: the
+      stored-decision read, the state read and the writer's single statement.
+      The fake now answers the first with no stored decision, derives the
+      parent's source set from its children as the graph does, and records the
+      scalar, the source set and the edges the writer sets.</td>
+    </tr>
+  </tbody>
+</table>
