@@ -224,6 +224,65 @@ def test_persist_refined_name_writes_the_domain_for_a_client_that_is_not_a_graph
     assert set(settled["edge_domains"]) == set(settled["source_domains"])
 
 
+class _ClientThatCannotQuery:
+    """A client with a session but no query interface."""
+
+    def __init__(self, inner: Any) -> None:
+        self._inner = inner
+
+    def __enter__(self) -> _ClientThatCannotQuery:
+        return self
+
+    def __exit__(self, *exc: object) -> bool:
+        return False
+
+    def session(self) -> Any:
+        return self._inner.session()
+
+
+def test_persist_refined_name_refuses_an_unwritable_client_before_it_commits(
+    disposable_neo4j_empty: str,
+) -> None:
+    """A client that cannot write the domain leaves no committed successor."""
+    from imas_codex.graph.client import GraphClient
+    from imas_codex.standard_names import graph_store  # noqa: F401 (binds services)
+    from imas_codex.standard_names.graph_store.graph_foundation import (
+        services_for_call,
+    )
+    from imas_codex.standard_names.graph_store.graph_refinement import (
+        persist_refined_name,
+    )
+
+    old = _uid("old_unwritable")
+    new = _uid("new_unwritable")
+    with GraphClient() as real:
+        _plant_name_with_dd_source(
+            real, old, "dd:unwritable/path", dd_domain="equilibrium"
+        )
+        real.query(
+            "MATCH (sn:StandardName {id: $id}) SET sn.name_stage = 'refining'",
+            id=old,
+        )
+        services = _ServicesBehindAProxy(
+            services_for_call(), _ClientThatCannotQuery(real)
+        )
+
+        with pytest.raises(TypeError):
+            persist_refined_name(
+                old_name=old,
+                new_name=new,
+                description="Test quantity",
+                services=services,
+            )
+        rows = list(
+            real.query("MATCH (sn:StandardName {id: $id}) RETURN sn.id AS id", id=new)
+        )
+
+    assert rows == [], (
+        "the rename committed a successor whose domain the caller could not write"
+    )
+
+
 def test_persist_refined_name_carries_the_stored_decision_through_the_writer(
     disposable_neo4j_empty: str,
 ) -> None:

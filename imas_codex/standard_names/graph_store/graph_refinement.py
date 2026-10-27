@@ -792,6 +792,15 @@ def persist_refined_name(
         escalation_set = ", new.refine_name_escalated_at = datetime()"
 
     with services.GraphClient() as gc:
+        # The domain write lands after this transaction commits, so a client
+        # that cannot write it is refused before anything is persisted: a
+        # successor committed without a domain is a half-written rename.
+        if not callable(getattr(gc, "query", None)):
+            raise TypeError(
+                f"persist_refined_name cannot write {new_name}'s domain: "
+                f"{type(gc).__name__} offers no query interface, so the scalar, "
+                "the source domains and the domain edges would be dropped"
+            )
         with gc.session() as session:
             tx = session.begin_transaction()
             try:
@@ -1401,12 +1410,6 @@ def persist_refined_name(
             _correction = _dd.DomainCorrection(
                 domain=_correction_domain,
                 reason=preflight_row.get("predecessor_correction_reason") or "",
-            )
-        if not callable(getattr(gc, "query", None)):
-            raise TypeError(
-                f"persist_refined_name cannot write {new_name}'s domain: "
-                f"{type(gc).__name__} offers no query interface, so the scalar, "
-                "the source domains and the domain edges would be dropped"
             )
         _dd.write_name_domain(
             gc,
