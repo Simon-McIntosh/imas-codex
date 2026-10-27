@@ -11,6 +11,7 @@ from typing import Any
 
 from imas_codex.standard_names.domain_decision import (
     DomainDecision,
+    _undecided,
     write_name_domain,
 )
 from imas_codex.standard_names.signed_manifest import apply_signed_manifest
@@ -63,21 +64,6 @@ def _stored_domain_decisions(
             else None,
         )
     return decided
-
-
-def _undecided_domain_decision(
-    sn_id: str, reason: str, candidates: Any = ()
-) -> DomainDecision:
-    """A name with no stored decision: the writer keeps its current value."""
-    return DomainDecision(
-        name=sn_id,
-        candidates=tuple(candidates or ()),
-        choice=None,
-        probability=None,
-        model=None,
-        decided_at=None,
-        undecided_reason=reason,
-    )
 
 
 def get_source_name_mapping(*, rich: bool = False, services: Any) -> dict[str, dict]:
@@ -1029,8 +1015,8 @@ def _write_standard_name_edges(
             gc,
             sn_id,
             stored
-            or _undecided_domain_decision(
-                sn_id, "no stored Jev decision; the name keeps its current domain"
+            or _undecided(
+                sn_id, (), "no stored Jev decision; the name keeps its current domain"
             ),
         )
         domain_batch.append({"sn_id": sn_id})
@@ -1569,11 +1555,11 @@ def _materialize_derived_parent_rows(
                 gc,
                 parent_id,
                 stored[parent_id]
-                or _undecided_domain_decision(
+                or _undecided(
                     parent_id,
+                    source_domains,
                     "a derived parent has no stored Jev decision; it keeps the "
                     "domain its children give it",
-                    candidates=source_domains,
                 ),
             )
         seeded += 1
@@ -1673,11 +1659,11 @@ def _materialize_derived_parent_rows_batched(
             gc,
             parent_id,
             stored_by_parent[parent_id]
-            or _undecided_domain_decision(
+            or _undecided(
                 parent_id,
+                row.get("source_domains") or (),
                 "a derived parent has no stored Jev decision; it keeps the "
                 "domain its children give it",
-                candidates=row.get("source_domains") or (),
             ),
         )
     return len(expected)

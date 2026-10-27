@@ -253,7 +253,13 @@ def reclassify_standard_name_domain(
     reason: str,
     dry_run: bool = False,
 ) -> dict[str, Any]:
-    """Reassign one name's domain property and relationship atomically."""
+    """Reassign one name's domain property and relationship atomically.
+
+    The domain write is one statement, so the property, the source set and
+    the edges move together or not at all. The change record is written
+    afterwards, so a failed domain write records no change for a domain
+    that did not move.
+    """
     from imas_codex.core.physics_domain import PhysicsDomain
 
     name = (name or "").strip()
@@ -302,6 +308,20 @@ def reclassify_standard_name_domain(
             result["noop"] = before["domain"] == target_domain
             return result
 
+        write_name_domain(
+            gc,
+            name,
+            DomainDecision(
+                name=name,
+                candidates=(),
+                choice=None,
+                probability=None,
+                model=None,
+                decided_at=None,
+                undecided_reason="a recorded correction names the domain",
+            ),
+            correction=DomainCorrection(domain=target_domain, reason=reason),
+        )
         change_id = f"sn-change:{uuid.uuid4()}"
         mutation = list(
             gc.query(
@@ -327,20 +347,6 @@ def reclassify_standard_name_domain(
             raise RuntimeError(
                 "standard name changed or disappeared during domain reclassification"
             )
-        write_name_domain(
-            gc,
-            name,
-            DomainDecision(
-                name=name,
-                candidates=(),
-                choice=None,
-                probability=None,
-                model=None,
-                decided_at=None,
-                undecided_reason="a recorded correction names the domain",
-            ),
-            correction=DomainCorrection(domain=target_domain, reason=reason),
-        )
         result["change_id"] = change_id
         return result
 

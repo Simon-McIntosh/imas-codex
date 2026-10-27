@@ -85,7 +85,8 @@ def test_reclassify_writes_property_and_edge_in_one_statement(
     assert graph.split_statements == 0
     assert graph.domain == "magnetic_field_diagnostics"
     assert graph.correction == "magnetic_field_diagnostics"
-    assert set(graph.domain_edges) == set(graph.source_domains)
+    assert graph.source_domains == ["equilibrium"]
+    assert graph.domain_edges == {"equilibrium"}
 
 
 def test_failed_edge_write_rolls_back_property(

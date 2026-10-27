@@ -18,7 +18,10 @@ from imas_codex.graph.client import GraphClient
 from imas_codex.standard_names import (  # noqa: F401 — wires the graph services
     graph_ops,
 )
-from imas_codex.standard_names.graph_store import graph_foundation as foundation
+from imas_codex.standard_names.graph_store import (
+    graph_foundation as foundation,
+    graph_lineage as lineage,
+)
 
 
 @pytest.fixture
@@ -47,6 +50,11 @@ class _BoundGraph:
 
     def __exit__(self, *args: object) -> None:
         return None
+
+
+def _services() -> Any:
+    """The wired composition root the module functions compose through."""
+    return foundation.services_for_call()
 
 
 def _read(graph: GraphClient, name_id: str) -> dict[str, Any]:
@@ -109,3 +117,131 @@ def test_catalog_edit_correction_writes_through_the_one_writer(
     assert row["correction"] == "magnetic_field_diagnostics"
     assert set(row["source_domains"]) == {"equilibrium"}
     assert set(row["edge_domains"]) == {"equilibrium"}
+
+
+def _seed_edge_pass_name(graph: GraphClient) -> None:
+    """A name whose DD source says equilibrium while a stale edge says general."""
+    graph.query(
+        """
+        CREATE (sn:StandardName {id: 'sn:plasma_current',
+                                 physics_domain: 'general',
+                                 source_domains: ['general'],
+                                 name_stage: 'accepted'})
+        CREATE (src:StandardNameSource {id: 'src:plasma_current'})
+        CREATE (dd:IMASNode {id: 'dd:equilibrium/time_slice/profiles_1d/psi',
+                             physics_domain: 'equilibrium'})
+        CREATE (stale:PhysicsDomain {id: 'general'})
+        CREATE (src)-[:PRODUCED_NAME]->(sn)
+        CREATE (src)-[:FROM_DD_PATH]->(dd)
+        CREATE (sn)-[:HAS_PHYSICS_DOMAIN]->(stale)
+        """
+    )
+
+
+def _seed_derived_parent(graph: GraphClient) -> dict[str, Any]:
+    """A derived parent whose only child's DD source says transport."""
+    graph.query(
+        """
+        CREATE (parent:StandardName {id: 'sn:electron_temperature',
+                                     physics_domain: 'transport',
+                                     name_stage: 'accepted'})
+        CREATE (child:StandardName {id: 'sn:electron_temperature_at_axis',
+                                    physics_domain: 'transport'})
+        CREATE (child)-[:HAS_PARENT]->(parent)
+        CREATE (child_src:StandardNameSource {id: 'src:electron_temperature_at_axis'})
+        CREATE (child_dd:IMASNode {id: 'dd:equilibrium/time_slice/profiles_1d/t_i',
+                                   physics_domain: 'transport'})
+        CREATE (child_src)-[:PRODUCED_NAME]->(child)
+        CREATE (child_src)-[:FROM_DD_PATH]->(child_dd)
+        """
+    )
+    return {
+        "parent_id": "sn:electron_temperature",
+        "authorized_unit": "eV",
+        "edge_kinds": ["coordinate"],
+        "child_data": [
+            {
+                "id": "sn:electron_temperature_at_axis",
+                "unit": "eV",
+                "physics_domain": "transport",
+                "kind": "scalar",
+                "cocos": None,
+                "op_kind": "coordinate",
+            }
+        ],
+    }
+
+
+@pytest.mark.graph
+def test_edge_pass_writes_the_domain_through_the_one_writer(
+    graph: GraphClient,
+) -> None:
+    """``_write_standard_name_edges`` rewrites the edges to the source set.
+
+    The name's DD source says ``equilibrium`` and a stale edge points at
+    ``general``. Reading the three back must show the source set and the edges
+    equal to ``equilibrium``: a site that merges the payload's domains without
+    deleting the stale edge leaves ``general`` in place and fails.
+    """
+    _seed_edge_pass_name(graph)
+    lineage._write_standard_name_edges(
+        graph, [{"id": "sn:plasma_current"}], services=_services()
+    )
+
+    row = _read(graph, "sn:plasma_current")
+    assert set(row["source_domains"]) == {"equilibrium"}
+    assert set(row["edge_domains"]) == {"equilibrium"}
+
+
+@pytest.mark.graph
+def test_single_materializer_writes_the_domain_through_the_one_writer(
+    graph: GraphClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """``_materialize_derived_parent_rows`` gives the parent its edges.
+
+    The parent's scalar comes from its children, as before, and the source set
+    and edges come from the writer. A site that sets only the two scalars writes
+    no edge at all and fails on the edge set.
+    """
+    parent = _seed_derived_parent(graph)
+    services = _services()
+    monkeypatch.setattr(
+        services, "_validate_derived_parent_identity", lambda *a, **k: []
+    )
+    assert (
+        lineage._materialize_derived_parent_rows(graph, [parent], services=services)
+        == 1
+    )
+
+    row = _read(graph, "sn:electron_temperature")
+    assert row["physics_domain"] == "transport"
+    assert set(row["source_domains"]) == {"transport"}
+    assert set(row["edge_domains"]) == {"transport"}
+
+
+@pytest.mark.graph
+def test_batched_materializer_writes_the_domain_through_the_one_writer(
+    graph: GraphClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """``_materialize_derived_parent_rows_batched`` writes the same three.
+
+    The cohort-wide statement sets the scalars for the batch; the domain, its
+    source set and the edges still come from the writer. A cohort statement that
+    sets ``source_domains`` itself leaves the edge set empty and fails.
+    """
+    parent = _seed_derived_parent(graph)
+    services = _services()
+    monkeypatch.setattr(
+        services, "_validate_derived_parent_identity", lambda *a, **k: []
+    )
+    assert (
+        lineage._materialize_derived_parent_rows_batched(
+            graph, [parent], services=services
+        )
+        == 1
+    )
+
+    row = _read(graph, "sn:electron_temperature")
+    assert row["physics_domain"] == "transport"
+    assert set(row["source_domains"]) == {"transport"}
+    assert set(row["edge_domains"]) == {"transport"}
