@@ -84,10 +84,11 @@ outside scope rather than changed here.</p>
 <ul>
   <li>Path tests
       (<code>tests/standard_names/test_name_domain_writer_catalog_sites.py</code>,
-      two disposable-graph tests, one per routed path): green at the head
-      revision, <code>2 passed</code>. Each plants a name with a DD source, runs
-      its path, and asserts the scalar, <code>source_domains</code> and the
-      edges agree.</li>
+      four disposable-graph tests): green at the head revision,
+      <code>4 passed, EXIT=0</code>. Two run a routed path each and assert the
+      scalar, <code>source_domains</code> and the edges agree; one drives the
+      rename through a client that is not a <code>GraphClient</code>; one gives
+      it a client that cannot write at all.</li>
   <li>Negative control: reverting the <code>persist_refined_name</code> site to a
       direct <code>physics_domain</code> write gives
       <code>1 failed, 1 passed</code> with <code>EXIT=1</code>; the failing id is
@@ -104,13 +105,14 @@ outside scope rather than changed here.</p>
       <code>73 failed, 8409 passed, 11 skipped</code>; the added-failure count
       is <strong>0</strong>.</li>
   <li>Gate, <code>-m graph</code> at head and base with <code>-n 8</code>: head
-      <code>59 failed, 311 passed, 19 skipped</code> against base
+      <code>59 failed, 312 passed, 19 skipped</code> against base
       <code>60 failed, 306 passed, 20 skipped</code>; the added-failure count is
-      <strong>0</strong> and all three path tests pass at the head.</li>
+      <strong>0</strong> and every path test passes at the head.</li>
   <li>Negative control on the client check: with the old
-      <code>isinstance(gc, GraphClient)</code> gate restored, the proxy-client
-      test fails with <code>1 failed, 2 deselected</code> and
-      <code>EXIT=1</code>.</li>
+      <code>isinstance(gc, GraphClient)</code> gate restored in place of the
+      capability check, the unwritable-client test fails
+      (<code>1 failed, 1 passed, EXIT=1</code>): the gate skips instead of
+      refusing.</li>
 </ul>
 
 <h3 id="scg-name-domain-route-catalog-sites-invariant">The invariant that guarded the old write</h3>
@@ -154,6 +156,12 @@ capability check: any client the call path accepts reaches
 <code>write_name_domain</code>, and a client that offers no <code>query</code>
 raises <code>TypeError</code> naming what would have been lost rather than
 skipping.</p>
+
+<p>The check runs where the client is acquired, before the rename transaction
+opens. It used to sit after <code>tx.commit()</code>, so an unsupported client
+left a committed successor with no domain — a half-written rename that the
+refusal came too late to prevent. The unwritable-client test asserts both halves:
+the <em>TypeError</em> and the absent successor.</p>
 
 <p>Two statements in the same function still bound <code>physics_domain</code>
 and <code>source_domains</code> as Cypher parameters after the provision stopped
