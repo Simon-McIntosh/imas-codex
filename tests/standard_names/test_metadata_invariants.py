@@ -15,6 +15,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 import yaml
 
+from tests.recording_graph_client import RecordingGraphClient
 from tests.standard_names.source_scan import worker_source_text
 
 #: The shared sample names carry IDS names (``core_profiles``, ``magnetics``)
@@ -188,13 +189,10 @@ class TestWriteCypherInvariants:
             write_name_domain,
         )
 
-        class RecordingClient:
-            def __init__(self) -> None:
-                self.statements: list[str] = []
-
+        class RecordingClient(RecordingGraphClient):
             def query(self, cypher: str, **params: object) -> list[dict[str, object]]:
-                self.statements.append(cypher)
-                if len(self.statements) == 1:
+                super().query(cypher, **params)
+                if len(self.calls) == 1:
                     return [
                         {
                             "physics_domain": None,
@@ -219,7 +217,7 @@ class TestWriteCypherInvariants:
                 decided_at="2026-01-01T00:00:00+00:00",
             ),
         )
-        written = "\n".join(gc.statements[1:])
+        written = "\n".join(cypher for cypher, _params in gc.calls[1:])
         assert "physics_domain" in written
         assert "source_domains" in written
         assert "HAS_PHYSICS_DOMAIN" in written

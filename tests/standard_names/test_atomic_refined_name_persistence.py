@@ -17,6 +17,7 @@ from imas_codex.standard_names.graph_store.graph_refinement import (
     RefinedNamePersistenceRefusalReason,
     persist_refined_name,
 )
+from tests.standard_names.conftest import answer_domain_state as _answer_domain_state
 
 _EDIT_FIELDS = (
     "edit_mode",
@@ -122,33 +123,6 @@ class _RacingEditTransaction:
             )
         raise AssertionError(f"unexpected transaction query: {cypher}")
 
-
-def _answer_domain_state(gc):
-    """Let a mock client answer the domain writer's state read.
-
-    ``persist_refined_name`` hands the successor to ``write_name_domain``,
-    which reads the name's stored physics domain, its own domains and its
-    children before writing. A mock that answers every query with nothing
-    cannot answer that read, so it returns an unsourced, childless successor
-    for it and defers every other query to the client's own behaviour.
-    """
-    inner = gc.query
-
-    def _query(cypher, **params):
-        if "AS child_stored_domains" in cypher:
-            return [
-                {
-                    "physics_domain": None,
-                    "own_domains": [],
-                    "child_ids": [],
-                    "child_dd_domains": [],
-                    "child_stored_domains": [],
-                }
-            ]
-        return inner(cypher, **params)
-
-    gc.query = MagicMock(side_effect=_query)
-    return gc
 
 
 def _graph(transaction: MagicMock) -> MagicMock:

@@ -25,9 +25,7 @@ from unittest.mock import patch
 import pytest
 
 from tests.recording_graph_client import RecordingGraphClient
-from tests.standard_names.test_name_domain_writer_catalog_sites import (
-    _domain_state,
-)
+from tests.standard_names.conftest import domain_state
 
 pytestmark = [pytest.mark.timeout(180)]
 
@@ -124,7 +122,7 @@ class _ForwardingRecorder(RecordingGraphClient):
         self._inner = inner
 
     def query(self, cypher: str, **params: Any) -> Any:
-        self.calls.append((cypher, params))
+        super().query(cypher, **params)
         return self._inner.query(cypher, **params)
 
 
@@ -201,7 +199,7 @@ def test_catalog_write_applies_the_domain_writer_exactly_once(
                 ],
                 gc=recorder,
             )
-        settled = _domain_state(real, sn_id)
+        settled = domain_state(real, sn_id)
         domain_writes = [
             cypher for cypher, params in recorder.calls if _sets_domain(cypher, params)
         ]

@@ -630,13 +630,21 @@ class TestEndpointAuthority:
 
 @pytest.mark.graph
 def test_bootstrap_transaction_rolls_back_partial_parent(
-    disposable_neo4j: tuple[str, str],
+    disposable_neo4j_empty: str,
 ) -> None:
+    """A failed bootstrap leaves the parent, its source and its edge untouched.
+
+    The fixture wipes the shared graph first: the test creates its nodes with
+    ``CREATE``, so a name another graph test left behind under the same id
+    would make its own verification read two nodes and measure that neighbour
+    rather than this write.
+    """
     from imas_codex.standard_names.graph_store.graph_lineage import (
         _materialize_derived_parent_rows,
     )
+    from tests.standard_names.conftest import neo4j_test_password
 
-    uri, password = disposable_neo4j
+    uri, password = disposable_neo4j_empty, neo4j_test_password()
     child_id = "maximum_of_electron_temperature"
     parent_id = "electron_temperature"
     source_id = f"derived:{parent_id}"

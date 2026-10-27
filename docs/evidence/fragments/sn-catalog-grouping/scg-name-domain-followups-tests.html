@@ -1,0 +1,89 @@
+<h2 id="scg-name-domain-followups-tests">The test doubles name their owners, and the rollback test owns its graph</h2>
+
+<p>The product half closed the write-path findings. This fragment records the
+findings its reviews left on the test side, and the two additions the product
+half's own review raised, each with how it closed.</p>
+
+<table>
+  <tr><th>Item</th><th>Finding</th><th>How it closed</th></tr>
+  <tr>
+    <td>5</td>
+    <td>Every suite carried its own copy of the domain-state answer helper and
+      its own recording client, so a change to how a statement is captured had
+      to be repeated in each copy.</td>
+    <td><code>answer_domain_state</code> now lives once in
+      <code>tests/standard_names/conftest.py</code> and the five suites that
+      carried a copy import it. The local recording clients are built on
+      <code>tests/recording_graph_client.py</code>'s
+      <code>RecordingGraphClient</code>: the routing-reconcile forwarding
+      recorder records through its superclass rather than appending to
+      <code>calls</code> itself, and the metadata-invariant recording client
+      subclasses it instead of keeping a parallel
+      <code>statements</code> list.</td>
+  </tr>
+  <tr>
+    <td>6</td>
+    <td><code>test_bootstrap_transaction_rolls_back_partial_parent</code> failed
+      inside a multi-file <code>-m graph</code> run while passing alone.</td>
+    <td>The test asked for <code>disposable_neo4j</code>, which does not wipe
+      the shared graph, and then created its nodes with <code>CREATE</code>
+      under the fixed ids <code>electron_temperature</code> and
+      <code>maximum_of_electron_temperature</code>. A prior graph file leaves
+      <code>electron_temperature</code> behind, so the second
+      <code>CREATE</code> minted a duplicate node and the rollback assertion
+      read two rows — its own and the neighbour's. Reproduced by running the
+      follow-ups file before this one in one session
+      (<code>[{'name_stage': 'drafted', 'origin': 'pipeline', 'unit': 'eV'}, …]</code>
+      against the expected single empty row). The test now takes
+      <code>disposable_neo4j_empty</code>, so it starts from a wiped graph and
+      measures its own write. The same two-file run then passes.</td>
+  </tr>
+  <tr>
+    <td>8</td>
+    <td><code>_stored_domain_decisions</code> returns an undecided decision for
+      a name with no stored choice, but its docstring and
+      <code>DomainDecision | None</code> annotation still said such a name maps
+      to <code>None</code>.</td>
+    <td>The contract now matches the code: the annotation is
+      <code>dict[str, DomainDecision]</code> and the docstring states that a
+      name with no stored choice maps to an undecided decision that keeps its
+      candidates. The three call sites already test membership rather than
+      <code>None</code>, so no behaviour moved.</td>
+  </tr>
+  <tr>
+    <td>9</td>
+    <td>The derived single-source-domain branch had no negative test: nothing
+      held the boundary at one source domain fails if the condition widened.</td>
+    <td><code>test_several_source_domains_stay_unset_and_undecided</code> plants
+      two DD sources carrying different domains, writes the name through
+      <code>write_standard_names</code> alone, and asserts the scalar stays
+      <code>None</code> while the source set and the edges carry both. Widening
+      <code>len(source_domains) == 1</code> to <code>&gt;= 1</code> sets the
+      scalar and fails that assertion.</td>
+  </tr>
+  <tr>
+    <td>10</td>
+    <td><code>_domain_state</code> and <code>_plant_name_with_dd_source</code>
+      were duplicated between the follow-ups file and the catalog-sites
+      file.</td>
+    <td>Both are lifted to <code>tests/standard_names/conftest.py</code> as
+      <code>domain_state</code> and <code>plant_name_with_dd_source</code>, with
+      the catalog-sites file's <code>dd_domain</code> keyword kept and
+      defaulted. All three files that used a copy now import the shared one.</td>
+  </tr>
+</table>
+
+<h3 id="scg-name-domain-followups-tests-measure">Measure</h3>
+
+<p>From separate archive trees of main (<code>2c08526b6</code>) and this node's
+head, each with its own <code>--basetemp</code>:
+<code>tests/standard_names/</code> on default markers with <code>-n 8</code> is
+recorded in the run's gate logs, and the <code>-m graph</code> arm over the
+<code>test_name_domain_*</code> files and
+<code>test_graph_edge_writers.py</code> is recorded beside it. Failure ids are
+compared as sets and this node adds none.</p>
+
+<p>Negative control: the shared capture in
+<code>tests/recording_graph_client.py</code> is broken in a scratch copy of the
+head tree and the migrated suites are re-run; they fail there and pass at head.
+The log is named in this run's manifest.</p>

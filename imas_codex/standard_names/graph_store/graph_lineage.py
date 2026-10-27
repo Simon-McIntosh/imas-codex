@@ -23,14 +23,15 @@ logger = logging.getLogger(__name__)
 
 def _stored_domain_decisions(
     gc: Any, sn_ids: list[str]
-) -> dict[str, DomainDecision | None]:
+) -> dict[str, DomainDecision]:
     """The stored decisions for these names, keyed by every name the graph holds.
 
-    A name the graph holds with no stored choice maps to ``None``: it has no
-    decision to route through, so its current value is kept and the gap is
-    recorded by the caller. A name the graph does not hold is absent, so a
-    caller writing a batch never asks the one writer about a node that is not
-    there.
+    A name the graph holds with no stored choice maps to an undecided
+    :class:`DomainDecision` that keeps the candidates the name was offered: the
+    writer reports the name undecided and keeps its current value rather than
+    discarding what the decision was made among. A name the graph does not hold
+    is absent, so a caller writing a batch never asks the one writer about a
+    node that is not there.
     """
     if not sn_ids:
         return {}
@@ -47,7 +48,7 @@ def _stored_domain_decisions(
         """,
         ids=list(sn_ids),
     )
-    decided: dict[str, DomainDecision | None] = {}
+    decided: dict[str, DomainDecision] = {}
     for row in rows:
         choice = row.get("choice")
         candidates = tuple(row.get("candidates") or ())
