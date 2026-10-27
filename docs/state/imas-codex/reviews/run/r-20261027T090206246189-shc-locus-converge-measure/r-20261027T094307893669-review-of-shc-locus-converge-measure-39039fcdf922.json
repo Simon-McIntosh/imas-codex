@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "completed_at": "2026-10-27T09:56:39.873Z",
   "dispatched_at": "2026-10-27T09:45:07Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "hygiene of a one-shot evidence runner whose run is finished; the recorded outcome is read from the apply's JSON summary and the gate logs",
+      "recorded_at": "2026-10-27T10:04:39.718880+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-measure-run.py",
