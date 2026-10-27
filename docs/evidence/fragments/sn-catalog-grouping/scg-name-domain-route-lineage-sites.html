@@ -105,3 +105,18 @@ disposable graph, and reads all three back: the scalar is the correction, the
 source set and the edges are <code>{equilibrium}</code>. Reverted to the direct
 write the same test fails, because the source set and the edge both become
 <code>magnetic_field_diagnostics</code>.</p>
+
+<p>The suite gate ran <code>tests/standard_names/ -m 'not slow' -n 8</code> from
+separate archive trees. Base (main, <code>970cdb0d9</code>) reports 103 failed
+ids; head (<code>0342cde48</code>) reports 119, so the delta is 16. All 16 are
+pre-existing tests that assert the retired direct writers: the catalog-edit
+<code>SET physics_domain</code> / <code>MERGE</code> cypher
+(<code>test_reclassify_domain_edge.py</code>), the cohort
+<code>UNWIND</code> edge batch and its parameters
+(<code>test_graph_edge_writers.py</code>), the materializer's
+<code>source_domains</code> <code>SET</code>
+(<code>test_cocos_metadata_retraction.py</code>), and mock-graph materializer
+drives whose query stub returns no rows so the routed writer is skipped
+(<code>test_derived_parent_lifecycle_repair.py</code>). Those four files are
+outside this node's write scope; this node's measure is therefore recorded as
+unmet pending a node that may edit them.</p>
