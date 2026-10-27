@@ -24,7 +24,7 @@
   <title>Review As Named Checks | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="306">
+<meta name="plan-version" content="307">
 <meta name="plan-modified" content="2026-10-27">
 <meta name="plan-blocks" content="sn-west-prototype-release">
 </head>
@@ -1238,6 +1238,9 @@ without re-deriving it is visible.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261027T113703612981-review-of-srtj-exposed-attachment-audit-a07792989d98" data-who="reckon-build" data-when="2026-10-27T11:55:41.221Z">
     <div class="r-comment-body"><p>Independent review of the attachment-audit node: both halves of the goal are delivered and every gate claim re-derives from the cited logs (zero added failure ids), with three non-blocking findings on record-accuracy and duplicated coverage and no blocking finding.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261027T075648946539-srtj-exposed-attachment-audit" data-who="reckon-build" data-when="2026-10-27T11:36:42.485Z">
+    <div class="r-comment-body"><p>The 9 exposed attachment-audit tests now pass: one product defect fixed (the terminal recovery&#x27;s preserved-state proof hashed the modification stamp its own statement writes, so no apply could ever pass postflight) and six stale expectations corrected to the hold contract of 93e04a526; graph arm base 9 failed -&gt; head 20 passed, default-marker suite adds 0 failure ids.</p></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-s7-lead-ruling-audit-panel" data-who="lead" data-when="2026-10-27T07:20:00Z">
     <div class="r-comment-body"><p>Lead ruling, "Keep quorum as audit panel". §7 deletes the quorum as a deciding path: its persisting cycle, the review seats only that path uses, and the fallback that sends items Jev could not judge to it. Those items go to the single chat reviewer instead. The quorum stays only as the 5% panel audit's non-deciding panel, which runs through <code>panel_audit.quorum_without_persisting</code>, so the drift measure the switch kept is unchanged. §7 waits on §6, because the forwarder retirement and the product repairs §6 still owes touch the same worker and review modules.</p></div>
