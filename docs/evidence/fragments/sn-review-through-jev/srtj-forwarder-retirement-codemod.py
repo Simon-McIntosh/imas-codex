@@ -193,6 +193,24 @@ def rewrite(
                                     "built_patch_strings",
                                 )
                             )
+                        elif (
+                            facade == "graph_ops"
+                            and first.value == "."
+                            and len(node.values) == 3
+                            and isinstance(node.values[2], ast.FormattedValue)
+                            and isinstance(node.values[2].value, ast.Name)
+                        ):
+                            name = node.values[2].value.id
+                            additions.add(
+                                f"from {BASE}.graph_store import owner_module_path as _owner_module_path"
+                            )
+                            edits.append(
+                                (
+                                    *span(lines, node),
+                                    f'f"{{_owner_module_path({name})}}.{{{name}}}"',
+                                    "dynamic_patch_strings",
+                                )
+                            )
 
     # Nested AST nodes can both identify one patch site; the outermost replacement
     # wins, leaving a single exact source span to apply.
