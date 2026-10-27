@@ -81,10 +81,15 @@ name-axis drift on 2 name(s) in a docs-only campaign: electrostatic_potential_at
     <code>plan_family_applies</code> now reads the members' name stages and
     splits them: only <code>accepted</code> members enter the batch list, and
     the rest are carried in the plan under <code>skipped</code> with their
-    stage, so the family's outcome names them rather than the gate halting on
-    them. A stage the read cannot answer for is treated as eligible — an
-    absent answer is not evidence that the member is excluded, and dropping it
-    silently would be the same defect in the other direction.
+    stage. Nothing the campaign measures can name a skipped member, because it
+    never enters a batch, so the plan is the only place the name survives — and
+    a plan nobody prints reaches no reader. <code>apply_families</code>
+    therefore logs one line per skipped member, naming it and its stage, and
+    <code>skipped_members</code> flattens each plan's entries into the returned
+    summary under <code>skipped</code>. A stage the read cannot answer for is
+    treated as eligible — an absent answer is not evidence that the member is
+    excluded, and dropping it silently would be the same defect in the other
+    direction.
   </p>
 
   <h3 id="shc-convergence-gate-cause-count">The second halt was true: the cascade refused the document</h3>
@@ -152,7 +157,7 @@ quantity.</code></pre>
     is a true halt for as long as the hold stands. If the hold is wrong, the
     repair belongs to the veto and the document, not to the convergence gate.
   </p>
-  <h3 id="shc-convergence-gate-tests">The three tests, and what they fail against</h3>
+  <h3 id="shc-convergence-gate-tests">The five tests, and what they fail against</h3>
   <p>
     <code>tests/standard_names/test_campaign_convergence_gate.py</code> carries
     the locus family's shape: two names whose stage is <code>reviewed</code> in
@@ -164,11 +169,25 @@ quantity.</code></pre>
     <tbody>
       <tr>
         <td><code>test_member_outside_accepted_before_the_drain_is_skipped_not_drift</code></td>
-        <td>the two <code>reviewed</code> members are split out at planning with their stage, and <code>measure_batch</code> over the eligible pair yields no drift, 2 touched, 2 accepted</td>
+        <td>the two <code>reviewed</code> members are split out at planning with their stage, and <code>measure_batch</code> over the eligible pair yields no drift and 2 touched — the two the batch could claim, of which one is accepted at the stage and one is the held document the acceptance row below covers</td>
       </tr>
       <tr>
         <td><code>test_member_the_drain_moves_out_of_accepted_still_halts</code></td>
         <td>a name accepted before the drain and <code>reviewed</code> after it is drift, 0 touched, and the run does not converge</td>
+      </tr>
+      <tr>
+        <td><code>test_unchanged_non_accepted_stage_is_not_drift</code></td>
+        <td>the behavioural guard on the inherited comparison: one member whose
+        stage is <code>reviewed</code> in both reads reports no drift, 0
+        touched and 0 accepted; replacing the comparison with the absolute
+        post-drain check fails this test and nothing else</td>
+      </tr>
+      <tr>
+        <td><code>test_apply_reports_each_skipped_member_with_its_stage</code></td>
+        <td>an apply over a plan carrying a skipped member logs
+        <code>member … skipped (name_stage=reviewed)</code> and returns the
+        member, its family and its stage under <code>skipped</code>, so
+        the skipped name reaches an operator rather than only the plan</td>
       </tr>
       <tr>
         <td><code>test_a_held_review_is_not_accepted_however_it_scored</code></td>
@@ -181,9 +200,9 @@ quantity.</code></pre>
     </tbody>
   </table>
   <p>
-    <strong>Negative control:</strong> all three run against
+    <strong>Negative control:</strong> all five run against
     <code>main</code>'s <code>campaign.py</code> from a <code>git archive</code>
-    tree of <code>43ae5712c</code> and fail there — three failures, exit 1, with
+    tree of <code>43ae5712c</code> and fail there — five failures, exit 1, with
     <code>module.__file__</code> naming the archive tree's module. The log is
     kept with the run.
   </p>
