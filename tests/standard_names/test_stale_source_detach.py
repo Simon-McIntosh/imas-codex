@@ -144,6 +144,27 @@ def _seed_signed_live_rows(client: GraphClient) -> list[dict[str, object]]:
         "name_stage: 'accepted', status: 'draft'})-[:HAS_PARENT]->(target)",
         target_ids=preserved_targets,
     )
+    # A stale source is one whose DD entity no longer exists, so detaching it
+    # never leaves its name without provenance: every preserved name is still
+    # produced by the sources that remain in current authority. The fixture
+    # seeds only the authority rows being detached, so that surviving producer
+    # is modelled here; without it the graph is not the state the operation
+    # intends to reach.
+    client.query(
+        "UNWIND $rows AS row "
+        "MATCH (target:StandardName {id: row.target_id}) "
+        "CREATE (live:StandardNameSource {id: row.id, source_id: row.source_id, "
+        "source_type: 'signals', status: 'attached'}) "
+        "CREATE (live)-[:PRODUCED_NAME]->(target)",
+        rows=[
+            {
+                "target_id": target_id,
+                "id": f"test:surviving/{target_id}",
+                "source_id": f"surviving/{target_id}",
+            }
+            for target_id in preserved_targets
+        ],
+    )
     return seeded
 
 
