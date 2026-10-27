@@ -16,17 +16,49 @@ import pytest
 
 
 def test_graph_composition_root_has_no_transitional_forwarders() -> None:
-    """Moved graph calls resolve at their owner rather than through the root."""
+    """Moved graph calls resolve at their owner rather than through the root.
+
+    A forwarder is identified by what its body does, not by how it is
+    described, so one written without the documentation prefix is still a
+    forwarder. Nothing this entrypoint defines may be a single delegation to a
+    symbol owned by a ``graph_store`` module.
+    """
     from imas_codex.standard_names import graph_ops
+    from imas_codex.standard_names.graph_store import _OWNER_BY_NAME
 
     tree = ast.parse(Path(graph_ops.__file__).read_text())
-    forwarders = [
+    delegating = [
         node.name
-        for node in tree.body
+        for node in ast.walk(tree)
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
-        and (ast.get_docstring(node) or "").startswith("Forward to ")
+        and _delegated_name(node) in _OWNER_BY_NAME
     ]
-    assert forwarders == []
+    assert delegating == []
+
+
+def _delegated_name(node: ast.FunctionDef | ast.AsyncFunctionDef) -> str | None:
+    """Return the symbol a function body only returns a call to, if any."""
+    body = [
+        statement
+        for statement in node.body
+        if not (
+            isinstance(statement, ast.Expr)
+            and isinstance(statement.value, ast.Constant)
+            and isinstance(statement.value.value, str)
+        )
+    ]
+    if len(body) != 1 or not isinstance(body[0], ast.Return):
+        return None
+    value = body[0].value
+    if isinstance(value, ast.Call):
+        callee = value.func
+        if isinstance(callee, ast.Name):
+            return callee.id
+        if isinstance(callee, ast.Attribute):
+            return callee.attr
+    if isinstance(value, ast.Name):
+        return value.id
+    return None
 
 
 #: The shared sample names carry IDS names (``core_profiles``, ``magnetics``)
