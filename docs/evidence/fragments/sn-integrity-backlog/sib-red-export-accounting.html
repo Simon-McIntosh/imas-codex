@@ -70,10 +70,18 @@ input the export itself names for an archive tree; without it both arms lose 22
 ids to a missing git history, an artefact with nothing to do with this change.
 </p>
 <ul id="sib-red-export-accounting-landing-gate-figures">
-<li>main <code>352e0096a</code>: <code>71 failed, 8452 passed, 12 skipped</code>, <code>EXIT=1</code></li>
-<li>head <code>b749ee5c4</code>: <code>66 failed, 8457 passed, 12 skipped</code>, <code>EXIT=1</code></li>
-<li>failure-id delta: <strong>zero added</strong>, five removed — exactly the five C4 ids</li>
+<li>main <code>282260d6c</code>: <code>71 failed, 8454 passed, 12 skipped</code>, <code>EXIT=1</code>, 71 <code>FAILED</code> lines in the log</li>
+<li>head <code>b749ee5c4</code>: <code>66 failed, 8457 passed, 12 skipped</code>, <code>EXIT=1</code>, 66 <code>FAILED</code> lines in the log</li>
+<li>failure-id delta, taken from the two logs' own <code>FAILED</code> lines: <strong>zero added</strong>, five removed — exactly the five C4 ids</li>
 </ul>
+<p id="sib-red-export-accounting-landing-gate-trees">
+Each arm names the tree it measured and that tree's revision on the log's
+header, and the archive is verified against the revision it was cut from by
+hashing <code>imas_codex/standard_names/export.py</code> in both places. The
+base arm's revision moved with the main branch between runs; the log records
+the revision the measured tree was actually cut from, not the branch tip at
+whichever moment the header was written.
+</p>
 <p id="sib-red-export-accounting-landing-gate-negative">
 Negative control: the five ids run against main fail 5 with <code>EXIT=1</code>;
 the head arm fails none of them. Log:
