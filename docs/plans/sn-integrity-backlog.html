@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="281">
+<meta name="plan-version" content="282">
 <meta name="plan-modified" content="2026-10-28">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -897,6 +897,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s41" data-id="c-run-r-20261028T101452434891-review-of-sib-services-root-at-owner-a8cb1c41e3f4" data-who="reckon-build" data-when="2026-10-28T10:20:46.935Z">
     <div class="r-comment-body"><p>review of r-20261028T094119490931-sib-services-root-at-owner at reviewed_base_sha f39a37bd84a8a76dc106e2f0a1da5525197c936a and reviewed_head_sha a8cb1c41e3f4bf8866b9811168695e425dc0186d — one commit gained (a test-only per-test ceiling), scores 18/17/20/18/19/20, one non-blocking finding on manifest.md:18, added_failure_count 0</p></div>
+</div>
+<div class="r-comment" data-section="s41" data-id="c-run-r-20261028T094119490931-sib-services-root-at-owner" data-who="reckon-build" data-when="2026-10-28T10:10:40Z">
+    <div class="r-comment-body"><p>sib-services-root-at-owner: the storage layer installs the graph services on their first read, so every reader works without an importer having loaded graph_ops; new test fails on main (exit 3, Services are not wired) and passes at head; tests/standard_names 52 failed both arms, zero failure ids added.</p></div>
 </div>
 <div class="r-comment" data-section="s42" data-id="c-run-r-20261028T075816173791-review-of-sib-split-name-bindings-53d7d9f4f1e0" data-who="reckon-build" data-when="2026-10-28T08:19:13.964Z">
     <div class="r-comment-body"><p>Reviewed r-20261028T064048248418-sib-split-name-bindings at b4254dfbf..53d7d9f4f, scored goal_fidelity 20, evidence 17, scope_discipline 18, durability 19, fit 18, reuse 15, with added_failure_count 0; two non-blocking findings — the evidence fragment overstates the removed bindings as eleven (actual ten bindings and two dynamic lookups, still 12 sites) and the new guard matches only a direct globals() call so an aliased dict evades it. Durability was measured, not inferred: reinstating the exact base spelling at graph_ops.py:303 in a scratch copy of the head tree made test_no_dynamic_name_binding fail.</p></div>
