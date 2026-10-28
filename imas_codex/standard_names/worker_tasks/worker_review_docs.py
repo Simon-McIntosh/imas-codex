@@ -761,7 +761,7 @@ async def _documentation_contradiction_note(
             )
             return (
                 f"contradicts source: {verdict['contradiction_reason']}; "
-                f"DD: {dd_text}"
+                f"DD bindings: {binding_labels}; DD: {dd_text}"
             )
         if any(
             answer is None or answer.get("choice") not in {"supports", "says nothing"}

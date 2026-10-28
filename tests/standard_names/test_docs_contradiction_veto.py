@@ -207,8 +207,18 @@ def test_claim_verdict_controls_acceptance(answer, expected_stage):
         assert manager.reserve.return_value.charge_event.call_args.args[0] == 0.0001
 
 
-def test_second_bound_dd_source_can_hold_documentation():
-    """Preparation must carry every bound source into the claim decision."""
+@pytest.mark.parametrize(
+    ("readings", "expected_stage"),
+    [
+        ((("contradicts", 0.9), ("contradicts", 0.9)), "reviewed"),
+        ((("supports", 0.9), ("contradicts", 0.9)), "accepted"),
+    ],
+    ids=["no-binding-supports", "one-binding-supports"],
+)
+def test_a_claim_is_held_only_when_no_bound_source_supports_it(
+    readings, expected_stage
+):
+    """Every bound source is read, and support from any of them releases the hold."""
     import imas_codex.standard_names.graph_ops as graph_ops
 
     first = "equilibrium/time_slice/profiles_1d/psi"
@@ -250,21 +260,27 @@ def test_second_bound_dd_source_can_hold_documentation():
     graph.query.side_effect = query
 
     async def decide(states, questions, **kwargs):
-        assert questions["check:claim_contradicts_source:0"]["type"] == "choice"
-        results = []
-        for state in states:
-            docs = state["dd_source_docs"]["value"]
-            assert len(docs) == 1
-            observed.extend(docs)
-            choice = (
-                "contradicts"
-                if docs[0].get("documentation") == source_docs[second]
-                else "supports"
-            )
-            results.append(
-                ({"check:claim_contradicts_source:0": {"choice": choice}}, 0.0001)
-            )
-        return results, 0.0001 * len(results)
+        """One judgment over the whole binding set, one question per binding."""
+        assert len(states) == 1
+        docs = states[0]["dd_source_docs"]["value"]
+        assert [doc["id"] for doc in docs] == [first, second]
+        observed.extend(docs)
+        keys = [key for key in questions if "claim_contradicts_source" in key]
+        assert keys == [
+            f"check:claim_contradicts_source:0:binding:{index}"
+            for index in range(len(readings))
+        ]
+        answers = {}
+        for index, key in enumerate(keys):
+            choice, probability = readings[index]
+            answers[key] = {
+                "choice": choice,
+                "probabilities": {
+                    choice: probability,
+                    "says nothing": round(1 - probability, 2),
+                },
+            }
+        return [(answers, 0.0001)], 0.0001
 
     async def review(*_args, **_kwargs):
         return {
@@ -352,12 +368,17 @@ def test_second_bound_dd_source_can_hold_documentation():
         )
 
     assert [source["id"] for source in observed] == [first, second]
-    assert persisted_stages == ["reviewed"]
+    assert persisted_stages == [expected_stage]
     assert persisted["score"] == 1.0
+    if expected_stage == "accepted":
+        assert hold_records.open_holds() == []
+        assert "contradicts_source" not in persisted["comments_per_dim"]
+        return
     assert len(hold_records.open_holds()) == 1
-    assert hold_records.open_holds()[0]["kind"] == "documentation_contradiction"
-    assert second in hold_records.open_holds()[0]["evidence"]
-    assert source_docs[second] in hold_records.open_holds()[0]["evidence"]
+    hold = hold_records.open_holds()[0]
+    assert hold["kind"] == "documentation_contradiction"
+    assert second in hold["evidence"]
+    assert source_docs[second] in hold["evidence"]
     assert second in persisted["comments_per_dim"]["contradicts_source"]
     assert source_docs[second] in persisted["comments_per_dim"]["contradicts_source"]
 
