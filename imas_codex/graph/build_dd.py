@@ -916,10 +916,12 @@ def _reference_cocos_labels(
 ) -> tuple[str | None, dict[str, str]]:
     """Return the newest 3.x version present and the labels it declares.
 
-    The 4.x DD line dropped ``cocos_label_transformation`` from its XML, so the
-    newest 3.x version in the build's scope is the only authority that declares
-    XML labels. Both the forward-port backfill and the stale-label clear read
-    this: a label is only judged by a version that could have declared it.
+    The 3.x line declares more labels than the 4.x line does (3.42.2 declares
+    623 fields, 4.1.1 declares 384), so the newest 3.x version in the build's
+    scope is the richest label source for a path the newest version still
+    carries. Both the forward-port backfill and the stale-label clear read
+    this: a label is judged by the newest version in scope that could have
+    declared it.
     """
     sorted_versions = sorted(version_data.keys())
     last_3x: str | None = None
@@ -940,11 +942,12 @@ def _reference_cocos_labels(
 def _backfill_cocos_labels(
     client: "GraphClient", version_data: dict[str, dict]
 ) -> tuple[int, set[str]]:
-    """Backfill COCOS labels for DD versions where XML lacks them.
+    """Backfill COCOS labels the newest DD version does not declare itself.
 
-    DD versions 4.0.0–4.1.1 removed ``cocos_label_transformation`` from
-    the XML schema while retaining ``cocos_transformation_expression``.
-    This leaves ~200-250 COCOS-dependent paths unlabelled in 4.x.
+    The newest version declares far fewer labels than the last 3.x one — 384
+    against 623 for the 4.1.1/3.42.2 pair — so a path the newest version still
+    carries can arrive unlabelled even though an earlier version declares its
+    label. Every source below supplies one of those missing labels.
 
     Three inference sources, applied in priority order:
 
@@ -955,9 +958,12 @@ def _backfill_cocos_labels(
     3. **imas-python sign flip paths** — paths identified by
        :func:`get_sign_flip_paths` are ``psi_like`` by definition.
 
+    A fourth pass labels paths that exist only in older versions, which the
+    forward-port cannot reach because it walks the newest version's path set.
+
     Every labelled path also receives a ``cocos_label_source`` tag for
     provenance (``xml``, ``inferred_forward``, ``inferred_expression``,
-    or ``inferred_sign_flip``).
+    ``inferred_sign_flip``, or ``inferred_older_version``).
 
     Returns:
         Tuple of (count of labels backfilled, set of paths that received a label).
@@ -1028,6 +1034,44 @@ def _backfill_cocos_labels(
             "imas_codex.cocos.transforms not available, skipping sign flip backfill"
         )
 
+    # Source 4: paths that exist only in older versions. A path renamed or
+    # dropped in a later DD version keeps its IMASNode, but it is absent from
+    # ``latest_paths``, so the forward-port never reaches it and the node stays
+    # unlabelled although a version in this build declares its label. The
+    # newest version that declares labels anywhere and contains the path is
+    # the authority: if it declares one, the node carries it; if it carries the
+    # path without a label, the DD stopped labelling that path. The
+    # filter to versions declaring at least one label is what makes that
+    # reading sound: a version that populates ``cocos_label_transformation``
+    # nowhere is silent about the attribute, not about the path, so its
+    # silence cannot be read as a dropped label — a sliced version set, or a
+    # line that stops populating the attribute, would otherwise delete labels
+    # no DD ever withdrew.
+    declaring_versions = [
+        v
+        for v in sorted_versions
+        if any(
+            info.get("cocos_transformation_type")
+            for info in version_data[v]["paths"].values()
+        )
+    ]
+    settled: set[str] = set()
+    for version in reversed(declaring_versions):
+        for path, info in version_data[version]["paths"].items():
+            if path in latest_paths or path in settled or path in handled:
+                continue
+            settled.add(path)
+            label = info.get("cocos_transformation_type")
+            if label:
+                updates.append(
+                    {
+                        "id": path,
+                        "label": label,
+                        "source": "inferred_older_version",
+                    }
+                )
+                handled.add(path)
+
     # Filter out any invalid updates (null label) to prevent half-state
     # where cocos_label_source is set but cocos_transformation_type is null.
     valid_updates = [u for u in updates if u.get("label")]
@@ -1054,11 +1098,13 @@ def _backfill_cocos_labels(
                 updates=batch,
             )
         logger.info(
-            "Backfilled %d COCOS labels (forward=%d, expression=%d, sign_flip=%d)",
+            "Backfilled %d COCOS labels (forward=%d, expression=%d, "
+            "sign_flip=%d, older_version=%d)",
             len(updates),
             sum(1 for u in updates if u["source"] == "inferred_forward"),
             sum(1 for u in updates if u["source"] == "inferred_expression"),
             sum(1 for u in updates if u["source"] == "inferred_sign_flip"),
+            sum(1 for u in updates if u["source"] == "inferred_older_version"),
         )
 
     # Mark XML-sourced labels for provenance tracking
@@ -2018,7 +2064,11 @@ def phase_build(
             scope_ids=list(scope_ids),
             labeled_paths=list(all_labeled),
             authority_covered=authority_covered,
-            authority_sources=["xml", "inferred_forward"],
+            authority_sources=[
+                "xml",
+                "inferred_forward",
+                "inferred_older_version",
+            ],
         )
 
         # Groom any pre-existing half-state left by earlier builds: a source

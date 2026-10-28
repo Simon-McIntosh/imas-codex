@@ -146,3 +146,138 @@ def test_full_rebuild_is_idempotent_on_labels(disposable_graph):
         "a 3.x-declared label was cleared although a version in the build declares it"
     )
     assert first == second, f"labels changed on rebuild: {first} -> {second}"
+
+
+V3_EARLY = "3.30.0"
+V3_LATE = "3.43.0"
+
+
+def test_older_version_only_path_takes_its_declaring_versions_label(disposable_graph):
+    """A path the newest DD version dropped keeps its declaring version's label.
+
+    The node exists in the graph but the DD version the build ends on (4.x) no
+    longer carries the path, so the forward-port never reaches it. Its label is
+    still the statement of the newest version that declares one.
+    """
+    from imas_codex.graph.client import GraphClient
+
+    psi = "equilibrium/time_slice/profiles_1d/psi"
+    dropped = "equilibrium/time_slice/profiles_1d/j_tor"
+    version_data = {
+        V3_EARLY: _version({psi: _path("psi", "psi_like"), dropped: _path("j_tor")}),
+        V3: _version(
+            {psi: _path("psi", "psi_like"), dropped: _path("j_tor", "ip_like")}
+        ),
+        V4: _version({psi: _path("psi")}),
+    }
+
+    with GraphClient() as gc:
+        _run_build(gc, version_data)
+        labels = _labels(gc)
+
+    assert labels.get(dropped), (
+        "a path the newest version dropped carried no label although 3.42.0 "
+        "declares one"
+    )
+    assert labels[dropped]["label"] == "ip_like"
+    assert labels[dropped]["source"] == "inferred_older_version"
+
+
+def test_scoped_build_leaves_older_version_label_intact(disposable_graph):
+    """A shard build over another IDS must not clear an older-version label."""
+    from imas_codex.graph.client import GraphClient
+
+    psi = "equilibrium/time_slice/profiles_1d/psi"
+    dropped = "equilibrium/time_slice/profiles_1d/j_tor"
+    temp = "core_profiles/profiles_1d/electrons/temperature"
+    equilibrium = {
+        V3_EARLY: _version({psi: _path("psi", "psi_like"), dropped: _path("j_tor")}),
+        V3: _version(
+            {psi: _path("psi", "psi_like"), dropped: _path("j_tor", "ip_like")}
+        ),
+        V4: _version({psi: _path("psi")}),
+    }
+    core_profiles = {
+        V3: _version({temp: _path("temperature", "psi_like")}),
+        V4: _version({temp: _path("temperature")}),
+    }
+
+    with GraphClient() as gc:
+        _run_build(gc, equilibrium)
+        _run_build(gc, core_profiles)  # shard over another IDS
+        labels = _labels(gc)
+
+    assert labels.get(dropped, {}).get("label") == "ip_like", (
+        "a shard build cleared an older-version label outside its scope"
+    )
+    assert labels[dropped]["source"] == "inferred_older_version"
+
+
+def test_path_the_dd_stops_labelling_loses_its_label(disposable_graph):
+    """A label leaves when a version the build covers carries the path unlabelled."""
+    from imas_codex.graph.client import GraphClient
+
+    psi = "equilibrium/time_slice/profiles_1d/psi"
+    dropped = "equilibrium/time_slice/profiles_1d/j_tor"
+    declaring = {
+        V3_EARLY: _version({psi: _path("psi", "psi_like"), dropped: _path("j_tor")}),
+        V3: _version(
+            {psi: _path("psi", "psi_like"), dropped: _path("j_tor", "ip_like")}
+        ),
+        V4: _version({psi: _path("psi")}),
+    }
+    stopped = {
+        V3_EARLY: _version({psi: _path("psi", "psi_like"), dropped: _path("j_tor")}),
+        V3: _version({psi: _path("psi", "psi_like"), dropped: _path("j_tor")}),
+        V3_LATE: _version({psi: _path("psi", "psi_like"), dropped: _path("j_tor")}),
+        V4: _version({psi: _path("psi")}),
+    }
+
+    with GraphClient() as gc:
+        _run_build(gc, declaring)
+        assert _labels(gc).get(dropped, {}).get("label") == "ip_like", (
+            "precondition: the declaring version's label was not written"
+        )
+        _run_build(gc, stopped)
+        labels = _labels(gc)
+
+    assert dropped not in labels, (
+        "a label survived although 3.43.0 carries the path unlabelled"
+    )
+
+
+def test_ids_scoped_rebuild_without_a_declaring_version_keeps_older_label(
+    disposable_graph,
+):
+    """A 4.x-only rebuild must not strip a label no covered version withdrew.
+
+    The build's scope decides what it can judge. With no version in scope that
+    declares labels at all — an incremental ``--from-version`` slice of the 4.x
+    line, or any window that populates no ``cocos_label_transformation`` — the
+    clear has no authority to say a label was dropped, so a label carried by a
+    version outside the window stays. This is the shape that stripped every
+    shard's labels when the clear was global.
+    """
+    from imas_codex.graph.client import GraphClient
+
+    dropped = "equilibrium/time_slice/profiles_1d/j_tor"
+    psi = "equilibrium/time_slice/profiles_1d/psi"
+    scope = {
+        "4.0.0": _version({psi: _path("psi")}),
+        "4.1.1": _version({psi: _path("psi")}),
+    }
+
+    with GraphClient() as gc:
+        gc.query(
+            "MERGE (p:IMASNode {id: $id}) "
+            "SET p.cocos_transformation_type = 'ip_like', "
+            "p.cocos_label_source = 'inferred_older_version'",
+            id=dropped,
+        )
+        _run_build(gc, scope)
+        labels = _labels(gc)
+
+    assert labels.get(dropped, {}).get("label") == "ip_like", (
+        "a 4.x-only scoped build cleared a label no covered version withdrew"
+    )
+    assert labels[dropped]["source"] == "inferred_older_version"
