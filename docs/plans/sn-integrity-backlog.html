@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="268">
+<meta name="plan-version" content="269">
 <meta name="plan-modified" content="2026-10-28">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -867,6 +867,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s41" data-id="c-run-r-20261028T090641662409-review-of-sib-red-sandbox-974669cc9bd9" data-who="reckon-build" data-when="2026-10-28T09:16:57.922Z">
     <div class="r-comment-body"><p>sib-red-sandbox delta reviewed at base a7a7facbe head 974669cc9 (two commits touching only test_cli_export.py and the evidence fragment); scores 18/19/20/14/19/19 total 109, 2 non-blocking findings, 0 added failure ids</p></div>
+</div>
+<div class="r-comment" data-section="s41" data-id="c-run-r-20261028T074944888965-sib-red-sandbox" data-who="reckon-build" data-when="2026-10-28T09:06:11Z">
+    <div class="r-comment-body"><p>sib-red-sandbox: gave test_cli_export.py a tmp_path staging root and the eight export modules a pinned SOURCE_DATE_EPOCH fixture; all 36 S1/S2 ids pass in a git archive tree (base 101 failed / 8419 passed, final head 65 failed / 8455 passed, zero ids added by this change)</p></div>
 </div>
 <div class="r-comment" data-section="s42" data-id="c-run-r-20261028T075816173791-review-of-sib-split-name-bindings-53d7d9f4f1e0" data-who="reckon-build" data-when="2026-10-28T08:19:13.964Z">
     <div class="r-comment-body"><p>Reviewed r-20261028T064048248418-sib-split-name-bindings at b4254dfbf..53d7d9f4f, scored goal_fidelity 20, evidence 17, scope_discipline 18, durability 19, fit 18, reuse 15, with added_failure_count 0; two non-blocking findings — the evidence fragment overstates the removed bindings as eleven (actual ten bindings and two dynamic lookups, still 12 sites) and the new guard matches only a direct globals() call so an aliased dict evades it. Durability was measured, not inferred: reinstating the exact base spelling at graph_ops.py:303 in a scratch copy of the head tree made test_no_dynamic_name_binding fail.</p></div>
