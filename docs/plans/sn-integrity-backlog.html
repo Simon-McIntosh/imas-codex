@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="271">
+<meta name="plan-version" content="272">
 <meta name="plan-modified" content="2026-10-28">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -876,6 +876,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s41" data-id="c-run-r-20261028T080236992095-sib-red-product-defects" data-who="reckon-build" data-when="2026-10-28T09:07:39.814Z">
     <div class="r-comment-body"><p>D2 repaired in imas_codex/cli/sn.py, where the pending refine-docs count now carries the open docs hold that the canonical claim predicate already uses, and D3 repaired in imas_codex/cli/discover/sequence.py, where a StageFailure exception type declares discovery_receipts; the standard-names suite goes 92 failed / 8431 passed at main to 90 failed / 8433 passed at head with zero failure ids added; D1 stays red and is blocked on imas_codex/standard_names/review/cascade.py, which vetoes a docs contradiction without capping decision_score, and on a re-frozen docs logistic column in srtj-jev-vs-panel-operating-point.json</p></div>
+</div>
+<div class="r-comment" data-section="s41" data-id="c-s41-sandbox-and-product-landed" data-who="reckon-build" data-when="2026-10-28T09:35:00Z">
+    <div class="r-comment-body"><p>Two of the four repair nodes have landed.</p><ul><li><code>sib-red-sandbox</code> (merge <code>5f2e6836f</code>, review 109): the export tests stage under <code>tmp_path</code> and take a pinned <code>SOURCE_DATE_EPOCH</code>. That clears 36 ids: the suite goes from 101 failed at base to 65 at head, with no id added.</li><li><code>sib-red-product-defects</code> (merge <code>5c14e9039</code>, review 101): D2 and D3 are repaired. The pending refine-docs count carries the open docs hold, and a discovery mapping failure raises <code>StageFailure</code> carrying its receipts. The suite goes from 92 failed to 90, with none added. Its ledger row records two tests added, but it added none: it made existing red tests pass.</li></ul><p>D1 stays red. Its two causes are the uncapped veto score in <code>review/cascade.py</code> and the stale frozen docs score in the srtj operating-point evidence. A follow-up node takes both after §44 lands, because §44 owns <code>cascade.py</code>.</p><p>Still open:</p><ul><li><code>sib-red-export-accounting</code> is re-recording its truncated baseline arm, its review's only blocker.</li><li><code>sib-red-transaction-doubles</code> passes 37 of 38. Its last id, a docs review that does not bump <code>names_reviewed</code>, is being settled as either a test-double fault or a product defect.</li></ul></div>
 </div>
 <div class="r-comment" data-section="s42" data-id="c-run-r-20261028T075816173791-review-of-sib-split-name-bindings-53d7d9f4f1e0" data-who="reckon-build" data-when="2026-10-28T08:19:13.964Z">
     <div class="r-comment-body"><p>Reviewed r-20261028T064048248418-sib-split-name-bindings at b4254dfbf..53d7d9f4f, scored goal_fidelity 20, evidence 17, scope_discipline 18, durability 19, fit 18, reuse 15, with added_failure_count 0; two non-blocking findings — the evidence fragment overstates the removed bindings as eleven (actual ten bindings and two dynamic lookups, still 12 sites) and the new guard matches only a direct globals() call so an aliased dict evades it. Durability was measured, not inferred: reinstating the exact base spelling at graph_ops.py:303 in a scratch copy of the head tree made test_no_dynamic_name_binding fail.</p></div>
