@@ -1,0 +1,68 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-28T05:29:35.272Z",
+  "dispatched_at": "2026-10-28T05:25:29Z",
+  "findings": [
+    {
+      "anchor": "plan.html:23",
+      "id": "wiring-1",
+      "reason": "the declared edge is the correct one and the hand-off document exists on disk (17 KB at the path \u00a74 names), so only the recorded state ordering reads wrong, not the relationship.",
+      "text": "the meta block makes `s4` depend on `jt60sa-imas-maps#s12`, yet line 30 records `s4` as `done` while that plan records `s12` as `implementable`; a reader is told the JT-60SA hand-off rests on mappings whose producing section is still unbuilt",
+      "type": "wiring",
+      "would_change": false
+    },
+    {
+      "anchor": "plan.html:192",
+      "id": "done_when-1",
+      "reason": "the node cannot be closed on this done-when as written, and the missing rule \u2014 whether pending sibling sections must be rebased onto the new names, and who owns that edit \u2014 decides whether \u00a72's removal of `--no-activate` breaks a section that has not run yet.",
+      "text": "\u00a73's fourth bullet, \"a search of live docs finds no `imas map` or `discover map` command\", names no search scope and is already false for the repository's live documents: `docs/plans/jt60sa-imas-maps.html` \u00a712 (still implementable) instructs `imas-codex discover map jt-60sa --focus` and `imas-codex imas map run \u2026 --no-activate`, the same two strings \u00a72 and \u00a73 retire, and seven further non-archived plans plus `docs/research/discover-cli-surface.html` carry them; meanwhile the node's write paths reach only `imas_codex/cli/**`, `AGENTS.md` and `agents/`, so the worker cannot make the search pass and cannot show it failing",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:259",
+      "id": "evidence_paths-1",
+      "reason": "a scoped worker is refused exactly where the deliverable lands, which surfaces as a scope blocker mid-node rather than at dispatch, and the section's own evidence rule (\"the PNG set is listed with its sizes\") cannot be satisfied from a path the node may not write.",
+      "text": "\u00a75 requires a PNG per render and chart in `/work/projects/imas_gpu/jt60sa/presentation/` while the node's write paths (lines 263-265) list only `docs/research/discovery-to-mapping-pipeline.html`, `docs/figures/discovery-to-mapping` and `scripts/figures_discovery_to_mapping.py`; \u00a74 has the same shape, and its JSON output at `/work/projects/imas_gpu/jt60sa/handoff/jt-60sa-mapping-handoff.json` (line 203) is likewise outside its declared write path (line 209)",
+      "type": "evidence_paths",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:152",
+      "id": "reasoning-1",
+      "reason": "the stronger sentence governs, the section has landed with the validated-only behaviour, and the delivered tests exercise both the refusal and the promotion, so no implementer is sent down the wrong path; the stale clause is a reading hazard only.",
+      "text": "\u00a72 says promotion is only `map activate`, \"which already admits only `generated` or `validated` mappings\", and immediately requires it to refuse a mapping that has not passed `map validate`; an activate that admitted `generated` would be promoting an unvalidated mapping, so the stated mechanism contradicts the stated rule, and at head `map_activate` refuses anything but `validated` (map.py:1083)",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "3d268b123f0d983fb07a420cd9719755134c48e1",
+  "plan_fingerprint": "ed5b3338b678905d3d4f0717ec900179569311de0554e139fd818f8240a210a5",
+  "plan_slug": "generated-map-handoff",
+  "plan_version": 12,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261028T052455184807-plan-review-of-generated-map-handoff",
+  "reviewed_blob_sha": "d083bc653da9d73ee676de2a1a8245f147b68d1f",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every cited file, module, evidence document and commit resolves at the reviewed revision, with extensionless hrefs resolved as `<path>.html`.",
+    "done_when": "a finding \u2014 \u00a73's done-when \"a search of live docs finds no `imas map` or `discover map` command\" is unmeasurable: it names no search scope, and eight live plan/research documents in this repository, including four `implementable` sections, still carry those exact strings.",
+    "evidence_paths": "a finding \u2014 \u00a75 and \u00a74 require writes to `/work/projects/imas_gpu/...` that their nodes' declared write paths do not include, so a scoped worker is refused at the point the deliverable is produced.",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or version tags reach symbols or files; \u00a73's rename targets are named by what they do, and the plan's own \u00a7-labels stay in the plan.",
+    "reasoning": "a finding \u2014 \u00a72 states that `map activate` \"already admits only `generated` or `validated` mappings\" and then requires it to refuse a mapping that has not passed `map validate`; the two sentences cannot both hold, and head admits only `validated`.",
+    "single_goal": "pass \u2014 each node names one deliverable (export builder; generated-until-validated; command rename; JT-60SA hand-off; research report), and the report's figure script and PNG set serve that one deliverable.",
+    "wiring": "a finding \u2014 \u00a74 is declared `done` while its own declared dependency `jt60sa-imas-maps#s12` is still `implementable`."
+  },
+  "section_digests": {
+    "_document": "bc4273de74fc6e50d7c4b2452f7d3b8b98f8547764597d1c8003510484a83c05",
+    "s1": "f70aec81e2fc3bb599a749706a4df68a5cf2d27d8e8bd61b2d43bbdc66d6d5bd",
+    "s2": "5e779affaad2461f8fd5f51b44213eac00860505094d1e19d8d96e212d2b9466",
+    "s3": "4b0bb9982c60bf2ceb1f9bab24cc1a21e7431d83d85deaa00d69d137d8830def",
+    "s4": "d3ebdc25b5dd0028ec0acbdba9a2af13c382a4a8b6b93e5169b0ab00707a3861",
+    "s5": "01f8588ba404c7f1ff65f83d98913204a56fdc3efa91b68e03e98a8809ca587d"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T05:31:28.560656+00:00"
+}
