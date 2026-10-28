@@ -1,0 +1,54 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-28T08:01:38.514Z",
+  "dispatched_at": "2026-10-28T07:53:22Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-veto-adjudicate.html",
+      "id": "f49783fda6b",
+      "line": "144",
+      "severity": "non-blocking",
+      "text": "non-blocking: the paragraph titled 'Positive control that the instrument sees what is present' uses two claims whose expected result is `None`, which is exactly the value the three suspect sentences produce, so a predicate that returned None for every input satisfies it; the discriminating control - a sentence in a form the settlement does recognise, which must return 'says nothing' - is absent. Verified at this head: claim_settlement('The quantity has no mandatory locus or aggregation.', 'electrostatic_potential') returns 'says nothing' and each of the three sentences returns None, so the conclusion is right, but the control as recorded cannot show it."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-veto-adjudicate.html",
+      "id": "f508c6f3d62",
+      "line": "173",
+      "severity": "non-blocking",
+      "text": "non-blocking: the two holds.dismiss_hold calls, their True returns, the '0 open holds' state and the promotion to docs_stage accepted at reviewer_score_docs 0.9521 are recorded only as prose assertions; no captured call receipt, log path or query stands beside them, so the graph state that released the document cannot be re-checked from the artefact or the manifest, which records only `tests: not-run` and no log."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-veto-adjudicate.html",
+      "id": "feec4039e15",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: step 3 of the brief - check the graph is quiet, no other sn writer running on these names, before writing - is recorded neither in the fragment nor in the manifest, although the node then wrote to the live graph through holds.dismiss_hold and the scoped re-apply; the precondition is unverifiable after the fact."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read commit by commit against b4254dfbf: 8e035d8d0 adds 219 lines carrying the adjudication, the binding table, the settlement measurement, the S0010 comparison and the action; 47a06f5d3 adds 60 lines carrying the spend table, the after-apply scores and the reproduced halt, and deletes one placeholder line; nothing outside the fragment.",
+    "done_when": "the done-when names four recorded facts in this fragment: the ruling with quoted source text (lines 96-104), the action taken (lines 170-181), the spend against LLMCost rows (lines 183-196, USD 0.288891 over 21 rows against the USD 2.00 cap) and the family's next halt reason quoted verbatim (lines 209-214); all four are present, and the settlement claim at lines 133-141 was reproduced independently.",
+    "goal": "the node's goal is to rule on the contradiction veto holding electrostatic_potential; docs/evidence/fragments/sn-harmonize-command/shc-locus-veto-adjudicate.html:96 states the ruling 'the veto is wrong' against the seven DD bindings tabulated at lines 60-71 and the three evidence sentences quoted at lines 30-34.",
+    "manifest": "read in full; it states status complete, both commit shas, one changed path, tests: not-run with the reason that no test can reach a docs-only fragment, 21 LLMCost rows and the halt quoted, and it lists the settlement predicate repair under outside_scope rather than attempting it.",
+    "write_paths": "the node declared docs/evidence/fragments/sn-harmonize-command/shc-locus-veto-adjudicate.html and the docs/figures/sn-harmonize-command/shc-locus-veto-adjudicate figure directory; the two commits 8e035d8d0 and 47a06f5d3 touch only the first of them, 278 insertions in one file."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to rule on the contradiction veto holding electrostatic_potential; docs/evidence/fragments/sn-harmonize-command/shc-locus-veto-adjudicate.html:96 states the ruling 'the veto is wrong' against the seven DD bindings tabulated at lines 60-71 and the three evidence sentences quoted at lines 30-34.\nVERDICT done_when: the done-when names four recorded facts in this fragment: the ruling with quoted source text (lines 96-104), the action taken (lines 170-181), the spend against LLMCost rows (lines 183-196, USD 0.288891 over 21 rows against the USD 2.00 cap) and the family's next halt reason quoted verbatim (lines 209-214); all four are present, and the settlement claim at lines 133-141 was reproduced independently.\nVERDICT write_paths: the node declared docs/evidence/fragments/sn-harmonize-command/shc-locus-veto-adjudicate.html and the docs/figures/sn-harmonize-command/shc-locus-veto-adjudicate figure directory; the two commits 8e035d8d0 and 47a06f5d3 touch only the first of them, 278 insertions in one file.\nVERDICT manifest: read in full; it states status complete, both commit shas, one changed path, tests: not-run with the reason that no test can reach a docs-only fragment, 21 LLMCost rows and the halt quoted, and it lists the settlement predicate repair under outside_scope rather than attempting it.\nVERDICT diff: read commit by commit against b4254dfbf: 8e035d8d0 adds 219 lines carrying the adjudication, the binding table, the settlement measurement, the S0010 comparison and the action; 47a06f5d3 adds 60 lines carrying the spend table, the after-apply scores and the reproduced halt, and deletes one placeholder line; nothing outside the fragment.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-harmonize-command/shc-locus-veto-adjudicate.html:96 rules the veto wrong and the table at lines 74-93 disposes of each of the three evidence sentences against quoted source text, which is the deliverable the goal names.\nSCORE evidence: 13\nJUSTIFICATION evidence: the done-when's four recorded facts are all present and the settlement claim at lines 133-141 reproduced exactly at this head (all three sentences return None, the qualifier predicate returns False), but the recorded positive control at line 144 cannot distinguish a working predicate from one that always returns None and the dismissal receipts behind lines 173-181 are assertions with no captured log or query.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: both commits against b4254dfbf touch only docs/evidence/fragments/sn-harmonize-command/shc-locus-veto-adjudicate.html, inside the declared write paths, with the settlement predicate repair named at line 243 as out of scope rather than performed.\nSCORE durability: 9\nJUSTIFICATION durability: the change is a documentation fragment and adds no test, so nothing fails if jev_review.py:705 claim_settlement is later widened - the very repair the fragment recommends - and the measurement recited at shc-locus-veto-adjudicate.html:136 silently becomes false.\nSCORE fit: 19\nJUSTIFICATION fit: the fragment uses the section/h2, id-per-paragraph and named-table shape of its siblings in docs/evidence/fragments/sn-harmonize-command/, its ids follow the file's own slug, and both commit subjects are conventional and carry a body.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no function, class or module, and the two mechanisms it leans on are the existing owners - jev_review.py:705 claim_settlement for the settlement reading and standard_names/review/holds.dismiss_hold for the dismissal - with no second implementation introduced.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-locus-veto-adjudicate.html:144 non-blocking: the 'positive control that the instrument sees what is present' uses two claims whose expected result is None, the same value the three suspect sentences produce, so a predicate returning None for every input satisfies it; the two claims asserting the quantity's own combination also cannot distinguish a working settlement from a silent one, whereas the discriminating control ('The quantity has no mandatory locus or aggregation.' returns 'says nothing', verified at this head) is absent.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-locus-veto-adjudicate.html:173 non-blocking: the two holds.dismiss_hold calls, their True returns, the 0 open holds state and the promotion to docs_stage accepted at 0.9521 are prose assertions with no captured receipt, log path or query beside them, so the graph state that released the document cannot be re-checked from the artefact.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-locus-veto-adjudicate.html:1 non-blocking: brief step 3, that the graph be quiet of other sn writers on these names before writing, is recorded neither in the fragment nor in the manifest, though the node then wrote to the live graph through dismiss_hold and the scoped re-apply.\n",
+  "review_run_id": "r-20261028T073017581395-review-of-shc-locus-veto-adjudicate-47a06f5d3026",
+  "reviewed_base_sha": "b4254dfbfdccc3248ecd999d2cf4972a8115d36f",
+  "reviewed_head_sha": "47a06f5d3026e5365c89e982773b095f0a82b56b",
+  "reviewed_run_id": "r-20261028T064503141474-shc-locus-veto-adjudicate",
+  "scores": {
+    "durability": 9,
+    "evidence": 13,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T08:03:17.579290+00:00",
+  "total": 100
+}
