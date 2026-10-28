@@ -32,7 +32,24 @@
   "plan_slug": "jt60sa-discovery-completion",
   "plan_version": 136,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "finding": "duplicate_owner-2",
+      "reason": "the plan's single-renderer claim is scoped to the path claims and the scoped reset, and `find_code`'s single scalar prefix filter is a different shape from the list-membership clause the renderer emits, so naming it would correct the docstring's aperture but not change the design.",
+      "when": "2026-10-28T05:04:56.555832+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-2": {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "reason": "the plan's single-renderer claim is scoped to the path claims and the scoped reset, and `find_code`'s single scalar prefix filter is a different shape from the list-membership clause the renderer emits, so naming it would correct the docstring's aperture but not change the design.",
+      "when": "2026-10-28T05:04:56.555832+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/jt60sa-discovery-completion/r-20261006T012711137312-plan-review-of-jt60sa-discovery-completion.json",
   "review_run_id": "r-20261006T012711137312-plan-review-of-jt60sa-discovery-completion",
   "reviewed_blob_sha": "15cb691bdd1190000ea23b12d38ceb33b6a56db3",
   "rubric": "design",
