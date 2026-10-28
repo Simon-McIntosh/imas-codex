@@ -70,6 +70,13 @@
       "finding": "reasoning-2",
       "reason": "",
       "when": "2026-10-28T09:40:53.843577+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "each repair node proves its classified ids fail at base and pass at head from archive trees, so a mislabelled id surfaces as one its repair cannot fix; that has already happened twice (D1 and the names_reviewed id in sib-red-transaction-doubles), each recorded and routed to its own node",
+      "when": "2026-10-28T09:40:59.785219+00:00"
     }
   ],
   "responses": {
@@ -78,6 +85,12 @@
       "by": "plan-review-reflex",
       "reason": "the stale range is a symptom of the status defect above; once s42 is declared done the pointer stops being an instruction, and rewriting line numbers against a tree that has moved would only rebind it to code the section is no longer about.",
       "when": "2026-10-28T09:04:50.976280+00:00"
+    },
+    "done_when-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "each repair node proves its classified ids fail at base and pass at head from archive trees, so a mislabelled id surfaces as one its repair cannot fix; that has already happened twice (D1 and the names_reviewed id in sib-red-transaction-doubles), each recorded and routed to its own node",
+      "when": "2026-10-28T09:40:59.785219+00:00"
     },
     "reasoning-1": {
       "action": "acted",
