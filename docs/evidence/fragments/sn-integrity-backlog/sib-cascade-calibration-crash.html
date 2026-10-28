@@ -66,8 +66,10 @@ The census recorded one <code>EXIT=139</code> and could not attribute it. It is
 <strong>not</strong> single. Two of five clean solo runs died with
 <code>EXIT=139</code>, at <strong>75 s</strong> and <strong>78 s</strong>,
 against three that passed at <strong>167 s</strong>, <strong>168 s</strong> and
-<strong>160 s</strong>. All five ran the same command, alone, with no profiler,
-under <code>OMP_NUM_THREADS=1</code>. The crash is a live defect at this
+<strong>160 s</strong>. All five ran the same command at base commit
+<code>7034624c1</code> — <code>logs/solo-run-1.log</code> …
+<code>-5.log</code> — alone, with no profiler, under
+<code>OMP_NUM_THREADS=1</code>. The crash is a live defect at this
 revision, not an artefact of the earlier session.
 </p>
 <p>
@@ -124,7 +126,7 @@ EXIT=1
 <table id="sib-cascade-calibration-crash-gate">
 <thead><tr><th>arm</th><th>result</th></tr></thead>
 <tbody>
-<tr><td>five solo runs, before the fix</td><td>3 passed (167 s, 168 s, 160 s), 2 SIGSEGV (75 s, 78 s)</td></tr>
+<tr><td>five solo runs, before the fix (base commit <code>7034624c1</code>)</td><td>3 passed (167 s, 168 s, 160 s), 2 SIGSEGV (75 s, 78 s)</td></tr>
 <tr><td>one solo run, <code>-p no:faulthandler</code></td><td>1 passed, 152.07 s, <code>EXIT=0</code></td></tr>
 <tr><td>solo runs at head, after the fix (commit <code>2a3539fbc</code>, the head the arm ran at; <code>logs/solo-head-1.log</code> … <code>-5.log</code>)</td><td>five of five passed — 166 s, 183 s, 165 s, 172 s, 168 s — <code>EXIT=0</code> each, no stack dump printed, against the test's 600-second timeout
 (<code>@pytest.mark.timeout(600)</code>)</td></tr>
