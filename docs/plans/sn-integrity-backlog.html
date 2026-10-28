@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="260">
+<meta name="plan-version" content="261">
 <meta name="plan-modified" content="2026-10-28">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -949,7 +949,10 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
     <div class="r-comment-body"><p>§40 closed. All eleven status exclusions handle a null status explicitly, each tested against a null-status row (merges <code>c288976cc</code>, <code>92bdfacc4</code>), and a static guard with no exemptions keeps it so (merge <code>d13ba8578</code>). <code>needs_composition</code> is now declared in the schema (merge <code>3ec9b84ae</code>). Eleven stale line-pinned adjudication rows are a follow-on. <a href="/imas-codex/evidence/archive/sn-integrity-backlog-landed.html#s40-null-status-predicates">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s41" data-id="c-run-r-20261028T063853734003-sib-red-suite-diagnosis" data-who="reckon-build" data-when="2026-10-28T07:16:57.807Z">
-    <div class="r-comment-body"><p>41 classified: 36 of the 101 ids are sandbox artefacts (14 the fence&#x27;s read-only /tmp, 22 a git-archive tree&#x27;s missing metadata), 62 are stale tests, 3 are product defects, and 92 of the 101 reproduce at b4254dfbf in the least privileged arm while the 9 cascade ids were retired by 6ff64b2d3 (the worklist names a file, a graph need and a size per cause; see the fragment&#x27;s three-arm table 92/78/56)</p></div>
+    <div class="r-comment-body"><p>41 classified: 36 of the 101 ids are sandbox artefacts (14 the fence's read-only /tmp, 22 a git-archive tree's missing metadata), 62 are stale tests, 3 are product defects, and 92 of the 101 reproduce at b4254dfbf in the least privileged arm while the 9 cascade ids were retired by 6ff64b2d3 (the worklist names a file, a graph need and a size per cause; see the fragment's three-arm table 92/78/56)</p></div>
+</div>
+<div class="r-comment" data-section="s43" data-id="c-run-r-20261028T080003677817-review-of-sib-dd-cocos-older-versions-5d5611c9b800" data-who="reckon-build" data-when="2026-10-28T08:13:21.556Z">
+    <div class="r-comment-body"><p>The commits r-20261028T064300090015-sib-dd-cocos-older-versions gained after its previous review (672737185, 5d5611c9b over base 3a8711083) are reviewed as parsed, scoring goal_fidelity 18, evidence 18, scope_discipline 19, durability 18, fit 16, reuse 18 (total 107), carrying reviewed_base_sha 3a87110834569bb357948fa9b7254628a6a4f0a5 and reviewed_head_sha 5d5611c9b800b829b561a3d413233dd3864cab39, added_failure_count 0, with one non-blocking finding at imas_codex/graph/build_dd.py:955; both prior non-blocking findings (the false XML-schema rationale and the untested authority_sources entry) are answered by the gained commits, the second now guarded by a test whose red log is logs/mutation-authority-sources.log.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

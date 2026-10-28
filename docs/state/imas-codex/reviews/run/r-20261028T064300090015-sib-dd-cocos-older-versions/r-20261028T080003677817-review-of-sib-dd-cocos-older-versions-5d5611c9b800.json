@@ -1,0 +1,57 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/graph/build_dd.py:2032 (phase_build calls _backfill_cocos_labels)",
+    "imas_codex/graph/build_dd.py:2048-2071 (phase_build's stale-label clear reads authority_sources)",
+    "imas_codex/graph/dd_workers.py:316 (phase_build caller in the DD build worker)"
+  ],
+  "completed_at": "2026-10-28T08:13:21.556Z",
+  "dispatched_at": "2026-10-28T08:02:44Z",
+  "findings": [
+    {
+      "file": "imas_codex/graph/build_dd.py",
+      "line": "955",
+      "severity": "non-blocking",
+      "text": "non-blocking: the source-list docstring still states 3.42.2 carries \"~680 labelled fields\" while the same commit's other comment (build_dd.py:923) and the measurement log (623 labelled fields for 3.42.2) both say 623, so the figure a reader weighs the \"384 against 623\" argument with disagrees three lines below it; the code is unaffected, but a stale number is exactly what this commit set out to remove."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read 672737185 and 5d5611c9b against 3a8711083 commit by commit: 672737185 rewrites the three stale XML-schema comments at imas_codex/graph/build_dd.py:917-1052 and adds test_ids_scoped_rebuild_without_a_declaring_version_keeps_older_label at tests/graph/test_dd_cocos_label_preservation.py:249-283, and 5d5611c9b changes the fragment only, recording the fourth test and its mutation.",
+    "done_when": "the done-when asks for four tests that fail on main, a zero-added-failure tests/graph gate, the 128-field fragment and no live-graph write; the manifest records all four and the logs bear them out: logs/negative-control-main.log reads 4 failed / 3 passed with EXIT=1 and its FAILED lines list all four new ids, logs/gate-cocos-head-tree.log and logs/head-cocos-tests.log read 7 passed with EXIT=0, and logs/gate-tests-graph-main.log and logs/gate-tests-graph-head.log both read 3 failed / 646 passed with the same three ids.",
+    "goal": "the node goal is that a DD node whose path exists only in older versions carries its declaring version's COCOS label; imas_codex/graph/build_dd.py:1070 supplies it under the tag inferred_older_version and imas_codex/graph/build_dd.py:2067-2071 keeps that tag through the stale-label clear, which the two gained commits complete.",
+    "manifest": "read; it states four tests fail on main and seven pass at head, carries both suite arms with the same three pre-existing failure ids, and names logs/mutation-authority-sources.log for the source-list mutation whose tail reads 1 failed with EXIT=1.",
+    "write_paths": "the source brief grants imas_codex/graph/build_dd.py, imas_codex/graph/dd_graph_ops.py, tests/graph/test_dd_cocos_label_preservation.py and the fragment plus its figures directory; git diff --name-only 3a8711083 5d5611c9b names only build_dd.py, tests/graph/test_dd_cocos_label_preservation.py and docs/evidence/fragments/sn-integrity-backlog/sib-dd-cocos-older-versions.html, all inside the grant, with dd_graph_ops.py and docs/figures/ untouched."
+  },
+  "justifications": {
+    "durability": "tests/graph/test_dd_cocos_label_preservation.py:280 asserts a seeded inferred_older_version label survives a 4.x-only scoped build and reddens when that source is removed from the authority list at imas_codex/graph/build_dd.py:2067-2071, which logs/mutation-authority-sources.log demonstrates by reinstating the regression rather than by observing green.",
+    "evidence": "every arm the done-when names is recorded rather than claimed: logs/negative-control-main.log shows 4 failed with all four new ids and EXIT=1, logs/gate-tests-graph-main.log and logs/gate-tests-graph-head.log both read 3 failed / 646 passed with the same three ids, and logs/mutation-authority-sources.log shows 1 failed with EXIT=1.",
+    "fit": "the new test follows the file's local-import and GraphClient-context idiom at tests/graph/test_dd_cocos_label_preservation.py:261-275, but the docstring line this commit rewrote at imas_codex/graph/build_dd.py:955 still says 3.42.2 carries \"~680 labelled fields\" against the 623 the same commit states at build_dd.py:923.",
+    "goal_fidelity": "imas_codex/graph/build_dd.py:1070 tags the fourth source and imas_codex/graph/build_dd.py:2067-2071 makes the clear defer to that tag, so the label the node adds survives the scoped rebuild that used to strip it.",
+    "reuse": "the new test reuses the existing _path, _version, _run_build and _labels helpers at tests/graph/test_dd_cocos_label_preservation.py:26-60 and adds no capability of its own; the newest-3.x lookup it exercises stays owned by _reference_cocos_labels at imas_codex/graph/build_dd.py:920.",
+    "scope_discipline": "git diff --name-only 3a8711083 5d5611c9b names only the three declared paths, and 5d5611c9b touches nothing but docs/evidence/fragments/sn-integrity-backlog/sib-dd-cocos-older-versions.html."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is that a DD node whose path exists only in older versions carries its declaring version's COCOS label; imas_codex/graph/build_dd.py:1070 supplies it under the tag inferred_older_version and imas_codex/graph/build_dd.py:2067-2071 keeps that tag through the stale-label clear, which the two gained commits complete.\nVERDICT done_when: the done-when asks for four tests that fail on main, a zero-added-failure tests/graph gate, the 128-field fragment and no live-graph write; the manifest records all four and the logs bear them out: logs/negative-control-main.log reads 4 failed / 3 passed with EXIT=1 and its FAILED lines list all four new ids, logs/gate-cocos-head-tree.log and logs/head-cocos-tests.log read 7 passed with EXIT=0, and logs/gate-tests-graph-main.log and logs/gate-tests-graph-head.log both read 3 failed / 646 passed with the same three ids.\nVERDICT write_paths: the source brief grants imas_codex/graph/build_dd.py, imas_codex/graph/dd_graph_ops.py, tests/graph/test_dd_cocos_label_preservation.py and the fragment plus its figures directory; git diff --name-only 3a8711083 5d5611c9b names only build_dd.py, tests/graph/test_dd_cocos_label_preservation.py and docs/evidence/fragments/sn-integrity-backlog/sib-dd-cocos-older-versions.html, all inside the grant, with dd_graph_ops.py and docs/figures/ untouched.\nVERDICT manifest: read; it states four tests fail on main and seven pass at head, carries both suite arms with the same three pre-existing failure ids, and names logs/mutation-authority-sources.log for the source-list mutation whose tail reads 1 failed with EXIT=1.\nVERDICT diff: read 672737185 and 5d5611c9b against 3a8711083 commit by commit: 672737185 rewrites the three stale XML-schema comments at imas_codex/graph/build_dd.py:917-1052 and adds test_ids_scoped_rebuild_without_a_declaring_version_keeps_older_label at tests/graph/test_dd_cocos_label_preservation.py:249-283, and 5d5611c9b changes the fragment only, recording the fourth test and its mutation.\nCALL_SITES: imas_codex/graph/build_dd.py:2032 (phase_build calls _backfill_cocos_labels), imas_codex/graph/build_dd.py:2048-2071 (phase_build's stale-label clear reads authority_sources), imas_codex/graph/dd_workers.py:316 (phase_build caller in the DD build worker)\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/graph/build_dd.py:1070 tags the fourth source and imas_codex/graph/build_dd.py:2067-2071 makes the clear defer to that tag, so the label the node adds survives the scoped rebuild that used to strip it.\nSCORE evidence: 18\nJUSTIFICATION evidence: every arm the done-when names is recorded rather than claimed: logs/negative-control-main.log shows 4 failed with all four new ids and EXIT=1, logs/gate-tests-graph-main.log and logs/gate-tests-graph-head.log both read 3 failed / 646 passed with the same three ids, and logs/mutation-authority-sources.log shows 1 failed with EXIT=1.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --name-only 3a8711083 5d5611c9b names only the three declared paths, and 5d5611c9b touches nothing but docs/evidence/fragments/sn-integrity-backlog/sib-dd-cocos-older-versions.html.\nSCORE durability: 18\nJUSTIFICATION durability: tests/graph/test_dd_cocos_label_preservation.py:280 asserts a seeded inferred_older_version label survives a 4.x-only scoped build and reddens when that source is removed from the authority list at imas_codex/graph/build_dd.py:2067-2071, which logs/mutation-authority-sources.log demonstrates by reinstating the regression rather than by observing green.\nSCORE fit: 16\nJUSTIFICATION fit: the new test follows the file's local-import and GraphClient-context idiom at tests/graph/test_dd_cocos_label_preservation.py:261-275, but the docstring line this commit rewrote at imas_codex/graph/build_dd.py:955 still says 3.42.2 carries \"~680 labelled fields\" against the 623 the same commit states at build_dd.py:923.\nSCORE reuse: 18\nJUSTIFICATION reuse: the new test reuses the existing _path, _version, _run_build and _labels helpers at tests/graph/test_dd_cocos_label_preservation.py:26-60 and adds no capability of its own; the newest-3.x lookup it exercises stays owned by _reference_cocos_labels at imas_codex/graph/build_dd.py:920.\nFINDING imas_codex/graph/build_dd.py:955 non-blocking: the source-list docstring still states 3.42.2 carries \"~680 labelled fields\" while the same commit's other comment (build_dd.py:923) and the measurement log (623 labelled fields for 3.42.2) both say 623, so the figure a reader weighs the \"384 against 623\" argument with disagrees three lines below it; the code is unaffected, but a stale number is exactly what this commit set out to remove.",
+  "review_run_id": "r-20261028T080003677817-review-of-sib-dd-cocos-older-versions-5d5611c9b800",
+  "reviewed_base_sha": "3a87110834569bb357948fa9b7254628a6a4f0a5",
+  "reviewed_head_sha": "5d5611c9b800b829b561a3d413233dd3864cab39",
+  "reviewed_run_id": "r-20261028T064300090015-sib-dd-cocos-older-versions",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T08:16:34.871068+00:00",
+  "total": 107
+}
