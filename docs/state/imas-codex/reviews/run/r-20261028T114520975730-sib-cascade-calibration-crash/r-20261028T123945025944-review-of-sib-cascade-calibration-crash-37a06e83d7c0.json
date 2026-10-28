@@ -1,0 +1,106 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "baseline_suite (logs/suite-base.log, revision 7034624c1, archive tree) ends EXIT=1 with 6 FAILED ids; after_suite (logs/suite-head-final.log, revision fc2c69052, the landed code) ends EXIT=0 with 8537 passed and zero FAILED lines. added = after minus base = none; the target id is removed by the change and the other five base ids are environment-only archive-tree ids classified by the residual census.",
+  "artifacts": {
+    "solo_runs_at_head": "absent: the five cited solo runs (logs/solo-fix-1..5.log) carry '# revision: a30950407', which predates the fixture commit fc2c69052, and none contains a 'Timeout (0:01:00)!' dump though each call runs 138.46-152.69 s against a 60 s interval",
+    "suite_after_call_seconds": 147.73,
+    "suite_after_summary": "8537 passed, 11 skipped, 274 warnings in 228.05s",
+    "suite_base_summary": "6 failed, 8530 passed, 12 skipped, 244.91s",
+    "target_test_duration_seconds": {
+      "base_two_builds_call_seconds": [
+        140.17,
+        144.7,
+        145.61
+      ],
+      "head_one_build_call_seconds": [
+        138.46,
+        140.59,
+        149.37,
+        147.73
+      ]
+    }
+  },
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/standard_names/review/cascade_calibration.py:481 build()",
+    "imas_codex/standard_names/review/cascade_calibration.py:602 main() calls build() and writes THRESHOLDS_PATH"
+  ],
+  "completed_at": "2026-10-28T12:50:35.509Z",
+  "dispatched_at": "2026-10-28T12:41:28Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-cascade-calibration-crash.html",
+      "line": "124",
+      "severity": "blocking",
+      "text": "the row 'solo runs at head, after the fix' cites five runs whose logs (logs/solo-fix-1.log .. solo-fix-5.log) each record '# revision: a309504070d9bf28cfccafa2077b6c828bb48c43', a commit that predates the faulthandler fixture added in fc2c69052, and none of the five logs contains a 'Timeout (0:01:00)!' dump even though every call runs 138.46-152.69 s against the 60 s interval, while all five base-arm solo logs (solo-run-1..5.log, revision 7034624c1) do dump; those runs therefore neither ran at the landed head nor exercised the dump-adjacent crash the fixture claims to suppress, so the brief's required 'five solo runs at head' arm is absent and the row's label is false."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-cascade-calibration-crash.html",
+      "line": "17",
+      "severity": "blocking",
+      "text": "the summary attributes the crash to a pytest-timeout kill at the 600 s mark, and the node's own logs refute that mechanism: logs/suite-head.log records 'worker gw6 crashed' immediately after the 60 s faulthandler dump in a suite that finished in 269.09 s (so a 600 s mark could not have fired), the two solo deaths are at 75 s and 78 s (logs/solo-run-1.log, logs/solo-run-4.log) which is mid-first-build, and pyproject.toml sets no timeout_method so pytest-timeout's signal method would report a failure rather than a crashed worker; the section 'Where the time goes' records the correct account, so the record's headline contradicts its own body and its own logs."
+    },
+    {
+      "file": "tests/standard_names/test_cascade_calibration.py",
+      "line": "107",
+      "severity": "non-blocking",
+      "text": "the comment justifies deleting the determinism assertion 'assert first == cc.build()' by saying a second call 'doubles a cost that already runs to minutes', and the node's logs contradict that: at base the two-build test spends 140.17, 144.70 and 145.61 s in the call, at head the one-build test spends 138.46, 140.59, 147.73 and 149.37 s, so the removed call bought no measurable time and the repository lost its only assertion that build() is deterministic and idempotent for no measured gain."
+    },
+    {
+      "file": "tests/standard_names/test_cascade_calibration.py",
+      "line": "112",
+      "severity": "non-blocking",
+      "text": "the retained gate compares the rebuilt document against cascade_thresholds.json, which build() itself reads at imas_codex/standard_names/review/cascade_calibration.py:501 and echoes verbatim at :547 as block['rubric']={dimensions,offset}, so those fields cannot differ by construction, and content_sha256 is recomputed from the compared content on both sides and adds no independence; the assertion does discriminate on the derived cutoffs, route counts and intervals (the reverted operating-point row reddens it, logs/negative-control-final.log, EXIT=1), but the self-referential subset must not be read as covered."
+    },
+    {
+      "file": "manifest.md",
+      "line": "test_logs",
+      "severity": "non-blocking",
+      "text": "the reviewed run's test_logs names /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T114520975730-sib-cascade-calibration-crash/logs/sigsegv-profile-arm.log, which does not exist in that directory, so one of the cited arms cannot be opened or checked by a reader."
+    }
+  ],
+  "gate_sources": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T114520975730-sib-cascade-calibration-crash/logs/suite-head-final.log",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T114520975730-sib-cascade-calibration-crash/logs/suite-base.log",
+    "negative_control": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T114520975730-sib-cascade-calibration-crash/logs/negative-control-final.log",
+    "solo_at_head": "absent",
+    "solo_cited": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T114520975730-sib-cascade-calibration-crash/logs/solo-fix-1.log"
+  },
+  "item_verdicts": {
+    "call_sites": "the delta is test-and-docs only; the production code it exercises is cascade_calibration.py:481 build() and the :602 main() that consumes it, neither modified",
+    "diff": "read all three commits against 7034624c1 -- a30950407 (drop the duplicate build), fc2c69052 (add the fixture that cancels the periodic dump), 37a06e83d (rewrite the evidence numbers); 156 insertions and 2 deletions across exactly tests/standard_names/test_cascade_calibration.py and the new evidence fragment",
+    "done_when": "the suite arm and the negative control are recorded and reproduce (8537 passed EXIT=0 at fc2c69052; EXIT=1 with an AssertionError under the reverted row), but the required five solo runs at head do not exist -- the five cited were run at a30950407 without the fixture and without a dump -- so the wall-time-at-head clause is unmet",
+    "goal": "keep test_matched_policy_rebuilds_from_frozen_scores_and_receipts a real rebuild check that finishes and fails as a test; at the head the test rebuilds once and compares the whole document against the frozen artifact at tests/standard_names/test_cascade_calibration.py:112, and it reddens with an AssertionError under the reverted row",
+    "manifest": "read at status complete; the baseline and after suite blocks reconcile with their logs, but the five solo-fix logs it calls the post-fix arm are at revision a30950407 rather than the head, and test_logs names a sigsegv-profile-arm.log that is absent",
+    "write_paths": "the reviewed node declared four write paths (cascade_calibration.py, the test file, the evidence fragment and a figures directory); the delta changes only the test file and the evidence fragment, both inside the declared scope"
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_cascade_calibration.py:112 reddens when the operating-point row is reverted (logs/negative-control-final.log, EXIT=1), but the determinism assertion was deleted on a cost premise its own logs refute and the fixture at :84-96 is guarded by no assertion.",
+    "evidence": "logs/suite-base.log and logs/suite-head-final.log are real arms ending EXIT=1 and EXIT=0 and the ids derive cleanly, but the at-head solo arm is absent and the fragment's mechanism at line 17 is refuted by logs/suite-head.log and its own body.",
+    "fit": "the fixture and the reworded comment follow the module's existing idiom and introduce no plan, ticket or version identifier.",
+    "goal_fidelity": "at fc2c69052 the target id passes in the suite in 147.73 s and, on the reverted row, fails with AssertionError instead of crashing (logs/negative-control-final.log).",
+    "reuse": "a search over tests/ and pyproject.toml for faulthandler handling found only tests/conftest.py:147's thread-bounded probe against the same interval -- a different capability -- so the fixture duplicates no existing mechanism.",
+    "scope_discipline": "git diff --stat 7034624c1..37a06e83d changes only tests/standard_names/test_cascade_calibration.py and docs/evidence/fragments/sn-integrity-backlog/sib-cascade-calibration-crash.html, inside the declared scope."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is that test_matched_policy_rebuilds_from_frozen_scores_and_receipts finishes and, when the evidence disagrees, fails as a test rather than crashing; at 37a06e83d it rebuilds once and compares the whole document to the frozen artifact at tests/standard_names/test_cascade_calibration.py:112, passes in the suite at 147.73 s, and reddens with an AssertionError on a reverted operating-point row.\nVERDICT done_when: the done_when asks for the mechanism named with evidence, the id passing in the suite and in five solo runs at head each inside its timeout with wall time recorded, a scratch reversion failing it with an assertion, zero added ids, and the fragment recording it; the suite arm (logs/suite-head-final.log, 8537 passed, EXIT=0, target 147.73 s), the negative control (logs/negative-control-final.log, EXIT=1, AssertionError at test_cascade_calibration.py:112), zero added ids and the fragment are all present, but the five solo runs were taken at a30950407 -- before the fixture commit fc2c69052 -- and none of them contains the 60 s dump that every base-arm solo run contains, so that arm is not at head.\nVERDICT write_paths: the node declared imas_codex/standard_names/review/cascade_calibration.py, tests/standard_names/test_cascade_calibration.py, docs/evidence/fragments/sn-integrity-backlog/sib-cascade-calibration-crash.html and docs/figures/sn-integrity-backlog/sib-cascade-calibration-crash; git diff --stat 7034624c1..37a06e83d touches only the test file (25 changed lines) and the new fragment (133 lines), and production code is untouched.\nVERDICT manifest: read at status complete; baseline_suite names logs/suite-base.log at 7034624c1 (6 ids, EXIT=1) and after_suite names logs/suite-head-final.log at fc2c69052 (0 ids, EXIT=0), both of which reconcile with the logs, but its artifacts line calls the solo-fix-1..5 runs (revision a30950407) 'solo runs at head after the fix' and its test_logs names logs/sigsegv-profile-arm.log, which is not on disk.\nVERDICT diff: read a30950407, fc2c69052 and 37a06e83d against 7034624c1; a30950407 deletes 'assert first == cc.build()', fc2c69052 adds the no_periodic_stack_dump fixture and its function argument, and 37a06e83d rewrites the fragment's gate table; the fragment's own section 'Where the time goes' is accurate about the frames (evaluation.py:214, eval reporting via cascade_calibration.py:413 and :449, vocab_loaders.py:904) while its summary paragraph states a timeout-kill mechanism the logs do not support.\nCALL_SITES: imas_codex/standard_names/review/cascade_calibration.py:481 build(), imas_codex/standard_names/review/cascade_calibration.py:602 main() calls build() and writes THRESHOLDS_PATH\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: tests/standard_names/test_cascade_calibration.py:112 passes at fc2c69052 in 147.73 s and fails with AssertionError under the reverted row, so the id finishes and discriminates as the goal asks.\nSCORE evidence: 8\nJUSTIFICATION evidence: logs/suite-base.log and logs/suite-head-final.log are genuine arms and the ids derive from them, but the fragment's mechanism at :17 is refuted by logs/suite-head.log, the at-head solo arm at :124 is absent, and manifest.md names a log that does not exist.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 7034624c1..37a06e83d touches only tests/standard_names/test_cascade_calibration.py and docs/evidence/fragments/sn-integrity-backlog/sib-cascade-calibration-crash.html, both inside the declared paths.\nSCORE durability: 13\nJUSTIFICATION durability: the comparison at tests/standard_names/test_cascade_calibration.py:112 reddens on the reverted row (logs/negative-control-final.log, EXIT=1) but :107 deleted the determinism assertion on a cost premise its own logs refute and :84-96's fixture is guarded by nothing.\nSCORE fit: 18\nJUSTIFICATION fit: the fixture at tests/standard_names/test_cascade_calibration.py:84-96 follows the module's fixture and docstring idiom and introduces no plan, ticket or version identifier.\nSCORE reuse: 20\nJUSTIFICATION reuse: no owner for per-test faulthandler suppression exists -- a search over tests/ and pyproject.toml found only tests/conftest.py:147's unrelated thread-bounded probe -- so the fixture forks nothing.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-cascade-calibration-crash.html:124 blocking: the 'solo runs at head, after the fix' row cites five runs whose logs record '# revision: a30950407', predating the fixture commit fc2c69052, and none of the five logs carries a 'Timeout (0:01:00)!' dump although every call runs 138.46-152.69 s against the 60 s interval, while all five base-arm solo logs do dump, so those runs neither ran at head nor exercised the crash path and the required five-solo-at-head arm is missing.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-cascade-calibration-crash.html:17 blocking: the summary states the crash was a pytest-timeout kill at the 600 s mark, which logs/suite-head.log refutes -- its worker crashed right after the 60 s dump inside a suite that finished in 269.09 s, and the two solo deaths are at 75 s and 78 s mid-first-build -- and pyproject.toml sets no timeout_method, so the headline contradicts the record's own body and logs.\nFINDING tests/standard_names/test_cascade_calibration.py:107 non-blocking: the comment says a second build 'doubles a cost that already runs to minutes', but the base arm's two-build call costs 140.17-145.61 s against 138.46-149.37 s for the head's one-build call, so deleting the determinism assertion 'assert first == cc.build()' bought no measurable time and dropped the repository's only idempotency check on build().\nFINDING tests/standard_names/test_cascade_calibration.py:112 non-blocking: the retained gate compares the rebuilt document against cascade_thresholds.json, which build() reads itself at imas_codex/standard_names/review/cascade_calibration.py:501 and echoes verbatim at :547 as block['rubric'], so those fields cannot differ, and content_sha256 is recomputed on both sides; only the derived cutoffs, route counts and intervals carry the discrimination.\nFINDING manifest.md:test_logs non-blocking: the reviewed run's test_logs cites logs/sigsegv-profile-arm.log, which is not present in the run's logs directory, so that arm cannot be opened or checked.",
+  "review_run_id": "r-20261028T123945025944-review-of-sib-cascade-calibration-crash-37a06e83d7c0",
+  "reviewed_base_sha": "7034624c1abc58ffc697ee57ebfc2f1dc1be109e",
+  "reviewed_head_sha": "37a06e83d7c07a5960a9eea42621bc41d201a1f0",
+  "reviewed_run_id": "r-20261028T114520975730-sib-cascade-calibration-crash",
+  "scores": {
+    "durability": 13,
+    "evidence": 8,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T12:52:09.181875+00:00",
+  "total": 96
+}
