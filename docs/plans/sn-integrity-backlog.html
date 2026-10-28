@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="266">
+<meta name="plan-version" content="267">
 <meta name="plan-modified" content="2026-10-28">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -861,6 +861,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s41" data-id="c-run-r-20261028T063853734003-sib-red-suite-diagnosis" data-who="reckon-build" data-when="2026-10-28T07:16:57.807Z">
     <div class="r-comment-body"><p>41 classified: 36 of the 101 ids are sandbox artefacts (14 the fence's read-only /tmp, 22 a git-archive tree's missing metadata), 62 are stale tests, 3 are product defects, and 92 of the 101 reproduce at b4254dfbf in the least privileged arm while the 9 cascade ids were retired by 6ff64b2d3 (the worklist names a file, a graph need and a size per cause; see the fragment's three-arm table 92/78/56)</p></div>
+</div>
+<div class="r-comment" data-section="s41" data-id="c-run-r-20261028T085938323214-review-of-sib-red-export-accounting-60e41670ffdb" data-who="reckon-build" data-when="2026-10-28T09:12:49.661Z">
+    <div class="r-comment-body"><p>independent review of r-20261028T075932338031-sib-red-export-accounting at b14dec11..60e41670f — six dimensions scored 19/11/18/17/18/20, zero added failure ids against the reviewed arms, one blocking finding that the baseline arm&#x27;s cited log is truncated and mis-cited, two non-blocking findings.</p></div>
 </div>
 <div class="r-comment" data-section="s42" data-id="c-run-r-20261028T075816173791-review-of-sib-split-name-bindings-53d7d9f4f1e0" data-who="reckon-build" data-when="2026-10-28T08:19:13.964Z">
     <div class="r-comment-body"><p>Reviewed r-20261028T064048248418-sib-split-name-bindings at b4254dfbf..53d7d9f4f, scored goal_fidelity 20, evidence 17, scope_discipline 18, durability 19, fit 18, reuse 15, with added_failure_count 0; two non-blocking findings — the evidence fragment overstates the removed bindings as eleven (actual ten bindings and two dynamic lookups, still 12 sites) and the new guard matches only a direct globals() call so an aliased dict evades it. Durability was measured, not inferred: reinstating the exact base spelling at graph_ops.py:303 in a scratch copy of the head tree made test_no_dynamic_name_binding fail.</p></div>

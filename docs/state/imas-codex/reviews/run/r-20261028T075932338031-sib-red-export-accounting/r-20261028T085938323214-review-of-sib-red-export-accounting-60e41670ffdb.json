@@ -1,0 +1,70 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run baseline_suite and after_suite id sets: 0 added, 5 removed, exactly the five ids in scope; the head set is corroborated by gate-head.log while the baseline set rests on the run record alone because gate-main.log is truncated and no preserved artefact carries its id list.",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/cli/sn.py:4504 _run_export_cli",
+    "imas_codex/cli/sn.py:4635 staging export path",
+    "imas_codex/standard_names/catalog_release.py:2290 release gate"
+  ],
+  "completed_at": "2026-10-28T09:12:49.661Z",
+  "dispatched_at": "2026-10-28T09:02:18Z",
+  "findings": [
+    {
+      "file": "gate-main.log",
+      "line": "1",
+      "severity": "blocking",
+      "text": "blocking: the log the manifest cites as the baseline arm is truncated at 77% of the suite with no summary line, no EXIT= line and zero FAILED lines, and its header names tree main2 at revision 282260d6c while baseline_suite declares tree gate/main at 352e0096a; no preserved artefact carries the 71 baseline failure ids at all \u2014 the run stream and the harness transcript hold the \"71 failed, 8452 passed\" summary but at most one FAILED id per record \u2014 so the id list behind the \"zero added\" claim cannot be read from any file a later reader can open; the head arm is corroborated line for line and both revisions carry a byte-identical export.py, so the repair is to re-record or re-point the baseline arm, not to re-measure."
+    },
+    {
+      "file": "imas_codex/standard_names/export.py",
+      "line": "3039",
+      "severity": "non-blocking",
+      "text": "non-blocking: the root is installed at this one caller instead of at the owner that needs it \u2014 classify_sourceless_standard_names reads foundation.get_services() at graph_supersession.py:3023-3124 \u2014 so any other entrypoint reaching the storage layer without importing graph_ops still refuses; the worker recorded this under outside_scope and the module is outside its fence."
+    },
+    {
+      "file": "tests/standard_names/test_manifest_generability.py",
+      "line": "49",
+      "severity": "non-blocking",
+      "text": "non-blocking: the three doubles identify the audit's count reads by Cypher substring (\"AS total\", then \"AS names\" with \"AS projections\"), so renaming an alias in graph_supersession.py turns the doubles into failing reads rather than into a silent wrong answer; loud, but the coupling belongs to the audit's query text rather than to a shared fixture."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "Read both commits against b14dec11 \u2014 b749ee5c4 adds one lazy-root call plus zero-count rows to three test doubles and rewrites one docstring, 60e41670f adds the 90-line landing fragment; no assertion is changed or removed.",
+    "done_when": "The done_when is that every C4 id passes at head and the gate adds zero failure ids; the manifest records both arms with literal commands, and gate-head.log ends \"66 failed, 8457 passed, 12 skipped\" with EXIT=1 and its 66 FAILED lines match after_suite.failure_ids exactly, but the baseline arm it cites (gate-main.log) ends mid-run at 77% with no summary and no EXIT=.",
+    "goal": "The node's goal was to settle the five C4 export ids and name a fix per id; imas_codex/standard_names/export.py:3029-3039 now installs the composition root before the source audit, and docs/evidence/fragments/sn-integrity-backlog/sib-red-export-accounting.html carries one line per id classifying four as code fixes and the refusal as already writing .export_report.json.",
+    "manifest": "Read at the reviewed run directory; it records both gate arms as JSON, a negative control log, the outside-scope pair, and six rubric lines, but its baseline_suite declares completed true for a log that has no summary line.",
+    "write_paths": "The manifest grants export.py, the three test files and the landing fragment; git diff b14dec11..60e41670f changes exactly those five paths and nothing else."
+  },
+  "justifications": {
+    "durability": "importing imas_codex.standard_names.export leaves graph_foundation._services uninitialised (verified on the head tree), so removing the call at export.py:3039 makes test_export_empty_refusal.py:71 and both manifest-generability assertions raise \"Graph services are not wired\"; the added lines themselves assert nothing, so what guards the change is those pre-existing assertions.",
+    "evidence": "gate-head.log:1667-1668 carries \"66 failed, 8457 passed\" and EXIT=1 matching the manifest's 66 ids, but gate-main.log has only 116 lines, no summary, no EXIT= and zero FAILED lines, and its header names revision 282260d6c/tree main2 while baseline_suite declares 352e0096a/tree gate/main.",
+    "fit": "the fix uses a lazy in-function import and one call, matching export.py's existing lazy-import idiom at :3027-3031, and the added comments state the mechanism without a plan or ticket reference.",
+    "goal_fidelity": "imas_codex/standard_names/export.py:3039 calls graph_foundation.services_for_call() before classify_sourceless_standard_names, which is exactly the seam whose absence made every export refuse, and the fragment records the decision per id.",
+    "reuse": "the capability search over graph_store found the owner imas_codex/standard_names/graph_store/graph_foundation.py:80 services_for_call, which the change calls rather than re-implementing; the test count rows mirror the real aliases at graph_supersession.py:3035 and :3095.",
+    "scope_discipline": "git diff --stat b14dec11..60e41670f lists only the four granted code/test paths and the granted fragment, with no change outside the fence."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The node's goal was to settle the five C4 export ids and name a fix per id; imas_codex/standard_names/export.py:3029-3039 now installs the composition root before the source audit, and docs/evidence/fragments/sn-integrity-backlog/sib-red-export-accounting.html carries one line per id classifying four as code fixes and the refusal as already writing .export_report.json.\nVERDICT done_when: The done_when is that every C4 id passes at head and the gate adds zero failure ids; the manifest records both arms with literal commands, and gate-head.log ends \"66 failed, 8457 passed, 12 skipped\" with EXIT=1 and its 66 FAILED lines match after_suite.failure_ids exactly, but the baseline arm it cites (gate-main.log) ends mid-run at 77% with no summary and no EXIT=.\nVERDICT write_paths: The manifest grants export.py, the three test files and the landing fragment; git diff b14dec11..60e41670f changes exactly those five paths and nothing else.\nVERDICT manifest: Read at the reviewed run directory; it records both gate arms as JSON, a negative control log, the outside-scope pair, and six rubric lines, but its baseline_suite declares completed true for a log that has no summary line.\nVERDICT diff: Read both commits against b14dec11 \u2014 b749ee5c4 adds one lazy-root call plus zero-count rows to three test doubles and rewrites one docstring, 60e41670f adds the 90-line landing fragment; no assertion is changed or removed.\nCALL_SITES: imas_codex/cli/sn.py:4504 _run_export_cli, imas_codex/cli/sn.py:4635 staging export path, imas_codex/standard_names/catalog_release.py:2290 release gate\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/export.py:3039 calls graph_foundation.services_for_call() before classify_sourceless_standard_names, which is exactly the seam whose absence made every export refuse, and the fragment records the decision per id.\nSCORE evidence: 11\nJUSTIFICATION evidence: gate-head.log:1667-1668 carries \"66 failed, 8457 passed\" and EXIT=1 matching the manifest's 66 ids, but gate-main.log has only 116 lines, no summary, no EXIT= and zero FAILED lines, and its header names revision 282260d6c/tree main2 while baseline_suite declares 352e0096a/tree gate/main.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: git diff --stat b14dec11..60e41670f lists only the four granted code/test paths and the granted fragment, with no change outside the fence.\nSCORE durability: 17\nJUSTIFICATION durability: importing imas_codex.standard_names.export leaves graph_foundation._services uninitialised (verified on the head tree), so removing the call at export.py:3039 makes test_export_empty_refusal.py:71 and both manifest-generability assertions raise \"Graph services are not wired\"; the added lines themselves assert nothing, so what guards the change is those pre-existing assertions.\nSCORE fit: 18\nJUSTIFICATION fit: the fix uses a lazy in-function import and one call, matching export.py's existing lazy-import idiom at :3027-3031, and the added comments state the mechanism without a plan or ticket reference.\nSCORE reuse: 20\nJUSTIFICATION reuse: the capability search over graph_store found the owner imas_codex/standard_names/graph_store/graph_foundation.py:80 services_for_call, which the change calls rather than re-implementing; the test count rows mirror the real aliases at graph_supersession.py:3035 and :3095.\nFINDING gate-main.log:1 blocking: the log the manifest cites as the baseline arm is truncated at 77% of the suite with no summary line, no EXIT= line and zero FAILED lines, and its header names tree main2 at revision 282260d6c while baseline_suite declares tree gate/main at 352e0096a; no preserved artefact carries the 71 baseline failure ids at all \u2014 the run stream and the harness transcript hold the \"71 failed, 8452 passed\" summary but at most one FAILED id per record \u2014 so the id list behind the \"zero added\" claim cannot be read from any file a later reader can open; the head arm is corroborated line for line and both revisions carry a byte-identical export.py, so the repair is to re-record or re-point the baseline arm, not to re-measure.\nFINDING imas_codex/standard_names/export.py:3039 non-blocking: the root is installed at this one caller instead of at the owner that needs it \u2014 classify_sourceless_standard_names reads foundation.get_services() at graph_supersession.py:3023-3124 \u2014 so any other entrypoint reaching the storage layer without importing graph_ops still refuses; the worker recorded this under outside_scope and the module is outside its fence.\nFINDING tests/standard_names/test_manifest_generability.py:49 non-blocking: the three doubles identify the audit's count reads by Cypher substring (\"AS total\", then \"AS names\" with \"AS projections\"), so renaming an alias in graph_supersession.py turns the doubles into failing reads rather than into a silent wrong answer; loud, but the coupling belongs to the audit's query text rather than to a shared fixture.",
+  "review_run_id": "r-20261028T085938323214-review-of-sib-red-export-accounting-60e41670ffdb",
+  "reviewed_base_sha": "b14dec1142d28f673f680fe3f9f2913644e387c7",
+  "reviewed_head_sha": "60e41670ffdb714a11857462a98ed1cab62bd86b",
+  "reviewed_run_id": "r-20261028T075932338031-sib-red-export-accounting",
+  "scores": {
+    "durability": 17,
+    "evidence": 11,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T09:12:13.184700+00:00",
+  "total": 103
+}
