@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="279">
+<meta name="plan-version" content="280">
 <meta name="plan-modified" content="2026-10-28">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -891,6 +891,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s41" data-id="c-run-r-20261028T075303780622-sib-red-transaction-doubles" data-who="reckon-build" data-when="2026-10-28T09:40:50Z">
     <div class="r-comment-body"><p>tests/standard_names/graph_transaction_doubles.py is the one shared double; all 15 C1 suites now drive it and their local row queues and client fakes are gone</p></div>
+</div>
+<div class="r-comment" data-section="s41" data-id="c-run-r-20261028T100115407429-review-of-sib-services-root-at-owner-f39a37bd84a8" data-who="reckon-build" data-when="2026-10-28T10:07:37.668Z">
+    <div class="r-comment-body"><p>review of sib-services-root-at-owner at f39a37bd8 against base abb08fa730: goal_fidelity 19, evidence 18, scope_discipline 20, durability 17, fit 18, reuse 19; added_failure_count 0 (both arms 52 failed, delta zero); two non-blocking findings (missing per-test timeout on the fresh-interpreter probe, and measurement_module naming the worktree module rather than the archive-tree module)</p></div>
 </div>
 <div class="r-comment" data-section="s42" data-id="c-run-r-20261028T075816173791-review-of-sib-split-name-bindings-53d7d9f4f1e0" data-who="reckon-build" data-when="2026-10-28T08:19:13.964Z">
     <div class="r-comment-body"><p>Reviewed r-20261028T064048248418-sib-split-name-bindings at b4254dfbf..53d7d9f4f, scored goal_fidelity 20, evidence 17, scope_discipline 18, durability 19, fit 18, reuse 15, with added_failure_count 0; two non-blocking findings — the evidence fragment overstates the removed bindings as eleven (actual ten bindings and two dynamic lookups, still 12 sites) and the new guard matches only a direct globals() call so an aliased dict evades it. Durability was measured, not inferred: reinstating the exact base spelling at graph_ops.py:303 in a scratch copy of the head tree made test_no_dynamic_name_binding fail.</p></div>

@@ -1,0 +1,59 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "imas_codex/standard_names/graph_store/graph_supersession.py:126",
+    "imas_codex/standard_names/graph_store/graph_audits.py:53",
+    "imas_codex/standard_names/graph_store/graph_review_persistence.py:42",
+    "imas_codex/standard_names/graph_store/__init__.py:23",
+    "imas_codex/standard_names/export.py:3034"
+  ],
+  "completed_at": "2026-10-28T10:07:37.668Z",
+  "dispatched_at": "2026-10-28T10:02:53Z",
+  "findings": [
+    {
+      "id": "fd84fcfae14",
+      "severity": "non-blocking",
+      "text": "tests/standard_names/test_services_root_at_owner.py:56 non-blocking: the test declares no @pytest.mark.timeout, so it runs under the project-wide 30 s ceiling in pyproject.toml:1082 while spawning a fresh interpreter that imports the whole graph facade; it measured about 17 s of call+setup at rest, and the sibling probe tests/standard_names/test_pool_registry_imports.py:31 declares a 300 s timeout for exactly this contention reason, so this guard will flake rather than report a regression on a loaded node."
+    },
+    {
+      "id": "ff02e9c66c9",
+      "severity": "non-blocking",
+      "text": "manifest.md:13 non-blocking: measurement_module records the worker worktree's graph_foundation.py, and every gate log's '# module:' header line repeats that worktree path even though the gate ran from the archive tree named in the same log's '# cwd:' and '# tree:' lines; negative-control-main.log's trailing line does record the tree-resolved module, so the provenance line the manifest carries is not the module the gate actually imported."
+    }
+  ],
+  "justifications": {
+    "durability": "tests/standard_names/test_services_root_at_owner.py:61 asserts the subprocess exit code is 0, which the main-tree control shows reddens (exit 3) when the lazy install is absent, but the test declares no per-test timeout against pyproject.toml:1082's 30 s default while its probe boots a fresh interpreter.",
+    "evidence": "negative-control-main.log records 1 failed / EXIT=1 at abb08fa730 with 'the reader refused: Graph services are not wired; import graph_ops first', and baseline-main.log/head.log summaries are 52 failed, 8470 passed and 52 failed, 8471 passed with an empty failure-id delta computed from the two id files.",
+    "fit": "The fresh-interpreter subprocess probe follows the existing pattern in tests/standard_names/test_pool_registry_imports.py, and the new names carry no plan labels or version suffixes.",
+    "goal_fidelity": "imas_codex/standard_names/graph_store/graph_foundation.py:73 makes get_services() install the composition root on first read, so every reader that goes through the owner is wired regardless of which entrypoint imported first, and export.py's per-caller install is removed.",
+    "reuse": "The lazy-install logic was moved out of services_for_call() and into its owner get_services() at graph_foundation.py:73-87, with services_for_call() delegating rather than duplicating, so no capability is forked.",
+    "scope_discipline": "Every path in abb08fa730..f39a37bd84a8 (graph_foundation.py, export.py, tests/standard_names/test_services_root_at_owner.py, the evidence fragment) is inside the four used entries of the manifest's declared write paths, and the declared figures directory is simply unused."
+  },
+  "overrides": {},
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is that every entrypoint into the storage layer gets the graph services; imas_codex/standard_names/graph_store/graph_foundation.py:73-87 makes get_services() install the composition root on first read, so a reader no longer depends on some other module having imported graph_ops.\nVERDICT done_when: the done_when asks for a test that fails on main and passes at head with zero added failure ids; negative-control-main.log records that failure at abb08fa730 and baseline-main.failure-ids.txt against head.failure-ids.txt is 52 ids against 52 identical ids.\nVERDICT write_paths: the manifest declares graph_foundation.py, export.py, the new test, the evidence fragment and a figures directory; the diff touches only the first four, every one inside the declared set.\nVERDICT manifest: read manifest.md; it records commits 469ad08f7, 19fbddd94 and f39a37bd8, both arms at 52 failed / 8470 and 8471 passed, and the negative-control log whose text carries the refusal line.\nVERDICT diff: read the three commits against base abb08fa730; the product change is 12 insertions and 13 deletions in graph_foundation.py and export.py plus a 63-line new test, with the fragment and its correction in their own commits.\nCALL_SITES: imas_codex/standard_names/graph_store/graph_supersession.py:126, imas_codex/standard_names/graph_store/graph_audits.py:53, imas_codex/standard_names/graph_store/graph_review_persistence.py:42, imas_codex/standard_names/graph_store/__init__.py:23, imas_codex/standard_names/export.py:3034\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: graph_foundation.py:73-87 installs the root on first read and export.py:3026-3034 no longer installs it per caller.\nSCORE evidence: 18\nJUSTIFICATION evidence: negative-control-main.log ends in EXIT=1 with the refusal quoted, and both arm logs end in EXIT=1 with summaries of 52 failed / 8470 and 8471 passed.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: all four changed paths sit inside the manifest's declared write paths.\nSCORE durability: 17\nJUSTIFICATION durability: tests/standard_names/test_services_root_at_owner.py:61 goes red on the reinstated defect as negative-control-main.log shows, but it carries no timeout mark against pyproject.toml:1082's 30 s default.\nSCORE fit: 18\nJUSTIFICATION fit: the probe idiom matches tests/standard_names/test_pool_registry_imports.py:45 but omits that sibling's explicit PYTHONPATH env construction.\nSCORE reuse: 19\nJUSTIFICATION reuse: graph_foundation.py:80-87 moves the lazy install into get_services() and leaves services_for_call() delegating, so no capability is forked.\nFINDING tests/standard_names/test_services_root_at_owner.py:56 non-blocking: the test declares no @pytest.mark.timeout, so it is governed by the 30 s project default while spawning a fresh interpreter that imports the graph facade.\nFINDING manifest.md:13 non-blocking: measurement_module names the worker worktree's module rather than the archive-tree module the gate resolved, and each log's '# module:' header repeats the worktree path.\n",
+  "review_run_id": "r-20261028T100115407429-review-of-sib-services-root-at-owner-f39a37bd84a8",
+  "reviewed_base_sha": "abb08fa730ba4918a657c7bea8614fcb2f5bbf80",
+  "reviewed_head_sha": "f39a37bd84a8a76dc106e2f0a1da5525197c936a",
+  "reviewed_run_id": "r-20261028T094119490931-sib-services-root-at-owner",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T10:08:39.128828+00:00",
+  "total": 111,
+  "verdicts": {
+    "diff": "read commit by commit: 469ad08f7 is 12 insertions and 13 deletions across graph_foundation.py and export.py plus a 63-line new test, 19fbddd94 adds the 103-line fragment, and f39a37bd8 corrects the fragment's diff figures to match the numstat.",
+    "done_when": "the done_when asks for a test that fails on main and passes at head with zero added failure ids; negative-control-main.log shows that failure at abb08fa730 and the two arms' failure-id files are identical at 52 ids each.",
+    "goal": "the node goal is that every entrypoint into the storage layer gets the graph services; graph_foundation.py:73-87 makes get_services() install the composition root on first read, so the reader no longer depends on some other module having imported graph_ops.",
+    "manifest": "manifest.md reports commits 469ad08f7, 19fbddd94 and f39a37bd8 with both suite arms, the failure-id delta and the negative-control log path recorded.",
+    "write_paths": "the manifest declares graph_foundation.py, export.py, the new test, the evidence fragment and a figures directory; the diff of abb08fa730..f39a37bd84a8 touches only the first four, all inside the declaration."
+  }
+}
