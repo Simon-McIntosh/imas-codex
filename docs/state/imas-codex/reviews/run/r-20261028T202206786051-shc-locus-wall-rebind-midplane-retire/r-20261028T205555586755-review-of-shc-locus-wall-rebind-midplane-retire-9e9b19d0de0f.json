@@ -1,0 +1,76 @@
+{
+  "added_failure_count": 0,
+  "added_failure_derivation": "Both arms are absent in the reviewed manifest: baseline_suite and after_suite each read 'not run' because no test path is reachable from the node's write scope (no product source or test changed). With neither arm run there is no observable failure delta, so added_failure_count is 0 and added_failure_ids is empty; this records an absence of suite evidence, not a measured green.",
+  "added_failure_ids": [],
+  "completed_at": "2026-10-28T21:05:59.489Z",
+  "dispatched_at": "2026-10-28T20:57:41Z",
+  "emitted": [
+    "VERDICT goal: the node goal is to apply the lead's ruling to rebind the wall potential's DD source and retire the outboard-midplane name; the landed runner, authorities and fragment do both (readback: wall path sole producer of electrostatic_potential_at_wall, outboard name superseded onto electrostatic_potential_at_langmuir_probe_position).",
+    "VERDICT done_when: the done_when names the wall path as single producing source, the base keeping six, the midplane retired with one successor edge, the classifier clean, the harmonize report, and a real EXIT=; check_readback at ...-run.py:733 asserts every state clause and logs/readback.log records EXIT=0, but no clause asserts the signed-exchange mechanism the done_when also names.",
+    "VERDICT write_paths: the declared write paths are the fragment html, the runner, the two authority JSONs and the figure dir; the diff adds exactly the four files and nothing else.",
+    "VERDICT manifest: read; it states status complete with commits b4b081b68, 588f5418b, 9e9b19d0d, records all eight logs ending EXIT=0, and discloses the adapter deviation and one retry under checkpoint/blockers.",
+    "VERDICT diff: read commit by commit against base b548911a4; b4b081b68 adds the runner and both authorities (1191 lines), 588f5418b adds the 3710-line fragment and a small runner fix, 9e9b19d0d adds the two-line landing paragraph; all inside the declared scope.",
+    "CALL_SITES: none",
+    "SCORE goal_fidelity: 15",
+    "JUSTIFICATION goal_fidelity: the outcome at logs/readback.log matches the ruling, but the wall move ran through retarget_standard_name_sources (...-run.py:630) rather than the ruled signed exchange.",
+    "SCORE evidence: 12",
+    "JUSTIFICATION evidence: the gate and its refusals are recorded (logs/readback.log, logs/stale-authority-refusal.log), yet the fragment's 'State before' table at ...html:25 reports post-write counts under a 'read live before any write' caption.",
+    "SCORE scope_discipline: 20",
+    "JUSTIFICATION scope_discipline: git diff b548911a4..9e9b19d0d touches only the four declared evidence paths, with the allowed figure directory unused.",
+    "SCORE durability: 12",
+    "JUSTIFICATION durability: check_readback (...-run.py:733) fails on a doctored readback (logs/readback-doctored-refusal.log EXIT=1) and would redden if the graph regressed, but it is a manually-run evidence script outside any test suite.",
+    "SCORE fit: 18",
+    "JUSTIFICATION fit: the runner follows the sibling evidence-runner shape and its commits carry conventional subjects with bodies, matching the docs/evidence/fragments/sn-harmonize-command/ neighbours.",
+    "SCORE reuse: 19",
+    "JUSTIFICATION reuse: the runner calls the owners retarget_standard_name_sources (provenance_lifecycle.py:505), build_repair_authority (repair_authority.py:135) and apply_signed_manifest rather than forking graph logic.",
+    "FINDING docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire.html:25 blocking: the 'State before' table is sourced from post-write readback data but captioned as read before any write, showing base 6 / wall 1 / midplane superseded where the real pre-state is base 7 / wall 0 / midplane exhausted.",
+    "FINDING docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py:630 blocking: the wall rebind used the unsigned retarget_standard_name_sources writer instead of the ruled signed dd-source-exchange, and did not stop on the exchange refusal as the brief directed.",
+    "FINDING docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py:733 non-blocking: check_readback asserts the resulting state but not the done_when's signed-exchange clause, so the mechanism deviation is invisible to the gate."
+  ],
+  "evidence_inputs": {
+    "doctored_control": "logs/readback-doctored-refusal.log EXIT=1 names the two wall producers",
+    "harmonize": "logs/harmonize.log EXIT=0, members 4, drift 0.5, lint_total 0, not applied",
+    "postcondition_read": "logs/readback.json: base producers 6, wall producers 1, wall projections [electrostatic_potential_at_wall], midplane superseded with one receipt-carrying successor",
+    "precondition_read": "logs/read-state.json: base producers 7, wall producers 0, midplane stage exhausted",
+    "stale_controls": "logs/stale-authority-refusal.log EXIT=1 (signature mismatch); logs/migration-stale-cas-refusal.log EXIT=1 (compare-and-set)"
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire.html",
+      "line": 25,
+      "severity": "blocking",
+      "text": "the 'State before' table is populated from the post-write read, not the precondition read, while its caption says 'read live before any write' \u2014 it shows electrostatic_potential at 6 producers, electrostatic_potential_at_wall at 1, and electrostatic_potential_at_outboard_midplane at superseded, whereas logs/read-state.json (the genuine pre-write read) shows 7, 0 and exhausted; the required evidence fragment therefore documents a false before-state for the very change it records"
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py",
+      "line": 630,
+      "severity": "blocking",
+      "text": "the wall rebind was applied by the unsigned compare-and-set writer retarget_standard_name_sources instead of the ruling's signed dd-source-exchange adapter, and instead of stopping on the exchange refusal as the brief's guard directed ('If a writer refuses, stop and report its refusal verbatim'); a signed ordinary-source-migration repair program already exists at imas_codex/standard_names/signed_manifest.py:799, so the deviation from the ruled signed mechanism needs coordinator adjudication rather than passing silently"
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py",
+      "line": 733,
+      "severity": "non-blocking",
+      "text": "check_readback asserts the resulting graph state but not the done_when's 'through a signed source exchange' clause, so the mechanism deviation above passes the gate unremarked; the gate asserts outcome only"
+    }
+  ],
+  "outside_scope": "none",
+  "project": "imas-codex",
+  "review_run_id": "r-20261028T205555586755-review-of-shc-locus-wall-rebind-midplane-retire-9e9b19d0de0f",
+  "reviewed_base_sha": "b548911a44f1398115d6db9ba41e5fdf77762f22",
+  "reviewed_head_sha": "9e9b19d0de0fb7edf06df4d0f12c6a5b3bbe22e0",
+  "reviewed_run_id": "r-20261028T202206786051-shc-locus-wall-rebind-midplane-retire",
+  "rubric": "landed",
+  "scores": {
+    "durability": 12,
+    "evidence": 12,
+    "fit": 18,
+    "goal_fidelity": 15,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T21:09:18.981851+00:00",
+  "total": 96
+}
