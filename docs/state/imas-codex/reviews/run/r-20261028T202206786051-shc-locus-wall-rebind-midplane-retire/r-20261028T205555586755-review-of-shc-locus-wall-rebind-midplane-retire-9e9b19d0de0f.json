@@ -34,6 +34,13 @@
     "precondition_read": "logs/read-state.json: base producers 7, wall producers 0, midplane stage exhausted",
     "stale_controls": "logs/stale-authority-refusal.log EXIT=1 (signature mismatch); logs/migration-stale-cas-refusal.log EXIT=1 (compare-and-set)"
   },
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-shc-locus-wall-rebind-midplane-retire-9e9b19d0de0f",
+      "recorded_at": "2026-10-28T21:24:11.168041+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire.html",
