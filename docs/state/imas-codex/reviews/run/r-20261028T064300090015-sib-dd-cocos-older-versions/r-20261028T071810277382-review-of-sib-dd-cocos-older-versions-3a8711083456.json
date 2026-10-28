@@ -1,0 +1,62 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/graph/build_dd.py:1986 (phase_build calls _backfill_cocos_labels)",
+    "imas_codex/graph/dd_workers.py:316 (phase_build call site)"
+  ],
+  "completed_at": "2026-10-28T07:44:51.665Z",
+  "dispatched_at": "2026-10-28T07:35:41Z",
+  "findings": [
+    {
+      "file": "imas_codex/graph/build_dd.py",
+      "line": "1042",
+      "severity": "non-blocking",
+      "text": "non-blocking: the added comment justifies the declaring_versions filter with \"the 4.x line removed the attribute from its XML schema\", a claim the node's own fragment (docs/evidence/fragments/sn-integrity-backlog/sib-dd-cocos-older-versions.html, \"4.1.1 declares 384 labels of its own, so the 4.x line is not silent\") and its manifest evidence_inputs (1) both contradict; the code is right because the criterion is \"declares labels anywhere\", but a later reader trusting the rationale could narrow the filter and stop the pass from firing."
+    },
+    {
+      "file": "imas_codex/graph/build_dd.py",
+      "line": "2064",
+      "severity": "non-blocking",
+      "text": "non-blocking: \"inferred_older_version\" was added to authority_sources with no test that fails if it is removed, because all three fixtures include a 3.x version so authority_covered is true and the clause is short-circuited; a scoped 4.x-only rebuild over an IDS would then strip the older-version labels the node exists to preserve."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read both commits against b4254dfbfdccc3248ecd999d2cf4972a8115d36f \u2014 25b8a0b19 adds the fourth source and the authority_sources entry in build_dd.py, 3a8711083 adds the evidence fragment, both with conventional subjects and bodies.",
+    "done_when": "the done-when names the three tests, a zero-added-failure gate, the 128-field fragment and a no-live-write build change; the manifest records logs/gate-tests-graph-main.log (3 failed / 3 ids), logs/gate-tests-graph-head.log (3 failed / 646 passed, same 3 ids), logs/gate-cocos-head-tree.log (6 passed, EXIT=0), logs/negative-control-main.log (3 failed, its last line a bare EXIT=1) and docs/evidence/fragments/sn-integrity-backlog/sib-dd-cocos-older-versions.html with a 128-row table carrying declaring version and expected label.",
+    "goal": "the goal is to make older-version-only DD nodes carry their declaring version's COCOS label, and imas_codex/graph/build_dd.py:1034-1067 adds a fourth backfill source that labels a path absent from the newest version's path set from the newest label-declaring version that carries it, tagged inferred_older_version.",
+    "manifest": "read; it states the three tests fail on main and pass at head, records both suite arms with matching failure ids, and names each gate log it cites.",
+    "write_paths": "read the source brief's five granted paths; the two commits touch build_dd.py, the test file and the fragment only, all inside the grant, and dd_graph_ops.py and docs/figures/ were granted but needed no change."
+  },
+  "justifications": {
+    "durability": "tests/graph/test_dd_cocos_label_preservation.py:188 asserts the ip_like label taken from the newer declaring version, which reddens if the walk runs oldest-first (the older version carries the path unlabelled), but no test reddens if \"inferred_older_version\" is removed from authority_sources at imas_codex/graph/build_dd.py:2064 because every fixture includes a 3.x version, making authority_covered true and short-circuiting that clause.",
+    "evidence": "the manifest's baseline_suite and after_suite both cite logs/gate-tests-graph-{main,head}.log, whose tails read 3 failed / 646 passed with the identical three pre-existing ids, so added_failure_count is 0 by delta and not by green.",
+    "fit": "the added source reuses the existing updates/handled idiom and the batched UNWIND update at imas_codex/graph/build_dd.py:1080, and names its provenance tag in the same inferred_* family as the three sources above it.",
+    "goal_fidelity": "imas_codex/graph/build_dd.py:1045-1067 labels exactly the paths absent from latest_paths, newest declaring version first, and already-labelled nodes keep their agreeing label because the update only fires where none is written.",
+    "reuse": "no owner for per-path newest-declaring-version resolution exists; imas_codex/graph/build_dd.py:914 _reference_cocos_labels resolves one version's label map only and cannot answer which declaring version carries a given older-only path, so the new walk extends the backfill rather than duplicating a capability, though it re-derives the \"newest declaring version\" scan that function already performs.",
+    "scope_discipline": "git diff b4254dfbf 3a8711083456 names only imas_codex/graph/build_dd.py, tests/graph/test_dd_cocos_label_preservation.py and docs/evidence/fragments/sn-integrity-backlog/sib-dd-cocos-older-versions.html, all declared."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to make older-version-only DD nodes carry their declaring version's COCOS label, and imas_codex/graph/build_dd.py:1034-1067 adds a fourth backfill source that labels a path absent from the newest version's path set from the newest label-declaring version that carries it, tagged inferred_older_version.\nVERDICT done_when: the done-when names the three tests, a zero-added-failure gate, the 128-field fragment and a no-live-write build change; the manifest records logs/gate-tests-graph-main.log (3 failed / 3 ids), logs/gate-tests-graph-head.log (3 failed / 646 passed, same 3 ids), logs/gate-cocos-head-tree.log (6 passed, EXIT=0), logs/negative-control-main.log (3 failed, its last line a bare EXIT=1) and docs/evidence/fragments/sn-integrity-backlog/sib-dd-cocos-older-versions.html with a 128-row table carrying declaring version and expected label.\nVERDICT write_paths: read the source brief's five granted paths; the two commits touch build_dd.py, the test file and the fragment only, all inside the grant, and dd_graph_ops.py and docs/figures/ were granted but needed no change.\nVERDICT manifest: read; it states the three tests fail on main and pass at head, records both suite arms with matching failure ids, and names each gate log it cites.\nVERDICT diff: read both commits against b4254dfbfdccc3248ecd999d2cf4972a8115d36f \u2014 25b8a0b19 adds the fourth source and the authority_sources entry in build_dd.py, 3a8711083 adds the evidence fragment, both with conventional subjects and bodies.\nCALL_SITES: imas_codex/graph/build_dd.py:1986 (phase_build calls _backfill_cocos_labels), imas_codex/graph/dd_workers.py:316 (phase_build call site)\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/graph/build_dd.py:1045-1067 labels exactly the paths absent from latest_paths, newest declaring version first, and already-labelled nodes keep their agreeing label because the update only fires where none is written.\nSCORE evidence: 17\nJUSTIFICATION evidence: the manifest's baseline_suite and after_suite both cite logs/gate-tests-graph-{main,head}.log, whose tails read 3 failed / 646 passed with the identical three pre-existing ids, so added_failure_count is 0 by delta and not by green.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff b4254dfbf 3a8711083456 names only imas_codex/graph/build_dd.py, tests/graph/test_dd_cocos_label_preservation.py and docs/evidence/fragments/sn-integrity-backlog/sib-dd-cocos-older-versions.html, all declared.\nSCORE durability: 15\nJUSTIFICATION durability: tests/graph/test_dd_cocos_label_preservation.py:188 asserts the ip_like label taken from the newer declaring version, which reddens if the walk runs oldest-first (the older version carries the path unlabelled), but no test reddens if \"inferred_older_version\" is removed from authority_sources at imas_codex/graph/build_dd.py:2064 because every fixture includes a 3.x version, making authority_covered true and short-circuiting that clause.\nSCORE fit: 17\nJUSTIFICATION fit: the added source reuses the existing updates/handled idiom and the batched UNWIND update at imas_codex/graph/build_dd.py:1080, and names its provenance tag in the same inferred_* family as the three sources above it.\nSCORE reuse: 18\nJUSTIFICATION reuse: no owner for per-path newest-declaring-version resolution exists; imas_codex/graph/build_dd.py:914 _reference_cocos_labels resolves one version's label map only and cannot answer which declaring version carries a given older-only path, so the new walk extends the backfill rather than duplicating a capability, though it re-derives the \"newest declaring version\" scan that function already performs.\nFINDING imas_codex/graph/build_dd.py:1042 non-blocking: the added comment justifies the declaring_versions filter with \"the 4.x line removed the attribute from its XML schema\", a claim the node's own fragment (docs/evidence/fragments/sn-integrity-backlog/sib-dd-cocos-older-versions.html, \"4.1.1 declares 384 labels of its own, so the 4.x line is not silent\") and its manifest evidence_inputs (1) both contradict; the code is right because the criterion is \"declares labels anywhere\", but a later reader trusting the rationale could narrow the filter and stop the pass from firing.\nFINDING imas_codex/graph/build_dd.py:2064 non-blocking: \"inferred_older_version\" was added to authority_sources with no test that fails if it is removed, because all three fixtures include a 3.x version so authority_covered is true and the clause is short-circuited; a scoped 4.x-only rebuild over an IDS would then strip the older-version labels the node exists to preserve.",
+  "review_run_id": "r-20261028T071810277382-review-of-sib-dd-cocos-older-versions-3a8711083456",
+  "reviewed_base_sha": "b4254dfbfdccc3248ecd999d2cf4972a8115d36f",
+  "reviewed_head_sha": "3a87110834569bb357948fa9b7254628a6a4f0a5",
+  "reviewed_run_id": "r-20261028T064300090015-sib-dd-cocos-older-versions",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T07:47:27.366949+00:00",
+  "total": 104
+}
