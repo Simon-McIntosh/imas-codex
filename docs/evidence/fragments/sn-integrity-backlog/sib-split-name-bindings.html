@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-split-name-bindings">
+<title>Ten public graph entrypoints were bound through a split string, and no check could read them</title>
+</head>
+<body>
+<main>
+<h1 id="sib-split-name-bindings-title">Ten public graph entrypoints were bound through a split string, and no check could read them</h1>
+
+<p id="sib-split-name-bindings-summary">
+The standard-name composition root re-exposed ten public callables, and
+<code>provenance_lifecycle.py</code> one more, by assigning through
+<code>globals()[</code> with a key built from two string literals, as in
+<code>globals()["reconcile_" + "error_siblings"] = _error_sibling_reconcile_apply</code>.
+The AST of that statement carries a <code>Subscript</code> target, so every audit
+that collects assignment targets skips it while <code>getattr()</code> resolves
+the name normally. Measured against <code>_collect_def_names</code> in
+<code>tests/standard_names/test_public_api_naming.py</code>, the audit that
+governs every public name in this module: at base <strong>0 of 10</strong> of
+these names are visible, and after the change <strong>10 of 10</strong> are. The bindings now stand as plain
+module-level assignments, so the audit reads the same name the interpreter does.
+A new guard refuses the pattern itself, and no non-literal <code>globals()</code>
+lookup remains anywhere under <code>imas_codex/</code>: the last one, in
+<code>worker_tasks</code>' composition root, now reads a declared collaborator
+map. The same change widened the facade-closure audit so it sees the
+<code>functools.partial</code> entrypoints it had been dropping. The split was
+<em>not</em> contrived to defeat a specific assertion — see "Why the pattern
+existed" below, where spelling the names whole is measured against every
+candidate guard and none fires.
+</p>
+
+<h2 id="sib-split-name-bindings-bindings">The eleven bindings and their callers</h2>
+<p>
+Every one of these names is imported from the composition root by test modules;
+one is imported by product code. The implementation of each lives in a
+<code>graph_store</code> module as a <code>functools.partial</code> over
+<code>apply_signed_manifest</code>, which is why the public name had to be
+carried somewhere.
+</p>
+
+<table id="sib-split-name-bindings-table">
+<thead><tr><th>Public name (bound at base)</th><th>Implementation</th><th>Callers outside the facade</th></tr></thead>
+<tbody>
+<tr><td><code>reconcile_structural_edges_for_standard_names</code></td><td><code>graph_lineage._structural_edge_reconcile_apply</code></td><td><code>standard_names/cascade.py:474</code>; <code>test_structural_edge_reconcile_graph.py</code>, <code>test_rename_cascade.py</code></td></tr>
+<tr><td><code>repair_normalization_peel_parent_units</code></td><td><code>graph_lineage._normalization_peel_unit_repair_apply</code></td><td><code>test_normalization_peel_unit_repair_graph.py</code>, <code>test_component_system.py:823</code></td></tr>
+<tr><td><code>reconcile_lifecycleless_standard_name_stubs</code></td><td><code>graph_lineage._lifecycleless_stub_reconcile_apply</code></td><td><code>test_reconcile_lifecycleless_stubs.py</code>, <code>test_mint_sets_status.py</code>, <code>test_null_status_predicates_manifest.py</code></td></tr>
+<tr><td><code>reconcile_error_siblings</code></td><td><code>graph_audits._error_sibling_reconcile_apply</code></td><td><code>test_error_sibling_reconcile_graph.py</code>, <code>test_error_siblings.py</code></td></tr>
+<tr><td><code>apply_adjudicated_source_dispositions</code></td><td><code>graph_supersession._catalog_source_disposition_apply</code></td><td><code>test_signed_source_dispositions.py</code>, <code>test_null_status_predicates_manifest.py</code></td></tr>
+<tr><td><code>repair_scalar_projection_mismatches</code></td><td><code>graph_supersession._semantic_mirror_repair_apply</code></td><td><code>test_signed_source_dispositions.py</code></td></tr>
+<tr><td><code>retire_ineligible_standard_name_sources</code></td><td><code>graph_supersession._ineligible_source_retirement_apply</code></td><td><code>test_dual_binding_dedup.py</code>; <code>sib-record-orphan-retirements-run.py</code></td></tr>
+<tr><td><code>retire_signed_dual_authority_targets</code></td><td><code>graph_supersession._dual_authority_retirement_apply</code></td><td><code>test_dual_authority_retirement.py</code></td></tr>
+<tr><td><code>retire_signed_provenance_orphans</code></td><td><code>graph_supersession._refused_target_orphan_apply</code></td><td><code>test_structural_orphan_retirement.py</code></td></tr>
+<tr><td><code>detach_signed_stale_source_bindings</code></td><td><code>provenance_lifecycle._stale_source_detach_apply</code></td><td><code>test_stale_source_detach.py</code></td></tr>
+</tbody>
+</table>
+
+<h2 id="sib-split-name-bindings-why">Why the pattern existed, measured</h2>
+<p>
+The pattern enters at <code>bd34e9631</code>, whose body records its intent:
+"preserving the existing public callable and behavior" while the body moved to
+<code>signed_manifest.py</code> and then <code>graph_store</code>. A
+<code>def</code> forwarder is refused outright by
+<code>test_facade_closure.py::test_facades_define_no_delegating_forwarder</code>,
+so the natural spelling was unavailable and the name was bound at runtime
+instead.
+</p>
+<p>
+The obvious hypothesis — that the split was written to get past a guard — does
+<strong>not</strong> survive measurement. With the names spelled whole, every
+candidate guard passes:
+</p>
+<ul>
+<li><code>tests/standard_names/test_facade_closure.py</code> — 6 passed
+(<code>EXIT=0</code>, <code>logs/facade_after.log</code>);</li>
+<li><code>tests/standard_names/test_public_api_naming.py</code> — 33 passed.</li>
+</ul>
+<p>
+Two structural reasons, both measured: the owner map lists the private
+<code>functools.partial</code> implementations, and
+<code>_moved_callables()</code> filters them out because a partial's
+<code>__module__</code> is <code>"functools"</code> rather than the owning
+module, so <code>test_entrypoint_refuses_moved_symbols</code> never examines
+them; and the public names are absent from the owner map altogether, so nothing
+resolves them. What the split actually bought was invisibility, not permission:
+a name no audit and no grep can read. That is the defect the plan records, and
+it is what this change removes.
+</p>
+
+<h2 id="sib-split-name-bindings-replacement">What replaced it</h2>
+<p>
+Each binding is now a plain module-level assignment in the module that carries
+it, so the same name is visible to grep, to <code>ast</code>, and to the
+composing audit — the interpreter and the reader now agree. The service bridge
+fallback in <code>graph_ops._GraphServices.__getattr__</code>, which read
+<code>globals()[name]</code> for any wired collaborator the owner map did not
+resolve, is replaced by a declared mapping. Measurement of what that fallback
+actually served: of the 186 wired names, <strong>185</strong> resolve through
+the owner map and <strong>1</strong> (<code>__file__</code>) resolved locally, so
+the declared mapping holds exactly that entry and an unwired name is now refused
+with the closure message rather than raising <code>KeyError</code>.
+</p>
+<p>
+The worker composition root carried the same shape one level down:
+<code>worker_tasks</code> asks <code>workers._worker_dependency(name)</code> for
+the thirteen collaborators it does not take from the owner map, and that
+function read <code>globals()[name]</code>. It now indexes a declared map whose
+values read the module attribute when the name is requested, not when the module
+is imported. Holding the imported object itself is what a frozen map would do,
+and it is measurably wrong here: the suite replaces these collaborators by
+dotted path — <code>monkeypatch</code> on
+<code>"imas_codex.standard_names.workers.model_provider_exposure"</code> — and a
+frozen map bypassed every such replacement, turning stubbed pricing into a live
+<code>ProviderPricingUnbounded</code> lookup. Measured on the head tree, that
+cost 65 added failure ids, all of which clear once each value
+is read at request time. The declared name set stays static and greppable, which
+is what the guard exists for; only the read is deferred.
+</p>
+
+<h2 id="sib-split-name-bindings-guard">The guard</h2>
+<p>
+<code>tests/standard_names/test_no_split_name_bindings.py</code> parses every
+<code>.py</code> under <code>imas_codex/</code> and refuses two shapes, with no
+exemption list:
+</p>
+<ul>
+<li>a <code>globals()[</code> subscript that is an assignment target whose key is
+not a string literal (<code>test_no_dynamic_name_binding</code>);</li>
+<li>a <code>globals()[</code> subscript used as a lookup whose key is not a
+string literal (<code>test_no_dynamic_name_lookup</code>).</li>
+</ul>
+<p>
+Negative control, declared mutation <em>plant
+<code>globals()['a' + 'b'] = f</code> in a scratch module; the guard must
+fail</em> — a scratch module carrying that statement was planted under
+<code>imas_codex/</code>, the guard run, and the file removed in the same
+command. Result: <strong>2 failed</strong>, log ending <code>EXIT=1</code>
+(<code>logs/negative_control.log</code>), with
+<code>test_no_dynamic_name_binding</code> failing — an id the head arm does not
+fail.
+</p>
+<p id="sib-split-name-bindings-remainder">
+No site remains: <code>grep -rn "globals()\[" imas_codex | wc -l</code> returns
+<strong>0</strong> on the head tree, against <strong>12</strong> at base: eleven
+split-string bindings and one dynamic lookup. The same guard was extended to the facade-closure audit, whose
+moved-symbol set dropped every <code>functools.partial</code> because a partial
+reports <code>"functools"</code> as its <code>__module__</code>. Counting a
+partial as owned when its owner module's namespace carries the name brings the
+ten manifest appliers back into both the entrypoint scan and the forwarder scan.
+That widening has its own negative control: with
+<code>reconcile_error_siblings()</code> re-planted in <code>graph_ops.py</code>
+as a one-line forwarder,
+<code>test_facades_define_no_delegating_forwarder</code> fails with
+<code>EXIT=1</code> (<code>logs/negative_control_forwarder.log</code>), and the
+plant was removed in the same session.
+</p>
+
+<h2 id="sib-split-name-bindings-gate">Gate</h2>
+<p>
+Two archive trees of the same run, same command, <code>-n 8</code>:
+</p>
+<table id="sib-split-name-bindings-gate-table">
+<thead><tr><th>Arm</th><th>Revision</th><th>Result</th><th>Log</th></tr></thead>
+<tbody>
+<tr><td>base</td><td><code>b4254dfbf</code></td><td>92 failed, 8431 passed, 12 skipped, <code>EXIT=1</code></td><td><code>logs/gate_base_suite.log</code></td></tr>
+<tr><td>head</td><td><code>a13cca54b</code></td><td>92 failed, 8433 passed, 12 skipped, <code>EXIT=1</code></td><td><code>logs/gate_head_suite.log</code></td></tr>
+<tr><td>added failure ids</td><td>—</td><td colspan="2">none</td></tr>
+<tr><td>removed failure ids</td><td>—</td><td colspan="2">none</td></tr>
+</tbody>
+</table>
+<p>
+The 92 base failures are pre-existing in both arms and are not attributable to
+this change: both arms are archive trees of the same command, and the failure-id
+sets are <strong>identical</strong> — zero added, zero removed. The two extra
+passing tests at head are the new guard file's own cases.
+</p>
+<p>
+The <code>-m graph</code> arm ran over the 17 test files under
+<code>tests/standard_names/</code> that import <code>graph_ops</code>,
+<code>provenance_lifecycle</code> or <code>workers</code>, in both archive trees:
+<strong>69 passed, 1 failed</strong>, <code>EXIT=1</code>, and the
+failing id is the same in each
+(<code>test_mint_sets_status.py::test_batch_mint_sets_draft_and_remint_preserves_active_status</code>
+— a pre-existing failure, present at base). Logs:
+<code>logs/gate_base_graph.log</code>, <code>logs/gate_head_graph.log</code>.
+</p>
+<p>
+This arm did exercise a real disposable instance: <code>IMAS_CODEX_TEST_NEO4J_URI</code>
+is unset here, so the autouse <code>disposable_neo4j_uri</code> fixture in
+<code>tests/standard_names/conftest.py</code> started an empty Neo4j of its own,
+and it calls <code>pytest.fail("no disposable Neo4j could start: …")</code> when
+it cannot. Zero tests skipped in either arm, so every graph-marked test there ran
+its Cypher against that instance, and the head tree's graph-write paths are
+exercised rather than merely imported.
+</p>
+</main>
+</body>
+</html>
