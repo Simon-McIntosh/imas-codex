@@ -30,6 +30,13 @@
   ],
   "completed_at": "2026-10-28T12:50:35.509Z",
   "dispatched_at": "2026-10-28T12:41:28Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-sib-cascade-calibration-crash-37a06e83d7c0",
+      "recorded_at": "2026-10-28T13:28:56.186285+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-integrity-backlog/sib-cascade-calibration-crash.html",
