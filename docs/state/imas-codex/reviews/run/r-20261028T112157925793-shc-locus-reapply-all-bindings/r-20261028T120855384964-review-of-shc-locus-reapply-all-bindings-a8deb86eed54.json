@@ -4,6 +4,13 @@
   "added_failure_ids": [],
   "call_sites": [],
   "completed_at": "2026-10-28T12:17:05.616Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "evidence runner for one operational measure: its verify() keys on member presence and misses a null score, but the page and manifest report the unscored midplane member correctly and the node is a record, not a guard; the unscored member is resolved by the lead's rebind-and-retire ruling",
+      "recorded_at": "2026-10-28T20:14:13.124204+00:00"
+    }
+  },
   "dispatched_at": "2026-10-28T12:10:53Z",
   "findings": [
     {
