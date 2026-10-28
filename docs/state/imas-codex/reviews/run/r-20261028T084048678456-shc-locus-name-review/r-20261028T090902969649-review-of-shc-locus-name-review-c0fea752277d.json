@@ -5,6 +5,13 @@
   "call_site_count": 0,
   "call_sites": [],
   "completed_at": "2026-10-28T09:23:40.010Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "operational graph run with no code change: the after-state capture is preserved as shc-locus-name-review-after.json in the run directory and the four sn command logs are kept; the scratch script was a read-only snapshot, not a gate the landing depends on",
+      "recorded_at": "2026-10-28T09:26:35.590378+00:00"
+    }
+  },
   "dispatched_at": "2026-10-28T09:11:28Z",
   "findings": [
     {
