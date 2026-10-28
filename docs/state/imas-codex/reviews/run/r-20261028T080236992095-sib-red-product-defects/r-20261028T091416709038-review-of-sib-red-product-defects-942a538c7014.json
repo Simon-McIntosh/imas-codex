@@ -1,0 +1,78 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "imas_codex/cli/sn.py:815 _compute_pool_pending -> _compute_pool_progress",
+    "imas_codex/cli/sn.py:981 _pool_pending_fn -> pending_fn at imas_codex/cli/sn.py:1003 and :1133",
+    "imas_codex/cli/discover/sequence.py:787 run_sequence stage loop except (discovery_receipts read at :923)",
+    "imas_codex/cli/discover/sequence.py:1006 run_sequence invoked from the discover run command"
+  ],
+  "completed_at": "2026-10-28T09:23:29.327Z",
+  "dispatched_at": "2026-10-28T09:16:06Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-red-product-defects.html",
+      "id": "f25953bb19c",
+      "line": 15,
+      "severity": "non-blocking",
+      "summary": "D1 does not pass at head, so the node's done_when (every id in D1, D2 and D3 passes at head) is unmet; the record states this plainly and the two causes it names are outside the declared write paths (review/cascade.py and the frozen srtj operating-point evidence), so the correct disposition is a follow-up node rather than a repair here."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-red-product-defects.html",
+      "id": "faf02797a5b",
+      "line": 44,
+      "severity": "non-blocking",
+      "summary": "The fragment asserts the existing budget test in tests/cli/test_discover_sequence.py still passes, but the gate ran only tests/standard_names, so that claim rests on no recorded log; the test does pass by inspection of its receipt path, yet the artefact states a result the node never measured."
+    },
+    {
+      "file": "imas_codex/cli/discover/sequence.py",
+      "id": "f1d59bd4e34",
+      "line": 576,
+      "severity": "non-blocking",
+      "summary": "run_mapping_stage now wraps every mapping failure in StageFailure, so a direct caller that catches the pipeline's own exception type would no longer match it; production only reaches this function through _run_with_receipt, which re-wraps and recovers the root cause, so the behaviour change is confined to direct callers and the module's own tests."
+    },
+    {
+      "file": "manifest.md",
+      "id": "fcf2bfb2838",
+      "line": 7,
+      "severity": "non-blocking",
+      "summary": "The reviewed run's commits field lists two of the three commits between base and head, omitting 71504f3ca, which carries the defect-diagnosis fragment the later commit edits."
+    }
+  ],
+  "justifications": {
+    "durability": "Both repaired ids redden on the pre-change code, shown by the negative control log which fails all three ids at 4f336fee2, and the D2 guard at tests/standard_names/test_compute_pool_pending.py:247 compares the pending clause against the predicate captured from the real claim adapter rather than against a value the test supplied.",
+    "evidence": "The gate arms recorded in baseline_suite.json and after_suite.json measure the done_when directly (92 failed at 4f336fee2, 90 failed at 00e0d2f15, added failure ids 0) and each log ends with a bare EXIT=1 line naming its tree and imported module.",
+    "fit": "imas_codex/cli/discover/sequence.py:669 declares StageFailure in the same style as the module's StageOutcome, and imas_codex/cli/sn.py:601 comments state the mechanism without a plan or ticket identifier.",
+    "goal_fidelity": "Two of the three defects named in the goal are fixed in imas_codex/cli/sn.py:600 and imas_codex/cli/discover/sequence.py:669, while the third (D1) is recorded as still red at docs/evidence/fragments/sn-integrity-backlog/sib-red-product-defects.html:15.",
+    "reuse": "imas_codex/cli/sn.py:599-605 reuses has_open_docs_hold_where, the fragment owner at imas_codex/standard_names/review/holds.py:237 that claim_refine_docs_batch already builds, and no owner of an exception-carried receipt list exists in imas_codex/cli/discover so StageFailure is the first rather than a duplicate.",
+    "scope_discipline": "git diff --stat 4f336fee2 942a538c7 names three files, all inside the declared write paths, and the worktree is clean at head."
+  },
+  "project": "imas-codex",
+  "removed_failure_ids": [
+    "tests/standard_names/test_compute_pool_pending.py::TestQueryStructure::test_refine_docs_pending_matches_canonical_claim_predicate",
+    "tests/standard_names/test_defaulted_attributes_exist.py::test_defaulted_literal_attributes_are_declared"
+  ],
+  "review_run_id": "r-20261028T091416709038-review-of-sib-red-product-defects-942a538c7014",
+  "reviewed_base_sha": "4f336fee25409eb35dab67fc2a37cbef27f6cb7c",
+  "reviewed_head_sha": "942a538c70141253ab1e25a8da1ef941420fefbb",
+  "reviewed_run_id": "r-20261028T080236992095-sib-red-product-defects",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 11,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T09:24:12.514505+00:00",
+  "total": 101,
+  "verdicts": {
+    "diff": "Read commit by commit against base 4f336fee2: 00e0d2f15 changes the refine_docs pending predicate and introduces StageFailure, 71504f3ca and 942a538c7 add and extend the evidence fragment; no test file is modified.",
+    "done_when": "The done_when requires every D1, D2 and D3 id to pass at head with zero added failure ids; baseline_suite.json and after_suite.json show D2 and D3 leaving the failure set and D1 (test_cascade_calibration.py::test_matched_policy_rebuilds_from_frozen_scores_and_receipts) still failing at head, with added failure ids computed as 0.",
+    "goal": "The node goal is to fix the three product defects the red suite exposed (D1 cascade calibration rebuild, D2 compute pool pending predicate, D3 undeclared discovery_receipts default); D2 and D3 are fixed in imas_codex/cli/sn.py and imas_codex/cli/discover/sequence.py, and D1 is not fixed.",
+    "manifest": "Read; it records status complete (repaired from blocked at 2026-10-28T09:12:18Z), both gate arms as JSON with literal commands, the negative control log, D1 under blockers and outside_scope, and one rubric line per dimension.",
+    "write_paths": "The declared write paths are imas_codex/standard_names/review/cascade_calibration.py, imas_codex/cli/sn.py, imas_codex/cli/discover/sequence.py, three tests/standard_names test files, the docs/evidence fragment and a docs/figures directory; git diff 4f336fee2..942a538c7 touches only sn.py, sequence.py and the fragment, all inside the fence."
+  }
+}
