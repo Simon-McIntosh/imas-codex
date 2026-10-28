@@ -58,6 +58,7 @@ CUTOFF = "2026-07-04T23:59:59"
 TERMINAL = {"deprecated", "superseded"}
 PATH_CLASSES = ("carried", "moved", "stale_source", "pending_composition", "dropped")
 SEVERITY = ("dropped", "moved", "stale_source", "pending_composition")
+NON_CARRIED = ("moved", "stale_source", "pending_composition", "dropped")
 CONTROL_SAMPLE = 20
 CONTROL_SEED = 20261028
 EXPORT_PY = ROOT / "imas_codex/standard_names/export.py"
@@ -428,9 +429,9 @@ def main() -> None:
     by_class: dict[str, list[dict]] = defaultdict(list)
     for pair in pairs:
         by_class[pair["class"]].append(pair)
-    per_class = CONTROL_SAMPLE // len(PATH_CLASSES)
+    per_class = -(-CONTROL_SAMPLE // len(NON_CARRIED))
     sample = []
-    for klass in ("moved", "stale_source", "pending_composition", "dropped"):
+    for klass in NON_CARRIED:
         sample.extend(rng.sample(by_class[klass], min(per_class, len(by_class[klass]))))
     sample = sorted(sample, key=lambda p: (p["name"], p["path"]))
     recheck = []
