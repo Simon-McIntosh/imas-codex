@@ -5,6 +5,13 @@
   ],
   "completed_at": "2026-10-28T00:04:33.483Z",
   "dispatched_at": "2026-10-27T23:57:25Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-scg-name-domain-exempt-writes-6ebb10264426",
+      "recorded_at": "2026-10-28T00:18:34.319367+00:00"
+    }
+  },
   "findings": [
     {
       "detail": "read from the reviewed run's own armed logs (log-suite-base.log 92 failed, log-suite-head.log 71 failed): the head arm adds exactly this id and removes nothing else from the door. The assertion at tests/standard_names/test_component_system.py:348 sits in the marker tuple for the derived-parent materialiser and asserts a write this node deliberately removed, so it is red at the reviewed head. The node's done_when requires zero added failure ids, so it is unmet; the file is outside this node's declared write paths and the worker reported it under outside_scope, so it needs a companion node or a scope extension, not silence. Repair is one line: drop the marker, or replace it with an assertion that the parent's domain is written through write_name_domain.",
