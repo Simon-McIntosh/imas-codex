@@ -22,6 +22,8 @@ from unittest.mock import MagicMock, call, patch
 
 import pytest
 
+from tests.standard_names.graph_transaction_doubles import transaction_double
+
 from imas_codex.standard_names.graph_store import (
     graph_cost_and_claims as _owning_graph_cost_and_claims,
     graph_refinement as _owning_graph_refinement,
@@ -35,15 +37,22 @@ _GC_PATH = "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
 
 
 def _mock_gc_query(return_values: list[list[dict]] | None = None):
-    """Return a mock GraphClient whose .query() returns successive values."""
-    gc = MagicMock()
-    gc.__enter__ = MagicMock(return_value=gc)
-    gc.__exit__ = MagicMock(return_value=False)
-    if return_values is not None:
-        gc.query = MagicMock(side_effect=return_values)
-    else:
-        gc.query = MagicMock(return_value=[])
-    return gc
+    """Return the shared transaction-shaped GraphClient double."""
+    return transaction_double(return_values)
+
+
+_READBACK_STATEMENT = "RETURN coalesce(sn.docs_chain_length"
+_WRITE_STATEMENT = "sn.reviewer_score_docs = $score"
+
+
+def _persist_gc(readback: list[dict], write: list[dict] | None) -> Any:
+    """Double answering ``persist_reviewed_docs``'s CAS statements by shape."""
+    return transaction_double(
+        by_statement={
+            _READBACK_STATEMENT: readback,
+            _WRITE_STATEMENT: [] if write is None else write,
+        }
+    )
 
 
 @contextmanager
@@ -1198,11 +1207,8 @@ class TestPersistWritesReviewNode:
 
     def test_persist_reviewed_docs_calls_write_reviews(self):
         """persist_reviewed_docs must MERGE a :StandardNameReview node with axis='docs'."""
-        gc = _mock_gc_query(
-            return_values=[
-                [{"docs_chain_length": 0}],
-                [{"id": "electron_temperature"}],  # SET committed (one row)
-            ]
+        gc = _persist_gc(
+            [{"docs_chain_length": 0}], [{"id": "electron_temperature"}]
         )
 
         with (

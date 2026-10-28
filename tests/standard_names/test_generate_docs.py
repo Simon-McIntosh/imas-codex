@@ -23,6 +23,8 @@ from unittest.mock import AsyncMock, MagicMock, call, patch
 
 import pytest
 
+from tests.standard_names.graph_transaction_doubles import transaction_double
+
 from imas_codex.standard_names.worker_tasks import (
     worker_common as _owning_worker_common,
 )
@@ -104,14 +106,23 @@ def _make_gc_tx(seed_rows=None, readback_rows=None):
     return gc, tx
 
 
-def _make_gc_query(return_value=None):
-    """Build a mock GraphClient with a .query() method."""
-    gc = MagicMock()
-    gc.__enter__ = MagicMock(return_value=gc)
-    gc.__exit__ = MagicMock(return_value=False)
-    _rv = [{"released": 1}] if return_value is None else return_value
-    gc.query = MagicMock(return_value=_rv)
-    return gc
+_RELEASE_STATEMENT = "AS released"
+_PERSIST_STATEMENT = "RETURN sn.docs_stage AS docs_stage"
+
+
+def _make_gc_query(return_value=None, *, statement: str = _RELEASE_STATEMENT):
+    """Build the shared transaction double answering one statement by shape."""
+    rows = [{"released": 1}] if return_value is None else return_value
+    return transaction_double(by_statement={statement: rows})
+
+
+def _persist_call(gc):
+    """Return the docs persist statement among the double's recorded calls."""
+    for call_obj in gc.query.call_args_list:
+        if _PERSIST_STATEMENT in call_obj.args[0]:
+            return call_obj
+    raise AssertionError("the docs persist statement was never issued")
+
 
 
 @contextmanager
@@ -266,7 +277,7 @@ def test_persist_writes_docs_fields():
         persist_generated_docs,
     )
 
-    gc = _make_gc_query(return_value=[{"docs_stage": "drafted"}])
+    gc = _make_gc_query([{"docs_stage": "drafted"}], statement=_PERSIST_STATEMENT)
     with _patch_gc(gc):
         stage = persist_generated_docs(
             sn_id="electron_temperature",
@@ -278,7 +289,8 @@ def test_persist_writes_docs_fields():
 
     assert stage == "drafted"
 
-    cypher: str = gc.query.call_args_list[0][0][0]
+    persist_call = _persist_call(gc)
+    cypher: str = persist_call.args[0]
     assert "docs_stage" in cypher
     assert "'drafted'" in cypher
     assert "docs_chain_length" in cypher
@@ -287,7 +299,7 @@ def test_persist_writes_docs_fields():
     assert "claim_token" in cypher
     assert "claimed_at" in cypher
 
-    kwargs = gc.query.call_args_list[0][1]
+    kwargs = persist_call.kwargs
     assert kwargs["description"] == "The electron kinetic temperature."
     assert kwargs["documentation"] == "Full documentation text here."
     assert kwargs["model"] == "test-model"
@@ -304,7 +316,7 @@ def test_persist_does_not_change_name_fields():
         persist_generated_docs,
     )
 
-    gc = _make_gc_query(return_value=[{"docs_stage": "drafted"}])
+    gc = _make_gc_query([{"docs_stage": "drafted"}], statement=_PERSIST_STATEMENT)
     with _patch_gc(gc):
         persist_generated_docs(
             sn_id="electron_temperature",
@@ -314,7 +326,7 @@ def test_persist_does_not_change_name_fields():
             model="test-model",
         )
 
-    cypher: str = gc.query.call_args[0][0]
+    cypher: str = _persist_call(gc).args[0]
     # The SET clause must not include identity fields
     set_start = cypher.find("SET")
     set_block = cypher[set_start:] if set_start >= 0 else cypher
@@ -369,7 +381,7 @@ def test_failed_release_clears_token():
 
     assert count == 1
 
-    cypher: str = gc.query.call_args[0][0]
+    cypher: str = gc.query.call_args.args[0]
     # Must clear claim fields
     assert "claim_token" in cypher
     assert "claimed_at" in cypher
