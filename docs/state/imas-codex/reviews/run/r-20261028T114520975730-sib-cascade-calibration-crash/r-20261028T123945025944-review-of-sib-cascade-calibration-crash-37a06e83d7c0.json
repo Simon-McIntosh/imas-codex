@@ -35,6 +35,11 @@
       "kind": "folded",
       "node": "repair-of-sib-cascade-calibration-crash-37a06e83d7c0",
       "recorded_at": "2026-10-28T13:28:56.186285+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "repair-of-sib-cascade-calibration-crash-37a06e83d7c0",
+      "recorded_at": "2026-10-28T13:28:57.860422+00:00"
     }
   },
   "findings": [
