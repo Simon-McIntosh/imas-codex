@@ -1,0 +1,219 @@
+<section>
+  <h2 id="shc-locus-veto-adjudicate">The contradiction veto on electrostatic_potential is wrong: it read a family base name's generality as a contradiction</h2>
+
+  <p id="shc-locus-veto-adjudicate-summary">
+    A Jev contradiction veto held <code>electrostatic_potential</code> at <code>reviewed</code>
+    despite a judged documentation score of 0.9521, above the 0.85 acceptance floor, and that hold
+    was the one thing stopping the locus family <code>electrostatic_potential</code> converging.
+    The ruling is <strong>wrong</strong>: the three evidence sentences the judge answered
+    <code>contradicts</code> to do not contradict any of the name's seven DD source bindings. Each
+    restates what every bound source defines, says the general quantity is not restricted to any one
+    of the regions its bindings span, or states that averaging is not implicit in the unqualified
+    quantity &mdash; all of them non-requirement sentences about a base name that is legitimately
+    broader than any single binding. The two open holds were dismissed through the hold channel's own
+    resolution path with the ruling as the reason, which promoted the document to
+    <code>accepted</code>; the family was then re-applied under a USD 2.00 cap.
+  </p>
+
+  <h3 id="shc-locus-veto-adjudicate-veto">The veto, the clause and the evidence, quoted</h3>
+  <p id="shc-locus-veto-adjudicate-veto-body">
+    The docs review row is
+    <code>electrostatic_potential:typesafe-jev-1-13:2026-10-27T14:40:27.605277+00:00</code>, axis
+    <code>docs</code>. Its clause is <code>claim_contradicts_source</code>, asked as
+    &ldquo;Which conflict, if any, does this claim have with its DD source definition?&rdquo; The judge
+    <code>typesafe/jev-1.13</code> answered <code>choice: contradicts</code> at probability
+    <strong>0.72</strong> against a <strong>0.30</strong> cutoff (veto criterion
+    <code>choice=contradicts or probability&gt;=cutoff</code>). The evidence it gave was three
+    sentences of this name's own documentation:
+  </p>
+  <ol id="shc-locus-veto-adjudicate-evidence">
+    <li id="shc-locus-veto-adjudicate-evidence-1">This quantity is the electrostatic potential in the plasma or at a plasma-facing surface, relative to a chosen electrical reference.</li>
+    <li id="shc-locus-veto-adjudicate-evidence-2">The general quantity is not restricted to the core, edge, scrape-off layer, or a particular surface.</li>
+    <li id="shc-locus-veto-adjudicate-evidence-3">It encompasses local values and explicitly identified magnetic-flux-surface averages; averaging is not implicit in the unqualified quantity.</li>
+  </ol>
+  <p id="shc-locus-veto-adjudicate-holds">
+    Two <code>ReviewHold</code> nodes recorded the refusal, both <code>status: open</code> before this
+    node ran: <code>94153d56&hellip;</code> (<code>cascade_contradiction</code>, raised by
+    <code>jev-cascade</code>) and <code>cc06569b&hellip;</code>
+    (<code>documentation_contradiction</code>, raised by <code>jev-contradiction</code>). The second
+    hold names the path it compared against and quotes the source text that drove its answer:
+    <code>plasma_profiles/profiles_1d/phi_potential</code>, whose DD documentation the judge recorded
+    as <em>DD: Electrostatic potential, averaged on the magnetic flux surface</em>.
+  </p>
+
+  <h3 id="shc-locus-veto-adjudicate-bindings">The name's DD source bindings, with their own text</h3>
+  <p id="shc-locus-veto-adjudicate-bindings-body">
+    <code>electrostatic_potential</code> reaches seven DD paths through <code>PRODUCED_NAME</code>
+    edges from <code>StandardNameSource</code> nodes of <code>source_type</code> <code>dd</code>. Three
+    are <code>profiles_1d</code> flux-surface-averaged radial profiles and four are per-element local
+    values in a grid-subset array. The catalog is COCOS 17; the name carries no locus or aggregation
+    qualifier of its own.
+  </p>
+  <table id="shc-locus-veto-adjudicate-bindings-table">
+    <thead><tr><th>DD source path</th><th>description</th><th>documentation</th><th>shape</th></tr></thead>
+    <tbody>
+      <tr><td><code>core_profiles/profiles_1d/phi_potential</code></td><td>Flux-surface-averaged electrostatic potential (&phi;) as a 1D radial profile in the core plasma.</td><td>&ldquo;Electrostatic potential, averaged on the magnetic flux surface&rdquo;</td><td>averaged profile</td></tr>
+      <tr><td><code>plasma_profiles/profiles_1d/phi_potential</code></td><td>Electrostatic potential (&Phi;) averaged over a magnetic flux surface as a 1D radial profile.</td><td>&ldquo;Electrostatic potential, averaged on the magnetic flux surface&rdquo;</td><td>averaged profile</td></tr>
+      <tr><td><code>edge_profiles/profiles_1d/phi_potential</code></td><td>Electrostatic potential (&phi;) as a flux-surface-averaged radial profile in the edge plasma and scrape-off layer.</td><td>&ldquo;Electrostatic potential, averaged on the magnetic flux surface&rdquo;</td><td>averaged profile</td></tr>
+      <tr><td><code>edge_profiles/ggd/phi_potential/values</code></td><td>Array of values for phi potential.</td><td>&ldquo;One scalar value is provided per element in the grid subset.&rdquo;</td><td>local values</td></tr>
+      <tr><td><code>mhd/ggd/phi_potential/values</code></td><td>Array of values for phi potential.</td><td>&ldquo;One scalar value is provided per element in the grid subset.&rdquo;</td><td>local values</td></tr>
+      <tr><td><code>plasma_profiles/ggd/phi_potential/values</code></td><td>Array of values for phi potential.</td><td>&ldquo;One scalar value is provided per element in the grid subset.&rdquo;</td><td>local values</td></tr>
+      <tr><td><code>wall/description_ggd/ggd/phi_potential/values</code></td><td>Array of values for phi potential.</td><td>&ldquo;One scalar value is provided per element in the grid subset.&rdquo;</td><td>local values</td></tr>
+    </tbody>
+  </table>
+
+  <h3 id="shc-locus-veto-adjudicate-sentences">Each evidence sentence against the sources</h3>
+  <table id="shc-locus-veto-adjudicate-sentences-table">
+    <thead><tr><th>sentence</th><th>what the sources say</th><th>verdict</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>1 &mdash; the potential in the plasma or at a plasma-facing surface, relative to a chosen reference</td>
+        <td>
+          Every one of the seven bindings is a <code>phi_potential</code>: the electrostatic potential.
+          The <code>profiles_1d</code> texts read &ldquo;Electrostatic potential, averaged on the magnetic
+          flux surface&rdquo;; the <code>wall/description_ggd</code> binding places the same quantity at a
+          plasma-facing surface. The sentence adds only <em>relative to a chosen electrical
+          reference</em>, which is the definition of a potential and is not something any binding denies.
+        </td>
+        <td>generalises &mdash; defines the base quantity every binding shares. No source is contradicted.</td>
+      </tr>
+      <tr>
+        <td>2 &mdash; the general quantity is not restricted to the core, edge, scrape-off layer, or a particular surface</td>
+        <td>
+          Each individual binding <em>is</em> restricted: <code>core_profiles</code> is the core plasma,
+          <code>edge_profiles/profiles_1d</code> is &ldquo;the edge plasma and scrape-off layer&rdquo;,
+          <code>wall/description_ggd</code> is a wall surface. That is the whole point of a family base
+          name: <code>electrostatic_potential</code> is the parent of all four loci, and its scope is their
+          union. The sentence says the <em>general</em> quantity is what the base name denotes; it does not
+          deny that a particular binding restricts an evaluation, and the documentation's next sentence
+          says exactly that &mdash; &ldquo;Locus-specific quantities, such as the wall-adjacent plasma
+          potential, restrict the evaluation position without changing the underlying definition.&rdquo;
+        </td>
+        <td>generalises &mdash; states the family scope, and the document itself names the locus-specific children. No source is contradicted.</td>
+      </tr>
+      <tr>
+        <td>3 &mdash; encompasses local values and explicitly identified flux-surface averages; averaging is not implicit</td>
+        <td>
+          This is the sentence the two holds rest on, because three bindings do say
+          &ldquo;averaged on the magnetic flux surface&rdquo;. The sentence does not deny averaging where it
+          applies: it says averages are <em>explicitly identified</em>, which is true of those very
+          bindings &mdash; the averaging is carried in the binding's own path segment
+          (<code>profiles_1d/phi_potential</code>) and its own documentation, not in the base name. It has
+          to say this, because four of the seven bindings are <code>ggd/&hellip;/values</code> arrays whose
+          own text is &ldquo;One scalar value is provided per element in the grid subset&rdquo; &mdash;
+          local values. A base name spanning both a local binding and an averaged one would be wrong to
+          claim averaging is implicit, and would contradict the <code>ggd</code> bindings if it did.
+        </td>
+        <td>generalises &mdash; and is <em>required</em> for a name bound to both local and averaged sources. No source is contradicted.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p id="shc-locus-veto-adjudicate-ruling">
+    <strong>Ruling: the veto is wrong.</strong> A general base name may legitimately be broader than any
+    single DD binding, and this one spans bindings whose own texts differ in exactly the two respects the
+    judge read as contradictions: which region the value is evaluated in, and whether it is averaged. The
+    judge compared the base name's stored documentation against the most restrictive single binding,
+    <code>plasma_profiles/profiles_1d/phi_potential</code>, and answered <code>contradicts</code> where the
+    sentences agree with that binding wherever it applies and with the other six everywhere else.
+    Nothing in the documentation asserts a claim any of the seven sources denies.
+  </p>
+
+  <h3 id="shc-locus-veto-adjudicate-settlement">The shipped settlement should have answered &ldquo;says nothing&rdquo;</h3>
+  <p id="shc-locus-veto-adjudicate-settlement-body">
+    This is not a judgement call the cascade was intended to route to the judge at all. Sentences 2 and 3
+    state <em>non-requirements</em>: that the quantity imposes no locus, and that no averaging is implied.
+    The veto's shipped settlement exists for exactly that form &mdash; a claim stating a non-requirement
+    settles code-side as <code>says nothing</code> with <code>settled_by: "non_requirement_sentence"</code>,
+    under two conditions: the documented name carries no locus or aggregation qualifier of its own, and the
+    sentence states a non-requirement rather than asserting the quantity's own combination. Both conditions
+    hold here &mdash; <code>name_fixes_locus_or_aggregation("electrostatic_potential")</code> is
+    <code>False</code>.
+  </p>
+  <p id="shc-locus-veto-adjudicate-settlement-measure">
+    Measured against this head's own predicate (<code>claim_settlement</code> in
+    <code>imas_codex/standard_names/review/jev_review.py</code>), the settlement does <strong>not</strong>
+    fire on any of the three sentences, nor on any of the thirteen claims the stored documentation splits
+    into: all thirteen return <code>None</code>, leaving every one for the judge. The cause is the
+    predicate's grammar, not its intent. It recognises a negated requirement only through the verb list
+    <code>prescrib&hellip;|impos&hellip;|requir&hellip;|mandat&hellip;|demand&hellip;|specif&hellip;</code>
+    or a &ldquo;no mandatory &hellip;&rdquo; form; these sentences negate <em>restricted</em> and
+    <em>implicit</em>, neither of which is in that list, so two true non-requirement sentences pass
+    to the judge and one of them is answered <code>contradicts</code>.
+  </p>
+  <p id="shc-locus-veto-adjudicate-settlement-control">
+    <strong>Positive control that the instrument sees what is present.</strong> Two claims asserting
+    the quantity's own combination &mdash; &ldquo;only the flux-surface average in the core plasma and
+    never a local value&rdquo; and &ldquo;only the temperature&rdquo; &mdash; also return <code>None</code>
+    from <code>claim_settlement</code>, which is correct: they are the judge's to read, and the settlement
+    declining them is what shows the <code>None</code> above is a reading of the sentences rather than a
+    predicate that returns nothing at all. The settlement is not silent by accident; it is silent on the
+    wrong sentences.
+  </p>
+
+  <h3 id="shc-locus-veto-adjudicate-s0010">Is the S0010 precision miss the same shape?</h3>
+  <p id="shc-locus-veto-adjudicate-s0010-body">
+    <strong>Related, not the same.</strong> S0010, recorded on <code>sn-review-through-jev</code>
+    (<code>srtj-docs-cascade-switch</code>), was <code>flux_surface_averaged_time_averaged_normalized_perturbed_parallel_magnetic_field_magnitude</code>,
+    and its veto fired on the <em>probability</em> channel at contradiction masses 0.30 and 0.32 against a
+    leading answer of &ldquo;says nothing&rdquo; (silence 0.47 and 0.35) &mdash; an undecided distribution
+    sitting at the cutoff, which the retune fixed by requiring the contradiction mass to reach the silence
+    mass. This case fired on the <em>choice</em> channel with a decided <code>contradicts</code> at 0.72:
+    the judge did not hesitate, it compared a family base name against one restrictive binding and called it
+    a contradiction. Both are fans of one defect &mdash; a veto firing where no source is denied &mdash;
+    and both are precision misses for the same calibration, but the mechanism differs, so S0010's fix does
+    not address it. The remedy this case points to is the settlement's grammar, not the probability
+    channel's cutoff.
+  </p>
+
+  <h3 id="shc-locus-veto-adjudicate-action">The action taken</h3>
+  <p id="shc-locus-veto-adjudicate-action-holds">
+    No document was refined; a refine would have rewritten correct prose to satisfy a wrong finding. Both
+    holds were resolved through the hold channel's own resolution path,
+    <code>imas_codex.standard_names.review.holds.dismiss_hold</code>, which is the sanctioned reasoned
+    dismissal, with the ruling recorded as the reason on each. The first call returned
+    <code>True</code> for <code>electrostatic_potential:docs:94153d56&hellip;</code> and the second for
+    <code>electrostatic_potential:docs:cc06569b&hellip;</code>; the name then carried
+    <strong>0</strong> open holds. That path releases a document only through the canonical promotion
+    predicate, the same one the stranded-promotion pass applies, and the name moved from
+    <code>docs_stage: reviewed</code> to <code>docs_stage: accepted</code> at
+    <code>reviewer_score_docs 0.9521</code> with <code>name_stage: accepted</code>.
+  </p>
+  <p id="shc-locus-veto-adjudicate-action-reapply">
+    APPLY_SENTINEL
+  </p>
+
+  <h3 id="shc-locus-veto-adjudicate-disagreement">The case, in the calibration's disagreement-record form</h3>
+  <p id="shc-locus-veto-adjudicate-disagreement-body">
+    Recorded in the shape the <code>sn-review-through-jev</code> disagreement sheet uses, so the veto
+    calibration can count it. The row is a precision miss: the judge fired on a row whose true label is
+    acceptable.
+  </p>
+  <table id="shc-locus-veto-adjudicate-disagreement-row">
+    <thead><tr><th>field</th><th>value</th></tr></thead>
+    <tbody>
+      <tr><td>sheet_id</td><td><code>SHC-LOCUS-1</code></td></tr>
+      <tr><td>name</td><td><code>electrostatic_potential</code></td></tr>
+      <tr><td>axis</td><td>docs</td></tr>
+      <tr><td>source_path</td><td><code>plasma_profiles/profiles_1d/phi_potential</code> (plus six sibling bindings)</td></tr>
+      <tr><td>source_documentation</td><td>&ldquo;Electrostatic potential, averaged on the magnetic flux surface&rdquo;</td></tr>
+      <tr><td>clause</td><td><code>claim_contradicts_source</code> &rarr; <code>cascade_contradiction</code> / <code>documentation_contradiction</code> hold</td></tr>
+      <tr><td>cascade_decision</td><td><code>refine</code>, <code>failed_checks: ["claim_contradicts_source"]</code></td></tr>
+      <tr><td>judge_answer</td><td><code>contradicts</code>, probability 0.72, cutoff 0.30, veto criterion <code>choice=contradicts or probability&gt;=cutoff</code></td></tr>
+      <tr><td>documentation_score</td><td>0.9521 (above the 0.85 floor)</td></tr>
+      <tr><td>true_label</td><td>acceptable &mdash; a base name legitimately broader than every single binding</td></tr>
+      <tr><td>label</td><td><strong>precision miss</strong></td></tr>
+      <tr><td>mechanism</td><td>general family scope read as contradiction against the most restrictive binding; the non-requirement settlement did not fire because the predicate's verb list omits <em>restricted</em> and <em>implicit</em></td></tr>
+      <tr><td>disposition</td><td>the veto was right in neither hold; no refine; holds dismissed with this row as the reason</td></tr>
+    </tbody>
+  </table>
+
+  <h3 id="shc-locus-veto-adjudicate-scope">Stated scope</h3>
+  <p id="shc-locus-veto-adjudicate-scope-body">
+    This node rules on the veto, records it as a calibration miss, resolves the two holds and re-applies
+    the family. It writes no documentation text and changes no veto threshold. The settlement predicate's
+    grammar lives in <code>imas_codex/standard_names/review/jev_review.py</code>, outside this node's write
+    scope, so widening it &mdash; admitting the negated-restriction and negated-implicitness forms &mdash;
+    is reported to the coordinator as a follow-on rather than done here.
+  </p>
+</section>
