@@ -1,0 +1,73 @@
+{
+  "added_failure_count": 0,
+  "added_failure_derivation": "Both arms are absent in the reviewed run's manifest: baseline_suite and after_suite each read 'not run' because no test path is reachable from this node's write scope (three docs/evidence files, no product source or test changed), and the run's logs/ directory carries no suite log. With neither arm run there is no observable failure delta, so added_failure_count is 0 and added_failure_ids is empty; this records an absence of suite evidence, not a measured green.",
+  "added_failure_ids": [],
+  "completed_at": "2026-10-28T21:36:20.342Z",
+  "dispatched_at": "2026-10-28T21:30:29Z",
+  "emitted": [
+    "VERDICT goal: the node goal is to apply the lead's ruling by rebinding wall/description_ggd/ggd/phi_potential/values to electrostatic_potential_at_wall and retiring electrostatic_potential_at_outboard_midplane; the reviewed range 9e9b19d0d..32f706331 writes no graph state and instead makes the fragment's before-state truthful (run.py:1301 renders from logs/read-state.json) and records the already-applied unsigned move under three signed row shapes at run.py:936, none of which the engine admits.",
+    "VERDICT done_when: the done_when's state clauses are asserted by check_readback (run.py:1119) which now also requires _check_signed (run.py:1126) to find a signed receipt or a recorded gap; logs/readback.log and logs/readback-signed-refusal.log record EXIT=0 and EXIT=1, and logs/signed.log and logs/record.log end EXIT=0, but no clause can assert a signed exchange for a move the engine has no row shape for.",
+    "VERDICT write_paths: the declared write paths are the fragment html, the runner, the exchange authority JSON and (unused here) the retirement authority and figure directory; git diff --stat 9e9b19d0d..32f706331 touches exactly the html, the runner and the exchange authority, all declared.",
+    "VERDICT manifest: read; it states status complete with commits 84319af1b and 32f706331, names the before-table-refusal negative control, and discloses the unsigned writer, the three signed refusals and the follow-on row shape.",
+    "VERDICT diff: read commit by commit. 84319af1b adds phase_signed plus the signed as-applied record and re-renders the before-table from logs/read-state.json (7/0/exhausted); 32f706331 adds the table_matches check and its control. 757 insertions and 6 deletions across the three declared files, one of the deletions being the undeclared landing section.",
+    "CALL_SITES: imas_codex/standard_names/signed_manifest.py:8676 (apply_signed_manifest), imas_codex/standard_names/repair_authority.py:135 (build_repair_authority), imas_codex/standard_names/provenance_lifecycle.py:505 (retarget_standard_name_sources)",
+    "SCORE goal_fidelity: 16",
+    "JUSTIFICATION goal_fidelity: the graph state at logs/readback.json matches the ruling, and the range now records the unsigned mechanism at run.py:936 with every refusal verbatim, but the ruled signed-exchange clause stays unmet because no signed row shape exists (run.py:1126 accepts the recorded gap).",
+    "SCORE evidence: 15",
+    "JUSTIFICATION evidence: signed.log, record.log and readback.log each end in a real EXIT= line and the two controls redden at EXIT=1 (logs/readback-signed-refusal.log, logs/before-table-refusal.log), but the before-table expectation comes from the same logs/read-state.json the renderer reads (run.py:1494) and no suite arm exists.",
+    "SCORE scope_discipline: 17",
+    "JUSTIFICATION scope_discipline: git diff 9e9b19d0d..32f706331 touches only the three declared evidence paths, with the extra cost that the html loses its landing section at ...html:3843 undeclared.",
+    "SCORE durability: 18",
+    "JUSTIFICATION durability: reinstating result[\"state\"][\"names\"] at run.py:1301 makes table_matches report the defect's exact three figures (logs/before-table-refusal.log EXIT=1), and dropping the signed record or its refusals reddens _check_signed (logs/readback-signed-refusal.log EXIT=1).",
+    "SCORE fit: 17",
+    "JUSTIFICATION fit: helpers are named by mechanism (read_binding, migration_row_as_applied, table_matches) and both commits carry conventional subjects with bodies, though run.py:697 extends the plan-prefixed SHC_LOCUS_ query tags.",
+    "SCORE reuse: 18",
+    "JUSTIFICATION reuse: the signed path calls the owners build_repair_authority (repair_authority.py:135) and apply_signed_manifest (signed_manifest.py:8676) instead of forking engine logic; only the guard literal list at run.py:677 restates what the sibling sib-apply-live-rulings-run.py:389 also carries."
+  ],
+  "evidence_inputs": {
+    "before_state": "logs/read-state.json: electrostatic_potential 7 producers (accepted), electrostatic_potential_at_wall 0 (reviewed), electrostatic_potential_at_outboard_midplane exhausted, langmuir_probe_position 2; matches the rendered table exactly (before_table_problems=[] in logs/record.log)",
+    "controls": "logs/before-table-refusal.log EXIT=1 (post-write render refused with 7/6, exhausted/superseded, 0/1); logs/readback-signed-refusal.log EXIT=1 (missing record and stripped refusals both refused)",
+    "landing_gap": "the landing h2/p present at 9e9b19d0d:...html:3708-3709 is absent at 32f706331; no landing text remains in the runner",
+    "prior_findings_resolved": "blocking 'false before-state' answered by rendering from read-state.json with a check and control; blocking 'unsigned move' answered by three previewed signed row shapes and their verbatim refusals; non-blocking 'signed clause unasserted' answered by _check_signed at run.py:1126",
+    "signed_attempts": "logs/signed-as-applied.json verdict no-signed-row-shape; refusals 'signed ordinary source lifecycle does not match migration authority', 'ordinary source is already bound', 'given source does not produce exactly the giving name'; follow-on row shape named"
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire.html",
+      "line": 3843,
+      "severity": "non-blocking",
+      "text": "re-rendering the fragment in phase_record dropped the 'landing' heading and its paragraph that commit 9e9b19d0d added (they are present at 9e9b19d0d:...html:3708 and absent at 32f706331; the runner contains no 'landing' text at all), and the deletion is described in neither commit message nor the manifest, so the evidence anchor silently loses a record it previously carried. It does not block: the landing line itself lives in the manifest, which promotion consumes."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py",
+      "line": 1494,
+      "severity": "non-blocking",
+      "text": "the new before-table check compares the rendered page against logs/read-state.json, which is the same file the renderer reads at run.py:1301, so it proves the table matches that file and cannot itself show the file is the pre-write read; the pre-write provenance rests on phase ordering and read.log. The check does redden on the exact regression it was added for, and the control reproduces the defect's three figures."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py",
+      "line": 697,
+      "severity": "non-blocking",
+      "text": "the two new Cypher tags SHC_LOCUS_READ_WALL_BINDING (line 697) and SHC_LOCUS_READ_SIGNED_NAMES (line 710) extend a plan-prefixed marker convention (SHC_ = sn-harmonize-command) that the repository naming rules forbid in source; they mirror the sibling sib-*.py evidence runners, so the convention is consistent but plan-coupled."
+    }
+  ],
+  "outside_scope": "none",
+  "project": "imas-codex",
+  "review_run_id": "r-20261028T212608991513-review-of-shc-locus-wall-rebind-midplane-retire-32f7063310cf",
+  "reviewed_base_sha": "9e9b19d0de0fb7edf06df4d0f12c6a5b3bbe22e0",
+  "reviewed_head_sha": "32f7063310cf38f21f86628aebab2e4bb30fde9f",
+  "reviewed_run_id": "r-20261028T202206786051-shc-locus-wall-rebind-midplane-retire",
+  "rubric": "landed",
+  "scores": {
+    "durability": 18,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 16,
+    "reuse": 18,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T21:40:05.883027+00:00",
+  "total": 101
+}
