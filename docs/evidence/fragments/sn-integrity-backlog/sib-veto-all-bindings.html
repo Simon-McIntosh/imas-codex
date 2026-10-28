@@ -23,7 +23,7 @@ no binding supports it, and any unanswered binding leaves the claim unknown.</p>
 <tbody>
 <tr><th>question table</th><td><code>imas_codex/standard_names/review/jev_review.py</code> — one question per (claim, binding) when the name binds more than one definition, naming the binding each question is about and asking for that binding alone</td></tr>
 <tr><th>fold</th><td><code>aggregate_binding_answers</code> — <code>supports</code> if any binding supports; <code>contradicts</code> only when no binding supports and at least one rules the claim out; a single-binding name returns its recorded answer untouched, so the probability channel and pre-change receipts replay identically</td></tr>
-<tr><th>review-docs note</th><td><code>worker_review_docs._documentation_contradiction_note</code> — one state carrying every binding, one judge call, one verdict for the claim set, replacing the per-source OR</td></tr>
+<tr><th>review-docs note</th><td><code>worker_review_docs._documentation_contradiction_note</code> — one state carrying every binding, one judge call, one verdict for the claim set, replacing the per-source OR; the hold message names the binding ids beside the DD text, so a hold records which definitions were compared as well as what they said</td></tr>
 <tr><th>clause text</th><td><code>imas_codex/llm/prompts/sn/review_checks.yaml</code> — the question names the DD definitions the name binds rather than one source definition</td></tr>
 <tr><th>routing</th><td><code>imas_codex/standard_names/review/cascade.py</code> passes the state binding ids into the question table</td></tr>
 </tbody>
@@ -53,9 +53,32 @@ perturbed field; it is not vetoed.</p>
 <p id="sib-veto-all-bindings-measure-text">Measured by replaying the frozen documentation receipts at base and re-judging the same rows at head under sn-judge, USD 0.00814 over the 36 golden B validation rows whose name binds more than one DD definition; the other 148 validation rows bind one definition, where the fold returns the recorded answer unchanged by construction. Before: 1 veto, on an unacceptable row. After: 0 vetoes. The single moved row is radial_velocity_of_pellet, bound to spi/injector/fragment/velocity_r and spi/injector/pellet/velocity_r: its documentation states the fragment velocity, the fragment binding supports its claims at 0.87 and 0.62 while the pellet centre-of-mass binding reads the same sentences as contradictions, and the old per-source OR held it. That is the S0010 and electrostatic_potential shape, so the moved row is a false positive resolved, not a real contradiction lost. No veto on an acceptable row appeared at either arm, so precision did not fall; the frozen cutoff was not touched, because the fold changes what is compared, not the threshold it is compared against.</p>
 
 <h2 id="sib-veto-all-bindings-gate">Gate</h2>
-<p id="sib-veto-all-bindings-gate-text">Both arms ran tests/standard_names/ on default markers with -n 8 from git archive trees. Base 282260d6c: 97 failed, 8434 passed. Head 0956864f2: 73 failed, 8459 passed. Three failure ids were added; two were repaired in c579b9e57. One remains: test_docs_contradiction_veto.py::test_second_bound_dd_source_can_hold_documentation, which asserts that a claim supported by one bound source and contradicted by another must hold the document. That is the per-source OR this section removes; the file lies outside this node write scope, so it is reported for a scope grant rather than rewritten here.</p>
-<h2 id="sib-veto-all-bindings-blocker">Blocker</h2>
-<p id="sib-veto-all-bindings-blocker-text">The zero-added-failure gate is unmet by one id. The test pins the aggregation the lead ruling retires and lives in a file this node may not write. Grant tests/standard_names/test_docs_contradiction_veto.py and the fixture can be restated as an all-bindings fixture.</p>
+<p id="sib-veto-all-bindings-gate-text">Both arms ran tests/standard_names/ on default markers with -n 8 from
+git archive trees. Base 282260d6c: 97 failed, 8434 passed. Head 794f04ae9: 70 failed, 8463 passed.
+The failure id sets were diffed, not the counts: <strong>zero added ids</strong>, 27 repaired. The three
+ids this node introduced along the way were repaired in 0956864f2, c579b9e57 and 794f04ae9.</p>
+
+<h2 id="sib-veto-all-bindings-fixture">The regression fixture restated under the all-bindings rule</h2>
+<p id="sib-veto-all-bindings-fixture-text">The fixture that pinned the retired aggregation,
+<code>test_second_bound_dd_source_can_hold_documentation</code>, is restated as
+<code>test_a_claim_is_held_only_when_no_bound_source_supports_it</code>, parametrised over the two
+readings that separate the rules. Both bindings contradicting the claim still holds the documentation,
+which keeps the fixture's original force. One binding supporting and the other contradicting does not
+hold it, which the per-source OR could not express. Its judge double answers one question per (claim,
+binding) and asserts a single state carrying both bindings, so it rejects a per-source shape instead of
+tolerating it.</p>
+<p id="sib-veto-all-bindings-fixture-main">It fails on main in two ways, and both are the retired
+aggregation rather than an incidental assertion. The double refuses main's shape outright:
+<code>assert len(states) == 1</code> reads 2, because main builds one single-source state per bound
+source. And when the double is made shape-aware so that only the outcome can differ, main holds the
+claim that one binding supports: the same readings give <code>reviewed</code> on main and
+<code>accepted</code> at head. The held case is unchanged on both arms.</p>
+<pre id="sib-veto-all-bindings-fixture-run"><code># restated fixture against main 282260d6c
+FAILED test_a_claim_is_held_only_when_no_bound_source_supports_it[no-binding-supports]
+FAILED test_a_claim_is_held_only_when_no_bound_source_supports_it[one-binding-supports]
+# shape-aware double, same readings, main's per-source OR
+DEMO observed: [psi, phi] stages: ['reviewed']   # head: ['accepted']
+EXIT=1</code></pre>
 </main>
 </body>
 </html>
