@@ -809,6 +809,7 @@ def build_docs_state(
         "source_paths": _observed(item.get("source_paths")),
         "sibling_names": _observed(item.get("sibling_names")),
         "related_neighbours": _observed(item.get("related_neighbours")),
+        "binding_ids": docs_binding_ids(item),
     }
     evidence_fields = {
         evidence_field
@@ -827,10 +828,33 @@ def build_docs_state(
     return state
 
 
+def docs_binding_ids(item: Mapping[str, Any]) -> list[str]:
+    """Name every DD definition the entry's source edges bind, in document order."""
+    return [
+        str(source.get("id") or source.get("path") or f"binding {index + 1}")
+        for index, source in enumerate(item.get("dd_source_docs") or ())
+    ]
+
+
+def claim_binding_key(index: int, binding: int) -> str:
+    """The question key for one claim read against one DD binding."""
+    return check_question_name(f"claim_contradicts_source:{index}:binding:{binding}")
+
+
 def docs_question_table(
-    checks: Sequence[ReviewCheck], claims: Sequence[str]
+    checks: Sequence[ReviewCheck],
+    claims: Sequence[str],
+    bindings: Sequence[str] | None = None,
 ) -> dict[str, dict[str, Any]]:
-    """Build three rubric categories and one source comparison per claim."""
+    """Build three rubric categories and one source comparison per claim.
+
+    A name bound to several DD definitions is judged one binding at a time, so
+    each claim is compared with every definition on its own and the readings are
+    folded by :func:`aggregate_binding_answers`. A broad claim states the base
+    name's scope, which is what makes it agree with the binding carrying that
+    scope; reading it against one narrow binding as though that binding were the
+    whole evidence denies a document the name supports.
+    """
     docs_checks = _docs_checks(checks)
     dimensions = {check.dimension for check in docs_checks}
     table: dict[str, dict[str, Any]] = {}
@@ -848,7 +872,28 @@ def docs_question_table(
     if claim_check is None or claim_check.question is None:
         raise ValueError("the claim support check is missing from the docs taxonomy")
     options = claim_check.question.options
+    criteria = {option: _CLAIM_COMPARISON_CRITERIA[option] for option in options}
+    binding_ids = [str(label) for label in bindings or ()]
     for index, _claim in enumerate(claims):
+        if len(binding_ids) > 1:
+            for position, label in enumerate(binding_ids):
+                table[claim_binding_key(index, position)] = {
+                    "type": "choice",
+                    "instructions": (
+                        f"{claim_check.question.text} This name binds "
+                        f"{len(binding_ids)} DD definitions. Compare only "
+                        f"`documentation_claims[{index}]` with "
+                        f"`dd_source_docs.value[{position}]`, the definition of "
+                        f"{label}, and judge that binding alone. Choose "
+                        "'contradicts' only when this definition rules the claim "
+                        "out; a claim that states a scope wider than this one "
+                        "binding, or that the binding is silent on, is not a "
+                        "contradiction. If this definition does not bear on the "
+                        "claim, choose 'says nothing'."
+                    ),
+                    "criteria": criteria,
+                }
+            continue
         table[check_question_name(f"{claim_check.id}:{index}")] = {
             "type": "choice",
             "instructions": (
@@ -856,14 +901,10 @@ def docs_question_table(
                 f"`documentation_claims[{index}]` with `dd_source_docs.value`, "
                 "`description`, `unit.value`, `links.value`, "
                 "`source_paths.value`, `sibling_names.value` and "
-                "`related_neighbours.value`. A contradiction in any part of "
-                "the sentence is a contradiction even when another part is "
-                "supported. If no observed source bears on the claim, choose "
-                "'says nothing'."
+                "`related_neighbours.value`. If no observed source bears on the "
+                "claim, choose 'says nothing'."
             ),
-            "criteria": {
-                option: _CLAIM_COMPARISON_CRITERIA[option] for option in options
-            },
+            "criteria": criteria,
         }
     for check in docs_checks:
         if check.id != claim_check.id and check.question is not None:
@@ -1030,6 +1071,59 @@ def settled_claim_answers(state: Mapping[str, Any]) -> dict[int, dict[str, Any]]
     }
 
 
+def claim_binding_answers(
+    state: Mapping[str, Any],
+    answers: Mapping[str, Mapping[str, Any]],
+) -> list[list[Mapping[str, Any] | None]]:
+    """Every reading the judge gave for each claim, one per DD binding."""
+    count = len(state.get("binding_ids") or ())
+    readings: list[list[Mapping[str, Any] | None]] = []
+    for index, _claim in enumerate(state["documentation_claims"]):
+        legacy = answers.get(check_question_name(f"claim_contradicts_source:{index}"))
+        per_binding = (
+            [
+                answers.get(claim_binding_key(index, position))
+                for position in range(count)
+            ]
+            if count > 1
+            else []
+        )
+        # A judgment recorded before a name's bindings were read one at a time
+        # carries the single claim-level answer and no per-binding ones, and
+        # replaying it must read that answer rather than lose the row.
+        if per_binding and any(answer is not None for answer in per_binding):
+            readings.append(per_binding)
+        else:
+            readings.append([legacy])
+    return readings
+
+
+def aggregate_binding_answers(
+    bindings: Sequence[Mapping[str, Any] | None],
+) -> Mapping[str, Any] | None:
+    """Fold a claim's per-binding readings into the claim's own verdict.
+
+    A claim contradicts only when no binding supports it. A name that binds
+    several DD definitions is documented for the base name as a claim about all
+    of them, so a sentence stating the base scope is precisely the sentence the
+    binding carrying that scope affirms; a definition nothing supports, and at
+    least one that rules the claim out, is the case the veto exists for. Any
+    binding left unanswered leaves the claim unknown rather than decided.
+    """
+    if not bindings or any(answer is None for answer in bindings):
+        return None
+    if len(bindings) == 1:
+        return bindings[0]
+    present = [answer for answer in bindings if answer is not None]
+    if any(answer.get("choice") == "supports" for answer in present):
+        choice = "supports"
+    elif any(claim_contradicts(answer) for answer in present):
+        choice = "contradicts"
+    else:
+        choice = "says nothing"
+    return {"choice": choice, "probabilities": {choice: 1.0}, "bindings": len(present)}
+
+
 def effective_claim_answers(
     state: Mapping[str, Any],
     answers: Mapping[str, Mapping[str, Any]],
@@ -1040,13 +1134,13 @@ def effective_claim_answers(
     every reader that scores or vetoes a claim answer reads it through here: for
     a settled claim the code's own answer stands whatever the judge returned for
     the same index, and no reader can fail or veto a claim the code has settled.
+    A claim judged binding by binding is folded here too, so every reader sees
+    the one verdict the whole binding set supports.
     """
     settled = settled_claim_answers(state)
     return [
-        settled[index]
-        if index in settled
-        else answers.get(check_question_name(f"claim_contradicts_source:{index}"))
-        for index, _claim in enumerate(state["documentation_claims"])
+        settled[index] if index in settled else aggregate_binding_answers(per_binding)
+        for index, per_binding in enumerate(claim_binding_answers(state, answers))
     ]
 
 
@@ -1076,8 +1170,9 @@ def aggregate_docs_review(
         check for check in docs_checks if check.id == "claim_contradicts_source"
     )
     raw_claim_answers = [
-        answers.get(check_question_name(f"{claim_check.id}:{index}"))
-        for index, _claim in enumerate(state["documentation_claims"])
+        answer
+        for per_binding in claim_binding_answers(state, answers)
+        for answer in per_binding
     ]
     claim_answers = []
     contradicted_claims = []

@@ -618,7 +618,7 @@ checks:
   retrieval: true
   question:
     kind: choice
-    text: Which conflict, if any, does this claim have with its DD source definition?
+    text: Which conflict, if any, does this claim have with the DD definitions the name binds?
     options:
     - supports
     - contradicts

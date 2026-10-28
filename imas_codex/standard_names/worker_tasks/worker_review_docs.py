@@ -708,20 +708,18 @@ async def _documentation_contradiction_note(
             return "DD source text unavailable; claim comparison could not run"
         return None
 
-    states = [
-        jev_review.build_docs_state({**item, "dd_source_docs": [source]})
-        for source in sources
-    ]
-    claims = states[0]["documentation_claims"]
+    state = jev_review.build_docs_state(item)
+    claims = state["documentation_claims"]
     if not claims:
         return None
     questions = {
         key: question
         for key, question in jev_review.docs_question_table(
-            jev_review._default_checks(), claims
+            jev_review._default_checks(), claims, state.get("binding_ids")
         ).items()
         if key.startswith("check:claim_contradicts_source:")
     }
+    binding_labels = ", ".join(state.get("binding_ids") or ()) or "DD source"
     lease = mgr.reserve(0.001 * len(sources), phase="review_docs")
     if lease is None:
         logger.warning("review_docs: claim comparison unfunded for %s", item["id"])
@@ -729,52 +727,52 @@ async def _documentation_contradiction_note(
     try:
         model = get_model("sn-judge")
         results, _ = await jev_review.decide_batch(
-            states, questions, model=model, service=jev_review.SERVICE
+            [state], questions, model=model, service=jev_review.SERVICE
         )
-        if len(results) != len(sources):
+        if len(results) != 1:
             logger.warning("review_docs: claim result count differs for %s", item["id"])
-            return "claim comparison unavailable: Jev omitted a DD source"
-        contradictions = []
-        unavailable = []
-        for source, state, result in zip(sources, states, results, strict=True):
-            source_path = str(source.get("id") or source.get("path") or "DD source")
-            if result is None:
-                unavailable.append(source_path)
-                continue
-            answers, spent = result
-            lease.charge_event(
-                spent,
-                LLMCostEvent(
-                    model=model,
-                    tokens_in=0,
-                    tokens_out=0,
-                    sn_ids=(item["id"],),
-                    phase="review_docs",
-                ),
-            )
-            verdict = jev_review.aggregate_docs_review(
-                state, jev_review._default_checks(), answers
-            )
-            if verdict["contradiction_veto"]:
-                dd_text = source.get("documentation") or source.get("description") or ""
-                contradictions.append(
-                    f"{source_path}: {verdict['contradiction_reason']}; DD: {dd_text}"
-                )
-            elif any(
-                answer is None
-                or answer.get("choice") not in {"supports", "says nothing"}
-                for answer in verdict["claim_answers"]
-            ):
-                unavailable.append(source_path)
-        if contradictions:
-            return "contradicts source: " + " | ".join(contradictions)
-        if unavailable:
+            return "claim comparison unavailable: Jev omitted the DD bindings"
+        result = results[0]
+        if result is None:
             logger.warning(
                 "review_docs: claim answer missing for %s at %s",
                 item["id"],
-                ", ".join(unavailable),
+                binding_labels,
             )
-            return "claim comparison unavailable at " + ", ".join(unavailable)
+            return "claim comparison unavailable at " + binding_labels
+        answers, spent = result
+        lease.charge_event(
+            spent,
+            LLMCostEvent(
+                model=model,
+                tokens_in=0,
+                tokens_out=0,
+                sn_ids=(item["id"],),
+                phase="review_docs",
+            ),
+        )
+        verdict = jev_review.aggregate_docs_review(
+            state, jev_review._default_checks(), answers
+        )
+        if verdict["contradiction_veto"]:
+            dd_text = " | ".join(
+                str(source.get("documentation") or source.get("description") or "")
+                for source in sources
+            )
+            return (
+                f"contradicts source: {verdict['contradiction_reason']}; "
+                f"DD bindings: {binding_labels}; DD: {dd_text}"
+            )
+        if any(
+            answer is None or answer.get("choice") not in {"supports", "says nothing"}
+            for answer in verdict["claim_answers"]
+        ):
+            logger.warning(
+                "review_docs: claim answer missing for %s at %s",
+                item["id"],
+                binding_labels,
+            )
+            return "claim comparison unavailable at " + binding_labels
         return None
     except Exception:
         logger.warning(
