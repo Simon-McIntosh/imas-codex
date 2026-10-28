@@ -14,14 +14,19 @@
 <p id="sib-cascade-calibration-crash-summary">
 <code>test_matched_policy_rebuilds_from_frozen_scores_and_receipts</code> called
 <code>cascade_calibration.build()</code> <strong>twice</strong>. One pass measures
-<strong>155.67 s</strong> under load, so the test spent roughly five minutes of
-wall time inside a single id, and under xdist the same call is charged against
-a <strong>600 s</strong> mark while seven sibling workers compete for eight
-cores. The kill that followed is the <code>worker crashed</code> xdist reports:
-pytest-timeout's thread method terminates the process, so no assertion is ever
-printed. The test now runs one rebuild and compares it against the committed
+<strong>155.67 s</strong> under load, so a single id held roughly five minutes
+of wall time. That cost is why the id dominated the suite, but it is
+<strong>not</strong> what turned it red: the suite arm that failed finished in
+<strong>269.09 s</strong>, which no <strong>600 s</strong> per-test mark can
+reach, and <code>pyproject.toml</code> sets no <code>timeout_method</code>, so a
+pytest-timeout expiry would be reported as a failure rather than an xdist
+<code>worker crashed</code>. The worker died of the fault described below: the
+60 s periodic stack dump fires, and about 15 s later the interpreter dies of
+SIGSEGV with an unreadable frame after a numpy reduction, which prints no
+assertion. The test now runs one rebuild and compares it against the committed
 artifact, which is the stronger repeatability statement — every cutoff, route
-count and interval must match — and costs one pass instead of two.
+count and interval must match — and costs one pass instead of two; its fixture
+also cancels the periodic dump, which is the change that stops the crash.
 </p>
 
 <h2 id="sib-cascade-calibration-crash-mechanism">Where the time goes</h2>
@@ -123,7 +128,7 @@ EXIT=1
 <tr><td>one solo run, <code>-p no:faulthandler</code></td><td>1 passed, 152.07 s, <code>EXIT=0</code></td></tr>
 <tr><td>solo runs at head, after the fix</td><td>five of five passed — 164 s, 164 s, 167 s, 162 s, 168 s — <code>EXIT=0</code> each, against a 600 s timeout</td></tr>
 <tr><td>suite <code>tests/standard_names</code>, <code>-n 8</code>, head before the fix</td><td>1 failed, 8536 passed, 11 skipped, 269.09 s — the id crashed at its 60 s dump</td></tr>
-<tr><td>suite <code>tests/standard_names</code>, <code>-n 8</code>, head after the fix (committed)</td><td><strong>8537 passed, 11 skipped, 0 failed</strong>, 228.05 s, <code>EXIT=0</code>; the rebuild itself 147.73 s</td></tr>
+<tr><td>suite <code>tests/standard_names</code>, <code>-n 8</code>, head after the fix (commit <code>fc2c69052</code>, the commit carrying the test change)</td><td><strong>8537 passed, 11 skipped, 0 failed</strong>, 228.05 s, <code>EXIT=0</code>; the rebuild itself 147.73 s</td></tr>
 <tr><td>suite <code>tests/standard_names</code>, <code>-n 8</code>, base <code>7034624c1</code></td><td>6 failed, 8530 passed, 12 skipped, 244.91 s — the same id plus five environment-only ids; <strong>zero ids added</strong> at head</td></tr>
 <tr><td>negative control at head, one re-frozen operating-point row reverted</td><td>failed with the assertion above, <code>EXIT=1</code>, 150.55 s</td></tr>
 </tbody>
