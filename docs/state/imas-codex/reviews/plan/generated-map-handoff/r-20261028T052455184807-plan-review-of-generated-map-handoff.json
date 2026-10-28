@@ -41,7 +41,24 @@
   "plan_slug": "generated-map-handoff",
   "plan_version": 12,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "finding": "wiring-1",
+      "reason": "the declared edge is the correct one and the hand-off document exists on disk (17 KB at the path \u00a74 names), so only the recorded state ordering reads wrong, not the relationship.",
+      "when": "2026-10-28T05:36:47.244648+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "reason": "the declared edge is the correct one and the hand-off document exists on disk (17 KB at the path \u00a74 names), so only the recorded state ordering reads wrong, not the relationship.",
+      "when": "2026-10-28T05:36:47.244648+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/generated-map-handoff/r-20261028T052455184807-plan-review-of-generated-map-handoff.json",
   "review_run_id": "r-20261028T052455184807-plan-review-of-generated-map-handoff",
   "reviewed_blob_sha": "d083bc653da9d73ee676de2a1a8245f147b68d1f",
   "rubric": "content",
