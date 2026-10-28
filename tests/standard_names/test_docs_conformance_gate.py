@@ -139,7 +139,14 @@ def _review(name: str, documentation: str, *, score: float = 1.0) -> dict[str, A
 
 
 def _routed_to_refinement(persisted: dict[str, Any]) -> bool:
-    return persisted["score"] < persisted["min_score"]
+    """Acceptance needs a passing score and no open documentation hold."""
+    return persisted["score"] < persisted["min_score"] or bool(
+        persisted["review_holds"]
+    )
+
+
+def _held_for(persisted: dict[str, Any], kind: str) -> bool:
+    return any(hold["kind"] == kind for hold in persisted["review_holds"])
 
 
 def test_conforming_documentation_is_accepted_on_score() -> None:
@@ -173,6 +180,7 @@ def test_off_template_opening_is_refined_at_a_perfect_score() -> None:
     persisted = _review(_AVERAGED, documentation)
 
     assert _routed_to_refinement(persisted)
+    assert _held_for(persisted, "registry_conformance")
     assert "template_opening" in persisted["comments"]
     assert "template_opening" in persisted["comments_per_dim"]["registry_conformance"]
 
@@ -188,6 +196,7 @@ def test_forbidden_variant_equation_is_refined_at_a_perfect_score() -> None:
     persisted = _review(_AVERAGED, documentation)
 
     assert _routed_to_refinement(persisted)
+    assert _held_for(persisted, "registry_conformance")
     assert "forbidden_equation_variant" in persisted["comments"]
 
 
@@ -205,6 +214,7 @@ def test_non_canonical_statement_of_a_registered_concept_is_refined(
     persisted = _review(_AVERAGED, documentation)
 
     assert _routed_to_refinement(persisted)
+    assert _held_for(persisted, "registry_conformance")
     assert "non_canonical_equation" in persisted["comments"]
     assert "flux-surface average" in persisted["comments"]
 

@@ -65,8 +65,11 @@ def _review(
         return quorum
 
     def persist(**kwargs):
+        """Mirror the persistence contract: a passing score plus no open hold."""
         persisted.update(kwargs)
-        stage = "accepted" if kwargs["score"] >= kwargs["min_score"] else "reviewed"
+        passing = kwargs["score"] >= kwargs["min_score"]
+        held = bool(kwargs["review_holds"])
+        stage = "accepted" if passing and not held else "reviewed"
         persisted_stage.append(stage)
         return stage
 
@@ -121,6 +124,7 @@ def test_estimator_recipe_is_held_and_sent_to_refinement():
     stage, persisted, adjudications = _review(documentation)
 
     assert stage == "reviewed"
+    assert [hold["kind"] for hold in persisted["review_holds"]] == ["banned_prose"]
     assert "is obtained from" in persisted["comments"].lower()
     assert "is obtained from" in persisted["comments_per_dim"]["banned_prose"].lower()
     assert adjudications[0]["findings"]["estimator_recipe"] == 1

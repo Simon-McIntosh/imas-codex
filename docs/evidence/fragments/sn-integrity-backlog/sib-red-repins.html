@@ -1,0 +1,70 @@
+<section data-reckon="evidence-fragment" data-node="sib-red-repins" data-plan="sn-integrity-backlog" data-section="s41">
+<h2 id="sib-red-repins-title">Re-pinning the stale prompt, conformance and classifier tests</h2>
+<p>All ten ids in causes <code>C2</code>, <code>C3</code> and <code>C5</code> of the failing-set classification are
+<strong>stale tests</strong>, not product defects. Each is re-pinned to the contract the code now holds, in commit
+<code>0dffb59f7</code>. No product source was changed. The repair is test-only: 24 lines added, 5 removed across the
+four files.</p>
+
+<h3 id="sib-red-repins-ids">One line per id: what the assertion pinned, and the fix kind</h3>
+<table id="sib-red-repins-idtable">
+<thead><tr><th>id</th><th>pinned</th><th>now measured</th><th>fix</th></tr></thead>
+<tbody>
+<tr id="sib-red-repins-id-conventions-generate"><td><code>test_conventions_prompt_block.py::test_documentation_prompt_has_no_block_without_selected_entry[sn/generate_docs_user]</code></td><td><code>conventions_context_for("argon_temperature") is None</code></td><td>every parseable name now selects at least its notation entry, so the empty selection is reached through the grammar's parse refusal; the pin uses <code>vacuum_toroidal_field_strength</code>, the id the conformance tests already use as unparseable</td><td><strong>re-pin</strong> (<code>0dffb59f7</code>)</td></tr>
+<tr id="sib-red-repins-id-conventions-refine"><td><code>test_conventions_prompt_block.py::test_documentation_prompt_has_no_block_without_selected_entry[sn/refine_docs_user]</code></td><td>same assertion</td><td>same re-pin</td><td><strong>re-pin</strong> (<code>0dffb59f7</code>)</td></tr>
+<tr id="sib-red-repins-id-conventions-review"><td><code>test_conventions_prompt_block.py::test_documentation_prompt_has_no_block_without_selected_entry[sn/review_docs]</code></td><td>same assertion</td><td>same re-pin</td><td><strong>re-pin</strong> (<code>0dffb59f7</code>)</td></tr>
+<tr id="sib-red-repins-id-conventions-review-user"><td><code>test_conventions_prompt_block.py::test_documentation_prompt_has_no_block_without_selected_entry[sn/review_docs_user]</code></td><td>same assertion</td><td>same re-pin</td><td><strong>re-pin</strong> (<code>0dffb59f7</code>)</td></tr>
+<tr id="sib-red-repins-id-gate-off-template"><td><code>test_docs_conformance_gate.py::test_off_template_opening_is_refined_at_a_perfect_score</code></td><td>routing to refinement = <code>score &lt; min_score</code></td><td>acceptance = passing score <em>and</em> no open documentation hold (<code>review/holds.py:266</code>); the test now asserts a <code>registry_conformance</code> hold</td><td><strong>re-pin</strong> (<code>0dffb59f7</code>)</td></tr>
+<tr id="sib-red-repins-id-gate-forbidden"><td><code>test_docs_conformance_gate.py::test_forbidden_variant_equation_is_refined_at_a_perfect_score</code></td><td>same routing pin</td><td>same hold assertion</td><td><strong>re-pin</strong> (<code>0dffb59f7</code>)</td></tr>
+<tr id="sib-red-repins-id-gate-noncanonical-subscripted"><td><code>test_docs_conformance_gate.py::test_non_canonical_statement_of_a_registered_concept_is_refined[$$\langle n\rangle_S = \oint n\,dS/|\nabla\psi| \,/\, \oint dS/|\nabla\psi|$$]</code></td><td>same routing pin</td><td>same hold assertion</td><td><strong>re-pin</strong> (<code>0dffb59f7</code>)</td></tr>
+<tr id="sib-red-repins-id-gate-noncanonical-fraction"><td><code>test_docs_conformance_gate.py::test_non_canonical_statement_of_a_registered_concept_is_refined[$$\left\langle n_{\mathrm{Ar}} \right\rangle_S = \frac{\oint_S n_{\mathrm{Ar}}\,dS/\lvert\nabla\psi\rvert}{\oint_S dS/\lvert\nabla\psi\rvert}$$]</code></td><td>same routing pin</td><td>same hold assertion</td><td><strong>re-pin</strong> (<code>0dffb59f7</code>)</td></tr>
+<tr id="sib-red-repins-id-prose-estimator"><td><code>test_prose_hold_before_accept.py::test_estimator_recipe_is_held_and_sent_to_refinement</code></td><td>the test's own persist stub decided the stage from the score alone, so a held document read as accepted</td><td>the stub mirrors <code>persist_reviewed_docs</code> (passing score and no hold); the test asserts a <code>banned_prose</code> hold</td><td><strong>re-pin</strong> (<code>0dffb59f7</code>)</td></tr>
+<tr id="sib-red-repins-id-classifier-protection"><td><code>test_cypher_mutation_classifier.py::test_read_only_protection_query_is_not_classified_as_a_mutation</code></td><td>the protection query literal opens at <code>protection.py:100</code></td><td>the literal now opens at <code>protection.py:99</code>; the reader was pointed at it and the fixture guard (<code>catalog_merge_commit_sha</code>) is kept</td><td><strong>re-pin</strong> (<code>0dffb59f7</code>)</td></tr>
+</tbody></table>
+
+<h3 id="sib-red-repins-repro">Reproduction before the repair</h3>
+<p>Run at revision <code>220b51638</code> (main) over the four files, the ten ids fail and 26 pass. The three shapes:</p>
+<pre><code>AssertionError: assert {'concepts': [], 'notation': [{'token': 'temperature', ...}]} is None
+  where ... = conventions_context_for('argon_temperature')
+assert False
+  where False = _routed_to_refinement({'checked_hold_kinds': {...}, 'claim_seq': 1, ...})
+assert 'accepted' == 'reviewed'
+AssertionError: no query string literal at .../imas_codex/standard_names/protection.py:100</code></pre>
+<p>The conformance findings themselves were never the defect: <code>conformance_findings</code> returned the expected
+<code>TEMPLATE_OPENING</code>, <code>FORBIDDEN_EQUATION_VARIANT</code> and <code>NON_CANONICAL_EQUATION</code> classes in every
+case, and the worker's INFO log raised the veto
+(<code>review_docs: magnetic_field found documentation veto &mdash; banned prose (estimator_recipe): 'is obtained from'</code>).
+Only the measurement of "sent to refinement" was pinned to the retired score-lowering mechanism.</p>
+
+<h3 id="sib-red-repins-anchors">Review-99 line anchors, checked</h3>
+<ul>
+<li><code>review/cascade.py:806</code> &mdash; confirmed: <code>chat_reviewer(models=_chat_seat(models))</code> is at 806, not 801.</li>
+<li><code>graph_store/graph_review_persistence.py:213</code> and <code>:870</code> &mdash; confirmed: both are the stage/token no-op
+<code>logger.debug("persist_reviewed_docs: stage/token mismatch ... &mdash; no-op")</code> path (the token mismatch at 870 and the
+review-name counterpart at 213).</li>
+<li>Evidence pointers &mdash; this fragment carries the assertion text and the reproduced failure for every id it repairs, not a log pointer.</li>
+</ul>
+
+<h3 id="sib-red-repins-arms">The two gate arms</h3>
+<table id="sib-red-repins-armtable">
+<thead><tr><th>arm</th><th>tree</th><th>command</th><th>outcome</th></tr></thead>
+<tbody>
+<tr><td>base</td><td><code>git archive 220b51638</code> (main)</td><td><code>uv run --no-sync pytest -p no:cacheprovider -n 8 --basetemp=&lt;base&gt;/bt-base tests/standard_names/</code></td><td><strong>92 failed</strong>, 8431 passed, 12 skipped</td></tr>
+<tr><td>head</td><td><code>git archive 0dffb59f7</code></td><td><code>uv run --no-sync pytest -p no:cacheprovider -n 8 --basetemp=&lt;head&gt;/bt-head tests/standard_names/</code></td><td><strong>82 failed</strong>, 8441 passed, 12 skipped</td></tr>
+</tbody></table>
+<p>Set difference: <strong>0 failure ids added, 10 cleared</strong>, and the ten cleared are exactly the ids in the table above
+(<code>comm -13 base.fails head.fails</code> is empty). Each arm has its own <code>--basetemp</code>; each log's first lines
+name the revision, the tree, the command, the imported module path and the working directory, and its last line is a bare
+<code>EXIT=1</code>.</p>
+
+<h3 id="sib-red-repins-negative">Negative control</h3>
+<p>The declared mutation &mdash; run the repaired ids against main &mdash; was applied: the same four files at
+<code>220b51638</code> give <strong>10 failed, 26 passed</strong>, <code>EXIT=1</code>, and each of the ten ids is in the
+failing set. The gate's base arm independently records the same ten ids failing.</p>
+
+<h3 id="sib-red-repins-scope">Scope note on the id count</h3>
+<p>The dispatch brief counts eight ids across <code>C2</code>, <code>C3</code> and <code>C5</code>, describing <code>C3</code> as
+three. The classification's worklist and its id table both give <code>C3</code> <strong>five</strong> ids (four in
+<code>test_docs_conformance_gate.py</code> and one in <code>test_prose_hold_before_accept.py</code>), so the three causes hold
+<strong>ten</strong> ids. All ten were reproduced and repaired; the arm difference of 10 clearing and 0 added matches the
+ten-id reading, not the eight-id one.</p>
+</section>
