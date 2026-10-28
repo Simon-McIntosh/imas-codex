@@ -70,7 +70,6 @@ def staging(tmp_path: Path) -> str:
     return str(tmp_path / "stg")
 
 
-
 class TestExportMissingArgs:
     """Verify required flags."""
 
