@@ -1258,7 +1258,7 @@ _stale_source_detach_apply = functools.partial(
         "out-of-allowlist-immutability",
     ),
 )
-globals()["detach_signed_" + "stale_source_bindings"] = _stale_source_detach_apply
+detach_signed_stale_source_bindings = _stale_source_detach_apply
 
 
 def bind_sources_exclusively(
