@@ -48,7 +48,24 @@
   "plan_slug": "sn-regeneration-decision",
   "plan_version": 0,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "finding": "reuse_search-3",
+      "reason": "the prerequisite plan already owns provenance recovery, so the finding sharpens the citation rather than changing the scope decision.",
+      "when": "2026-10-28T05:05:06.964452+00:00"
+    }
+  ],
+  "responses": {
+    "reuse_search-3": {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "reason": "the prerequisite plan already owns provenance recovery, so the finding sharpens the citation rather than changing the scope decision.",
+      "when": "2026-10-28T05:05:06.964452+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-regeneration-decision/r-20261005T053451305669-plan-review-of-sn-regeneration-decision.json",
   "review_run_id": "r-20261005T053451305669-plan-review-of-sn-regeneration-decision",
   "reviewed_blob_sha": "2a57d0791b1b94c9dfe695cdcaaf1a8890594a75",
   "rubric": "design",
