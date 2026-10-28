@@ -1649,6 +1649,14 @@ classes:
           seed_parent_sources when HAS_PARENT edges carry
           operator_kind='coordinate'.
         range: boolean
+      needs_composition:
+        description: >-
+          True while this name is a structural parent placeholder that still
+          waits to be composed from its children; cleared to null once the
+          derived-parent materializers write its composed content. Set by the
+          HAS_PARENT edge pass for projection, coordinate and unary-postfix
+          operators. Absent or null means no composition is outstanding.
+        range: boolean
       desc_name_similarity:
         description: >-
           Cosine similarity between the grammar-expanded name embedding

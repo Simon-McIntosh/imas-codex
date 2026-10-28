@@ -139,7 +139,6 @@ imas_codex/standard_names/graph_store/graph_claim_scope.py|StandardName|_drain_s
 imas_codex/standard_names/graph_store/graph_lineage.py|StandardName|_lifecycleless_reconcile_lock|5021,5021
 imas_codex/standard_names/graph_store/graph_claim_release.py|StandardName|_refine_claim_release_lock|405,406
 imas_codex/standard_names/graph_store/graph_parent_lifecycle.py|StandardName|_structural_authority_lock|647,648
-imas_codex/standard_names/graph_store/graph_lineage.py|StandardName|needs_composition|3083,4094,5822
 imas_codex/standard_names/graph_store/graph_cost_and_claims.py|StandardNameSource|_claim_lock|14557,14558,14630,14631,14672,14673,14709,14710
 imas_codex/standard_names/graph_store/graph_claim_scope.py|StandardNameSource|_drain_scope_lock|923,924
 imas_codex/standard_names/graph_store/graph_source_bindings.py|StandardName|reservation_source_id|888

@@ -1,0 +1,77 @@
+<section id="sib-declare-needs-composition">
+  <p><code>StandardName.needs_composition</code> is written and read by repository Cypher and was never
+  declared in <code>imas_codex/schemas/standard_name.yaml</code>. The property check only passed because
+  <code>imas_codex/graph/cypher_property_check.py</code> carried an adjudication row allowing the
+  occurrences by path, label and property name, with source-line pins
+  (<code>graph_lineage.py|3083,4094,5822</code>) that stopped matching when that file was split. The row
+  permitted three occurrences in <code>graph_lineage.py</code> and none in
+  <code>signed_manifest.py</code>, so the duplicate-stub deletion's
+  <code>SET stub.needs_composition = true</code> was reported as an undeclared property.</p>
+
+  <h3 id="sib-declare-needs-composition-reproduction">The failure, before the repair</h3>
+  <p>At <code>5b10d191f</code>, on the repository's own tree:</p>
+  <pre><code>tests/graph/test_cypher_property_check.py:141: in test_repository_cypher_literals_have_declared_properties
+E   AssertionError: Cypher properties absent from their labels' LinkML slots:
+E     imas_codex/standard_names/signed_manifest.py:8057: StandardName.needs_composition:
+E     property is not declared by LinkML for this label
+1 failed in 27.44s</code></pre>
+
+  <h3 id="sib-declare-needs-composition-declaration">What the property means</h3>
+  <p>The slot is now declared on <code>StandardName</code> as an optional boolean, described by its
+  lifecycle rather than by the plan that motivated it: true while the name is a structural parent
+  placeholder that still waits to be composed from its children, cleared to null once the derived-parent
+  materializers write its composed content. Absent or null means no composition is outstanding. The three
+  repository readers agree with that reading — the HAS_PARENT edge pass sets it for projection,
+  coordinate and unary-postfix operators on a name whose <code>name_stage</code> is still pending; both
+  derived-parent materializers clear it as they write the parent's content; the placeholder-stub deletion
+  requires <code>sn.needs_composition = true</code> before removing a bare parent; and the orphan sweep
+  selects on <code>sn.needs_composition IS NULL</code>.</p>
+
+  <h3 id="sib-declare-needs-composition-adjudication">The adjudication row is gone</h3>
+  <p>The row was removed rather than re-pinned, so the check now rests on the declaration. A declared
+  property is resolved before any adjudication is consulted, so a row for a declared property can never
+  match again and only leaves a stale inventory behind.</p>
+
+  <h3 id="sib-declare-needs-composition-other-rows">Other adjudication rows whose line pins no longer exist</h3>
+  <p>Eleven rows across five files pin source lines past the end of the file. None of their properties is
+  declared — checked against <code>GraphSchema.get_all_slots</code> — and each is genuinely written by
+  repository Cypher, so they are left in place and recorded here for the follow-on that re-pins the
+  inventory. Line movement is harmless to the matcher by design (it matches on path, label and property
+  name, and the inventory counts occurrences), so these rows are stale in their prose rather than in their
+  effect:</p>
+  <table id="sib-declare-needs-composition-stale-rows">
+    <thead>
+      <tr><th>Category</th><th>Path</th><th>Label</th><th>Property</th><th>Pinned lines</th><th>File lines now</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>defect</td><td><code>standard_names/graph_ops.py</code></td><td>FacilitySignal</td><td><code>units</code></td><td>738</td><td>377</td></tr>
+      <tr><td>defect</td><td><code>standard_names/graph_ops.py</code></td><td>IMASNode</td><td><code>units</code></td><td>4658, 12530</td><td>377</td></tr>
+      <tr><td>defect</td><td><code>standard_names/graph_ops.py</code></td><td>StandardName</td><td><code>name</code></td><td>13132</td><td>377</td></tr>
+      <tr><td>defect</td><td><code>standard_names/graph_ops.py</code></td><td>StandardNameSource</td><td><code>unit</code></td><td>4658</td><td>377</td></tr>
+      <tr><td>defect</td><td><code>standard_names/workers.py</code></td><td>IMASNode</td><td><code>alias</code></td><td>8509</td><td>37</td></tr>
+      <tr><td>defect</td><td><code>standard_names/workers.py</code></td><td>IMASNode</td><td><code>units</code></td><td>8493</td><td>37</td></tr>
+      <tr><td>defect</td><td><code>standard_names/workers.py</code></td><td>StandardName</td><td><code>name</code></td><td>9572</td><td>37</td></tr>
+      <tr><td>runtime</td><td><code>discovery/base/grouping.py</code></td><td>SignalSource</td><td><code>claim_token</code></td><td>260</td><td>234</td></tr>
+      <tr><td>runtime</td><td><code>discovery/base/grouping.py</code></td><td>SignalSource</td><td><code>claimed_at</code></td><td>260</td><td>234</td></tr>
+      <tr><td>runtime</td><td><code>standard_names/graph_store/graph_lineage.py</code></td><td>StandardName</td><td><code>_lifecycleless_reconcile_lock</code></td><td>5021</td><td>2365</td></tr>
+      <tr><td>runtime</td><td><code>standard_names/graph_store/graph_cost_and_claims.py</code></td><td>StandardNameSource</td><td><code>_claim_lock</code></td><td>14557, 14558, 14630, 14631, 14672, 14673, 14709, 14710</td><td>688</td></tr>
+    </tbody>
+  </table>
+  <p><code>graph_ops.py</code> and <code>workers.py</code> shrank furthest, from more than 13,000 and 9,500
+  lines to 377 and 37: both were split into sibling modules, which is what moved every pin below their new
+  end-of-file.</p>
+
+  <h3 id="sib-declare-needs-composition-measure">Measure</h3>
+  <p>Both arms were extracted with <code>git archive</code> into separate trees, each rebuilt with its own
+  <code>build-models --force</code> and run with its own <code>--basetemp</code>. At head the property
+  check passes (4 of 4 in <code>tests/graph/test_cypher_property_check.py</code>); at
+  <code>5b10d191f</code> it fails on <code>StandardName.needs_composition</code> in
+  <code>signed_manifest.py</code>.</p>
+  <p><code>tests/standard_names/</code> on default markers with <code>-n 8</code> adds zero failure ids.
+  Both arms finish at <code>101 failed, 8413 passed, 15 skipped</code>, and the sorted failure-id lists
+  from the two arms are identical (<code>md5 a6c993d8427e30982bb5d76734b6e811</code> in each). Those 101
+  failures are present on the base arm as well, so none belongs to this change; they are concentrated in
+  <code>test_review_docs_stages.py</code> (18), <code>test_cli_export.py</code> (14),
+  <code>test_review_cascade.py</code> (9) and <code>test_export_exclusion_ledger.py</code> (8), and are
+  reported to the coordinator rather than triaged here.</p>
+</section>
