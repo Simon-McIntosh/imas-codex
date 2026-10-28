@@ -24,7 +24,24 @@
   "plan_slug": "jt60sa-discovery-completion",
   "plan_version": 207,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "finding": "duplicate_owner-1",
+      "reason": "these take a single caller-computed prefix rather than a user-supplied list, so folding them into the list renderer is a different operation; naming them would let the author state the renderer's scope instead of claiming the tree holds only one, but no code change follows.",
+      "when": "2026-10-28T05:05:00.374548+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "reason": "these take a single caller-computed prefix rather than a user-supplied list, so folding them into the list renderer is a different operation; naming them would let the author state the renderer's scope instead of claiming the tree holds only one, but no code change follows.",
+      "when": "2026-10-28T05:05:00.374548+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/jt60sa-discovery-completion/r-20261006T091324233707-plan-review-of-jt60sa-discovery-completion.json",
   "review_run_id": "r-20261006T091324233707-plan-review-of-jt60sa-discovery-completion",
   "reviewed_blob_sha": "3c0cab6729738347b1d693c4b3c3d850dcff31d5",
   "rubric": "design",
