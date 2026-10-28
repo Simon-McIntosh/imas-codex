@@ -1,0 +1,79 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "call_sites_emission": "none",
+  "completed_at": "2026-10-28T07:42:49.124Z",
+  "derivation": "Docs-only change (one HTML fragment); the reviewed run's three arms measure the unchanged base revision b4254dfbf, not a before/after of 081dcad15, so no test outcome can move and added failures are 0 by construction. Arm1=92 failed, arm2=78 (14 cleared, 0 added), arm3=56 (22 cleared, 0 added), read from the FAILED lines of the three logs.",
+  "dispatched_at": "2026-10-28T07:35:17Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-red-suite-diagnosis.html",
+      "id": "f0245382a5c",
+      "line": 41,
+      "severity": "non-blocking",
+      "text": "Cites imas_codex/standard_names/review/cascade.py:801 as the line changed from _chat_then_unjudged to chat_reviewer(models=_chat_seat(models)); that call is at cascade.py:806 and line 801 is _run_panel_audit, so a repair node following the anchor lands on the wrong statement."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-red-suite-diagnosis.html",
+      "id": "fe0ac9ecbfa",
+      "line": 64,
+      "severity": "non-blocking",
+      "text": "Cites graph_review_persistence.py:869 for the 'stage/token mismatch \u2014 no-op' line; the lines are at imas_codex/standard_names/graph_store/graph_review_persistence.py:213 and :870, and the path omits the graph_store/ directory."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-red-suite-diagnosis.html",
+      "id": "fb9ffd190c1",
+      "line": 123,
+      "severity": "non-blocking",
+      "text": "56 of the 103 id rows carry only 'see the arm-3 log' as evidence rather than the failing assertion or the source line the done_when asks for ('each with a class and evidence'); the class is present per id but the evidence is a pointer into a shared 135KB log."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-red-suite-diagnosis.html",
+      "id": "f4a7edff80d",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "The section wrapper uses data-reckon=\"evidence-fragment\" with data-node/data-plan/data-section, while the two sibling fragments that carry a wrapper use data-reckon=\"fragment\" data-id; a loader keyed on the sibling vocabulary may not discover this fragment."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-red-suite-diagnosis.html",
+      "id": "f00ddf49d71",
+      "line": 184,
+      "severity": "non-blocking",
+      "text": "The Figures bullet says stale tests: 64 while the reviewed run's manifest landing line says 62 stale; the two use different denominators (11 vs 9 retired cascade ids), so a reader reconciling the two records sees a two-id gap; the fragment's own arithmetic (36+64+3=103) is coherent."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit 081dcad15 against base b4254dfbf: one added file, docs/evidence/fragments/sn-integrity-backlog/sib-red-suite-diagnosis.html (+188 lines), a section-wrapped HTML evidence fragment with three arm tables and a 103-row id table.",
+    "done_when": "The brief asks for all 101 ids with a class and evidence, the sandbox setting and a grouped worklist; the fragment lists 103 rows (92 measured + 11 retired) at docs/evidence/fragments/sn-integrity-backlog/sib-red-suite-diagnosis.html:75, states the settings at :17 and the worklist at :49, though 56 rows cite only the arm-3 log for evidence.",
+    "goal": "Read docs/evidence/fragments/sn-integrity-backlog/sib-red-suite-diagnosis.html (188 lines); it classifies every measured id, states the two sandbox settings, and gives a repair worklist with file, graph need and size per cause, reconciling the file split the brief named.",
+    "manifest": "The reviewed run's manifest records status complete, names three arm logs each ending EXIT=, and states arm counts 92/78/56, which the log summary lines and FAILED lines confirm.",
+    "write_paths": "The reviewed node's declared paths were docs/evidence/fragments/sn-integrity-backlog/sib-red-suite-diagnosis.html and docs/figures/sn-integrity-backlog/sib-red-suite-diagnosis; the commit writes only the first, so every changed path is inside the declaration."
+  },
+  "justifications": {
+    "durability": "No assertion guards the fragment: the id table at docs/evidence/fragments/sn-integrity-backlog/sib-red-suite-diagnosis.html:75 is hand-maintained against the logs, so nothing reddens if a row or a count regresses.",
+    "evidence": "The three arm logs full-suite-{baseline,writable-tmp,worktree}.log each carry a revision/tree/module/cwd header and a bare EXIT= line, and the subsetting they claim (14 then 22 cleared, 0 added) reproduces from the FAILED lines.",
+    "fit": "The fragment is a valid HTML fragment but wraps itself in data-reckon=\"evidence-fragment\" data-node/data-plan/data-section (docs/evidence/fragments/sn-integrity-backlog/sib-red-suite-diagnosis.html:1), a marker vocabulary the two wrapping siblings use as data-reckon=\"fragment\" data-id.",
+    "goal_fidelity": "The fragment at docs/evidence/fragments/sn-integrity-backlog/sib-red-suite-diagnosis.html:49 names a file, graph need and size per cause and reconciles to 101, but 56 of the 103 id rows (first at :123) carry only \u2018see the arm-3 log\u2019 rather than the failing assertion the done_when asks for.",
+    "reuse": "The change adds no definition that could fork a capability; it is one documentation artifact under docs/evidence/fragments/, so there is nothing to duplicate.",
+    "scope_discipline": "The only path in the commit diff is docs/evidence/fragments/sn-integrity-backlog/sib-red-suite-diagnosis.html, inside the declared write paths, and no product or test code changes."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: Read docs/evidence/fragments/sn-integrity-backlog/sib-red-suite-diagnosis.html (188 lines); it classifies every measured id, states the two sandbox settings, and gives a repair worklist with file, graph need and size per cause, reconciling the file split the brief named.\nVERDICT done_when: The brief asks for all 101 ids with a class and evidence, the sandbox setting and a grouped worklist; the fragment lists 103 rows (92 measured + 11 retired) at docs/evidence/fragments/sn-integrity-backlog/sib-red-suite-diagnosis.html:75, states the settings at :17 and the worklist at :49, though 56 rows cite only the arm-3 log for evidence.\nVERDICT write_paths: The reviewed node's declared paths were docs/evidence/fragments/sn-integrity-backlog/sib-red-suite-diagnosis.html and docs/figures/sn-integrity-backlog/sib-red-suite-diagnosis; the commit writes only the first, so every changed path is inside the declaration.\nVERDICT manifest: The reviewed run's manifest records status complete, names three arm logs each ending EXIT=, and states arm counts 92/78/56, which the log summary lines and FAILED lines confirm.\nVERDICT diff: Read commit 081dcad15 against base b4254dfbf: one added file, docs/evidence/fragments/sn-integrity-backlog/sib-red-suite-diagnosis.html (+188 lines), a section-wrapped HTML evidence fragment with three arm tables and a 103-row id table.\nCALL_SITES: none\nSCORE goal_fidelity: 15\nSCORE evidence: 18\nSCORE scope_discipline: 20\nSCORE durability: 12\nSCORE fit: 14\nSCORE reuse: 20\nJUSTIFICATION goal_fidelity: The fragment at docs/evidence/fragments/sn-integrity-backlog/sib-red-suite-diagnosis.html:49 names a file, graph need and size per cause and reconciles to 101, but 56 of the 103 id rows (first at :123) carry only \u2018see the arm-3 log\u2019 rather than the failing assertion the done_when asks for.\nJUSTIFICATION evidence: The three arm logs full-suite-{baseline,writable-tmp,worktree}.log each carry a revision/tree/module/cwd header and a bare EXIT= line, and the subsetting they claim (14 then 22 cleared, 0 added) reproduces from the FAILED lines.\nJUSTIFICATION scope_discipline: The only path in the commit diff is docs/evidence/fragments/sn-integrity-backlog/sib-red-suite-diagnosis.html, inside the declared write paths, and no product or test code changes.\nJUSTIFICATION durability: No assertion guards the fragment: the id table at docs/evidence/fragments/sn-integrity-backlog/sib-red-suite-diagnosis.html:75 is hand-maintained against the logs, so nothing reddens if a row or a count regresses.\nJUSTIFICATION fit: The fragment is a valid HTML fragment but wraps itself in data-reckon=\"evidence-fragment\" data-node/data-plan/data-section (docs/evidence/fragments/sn-integrity-backlog/sib-red-suite-diagnosis.html:1), a marker vocabulary the two wrapping siblings use as data-reckon=\"fragment\" data-id.\nJUSTIFICATION reuse: The change adds no definition that could fork a capability; it is one documentation artifact under docs/evidence/fragments/, so there is nothing to duplicate.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-red-suite-diagnosis.html:41 non-blocking: Cites imas_codex/standard_names/review/cascade.py:801 as the line changed from _chat_then_unjudged to chat_reviewer(models=_chat_seat(models)); that call is at cascade.py:806 and line 801 is _run_panel_audit, so a repair node following the anchor lands on the wrong statement.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-red-suite-diagnosis.html:64 non-blocking: Cites graph_review_persistence.py:869 for the 'stage/token mismatch \u2014 no-op' line; the lines are at imas_codex/standard_names/graph_store/graph_review_persistence.py:213 and :870, and the path omits the graph_store/ directory.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-red-suite-diagnosis.html:123 non-blocking: 56 of the 103 id rows carry only 'see the arm-3 log' as evidence rather than the failing assertion or the source line the done_when asks for ('each with a class and evidence'); the class is present per id but the evidence is a pointer into a shared 135KB log.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-red-suite-diagnosis.html:1 non-blocking: The section wrapper uses data-reckon=\"evidence-fragment\" with data-node/data-plan/data-section, while the two sibling fragments that carry a wrapper use data-reckon=\"fragment\" data-id; a loader keyed on the sibling vocabulary may not discover this fragment.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-red-suite-diagnosis.html:184 non-blocking: The Figures bullet says stale tests: 64 while the reviewed run's manifest landing line says 62 stale; the two use different denominators (11 vs 9 retired cascade ids), so a reader reconciling the two records sees a two-id gap; the fragment's own arithmetic (36+64+3=103) is coherent.",
+  "review_run_id": "r-20261028T071800608680-review-of-sib-red-suite-diagnosis-081dcad15494",
+  "reviewed_base_sha": "b4254dfbfdccc3248ecd999d2cf4972a8115d36f",
+  "reviewed_head_sha": "081dcad15494ad6a0b41863895b5afe27a51fabe",
+  "reviewed_run_id": "r-20261028T063853734003-sib-red-suite-diagnosis",
+  "scores": {
+    "durability": 12,
+    "evidence": 18,
+    "fit": 14,
+    "goal_fidelity": 15,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T07:42:56.745980+00:00",
+  "total": 99
+}
