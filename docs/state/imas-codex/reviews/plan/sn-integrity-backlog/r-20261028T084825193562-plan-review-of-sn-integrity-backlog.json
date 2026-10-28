@@ -1,0 +1,131 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-28T08:58:12.358Z",
+  "dispatched_at": "2026-10-28T08:50:11Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-integrity-backlog/r-20261028T084825193562-plan-review-of-sn-integrity-backlog/plan.html:20",
+      "id": "reasoning-1",
+      "reason": "the three statuses are the dispatch decision; flipped to done they remove three redundant nodes, and left as they are they cost a full node each plus a duplicate graph rebuild for s43.",
+      "text": "the declarations record s41, s42 and s43 as `implementable`, while the same document's comments record each of their deliverables as landed: s41 \"41 classified: 36 of the 101 ids are sandbox artefacts \u2026 62 are stale tests, 3 are product defects\" (plan.html:955), s42 \"Replaced eleven split-string globals() bindings \u2026 added tests/standard_names/test_no_split_name_bindings.py\" (plan.html:967), s43 \"Older-version-only DD paths now take their declaring version's COCOS label \u2026 128 live-graph nodes gain a label\" (plan.html:961, merged as fed45db9e). A coordinator reading the declarations dispatches three nodes that would re-run landed work and re-review a landed merge.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-integrity-backlog/r-20261028T084825193562-plan-review-of-sn-integrity-backlog/plan.html:273",
+      "id": "reasoning-2",
+      "reason": "the mechanism must name the per-source loop and its OR aggregation as part of the change, or the node fixes the wrong layer and the measured misfire survives.",
+      "text": "\u00a744 concludes \"the fault lies in the clause, not the text\" and asks to \"give the clause the definitions of every binding the name carries\", but the misfire is produced one layer up: `_documentation_contradiction_note` (imas_codex/standard_names/worker_tasks/worker_review_docs.py:666-770, reached from the review-docs worker at :890) builds one state per DD source with `build_docs_state({**item, \"dd_source_docs\": [source]})`, judges each alone, and returns \"contradicts source\" if *any single* source sets `contradiction_veto`. So with seven phi_potential bindings the clause is asked seven separate single-binding questions, and a clause that correctly answers each binding is still ORed into a hold. The section names neither the caller nor the aggregation, so a node implementing it as written can rewrite the clause and watch electrostatic_potential stay held.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-integrity-backlog/r-20261028T084825193562-plan-review-of-sn-integrity-backlog/plan.html:261",
+      "id": "done_when-1",
+      "reason": "a planted failure of each kind (one known sandbox artefact, one known product defect) that the classifier must place, and must be shown to place wrongly when the classifier regresses, is what separates a real classification from a relabelling.",
+      "text": "\u00a741's done-when is \"every one of the 101 ids is classified with evidence and either repaired or owned by a named open node, and the suite on main outside the sandbox reports only owned failures\", with no negative control: a classifier that labels all 101 \"stale test\" and names itself the owning node satisfies both clauses, and the inside/outside-sandbox comparison it rests on is the classifier's own claim rather than a gate that can fail. Compare s43's \"a disposable-graph test fails on main\" and s44's \"a claim false for every binding is still vetoed\".",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-integrity-backlog/r-20261028T084825193562-plan-review-of-sn-integrity-backlog/plan.html:261",
+      "id": "reasoning-3",
+      "reason": "a coordinator creating one repair node per named cluster covers 49 ids and leaves 52 with nowhere to land; stating the residual 52 and the files they sit in is what makes the repair plan complete.",
+      "text": "\u00a741 says \"The failures cluster in four files\" and lists 18 + 14 + 9 + 8, which is 49 of the 101 ids it states; the remaining 52 are named by no cluster, yet the plan's repair step is \"a repair node per cluster\". The section's own evidence shows the four are the largest clusters, not that they hold the failures, and half the ids therefore have no planned repair node even though the done-when requires every id repaired or owned.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-integrity-backlog/r-20261028T084825193562-plan-review-of-sn-integrity-backlog/plan.html:265",
+      "id": "anchors_resolve-1",
+      "reason": "the stale range is a symptom of the status defect above; once s42 is declared done the pointer stops being an instruction, and rewriting line numbers against a tree that has moved would only rebind it to code the section is no longer about.",
+      "text": "\u00a742 cites \"imas_codex/standard_names/graph_ops.py (lines 259-377) binds ten public functions\" by runtime name and `provenance_lifecycle.py` \"one more\", but at the reviewed head `grep -rn 'globals()\\[' imas_codex/` returns nothing, and the section's own comment (plan.html:967) records \"0 of the 12 sites\" remaining. The anchor now points at plain module-level assignments, so a reader sent to those lines finds no split binding and no statement of what the code used to do.",
+      "type": "anchors_resolve",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "16fb4213db71bb2ad1f31ac0139c7a77af0ec382",
+  "plan_fingerprint": "08adfc6e06ac5df489d633826f1a20dd6e53944d77d6f6804c8c1ba788c27c83",
+  "plan_slug": "sn-integrity-backlog",
+  "plan_version": 265,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "finding": "anchors_resolve-1",
+      "reason": "the stale range is a symptom of the status defect above; once s42 is declared done the pointer stops being an instruction, and rewriting line numbers against a tree that has moved would only rebind it to code the section is no longer about.",
+      "when": "2026-10-28T09:04:50.976280+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "reason": "the stale range is a symptom of the status defect above; once s42 is declared done the pointer stops being an instruction, and rewriting line numbers against a tree that has moved would only rebind it to code the section is no longer about.",
+      "when": "2026-10-28T09:04:50.976280+00:00"
+    }
+  },
+  "review_run_id": "r-20261028T084825193562-plan-review-of-sn-integrity-backlog",
+  "reviewed_blob_sha": "dcef6db742851dd8df8153d643f0681d1c9d7d3f",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 \u00a742's cited range, graph_ops.py:259-377, carries no `globals()[...]` binding at the plan's own head, because the landed work the same document records removed the pattern.",
+    "done_when": "a finding \u2014 \u00a741's done-when names no negative control, so a diagnosis that attributes every failure to a stale test satisfies every bullet it states.",
+    "evidence_paths": "pass \u2014 the cited evidence sits under docs/evidence/fragments/sn-integrity-backlog/ and docs/evidence/archive/, both durable repository paths.",
+    "naming": "pass \u2014 the four sections name mechanisms (contradiction veto, split-string binding, declaring-version label) and carry no plan labels, ticket numbers or changelog prose into symbols.",
+    "reasoning": "a finding \u2014 \u00a744's mechanism is aimed at the clause, but the veto that misfired is produced by the per-source loop and OR aggregation in `_documentation_contradiction_note`, which the section never names.",
+    "single_goal": "pass \u2014 each of the four sections names one reviewable outcome (s41 the 101 ids resolved, s42 no split binding plus a guard, s43 older-version-only labels present, s44 the veto judging all bindings), even where the work splits into several nodes.",
+    "wiring": "pass \u2014 s41\u2013s44 declare no depends-on, informs or gates, and the only external reliance among them (s43 on the label restore and clear-stale pass \u00a739 landed) is on a section already `done`, so no relationship a scheduler needs is missing."
+  },
+  "section_digests": {
+    "_document": "c162fe4021c960e188536178625cc7091ae6501a00bfef225f8f76503373499e",
+    "s1": "c5d818234e097cc66d461db952acf180dd9364d0ece43082d00f7b2bfdda19e2",
+    "s10": "84c8bdeb15133e22cd2f08ee96d429ac3f92f85d28d6720d5e2fd0a87a97cbf2",
+    "s11": "499a319e38a73614c326b3607a7d1cae481dac12714fad0562ffe74a78694c89",
+    "s12": "62e459e2a7b4232b44e54b32969fb970620d613ef8797e09b993d36d4b44d757",
+    "s13": "80e90ea7c45053ae6c5de9d69ac1ef80a87289bb80c7afb2f796f3c31b3235d7",
+    "s14": "4981171151a50aafb83f844e0ad63c7df82749d58b56d7fb8590f5ee8cccfb9b",
+    "s15": "0e2bcb71a7aac4d1ddeae8e3a5959c43e1f3e90ae3ea89c3ca3b16303b3f87b2",
+    "s16": "0ea017c6ac78ad295a75878f5d17514576fb4cc4c0b96f3acbde1adf6dbce703",
+    "s17": "32359142ba3b6f1263abefa9f37711fbc5fdefe9548620b20287985e5858d673",
+    "s18": "c6a5bf0492c322e4f1c9ebe6e0e4b880f6312ab30ec62992d8c786d321fa2d82",
+    "s19": "f735f604bc9a9d5ff1664a38976a03f6a4ede1a90baa42b16f38af66702d3c4b",
+    "s2": "af2703cbe346dcd322398505bfee69c50a6bcd1238937227f17cdb6c5fc75c58",
+    "s20": "805e801ca7a749b7317a6427d250b1a67bead66a292735383165c6e4e1877825",
+    "s21": "47e390d3695f9b02e65881501ddd52ecd87022d600dc4e915c6d282fa6da35bd",
+    "s22": "ba8506427fb29722b2940dcd76473585cc4f09fe8f4baa48ecff9fa7a723597a",
+    "s23": "44670189f5cafaaefa0ad448ffffd16b3b33a1cc017a2be6b72d08a2a911b48a",
+    "s24": "9c7844d14a2768bfd77971a05dac1d799cff7466e3e9f6802dd0336fadc6fee1",
+    "s25": "40eced7f771252fb9ab48c78df7b98f91a7c1d3300462bc4ecae8c5d4ccc9908",
+    "s26": "6a0bd41e4ff1e25988259389e8245175eb581650bebc0cddbc945a9929aa9a17",
+    "s27": "585251740b9450d952a7e031af167fe71be5f24dd03ecec62395c2344bdceea4",
+    "s28": "10bfd618b26981d0069214a9c611c9fef9bdb5b3da4e6058d2e7378683d2b3fa",
+    "s29": "82321ad1506f8fcde238b5afa9c7b5261e6260db85f5f99889639095ee424b7a",
+    "s3": "300c4331f0fe1af8d898818b2f5b5a441aba08a7471954d088e13d6f8b499de5",
+    "s30": "3f04c2991d18b10a9540db81a31f0b4858b5aff2a5173128826ea0f5e9c65bbf",
+    "s31": "e0680800ed07ea9e6f992f07ba811c8024e82f21ca23c3feb00fdc9a770e2820",
+    "s32": "e57a48b0bd16b5676288a9c2f25d6f6757557cd00e8f0fa3609406df32db55fb",
+    "s33": "4cb7f0c6143d01741bee63e0d19e3b3c28414d8a93c5173e5146d84cca68ed5f",
+    "s34": "09b1730cdf7460d28d27e9a7e774b653e48b93c65363e42967315e5fcc5ad3b1",
+    "s35": "1b0823c332d9635cbced7249ae633900d0b2dc3bf48115bfbe7f4f3c8409e150",
+    "s36": "37252b47ae5685152ecfeedeac6cb23286fff432a25850ed6c4b3a90868794e1",
+    "s37": "d0a7ffabc4967ddf6fea0e673f2ab371cd81ca7a62f646754c9c54fa76507f3b",
+    "s38": "bd84527b717e3c9bd89cbfb4d127c83e2a1507e92a79a9360e7a8753ad4d7731",
+    "s39": "36435d98523924c764cd759ba4387ef2db43f3ba076c56333160112405c22f23",
+    "s4": "9307d261fa4d9e060cd79e2c7b1e6f93c38744adf9aed1dedefa687ebbfa8e73",
+    "s40": "03fe27d87618703c544206edb62e72058a9f7098f0177a4199241ab7f69c808d",
+    "s41": "62049348ccb6d2bb029946d32ab7098803989262e95eb7a25a9f1de01921bf26",
+    "s42": "699c0059fd7fec1dcdbe36dad64191a8a775a22cafb48803633a85d6b40b8c6f",
+    "s43": "7e0432331fac79fcc40e4a4dbe4d8cc6671c02f3dcedd7c6564f68bcad5fb55f",
+    "s44": "785e68a4eb6793368d78cad831c822d2ddfb500005b1f5ffb1ecb55e80f35b55",
+    "s5": "d461f7815409b858add81013dfb1604c76f2d4a79f2d45ddce0880e90a64c8fd",
+    "s6": "e6bf01013b7bd341cf2f86ebf24dc60084ea8cabeb4cf4cd2664c1109ac5ca62",
+    "s7": "1930b98dfc66a2e1f9a1ce5149fbb73fe208b66c3e0c35664330a12e7e945933",
+    "s8": "6b362f87f941f8c95d562c95cdf93e578892ff32c85156fd5565c76548c58eab",
+    "s9": "20748220a6f94f6c422b1b677587d4456ccf3be5fbe204daac414373443327bd"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T09:04:47.101722+00:00"
+}
