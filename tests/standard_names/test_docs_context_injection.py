@@ -532,8 +532,13 @@ def test_source_owners_are_not_automatic_prose_family_members():
     assert fetch_sibling_family("vertical_outline", gc=gc) is None
     assert len(source_owners) == 10
     cypher = gc.calls[0][0]
-    assert "StandardNameSource" not in cypher
-    assert "PRODUCED_NAME" not in cypher
+    # Sources are consulted only to report whether an already-admitted member
+    # is DD-derived; the membership match and its axis predicates name
+    # StandardName alone, so an attached owner is never admitted as a sibling.
+    membership = cypher.split("EXISTS")[0]
+    assert "MATCH (m:StandardName)" in membership
+    assert "StandardNameSource" not in membership
+    assert "PRODUCED_NAME" not in membership
 
 
 def test_entity_owners_are_not_an_automatic_docs_cohort():

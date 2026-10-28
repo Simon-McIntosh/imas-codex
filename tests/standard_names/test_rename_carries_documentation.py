@@ -21,6 +21,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from .graph_transaction_doubles import transaction_double
+
 _GC_PATH = "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
 
 # Measured live pairs. The re-rendered spellings are from the cohort a
@@ -50,18 +52,13 @@ PROJECTION_NARROWING = (
 
 
 def _graph_client_double(tx: MagicMock) -> MagicMock:
-    """Return a context-managed graph client using one transaction double."""
-    gc = MagicMock()
-    gc.__enter__ = MagicMock(return_value=gc)
-    gc.__exit__ = MagicMock(return_value=False)
-    session = MagicMock()
-    session.begin_transaction = MagicMock(return_value=tx)
-
-    @contextmanager
-    def _session_ctx():
-        yield session
-
-    gc.session = _session_ctx
+    """Return a shared transaction double whose one log lives on ``tx.run``."""
+    gc = transaction_double()
+    gc.query = tx.run
+    gc.transaction.run = tx.run
+    gc.transaction.commit = tx.commit
+    gc.transaction.rollback = tx.rollback
+    gc.transaction.close = tx.close
     return gc
 
 
@@ -107,16 +104,33 @@ def _successful_persist_with_assertion() -> tuple[MagicMock, MagicMock]:
     old_name, new_name = QUALIFIER_ADDITION
     tx = MagicMock()
     tx.closed = False
-    tx.run.side_effect = [
-        [
-            {
-                "old_name": old_name,
-                "new_name": new_name,
-                "source_documentation": "accepted predecessor document",
-            }
-        ],
-        [{"old_name": old_name, "new_name": new_name}],
-    ]
+    carried = {"old_name": old_name, "new_name": new_name}
+
+    def answer(cypher: str, **_params: Any) -> list[dict[str, Any]]:
+        statement = " ".join(cypher.split())
+        if "old.documentation AS source_documentation" in statement:
+            return [{**carried, "source_documentation": "accepted predecessor document"}]
+        if "// SOURCE_INVARIANT" in statement:
+            return []
+        if "RETURN sn.physics_domain AS physics_domain" in statement:
+            # A successor with no scalar and no sources keeps the domain unset.
+            return [
+                {
+                    "physics_domain": None,
+                    "own_domains": [],
+                    "child_ids": [],
+                    "child_dd_domains": [],
+                    "child_stored_domains": [],
+                }
+            ]
+        if (
+            "RETURN new.id AS new_name, old.id AS old_name" in statement
+            or "RETURN old.name_stage AS predecessor_name_stage" in statement
+        ):
+            return [dict(carried)]
+        return []
+
+    tx.run.side_effect = answer
     gc = _graph_client_double(tx)
     record_path = (
         "imas_codex.standard_names.provenance_lifecycle.record_standard_name_change"

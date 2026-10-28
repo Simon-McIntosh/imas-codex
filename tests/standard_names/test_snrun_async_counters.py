@@ -15,7 +15,10 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+import imas_codex.standard_names.graph_ops  # noqa: F401  (wires the graph composition root)
+
 from tests.standard_names.conftest import answer_domain_state as _answer_domain_state
+from tests.standard_names.graph_transaction_doubles import transaction_double
 
 _RUN_ID = "run-async-counter-test"
 
@@ -249,11 +252,19 @@ class TestReviewDocsBumpsReviewed:
     def test_review_docs_bumps_reviewed(self):
         patcher, mock_gc = _mock_gc_ctx()
         try:
-            mock_gc.query.side_effect = [
-                [{"docs_chain_length": 0}],
-                [{"id": "electron_temperature"}],  # SET committed (one row)
-                [],
-            ]
+            mock_gc.session = transaction_double(
+                by_statement={
+                    "AS docs_chain_length": [
+                        {
+                            "docs_chain_length": 0,
+                            "documentation": "drafted documentation",
+                            "edit_status": None,
+                        }
+                    ],
+                    "RETURN sn.id AS id": [{"id": "electron_temperature"}],
+                }
+            ).session
+            mock_gc.query.return_value = []
             with patch(
                 "imas_codex.standard_names.graph_store.graph_catalog.write_reviews"
             ):

@@ -16,6 +16,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from .graph_transaction_doubles import transaction_double
+
 # ---------------------------------------------------------------------------
 # Helpers — mock GraphClient wiring (same pattern as test_claim_atomic.py)
 # ---------------------------------------------------------------------------
@@ -169,10 +171,9 @@ class TestPersistGuardsNameStage:
             persist_generated_docs,
         )
 
-        gc = MagicMock()
-        gc.__enter__ = MagicMock(return_value=gc)
-        gc.__exit__ = MagicMock(return_value=False)
-        gc.query = MagicMock(return_value=[{"docs_stage": "drafted"}])
+        gc = transaction_double(
+            by_statement={"RETURN sn.docs_stage AS docs_stage": [{"docs_stage": "drafted"}]}
+        )
 
         with _patch_gc(gc):
             persist_generated_docs(

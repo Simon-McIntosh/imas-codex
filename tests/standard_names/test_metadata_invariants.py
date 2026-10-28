@@ -377,11 +377,14 @@ class TestComposeWorkerInjection:
         assert 'unit": unit' in source or '"unit": unit' in source
 
     def test_physics_domain_injected_from_source(self) -> None:
-        """physics_domain must be injected from source DD, not LLM."""
+        """physics_domain must come from DD data, never from an LLM answer."""
         source = worker_source_text()
         assert "physics_domain" in source
-        # Must reference source_item for physics_domain
-        assert 'source_item.get("physics_domain")' in source
+        # The worker no longer derives the domain itself: every write goes
+        # through the one domain writer, which takes its source from the
+        # graph. An LLM-side assignment would have to bypass it.
+        assert 'source_item.get("physics_domain")' not in source
+        assert "write_name_domain" in source
 
     def test_cocos_injected_from_source(self) -> None:
         """cocos_transformation_type must come from source_item, not LLM."""

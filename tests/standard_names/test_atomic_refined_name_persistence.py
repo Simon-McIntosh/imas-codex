@@ -44,6 +44,9 @@ def _transaction(
     effective_edit_state = effective_edit_state or {}
 
     def run(cypher: str, **_params):
+        if "// SOURCE_INVARIANT" in cypher:
+            # No touched name is left without a producer.
+            return []
         if "// REFINE_ATOMIC_PREFLIGHT" in cypher:
             return [
                 {
@@ -92,6 +95,8 @@ class _RacingEditTransaction:
         self.rollback = MagicMock()
 
     def run(self, cypher: str, **params):
+        if "// SOURCE_INVARIANT" in cypher:
+            return []
         if "// REFINE_ATOMIC_PREFLIGHT" in cypher:
             source_state = {field: self.state.get(field) for field in _EDIT_FIELDS}
             self.successor = dict(source_state)

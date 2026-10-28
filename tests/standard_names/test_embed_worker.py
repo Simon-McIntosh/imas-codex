@@ -7,6 +7,11 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from tests.standard_names.graph_transaction_doubles import transaction_double
+
+_PERSIST_STATEMENT = "RETURN sn.docs_stage AS docs_stage"
+
+
 # ── test_compute_embed_hash ─────────────────────────────────────────
 
 
@@ -150,15 +155,9 @@ def test_persist_generated_docs_clears_hash():
         persist_generated_docs,
     )
 
-    mock_gc = MagicMock()
-    mock_gc.query.side_effect = [
-        # Main persist query result
-        [{"docs_stage": "drafted"}],
-        # embed_text_hash clearing query
-        None,
-    ]
-    mock_gc.__enter__ = MagicMock(return_value=mock_gc)
-    mock_gc.__exit__ = MagicMock(return_value=False)
+    mock_gc = transaction_double(
+        by_statement={_PERSIST_STATEMENT: [{"docs_stage": "drafted"}]}
+    )
 
     with (
         patch(
@@ -179,11 +178,10 @@ def test_persist_generated_docs_clears_hash():
         )
 
     assert result == "drafted"
-    # Second query should be the embed_text_hash clearing
-    calls = mock_gc.query.call_args_list
-    assert len(calls) >= 2
-    hash_clear_query = calls[1][0][0]
-    assert "embed_text_hash" in hash_clear_query
+    # The persist SET clears embed_text_hash so the embed worker re-reads it.
+    persist_query = mock_gc.query.call_args_list[0][0][0]
+    set_block = persist_query.split("SET", 1)[1]
+    assert "sn.embed_text_hash  = null" in set_block
 
 
 # ── test_display_merge_constants ────────────────────────────────────

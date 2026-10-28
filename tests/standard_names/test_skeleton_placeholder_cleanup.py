@@ -172,6 +172,8 @@ def test_edge_writer_reports_every_standard_name_merge_endpoint() -> None:
         "error_source",
         "error_target",
         "predecessor_placeholder",
-        "successor_placeholder",
     }
     assert "ignored_locus_node" not in candidates
+    # Successor links are written by the signed supersede mutation, so a
+    # `successor` field on a composed name authorizes no endpoint here.
+    assert "successor_placeholder" not in candidates
