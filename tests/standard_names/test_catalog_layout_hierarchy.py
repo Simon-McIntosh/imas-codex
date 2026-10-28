@@ -794,6 +794,20 @@ class TestOrderingCycleDetection:
                 return False
 
             def query(self, cypher: str, **params):
+                # The export's source audit refuses a population whose
+                # independent count it cannot read, so an empty graph still
+                # answers a count query with the zero row it returns.
+                if "AS total" in cypher:
+                    return [{"total": 0}]
+                if "AS names" in cypher and "AS projections" in cypher:
+                    return [
+                        {
+                            "names": 0,
+                            "relations": 0,
+                            "changes": 0,
+                            "projections": 0,
+                        }
+                    ]
                 return []
 
         with (
