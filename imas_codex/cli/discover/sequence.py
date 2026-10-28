@@ -573,8 +573,7 @@ def run_mapping_stage(
             stage="all",
         )
     except (Exception, SystemExit) as exc:
-        exc.discovery_receipts = [receipt]
-        raise
+        raise StageFailure(exc, [receipt]) from exc
     finally:
         workers.run_mapping_engine = original
     return receipt
@@ -667,6 +666,22 @@ def _report(facility: str, outcomes: list[StageOutcome]) -> str:
     return "\n".join(lines)
 
 
+class StageFailure(Exception):
+    """A failed discovery stage carrying the receipts it produced first.
+
+    A thin stage wrapper returns nothing, so the cost it spent exists only in
+    the receipts the harness returned before the failure. This exception
+    carries them across the raise so the running summary can still report that
+    cost and charge it against the remaining budget.
+    """
+
+    discovery_receipts: list[dict]
+
+    def __init__(self, cause: BaseException, receipts: list[dict]) -> None:
+        super().__init__(f"{type(cause).__name__}: {cause}")
+        self.discovery_receipts = receipts
+
+
 def _run_with_receipt(function, *args):
     """Retain the discovery harness result while thin stage wrappers return None."""
     from imas_codex.cli.discover import common
@@ -683,8 +698,9 @@ def _run_with_receipt(function, *args):
     try:
         result = function(*args)
     except (Exception, SystemExit) as exc:
-        exc.discovery_receipts = getattr(exc, "discovery_receipts", []) + receipts
-        raise
+        root = exc.__cause__ if isinstance(exc, StageFailure) else exc
+        carried = exc.discovery_receipts if isinstance(exc, StageFailure) else []
+        raise StageFailure(root, carried + receipts) from root
     finally:
         common.run_discovery = original
     if isinstance(result, dict):
@@ -903,7 +919,9 @@ def run_sequence(
             outcome.reason = f"{type(detail).__name__}: {detail}"
             outcome.cost = sum(
                 float(receipt.get("cost", 0.0))
-                for receipt in getattr(exc, "discovery_receipts", [])
+                for receipt in (
+                    exc.discovery_receipts if isinstance(exc, StageFailure) else []
+                )
             )
             spent += outcome.cost
         outcome.seconds = time.monotonic() - stage_started
