@@ -3026,17 +3026,9 @@ def run_export(
     )
 
     from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.graph_store import graph_foundation
     from imas_codex.standard_names.graph_store.graph_supersession import (
         classify_sourceless_standard_names,
     )
-
-    # The storage layer resolves its collaborators through a composition root
-    # installed on the first direct call. An export invoked as an entrypoint —
-    # by the CLI, or by a caller outside the graph facade — reaches it without
-    # that root installed, so install it here rather than depending on some
-    # other module having been imported first.
-    graph_foundation.services_for_call()
 
     with GraphClient() as gc:
         source_audit = classify_sourceless_standard_names(gc)

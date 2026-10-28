@@ -71,17 +71,24 @@ def wire_services(services: Any) -> None:
 
 
 def get_services() -> Any:
-    """Return wired collaborators or explain a missing composition root."""
+    """Return the wired collaborators, installing the composition root on first read.
+
+    Every storage-module reader reaches the collaborators through this function,
+    so wiring here is what makes a reader independent of some other module
+    having imported the graph facade first. ``None`` is a deliberate refusal —
+    it says the root was explicitly removed, not that it was never installed —
+    and still raises.
+    """
+    if _services is _UNINITIALIZED_SERVICES:
+        from imas_codex.standard_names import graph_ops  # noqa: F401
+
     if _services is _UNINITIALIZED_SERVICES or _services is None:
         raise RuntimeError("Graph services are not wired; import graph_ops first")
     return _services
 
 
 def services_for_call() -> Any:
-    """Wire the composition root on first direct call, then return its services."""
-    if _services is _UNINITIALIZED_SERVICES:
-        from imas_codex.standard_names import graph_ops  # noqa: F401
-
+    """Return the wired collaborators, installing the composition root on first call."""
     return get_services()
 
 
