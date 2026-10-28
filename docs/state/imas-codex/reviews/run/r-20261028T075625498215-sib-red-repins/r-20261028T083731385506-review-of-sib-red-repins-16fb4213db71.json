@@ -1,0 +1,61 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-28T08:49:56.604Z",
+  "dispatched_at": "2026-10-28T08:38:52Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_conventions_prompt_block.py",
+      "id": "f4dda942b1b",
+      "line": "65",
+      "severity": "non-blocking",
+      "text": "non-blocking: the assertion the commit adds, `assert \"## Selected documentation conventions for this name\" not in rendered`, is an exact duplicate of the pre-existing assertion two lines below at 67. The repair's only new coverage in this test is the `conventions_context_for(UNSELECTED) is None` line; the duplicated block renders as a second check that no longer exists in intent, and the reader cannot tell which of the two was meant to say something else."
+    },
+    {
+      "file": "tests/standard_names/test_docs_conformance_gate.py",
+      "id": "fc14fb6f43f",
+      "line": "141",
+      "severity": "non-blocking",
+      "text": "non-blocking: `_routed_to_refinement` is the test file's own re-implementation of the acceptance predicate (`score < min_score or review_holds`) rather than a call to the owner at imas_codex/standard_names/review/holds.py:263 `docs_accepted`, which returns `score >= min_score and not open_holds(...)`. The two move together by convention, not by construction: a future change to the production predicate that keeps those two terms (a new quorum or link gate) leaves the helper and the four tests resting on it green. The added `_held_for(persisted, \"registry_conformance\")` assertions at 183, 199 and 215 are independent of the helper and do guard production output."
+    },
+    {
+      "file": "tests/standard_names/test_prose_hold_before_accept.py",
+      "id": "f5601a21d0e",
+      "line": "67",
+      "severity": "non-blocking",
+      "text": "non-blocking: the stage the test asserts on (`assert stage == \"reviewed\"`) is produced by a test-local `persist` stub that this commit rewrote to add the `review_holds` term. The assertion therefore measures the stub's model of `persist_reviewed_docs`, not the function, and stays green if production regressed to score-only acceptance. The added `assert [hold[\"kind\"] for hold in persisted[\"review_holds\"]] == [\"banned_prose\"]` is independent, because `persisted` is the kwargs the real worker hands to persistence."
+    },
+    {
+      "file": "tests/standard_names/test_cypher_mutation_classifier.py",
+      "id": "f517e24d356",
+      "line": "14",
+      "severity": "non-blocking",
+      "text": "non-blocking: `_PROTECTION_QUERY_LINE` pins a raw line number into imas_codex/standard_names/protection.py, and a line-number pin is what broke when an unrelated guard shifted the literal from 100 to 99. The content guard at line 43 (`assert \"catalog_merge_commit_sha\" in query`) is the right instrument; the line pin adds brittleness without adding discrimination, and an ast walk selecting the `query(...)` literal that carries that identifier would survive the next insertion. Pre-existing shape, re-pinned rather than re-anchored."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-red-repins.html",
+      "id": "fdd8747d899",
+      "line": "16",
+      "severity": "non-blocking",
+      "text": "non-blocking: the id table cites `review/holds.py:266` as the acceptance predicate; 266 is the docstring line and the `return score >= min_score and not open_holds(name_id, \"docs\", graph=graph)` is at 267. The statement is correct and the anchor is off by one, in a fragment whose own anchor-check section is about exactly this failure."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source goal is to re-pin the stale prompt, conformance and classifier tests or fix the code they catch for C2/C3/C5; tests/standard_names/test_conventions_prompt_block.py:65 and tests/standard_names/test_docs_conformance_gate.py:141,197,215 carry the re-pinned assertions and the fragment docs/evidence/fragments/sn-integrity-backlog/sib-red-repins.html:9 names the fix kind per id, so the deliverable is the tests plus the per-id record.\nVERDICT done_when: the done_when requires every C2/C3/C5 id to pass at head, zero added failure ids, and the fragment to record it; the run's own two arms measure exactly that (logs/base.json 92 failures at 220b51638, logs/head.json 82 at 0dffb59f7), and my own set difference over those two files gives 0 added and 10 cleared, matching the ten ids in the fragment's table.\nVERDICT write_paths: the manifest declares the four test files, the fragment and a docs/figures/sn-integrity-backlog/sib-red-repins directory; 966f3d96..54a10ea68 touches 94 insertions over exactly four test files plus the fragment, and no figure directory, so nothing in the diff falls outside the declared scope.\nVERDICT manifest: read in full; it states status complete, commits 0dffb59f7 and 54a10ea68, the gate command with both arms, base 92 failed / head 82 failed / 0 added / 10 cleared, a negative control log at logs/negative-control.log reading 10 failed 26 passed EXIT=1, and it records the eight-versus-ten id discrepancy from the brief rather than rounding it.\nVERDICT diff: read commit by commit from 966f3d965de9b42831c77acc09af262a6e8fb20f; 0dffb59f7 changes 24 lines across the four test files (UNSELECTED re-pin, holds-aware helpers and assertions, the classifier literal moving 100 to 99) and 54a10ea68 adds the 70-line evidence fragment; no product source is touched by either commit.\nCALL_SITES: imas_codex/standard_names/context.py:conventions_context_for, imas_codex/standard_names/worker_tasks/worker_review_docs.py:process_review_docs_batch, imas_codex/standard_names/graph_store/graph_review_persistence.py:persist_reviewed_docs, imas_codex/standard_names/review/holds.py:docs_accepted, imas_codex/standard_names/protection.py:automatic_deletion_protections\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: all ten ids the classification lists under C2/C3/C5 are re-pinned and pass at head, each justified as a stale test with the commit named per row at docs/evidence/fragments/sn-integrity-backlog/sib-red-repins.html:9-27.\nSCORE evidence: 19\nJUSTIFICATION evidence: both arms ran to their summary line with a bare EXIT=1 (logs/base.log, logs/head.log), and my own set difference over logs/base.json and logs/head.json reproduces 0 added and the same 10 cleared ids; the only slack is that the base arm is main at 220b51638 rather than the fork point 966f3d96, which I checked is unconfounded because the eight commits between them touch only docs/state files.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in 966f3d96..54a10ea68 is inside the declared write paths and no product module is modified, so the change cannot alter runtime behaviour.\nSCORE durability: 15\nJUSTIFICATION durability: the `_held_for(persisted, \"registry_conformance\")` assertion at tests/standard_names/test_docs_conformance_gate.py:183 reddens if worker_review_docs stops raising the conformance hold, but the routing assertion rests on the test's own predicate copy at test_docs_conformance_gate.py:141 and the prose test's stage comes from the stub at test_prose_hold_before_accept.py:67, so neither reddens on a production regression to score-only acceptance.\nSCORE fit: 17\nJUSTIFICATION fit: the edits follow the surrounding pytest idiom and the conventional subject-and-body commit style, but tests/standard_names/test_conventions_prompt_block.py:65 duplicates the assertion at 67, and the classifier pin stays a raw line number at test_cypher_mutation_classifier.py:14.\nSCORE reuse: 19\nJUSTIFICATION reuse: the diff adds no module or production definition, only two small test helpers (`_held_for` at test_docs_conformance_gate.py:148 and the `UNSELECTED` constant at test_conventions_prompt_block.py:11); the sibling tests write hold-kind checks inline (test_review_findings_cap.py:271, test_review_cascade.py:368) and no shared helper exists for one to extend, so nothing the repository owns is forked.\nFINDING tests/standard_names/test_conventions_prompt_block.py:65 non-blocking: the added assertion is an exact duplicate of the pre-existing one at line 67, so the repair adds no coverage there and hides what the second assertion was meant to measure.\nFINDING tests/standard_names/test_docs_conformance_gate.py:141 non-blocking: `_routed_to_refinement` re-implements the acceptance predicate instead of calling imas_codex/standard_names/review/holds.py:263 `docs_accepted`, so a change to the production predicate that keeps both terms leaves these four tests green; the added `_held_for` assertions are independent and do hold.\nFINDING tests/standard_names/test_prose_hold_before_accept.py:67 non-blocking: the asserted stage is produced by the test-local `persist` stub this commit rewrote, so the assertion measures the stub's model of `persist_reviewed_docs` and survives a production regression to score-only acceptance.\nFINDING tests/standard_names/test_cypher_mutation_classifier.py:14 non-blocking: the repaired id is pinned to a raw line number in protection.py, which is the fragility that broke it; selecting the `query(...)` literal by its `catalog_merge_commit_sha` content would survive the next unrelated insertion.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-red-repins.html:16 non-blocking: the acceptance predicate is cited as review/holds.py:266, which is the docstring; the return is at line 267.\n",
+  "review_run_id": "r-20261028T083731385506-review-of-sib-red-repins-16fb4213db71",
+  "reviewed_base_sha": "966f3d965de9b42831c77acc09af262a6e8fb20f",
+  "reviewed_head_sha": "54a10ea683339ab74776f8eff83ecc2cc8a3ca5d",
+  "reviewed_run_id": "r-20261028T075625498215-sib-red-repins",
+  "scores": {
+    "durability": 15,
+    "evidence": 19,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T08:53:06.577421+00:00",
+  "total": 109
+}
