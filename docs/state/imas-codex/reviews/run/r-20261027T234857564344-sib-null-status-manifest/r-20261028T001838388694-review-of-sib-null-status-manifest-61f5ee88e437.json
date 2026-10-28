@@ -1,0 +1,67 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/standard_names/signed_manifest.py:4414 `_replay` calls `_verify_postconditions` (the :4113 predicate)",
+    "imas_codex/standard_names/signed_manifest.py:4797 `_apply_mutation` dispatches `_apply_ordinary_source_migration` (the :4611 predicate)",
+    "imas_codex/standard_names/signed_manifest.py:8880 `apply_signed_manifest` calls `_apply_catalog_source_dispositions` (the :5844 predicate)",
+    "imas_codex/standard_names/signed_manifest.py:9132 `apply_signed_manifest` calls `_verify_postconditions` (the :4113 predicate)",
+    "imas_codex/cli/sn.py:9041 the `sn` CLI entry calls `apply_signed_manifest`, reaching all three sites at runtime"
+  ],
+  "completed_at": "2026-10-28T00:26:18.230Z",
+  "dispatched_at": "2026-10-28T00:20:31Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_null_status_predicates_manifest.py",
+      "line": "206",
+      "severity": "non-blocking",
+      "text": "non-blocking: `assert _apply_ordinary_source_migration(query, action) == len(row.mutations)` compares the return value with the mutation count the test itself put inside `action`, so the two sides move together for any code path that reports the supplied count; the independent evidence is the graph-state assertion at :208-212, which the durability score rests on."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T234857564344-sib-null-status-manifest/head-suite.log",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the head suite and head graph arms were run at 01:11 and 01:13 from the uncommitted worktree and their headers record `5c94bae36 ... (head, uncommitted worktree changes)`, so nothing in the receipt ties the head suite to the reviewed revision 61f5ee88e committed at 01:15:55; rerunning the arm at the commit would make the receipt self-identifying."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-null-status-manifest.html",
+      "line": "121",
+      "severity": "non-blocking",
+      "text": "non-blocking: the fragment says the unit-arm failure set is 'the same id set at both arms' while the head log drops 31 of the base's 101 ids; the qualifier 'strict subset' on :122 is correct and the sentence before it is not, so a reader skimming the table gets the stronger, wrong claim."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read the single commit 61f5ee88e against base 5c94bae36: three one-line Cypher predicate changes in signed_manifest.py, a 313-line new disposable-graph test file, and a 127-line evidence fragment; no other file moved.",
+    "done_when": "The brief's four measures are each met: the fragment docs/evidence/fragments/sn-integrity-backlog/sib-null-status-manifest.html:34-62 records a decision and reason per site, negative-control-base.log ends `3 failed, 1 passed` and EXIT=1 so each changed site's test is red on main, and the two suite arms add zero failure ids (101 base ids vs 70 head ids, 0 added).",
+    "goal": "The source brief asks that each of the three `.status <>` sites in imas_codex/standard_names/signed_manifest.py state what a null status means; the landed diff coalesced all three at signed_manifest.py:4113, :4611 and :5844.",
+    "manifest": "The source manifest records commit 61f5ee88e, status complete, both gate arms as JSON with literal commands and full failure-id lists, the negative-control log path, and a rubric self-check; its stated numbers reconcile with base-suite.log, head-suite.log, base-graph.log and head-graph.log.",
+    "write_paths": "The source manifest declares signed_manifest.py, the new test file and the evidence fragment; `git diff --stat 5c94bae36..61f5ee88e` changes exactly those three paths and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_null_status_predicates_manifest.py:120, :208-212, :243-255 and :295-301 each redden when the corresponding predicate or guard is reverted, but the :206 assertion compares the return value with `len(row.mutations)`, the count the test itself supplied.",
+    "evidence": "base-suite.log and head-suite.log carry full failure-id sets (101 vs 70, 0 added) and negative-control-base.log ends EXIT=1 with the three changed-site tests named as FAILED, but head-suite.log:1 records the head arm as `5c94bae36 (head, uncommitted worktree changes)` so the receipt names the base revision rather than 61f5ee88e.",
+    "fit": "tests/standard_names/test_null_status_predicates_manifest.py follows the repo's disposable-graph idiom (`@pytest.mark.graph` with a client adapter, as in tests/standard_names/test_edit_engine.py:203) and introduces no plan label or version suffix in its name or symbols.",
+    "goal_fidelity": "signed_manifest.py:4113, :4611 and :5844 now read `coalesce(<x>.status, '') <> 'stale'`, matching the null-is-live ruling the module already applies in Python at signed_manifest.py:1850 and :2882.",
+    "reuse": "the test reuses `_seed`, `_row`, `_adjudication` and `_cleanup` from tests/standard_names/test_signed_source_dispositions.py and the existing `disposable_neo4j` fixture; the search found the module's own `_TransactionQuery` adapter at signed_manifest.py:331 wraps a transaction, not a client, so no owner for a client adapter exists to extend.",
+    "scope_discipline": "`git diff --stat 5c94bae36..61f5ee88e` touches only imas_codex/standard_names/signed_manifest.py, tests/standard_names/test_null_status_predicates_manifest.py and the evidence fragment, all inside the declared write paths, and adds no repo-wide guard."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source brief asks that each of the three `.status <>` sites in imas_codex/standard_names/signed_manifest.py state what a null status means; the landed diff coalesced all three at signed_manifest.py:4113, :4611 and :5844.\nVERDICT done_when: The brief's four measures are each met: the fragment docs/evidence/fragments/sn-integrity-backlog/sib-null-status-manifest.html:34-62 records a decision and reason per site, negative-control-base.log ends `3 failed, 1 passed` and EXIT=1 so each changed site's test is red on main, and the two suite arms add zero failure ids (101 base ids vs 70 head ids, 0 added).\nVERDICT write_paths: The source manifest declares signed_manifest.py, the new test file and the evidence fragment; `git diff --stat 5c94bae36..61f5ee88e` changes exactly those three paths and nothing else.\nVERDICT manifest: The source manifest records commit 61f5ee88e, status complete, both gate arms as JSON with literal commands and full failure-id lists, the negative-control log path, and a rubric self-check; its stated numbers reconcile with base-suite.log, head-suite.log, base-graph.log and head-graph.log.\nVERDICT diff: Read the single commit 61f5ee88e against base 5c94bae36: three one-line Cypher predicate changes in signed_manifest.py, a 313-line new disposable-graph test file, and a 127-line evidence fragment; no other file moved.\nCALL_SITES: imas_codex/standard_names/signed_manifest.py:4414 `_replay` calls `_verify_postconditions` (the :4113 predicate), imas_codex/standard_names/signed_manifest.py:4797 `_apply_mutation` dispatches `_apply_ordinary_source_migration` (the :4611 predicate), imas_codex/standard_names/signed_manifest.py:8880 `apply_signed_manifest` calls `_apply_catalog_source_dispositions` (the :5844 predicate), imas_codex/standard_names/signed_manifest.py:9132 `apply_signed_manifest` calls `_verify_postconditions` (the :4113 predicate), imas_codex/cli/sn.py:9041 the `sn` CLI entry calls `apply_signed_manifest`, reaching all three sites at runtime\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: signed_manifest.py:4113, :4611 and :5844 now read `coalesce(<x>.status, '') <> 'stale'`, matching the null-is-live ruling the module already applies in Python at signed_manifest.py:1850 and :2882.\nSCORE evidence: 18\nJUSTIFICATION evidence: base-suite.log and head-suite.log carry full failure-id sets (101 vs 70, 0 added) and negative-control-base.log ends EXIT=1 with the three changed-site tests named as FAILED, but head-suite.log:1 records the head arm as `5c94bae36 (head, uncommitted worktree changes)` so the receipt names the base revision rather than 61f5ee88e.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: `git diff --stat 5c94bae36..61f5ee88e` touches only imas_codex/standard_names/signed_manifest.py, tests/standard_names/test_null_status_predicates_manifest.py and the evidence fragment, all inside the declared write paths, and adds no repo-wide guard.\nSCORE durability: 18\nJUSTIFICATION durability: tests/standard_names/test_null_status_predicates_manifest.py:120, :208-212, :243-255 and :295-301 each redden when the corresponding predicate or guard is reverted, but the :206 assertion compares the return value with `len(row.mutations)`, the count the test itself supplied.\nSCORE fit: 19\nJUSTIFICATION fit: tests/standard_names/test_null_status_predicates_manifest.py follows the repo's disposable-graph idiom (`@pytest.mark.graph` with a client adapter, as in tests/standard_names/test_edit_engine.py:203) and introduces no plan label or version suffix in its name or symbols.\nSCORE reuse: 19\nJUSTIFICATION reuse: the test reuses `_seed`, `_row`, `_adjudication` and `_cleanup` from tests/standard_names/test_signed_source_dispositions.py and the existing `disposable_neo4j` fixture; the search found the module's own `_TransactionQuery` adapter at signed_manifest.py:331 wraps a transaction, not a client, so no owner for a client adapter exists to extend.\nFINDING tests/standard_names/test_null_status_predicates_manifest.py:206 non-blocking: `assert _apply_ordinary_source_migration(query, action) == len(row.mutations)` compares the return value with the mutation count the test itself put inside `action`, so the two sides move together for any code path that reports the supplied count; the independent evidence is the graph-state assertion at :208-212, which the durability score rests on.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T234857564344-sib-null-status-manifest/head-suite.log:1 non-blocking: the head suite and head graph arms were run at 01:11 and 01:13 from the uncommitted worktree and their headers record `5c94bae36 ... (head, uncommitted worktree changes)`, so nothing in the receipt ties the head suite to the reviewed revision 61f5ee88e committed at 01:15:55; rerunning the arm at the commit would make the receipt self-identifying.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-null-status-manifest.html:121 non-blocking: the fragment says the unit-arm failure set is 'the same id set at both arms' while the head log drops 31 of the base's 101 ids; the qualifier 'strict subset' on :122 is correct and the sentence before it is not, so a reader skimming the table gets the stronger, wrong claim.\n",
+  "review_run_id": "r-20261028T001838388694-review-of-sib-null-status-manifest-61f5ee88e437",
+  "reviewed_base_sha": "5c94bae36cca434169ab47b87ded652f6e203024",
+  "reviewed_head_sha": "61f5ee88e4375888199cab1b5447074f366d7d04",
+  "reviewed_run_id": "r-20261027T234857564344-sib-null-status-manifest",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T00:27:55.662868+00:00",
+  "total": 113
+}
