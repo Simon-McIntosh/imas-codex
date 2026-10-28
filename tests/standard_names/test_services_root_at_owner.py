@@ -16,6 +16,8 @@ import sys
 import textwrap
 from pathlib import Path
 
+import pytest
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 _READER_PROBE = textwrap.dedent(
@@ -50,6 +52,12 @@ _READER_PROBE = textwrap.dedent(
 )
 
 
+# The cost of this case is the fresh interpreter and the package import, not the
+# assertion: about 17 s alone on an idle node. A contended node stretches that
+# by however much the run is squeezed, so the project's 30 s default sits inside
+# the ordinary spread and the ceiling is raised for the same reason the other
+# fresh-process import contract raises it.
+@pytest.mark.timeout(300)
 def test_a_storage_reader_installs_the_services_it_reads() -> None:
     result = subprocess.run(
         [sys.executable, "-c", _READER_PROBE],
