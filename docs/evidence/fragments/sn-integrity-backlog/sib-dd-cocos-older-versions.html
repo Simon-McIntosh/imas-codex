@@ -231,12 +231,21 @@ leaves them untouched; they are listed for completeness and agree with the DD.
 
 <h2 id="sib-dd-cocos-older-versions-tests">Tests and gate</h2>
 <p>
-Three tests in <code>tests/graph/test_dd_cocos_label_preservation.py</code> run the
+Four tests in <code>tests/graph/test_dd_cocos_label_preservation.py</code> run the
 real <code>phase_build</code> on the disposable graph: a 3.x-only path takes its
-declaring version's label; a shard build over another IDS leaves it intact; and a
-build covering a later version that carries the path unlabelled removes it. Against
-main's <code>build_dd.py</code> all three fail (<code>3 failed, 3 passed</code>,
-<code>EXIT=1</code>); at head all six pass (<code>EXIT=0</code>).
+declaring version's label; a shard build over another IDS leaves it intact; a build
+covering a later version that carries the path unlabelled removes it; and a scoped
+rebuild over an IDS whose scope holds only 4.x versions keeps a label it has no
+authority to withdraw. Against main's <code>build_dd.py</code> all four fail
+(<code>4 failed, 3 passed</code>, <code>EXIT=1</code>); at head all seven pass
+(<code>EXIT=0</code>).
+</p>
+<p>
+The fourth test exists because the clear's source list is otherwise unexercised:
+every other fixture carries a 3.x version, so the authority clause short-circuits.
+Removing <code>inferred_older_version</code> from <code>authority_sources</code>
+makes exactly that test fail (<code>1 failed</code>, <code>EXIT=1</code>), which is
+the shape that stripped every shard's labels when the clear was global.
 </p>
 </main>
 </body>
