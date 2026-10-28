@@ -1138,7 +1138,9 @@ def _mark_files_ingested(file_ids: list[str]) -> int:
             """
             UNWIND $ids AS fid
             MATCH (sf:CodeFile {id: fid})
-            WHERE sf.status <> 'failed'
+            // Only a recorded failure withholds the ingested mark; a file
+            // without a status was never recorded as failed.
+            WHERE coalesce(sf.status, '') <> 'failed'
             SET sf.status = 'ingested',
                 sf.ingested_at = datetime(),
                 sf.claimed_at = null,

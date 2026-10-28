@@ -831,7 +831,10 @@ def retarget_standard_name_sources(
               (new:StandardName {id: $new_name})
         UNWIND $source_ids AS source_id
         MATCH (source:StandardNameSource {id: source_id})
-        WHERE source.status <> 'stale'
+        // A source without a status is not a proven stale tombstone, and the
+        // invariant counts it as a live producer, so it migrates with its
+        // cohort rather than dropping out of the moved set.
+        WHERE coalesce(source.status, '') <> 'stale'
           AND source.claimed_at IS NULL
           AND source.claim_token IS NULL
           AND source.produced_sn_id = $old_name
@@ -1173,8 +1176,11 @@ def reset_standard_name_sources(
             // EXACT_SOURCE_RESET_APPLY
             UNWIND $items AS item
             MATCH (source:StandardNameSource {id: item.source_id})
+            // The manifest declares the exact status it expects, so a source
+            // without one is already excluded by that equality; the stale
+            // clause only restates it for a declared stale reading.
             WHERE source.status = item.expected_status
-              AND source.status <> 'stale'
+              AND coalesce(source.status, '') <> 'stale'
               AND source.produced_sn_id = item.expected_scalar
               AND source.claimed_at IS NULL
               AND source.claim_token IS NULL

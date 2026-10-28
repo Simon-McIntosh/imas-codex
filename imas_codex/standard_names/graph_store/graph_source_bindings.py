@@ -137,7 +137,11 @@ def _source_compose_hint_decision(
                  WHEN sns IS NULL THEN 'missing_source'
                  WHEN sns.source_type <> 'dd' THEN 'not_dd_source'
                  WHEN sns.claimed_at IS NOT NULL THEN 'active_claim'
-                 WHEN sns.status <> 'extracted' THEN 'source_not_extracted'
+                 // Only a source proven to be sitting at `extracted` may take
+                 // a compose steer; a source without a status is unknown and
+                 // is refused here rather than falling through to eligible.
+                 WHEN coalesce(sns.status, '') <> 'extracted'
+                   THEN 'source_not_extracted'
                  WHEN coalesce(sns.attempt_count, 0) >= $attempt_cap
                    THEN 'attempt_cap_reached'
                  WHEN has_live_binding THEN 'live_name_binding'

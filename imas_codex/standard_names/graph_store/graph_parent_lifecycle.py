@@ -1101,8 +1101,10 @@ def find_orphan_parent_source_candidates(
                   id: 'derived:' + parent.id
                 })
                 WITH parent, structural_source
+                // Only a proven tombstone withholds reconstruction; a
+                // structural source without a status is not one.
                 WHERE structural_source IS NULL
-                   OR structural_source.status <> 'stale'
+                   OR coalesce(structural_source.status, '') <> 'stale'
                 WITH parent, structural_source
                 WHERE structural_source IS NULL OR NOT EXISTS {
                   MATCH (structural_source)-[:PRODUCED_NAME]->(bound)
@@ -1252,8 +1254,10 @@ def reconcile_orphan_parent_sources(
                   AND NOT EXISTS {
                     MATCH (:StandardNameSource)-[:PRODUCED_NAME]->(parent)
                   }
+                  // Only a proven tombstone withholds seeding; a structural
+                  // source without a status is not one.
                   AND (existing_source IS NULL
-                       OR existing_source.status <> 'stale')
+                       OR coalesce(existing_source.status, '') <> 'stale')
                   AND (existing_source IS NULL OR NOT EXISTS {
                     MATCH (existing_source)-[:PRODUCED_NAME]->(bound)
                     WHERE bound <> parent
