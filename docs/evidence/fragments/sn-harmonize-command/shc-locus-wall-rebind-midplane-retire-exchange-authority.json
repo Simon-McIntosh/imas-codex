@@ -1,0 +1,66 @@
+{
+  "adapter_attempts": [
+    {
+      "authority_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T202206786051-shc-locus-wall-rebind-midplane-retire/logs/exchange-transfer_without_replacement.json",
+      "label": "transfer_without_replacement",
+      "outcome": "refused",
+      "refusal_text": "SignedManifestAuthorityError: invalid or overlapping source-exchange row",
+      "row": {
+        "given_source_id": "dd:wall/description_ggd/ggd/phi_potential/values",
+        "id": "electrostatic_potential",
+        "name_id": "electrostatic_potential",
+        "receiving_name_id": "electrostatic_potential_at_wall",
+        "selection": {
+          "id": "artifact-rows",
+          "mode": "exact_complete_signed_cohort",
+          "predicate": "artifact-rows"
+        }
+      }
+    },
+    {
+      "authority_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T202206786051-shc-locus-wall-rebind-midplane-retire/logs/exchange-transfer_with_a_held_replacement.json",
+      "label": "transfer_with_a_held_replacement",
+      "outcome": "refused",
+      "refusals": [
+        {
+          "reason": "taken source already has a live owner",
+          "row_id": "electrostatic_potential"
+        }
+      ],
+      "row": {
+        "given_source_id": "dd:wall/description_ggd/ggd/phi_potential/values",
+        "id": "electrostatic_potential",
+        "name_id": "electrostatic_potential",
+        "receiving_name_id": "electrostatic_potential_at_wall",
+        "selection": {
+          "id": "artifact-rows",
+          "mode": "exact_complete_signed_cohort",
+          "predicate": "artifact-rows"
+        },
+        "taken_source_id": "dd:edge_profiles/ggd/phi_potential/values"
+      }
+    }
+  ],
+  "adapter_named_by_the_ruling": "dd-source-exchange",
+  "adapter_outcomes": [
+    "refused",
+    "refused"
+  ],
+  "adapter_verdict": "transfer-not-expressible",
+  "applied_writer": "imas_codex.standard_names.provenance_lifecycle.retarget_standard_name_sources",
+  "migration_manifest": {
+    "expected_current_bindings": {
+      "dd:wall/description_ggd/ggd/phi_potential/values": "electrostatic_potential"
+    },
+    "new_name": "electrostatic_potential_at_wall",
+    "old_name": "electrostatic_potential",
+    "operation": "source_migration_manifest",
+    "source_ids": [
+      "dd:wall/description_ggd/ggd/phi_potential/values"
+    ]
+  },
+  "migration_manifest_sha256": "9a0b20277e998541709c88d8df799529437758956b09b220049f87b797594f0b",
+  "node": "shc-locus-wall-rebind-midplane-retire",
+  "ruled_direction": "electrostatic_potential -> electrostatic_potential_at_wall",
+  "source_id": "dd:wall/description_ggd/ggd/phi_potential/values"
+}
