@@ -1,0 +1,71 @@
+{
+  "added_failure_count": 0,
+  "added_failure_derivation": "The reviewed run's manifest block records baseline_suite: null and after_suite: null (confirmed in the run's classification.json manifest.data), so no suite gate log exists from which added failures could be derived; the node's write paths reach no test path. added_failure_count is therefore 0 on a measured absence of suite logs, not on a green suite.",
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-10-28T12:17:05.616Z",
+  "dispatched_at": "2026-10-28T12:10:53Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-reapply-all-bindings-run.py",
+      "id": "f1958e2e3f3",
+      "line": 1125,
+      "severity": "non-blocking",
+      "summary": "The missing-score guard tests key membership, so a null score passes it",
+      "text": "missing = [m for m in members if m not in scores_b or m not in scores_a] tests key presence, but both halves of this record carry electrostatic_potential_at_outboard_midplane with the value null, so the member's key is present and the guard cannot see the very unscored member the page reports at shc-locus-reapply-all-bindings.html:6; a record where a member is unscored and nothing fell would exit 0 from verify() while the page calls the family non-converged."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-reapply-all-bindings-run.py",
+      "id": "f63167bb95e",
+      "line": 194,
+      "severity": "non-blocking",
+      "summary": "fixture() is defined but never run and never asserted, and the delivered record carries no fixture key",
+      "text": "fixture() writes payload['fixture'] and asserts docs_score_regressions names a below-threshold member, but the delivered shc-locus-reapply-all-bindings.json has no fixture key and verify() at line 1068 never reads one, so the plan's clause that the comparison be shown able to see a regression is unattested by this node's evidence; sibling shc-three-family-measure-results.json carries it instead."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-reapply-all-bindings-run.py",
+      "id": "f84d4e86bde",
+      "line": 91,
+      "severity": "non-blocking",
+      "summary": "roster_check and five other helpers are byte-identical copies of the sibling fragment's",
+      "text": "roster_check, _CostServices, _fmt, _id, read_results and write_results are byte-identical to shc-locus-converge-remeasure-run.py:91 and its siblings, making this the twelfth near-duplicate evidence script in the directory; no product module owns the fragment-scaffolding capability, and the measurement itself does extend the owners (imas_codex/standard_names/harmonize.py:1375 docs_score_regressions, imas_codex/standard_names/graph_store/graph_cost_and_claims.py:130 aggregate_calls_per_phase)."
+    }
+  ],
+  "justifications": {
+    "durability": "shc-locus-reapply-all-bindings-run.py:1125 checks member score presence by key membership, so the null score the delivered record carries for electrostatic_potential_at_outboard_midplane passes the gate's own missing-score guard; the one assertion that did fire is the fell comparison at line 1127.",
+    "evidence": "shc-locus-reapply-all-bindings-run.py:1068-1166 verify() asserts cost against the cap, the roster scope, per-binding answers on every vetoed claim, both snapshots and the fell set, and its EXIT=1 is recorded in the run's verify.log beside EXIT=0 apply-1.log and two dry-run logs.",
+    "fit": "shc-locus-reapply-all-bindings-run.py:1-24 follows the module-docstring and subcommand idiom of its sibling shc-locus-converge-remeasure-run.py and imports measurement from the product owners rather than re-deriving it.",
+    "goal_fidelity": "docs/evidence/fragments/sn-harmonize-command/shc-locus-reapply-all-bindings.html:4-6 records the dry runs, per-member before/after documentation scores, per-name cost, lint by kind before and after, the veto record and the out-of-family check, and states the convergence verdict as no.",
+    "reuse": "shc-locus-reapply-all-bindings-run.py:91 roster_check, together with _CostServices, _fmt, _id, read_results and write_results at lines 69-110, is byte-identical to shc-locus-converge-remeasure-run.py:91 etc., a twelfth copy of evidence-fragment scaffolding the directory already holds eleven times.",
+    "scope_discipline": "The diff against 17501cf00 touches exactly the three declared write paths, all under docs/evidence/fragments/sn-harmonize-command/, and adds no product source, plan or peer file."
+  },
+  "node": "review-of-shc-locus-reapply-all-bindings-a8deb86eed54",
+  "plan": "imas-codex:sn-harmonize-command",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to re-apply the electrostatic_potential family under the all-bindings veto and record its figures; shc-locus-reapply-all-bindings.json records 1 family applied, 0 stamped, USD 0.265472 over 9 LLMCost calls, 0 names outside the roster.\nVERDICT done_when: the done-when names the HTML and JSON holding dry run, figures, veto record, out-of-family check, convergence verdict and per-name cost; shc-locus-reapply-all-bindings-run.py:1068-1166 verify() asserts those and its EXIT=1 is recorded in verify.log.\nVERDICT write_paths: the declared paths are the fragment HTML, JSON, runner and figures directory; the diff against 17501cf00 touches only the HTML, JSON and runner.\nVERDICT manifest: read; status complete, both commits named, four gate logs with exit codes, and the non-convergence stated rather than claimed away.\nVERDICT diff: read commit by commit against 17501cf00; cf0e0ab11 adds the runner and the rendered record, a8deb86ee strips 78 trailing commas from the JSON and changes no value.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: shc-locus-reapply-all-bindings.html:4-6 records every required figure and states the convergence verdict as no.\nSCORE evidence: 16\nJUSTIFICATION evidence: shc-locus-reapply-all-bindings-run.py:1068-1166 verify() asserts the done-when from the record and its EXIT=1 is preserved in verify.log beside three EXIT=0 logs.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 17501cf00 a8deb86ee lists only the three declared docs/evidence paths.\nSCORE durability: 12\nJUSTIFICATION durability: shc-locus-reapply-all-bindings-run.py:1125 guards score presence by key membership, so the null outboard_midplane score passes it.\nSCORE fit: 17\nJUSTIFICATION fit: shc-locus-reapply-all-bindings-run.py:1-24 follows the sibling fragment idiom and imports measurement from imas_codex/standard_names/harmonize.py:1375.\nSCORE reuse: 12\nJUSTIFICATION reuse: shc-locus-reapply-all-bindings-run.py:91 roster_check is byte-identical to shc-locus-converge-remeasure-run.py:91, a twelfth copy of the same scaffolding.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-locus-reapply-all-bindings-run.py:1125 non-blocking: the missing-score guard tests key membership so a null score passes it.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-locus-reapply-all-bindings-run.py:194 non-blocking: fixture() is defined but never run and never asserted, so the record carries no fixture key.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-locus-reapply-all-bindings-run.py:91 non-blocking: roster_check and five other helpers are byte-identical copies of the sibling fragment's.\n",
+  "review_run_id": "r-20261028T120855384964-review-of-shc-locus-reapply-all-bindings-a8deb86eed54",
+  "reviewed_base_sha": "17501cf00b0025b67d5170589fb0e5d2b90b6f75",
+  "reviewed_head_sha": "a8deb86eed54c26c7d2b70e9ffea4ce0557c2dbb",
+  "reviewed_run_id": "r-20261028T112157925793-shc-locus-reapply-all-bindings",
+  "scores": {
+    "durability": 12,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 12,
+    "scope_discipline": 20
+  },
+  "section": "s4",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T20:12:08.810347+00:00",
+  "total": 95,
+  "verdicts": {
+    "call_sites": "no production call sites found; the change is a standalone evidence script plus its rendered record, reached by nothing under imas_codex/.",
+    "diff": "Read commit by commit: cf0e0ab11 adds the 1227-line runner and the rendered HTML and JSON record, and a8deb86ee removes 78 trailing commas from the JSON so it parses again, changing no value.",
+    "done_when": "The done-when names the HTML fragment and its JSON holding dry run, figures, veto record, out-of-family check, convergence verdict and per-name cost; shc-locus-reapply-all-bindings-run.py:1068-1166 verify() asserts each of those from the record and its EXIT=1 result is recorded in verify.log.",
+    "goal": "The goal is to re-apply the electrostatic_potential family under the all-bindings contradiction veto and record the measured figures; shc-locus-reapply-all-bindings.json records 1 family applied, accepted=3/3, 0 stamped, USD 0.265472 over 9 LLMCost calls and 0 names outside the roster.",
+    "manifest": "The manifest states status complete, both commits, the four gate logs with their exit codes, 0 names outside the roster, and declares the non-convergence explicitly rather than claiming a pass.",
+    "write_paths": "The declared paths are the fragment HTML, JSON, runner and figures directory; git diff --stat against 17501cf00 shows only the HTML, JSON and runner, all three inside the declaration."
+  }
+}
