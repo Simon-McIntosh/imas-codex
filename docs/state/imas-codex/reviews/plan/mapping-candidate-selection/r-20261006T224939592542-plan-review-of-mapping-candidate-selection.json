@@ -32,7 +32,24 @@
   "plan_slug": "mapping-candidate-selection",
   "plan_version": 62,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "finding": "reuse_search-1",
+      "reason": "the concepts do not overlap, so naming node_classifier would be a citation nicety rather than a reuse the plan should adopt.",
+      "when": "2026-10-28T05:05:02.675236+00:00"
+    }
+  ],
+  "responses": {
+    "reuse_search-1": {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "reason": "the concepts do not overlap, so naming node_classifier would be a citation nicety rather than a reuse the plan should adopt.",
+      "when": "2026-10-28T05:05:02.675236+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/mapping-candidate-selection/r-20261006T224939592542-plan-review-of-mapping-candidate-selection.json",
   "review_run_id": "r-20261006T224939592542-plan-review-of-mapping-candidate-selection",
   "reviewed_blob_sha": "c155187279ad8b7f619999dbd829723f45bc6da9",
   "rubric": "design",
