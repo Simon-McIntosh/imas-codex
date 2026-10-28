@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-null-status-guard">
+<title>A status exclusion now states what a null status means</title>
+</head>
+<body>
+<main>
+
+<h1 id="sib-null-status-guard-title">Every status exclusion in the package's Cypher states its null handling</h1>
+
+<h2 id="sib-null-status-guard-header">Header</h2>
+<table id="sib-null-status-guard-header-table">
+<tbody>
+<tr><th>Base revision</th><td><code>5b10d191f1c89374288676aa2cb47ed7bcd32abe</code></td></tr>
+<tr><th>Head revision</th><td><code>ef57f3ad3</code></td></tr>
+<tr><th>Worktree</th><td><code>/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-null-status-guard</code></td></tr>
+<tr><th>Posture</th><td>One new test module and nothing else; no graph, no LLM, spend USD 0.</td></tr>
+<tr><th>New test</th><td><code>tests/standard_names/test_status_predicate_null_safety.py</code></td></tr>
+</tbody>
+</table>
+
+<h2 id="sib-null-status-guard-rule">What the guard refuses, and what it accepts</h2>
+<p>In Cypher, <code>x.status &lt;&gt; 'v'</code> evaluates to null — not true — when
+<code>x.status</code> is null, and a null filter drops the row. A guard written that way
+therefore excludes two classes of row and names only one of them. The eight sites repaired
+under this plan chose their reading deliberately; this test keeps a later edit from
+reintroducing the silent drop.</p>
+<p>A comparison is refused unless it is explicit in one of two ways:</p>
+<ul id="sib-null-status-guard-accepts">
+<li>the property is read inside <code>coalesce(...)</code>, which names the value a null
+status takes — <code>coalesce(source.status, '') &lt;&gt; 'stale'</code>; or</li>
+<li>the same <code>alias.property</code> carries an <code>IS NULL</code> or
+<code>IS NOT NULL</code> test in the same statement, which names the null case beside the
+exclusion — <code>n.status IS NULL OR n.status &lt;&gt; 'draft'</code>.</li>
+</ul>
+<p>The property filter covers <code>status</code> and every <code>_status</code> suffix
+(<code>validation_status</code>, <code>lifecycle_status</code>, <code>edit_status</code>):
+a validation or lifecycle status drops a row exactly as a plain status does.</p>
+
+<h2 id="sib-null-status-guard-readers">The readers, and why literals are kept</h2>
+<p>Strings are selected by <code>python_cypher_strings</code>
+(<code>imas_codex/graph/cypher_property_check.py</code>) and blanked with
+<code>CYPHER_LITERAL_OR_COMMENT</code> (<code>imas_codex/cli/sn.py</code>), so a string the
+repository does not read as Cypher is not scanned and a commented-out exclusion is not a
+finding.</p>
+<p>One deliberate difference from the readers' use of that pattern: a quoted run is blanked
+inside its delimiters rather than whole. The operator being checked sits <em>between</em>
+two literals, so emptying the delimiters too would delete the comparison along with the
+value — <code>coalesce(x.status, '') &lt;&gt; 'stale'</code> must survive as
+<code>coalesce(x.status, '') &lt;&gt; ''</code>. Comment spans still become whitespace,
+which is what makes the commented-copy arm pass.</p>
+
+<h2 id="sib-null-status-guard-measure">Measure</h2>
+<table id="sib-null-status-guard-gate-table">
+<tbody>
+<tr><th>Scan at head <code>ef57f3ad3</code></th>
+<td>510 modules read, 263 status property references seen, <strong>0</strong> implicit
+exclusions. The reference count is the scan's positive control: an empty finding list from
+a scan that read no Cypher would report safety it never measured, so the test asserts the
+count is non-zero.</td></tr>
+<tr><th>Gate arm — main <code>5b10d191f</code></th>
+<td>Archive tree, <code>tests/graph/test_cypher_property_check.py</code>: 1 failed,
+3 passed, EXIT=1. Failure id
+<code>test_cypher_property_literals_have_declared_properties</code>.</td></tr>
+<tr><th>Gate arm — head <code>ef57f3ad3</code></th>
+<td>Archive tree, the new test plus <code>tests/graph/test_cypher_property_check.py</code>:
+1 failed, 9 passed, EXIT=1. The failure id is the same one, so this node adds zero failure
+ids. The 6 new tests pass.</td></tr>
+<tr><th>Baseline failure, attributed</th>
+<td><code>test_cypher_property_literals_have_declared_properties</code> fails identically
+in the base archive, the head archive and the untouched worktree: the repository's own
+Cypher writes <code>StandardName.needs_composition</code>, which the LinkML schema does not
+declare. It is pre-existing and untouched by this node.</td></tr>
+</tbody>
+</table>
+
+<h2 id="sib-null-status-guard-negative-control">Negative control</h2>
+<p>Both arms run against a scratch copy of <code>imas_codex/</code> under
+<code>$TMPDIR</code>, imported by absolute path so the planted site is the one scanned
+(<code>module.__file__</code> is recorded on each log's header lines).</p>
+<table id="sib-null-status-guard-negative-table">
+<thead><tr><th>Arm</th><th>Planted</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>Red</td>
+<td>One bare exclusion in
+<code>standard_names/graph_store/graph_audits.py</code> and one in
+<code>graph/build_dd.py</code>, a module outside <code>standard_names</code>: each
+<code>MATCH (n:StandardName) WHERE n.status &lt;&gt; 'x' RETURN count(n) AS total</code></td>
+<td>EXIT=1, naming both sites:
+<code>imas_codex/graph/build_dd.py:4929 n.status</code> and
+<code>imas_codex/standard_names/graph_store/graph_audits.py:3455 n.status</code></td></tr>
+<tr><td>Commented</td>
+<td>The same two statements with the comparison behind a <code>//</code> comment:
+<code>WHERE true // n.status &lt;&gt; 'x'</code></td>
+<td>EXIT=0 — a commented-out copy does not fail the check</td></tr>
+</tbody>
+</table>
+<p>The red arm was first run with the worktree still on <code>sys.path</code>, and it passed
+against a copy that genuinely carried the planted writes: the instrument was reading the
+wrong tree. Every arm now pins the working directory and its own tree, and records the
+module path it resolved, so the same blindness cannot report as a green.</p>
+
+<h2 id="sib-null-status-guard-limits">What this check does not cover</h2>
+<p>Cypher accepts <code>!=</code> as a synonym for <code>&lt;&gt;</code>. The brief named
+<code>&lt;&gt;</code>, so <code>!=</code> is not detected; no Cypher string in the package
+uses it today (measured: zero occurrences). A status property compared with
+<code>IN</code> or <code>=</code> is outside the rule entirely — those select on a value
+rather than exclude one, so the null row is not silently dropped in the same way.</p>
+
+</main>
+</body>
+</html>
