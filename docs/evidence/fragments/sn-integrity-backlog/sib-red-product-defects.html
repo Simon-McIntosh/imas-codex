@@ -79,13 +79,29 @@ exploratory edits there rather than land a partial change that moves calibration
 measure. The defect is a real one: a vetoed name whose <code>decision_score</code> reads above the
 consumer threshold is a name a score-reading consumer would accept.</p>
 
+<p id="sib-red-product-defects-d1-at-head">At head the id still fails with the same error after
+104.8&nbsp;s in the gate arm, <code>ValueError: landed logistic mismatch:
+extent_of_soft_xray_detector</code>, so nothing this node landed touched the calibration path.</p>
+
 <h2 id="sib-red-product-defects-gate">Gate</h2>
 
 <p id="sib-red-product-defects-gate-result">Two <code>git archive</code> trees, each with its own
 <code>--basetemp</code>, running <code>tests/standard_names/</code> on default markers with
 <code>-n 8</code>: main <code>4f336fee2</code> gave <b>92 failed, 8431 passed, 12 skipped</b>; head
-<code>00e0d2f15</code> gave the counts recorded in the run manifest, and the id sets are compared there
-id by id. The repaired D2 and D3 ids pass at head and are absent from the head failure set; D1 is the
-blocked third.</p>
+<code>00e0d2f15</code> gave <b>90 failed, 8433 passed, 12 skipped</b>. The id sets are compared in the
+run manifest: <b>no failure id is added</b>, and exactly two leave the set &mdash; the D2 and D3 ids
+below. D1 remains in both sets and is the blocked third.</p>
+
+<p id="sib-red-product-defects-gate-provenance">Each arm imports the module under test from its own
+tree, which was checked rather than assumed: from inside the head tree
+<code>imas_codex.cli.sn.__file__</code> resolves under that tree, and from inside the base tree under
+that one. A probe run from the worktree instead resolves to the worktree, because <code>python -c</code>
+puts the current directory ahead of any path the environment supplies &mdash; the arms avoid that by
+running with the tree as their working directory.</p>
+
+<p id="sib-red-product-defects-negative-control">Negative control, run before the arms: the repaired
+D2 and D3 ids and D1 were run against main <code>4f336fee2</code>, where all three failed
+(<code>EXIT=1</code>). Each repair therefore fails where the defect is present and passes only at
+head.</p>
 
 </body></html>
