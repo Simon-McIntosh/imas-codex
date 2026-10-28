@@ -3,9 +3,9 @@
 Cutoffs match the panel's calibration acceptance rate before the docs veto.
 The decision score is piecewise linear through (0, 0), (cutoff, min_score)
 and (1, 1); it is an operating-score mapping, not an acceptance probability.
-A contradiction routes a document to refine while its judged scores stay
-unchanged; the refusal travels as a documentation review hold, not as a lowered
-score. The same mapping handles explicit consumer min_score values.
+A contradiction routes a document to refine, caps its decision score at the
+float immediately below the consumer threshold, and raises a documentation
+review hold naming the failed check. The same mapping handles explicit consumer min_score values.
 Thresholds and name-score weights are fitted on frozen calibration judgments.
 Every Jev judgment is stored as a noncanonical review with no scalar score;
 the explicit deciding switch makes it the decision, and an item Jev could not
@@ -237,6 +237,12 @@ def _route(
     mapped = map_decision_score(selected, thresholds["accept_threshold"], min_score)
     holds: tuple[Mapping[str, str], ...] = ()
     if "claim_contradicts_source" in failed:
+        # A vetoed document never reads as acceptable: the mapped score is the
+        # value a score-reading consumer compares against its own threshold, so
+        # cap it at the float immediately below the consumer threshold. The
+        # hold still records which checks failed; the cap only makes the score
+        # agree with the refine route the veto already decided.
+        mapped = min(mapped, math.nextafter(min_score, 0.0))
         detail = details.get("claim_contradicts_source", {})
         holds = (
             {
@@ -362,9 +368,9 @@ def sync_route_holds(
 ) -> list[str]:
     """Reconcile the documentation holds a deciding route carries on its name.
 
-    A veto reaches the graph as its own review hold rather than as a lowered
-    score: the judged score is unchanged, so the refusal is visible as a
-    distinct dimension a triager can act on and can dismiss.
+    A veto reaches the graph as its own review hold as well as through the
+    capped decision score, so the refusal is visible as a distinct dimension a
+    triager can act on and can dismiss.
 
     The reconciliation runs in both directions on every deciding pass, mirroring
     the per-pass recomputation the score mapping used to do. A check the route

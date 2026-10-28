@@ -829,10 +829,17 @@ def build_docs_state(
 
 
 def docs_binding_ids(item: Mapping[str, Any]) -> list[str]:
-    """Name every DD definition the entry's source edges bind, in document order."""
+    """Name every DD definition the entry's source edges bind, in document order.
+
+    The labels are taken from the same list the judge is given, so a binding's
+    label and the question asked about it are index-aligned by construction
+    rather than by two independent readings of the item.
+    """
     return [
         str(source.get("id") or source.get("path") or f"binding {index + 1}")
-        for index, source in enumerate(item.get("dd_source_docs") or ())
+        for index, source in enumerate(
+            comparison_sources(item.get("dd_source_docs")) or ()
+        )
     ]
 
 
