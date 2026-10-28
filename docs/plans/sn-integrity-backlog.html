@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="256">
+<meta name="plan-version" content="257">
 <meta name="plan-modified" content="2026-10-28">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -928,7 +928,10 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
     <div class="r-comment-body"><p>Added tests/standard_names/test_status_predicate_null_safety.py, a static guard that reads every Cypher string in imas_codex/ through python_cypher_strings and CYPHER_LITERAL_OR_COMMENT and fails on any status or *_status comparison against &lt;&gt; whose null handling is implicit (not inside coalesce(...) and not paired with an IS NULL / IS NOT NULL test on the same alias.property). At head ef57f3ad3 it reads 510 modules and 263 status property references and reports 0 implicit exclusions, with no exemption list; planted bare exclusions in standard_names/graph_store/graph_audits.py and graph/build_dd.py both fail naming file and line, a commented copy passes, and the two archive-tree arms share one pre-existing failure id so the node adds zero.</p></div>
 </div>
 <div class="r-comment" data-section="s40" data-id="c-run-r-20261028T020128716457-review-of-sib-declare-needs-composition-1fef2d297979" data-who="reckon-build" data-when="2026-10-28T02:33:24.237Z">
-    <div class="r-comment-body"><p>Review of r-20261028T005804811972-sib-declare-needs-composition at 1fef2d297 (base 5b10d191f) scored goal_fidelity 20, evidence 19, scope_discipline 20, durability 18, fit 20, reuse 20, with added_failure_count 0 and two non-blocking findings; the declaration at imas_codex/schemas/standard_name.yaml:1652 is accurate and the adjudication row&#x27;s removal is required, not cosmetic, because a declared property resolves before adjudication and an unconsumed runtime row would itself become a stale_adjudication violation.</p></div>
+    <div class="r-comment-body"><p>Review of r-20261028T005804811972-sib-declare-needs-composition at 1fef2d297 (base 5b10d191f) scored goal_fidelity 20, evidence 19, scope_discipline 20, durability 18, fit 20, reuse 20, with added_failure_count 0 and two non-blocking findings; the declaration at imas_codex/schemas/standard_name.yaml:1652 is accurate and the adjudication row's removal is required, not cosmetic, because a declared property resolves before adjudication and an unconsumed runtime row would itself become a stale_adjudication violation.</p></div>
+</div>
+<div class="r-comment" data-section="s40" data-id="c-run-r-20261028T005804811972-sib-declare-needs-composition" data-who="reckon-build" data-when="2026-10-28T01:23:38.270Z">
+    <div class="r-comment-body"><p>Declared `StandardName.needs_composition` as an optional boolean placeholder marker in `imas_codex/schemas/standard_name.yaml` and removed its stale line-pinned adjudication row from `imas_codex/graph/cypher_property_check.py`; the repository property check passes at head (4/4 at 04425d4b3) and fails at base 5b10d191f on `signed_manifest.py:8057`, and `tests/standard_names/` with `-n 8` adds zero failure ids (both arms 101 failed / 8413 passed / 15 skipped, identical failure-id sets, md5 a6c993d8427e30982bb5d76734b6e811).</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
