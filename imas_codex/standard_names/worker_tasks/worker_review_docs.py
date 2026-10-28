@@ -715,11 +715,11 @@ async def _documentation_contradiction_note(
     questions = {
         key: question
         for key, question in jev_review.docs_question_table(
-            jev_review._default_checks(), claims, state["binding_ids"]
+            jev_review._default_checks(), claims, state.get("binding_ids")
         ).items()
         if key.startswith("check:claim_contradicts_source:")
     }
-    binding_labels = ", ".join(state["binding_ids"]) or "DD source"
+    binding_labels = ", ".join(state.get("binding_ids") or ()) or "DD source"
     lease = mgr.reserve(0.001 * len(sources), phase="review_docs")
     if lease is None:
         logger.warning("review_docs: claim comparison unfunded for %s", item["id"])
@@ -755,9 +755,13 @@ async def _documentation_contradiction_note(
             state, jev_review._default_checks(), answers
         )
         if verdict["contradiction_veto"]:
+            dd_text = " | ".join(
+                str(source.get("documentation") or source.get("description") or "")
+                for source in sources
+            )
             return (
                 f"contradicts source: {verdict['contradiction_reason']}; "
-                f"DD bindings: {binding_labels}"
+                f"DD: {dd_text}"
             )
         if any(
             answer is None or answer.get("choice") not in {"supports", "says nothing"}

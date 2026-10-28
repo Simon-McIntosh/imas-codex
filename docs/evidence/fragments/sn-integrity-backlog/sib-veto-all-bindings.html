@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-veto-all-bindings">
+<title>The contradiction veto now judges a claim against every binding the name carries</title>
+</head>
+<body>
+<main>
+<h1 id="sib-veto-all-bindings-title">A claim is vetoed only when no binding supports it</h1>
+
+<p id="sib-veto-all-bindings-summary">The veto misfired one layer above the clause. The review-docs
+note built one judgment state per DD source and returned a hold when <em>any single</em> source set
+<code>contradiction_veto</code>, so a base name spanning seven bindings had its three scope sentences
+answered seven times, once per narrow binding, and the answers were ORed into a hold. The clause now
+asks one question per (claim, binding) and folds the readings by support: a claim contradicts only when
+no binding supports it, and any unanswered binding leaves the claim unknown.</p>
+
+<h2 id="sib-veto-all-bindings-change">What changed</h2>
+<table id="sib-veto-all-bindings-change-table">
+<tbody>
+<tr><th>question table</th><td><code>imas_codex/standard_names/review/jev_review.py</code> — one question per (claim, binding) when the name binds more than one definition, naming the binding each question is about and asking for that binding alone</td></tr>
+<tr><th>fold</th><td><code>aggregate_binding_answers</code> — <code>supports</code> if any binding supports; <code>contradicts</code> only when no binding supports and at least one rules the claim out; a single-binding name returns its recorded answer untouched, so the probability channel and pre-change receipts replay identically</td></tr>
+<tr><th>review-docs note</th><td><code>worker_review_docs._documentation_contradiction_note</code> — one state carrying every binding, one judge call, one verdict for the claim set, replacing the per-source OR</td></tr>
+<tr><th>clause text</th><td><code>imas_codex/llm/prompts/sn/review_checks.yaml</code> — the question names the DD definitions the name binds rather than one source definition</td></tr>
+<tr><th>routing</th><td><code>imas_codex-placeholder</code></td></tr>
+</tbody>
+</table>
+
+<h2 id="sib-veto-all-bindings-negative">Regression fixtures fail on main, pass at head</h2>
+
+<pre id="sib-veto-all-bindings-negative-run"><code># revision 282260d6c (main), tests/standard_names/test_veto_all_bindings.py
+5 failed, 1 passed
+FAILED test_a_broad_base_name_claim_is_not_vetoed_by_one_narrow_binding
+FAILED test_a_claim_false_for_every_binding_is_vetoed
+FAILED test_the_electrostatic_potential_scope_sentence_is_judged_once_per_binding
+FAILED test_the_s0010_generic_claim_survives_a_sibling_binding_that_narrows_it
+FAILED test_the_review_docs_note_reads_every_binding_and_holds_on_none
+EXIT=1</code></pre>
+
+<h2 id="sib-veto-all-bindings-positive">Positive control</h2>
+<p id="sib-veto-all-bindings-positive-text">Two readings are pinned by
+<code>tests/standard_names/test_veto_all_bindings.py</code>. The three
+<code>electrostatic_potential</code> scope sentences read against its seven
+<code>phi_potential</code> bindings are not vetoed when any binding supports them, and the same claim
+is vetoed when every binding rules it out. The <code>S0010</code> claim about the parallel magnetic
+perturbation is supported by its own binding and reads as contradicting a sibling binding of the total
+perturbed field; it is not vetoed.</p>
+
+<h2 id="sib-veto-all-bindings-measure">Precision and recall, before and after</h2>
+<p id="sib-veto-all-bindings-measure-text">MEASURE_PLACEHOLDER</p>
+
+<h2 id="sib-veto-all-bindings-gate">Gate</h2>
+<p id="sib-veto-all-bindings-gate-text">GATE_PLACEHOLDER</p>
+</main>
+</body>
+</html>
