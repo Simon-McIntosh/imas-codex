@@ -11,6 +11,7 @@ names again fails here.
 from __future__ import annotations
 
 import ast
+import functools
 import importlib
 from pathlib import Path
 
@@ -48,7 +49,16 @@ def _store_modules() -> dict[str, object]:
 
 
 def _moved_callables() -> dict[str, str]:
-    """Moved symbols a caller could reach as a name, and their owner path."""
+    """Moved symbols a caller could reach as a name, and their owner path.
+
+    A ``functools.partial`` carries no ``__module__`` of its own, so it does not
+    report the module that built it. Comparing ``__module__`` therefore dropped
+    every partial-owned entrypoint — the ten manifest appliers among them — from
+    this set, leaving them outside both the entrypoint scan and the forwarder
+    scan while a facade could still re-expose them. The binding a store module
+    holds is what makes a symbol its own, so a partial counts when the owner
+    module's namespace carries that name.
+    """
     from imas_codex.standard_names.graph_store import _OWNERS_BY_MODULE
 
     moved: dict[str, str] = {}
@@ -58,11 +68,18 @@ def _moved_callables() -> dict[str, str]:
             attribute = getattr(module, name, None)
             if attribute is None or name in _NOT_MOVED:
                 continue
-            if getattr(attribute, "__module__", None) != module.__name__:
+            if not _is_owned(module, name, attribute):
                 continue
             if callable(attribute):
                 moved[name] = f"{_STORE_PACKAGE}.{module_name}"
     return moved
+
+
+def _is_owned(module: object, name: str, attribute: object) -> bool:
+    """Whether *attribute*, bound as *name*, belongs to *module* itself."""
+    if isinstance(attribute, functools.partial):
+        return name in vars(module)
+    return getattr(attribute, "__module__", None) == module.__name__
 
 
 def _local_definitions(path: str) -> set[str]:

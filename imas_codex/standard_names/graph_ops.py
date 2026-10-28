@@ -371,3 +371,18 @@ _refused_target_orphan_apply = import_module(
 )._refused_target_orphan_apply
 
 retire_signed_provenance_orphans = _refused_target_orphan_apply
+
+#: The implementations are the store's symbols, not this root's. Keeping a
+#: private alias for each would leave every one of them resolvable here, which
+#: is the reachability the owner map exists to deny.
+del (
+    _catalog_source_disposition_apply,
+    _dual_authority_retirement_apply,
+    _error_sibling_reconcile_apply,
+    _ineligible_source_retirement_apply,
+    _lifecycleless_stub_reconcile_apply,
+    _normalization_peel_unit_repair_apply,
+    _refused_target_orphan_apply,
+    _semantic_mirror_repair_apply,
+    _structural_edge_reconcile_apply,
+)
