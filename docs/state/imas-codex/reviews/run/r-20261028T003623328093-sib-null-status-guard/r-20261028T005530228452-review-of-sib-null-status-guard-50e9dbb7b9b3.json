@@ -1,0 +1,26 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-28T01:04:31.304Z",
+  "dispatched_at": "2026-10-28T00:57:10Z",
+  "findings": [
+    "tests/standard_names/test_status_predicate_null_safety.py:38 non-blocking: _EXCLUSION_RE allows an optionally backticked property name, but _blank_literals_and_comments (line 45) blanks the whole backticked run before the operator is parsed, so implicit_null_status_exclusions(\"MATCH (n:X) WHERE n.`status` <> 'x' RETURN n\") returns [] and a backticked status exclusion escapes the guard while the regex reads as if it covered it"
+  ],
+  "project": "imas-codex",
+  "review_run_id": "r-20261028T005530228452-review-of-sib-null-status-guard-50e9dbb7b9b3",
+  "reviewed_base_sha": "5b10d191f1c89374288676aa2cb47ed7bcd32abe",
+  "reviewed_head_sha": "50e9dbb7b9b367101a64e01b9c904e9a07da4cfc",
+  "reviewed_run_id": "r-20261028T003623328093-sib-null-status-guard",
+  "scores": {
+    "durability": 17,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T01:05:32.293065+00:00",
+  "total": 111
+}
