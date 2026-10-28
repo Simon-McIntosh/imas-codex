@@ -282,11 +282,15 @@ def _docs_axis(
                 )
                 if score is None:
                     continue
-                contradiction = any(
-                    jev_review.claim_contradicts(answer)
-                    for key, answer in answers.items()
-                    if key.startswith("check:claim_contradicts_source:")
+                # The live path folds a claim's per-binding readings by support:
+                # a claim contradicts only when no binding supports it. The
+                # replay reads the same fold the score and the route read, so a
+                # row cannot be vetoed here by one narrow binding that the
+                # deciding pass accepts.
+                docs_review = jev_review.aggregate_docs_review(
+                    state, checks, answers, audit_report=audit
                 )
+                contradiction = bool(docs_review["contradiction_veto"])
                 check_fail: dict[str, float] = {}
                 for check in checks:
                     if check.id == "claim_contradicts_source":
@@ -311,9 +315,7 @@ def _docs_axis(
                         "contradiction": contradiction,
                         "score": float(score),
                         "judgment": {
-                            **jev_review.aggregate_docs_review(
-                                state, checks, answers, audit_report=audit
-                            ),
+                            **docs_review,
                             "categories": {
                                 dimension: answers.get("dimension:" + dimension)
                                 for dimension in jev_review._DOCS_DIMENSION_CRITERIA

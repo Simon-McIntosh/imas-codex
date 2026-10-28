@@ -29,7 +29,9 @@ from imas_codex.standard_names.worker_tasks import (
     worker_review_docs as _owning_worker_review_docs,
 )
 
-_CALIBRATION_SHA256 = "4e47220f157edee78fc6b0c1c98994606fce42be6a620a68f9f09980eccba428"
+# The refit artifact's digest, derived by this module's own
+# ``_assert_calibration_digest`` expression over ``cascade_thresholds.json``.
+_CALIBRATION_SHA256 = "4ae713f939c94e3a0a47d2ea276b2e9ab5cf9bd2cc6f1ad6e4e5d3908ce5db1f"
 
 
 def _decision(route, probability, failed_checks=()):
@@ -363,8 +365,13 @@ def test_unsupported_claim_is_not_a_contradiction_veto(planted_thresholds):
         ],
     )
     decision = route_docs(judgment, probability=0.9)
+    # The veto decides the route, and the score must agree with it: the mapped
+    # score is capped at the float immediately below the consumer threshold, so
+    # no consumer comparing the score alone can accept a vetoed document.
+    import math
+
     assert decision.route == "refine"
-    assert decision.decision_score >= 0.85
+    assert decision.decision_score == math.nextafter(0.85, 0.0)
     assert [hold["kind"] for hold in decision.holds] == ["cascade_contradiction"]
     assert decision.scores == clear.scores == decision.raw_scores
     assert decision.check_details["claim_contradicts_source"]["probability"] == 0.3

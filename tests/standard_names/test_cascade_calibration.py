@@ -105,7 +105,7 @@ def test_matched_policy_rebuilds_from_frozen_scores_and_receipts():
         assert "check_thresholds" not in block and "band_width" not in block["rubric"]
         for metric in cc.METRICS:
             assert metric in block["report"]["validation"]["paired_difference"]
-    assert first["docs"]["report"]["calibration"]["veto"]["refine_count"] == 15
+    assert first["docs"]["report"]["calibration"]["veto"]["refine_count"] == 10
 
 
 def test_a_missing_receipt_names_the_receipt_it_could_not_read():

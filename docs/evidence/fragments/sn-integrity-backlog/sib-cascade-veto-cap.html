@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-cascade-veto-cap">
+<title>A vetoed documentation decision never reads as acceptable, and the calibration rebuilds</title>
+</head>
+<body>
+<main>
+<h1 id="sib-cascade-veto-cap-title">A vetoed documentation decision never reads as acceptable, and the calibration rebuilds</h1>
+
+<p id="sib-cascade-veto-cap-summary">
+Three independent causes kept
+<code>test_matched_policy_rebuilds_from_frozen_scores_and_receipts</code> red. The
+contradiction veto chose the refine route but left <code>decision_score</code> at the
+unvetoed mapping, so <code>poloidal_mode_number</code> read <strong>0.9121</strong>
+against an <code>accept_threshold</code> of 0.3883 — a score any consumer comparing
+against its own threshold would accept. The veto now caps the mapped score at the float
+immediately below <code>min_score</code>, which is what the artifact's own
+<code>policy.veto_score</code> states. The frozen documentation logistic column was
+written against the scorer as it stood before the claim-settlement retunes, so
+<strong>12</strong> of its <strong>386</strong> paired rows no longer reproduce, nine of
+them sitting at exactly 0.0 — the retired veto's denial. The column is re-derived from
+the stored receipts with no judge call, and the cutoffs refit through the existing build.
+The calibration replay ORed every per-binding claim answer into a veto; it now reads the
+fold the live path uses, where a claim contradicts only when no binding supports it.
+</p>
+
+<h2 id="sib-cascade-veto-cap-cap">The cap</h2>
+<p>
+<code>cascade._route</code> raises <code>claim_contradicts_source</code> for a
+contradicted documentation claim and routes the item to refine. The mapped score was
+computed before that happened and was returned unchanged, so the route and the score
+disagreed. The cap is applied at the veto: <code>mapped = min(mapped,
+math.nextafter(min_score, 0.0))</code>. A vetoed item below the threshold already keeps
+its lower value, and the hold still records which check failed, so a triager sees the
+finding as well as the score. Without the cap the new test reads
+<strong>0.985</strong> on the same judgment; with it the score is the float below
+<strong>0.85</strong>.
+</p>
+
+<h2 id="sib-cascade-veto-cap-column">The re-frozen column, and the refit</h2>
+<p>
+Replaying the stored documentation receipts through the current scorer reports 12
+mismatches against the committed column, exactly the set the defect recorded: nine at
+<code>0.0</code> (the old veto's zero, from before the veto stopped treating an undecided
+answer as a denial) and three that follow the documentation gate learning which name it
+documents. Re-freezing those twelve values is the whole change to
+<code>srtj-jev-vs-panel-operating-point.json</code>. The rebuild then completes and the
+cutoffs are refit through <code>cascade_calibration.build</code>.
+</p>
+<table id="sib-cascade-veto-cap-refit">
+<thead><tr><th>quantity</th><th>before</th><th>after</th></tr></thead>
+<tbody>
+<tr><td>docs <code>accept_threshold</code></td><td>0.38829396813183875</td><td>0.38828828632095647</td></tr>
+<tr><td>name <code>accept_threshold</code></td><td>0.32447569396775017</td><td>0.32447569396775017</td></tr>
+<tr><td>docs calibration rows changing route</td><td>—</td><td>1 (<code>major_length_of_antenna_strap</code>, refine → accept)</td></tr>
+<tr><td>docs calibration veto <code>refine_count</code></td><td>15</td><td>10</td></tr>
+</tbody>
+</table>
+<p>
+The veto count falls by exactly the five calibration rows the old scorer froze at 0.0.
+Under the current scorer they no longer hit the veto, so they are not vetoed — the
+retired number was the old column's, not the policy's. No per-axis rubric cutoff moved;
+the rubric blocks are frozen inputs and the fit changes the decision policy only.
+</p>
+
+<h2 id="sib-cascade-veto-cap-replay">The replay folds by support</h2>
+<p>
+The replay computed its contradiction feature as
+<code>any(claim_contradicts(answer) for key … if key.startswith("check:claim_contradicts_source:"))</code>,
+which reintroduces the per-source OR the live path retired: one narrow binding ruling a
+claim out vetoed a name another binding supports. It now reads
+<code>aggregate_docs_review(...)["contradiction_veto"]</code> and reuses that verdict for
+the judgment it stores, so the replay and the deciding pass read one fold. On the paired
+rows the two agree for these receipts; the construction is still the live one, so a name
+whose bindings disagree cannot be vetoed by the replay alone.
+</p>
+
+<h2 id="sib-cascade-veto-cap-bindings">Binding labels</h2>
+<p>
+<code>docs_binding_ids</code> now names bindings from
+<code>comparison_sources(item["dd_source_docs"])</code>, the list the judge itself reads,
+so a label and the question asked about it are index-aligned by construction rather than
+by two independent readings of the item. The review-docs note renders those ids through
+<code>strip_dd_prefix</code>, the one id form the rest of the module uses, so a duplicate
+warning names the same path a binding does.
+</p>
+
+<h2 id="sib-cascade-veto-cap-gate">Gate</h2>
+<p>
+Two archive trees of <code>main</code> (686d448d) and head (68f5e007f), each with its own
+<code>--basetemp</code> and the five generated files, ran <code>tests/standard_names/</code>
+on default markers with <code>-n 8</code> under <code>OMP_NUM_THREADS=1</code>. Base:
+<strong>44 failed, 8488 passed, 12 skipped</strong> in 252.47 s. Head: <strong>42 failed,
+8493 passed, 12 skipped</strong> in 345.59 s. The failure id sets were diffed, not the
+counts: <strong>zero ids added</strong>, and two leave — the D1 id and
+<code>test_writer_crash_recreation</code>, which is in no file this node touched and is
+order-dependent.
+</p>
+<p id="sib-cascade-veto-cap-restated">
+Two assertions in <code>tests/standard_names/test_review_cascade.py</code> pinned the
+behaviour this node changes, and both are restated rather than relaxed. The digest pin now
+names the refit artifact's digest
+<code>4ae713f939c94e3a0a47d2ea276b2e9ab5cf9bd2cc6f1ad6e4e5d3908ce5db1f</code>, derived
+by the module's own <code>_assert_calibration_digest</code> expression over
+<code>cascade_thresholds.json</code> and cross-checked against the artifact the build
+wrote. The veto test now asserts that a vetoed document's score <em>is</em> the cap:
+<code>decision.decision_score == math.nextafter(0.85, 0.0)</code>, beside the refine route
+it already asserted — a statement about the value, not the inequality the old line made.
+Run against the main source with the restated file, both fail for the intended reason:
+the score reads <strong>0.99</strong> rather than 0.8499999999999999, and the artifact
+carries the pre-refit digest <code>4e47220f…</code>.
+</p>
+<p>
+Negative control, run before the arms: the new cap test and the D1 id were run against
+main 686d448d, where both fail (EXIT=1). Each repair therefore fails where the defect is
+present and passes only at head.
+</p>
+</main>
+</body>
+</html>

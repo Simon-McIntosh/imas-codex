@@ -719,7 +719,12 @@ async def _documentation_contradiction_note(
         ).items()
         if key.startswith("check:claim_contradicts_source:")
     }
-    binding_labels = ", ".join(state.get("binding_ids") or ()) or "DD source"
+    binding_labels = (
+        ", ".join(
+            strip_dd_prefix(str(binding)) for binding in state.get("binding_ids") or ()
+        )
+        or "DD source"
+    )
     lease = mgr.reserve(0.001 * len(sources), phase="review_docs")
     if lease is None:
         logger.warning("review_docs: claim comparison unfunded for %s", item["id"])
