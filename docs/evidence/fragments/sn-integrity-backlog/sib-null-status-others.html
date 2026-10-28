@@ -1,0 +1,100 @@
+<section id="sib-null-status-others">
+  <p>In Cypher, <code>x.status &lt;&gt; 'v'</code> is null, not true, when <code>x.status</code> is null, so a row
+  carrying no status silently drops out of any guard written that way. Eight such comparisons remain in
+  <code>provenance_lifecycle.py</code> (2), <code>graph_store/graph_parent_lifecycle.py</code> (2),
+  <code>graph_store/graph_source_bindings.py</code>, <code>attachment_audit.py</code>,
+  <code>review/holds.py</code> and <code>discovery/code/workers.py</code>. Each now decides the case in the
+  query text and states why in a comment, so a future reader can see which reading the guard intends.</p>
+
+  <h3 id="sib-null-status-others-decisions">The eight sites and what a null status means</h3>
+  <table id="sib-null-status-others-sites">
+    <thead>
+      <tr><th>Site</th><th>Reading of a null status</th><th>Why</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>provenance_lifecycle.py</code> source-migration apply, <code>source.status &lt;&gt; 'stale'</code></td>
+        <td>not the excluded value — the source migrates with its cohort</td>
+        <td>The clause excludes a proven stale tombstone only, and the same source already counts as a live
+        producer in the source invariant (<code>coalesce(source.status, '') &lt;&gt; 'stale'</code>). Excluding
+        it here made the invariant's producer count and the migration's cohort disagree, and the moved-set
+        size check then failed the whole migration anonymously.</td>
+      </tr>
+      <tr>
+        <td><code>provenance_lifecycle.py</code> exact-source reset apply, <code>source.status &lt;&gt; 'stale'</code></td>
+        <td>unknown, so excluded — and the exclusion is stated twice</td>
+        <td>The manifest declares the exact <code>expected_status</code> it is resetting, and the equality on
+        the line above already drops a source without one. The coalesce states that the stale clause adds no
+        second route in. Behaviour is unchanged, so this site is pinned rather than fixed: its test asserts
+        the refusal names the source.</td>
+      </tr>
+      <tr>
+        <td><code>graph_store/graph_parent_lifecycle.py</code> candidate finder,
+        <code>structural_source.status &lt;&gt; 'stale'</code></td>
+        <td>not the excluded value — the parent is a reconstruction candidate</td>
+        <td>The guard admits a parent whose structural source is absent or not a tombstone. A source with no
+        status is not a proven tombstone, so leaving the comparison null excluded the parent from
+        reconstruction forever.</td>
+      </tr>
+      <tr>
+        <td><code>graph_store/graph_parent_lifecycle.py</code> structural seeding,
+        <code>existing_source.status &lt;&gt; 'stale'</code></td>
+        <td>not the excluded value — seeding proceeds</td>
+        <td>Same reading as the candidate finder, on the write that follows it; the MERGE then adopts the
+        row with <code>coalesce(sns.status, 'composed')</code>.</td>
+      </tr>
+      <tr>
+        <td><code>graph_store/graph_source_bindings.py</code> compose-hint decision,
+        <code>CASE WHEN sns.status &lt;&gt; 'extracted'</code></td>
+        <td>unknown, so excluded — <code>source_not_extracted</code></td>
+        <td>Only a source proven to sit at <code>extracted</code> may take a compose steer. A null CASE fell
+        through to the later branches, so a status-less source was reported <code>eligible</code> and would
+        accept steering it never earned.</td>
+      </tr>
+      <tr>
+        <td><code>attachment_audit.py</code> live producer count, <code>live_producer.status &lt;&gt; 'stale'</code></td>
+        <td>not the excluded value — the producer is live</td>
+        <td>This is a positive selection of producers. Null excluded a real producer, so a name backed only by
+        status-less sources read as sourceless — the same defect the source invariant carried.</td>
+      </tr>
+      <tr>
+        <td><code>review/holds.py</code> hold dismissal, <code>hold.status &lt;&gt; 'dismissed'</code></td>
+        <td>not the excluded value — the hold is dismissible</td>
+        <td>Only an already dismissed hold refuses a second dismissal. A hold with no status has not been
+        dismissed, so null silently made it undismissable and <code>dismiss_hold</code> returned False.</td>
+      </tr>
+      <tr>
+        <td><code>discovery/code/workers.py</code> ingested mark, <code>sf.status &lt;&gt; 'failed'</code></td>
+        <td>not the excluded value — the file is marked ingested</td>
+        <td>Only a recorded failure withholds the ingested mark. A file with no status was never recorded as
+        failed, and null left it unmarked so the batch reported zero updates.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 id="sib-null-status-others-measure">Measure</h3>
+  <table id="sib-null-status-others-gate">
+    <tbody>
+      <tr><th>Baseline arm — <code>tests/standard_names/</code>, base 5c94bae36</th>
+        <td>92 failed, 8421 passed, 12 skipped; EXIT=1.</td></tr>
+      <tr><th>After arm — <code>tests/standard_names/</code>, head 7ef5c03d6</th>
+        <td>92 failed, 8421 passed, 12 skipped; EXIT=1 — the failure-id sets are identical, zero added and
+        zero fixed.</td></tr>
+      <tr><th>Baseline arm — <code>-m graph</code> over the 99 test files importing a changed module</th>
+        <td>6 failed, 121 passed, 35 skipped; EXIT=1.</td></tr>
+      <tr><th>After arm — same 99 files, head</th>
+        <td>6 failed, 121 passed, 35 skipped; EXIT=1 — identical failure ids, zero added.</td></tr>
+      <tr><th>Cypher property check, both arms</th>
+        <td>1 failed, 3 passed; EXIT=1 on each arm, the same pre-existing undeclared-slot finding.</td></tr>
+      <tr><th>The new tests against base modules (negative control)</th>
+        <td>7 failed, 1 passed; EXIT=1. The one that passes is the reset site, whose test asserts a refusal
+        that the manifest's own status equality already produces.</td></tr>
+    </tbody>
+  </table>
+  <p>The 92 pre-existing <code>tests/standard_names/</code> failures and the 6 graph-marked ones reproduce
+  unchanged on the base revision from separate archive trees, so they are outside this change: they are
+  recorded under <code>outside_scope</code> rather than triaged here.</p>
+  <p>Logs in the run directory: <code>baseline-suite.log</code>, <code>after-suite.log</code>,
+  <code>baseline-graph.log</code>, <code>after-graph.log</code>, <code>baseline-cypher-property.log</code>,
+  <code>after-cypher-property.log</code>, <code>negative-control.log</code>.</p>
+</section>
