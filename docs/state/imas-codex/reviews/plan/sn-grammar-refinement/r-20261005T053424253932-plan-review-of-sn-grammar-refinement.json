@@ -48,7 +48,24 @@
   "plan_slug": "sn-grammar-refinement",
   "plan_version": 89,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "finding": "thin_wrapper-1",
+      "reason": "\u00a79 already lands the withdrawal, so this is a stale \u00a77 heading rather than a live decision to reverse; it matters only as an instruction not to re-open the token in the release that \u00a77 and \u00a79 jointly own.",
+      "when": "2026-10-28T05:05:04.996029+00:00"
+    }
+  ],
+  "responses": {
+    "thin_wrapper-1": {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "reason": "\u00a79 already lands the withdrawal, so this is a stale \u00a77 heading rather than a live decision to reverse; it matters only as an instruction not to re-open the token in the release that \u00a77 and \u00a79 jointly own.",
+      "when": "2026-10-28T05:05:04.996029+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-grammar-refinement/r-20261005T053424253932-plan-review-of-sn-grammar-refinement.json",
   "review_run_id": "r-20261005T053424253932-plan-review-of-sn-grammar-refinement",
   "reviewed_blob_sha": "e5a4ab2b560b09b1150791e4a80d2031779206bc",
   "rubric": "design",
