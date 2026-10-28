@@ -39,6 +39,13 @@
       "finding": "duplicate_owner-2",
       "reason": "the plan's single-renderer claim is scoped to the path claims and the scoped reset, and `find_code`'s single scalar prefix filter is a different shape from the list-membership clause the renderer emits, so naming it would correct the docstring's aperture but not change the design.",
       "when": "2026-10-28T05:04:56.555832+00:00"
+    },
+    {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "finding": "duplicate_owner-3",
+      "reason": "\u00a79's text explicitly scopes the claim to signals discovery (\"the only DataAccess MERGE in signals discovery\") and routes the bespoke signals MDSplus branch through it, so the section is accurate as written and only the section title reads broader than it delivers.",
+      "when": "2026-10-28T05:04:58.127966+00:00"
     }
   ],
   "responses": {
@@ -47,6 +54,12 @@
       "by": "plan-review-reflex",
       "reason": "the plan's single-renderer claim is scoped to the path claims and the scoped reset, and `find_code`'s single scalar prefix filter is a different shape from the list-membership clause the renderer emits, so naming it would correct the docstring's aperture but not change the design.",
       "when": "2026-10-28T05:04:56.555832+00:00"
+    },
+    "duplicate_owner-3": {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "reason": "\u00a79's text explicitly scopes the claim to signals discovery (\"the only DataAccess MERGE in signals discovery\") and routes the bespoke signals MDSplus branch through it, so the section is accurate as written and only the section title reads broader than it delivers.",
+      "when": "2026-10-28T05:04:58.127966+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/jt60sa-discovery-completion/r-20261006T012711137312-plan-review-of-jt60sa-discovery-completion.json",
