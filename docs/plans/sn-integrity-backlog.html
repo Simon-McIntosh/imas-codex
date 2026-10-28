@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="252">
+<meta name="plan-version" content="253">
 <meta name="plan-modified" content="2026-10-28">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -917,6 +917,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s40" data-id="c-run-r-20261027T234857564344-sib-null-status-manifest" data-who="reckon-build" data-when="2026-10-28T00:17:11.238Z">
     <div class="r-comment-body"><p>coalesced the null in the three signed_manifest status predicates (detach and removed-target authority postconditions, ordinary-source migration CAS), each with a disposable-graph test that fails on main (3 of 4 added tests red at 5c94bae36, EXIT=1) and passed at head; tests/standard_names default-marker arm added 0 failure ids (101 failed/8409 passed on main -&gt; 70 failed/8444 passed at head) and the graph arm added 0 (3 failed/48 passed on main -&gt; 51 passed at head)</p></div>
+</div>
+<div class="r-comment" data-section="s40" data-id="c-run-r-20261027T235108654213-sib-null-status-others" data-who="reckon-build" data-when="2026-10-28T00:20:27.431Z">
+    <div class="r-comment-body"><p>§40 (eight status guards outside signed_manifest.py): each now states what a null status means — six treat it as &quot;not the excluded value&quot; (coalesce) and two as unknown (compose-hint eligibility refuses it; the source reset is already excluded by the manifest&#x27;s own expected_status equality) — with a disposable-graph null-row test each; 7 of 8 fail against base modules and the reset case pins a refusal the equality already produces; standard-names suite and the 99 graph-marked importing files add zero failure ids against base 5c94bae36 (92/8421/12 identical; 6/121/35 identical).</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
