@@ -8,6 +8,7 @@ from imas_codex.llm.prompt_loader import render_prompt
 from imas_codex.standard_names.context import conventions_context_for
 
 NAME = "flux_surface_averaged_argon_density_at_plasma_boundary"
+UNSELECTED = "vacuum_toroidal_field_strength"
 EQUATION = (
     r"\langle f\rangle = \oint f\,dS/|\nabla\psi| "
     r"\,/\, \oint dS/|\nabla\psi|"
@@ -56,8 +57,12 @@ def test_documentation_prompt_uses_only_selected_conventions(prompt: str) -> Non
 
 @pytest.mark.parametrize("prompt", PROMPTS)
 def test_documentation_prompt_has_no_block_without_selected_entry(prompt: str) -> None:
-    assert conventions_context_for("argon_temperature") is None
-    rendered = _render("argon_temperature", prompt)
+    # Every parseable name now selects at least its notation entry, so the
+    # empty selection is reached through the grammar's parse refusal.
+    assert conventions_context_for(UNSELECTED) is None
+    rendered = _render(UNSELECTED, prompt)
+
+    assert "## Selected documentation conventions for this name" not in rendered
 
     assert "## Selected documentation conventions for this name" not in rendered
 
