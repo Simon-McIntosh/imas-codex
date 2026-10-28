@@ -502,3 +502,9 @@ def test_rebuild_excludes_exhausted_audit_findings_from_repair_and_retirement() 
     assert summary["orphans_after"] == 0
     bind.assert_not_called()
     retire.assert_called_once_with(gc, ["active_loss"], include_accepted=False)
+
+
+@pytest.fixture(autouse=True)
+def _pin_export_provenance(pinned_export_provenance):
+    """Drive this module's exports with archive provenance pinned."""
+    return pinned_export_provenance

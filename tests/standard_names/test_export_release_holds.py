@@ -6,6 +6,8 @@ from collections import Counter
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
+
 from imas_codex.standard_names.export import (
     _RELEASE_IDENTITY_HOLDS,
     _classify_export_population,
@@ -182,3 +184,9 @@ def test_release_holds_close_the_identity_ledger(tmp_path: Path) -> None:
     assert report.exported_count + sum(row["count"] for row in rows.values()) == len(
         population
     )
+
+
+@pytest.fixture(autouse=True)
+def _pin_export_provenance(pinned_export_provenance):
+    """Drive this module's exports with archive provenance pinned."""
+    return pinned_export_provenance

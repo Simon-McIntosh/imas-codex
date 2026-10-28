@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>sib-red-sandbox: the standard-names suite in a sandbox tree</title>
+</head>
+<body>
+<section id="sib-red-sandbox">
+<h1>sib-red-sandbox: the suite without a writable /tmp or a Git checkout</h1>
+
+<p>Two sandbox artefacts held 36 ids of <code>tests/standard_names/</code> red.
+Both are test scaffolding, so both are repaired in the tests. No product code
+changed, and the export's refusal of an untimestamped manifest is untouched.</p>
+
+<h2 id="sib-red-sandbox-reproduction">Reproduction before the repair</h2>
+<p>Both were reproduced at base <code>966f3d965</code> before anything changed,
+and again afterwards as this node's negative control (36 ids, 36 failures).</p>
+<ul>
+  <li id="sib-red-sandbox-repro-s1"><strong>S1.</strong> In a user namespace with
+  a read-only tmpfs on <code>/tmp</code>, <code>test_cli_export.py</code> gives
+  <em>14 failed, 5 passed</em>, each failing with
+  <code>OSError(30, 'Read-only file system')</code> from
+  <code>imas_codex/cli/sn.py:4484</code>. The same 14 also fail in the parallel
+  gate against a writable <code>/tmp</code>, because eight workers share the one
+  literal <code>/tmp/stg</code>.</li>
+  <li id="sib-red-sandbox-repro-s2"><strong>S2.</strong> In a tree extracted with
+  <code>git archive 966f3d965</code>, the 22 export ids give
+  <code>RuntimeError: export provenance timestamp unavailable: run from an
+  imas-codex Git checkout or set SOURCE_DATE_EPOCH for an archive/install
+  export</code>, raised at
+  <code>imas_codex/standard_names/export.py:2656</code> and reached from
+  <code>run_export</code> writing its manifest with
+  <code>require_provenance=True</code> (<code>export.py:3753</code>).</li>
+</ul>
+<p>The refusal is correct product behaviour: a cut that cannot state when it was
+generated is not reproducible, and
+<code>tests/standard_names/test_export_determinism.py</code> asserts it
+directly. Nothing in the product changed for these 36 ids.</p>
+
+<h2 id="sib-red-sandbox-changes">What changed</h2>
+<ul>
+  <li id="sib-red-sandbox-change-staging"><code>test_cli_export.py</code> takes
+  its staging root from a <code>staging</code> fixture built on
+  <code>tmp_path</code>, so each test owns its directory and no test writes to a
+  path it does not own.</li>
+  <li id="sib-red-sandbox-change-provenance">A
+  <code>pinned_export_provenance</code> fixture in
+  <code>tests/standard_names/conftest.py</code> sets
+  <code>SOURCE_DATE_EPOCH</code>; the eight export test modules that drive a real
+  export use it through a module-level autouse fixture. The pinned value is the
+  reproducible-build stamp, which is the documented archive path, not a
+  weakening of the refusal.</li>
+</ul>
+
+<h2 id="sib-red-sandbox-gate">Gate</h2>
+<p>Two <code>git archive</code> trees, base <code>966f3d965</code> and head
+<code>e8e7376a5</code>, each with its own <code>--basetemp</code>, running
+<code>tests/standard_names/</code> on default markers with <code>-n 8</code>.
+Each tree imported the module it ran: <code>python -c "import imas_codex;
+print(imas_codex.__file__)"</code> printed the tree's own
+<code>imas_codex/__init__.py</code>, and each gate log's header names that path,
+the cwd it resolved from and the literal command.</p>
+<ul>
+  <li id="sib-red-sandbox-gate-base">Base arm: 101 failed, 8419 passed,
+  15 skipped, <code>EXIT=1</code>.</li>
+  <li id="sib-red-sandbox-gate-head">Head arm: 65 failed, 8455 passed, 15 skipped,
+  <code>EXIT=1</code>. An earlier head arm at <code>c464126e3</code> read 66
+  failed; the id that differed is the flake below.</li>
+  <li id="sib-red-sandbox-gate-delta">All 36 ids present in the base failure list
+  and absent from every head list: 14 S1 and 22 S2 fixed, nothing of mine left
+  red. Compared set-wise against the base list, the final head arm adds
+  <strong>zero</strong> ids.</li>
+  <li id="sib-red-sandbox-gate-flake">One id,
+  <code>test_harmonize_apply.py::test_apply_reports_no_fall_when_no_member_scores_worse</code>,
+  failed in the first head arm only and in no base arm. It was then run three
+  times per arm, each time from its own freshly extracted archive tree of base
+  and of head: <em>1 passed</em> in all six runs. That file references neither
+  the new fixture nor any module this node changed
+  (<code>grep -n "pinned_export_provenance\|SOURCE_DATE_EPOCH\|from
+  tests.standard_names" test_harmonize_apply.py</code> prints nothing), and the
+  only shared file touched is <code>tests/standard_names/conftest.py</code>,
+  which gained a non-autouse fixture. The id is therefore an order-dependent
+  flake under <code>-n 8</code>, not an added failure.</li>
+</ul>
+
+<h2 id="sib-red-sandbox-ids">Per-id decision</h2>
+<table>
+  <thead><tr><th>id</th><th>cause</th><th>decision</th><th>evidence</th></tr></thead>
+  <tbody>
+    <tr id="sib-red-sandbox-id-1"><td><code>tests/standard_names/test_cli_export.py::TestExportGateFailure::test_failure_message</code></td><td>S1</td><td>fix the test: the CLI creates the staging root it is given, which is right; the test named one fixed literal path shared by every test and unwritable under the fence</td><td>Batch 1, read-only /tmp: OSError(30) at Path(staging).mkdir(); passes at head</td></tr>
+    <tr id="sib-red-sandbox-id-2"><td><code>tests/standard_names/test_cli_export.py::TestExportInternalError::test_exit_three_on_internal</code></td><td>S1</td><td>fix the test: the CLI creates the staging root it is given, which is right; the test named one fixed literal path shared by every test and unwritable under the fence</td><td>Batch 1, read-only /tmp: OSError(30) at Path(staging).mkdir(); passes at head</td></tr>
+    <tr id="sib-red-sandbox-id-3"><td><code>tests/standard_names/test_cli_export.py::TestExportPreconditionError::test_exit_two_on_file_exists</code></td><td>S1</td><td>fix the test: the CLI creates the staging root it is given, which is right; the test named one fixed literal path shared by every test and unwritable under the fence</td><td>Batch 1, read-only /tmp: OSError(30) at Path(staging).mkdir(); passes at head</td></tr>
+    <tr id="sib-red-sandbox-id-4"><td><code>tests/standard_names/test_cli_export.py::TestExportSuccess::test_custom_min_score</code></td><td>S1</td><td>fix the test: the CLI creates the staging root it is given, which is right; the test named one fixed literal path shared by every test and unwritable under the fence</td><td>Batch 1, read-only /tmp: OSError(30) at Path(staging).mkdir(); passes at head</td></tr>
+    <tr id="sib-red-sandbox-id-5"><td><code>tests/standard_names/test_cli_export.py::TestExportSuccess::test_default_min_score</code></td><td>S1</td><td>fix the test: the CLI creates the staging root it is given, which is right; the test named one fixed literal path shared by every test and unwritable under the fence</td><td>Batch 1, read-only /tmp: OSError(30) at Path(staging).mkdir(); passes at head</td></tr>
+    <tr id="sib-red-sandbox-id-6"><td><code>tests/standard_names/test_cli_export.py::TestExportSuccess::test_domain_forwarded</code></td><td>S1</td><td>fix the test: the CLI creates the staging root it is given, which is right; the test named one fixed literal path shared by every test and unwritable under the fence</td><td>Batch 1, read-only /tmp: OSError(30) at Path(staging).mkdir(); passes at head</td></tr>
+    <tr id="sib-red-sandbox-id-7"><td><code>tests/standard_names/test_cli_export.py::TestExportSuccess::test_exit_zero</code></td><td>S1</td><td>fix the test: the CLI creates the staging root it is given, which is right; the test named one fixed literal path shared by every test and unwritable under the fence</td><td>Batch 1, read-only /tmp: OSError(30) at Path(staging).mkdir(); passes at head</td></tr>
+    <tr id="sib-red-sandbox-id-8"><td><code>tests/standard_names/test_cli_export.py::TestExportSuccess::test_gate_only_forwarded</code></td><td>S1</td><td>fix the test: the CLI creates the staging root it is given, which is right; the test named one fixed literal path shared by every test and unwritable under the fence</td><td>Batch 1, read-only /tmp: OSError(30) at Path(staging).mkdir(); passes at head</td></tr>
+    <tr id="sib-red-sandbox-id-9"><td><code>tests/standard_names/test_cli_export.py::TestExportSuccess::test_gate_scope_forwarded</code></td><td>S1</td><td>fix the test: the CLI creates the staging root it is given, which is right; the test named one fixed literal path shared by every test and unwritable under the fence</td><td>Batch 1, read-only /tmp: OSError(30) at Path(staging).mkdir(); passes at head</td></tr>
+    <tr id="sib-red-sandbox-id-10"><td><code>tests/standard_names/test_cli_export.py::TestExportSuccess::test_include_unreviewed_forwarded</code></td><td>S1</td><td>fix the test: the CLI creates the staging root it is given, which is right; the test named one fixed literal path shared by every test and unwritable under the fence</td><td>Batch 1, read-only /tmp: OSError(30) at Path(staging).mkdir(); passes at head</td></tr>
+    <tr id="sib-red-sandbox-id-11"><td><code>tests/standard_names/test_cli_export.py::TestExportSuccess::test_override_edits_forwarded_as_list</code></td><td>S1</td><td>fix the test: the CLI creates the staging root it is given, which is right; the test named one fixed literal path shared by every test and unwritable under the fence</td><td>Batch 1, read-only /tmp: OSError(30) at Path(staging).mkdir(); passes at head</td></tr>
+    <tr id="sib-red-sandbox-id-12"><td><code>tests/standard_names/test_cli_export.py::TestExportSuccess::test_override_edits_none_when_not_provided</code></td><td>S1</td><td>fix the test: the CLI creates the staging root it is given, which is right; the test named one fixed literal path shared by every test and unwritable under the fence</td><td>Batch 1, read-only /tmp: OSError(30) at Path(staging).mkdir(); passes at head</td></tr>
+    <tr id="sib-red-sandbox-id-13"><td><code>tests/standard_names/test_cli_export.py::TestExportSummaryOutput::test_exported_count_in_output</code></td><td>S1</td><td>fix the test: the CLI creates the staging root it is given, which is right; the test named one fixed literal path shared by every test and unwritable under the fence</td><td>Batch 1, read-only /tmp: OSError(30) at Path(staging).mkdir(); passes at head</td></tr>
+    <tr id="sib-red-sandbox-id-14"><td><code>tests/standard_names/test_cli_export.py::TestExportSummaryOutput::test_gate_results_in_output</code></td><td>S1</td><td>fix the test: the CLI creates the staging root it is given, which is right; the test named one fixed literal path shared by every test and unwritable under the fence</td><td>Batch 1, read-only /tmp: OSError(30) at Path(staging).mkdir(); passes at head</td></tr>
+    <tr id="sib-red-sandbox-id-15"><td><code>tests/standard_names/test_export_bound_adjacent.py::test_bound_adjacent_is_distinct_and_ledger_closes</code></td><td>S2</td><td>fix the test: the export refuses a manifest it cannot timestamp, which is right; the test ran outside a Git checkout without the reproducible-build stamp an archive build carries</td><td>Batch 1, archive tree: RuntimeError export provenance timestamp unavailable; passes at head</td></tr>
+    <tr id="sib-red-sandbox-id-16"><td><code>tests/standard_names/test_export_exclusion_ledger.py::test_export_emits_generic_source_bindings_and_preserves_accounting</code></td><td>S2</td><td>fix the test: the export refuses a manifest it cannot timestamp, which is right; the test ran outside a Git checkout without the reproducible-build stamp an archive build carries</td><td>Batch 1, archive tree: RuntimeError export provenance timestamp unavailable; passes at head</td></tr>
+    <tr id="sib-red-sandbox-id-17"><td><code>tests/standard_names/test_export_exclusion_ledger.py::test_export_keeps_catalog_semantic_advisories</code></td><td>S2</td><td>fix the test: the export refuses a manifest it cannot timestamp, which is right; the test ran outside a Git checkout without the reproducible-build stamp an archive build carries</td><td>Batch 1, archive tree: RuntimeError export provenance timestamp unavailable; passes at head</td></tr>
+    <tr id="sib-red-sandbox-id-18"><td><code>tests/standard_names/test_export_exclusion_ledger.py::test_export_ledger_closes_over_fixture_population</code></td><td>S2</td><td>fix the test: the export refuses a manifest it cannot timestamp, which is right; the test ran outside a Git checkout without the reproducible-build stamp an archive build carries</td><td>Batch 1, archive tree: RuntimeError export provenance timestamp unavailable; passes at head</td></tr>
+    <tr id="sib-red-sandbox-id-19"><td><code>tests/standard_names/test_export_exclusion_ledger.py::test_export_publishes_derived_producer_parent</code></td><td>S2</td><td>fix the test: the export refuses a manifest it cannot timestamp, which is right; the test ran outside a Git checkout without the reproducible-build stamp an archive build carries</td><td>Batch 1, archive tree: RuntimeError export provenance timestamp unavailable; passes at head</td></tr>
+    <tr id="sib-red-sandbox-id-20"><td><code>tests/standard_names/test_export_exclusion_ledger.py::test_export_validates_cross_links_against_full_catalog</code></td><td>S2</td><td>fix the test: the export refuses a manifest it cannot timestamp, which is right; the test ran outside a Git checkout without the reproducible-build stamp an archive build carries</td><td>Batch 1, archive tree: RuntimeError export provenance timestamp unavailable; passes at head</td></tr>
+    <tr id="sib-red-sandbox-id-21"><td><code>tests/standard_names/test_export_exclusion_ledger.py::test_generated_roles_mark_quantity_parent_and_leaf</code></td><td>S2</td><td>fix the test: the export refuses a manifest it cannot timestamp, which is right; the test ran outside a Git checkout without the reproducible-build stamp an archive build carries</td><td>Batch 1, archive tree: RuntimeError export provenance timestamp unavailable; passes at head</td></tr>
+    <tr id="sib-red-sandbox-id-22"><td><code>tests/standard_names/test_export_exclusion_ledger.py::test_manifest_sources_reconcile_emitted_excluded_and_non_nameable</code></td><td>S2</td><td>fix the test: the export refuses a manifest it cannot timestamp, which is right; the test ran outside a Git checkout without the reproducible-build stamp an archive build carries</td><td>Batch 1, archive tree: RuntimeError export provenance timestamp unavailable; passes at head</td></tr>
+    <tr id="sib-red-sandbox-id-23"><td><code>tests/standard_names/test_export_exclusion_ledger.py::test_quantity_token_duals_pass_identity_collision_gate</code></td><td>S2</td><td>fix the test: the export refuses a manifest it cannot timestamp, which is right; the test ran outside a Git checkout without the reproducible-build stamp an archive build carries</td><td>Batch 1, archive tree: RuntimeError export provenance timestamp unavailable; passes at head</td></tr>
+    <tr id="sib-red-sandbox-id-24"><td><code>tests/standard_names/test_export_exit_accounting.py::test_domain_and_quarantine_exits_are_counted</code></td><td>S2</td><td>fix the test: the export refuses a manifest it cannot timestamp, which is right; the test ran outside a Git checkout without the reproducible-build stamp an archive build carries</td><td>Batch 1, archive tree: RuntimeError export provenance timestamp unavailable; passes at head</td></tr>
+    <tr id="sib-red-sandbox-id-25"><td><code>tests/standard_names/test_export_exit_accounting.py::test_exempt_origin_can_publish_below_declared_min_score</code></td><td>S2</td><td>fix the test: the export refuses a manifest it cannot timestamp, which is right; the test ran outside a Git checkout without the reproducible-build stamp an archive build carries</td><td>Batch 1, archive tree: RuntimeError export provenance timestamp unavailable; passes at head</td></tr>
+    <tr id="sib-red-sandbox-id-26"><td><code>tests/standard_names/test_export_exit_accounting.py::test_reconciling_cut_passes</code></td><td>S2</td><td>fix the test: the export refuses a manifest it cannot timestamp, which is right; the test ran outside a Git checkout without the reproducible-build stamp an archive build carries</td><td>Batch 1, archive tree: RuntimeError export provenance timestamp unavailable; passes at head</td></tr>
+    <tr id="sib-red-sandbox-id-27"><td><code>tests/standard_names/test_export_exit_accounting.py::test_retired_stage_batch_member_is_counted_not_vanished</code></td><td>S2</td><td>fix the test: the export refuses a manifest it cannot timestamp, which is right; the test ran outside a Git checkout without the reproducible-build stamp an archive build carries</td><td>Batch 1, archive tree: RuntimeError export provenance timestamp unavailable; passes at head</td></tr>
+    <tr id="sib-red-sandbox-id-28"><td><code>tests/standard_names/test_export_producer_predicate.py::test_export_refuses_name_with_no_producing_source</code></td><td>S2</td><td>fix the test: the export refuses a manifest it cannot timestamp, which is right; the test ran outside a Git checkout without the reproducible-build stamp an archive build carries</td><td>Batch 1, archive tree: RuntimeError export provenance timestamp unavailable; passes at head</td></tr>
+    <tr id="sib-red-sandbox-id-29"><td><code>tests/standard_names/test_export_producer_predicate.py::test_keyless_refusal_disappears_with_the_key_presence_form</code></td><td>S2</td><td>fix the test: the export refuses a manifest it cannot timestamp, which is right; the test ran outside a Git checkout without the reproducible-build stamp an archive build carries</td><td>Batch 1, archive tree: RuntimeError export provenance timestamp unavailable; passes at head</td></tr>
+    <tr id="sib-red-sandbox-id-30"><td><code>tests/standard_names/test_export_producer_predicate.py::test_refusal_disappears_when_the_predicate_is_reverted</code></td><td>S2</td><td>fix the test: the export refuses a manifest it cannot timestamp, which is right; the test ran outside a Git checkout without the reproducible-build stamp an archive build carries</td><td>Batch 1, archive tree: RuntimeError export provenance timestamp unavailable; passes at head</td></tr>
+    <tr id="sib-red-sandbox-id-31"><td><code>tests/standard_names/test_export_release_holds.py::test_release_holds_close_the_identity_ledger</code></td><td>S2</td><td>fix the test: the export refuses a manifest it cannot timestamp, which is right; the test ran outside a Git checkout without the reproducible-build stamp an archive build carries</td><td>Batch 1, archive tree: RuntimeError export provenance timestamp unavailable; passes at head</td></tr>
+    <tr id="sib-red-sandbox-id-32"><td><code>tests/standard_names/test_export_resolution_method.py::test_export_resolves_accepting_docs_review_method_and_keeps_absence_closed</code></td><td>S2</td><td>fix the test: the export refuses a manifest it cannot timestamp, which is right; the test ran outside a Git checkout without the reproducible-build stamp an archive build carries</td><td>Batch 1, archive tree: RuntimeError export provenance timestamp unavailable; passes at head</td></tr>
+    <tr id="sib-red-sandbox-id-33"><td><code>tests/standard_names/test_export_waiver_intermediates.py::test_the_cut_carries_a_waived_source_whose_chain_reached_nothing</code></td><td>S2</td><td>fix the test: the export refuses a manifest it cannot timestamp, which is right; the test ran outside a Git checkout without the reproducible-build stamp an archive build carries</td><td>Batch 1, archive tree: RuntimeError export provenance timestamp unavailable; passes at head</td></tr>
+    <tr id="sib-red-sandbox-id-34"><td><code>tests/standard_names/test_export_waiver_intermediates.py::test_the_cut_reads_a_chain_reaching_exactly_the_bound_without_refusing</code></td><td>S2</td><td>fix the test: the export refuses a manifest it cannot timestamp, which is right; the test ran outside a Git checkout without the reproducible-build stamp an archive build carries</td><td>Batch 1, archive tree: RuntimeError export provenance timestamp unavailable; passes at head</td></tr>
+    <tr id="sib-red-sandbox-id-35"><td><code>tests/standard_names/test_source_audit_gate.py::test_exhausted_sourceless_row_is_dormant_not_blocking</code></td><td>S2</td><td>fix the test: the export refuses a manifest it cannot timestamp, which is right; the test ran outside a Git checkout without the reproducible-build stamp an archive build carries</td><td>Batch 1, archive tree: RuntimeError export provenance timestamp unavailable; passes at head</td></tr>
+    <tr id="sib-red-sandbox-id-36"><td><code>tests/standard_names/test_source_audit_gate.py::test_held_sourceless_identity_is_not_counted_and_not_exported</code></td><td>S2</td><td>fix the test: the export refuses a manifest it cannot timestamp, which is right; the test ran outside a Git checkout without the reproducible-build stamp an archive build carries</td><td>Batch 1, archive tree: RuntimeError export provenance timestamp unavailable; passes at head</td></tr>
+  </tbody>
+</table>
+</section>
+</body>
+</html>

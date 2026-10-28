@@ -27,6 +27,23 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+#: Reproducible-build stamp used when a test exports outside a Git checkout.
+_ARCHIVE_PROVENANCE_EPOCH = "1783591200"
+
+
+@pytest.fixture
+def pinned_export_provenance(monkeypatch):
+    """Supply the provenance an archive or install build carries.
+
+    ``run_export`` refuses to write a manifest whose timestamp it cannot
+    derive, because a cut with no provenance is not reproducible. A tree
+    extracted from a source archive is not a Git checkout, so the tests that
+    drive a real export pin the reproducible-build stamp rather than
+    depending on the surrounding working copy.
+    """
+    monkeypatch.setenv("SOURCE_DATE_EPOCH", _ARCHIVE_PROVENANCE_EPOCH)
+    return _ARCHIVE_PROVENANCE_EPOCH
+
 
 @pytest.fixture
 def seed_dd_resolutions(disposable_neo4j_uri):

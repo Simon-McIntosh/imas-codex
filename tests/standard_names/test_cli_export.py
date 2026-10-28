@@ -15,6 +15,7 @@ from __future__ import annotations
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
 from click.testing import CliRunner
 
 from imas_codex.cli.sn import sn
@@ -63,6 +64,12 @@ def _failing_report(**overrides) -> ExportReport:
 MOCK_TARGET = "imas_codex.standard_names.export.run_export"
 
 
+@pytest.fixture
+def staging(tmp_path: Path) -> str:
+    """A staging root owned by the calling test, never a shared fixed path."""
+    return str(tmp_path / "stg")
+
+
 class TestExportMissingArgs:
     """Verify required flags."""
 
@@ -80,36 +87,34 @@ class TestExportSuccess:
     """Successful export with default flags."""
 
     @patch(MOCK_TARGET)
-    def test_exit_zero(self, mock_export):
+    def test_exit_zero(self, mock_export, staging):
         mock_export.return_value = _success_report()
         runner = CliRunner()
-        result = runner.invoke(
-            sn, ["release", "--export-only", "--staging", "/tmp/stg"]
-        )
+        result = runner.invoke(sn, ["release", "--export-only", "--staging", staging])
         assert result.exit_code == 0, result.output
         assert "Export complete" in result.output
 
     @patch(MOCK_TARGET)
-    def test_default_min_score(self, mock_export):
+    def test_default_min_score(self, mock_export, staging):
         mock_export.return_value = _success_report()
         runner = CliRunner()
-        runner.invoke(sn, ["release", "--export-only", "--staging", "/tmp/stg"])
+        runner.invoke(sn, ["release", "--export-only", "--staging", staging])
         _, kwargs = mock_export.call_args
         assert kwargs["min_score"] == 0.65
 
     @patch(MOCK_TARGET)
-    def test_custom_min_score(self, mock_export):
+    def test_custom_min_score(self, mock_export, staging):
         mock_export.return_value = _success_report()
         runner = CliRunner()
         runner.invoke(
             sn,
-            ["release", "--export-only", "--staging", "/tmp/stg", "--min-score", "0.8"],
+            ["release", "--export-only", "--staging", staging, "--min-score", "0.8"],
         )
         _, kwargs = mock_export.call_args
         assert kwargs["min_score"] == 0.8
 
     @patch(MOCK_TARGET)
-    def test_domain_forwarded(self, mock_export):
+    def test_domain_forwarded(self, mock_export, staging):
         mock_export.return_value = _success_report()
         runner = CliRunner()
         runner.invoke(
@@ -118,7 +123,7 @@ class TestExportSuccess:
                 "release",
                 "--export-only",
                 "--staging",
-                "/tmp/stg",
+                staging,
                 "--domain",
                 "equilibrium",
             ],
@@ -127,18 +132,18 @@ class TestExportSuccess:
         assert kwargs["domain"] == "equilibrium"
 
     @patch(MOCK_TARGET)
-    def test_gate_only_forwarded(self, mock_export):
+    def test_gate_only_forwarded(self, mock_export, staging):
         mock_export.return_value = _success_report()
         runner = CliRunner()
         result = runner.invoke(
-            sn, ["release", "--export-only", "--staging", "/tmp/stg", "--gate-only"]
+            sn, ["release", "--export-only", "--staging", staging, "--gate-only"]
         )
         assert result.exit_code == 0
         _, kwargs = mock_export.call_args
         assert kwargs["gate_only"] is True
 
     @patch(MOCK_TARGET)
-    def test_include_unreviewed_forwarded(self, mock_export):
+    def test_include_unreviewed_forwarded(self, mock_export, staging):
         mock_export.return_value = _success_report()
         runner = CliRunner()
         runner.invoke(
@@ -147,7 +152,7 @@ class TestExportSuccess:
                 "release",
                 "--export-only",
                 "--staging",
-                "/tmp/stg",
+                staging,
                 "--include-unreviewed",
             ],
         )
@@ -155,18 +160,18 @@ class TestExportSuccess:
         assert kwargs["include_unreviewed"] is True
 
     @patch(MOCK_TARGET)
-    def test_gate_scope_forwarded(self, mock_export):
+    def test_gate_scope_forwarded(self, mock_export, staging):
         mock_export.return_value = _success_report()
         runner = CliRunner()
         runner.invoke(
             sn,
-            ["release", "--export-only", "--staging", "/tmp/stg", "--gate-scope", "b"],
+            ["release", "--export-only", "--staging", staging, "--gate-scope", "b"],
         )
         _, kwargs = mock_export.call_args
         assert kwargs["gate_scope"] == "b"
 
     @patch(MOCK_TARGET)
-    def test_override_edits_forwarded_as_list(self, mock_export):
+    def test_override_edits_forwarded_as_list(self, mock_export, staging):
         mock_export.return_value = _success_report()
         runner = CliRunner()
         runner.invoke(
@@ -175,7 +180,7 @@ class TestExportSuccess:
                 "release",
                 "--export-only",
                 "--staging",
-                "/tmp/stg",
+                staging,
                 "--override-edits",
                 "foo",
                 "--override-edits",
@@ -186,10 +191,10 @@ class TestExportSuccess:
         assert kwargs["override_edits"] == ["foo", "bar"]
 
     @patch(MOCK_TARGET)
-    def test_override_edits_none_when_not_provided(self, mock_export):
+    def test_override_edits_none_when_not_provided(self, mock_export, staging):
         mock_export.return_value = _success_report()
         runner = CliRunner()
-        runner.invoke(sn, ["release", "--export-only", "--staging", "/tmp/stg"])
+        runner.invoke(sn, ["release", "--export-only", "--staging", staging])
         _, kwargs = mock_export.call_args
         assert kwargs["override_edits"] is None
 
@@ -207,21 +212,17 @@ class TestExportGateFailure:
     """Gate failures should exit 1."""
 
     @patch(MOCK_TARGET)
-    def test_exit_one_on_gate_failure(self, mock_export):
+    def test_exit_one_on_gate_failure(self, mock_export, staging):
         mock_export.return_value = _failing_report()
         runner = CliRunner()
-        result = runner.invoke(
-            sn, ["release", "--export-only", "--staging", "/tmp/stg"]
-        )
+        result = runner.invoke(sn, ["release", "--export-only", "--staging", staging])
         assert result.exit_code == 1
 
     @patch(MOCK_TARGET)
-    def test_failure_message(self, mock_export):
+    def test_failure_message(self, mock_export, staging):
         mock_export.return_value = _failing_report()
         runner = CliRunner()
-        result = runner.invoke(
-            sn, ["release", "--export-only", "--staging", "/tmp/stg"]
-        )
+        result = runner.invoke(sn, ["release", "--export-only", "--staging", staging])
         assert "gate failure" in result.output.lower() or "FAIL" in result.output
 
 
@@ -229,11 +230,9 @@ class TestExportPreconditionError:
     """FileExistsError maps to exit 2."""
 
     @patch(MOCK_TARGET, side_effect=FileExistsError("staging dir not empty"))
-    def test_exit_two_on_file_exists(self, mock_export):
+    def test_exit_two_on_file_exists(self, mock_export, staging):
         runner = CliRunner()
-        result = runner.invoke(
-            sn, ["release", "--export-only", "--staging", "/tmp/stg"]
-        )
+        result = runner.invoke(sn, ["release", "--export-only", "--staging", staging])
         assert result.exit_code == 2
         assert "Precondition" in result.output or "--force" in result.output
 
@@ -242,11 +241,9 @@ class TestExportInternalError:
     """Unexpected errors map to exit 3."""
 
     @patch(MOCK_TARGET, side_effect=RuntimeError("kaboom"))
-    def test_exit_three_on_internal(self, mock_export):
+    def test_exit_three_on_internal(self, mock_export, staging):
         runner = CliRunner()
-        result = runner.invoke(
-            sn, ["release", "--export-only", "--staging", "/tmp/stg"]
-        )
+        result = runner.invoke(sn, ["release", "--export-only", "--staging", staging])
         assert result.exit_code == 3
         assert "kaboom" in result.output
 
@@ -255,21 +252,17 @@ class TestExportSummaryOutput:
     """Summary table renders correct metrics."""
 
     @patch(MOCK_TARGET)
-    def test_exported_count_in_output(self, mock_export):
+    def test_exported_count_in_output(self, mock_export, staging):
         mock_export.return_value = _success_report(exported_count=42)
         runner = CliRunner()
-        result = runner.invoke(
-            sn, ["release", "--export-only", "--staging", "/tmp/stg"]
-        )
+        result = runner.invoke(sn, ["release", "--export-only", "--staging", staging])
         assert "42" in result.output
 
     @patch(MOCK_TARGET)
-    def test_gate_results_in_output(self, mock_export):
+    def test_gate_results_in_output(self, mock_export, staging):
         mock_export.return_value = _success_report()
         runner = CliRunner()
-        result = runner.invoke(
-            sn, ["release", "--export-only", "--staging", "/tmp/stg"]
-        )
+        result = runner.invoke(sn, ["release", "--export-only", "--staging", staging])
         assert "Gate Results" in result.output or "PASS" in result.output
 
 

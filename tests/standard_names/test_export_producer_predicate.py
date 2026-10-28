@@ -25,6 +25,7 @@ from contextlib import ExitStack
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
 import yaml
 
 from imas_codex.standard_names.export import (
@@ -323,3 +324,9 @@ def test_population_query_projects_live_child_evidence() -> None:
     assert "MATCH (child:StandardName)-[:HAS_PARENT]->(sn)" in cypher
     for stage in _RETIRED_CHILD_STAGES:
         assert f"'{stage}'" in cypher
+
+
+@pytest.fixture(autouse=True)
+def _pin_export_provenance(pinned_export_provenance):
+    """Drive this module's exports with archive provenance pinned."""
+    return pinned_export_provenance

@@ -290,3 +290,9 @@ def test_the_cut_reads_a_chain_reaching_exactly_the_bound_without_refusing(
         for record in report.source_disposition_records
     }
     assert records == {_DECLARED_WAIVED: "waived"}
+
+
+@pytest.fixture(autouse=True)
+def _pin_export_provenance(pinned_export_provenance):
+    """Drive this module's exports with archive provenance pinned."""
+    return pinned_export_provenance

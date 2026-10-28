@@ -7,6 +7,7 @@ from contextlib import ExitStack
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
 import yaml
 
 from imas_codex.standard_names.export import (
@@ -864,3 +865,9 @@ def test_manifest_source_projection_follows_superseded_identity() -> None:
             "non_nameable_reason": "",
         }
     ]
+
+
+@pytest.fixture(autouse=True)
+def _pin_export_provenance(pinned_export_provenance):
+    """Drive this module's exports with archive provenance pinned."""
+    return pinned_export_provenance
