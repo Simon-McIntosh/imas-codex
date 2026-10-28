@@ -1,0 +1,247 @@
+<section>
+  <h2 id="shc-locus-name-review">Both locus members held at name review: neither could be judged against a source it has none of</h2>
+
+  <p id="shc-locus-name-review-summary">
+    The two <code>electrostatic_potential</code> locus members that a docs-only harmonize cannot
+    reach were put through the pipeline's own scoped name review. Both were reviewed by the
+    locally served Jev router <code>typesafe/jev-1.13</code> and both were <strong>held</strong>:
+    <code>electrostatic_potential_at_outboard_midplane</code> went <code>reviewed</code> &rarr;
+    <code>drafted</code> &rarr; <code>exhausted</code> at a decision score of
+    <strong>0.7513</strong>, and <code>electrostatic_potential_at_wall</code> went
+    <code>reviewed</code> &rarr; <code>drafted</code> &rarr; <code>reviewed</code> at
+    <strong>0.5376</strong>; the 0.85 floor is unmet by both, and no successor identity was minted.
+    The spend was <strong>USD 0.000254 over two <code>LLMCost</code> rows</strong> against the
+    USD 2.00 ceiling, because the decider is a local router rather than a metered seat.
+  </p>
+
+  <p id="shc-locus-name-review-cause">
+    The refusal both reviews returned rests on a check that had nothing to read. Every failing
+    judgement cites <code>evidence: "source_paths=[]"</code>, and the graph confirms it: neither
+    name carries a single DD binding. A positive control in the same family shows the measurement
+    can see bindings when they exist &mdash; <code>electrostatic_potential_at_langmuir_probe_position</code>
+    and <code>floating_electrostatic_potential</code> each carry two <code>PRODUCED_NAME</code>
+    sources and both read <code>accepted</code>. So the absence is real and it is the reason: a
+    source-fidelity rubric asked of an unbound name answers &ldquo;a different object&rdquo;, and
+    the name cannot clear the floor however the quorum scores its grammar and convention.
+  </p>
+
+  <h3 id="shc-locus-name-review-before">State before the step</h3>
+  <p id="shc-locus-name-review-before-body">
+    Read with two bounded, indexed queries (<code>sn.id IN $ids</code>) against the live graph at
+    2026-10-28T08:51:46Z. Recorded in
+    <code>runs/r-20261028T084048678456-shc-locus-name-review/shc-locus-name-review-before.json</code>.
+  </p>
+  <table id="shc-locus-name-review-before-table">
+    <thead>
+      <tr><th>name</th><th>name_stage</th><th>docs_stage</th><th>score_name</th><th>refine_attempts / cap</th><th>name reviews</th><th>last reviewed</th><th>DD source bindings</th><th>open holds</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>electrostatic_potential_at_outboard_midplane</code></td>
+        <td>reviewed</td><td>pending</td><td>0.6125</td><td>3 / 3</td><td>3</td>
+        <td>2026-08-23T15:48:33Z</td><td>0</td><td>0</td>
+      </tr>
+      <tr>
+        <td><code>electrostatic_potential_at_wall</code></td>
+        <td>reviewed</td><td>accepted (0.8625)</td><td>0.825</td><td>1 / 3</td><td>3</td>
+        <td>2026-08-23T13:53:41Z</td><td>0</td><td>0</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p id="shc-locus-name-review-why">
+    <strong>Why each stopped at <code>reviewed</code>.</strong> The name stage is written by
+    <code>persist_reviewed_name</code> from one decision: <code>accepted</code> when the score
+    reaches <code>min_score</code>; <code>exhausted</code> when a below-threshold score meets a
+    spent rotation cap; <code>reviewed</code> otherwise, meaning the name waits for a refine
+    rotation. Both names sit below the 0.85 floor and neither has an accepted document, so neither
+    could have reached <code>accepted</code> at that review. The two then diverge:
+  </p>
+  <ul id="shc-locus-name-review-why-list">
+    <li id="shc-locus-name-review-why-midplane">
+      <code>electrostatic_potential_at_outboard_midplane</code> scored 0.6125 with the durable
+      attempt counter already at the cap of 3 (lineage depth reads 2), so the same predicate that
+      held it at <code>reviewed</code> also makes it unclaimable by either pool:
+      <code>REFINE_NAME_ELIGIBILITY_WHERE</code> requires <code>refine_attempts &lt; 3</code> and
+      <code>REVIEW_NAME_ELIGIBILITY_WHERE</code> requires either <code>drafted</code> or a drained
+      scope with a score at or above the floor. It was stranded by the counter crossing the cap
+      without a fresh stage decision.
+    </li>
+    <li id="shc-locus-name-review-why-wall">
+      <code>electrostatic_potential_at_wall</code> scored 0.825 with one rotation spent, so it stayed
+      genuinely refine-eligible, but nothing claimed it: the refine pool only runs when a
+      <code>sn run</code>, harmonize, or rescore scope reaches it, and a docs-only harmonize skips a
+      member whose <code>name_stage</code> is not <code>accepted</code>.
+    </li>
+  </ul>
+  <p id="shc-locus-name-review-history">
+    The refine history explains the empty binding set. <code>StandardNameChange</code> records from
+    2026-08-23 show both names arriving by <code>refine</code> from
+    <code>plasma_electrostatic_potential_at_midplane</code> and
+    <code>plasma_electrostatic_potential_at_first_wall</code>, each accompanied by a
+    <code>source_migration_manifest</code> whose own reason field carries
+    <code>"backing_ids":[],"backings":[]</code>. The successor inherited an empty backing set, so
+    the names have been unbound since the rename; the source-fidelity check has had nothing to
+    compare against at every review since.
+  </p>
+
+  <h3 id="shc-locus-name-review-quiet">Quiet-graph check</h3>
+  <p id="shc-locus-name-review-quiet-body">
+    Run before any write, at 2026-10-28T08:51:46Z. Both names read <code>claim_token</code> null,
+    <code>claimed_at</code> null, <code>drain_claim_scope_id</code> null,
+    <code>run_id</code> null and no open <code>ReviewHold</code>, so no writer held either.
+    <code>ps</code> over the account shows no <code>sn run|review|rescore|harmonize|edit</code>
+    process, and <code>squeue</code> shows only the services
+    (<code>codex-neo4j</code>, <code>codex-embed</code>, <code>ambix-router</code>,
+    <code>deepseek-v4-1-flash</code>) and this node's own <code>reckon-fleet</code> job. The last
+    name review on either name was 2026-08-23, sixty-six days before the step.
+  </p>
+
+  <h3 id="shc-locus-name-review-commands">The exact commands</h3>
+  <p id="shc-locus-name-review-commands-body">
+    The documented scope flags were tried first and measured inert for this state. Preview and run,
+    from the worktree, with the shared environment reused rather than materialised:
+  </p>
+  <pre id="shc-locus-name-review-cmd-preview"><code>UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH="$PWD" \
+  uv run --no-sync imas-codex sn run \
+    --name electrostatic_potential_at_outboard_midplane \
+    --name electrostatic_potential_at_wall \
+    --only review_name --skip-global-maintenance --dry-run</code></pre>
+  <p id="shc-locus-name-review-preview-result">
+    The preview resolved both names: <code>Exact-name dry run: 2 existing name(s) eligible; no graph
+    writes performed</code>. The real run of the same flags with <code>-c 0.10</code> then measured
+    the claim itself:
+    <code>pool=review_name processed=0 spent=$0.0000</code> with
+    <code>consecutive_empty_claims=8</code>. Eligible in the scope but unclaimable by the pool:
+    <code>review_name</code> takes <code>name_stage='drafted'</code>, and a <code>reviewed</code>
+    name only when a drain scope carries a score at or above the floor, which neither does. Log:
+    <code>sn-run-review-name-scoped.log</code>.
+  </p>
+  <p id="shc-locus-name-review-commands-rescore">
+    The pipeline's own recovery entry point for exactly this state is <code>sn rescore</code>,
+    whose own help names it: &ldquo;a <code>reviewed</code> name whose score never cleared&rdquo;. It
+    stages the name to <code>drafted</code> under a fresh scope run id, revalidates it
+    deterministically, and then runs the same <code>sn run</code> pools scoped to that one id
+    (<code>rescore_name</code> &rarr; <code>_run_scoped_pipeline(skip_generate=True)</code>). Each
+    name was dry-run first, then run:
+  </p>
+  <pre id="shc-locus-name-review-cmd-rescore"><code>UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH="$PWD" \
+  uv run --no-sync imas-codex sn rescore electrostatic_potential_at_outboard_midplane -c 0.90
+UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH="$PWD" \
+  uv run --no-sync imas-codex sn rescore electrostatic_potential_at_wall -c 0.90</code></pre>
+  <p id="shc-locus-name-review-dryrun">
+    Both dry runs reported the intended transition and nothing else:
+    <code>would rescore electrostatic_potential_at_outboard_midplane (reviewed &rarr; drafted,
+    run_id=sn-rescore-20261028T085205Z)</code> and
+    <code>would rescore electrostatic_potential_at_wall (reviewed &rarr; drafted,
+    run_id=sn-rescore-20261028T085218Z)</code>.
+  </p>
+
+  <h3 id="shc-locus-name-review-after">State after the step</h3>
+  <table id="shc-locus-name-review-after-table">
+    <thead>
+      <tr><th>name</th><th>outcome</th><th>name_stage</th><th>decision score</th><th>name_stage before</th><th>refine_attempts</th><th>scope run id</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>electrostatic_potential_at_outboard_midplane</code></td>
+        <td>held &mdash; <code>exhausted</code></td>
+        <td>exhausted</td><td>0.7513</td><td>reviewed (0.6125)</td><td>3 / 3</td>
+        <td><code>sn-rescore-20261028T085435Z</code></td>
+      </tr>
+      <tr>
+        <td><code>electrostatic_potential_at_wall</code></td>
+        <td>held &mdash; <code>below threshold</code>, stays <code>reviewed</code></td>
+        <td>reviewed</td><td>0.5376</td><td>reviewed (0.825)</td><td>1 / 3</td>
+        <td><code>sn-rescore-20261028T085551Z</code></td>
+      </tr>
+    </tbody>
+  </table>
+  <p id="shc-locus-name-review-after-write">
+    Nothing else moved. A query for every <code>StandardName</code> updated since 08:40Z returns
+    exactly these two ids, and <code>StandardNameChange</code> since 08:40Z returns zero rows, so no
+    successor identity was minted by either review &mdash; the outcome is a hold for both. The
+    rescore that was to re-decide the name reproduced the same refusal instead, and for the midplane
+    member it closed the last rotation: the name is now <code>exhausted</code> and no pool can claim
+    it again.
+  </p>
+
+  <h3 id="shc-locus-name-review-reasons">The reasons, quoted</h3>
+  <p id="shc-locus-name-review-reasons-body">
+    Both new review rows are <code>cascade_route</code>, model <code>typesafe/jev-1.13</code>, and
+    both route to <code>refine</code>.
+  </p>
+  <table id="shc-locus-name-review-reasons-table">
+    <thead><tr><th>name</th><th>failing check</th><th>criterion</th><th>evidence as the judge received it</th><th>answer</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>electrostatic_potential_at_outboard_midplane</code></td>
+        <td><code>bound_to_wrong_object</code></td>
+        <td>Which object does the name denote, read against its bound source path?</td>
+        <td><code>source_paths=[]</code></td>
+        <td><code>a different object</code> at p=0.74 (confidence 0.61)</td>
+      </tr>
+      <tr>
+        <td><code>electrostatic_potential_at_outboard_midplane</code></td>
+        <td><code>dropped_distinguishing_axis</code></td>
+        <td>Does the name drop a distinguishing axis the source states for the observable?</td>
+        <td><code>physical_base='electrostatic_potential'; position='outboard_midplane'; source_paths=[]</code></td>
+        <td>p=0.60</td>
+      </tr>
+      <tr>
+        <td><code>electrostatic_potential_at_wall</code></td>
+        <td><code>bound_to_wrong_object</code></td>
+        <td>Which object does the name denote, read against its bound source path?</td>
+        <td><code>source_paths=[]</code></td>
+        <td><code>a different object</code> at p=0.65 (confidence 0.48)</td>
+      </tr>
+    </tbody>
+  </table>
+  <p id="shc-locus-name-review-rubric">
+    The rubric totals are 0.7354 and 0.8169 with every dimension between 13.97 and 16.45 out of 20
+    &mdash; the grammar, convention, semantic and completeness axes all sit at about
+    three-quarters, which is what a well-formed, correctly spelled name with no source to bind to
+    scores. The decision scores of 0.7513 and 0.5376 come from the cascade route, not the rubric
+    total, so the refusal is driven by the source-fidelity check rather than by the shape of the
+    name.
+  </p>
+
+  <h3 id="shc-locus-name-review-spend">Spend, from the LLMCost rows</h3>
+  <p id="shc-locus-name-review-spend-body">
+    Two <code>LLMCost</code> rows were written, one per review, and they are the whole spend:
+  </p>
+  <table id="shc-locus-name-review-spend-table">
+    <thead><tr><th>run_id</th><th>phase</th><th>model</th><th>cost_usd</th><th>at (UTC)</th><th>standard_name_ids</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>6d50e916-6edc-41f0-b0ab-7c5543c2e6b9</code></td><td>review_name</td>
+        <td><code>typesafe/jev-1.13</code></td><td>0.000122</td><td>08:54:45.520580</td>
+        <td><code>electrostatic_potential_at_outboard_midplane</code></td>
+      </tr>
+      <tr>
+        <td><code>fc88b6ab-e3d3-4464-8168-59506c318231</code></td><td>review_name</td>
+        <td><code>typesafe/jev-1.13</code></td><td>0.000132</td><td>08:56:01.612145</td>
+        <td><code>electrostatic_potential_at_wall</code></td>
+      </tr>
+    </tbody>
+  </table>
+  <p id="shc-locus-name-review-spend-why">
+    <strong>Total: USD 0.000254</strong>, against a USD 2.00 ceiling and a per-name budget of
+    USD 0.90. The ceiling was never binding and most of the authorised budget was not used because
+    the decider is the locally served Jev router rather than a metered seat: the two rows are the
+    <em>complete</em> record: the whole graph holds no <code>LLMCost</code> row with a later
+    <code>llm_at</code> than the second, and the CLI's own <code>Inline review cost: $0.0001</code>
+    per name is these rows rounded to four decimals. The rows key on an internal review run id, not
+    on the <code>sn-rescore-…</code> scope id, which is why a lookup by scope id returns nothing and
+    why the cost was read by <code>llm_at</code> window instead.
+  </p>
+
+  <h3 id="shc-locus-name-review-not-done">What this node did not do</h3>
+  <p id="shc-locus-name-review-not-done-body">
+    The family was <strong>not</strong> re-applied. Neither name reached <code>accepted</code>, so a
+    harmonize still has nothing to stamp for them, and re-applying before the all-bindings veto fix
+    would re-run the family against the same two causes. Repairing the missing DD binding and
+    re-applying the family once, with both causes removed, belongs to
+    <code>sib-veto-all-bindings</code>.
+  </p>
+</section>
