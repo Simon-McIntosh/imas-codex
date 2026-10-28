@@ -1,0 +1,88 @@
+<section data-reckon="evidence-fragment" data-node="sib-red-transaction-doubles" data-plan="sn-integrity-backlog" data-section="s41">
+<h2 id="sib-red-transaction-doubles-title">The transaction-shaped double, and the ids that were reading the wrong surface</h2>
+<p>These suites failed for one reason: each persistence path runs its compare-and-set statement inside
+<code>gc.session().begin_transaction()</code>, so a double that answered only <code>gc.query</code>
+recorded nothing and returned nothing for the statement under test. The same transaction also issues
+its hold scan, its link scan and its source-invariant read between the compare-and-set pair, which
+misaligned every positional row queue. Both defects sit in the doubles, not in the stages or the
+claim tokens: a double given a session and keyed answers passes the confirmation the brief asked for
+on the eighteen <code>test_review_docs_stages.py</code> ids unchanged.</p>
+
+<h3 id="sib-red-transaction-doubles-double">One double, one statement log</h3>
+<p><code>tests/standard_names/graph_transaction_doubles.py</code> adds
+<code>transaction_double(rows=None, *, by_statement=None)</code>. It extends the existing
+<code>RecordingGraphClient</code>; <code>query</code> is a <code>MagicMock</code>, and the session
+transaction's <code>run</code> forwards to the same <code>query</code>, so
+<code>double.query.call_args_list</code> carries every statement the code sent, in order, whichever
+surface it used. <code>by_statement</code> maps a marker substring to the rows that statement
+answers, so a test locates the statement it asserts on by shape rather than by call index, which is
+the difference between a suite that survives a new statement in the transaction and one that reads
+the neighbouring answer.</p>
+
+<h3 id="sib-red-transaction-doubles-arms">The two gate arms</h3>
+<table id="sib-red-transaction-doubles-gate">
+<thead><tr><th>arm</th><th>tree</th><th>outcome</th></tr></thead>
+<tbody>
+<tr><td>main</td><td><code>git archive</code> of <code>966f3d965</code> under <code>$TMPDIR</code>, own <code>--basetemp</code></td><td><strong>70 failed</strong>, 8454 passed, 11 skipped (EXIT=1)</td></tr>
+<tr><td>head</td><td><code>git archive</code> of the node head, own <code>--basetemp</code></td><td><strong>33 failed</strong>, 8491 passed, 11 skipped (EXIT=1)</td></tr>
+</tbody></table>
+<p>Both arms ran <code>pytest TREE/tests/standard_names/ -p no:cacheprovider --no-header -q -n 8
+--basetemp=ARM-basetemp</code> with the project environment and PYTHONPATH set to the tree; each
+was logged whole, with its literal command at the head and its exit code as the final line. The
+head failure set is a strict subset of the main set: 33 of 70, and <strong>zero ids are added</strong>.</p>
+
+<h3 id="sib-red-transaction-doubles-ids">The ids, and what each needed</h3>
+<p>"Double" means the test's own client fake was replaced by the shared transaction double and its
+assertions were left intact. "Re-pin" means the test asserted something the code has deliberately
+stopped doing, so the assertion now pins the behaviour that replaced it, citing the commit that
+decided it. No assertion was removed to make a test pass.</p>
+<table id="sib-red-transaction-doubles-id-table">
+<thead><tr><th>id</th><th>fix kind</th><th>evidence</th></tr></thead>
+<tbody>
+<tr id="sib-red-transaction-doubles-id-1"><td><code>test_atomic_refined_name_persistence.py::test_event_write_failure_rolls_back_graph_mutation</code></td><td>double</td><td>the transaction answers the in-transaction source invariant (7b7b9bd08, c821afa47)</td></tr>
+<tr id="sib-red-transaction-doubles-id-2"><td><code>test_atomic_refined_name_persistence.py::test_full_source_set_and_ledger_commit_once</code></td><td>double</td><td>same (7b7b9bd08, c821afa47)</td></tr>
+<tr id="sib-red-transaction-doubles-id-3"><td><code>test_atomic_refined_name_persistence.py::test_open_edit_propagation_uses_only_the_atomic_transaction</code></td><td>double</td><td>same (7b7b9bd08, c821afa47)</td></tr>
+<tr id="sib-red-transaction-doubles-id-4"><td><code>test_atomic_refined_name_persistence.py::test_source_less_rename_still_records_human_edit</code></td><td>double</td><td>same (7b7b9bd08, c821afa47)</td></tr>
+<tr id="sib-red-transaction-doubles-id-5"><td><code>test_atomic_refined_name_persistence.py::test_transient_retry_rolls_back_first_event_and_commits_one</code></td><td>double</td><td>same (7b7b9bd08, c821afa47)</td></tr>
+<tr id="sib-red-transaction-doubles-id-6"><td><code>test_docs_context_injection.py::test_source_owners_are_not_automatic_prose_family_member</code></td><td>re-pin</td><td>the family query now reports <code>has_dd_source</code> through an EXISTS predicate over a member the grammar axes already admitted, so the membership clause still names <code>StandardName</code> alone; the assertion checks that clause (abd72b0cf)</td></tr>
+<tr id="sib-red-transaction-doubles-id-7"><td><code>test_docs_supersede_safety.py::TestPersistGuardsNameStage::test_persist_generated_docs_cypher_contains_name_stage_guard</code></td><td>double</td><td>answer keyed on the persist statement, so the source-stamp read no longer consumes it (c821afa47)</td></tr>
+<tr id="sib-red-transaction-doubles-id-8"><td><code>test_embed_worker.py::test_persist_generated_docs_clears_hash</code></td><td>double</td><td>answer keyed on the persist statement (89d8381e7)</td></tr>
+<tr id="sib-red-transaction-doubles-id-9"><td><code>test_error_siblings.py::TestReconcileErrorSiblings::test_reconcile_orphans_error_siblings</code></td><td>re-pin</td><td>the scalar <code>quarantine_reason</code> was retired for <code>validation_issues</code> (cde021cf0); the test pins the list write and the carried reason (7f7d8f6d7)</td></tr>
+<tr id="sib-red-transaction-doubles-id-10"><td><code>test_frozen_stage_pool_guard.py::test_review_persistence_and_aggregates_skip_frozen_names[approved]</code></td><td>double</td><td>the review graph had no session at all; it delegates to the shared double, keyed on the frozen-stage statement (7f7d8f6d7)</td></tr>
+<tr id="sib-red-transaction-doubles-id-11"><td><code>test_frozen_stage_pool_guard.py::test_review_persistence_and_aggregates_skip_frozen_names[contested]</code></td><td>double</td><td>same (7f7d8f6d7)</td></tr>
+<tr id="sib-red-transaction-doubles-id-12"><td><code>test_generate_docs.py::test_persist_does_not_change_name_fields</code></td><td>double</td><td>answer keyed on the persist statement (89d8381e7)</td></tr>
+<tr id="sib-red-transaction-doubles-id-13"><td><code>test_generate_docs.py::test_persist_writes_docs_fields</code></td><td>double</td><td>same (89d8381e7)</td></tr>
+<tr id="sib-red-transaction-doubles-id-14"><td><code>test_metadata_invariants.py::TestComposeWorkerInjection::test_physics_domain_injected_from_source</code></td><td>re-pin</td><td>compose stopped deriving a domain and routes every write through the one domain writer (ccb6f5f50); the scan now refuses an LLM-side derivation and requires the writer (abd72b0cf)</td></tr>
+<tr id="sib-red-transaction-doubles-id-15"><td><code>test_rename_carries_documentation.py::TestExplicitMeaningAuthority::test_persistence_records_a_distinct_content_addressed_receipt</code></td><td>double</td><td>one statement log on the transaction recorder, and an answer for the domain-state read (c821afa47)</td></tr>
+<tr id="sib-red-transaction-doubles-id-16"><td><code>test_review_docs_stages.py::TestAcceptOverridesChainLengthAtCap::test_accept_overrides_chain_length_at_cap</code></td><td>double</td><td>shared double, answers keyed on the readback and write statements (7b7b9bd08)</td></tr>
+<tr id="sib-red-transaction-doubles-id-17"><td><code>test_review_docs_stages.py::TestPersistDoesNotChangeNameFields::test_persist_does_not_change_name_fields</code></td><td>double</td><td>same (7b7b9bd08)</td></tr>
+<tr id="sib-red-transaction-doubles-id-18"><td><code>test_review_docs_stages.py::TestPersistReviewedDocsConcurrentWinNoOp::test_concurrent_transition_is_noop</code></td><td>double</td><td>same (7b7b9bd08)</td></tr>
+<tr id="sib-red-transaction-doubles-id-19"><td><code>test_review_docs_stages.py::TestPersistToAccepted::test_persist_to_accepted</code></td><td>double + re-pin</td><td>shared double; the assertion that the persist carries a <code>resolution_method</code> parameter was dropped because the docs resolution mirror it read was deliberately removed by 23c4b55a2 (7b7b9bd08)</td></tr>
+<tr id="sib-red-transaction-doubles-id-20"><td><code>test_review_docs_stages.py::TestPersistToExhaustedAtCap::test_persist_to_exhausted_post_escalator</code></td><td>double</td><td>shared double (7b7b9bd08)</td></tr>
+<tr id="sib-red-transaction-doubles-id-21"><td><code>test_review_docs_stages.py::TestPersistToExhaustedAtCap::test_persist_to_reviewed_at_escalator_attempt</code></td><td>double</td><td>shared double (7b7b9bd08)</td></tr>
+<tr id="sib-red-transaction-doubles-id-22"><td><code>test_review_docs_stages.py::TestPersistToReviewedBelowCap::test_persist_to_reviewed_below_cap</code></td><td>double</td><td>shared double (7b7b9bd08)</td></tr>
+<tr id="sib-red-transaction-doubles-id-23"><td><code>test_review_docs_stages.py::TestPersistToReviewedLowScore::test_persist_to_reviewed_low_score</code></td><td>double</td><td>shared double (7b7b9bd08)</td></tr>
+<tr id="sib-red-transaction-doubles-id-24"><td><code>test_review_docs_stages.py::TestPersistTokenMismatchNoOp::test_persist_token_mismatch_no_op</code></td><td>double</td><td>shared double (7b7b9bd08)</td></tr>
+<tr id="sib-red-transaction-doubles-id-25"><td><code>test_review_docs_stages.py::TestPersistWritesReviewerDocsFields::test_persist_writes_reviewer_docs_fields</code></td><td>double</td><td>shared double (7b7b9bd08)</td></tr>
+<tr id="sib-red-transaction-doubles-id-26"><td><code>test_review_docs_stages.py::test_docs_acceptance_requires_canonical_quorum_authority[None-None-reviewed-True]</code></td><td>double</td><td>shared double (7b7b9bd08)</td></tr>
+<tr id="sib-red-transaction-doubles-id-27"><td><code>test_review_docs_stages.py::test_docs_acceptance_requires_canonical_quorum_authority[authoritative_escalation-3-accepted-False]</code></td><td>double</td><td>shared double (7b7b9bd08)</td></tr>
+<tr id="sib-red-transaction-doubles-id-28"><td><code>test_review_docs_stages.py::test_docs_acceptance_requires_canonical_quorum_authority[max_cycles_reached-2-accepted-False]</code></td><td>double</td><td>shared double (7b7b9bd08)</td></tr>
+<tr id="sib-red-transaction-doubles-id-29"><td><code>test_review_docs_stages.py::test_docs_acceptance_requires_canonical_quorum_authority[max_cycles_reached-3-reviewed-True]</code></td><td>double</td><td>shared double (7b7b9bd08)</td></tr>
+<tr id="sib-red-transaction-doubles-id-30"><td><code>test_review_docs_stages.py::test_docs_acceptance_requires_canonical_quorum_authority[quorum_consensus-3-accepted-False]</code></td><td>double</td><td>shared double (7b7b9bd08)</td></tr>
+<tr id="sib-red-transaction-doubles-id-31"><td><code>test_review_docs_stages.py::test_docs_acceptance_requires_canonical_quorum_authority[single_review-3-reviewed-True]</code></td><td>double</td><td>shared double (7b7b9bd08)</td></tr>
+<tr id="sib-red-transaction-doubles-id-32"><td><code>test_review_docs_stages.py::test_fresh_docs_quorum_clears_a_prior_shortfall</code></td><td>double</td><td>shared double (7b7b9bd08)</td></tr>
+<tr id="sib-red-transaction-doubles-id-33"><td><code>test_review_docs_stages.py::test_missing_authority_preserves_exhaustion_but_blocks_refinement</code></td><td>double</td><td>shared double (7b7b9bd08)</td></tr>
+<tr id="sib-red-transaction-doubles-id-34"><td><code>test_review_name_stages.py::TestPersistWritesReviewNode::test_persist_reviewed_docs_calls_write_reviews</code></td><td>double</td><td>shared double, answers keyed on the readback and write statements (89d8381e7)</td></tr>
+<tr id="sib-red-transaction-doubles-id-35"><td><code>test_reviewer_profiles.py::test_configured_default_profile_uses_blind_pair_and_disagreement_breaker</code></td><td>re-pin</td><td>the live default profile's second seat moved to its ruled GPT-6 model (ab4af6700); the expectation follows the configuration (7f7d8f6d7)</td></tr>
+<tr id="sib-red-transaction-doubles-id-36"><td><code>test_skeleton_placeholder_cleanup.py::test_edge_writer_reports_every_standard_name_merge_endpoint</code></td><td>re-pin</td><td>successor links are written by the signed supersede mutation, so a composed name's successor field authorizes no endpoint (64905bbc1); the test now requires that absence beside the endpoint set (7f7d8f6d7)</td></tr>
+<tr id="sib-red-transaction-doubles-id-37"><td><code>test_sn_edit_kind.py::test_rename_derives_successor_kind_instead_of_copying_predecessor</code></td><td>double</td><td>the rename path issues the in-transaction source invariant; the fake answers it (7f7d8f6d7)</td></tr>
+<tr id="sib-red-transaction-doubles-id-38"><td><code>test_snrun_async_counters.py::TestReviewDocsBumpsReviewed::test_review_docs_bumps_reviewed</code></td><td><strong>NOT FIXED</strong></td><td>still failing at head: its positional row queue is misaligned by the extra in-transaction statements, and keying the answer on the readback and write statements did not restore the recorded <code>names_reviewed</code> bump, so the counting surface still needs tracing</td></tr>
+</tbody></table>
+
+<h3 id="sib-red-transaction-doubles-negative-control">Negative control</h3>
+<p>The declared control was applied verbatim: run the repaired ids against main, and each must fail
+there. The same 38 ids were run against the main tree at <code>966f3d965</code> and produced
+<strong>38 failed, EXIT=1</strong>, and the same invocation against the head tree produced
+<strong>37 passed, 1 failed</strong>. The head failure set is a strict subset of the main set, so the
+ids were genuinely red at main and the repair, not the tree, is what turned them green.</p>
+</section>
