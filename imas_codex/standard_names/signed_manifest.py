@@ -4110,7 +4110,7 @@ def _verify_postconditions(
             UNWIND $target_ids AS target_id
             MATCH (target:StandardName {id: target_id})
             OPTIONAL MATCH (live:StandardNameSource)-[:PRODUCED_NAME]->(target)
-            WHERE live.status <> 'stale'
+            WHERE coalesce(live.status, '') <> 'stale'
             WITH target_id, target, count(DISTINCT live) AS live_producers
             OPTIONAL MATCH (child:StandardName)-[:HAS_PARENT]->(target)
             WHERE coalesce(child.name_stage, '') <> 'superseded'
@@ -4608,7 +4608,7 @@ def _apply_ordinary_source_migration(query: _Query, action: dict[str, Any]) -> i
         WHERE elementId(source) = $source_element_id
           AND elementId(old) = $old_target_element_id
           AND elementId(new) = $new_target_element_id
-          AND source.status <> 'stale'
+          AND coalesce(source.status, '') <> 'stale'
           AND source.claimed_at IS NULL
           AND source.claim_token IS NULL
           AND source.produced_sn_id = old.id
@@ -5841,7 +5841,7 @@ def _apply_catalog_source_dispositions(
                     MATCH (target:StandardName {id: target_id})
                     OPTIONAL MATCH (remaining:StandardNameSource)
                       -[:PRODUCED_NAME]->(target)
-                    WHERE remaining.status <> 'stale'
+                    WHERE coalesce(remaining.status, '') <> 'stale'
                     WITH target_id, target, count(remaining) AS incoming_bindings
                     OPTIONAL MATCH (child:StandardName)-[:HAS_PARENT]->(target)
                     WHERE child.name_stage <> 'superseded'

@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-null-status-manifest">
+<title>Signed manifest status predicates state their null handling</title>
+</head>
+<body>
+<main>
+
+<h1 id="sib-null-status-manifest-title">Every status exclusion in the signed manifest now states what a null status means</h1>
+
+<h2 id="sib-null-status-manifest-header">Header</h2>
+<table id="sib-null-status-manifest-header-table">
+<tbody>
+<tr><th>Base revision</th><td><code>5c94bae36cca434169ab47b87ded652f6e203024</code></td></tr>
+<tr><th>Worktree</th><td><code>/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-null-status-manifest</code></td></tr>
+<tr><th>Posture</th><td>Three product-source predicates changed; disposable Neo4j only, no live-graph write and no LLM call.</td></tr>
+<tr><th>Reference</th><td><code>ffad2fd46</code> (merge): <code>source_invariant.py</code> coalesced the same predicate, so a status-less source counts as a live producer.</td></tr>
+<tr><th>New tests</th><td><code>tests/standard_names/test_null_status_predicates_manifest.py</code></td></tr>
+</tbody>
+</table>
+
+<h2 id="sib-null-status-manifest-why">Why the predicate was wrong</h2>
+<p>In Cypher, <code>x.status &lt;&gt; 'stale'</code> evaluates to null when
+<code>x.status</code> is null, and a null filter drops the row. A
+<code>StandardNameSource</code> that carries no status therefore vanished from every
+count that asked whether a source was live: the query answered "no producer here"
+about a source the rest of the module treats as a producer. The module already
+evaluates this test in Python in the disposition preview
+(<code>status != "stale"</code> &rarr; a null status is live), so the Cypher filter
+disagreed with the preview it was verifying.</p>
+
+<h2 id="sib-null-status-manifest-sites">The three sites, and what a null status means</h2>
+<table id="sib-null-status-manifest-sites-table">
+<thead><tr><th>Site</th><th>Predicate</th><th>Decision</th><th>Reason</th></tr></thead>
+<tbody>
+<tr>
+<td><code>signed_manifest.py:4113</code> — stale-source detach postcondition
+(<code>_verify_postconditions</code>)</td>
+<td><code>coalesce(live.status, '') &lt;&gt; 'stale'</code></td>
+<td>Null means <em>not the excluded value</em>: a live producer.</td>
+<td>This is the postcondition that asserts a detached target kept producing authority.
+A status-less producer is exactly the authority the detach was told to preserve; dropping
+it from the count makes a sound detach refuse as
+<code>"stale-source target authority was stripped"</code>.</td>
+</tr>
+<tr>
+<td><code>signed_manifest.py:4611</code> — ordinary source migration compare-and-set
+(<code>_apply_ordinary_source_migration</code>)</td>
+<td><code>coalesce(source.status, '') &lt;&gt; 'stale'</code></td>
+<td>Null means <em>not the excluded value</em>: the signed source may be rewritten.</td>
+<td>The guard's purpose is to refuse a source that was retired from authority; the row's
+identity is already pinned by element id, scalar, single binding and an unclaimed lease.
+<code>stale</code> is a retirement marker, not a "do not touch" marker for unclassified
+rows, so a null status must not silently block a signed migration.</td>
+</tr>
+<tr>
+<td><code>signed_manifest.py:5844</code> — removed-target live-authority postcondition
+(<code>_apply_catalog_source_dispositions</code>)</td>
+<td><code>coalesce(remaining.status, '') &lt;&gt; 'stale'</code></td>
+<td>Null means <em>not the excluded value</em>: a live incoming binding.</td>
+<td>The same preview evaluates this in Python, where a null status counts as live; the
+Cypher postcondition counted it as absent and raised
+<code>"removed target lost its final live authority"</code> on a graph the preview had
+just admitted. Coalescing makes the postcondition agree with the admission it verifies.</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="sib-null-status-manifest-tests">Tests, and the refusal they cover</h2>
+<ul>
+<li><code>test_stale_detach_postcondition_counts_a_status_less_producer</code> drives
+<code>_verify_postconditions</code> over a target whose only producer has no status, and
+asserts <code>live_producers == 1</code>.</li>
+<li><code>test_ordinary_source_migration_admits_a_status_less_source</code> drives
+<code>_apply_ordinary_source_migration</code> and asserts the binding, scalar and
+projection all moved to the new target.</li>
+<li><code>test_catalog_source_disposition_keeps_status_less_authority</code> drives the
+public <code>apply_adjudicated_source_dispositions</code> over a removed target kept
+alive only by a status-less producer, and asserts the apply completes.</li>
+<li><code>test_lifecycleless_stub_cohort_change_refuses_before_deletion</code> reaches the
+previously untested <code>LifecyclelessStubConflict("stub placeholder cohort changed
+before deletion")</code> by mutating a stub inside the apply transaction, after the
+manifest hash is checked and before the placeholder stamp. It asserts the refusal and
+that the transaction rolled back, so nothing was half-deleted.</li>
+</ul>
+
+<h2 id="sib-null-status-manifest-negative-control">Negative control</h2>
+<p>The three null-status tests were run against main's <code>signed_manifest.py</code>
+from an archive of <code>5c94bae36</code>; all three fail there and all three pass at
+head. The refusal test passes on both, since it adds coverage of behaviour that was
+already correct. Failure ids on main:
+<code>test_catalog_source_disposition_keeps_status_less_authority</code>,
+<code>test_ordinary_source_migration_admits_a_status_less_source</code>,
+<code>test_stale_detach_postcondition_counts_a_status_less_producer</code>.
+Logs are in the run directory; the negative-control log's last line is
+<code>EXIT=1</code>.</p>
+
+<h2 id="sib-null-status-manifest-gate">Gate</h2>
+<table id="sib-null-status-manifest-gate-table">
+<thead><tr><th>Arm</th><th>Command</th><th>Main</th><th>Head</th></tr></thead>
+<tbody>
+<tr>
+<td>unit suite</td>
+<td><code>pytest -n 8 tests/standard_names/</code> (default markers)</td>
+<td>101 failed, 8409 passed</td>
+<td>70 failed, 8444 passed; <strong>0 added failure ids</strong></td>
+</tr>
+<tr>
+<td>graph tier</td>
+<td><code>pytest -m graph tests/graph/test_cypher_property_check.py</code> plus the 29
+<code>tests/standard_names</code> files that import <code>signed_manifest</code></td>
+<td>3 failed (the new null-status tests), 48 passed</td>
+<td>51 passed; <strong>0 added failure ids</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The 101 and 70 failures in the unit arm are pre-existing on this host and are the same
+id set at both arms (the head log's set is a strict subset); the delta is what the gate
+reads.</p>
+
+</main>
+</body>
+</html>
