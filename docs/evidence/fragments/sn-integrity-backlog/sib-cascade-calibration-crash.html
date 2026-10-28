@@ -126,7 +126,8 @@ EXIT=1
 <tbody>
 <tr><td>five solo runs, before the fix</td><td>3 passed (167 s, 168 s, 160 s), 2 SIGSEGV (75 s, 78 s)</td></tr>
 <tr><td>one solo run, <code>-p no:faulthandler</code></td><td>1 passed, 152.07 s, <code>EXIT=0</code></td></tr>
-<tr><td>solo runs at head, after the fix (commit <code>2a3539fbc</code>, the head the arm ran at; <code>logs/solo-head-1.log</code> … <code>-5.log</code>)</td><td>five of five passed — 166 s, 183 s, 165 s, 172 s, 168 s — <code>EXIT=0</code> each, no stack dump printed, against a 600 s timeout</td></tr>
+<tr><td>solo runs at head, after the fix (commit <code>2a3539fbc</code>, the head the arm ran at; <code>logs/solo-head-1.log</code> … <code>-5.log</code>)</td><td>five of five passed — 166 s, 183 s, 165 s, 172 s, 168 s — <code>EXIT=0</code> each, no stack dump printed, against the test's 600-second timeout
+(<code>@pytest.mark.timeout(600)</code>)</td></tr>
 <tr><td>suite <code>tests/standard_names</code>, <code>-n 8</code>, head before the fix</td><td>1 failed, 8536 passed, 11 skipped, 269.09 s — the id crashed at its 60 s dump</td></tr>
 <tr><td>suite <code>tests/standard_names</code>, <code>-n 8</code>, head after the fix (commit <code>fc2c69052</code>, the commit carrying the test change)</td><td><strong>8537 passed, 11 skipped, 0 failed</strong>, 228.05 s, <code>EXIT=0</code>; the rebuild itself 147.73 s</td></tr>
 <tr><td>suite <code>tests/standard_names</code>, <code>-n 8</code>, base <code>7034624c1</code></td><td>6 failed, 8530 passed, 12 skipped, 244.91 s — the same id plus five environment-only ids; <strong>zero ids added</strong> at head</td></tr>
