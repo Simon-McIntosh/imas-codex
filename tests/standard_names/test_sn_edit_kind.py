@@ -139,6 +139,9 @@ def test_rename_derives_successor_kind_instead_of_copying_predecessor() -> None:
         def query(self, cypher: str, **params: object) -> list[dict[str, int]]:
             if "EDIT_CHECK_COLLISION" in cypher:
                 return [{"n": 0}]
+            if "// SOURCE_INVARIANT" in cypher:
+                # No touched name is left without a producer.
+                return []
             raise AssertionError(cypher)
 
     target_row = {

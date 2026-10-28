@@ -9,6 +9,7 @@ from unittest.mock import patch
 
 import pytest
 
+from .graph_transaction_doubles import transaction_double
 from imas_codex.standard_names import graph_ops
 from imas_codex.standard_names.graph_store import (
     graph_catalog as _owning_graph_catalog,
@@ -132,7 +133,19 @@ def test_generate_name_excludes_sources_bound_to_frozen_names() -> None:
 class _ReviewGraph:
     def __init__(self, stage: str) -> None:
         self.stage = stage
-        self.statements: list[str] = []
+        self.double = transaction_double(
+            by_statement={
+                "$frozen_name_stages": (
+                    []
+                    if stage in {"approved", "contested"}
+                    else [{"id": "accepted_name"}]
+                )
+            }
+        )
+
+    @property
+    def statements(self) -> list[str]:
+        return [call[0][0] for call in self.double.query.call_args_list]
 
     def __enter__(self) -> _ReviewGraph:
         return self
@@ -140,15 +153,11 @@ class _ReviewGraph:
     def __exit__(self, *_args: Any) -> None:
         return None
 
-    def query(self, statement: str, **_parameters: Any) -> list[dict[str, Any]]:
-        self.statements.append(statement)
-        if "update_review_aggregates" in inspect.stack()[1].function:
-            return (
-                []
-                if self.stage in {"approved", "contested"}
-                else [{"id": "accepted_name"}]
-            )
-        return []
+    def query(self, statement: str, **parameters: Any) -> list[dict[str, Any]]:
+        return self.double.query(statement, **parameters)
+
+    def session(self):
+        return self.double.session()
 
 
 @pytest.mark.parametrize("stage", ["approved", "contested"])

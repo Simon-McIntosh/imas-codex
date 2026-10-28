@@ -304,10 +304,9 @@ class TestReconcileErrorSiblings:
         set_query = set_call[0][0]
         assert "SET sn.updated_at = datetime()" in set_query
         assert "sn.validation_status = 'quarantined'" in set_query
-        assert (
-            "sn.quarantine_reason = 'orphaned error sibling (parent name deleted)'"
-            in set_query
-        )
+        assert "sn.quarantine_reason = 'orphaned error sibling (parent name deleted)'" not in set_query
+        assert "sn.validation_issues = [$reason]" in set_query
+        assert "orphaned error sibling (parent name deleted)" in str(set_call[1])
         assert set_call[1]["ids"] == ["upper_uncertainty_of_plasma_current"]
 
     def test_reconcile_no_orphans(self):

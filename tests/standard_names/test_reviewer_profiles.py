@@ -115,7 +115,7 @@ def test_configured_default_profile_uses_blind_pair_and_disagreement_breaker(
 
     expected = [
         "openrouter/x-ai/grok-4.5",
-        "openrouter/openai/gpt-5.6-luna",
+        "openrouter/openai/gpt-6-luna",
         "openrouter/anthropic/claude-sonnet-5",
     ]
     configured = settings_mod.get_sn_review_profile_models("default")
