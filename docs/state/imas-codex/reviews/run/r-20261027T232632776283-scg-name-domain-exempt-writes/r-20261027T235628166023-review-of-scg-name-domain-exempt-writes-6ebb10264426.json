@@ -1,0 +1,76 @@
+{
+  "added_failure_count": 1,
+  "added_failure_ids": [
+    "tests/standard_names/test_component_system.py::test_seed_parent_sources_routes_derived_through_review"
+  ],
+  "completed_at": "2026-10-28T00:04:33.483Z",
+  "dispatched_at": "2026-10-27T23:57:25Z",
+  "findings": [
+    {
+      "detail": "read from the reviewed run's own armed logs (log-suite-base.log 92 failed, log-suite-head.log 71 failed): the head arm adds exactly this id and removes nothing else from the door. The assertion at tests/standard_names/test_component_system.py:348 sits in the marker tuple for the derived-parent materialiser and asserts a write this node deliberately removed, so it is red at the reviewed head. The node's done_when requires zero added failure ids, so it is unmet; the file is outside this node's declared write paths and the worker reported it under outside_scope, so it needs a companion node or a scope extension, not silence. Repair is one line: drop the marker, or replace it with an assertion that the parent's domain is written through write_name_domain.",
+      "file": "tests/standard_names/test_component_system.py",
+      "id": "f4311d25df9",
+      "line": 348,
+      "severity": "blocking",
+      "summary": "the only added failure id: test_seed_parent_sources_routes_derived_through_review still requires the marker 'parent.physics_domain =' in the materialiser's Cypher, which this node retires"
+    },
+    {
+      "detail": "derived_parent_domain_decision and dominant_domain carry the whole majority rule and the stored-choice-wins branch, and no test in the tree calls either (grep over tests/ finds only the docstring mention in test_name_domain_single_writer.py:16). The graph tests that do exercise the path \u2014 tests/standard_names/test_name_domain_writer_lineage_sites.py:200 and :226 \u2014 seed a single child, so write_name_domain's single-source-domain fallback (domain_decision.py:495) produces the expected scalar even if derived_parent_domain_decision returned its input unchanged. A regression in the majority, the name tie-break, or the settled-decision branch would be silent. A unit test over two differing child domains plus the undecided/decided pair would close it.",
+      "file": "imas_codex/standard_names/domain_decision.py",
+      "id": "f14547e853f",
+      "line": 432,
+      "severity": "non-blocking",
+      "summary": "the new derived-parent domain rule has no test that distinguishes it from doing nothing"
+    },
+    {
+      "detail": "the node's done_when requires this fragment to record the work; it does record the rule, the retired entries and the promoted readers, but its Evidence section only points at the run manifest. Neither the arms' totals (92 failed base, 71 failed head) nor the single added failure id appear, so a reader of the fragment cannot see that the gate is not clean.",
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-exempt-writes.html",
+      "id": "fa1fc26dc8e",
+      "line": 71,
+      "severity": "non-blocking",
+      "summary": "the evidence fragment records the change but not its gate result, including the one added failure id"
+    },
+    {
+      "detail": "the alias is a compatibility shim: grep over the head finds no production reader \u2014 its only importers are tests/standard_names/test_cypher_mutation_classifier.py:10 and tests/standard_names/test_review_report_only.py:47. The repository's own rule is to change the code rather than keep a re-export for old callers, and two test imports are the cheapest possible callers to update.",
+      "file": "imas_codex/cli/sn.py",
+      "id": "ff630fae6c7",
+      "line": 62,
+      "severity": "non-blocking",
+      "summary": "the private alias _cypher_mutation_clause is kept only for two test modules that could import the public name"
+    },
+    {
+      "detail": "path_counts (domain_decision.py:152) returns counts ordered by (-count, name), so its first key is the same answer dominant_domain computes by hand; the two rules can drift apart. Small, and the module is the right owner, but expressing dominant_domain on top of path_counts' ordering would keep one definition of the tie-break.",
+      "file": "imas_codex/standard_names/domain_decision.py",
+      "id": "f21831c4cd0",
+      "line": 416,
+      "severity": "non-blocking",
+      "summary": "dominant_domain repeats the dominant-with-name-tie-break ordering the same module already owns in path_counts"
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "pass: the changed materialiser is reached from graph_lineage.py:789, :1781, :1898-1914 (structural closure seeding and lifecycle repair) and signed_manifest.py:8002, and the promoted readers from cypher_property_check.audit_cypher_properties and audit_standard_name_touch plus cli/sn.py:_WriteSuppressingRun.run.",
+    "diff": "pass: read both commits against fecd858a7b4d92eae672b12f5010aca5a5540010 \u2014 118d49b32 routes both derived-parent statements through derived_parent_domain_decision and write_name_domain, promotes the four readers, empties EXEMPT_SITES and rewrites the guard on them, and replaces the dead followup assertion; 6ebb10264 adds only the evidence fragment, so the suite arm recorded at 118d49b32 covers the whole code delta.",
+    "done_when": "fail: the done_when requires the gate to add zero failure ids; the reviewed run's own logs show 92 failed at fecd858 and 71 failed at 118d49b, and their difference adds tests/standard_names/test_component_system.py::test_seed_parent_sources_routes_derived_through_review, which is red at the reviewed head (the other done_when items \u2014 empty EXEMPT_SITES, owning parsers, one-line followup fix, rollback logs both arms \u2014 are met).",
+    "goal": "pass: the node's goal is to retire the two exempted direct StandardName domain writes in the derived-parent materialiser; at the reviewed head imas_codex/standard_names/graph_store/graph_lineage.py both statements carry no parent.physics_domain assignment and every parent is written through domain_decision.write_name_domain.",
+    "manifest": "pass: read the manifest of r-20261027T232632776283-scg-name-domain-exempt-writes; it records both suite arms and both graph arms as JSON with literal commands and log paths, the negative-control log, the rollback logs, and it names the one added failure id honestly under outside_scope and blockers rather than reporting a clean gate.",
+    "write_paths": "pass: every path in the diff (imas_codex/cli/sn.py, imas_codex/graph/cypher_property_check.py, imas_codex/standard_names/domain_decision.py, imas_codex/standard_names/graph_store/graph_lineage.py, tests/standard_names/test_name_domain_single_writer.py, tests/standard_names/test_name_domain_followups.py, docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-exempt-writes.html) is inside the nine paths the manifest declares."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: pass \u2014 the two exempted direct StandardName domain writes in imas_codex/standard_names/graph_store/graph_lineage.py are retired and every derived parent is written through domain_decision.write_name_domain.\nVERDICT done_when: fail \u2014 the gate adds one failure id (tests/standard_names/test_component_system.py::test_seed_parent_sources_routes_derived_through_review), derived from log-suite-base.log (92 failed) and log-suite-head.log (71 failed) in the reviewed run directory.\nVERDICT write_paths: pass \u2014 all seven paths in the diff are inside the nine declared write paths, read from the reviewed manifest.\nVERDICT manifest: pass \u2014 it records both suite arms, both graph arms, the negative control and the rollback logs with literal commands, and names the added failure under outside_scope.\nVERDICT diff: pass \u2014 read commit by commit from fecd858a7b4d92eae672b12f5010aca5a5540010 to 6ebb102644262a995799cfbb5422e7cbcd6e623b; the code delta is 118d49b32 and 6ebb10264 adds only the evidence fragment.\nCALL_SITES: imas_codex/standard_names/graph_store/graph_lineage.py:789, imas_codex/standard_names/graph_store/graph_lineage.py:1781, imas_codex/standard_names/graph_store/graph_lineage.py:1898, imas_codex/standard_names/signed_manifest.py:8002, imas_codex/cli/sn.py:_WriteSuppressingRun.run, imas_codex/graph/cypher_property_check.py:audit_cypher_properties\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: graph_lineage.py no longer assigns parent.physics_domain in either materialiser and calls write_name_domain with derived_parent_domain_decision at graph_lineage.py:1547 and :1655.\nSCORE evidence: 15\nJUSTIFICATION evidence: the two suite logs end in a bare EXIT= and carry their own totals lines, but the head arm is recorded at 118d49b32 rather than the reviewed head and its added id is admitted, so the gate is recorded but not clean.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every changed path is declared, and the only collateral is a formatter-only reflow at tests/standard_names/test_name_domain_followups.py:91-93 in a file the node already edits.\nSCORE durability: 12\nJUSTIFICATION durability: the scanner cases at tests/standard_names/test_name_domain_single_writer.py:294-330 are independent literal-versus-literal guards proven by the negative control, but no test exercises derived_parent_domain_decision at domain_decision.py:432, so its majority and stored-choice branches are unguarded.\nSCORE fit: 17\nJUSTIFICATION fit: the new names in domain_decision.py:416 and cypher_property_check.py:330 follow the surrounding idiom and carry no plan or ticket identifiers, with only the compat alias at cli/sn.py:62 out of place.\nSCORE reuse: 15\nJUSTIFICATION reuse: the materialiser's inline majority rule is now owned by domain_decision.derived_parent_domain_decision, though dominant_domain at domain_decision.py:416 re-states the (-count, name) ordering path_counts already owns at domain_decision.py:152.",
+  "review_run_id": "r-20261027T235628166023-review-of-scg-name-domain-exempt-writes-6ebb10264426",
+  "reviewed_base_sha": "fecd858a7b4d92eae672b12f5010aca5a5540010",
+  "reviewed_head_sha": "6ebb102644262a995799cfbb5422e7cbcd6e623b",
+  "reviewed_run_id": "r-20261027T232632776283-scg-name-domain-exempt-writes",
+  "scores": {
+    "durability": 12,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 15,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T00:05:24.393163+00:00",
+  "total": 95
+}
