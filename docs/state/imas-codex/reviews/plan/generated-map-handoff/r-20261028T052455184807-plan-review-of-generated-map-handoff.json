@@ -48,9 +48,22 @@
       "finding": "wiring-1",
       "reason": "the declared edge is the correct one and the hand-off document exists on disk (17 KB at the path \u00a74 names), so only the recorded state ordering reads wrong, not the relationship.",
       "when": "2026-10-28T05:36:47.244648+00:00"
+    },
+    {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "finding": "reasoning-1",
+      "reason": "the stronger sentence governs, the section has landed with the validated-only behaviour, and the delivered tests exercise both the refusal and the promotion, so no implementer is sent down the wrong path; the stale clause is a reading hazard only.",
+      "when": "2026-10-28T05:36:47.765192+00:00"
     }
   ],
   "responses": {
+    "reasoning-1": {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "reason": "the stronger sentence governs, the section has landed with the validated-only behaviour, and the delivered tests exercise both the refusal and the promotion, so no implementer is sent down the wrong path; the stale clause is a reading hazard only.",
+      "when": "2026-10-28T05:36:47.765192+00:00"
+    },
     "wiring-1": {
       "action": "noted",
       "by": "plan-review-reflex",
