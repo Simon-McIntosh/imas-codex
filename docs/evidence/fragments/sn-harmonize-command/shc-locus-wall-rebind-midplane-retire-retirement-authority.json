@@ -1,0 +1,87 @@
+{
+  "authority_mode": "external_reviewed",
+  "operation_id": "retire-outboard-midplane-in-favour-of-langmuir-probe-position",
+  "orphan_policy": "refuse",
+  "receipt_policy": {
+    "cardinality": "per_target",
+    "expected_count": "admitted_rows",
+    "id": "one-per-superseded-identity",
+    "link_participant_kind": "standard_name",
+    "operation": "link_signed_successor",
+    "replay_projection": [
+      "manifest_sha256",
+      "row_id"
+    ]
+  },
+  "repair_rows": [
+    "electrostatic_potential_at_outboard_midplane=>electrostatic_potential_at_langmuir_probe_position"
+  ],
+  "rows": [
+    {
+      "guards": [
+        {
+          "id": "electrostatic_potential_at_outboard_midplane=>electrostatic_potential_at_langmuir_probe_position:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "electrostatic_potential_at_outboard_midplane"
+          ]
+        },
+        {
+          "id": "electrostatic_potential_at_outboard_midplane=>electrostatic_potential_at_langmuir_probe_position:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "electrostatic_potential_at_outboard_midplane",
+            "electrostatic_potential_at_langmuir_probe_position"
+          ]
+        }
+      ],
+      "id": "electrostatic_potential_at_outboard_midplane=>electrostatic_potential_at_langmuir_probe_position",
+      "identity": {
+        "id": "electrostatic_potential_at_outboard_midplane=>electrostatic_potential_at_langmuir_probe_position",
+        "kind": "standard_name",
+        "target_id": "electrostatic_potential_at_outboard_midplane"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "electrostatic_potential_at_langmuir_probe_position"
+          },
+          "id": "electrostatic_potential_at_outboard_midplane:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "electrostatic_potential_at_outboard_midplane"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "electrostatic_potential_at_outboard_midplane",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "electrostatic_potential_at_langmuir_probe_position",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    }
+  ],
+  "schema": "imas-codex.repair-authority.v1",
+  "selection": {
+    "id": "artifact-rows",
+    "mode": "exact_complete_signed_cohort",
+    "predicate": "artifact-rows"
+  },
+  "signature": {
+    "canonicalization": "json-sort-keys-v1",
+    "sha256": "5b540d56b289936290adc664d84169bdf6d60a5c63b571a3e067c5d5a75965ab"
+  }
+}
