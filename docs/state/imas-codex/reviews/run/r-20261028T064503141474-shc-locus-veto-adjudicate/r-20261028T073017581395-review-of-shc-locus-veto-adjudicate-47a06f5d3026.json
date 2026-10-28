@@ -2,6 +2,13 @@
   "added_failure_count": 0,
   "added_failure_ids": [],
   "completed_at": "2026-10-28T08:01:38.514Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "srtj-contradiction-veto-generality",
+      "recorded_at": "2026-10-28T08:04:46.167077+00:00"
+    }
+  },
   "dispatched_at": "2026-10-28T07:53:22Z",
   "findings": [
     {
