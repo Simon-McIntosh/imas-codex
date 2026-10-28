@@ -48,7 +48,24 @@
   "plan_slug": "sn-lifecycle-integrity",
   "plan_version": 161,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "finding": "duplicate_owner-3",
+      "reason": "the disposition is honest and already adjudicated, the plan names the authority explicitly, and the remaining work is a followup node rather than a change to the design.",
+      "when": "2026-10-28T05:05:06.199476+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-3": {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "reason": "the disposition is honest and already adjudicated, the plan names the authority explicitly, and the remaining work is a followup node rather than a change to the design.",
+      "when": "2026-10-28T05:05:06.199476+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-lifecycle-integrity/r-20261005T053437676103-plan-review-of-sn-lifecycle-integrity.json",
   "review_run_id": "r-20261005T053437676103-plan-review-of-sn-lifecycle-integrity",
   "reviewed_blob_sha": "2e00751484bcf208746e69be265b14064c233851",
   "rubric": "design",
