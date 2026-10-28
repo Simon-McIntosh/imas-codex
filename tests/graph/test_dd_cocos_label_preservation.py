@@ -244,3 +244,40 @@ def test_path_the_dd_stops_labelling_loses_its_label(disposable_graph):
     assert dropped not in labels, (
         "a label survived although 3.43.0 carries the path unlabelled"
     )
+
+
+def test_ids_scoped_rebuild_without_a_declaring_version_keeps_older_label(
+    disposable_graph,
+):
+    """A 4.x-only rebuild must not strip a label no covered version withdrew.
+
+    The build's scope decides what it can judge. With no version in scope that
+    declares labels at all — an incremental ``--from-version`` slice of the 4.x
+    line, or any window that populates no ``cocos_label_transformation`` — the
+    clear has no authority to say a label was dropped, so a label carried by a
+    version outside the window stays. This is the shape that stripped every
+    shard's labels when the clear was global.
+    """
+    from imas_codex.graph.client import GraphClient
+
+    dropped = "equilibrium/time_slice/profiles_1d/j_tor"
+    psi = "equilibrium/time_slice/profiles_1d/psi"
+    scope = {
+        "4.0.0": _version({psi: _path("psi")}),
+        "4.1.1": _version({psi: _path("psi")}),
+    }
+
+    with GraphClient() as gc:
+        gc.query(
+            "MERGE (p:IMASNode {id: $id}) "
+            "SET p.cocos_transformation_type = 'ip_like', "
+            "p.cocos_label_source = 'inferred_older_version'",
+            id=dropped,
+        )
+        _run_build(gc, scope)
+        labels = _labels(gc)
+
+    assert labels.get(dropped, {}).get("label") == "ip_like", (
+        "a 4.x-only scoped build cleared a label no covered version withdrew"
+    )
+    assert labels[dropped]["source"] == "inferred_older_version"

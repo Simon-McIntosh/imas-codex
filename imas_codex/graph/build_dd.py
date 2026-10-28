@@ -916,10 +916,12 @@ def _reference_cocos_labels(
 ) -> tuple[str | None, dict[str, str]]:
     """Return the newest 3.x version present and the labels it declares.
 
-    The 4.x DD line dropped ``cocos_label_transformation`` from its XML, so the
-    newest 3.x version in the build's scope is the only authority that declares
-    XML labels. Both the forward-port backfill and the stale-label clear read
-    this: a label is only judged by a version that could have declared it.
+    The 3.x line declares more labels than the 4.x line does (3.42.2 declares
+    623 fields, 4.1.1 declares 384), so the newest 3.x version in the build's
+    scope is the richest label source for a path the newest version still
+    carries. Both the forward-port backfill and the stale-label clear read
+    this: a label is judged by the newest version in scope that could have
+    declared it.
     """
     sorted_versions = sorted(version_data.keys())
     last_3x: str | None = None
@@ -940,11 +942,12 @@ def _reference_cocos_labels(
 def _backfill_cocos_labels(
     client: "GraphClient", version_data: dict[str, dict]
 ) -> tuple[int, set[str]]:
-    """Backfill COCOS labels for DD versions where XML lacks them.
+    """Backfill COCOS labels the newest DD version does not declare itself.
 
-    DD versions 4.0.0–4.1.1 removed ``cocos_label_transformation`` from
-    the XML schema while retaining ``cocos_transformation_expression``.
-    This leaves ~200-250 COCOS-dependent paths unlabelled in 4.x.
+    The newest version declares far fewer labels than the last 3.x one — 384
+    against 623 for the 4.1.1/3.42.2 pair — so a path the newest version still
+    carries can arrive unlabelled even though an earlier version declares its
+    label. Every source below supplies one of those missing labels.
 
     Three inference sources, applied in priority order:
 
@@ -1037,10 +1040,13 @@ def _backfill_cocos_labels(
     # unlabelled although a version in this build declares its label. The
     # newest version that declares labels anywhere and contains the path is
     # the authority: if it declares one, the node carries it; if it carries the
-    # path without a label, the DD stopped labelling that path. A version that
-    # declares no labels at all cannot speak to the question — the 4.x line
-    # removed the attribute from its XML schema, so its silence is not a
-    # dropped label.
+    # path without a label, the DD stopped labelling that path. The
+    # filter to versions declaring at least one label is what makes that
+    # reading sound: a version that populates ``cocos_label_transformation``
+    # nowhere is silent about the attribute, not about the path, so its
+    # silence cannot be read as a dropped label — a sliced version set, or a
+    # line that stops populating the attribute, would otherwise delete labels
+    # no DD ever withdrew.
     declaring_versions = [
         v
         for v in sorted_versions
