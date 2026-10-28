@@ -77,6 +77,13 @@
       "finding": "done_when-1",
       "reason": "each repair node proves its classified ids fail at base and pass at head from archive trees, so a mislabelled id surfaces as one its repair cannot fix; that has already happened twice (D1 and the names_reviewed id in sib-red-transaction-doubles), each recorded and routed to its own node",
       "when": "2026-10-28T09:40:59.785219+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-3",
+      "reason": "the four named clusters are the largest files, not the repair plan: the diagnosis classified all 101 ids per id (36 sandbox, 62 stale, 3 product) and the repair nodes were cut by class across all of them (sandbox, export accounting, transaction doubles, repins, product defects)",
+      "when": "2026-10-28T09:41:03.716575+00:00"
     }
   ],
   "responses": {
@@ -103,6 +110,12 @@
       "by": "",
       "reason": "",
       "when": "2026-10-28T09:40:53.843577+00:00"
+    },
+    "reasoning-3": {
+      "action": "declined",
+      "by": "",
+      "reason": "the four named clusters are the largest files, not the repair plan: the diagnosis classified all 101 ids per id (36 sandbox, 62 stale, 3 product) and the repair nodes were cut by class across all of them (sandbox, export accounting, transaction doubles, repins, product defects)",
+      "when": "2026-10-28T09:41:03.716575+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-integrity-backlog/r-20261028T084825193562-plan-review-of-sn-integrity-backlog.json",
