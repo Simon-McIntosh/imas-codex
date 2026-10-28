@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>sib-red-residual-census: what is still red on main after the repair wave</title>
+</head>
+<body>
+<section id="sib-red-residual-census">
+<h1>sib-red-residual-census: what is still red on main after the repair wave</h1>
+
+<p>Two arms of <code>tests/standard_names/</code> were run at
+<code>17501cf00b0025b67d5170589fb0e5d2b90b6f75</code> — a <code>git archive</code>
+extraction under <code>$TMPDIR</code> with its own <code>--basetemp</code>, and the
+Git worktree itself — as <code>-n 8</code> on default markers with
+<code>OMP_NUM_THREADS=1</code>. <strong>One id is red on main. The other four red
+ids in the archive arm are artefacts of that tree's missing Git metadata and pass
+in the checkout.</strong> That one id is a worker crash, not an assertion, and the
+repair wave reported it closed; it is not.</p>
+
+<h2 id="sib-red-residual-census-arms">The two arms</h2>
+<table>
+<caption>Both arms, default markers, <code>-n 8</code>.
+Each log's last line is its own bare <code>EXIT=</code> line.</caption>
+<thead>
+<tr><th>arm</th><th>tree</th><th>outcome</th><th>failing ids</th><th>log</th></tr>
+</thead>
+<tbody>
+<tr id="sib-red-residual-census-arm-archive">
+  <td>1</td>
+  <td><code>git archive</code> of <code>17501cf00</code> under <code>$TMPDIR</code>, five generated
+  files copied in, no <code>.git</code></td>
+  <td>5 failed, 8531 passed, 12 skipped, <code>EXIT=1</code></td>
+  <td>5</td>
+  <td><code>arm-archive.log</code>, <code>arm-archive-ids.txt</code></td>
+</tr>
+<tr id="sib-red-residual-census-arm-checkout">
+  <td>2</td>
+  <td>the Git worktree itself at the same revision</td>
+  <td>1 failed, 8536 passed, 11 skipped, <code>EXIT=1</code></td>
+  <td>1</td>
+  <td><code>arm-checkout.log</code>, <code>arm-checkout-ids.txt</code></td>
+</tr>
+</tbody>
+</table>
+
+<p>The archive arm is a strict superset: 4 ids fail there and clear in the checkout,
+and the checkout arm adds none. Both suites ran to their summary line, so both arms
+are readable.</p>
+
+<h3 id="sib-red-residual-census-ids">The id lists</h3>
+<p>Archive arm (5):</p>
+<ol>
+<li><code>test_cascade_calibration.py::test_matched_policy_rebuilds_from_frozen_scores_and_receipts</code></li>
+<li><code>test_manifest_generability.py::test_every_manifest_source_is_carried_or_names_its_blocking_mechanism</code></li>
+<li><code>test_manifest_generability.py::test_a_cut_refuses_a_manifest_it_cannot_generate_rather_than_counting</code></li>
+<li><code>test_manifest_generability.py::test_a_manifest_whose_sources_all_reach_a_name_is_not_refused</code></li>
+<li><code>test_catalog_layout_hierarchy.py::TestOrderingCycleDetection::test_export_ledgers_cycle_and_writes_packet</code></li>
+</ol>
+<p>Checkout arm (1):</p>
+<ol>
+<li><code>test_cascade_calibration.py::test_matched_policy_rebuilds_from_frozen_scores_and_receipts</code></li>
+</ol>
+
+<h2 id="sib-red-residual-census-classes">Per-id class, with evidence</h2>
+<table>
+<caption>Class and evidence for every failing id. The error line and the
+<code>file:line</code> it is raised at are quoted from the arm noted in the
+last column.</caption>
+<thead>
+<tr><th>id</th><th>class</th><th>error line</th><th>raised at</th><th>arm</th></tr>
+</thead>
+<tbody>
+<tr id="sib-red-residual-census-id-cascade-calibration">
+  <td><code>test_cascade_calibration.py::test_matched_policy_rebuilds_from_frozen_scores_and_receipts</code></td>
+  <td><strong>product defect</strong> (unattributed interpreter crash)</td>
+  <td><code>worker 'gw5' crashed while running
+  'tests/standard_names/test_cascade_calibration.py::test_matched_policy_rebuilds_from_frozen_scores_and_receipts'</code>
+  — no assertion text. Run alone it does the same: the 60 s
+  faulthandler dump fires, and the run does not end even when its 240 s
+  <code>timeout</code> sends TERM; it was stopped by hand at 4 min 5 s
+  (<code>EXIT=143</code>, <code>reproduction-cascade-crash.log</code>). An
+  earlier attempt of the same serial command exited 139 (SIGSEGV)</td>
+  <td><code>No node id</code>; the crash carries no frame of its own. Seen again
+  alone in <code>reproduction-cascade-crash.log</code></td>
+  <td>both arms</td>
+</tr>
+<tr id="sib-red-residual-census-id-manifest-every-source">
+  <td><code>test_manifest_generability.py::test_every_manifest_source_is_carried_or_names_its_blocking_mechanism</code></td>
+  <td>sandbox artefact (S2), environment-only</td>
+  <td><code>RuntimeError: export provenance timestamp unavailable: run from an
+  imas-codex Git checkout or set SOURCE_DATE_EPOCH for an archive/install export</code></td>
+  <td><code>imas_codex/standard_names/export.py:2657</code>, reached from
+  <code>export.py:2361</code> and <code>export.py:3739</code></td>
+  <td>archive only</td>
+</tr>
+<tr id="sib-red-residual-census-id-manifest-cut-refuses">
+  <td><code>test_manifest_generability.py::test_a_cut_refuses_a_manifest_it_cannot_generate_rather_than_counting</code></td>
+  <td>sandbox artefact (S2), environment-only</td>
+  <td><code>RuntimeError: export provenance timestamp unavailable: run from an
+  imas-codex Git checkout or set SOURCE_DATE_EPOCH for an archive/install export</code></td>
+  <td><code>imas_codex/standard_names/export.py:2657</code></td>
+  <td>archive only</td>
+</tr>
+<tr id="sib-red-residual-census-id-manifest-sources-reach-name">
+  <td><code>test_manifest_generability.py::test_a_manifest_whose_sources_all_reach_a_name_is_not_refused</code></td>
+  <td>sandbox artefact (S2), environment-only</td>
+  <td><code>RuntimeError: export provenance timestamp unavailable: run from an
+  imas-codex Git checkout or set SOURCE_DATE_EPOCH for an archive/install export</code></td>
+  <td><code>imas_codex/standard_names/export.py:2657</code></td>
+  <td>archive only</td>
+</tr>
+<tr id="sib-red-residual-census-id-ledger-cycle-packet">
+  <td><code>test_catalog_layout_hierarchy.py::TestOrderingCycleDetection::test_export_ledgers_cycle_and_writes_packet</code></td>
+  <td>sandbox artefact (S2), environment-only</td>
+  <td><code>RuntimeError: export provenance timestamp unavailable: run from an
+  imas-codex Git checkout or set SOURCE_DATE_EPOCH for an archive/install export</code></td>
+  <td><code>imas_codex/standard_names/export.py:2657</code></td>
+  <td>archive only</td>
+</tr>
+</tbody>
+</table>
+
+<p>The classifier that produced these classes is
+<code>classify.py</code> in the run directory. It reads the <code>FAILED</code>
+lines and the short tracebacks of each arm and decides by two facts: the error
+signature, and which arm the id fails in when the arms differ in exactly one
+condition. Every branch is written down in it; none of the five ids needed a
+manual override.</p>
+
+<h2 id="sib-red-residual-census-named">Against the diagnosis: what it named, what is new</h2>
+<p>The diagnosis (<code>sib-red-suite-diagnosis.html</code>, at
+<code>b4254dfbf</code>) named 92 ids. All five ids failing today are in that set
+<strong>except one</strong>:
+<code>test_catalog_layout_hierarchy.py::TestOrderingCycleDetection::test_export_ledgers_cycle_and_writes_packet</code>
+is <strong>new since the diagnosis ran</strong>, and its cause is the same S2
+provenance refusal the diagnosis already traced at
+<code>export.py:2657</code>. The four <code>test_manifest_generability.py</code>
+and <code>test_catalog_layout_hierarchy.py</code> ids are the residue of S2 that
+the sandbox repair did not reach: that node gave the eight export modules a pinned
+<code>SOURCE_DATE_EPOCH</code> fixture, and these four suites call
+<code>run_export</code> directly rather than through a fixture that sets it.</p>
+
+<p>The diagnosis's own count for the archive arm was 92 failed; today it is 5. The
+repair wave cleared 87 of them, and the 5 that remain break down as the diagnosis
+predicted: 4 sandbox artefacts of the same S2 cause, 1 real failure.</p>
+
+<h2 id="sib-red-residual-census-negative-control">Negative control</h2>
+<p>The diagnosis's D1 repair (<code>sib-cascade-veto-cap</code>) has a test of its
+own, <code>tests/standard_names/test_cascade_veto_cap.py</code>, which is green on
+main. Planting the brief's mutation — the veto cap's
+<code>min(mapped, nextafter(min_score, 0.0))</code> inverted to
+<code>max(mapped, min_score)</code> at
+<code>imas_codex/standard_names/review/cascade.py:245</code> — in a scratch
+extraction of the same revision turns two of its ids red:</p>
+<pre><code># negative control — mutated arm: veto cap comparison inverted
+# tree: $TMPDIR/nc-tree (git archive extraction of 17501cf00, no .git)
+# mutation: imas_codex/standard_names/review/cascade.py:245
+FAILED tests/standard_names/test_cascade_veto_cap.py::test_a_vetoed_document_already_below_the_threshold_is_not_raised
+FAILED tests/standard_names/test_cascade_veto_cap.py::test_a_vetoed_document_decision_score_stays_below_the_accept_threshold
+=================== 2 failed, 1 passed, 1 warning in 14.15 s ====================
+EXIT=1</code></pre>
+<p>The unmutated control of the same file in an identical extraction:</p>
+<pre><code>======================== 3 passed, 1 warning in 11.79s =========================
+EXIT=0</code></pre>
+<p>The classifier, run over that pair with the differing condition declared as
+<em>product source</em>, places <strong>both</strong> ids as
+<code>product defect</code> — not as a stale test, and not as an
+environment artefact — with the evidence it reads from the log:
+<code>test_cascade_veto_cap.py:83</code> and <code>:92</code>, and the assertion
+showing <code>0.997</code> where the test expects a score below the threshold. The
+run is <code>negative-control.log</code>; the control is
+<code>negative-control-control.log</code>.</p>
+
+<p>The brief's suggested mutation was first tried against
+<code>test_cascade_calibration.py::test_matched_policy_rebuilds_from_frozen_scores_and_receipts</code>,
+which is the test the cap was repaired for. That test cannot serve as the control
+here: it <strong>already</strong> crashes the interpreter on the unmutated tree, in
+both arms, so a red there would not have been evidence of the mutation. That is
+the same fact recorded as the one real failure above, and it is why the control
+was moved to the cap's own dedicated test file.</p>
+
+<h2 id="sib-red-residual-census-owners">Proposed owner for every non-environment id</h2>
+<p>One id needs an owner. It cannot be repaired under this node's scope (the brief
+forbids any product or test change), and no open plan section owns it: §44
+(<code>cascade.py</code>) is <code>done</code>, and §41 closes on this census.</p>
+<table>
+<caption>The proposed owner, as a new repair node. Everything else this arm found
+is environment-only and needs no owner.</caption>
+<thead><tr><th>id</th><th>class</th><th>owner</th></tr></thead>
+<tbody>
+<tr id="sib-red-residual-census-owner-cascade-crash">
+  <td><code>test_cascade_calibration.py::test_matched_policy_rebuilds_from_frozen_scores_and_receipts</code></td>
+  <td>product defect</td>
+  <td><strong>new repair node <code>sib-cascade-calibration-crash</code></strong></td>
+</tr>
+</tbody>
+</table>
+<dl id="sib-red-residual-census-owner-cascade-crash-detail">
+  <dt>goal</dt>
+  <dd>Make <code>test_matched_policy_rebuilds_from_frozen_scores_and_receipts</code>
+  pass on <code>main</code>, or fail with an assertion that names the disagreement
+  instead of taking the interpreter down.</dd>
+  <dt>write paths</dt>
+  <dd><code>tests/standard_names/test_cascade_calibration.py</code>,
+  <code>imas_codex/standard_names/review/cascade.py</code>,
+  <code>imas_codex/standard_names/review/cascade_calibration.py</code>,
+  <code>docs/evidence/fragments/sn-integrity-backlog/sib-cascade-calibration-crash.html</code></dd>
+  <dt>what it must establish first</dt>
+  <dd>The repaired cap and the re-frozen column landed in <code>1bbc0c189</code>
+  and the node's arm reported the D1 id passing, so the red here is either a
+  regression the merge did not carry or a crash the earlier arm did not hit at its
+  own concurrency. The node must reproduce it at <code>17501cf00</code> alone (it
+  does: <code>reproduction-cascade-crash.log</code>) and attribute the crash to a
+  frame before changing anything.</dd>
+</dl>
+
+<h2 id="sib-red-residual-census-done-when">Is §41's done-when met as things stand?</h2>
+<p><strong>No.</strong> §41 is met when the diagonal-names suite is green on main
+<em>or</em> every red id is owned by a named open node. As things stand one id is
+red on main and no open node owns it — the one proposed above is a new node that
+does not exist yet. The four environment-only ids do not block it: they pass in a
+checkout, which is what "red on main" means, and the diagnosis already classes
+their cause as an artefact.</p>
+<p>§41 becomes met on one dispatch: land
+<code>sib-cascade-calibration-crash</code> and it owns the id until it closes it.
+Until then the section is open on this one id.</p>
+
+<h2 id="sib-red-residual-census-limits">Limits of this measurement</h2>
+<ul>
+<li>The archive arm ran without a read-only <code>/tmp</code> (this node's
+<code>/tmp</code> is writable), so the S1 class the diagnosis measured could not
+recur here; the 14 S1 ids are covered by the sandbox repair's own arm and are not
+re-measured by this node.</li>
+<li>Both arms ran <code>-n 8</code>. The one product defect is a worker crash; a
+serial run was attempted once more for attribution and it hangs rather than
+asserting, which is recorded rather than diagnosed.</li>
+<li>The arm counts are this node's own two runs at one revision. They are not a
+comparison against a base revision; the base comparison belongs to the nodes that
+repaired each cause; this node's question is what is red <em>now</em>.</li>
+</ul>
+</section>
+</body>
+</html>
