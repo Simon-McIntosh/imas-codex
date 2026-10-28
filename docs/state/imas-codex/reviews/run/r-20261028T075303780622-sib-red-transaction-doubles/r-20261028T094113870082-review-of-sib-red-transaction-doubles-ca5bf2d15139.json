@@ -1,0 +1,91 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate logs rather than the manifest's prose: gate-main.log carries 70 distinct FAILED ids (summary '70 failed, 8454 passed, 11 skipped', EXIT=1 at the last line) and gate-head.log 32 ('32 failed, 8492 passed, 11 skipped', EXIT=1), and the id sets differ by 0 added and 38 removed; the 38 removed ids are byte-for-byte the 38 ids the reviewed run's head-c1.log ran (38 passed, EXIT=0) and the same 38 negative-control.log finds red at main (38 failed, EXIT=1).",
+  "call_site_count": 1,
+  "call_sites": [],
+  "completed_at": "2026-10-28T09:51:33.479Z",
+  "dispatched_at": "2026-10-28T09:42:54Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_generate_docs.py",
+      "line": 46,
+      "severity": "non-blocking",
+      "text": "non-blocking: _make_gc_tx still builds its own session/begin_transaction/transaction stack for the four claim tests, so this file carries two doubles and the brief's 'delete each file's local copy' and the manifest's landing claim that local fakes are gone are not fully met; test_docs_supersede_safety.py:140, test_atomic_refined_name_persistence.py and test_snrun_async_counters.py retain equivalent local session fakes for their non-C1 tests."
+    },
+    {
+      "file": "tests/standard_names/test_review_name_stages.py",
+      "line": 44,
+      "severity": "non-blocking",
+      "text": "non-blocking: _READBACK_STATEMENT, _WRITE_STATEMENT and _persist_gc are copied verbatim from test_review_docs_stages.py:47-62, so the per-statement keying the shared module exists to centralise is now duplicated in two files and will drift."
+    },
+    {
+      "file": "tests/standard_names/graph_transaction_doubles.py",
+      "line": 87,
+      "severity": "non-blocking",
+      "text": "non-blocking: the new module ends without a trailing newline (the file's last two bytes are 't)'), which ruff format would rewrite and which shows the file was not passed through the repository's formatter before commit."
+    },
+    {
+      "file": ".config/reckon/crew/runs/r-20261028T075303780622-sib-red-transaction-doubles/manifest.md",
+      "line": 11,
+      "severity": "non-blocking",
+      "text": "non-blocking: the tests line is a description ('38 C1 ids, all of which pass at head') and baseline_suite (line 17) / after_suite (line 18) are prose, not the armed JSON with revision, command, exit_status, log_path, completed, failure_count and failure_ids; the literal commands and counts are recoverable from each gate log's '# command:' header and summary line, but the record itself cannot supply a promotion gate receipt without re-reading the logs."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none: the landed change adds and edits only test modules and one evidence fragment, so no runtime module imports it; the production contract it mirrors was read and matched - imas_codex/standard_names/graph_store/graph_foundation.py:196-200 builds _TransactionQuery(tx) whose query maps tx.run(cypher, **params) through dict(record), exactly the surface the double answers - and the persistence paths it now reaches (graph_review_persistence.py, graph_docs_persistence.py) are unchanged at this head.",
+    "diff": "Read commit by commit against 966f3d965: eight commits, all confined to the tests/standard_names modules and the one evidence fragment; 7b7b9bd08 adds the shared double, 89d8381e7/c821afa47/7f7d8f6d7/0bee50f5a migrate the 15 files, abd72b0cf re-pins two source scans, 76d22a438/ca5bf2d15 record the fragment; no production module is touched.",
+    "done_when": "The done_when has three clauses; all 38 C1 ids pass at head (head-c1.log: 38 passed, EXIT=0) and all 38 fail at main (negative-control.log: 38 failed, EXIT=1), the two full arms add zero failure ids (gate-main.log 70 FAILED, gate-head.log 32 FAILED, set difference 0 added / 38 removed, exactly the C1 set), and the fragment carries one row per id with its fix kind.",
+    "goal": "The source node's goal is to bring the 15 standard-names suites onto one shared transaction-shaped GraphClient double and settle the 38 C1 ids; tests/standard_names/graph_transaction_doubles.py adds that double and every one of the 38 ids now passes, with the per-id fix kind and deciding commit recorded at docs/evidence/fragments/sn-integrity-backlog/sib-red-transaction-doubles.html:30-72.",
+    "manifest": "Read at the run directory; it states all 38 ids pass at head and names the four logs, but its baseline_suite (:17), after_suite (:18) and tests (:11) fields are prose rather than the armed JSON/literal-command shape the contract asks for, so the arm figures are machine-readable only through the linked gate logs.",
+    "write_paths": "The manifest declares 17 paths (15 test modules, tests/standard_names/graph_transaction_doubles.py and the evidence fragment); git diff --stat 966f3d965..ca5bf2d15 lists exactly those 17 files and nothing else."
+  },
+  "justifications": {
+    "durability": "Reverting the session answer in tests/standard_names/graph_transaction_doubles.py:66-68 reproduces the exact red state negative-control.log records (38 failed at 966f3d965), and the assertion changes each fail on their own reversal - tests/standard_names/test_embed_worker.py:182 on dropping the embed_text_hash clear, tests/standard_names/test_error_siblings.py:307 on restoring quarantine_reason, tests/standard_names/test_skeleton_placeholder_cleanup.py:178 on re-adding successor_placeholder - though the two source-text re-pins are weaker than a behavioural check and no test exercises the double directly.",
+    "evidence": "gate-main.log's last-but-one line reads '70 failed, 8454 passed, 11 skipped' with EXIT=1 and gate-head.log '32 failed, 8492 passed, 11 skipped' with EXIT=1, their FAILED sets differing by exactly the 38 C1 ids, and head-c1.log/negative-control.log show 38 passed vs 38 failed on the same id list.",
+    "fit": "The module and its docstring follow tests/recording_graph_client.py:1-25 and the comments name mechanisms; the only blemishes are a missing trailing newline at tests/standard_names/graph_transaction_doubles.py:87 and mixed import styles ('tests.standard_names.graph_transaction_doubles' in test_embed_worker.py:10 versus '.graph_transaction_doubles' in test_frozen_stage_pool_guard.py:12).",
+    "goal_fidelity": "tests/standard_names/graph_transaction_doubles.py:30-87 supplies the one double the goal names and all 38 ids turn green, but tests/standard_names/test_generate_docs.py:46 still carries a second local transaction double, so the 'delete each file's local copy' half of the goal is met only for the fakes that caused the C1 failures.",
+    "reuse": "TransactionDouble at tests/standard_names/graph_transaction_doubles.py:30 extends RecordingGraphClient (tests/recording_graph_client.py:18), the owner of statement capture, and a search of tests/ found no pre-existing shared transaction double, so nothing is duplicated at the module level; the leftover local double at test_generate_docs.py:46 is reported as a finding rather than counted against the added definition.",
+    "scope_discipline": "git diff --name-only 966f3d965de9b42831c77acc09af262a6e8fb20f ca5bf2d151396763c4d81f3d4d4a602bedf813e4 returns only the 17 declared write paths, with no production change smuggled in beside the double."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source node's goal is to bring the 15 standard-names suites onto one shared transaction-shaped GraphClient double and settle the 38 C1 ids; tests/standard_names/graph_transaction_doubles.py adds that double and every one of the 38 ids now passes, with the per-id fix kind and deciding commit recorded at docs/evidence/fragments/sn-integrity-backlog/sib-red-transaction-doubles.html:30-72.\nVERDICT done_when: The done_when has three clauses; all 38 C1 ids pass at head (head-c1.log: 38 passed, EXIT=0) and all 38 fail at main (negative-control.log: 38 failed, EXIT=1), the two full arms add zero failure ids (gate-main.log 70 FAILED, gate-head.log 32 FAILED, set difference 0 added / 38 removed, exactly the C1 set), and the fragment carries one row per id with its fix kind.\nVERDICT write_paths: The manifest declares 17 paths (15 test modules, tests/standard_names/graph_transaction_doubles.py and the evidence fragment); git diff --stat 966f3d965..ca5bf2d15 lists exactly those 17 files and nothing else.\nVERDICT manifest: Read at the run directory; it states all 38 ids pass at head and names the four logs, but its baseline_suite (:17), after_suite (:18) and tests (:11) fields are prose rather than the armed JSON/literal-command shape the contract asks for, so the arm figures are machine-readable only through the linked gate logs.\nVERDICT diff: Read commit by commit against 966f3d965: eight commits, all confined to the tests/standard_names modules and the one evidence fragment; 7b7b9bd08 adds the shared double, 89d8381e7/c821afa47/7f7d8f6d7/0bee50f5a migrate the 15 files, abd72b0cf re-pins two source scans, 76d22a438/ca5bf2d15 record the fragment; no production module is touched.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: tests/standard_names/graph_transaction_doubles.py:30-87 supplies the one double the goal names and all 38 ids turn green, but tests/standard_names/test_generate_docs.py:46 still carries a second local transaction double, so the 'delete each file's local copy' half of the goal is met only for the fakes that caused the C1 failures.\nSCORE evidence: 18\nJUSTIFICATION evidence: gate-main.log's last-but-one line reads '70 failed, 8454 passed, 11 skipped' with EXIT=1 and gate-head.log '32 failed, 8492 passed, 11 skipped' with EXIT=1, their FAILED sets differing by exactly the 38 C1 ids, and head-c1.log/negative-control.log show 38 passed vs 38 failed on the same id list.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only 966f3d965de9b42831c77acc09af262a6e8fb20f ca5bf2d151396763c4d81f3d4d4a602bedf813e4 returns only the 17 declared write paths, with no production change smuggled in beside the double.\nSCORE durability: 17\nJUSTIFICATION durability: Reverting the session answer in tests/standard_names/graph_transaction_doubles.py:66-68 reproduces the exact red state negative-control.log records (38 failed at 966f3d965), and the assertion changes each fail on their own reversal - tests/standard_names/test_embed_worker.py:182 on dropping the embed_text_hash clear, tests/standard_names/test_error_siblings.py:307 on restoring quarantine_reason, tests/standard_names/test_skeleton_placeholder_cleanup.py:178 on re-adding successor_placeholder - though the two source-text re-pins are weaker than a behavioural check and no test exercises the double directly.\nSCORE fit: 17\nJUSTIFICATION fit: The module and its docstring follow tests/recording_graph_client.py:1-25 and the comments name mechanisms; the only blemishes are a missing trailing newline at tests/standard_names/graph_transaction_doubles.py:87 and mixed import styles ('tests.standard_names.graph_transaction_doubles' in test_embed_worker.py:10 versus '.graph_transaction_doubles' in test_frozen_stage_pool_guard.py:12).\nSCORE reuse: 18\nJUSTIFICATION reuse: TransactionDouble at tests/standard_names/graph_transaction_doubles.py:30 extends RecordingGraphClient (tests/recording_graph_client.py:18), the owner of statement capture, and a search of tests/ found no pre-existing shared transaction double, so nothing is duplicated at the module level; the leftover local double at test_generate_docs.py:46 is reported as a finding rather than counted against the added definition.\nFINDING tests/standard_names/test_generate_docs.py:46 non-blocking: non-blocking: _make_gc_tx still builds its own session/begin_transaction/transaction stack for the four claim tests, so this file carries two doubles and the brief's 'delete each file's local copy' and the manifest's landing claim that local fakes are gone are not fully met; test_docs_supersede_safety.py:140, test_atomic_refined_name_persistence.py and test_snrun_async_counters.py retain equivalent local session fakes for their non-C1 tests.\nFINDING tests/standard_names/test_review_name_stages.py:44 non-blocking: non-blocking: _READBACK_STATEMENT, _WRITE_STATEMENT and _persist_gc are copied verbatim from test_review_docs_stages.py:47-62, so the per-statement keying the shared module exists to centralise is now duplicated in two files and will drift.\nFINDING tests/standard_names/graph_transaction_doubles.py:87 non-blocking: non-blocking: the new module ends without a trailing newline (the file's last two bytes are 't)'), which ruff format would rewrite and which shows the file was not passed through the repository's formatter before commit.\nFINDING .config/reckon/crew/runs/r-20261028T075303780622-sib-red-transaction-doubles/manifest.md:11 non-blocking: non-blocking: the tests line is a description ('38 C1 ids, all of which pass at head') and baseline_suite (line 17) / after_suite (line 18) are prose, not the armed JSON with revision, command, exit_status, log_path, completed, failure_count and failure_ids; the literal commands and counts are recoverable from each gate log's '# command:' header and summary line, but the record itself cannot supply a promotion gate receipt without re-reading the logs.",
+  "review_run_id": "r-20261028T094113870082-review-of-sib-red-transaction-doubles-ca5bf2d15139",
+  "reviewed_base_sha": "966f3d965de9b42831c77acc09af262a6e8fb20f",
+  "reviewed_head_sha": "ca5bf2d151396763c4d81f3d4d4a602bedf813e4",
+  "reviewed_paths": [
+    "tests/standard_names/graph_transaction_doubles.py",
+    "tests/standard_names/test_atomic_refined_name_persistence.py",
+    "tests/standard_names/test_docs_context_injection.py",
+    "tests/standard_names/test_docs_supersede_safety.py",
+    "tests/standard_names/test_embed_worker.py",
+    "tests/standard_names/test_error_siblings.py",
+    "tests/standard_names/test_frozen_stage_pool_guard.py",
+    "tests/standard_names/test_generate_docs.py",
+    "tests/standard_names/test_metadata_invariants.py",
+    "tests/standard_names/test_rename_carries_documentation.py",
+    "tests/standard_names/test_review_docs_stages.py",
+    "tests/standard_names/test_review_name_stages.py",
+    "tests/standard_names/test_reviewer_profiles.py",
+    "tests/standard_names/test_skeleton_placeholder_cleanup.py",
+    "tests/standard_names/test_sn_edit_kind.py",
+    "tests/standard_names/test_snrun_async_counters.py",
+    "docs/evidence/fragments/sn-integrity-backlog/sib-red-transaction-doubles.html"
+  ],
+  "reviewed_run_id": "r-20261028T075303780622-sib-red-transaction-doubles",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T09:54:32.964173+00:00",
+  "total": 107
+}

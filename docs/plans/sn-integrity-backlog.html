@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="277">
+<meta name="plan-version" content="278">
 <meta name="plan-modified" content="2026-10-28">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -885,6 +885,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s41" data-id="c-run-r-20261028T075932338031-sib-red-export-accounting" data-who="reckon-build" data-when="2026-10-28T09:22:56Z">
     <div class="r-comment-body"><p>sib-red-export-accounting — wired the export entrypoint's composition root and taught three empty-graph test doubles the zero count row; the five C4 export ids pass at head, base arm 282260d6c 71 failures against head 66, zero ids added and the five removed, both id lists readable from the arm logs.</p></div>
+</div>
+<div class="r-comment" data-section="s41" data-id="c-run-r-20261028T094113870082-review-of-sib-red-transaction-doubles-ca5bf2d15139" data-who="reckon-build" data-when="2026-10-28T09:51:33.479Z">
+    <div class="r-comment-body"><p>review of r-20261028T075303780622-sib-red-transaction-doubles over base 966f3d965 head ca5bf2d15: six dimensions scored 17/18/20/17/17/18, added_failure_count 0 with an empty id list derived from gate-main.log (70 FAILED) and gate-head.log (32 FAILED), four non-blocking findings; record parsed by crew check --review</p></div>
 </div>
 <div class="r-comment" data-section="s42" data-id="c-run-r-20261028T075816173791-review-of-sib-split-name-bindings-53d7d9f4f1e0" data-who="reckon-build" data-when="2026-10-28T08:19:13.964Z">
     <div class="r-comment-body"><p>Reviewed r-20261028T064048248418-sib-split-name-bindings at b4254dfbf..53d7d9f4f, scored goal_fidelity 20, evidence 17, scope_discipline 18, durability 19, fit 18, reuse 15, with added_failure_count 0; two non-blocking findings — the evidence fragment overstates the removed bindings as eleven (actual ten bindings and two dynamic lookups, still 12 sites) and the new guard matches only a direct globals() call so an aliased dict evades it. Durability was measured, not inferred: reinstating the exact base spelling at graph_ops.py:303 in a scratch copy of the head tree made test_no_dynamic_name_binding fail.</p></div>
