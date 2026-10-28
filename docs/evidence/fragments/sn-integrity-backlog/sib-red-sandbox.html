@@ -54,22 +54,33 @@ directly. Nothing in the product changed for these 36 ids.</p>
 
 <h2 id="sib-red-sandbox-gate">Gate</h2>
 <p>Two <code>git archive</code> trees, base <code>966f3d965</code> and head
-<code>c464126e3</code>, each with its own <code>--basetemp</code>, running
+<code>e8e7376a5</code>, each with its own <code>--basetemp</code>, running
 <code>tests/standard_names/</code> on default markers with <code>-n 8</code>.
 Each tree imported the module it ran: <code>python -c "import imas_codex;
 print(imas_codex.__file__)"</code> printed the tree's own
-<code>imas_codex/__init__.py</code>.</p>
+<code>imas_codex/__init__.py</code>, and each gate log's header names that path,
+the cwd it resolved from and the literal command.</p>
 <ul>
   <li id="sib-red-sandbox-gate-base">Base arm: 101 failed, 8419 passed,
   15 skipped, <code>EXIT=1</code>.</li>
-  <li id="sib-red-sandbox-gate-head">Head arm: 66 failed, 8454 passed, 15 skipped,
-  <code>EXIT=1</code>.</li>
+  <li id="sib-red-sandbox-gate-head">Head arm: 65 failed, 8455 passed, 15 skipped,
+  <code>EXIT=1</code>. An earlier head arm at <code>c464126e3</code> read 66
+  failed; the id that differed is the flake below.</li>
   <li id="sib-red-sandbox-gate-delta">All 36 ids present in the base failure list
-  and absent from the head one: 14 S1 and 22 S2 fixed, nothing of mine left red.
-  One id appears only in the head list,
+  and absent from every head list: 14 S1 and 22 S2 fixed, nothing of mine left
+  red. Compared set-wise against the base list, the final head arm adds
+  <strong>zero</strong> ids.</li>
+  <li id="sib-red-sandbox-gate-flake">One id,
   <code>test_harmonize_apply.py::test_apply_reports_no_fall_when_no_member_scores_worse</code>,
-  a file this node does not touch; it passes in isolation in both trees (head
-  and base), so it is an order-dependent flake rather than an added failure.</li>
+  failed in the first head arm only and in no base arm. It was then run three
+  times per arm, each time from its own freshly extracted archive tree of base
+  and of head: <em>1 passed</em> in all six runs. That file references neither
+  the new fixture nor any module this node changed
+  (<code>grep -n "pinned_export_provenance\|SOURCE_DATE_EPOCH\|from
+  tests.standard_names" test_harmonize_apply.py</code> prints nothing), and the
+  only shared file touched is <code>tests/standard_names/conftest.py</code>,
+  which gained a non-autouse fixture. The id is therefore an order-dependent
+  flake under <code>-n 8</code>, not an added failure.</li>
 </ul>
 
 <h2 id="sib-red-sandbox-ids">Per-id decision</h2>
