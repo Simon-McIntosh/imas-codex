@@ -59,9 +59,6 @@ def cypher_mutation_clause(cypher: str) -> str | None:
     return match.group(0).upper() if match else None
 
 
-_cypher_mutation_clause = cypher_mutation_clause
-
-
 class _SuppressedWriteResult:
     """The Result-shaped return for a statement the guard dropped.
 

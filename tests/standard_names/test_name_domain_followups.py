@@ -183,6 +183,61 @@ def test_undecided_is_public_in_its_owner() -> None:
     assert not decision.decided
 
 
+def test_a_derived_parent_takes_the_domain_most_children_carry() -> None:
+    """The derived-parent rule is the children's majority, ties broken by name.
+
+    A parent with no sources of its own has no domain of its own either, so its
+    decision is derived from its children. The rule has to answer *decided*:
+    an undecided decision leaves the parent's scalar at whatever it held, which
+    is the behaviour this rule exists to replace.
+    """
+    from imas_codex.standard_names.domain_decision import (
+        DomainDecision,
+        derived_parent_domain_decision,
+        undecided,
+    )
+
+    offered = ("general", "magnetics", "transport")
+    majority = derived_parent_domain_decision(
+        undecided("parent", offered, "no answer"),
+        ["magnetics", "transport", "magnetics"],
+    )
+    assert majority.decided, (
+        "a parent three of whose children carry a domain must be decided, not "
+        f"left holding its current scalar: {majority}"
+    )
+    assert majority.choice == "magnetics"
+    assert majority.probability == pytest.approx(2 / 3)
+    assert majority.candidates == ("magnetics", "transport")
+
+    tied = derived_parent_domain_decision(
+        undecided("parent", offered, "no answer"),
+        ["transport", "magnetics"],
+    )
+    assert tied.decided, f"a tie between domains is still a decision: {tied}"
+    assert tied.choice == "magnetics", (
+        "a tie breaks by name, so the same children always yield the same "
+        f"parent whatever order they arrive in: {tied}"
+    )
+    assert tied.probability == pytest.approx(0.5)
+
+    assert not derived_parent_domain_decision(
+        undecided("parent", offered, "no answer"), []
+    ).decided, "a parent whose children carry no domain gains none from them"
+
+    stored = DomainDecision(
+        name="parent",
+        candidates=offered,
+        choice="transport",
+        probability=0.9,
+        model="sn-domain-tree",
+        decided_at="2026-01-01T00:00:00+00:00",
+    )
+    assert (
+        derived_parent_domain_decision(stored, ["magnetics", "magnetics"]) is stored
+    ), "a settled decision outranks the one its children would give it"
+
+
 def test_persist_refined_name_carries_no_source_domains_parameter() -> None:
     """A parameter no caller's value reaches is not carried."""
     from imas_codex.standard_names.graph_store.graph_refinement import (

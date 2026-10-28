@@ -413,13 +413,14 @@ def _expected_source_domains(row: Mapping[str, Any]) -> frozenset[str]:
     return frozenset(union)
 
 
+def _ranked_domains(domains: Sequence[str]) -> dict[str, int]:
+    """The domains these carry, most frequent first, ties broken by name."""
+    return path_counts({str(index): domain for index, domain in enumerate(domains)})
+
+
 def dominant_domain(domains: Sequence[str]) -> str | None:
     """The domain most of these carry, ties broken by name; ``None`` if none do."""
-    counts = Counter(domain for domain in domains if domain)
-    if not counts:
-        return None
-    most = max(counts.values())
-    return sorted(domain for domain, n in counts.items() if n == most)[0]
+    return next(iter(_ranked_domains(domains)), None)
 
 
 def derived_parent_domain_decision(
@@ -438,15 +439,15 @@ def derived_parent_domain_decision(
     """
     if decision.decided:
         return decision
-    counts = Counter(domain for domain in child_domains if domain)
-    chosen = dominant_domain(child_domains)
-    if chosen is None:
+    ranked = _ranked_domains(child_domains)
+    if not ranked:
         return decision
+    chosen = next(iter(ranked))
     return DomainDecision(
         name=decision.name,
-        candidates=tuple(sorted(counts)),
+        candidates=tuple(sorted(ranked)),
         choice=chosen,
-        probability=counts[chosen] / sum(counts.values()),
+        probability=ranked[chosen] / sum(ranked.values()),
         model="derived-parent-majority",
         decided_at=None,
     )

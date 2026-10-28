@@ -280,7 +280,7 @@ def test_seed_parent_sources_picks_up_placeholder_without_flag():
     )
 
 
-def test_seed_parent_sources_routes_derived_through_review():
+def test_seed_parent_sources_routes_derived_through_review(monkeypatch):
     """Derived parents are stamped ``origin='derived'`` and promoted with a
     review-aware ``name_stage``: an already-reviewed parent stays ``accepted``,
     an unreviewed but review-ready parent (real description + embedding) is
@@ -288,12 +288,33 @@ def test_seed_parent_sources_routes_derived_through_review():
     a parent carrying only the placeholder description is held at ``accepted``
     (the docs gate keeps it out of docs until enrichment + review fill it in).
     Docs are never spent on a name whose form has not been vetted.
+
+    The parent's domain is not among the fields this statement sets: it is
+    written by ``write_name_domain``, which sets the scalar, the source set and
+    the ``HAS_PHYSICS_DOMAIN`` edges in one transaction.
     """
     gc = MagicMock()
     captured_sets: list[str] = []
+    domain_writes: list[tuple[str, object]] = []
+    monkeypatch.setattr(
+        _owning_graph_lineage,
+        "write_name_domain",
+        lambda client, sn_id, decision: domain_writes.append((sn_id, decision)),
+    )
 
     def _query(cypher, **kwargs):
         captured_sets.append(cypher)
+        if "UNWIND $ids AS id" in cypher and "domain_decision_choice" in cypher:
+            return [
+                {
+                    "id": "magnetic_field",
+                    "candidates": ["general", "magnetics"],
+                    "choice": None,
+                    "probability": None,
+                    "model": None,
+                    "decided_at": None,
+                }
+            ]
         if "name_stage IS NULL" in cypher and "HAS_PARENT" in cypher:
             return [
                 {
@@ -345,11 +366,27 @@ def test_seed_parent_sources_routes_derived_through_review():
         "parent.validation_status = coalesce(parent.validation_status, 'valid')",
         "parent.kind = $kind",
         "parent.unit = coalesce($unit, parent.unit)",
-        "parent.physics_domain =",
         "parent.description = CASE",
         "parent.needs_composition = null",
     ):
         assert marker in write_query, f"materializer must set {marker!r}: {write_query}"
+
+    # The domain is the one writer's, so this statement sets it nowhere and the
+    # derived decision reaches the graph through ``write_name_domain`` alone.
+    assert "parent.physics_domain =" not in write_query, (
+        "the materializer must not write the parent's domain itself: the scalar, "
+        "the source set and the HAS_PHYSICS_DOMAIN edges are one transaction "
+        "owned by write_name_domain"
+    )
+    assert [sn_id for sn_id, _ in domain_writes] == ["magnetic_field"], (
+        "every materialised parent's domain must be written through "
+        f"write_name_domain, not through the statement: {domain_writes}"
+    )
+    decision = domain_writes[0][1]
+    assert decision.decided and decision.choice == "magnetics", (
+        "the parent takes the domain its children carry, as a decided decision: "
+        f"{decision}"
+    )
 
 
 def test_seed_parent_sources_keeps_seedable_operator_gate() -> None:

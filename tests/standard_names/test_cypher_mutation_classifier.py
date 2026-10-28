@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from imas_codex.cli.sn import _cypher_mutation_clause
+from imas_codex.cli.sn import cypher_mutation_clause
 from imas_codex.standard_names import protection
 
 #: Line of the string literal opening the automatic-deletion protection query.
@@ -40,12 +40,12 @@ def test_read_only_protection_query_is_not_classified_as_a_mutation() -> None:
     # Guard the fixture: the identifier that drives the defect must be present,
     # otherwise this test could pass because the query changed, not the reader.
     assert "catalog_merge_commit_sha" in query
-    assert _cypher_mutation_clause(query) is None
+    assert cypher_mutation_clause(query) is None
 
 
 def test_identifier_part_named_merge_is_not_a_mutation() -> None:
     query = "MATCH (sn:StandardName) RETURN sn.catalog_merge_commit_sha, sn.exported_at"
-    assert _cypher_mutation_clause(query) is None
+    assert cypher_mutation_clause(query) is None
 
 
 @pytest.mark.parametrize(
@@ -65,9 +65,9 @@ def test_identifier_part_named_merge_is_not_a_mutation() -> None:
 def test_genuine_mutation_statements_keep_their_clause(
     keyword: str, statement: str
 ) -> None:
-    assert _cypher_mutation_clause(statement) == keyword
+    assert cypher_mutation_clause(statement) == keyword
 
 
 def test_first_mutation_clause_is_reported_in_document_order() -> None:
     statement = "MERGE (sn:StandardName {id: $id}) SET sn.name_stage = 'approved'"
-    assert _cypher_mutation_clause(statement) == "MERGE"
+    assert cypher_mutation_clause(statement) == "MERGE"
