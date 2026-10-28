@@ -1,0 +1,79 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-28T05:28:30.022Z",
+  "dispatched_at": "2026-10-28T05:23:51Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/facility-discovery-sequence/r-20261028T052258403041-plan-review-of-facility-discovery-sequence/plan.html:179",
+      "id": "reasoning-1",
+      "reason": "\u00a74 is the section a later node reads to learn when mapping runs, and its summary tells that node the default was kept, which is the exact reversal the decision recorded hours later.",
+      "text": "\u00a74's landed summary says \"The mapping domain runs by default in `imas-codex discover FACILITY`\", while the `mapping-stage-default` decision in the same document (data-choice=\"opt-in\", 2026-10-08T09:47:46) and \u00a73's landed summary (\"Mapping runs only as `--only mapping`\") say the opposite; `sequence.py:615` returns \"not requested\" for mapping whenever `--only` is absent and `--until` gives no closure",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/facility-discovery-sequence/r-20261028T052258403041-plan-review-of-facility-discovery-sequence/plan.html:64",
+      "id": "reasoning-2",
+      "reason": "\u00a72's done-when bullet \"each stage's `nothing to do` follows its named pending-work predicate\" cannot hold as written, and the \u00a77 nodes that edit these very modules are told the documents and wiki predicates are already in the registry when they are not.",
+      "text": "\u00a72 (declared done) describes a nine-stage registry in which each stage's pending-work predicate is named by the registry, \"the mapping stage records none\" because \"mapping is not a discover domain\", and \"the registry's documents stage calls only `has_pending_work`\"; the built registry has eight stages (`_stage(` occurs 8 times in `imas_codex/cli/discover/sequence.py`), has no separate `signals check` stage (check folded into `signals enrich`'s pending tuple at :155-157), declares `pending=()` for both `documents` (:132) and `wiki` (:140) so neither named predicate group is wired, and records `domain=\"mapping\"` for the mapping stage against `DOMAINS = (..., \"mapping\")` \u2014 `DISCOVERY_DOMAINS` at `common.py:33` also contains `\"map\"`, so mapping is a discover domain",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/facility-discovery-sequence/r-20261028T052258403041-plan-review-of-facility-discovery-sequence/plan.html:108",
+      "id": "anchors_resolve-1",
+      "reason": "a reader following any of the ten lands in unrelated code with no signal that the pointer is stale, which is worse than a bare symbol name because it looks resolved.",
+      "text": "10 of the 12 cited `file:line` anchors are stale: `paths/parallel.py:198` (actual 277, the cited line is inside a Cypher `RETURN count(p)` clause), `signals/parallel.py:549\u2013587` (actual 768\u2013819, the cited range starts on a blank line before `get_checkpoint_dir`), `ids/workers.py:404` (actual 580, cited line is inside a docstring `Args:` block), `ids/workers.py:386\u2013395` (actual 525\u2013571), `code/graph_ops.py:579\u2013717` (actual 631\u2013811), `wiki/graph_ops.py:614\u2013690` (actual 628\u2013716), `documents/pipeline.py:74` (actual 84), `common.py:30` (`DISCOVERY_DOMAINS`, actual 33), `common.py:502`/`:443` (actual 543/484); only `services.py:159,178,200` and `base/image.py:354` land correctly",
+      "type": "anchors_resolve",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/facility-discovery-sequence/r-20261028T052258403041-plan-review-of-facility-discovery-sequence/plan.html:237",
+      "id": "anchors_resolve-2",
+      "reason": "the required evidence for both closed gates is unreachable from the plan surface, so a reader cannot check the claim the gate certifies without searching the archive by hand.",
+      "text": "both evidence gates put their evidence as prose in the `href` attribute (`href=\"mapping-candidate-selection section 8 landed (merge 3c1c0ce8f on main): \u2026\"` at :237 and a sentence beginning \"The census merged as bdb42163a\" at :242) instead of a target, so the gate's only link resolves to nothing while the prose that belongs in the gate body is hidden in an attribute",
+      "type": "anchors_resolve",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/facility-discovery-sequence/r-20261028T052258403041-plan-review-of-facility-discovery-sequence/plan.html:204",
+      "id": "done_when-1",
+      "reason": "the measure is quantitative and can fail on its own terms (count did not rise, spend over cap), and the node is a record of a lead-run execution rather than a guard-bearing code change, so adding a control changes the evidence's shape but not the path any later node takes.",
+      "text": "the `sequence-jt60sa-proof` done-when (\"the fragment holds both tables, and the real run's enriched-signal count rose and every stage's outcome and spend is in the final table, within the cap\") states no negative control, so a run in which every stage silently reported `ran` with zero work, or in which mapping was reported as requested and still skipped nothing, satisfies it; \u00a72 by contrast names one (\"a test patches the check and sees the outcome follow it\")",
+      "type": "done_when",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "3ea4982988a467f96df04009c632865404db5cf7",
+  "plan_fingerprint": "225620ee73736ea7a8aa6f01ee4e8c8c7ad2d01d45833cfba384bd18da817b60",
+  "plan_slug": "facility-discovery-sequence",
+  "plan_version": 98,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261028T052258403041-plan-review-of-facility-discovery-sequence",
+  "reviewed_blob_sha": "6e7e436881b6c61d5d7de5d3db5e7e7543a69485",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "two findings \u2014 10 of the 12 cited `file:line` anchors are stale by 4 to 270 lines and land in unrelated code, and both gate evidence `href` attributes carry prose instead of a target.",
+    "done_when": "a finding \u2014 the \u00a75 proof node's done-when names no negative control, so nothing shows that a stage which should have been skipped was reported as skipped.",
+    "evidence_paths": "pass \u2014 every gate and fragment path is durable under `docs/evidence/fragments/facility-discovery-sequence/`, `docs/evidence/archive/` and `docs/figures/facility-discovery-sequence/`, and all of those resolve on disk.",
+    "naming": "pass \u2014 the plan prescribes mechanism-named symbols (`resolve_focus_items`, `has_pending_work`) and no plan label, stage name, ticket number or version tag is prescribed into code; node ids such as `signal-status-monotonic` are tracker identifiers and stay in the plan, as they should.",
+    "reasoning": "two findings \u2014 \u00a74's landed summary states that mapping runs by default, which the plan's own later `mapping-stage-default` decision and \u00a73 contradict; and \u00a72's mechanism (nine stages, a names-predicate-per-stage registry, \"mapping is not a discover domain\") is not the mechanism in `imas_codex/cli/discover/sequence.py`.",
+    "single_goal": "pass \u2014 the implementable nodes each name one deliverable (one registry, one refusal rule, one focus filter per domain), and the \u00a77 nodes not yet built are each described as one domain's filter with one named test file.",
+    "wiring": "pass \u2014 every cross-plan reference the plan names resolves in `docs/plans/jt60sa-discovery-completion.html` (`s56`, `jt60sa-jev-rescan`, `signal-status-monotonic`) and the two evidence gates carry `data-section`/`data-gated-sections`; section `data-links=\"\"` is the house convention in this repo (62 of 62 in the sibling plan), so absence of link attributes is not a defect here."
+  },
+  "section_digests": {
+    "_document": "d6d0a61d05de44cd07c5f1553f38d75e88bfcdba76173e57c7ee113ffc6be025",
+    "s1": "3992671283458b0f4b8b18b7b0aed3eeb299da5f7c62dba76e5df85f856f9819",
+    "s2": "91aba78b03492a99f91cbd2325542ccd549b22f9faf717133f2bbce9726d941d",
+    "s3": "2f15ec82d345fe569a1795c32edee8a683913c2af3f20db4143bfa5f4551eb8c",
+    "s4": "7225e1dc1b66dc0782e3cbd5fc72872d40207b5af69efe44eca8052195f545b5",
+    "s5": "cf17d562f1910dab7533b3ef05762505fd228fceb9bc741a608d833f6778d9a6",
+    "s6": "119fba697d36a575e0be420b1ade363aa87bd66f908dadc17b61f6bb388520ca",
+    "s7": "8fcedb06998790972c5fa15f643b78d77c1ee77e8f8bb5fd9620ee1054f0b3d3",
+    "s8": "c44e6ef9d8721d83a3130627b986852330590075e3d4e42c9d50f53293b43111"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T05:30:00.659483+00:00"
+}
