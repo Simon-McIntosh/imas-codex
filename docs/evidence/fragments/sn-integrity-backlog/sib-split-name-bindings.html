@@ -150,11 +150,19 @@ Two archive trees of the same run, same command, <code>-n 8</code>:
 <p>
 The 92 base failures are pre-existing in both arms and are not attributable to
 this change: both arms are archive trees of the same command and their failure
-id sets differ only by the one added id above. The <code>-m graph</code> arm was
-not run: <code>tests/graph/conftest.py</code> requires
-<code>IMAS_CODEX_TEST_NEO4J_URI</code> for <code>disposable_graph</code>, none
-was provisioned, and pointing graph-marked tests at the running
-<code>codex-neo4j</code> would be the live-graph write the gate forbids.
+id sets differ only by the one added id above.
+</p>
+<p>
+The <code>-m graph</code> arm ran over the nine test files that import a changed
+module and carry the marker, in both archive trees: <strong>69 passed, 19
+deselected</strong>, <code>EXIT=0</code>, identical in each
+(<code>logs/gate_base_graph.log</code>, <code>logs/gate_head_graph.log</code>).
+That selection did not exercise a disposable instance —
+<code>IMAS_CODEX_TEST_NEO4J_URI</code> is unset on this host, so the
+<code>disposable_graph</code> fixture in <code>tests/graph/conftest.py</code> was
+never requested. The arm therefore shows zero delta for the changed modules and
+says nothing about graph-write behaviour on a disposable instance, which remains
+unmeasured for want of one.
 </p>
 </main>
 </body>
