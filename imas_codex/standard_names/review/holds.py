@@ -167,7 +167,9 @@ def dismiss_hold(
         rows = client.query(
             """
             MATCH (sn:StandardName)-[:HAS_HOLD]->(hold:ReviewHold {id: $id})
-            WHERE hold.status <> 'dismissed'
+            // Only an already dismissed hold refuses a second dismissal; a hold
+            // without a status has not been dismissed.
+            WHERE coalesce(hold.status, '') <> 'dismissed'
             SET hold.status = 'dismissed', hold.triaged_by = $by,
                 hold.triaged_at = datetime(), hold.triage_reason = $reason
             RETURN hold.id AS id, hold.axis AS axis, sn.id AS name_id

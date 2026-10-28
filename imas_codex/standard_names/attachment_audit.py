@@ -206,7 +206,9 @@ _ATTACHMENTS_QUERY = (
 MATCH (src:StandardNameSource)-[:PRODUCED_NAME]->(sn:StandardName)
 {scope}
 OPTIONAL MATCH (live_producer:StandardNameSource)-[:PRODUCED_NAME]->(sn)
-  WHERE live_producer.status <> 'stale'
+  // A producer without a status is not a proven stale tombstone, so the name
+  // is not read as sourceless on that ground alone.
+  WHERE coalesce(live_producer.status, '') <> 'stale'
 WITH src, sn,
      [p IN collect(DISTINCT live_producer.id) WHERE p IS NOT NULL] AS live_producers
 MATCH (src)-[:FROM_DD_PATH]->(dd:IMASNode)
