@@ -1,5 +1,6 @@
 """Calibration-only rate matching and shared paired resampling."""
 
+import faulthandler
 import json
 from pathlib import Path
 
@@ -80,12 +81,29 @@ def test_undefined_precision_is_not_reported_as_zero():
     assert control["point"] == 1 and control["n_resamples"] == 20
 
 
+@pytest.fixture
+def no_periodic_stack_dump():
+    """Silence the periodic stack dump for a pass that outlives its interval.
+
+    The suite arms a stack dump at 60 s for every test. This rebuild takes
+    about 160 s, so that dump lands while the main thread is inside a numpy
+    reduction, and every observed interpreter death followed such a dump by
+    about 15 s with the frame after the reduction unreadable. The test's own
+    600 s timeout still bounds a hang; only the periodic dump is cancelled.
+    """
+    faulthandler.cancel_dump_traceback_later()
+    yield
+    faulthandler.cancel_dump_traceback_later()
+
+
 @pytest.mark.timeout(600)
 @pytest.mark.skipif(
     not cc.DEFAULT_NAME_RECEIPTS.exists() or not cc.DEFAULT_DOCS_RECEIPTS.exists(),
     reason="frozen calibration receipts are not installed",
 )
-def test_matched_policy_rebuilds_from_frozen_scores_and_receipts():
+def test_matched_policy_rebuilds_from_frozen_scores_and_receipts(
+    no_periodic_stack_dump,
+):
     # One rebuild is the check: a second call re-runs the whole resampling pass
     # and doubles a cost that already runs to minutes under a loaded suite. The
     # committed artifact is the repeatability reference, so every value the
