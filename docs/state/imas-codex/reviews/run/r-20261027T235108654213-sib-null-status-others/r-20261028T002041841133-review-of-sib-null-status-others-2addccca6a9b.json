@@ -1,0 +1,83 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 11,
+  "call_sites": [
+    "imas_codex/standard_names/provenance_lifecycle.py:588 and :2185 call retarget_standard_name_sources",
+    "imas_codex/standard_names/edit.py:1936 calls retarget_standard_name_sources",
+    "imas_codex/standard_names/graph_store/graph_supersession.py:247 imports and calls retarget_standard_name_sources",
+    "imas_codex/standard_names/signed_manifest.py:7946 and imas_codex/standard_names/provenance_lifecycle.py:1040 call reset_standard_name_sources",
+    "imas_codex/standard_names/provenance_rebuild.py:646 calls find_orphan_parent_source_candidates",
+    "imas_codex/standard_names/provenance_rebuild.py:662 and imas_codex/standard_names/loop.py:2912 call reconcile_orphan_parent_sources",
+    "imas_codex/standard_names/graph_store/graph_source_bindings.py:194 and :251 call _source_compose_hint_decision",
+    "imas_codex/standard_names/attachment_audit.py:1056 calls _attachments_query",
+    "imas_codex/discovery/code/workers.py:1401 calls _mark_files_ingested",
+    "imas_codex/standard_names/review/holds.py:160 dismiss_hold has no production caller inside imas_codex"
+  ],
+  "completed_at": "2026-10-28T00:27:32.460Z",
+  "dispatched_at": "2026-10-28T00:22:23Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/provenance_lifecycle.py",
+      "line": "1183",
+      "severity": "non-blocking",
+      "text": "non-blocking: the coalesce added here changes no outcome, because the 'source.status = item.expected_status' equality on the line above already drops a null status, and the test at tests/standard_names/test_null_status_predicates_others.py:84 passes against the base modules, so this site is a restatement of the reading rather than a repaired guard; the manifest and fragment say so, which is why it is recorded rather than blocking."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T235108654213-sib-null-status-others/fix_log_headers.py",
+      "line": "40",
+      "severity": "non-blocking",
+      "text": "non-blocking: the '# command:' header of baseline-graph.log and after-graph.log, and every header line of head-newtests.log, was written by this repair script after the runs instead of being captured from the invocation, so those header lines cannot corroborate the literal command they state; the captured summary lines, EXIT codes and identical failure-id sets still carry the measurement."
+    },
+    {
+      "file": "tests/standard_names/test_null_status_predicates_others.py",
+      "line": "271",
+      "severity": "non-blocking",
+      "text": "non-blocking: the -m graph arm names 99 files but omits five that import imas_codex/discovery/code/workers.py (tests/cli/test_discover_sequence.py, tests/discovery/test_code_pipeline.py, test_code_reset_chunks.py, test_code_scan_failures.py, test_path_judgments.py); they carry no graph marker so -m graph collects nothing from them and they sit outside the standard_names arm, leaving the workers.py guard covered only by the new test."
+    }
+  ],
+  "gate_sources": {
+    "after_graph": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T235108654213-sib-null-status-others/after-graph.log",
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T235108654213-sib-null-status-others/after-suite.log",
+    "baseline_graph": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T235108654213-sib-null-status-others/baseline-graph.log",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T235108654213-sib-null-status-others/baseline-suite.log",
+    "negative_control": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T235108654213-sib-null-status-others/negative-control.log"
+  },
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "Verified 11 production call sites across the six changed modules; eight of the nine symbols have runtime callers, and review/holds.py:160 dismiss_hold has none inside imas_codex.",
+    "diff": "Read commit by commit from 5c94bae36; 7ef5c03d6 changes eight comparisons in six modules and adds a 281-line test file, and 2addccca6 adds only the 100-line evidence fragment.",
+    "done_when": "done_when asks a per-site reason, a disposable-graph null-row test per site failing on main, zero added failure ids and a fragment listing the sites; negative-control.log ends '7 failed, 1 passed' EXIT=1 against head-newtests.log '8 passed' EXIT=0, after-suite.log and baseline-suite.log both read '92 failed, 8421 passed, 12 skipped' with identical failure ids (diff main-failures.txt head-failures.txt is empty), and docs/evidence/fragments/sn-integrity-backlog/sib-null-status-others.html tabulates all eight sites, readings and reasons.",
+    "goal": "The source goal asks each remaining status exclusion to state what a null status means; imas_codex/discovery/code/workers.py:1143 and the seven other guards now coalesce the status and state the reading in a comment.",
+    "manifest": "Read; the source manifest names commits 7ef5c03d6 and 2addccca6, both gate arms with literal commands, exit statuses, counts and failure ids, the 7-of-8 negative control, and states plainly that the reset site is pinned rather than fixed.",
+    "write_paths": "The source brief fences nine paths; git diff 5c94bae36..2addccca6 changes six of the declared modules, tests/standard_names/test_null_status_predicates_others.py and the fragment, and no path outside the fence (git show --stat on both commits lists eight files in total)."
+  },
+  "justifications": {
+    "durability": "seven of the eight added assertions redden on the base modules as negative-control.log records, but tests/standard_names/test_null_status_predicates_others.py:104 passes there too, so the coalesce at provenance_lifecycle.py:1183 is exercised by nothing.",
+    "evidence": "after-suite.log and baseline-suite.log were both run in separate archive trees with their own basetemps and their failure-id sets are identical, but the '# command:' header of baseline-graph.log and after-graph.log was written after the run by fix_log_headers.py:40 rather than captured.",
+    "fit": "imas_codex/standard_names/graph_store/graph_parent_lifecycle.py:1104 follows the coalesce(x.status, '') idiom already used at imas_codex/standard_names/graph_store/graph_audits.py:266 and across the package, and the comments name the mechanism with no plan label.",
+    "goal_fidelity": "imas_codex/discovery/code/workers.py:1143 and imas_codex/standard_names/attachment_audit.py:211 decide the null case in the query text, and each carries the one-line reason the goal asks for.",
+    "reuse": "a capability search over imas_codex/ for a shared null-safe status predicate found none - the idiom is written inline at roughly fifty sites, including imas_codex/standard_names/source_invariant.py after ffad2fd46 - so each addition extends the existing idiom rather than forking a new mechanism.",
+    "scope_discipline": "git show --stat 7ef5c03d6 and 2addccca6 list six modules, the new test file and the fragment, all inside the nine declared write paths, and no repo-wide guard is added."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source goal asks each remaining status exclusion to state what a null status means; imas_codex/discovery/code/workers.py:1143 and the seven other guards now coalesce the status and state the reading in a comment.\nVERDICT done_when: done_when asks a per-site reason, a disposable-graph null-row test per site failing on main, zero added failure ids and a fragment listing the sites; negative-control.log ends '7 failed, 1 passed' EXIT=1 against head-newtests.log '8 passed' EXIT=0, after-suite.log and baseline-suite.log both read '92 failed, 8421 passed, 12 skipped' with identical failure ids, and docs/evidence/fragments/sn-integrity-backlog/sib-null-status-others.html tabulates all eight sites, readings and reasons.\nVERDICT write_paths: The source brief fences nine paths; git diff 5c94bae36..2addccca6 changes six of the declared modules, tests/standard_names/test_null_status_predicates_others.py and the fragment, and no path outside the fence.\nVERDICT manifest: Read; the source manifest names commits 7ef5c03d6 and 2addccca6, both gate arms with literal commands, exit statuses, counts and failure ids, the 7-of-8 negative control, and states plainly that the reset site is pinned rather than fixed.\nVERDICT diff: Read commit by commit from 5c94bae36; 7ef5c03d6 changes eight comparisons in six modules and adds a 281-line test file, and 2addccca6 adds only the 100-line evidence fragment.\nCALL_SITES: imas_codex/standard_names/provenance_lifecycle.py:588 and :2185 call retarget_standard_name_sources, imas_codex/standard_names/edit.py:1936 calls retarget_standard_name_sources, imas_codex/standard_names/graph_store/graph_supersession.py:247 calls retarget_standard_name_sources, imas_codex/standard_names/signed_manifest.py:7946 and imas_codex/standard_names/provenance_lifecycle.py:1040 call reset_standard_name_sources, imas_codex/standard_names/provenance_rebuild.py:646 calls find_orphan_parent_source_candidates, imas_codex/standard_names/provenance_rebuild.py:662 and imas_codex/standard_names/loop.py:2912 call reconcile_orphan_parent_sources, imas_codex/standard_names/graph_store/graph_source_bindings.py:194 and :251 call _source_compose_hint_decision, imas_codex/standard_names/attachment_audit.py:1056 calls _attachments_query, imas_codex/discovery/code/workers.py:1401 calls _mark_files_ingested, imas_codex/standard_names/review/holds.py:160 dismiss_hold has no production caller inside imas_codex\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/discovery/code/workers.py:1143 and imas_codex/standard_names/attachment_audit.py:211 decide the null case in the query text, and each carries the one-line reason the goal asks for.\nSCORE evidence: 18\nJUSTIFICATION evidence: after-suite.log and baseline-suite.log were both run in separate archive trees with their own basetemps and their failure-id sets are identical, but the '# command:' header of baseline-graph.log and after-graph.log was written after the run by fix_log_headers.py:40 rather than captured.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat 7ef5c03d6 and 2addccca6 list six modules, the new test file and the fragment, all inside the nine declared write paths, and no repo-wide guard is added.\nSCORE durability: 16\nJUSTIFICATION durability: seven of the eight added assertions redden on the base modules as negative-control.log records, but tests/standard_names/test_null_status_predicates_others.py:104 passes there too, so the coalesce at provenance_lifecycle.py:1183 is exercised by nothing.\nSCORE fit: 19\nJUSTIFICATION fit: imas_codex/standard_names/graph_store/graph_parent_lifecycle.py:1104 follows the coalesce(x.status, '') idiom already used at imas_codex/standard_names/graph_store/graph_audits.py:266, and the comments name the mechanism with no plan label.\nSCORE reuse: 20\nJUSTIFICATION reuse: a capability search over imas_codex/ for a shared null-safe status predicate found none - the idiom is written inline at roughly fifty sites, including imas_codex/standard_names/source_invariant.py after ffad2fd46 - so each addition extends the existing idiom rather than forking a new mechanism.\nFINDING imas_codex/standard_names/provenance_lifecycle.py:1183 non-blocking: the coalesce added here changes no outcome, because the 'source.status = item.expected_status' equality on the line above already drops a null status, and the test at tests/standard_names/test_null_status_predicates_others.py:84 passes against the base modules, so this site restates the reading rather than repairing a guard.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261027T235108654213-sib-null-status-others/fix_log_headers.py:40 non-blocking: the '# command:' header of baseline-graph.log and after-graph.log, and every header line of head-newtests.log, was written by this repair script after the runs instead of being captured from the invocation, so those header lines cannot corroborate the literal command they state.\nFINDING tests/standard_names/test_null_status_predicates_others.py:271 non-blocking: the -m graph arm omits five files that import imas_codex/discovery/code/workers.py and carry no graph marker, leaving the workers.py guard covered only by the new test.\n",
+  "review_run_id": "r-20261028T002041841133-review-of-sib-null-status-others-2addccca6a9b",
+  "reviewed_base_sha": "5c94bae36cca434169ab47b87ded652f6e203024",
+  "reviewed_head_sha": "2addccca6a9b387b030af483cbe35751bfd4b88a",
+  "reviewed_run_id": "r-20261027T235108654213-sib-null-status-others",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T00:26:15.920248+00:00",
+  "total": 112
+}
