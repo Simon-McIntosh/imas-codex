@@ -1,0 +1,60 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run recorded no suite: its manifest carries baseline_suite null and after_suite null, and test_logs names four pipeline gate logs (gate-sn-run-preview.log, gate-sn-run-review-name-scoped.log, gate-sn-rescore-midplane.log, gate-sn-rescore-wall.log) rather than test arms. Those logs were read: preview EXIT=0 '2 existing name(s) eligible', the scoped pool reported processed=0, and both rescores exit 3 with the pipeline's held message, each log ending in a bare EXIT= line. So added_failure_count 0 here means no failure measurement exists, not that the gate was clean.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-28T09:23:40.010Z",
+  "dispatched_at": "2026-10-28T09:11:28Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-name-review.html",
+      "line": "19",
+      "severity": "non-blocking",
+      "text": "the sentence \"Every failing judgement cites evidence: source_paths=[]\" is false for the midplane's missing_required_segment check, whose recorded evidence is \"physical_base='electrostatic_potential'; position='outboard_midplane'\" with no source_paths (shc-locus-name-review-after.json comments_json), and the reasons table at :174-196 drops that check (p=0.55) and over_qualified_modifier (p=0.58), so the record's causal claim that the refusal is driven by the source-fidelity check \"rather than by the shape of the name\" rests on a partial list; the repair belongs with the node that repairs the bindings, since both omitted checks also exceeded their cutoff."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T084048678456-shc-locus-name-review/manifest.md",
+      "line": "16",
+      "severity": "non-blocking",
+      "text": "the tests line names a state-capture command at /tmp/reckon-crew-scratch/.../after.py whose log is absent from test_logs and whose scratch tree does not survive the node, so the gate receipt promotion reads from that line cannot be re-run or opened, although the artefact it produced (shc-locus-name-review-after.json) is preserved in the run directory."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "none",
+    "diff": "read c0fea752277d against 16fb4213db71; it is a single commit adding one new 247-line evidence fragment and nothing else, and every figure I spot-checked (before table, after table, spend rows, rubric range 13.97-16.45) reconciles with shc-locus-name-review-before.json and shc-locus-name-review-after.json.",
+    "done_when": "the source brief's done_when is the fragment recording, for both names, the state before, the exact command, the state after, the spend against LLMCost rows and the quiet-graph check; fragment lines 38-56 (before), 104-138 (commands), 141-163 (after), 203-228 (spend) and 86-97 (quiet graph) carry all five, and each reconciles with an on-disk record in the run directory.",
+    "goal": "the source node's goal is to put the two electrostatic_potential locus members held at name_stage=reviewed through the pipeline's own name review and record each outcome; docs/evidence/fragments/sn-harmonize-command/shc-locus-name-review.html:4-22 records both as held (midplane exhausted at 0.7513, wall still reviewed at 0.5376), which is the outcome the pipeline actually produced.",
+    "manifest": "the manifest at runs/r-20261028T084048678456-shc-locus-name-review/manifest.md records status complete, one commit (c0fea752277d), the four gate logs and a tests line naming a scratch state-capture script, with baseline_suite and after_suite both null because no test suite was run for a docs-only node.",
+    "write_paths": "the source node declared docs/evidence/fragments/sn-harmonize-command/shc-locus-name-review.html and docs/figures/sn-harmonize-command/shc-locus-name-review; the commit touches only the first, so the diff stays inside the fence."
+  },
+  "justifications": {
+    "durability": "the diff adds no assertion, and none can exist for a document whose subject is a live graph state read at 2026-10-28T09:02:33Z (shc-locus-name-review-after.json), so nothing would redden if a later reader mistyped a figure in shc-locus-name-review.html:141-163.",
+    "evidence": "every claim I checked is backed by a record on disk (four gate-*.log with EXIT= trailers, before/after JSON, squeue output in the run stream), but shc-locus-name-review.html:19 asserts every failing judgement cites source_paths=[] when the midplane's missing_required_segment check cites no source_paths, and :174-196 records two of that name's four failed checks.",
+    "fit": "shc-locus-name-review.html follows the sibling fragments' section/h2-id/p-id/table idiom under docs/evidence/fragments/sn-harmonize-command/ and introduces no plan, phase or version label in its filename, ids or commit message.",
+    "goal_fidelity": "shc-locus-name-review.html:4-22 states both names held at the decision scores found in shc-locus-name-review-after.json, and the deviation from sn run to sn rescore is disclosed at :120-138 rather than concealed, though the brief named the sn run scope flags as the step.",
+    "reuse": "the change adds no definition to duplicate a repository mechanism; the review itself was driven through the pipeline's own sn run and sn rescore entry points rather than a new script, so nothing forks a capability the repository owns.",
+    "scope_discipline": "the single commit c0fea752277d adds only docs/evidence/fragments/sn-harmonize-command/shc-locus-name-review.html, which is the first of the two declared write paths, and carries no code change at all."
+  },
+  "node": "review-of-shc-locus-name-review-c0fea752277d",
+  "node:reviewed": "shc-locus-name-review",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source node's goal is to put the two electrostatic_potential locus members held at name_stage=reviewed through the pipeline's own name review and record each outcome; docs/evidence/fragments/sn-harmonize-command/shc-locus-name-review.html:4-22 records both as held (midplane exhausted at 0.7513, wall still reviewed at 0.5376), which is the outcome the pipeline actually produced.\nVERDICT done_when: the source brief's done_when is the fragment recording, for both names, the state before, the exact command, the state after, the spend against LLMCost rows and the quiet-graph check; fragment lines 38-56 (before), 104-138 (commands), 141-163 (after), 203-228 (spend) and 86-97 (quiet graph) carry all five, and each reconciles with an on-disk record in the run directory.\nVERDICT write_paths: the source node declared docs/evidence/fragments/sn-harmonize-command/shc-locus-name-review.html and docs/figures/sn-harmonize-command/shc-locus-name-review; the commit touches only the first, so the diff stays inside the fence.\nVERDICT manifest: the manifest at runs/r-20261028T084048678456-shc-locus-name-review/manifest.md records status complete, one commit (c0fea752277d), the four gate logs and a tests line naming a scratch state-capture script, with baseline_suite and after_suite both null because no test suite was run for a docs-only node.\nVERDICT diff: read c0fea752277d against 16fb4213db71; it is a single commit adding one new 247-line evidence fragment and nothing else, and every figure I spot-checked (before table, after table, spend rows, rubric range 13.97-16.45) reconciles with shc-locus-name-review-before.json and shc-locus-name-review-after.json.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: shc-locus-name-review.html:4-22 states both names held at the decision scores found in shc-locus-name-review-after.json, and the deviation from sn run to sn rescore is disclosed at :120-138 rather than concealed, though the brief named the sn run scope flags as the step.\nSCORE evidence: 15\nJUSTIFICATION evidence: every claim I checked is backed by a record on disk (four gate-*.log with EXIT= trailers, before/after JSON, squeue output in the run stream), but shc-locus-name-review.html:19 asserts every failing judgement cites source_paths=[] when the midplane's missing_required_segment check cites no source_paths, and :174-196 records two of that name's four failed checks.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the single commit c0fea752277d adds only docs/evidence/fragments/sn-harmonize-command/shc-locus-name-review.html, which is the first of the two declared write paths, and carries no code change at all.\nSCORE durability: 8\nJUSTIFICATION durability: the diff adds no assertion, and none can exist for a document whose subject is a live graph state read at 2026-10-28T09:02:33Z (shc-locus-name-review-after.json), so nothing would redden if a later reader mistyped a figure in shc-locus-name-review.html:141-163.\nSCORE fit: 18\nJUSTIFICATION fit: shc-locus-name-review.html follows the sibling fragments' section/h2-id/p-id/table idiom under docs/evidence/fragments/sn-harmonize-command/ and introduces no plan, phase or version label in its filename, ids or commit message.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds no definition to duplicate a repository mechanism; the review itself was driven through the pipeline's own sn run and sn rescore entry points rather than a new script, so nothing forks a capability the repository owns.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-locus-name-review.html:19 non-blocking: the sentence \"Every failing judgement cites evidence: source_paths=[]\" is false for the midplane's missing_required_segment check, whose recorded evidence is \"physical_base='electrostatic_potential'; position='outboard_midplane'\" with no source_paths (shc-locus-name-review-after.json comments_json), and the reasons table at :174-196 drops that check (p=0.55) and over_qualified_modifier (p=0.58), so the record's causal claim that the refusal is driven by the source-fidelity check \"rather than by the shape of the name\" rests on a partial list; the repair belongs with the node that repairs the bindings, since both omitted checks also exceeded their cutoff.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T084048678456-shc-locus-name-review/manifest.md:16 non-blocking: the tests line names a state-capture command at /tmp/reckon-crew-scratch/.../after.py whose log is absent from test_logs and whose scratch tree does not survive the node, so the gate receipt promotion reads from that line cannot be re-run or opened, although the artefact it produced (shc-locus-name-review-after.json) is preserved in the run directory.\n",
+  "review_run_id": "r-20261028T090902969649-review-of-shc-locus-name-review-c0fea752277d",
+  "reviewed_base_sha": "16fb4213db71bb2ad1f31ac0139c7a77af0ec382",
+  "reviewed_head_sha": "c0fea752277d1d8a4553607474b00870fac6fa75",
+  "reviewed_run_id": "r-20261028T084048678456-shc-locus-name-review",
+  "rubric": "six-dimension text review of a landed evidence fragment",
+  "scores": {
+    "durability": 8,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T09:20:29.186027+00:00",
+  "total": 99
+}
