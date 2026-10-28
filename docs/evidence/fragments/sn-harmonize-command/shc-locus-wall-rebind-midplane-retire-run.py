@@ -26,6 +26,7 @@ import hashlib
 import html
 import json
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -1468,6 +1469,51 @@ and not applied.</p>
 """
         FRAGMENT_HTML.write_text(page)
         log.write(f"wrote {FRAGMENT_HTML}")
+
+        # the written table must be the pre-write read, and must fail otherwise.
+        def table_matches(state_rows: list[dict]) -> list[str]:
+            section = page.split("before-table")[1].split("</table>")[0]
+            rendered = {
+                name: (stage, count)
+                for name, stage, count in re.findall(
+                    r"<tr><td><code>([^<]+)</code></td><td>([^<]*)</td>"
+                    r"<td>(\d+)</td>",
+                    section,
+                )
+            }
+            expected = {
+                row["id"]: (str(row["name_stage"]), str(len(row["producers"])))
+                for row in state_rows
+            }
+            return [
+                f"{name}: table {rendered.get(name)!r} != read {expected.get(name)!r}"
+                for name in expected
+                if rendered.get(name) != expected[name]
+            ]
+
+        mismatched = table_matches(before_state["names"])
+        log.write(f"before_table_problems={mismatched}")
+        control = Log(LOGS / "before-table-refusal.log")
+        post_write = table_matches(result["state"]["names"])
+        if not mismatched and post_write:
+            control.write("before-table check: the table is the pre-write read")
+            control.write(f"admitted={mismatched}")
+            control.write(
+                "doctored_expectation: render the table from the post-write read"
+            )
+            control.write(f"refused={post_write}")
+            control.close(1)
+            log.write("before_table_control=refused (EXIT=1)")
+        else:
+            control.write("the before-table check did not separate the two reads")
+            control.write(f"pre_write_mismatch={mismatched}")
+            control.write(f"post_write_mismatch={post_write}")
+            control.close(3)
+            log.write("before_table_control=NOT-SEPARATING")
+            rc = 3
+        if mismatched:
+            rc = 2
+
         exchange_record = json.loads(EXCHANGE_AUTHORITY.read_text())
         exchange_record["signed_as_applied"] = signed
         EXCHANGE_AUTHORITY.write_text(_json(exchange_record) + "\n")
