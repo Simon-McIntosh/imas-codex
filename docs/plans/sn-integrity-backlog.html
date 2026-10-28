@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="274">
+<meta name="plan-version" content="275">
 <meta name="plan-modified" content="2026-10-28">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -884,7 +884,7 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
     <div class="r-comment-body"><p>review of r-20261028T075932338031-sib-red-export-accounting over the commits gained since its first review (60e41670f..4979b6d2c3eb): parsed record, six scores 17/16/20/6/19/20, added_failure_count 0 with an empty id list derived from the run's own gate-main.log and gate-head.log FAILED lines, one non-blocking finding; the prior blocking finding (truncated baseline arm, revision mismatch) is verified repaired.</p></div>
 </div>
 <div class="r-comment" data-section="s41" data-id="c-run-r-20261028T075932338031-sib-red-export-accounting" data-who="reckon-build" data-when="2026-10-28T09:22:56Z">
-    <div class="r-comment-body"><p>sib-red-export-accounting — wired the export entrypoint&#x27;s composition root and taught three empty-graph test doubles the zero count row; the five C4 export ids pass at head, base arm 282260d6c 71 failures against head 66, zero ids added and the five removed, both id lists readable from the arm logs.</p></div>
+    <div class="r-comment-body"><p>sib-red-export-accounting — wired the export entrypoint's composition root and taught three empty-graph test doubles the zero count row; the five C4 export ids pass at head, base arm 282260d6c 71 failures against head 66, zero ids added and the five removed, both id lists readable from the arm logs.</p></div>
 </div>
 <div class="r-comment" data-section="s42" data-id="c-run-r-20261028T075816173791-review-of-sib-split-name-bindings-53d7d9f4f1e0" data-who="reckon-build" data-when="2026-10-28T08:19:13.964Z">
     <div class="r-comment-body"><p>Reviewed r-20261028T064048248418-sib-split-name-bindings at b4254dfbf..53d7d9f4f, scored goal_fidelity 20, evidence 17, scope_discipline 18, durability 19, fit 18, reuse 15, with added_failure_count 0; two non-blocking findings — the evidence fragment overstates the removed bindings as eleven (actual ten bindings and two dynamic lookups, still 12 sites) and the new guard matches only a direct globals() call so an aliased dict evades it. Durability was measured, not inferred: reinstating the exact base spelling at graph_ops.py:303 in a scratch copy of the head tree made test_no_dynamic_name_binding fail.</p></div>
@@ -999,6 +999,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s44" data-id="c-s44-aggregation-layer" data-who="reckon-build" data-when="2026-10-28T09:05:00Z">
     <div class="r-comment-body"><p>The plan review corrects the mechanism. The misfire is produced one layer above the clause. <code>worker_review_docs._documentation_contradiction_note</code> (around lines 666-770) judges each DD source alone and holds the document if any single source sets the veto, so a name with seven bindings gets seven single-binding questions ORed into a hold. The node <code>sib-veto-all-bindings</code> now has that file in scope. It changes the aggregation so a claim is vetoed only when no binding supports it.</p></div>
+</div>
+<div class="r-comment" data-section="s44" data-id="c-run-r-20261028T093659425719-review-of-sib-veto-all-bindings-143c0332e99e" data-who="reckon-build" data-when="2026-10-28T09:45:24.018Z">
+    <div class="r-comment-body"><p>review of run r-20261028T084534731496-sib-veto-all-bindings at 143c0332e99e6ab30ca2ad5900f864a178036da2 (base 282260d6c560ec2553f091a05e13c643c5ab3c26) — parsed, all six dimensions scored, goal fidelity and scope hold, four non-blocking findings recorded</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
