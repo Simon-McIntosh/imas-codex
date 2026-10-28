@@ -1,0 +1,47 @@
+<section>
+  <h2 id="shc-locus-reapply-all-bindings">Locus family electrostatic_potential: re-applied with the veto judging every binding</h2>
+  <p id="shc-locus-reapply-all-bindings-summary">
+    The non-WEST locus family <code>electrostatic_potential</code> ran under <code>sn harmonize --family electrostatic_potential --apply --cost-limit 4.00</code>. Its own family gate reported <strong>3/3 member(s) accepted, converged</strong>, and it <strong>stamped nothing</strong>. By this node's convergence definition (every member scored, none fallen, family stamped) the family is <strong>halted</strong>. Spend <strong>USD 0.2655</strong> over <strong>9 LLMCost call(s)</strong> (generate_docs 3, review_docs 6); wall 1022s. Lint findings {"link_missing_reverse": 2} before, {} after. 0 member(s) are below the 0.85 threshold after the apply, 3 fell and 1 carry no score. 0 name(s) outside the family roster were paid for. Contradiction vetoes raised: <strong>0</strong>.
+  </p>
+  <p id="shc-locus-reapply-all-bindings-convergence"><strong>Converged:</strong> no — the family is unstamped, 1 of 5 member(s) carry no documentation score (<code>electrostatic_potential_at_outboard_midplane</code>), 0 fall below 0.85, and 3 fell on re-review (<code>electrostatic_potential</code>: 0.9427 &rarr; 0.9233, <code>electrostatic_potential_at_langmuir_probe_position</code>: 0.9548 &rarr; 0.9533, <code>floating_electrostatic_potential</code>: 0.9575 &rarr; 0.9562).</p>
+  <h3 id="shc-locus-reapply-all-bindings-dry-run">Dry runs and planned calls</h3>
+  <p id="shc-locus-reapply-all-bindings-dry-run-body">
+    The first dry run planned 3 call(s), estimated USD 1.7024 from 29 recent run(s) and 33 call(s) at USD 0.5675 per call, under a USD 4.00 cap. The second dry run after the apply planned 3 call(s); the family is unstamped. Refusals previewed before the apply: {}.
+  </p>
+  <h3 id="shc-locus-reapply-all-bindings-veto">Contradiction vetoes: the claim and every binding</h3>
+  <p id="shc-locus-reapply-all-bindings-veto-body">
+    The apply window holds 3 docs review row(s) for the family and raised <strong>0</strong> contradiction veto(es) across 0 name(s): none. Each claim was read against every DD binding the name carries and the claim-level fold is recomputed from those answers. Claims held while at least one binding supports them: <strong>0</strong>.
+  </p>
+  <table>
+    <thead><tr><th>name</th><th>bindings</th><th>claims read</th><th>claims per binding</th><th>vetoed</th></tr></thead>
+    <tbody><tr><td><code>electrostatic_potential_at_langmuir_probe_position</code></td><td>2</td><td>10</td><td>10</td><td>0</td></tr><tr><td><code>electrostatic_potential</code></td><td>7</td><td>15</td><td>15</td><td>0</td></tr><tr><td><code>floating_electrostatic_potential</code></td><td>2</td><td>11</td><td>11</td><td>0</td></tr></tbody>
+  </table>
+  <h3 id="shc-locus-reapply-all-bindings-spared">Claims a single binding contradicted that were not held</h3>
+  <p>Under the earlier per-source reading each of these was held on one binding's answer. The fold and the code's own settlement now decide, and none was held.</p>
+  <table>
+    <thead><tr><th>name</th><th>claim</th><th>each binding's answer</th><th>fold</th><th>why not held</th></tr></thead>
+    <tbody><tr><td><code>electrostatic_potential</code></td><td>This quantity is the electrostatic potential at a location in a plasma or on a plasma-facing surface, relative to a chosen electrical reference.</td><td><code>core_profiles/profiles_1d/phi_potential</code>: contradicts; <code>edge_profiles/ggd/phi_potential/values</code>: says nothing; <code>edge_profiles/profiles_1d/phi_potential</code>: says nothing; <code>mhd/ggd/phi_potential/values</code>: says nothing; <code>plasma_profiles/ggd/phi_potential/values</code>: supports; <code>plasma_profiles/profiles_1d/phi_potential</code>: supports; <code>wall/description_ggd/ggd/phi_potential/values</code>: says nothing</td><td>supports</td><td>not settled — the fold spared it</td></tr><tr><td><code>electrostatic_potential</code></td><td>No particular location or spatial averaging is implied.</td><td><code>core_profiles/profiles_1d/phi_potential</code>: contradicts; <code>edge_profiles/ggd/phi_potential/values</code>: says nothing; <code>edge_profiles/profiles_1d/phi_potential</code>: says nothing; <code>mhd/ggd/phi_potential/values</code>: says nothing; <code>plasma_profiles/ggd/phi_potential/values</code>: contradicts; <code>plasma_profiles/profiles_1d/phi_potential</code>: contradicts; <code>wall/description_ggd/ggd/phi_potential/values</code>: says nothing</td><td>contradicts</td><td>non_requirement_sentence</td></tr></tbody>
+  </table>
+  <h3 id="shc-locus-reapply-all-bindings-apply">Apply cost and member documentation score before and after</h3>
+  <p id="shc-locus-reapply-all-bindings-apply-body">
+    Apply log <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T112157925793-shc-locus-reapply-all-bindings/apply-1.log</code> ending <code>EXIT=0</code>. Selected by exact run id <code>3dbdeb81-1f8c-4a6e-9d16-2dbc4e040e58</code>, <code>5928ae2b-98b4-4d72-b298-85e21305daa5</code>, the run made <strong>9 LLMCost call(s)</strong> in 2 phase(s) (generate_docs 3, review_docs 6), spending <strong>USD 0.2655</strong> of the USD 4.00 cap.
+  </p>
+  <table>
+    <thead><tr><th>member</th><th>before</th><th>after</th></tr></thead>
+    <tbody><tr><td><code>electrostatic_potential</code></td><td>0.9427</td><td>0.9233</td></tr><tr><td><code>electrostatic_potential_at_langmuir_probe_position</code></td><td>0.9548</td><td>0.9533</td></tr><tr><td><code>electrostatic_potential_at_outboard_midplane</code></td><td>—</td><td>—</td></tr><tr><td><code>electrostatic_potential_at_wall</code></td><td>0.8625</td><td>0.8625</td></tr><tr><td><code>floating_electrostatic_potential</code></td><td>0.9575</td><td>0.9562</td></tr></tbody>
+  </table>
+<p>Members below the acceptance threshold (both scores): none. Members whose score fell: <code>electrostatic_potential: 0.9427 &rarr; 0.9233</code>; <code>electrostatic_potential_at_langmuir_probe_position: 0.9548 &rarr; 0.9533</code>; <code>floating_electrostatic_potential: 0.9575 &rarr; 0.9562</code>.</p>
+  <h3 id="shc-locus-reapply-all-bindings-outside">Out-of-family check</h3>
+  <p id="shc-locus-reapply-all-bindings-outside-body">
+    The run's cost rows apportion to 3 name(s); 0 of them are outside the 5-member family roster. Names the roster carries that the run paid nothing for: <code>electrostatic_potential_at_outboard_midplane</code>, <code>electrostatic_potential_at_wall</code>.
+  </p>
+  <table>
+    <thead><tr><th>name</th><th>USD paid</th></tr></thead>
+    <tbody><tr><td><code>electrostatic_potential</code></td><td>0.0988</td></tr><tr><td><code>electrostatic_potential_at_langmuir_probe_position</code></td><td>0.0816</td></tr><tr><td><code>floating_electrostatic_potential</code></td><td>0.0850</td></tr></tbody>
+  </table>
+  <h3 id="shc-locus-reapply-all-bindings-roster">Family roster and review-roster check</h3>
+  <p id="shc-locus-reapply-all-bindings-roster-body">
+    The search reads 14 files under <code>imas_codex/standard_names/manifests/reviews</code>. Positive control <code>flux_surface_averaged_electron_density_at_plasma_boundary</code> matched 10 times (expected 10), so a zero member count is a real absence rather than a search that reads nothing. Members: <code>electrostatic_potential</code>, <code>electrostatic_potential_at_langmuir_probe_position</code>, <code>electrostatic_potential_at_outboard_midplane</code>, <code>electrostatic_potential_at_wall</code>, <code>floating_electrostatic_potential</code>.
+  </p>
+<table><thead><tr><th>member</th><th>matches</th></tr></thead><tbody><tr><td><code>electrostatic_potential</code></td><td>0</td></tr><tr><td><code>electrostatic_potential_at_langmuir_probe_position</code></td><td>0</td></tr><tr><td><code>electrostatic_potential_at_outboard_midplane</code></td><td>0</td></tr><tr><td><code>electrostatic_potential_at_wall</code></td><td>0</td></tr><tr><td><code>floating_electrostatic_potential</code></td><td>0</td></tr></tbody></table>
+</section>
