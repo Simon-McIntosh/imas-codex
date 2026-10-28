@@ -40,7 +40,24 @@
   "plan_slug": "jt60sa-discovery-completion",
   "plan_version": 218,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "finding": "reuse_search-1",
+      "reason": "\u00a714 is a cumulative landing record whose landed nodes are named in-line (\"The seed fix landed on 2026-10-06\", \"the paths node \u2026 and the code-reset node \u2026 landed\"), so the residual nodes are recoverable without a design change; the finding is a legibility risk, not a defect that alters the plan.",
+      "when": "2026-10-28T05:05:01.177116+00:00"
+    }
+  ],
+  "responses": {
+    "reuse_search-1": {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "reason": "\u00a714 is a cumulative landing record whose landed nodes are named in-line (\"The seed fix landed on 2026-10-06\", \"the paths node \u2026 and the code-reset node \u2026 landed\"), so the residual nodes are recoverable without a design change; the finding is a legibility risk, not a defect that alters the plan.",
+      "when": "2026-10-28T05:05:01.177116+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/jt60sa-discovery-completion/r-20261006T113343051753-plan-review-of-jt60sa-discovery-completion.json",
   "review_run_id": "r-20261006T113343051753-plan-review-of-jt60sa-discovery-completion",
   "reviewed_blob_sha": "59437631379a3336e12ef25a79c2a804f66394eb",
   "rubric": "design",
