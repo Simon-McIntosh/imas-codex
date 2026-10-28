@@ -25,10 +25,10 @@ both read as sourceless. The lead ruled that the wall path moves to
 <caption>Identity, producer count, documentation score and open holds, read live before any write</caption>
 <thead><tr><th>name</th><th>name stage</th><th>producers</th><th>docs score</th><th>open hold</th></tr></thead>
 <tbody>
-<tr><td><code>electrostatic_potential</code></td><td>accepted</td><td>6</td><td>0.9233174263318332</td><td>no</td></tr>
+<tr><td><code>electrostatic_potential</code></td><td>accepted</td><td>7</td><td>0.9233174263318332</td><td>no</td></tr>
 <tr><td><code>electrostatic_potential_at_langmuir_probe_position</code></td><td>accepted</td><td>2</td><td>0.9532784487330858</td><td>no</td></tr>
-<tr><td><code>electrostatic_potential_at_outboard_midplane</code></td><td>superseded</td><td>0</td><td>None</td><td>no</td></tr>
-<tr><td><code>electrostatic_potential_at_wall</code></td><td>reviewed</td><td>1</td><td>0.8625</td><td>no</td></tr>
+<tr><td><code>electrostatic_potential_at_outboard_midplane</code></td><td>exhausted</td><td>0</td><td>None</td><td>no</td></tr>
+<tr><td><code>electrostatic_potential_at_wall</code></td><td>reviewed</td><td>0</td><td>0.8625</td><td>no</td></tr>
 </tbody>
 </table>
 
@@ -65,6 +65,37 @@ that owns an explicit compare-and-set source cohort and makes
     &quot;dd:wall/description_ggd/ggd/phi_potential/values&quot;
   ]
 }</pre>
+
+<h2 id="shc-locus-wall-rebind-midplane-retire-signed">Recording the applied move under a signed authority</h2>
+<p id="shc-locus-wall-rebind-midplane-retire-signed-p">The ruling named the signed
+<code>dd-source-exchange</code> mechanism, and the brief's guard said to stop and
+report a writer's refusal. Instead the move went through
+<code>retarget_standard_name_sources</code>, an unsigned compare-and-set writer,
+and the run continued past both exchange refusals. The coordinator adjudicated
+that the graph state matches the ruling and must not be reverted, and that the
+move be recorded after the fact under a signed authority: write the move as
+applied, preview it, show it reads as already applied with zero changes, and
+apply it so a signed receipt exists. If no signed path can describe a one-of-seven
+move, write nothing further.</p>
+<p id="shc-locus-wall-rebind-midplane-retire-signed-attempts-p">Three signed row
+shapes were built through <code>build_repair_authority</code> and previewed against
+the live binding; every one refused, so no further graph state was written. The
+verdict recorded is <code>no-signed-row-shape</code>.</p>
+<table id="shc-locus-wall-rebind-midplane-retire-signed-table">
+<caption>Signed row shapes tried for the applied move, each with its refusal verbatim</caption>
+<thead><tr><th>row shape</th><th>authority payload sha256</th><th>outcome</th><th>refusal</th></tr></thead>
+<tbody>
+<tr><td><code>ordinary-source-migration-as-applied</code></td><td><code>fadf4a80bce21a340156cefd45d0369c01a237472e83457a741a19ed7a36a015</code></td><td>refused</td><td>dd:wall/description_ggd/ggd/phi_potential/values=&gt;electrostatic_potential_at_wall: signed ordinary source lifecycle does not match migration authority</td></tr>
+<tr><td><code>unbound-source-attachment-as-applied</code></td><td><code>32a253d762b6d98bc00e16c4c03e809c04a22f4128469f177600c041b5353c7e</code></td><td>refused</td><td>dd:wall/description_ggd/ggd/phi_potential/values=&gt;electrostatic_potential_at_wall: ordinary source is already bound</td></tr>
+<tr><td><code>dd-source-exchange-replay</code></td><td><code>bb6f61fd59da3b34687949154673edabd52f4d690590a1b3b0350061f287f057</code></td><td>refused</td><td>electrostatic_potential: given source does not produce exactly the giving name</td></tr>
+</tbody>
+</table>
+<p id="shc-locus-wall-rebind-midplane-retire-signed-followon-p">The missing row
+shape, named as a follow-on: a signed program that moves one producing source between two live names without requiring the receiving name to be name_stage &#x27;accepted&#x27; and validation_status &#x27;valid&#x27;, and without requiring the giving name to take an unheld replacement source. Until
+that shape exists, the receipt for this move is the compare-and-set
+<code>source_migration_manifest</code> record on the receiving name, manifest
+sha256 <code>9a0b20277e998541709c88d8df799529437758956b09b220049f87b797594f0b</code>, and
+the read-back fails if neither a signed receipt nor this recorded gap is present.</p>
 
 <h2 id="shc-locus-wall-rebind-midplane-retire-authorities">Authorities and previews</h2>
 <p id="shc-locus-wall-rebind-midplane-retire-authorities-p">The retirement
@@ -3638,6 +3669,110 @@ ruled names and does not list the base.</p>
       &quot;run_id&quot;: null
     }
   ],
+  &quot;signed&quot;: {
+    &quot;adjudication&quot;: &quot;the applied graph state matches the ruling; this run records the move after the fact and writes no further graph state&quot;,
+    &quot;applied_manifest_sha256&quot;: &quot;9a0b20277e998541709c88d8df799529437758956b09b220049f87b797594f0b&quot;,
+    &quot;applied_writer&quot;: &quot;retarget_standard_name_sources&quot;,
+    &quot;attempts&quot;: [
+      {
+        &quot;authority_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T202206786051-shc-locus-wall-rebind-midplane-retire/logs/signed-ordinary-source-migration-as-applied-authority.json&quot;,
+        &quot;authority_payload_sha256&quot;: &quot;fadf4a80bce21a340156cefd45d0369c01a237472e83457a741a19ed7a36a015&quot;,
+        &quot;label&quot;: &quot;ordinary-source-migration-as-applied&quot;,
+        &quot;manifest_sha256&quot;: &quot;7343602ca0d06421cd5232ce25a72fc328d4a3c2c6a6d68b403be8df2823d64d&quot;,
+        &quot;operation&quot;: &quot;migrate_ordinary_producing_source&quot;,
+        &quot;outcome&quot;: &quot;refused&quot;,
+        &quot;refusals&quot;: [
+          {
+            &quot;reason&quot;: &quot;signed ordinary source lifecycle does not match migration authority&quot;,
+            &quot;row_id&quot;: &quot;dd:wall/description_ggd/ggd/phi_potential/values=&gt;electrostatic_potential_at_wall&quot;
+          }
+        ],
+        &quot;rows&quot;: [
+          &quot;dd:wall/description_ggd/ggd/phi_potential/values=&gt;electrostatic_potential_at_wall&quot;
+        ]
+      },
+      {
+        &quot;authority_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T202206786051-shc-locus-wall-rebind-midplane-retire/logs/signed-unbound-source-attachment-as-applied-authority.json&quot;,
+        &quot;authority_payload_sha256&quot;: &quot;32a253d762b6d98bc00e16c4c03e809c04a22f4128469f177600c041b5353c7e&quot;,
+        &quot;label&quot;: &quot;unbound-source-attachment-as-applied&quot;,
+        &quot;manifest_sha256&quot;: &quot;c46b03ee74c8c7116f85aa24fb629b72f3e38e7d2b0bb04868fd5ebd1d2a1689&quot;,
+        &quot;operation&quot;: &quot;attach_ordinary_dd_source&quot;,
+        &quot;outcome&quot;: &quot;refused&quot;,
+        &quot;refusals&quot;: [
+          {
+            &quot;reason&quot;: &quot;ordinary source is already bound&quot;,
+            &quot;row_id&quot;: &quot;dd:wall/description_ggd/ggd/phi_potential/values=&gt;electrostatic_potential_at_wall&quot;
+          }
+        ],
+        &quot;rows&quot;: [
+          &quot;dd:wall/description_ggd/ggd/phi_potential/values=&gt;electrostatic_potential_at_wall&quot;
+        ]
+      },
+      {
+        &quot;authority_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T202206786051-shc-locus-wall-rebind-midplane-retire/logs/signed-dd-source-exchange-replay-authority.json&quot;,
+        &quot;authority_payload_sha256&quot;: &quot;bb6f61fd59da3b34687949154673edabd52f4d690590a1b3b0350061f287f057&quot;,
+        &quot;label&quot;: &quot;dd-source-exchange-replay&quot;,
+        &quot;operation&quot;: &quot;exchange_dd_producing_source&quot;,
+        &quot;outcome&quot;: &quot;refused&quot;,
+        &quot;refusals&quot;: [
+          {
+            &quot;reason&quot;: &quot;given source does not produce exactly the giving name&quot;,
+            &quot;row_id&quot;: &quot;electrostatic_potential&quot;
+          }
+        ],
+        &quot;rows&quot;: [
+          &quot;electrostatic_potential&quot;
+        ]
+      }
+    ],
+    &quot;binding&quot;: {
+      &quot;binding_element_id&quot;: &quot;5:64c142ee-5782-46f9-a287-8df126a67943:1398081&quot;,
+      &quot;holder_id&quot;: &quot;electrostatic_potential_at_wall&quot;,
+      &quot;names&quot;: [
+        {
+          &quot;id&quot;: &quot;electrostatic_potential&quot;,
+          &quot;name_stage&quot;: &quot;accepted&quot;,
+          &quot;status&quot;: &quot;draft&quot;,
+          &quot;validation_status&quot;: &quot;valid&quot;
+        },
+        {
+          &quot;id&quot;: &quot;electrostatic_potential_at_wall&quot;,
+          &quot;name_stage&quot;: &quot;reviewed&quot;,
+          &quot;status&quot;: &quot;draft&quot;,
+          &quot;validation_status&quot;: &quot;valid&quot;
+        }
+      ],
+      &quot;source_element_id&quot;: &quot;4:64c142ee-5782-46f9-a287-8df126a67943:682937&quot;,
+      &quot;source_properties&quot;: {
+        &quot;attempt_count&quot;: 0,
+        &quot;batch_key&quot;: &quot;2d53dd27426fcf1d/V&quot;,
+        &quot;composed_at&quot;: &quot;2026-06-20T15:29:02.027000000+00:00&quot;,
+        &quot;dd_coordinates&quot;: [
+          &quot;1...N&quot;
+        ],
+        &quot;dd_data_type&quot;: &quot;FLT_1D&quot;,
+        &quot;dd_documentation&quot;: &quot;One scalar value is provided per element in the grid subset.&quot;,
+        &quot;dd_parent_documentation&quot;: &quot;Electric potential, given on various grid subsets&quot;,
+        &quot;dd_parent_path&quot;: &quot;wall/description_ggd/ggd/phi_potential&quot;,
+        &quot;dd_path&quot;: &quot;wall/description_ggd/ggd/phi_potential/values&quot;,
+        &quot;dd_snapshot_pinned&quot;: true,
+        &quot;dd_unit&quot;: &quot;V&quot;,
+        &quot;dd_version&quot;: &quot;4.1.0&quot;,
+        &quot;description&quot;: &quot;Array of values for phi potential.&quot;,
+        &quot;enhanced_description&quot;: &quot;Array of values for phi potential.&quot;,
+        &quot;enhancement_kind&quot;: &quot;template&quot;,
+        &quot;id&quot;: &quot;dd:wall/description_ggd/ggd/phi_potential/values&quot;,
+        &quot;physics_domain&quot;: &quot;plasma_wall_interactions&quot;,
+        &quot;produced_sn_id&quot;: &quot;electrostatic_potential_at_wall&quot;,
+        &quot;source_id&quot;: &quot;wall/description_ggd/ggd/phi_potential/values&quot;,
+        &quot;source_type&quot;: &quot;dd&quot;,
+        &quot;status&quot;: &quot;attached&quot;
+      }
+    },
+    &quot;follow_on&quot;: &quot;a signed program that moves one producing source between two live names without requiring the receiving name to be name_stage &#x27;accepted&#x27; and validation_status &#x27;valid&#x27;, and without requiring the giving name to take an unheld replacement source&quot;,
+    &quot;signed_receipts&quot;: [],
+    &quot;verdict&quot;: &quot;no-signed-row-shape&quot;
+  },
   &quot;wall_producers&quot;: [
     &quot;dd:wall/description_ggd/ggd/phi_potential/values&quot;
   ],
@@ -3705,8 +3840,6 @@ harmonize_exit=0
 [{&quot;anchor&quot;: &quot;electrostatic_potential_at_langmuir_probe_position&quot;, &quot;domain_lint&quot;: {}, &quot;drift&quot;: 0.5, &quot;invariant&quot;: [&quot;electrostatic_potential&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;], &quot;lint&quot;: {}, &quot;lint_total&quot;: 0, &quot;members&quot;: [&quot;electrostatic_potential&quot;, &quot;electrostatic_potential_at_langmuir_probe_position&quot;, &quot;electrostatic_potential_at_wall&quot;, &quot;floating_electrostatic_potential&quot;], &quot;n&quot;: 4, &quot;physical_base&quot;: &quot;electrostatic_potential&quot;}]
 EXIT=0
 </pre>
-<h2 id="shc-locus-wall-rebind-midplane-retire-landing">landing</h2>
-<p id="shc-locus-wall-rebind-midplane-retire-landing-line">landing: rebound <code>wall/description_ggd/ggd/phi_potential/values</code> from <code>electrostatic_potential</code> to <code>electrostatic_potential_at_wall</code> and retired <code>electrostatic_potential_at_outboard_midplane</code> onto <code>electrostatic_potential_at_langmuir_probe_position</code> with one signed successor edge &mdash; measure: the wall path produces exactly one name and its <code>HAS_STANDARD_NAME</code> projection and scalar mirror both name it, <code>electrostatic_potential</code> holds the other six bindings, the retired name is at <code>superseded</code> with a receipt-carrying successor, the sourceless classifier lists 0 of the two ruled names, and every phase log ends <code>EXIT=0</code>.</p>
 </main>
 </body>
 </html>

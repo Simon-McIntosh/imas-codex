@@ -663,6 +663,352 @@ def phase_apply() -> int:
     return rc
 
 
+# ── phase: signed (try to describe the applied move under a signed row) ───
+MIGRATE_OPERATION = "migrate_ordinary_producing_source"
+ATTACH_OPERATION = "attach_ordinary_dd_source"
+SIGNED_ROW_ID = f"{WALL_PATH}=>{WALL}"
+SIGNED_REASON = (
+    "record the wall GGD potential's producing-source move, already applied by "
+    "the compare-and-set writer, under a signed authority"
+)
+
+
+def _guards() -> list[dict]:
+    return [
+        {
+            "id": "last-producing-source",
+            "kind": "semantic_authority",
+            "implementation": "last-producing-source",
+            "participant_ids": [],
+        },
+        {
+            "id": "out-of-allowlist-immutability",
+            "kind": "collateral_immutability",
+            "implementation": "out-of-allowlist-immutability",
+            "participant_ids": [],
+        },
+    ]
+
+
+def read_binding(gc) -> dict:
+    rows = gc.query(
+        """
+        // SHC_LOCUS_READ_WALL_BINDING
+        MATCH (source:StandardNameSource {id: $path})
+        OPTIONAL MATCH (source)-[binding:PRODUCED_NAME]->(holder:StandardName)
+        RETURN elementId(source) AS source_element_id,
+               properties(source) AS source_properties,
+               elementId(binding) AS binding_element_id,
+               holder.id AS holder_id
+        """,
+        path=WALL_PATH,
+    )
+    binding = dict(rows[0]) if rows else {}
+    stages = gc.query(
+        """
+        // SHC_LOCUS_READ_SIGNED_NAMES
+        UNWIND $ids AS id
+        MATCH (name:StandardName {id: id})
+        RETURN id, name.name_stage AS name_stage,
+               name.validation_status AS validation_status,
+               name.status AS status
+        ORDER BY id
+        """,
+        ids=[BASE, WALL],
+    )
+    binding["names"] = [dict(row) for row in stages]
+    return binding
+
+
+def migration_row_as_applied(binding: dict) -> dict:
+    """The ordinary-source-migration row that would describe the move just made."""
+    return {
+        "id": SIGNED_ROW_ID,
+        "identity": {
+            "id": SIGNED_ROW_ID,
+            "kind": "source",
+            "source_id": WALL_PATH,
+            "target_id": WALL,
+        },
+        "participants": [
+            {"id": WALL_PATH, "kind": "node", "graph_label": "StandardNameSource"},
+            {"id": WALL, "kind": "node", "graph_label": "StandardName"},
+            {"id": BASE, "kind": "node", "graph_label": "StandardName"},
+            {
+                "id": binding["binding_element_id"],
+                "kind": "relationship",
+                "graph_label": "PRODUCED_NAME",
+            },
+        ],
+        "selection": dict(SELECTION),
+        "mutations": [
+            {
+                "id": "remove-incumbent-binding",
+                "order": 1,
+                "kind": "delete_relationship",
+                "participant_id": binding["binding_element_id"],
+            },
+            {
+                "id": "attach-authoritative-target",
+                "order": 2,
+                "kind": "add_relationship",
+                "participant_id": WALL,
+                "arguments": {
+                    "relationship_type": "PRODUCED_NAME",
+                    "start_id": WALL_PATH,
+                    "end_id": WALL,
+                },
+            },
+            {
+                "id": "retarget-source-scalar",
+                "order": 3,
+                "kind": "set_properties",
+                "participant_id": WALL_PATH,
+                "arguments": {"properties": {"produced_sn_id": WALL}},
+            },
+        ],
+        "guards": _guards(),
+        "orphan_policy": "refuse",
+    }
+
+
+def attachment_row_as_applied() -> dict:
+    """The unbound-source-attachment row the same move would have used instead."""
+    return {
+        "id": SIGNED_ROW_ID,
+        "identity": {
+            "id": SIGNED_ROW_ID,
+            "kind": "source",
+            "source_id": WALL_PATH,
+            "target_id": WALL,
+        },
+        "participants": [
+            {"id": WALL_PATH, "kind": "node", "graph_label": "StandardNameSource"},
+            {"id": WALL, "kind": "node", "graph_label": "StandardName"},
+        ],
+        "selection": dict(SELECTION),
+        "mutations": [
+            {
+                "id": "attach-authoritative-target",
+                "order": 1,
+                "kind": "add_relationship",
+                "participant_id": WALL,
+                "arguments": {
+                    "relationship_type": "PRODUCED_NAME",
+                    "start_id": WALL_PATH,
+                    "end_id": WALL,
+                },
+            },
+            {
+                "id": "advance-source-lifecycle",
+                "order": 2,
+                "kind": "set_properties",
+                "participant_id": WALL_PATH,
+                "arguments": {
+                    "properties": {
+                        "status": "attached",
+                        "produced_sn_id": WALL,
+                        "claimed_at": None,
+                        "claim_token": None,
+                        "last_error": None,
+                    }
+                },
+            },
+        ],
+        "guards": _guards()[-1:],
+        "orphan_policy": "refuse",
+    }
+
+
+def signed_authority(
+    rows: list[dict], operation: str, tag: str
+) -> tuple[Path, str, str]:
+    from imas_codex.standard_names.repair_authority import build_repair_authority
+
+    built = build_repair_authority(
+        {
+            "operation_id": operation,
+            "authority_mode": "external_reviewed",
+            "rows": rows,
+            "receipt_policy": {
+                "id": "one-per-logical-change",
+                "operation": operation,
+                "cardinality": "per_target",
+                "expected_count": "admitted_rows",
+                "link_participant_kind": "standard_name",
+                "replay_projection": ["manifest_sha256", "row_id"],
+            },
+            "orphan_policy": "refuse",
+        }
+    )
+    path = LOGS / f"signed-{tag}-authority.json"
+    path.write_bytes(built.content)
+    return path, built.file_sha256, built.payload_sha256
+
+
+def preview_signed(gc, rows: list[dict], operation: str, tag: str) -> dict:
+    """Preview a signed row set; apply it only when the engine admits it."""
+    from imas_codex.standard_names import signed_manifest as operator
+
+    attempt: dict = {
+        "label": tag,
+        "operation": operation,
+        "rows": [r["id"] for r in rows],
+    }
+    try:
+        path, file_sha, payload_sha = signed_authority(rows, operation, tag)
+        attempt["authority_path"] = str(path)
+        attempt["authority_payload_sha256"] = payload_sha
+        preview = operator.apply_signed_manifest(
+            path,
+            authority_file_sha256=file_sha,
+            authority_payload_sha256=payload_sha,
+            reason=SIGNED_REASON,
+            apply=False,
+            run_id=RUN_ID,
+            gc=gc,
+        )
+        attempt["outcome"] = preview.get("outcome")
+        attempt["refusals"] = preview.get("refusals")
+        attempt["manifest_sha256"] = preview.get("manifest_sha256")
+        if preview.get("outcome") in {"would_apply", "already_applied"}:
+            receipt = operator.apply_signed_manifest(
+                path,
+                authority_file_sha256=file_sha,
+                authority_payload_sha256=payload_sha,
+                reason=SIGNED_REASON,
+                apply=True,
+                manifest_sha256=preview.get("manifest_sha256"),
+                run_id=RUN_ID,
+                gc=gc,
+            )
+            attempt["apply_outcome"] = receipt.get("outcome")
+            attempt["changes"] = receipt.get("changes")
+            attempt["receipt_manifest_sha256"] = receipt.get("manifest_sha256")
+    except Exception as exc:  # noqa: BLE001
+        attempt["outcome"] = "refused"
+        attempt["refusal_text"] = f"{type(exc).__name__}: {exc}"
+    return attempt
+
+
+def exchange_replay(binding: dict, gc) -> dict:
+    """Re-offer the ruled exchange direction now that the move is already made."""
+    from imas_codex.standard_names import signed_manifest as operator
+
+    attempt: dict = {
+        "label": "dd-source-exchange-replay",
+        "operation": "exchange_dd_producing_source",
+    }
+    row = {
+        "id": BASE,
+        "name_id": BASE,
+        "given_source_id": WALL_PATH,
+        "receiving_name_id": WALL,
+        "taken_source_id": KEPT_PATHS[0],
+        "selection": dict(SELECTION),
+    }
+    attempt["rows"] = [row["id"]]
+    try:
+        content, file_sha, payload_sha = exchange_authority([row])
+        path = LOGS / "signed-dd-source-exchange-replay-authority.json"
+        path.write_bytes(content)
+        attempt["authority_path"] = str(path)
+        attempt["authority_payload_sha256"] = payload_sha
+        preview = operator.apply_signed_manifest(
+            path,
+            authority_adapter=operator._SOURCE_EXCHANGE_ADAPTER,
+            authority_file_sha256=file_sha,
+            authority_payload_sha256=payload_sha,
+            guard_set=operator._SOURCE_EXCHANGE_GUARDS,
+            reason=SIGNED_REASON,
+            apply=False,
+            gc=gc,
+        )
+        attempt["outcome"] = preview.get("outcome")
+        attempt["refusals"] = preview.get("refusals")
+    except Exception as exc:  # noqa: BLE001
+        attempt["outcome"] = "refused"
+        attempt["refusal_text"] = f"{type(exc).__name__}: {exc}"
+    return attempt
+
+
+def phase_signed() -> int:
+    log = Log(LOGS / "signed.log")
+    log.write(f"# command: {sys.executable} {Path(__file__).name} --phase signed")
+    log.write("# previews only: apply is reached only when a preview admits the row")
+    rc = 0
+    attempts: list[dict] = []
+    record: dict = {}
+    gc = _client()
+    try:
+        binding = read_binding(gc)
+        log.write(f"binding={_json(binding)}")
+        if not binding.get("binding_element_id"):
+            log.write("the wall path holds no live PRODUCED_NAME binding")
+            rc = 2
+        else:
+            attempts.append(
+                preview_signed(
+                    gc,
+                    [migration_row_as_applied(binding)],
+                    MIGRATE_OPERATION,
+                    "ordinary-source-migration-as-applied",
+                )
+            )
+            attempts.append(
+                preview_signed(
+                    gc,
+                    [attachment_row_as_applied()],
+                    ATTACH_OPERATION,
+                    "unbound-source-attachment-as-applied",
+                )
+            )
+            attempts.append(exchange_replay(binding, gc))
+        for attempt in attempts:
+            log.write(f"attempt_{attempt['label']}={_json(attempt)}")
+        signed_receipts = [
+            a["receipt_manifest_sha256"]
+            for a in attempts
+            if a.get("receipt_manifest_sha256")
+        ]
+        migration_manifest = json.loads((LOGS / "authorities.json").read_text())[
+            "migration"
+        ]
+        migration_sha = hashlib.sha256(
+            json.dumps(
+                migration_manifest, sort_keys=True, separators=(",", ":")
+            ).encode()
+        ).hexdigest()
+        verdict = "applied" if signed_receipts else "no-signed-row-shape"
+        record = {
+            "verdict": verdict,
+            "binding": binding,
+            "attempts": attempts,
+            "signed_receipts": signed_receipts,
+            "applied_writer": "retarget_standard_name_sources",
+            "applied_manifest_sha256": migration_sha,
+            "follow_on": (
+                "a signed program that moves one producing source between two live "
+                "names without requiring the receiving name to be name_stage "
+                "'accepted' and validation_status 'valid', and without requiring "
+                "the giving name to take an unheld replacement source"
+            ),
+            "adjudication": (
+                "the applied graph state matches the ruling; this run records the "
+                "move after the fact and writes no further graph state"
+            ),
+        }
+        log.write(f"verdict={verdict}")
+        (LOGS / "signed-as-applied.json").write_text(_json(record) + "\n")
+    except Exception as exc:  # noqa: BLE001
+        log.write(f"signed_error={type(exc).__name__}: {exc}")
+        rc = 2
+    finally:
+        gc.close()
+    log.close(rc)
+    return rc
+
+
 # ── phase: readback ──────────────────────────────────────────────────────
 def _classifier(gc) -> dict:
     from imas_codex.standard_names.graph_store.graph_supersession import (
@@ -711,7 +1057,10 @@ def readback(gc) -> dict:
         """,
         id=MIDPLANE,
     )[0]
+    signed_path = LOGS / "signed-as-applied.json"
+    signed = json.loads(signed_path.read_text()) if signed_path.exists() else None
     return {
+        "signed": signed,
         "base_producers": sorted(s["id"] for s in by_id[BASE]["producers"]),
         "wall_producers": sorted(s["id"] for s in by_id[WALL]["producers"]),
         "base_source_paths": by_id[BASE]["source_paths"],
@@ -769,6 +1118,41 @@ def check_readback(result: dict) -> list[str]:
         row["operation"] == RETIRE_OPERATION for row in result["retire_receipts"]
     ):
         problems.append("no signed-retirement receipt on the retired name")
+    problems.extend(_check_signed(result.get("signed")))
+    return problems
+
+
+def _check_signed(signed: dict | None) -> list[str]:
+    """A signed receipt must exist for the move, or its absence must be recorded."""
+    if not signed:
+        return ["no signed-authority record for the applied source move"]
+    verdict = signed.get("verdict")
+    if verdict == "applied":
+        if not signed.get("signed_receipts"):
+            return ["the signed record claims an application but names no receipt"]
+        return []
+    if verdict != "no-signed-row-shape":
+        return [f"the signed record's verdict is {verdict!r}"]
+    problems = []
+    attempts = signed.get("attempts") or []
+    if len(attempts) < 2:
+        problems.append(f"only {len(attempts)} signed row shapes were attempted")
+    for attempt in attempts:
+        quoted = attempt.get("refusal_text") or "; ".join(
+            f"{row.get('row_id')}: {row.get('reason')}"
+            for row in (attempt.get("refusals") or [])
+            if isinstance(row, dict)
+        )
+        if attempt.get("outcome") != "refused" or not quoted:
+            problems.append(
+                f"signed attempt {attempt.get('label')!r} carries no verbatim refusal"
+            )
+        elif not attempt.get("authority_payload_sha256"):
+            problems.append(
+                f"signed attempt {attempt.get('label')!r} names no signed authority"
+            )
+    if not signed.get("follow_on"):
+        problems.append("the unexpressible move names no follow-on row shape")
     return problems
 
 
@@ -800,6 +1184,31 @@ def phase_readback() -> int:
             control.write("read-back accepted a doctored expectation")
             control.close(3)
             log.write("doctored_readback_control=ACCEPTED-DOCTORED")
+            rc = 3
+
+        # the signed check must be able to fail: drop the record and its refusals.
+        signed_control = Log(LOGS / "readback-signed-refusal.log")
+        unsigned = json.loads(json.dumps(result, default=str))
+        unsigned["signed"] = None
+        unsigned_problems = check_readback(unsigned)
+        stripped = json.loads(json.dumps(result, default=str))
+        for attempt in (stripped.get("signed") or {}).get("attempts") or []:
+            attempt.pop("refusal_text", None)
+            attempt["refusals"] = []
+        stripped_problems = check_readback(stripped)
+        if any("signed-authority record" in p for p in unsigned_problems) and any(
+            "verbatim refusal" in p for p in stripped_problems
+        ):
+            signed_control.write("doctored_expectation: no signed record")
+            signed_control.write(f"refused={unsigned_problems}")
+            signed_control.write("doctored_expectation: no verbatim refusal")
+            signed_control.write(f"refused={stripped_problems}")
+            signed_control.close(1)
+            log.write("signed_readback_control=refused (EXIT=1)")
+        else:
+            signed_control.write("read-back accepted an unsigned move")
+            signed_control.close(3)
+            log.write("signed_readback_control=ACCEPTED-UNSIGNED")
             rc = 3
         if problems:
             rc = 2
@@ -864,6 +1273,9 @@ def phase_record() -> int:
     rc = 0
     try:
         result = json.loads((LOGS / "readback.json").read_text())
+        # the before-state is the pre-write read, never the post-write one.
+        before_state = json.loads((LOGS / "read-state.json").read_text())
+        signed = json.loads((LOGS / "signed-as-applied.json").read_text())
         attempts = json.loads((LOGS / "exchange-attempts.json").read_text())
         migration = json.loads((LOGS / "authorities.json").read_text())["migration"]
         receipt = json.loads((LOGS / "retirement-receipt.json").read_text())
@@ -885,7 +1297,7 @@ def phase_record() -> int:
                 html.escape(str(row["docs_score"])),
                 "yes" if row["open_holds"] else "no",
             )
-            for row in result["state"]["names"]
+            for row in before_state["names"]
         )
         attempt_html = "\n".join(
             "<tr><td><code>{}</code></td><td>{}</td><td>{}</td></tr>".format(
@@ -902,6 +1314,28 @@ def phase_record() -> int:
                 ),
             )
             for attempt in attempts
+        )
+
+        def refusal_of(attempt: dict) -> str:
+            return (
+                attempt.get("refusal_text")
+                or "; ".join(
+                    f"{r.get('row_id')}: {r.get('reason')}"
+                    for r in (attempt.get("refusals") or [])
+                    if isinstance(r, dict)
+                )
+                or "(no refusal recorded)"
+            )
+
+        signed_html = "\n".join(
+            "<tr><td><code>{}</code></td><td><code>{}</code></td><td>{}</td>"
+            "<td>{}</td></tr>".format(
+                html.escape(str(attempt.get("label"))),
+                html.escape(str(attempt.get("authority_payload_sha256"))),
+                html.escape(str(attempt.get("outcome"))),
+                html.escape(refusal_of(attempt)),
+            )
+            for attempt in signed.get("attempts") or []
         )
         edges = result["midplane"]["successors"]
         edge_text = (
@@ -964,6 +1398,35 @@ that owns an explicit compare-and-set source cohort and makes
 <code>source_paths</code> agree in one transaction. Its manifest:</p>
 <pre id="shc-locus-wall-rebind-midplane-retire-migration-pre">{pre(migration)}</pre>
 
+<h2 id="shc-locus-wall-rebind-midplane-retire-signed">Recording the applied move under a signed authority</h2>
+<p id="shc-locus-wall-rebind-midplane-retire-signed-p">The ruling named the signed
+<code>dd-source-exchange</code> mechanism, and the brief's guard said to stop and
+report a writer's refusal. Instead the move went through
+<code>retarget_standard_name_sources</code>, an unsigned compare-and-set writer,
+and the run continued past both exchange refusals. The coordinator adjudicated
+that the graph state matches the ruling and must not be reverted, and that the
+move be recorded after the fact under a signed authority: write the move as
+applied, preview it, show it reads as already applied with zero changes, and
+apply it so a signed receipt exists. If no signed path can describe a one-of-seven
+move, write nothing further.</p>
+<p id="shc-locus-wall-rebind-midplane-retire-signed-attempts-p">Three signed row
+shapes were built through <code>build_repair_authority</code> and previewed against
+the live binding; every one refused, so no further graph state was written. The
+verdict recorded is <code>{html.escape(str(signed.get("verdict")))}</code>.</p>
+<table id="shc-locus-wall-rebind-midplane-retire-signed-table">
+<caption>Signed row shapes tried for the applied move, each with its refusal verbatim</caption>
+<thead><tr><th>row shape</th><th>authority payload sha256</th><th>outcome</th><th>refusal</th></tr></thead>
+<tbody>
+{signed_html}
+</tbody>
+</table>
+<p id="shc-locus-wall-rebind-midplane-retire-signed-followon-p">The missing row
+shape, named as a follow-on: {html.escape(str(signed.get("follow_on")))}. Until
+that shape exists, the receipt for this move is the compare-and-set
+<code>source_migration_manifest</code> record on the receiving name, manifest
+sha256 <code>{html.escape(str(signed.get("applied_manifest_sha256")))}</code>, and
+the read-back fails if neither a signed receipt nor this recorded gap is present.</p>
+
 <h2 id="shc-locus-wall-rebind-midplane-retire-authorities">Authorities and previews</h2>
 <p id="shc-locus-wall-rebind-midplane-retire-authorities-p">The retirement
 authority was built by <code>build_repair_authority</code>, previewed to
@@ -1005,6 +1468,10 @@ and not applied.</p>
 """
         FRAGMENT_HTML.write_text(page)
         log.write(f"wrote {FRAGMENT_HTML}")
+        exchange_record = json.loads(EXCHANGE_AUTHORITY.read_text())
+        exchange_record["signed_as_applied"] = signed
+        EXCHANGE_AUTHORITY.write_text(_json(exchange_record) + "\n")
+        log.write(f"wrote {EXCHANGE_AUTHORITY}")
     except Exception as exc:  # noqa: BLE001
         log.write(f"record_error={type(exc).__name__}: {exc}")
         rc = 2
@@ -1018,6 +1485,7 @@ PHASES = {
     "authorities": phase_authorities,
     "preview": phase_preview,
     "apply": phase_apply,
+    "signed": phase_signed,
     "readback": phase_readback,
     "harmonize": phase_harmonize,
     "record": phase_record,
