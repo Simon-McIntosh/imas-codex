@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="288">
+<meta name="plan-version" content="289">
 <meta name="plan-modified" content="2026-10-28">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -918,6 +918,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s41" data-id="c-run-r-20261028T133043540557-review-of-sib-cascade-calibration-crash-90a16b025966" data-who="reckon-build" data-when="2026-10-28T13:42:06.586Z">
     <div class="r-comment-body"><p>review(standard-names): the four commits gained since 37a06e83d repair both blocking findings — the solo row now names commit 2a3539fbc and five solo-head logs that exist at that revision with the times it prints, and the summary states the dump-adjacent SIGSEGV instead of a pytest-timeout kill — scoring 19/18/20/12/17/20 with three non-blocking findings and zero added failure ids.</p></div>
+</div>
+<div class="r-comment" data-section="s41" data-id="c-run-r-20261028T114520975730-sib-cascade-calibration-crash" data-who="reckon-build" data-when="2026-10-28T13:27:24Z">
+    <div class="r-comment-body"><p>retest(standard-names): the calibration rebuild runs once and finishes; the periodic stack dump is scoped off for it, so the id passes in five solo runs at 165-183 s each and in the standard-names suite at eight workers, and reverting one re-frozen operating-point row still fails it with an assertion.</p></div>
 </div>
 <div class="r-comment" data-section="s42" data-id="c-run-r-20261028T075816173791-review-of-sib-split-name-bindings-53d7d9f4f1e0" data-who="reckon-build" data-when="2026-10-28T08:19:13.964Z">
     <div class="r-comment-body"><p>Reviewed r-20261028T064048248418-sib-split-name-bindings at b4254dfbf..53d7d9f4f, scored goal_fidelity 20, evidence 17, scope_discipline 18, durability 19, fit 18, reuse 15, with added_failure_count 0; two non-blocking findings — the evidence fragment overstates the removed bindings as eleven (actual ten bindings and two dynamic lookups, still 12 sites) and the new guard matches only a direct globals() call so an aliased dict evades it. Durability was measured, not inferred: reinstating the exact base spelling at graph_ops.py:303 in a scratch copy of the head tree made test_no_dynamic_name_binding fail.</p></div>
