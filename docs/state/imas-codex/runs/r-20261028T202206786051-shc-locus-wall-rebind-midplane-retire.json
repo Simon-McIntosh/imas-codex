@@ -1,0 +1,1095 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 3,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "b548911a44f1398115d6db9ba41e5fdf77762f22",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T202206786051-shc-locus-wall-rebind-midplane-retire/brief.md",
+    "sha256": "f9aaa7c695ea4838b7b97e9148cd909a6bf8e03bda6ce3fdf97f71870e3fe1b1"
+  },
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 9534613,
+      "input_tokens_cumulative": 9534613,
+      "output_tokens": 35324,
+      "output_tokens_cumulative": 35324,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 5652,
+    "files": 4,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 164,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_dd_residue_release.py"
+      },
+      "run_function": {
+        "line": 282,
+        "name": "exchange_authority",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 293
+    },
+    {
+      "existing_function": {
+        "line": 112,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_ordinary_source_migration.py"
+      },
+      "run_function": {
+        "line": 282,
+        "name": "exchange_authority",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 293
+    },
+    {
+      "existing_function": {
+        "line": 204,
+        "name": "_specification",
+        "path": "tests/standard_names/test_repair_authority_builder.py"
+      },
+      "run_function": {
+        "line": 282,
+        "name": "exchange_authority",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 294
+    },
+    {
+      "existing_function": {
+        "line": 241,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_rewire_relocation_retire.py"
+      },
+      "run_function": {
+        "line": 282,
+        "name": "exchange_authority",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 293
+    },
+    {
+      "existing_function": {
+        "line": 93,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_signed_manifest_operator.py"
+      },
+      "run_function": {
+        "line": 282,
+        "name": "exchange_authority",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 293
+    },
+    {
+      "existing_function": {
+        "line": 266,
+        "name": "_authority",
+        "path": "tests/standard_names/test_signed_source_exchange.py"
+      },
+      "run_function": {
+        "line": 282,
+        "name": "exchange_authority",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 291
+    },
+    {
+      "existing_function": {
+        "line": 72,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_signed_supersede_edge.py"
+      },
+      "run_function": {
+        "line": 282,
+        "name": "exchange_authority",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 293
+    },
+    {
+      "existing_function": {
+        "line": 39,
+        "name": "_authority",
+        "path": "tests/standard_names/test_signed_supersede_replay.py"
+      },
+      "run_function": {
+        "line": 282,
+        "name": "exchange_authority",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 292
+    },
+    {
+      "existing_function": {
+        "line": 108,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_source_target_reconciliation.py"
+      },
+      "run_function": {
+        "line": 282,
+        "name": "exchange_authority",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 293
+    },
+    {
+      "existing_function": {
+        "line": 133,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_structural_release.py"
+      },
+      "run_function": {
+        "line": 282,
+        "name": "exchange_authority",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 293
+    },
+    {
+      "existing_function": {
+        "line": 91,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_structural_reparent.py"
+      },
+      "run_function": {
+        "line": 282,
+        "name": "exchange_authority",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 293
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_structural_source_revival.py"
+      },
+      "run_function": {
+        "line": 282,
+        "name": "exchange_authority",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 293
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_supersede_successor_scalar.py"
+      },
+      "run_function": {
+        "line": 282,
+        "name": "exchange_authority",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 293
+    },
+    {
+      "existing_function": {
+        "line": 96,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_unbound_source_attachment.py"
+      },
+      "run_function": {
+        "line": 282,
+        "name": "exchange_authority",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 293
+    },
+    {
+      "existing_function": {
+        "line": 260,
+        "name": "test_linked_pages_relationships",
+        "path": "tests/wiki/test_graph_ops_unit.py"
+      },
+      "run_function": {
+        "line": 282,
+        "name": "exchange_authority",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 292
+    },
+    {
+      "existing_function": {
+        "line": 164,
+        "name": "test_multiple_signals",
+        "path": "tests/discovery/test_enrichment_context.py"
+      },
+      "run_function": {
+        "line": 677,
+        "name": "_guards",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 684
+    },
+    {
+      "existing_function": {
+        "line": 68,
+        "name": "sample_groups",
+        "path": "tests/ids/test_mapping_e2e.py"
+      },
+      "run_function": {
+        "line": 677,
+        "name": "_guards",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 683
+    },
+    {
+      "existing_function": {
+        "line": 1083,
+        "name": "test_page_grouping",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 677,
+        "name": "_guards",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 683
+    },
+    {
+      "existing_function": {
+        "line": 383,
+        "name": "test_byte_stable_round_trip",
+        "path": "tests/standard_names/test_catalog_layout_hierarchy.py"
+      },
+      "run_function": {
+        "line": 677,
+        "name": "_guards",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 686
+    },
+    {
+      "existing_function": {
+        "line": 555,
+        "name": "test_check_catalog_list_root",
+        "path": "tests/standard_names/test_catalog_layout_hierarchy.py"
+      },
+      "run_function": {
+        "line": 677,
+        "name": "_guards",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 686
+    },
+    {
+      "existing_function": {
+        "line": 179,
+        "name": "test_reconcile_does_not_turn_exhaustion_into_validation_failure",
+        "path": "tests/standard_names/test_catalog_status_reconcile.py"
+      },
+      "run_function": {
+        "line": 677,
+        "name": "_guards",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 680
+    },
+    {
+      "existing_function": {
+        "line": 94,
+        "name": "_authority_row",
+        "path": "tests/standard_names/test_dd_residue_release.py"
+      },
+      "run_function": {
+        "line": 677,
+        "name": "_guards",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 649,
+        "name": "test_multi_ids_context",
+        "path": "tests/standard_names/test_enrichment.py"
+      },
+      "run_function": {
+        "line": 677,
+        "name": "_guards",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 682
+    },
+    {
+      "existing_function": {
+        "line": 48,
+        "name": "_row",
+        "path": "tests/standard_names/test_ordinary_source_migration.py"
+      },
+      "run_function": {
+        "line": 677,
+        "name": "_guards",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 190,
+        "name": "test_change_history_recovery_uses_existing_composed_sources",
+        "path": "tests/standard_names/test_provenance_rebuild.py"
+      },
+      "run_function": {
+        "line": 677,
+        "name": "_guards",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 681
+    },
+    {
+      "existing_function": {
+        "line": 43,
+        "name": "_row",
+        "path": "tests/standard_names/test_rewire_relocation_retire.py"
+      },
+      "run_function": {
+        "line": 677,
+        "name": "_guards",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 11,
+        "name": "query",
+        "path": "tests/standard_names/test_roster_reason_transcription.py"
+      },
+      "run_function": {
+        "line": 677,
+        "name": "_guards",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 683
+    },
+    {
+      "existing_function": {
+        "line": 15,
+        "name": "test_dd_projection_reconcile_uses_full_attachment_guard",
+        "path": "tests/standard_names/test_semantic_source_repair.py"
+      },
+      "run_function": {
+        "line": 677,
+        "name": "_guards",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 680
+    },
+    {
+      "existing_function": {
+        "line": 48,
+        "name": "_row",
+        "path": "tests/standard_names/test_ordinary_source_migration.py"
+      },
+      "run_function": {
+        "line": 724,
+        "name": "migration_row_as_applied",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 761
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "_relationship_add_row",
+        "path": "tests/standard_names/test_repair_authority_builder.py"
+      },
+      "run_function": {
+        "line": 724,
+        "name": "migration_row_as_applied",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 761
+    },
+    {
+      "existing_function": {
+        "line": 52,
+        "name": "_revival_row",
+        "path": "tests/standard_names/test_structural_source_revival.py"
+      },
+      "run_function": {
+        "line": 724,
+        "name": "migration_row_as_applied",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 761
+    },
+    {
+      "existing_function": {
+        "line": 34,
+        "name": "_row",
+        "path": "tests/standard_names/test_unbound_source_attachment.py"
+      },
+      "run_function": {
+        "line": 724,
+        "name": "migration_row_as_applied",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 761
+    },
+    {
+      "existing_function": {
+        "line": 48,
+        "name": "_row",
+        "path": "tests/standard_names/test_ordinary_source_migration.py"
+      },
+      "run_function": {
+        "line": 776,
+        "name": "attachment_row_as_applied",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 801
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "_relationship_add_row",
+        "path": "tests/standard_names/test_repair_authority_builder.py"
+      },
+      "run_function": {
+        "line": 776,
+        "name": "attachment_row_as_applied",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 801
+    },
+    {
+      "existing_function": {
+        "line": 52,
+        "name": "_revival_row",
+        "path": "tests/standard_names/test_structural_source_revival.py"
+      },
+      "run_function": {
+        "line": 776,
+        "name": "attachment_row_as_applied",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 801
+    },
+    {
+      "existing_function": {
+        "line": 34,
+        "name": "_row",
+        "path": "tests/standard_names/test_unbound_source_attachment.py"
+      },
+      "run_function": {
+        "line": 776,
+        "name": "attachment_row_as_applied",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 801
+    },
+    {
+      "existing_function": {
+        "line": 164,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_dd_residue_release.py"
+      },
+      "run_function": {
+        "line": 824,
+        "name": "signed_authority",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 837
+    },
+    {
+      "existing_function": {
+        "line": 112,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_ordinary_source_migration.py"
+      },
+      "run_function": {
+        "line": 824,
+        "name": "signed_authority",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 837
+    },
+    {
+      "existing_function": {
+        "line": 204,
+        "name": "_specification",
+        "path": "tests/standard_names/test_repair_authority_builder.py"
+      },
+      "run_function": {
+        "line": 824,
+        "name": "signed_authority",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 838
+    },
+    {
+      "existing_function": {
+        "line": 241,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_rewire_relocation_retire.py"
+      },
+      "run_function": {
+        "line": 824,
+        "name": "signed_authority",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 837
+    },
+    {
+      "existing_function": {
+        "line": 93,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_signed_manifest_operator.py"
+      },
+      "run_function": {
+        "line": 824,
+        "name": "signed_authority",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 837
+    },
+    {
+      "existing_function": {
+        "line": 266,
+        "name": "_authority",
+        "path": "tests/standard_names/test_signed_source_exchange.py"
+      },
+      "run_function": {
+        "line": 824,
+        "name": "signed_authority",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 837
+    },
+    {
+      "existing_function": {
+        "line": 72,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_signed_supersede_edge.py"
+      },
+      "run_function": {
+        "line": 824,
+        "name": "signed_authority",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 837
+    },
+    {
+      "existing_function": {
+        "line": 39,
+        "name": "_authority",
+        "path": "tests/standard_names/test_signed_supersede_replay.py"
+      },
+      "run_function": {
+        "line": 824,
+        "name": "signed_authority",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 837
+    },
+    {
+      "existing_function": {
+        "line": 108,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_source_target_reconciliation.py"
+      },
+      "run_function": {
+        "line": 824,
+        "name": "signed_authority",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 837
+    },
+    {
+      "existing_function": {
+        "line": 133,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_structural_release.py"
+      },
+      "run_function": {
+        "line": 824,
+        "name": "signed_authority",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 837
+    },
+    {
+      "existing_function": {
+        "line": 91,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_structural_reparent.py"
+      },
+      "run_function": {
+        "line": 824,
+        "name": "signed_authority",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 837
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_structural_source_revival.py"
+      },
+      "run_function": {
+        "line": 824,
+        "name": "signed_authority",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 837
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_supersede_successor_scalar.py"
+      },
+      "run_function": {
+        "line": 824,
+        "name": "signed_authority",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 837
+    },
+    {
+      "existing_function": {
+        "line": 96,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_unbound_source_attachment.py"
+      },
+      "run_function": {
+        "line": 824,
+        "name": "signed_authority",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 837
+    },
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "test_pass_symbols_defined",
+        "path": "tests/standard_names/test_audits.py"
+      },
+      "run_function": {
+        "line": 936,
+        "name": "phase_signed",
+        "path": "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py"
+      },
+      "window_line": 991
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "b4b081b6866572ab7e7d1d469ec7a402ebb3501c",
+    "588f5418b03a0a9c01787c6fa2ec4b4e10c56674",
+    "9e9b19d0de0fb7edf06df4d0f12c6a5b3bbe22e0",
+    "84319af1b20feb0fbb44512d95c217ea456bcdff",
+    "32f7063310cf38f21f86628aebab2e4bb30fde9f"
+  ],
+  "completed_at": "2026-10-28T21:22:27Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-28T20:26:23Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.9380952380952381,
+    "plan": "sn-harmonize-command",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-28T21:22:18.085807+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-28T20:22:18Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 30,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 4,
+    "headroom": 7,
+    "mean_context": 100000,
+    "observed_at": "2026-10-28T20:21:53Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 30,
+      "aggregate_tokens_per_second": 260.751,
+      "detail": "",
+      "mean_tokens_per_second": 62.083,
+      "observed_at": "2026-10-28T20:21:53Z",
+      "runs": 4.2,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-28T21:22:27Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T202206786051-shc-locus-wall-rebind-midplane-retire/manifest.md",
+  "member": "disposable-r-20261028T202206786051-shc-locus-wall-rebind-midplane-retire",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "shc-locus-wall-rebind-midplane-retire",
+  "node_definition": {
+    "after": [],
+    "brief": "/home/ITER/mcintos/.cache/imas-codex-s18/briefs/shc-locus-wall-rebind-midplane-retire.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T202206786051-shc-locus-wall-rebind-midplane-retire/brief.md",
+    "brief_sha256": "f9aaa7c695ea4838b7b97e9148cd909a6bf8e03bda6ce3fdf97f71870e3fe1b1",
+    "capability": {
+      "class": "general",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "moderate",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 278,
+          "cached_input_tokens": 463695,
+          "input_tokens": 463975,
+          "output_tokens": 36,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 464011,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+      "session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea"
+    },
+    "done_when": "wall/description_ggd/ggd/phi_potential/values is the single producing source of electrostatic_potential_at_wall through a signed source exchange, electrostatic_potential keeps its other six, electrostatic_potential_at_outboard_midplane is retired with one successor edge to electrostatic_potential_at_langmuir_probe_position through a signed retirement, the source audit lists neither name as sourceless, the harmonize report for the family is recorded, and the runner writes the fragment with a log ending in a real EXIT=",
+    "estimated_hours": null,
+    "goal": "Apply the lead's ruling to rebind the wall potential's DD source and retire the outboard midplane name",
+    "id": "shc-locus-wall-rebind-midplane-retire",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-28T20:22:18Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 30,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 4,
+      "headroom": 7,
+      "mean_context": 100000,
+      "observed_at": "2026-10-28T20:21:53Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 30,
+        "aggregate_tokens_per_second": 260.751,
+        "detail": "",
+        "mean_tokens_per_second": 62.083,
+        "observed_at": "2026-10-28T20:21:53Z",
+        "runs": 4.2,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T202206786051-shc-locus-wall-rebind-midplane-retire/manifest.md",
+    "negative_control": "the preview of each signed operation must refuse a stale authority before the real apply",
+    "plan": "sn-harmonize-command",
+    "regenerate_paths": [],
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§4",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire.html",
+      "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-run.py",
+      "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-exchange-authority.json",
+      "docs/evidence/fragments/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire-retirement-authority.json",
+      "docs/figures/sn-harmonize-command/shc-locus-wall-rebind-midplane-retire"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 6380671.0,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "shc-locus-wall-rebind-midplane-retire",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-28T20:25:58.262319+00:00",
+    "score": 0.64375,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "asks": [
+      {
+        "action": "route",
+        "backend": "codex",
+        "confidence": 0.29,
+        "lane": "codex",
+        "model": "gpt-6-sol",
+        "offered": [
+          "clive",
+          "codex",
+          "codex",
+          "codex"
+        ],
+        "probabilities": {
+          "codex:gpt-6-astra:codex": 0.03,
+          "codex:gpt-6-luna:codex": 0.14,
+          "codex:gpt-6-sol:codex": 0.43,
+          "hold": 0,
+          "local:deepseek-v4.1-flash:clive": 0.4
+        }
+      },
+      {
+        "action": "fallback",
+        "backend": null,
+        "confidence": null,
+        "lane": null,
+        "model": null,
+        "offered": [],
+        "probabilities": {}
+      }
+    ],
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5181.497,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "reissued": true,
+    "reserved_lane_unreasoned": "codex",
+    "stage_ms": {
+      "budget-snapshot": null,
+      "context-estimate": 6.039,
+      "records": null,
+      "verdict-inputs": null
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.9380952380952381,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "32f7063310cf38f21f86628aebab2e4bb30fde9f",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "9e9b19d0de0fb7edf06df4d0f12c6a5b3bbe22e0",
+    "reviewed_head_sha": "32f7063310cf38f21f86628aebab2e4bb30fde9f",
+    "scores": {
+      "durability": 18,
+      "evidence": 15,
+      "fit": 17,
+      "goal_fidelity": 16,
+      "reuse": 18,
+      "scope_discipline": 17
+    },
+    "status": "parsed",
+    "total": 101
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261028T202206786051-shc-locus-wall-rebind-midplane-retire",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§4",
+  "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+  "session_harness": "claude",
+  "session_id": "707d70de-caa4-4a47-90a9-6569747076a6",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 23041107,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 712.095,
+    "generated_tokens": 136239,
+    "generation_seconds": 564.954,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 76.7,
+    "machine_seconds": 147.141,
+    "peak_input_tokens": 176616,
+    "tokens_per_second": 241.15,
+    "wall_tokens_per_second": 191.32
+  },
+  "time_budget": "60m",
+  "tool_steps": 128.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 3364,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 3,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-10-28T21:22:37Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-28T21:10:26Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [],
+    "run_id": "r-20261028T202206786051-shc-locus-wall-rebind-midplane-retire",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 12808,
+    "worker_pid": 2930460
+  },
+  "worker_seconds": 2374,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
