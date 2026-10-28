@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="261">
+<meta name="plan-version" content="262">
 <meta name="plan-modified" content="2026-10-28">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -953,6 +953,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s43" data-id="c-run-r-20261028T080003677817-review-of-sib-dd-cocos-older-versions-5d5611c9b800" data-who="reckon-build" data-when="2026-10-28T08:13:21.556Z">
     <div class="r-comment-body"><p>The commits r-20261028T064300090015-sib-dd-cocos-older-versions gained after its previous review (672737185, 5d5611c9b over base 3a8711083) are reviewed as parsed, scoring goal_fidelity 18, evidence 18, scope_discipline 19, durability 18, fit 16, reuse 18 (total 107), carrying reviewed_base_sha 3a87110834569bb357948fa9b7254628a6a4f0a5 and reviewed_head_sha 5d5611c9b800b829b561a3d413233dd3864cab39, added_failure_count 0, with one non-blocking finding at imas_codex/graph/build_dd.py:955; both prior non-blocking findings (the false XML-schema rationale and the untested authority_sources entry) are answered by the gained commits, the second now guarded by a test whose red log is logs/mutation-authority-sources.log.</p></div>
+</div>
+<div class="r-comment" data-section="s42" data-id="c-run-r-20261028T075816173791-review-of-sib-split-name-bindings-53d7d9f4f1e0" data-who="reckon-build" data-when="2026-10-28T08:19:13.964Z">
+    <div class="r-comment-body"><p>Reviewed r-20261028T064048248418-sib-split-name-bindings at b4254dfbf..53d7d9f4f, scored goal_fidelity 20, evidence 17, scope_discipline 18, durability 19, fit 18, reuse 15, with added_failure_count 0; two non-blocking findings — the evidence fragment overstates the removed bindings as eleven (actual ten bindings and two dynamic lookups, still 12 sites) and the new guard matches only a direct globals() call so an aliased dict evades it. Durability was measured, not inferred: reinstating the exact base spelling at graph_ops.py:303 in a scratch copy of the head tree made test_no_dynamic_name_binding fail.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
