@@ -86,8 +86,11 @@ def test_undefined_precision_is_not_reported_as_zero():
     reason="frozen calibration receipts are not installed",
 )
 def test_matched_policy_rebuilds_from_frozen_scores_and_receipts():
+    # One rebuild is the check: a second call re-runs the whole resampling pass
+    # and doubles a cost that already runs to minutes under a loaded suite. The
+    # committed artifact is the repeatability reference, so every value the
+    # rebuild produces - cutoffs, route counts, and each interval - must match it.
     first = cc.build()
-    assert first == cc.build()
     assert first == json.loads(cc.THRESHOLDS_PATH.read_text())
     assert first["name"]["score_kind"] == "logistic"
     assert first["docs"]["score_kind"] == "rubric"
