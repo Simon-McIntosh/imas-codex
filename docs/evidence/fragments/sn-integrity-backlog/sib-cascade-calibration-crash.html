@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-cascade-calibration-crash">
+<title>The calibration rebuild finishes inside its timeout and fails as a test</title>
+</head>
+<body>
+<main>
+<h1 id="sib-cascade-calibration-crash-title">The calibration rebuild finishes inside its timeout and fails as a test</h1>
+
+<p id="sib-cascade-calibration-crash-summary">
+<code>test_matched_policy_rebuilds_from_frozen_scores_and_receipts</code> called
+<code>cascade_calibration.build()</code> <strong>twice</strong>. One pass measures
+<strong>155.67 s</strong> under load, so a single id held roughly five minutes
+of wall time. That cost is why the id dominated the suite, but it is
+<strong>not</strong> what turned it red: the suite arm that failed finished in
+<strong>269.09 s</strong>, which no <strong>600 s</strong> per-test mark can
+reach, and <code>pyproject.toml</code> sets no <code>timeout_method</code>, so a
+pytest-timeout expiry would be reported as a failure rather than an xdist
+<code>worker crashed</code>. The worker died of the fault described below: the
+60 s periodic stack dump fires, and about 15 s later the interpreter dies of
+SIGSEGV with an unreadable frame after a numpy reduction, which prints no
+assertion. The test now runs one rebuild and compares it against the committed
+artifact, which is the stronger repeatability statement — every cutoff, route
+count and interval must match — and costs one pass instead of two; its fixture
+also cancels the periodic dump, which is the change that stops the crash.
+</p>
+
+<h2 id="sib-cascade-calibration-crash-mechanism">Where the time goes</h2>
+<p>
+A clean single <code>build()</code> at this revision took <strong>155.67 s</strong>
+with five sibling pytest processes running, and ended
+<code>ARTIFACT_EQUAL: True</code>. The two costs inside it, each caught by a
+faulthandler dump with its frame:
+</p>
+<ul>
+<li><strong>Grammar registry re-read.</strong> The 90 s dump sits at
+<code>imas_codex/standard_names/review/cascade_calibration.py:275</code> in
+<code>_docs_axis</code>, through
+<code>jev_review.build_docs_audit_report</code> (<code>jev_review.py:940</code>)
+into <code>audits.run_house_style_checks</code> (<code>audits.py:703</code>) and
+<code>vocab_loaders.load_conventions</code> (<code>vocab_loaders.py:904</code>),
+which parses the vocabulary YAML. The pass already wraps that loop in
+<code>_cached_conventions</code>, and the cache was measured effective: the
+first <code>run_house_style_checks</code> costs <strong>9.638 s</strong> and the
+next two <strong>0.081 s</strong> and <strong>0.085 s</strong>. So the registry
+is one warm-up, not the per-item cost the comment above it claims.</li>
+<li><strong>The resampling pass.</strong> The 120 s dump sits at
+<code>evaluation.py:214</code> inside <code>bootstrap_interval</code>, called
+from <code>cascade_calibration.py:413</code> in <code>_measure</code> and
+<code>:449</code> in <code>_matched_report</code>. <code>RESAMPLES</code> is
+<strong>10000</strong>, and <code>_matched_report</code> runs 25 bootstraps per
+axis — 18 in three <code>_measure</code> calls, six paired differences and the
+veto precision — for two axes. Each draw rebuilds its index set with a Python
+list comprehension over every copy group
+(<code>evaluation.py:210</code>). That is the pass's dominant cost and it is
+deterministic work the artifact already records.</li>
+</ul>
+
+<h2 id="sib-cascade-calibration-crash-sigsegv">The SIGSEGV is not a single event</h2>
+<p>
+The census recorded one <code>EXIT=139</code> and could not attribute it. It is
+<strong>not</strong> single. Two of five clean solo runs died with
+<code>EXIT=139</code>, at <strong>75 s</strong> and <strong>78 s</strong>,
+against three that passed at <strong>167 s</strong>, <strong>168 s</strong> and
+<strong>160 s</strong>. All five ran the same command at base commit
+<code>7034624c1</code> — <code>logs/solo-run-1.log</code> …
+<code>-5.log</code> — alone, with no profiler, under
+<code>OMP_NUM_THREADS=1</code>. The crash is a live defect at this
+revision, not an artefact of the earlier session.
+</p>
+<p>
+Every sample carries one signature: the 60 s faulthandler dump configured in
+<code>pyproject.toml</code> catches the main thread inside a numpy reduction,
+and the process dies about 15 s later with the frame after the reduction
+unreadable.
+</p>
+<pre id="sib-cascade-calibration-crash-sigsegv-frames">
+Timeout (0:01:00)!
+Thread 0x00007fb4a3201b80 (most recent call first):
+  File ".../numpy/_core/fromnumeric.py", line 83 in _wrapreduction
+  File ".../numpy/_core/fromnumeric.py", line 2425 in sum
+  File ???, line 0 in
+# wall_seconds: 78
+EXIT=139
+</pre>
+<p>
+The samples differ in what the dump caught first — the <code>cProfile</code>
+run died at 131 s inside <code>yaml/scanner.py:1303</code> under the same
+<code>load_conventions</code> frame — but each death follows a dump taken while
+the interpreter was executing C-level code, and the last frame printed is
+corrupt. In the one arm that suppressed the dump
+(<code>-p no:faulthandler</code>) the same command passed in
+<strong>152.07 s</strong>. One sample does not settle a cause, so the cause is
+recorded as unestablished: the surviving frames sit in numpy's reduction and in
+the grammar loader, and the dump interval that accompanies them is set in
+<code>pyproject.toml</code> — none of the three is in this node's write scope.
+</p>
+
+<h2 id="sib-cascade-calibration-crash-fix">The fix</h2>
+<p>
+The test's second <code>cc.build()</code> is removed. The remaining assertion,
+<code>first == json.loads(cc.THRESHOLDS_PATH.read_text())</code>, is a stronger
+repeatability check than the one it replaces: the committed artifact carries
+every interval the rebuild computes, so a change to any frozen column, to any
+threshold, or to the resampling itself fails it.
+</p>
+<p>
+The periodic stack dump is also cancelled for this one test, by a fixture. The
+suite's 60 s interval cannot be exceeded without a dump, and every observed
+death followed such a dump. The test keeps its 600 s timeout, so a genuine hang
+is still bounded; only the periodic dump is silenced.
+</p>
+<pre id="sib-cascade-calibration-crash-negative-control">
+tests/standard_names/test_cascade_calibration.py:94: in test_matched_policy_rebuilds_from_frozen_scores_and_receipts
+    assert first == json.loads(cc.THRESHOLDS_PATH.read_text())
+E   AssertionError: assert {'content_sha...a58f56f', ...} == {'content_sha...d822478', ...}
+E     {'docs': {'accept_threshold': 0.40300191447321704, ... 'panel_accepts': 207, ...}}
+E  != {'docs': {'accept_threshold': 0.38828828632095647, ... 'panel_accepts': 208, ...}}
+1 failed, 1 warning in 150.55s (0:02:30)
+EXIT=1
+</pre>
+<table id="sib-cascade-calibration-crash-gate">
+<thead><tr><th>arm</th><th>result</th></tr></thead>
+<tbody>
+<tr><td>five solo runs, before the fix (base commit <code>7034624c1</code>)</td><td>3 passed (167 s, 168 s, 160 s), 2 SIGSEGV (75 s, 78 s)</td></tr>
+<tr><td>one solo run, <code>-p no:faulthandler</code></td><td>1 passed, 152.07 s, <code>EXIT=0</code></td></tr>
+<tr><td>solo runs at head, after the fix (commit <code>2a3539fbc</code>, the head the arm ran at; <code>logs/solo-head-1.log</code> … <code>-5.log</code>)</td><td>five of five passed — 166 s, 183 s, 165 s, 172 s, 168 s — <code>EXIT=0</code> each, no stack dump printed, against the test's 600-second timeout
+(<code>@pytest.mark.timeout(600)</code>)</td></tr>
+<tr><td>suite <code>tests/standard_names</code>, <code>-n 8</code>, head before the fix</td><td>1 failed, 8536 passed, 11 skipped, 269.09 s — the id crashed at its 60 s dump</td></tr>
+<tr><td>suite <code>tests/standard_names</code>, <code>-n 8</code>, head after the fix (commit <code>fc2c69052</code>, the commit carrying the test change)</td><td><strong>8537 passed, 11 skipped, 0 failed</strong>, 228.05 s, <code>EXIT=0</code>; the rebuild itself 147.73 s</td></tr>
+<tr><td>suite <code>tests/standard_names</code>, <code>-n 8</code>, base <code>7034624c1</code></td><td>6 failed, 8530 passed, 12 skipped, 244.91 s — the same id plus five environment-only ids; <strong>zero ids added</strong> at head</td></tr>
+<tr><td>negative control at head, one re-frozen operating-point row reverted</td><td>failed with the assertion above, <code>EXIT=1</code>, 150.55 s</td></tr>
+</tbody>
+</table>
+</main>
+</body>
+</html>
