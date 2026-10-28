@@ -10,17 +10,17 @@
                 "per_name_usd": {
                     "electrostatic_potential": 0.098833,
                     "electrostatic_potential_at_langmuir_probe_position": 0.081603,
-                    "floating_electrostatic_potential": 0.085036,
+                    "floating_electrostatic_potential": 0.085036
                 },
                 "phases": {
                     "generate_docs": {"calls": 3, "usd": 0.261693},
-                    "review_docs": {"calls": 6, "usd": 0.003779},
+                    "review_docs": {"calls": 6, "usd": 0.003779}
                 },
                 "run_ids": [
                     "3dbdeb81-1f8c-4a6e-9d16-2dbc4e040e58",
-                    "5928ae2b-98b4-4d72-b298-85e21305daa5",
+                    "5928ae2b-98b4-4d72-b298-85e21305daa5"
                 ],
-                "spend_usd": 0.265472,
+                "spend_usd": 0.265472
             },
             "cost_limit_unspent_usd": 3.7345,
             "cost_limit_usd": 4.0,
@@ -35,7 +35,7 @@
                 {
                     "dd_path": "ic_antennas/antenna/module/strap/geometry/arcs_of_circle/z",
                     "reason": "locus/source device mismatch: SN 'vertical_coordinate_of_coil_conductor' has hardware locus 'coil_conductor' but path 'ic_antennas/antenna/module/strap/geometry/arcs_of_circle/z' shares no device token with it",
-                    "sn_id": "vertical_coordinate_of_coil_conductor",
+                    "sn_id": "vertical_coordinate_of_coil_conductor"
                 }
             ],
             "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T112157925793-shc-locus-reapply-all-bindings/apply-1.log",
@@ -45,7 +45,7 @@
             "produced_summary": false,
             "run_ids": [
                 "3dbdeb81-1f8c-4a6e-9d16-2dbc4e040e58",
-                "5928ae2b-98b4-4d72-b298-85e21305daa5",
+                "5928ae2b-98b4-4d72-b298-85e21305daa5"
             ],
             "run_ids_source": "selected from the exact LLMCost rows written between the apply log's own '# started' and '# ended' lines; the summary's scope run ids own none",
             "run_selection": {
@@ -53,32 +53,32 @@
                 "claimed_names": {
                     "3dbdeb81-1f8c-4a6e-9d16-2dbc4e040e58": [
                         "electrostatic_potential",
-                        "floating_electrostatic_potential",
+                        "floating_electrostatic_potential"
                     ],
                     "5928ae2b-98b4-4d72-b298-85e21305daa5": [
                         "electrostatic_potential_at_langmuir_probe_position"
-                    ],
+                    ]
                 },
                 "pool_run_ids": [
                     "3dbdeb81-1f8c-4a6e-9d16-2dbc4e040e58",
-                    "5928ae2b-98b4-4d72-b298-85e21305daa5",
+                    "5928ae2b-98b4-4d72-b298-85e21305daa5"
                 ],
                 "pool_run_rows": {
                     "3dbdeb81-1f8c-4a6e-9d16-2dbc4e040e58": {
                         "cap": 3.918397,
                         "cost_spent": 0.183869,
                         "id": "3dbdeb81-1f8c-4a6e-9d16-2dbc4e040e58",
-                        "stop_reason": "no_eligible_work",
+                        "stop_reason": "no_eligible_work"
                     },
                     "5928ae2b-98b4-4d72-b298-85e21305daa5": {
                         "cap": 4.0,
                         "cost_spent": 0.081603,
                         "id": "5928ae2b-98b4-4d72-b298-85e21305daa5",
-                        "stop_reason": "no_eligible_work",
-                    },
+                        "stop_reason": "no_eligible_work"
+                    }
                 },
                 "selection": "selected from the exact LLMCost rows written between the apply log's own '# started' and '# ended' lines; the summary's scope run ids own none",
-                "summary_scope_run_ids": [],
+                "summary_scope_run_ids": []
             },
             "scope_check": {
                 "outside_count": 0,
@@ -88,27 +88,27 @@
                     "electrostatic_potential_at_langmuir_probe_position",
                     "electrostatic_potential_at_outboard_midplane",
                     "electrostatic_potential_at_wall",
-                    "floating_electrostatic_potential",
+                    "floating_electrostatic_potential"
                 ],
                 "roster_names_not_touched": [
                     "electrostatic_potential_at_outboard_midplane",
-                    "electrostatic_potential_at_wall",
+                    "electrostatic_potential_at_wall"
                 ],
                 "touched_names": [
                     "electrostatic_potential",
                     "electrostatic_potential_at_langmuir_probe_position",
-                    "floating_electrostatic_potential",
-                ],
+                    "floating_electrostatic_potential"
+                ]
             },
             "score_regressions": null,
             "selection_window_utc": {
                 "ended": "2026-10-28T11:51:59Z",
-                "started": "2026-10-28T11:34:57Z",
+                "started": "2026-10-28T11:34:57Z"
             },
             "stamped": false,
             "summary": null,
             "summary_scope_run_ids": [],
-            "wall_seconds": 1022.0,
+            "wall_seconds": 1022.0
         }
     ],
     "dry_runs": [
@@ -119,7 +119,7 @@
                 "Dry run: 1 family(ies), 3 planned call(s), estimated cost $1.70 from 29 recent "
             ],
             "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T112157925793-shc-locus-reapply-all-bindings/dry-run-1.log",
-            "planned_calls": [3],
+            "planned_calls": [3]
         },
         {
             "exit_line": "EXIT=0",
@@ -128,8 +128,8 @@
                 "Dry run: 1 family(ies), 3 planned call(s), estimated cost $1.73 from 31 recent "
             ],
             "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T112157925793-shc-locus-reapply-all-bindings/dry-run-2.log",
-            "planned_calls": [3],
-        },
+            "planned_calls": [3]
+        }
     ],
     "family": {
         "members": [
@@ -137,9 +137,9 @@
             "electrostatic_potential_at_langmuir_probe_position",
             "electrostatic_potential_at_outboard_midplane",
             "electrostatic_potential_at_wall",
-            "floating_electrostatic_potential",
+            "floating_electrostatic_potential"
         ],
-        "seed": "electrostatic_potential",
+        "seed": "electrostatic_potential"
     },
     "phases": {
         "after": {
@@ -150,14 +150,14 @@
                 "electrostatic_potential_at_langmuir_probe_position": 0.9532784487330858,
                 "electrostatic_potential_at_outboard_midplane": null,
                 "electrostatic_potential_at_wall": 0.8625,
-                "floating_electrostatic_potential": 0.95618167852435,
+                "floating_electrostatic_potential": 0.95618167852435
             },
             "drift": 0.6,
             "estimate_basis": {
                 "calls": 33,
                 "mean_usd_per_call": 0.5755,
                 "runs": 31,
-                "total_usd": 18.9919,
+                "total_usd": 18.9919
             },
             "estimate_usd": 1.7265,
             "harmonized": false,
@@ -170,43 +170,43 @@
                     "id": "electrostatic_potential",
                     "name_stage": "accepted",
                     "reviewer_score_docs": 0.9233174263318332,
-                    "validation_status": "valid",
+                    "validation_status": "valid"
                 },
                 "electrostatic_potential_at_langmuir_probe_position": {
                     "docs_stage": "accepted",
                     "id": "electrostatic_potential_at_langmuir_probe_position",
                     "name_stage": "accepted",
                     "reviewer_score_docs": 0.9532784487330858,
-                    "validation_status": "valid",
+                    "validation_status": "valid"
                 },
                 "electrostatic_potential_at_outboard_midplane": {
                     "docs_stage": "pending",
                     "id": "electrostatic_potential_at_outboard_midplane",
                     "name_stage": "exhausted",
                     "reviewer_score_docs": null,
-                    "validation_status": "valid",
+                    "validation_status": "valid"
                 },
                 "electrostatic_potential_at_wall": {
                     "docs_stage": "accepted",
                     "id": "electrostatic_potential_at_wall",
                     "name_stage": "reviewed",
                     "reviewer_score_docs": 0.8625,
-                    "validation_status": "valid",
+                    "validation_status": "valid"
                 },
                 "floating_electrostatic_potential": {
                     "docs_stage": "accepted",
                     "id": "floating_electrostatic_potential",
                     "name_stage": "accepted",
                     "reviewer_score_docs": 0.95618167852435,
-                    "validation_status": "valid",
-                },
+                    "validation_status": "valid"
+                }
             },
             "members": [
                 "electrostatic_potential",
                 "electrostatic_potential_at_langmuir_probe_position",
                 "electrostatic_potential_at_outboard_midplane",
                 "electrostatic_potential_at_wall",
-                "floating_electrostatic_potential",
+                "floating_electrostatic_potential"
             ],
             "phase": "after",
             "physical_base": "electrostatic_potential",
@@ -214,7 +214,7 @@
             "read_at_utc": "2026-10-28T11:52:34.872549+00:00",
             "refusals": {},
             "seed": "electrostatic_potential",
-            "status_counts": {"accepted": 4, "other": 1},
+            "status_counts": {"accepted": 4, "other": 1}
         },
         "before": {
             "anchor": "electrostatic_potential_at_langmuir_probe_position",
@@ -224,14 +224,14 @@
                 "electrostatic_potential_at_langmuir_probe_position": 0.954836668004306,
                 "electrostatic_potential_at_outboard_midplane": null,
                 "electrostatic_potential_at_wall": 0.8625,
-                "floating_electrostatic_potential": 0.957504195521451,
+                "floating_electrostatic_potential": 0.957504195521451
             },
             "drift": 0.8,
             "estimate_basis": {
                 "calls": 33,
                 "mean_usd_per_call": 0.5675,
                 "runs": 29,
-                "total_usd": 18.7264,
+                "total_usd": 18.7264
             },
             "estimate_usd": 1.7024,
             "harmonized": false,
@@ -244,43 +244,43 @@
                     "id": "electrostatic_potential",
                     "name_stage": "accepted",
                     "reviewer_score_docs": 0.9426824733383852,
-                    "validation_status": "valid",
+                    "validation_status": "valid"
                 },
                 "electrostatic_potential_at_langmuir_probe_position": {
                     "docs_stage": "accepted",
                     "id": "electrostatic_potential_at_langmuir_probe_position",
                     "name_stage": "accepted",
                     "reviewer_score_docs": 0.954836668004306,
-                    "validation_status": "valid",
+                    "validation_status": "valid"
                 },
                 "electrostatic_potential_at_outboard_midplane": {
                     "docs_stage": "pending",
                     "id": "electrostatic_potential_at_outboard_midplane",
                     "name_stage": "exhausted",
                     "reviewer_score_docs": null,
-                    "validation_status": "valid",
+                    "validation_status": "valid"
                 },
                 "electrostatic_potential_at_wall": {
                     "docs_stage": "accepted",
                     "id": "electrostatic_potential_at_wall",
                     "name_stage": "reviewed",
                     "reviewer_score_docs": 0.8625,
-                    "validation_status": "valid",
+                    "validation_status": "valid"
                 },
                 "floating_electrostatic_potential": {
                     "docs_stage": "accepted",
                     "id": "floating_electrostatic_potential",
                     "name_stage": "accepted",
                     "reviewer_score_docs": 0.957504195521451,
-                    "validation_status": "valid",
-                },
+                    "validation_status": "valid"
+                }
             },
             "members": [
                 "electrostatic_potential",
                 "electrostatic_potential_at_langmuir_probe_position",
                 "electrostatic_potential_at_outboard_midplane",
                 "electrostatic_potential_at_wall",
-                "floating_electrostatic_potential",
+                "floating_electrostatic_potential"
             ],
             "phase": "before",
             "physical_base": "electrostatic_potential",
@@ -288,8 +288,8 @@
             "read_at_utc": "2026-10-28T11:33:30.996178+00:00",
             "refusals": {},
             "seed": "electrostatic_potential",
-            "status_counts": {"accepted": 3, "other": 2},
-        },
+            "status_counts": {"accepted": 3, "other": 2}
+        }
     },
     "roster_check": {
         "member_matches": {
@@ -297,7 +297,7 @@
             "electrostatic_potential_at_langmuir_probe_position": 0,
             "electrostatic_potential_at_outboard_midplane": 0,
             "electrostatic_potential_at_wall": 0,
-            "floating_electrostatic_potential": 0,
+            "floating_electrostatic_potential": 0
         },
         "members_in_west_rosters": [],
         "positive_control": "flux_surface_averaged_electron_density_at_plasma_boundary",
@@ -305,7 +305,7 @@
         "positive_control_match_count": 10,
         "roster_files": 14,
         "searched": "imas_codex/standard_names/manifests/reviews",
-        "valid_non_west": true,
+        "valid_non_west": true
     },
     "seed": "electrostatic_potential",
     "vetoes": {
@@ -317,7 +317,7 @@
                 "binding_count": 2,
                 "binding_labels": [
                     "langmuir_probes/embedded/v_plasma",
-                    "langmuir_probes/reciprocating/plunge/v_plasma",
+                    "langmuir_probes/reciprocating/plunge/v_plasma"
                 ],
                 "claims_read": 10,
                 "claims_with_a_contradicting_binding": [],
@@ -328,7 +328,7 @@
                 "review_id": "electrostatic_potential_at_langmuir_probe_position:typesafe-jev-1-13:2026-10-28T11:41:54.807951+00:00",
                 "reviewed_at": "2026-10-28T11:41:54.807951Z",
                 "veto_count": 0,
-                "vetoed_claims": [],
+                "vetoed_claims": []
             },
             {
                 "binding_count": 7,
@@ -339,7 +339,7 @@
                     "mhd/ggd/phi_potential/values",
                     "plasma_profiles/ggd/phi_potential/values",
                     "plasma_profiles/profiles_1d/phi_potential",
-                    "wall/description_ggd/ggd/phi_potential/values",
+                    "wall/description_ggd/ggd/phi_potential/values"
                 ],
                 "claims_read": 15,
                 "claims_with_a_contradicting_binding": [
@@ -349,58 +349,58 @@
                                 "answer": "contradicts",
                                 "binding": "core_profiles/profiles_1d/phi_potential",
                                 "confidence": 0.09,
-                                "position": 0,
+                                "position": 0
                             },
                             {
                                 "answer": "says nothing",
                                 "binding": "edge_profiles/ggd/phi_potential/values",
                                 "confidence": 0.95,
-                                "position": 1,
+                                "position": 1
                             },
                             {
                                 "answer": "says nothing",
                                 "binding": "edge_profiles/profiles_1d/phi_potential",
                                 "confidence": 0.91,
-                                "position": 2,
+                                "position": 2
                             },
                             {
                                 "answer": "says nothing",
                                 "binding": "mhd/ggd/phi_potential/values",
                                 "confidence": 0.94,
-                                "position": 3,
+                                "position": 3
                             },
                             {
                                 "answer": "supports",
                                 "binding": "plasma_profiles/ggd/phi_potential/values",
                                 "confidence": 0.09,
-                                "position": 4,
+                                "position": 4
                             },
                             {
                                 "answer": "supports",
                                 "binding": "plasma_profiles/profiles_1d/phi_potential",
                                 "confidence": 0.22,
-                                "position": 5,
+                                "position": 5
                             },
                             {
                                 "answer": "says nothing",
                                 "binding": "wall/description_ggd/ggd/phi_potential/values",
                                 "confidence": 0.89,
-                                "position": 6,
-                            },
+                                "position": 6
+                            }
                         ],
                         "bindings_contradicting": [
                             "core_profiles/profiles_1d/phi_potential"
                         ],
                         "bindings_supporting": [
                             "plasma_profiles/ggd/phi_potential/values",
-                            "plasma_profiles/profiles_1d/phi_potential",
+                            "plasma_profiles/profiles_1d/phi_potential"
                         ],
                         "claim": "This quantity is the electrostatic potential at a location in a plasma or on a plasma-facing surface, relative to a chosen electrical reference.",
                         "claim_level_answer": null,
                         "folded": "supports",
                         "index": 0,
                         "settled_by": null,
-                        "vetoed": false,
+                        "vetoed": false
                     },
                     {
                         "bindings": [
@@ -408,49 +408,49 @@
                                 "answer": "contradicts",
                                 "binding": "core_profiles/profiles_1d/phi_potential",
                                 "confidence": 0.82,
-                                "position": 0,
+                                "position": 0
                             },
                             {
                                 "answer": "says nothing",
                                 "binding": "edge_profiles/ggd/phi_potential/values",
                                 "confidence": 0.85,
-                                "position": 1,
+                                "position": 1
                             },
                             {
                                 "answer": "says nothing",
                                 "binding": "edge_profiles/profiles_1d/phi_potential",
                                 "confidence": 0.89,
-                                "position": 2,
+                                "position": 2
                             },
                             {
                                 "answer": "says nothing",
                                 "binding": "mhd/ggd/phi_potential/values",
                                 "confidence": 0.94,
-                                "position": 3,
+                                "position": 3
                             },
                             {
                                 "answer": "contradicts",
                                 "binding": "plasma_profiles/ggd/phi_potential/values",
                                 "confidence": 0.37,
-                                "position": 4,
+                                "position": 4
                             },
                             {
                                 "answer": "contradicts",
                                 "binding": "plasma_profiles/profiles_1d/phi_potential",
                                 "confidence": 0.46,
-                                "position": 5,
+                                "position": 5
                             },
                             {
                                 "answer": "says nothing",
                                 "binding": "wall/description_ggd/ggd/phi_potential/values",
                                 "confidence": 0.86,
-                                "position": 6,
-                            },
+                                "position": 6
+                            }
                         ],
                         "bindings_contradicting": [
                             "core_profiles/profiles_1d/phi_potential",
                             "plasma_profiles/ggd/phi_potential/values",
-                            "plasma_profiles/profiles_1d/phi_potential",
+                            "plasma_profiles/profiles_1d/phi_potential"
                         ],
                         "bindings_supporting": [],
                         "claim": "No particular location or spatial averaging is implied.",
@@ -458,8 +458,8 @@
                         "folded": "contradicts",
                         "index": 5,
                         "settled_by": "non_requirement_sentence",
-                        "vetoed": false,
-                    },
+                        "vetoed": false
+                    }
                 ],
                 "claims_with_per_binding_answers": 15,
                 "held_by_a_binding_that_supports_it": [],
@@ -468,13 +468,13 @@
                 "review_id": "electrostatic_potential:typesafe-jev-1-13:2026-10-28T11:49:16.588024+00:00",
                 "reviewed_at": "2026-10-28T11:49:16.588024Z",
                 "veto_count": 0,
-                "vetoed_claims": [],
+                "vetoed_claims": []
             },
             {
                 "binding_count": 2,
                 "binding_labels": [
                     "langmuir_probes/embedded/v_floating",
-                    "langmuir_probes/reciprocating/plunge/collector/v_floating",
+                    "langmuir_probes/reciprocating/plunge/collector/v_floating"
                 ],
                 "claims_read": 11,
                 "claims_with_a_contradicting_binding": [],
@@ -485,14 +485,14 @@
                 "review_id": "floating_electrostatic_potential:typesafe-jev-1-13:2026-10-28T11:49:44.403708+00:00",
                 "reviewed_at": "2026-10-28T11:49:44.403708Z",
                 "veto_count": 0,
-                "vetoed_claims": [],
-            },
+                "vetoed_claims": []
+            }
         ],
         "reviews_read": 3,
         "veto_count": 0,
         "window_utc": {
             "ended": "2026-10-28T11:51:59Z",
-            "started": "2026-10-28T11:34:57Z",
-        },
-    },
+            "started": "2026-10-28T11:34:57Z"
+        }
+    }
 }
