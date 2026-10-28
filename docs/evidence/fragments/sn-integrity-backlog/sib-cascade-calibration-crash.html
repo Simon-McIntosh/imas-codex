@@ -99,8 +99,7 @@ The test's second <code>cc.build()</code> is removed. The remaining assertion,
 <code>first == json.loads(cc.THRESHOLDS_PATH.read_text())</code>, is a stronger
 repeatability check than the one it replaces: the committed artifact carries
 every interval the rebuild computes, so a change to any frozen column, to any
-threshold, or to the resampling itself fails it. <em>Placeholder: the gate
-numbers below are filled from the run logs.</em>
+threshold, or to the resampling itself fails it.
 </p>
 <p>
 The periodic stack dump is also cancelled for this one test, by a fixture. The
@@ -114,7 +113,7 @@ tests/standard_names/test_cascade_calibration.py:94: in test_matched_policy_rebu
 E   AssertionError: assert {'content_sha...a58f56f', ...} == {'content_sha...d822478', ...}
 E     {'docs': {'accept_threshold': 0.40300191447321704, ... 'panel_accepts': 207, ...}}
 E  != {'docs': {'accept_threshold': 0.38828828632095647, ... 'panel_accepts': 208, ...}}
-1 failed, 1 warning in 153.65s (0:02:33)
+1 failed, 1 warning in 150.55s (0:02:30)
 EXIT=1
 </pre>
 <table id="sib-cascade-calibration-crash-gate">
@@ -124,9 +123,9 @@ EXIT=1
 <tr><td>one solo run, <code>-p no:faulthandler</code></td><td>1 passed, 152.07 s, <code>EXIT=0</code></td></tr>
 <tr><td>solo runs at head, after the fix</td><td>five of five passed — 164 s, 164 s, 167 s, 162 s, 168 s — <code>EXIT=0</code> each, against a 600 s timeout</td></tr>
 <tr><td>suite <code>tests/standard_names</code>, <code>-n 8</code>, head before the fix</td><td>1 failed, 8536 passed, 11 skipped, 269.09 s — the id crashed at its 60 s dump</td></tr>
-<tr><td>suite <code>tests/standard_names</code>, <code>-n 8</code>, head after the fix</td><td><strong>8537 passed, 11 skipped, 0 failed</strong>, 252.55 s, <code>EXIT=0</code></td></tr>
+<tr><td>suite <code>tests/standard_names</code>, <code>-n 8</code>, head after the fix (committed)</td><td><strong>8537 passed, 11 skipped, 0 failed</strong>, 228.05 s, <code>EXIT=0</code>; the rebuild itself 147.73 s</td></tr>
 <tr><td>suite <code>tests/standard_names</code>, <code>-n 8</code>, base <code>7034624c1</code></td><td>6 failed, 8530 passed, 12 skipped, 244.91 s — the same id plus five environment-only ids; <strong>zero ids added</strong> at head</td></tr>
-<tr><td>negative control, one re-frozen operating-point row reverted</td><td>failed with the assertion above, <code>EXIT=1</code>, 153.65 s</td></tr>
+<tr><td>negative control at head, one re-frozen operating-point row reverted</td><td>failed with the assertion above, <code>EXIT=1</code>, 150.55 s</td></tr>
 </tbody>
 </table>
 </main>
