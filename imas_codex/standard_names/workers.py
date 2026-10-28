@@ -10,6 +10,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+from collections.abc import Callable
 
 from imas_codex.standard_names.budget import (
     bind_attempt_exposure,
@@ -33,26 +34,28 @@ logger = logging.getLogger(__name__)
 #: Collaborators a task module requests by name, declared rather than read out
 #: of the module namespace: the set a task may ask for is then readable here,
 #: and a name this root does not carry raises ``KeyError`` exactly as the
-#: namespace it replaces did.
-_WORKER_DEPENDENCIES: dict[str, object] = {
-    "DD_PREFIX": DD_PREFIX,
+#: namespace it replaces did. Each value is read when it is requested, so a
+#: caller that replaces one of these names on this module is the one a task
+#: sees; holding the imported object here would serve the import instead.
+_WORKER_DEPENDENCIES: dict[str, Callable[[], object]] = {
+    "DD_PREFIX": lambda: DD_PREFIX,
     "DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER": (
-        DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER
+        lambda: DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER
     ),
-    "SEMANTIC_SIM_GATE_MODEL": SEMANTIC_SIM_GATE_MODEL,
-    "SEMANTIC_SIM_GATE_RESOLUTION_METHOD": SEMANTIC_SIM_GATE_RESOLUTION_METHOD,
-    "asyncio": asyncio,
-    "bind_attempt_exposure": bind_attempt_exposure,
-    "charge_billable_exception": charge_billable_exception,
-    "detect_value_provenance": detect_value_provenance,
-    "encode_source_path": encode_source_path,
-    "json": json,
-    "logger": logger,
-    "model_provider_exposure": model_provider_exposure,
-    "strip_dd_prefix": strip_dd_prefix,
+    "SEMANTIC_SIM_GATE_MODEL": lambda: SEMANTIC_SIM_GATE_MODEL,
+    "SEMANTIC_SIM_GATE_RESOLUTION_METHOD": lambda: SEMANTIC_SIM_GATE_RESOLUTION_METHOD,
+    "asyncio": lambda: asyncio,
+    "bind_attempt_exposure": lambda: bind_attempt_exposure,
+    "charge_billable_exception": lambda: charge_billable_exception,
+    "detect_value_provenance": lambda: detect_value_provenance,
+    "encode_source_path": lambda: encode_source_path,
+    "json": lambda: json,
+    "logger": lambda: logger,
+    "model_provider_exposure": lambda: model_provider_exposure,
+    "strip_dd_prefix": lambda: strip_dd_prefix,
 }
 
 
 def _worker_dependency(name: str):
-    """Resolve a non-task collaborator through the composition root."""
-    return _WORKER_DEPENDENCIES[name]
+    """Resolve a non-task collaborator through the namespace that holds it."""
+    return _WORKER_DEPENDENCIES[name]()
