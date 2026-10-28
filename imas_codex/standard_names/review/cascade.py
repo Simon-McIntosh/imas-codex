@@ -589,7 +589,9 @@ async def _docs_judgment(
 
     checks = [check for check in jev_review._default_checks() if check.axis == "docs"]
     state = jev_review.build_docs_state(item, checks=checks)
-    questions = jev_review.docs_question_table(checks, state["documentation_claims"])
+    questions = jev_review.docs_question_table(
+        checks, state["documentation_claims"], state.get("binding_ids")
+    )
     results, batch_cost = await jev_review.decide_batch(
         [state], questions, model=model, service=jev_review.SERVICE
     )
