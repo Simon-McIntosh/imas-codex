@@ -11,7 +11,9 @@ could not see a new direct write as a defect while those two entries stood.</p>
 <code>domain_decision.derived_parent_domain_decision(decision, child_domains)</code>:
 a stored choice wins, because a settled decision outranks an inherited one;
 otherwise the domain most children carry becomes the parent's choice, ties
-broken by name so the same child set always yields the same parent; a parent
+broken by name so the same child set always yields the same parent, through the
+one ranking <code>path_counts</code> already publishes for the writer's own
+counts; a parent
 whose children carry no domain keeps the scalar it holds and stays undecided.
 The materialiser writes no domain at all — it calls
 <code>write_name_domain</code> for every parent it materialises, passing that
@@ -61,6 +63,22 @@ and the guard's table is now empty, so
 <code>test_exempt_sites_are_exactly_the_recorded_ones</code> asserts that no
 outside write of any kind exists in the package.</p>
 
+<h3>What the gate measured</h3>
+
+<p><code>tests/standard_names/</code> on default markers, <code>-n 8</code>,
+each arm from its own archive tree and its own <code>--basetemp</code>: 92
+failing ids on <code>main</code> at <code>fecd858a7</code>, 70 at the landed
+head, and <strong>zero added</strong> — the head's failures are a strict subset
+of main's, so the retired write introduces none. Seven graph-marked tests over
+the domain writers and the lifecycle repair pass on both arms.</p>
+
+<p>One id was added by the first pass and is now gone: the component-system test
+asserted <code>parent.physics_domain =</code> inside the materialiser's own
+statement, which is exactly the write this node retires. It now asserts the
+opposite — the statement sets no domain — and that every materialised parent's
+derived decision reaches the graph through <code>write_name_domain</code>, with
+the decision's choice read off the child majority.</p>
+
 <h3>Evidence</h3>
 
 <ul>
@@ -68,4 +86,7 @@ outside write of any kind exists in the package.</p>
   <code>manifest.md</code>; the negative control plants one commented
   <code>SET sn.physics_domain</code> (guard green) and then one real
   <code>SET</code> beside it (guard red, two failing ids).</li>
+  <li>the two failure-id sets are kept beside the logs
+  (<code>failed-base.txt</code>, <code>failed-head-final.txt</code>), so the
+  zero-added result can be re-derived rather than taken on trust.</li>
 </ul>
