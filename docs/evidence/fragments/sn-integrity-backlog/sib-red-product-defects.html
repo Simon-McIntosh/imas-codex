@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Red-suite product defects D1-D3</title></head>
+<body>
+<h1 id="sib-red-product-defects-title">Red-suite product defects D1&ndash;D3</h1>
+
+<p id="sib-red-product-defects-scope">Three ids the red standard-name suite exposed. Each was reproduced at the
+main revision before anything was changed, and each is classified below by what
+its repair turned out to be.</p>
+
+<table id="sib-red-product-defects-worklist">
+<thead><tr><th>id</th><th>test</th><th>classification</th><th>state at head</th></tr></thead>
+<tbody>
+<tr id="sib-red-product-defects-row-D2"><td>D2</td><td><code>test_compute_pool_pending.py::TestQueryStructure::test_refine_docs_pending_matches_canonical_claim_predicate</code></td><td>fix the code — the test is right</td><td>passes</td></tr>
+<tr id="sib-red-product-defects-row-D3"><td>D3</td><td><code>test_defaulted_attributes_exist.py::test_defaulted_literal_attributes_are_declared</code></td><td>fix the code — the test is right</td><td>passes</td></tr>
+<tr id="sib-red-product-defects-row-D1"><td>D1</td><td><code>test_cascade_calibration.py::test_matched_policy_rebuilds_from_frozen_scores_and_receipts</code></td><td>needs a file outside this node's scope — reported as a blocker</td><td>still fails at head</td></tr>
+</tbody>
+</table>
+
+<h2 id="sib-red-product-defects-d2">D2 &mdash; the pending count dropped the open docs veto</h2>
+
+<p id="sib-red-product-defects-d2-repro">Reproduced before the change:
+<code>test_refine_docs_pending_matches_canonical_claim_predicate</code> failed because the emitted
+<code>refine_docs</code> clause carried <code>sn.reviewer_score_docs &lt; $min_score</code> where
+<code>claim_refine_docs_batch</code> builds
+<code>(sn.reviewer_score_docs &lt; $min_score OR EXISTS { MATCH (sn)-[:HAS_HOLD]-&gt;(hold:ReviewHold) WHERE hold.axis = 'docs' AND hold.status = 'open' })</code>.</p>
+
+<p id="sib-red-product-defects-d2-cause">The claim is right and the pending count was wrong. A name
+above the threshold that carries an open documentation veto is claimable work, and the watchdog
+counted only low scores, so it reported an empty pool while the claim query still returned items &mdash;
+the premature exit the test's own docstring names. <code>imas_codex/cli/sn.py</code> now builds that
+disjunction once and renders it into the pending clause.</p>
+
+<h2 id="sib-red-product-defects-d3">D3 &mdash; an exception attribute nothing declared</h2>
+
+<p id="sib-red-product-defects-d3-repro">Reproduced before the change: the guard reported two reads of an
+undeclared defaulted attribute, <code>imas_codex/cli/discover/sequence.py:686</code> (now the raise site)
+and <code>:906</code> (now the stage loop), both <code>getattr(exc, "discovery_receipts", [])</code>.</p>
+
+<p id="sib-red-product-defects-d3-cause">The attribute was real only at runtime: three sites assigned it to
+whatever exception a stage raised. A <code>StageFailure</code> now declares
+<code>discovery_receipts</code> and carries the receipts, and both readers check the type before reading
+the declared field. The wrapper keeps the original exception as its cause, so the stage summary still
+reports the original type name and the host-unreachable test still sees the original error; the
+existing budget test that charges a failed stage's receipt to the next stage's limit still passes.</p>
+
+<h2 id="sib-red-product-defects-d1">D1 &mdash; the frozen docs logistic column predates the scorer</h2>
+
+<p id="sib-red-product-defects-d1-repro">Reproduced before the change, and the cause confirmed directly:
+<code>cascade_calibration.build()</code> raises
+<code>ValueError: landed logistic mismatch: extent_of_soft_xray_detector</code> after 120.6&nbsp;s. The
+item's landed docs score is <code>0.18538907974010682</code>; the frozen value in
+<code>srtj-jev-vs-panel-operating-point.json</code> is <code>0.48696524039224126</code>.</p>
+
+<p id="sib-red-product-defects-d1-census">The disagreement is not one item. Against the current scorer,
+<b>374 of the 386</b> paired docs items reproduce to 1e-10 and <b>12 do not</b>. Nine of the twelve are
+frozen at exactly <code>0.0</code>, which is the score the contradiction veto returns &mdash; commit
+<code>040e16a16</code> deliberately stopped that veto reading an undecided answer as a denial. The
+remaining disagreements follow the documentation gate learning which name it documents
+(<code>e4752d43c</code>) and the claim-settlement retunes. The frozen column was written with the
+scorer as it stood at <code>bd658567d</code>, the commit that also froze
+<code>cascade_thresholds.json</code>.</p>
+
+<p id="sib-red-product-defects-d1-second">Relaxing only that cross-check exposes a second, independent
+defect in the same rebuild. With the equality bypassed, <code>build()</code> trips
+<code>_matched_report</code>'s own invariant on <b>8 docs calibration rows</b> (the name axis is clean on
+both folds). Each is a contradiction-vetoed row that <code>_route</code> routes to <code>refine</code>
+while <code>decision_score</code> stays at the unvetoed mapping &mdash; for example
+<code>poloidal_mode_number</code> at <code>decision_score 0.9121</code> with
+<code>accept_threshold 0.3883</code>. The artifact's own <code>policy.veto_score</code> says the veto
+caps the mapped score at the float immediately below the consumer threshold, and
+<code>cascade.py:213</code> raises the veto without applying that cap.</p>
+
+<p id="sib-red-product-defects-d1-blocker">Both repairs need files this node may not write:
+<code>imas_codex/standard_names/review/cascade.py</code> for the missing cap, and a re-frozen
+<code>docs/evidence/fragments/sn-review-through-jev/srtj-jev-vs-panel-operating-point.json</code> (or a
+regenerated <code>cascade_thresholds.json</code>) for the stale column. No change to
+<code>cascade_calibration.py</code> makes the id pass on its own, so this node reverted its two
+exploratory edits there rather than land a partial change that moves calibration output without a green
+measure. The defect is a real one: a vetoed name whose <code>decision_score</code> reads above the
+consumer threshold is a name a score-reading consumer would accept.</p>
+
+<p id="sib-red-product-defects-d1-at-head">At head the id still fails with the same error after
+104.8&nbsp;s in the gate arm, <code>ValueError: landed logistic mismatch:
+extent_of_soft_xray_detector</code>, so nothing this node landed touched the calibration path.</p>
+
+<h2 id="sib-red-product-defects-gate">Gate</h2>
+
+<p id="sib-red-product-defects-gate-result">Two <code>git archive</code> trees, each with its own
+<code>--basetemp</code>, running <code>tests/standard_names/</code> on default markers with
+<code>-n 8</code>: main <code>4f336fee2</code> gave <b>92 failed, 8431 passed, 12 skipped</b>; head
+<code>00e0d2f15</code> gave <b>90 failed, 8433 passed, 12 skipped</b>. The id sets are compared in the
+run manifest: <b>no failure id is added</b>, and exactly two leave the set &mdash; the D2 and D3 ids
+below. D1 remains in both sets and is the blocked third.</p>
+
+<p id="sib-red-product-defects-gate-provenance">Each arm imports the module under test from its own
+tree, which was checked rather than assumed: from inside the head tree
+<code>imas_codex.cli.sn.__file__</code> resolves under that tree, and from inside the base tree under
+that one. A probe run from the worktree instead resolves to the worktree, because <code>python -c</code>
+puts the current directory ahead of any path the environment supplies &mdash; the arms avoid that by
+running with the tree as their working directory.</p>
+
+<p id="sib-red-product-defects-negative-control">Negative control, run before the arms: the repaired
+D2 and D3 ids and D1 were run against main <code>4f336fee2</code>, where all three failed
+(<code>EXIT=1</code>). Each repair therefore fails where the defect is present and passes only at
+head.</p>
+
+</body></html>

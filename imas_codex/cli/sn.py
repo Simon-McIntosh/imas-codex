@@ -596,8 +596,16 @@ def _compute_pool_progress(
     from imas_codex.standard_names.graph_store.graph_refinement import (
         REFINE_NAME_ATTEMPTS_SPENT,
     )
+    from imas_codex.standard_names.review.holds import has_open_docs_hold_where
 
     refine_attempts_spent = REFINE_NAME_ATTEMPTS_SPENT
+    # Claiming a docs refine reads the open docs veto as well as the score, so
+    # the pending count must accept either: a name held open above the
+    # threshold is claimable, and counting only low scores would leave the
+    # watchdog reporting an empty pool while the claim still returns work.
+    refine_docs_needed = (
+        f"(sn.reviewer_score_docs < $min_score OR {has_open_docs_hold_where()})"
+    )
     docs_review_eligible = docs_review_eligibility_where()
 
     query = f"""
@@ -659,7 +667,7 @@ def _compute_pool_progress(
       MATCH (sn:StandardName)
       WHERE sn.docs_stage = 'reviewed'
         AND sn.reviewer_score_docs IS NOT NULL
-        AND sn.reviewer_score_docs < $min_score
+        AND {refine_docs_needed}
         AND coalesce(sn.docs_chain_length, 0) < $rotation_cap
         AND NOT (sn.name_stage IN ['superseded', 'exhausted', 'contested'])
         AND {docs_review_eligible}
