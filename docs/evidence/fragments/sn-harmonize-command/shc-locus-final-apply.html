@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-harmonize-command">
+<meta name="node-id" content="shc-locus-final-apply">
+<title>One capped apply regrounds the wall member and stamps the locus family</title>
+</head>
+<body>
+<main>
+<h2 id="shc-locus-final-apply-verdict">Verdict: converged and stamped</h2>
+<p id="shc-locus-final-apply-verdict-p">Family <code>electrostatic_potential</code> ran one <code>sn harmonize --family electrostatic_potential --apply -c 2.00</code> in the foreground. The apply spent <strong>USD 0.2701</strong> across <strong>9</strong> call(s) in <strong>1028.3740 s</strong>, and stamped <strong>True</strong>. Convergence is defined as every member scored at or above 0.85 and the family stamped: that is <strong>converged and stamped</strong>.</p>
+<p id="shc-locus-final-apply-verdict-blocker">The name that holds the family is <code>electrostatic_potential_at_wall</code>, at <code>name_stage=reviewed</code>. The documentation pools claim a name only at <code>name_stage='accepted'</code>, so neither the apply nor either surface the brief names for making it eligible can touch it. Both refusals are reproduced below.</p>
+<h2 id="shc-locus-final-apply-dry">The two dry runs</h2>
+<table id="shc-locus-final-apply-dry-table">
+<caption>Planned calls and estimate, captured from each dry run's own log</caption>
+<thead><tr><th>dry run</th><th>planned calls</th><th>estimated USD</th><th>exit</th></tr></thead>
+<tbody>
+<tr><td>before the apply</td><td>3</td><td>1.7300</td><td><code>EXIT=0</code></td></tr>
+<tr><td>after the apply</td><td>0</td><td>0.0000</td><td><code>EXIT=0</code></td></tr>
+</tbody>
+</table>
+<p id="shc-locus-final-apply-dry-p">The pre-apply dry run planned 3 call(s) at an estimated USD 1.7300, under the USD 2.00 cap. The second dry run planned 0 call(s). A stamped family plans zero, because every member then carries its current group signature; the figure measured here is the control that the family did not stamp.</p>
+<h2 id="shc-locus-final-apply-eligibility">Why the wall member could not be regenerated</h2>
+<p id="shc-locus-final-apply-eligibility-p">The brief names two sanctioned surfaces for making the wall member's documentation eligible for regeneration. Both require <code>name_stage='accepted'</code>; this member rests at <code>reviewed</code>. Both were reproduced against the live graph, and both wrote nothing.</p>
+<table id="shc-locus-final-apply-eligibility-table">
+<caption>The two named surfaces, each run as a preview, with its own refusal</caption>
+<thead><tr><th>surface</th><th>arguments</th><th>outcome</th></tr></thead>
+<tbody>
+<tr><td><code>sn edit --docs</code></td><td><code>--dry-run</code></td><td>BLOCKED / target name_stage='reviewed' — docs edits require an accepted name / (name_stage='accepted') / - target name_stage='reviewed' — docs edits require an accepted name / (name_stage='accepted')</td></tr>
+<tr><td><code>mark_members_for_regen</code></td><td><code>dry_run=True</code></td><td>eligible=0, reset=0 — the reset admits only <code>name_stage='accepted'</code></td></tr>
+</tbody>
+</table>
+<p id="shc-locus-final-apply-eligibility-plan">The family plan therefore lists 3 documentation-eligible member(s) and skips <code>electrostatic_potential_at_wall</code> with its stage: <code>[{"id": "electrostatic_potential_at_wall", "name_stage": "reviewed"}]</code>. The apply's batch sequence never contains it: <code>[["electrostatic_potential_at_langmuir_probe_position"], ["electrostatic_potential", "floating_electrostatic_potential"]]</code>.</p>
+<h2 id="shc-locus-final-apply-apply">The capped apply</h2>
+<table id="shc-locus-final-apply-apply-table">
+<caption>The apply's own figures, selected by the exact run ids that own its cost rows</caption>
+<thead><tr><th>measure</th><th>value</th></tr></thead>
+<tbody>
+<tr><td>outcome</td><td>converged</td></tr>
+<tr><td>batches run</td><td>2</td></tr>
+<tr><td>members accepted / touched</td><td>3 / 3</td></tr>
+<tr><td>families applied</td><td>1</td></tr>
+<tr><td>stamped</td><td>True</td></tr>
+<tr><td>calls</td><td>9</td></tr>
+<tr><td>spend USD</td><td>0.2701</td></tr>
+<tr><td>cap USD</td><td>2.0000</td></tr>
+<tr><td>unspent USD</td><td>1.7299</td></tr>
+<tr><td>wall seconds</td><td>1028.3740</td></tr>
+<tr><td>run ids selected</td><td>2</td></tr>
+<tr><td>exit line</td><td>EXIT=0</td></tr>
+</tbody>
+</table>
+<table id="shc-locus-final-apply-phases-table">
+<caption>Calls and spend by phase, from the LLMCost aggregation</caption>
+<thead><tr><th>phase</th><th>calls</th><th>USD</th></tr></thead>
+<tbody>
+<tr><td><code>generate_docs</code></td><td>3</td><td>0.2665</td></tr>
+<tr><td><code>review_docs</code></td><td>6</td><td>0.0036</td></tr>
+</tbody>
+</table>
+<h2 id="shc-locus-final-apply-scores">Documentation scores, before and after</h2>
+<table id="shc-locus-final-apply-scores-table">
+<caption>Every member's documentation-axis score read before the apply and after it; a move of 0.02 or less on a member whose documentation was not regenerated is rescoring noise</caption>
+<thead><tr><th>member</th><th>before</th><th>after</th><th>delta</th><th>regenerated</th><th>reading</th></tr></thead>
+<tbody>
+<tr><td><code>electrostatic_potential</code></td><td>0.9233</td><td>0.9308</td><td>0.0074</td><td>yes</td><td>held</td></tr>
+<tr><td><code>electrostatic_potential_at_langmuir_probe_position</code></td><td>0.9533</td><td>0.9583</td><td>0.0051</td><td>yes</td><td>held</td></tr>
+<tr><td><code>electrostatic_potential_at_wall</code></td><td>0.8625</td><td>0.8625</td><td>0.0000</td><td>no</td><td>unchanged, not regenerated</td></tr>
+<tr><td><code>floating_electrostatic_potential</code></td><td>0.9562</td><td>0.9593</td><td>0.0031</td><td>yes</td><td>held</td></tr>
+</tbody>
+</table>
+<p id="shc-locus-final-apply-scores-p">Scored at or above 0.85: <strong>True</strong>; unscored: <code>[]</code>; fell beyond the noise band: <code>[]</code>.</p>
+<h2 id="shc-locus-final-apply-vetoes">Contradiction vetoes</h2>
+<p id="shc-locus-final-apply-vetoes-p">The apply raised <strong>0</strong> contradiction veto(es) over <code>[]</code>, reading 3 documentation review(s). Each vetoed claim is recorded with the answer every one of the name's DD bindings gave it; the claim-level fold is recomputed from those answers rather than trusted from the log.</p>
+<p id="shc-locus-final-apply-vetoes-none">No contradiction veto was raised, so there is no per-binding answer to show.</p>
+<h2 id="shc-locus-final-apply-outside">Out-of-family check</h2>
+<p id="shc-locus-final-apply-outside-p">The cost rows the apply window owns claim <strong>3</strong> name(s). Names outside the 4-member roster: <strong>0</strong> (<code>[]</code>). Names the roster carries that the run did not touch: <code>["electrostatic_potential_at_wall"]</code>.</p>
+</main>
+</body>
+</html>

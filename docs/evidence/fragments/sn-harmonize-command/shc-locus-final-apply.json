@@ -1,0 +1,545 @@
+{
+"applies": [
+{
+"anchor": "electrostatic_potential_at_langmuir_probe_position",
+"applied": null,
+"batches_run": 2,
+"cost": {
+"calls_total": 9,
+"per_name_usd": {
+"electrostatic_potential": 0.09786,
+"electrostatic_potential_at_langmuir_probe_position": 0.085865,
+"floating_electrostatic_potential": 0.086354
+},
+"phases": {
+"generate_docs": {
+"calls": 3,
+"usd": 0.26652
+},
+"review_docs": {
+"calls": 6,
+"usd": 0.003559
+}
+},
+"run_ids": [
+"91f40fdd-1e68-482b-b985-87724dd33b61",
+"e1b005ab-2a9f-4089-b2f5-4dc7a78c33ad"
+],
+"spend_usd": 0.270079
+},
+"cost_limit_unspent_usd": 1.7299,
+"cost_limit_usd": 2.0,
+"decision": null,
+"dry_run_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T215047215974-shc-locus-final-apply/logs/dry-run-before-apply.log",
+"error_line": null,
+"exit_line": "EXIT=0",
+"families_applied": 1,
+"halt_reasons": null,
+"halted": false,
+"held_attachments": [
+{
+"dd_path": "ic_antennas/antenna/module/strap/geometry/arcs_of_circle/z",
+"reason": "locus/source device mismatch: SN 'vertical_coordinate_of_coil_conductor' has hardware locus 'coil_conductor' but path 'ic_antennas/antenna/module/strap/geometry/arcs_of_circle/z' shares no device token with it",
+"sn_id": "vertical_coordinate_of_coil_conductor"
+}
+],
+"log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T215047215974-shc-locus-final-apply/logs/apply.log",
+"members_accepted": 3,
+"members_touched": 3,
+"output": [
+"             Run 91f40fdd\u2026              ",
+"             Run e1b005ab\u2026              ",
+"family electrostatic_potential  ",
+"    docs scores: no member below threshold, none fell",
+"apply: 1 family(ies) applied, 1 stamped.",
+"docs scores: 0 member(s) below the acceptance threshold, 0 fell.",
+"    For further information visit https://errors.pydantic.dev/2.12/v/value_error",
+"    For further information visit https://errors.pydantic.dev/2.12/v/value_error",
+"    For further information visit https://errors.pydantic.dev/2.12/v/value_error",
+"    For further information visit https://errors.pydantic.dev/2.12/v/value_error"
+],
+"output_note": "3454 line(s) captured; full text in the log",
+"physical_base": "electrostatic_potential",
+"produced_summary": false,
+"run_ids": [
+"91f40fdd-1e68-482b-b985-87724dd33b61",
+"e1b005ab-2a9f-4089-b2f5-4dc7a78c33ad"
+],
+"run_ids_source": "selected from the exact LLMCost rows written between the apply log's own '# started' and '# ended' lines; the summary's scope run ids own none",
+"run_selection": {
+"all_claimed_names_in_roster": true,
+"claimed_names": {
+"91f40fdd-1e68-482b-b985-87724dd33b61": [
+"electrostatic_potential_at_langmuir_probe_position"
+],
+"e1b005ab-2a9f-4089-b2f5-4dc7a78c33ad": [
+"electrostatic_potential",
+"floating_electrostatic_potential"
+]
+},
+"pool_run_ids": [
+"91f40fdd-1e68-482b-b985-87724dd33b61",
+"e1b005ab-2a9f-4089-b2f5-4dc7a78c33ad"
+],
+"pool_run_rows": {
+"91f40fdd-1e68-482b-b985-87724dd33b61": {
+"cap": 2.0,
+"cost_spent": 0.085865,
+"id": "91f40fdd-1e68-482b-b985-87724dd33b61",
+"stop_reason": "no_eligible_work"
+},
+"e1b005ab-2a9f-4089-b2f5-4dc7a78c33ad": {
+"cap": 1.914135,
+"cost_spent": 0.184214,
+"id": "e1b005ab-2a9f-4089-b2f5-4dc7a78c33ad",
+"stop_reason": "no_eligible_work"
+}
+},
+"selection": "selected from the exact LLMCost rows written between the apply log's own '# started' and '# ended' lines; the summary's scope run ids own none",
+"summary_scope_run_ids": []
+},
+"scope_check": {
+"outside_count": 0,
+"outside_roster": [],
+"roster": [
+"electrostatic_potential",
+"electrostatic_potential_at_langmuir_probe_position",
+"electrostatic_potential_at_wall",
+"floating_electrostatic_potential"
+],
+"roster_names_not_touched": [
+"electrostatic_potential_at_wall"
+],
+"touched_names": [
+"electrostatic_potential",
+"electrostatic_potential_at_langmuir_probe_position",
+"floating_electrostatic_potential"
+]
+},
+"score_regressions": null,
+"selection_window_utc": {
+"ended": "2026-10-28T22:19:54.906152+00:00",
+"started": "2026-10-28T22:02:46.532145+00:00"
+},
+"stamped": true,
+"summary": null,
+"summary_scope_run_ids": [],
+"wall_seconds": 1028.374
+}
+],
+"dry_runs": [
+{
+"estimated_usd": 1.73,
+"exit_line": "EXIT=0",
+"label": "before-apply",
+"log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T215047215974-shc-locus-final-apply/logs/dry-run-before-apply.log",
+"output": [
+"family electrostatic_potential  decision=apply  ",
+"anchor=electrostatic_potential_at_langmuir_probe_position  members=4  calls=3",
+"Dry run: 1 family(ies), 3 planned call(s), estimated cost $1.73 from 31 recent ",
+"run(s) and 33 call(s) at $0.58 per call. Wrote nothing."
+],
+"planned_calls": 3
+},
+{
+"estimated_usd": 0.0,
+"exit_line": "EXIT=0",
+"label": "after-apply",
+"log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T215047215974-shc-locus-final-apply/logs/dry-run-after-apply.log",
+"output": [
+"family electrostatic_potential  decision=harmonized  ",
+"anchor=floating_electrostatic_potential  members=4  calls=0",
+"Dry run: 1 family(ies), 0 planned call(s), estimated cost $0.00. Wrote nothing."
+],
+"planned_calls": 0
+}
+],
+"family": {
+"members": [
+"electrostatic_potential",
+"electrostatic_potential_at_langmuir_probe_position",
+"electrostatic_potential_at_wall",
+"floating_electrostatic_potential"
+],
+"seed": "electrostatic_potential"
+},
+"node": "shc-locus-final-apply",
+"phases": {
+"after": {
+"anchor": "floating_electrostatic_potential",
+"decision": "harmonized",
+"documentation_scores": {
+"electrostatic_potential": 0.9307560226249008,
+"electrostatic_potential_at_langmuir_probe_position": 0.9583472639316845,
+"electrostatic_potential_at_wall": 0.8625,
+"floating_electrostatic_potential": 0.9592662539846679
+},
+"drift": 0.75,
+"estimate_basis": {
+"calls": 33,
+"mean_usd_per_call": 0.5837,
+"runs": 33,
+"total_usd": 19.262
+},
+"estimate_usd": 0.0,
+"harmonized": true,
+"invariant": [
+"electrostatic_potential",
+"",
+"",
+"",
+""
+],
+"lint": {},
+"lint_total": 0,
+"member_status": {
+"electrostatic_potential": {
+"docs_stage": "accepted",
+"id": "electrostatic_potential",
+"name_stage": "accepted",
+"reviewer_score_docs": 0.9307560226249008,
+"validation_status": "valid"
+},
+"electrostatic_potential_at_langmuir_probe_position": {
+"docs_stage": "accepted",
+"id": "electrostatic_potential_at_langmuir_probe_position",
+"name_stage": "accepted",
+"reviewer_score_docs": 0.9583472639316845,
+"validation_status": "valid"
+},
+"electrostatic_potential_at_wall": {
+"docs_stage": "accepted",
+"id": "electrostatic_potential_at_wall",
+"name_stage": "reviewed",
+"reviewer_score_docs": 0.8625,
+"validation_status": "valid"
+},
+"floating_electrostatic_potential": {
+"docs_stage": "accepted",
+"id": "floating_electrostatic_potential",
+"name_stage": "accepted",
+"reviewer_score_docs": 0.9592662539846679,
+"validation_status": "valid"
+}
+},
+"members": [
+"electrostatic_potential",
+"electrostatic_potential_at_langmuir_probe_position",
+"electrostatic_potential_at_wall",
+"floating_electrostatic_potential"
+],
+"phase": "after",
+"physical_base": "electrostatic_potential",
+"planned_calls": 0,
+"read_at_utc": "2026-10-28T22:24:27.479859+00:00",
+"refusals": {},
+"seed": "electrostatic_potential",
+"status_counts": {
+"accepted": 4,
+"other": 0
+}
+},
+"before": {
+"anchor": "electrostatic_potential_at_langmuir_probe_position",
+"decision": "apply",
+"documentation_scores": {
+"electrostatic_potential": 0.9233174263318332,
+"electrostatic_potential_at_langmuir_probe_position": 0.9532784487330858,
+"electrostatic_potential_at_wall": 0.8625,
+"floating_electrostatic_potential": 0.95618167852435
+},
+"drift": 0.5,
+"estimate_basis": {
+"calls": 33,
+"mean_usd_per_call": 0.5755,
+"runs": 31,
+"total_usd": 18.9919
+},
+"estimate_usd": 1.7265,
+"harmonized": false,
+"invariant": [
+"electrostatic_potential",
+"",
+"",
+"",
+""
+],
+"lint": {},
+"lint_total": 0,
+"member_status": {
+"electrostatic_potential": {
+"docs_stage": "accepted",
+"id": "electrostatic_potential",
+"name_stage": "accepted",
+"reviewer_score_docs": 0.9233174263318332,
+"validation_status": "valid"
+},
+"electrostatic_potential_at_langmuir_probe_position": {
+"docs_stage": "accepted",
+"id": "electrostatic_potential_at_langmuir_probe_position",
+"name_stage": "accepted",
+"reviewer_score_docs": 0.9532784487330858,
+"validation_status": "valid"
+},
+"electrostatic_potential_at_wall": {
+"docs_stage": "accepted",
+"id": "electrostatic_potential_at_wall",
+"name_stage": "reviewed",
+"reviewer_score_docs": 0.8625,
+"validation_status": "valid"
+},
+"floating_electrostatic_potential": {
+"docs_stage": "accepted",
+"id": "floating_electrostatic_potential",
+"name_stage": "accepted",
+"reviewer_score_docs": 0.95618167852435,
+"validation_status": "valid"
+}
+},
+"members": [
+"electrostatic_potential",
+"electrostatic_potential_at_langmuir_probe_position",
+"electrostatic_potential_at_wall",
+"floating_electrostatic_potential"
+],
+"phase": "before",
+"physical_base": "electrostatic_potential",
+"planned_calls": 3,
+"read_at_utc": "2026-10-28T22:02:46.523484+00:00",
+"refusals": {},
+"seed": "electrostatic_potential",
+"status_counts": {
+"accepted": 4,
+"other": 0
+}
+}
+},
+"preflight": {
+"acceptance_threshold": 0.85,
+"anchor": "electrostatic_potential_at_langmuir_probe_position",
+"batches": [
+[
+"electrostatic_potential_at_langmuir_probe_position"
+],
+[
+"electrostatic_potential",
+"floating_electrostatic_potential"
+]
+],
+"decision": "apply",
+"docs_edit_refusal": {
+"exit": 2,
+"lines": [
+"\u2502 BLOCKED                                                                      \u2502",
+"\u2502 target name_stage='reviewed' \u2014 docs edits require an accepted name           \u2502",
+"\u2502 (name_stage='accepted')                                                      \u2502",
+"- target name_stage='reviewed' \u2014 docs edits require an accepted name",
+"(name_stage='accepted')"
+],
+"log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T215047215974-shc-locus-final-apply/logs/repro-sn-edit-docs.log"
+},
+"docs_eligible": [
+"electrostatic_potential",
+"electrostatic_potential_at_langmuir_probe_position",
+"floating_electrostatic_potential"
+],
+"member_scores": {
+"electrostatic_potential": 0.9233174263318332,
+"electrostatic_potential_at_langmuir_probe_position": 0.9532784487330858,
+"electrostatic_potential_at_wall": 0.8625,
+"floating_electrostatic_potential": 0.95618167852435
+},
+"member_state": {
+"electrostatic_potential": {
+"docs_stage": "accepted",
+"id": "electrostatic_potential",
+"name_stage": "accepted",
+"reviewer_score_docs": 0.9233174263318332,
+"reviewer_score_name": 0.9125,
+"signature": "b1bcdfe53efc602529617a773520c9f3620cf984dba9a0f2bab910f0b64ecc6a",
+"source_paths": [
+"dd:plasma_profiles/profiles_1d/phi_potential",
+"dd:plasma_profiles/ggd/phi_potential/values",
+"dd:mhd/ggd/phi_potential/values",
+"dd:core_profiles/profiles_1d/phi_potential",
+"dd:edge_profiles/profiles_1d/phi_potential",
+"dd:edge_profiles/ggd/phi_potential/values"
+],
+"validation_status": "valid"
+},
+"electrostatic_potential_at_langmuir_probe_position": {
+"docs_stage": "accepted",
+"id": "electrostatic_potential_at_langmuir_probe_position",
+"name_stage": "accepted",
+"reviewer_score_docs": 0.9532784487330858,
+"reviewer_score_name": 0.99375,
+"signature": null,
+"source_paths": [
+"dd:langmuir_probes/embedded/v_plasma",
+"dd:langmuir_probes/reciprocating/plunge/v_plasma"
+],
+"validation_status": "valid"
+},
+"electrostatic_potential_at_wall": {
+"docs_stage": "accepted",
+"id": "electrostatic_potential_at_wall",
+"name_stage": "reviewed",
+"reviewer_score_docs": 0.8625,
+"reviewer_score_name": 0.5375804071912775,
+"signature": "6a34602a002f69682a735937a7329313b6fc7a28137040b6dc16289ec8bf8362",
+"source_paths": [
+"dd:wall/description_ggd/ggd/phi_potential/values"
+],
+"validation_status": "valid"
+},
+"floating_electrostatic_potential": {
+"docs_stage": "accepted",
+"id": "floating_electrostatic_potential",
+"name_stage": "accepted",
+"reviewer_score_docs": 0.95618167852435,
+"reviewer_score_name": 0.96875,
+"signature": "b1bcdfe53efc602529617a773520c9f3620cf984dba9a0f2bab910f0b64ecc6a",
+"source_paths": [
+"dd:langmuir_probes/embedded/v_floating",
+"dd:langmuir_probes/reciprocating/plunge/collector/v_floating"
+],
+"validation_status": "valid"
+}
+},
+"members": [
+"electrostatic_potential",
+"electrostatic_potential_at_langmuir_probe_position",
+"electrostatic_potential_at_wall",
+"floating_electrostatic_potential"
+],
+"planned_calls": 3,
+"read_at_utc": "2026-10-28T22:02:20.349232+00:00",
+"scoped_reset_preview": {
+"eligible": 0,
+"reset": 0,
+"run_id": "2001f760-daaa-4637-9806-5936c6575d67"
+},
+"scoped_reset_surface": "imas_codex.standard_names.harmonize.mark_members_for_regen",
+"skipped": [
+{
+"id": "electrostatic_potential_at_wall",
+"name_stage": "reviewed"
+}
+],
+"wall_name_stage": "reviewed"
+},
+"scores": {
+"fell": [],
+"members": [
+{
+"after": 0.9307560226249008,
+"before": 0.9233174263318332,
+"below_acceptance": false,
+"delta": 0.007439,
+"id": "electrostatic_potential",
+"noise_only": false,
+"regenerated": true
+},
+{
+"after": 0.9583472639316845,
+"before": 0.9532784487330858,
+"below_acceptance": false,
+"delta": 0.005069,
+"id": "electrostatic_potential_at_langmuir_probe_position",
+"noise_only": false,
+"regenerated": true
+},
+{
+"after": 0.8625,
+"before": 0.8625,
+"below_acceptance": false,
+"delta": 0.0,
+"id": "electrostatic_potential_at_wall",
+"noise_only": true,
+"regenerated": false
+},
+{
+"after": 0.9592662539846679,
+"before": 0.95618167852435,
+"below_acceptance": false,
+"delta": 0.003085,
+"id": "floating_electrostatic_potential",
+"noise_only": false,
+"regenerated": true
+}
+],
+"noise_band": 0.02,
+"scored_at_or_above": true,
+"threshold": 0.85,
+"unscored": []
+},
+"seed": "electrostatic_potential",
+"vetoes": {
+"held_claim_names_a_supporting_binding": [],
+"holds": [],
+"names_vetoed": [],
+"reviews": [
+{
+"binding_count": 2,
+"binding_labels": [
+"langmuir_probes/embedded/v_plasma",
+"langmuir_probes/reciprocating/plunge/v_plasma"
+],
+"claims_read": 11,
+"claims_with_a_contradicting_binding": [],
+"claims_with_per_binding_answers": 11,
+"held_by_a_binding_that_supports_it": [],
+"model": "typesafe/jev-1.13",
+"name_id": "electrostatic_potential_at_langmuir_probe_position",
+"review_id": "electrostatic_potential_at_langmuir_probe_position:typesafe-jev-1-13:2026-10-28T22:09:41.755560+00:00",
+"reviewed_at": "2026-10-28T22:09:41.75556Z",
+"veto_count": 0,
+"vetoed_claims": []
+},
+{
+"binding_count": 6,
+"binding_labels": [
+"core_profiles/profiles_1d/phi_potential",
+"edge_profiles/ggd/phi_potential/values",
+"edge_profiles/profiles_1d/phi_potential",
+"mhd/ggd/phi_potential/values",
+"plasma_profiles/ggd/phi_potential/values",
+"plasma_profiles/profiles_1d/phi_potential"
+],
+"claims_read": 16,
+"claims_with_a_contradicting_binding": [],
+"claims_with_per_binding_answers": 16,
+"held_by_a_binding_that_supports_it": [],
+"model": "typesafe/jev-1.13",
+"name_id": "electrostatic_potential",
+"review_id": "electrostatic_potential:typesafe-jev-1-13:2026-10-28T22:17:13.575191+00:00",
+"reviewed_at": "2026-10-28T22:17:13.575191Z",
+"veto_count": 0,
+"vetoed_claims": []
+},
+{
+"binding_count": 2,
+"binding_labels": [
+"langmuir_probes/embedded/v_floating",
+"langmuir_probes/reciprocating/plunge/collector/v_floating"
+],
+"claims_read": 10,
+"claims_with_a_contradicting_binding": [],
+"claims_with_per_binding_answers": 10,
+"held_by_a_binding_that_supports_it": [],
+"model": "typesafe/jev-1.13",
+"name_id": "floating_electrostatic_potential",
+"review_id": "floating_electrostatic_potential:typesafe-jev-1-13:2026-10-28T22:17:43.754793+00:00",
+"reviewed_at": "2026-10-28T22:17:43.754793Z",
+"veto_count": 0,
+"vetoed_claims": []
+}
+],
+"reviews_read": 3,
+"veto_count": 0,
+"window_utc": {
+"ended": "2026-10-28T22:19:54.906152+00:00",
+"started": "2026-10-28T22:02:46.532145+00:00"
+}
+}
+}
