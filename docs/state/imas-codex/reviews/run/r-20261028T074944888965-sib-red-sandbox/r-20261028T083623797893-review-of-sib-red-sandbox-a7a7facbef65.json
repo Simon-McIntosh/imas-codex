@@ -1,0 +1,69 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 1,
+  "added_failure_ids": [
+    "tests/standard_names/test_harmonize_apply.py::test_apply_reports_no_fall_when_no_member_scores_worse"
+  ],
+  "added_failures_note": "differenced the reviewed run's own arms: gate-base.log 101 failure ids, gate-head.log 66; comm -13 yields exactly one added id, which the reviewed manifest discloses under retry_failures as an order-dependent flake that passes in isolation in both trees; gate-head2.log (a rerun at the same revision) drops to 65 failures, consistent with a flake rather than a caused failure.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-28T08:45:33.752Z",
+  "dispatched_at": "2026-10-28T08:37:20Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_cli_export.py",
+      "line": "74",
+      "severity": "non-blocking",
+      "text": "the added fixture block leaves three blank lines before 'class TestExportMissingArgs', so 'ruff format --check' would reformat this file at head while the base revision was already formatted; the repo's pre-stage workflow requires ruff format on touched files."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T074944888965-sib-red-sandbox/gate-head.log",
+      "line": "5",
+      "severity": "non-blocking",
+      "text": "the head arm's '# command:' header line reads 'PYTHONPATH placeholder' rather than the literal command, so the gate log cannot be re-run from its own header; the manifest's tests and after_suite.command do carry the literal command, which is the field promotion reads."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T074944888965-sib-red-sandbox/manifest.md",
+      "line": "16",
+      "severity": "non-blocking",
+      "text": "the test_logs line cites repro-s2b.log but the run directory holds only repro-s1.log, so one of the cited receipts cannot be opened; the S2 reproduction itself is corroborated by the 22 provenance refusals counted in gate-base.log."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read both commits against base 966f3d965; c464126e3 is the whole behavioural change (conftest fixture plus eight autouse wrappers plus the test_cli_export.py staging fixture, 10 files, +230/-44) and a7a7facbe adds only the 119-line evidence fragment, so the reviewed head adds no untested source.",
+    "done_when": "the done_when names 'tests/standard_names/' in separate git archive trees of main and head with separate --basetemp, and the manifest records both arms as JSON with literal commands; I re-derived the delta from the two logs myself: 36 base-failed ids absent at head, exactly one id added, and both defect signatures gone from the head arm (22 'export provenance timestamp unavailable' and 9 'Read-only file system' occurrences at base, 0 of each at head).",
+    "goal": "the node goal is to make 'tests/standard_names/' independent of a read-only /tmp and of a surrounding Git checkout; the landed change gives tests/standard_names/test_cli_export.py a per-test staging root from tmp_path (test_cli_export.py:67-71) and pins SOURCE_DATE_EPOCH through a conftest fixture used by the eight export modules (tests/standard_names/conftest.py:30-44), and I confirmed every one of the 36 diagnosed ids passes at head.",
+    "manifest": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T074944888965-sib-red-sandbox/manifest.md; status complete, commits c464126e3 and a7a7facbe, tests line carries the literal head command, baseline_suite and after_suite are armed with 101 and 66 failure ids, and the single added id is disclosed under retry_failures.",
+    "write_paths": "the manifest declares eleven paths (nine test modules, conftest.py, the evidence fragment plus a figures directory); git diff --stat 966f3d965..a7a7facbe changes exactly those eleven files' scope and nothing else."
+  },
+  "justifications": {
+    "durability": "no assertion was added \u2014 the change is fixture plumbing, so the guard is the existing assertions surviving an environment where they can fail, and a regression that reinstates '/tmp/stg' or drops an autouse wrapper would pass a normal single-process run in a writable checkout (it reddens only under a read-only /tmp, under -n 8 contention, or in a git archive tree), while tests/standard_names/test_export_determinism.py:99 still asserts the provenance refusal so the product guard the tests exercise is not weakened.",
+    "evidence": "the manifest's baseline_suite and after_suite name gate-base.log and gate-head.log and their recorded counts reconcile with the logs' own summary lines (101 failed/8419 passed and 66 failed/8454 passed, each ending EXIT=1), and my re-derivation reproduces the 36-id removal and the one added id; the head arm ran at c464126e3 rather than the reviewed head a7a7facbe (harmless, since a7a7facbe adds only the fragment), gate-head.log:5 records its command as 'PYTHONPATH placeholder' so the log alone is not re-runnable, and the added id's isolation runs are recorded only in stream.jsonl.",
+    "fit": "the fixture name, docstrings and module-level autouse wrapper at tests/standard_names/test_export_bound_adjacent.py:132-135 follow the surrounding idiom (tests/standard_names/conftest.py already carries five autouse fixtures and the directory has 57 autouse definitions), and no name carries a plan, ticket or version label; the added block at tests/standard_names/test_cli_export.py:73-75 leaves three blank lines, so 'ruff format --check' fails at head where base was clean.",
+    "goal_fidelity": "tests/standard_names/test_cli_export.py:71 supplies tmp_path/'stg' instead of the shared literal /tmp/stg and tests/standard_names/conftest.py:44 sets SOURCE_DATE_EPOCH, and I measured 0 'Read-only file system' and 0 provenance refusals in gate-head.log against 9 and 22 in gate-base.log, so the landed change does what the goal states; the brief's literal 'find and fix any other literal /tmp path' was answered by argument rather than by change for five files, which is why this is not 20.",
+    "reuse": "tests/standard_names/conftest.py:32 is the first owner of archive-provenance pinning in the suite \u2014 my search over tests/standard_names found no shared helper, only the inline patch.dict at tests/standard_names/test_export_determinism.py:126 \u2014 and the staging root reuses pytest's tmp_path rather than a bespoke helper, so the change extends rather than forks an owner.",
+    "scope_discipline": "git diff --stat 966f3d965..a7a7facbe lists only the nine test modules, tests/standard_names/conftest.py and docs/evidence/fragments/sn-integrity-backlog/sib-red-sandbox.html, all inside the declared write paths, and no file under imas_codex/ is touched, so the export refusal at imas_codex/standard_names/export.py:2656 stands unchanged as the brief required."
+  },
+  "node": "review-of-sib-red-sandbox-a7a7facbef65",
+  "node:reviewed": "sib-red-sandbox",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to make 'tests/standard_names/' independent of a read-only /tmp and of a surrounding Git checkout; the landed change gives tests/standard_names/test_cli_export.py a per-test staging root from tmp_path (test_cli_export.py:67-71) and pins SOURCE_DATE_EPOCH through a conftest fixture used by the eight export modules (tests/standard_names/conftest.py:30-44), and I confirmed every one of the 36 diagnosed ids passes at head.\nVERDICT done_when: the done_when names 'tests/standard_names/' in separate git archive trees of main and head with separate --basetemp, and the manifest records both arms as JSON with literal commands; I re-derived the delta from the two logs myself: 36 base-failed ids absent at head, exactly one id added, and both defect signatures gone from the head arm (22 'export provenance timestamp unavailable' and 9 'Read-only file system' occurrences at base, 0 of each at head).\nVERDICT write_paths: the manifest declares eleven paths (nine test modules, conftest.py, the evidence fragment plus a figures directory); git diff --stat 966f3d965..a7a7facbe changes exactly those eleven files' scope and nothing else.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T074944888965-sib-red-sandbox/manifest.md; status complete, commits c464126e3 and a7a7facbe, tests line carries the literal head command, baseline_suite and after_suite are armed with 101 and 66 failure ids, and the single added id is disclosed under retry_failures.\nVERDICT diff: read both commits against base 966f3d965; c464126e3 is the whole behavioural change (conftest fixture plus eight autouse wrappers plus the test_cli_export.py staging fixture, 10 files, +230/-44) and a7a7facbe adds only the 119-line evidence fragment, so the reviewed head adds no untested source.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: tests/standard_names/test_cli_export.py:71 supplies tmp_path/'stg' instead of the shared literal /tmp/stg and tests/standard_names/conftest.py:44 sets SOURCE_DATE_EPOCH, and I measured 0 'Read-only file system' and 0 provenance refusals in gate-head.log against 9 and 22 in gate-base.log, so the landed change does what the goal states; the brief's literal 'find and fix any other literal /tmp path' was answered by argument rather than by change for five files, which is why this is not 20.\nSCORE evidence: 15\nJUSTIFICATION evidence: the manifest's baseline_suite and after_suite name gate-base.log and gate-head.log and their recorded counts reconcile with the logs' own summary lines (101 failed/8419 passed and 66 failed/8454 passed, each ending EXIT=1), and my re-derivation reproduces the 36-id removal and the one added id; the head arm ran at c464126e3 rather than the reviewed head a7a7facbe (harmless, since a7a7facbe adds only the fragment), gate-head.log:5 records its command as 'PYTHONPATH placeholder' so the log alone is not re-runnable, and the added id's isolation runs are recorded only in stream.jsonl.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat 966f3d965..a7a7facbe lists only the nine test modules, tests/standard_names/conftest.py and docs/evidence/fragments/sn-integrity-backlog/sib-red-sandbox.html, all inside the declared write paths, and no file under imas_codex/ is touched, so the export refusal at imas_codex/standard_names/export.py:2656 stands unchanged as the brief required.\nSCORE durability: 14\nJUSTIFICATION durability: no assertion was added \u2014 the change is fixture plumbing, so the guard is the existing assertions surviving an environment where they can fail, and a regression that reinstates '/tmp/stg' or drops an autouse wrapper would pass a normal single-process run in a writable checkout (it reddens only under a read-only /tmp, under -n 8 contention, or in a git archive tree), while tests/standard_names/test_export_determinism.py:99 still asserts the provenance refusal so the product guard the tests exercise is not weakened.\nSCORE fit: 15\nJUSTIFICATION fit: the fixture name, docstrings and module-level autouse wrapper at tests/standard_names/test_export_bound_adjacent.py:132-135 follow the surrounding idiom (tests/standard_names/conftest.py already carries five autouse fixtures and the directory has 57 autouse definitions), and no name carries a plan, ticket or version label; the added block at tests/standard_names/test_cli_export.py:73-75 leaves three blank lines, so 'ruff format --check' fails at head where base was clean.\nSCORE reuse: 18\nJUSTIFICATION reuse: tests/standard_names/conftest.py:32 is the first owner of archive-provenance pinning in the suite \u2014 my search over tests/standard_names found no shared helper, only the inline patch.dict at tests/standard_names/test_export_determinism.py:126 \u2014 and the staging root reuses pytest's tmp_path rather than a bespoke helper, so the change extends rather than forks an owner.\nFINDING tests/standard_names/test_cli_export.py:74 non-blocking: the added fixture block leaves three blank lines before 'class TestExportMissingArgs', so 'ruff format --check' would reformat this file at head while the base revision was already formatted; the repo's pre-stage workflow requires ruff format on touched files.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T074944888965-sib-red-sandbox/gate-head.log:5 non-blocking: the head arm's '# command:' header line reads 'PYTHONPATH placeholder' rather than the literal command, so the gate log cannot be re-run from its own header; the manifest's tests and after_suite.command do carry the literal command, which is the field promotion reads.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T074944888965-sib-red-sandbox/manifest.md:16 non-blocking: the test_logs line cites repro-s2b.log but the run directory holds only repro-s1.log, so one of the cited receipts cannot be opened; the S2 reproduction itself is corroborated by the 22 provenance refusals counted in gate-base.log.",
+  "review_run_id": "r-20261028T083623797893-review-of-sib-red-sandbox-a7a7facbef65",
+  "reviewed_base_sha": "966f3d965de9b42831c77acc09af262a6e8fb20f",
+  "reviewed_head_sha": "a7a7facbef6586d31273fdb4a27cb8843d4295f3",
+  "reviewed_run_id": "r-20261028T074944888965-sib-red-sandbox",
+  "scores": {
+    "durability": 14,
+    "evidence": 15,
+    "fit": 15,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T08:52:00+00:00",
+  "total": 99
+}
