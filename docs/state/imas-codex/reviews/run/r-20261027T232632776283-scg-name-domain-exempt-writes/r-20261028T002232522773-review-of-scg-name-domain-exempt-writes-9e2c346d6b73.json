@@ -1,0 +1,41 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-28T00:29:06.903Z",
+  "dispatched_at": "2026-10-28T00:23:09Z",
+  "findings": [
+    {
+      "detail": "log-graph-base.log ends '12 passed, 44 deselected' and log-graph-head-final.log ends '12 passed, 48 deselected', and the manifest's artifacts line says 'graph arm 12 passed base, 12 passed head-final'. The sentence at line 72 is the fragment's record of the gate, so a reader reconciling the artefact against the logs it cites finds a number that is wrong. The suite figures in the same paragraph (92 vs 70, zero added) do reconcile.",
+      "file": "docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-exempt-writes.html",
+      "id": "f7c612a44f5",
+      "line": 72,
+      "severity": "non-blocking",
+      "summary": "the new gate paragraph states seven graph-marked tests where both graph-arm logs record 12 passed"
+    }
+  ],
+  "item_verdicts": {
+    "diff": "pass: 628947573 carries the rule refactor, the component-test rewrite, the two import repoints and the alias drop; 9e2c346d6 is docs-only against the evidence fragment, so the suite result taken at 628947573 transfers to the reviewed head.",
+    "done_when": "pass: comm -13 over failed-base.txt (92 ids) and failed-head-final.txt (70 ids) is empty, so the gate adds zero failure ids; both arms completed to their summary line and end EXIT=1.",
+    "goal": "pass: the review round's blocking item (the component-system test asserting the retired marker) is answered \u2014 tests/standard_names/test_component_system.py now asserts 'parent.physics_domain =' is absent and that write_name_domain receives a decided decision; ran green at the reviewed head.",
+    "manifest": "pass: the manifest records both suite arms with literal commands, revisions, log paths and failure-id lists, both graph arms, the negative-control log (green on a commented plant at EXIT=0, red on a real one at EXIT=1), and a rubric line per review item.",
+    "write_paths": "partial: five of the seven changed paths are inside the nine declared write paths; tests/standard_names/test_cypher_mutation_classifier.py and tests/standard_names/test_review_report_only.py are outside them and were already reported by the worker under outside_scope."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the prior review's blocking item was that tests/standard_names/test_component_system.py required the marker 'parent.physics_domain =' that this node retired; at the reviewed head that test asserts its absence and that the derived decision reaches the graph through write_name_domain, and I ran it green (2 passed, EXIT=0).\nVERDICT done_when: the done_when's gate item requires zero added failure ids; failed-base.txt (92) against failed-head-final.txt (70) yields comm -13 empty, so zero ids were added and 22 retired, and log-suite-head-final.log ends EXIT=1 with a complete summary line.\nVERDICT write_paths: read the manifest's declared paths; seven files changed in the window, and tests/standard_names/test_cypher_mutation_classifier.py and tests/standard_names/test_review_report_only.py lie outside the recorded nine per the manifest's own outside_scope entry.\nVERDICT manifest: read; it records both suite arms and both graph arms as JSON with literal commands, the negative-control log, and rubric lines for each review item.\nVERDICT diff: read commit by commit against 6ebb10264 \u2014 628947573 changes the rule, the component test, the two repointed imports and drops the private alias; 9e2c346d6 is docs-only and touches just the evidence fragment.\nCALL_SITES: imas_codex/standard_names/graph_store/graph_lineage.py:1486, imas_codex/standard_names/graph_store/graph_lineage.py:1549, imas_codex/standard_names/graph_store/graph_lineage.py:1655, imas_codex/cli/sn.py:95\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: at the reviewed head imas_codex/standard_names/graph_store/graph_lineage.py:1549 passes derived_parent_domain_decision into write_name_domain and tests/standard_names/test_component_system.py:373 asserts the statement sets no parent.physics_domain.\nSCORE evidence: 14\nJUSTIFICATION evidence: both suite arms are recorded with literal commands and EXIT lines and I re-derived zero added ids from the kept failure-id files, but the after_suite ran at 628947573 rather than the reviewed head and docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-exempt-writes.html:72 states seven graph-marked tests where its own logs record 12.\nSCORE scope_discipline: 15\nJUSTIFICATION scope_discipline: tests/standard_names/test_cypher_mutation_classifier.py:10 and tests/standard_names/test_review_report_only.py:47 were edited though they are outside the nine declared write paths, a mechanical repoint forced by dropping the alias at imas_codex/cli/sn.py.\nSCORE durability: 18\nJUSTIFICATION durability: tests/standard_names/test_name_domain_followups.py:213 feeds the tie case in the order [\"transport\", \"magnetics\"] so first-seen ordering would answer transport while the assertion demands magnetics, and the same test fails on main at EXIT=1 (log-rule-test-base.log).\nSCORE fit: 17\nJUSTIFICATION fit: imas_codex/standard_names/domain_decision.py:416 adds one private helper named by what it does and expresses it on path_counts; the index-keyed mapping it hands path_counts is the only awkward line.\nSCORE reuse: 20\nJUSTIFICATION reuse: the rule now reuses the module's own path_counts ranking (domain_decision.py:418) instead of a second count-and-tie-break, which is the deduplication the prior review asked for at domain_decision.py:432.\nFINDING docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-exempt-writes.html:72 non-blocking: the new gate paragraph states \"Seven graph-marked tests\" while log-graph-base.log and log-graph-head-final.log both report 12 passed, so the artefact whose purpose is recording the gate does not reconcile with the logs it cites.",
+  "review_run_id": "r-20261028T002232522773-review-of-scg-name-domain-exempt-writes-9e2c346d6b73",
+  "reviewed_base_sha": "6ebb102644262a995799cfbb5422e7cbcd6e623b",
+  "reviewed_head_sha": "9e2c346d6b73281b6a908c940ade1d4e57c4085b",
+  "reviewed_run_id": "r-20261027T232632776283-scg-name-domain-exempt-writes",
+  "scores": {
+    "durability": 18,
+    "evidence": 14,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 15
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T00:30:29.011144+00:00",
+  "total": 103
+}
