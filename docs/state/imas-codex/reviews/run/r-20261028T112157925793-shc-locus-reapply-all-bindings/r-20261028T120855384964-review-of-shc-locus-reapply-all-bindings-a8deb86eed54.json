@@ -9,6 +9,11 @@
       "kind": "exempted",
       "reason": "evidence runner for one operational measure: its verify() keys on member presence and misses a null score, but the page and manifest report the unscored midplane member correctly and the node is a record, not a guard; the unscored member is resolved by the lead's rebind-and-retire ruling",
       "recorded_at": "2026-10-28T20:14:13.124204+00:00"
+    },
+    "reuse": {
+      "kind": "exempted",
+      "reason": "the measurement extends its owners (harmonize.docs_score_regressions, graph_cost_and_claims.aggregate_calls_per_phase); the duplicated fragment scaffolding across evidence runners is a known pattern not worth a product module for single-use records",
+      "recorded_at": "2026-10-28T20:14:18.752159+00:00"
     }
   },
   "dispatched_at": "2026-10-28T12:10:53Z",
