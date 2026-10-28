@@ -6,6 +6,7 @@ from contextlib import ExitStack
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
 import yaml
 
 from imas_codex.standard_names.export import run_export
@@ -138,3 +139,9 @@ def test_export_resolves_accepting_docs_review_method_and_keeps_absence_closed(
         (tmp_path / "standard_names" / "general.yml").read_text(encoding="utf-8")
     )
     assert [entry["name"] for entry in entries] == ["accepted_documentation"]
+
+
+@pytest.fixture(autouse=True)
+def _pin_export_provenance(pinned_export_provenance):
+    """Drive this module's exports with archive provenance pinned."""
+    return pinned_export_provenance

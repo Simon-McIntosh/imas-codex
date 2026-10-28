@@ -27,6 +27,7 @@ from contextlib import ExitStack
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
 import yaml
 
 from imas_codex.standard_names.export import run_export
@@ -348,3 +349,9 @@ def test_exempt_origin_can_publish_below_declared_min_score(
     manifest = yaml.safe_load((tmp_path / "catalog.yml").read_text(encoding="utf-8"))
     assert manifest["min_score_applied"] == 0.65
     assert manifest["published_count"] == 1
+
+
+@pytest.fixture(autouse=True)
+def _pin_export_provenance(pinned_export_provenance):
+    """Drive this module's exports with archive provenance pinned."""
+    return pinned_export_provenance
