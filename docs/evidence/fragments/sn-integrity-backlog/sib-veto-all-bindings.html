@@ -25,7 +25,7 @@ no binding supports it, and any unanswered binding leaves the claim unknown.</p>
 <tr><th>fold</th><td><code>aggregate_binding_answers</code> — <code>supports</code> if any binding supports; <code>contradicts</code> only when no binding supports and at least one rules the claim out; a single-binding name returns its recorded answer untouched, so the probability channel and pre-change receipts replay identically</td></tr>
 <tr><th>review-docs note</th><td><code>worker_review_docs._documentation_contradiction_note</code> — one state carrying every binding, one judge call, one verdict for the claim set, replacing the per-source OR</td></tr>
 <tr><th>clause text</th><td><code>imas_codex/llm/prompts/sn/review_checks.yaml</code> — the question names the DD definitions the name binds rather than one source definition</td></tr>
-<tr><th>routing</th><td><code>imas_codex-placeholder</code></td></tr>
+<tr><th>routing</th><td><code>imas_codex/standard_names/review/cascade.py</code> passes the state binding ids into the question table</td></tr>
 </tbody>
 </table>
 
@@ -50,10 +50,12 @@ perturbation is supported by its own binding and reads as contradicting a siblin
 perturbed field; it is not vetoed.</p>
 
 <h2 id="sib-veto-all-bindings-measure">Precision and recall, before and after</h2>
-<p id="sib-veto-all-bindings-measure-text">MEASURE_PLACEHOLDER</p>
+<p id="sib-veto-all-bindings-measure-text">Measured by replaying the frozen documentation receipts at base and re-judging the same rows at head under sn-judge, USD 0.00814 over the 36 golden B validation rows whose name binds more than one DD definition; the other 148 validation rows bind one definition, where the fold returns the recorded answer unchanged by construction. Before: 1 veto, on an unacceptable row. After: 0 vetoes. The single moved row is radial_velocity_of_pellet, bound to spi/injector/fragment/velocity_r and spi/injector/pellet/velocity_r: its documentation states the fragment velocity, the fragment binding supports its claims at 0.87 and 0.62 while the pellet centre-of-mass binding reads the same sentences as contradictions, and the old per-source OR held it. That is the S0010 and electrostatic_potential shape, so the moved row is a false positive resolved, not a real contradiction lost. No veto on an acceptable row appeared at either arm, so precision did not fall; the frozen cutoff was not touched, because the fold changes what is compared, not the threshold it is compared against.</p>
 
 <h2 id="sib-veto-all-bindings-gate">Gate</h2>
-<p id="sib-veto-all-bindings-gate-text">GATE_PLACEHOLDER</p>
+<p id="sib-veto-all-bindings-gate-text">Both arms ran tests/standard_names/ on default markers with -n 8 from git archive trees. Base 282260d6c: 97 failed, 8434 passed. Head 0956864f2: 73 failed, 8459 passed. Three failure ids were added; two were repaired in c579b9e57. One remains: test_docs_contradiction_veto.py::test_second_bound_dd_source_can_hold_documentation, which asserts that a claim supported by one bound source and contradicted by another must hold the document. That is the per-source OR this section removes; the file lies outside this node write scope, so it is reported for a scope grant rather than rewritten here.</p>
+<h2 id="sib-veto-all-bindings-blocker">Blocker</h2>
+<p id="sib-veto-all-bindings-blocker-text">The zero-added-failure gate is unmet by one id. The test pins the aggregation the lead ruling retires and lives in a file this node may not write. Grant tests/standard_names/test_docs_contradiction_veto.py and the fixture can be restated as an all-bindings fixture.</p>
 </main>
 </body>
 </html>
