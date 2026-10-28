@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="254">
+<meta name="plan-version" content="255">
 <meta name="plan-modified" content="2026-10-28">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -923,6 +923,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s40" data-id="c-run-r-20261028T005530228452-review-of-sib-null-status-guard-50e9dbb7b9b3" data-who="reckon-build" data-when="2026-10-28T01:04:31.304Z">
     <div class="r-comment-body"><p>Reviewed r-20261028T003623328093-sib-null-status-guard at base 5b10d191f1c89374288676aa2cb47ed7bcd32abe, head 50e9dbb7b9b367101a64e01b9c904e9a07da4cfc. The landed change is one new test module (tests/standard_names/test_status_predicate_null_safety.py) that scans every Cypher string under imas_codex/ through python_cypher_strings and refuses a status or *_status comparison against &lt;&gt; unless the property is inside coalesce(...) or paired with an IS NULL / IS NOT NULL test on the same alias.property, with no exemption list; I re-derived its scan independently and reproduced 510 modules, 263 status references and 0 findings, and re-ran the new module alone (6 passed, EXIT=0). Verdict: lands, with one non-blocking finding that a backticked property escapes the guard.</p></div>
+</div>
+<div class="r-comment" data-section="s40" data-id="c-run-r-20261028T003623328093-sib-null-status-guard" data-who="reckon-build" data-when="2026-10-28T00:54:13.721Z">
+    <div class="r-comment-body"><p>Added tests/standard_names/test_status_predicate_null_safety.py, a static guard that reads every Cypher string in imas_codex/ through python_cypher_strings and CYPHER_LITERAL_OR_COMMENT and fails on any status or *_status comparison against &lt;&gt; whose null handling is implicit (not inside coalesce(...) and not paired with an IS NULL / IS NOT NULL test on the same alias.property). At head ef57f3ad3 it reads 510 modules and 263 status property references and reports 0 implicit exclusions, with no exemption list; planted bare exclusions in standard_names/graph_store/graph_audits.py and graph/build_dd.py both fail naming file and line, a commented copy passes, and the two archive-tree arms share one pre-existing failure id so the node adds zero.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
