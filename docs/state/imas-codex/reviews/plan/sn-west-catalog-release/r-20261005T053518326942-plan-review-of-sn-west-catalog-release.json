@@ -32,7 +32,24 @@
   "plan_slug": "sn-west-catalog-release",
   "plan_version": 306,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "finding": "thin_wrapper-1",
+      "reason": "the added re-check is load-bearing and correct (it blocks the manifest write); the finding is a placement preference, not a defect that changes what the plan lands.",
+      "when": "2026-10-28T05:05:09.507246+00:00"
+    }
+  ],
+  "responses": {
+    "thin_wrapper-1": {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "reason": "the added re-check is load-bearing and correct (it blocks the manifest write); the finding is a placement preference, not a defect that changes what the plan lands.",
+      "when": "2026-10-28T05:05:09.507246+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-west-catalog-release/r-20261005T053518326942-plan-review-of-sn-west-catalog-release.json",
   "review_run_id": "r-20261005T053518326942-plan-review-of-sn-west-catalog-release",
   "reviewed_blob_sha": "c13a7147c49c37ff5575af463f8db6d11eae518e",
   "rubric": "design",
