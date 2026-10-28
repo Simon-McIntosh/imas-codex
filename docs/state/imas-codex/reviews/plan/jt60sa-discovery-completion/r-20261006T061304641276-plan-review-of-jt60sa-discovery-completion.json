@@ -32,7 +32,24 @@
   "plan_slug": "jt60sa-discovery-completion",
   "plan_version": 175,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "finding": "duplicate_owner-1",
+      "reason": "the mechanism is landed and does centralize the clause; only the plan's description of parameter-name ownership is inaccurate, so correcting the text does not change the implemented design.",
+      "when": "2026-10-28T05:04:59.464015+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "reason": "the mechanism is landed and does centralize the clause; only the plan's description of parameter-name ownership is inaccurate, so correcting the text does not change the implemented design.",
+      "when": "2026-10-28T05:04:59.464015+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/jt60sa-discovery-completion/r-20261006T061304641276-plan-review-of-jt60sa-discovery-completion.json",
   "review_run_id": "r-20261006T061304641276-plan-review-of-jt60sa-discovery-completion",
   "reviewed_blob_sha": "bd61772973a5b34421eaa97c8f1f7cd059046d8f",
   "rubric": "design",
