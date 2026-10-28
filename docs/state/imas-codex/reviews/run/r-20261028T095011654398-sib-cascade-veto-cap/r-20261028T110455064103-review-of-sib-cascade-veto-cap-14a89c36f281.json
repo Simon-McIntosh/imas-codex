@@ -1,0 +1,47 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-28T11:16:59.561Z",
+  "dispatched_at": "2026-10-28T11:06:36Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-cascade-veto-cap.html",
+      "id": "f1082055071",
+      "line": 59,
+      "severity": "non-blocking",
+      "text": "The refit table records one calibration row changing route, but the artifact the refit wrote moves five: cascade_thresholds.json docs route_counts accept 195 -> 200 and refine 15 -> 10, and the paragraph below the table itself says the veto count falls by the five calibration rows the old scorer froze at 0.0. The recorded before/after figure contradicts both the artifact and the surrounding prose."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-cascade-veto-cap.html",
+      "id": "f98119b439e",
+      "line": 24,
+      "severity": "non-blocking",
+      "text": "The fragment (and the run manifest) states that nine of the twelve re-frozen rows sat at exactly 0.0. Recomputing the base and head columns of srtj-jev-vs-panel-operating-point.json shows 12 of 386 rows changed and 7 of those were 0.0 at the base revision (21 docs rows read 0.0 in the base column). The count of zeros does not reproduce."
+    },
+    {
+      "file": "imas_codex/standard_names/worker_tasks/worker_review_docs.py",
+      "id": "f8fc828a25e",
+      "line": 722,
+      "severity": "non-blocking",
+      "text": "The restored strip_dd_prefix on the contradiction note's binding labels has no assertion that fails if it is removed: the two note tests in tests/standard_names/test_veto_all_bindings.py:201 and :235 inject strip_dd_prefix as the identity lambda, so a regression back to the unstripped labels leaves both green."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is that a vetoed documentation decision never reads as acceptable and that calibration rebuilds; imas_codex/standard_names/review/cascade.py:245 caps the mapped score and cascade_calibration.py:290 folds the replay through the live aggregate.\nVERDICT done_when: the done_when names tests/standard_names/ default-markers with -n 8 and the D1 id passing at head and failing on main; gate-base.log and gate-head3.log record both arms with EXIT=1, and negative-control.log shows the D1 id and the new cap test failing on 686d448d.\nVERDICT write_paths: read the manifest's declared paths; every changed file in the diff is inside them, and the one outside path (tests/standard_names/test_review_cascade.py) is covered by the recorded scope grant in the run's resume-1-advice.txt.\nVERDICT manifest: read; it states the gate command, 44 base failures against 42 at head, zero added ids, and the threshold before/after values, and its digest and threshold numbers reproduce against the artifacts.\nVERDICT diff: read commit by commit against 686d448d across four commits; source, refit artifact, re-frozen column, new test and evidence fragment, all inside scope.\nCALL_SITES: imas_codex/standard_names/review/cascade.py:343 route_docs, imas_codex/standard_names/review/cascade.py:619 decide_batch route call, imas_codex/standard_names/review/cascade_calibration.py:433 calibration row replay, imas_codex/standard_names/review/jev_review.py:812 build_docs_state binding_ids, imas_codex/standard_names/worker_tasks/worker_review_docs.py:722 contradiction note\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/review/cascade.py:245 caps the vetoed score at nextafter(min_score, 0.0), which is exactly what the artifact's own policy.veto_score states at cascade_thresholds.json:1260.\nSCORE evidence: 15\nJUSTIFICATION evidence: the two gate logs and the two negative-control logs are on disk with EXIT lines and the failure-id diff reproduces as zero added, but the recorded refit facts at sib-cascade-veto-cap.html:24 and :59 do not match the artifacts.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every changed path is inside the declared write paths, with tests/standard_names/test_review_cascade.py covered by the executor's recorded grant in resume-1-advice.txt.\nSCORE durability: 16\nJUSTIFICATION durability: tests/standard_names/test_cascade_veto_cap.py:87 fails on the pre-cap code (0.985 against the capped 0.85) as negative-control.log shows, but the restored strip_dd_prefix at worker_review_docs.py:722 has no assertion that reddens if it is removed.\nSCORE fit: 18\nJUSTIFICATION fit: the cap and fold comments state the mechanism, and the function-local import at tests/standard_names/test_review_cascade.py:371 matches the same file's existing local-import idiom at :283 and :297.\nSCORE reuse: 20\nJUSTIFICATION reuse: the replay reuses jev_review.aggregate_docs_review at cascade_calibration.py:290 and the labels reuse comparison_sources at jev_review.py:841; a search over imas_codex for nextafter found no owner of a cap-below-threshold helper beyond map_decision_score's own clamp at cascade.py:282, and no new definition was added.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-cascade-veto-cap.html:59 non-blocking: the refit table records one calibration row changing route while cascade_thresholds.json moves five (accept 195 -> 200, refine 15 -> 10).\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-cascade-veto-cap.html:24 non-blocking: the fragment says nine of the twelve re-frozen rows sat at 0.0; the base column has 7 such rows among the 12 changed.\nFINDING imas_codex/standard_names/worker_tasks/worker_review_docs.py:722 non-blocking: the restored strip_dd_prefix has no assertion, since test_veto_all_bindings.py:201/:235 inject it as the identity lambda.\n",
+  "review_run_id": "r-20261028T110455064103-review-of-sib-cascade-veto-cap-14a89c36f281",
+  "reviewed_base_sha": "686d448d3db3685471b0d47f4b9fa3ff74d8282e",
+  "reviewed_head_sha": "14a89c36f28172c5e98cd5977e4cb8e4b7383da6",
+  "reviewed_run_id": "r-20261028T095011654398-sib-cascade-veto-cap",
+  "scores": {
+    "durability": 16,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T11:17:56.058748+00:00",
+  "total": 107
+}
