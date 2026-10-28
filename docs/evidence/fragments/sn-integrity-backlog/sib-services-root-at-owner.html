@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-services-root-at-owner">
+<title>Landing record — sib-services-root-at-owner</title>
+</head>
+<body>
+<main>
+<h1 id="sib-services-root-at-owner-title">Landing record: the storage layer installs the services it reads</h1>
+
+<p id="sib-services-root-at-owner-summary">
+Twelve insertions and thirteen deletions across two product files, plus one
+new test. The graph store
+reaches its collaborators through a composition root that was installed only as
+a side effect of importing <code>imas_codex.standard_names.graph_ops</code>.
+Every storage-module reader calls <code>foundation.get_services()</code>, so a
+reader imported by an entrypoint that never imported the facade — a CLI command,
+a worker task, a test — refused with <code>Graph services are not wired; import
+graph_ops first</code>. <code>sib-red-export-accounting</code> worked around that
+at one call site; this node moves the install into the module that owns it, so
+every entrypoint into the storage layer gets it, and removes that call site.
+</p>
+
+<h2 id="sib-services-root-at-owner-reproduction">Reproduction before any change</h2>
+<p id="sib-services-root-at-owner-reproduction-probe">
+A fresh interpreter that imports a storage reader and nothing else, calling
+<code>classify_sourceless_standard_names</code> with a client that is never
+meant to answer, at the assigned base <code>abb08fa730</code>:
+</p>
+<pre id="sib-services-root-at-owner-reproduction-receipt"><code>graph_ops imported: False
+services initialized: False
+RuntimeError: Graph services are not wired; import graph_ops first</code></pre>
+<p id="sib-services-root-at-owner-reproduction-head">
+The same probe at head prints
+<code>wired: reader read the services before touching the client</code> and exits
+0: the reader installs the root on its own first read and then reaches the
+client, which is the whole of the change.
+</p>
+
+<h2 id="sib-services-root-at-owner-census">Reader and installer census</h2>
+<table id="sib-services-root-at-owner-census-readers">
+<caption>Readers — every call of <code>get_services()</code>, by module</caption>
+<thead><tr><th>module</th><th>reads</th><th>first at line</th></tr></thead>
+<tbody>
+<tr id="sib-services-root-at-owner-census-supersession"><td><code>imas_codex/standard_names/graph_store/graph_supersession.py</code></td><td>152</td><td>126</td></tr>
+<tr id="sib-services-root-at-owner-census-audits"><td><code>imas_codex/standard_names/graph_store/graph_audits.py</code></td><td>84</td><td>53</td></tr>
+<tr id="sib-services-root-at-owner-census-review"><td><code>imas_codex/standard_names/graph_store/graph_review_persistence.py</code></td><td>30</td><td>42</td></tr>
+<tr id="sib-services-root-at-owner-census-foundation"><td><code>imas_codex/standard_names/graph_store/graph_foundation.py</code></td><td>15</td><td>73</td></tr>
+</tbody>
+</table>
+<table id="sib-services-root-at-owner-census-installers">
+<caption>Places that install or obtain the root</caption>
+<thead><tr><th>site</th><th>what it did</th><th>after this node</th></tr></thead>
+<tbody>
+<tr id="sib-services-root-at-owner-census-wire"><td><code>imas_codex/standard_names/graph_ops.py:260</code></td><td><code>_graph_foundation.wire_services(_GraphServices())</code> at module import — the only real install</td><td>unchanged; it still installs at import, and now it is no longer the <em>only</em> way</td></tr>
+<tr id="sib-services-root-at-owner-census-owner"><td><code>imas_codex/standard_names/graph_store/graph_foundation.py:73</code></td><td><code>get_services()</code> raised whenever the root was uninitialized</td><td>installs the root on first read, then returns it</td></tr>
+<tr id="sib-services-root-at-owner-census-binding"><td><code>imas_codex/standard_names/graph_store/__init__.py:23,34</code></td><td>the public-call wrapper injected <code>services_for_call()</code></td><td>unchanged; <code>services_for_call()</code> now delegates to <code>get_services()</code></td></tr>
+<tr id="sib-services-root-at-owner-census-export"><td><code>imas_codex/standard_names/export.py:3039</code></td><td>per-caller <code>graph_foundation.services_for_call()</code> added by <code>sib-red-export-accounting</code></td><td><strong>removed</strong>: the owner covers it</td></tr>
+</tbody>
+</table>
+
+<h2 id="sib-services-root-at-owner-fix">The fix</h2>
+<p id="sib-services-root-at-owner-fix-shape">
+<code>get_services()</code> imports the composition root when the module-level
+services are still uninitialized, and <code>services_for_call()</code> becomes a
+delegation to it — one install path, in the module that owns the services, and
+no new public name. <code>None</code> keeps its distinct meaning: an
+<em>explicitly removed</em> root still raises, which is what
+<code>tests/standard_names/test_package_import_boundaries.py::test_unwired_graph_services_refuse</code>
+measures by setting the module attribute to <code>None</code>. That guard passes
+unchanged.
+</p>
+
+<h2 id="sib-services-root-at-owner-gate">Gate</h2>
+<p id="sib-services-root-at-owner-gate-both">
+Two <code>git archive</code> trees of the assigned base and of head, each with
+its own <code>--basetemp</code> and the five generated files copied in,
+<code>tests/standard_names/</code> on default markers with <code>-n 8</code>.
+Each arm's log names its tree, its revision, the command, and the module path
+resolved from the tree's own working directory.
+</p>
+<ul id="sib-services-root-at-owner-gate-figures">
+<li>main <code>abb08fa730</code>: <code>52 failed, 8470 passed, 15 skipped</code>, <code>EXIT=1</code></li>
+<li>head <code>469ad08f7</code>: <code>52 failed, 8471 passed, 15 skipped</code>, <code>EXIT=1</code></li>
+<li>failure-id delta, taken from the two logs' own <code>FAILED</code> lines: <strong>zero added, zero removed</strong> — 52 ids identical in both arms, and the one extra pass at head is the new test</li>
+</ul>
+<p id="sib-services-root-at-owner-gate-negatives">
+The 52 ids fail in both arms and are untouched here: they are the archive
+tree's own artefacts (no git history, no credentials, no live graph), measured
+identically in both trees and outside this node's scope.
+</p>
+<p id="sib-services-root-at-owner-gate-control">
+Negative control: the new test copied into main's tree fails
+<code>1 failed</code>, <code>EXIT=1</code>, with the reader refusing —
+<code>exit 3: the reader refused: Graph services are not wired; import graph_ops
+first</code>. The head arm does not fail it. Log:
+<code>negative-control-main.log</code> in the run directory.
+</p>
+</main>
+</body>
+</html>
