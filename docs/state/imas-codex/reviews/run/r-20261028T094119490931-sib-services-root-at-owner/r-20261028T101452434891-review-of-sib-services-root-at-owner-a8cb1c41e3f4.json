@@ -1,0 +1,54 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "imas_codex/standard_names/graph_store/graph_supersession.py:126",
+    "imas_codex/standard_names/graph_store/graph_audits.py:53",
+    "imas_codex/standard_names/graph_store/graph_review_persistence.py:42",
+    "imas_codex/standard_names/graph_store/__init__.py:23",
+    "imas_codex/standard_names/graph_store/graph_foundation.py:73"
+  ],
+  "completed_at": "2026-10-28T10:20:46.935Z",
+  "dispatched_at": "2026-10-28T10:16:37Z",
+  "findings": [
+    {
+      "id": "fefa2a9b453",
+      "severity": "non-blocking",
+      "text": "manifest.md:18 non-blocking: after_suite names revision 469ad08f7 while the reviewed head is a8cb1c41e, so the full-suite arm predates the ceiling commit by one test-only change; the coverage is proportionate because a8cb1c41e touches only the test file and head-timeout-marker.log re-runs that test at the reviewed head, but the record's suite figure is not a measurement of the head being promoted."
+    }
+  ],
+  "justifications": {
+    "durability": "tests/standard_names/test_services_root_at_owner.py:69 asserts the subprocess exit code against 0, an independent value the probe produces from real code, and negative-control-main.log shows it reddening as 'exit 3: the reader refused: Graph services are not wired; import graph_ops first'; the delta's own mark is a flake-avoidance setting no test can falsify.",
+    "evidence": "head-timeout-marker.log re-runs the guarded test at the reviewed head a8cb1c41e (1 passed, EXIT=0, 8.12s call + 6.23s setup), and baseline-main.log/head.log both ran to their summary lines at 52 failed with identical failure-id files, but the suite arms were taken at 469ad08f7 rather than at the reviewed head.",
+    "fit": "The mark reuses the registered timeout marker at pyproject.toml:1101 with the sibling precedent's value at tests/standard_names/test_pool_registry_imports.py:28, and the added comment states the mechanism with no plan, ticket or version label.",
+    "goal_fidelity": "The only commit gained since the prior review, a8cb1c41e, touches tests/standard_names/test_services_root_at_owner.py:60 alone, raising the per-test ceiling on the probe that guards graph_foundation.py:73-87's first-read install, so it hardens the node's goal without altering it.",
+    "reuse": "The delta adds no definition at all; it decorates the existing test with the project's own pytest-timeout marker rather than adding a bespoke timing mechanism, so nothing is forked.",
+    "scope_discipline": "The diff of f39a37bd8..a8cb1c41e is 8 insertions and 0 deletions in tests/standard_names/test_services_root_at_owner.py only, which is one of the manifest's declared write paths."
+  },
+  "overrides": {},
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is that every storage-layer entrypoint gets the graph services without an importer having loaded graph_ops; the delta commit a8cb1c41e touches only tests/standard_names/test_services_root_at_owner.py:60, adding @pytest.mark.timeout(300) to the probe that guards graph_foundation.py:73-87's first-read install.\nVERDICT done_when: the done_when asks for a test that fails on main and passes at head with zero added failure ids; head-timeout-marker.log re-runs that test at a8cb1c41e (1 passed, EXIT=0) and negative-control-main.log records 1 failed / EXIT=1 at abb08fa730 quoting 'the reader refused: Graph services are not wired; import graph_ops first'.\nVERDICT write_paths: the manifest declares graph_foundation.py, export.py, tests/standard_names/test_services_root_at_owner.py, the evidence fragment and a figures directory; the delta commit touches only the test file, inside the declaration.\nVERDICT manifest: read; manifest.md:6 records commit a8cb1c41e as 'per-test ceiling' and names head-timeout-marker.log as the single-test re-run at head, and its after_suite block names 469ad08f7 rather than the reviewed head.\nVERDICT diff: read the single commit in f39a37bd8..a8cb1c41e: 8 insertions in tests/standard_names/test_services_root_at_owner.py \u2014 a pytest import, a five-line rationale comment naming the fresh interpreter's cost, and the timeout mark on the existing test.\nCALL_SITES: imas_codex/standard_names/graph_store/graph_supersession.py:126, imas_codex/standard_names/graph_store/graph_audits.py:53, imas_codex/standard_names/graph_store/graph_review_persistence.py:42, imas_codex/standard_names/graph_store/__init__.py:23, imas_codex/standard_names/graph_store/graph_foundation.py:73\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: a8cb1c41e touches tests/standard_names/test_services_root_at_owner.py:60 alone, hardening the probe that guards graph_foundation.py:73-87's first-read install without altering what that guard asserts.\nSCORE evidence: 17\nJUSTIFICATION evidence: head-timeout-marker.log re-runs the guarded test at the reviewed head a8cb1c41e to 1 passed / EXIT=0.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the whole f39a37bd8..a8cb1c41e diff is 8 insertions in tests/standard_names/test_services_root_at_owner.py, a declared write path, and nothing else.\nSCORE durability: 18\nJUSTIFICATION durability: tests/standard_names/test_services_root_at_owner.py:69 asserts an exit code the probe produces from real code, which negative-control-main.log shows reddening at abb08fa730 with the refusal quoted, while the delta's mark itself no test can falsify.\nSCORE fit: 19\nJUSTIFICATION fit: tests/standard_names/test_services_root_at_owner.py:60 uses the registered timeout marker from pyproject.toml:1101 at the sibling precedent's value in tests/standard_names/test_pool_registry_imports.py:28.\nSCORE reuse: 20\nJUSTIFICATION reuse: the delta adds no definition and reuses the project's pytest-timeout marker, so no capability is forked.\nFINDING manifest.md:18 non-blocking: after_suite names revision 469ad08f7 while the reviewed head is a8cb1c41e, so the suite figure recorded is not a measurement of the head being promoted, mitigated only by head-timeout-marker.log's single-test re-run at head.",
+  "review_run_id": "r-20261028T101452434891-review-of-sib-services-root-at-owner-a8cb1c41e3f4",
+  "reviewed_base_sha": "f39a37bd84a8a76dc106e2f0a1da5525197c936a",
+  "reviewed_head_sha": "a8cb1c41e3f4bf8866b9811168695e425dc0186d",
+  "reviewed_run_id": "r-20261028T094119490931-sib-services-root-at-owner",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T10:21:33.935855+00:00",
+  "total": 112,
+  "verdicts": {
+    "diff": "read the single commit in f39a37bd8..a8cb1c41e: 8 insertions in tests/standard_names/test_services_root_at_owner.py \u2014 a pytest import, a five-line rationale comment naming the fresh interpreter's cost, and the timeout mark on the existing test.",
+    "done_when": "the done_when asks for a test that fails on main and passes at head with zero added failure ids; head-timeout-marker.log re-runs that test at a8cb1c41e (1 passed, EXIT=0) and negative-control-main.log records 1 failed / EXIT=1 at abb08fa730 quoting 'the reader refused: Graph services are not wired; import graph_ops first'.",
+    "goal": "the node goal is that every storage-layer entrypoint gets the graph services without an importer having loaded graph_ops; the delta commit a8cb1c41e touches only tests/standard_names/test_services_root_at_owner.py:60, adding @pytest.mark.timeout(300) to the probe that guards graph_foundation.py:73-87's first-read install.",
+    "manifest": "read; manifest.md:6 records commit a8cb1c41e as 'per-test ceiling' and names head-timeout-marker.log as the single-test re-run at head, and its after_suite block names 469ad08f7 rather than the reviewed head.",
+    "write_paths": "the manifest declares graph_foundation.py, export.py, tests/standard_names/test_services_root_at_owner.py, the evidence fragment and a figures directory; the delta commit touches only the test file, inside the declaration."
+  }
+}
