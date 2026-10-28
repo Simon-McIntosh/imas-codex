@@ -180,7 +180,66 @@
     <code>reviewer_score_docs 0.9521</code> with <code>name_stage: accepted</code>.
   </p>
   <p id="shc-locus-veto-adjudicate-action-reapply">
-    APPLY_SENTINEL
+    The family was then re-applied with the scoped command the earlier re-measure used,
+    <code>sn harmonize --family electrostatic_potential --apply --cost-limit 2.00</code>. It
+    drained two batches anchor-first and made <strong>21 LLMCost rows</strong> across three run
+    ids, spending <strong>USD 0.288891</strong> of the <strong>USD 2.00</strong> cap
+    (generate_docs 4 rows, USD 0.285295; review_docs 17 rows, USD 0.003596). The cap was not
+    approached because there was no eligible work left to buy: both batches returned
+    <code>stop_reason: no_eligible_work</code>, and what remains is a veto, not a queue.
+  </p>
+  <table id="shc-locus-veto-adjudicate-spend">
+    <thead><tr><th>run id</th><th>batch</th><th>LLMCost rows</th><th>USD</th></tr></thead>
+    <tbody>
+      <tr><td><code>3eeff890-98ff-4be9-bdf4-7c2bf9512bf1</code></td><td>anchor</td><td>4</td><td>0.084425</td></tr>
+      <tr><td><code>e5e72de3-21d7-40e3-b065-725b6534eff9</code></td><td>anchor</td><td>4</td><td>0.023014</td></tr>
+      <tr><td><code>15f4bb34&hellip;</code></td><td>members</td><td>13</td><td>0.181452</td></tr>
+      <tr><td><strong>total</strong></td><td></td><td><strong>21</strong></td><td><strong>0.288891</strong></td></tr>
+    </tbody>
+  </table>
+  <p id="shc-locus-veto-adjudicate-score-after">
+    Documentation scores after the drain: the anchor <code>electrostatic_potential_at_langmuir_probe_position</code>
+    <strong>0.9548</strong> (accepted), <code>floating_electrostatic_potential</code>
+    <strong>0.9575</strong> (accepted), <code>electrostatic_potential</code> <strong>0.9427</strong>
+    (held), <code>electrostatic_potential_at_wall</code> <strong>0.8625</strong> (accepted, name
+    stage <code>reviewed</code>), <code>electrostatic_potential_at_outboard_midplane</code>
+    unscored. No member fell below the 0.85 threshold.
+  </p>
+
+  <h3 id="shc-locus-veto-adjudicate-reproduced">The family did not converge, and the veto reproduced on a regenerated document</h3>
+  <p id="shc-locus-veto-adjudicate-halt">
+    The apply halted, unstamped. Its halt reason, quoted verbatim from the run:
+  </p>
+  <pre id="shc-locus-veto-adjudicate-halt-text">accepted=2/3  halted: docs acceptance 50.00% &lt; 90.00% (1/2 touched)
+docs scores: no member below threshold, none fell
+apply: 1 family(ies) applied, 0 stamped.</pre>
+  <p id="shc-locus-veto-adjudicate-reproduced-body">
+    The halt is the <em>same defect</em>, not a leftover of the dismissed holds. The member batch
+    regenerated <code>electrostatic_potential</code>'s documentation at
+    <code>2026-10-28T07:21:58Z</code> (model <code>openrouter/openai/gpt-6.1-sol</code>), and the
+    judge answered <code>contradicts</code> again on <strong>new finding keys</strong>
+    (<code>b389f3ab&hellip;</code> <code>cascade_contradiction</code> and
+    <code>9942215e&hellip;</code> <code>documentation_contradiction</code>), so the earlier
+    dismissal &mdash; which suppresses a finding <em>key</em>, correctly &mdash; does not cover
+    them. The new text is not the old text and is a better document: it now names the loci
+    outright, &ldquo;The quantity applies in the core, edge, and scrape-off layer and at
+    plasma-facing surfaces; it is not restricted to one population or locus&rdquo;, and it
+    distinguishes the averaged case, &ldquo;A flux-surface mean is a spatially averaged
+    specialization, not the unaveraged potential at a selected point.&rdquo; The judge held it on
+    exactly two sentences, <code>contradicts source: This quantity is the electrostatic potential
+    in the plasma or at a plasma-facing surface, relative to a chosen electrical reference.; The
+    quantity applies in the core, edge, and scrape-off layer and at plasma-facing surfaces; it is
+    not restricted to one population or locus.</code> &mdash; the definition and the scope
+    statement, neither of which any of the seven bindings denies.
+  </p>
+  <p id="shc-locus-veto-adjudicate-reproduced-reading">
+    For the calibration this is the strongest form of the case: the veto is not a reading of one
+    unlucky document. Independently generated text, differently worded and explicit about the
+    loci, produced the same judgement, so the miss is systematic &mdash; the judge treats a base
+    name's statement of its own scope as a contradiction of the most restrictive binding that
+    scope covers. Converging this family needs the settlement widened (<em>restricted</em>,
+    <em>population</em>, <em>implicit</em> as non-requirement forms) or the clause narrowed to
+    the individual binding, not another regeneration of the prose.
   </p>
 
   <h3 id="shc-locus-veto-adjudicate-disagreement">The case, in the calibration's disagreement-record form</h3>
