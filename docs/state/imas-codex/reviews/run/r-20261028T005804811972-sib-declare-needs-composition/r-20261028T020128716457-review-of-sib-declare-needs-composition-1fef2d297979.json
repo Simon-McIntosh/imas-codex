@@ -1,0 +1,69 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "imas_codex/graph/schema.py:get_all_slots",
+    "imas_codex/standard_names/graph_store/graph_lineage.py:990",
+    "imas_codex/standard_names/graph_store/graph_lineage.py:1318",
+    "imas_codex/standard_names/graph_store/graph_lineage.py:1524",
+    "imas_codex/standard_names/graph_store/graph_lineage.py:1591",
+    "imas_codex/standard_names/graph_store/graph_lineage.py:2338",
+    "imas_codex/standard_names/signed_manifest.py:8061",
+    "imas_codex/standard_names/graph_store/graph_catalog_reset.py:990"
+  ],
+  "completed_at": "2026-10-28T02:33:24.237Z",
+  "dispatched_at": "2026-10-28T02:13:38Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-declare-needs-composition.html",
+      "id": "f33b0f2481e",
+      "line": 24,
+      "severity": "non-blocking",
+      "text": "The prose says \"The three repository readers agree with that reading\" and then enumerates four mechanisms - the HAS_PARENT edge pass (writer), both derived-parent materializers (writers), the placeholder-stub deletion (reader) and the orphan sweep (reader) - so the count disagrees with the list it introduces and understates the surveyed surface."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T005804811972-sib-declare-needs-composition/logs/head-propertycheck.log",
+      "id": "f3961f6e9d6",
+      "line": 3,
+      "severity": "non-blocking",
+      "text": "The head gate log carries a second '# rev:' header line with an empty revision value because the git rev-parse that produced it ran inside the extracted archive tree (\"Stopping at filesystem boundary\"); the first line names 04425d4b3 correctly, but a reader or parser taking the last '# rev:' line gets no revision."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "pass - the checker audit_cypher_properties has no production caller, so the declaration's runtime reach is through GraphSchema.get_all_slots and the Cypher sites named on the CALL_SITES line, each of which reads or writes the property on a StandardName-bound alias.",
+    "diff": "pass - read commit by commit: 04425d4b3 adds eight lines to standard_name.yaml and deletes the one adjudication row, 1fef2d297 adds the 77-line evidence fragment; both subjects are conventional, both carry bodies, neither carries an attribution trailer.",
+    "done_when": "pass - the done_when asserts the property is declared, the row gone, the property check green at head and zero added failure ids; the recorded gate measures all of it, base arm red on signed_manifest.py:8057 (EXIT=1) and head arm 4/4 green (EXIT=0).",
+    "goal": "pass - the node goal is to declare StandardName.needs_composition and drop its stale adjudication row; imas_codex/schemas/standard_name.yaml:1652 declares the slot as an optional boolean placeholder marker and the row at imas_codex/graph/cypher_property_check.py:142 is deleted.",
+    "manifest": "pass - the reviewed manifest reads status complete and states both arm commands, both suite arms at 101 failed / 8413 passed / 15 skipped with matching md5 a6c993d8427e30982bb5d76734b6e811, the four log paths and the measurement module and cwd.",
+    "write_paths": "pass - the declared paths are standard_name.yaml, cypher_property_check.py and the evidence fragment/figures; git diff --stat over the range shows exactly those three files, 85 insertions and 1 deletion, and no generated model is staged."
+  },
+  "justifications": {
+    "durability": "tests/graph/test_cypher_property_check.py:141 fails on exactly this regression - the base arm demonstrates that removing the declaration reddens test_repository_cypher_literals_have_declared_properties - but the guard is defeated rather than answered by any future adjudication row for the same property, which is the mechanism that hid the defect for weeks, so it is not a maximal score.",
+    "evidence": "Both arms are recorded with EXIT lines in their own logs (main-propertycheck.log EXIT=1 on signed_manifest.py:8057, head-propertycheck.log EXIT=0 with 4 passed) and the two standard_names failure-id lists compare identical at md5 a6c993d8427e30982bb5d76734b6e811, so the measured zero added failures is read from receipts rather than claimed.",
+    "fit": "imas_codex/schemas/standard_name.yaml:1652 follows the neighbouring slot shape at :1645-1651 (description block scalar, bare range: boolean, optional by default) and its description is written by mechanism with no plan or release identifier.",
+    "goal_fidelity": "imas_codex/schemas/standard_name.yaml:1652-1659 declares an optional boolean whose description states the set-on-HAS_PARENT / clear-on-materialize lifecycle, which is exactly the deliverable the goal and the plan section name.",
+    "reuse": "The diff adds no function, class or module; a grep of imas_codex/schemas/*.yaml finds no other declaration of needs_composition, and the row removal retires an entry from the existing inventory in imas_codex/graph/cypher_property_check.py rather than adding a parallel mechanism.",
+    "scope_discipline": "git diff --stat 5b10d191f..1fef2d297 shows only imas_codex/schemas/standard_name.yaml, imas_codex/graph/cypher_property_check.py and the fragment, all inside the declared write paths, with no generated model staged and the eleven other stale rows left untouched."
+  },
+  "plan": "sn-integrity-backlog",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to declare StandardName.needs_composition and retire its stale adjudication row; imas_codex/schemas/standard_name.yaml:1652 declares it and imas_codex/graph/cypher_property_check.py:142 is gone.\nVERDICT done_when: the done_when is a green property check at head, a red one at base, zero added failure ids and a fragment; the recorded gate measures all four and each is in a log with a bare EXIT line.\nVERDICT write_paths: the declared scope is standard_name.yaml, cypher_property_check.py and the fragment tree; the diff of 5b10d191f..1fef2d297 changes exactly those three files and nothing else.\nVERDICT manifest: read; it states status complete, the two arm commands, both suite arms at 101 failed / 8413 passed / 15 skipped with identical md5, and names all four logs plus the measurement module and cwd.\nVERDICT diff: read commit by commit - 04425d4b3 declares the slot and deletes the row, 1fef2d297 adds the evidence fragment; conventional subjects with bodies and no attribution.\nCALL_SITES: imas_codex/graph/schema.py:get_all_slots, imas_codex/standard_names/graph_store/graph_lineage.py:990, imas_codex/standard_names/graph_store/graph_lineage.py:1318, imas_codex/standard_names/graph_store/graph_lineage.py:1524, imas_codex/standard_names/graph_store/graph_lineage.py:1591, imas_codex/standard_names/graph_store/graph_lineage.py:2338, imas_codex/standard_names/signed_manifest.py:8061, imas_codex/standard_names/graph_store/graph_catalog_reset.py:990\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/schemas/standard_name.yaml:1652-1659 declares an optional boolean describing the set-on-edge and clear-on-materialize lifecycle, which is the deliverable the goal names.\nSCORE evidence: 19\nJUSTIFICATION evidence: main-propertycheck.log EXIT=1 on signed_manifest.py:8057 and head-propertycheck.log EXIT=0 with 4 passed, with both failure-id lists identical at md5 a6c993d8427e30982bb5d76734b6e811.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 5b10d191f..1fef2d297 names only the three declared paths, and no generated model is staged.\nSCORE durability: 18\nJUSTIFICATION durability: tests/graph/test_cypher_property_check.py:141 reddens on the base arm, proving it guards the regression, though an adjudication row for the same property would still silence it.\nSCORE fit: 20\nJUSTIFICATION fit: imas_codex/schemas/standard_name.yaml:1652 matches the neighbouring slot shape at :1645-1651 and names no plan or release identifier.\nSCORE reuse: 20\nJUSTIFICATION reuse: no new definition is added and the row removal retires an inventory entry in imas_codex/graph/cypher_property_check.py rather than forking the checker.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-declare-needs-composition.html:24 non-blocking: the prose says \"The three repository readers\" and then enumerates four mechanisms - two writers and two readers - so the count disagrees with the list it introduces.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T005804811972-sib-declare-needs-composition/logs/head-propertycheck.log:3 non-blocking: a second '# rev:' header line carries an empty revision because git rev-parse ran inside the archive tree, so a reader taking the last such line gets no revision.\n",
+  "review_run_id": "r-20261028T020128716457-review-of-sib-declare-needs-composition-1fef2d297979",
+  "reviewed_base_sha": "5b10d191f1c89374288676aa2cb47ed7bcd32abe",
+  "reviewed_head_sha": "1fef2d297979fdc7328c7b9cf703116d16064292",
+  "reviewed_node": "sib-declare-needs-composition",
+  "reviewed_run_id": "r-20261028T005804811972-sib-declare-needs-composition",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "section": "\u00a740",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T02:36:04.895492+00:00",
+  "total": 117
+}
