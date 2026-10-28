@@ -76,8 +76,10 @@ last column.</caption>
   <td><code>worker 'gw5' crashed while running
   'tests/standard_names/test_cascade_calibration.py::test_matched_policy_rebuilds_from_frozen_scores_and_receipts'</code>
   — no assertion text. Run alone it does the same: the 60 s
-  faulthandler dump fires and the run does not finish inside a 240 s bound; an
-  earlier attempt of that same command exited 139 (SIGSEGV)</td>
+  faulthandler dump fires, and the run does not end even when its 240 s
+  <code>timeout</code> sends TERM; it was stopped by hand at 4 min 5 s
+  (<code>EXIT=143</code>, <code>reproduction-cascade-crash.log</code>). An
+  earlier attempt of the same serial command exited 139 (SIGSEGV)</td>
   <td><code>No node id</code>; the crash carries no frame of its own. Seen again
   alone in <code>reproduction-cascade-crash.log</code></td>
   <td>both arms</td>
