@@ -44,9 +44,9 @@ class _ObservedGraph:
             return session.run(cypher, **params)
 
     def run(self, cypher: str, *_args: Any, **params: Any) -> list[dict[str, Any]]:
-        from imas_codex.cli.sn import _cypher_mutation_clause
+        from imas_codex.cli.sn import cypher_mutation_clause
 
-        if _cypher_mutation_clause(cypher) is not None:
+        if cypher_mutation_clause(cypher) is not None:
             type(self).mutation_queries.append(cypher)
             if "StandardNameReview" in cypher:
                 type(self).review_nodes += len(params.get("batch") or [None])

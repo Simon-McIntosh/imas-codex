@@ -56,6 +56,8 @@ __all__ = [
     "build_state",
     "candidate_domains",
     "decide_domain",
+    "derived_parent_domain_decision",
+    "dominant_domain",
     "ids_domain_map",
     "option_text",
     "undecided",
@@ -409,6 +411,46 @@ def _expected_source_domains(row: Mapping[str, Any]) -> frozenset[str]:
     for entry in row.get("child_stored_domains") or []:
         union |= {d for d in (entry or []) if d}
     return frozenset(union)
+
+
+def _ranked_domains(domains: Sequence[str]) -> dict[str, int]:
+    """The domains these carry, most frequent first, ties broken by name."""
+    return path_counts({str(index): domain for index, domain in enumerate(domains)})
+
+
+def dominant_domain(domains: Sequence[str]) -> str | None:
+    """The domain most of these carry, ties broken by name; ``None`` if none do."""
+    return next(iter(_ranked_domains(domains)), None)
+
+
+def derived_parent_domain_decision(
+    decision: DomainDecision,
+    child_domains: Sequence[str],
+) -> DomainDecision:
+    """The decision a derived parent carries: its stored choice, else its children's.
+
+    A derived parent has no sources of its own, so its domain is the one its
+    children carry. A stored choice wins, because a settled decision outranks
+    an inherited one. Otherwise the domain the most children hold becomes the
+    parent's choice, ties broken by name so the same child set always yields
+    the same parent. A parent whose children carry no domain at all keeps the
+    scalar it holds and stays undecided, so a decision is never invented where
+    there is nothing to inherit.
+    """
+    if decision.decided:
+        return decision
+    ranked = _ranked_domains(child_domains)
+    if not ranked:
+        return decision
+    chosen = next(iter(ranked))
+    return DomainDecision(
+        name=decision.name,
+        candidates=tuple(sorted(ranked)),
+        choice=chosen,
+        probability=ranked[chosen] / sum(ranked.values()),
+        model="derived-parent-majority",
+        decided_at=None,
+    )
 
 
 def write_name_domain(

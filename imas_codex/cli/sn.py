@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 console = Console()
 
 
-_CYPHER_LITERAL_OR_COMMENT = re.compile(
+CYPHER_LITERAL_OR_COMMENT = re.compile(
     r"/\*.*?\*/|//[^\n]*|'(?:\\.|''|[^'])*'|\"(?:\\.|\"\"|[^\"])*\"|`(?:``|[^`])*`",
     re.DOTALL,
 )
@@ -43,7 +43,7 @@ _CYPHER_MUTATION_CLAUSE = re.compile(
 )
 
 
-def _cypher_mutation_clause(cypher: str) -> str | None:
+def cypher_mutation_clause(cypher: str) -> str | None:
     """Return the first graph-mutating Cypher clause outside literals/comments.
 
     The clause is returned in upper case for reporting; ``None`` means the
@@ -54,7 +54,7 @@ def _cypher_mutation_clause(cypher: str) -> str | None:
     ``catalog_merge_commit_sha`` carries no ``MERGE`` clause, and a read-only
     statement projecting it is not reported as a mutation.
     """
-    executable = _CYPHER_LITERAL_OR_COMMENT.sub(" ", cypher)
+    executable = CYPHER_LITERAL_OR_COMMENT.sub(" ", cypher)
     match = _CYPHER_MUTATION_CLAUSE.search(executable)
     return match.group(0).upper() if match else None
 
@@ -92,7 +92,7 @@ class _WriteSuppressingRun:
     _suppressed: list[str]
 
     def run(self, cypher: str, *args: Any, **params: Any) -> Any:
-        clause = _cypher_mutation_clause(cypher)
+        clause = cypher_mutation_clause(cypher)
         if clause is not None:
             self._suppressed.append(clause)
             return _SuppressedWriteResult()

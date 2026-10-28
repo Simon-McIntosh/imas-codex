@@ -11,8 +11,10 @@ made outside the writer and the functions it calls.
 A write whose target label is proven not to be ``StandardName`` is allowed —
 a DD node's own domain is the source of truth the name's decision reads. A
 variable whose label the statement leaves unlabelled counts as a name: the
-reader cannot prove otherwise, and the two derived-parent statements below rely
-on that, since their label arrives through a substituted fragment.
+reader cannot prove otherwise. A derived parent's domain is the one its
+children carry, stated by
+``domain_decision.derived_parent_domain_decision``; the materialiser writes no
+domain itself, so this table has no exemptions.
 """
 
 from __future__ import annotations
@@ -25,6 +27,12 @@ from pathlib import Path
 import pytest
 
 import imas_codex.standard_names as standard_names
+from imas_codex.cli.sn import CYPHER_LITERAL_OR_COMMENT, cypher_mutation_clause
+from imas_codex.graph.cypher_property_check import (
+    NODE_BINDING_RE,
+    cypher_set_blocks,
+    python_cypher_strings,
+)
 
 PACKAGE_ROOT = Path(standard_names.__file__).resolve().parent
 WRITER_MODULE = "domain_decision.py"
@@ -33,39 +41,8 @@ WRITER_FUNCTION = "write_name_domain"
 DOMAIN_PROPS = frozenset({"physics_domain", "source_domains"})
 DOMAIN_EDGE = "HAS_PHYSICS_DOMAIN"
 
-_CYPHER_HINT = re.compile(r"\b(MATCH|MERGE|UNWIND|CALL|FOREACH)\b")
 _DOMAIN_HINT = re.compile(r"physics_domain|source_domains|" + DOMAIN_EDGE)
 
-_CLAUSE_KEYWORDS = (
-    "OPTIONAL MATCH",
-    "ON CREATE SET",
-    "ON MATCH SET",
-    "DETACH DELETE",
-    "USING INDEX",
-    "ORDER BY",
-    "MATCH",
-    "MERGE",
-    "CREATE",
-    "DELETE",
-    "REMOVE",
-    "UNWIND",
-    "FOREACH",
-    "CALL",
-    "WITH",
-    "RETURN",
-    "WHERE",
-    "YIELD",
-    "LIMIT",
-    "SKIP",
-    "SET",
-)
-_CLAUSE_RE = re.compile(
-    r"\b(" + "|".join(k.replace(" ", r"\s+") for k in _CLAUSE_KEYWORDS) + r")\b"
-)
-_SET_CLAUSES = frozenset({"SET", "ON CREATE SET", "ON MATCH SET"})
-_NODE_LABEL_RE = re.compile(
-    r"\(\s*([A-Za-z_]\w*)\s*:\s*([A-Za-z_]\w*(?:\s*:\s*[A-Za-z_]\w*)*)"
-)
 _PROPERTY_ASSIGN_RE = re.compile(r"\b([A-Za-z_]\w*)\.([A-Za-z_]\w*)\s*=")
 _REL_WRITE_RE = re.compile(
     r"\b(MERGE|CREATE)\b[^\n;]*?\(\s*[A-Za-z_]\w*\s*\)[^\n;]*?"
@@ -74,73 +51,35 @@ _REL_WRITE_RE = re.compile(
 _REL_BINDING_RE = re.compile(r"\[\s*([A-Za-z_]\w*)\s*:\s*([A-Za-z_]\w*)")
 _DELETE_RE = re.compile(r"\bDELETE\s+([A-Za-z_]\w*)")
 
-#: Direct ``StandardName`` domain writes that the one-writer rule has not
-#: retired yet, keyed by the file, the enclosing function, the write and its
-#: target. The guard refuses every other site, and refuses an entry that no
-#: longer occurs, so this table can only shrink. Each reason names what still
-#: has to happen for the entry to go.
-EXEMPT_SITES: dict[tuple[str, str, str, str], str] = {
-    (
-        "graph_store/graph_lineage.py",
-        "_materialize_derived_parent_rows",
-        "set physics_domain",
-        "parent.physics_domain",
-    ): (
-        "the single derived-parent materialiser still seeds the parent's scalar "
-        "from its children's most frequent domain before calling the writer; "
-        "retiring that rule edits a module outside this test's write scope"
-    ),
-    (
-        "graph_store/graph_lineage.py",
-        "_materialize_derived_parent_rows_batched",
-        "set physics_domain",
-        "parent.physics_domain",
-    ): (
-        "the batched derived-parent statement still seeds the parent's scalar "
-        "from the batch row's children domain before calling the writer; "
-        "retiring that rule edits a module outside this test's write scope"
-    ),
-}
+#: Direct ``StandardName`` domain writes the one-writer rule has not retired
+#: yet, keyed by the file, the enclosing function, the write and its target.
+#: The guard refuses every other site, and refuses an entry that no longer
+#: occurs, so this table can only shrink. It is empty: every derived-parent
+#: domain write goes through ``write_name_domain``.
+EXEMPT_SITES: dict[tuple[str, str, str, str], str] = {}
 
 
 def _package_modules() -> list[Path]:
     return sorted(PACKAGE_ROOT.rglob("*.py"))
 
 
-def _cypher_literals(tree: ast.Module) -> list[tuple[int, str]]:
-    """Every string constant that reads as Cypher touching a name's domain."""
-    found = []
-    for node in ast.walk(tree):
-        if not isinstance(node, ast.Constant) or not isinstance(node.value, str):
-            continue
-        text = node.value
-        if _CYPHER_HINT.search(text) and _DOMAIN_HINT.search(text):
-            found.append((node.lineno, text))
-    return found
+def _domain_cypher(path: Path) -> list[tuple[int, str]]:
+    """Every Python string in *path* that reads as Cypher touching a domain.
 
-
-def _clauses(text: str) -> list[tuple[str, str]]:
-    """Split one Cypher statement into (keyword, body) clauses."""
-    marks = list(_CLAUSE_RE.finditer(text))
-    clauses = []
-    for index, mark in enumerate(marks):
-        end = marks[index + 1].start() if index + 1 < len(marks) else len(text)
-        clauses.append(
-            (
-                " ".join(mark.group(1).replace("\n", " ").split()).upper(),
-                text[mark.end() : end],
-            )
-        )
-    return clauses
+    ``python_cypher_strings`` decides which strings are Cypher; this adds the
+    domain filter that decides which of those can write a name's domain.
+    """
+    return [
+        (node.lineno, text)
+        for node, text in python_cypher_strings(path, require_property=False)
+        if _DOMAIN_HINT.search(text)
+    ]
 
 
 def _node_labels(text: str) -> dict[str, set[str]]:
     labels: dict[str, set[str]] = {}
-    for match in _NODE_LABEL_RE.finditer(text):
-        variable = match.group(1)
-        for label in re.split(r"\s*:\s*", match.group(2)):
-            if label:
-                labels.setdefault(variable, set()).add(label)
+    for match in NODE_BINDING_RE.finditer(text):
+        labels.setdefault(match["alias"], set()).add(match["label"])
     return labels
 
 
@@ -152,12 +91,20 @@ def domain_writes(text: str) -> list[tuple[str, str]]:
     a DD node's own domain, or a ``StandardNameSource``'s copied one, is not a
     name's domain. Relationship writes count for a ``HAS_PHYSICS_DOMAIN`` merge,
     create or delete.
+
+    The statement is read through the project's own Cypher readers: a statement
+    with no mutation outside its literals and comments reads nothing, and the
+    literal and comment spans are blanked before any clause is parsed, so a
+    commented-out or quoted ``SET`` is not a write while a real one beside it
+    still is.
     """
+    if cypher_mutation_clause(text) is None:
+        return []
+    executable = CYPHER_LITERAL_OR_COMMENT.sub(" ", text)
+    labels = _node_labels(executable)
     writes: list[tuple[str, str]] = []
-    labels = _node_labels(text)
-    for keyword, body in _clauses(text):
-        if keyword not in _SET_CLAUSES:
-            continue
+    for _set, body_start, body_end in cypher_set_blocks(executable):
+        body = executable[body_start:body_end]
         for match in _PROPERTY_ASSIGN_RE.finditer(body):
             variable, prop = match.group(1), match.group(2)
             if prop not in DOMAIN_PROPS:
@@ -166,16 +113,16 @@ def domain_writes(text: str) -> list[tuple[str, str]]:
             if known and "StandardName" not in known:
                 continue
             writes.append((f"set {prop}", f"{variable}.{prop}"))
-    for match in _REL_WRITE_RE.finditer(text):
+    for match in _REL_WRITE_RE.finditer(executable):
         verb, relationship = match.groups()
         if relationship == DOMAIN_EDGE:
             writes.append((f"{verb.lower()} {DOMAIN_EDGE}", match.group(0).strip()))
     edge_variables = {
         match.group(1)
-        for match in _REL_BINDING_RE.finditer(text)
+        for match in _REL_BINDING_RE.finditer(executable)
         if match.group(2) == DOMAIN_EDGE
     }
-    for match in _DELETE_RE.finditer(text):
+    for match in _DELETE_RE.finditer(executable):
         if match.group(1) in edge_variables:
             writes.append((f"delete {DOMAIN_EDGE}", match.group(1)))
     return writes
@@ -271,7 +218,7 @@ def _findings() -> list[tuple[str, int, str, str, str, str]]:
         tree = ast.parse(path.read_text(encoding="utf-8"))
         functions = _enclosing_functions(tree)
         constants = _module_level_constant_names(tree)
-        for lineno, text in _cypher_literals(tree):
+        for lineno, text in _domain_cypher(path):
             owner = functions.get(lineno)
             allowed = owner is not None and (relative, owner) in scope
             if owner is None:
@@ -342,6 +289,39 @@ def test_scanner_allows_a_non_standard_name_label() -> None:
         "SET sns.physics_domain = $domain"
     )
     assert domain_writes(cypher) == []
+
+
+def test_scanner_ignores_a_commented_out_set() -> None:
+    """A line comment and a block comment are not writes."""
+    cypher = (
+        "MATCH (sn:StandardName {id: $sn_id})\n"
+        "// SET sn.physics_domain = 'equilibrium'\n"
+        "/* SET sn.source_domains = ['equilibrium'] */\n"
+        "RETURN sn.id AS sn_id"
+    )
+    assert domain_writes(cypher) == []
+
+
+def test_scanner_ignores_a_quoted_set() -> None:
+    """A ``SET`` inside a string literal is text, not a clause."""
+    cypher = (
+        "MATCH (sn:StandardName {id: $sn_id}) "
+        "SET sn.description = 'SET sn.physics_domain = 1' "
+        "RETURN sn.id AS sn_id"
+    )
+    assert domain_writes(cypher) == []
+
+
+def test_scanner_still_sees_a_real_set_beside_a_commented_one() -> None:
+    """Blanking the comments and literals must not blank the real write."""
+    cypher = (
+        "MATCH (sn:StandardName {id: $sn_id})\n"
+        "// SET sn.physics_domain = 'equilibrium'\n"
+        "SET sn.description = 'SET sn.physics_domain = 1', "
+        "sn.physics_domain = $domain\n"
+        "RETURN sn.id AS sn_id"
+    )
+    assert domain_writes(cypher) == [("set physics_domain", "sn.physics_domain")]
 
 
 def test_scanner_reads_a_where_clause_as_a_read() -> None:
