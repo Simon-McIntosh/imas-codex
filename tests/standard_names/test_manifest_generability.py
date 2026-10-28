@@ -32,7 +32,12 @@ from imas_codex.standard_names.export import (
 
 
 class _ReadOnlyGraphClient:
-    """A read-only client that answers every query with nothing."""
+    """A read-only client over an empty graph.
+
+    Row reads answer with nothing; count reads answer with the zero row a count
+    query returns, because the export refuses a population whose independent
+    count it cannot read.
+    """
 
     def __enter__(self) -> _ReadOnlyGraphClient:
         return self
@@ -41,6 +46,10 @@ class _ReadOnlyGraphClient:
         return False
 
     def query(self, cypher: str, **_params):
+        if "AS total" in cypher:
+            return [{"total": 0}]
+        if "AS names" in cypher and "AS projections" in cypher:
+            return [{"names": 0, "relations": 0, "changes": 0, "projections": 0}]
         return []
 
 

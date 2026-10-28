@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-red-export-accounting">
+<title>Landing record — sib-red-export-accounting</title>
+</head>
+<body>
+<main>
+<h1 id="sib-red-export-accounting-landing-title">Landing record: the export accounting the C4 tests disagree with</h1>
+
+<p id="sib-red-export-accounting-landing-summary">
+The five C4 ids pass at head. Four of them were not stale assertions at all: the
+export entrypoint itself was broken. <code>run_export</code> reaches the source
+audit through the storage layer, whose collaborators come from a composition
+root installed only when <code>graph_ops</code> is imported. Invoked as an
+entrypoint — by the CLI, or by a caller outside the graph facade — nothing had
+installed it, so every export refused with <code>Graph services are not
+wired; import graph_ops first</code> and the CLI exited 3 before any gate ran.
+That is the defect added by <code>5efabce2f</code>, which put the audit call into
+<code>run_export</code> without wiring the root. The fix installs the root at
+the start of the export's graph work, and the empty-graph doubles in three
+export tests now answer a count query with its zero row. 46 lines across 4
+files.
+</p>
+
+<h2 id="sib-red-export-accounting-landing-reproduction">Reproduction before any change</h2>
+<p id="sib-red-export-accounting-landing-reproduction-cli">
+<code>sn release --export-only</code> over an empty candidate set, with the
+population reads patched, at the assigned base <code>b14dec114</code>:
+</p>
+<pre id="sib-red-export-accounting-landing-reproduction-cli-receipt"><code>EXIT 3
+Export error: Graph services are not wired; import graph_ops first</code></pre>
+<p id="sib-red-export-accounting-landing-reproduction-ids">
+The same five ids, run alone rather than in the full suite, failed at base for
+a second, masking reason: the doubles answered the audit's count read with no
+rows, so <code>read(...)[0]["total"]</code> raised
+<code>IndexError: list index out of range</code>, or — through the CLI — exited
+3 with no <code>.export_report.json</code> written. In the full-suite ordering
+the crash was hidden and the ids failed at the provenance stamp instead
+(<code>export provenance timestamp unavailable</code>), which is the archive-tree
+artefact, not their own cause.
+</p>
+
+<h2 id="sib-red-export-accounting-landing-decisions">Per-id decision</h2>
+<table id="sib-red-export-accounting-landing-decisions-table">
+<thead><tr><th>id</th><th>kind</th><th>what it needed</th></tr></thead>
+<tbody>
+<tr id="sib-red-export-accounting-landing-id-cycle"><td><code>test_catalog_layout_hierarchy.py::TestOrderingCycleDetection::test_export_ledgers_cycle_and_writes_packet</code></td><td>fix the code (the test is right)</td><td>wire the composition root in <code>run_export</code>; gave the <code>EmptyGraphClient</code> double the zero count row</td></tr>
+<tr id="sib-red-export-accounting-landing-id-empty-refusal"><td><code>test_export_empty_refusal.py::test_export_over_empty_candidate_set_exits_non_zero</code></td><td>fix the code (the test is right)</td><td>same wiring fix; the double's count row. The refusal <em>must</em> still write the report and already does: exit 1, <code>.export_report.json</code> present, <code>export_population</code> failed with <code>empty_input_population</code>, no <code>catalog.yml</code></td></tr>
+<tr id="sib-red-export-accounting-landing-id-carried"><td><code>test_manifest_generability.py::test_every_manifest_source_is_carried_or_names_its_blocking_mechanism</code></td><td>fix the code (the test is right)</td><td>wiring fix plus the double's count row; no assertion changed</td></tr>
+<tr id="sib-red-export-accounting-landing-id-refuses"><td><code>test_manifest_generability.py::test_a_cut_refuses_a_manifest_it_cannot_generate_rather_than_counting</code></td><td>fix the code (the test is right)</td><td>wiring fix plus the double's count row; no assertion changed</td></tr>
+<tr id="sib-red-export-accounting-landing-id-control"><td><code>test_manifest_generability.py::test_a_manifest_whose_sources_all_reach_a_name_is_not_refused</code></td><td>fix the code (the test is right)</td><td>wiring fix plus the double's count row; no assertion changed</td></tr>
+</tbody>
+</table>
+<p id="sib-red-export-accounting-landing-decisions-note">
+No assertion was weakened. The only test-side change is to what the doubles
+answer: an empty graph still returns the row a count query returns, which is
+what the audit's independent-population guard reads</p>
+
+<h2 id="sib-red-export-accounting-landing-gate">Gate</h2>
+<p id="sib-red-export-accounting-landing-gate-both">
+Two <code>git archive</code> trees, each with its own <code>--basetemp</code>,
+<code>tests/standard_names/</code>, default markers, <code>-n 8</code>. Both arms
+run with <code>GIT_ARCHIVE</code>-appropriate provenance,
+<code>SOURCE_DATE_EPOCH=1750000000</code>, the documented reproducible-build
+input the export itself names for an archive tree; without it both arms lose 22
+ids to a missing git history, an artefact with nothing to do with this change.
+</p>
+<ul id="sib-red-export-accounting-landing-gate-figures">
+<li>main <code>282260d6c</code>: <code>71 failed, 8454 passed, 12 skipped</code>, <code>EXIT=1</code>, 71 <code>FAILED</code> lines in the log</li>
+<li>head <code>b749ee5c4</code>: <code>66 failed, 8457 passed, 12 skipped</code>, <code>EXIT=1</code>, 66 <code>FAILED</code> lines in the log</li>
+<li>failure-id delta, taken from the two logs' own <code>FAILED</code> lines: <strong>zero added</strong>, five removed — exactly the five C4 ids</li>
+</ul>
+<p id="sib-red-export-accounting-landing-gate-trees">
+Each arm names the tree it measured and that tree's revision on the log's
+header, and the archive is verified against the revision it was cut from by
+hashing <code>imas_codex/standard_names/export.py</code> in both places. The
+base arm's revision moved with the main branch between runs; the log records
+the revision the measured tree was actually cut from, not the branch tip at
+whichever moment the header was written.
+</p>
+<p id="sib-red-export-accounting-landing-gate-negative">
+Negative control: the five ids run against main fail 5 with <code>EXIT=1</code>;
+the head arm fails none of them. Log:
+<code>negative-control-main.log</code> in the run directory.
+</p>
+
+<h2 id="sib-red-export-accounting-landing-outside">Outside this node's scope</h2>
+<ul id="sib-red-export-accounting-landing-outside-list">
+<li><code>imas_codex/standard_names/graph_store/graph_supersession.py</code>: <code>classify_sourceless_standard_names</code> reads a clock through <code>foundation.get_services()</code> rather than the lazy <code>services_for_call()</code> the storage layer's own public surface uses. The entrypoint fix above makes the export work; the durable fix belongs in that module.</li>
+<li><code>imas_codex/standard_names/graph_store/graph_catalog.py</code> (via <code>catalog_import</code>): <code>test_catalog_layout_hierarchy.py::TestCheckCatalogListRoot::test_check_catalog_list_root</code> fails when the three export files are run alone, on the same unwired-services cause.</li>
+</ul>
+</main>
+</body>
+</html>
