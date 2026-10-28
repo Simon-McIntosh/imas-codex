@@ -1,0 +1,84 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "baseline_suite (/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T114520975730-sib-cascade-calibration-crash/logs/suite-base.log, revision 7034624c1, archive tree /tmp/reckon-crew-scratch/r-20261028T114520975730-sib-cascade-calibration-crash/sibcal-EaDC/base-tree) ends '6 failed, 8530 passed, 12 skipped ... 244.91s' then EXIT=1 with 6 FAILED ids; after_suite (/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T114520975730-sib-cascade-calibration-crash/logs/suite-head-final.log, revision fc2c69052) ends '8537 passed, 11 skipped ... 228.05s' then EXIT=0 with no FAILED line. added = after minus base = none; the reviewed delta is documentation only (one HTML fragment), so the after arm still covers the landed tree since fc2c69052 and the test file is byte-identical through 90a16b025.",
+  "artifacts": {
+    "base_arm": "6 failed, 8530 passed, 12 skipped, 244.91s at logs/suite-base.log (EXIT=1)",
+    "scratch_negative_control_scripts": "/tmp/reckon-crew-scratch/r-20261028T114520975730-sib-cascade-calibration-crash/sibcal-EaDC/check_solo_at_head.sh, check_crash_mechanism.sh",
+    "solo_runs_at_head": "five logs stamped 2a3539fbc, wall_seconds 166, 183, 165, 172, 168, all EXIT=0, none printing the 60 s dump",
+    "suite_arm_after_fix": "8537 passed, 11 skipped, 0 failed, 228.05s at logs/suite-head-final.log (EXIT=0)",
+    "suite_arm_before_fix": "1 failed, 8536 passed, 11 skipped, 269.09s at logs/suite-head.log (EXIT=1)"
+  },
+  "call_site_count": 0,
+  "call_sites": [
+    "none"
+  ],
+  "completed_at": "2026-10-28T13:42:06.586Z",
+  "dispatched_at": "2026-10-28T13:32:28Z",
+  "evidence_inputs": {
+    "arm_revision_vs_scope": "the solo arm ran at 2a3539fbc rather than the final head 90a16b025, but the test file is byte-identical across all four commits, so the arm exercises the landed test code.",
+    "prior_findings_open": "the previous review's non-blocking findings 3 and 4 (tests/standard_names/test_cascade_calibration.py:107 comment cost premise, :112 assertion independence) are untouched by this delta; the test file is unchanged between 37a06e83d and 90a16b025, so both remain live and are the coordinator's to fold.",
+    "prior_findings_repaired": "both blocking findings of r-20261028T123945025944-review-of-sib-cascade-calibration-crash-37a06e83d7c0 are repaired: the solo row now names commit 2a3539fbc and the solo-head logs, and the summary states the dump-adjacent SIGSEGV rather than a pytest-timeout kill.",
+    "timeout_method": "pyproject.toml:1082-1083 sets timeout=30 and faulthandler_timeout=60 with no timeout_method, so pytest-timeout's default signal method reports an expiry as a failure; the delta's inference is sound."
+  },
+  "findings": [
+    {
+      "file": "manifest.md",
+      "line": "22",
+      "severity": "non-blocking",
+      "text": "the negative controls this repair round rests on are named only by bare filename and exist solely under /tmp/reckon-crew-scratch/r-20261028T114520975730-sib-cascade-calibration-crash/sibcal-EaDC/, which is node-local and dies with the run's scratch, so a later reader cannot open or re-run the checks that are cited as the evidence that the fragment's claims are guarded; I recovered them only by searching that scratch tree, and the record names no path."
+    },
+    {
+      "file": "manifest.md",
+      "line": "11",
+      "severity": "non-blocking",
+      "text": "test_logs still names /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T114520975730-sib-cascade-calibration-crash/logs/sigsegv-profile-arm.log, which is the only test log in that list absent from disk, so one cited arm cannot be opened; the defect was recorded by the previous review and the four commits reviewed here did not repair it."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-cascade-calibration-crash.html",
+      "line": "70",
+      "severity": "non-blocking",
+      "text": "the citations this delta adds \u2014 'logs/solo-run-1.log' \u2026 '-5.log' at :70 and 'logs/solo-head-1.log' \u2026 '-5.log' at :131 \u2014 are run-relative and the document names no run directory, so neither resolves from the rendered page; the figures they support are otherwise correct."
+    }
+  ],
+  "gate_sources": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T114520975730-sib-cascade-calibration-crash/logs/suite-head-final.log",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T114520975730-sib-cascade-calibration-crash/logs/suite-base.log",
+    "negative_control": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T114520975730-sib-cascade-calibration-crash/logs/negative-control-final.log",
+    "solo_runs_at_head": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T114520975730-sib-cascade-calibration-crash/logs/solo-head-1.log, /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T114520975730-sib-cascade-calibration-crash/logs/solo-head-2.log, /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T114520975730-sib-cascade-calibration-crash/logs/solo-head-3.log, /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T114520975730-sib-cascade-calibration-crash/logs/solo-head-4.log, /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T114520975730-sib-cascade-calibration-crash/logs/solo-head-5.log"
+  },
+  "item_verdicts": {
+    "diff": "read commit by commit against 37a06e83d: 2a3539fbc rewrites the summary's mechanism, 5ee71a2a1 cites the fresh solo-head logs, 79b245ce7 qualifies the 600 s figure as the marker, 90a16b025 names the base commit behind the crash counts; 20 insertions and 12 deletions, all in docs/evidence/fragments/sn-integrity-backlog/sib-cascade-calibration-crash.html. No production code reaches the delta: a search over imas_codex/ and tests/ for a reader or validator of evidence fragments found no consumer of sn-integrity-backlog fragments, and the fragment is static HTML rendered by the docs server.",
+    "done_when": "the done_when requires five solo runs at head each finishing inside the timeout; the row at docs/evidence/fragments/sn-integrity-backlog/sib-cascade-calibration-crash.html:131 now cites /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T114520975730-sib-cascade-calibration-crash/logs/solo-head-1.log .. -5.log, which I opened: every one is stamped '# revision: 2a3539fbc', ends EXIT=0, prints no 'Timeout (0:01:00)' dump, and carries wall_seconds 166, 183, 165, 172, 168 \u2014 exactly the five figures the row prints.",
+    "goal": "the source node's goal is that test_matched_policy_rebuilds_from_frozen_scores_and_receipts finishes and, when the frozen evidence disagrees, fails as a test rather than crashing; the four commits gained since 37a06e83d touch only docs/evidence/fragments/sn-integrity-backlog/sib-cascade-calibration-crash.html and leave that test behaviour as fc2c69052 landed it, while correcting the record of what it does.",
+    "manifest": "read at status complete; its repair_round block names the two prior blocking findings it answers (fcc11512a76, f68c02fe406) and states a negative control per commit, but test_logs still names /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T114520975730-sib-cascade-calibration-crash/logs/sigsegv-profile-arm.log, which does not exist in that directory.",
+    "write_paths": "the source node declared cascade_calibration.py, tests/standard_names/test_cascade_calibration.py, the evidence fragment and docs/figures/sn-integrity-backlog/sib-cascade-calibration-crash; the whole delta is the one fragment file, inside that scope."
+  },
+  "justifications": {
+    "durability": "the repair round's two guard scripts do fire when the commits are reverted \u2014 check_solo_at_head.sh fails at 37a06e83d, 5ee71a2a1 and 2a3539fbc and passes from 79b245ce7; check_crash_mechanism.sh fails on all three of its assertions at 37a06e83d \u2014 but both live only in node-local scratch and are named by no path in manifest.md:22-23, so no later reader can re-run them.",
+    "evidence": "every figure the delta adds reconciles with a log I opened: 269.09 s at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T114520975730-sib-cascade-calibration-crash/logs/suite-head.log:772, the five wall times at solo-head-1..5.log, and revision 7034624c1 at solo-run-1.log:1, so the failure ids derive from the two suite logs (6 in suite-base.log ending EXIT=1, 0 in suite-head-final.log ending EXIT=0).",
+    "fit": "the edits follow the fragment's existing table and prose idiom and the four commits carry conventional subjects with bodies and no banned identifier, but the citations newly added at docs/evidence/fragments/sn-integrity-backlog/sib-cascade-calibration-crash.html:70 and :131 are run-relative ('logs/solo-head-1.log') with no directory named.",
+    "goal_fidelity": "the summary at docs/evidence/fragments/sn-integrity-backlog/sib-cascade-calibration-crash.html:19-25 states the mechanism its own logs support \u2014 the 269.09 s suite arm, no timeout_method in pyproject.toml:1082-1083, and a SIGSEGV about 15 s after the 60 s dump \u2014 while the test behaviour is unchanged since fc2c69052.",
+    "reuse": "the delta adds no definition; a search by capability over imas_codex/ and tests/ for an evidence-fragment reader or a claim-versus-log checker found none, so there is no owner to extend.",
+    "scope_discipline": "git diff --stat 37a06e83d..90a16b025 changes exactly one file, docs/evidence/fragments/sn-integrity-backlog/sib-cascade-calibration-crash.html, carrying nothing the goal does not imply."
+  },
+  "outside_scope": "none",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source node's goal is that test_matched_policy_rebuilds_from_frozen_scores_and_receipts finishes and, when the frozen evidence disagrees, fails as a test rather than crashing; the four commits gained since 37a06e83d touch only docs/evidence/fragments/sn-integrity-backlog/sib-cascade-calibration-crash.html and leave that test behaviour as fc2c69052 landed it, while correcting the record of what it does.\nVERDICT done_when: the done_when requires five solo runs at head each finishing inside the timeout; the row at docs/evidence/fragments/sn-integrity-backlog/sib-cascade-calibration-crash.html:131 now cites /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T114520975730-sib-cascade-calibration-crash/logs/solo-head-1.log .. -5.log, which I opened: every one is stamped '# revision: 2a3539fbc', ends EXIT=0, prints no 'Timeout (0:01:00)' dump, and carries wall_seconds 166, 183, 165, 172, 168 \u2014 exactly the five figures the row prints.\nVERDICT write_paths: the source node declared cascade_calibration.py, tests/standard_names/test_cascade_calibration.py, the evidence fragment and docs/figures/sn-integrity-backlog/sib-cascade-calibration-crash; the whole delta is the one fragment file, inside that scope.\nVERDICT manifest: read at status complete; its repair_round block names the two prior blocking findings it answers (fcc11512a76, f68c02fe406) and states a negative control per commit, but test_logs still names /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T114520975730-sib-cascade-calibration-crash/logs/sigsegv-profile-arm.log, which does not exist in that directory.\nVERDICT diff: read commit by commit against 37a06e83d: 2a3539fbc rewrites the summary's mechanism, 5ee71a2a1 cites the fresh solo-head logs, 79b245ce7 qualifies the 600 s figure as the marker, 90a16b025 names the base commit behind the crash counts; 20 insertions and 12 deletions, all in docs/evidence/fragments/sn-integrity-backlog/sib-cascade-calibration-crash.html. No production code reaches the delta: a search over imas_codex/ and tests/ for a reader or validator of evidence fragments found no consumer of sn-integrity-backlog fragments, and the fragment is static HTML rendered by the docs server.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the summary at docs/evidence/fragments/sn-integrity-backlog/sib-cascade-calibration-crash.html:19-25 states the mechanism its own logs support \u2014 the 269.09 s suite arm, no timeout_method in pyproject.toml:1082-1083, and a SIGSEGV about 15 s after the 60 s dump \u2014 while the test behaviour is unchanged since fc2c69052.\nSCORE evidence: 18\nJUSTIFICATION evidence: every figure the delta adds reconciles with a log I opened: 269.09 s at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T114520975730-sib-cascade-calibration-crash/logs/suite-head.log:772, the five wall times at solo-head-1..5.log, and revision 7034624c1 at solo-run-1.log:1, so the failure ids derive from the two suite logs (6 in suite-base.log ending EXIT=1, 0 in suite-head-final.log ending EXIT=0).\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 37a06e83d..90a16b025 changes exactly one file, docs/evidence/fragments/sn-integrity-backlog/sib-cascade-calibration-crash.html, carrying nothing the goal does not imply.\nSCORE durability: 12\nJUSTIFICATION durability: the repair round's two guard scripts do fire when the commits are reverted \u2014 check_solo_at_head.sh fails at 37a06e83d, 5ee71a2a1 and 2a3539fbc and passes from 79b245ce7; check_crash_mechanism.sh fails on all three of its assertions at 37a06e83d \u2014 but both live only in node-local scratch and are named by no path in manifest.md:22-23, so no later reader can re-run them.\nSCORE fit: 17\nJUSTIFICATION fit: the edits follow the fragment's existing table and prose idiom and the four commits carry conventional subjects with bodies and no banned identifier, but the citations newly added at docs/evidence/fragments/sn-integrity-backlog/sib-cascade-calibration-crash.html:70 and :131 are run-relative ('logs/solo-head-1.log') with no directory named.\nSCORE reuse: 20\nJUSTIFICATION reuse: the delta adds no definition; a search by capability over imas_codex/ and tests/ for an evidence-fragment reader or a claim-versus-log checker found none, so there is no owner to extend.\nFINDING manifest.md:22 non-blocking: the negative controls this repair round rests on are named only by bare filename and exist solely under /tmp/reckon-crew-scratch/r-20261028T114520975730-sib-cascade-calibration-crash/sibcal-EaDC/, which is node-local and dies with the run's scratch, so a later reader cannot open or re-run the checks that are cited as the evidence that the fragment's claims are guarded; I recovered them only by searching that scratch tree, and the record names no path.\nFINDING manifest.md:11 non-blocking: test_logs still names /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T114520975730-sib-cascade-calibration-crash/logs/sigsegv-profile-arm.log, which is the only test log in that list absent from disk, so one cited arm cannot be opened; the defect was recorded by the previous review and the four commits reviewed here did not repair it.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-cascade-calibration-crash.html:70 non-blocking: the citations this delta adds \u2014 'logs/solo-run-1.log' \u2026 '-5.log' at :70 and 'logs/solo-head-1.log' \u2026 '-5.log' at :131 \u2014 are run-relative and the document names no run directory, so neither resolves from the rendered page; the figures they support are otherwise correct.",
+  "review_run_id": "r-20261028T133043540557-review-of-sib-cascade-calibration-crash-90a16b025966",
+  "reviewed_base_sha": "37a06e83d7c07a5960a9eea42621bc41d201a1f0",
+  "reviewed_head_sha": "90a16b02596669ace2070ddf785a76ef9765f618",
+  "reviewed_run_id": "r-20261028T114520975730-sib-cascade-calibration-crash",
+  "scores": {
+    "durability": 12,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T13:43:58.848660+00:00",
+  "total": 106
+}
