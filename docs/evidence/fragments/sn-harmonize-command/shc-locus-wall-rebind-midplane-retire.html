@@ -1,0 +1,3710 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-harmonize-command">
+<meta name="node-id" content="shc-locus-wall-rebind-midplane-retire">
+<title>The wall potential gets its DD source back; the outboard-midplane name retires</title>
+</head>
+<body>
+<main>
+<h2 id="shc-locus-wall-rebind-midplane-retire-ruling">The ruling</h2>
+<p id="shc-locus-wall-rebind-midplane-retire-ruling-p">Both names were published
+with a DD source: <code>electrostatic_potential_at_wall</code> from
+<code>wall/description_ggd/ggd/phi_potential/values</code>, and the midplane name
+from <code>langmuir_probes/reciprocating/plunge/potential_plasma</code>, which DD 4
+renamed <code>v_plasma</code>. The graph imported them with no source edge, so
+both read as sourceless. The lead ruled that the wall path moves to
+<code>electrostatic_potential_at_wall</code>, and that
+<code>electrostatic_potential_at_outboard_midplane</code> is retired onto
+<code>electrostatic_potential_at_langmuir_probe_position</code>.</p>
+
+<h2 id="shc-locus-wall-rebind-midplane-retire-before">State before</h2>
+<table id="shc-locus-wall-rebind-midplane-retire-before-table">
+<caption>Identity, producer count, documentation score and open holds, read live before any write</caption>
+<thead><tr><th>name</th><th>name stage</th><th>producers</th><th>docs score</th><th>open hold</th></tr></thead>
+<tbody>
+<tr><td><code>electrostatic_potential</code></td><td>accepted</td><td>6</td><td>0.9233174263318332</td><td>no</td></tr>
+<tr><td><code>electrostatic_potential_at_langmuir_probe_position</code></td><td>accepted</td><td>2</td><td>0.9532784487330858</td><td>no</td></tr>
+<tr><td><code>electrostatic_potential_at_outboard_midplane</code></td><td>superseded</td><td>0</td><td>None</td><td>no</td></tr>
+<tr><td><code>electrostatic_potential_at_wall</code></td><td>reviewed</td><td>1</td><td>0.8625</td><td>no</td></tr>
+</tbody>
+</table>
+
+<h2 id="shc-locus-wall-rebind-midplane-retire-exchange">Why the source move is a migration, not an exchange</h2>
+<p id="shc-locus-wall-rebind-midplane-retire-exchange-p">The
+<code>dd-source-exchange</code> adapter swaps one source for another: the giving
+name hands over one source <em>and takes</em> a second, unheld one, while the
+receiving name takes the first. A pure transfer, where the giving name keeps its
+other six bindings and takes nothing, has no row shape in that adapter. Both
+attempts below are previews and wrote nothing: the first carries no replacement
+source, the second offers a source the giver already holds.</p>
+<table id="shc-locus-wall-rebind-midplane-retire-exchange-table">
+<caption>Exchange previews against the ruled direction</caption>
+<thead><tr><th>attempt</th><th>outcome</th><th>refusal</th></tr></thead>
+<tbody>
+<tr><td><code>transfer_without_replacement</code></td><td>refused</td><td>SignedManifestAuthorityError: invalid or overlapping source-exchange row</td></tr>
+<tr><td><code>transfer_with_a_held_replacement</code></td><td>refused</td><td>electrostatic_potential: taken source already has a live owner</td></tr>
+</tbody>
+</table>
+<p id="shc-locus-wall-rebind-midplane-retire-migration">The move was therefore
+applied by <code>retarget_standard_name_sources</code>, the production writer
+that owns an explicit compare-and-set source cohort and makes
+<code>PRODUCED_NAME</code>, its scalar mirror, the upstream
+<code>HAS_STANDARD_NAME</code> projection and both names'
+<code>source_paths</code> agree in one transaction. Its manifest:</p>
+<pre id="shc-locus-wall-rebind-midplane-retire-migration-pre">{
+  &quot;expected_current_bindings&quot;: {
+    &quot;dd:wall/description_ggd/ggd/phi_potential/values&quot;: &quot;electrostatic_potential&quot;
+  },
+  &quot;new_name&quot;: &quot;electrostatic_potential_at_wall&quot;,
+  &quot;old_name&quot;: &quot;electrostatic_potential&quot;,
+  &quot;operation&quot;: &quot;source_migration_manifest&quot;,
+  &quot;source_ids&quot;: [
+    &quot;dd:wall/description_ggd/ggd/phi_potential/values&quot;
+  ]
+}</pre>
+
+<h2 id="shc-locus-wall-rebind-midplane-retire-authorities">Authorities and previews</h2>
+<p id="shc-locus-wall-rebind-midplane-retire-authorities-p">The retirement
+authority was built by <code>build_repair_authority</code>, previewed to
+<code>would_apply</code>, and applied under that preview's digest.</p>
+<pre id="shc-locus-wall-rebind-midplane-retire-preview-pre">{
+  &quot;authority_file_sha256&quot;: &quot;b6cbc0d1a5981639c4291f5073269bf81f4a0602b3ee0501e608cfe3525aab72&quot;,
+  &quot;authority_payload_sha256&quot;: &quot;5b540d56b289936290adc664d84169bdf6d60a5c63b571a3e067c5d5a75965ab&quot;,
+  &quot;changed&quot;: 0,
+  &quot;counts&quot;: {
+    &quot;admitted&quot;: 1,
+    &quot;authority_rows&quot;: 1,
+    &quot;refused&quot;: 0
+  },
+  &quot;manifest_sha256&quot;: &quot;276014026907fc6b5a5c901beb62c8bbe99b2649842cd23d485af63e90c4b6c1&quot;,
+  &quot;outcome&quot;: &quot;would_apply&quot;,
+  &quot;refusals&quot;: [],
+  &quot;schema&quot;: &quot;imas-codex.signed-repair-receipt.v1&quot;,
+  &quot;would_change&quot;: 1
+}</pre>
+<pre id="shc-locus-wall-rebind-midplane-retire-receipt-pre">{
+  &quot;admitted_actions&quot;: [
+    {
+      &quot;participant_digests&quot;: [
+        {
+          &quot;participant_id&quot;: &quot;electrostatic_potential_at_langmuir_probe_position&quot;,
+          &quot;sha256&quot;: &quot;7cfc6eddb0565de39be50353ccd6af6811dc0cdb1b791a524a921fc629719642&quot;
+        },
+        {
+          &quot;participant_id&quot;: &quot;electrostatic_potential_at_outboard_midplane&quot;,
+          &quot;sha256&quot;: &quot;a73130ace2701776a30c898b383d6e912d78204a62beacadd31945101bce56ad&quot;
+        }
+      ],
+      &quot;participant_snapshots&quot;: {
+        &quot;electrostatic_potential_at_langmuir_probe_position&quot;: {
+          &quot;element_id&quot;: &quot;4:64c142ee-5782-46f9-a287-8df126a67943:1630583&quot;,
+          &quot;labels&quot;: [
+            &quot;StandardName&quot;
+          ],
+          &quot;properties&quot;: {
+            &quot;chain_length&quot;: 1,
+            &quot;claim_seq&quot;: 23,
+            &quot;created_at&quot;: &quot;2026-09-07T04:09:02.040000000+00:00&quot;,
+            &quot;description&quot;: &quot;Electrostatic potential energy per unit positive test charge in the plasma at a Langmuir-probe position, relative to a chosen electrical reference.&quot;,
+            &quot;docs_chain_length&quot;: 0,
+            &quot;docs_generated_at&quot;: &quot;2026-10-28T11:41:47.537000000+00:00&quot;,
+            &quot;docs_hint&quot;: &quot;The Data Dictionary source this name derives from has changed. Update the documentation to reflect the corrected source.&quot;,
+            &quot;docs_model&quot;: &quot;openrouter/openai/gpt-6.1-sol&quot;,
+            &quot;docs_stage&quot;: &quot;accepted&quot;,
+            &quot;documentation&quot;: &quot;This quantity is the local plasma electrostatic potential at the Langmuir-probe position, relative to a chosen electrical reference. It is the local restriction of [electrostatic potential](name:electrostatic_potential).\n\nThe defining energy relation is\n\n$$\nV_p = \\frac{U_p-U_{\\mathrm{ref}}}{q_t}\n$$\n\nwhere $V_p$ is the local plasma potential relative to the chosen reference, $q_t$ is a positive test charge, $U_p$ is its electrostatic potential energy in the local plasma, and $U_{\\mathrm{ref}}$ is its electrostatic potential energy at the reference.\n\nThe quantity denotes a local value in the boundary plasma, not a spatial average or the collector-surface potential. It is distinct from the [floating electrostatic potential](name:floating_electrostatic_potential), which is the collector potential at zero net current, and is not itself a plasma-to-collector sheath potential difference.\n\nFor a floating collector, the plasma-to-collector sheath potential difference is $V_p-V_f$, where $V_f$ is the floating collector potential relative to the same reference. This difference is governed by sheath current balance and depends on the local electron temperature. Changing the electrical reference shifts both potentials by the same additive constant without changing their difference.\n\nSign convention: Positive when a positive test charge has greater electrostatic potential energy in the local plasma than at the chosen electrical reference.&quot;,
+            &quot;domain_decision_candidates&quot;: [],
+            &quot;edit_include_accepted&quot;: false,
+            &quot;edit_mode&quot;: &quot;hint&quot;,
+            &quot;edit_origin&quot;: &quot;agent&quot;,
+            &quot;edit_override_edits&quot;: false,
+            &quot;edit_reason&quot;: &quot;DD source drift \u2014 the anchoring Data Dictionary path changed (path changed: &#x27;langmuir_probes/reciprocating/plunge/v_plasma&#x27; \u2192 &#x27;langmuir_probes/embedded/v_plasma&#x27;). Refresh this name&#x27;s documentation to reflect the corrected source; preserve the established intent and family phrasing. This is a targeted source-refresh, not a rewrite.&quot;,
+            &quot;edit_requested_at&quot;: &quot;2026-10-28T11:39:42.863621+00:00&quot;,
+            &quot;edit_scope&quot;: &quot;only_self&quot;,
+            &quot;edit_status&quot;: &quot;applied&quot;,
+            &quot;embedded_at&quot;: &quot;2026-10-17T20:42:17.354000000+00:00&quot;,
+            &quot;embedding&quot;: [
+              0.05126953125,
+              -0.03460693359375,
+              -0.0189666748046875,
+              0.00888824462890625,
+              -0.0012416839599609375,
+              0.23193359375,
+              0.02166748046875,
+              -0.053985595703125,
+              -0.067138671875,
+              -0.01641845703125,
+              0.01375579833984375,
+              0.1077880859375,
+              0.05133056640625,
+              -0.024017333984375,
+              -0.0966796875,
+              0.1968994140625,
+              0.0504150390625,
+              0.05316162109375,
+              -0.06451416015625,
+              -0.03155517578125,
+              -0.0023097991943359375,
+              0.037506103515625,
+              -0.12115478515625,
+              0.1378173828125,
+              0.07879638671875,
+              0.0115203857421875,
+              -0.041229248046875,
+              0.03466796875,
+              -0.15673828125,
+              -0.0273895263671875,
+              0.1961669921875,
+              0.0278167724609375,
+              -0.135986328125,
+              -0.0292510986328125,
+              -0.01873779296875,
+              -0.02978515625,
+              -0.045745849609375,
+              0.0023193359375,
+              -0.07470703125,
+              0.046600341796875,
+              0.054901123046875,
+              0.059539794921875,
+              0.047271728515625,
+              0.00557708740234375,
+              0.05328369140625,
+              0.016571044921875,
+              -0.0183868408203125,
+              0.10467529296875,
+              0.046142578125,
+              -0.05224609375,
+              -0.0845947265625,
+              -0.03369140625,
+              0.014862060546875,
+              0.0233917236328125,
+              -0.024566650390625,
+              -0.0262603759765625,
+              0.047088623046875,
+              0.0635986328125,
+              0.1075439453125,
+              -0.0265960693359375,
+              -0.0212860107421875,
+              0.07537841796875,
+              -0.20068359375,
+              0.01666259765625,
+              -0.046875,
+              0.0321044921875,
+              0.051849365234375,
+              0.0123443603515625,
+              -0.137939453125,
+              0.018035888671875,
+              0.026580810546875,
+              -0.06988525390625,
+              -0.054931640625,
+              0.02899169921875,
+              -0.031768798828125,
+              0.06805419921875,
+              0.055511474609375,
+              -0.006542205810546875,
+              0.045379638671875,
+              0.086669921875,
+              0.031646728515625,
+              0.112548828125,
+              0.054412841796875,
+              -0.0257110595703125,
+              -0.0897216796875,
+              -0.0299072265625,
+              0.07855224609375,
+              0.034698486328125,
+              -0.032318115234375,
+              -0.0009984970092773438,
+              0.14404296875,
+              0.0299072265625,
+              -0.0218048095703125,
+              -0.0014047622680664062,
+              0.055908203125,
+              -0.0158843994140625,
+              0.01383209228515625,
+              -0.0131683349609375,
+              -0.07208251953125,
+              -0.07666015625,
+              0.038421630859375,
+              -0.012542724609375,
+              -0.0089569091796875,
+              -0.11083984375,
+              -0.11871337890625,
+              0.124267578125,
+              -0.128173828125,
+              0.033477783203125,
+              -0.036468505859375,
+              -0.07611083984375,
+              -0.03997802734375,
+              0.04400634765625,
+              0.080078125,
+              -0.042022705078125,
+              -0.017669677734375,
+              -0.041473388671875,
+              -0.06298828125,
+              -0.06591796875,
+              -0.06036376953125,
+              0.0228424072265625,
+              0.063720703125,
+              0.019622802734375,
+              0.01727294921875,
+              -0.0421142578125,
+              0.0709228515625,
+              0.005153656005859375,
+              -0.05963134765625,
+              0.00969696044921875,
+              0.046142578125,
+              -0.036865234375,
+              0.038330078125,
+              -0.0245819091796875,
+              -0.01004791259765625,
+              -0.07977294921875,
+              0.073486328125,
+              -0.032989501953125,
+              -0.00838470458984375,
+              -0.00862884521484375,
+              0.053497314453125,
+              -0.013885498046875,
+              -0.10833740234375,
+              -0.042266845703125,
+              -0.06341552734375,
+              0.011383056640625,
+              0.002712249755859375,
+              -0.040985107421875,
+              -0.020172119140625,
+              -0.0169677734375,
+              -0.0163726806640625,
+              -0.061492919921875,
+              -0.053192138671875,
+              0.0219879150390625,
+              -0.00909423828125,
+              -0.03631591796875,
+              0.0161285400390625,
+              0.08721923828125,
+              -0.03631591796875,
+              -0.061553955078125,
+              -0.0136260986328125,
+              -0.0254058837890625,
+              0.0229949951171875,
+              -0.06280517578125,
+              0.0007872581481933594,
+              -0.0262298583984375,
+              -0.050079345703125,
+              0.01323699951171875,
+              0.0174407958984375,
+              -0.080322265625,
+              -0.0002422332763671875,
+              -0.03179931640625,
+              -0.0250091552734375,
+              0.043487548828125,
+              -0.0015687942504882812,
+              -0.057098388671875,
+              0.048614501953125,
+              -0.0165252685546875,
+              -0.058502197265625,
+              -0.07379150390625,
+              -0.026214599609375,
+              0.01287841796875,
+              -0.0013751983642578125,
+              -0.012359619140625,
+              0.0032482147216796875,
+              0.02545166015625,
+              -0.036224365234375,
+              0.0142364501953125,
+              0.01508331298828125,
+              -0.06353759765625,
+              -0.061126708984375,
+              -0.08697509765625,
+              0.0406494140625,
+              -0.11224365234375,
+              0.069580078125,
+              0.007312774658203125,
+              -0.0309295654296875,
+              -0.056549072265625,
+              0.0075836181640625,
+              -0.08514404296875,
+              0.035125732421875,
+              -0.0679931640625,
+              -0.06622314453125,
+              -0.04522705078125,
+              0.027008056640625,
+              0.0206146240234375,
+              -0.0293121337890625,
+              0.005859375,
+              0.055633544921875,
+              -0.032806396484375,
+              -0.06494140625,
+              -0.0670166015625,
+              -0.0288543701171875,
+              0.08428955078125,
+              -0.0251312255859375,
+              0.0144195556640625,
+              0.03692626953125,
+              0.09918212890625,
+              -0.054168701171875,
+              -0.01447296142578125,
+              -0.041259765625,
+              0.0859375,
+              0.074462890625,
+              0.044219970703125,
+              -0.0249481201171875,
+              -0.051849365234375,
+              -0.07977294921875,
+              -0.09747314453125,
+              0.0303955078125,
+              0.00760650634765625,
+              -0.1165771484375,
+              0.030975341796875,
+              -0.048553466796875,
+              -0.045318603515625,
+              0.019012451171875,
+              0.05731201171875,
+              0.09259033203125,
+              0.003955841064453125,
+              0.059967041015625,
+              -0.099365234375,
+              -0.031890869140625,
+              0.040313720703125,
+              0.0190582275390625,
+              -0.0484619140625,
+              0.006694793701171875,
+              0.02685546875,
+              -0.04193115234375,
+              0.052642822265625,
+              -0.01690673828125,
+              -0.12078857421875,
+              -0.003658294677734375,
+              -0.085693359375,
+              0.109375,
+              -0.209228515625,
+              -0.08447265625,
+              -0.06451416015625,
+              0.0323486328125,
+              0.051910400390625
+            ],
+            &quot;generate_docs_count&quot;: 6,
+            &quot;generated_at&quot;: &quot;2026-09-07T04:09:02.040000000+00:00&quot;,
+            &quot;grammar_parse_version&quot;: &quot;0.8.1.dev32+g12b557363&quot;,
+            &quot;harmonized_anchor&quot;: &quot;electrostatic_potential_at_langmuir_probe_position&quot;,
+            &quot;id&quot;: &quot;electrostatic_potential_at_langmuir_probe_position&quot;,
+            &quot;kind&quot;: &quot;scalar&quot;,
+            &quot;link_status&quot;: &quot;resolved&quot;,
+            &quot;links&quot;: [
+              &quot;name:electrostatic_potential&quot;,
+              &quot;name:floating_electrostatic_potential&quot;
+            ],
+            &quot;llm_cost&quot;: 0.278156678,
+            &quot;llm_cost_review_docs&quot;: 0.220778598,
+            &quot;llm_cost_review_name&quot;: 0.05737808,
+            &quot;model&quot;: &quot;sn-edit&quot;,
+            &quot;name_stage&quot;: &quot;accepted&quot;,
+            &quot;origin&quot;: &quot;pipeline&quot;,
+            &quot;physical_base&quot;: &quot;electrostatic_potential&quot;,
+            &quot;position&quot;: &quot;langmuir_probe_position&quot;,
+            &quot;refine_attempts&quot;: 1,
+            &quot;refine_reason&quot;: &quot;Both bound DD paths are Langmuir-probe plasma-potential measurements; langmuir_probe_position is the registered position token naming that same probe locus.&quot;,
+            &quot;review_count&quot;: 6,
+            &quot;review_disagreement&quot;: false,
+            &quot;review_docs_count&quot;: 6,
+            &quot;review_mean_score&quot;: 0.9583333333333333,
+            &quot;review_name_count&quot;: 1,
+            &quot;review_resolution_method&quot;: &quot;quorum_consensus&quot;,
+            &quot;reviewed_docs_at&quot;: &quot;2026-10-28T11:41:57.734000000+00:00&quot;,
+            &quot;reviewed_name_at&quot;: &quot;2026-09-07T05:48:12.651000000+00:00&quot;,
+            &quot;reviewer_comments_docs&quot;: &quot;Calibrated Jev route: accept&quot;,
+            &quot;reviewer_comments_name&quot;: &quot;[Primary] Grammar: verified ISN round-trip with physical_base=electrostatic_potential and position=langmuir_probe_position; both tokens registered, _at_ locus correct, no absorption or unregistered-token defects. Semantic: a domain expert reading only the name gets local electrostatic (plasma) potential evaluated at a Langmuir-probe locus; unit V matches; source paths langmuir_probes/.../v_plasma are plasma-potential measurements and expert steering confirms langmuir_probe_position names that same probe locus, so source fidelity holds. Distinct from same_base siblings electrostatic_potential (no locus), electrostatic_potential_amplitude, and electrostatic_potential_imaginary_part, and from hybrid neighbour floating_electrostatic_potential (zero-current bias, not Vp). Minor residual: bare electrostatic_potential does not spell the diagnostic synonym &#x27;plasma potential&#x27;, but that is the accepted base family spelling and does not impair identity. Convention: canonical snake_case and base_at_position order; consistent with effective_area_of_langmuir_probe using object _of_ for a probe property versus _at_ for a field sample. Completeness: scalar needs no component/subject; position segment present; both embedded and reciprocating bound paths share the same probe-locus identity.\n[Secondary] Grammar is fully validated: the name round-trips as physical_base=electrostatic_potential with the registered position langmuir_probe_position and the canonical _at_ locus relation. Semantically, it accurately identifies the plasma&#x27;s local electrostatic potential measured at a Langmuir-probe position, matching the authoritative DD definition and the deliberately supplied embedded/reciprocating probe family. The snake_case ordering and naming style are canonical, with no arbitrary suffixes or sibling clash; the accepted effective_area_of_langmuir_probe establishes consistent Langmuir-probe naming context. All required identity elements\u2014the potential quantity and probe measurement locus\u2014are present, and the V unit is consistent.&quot;,
+            &quot;reviewer_comments_per_dim_docs&quot;: &quot;{\&quot;failed_checks\&quot;: [{\&quot;id\&quot;: \&quot;claim_contradicts_source\&quot;, \&quot;criterion\&quot;: \&quot;Which conflict, if any, does this claim have with the DD definitions the name binds?\&quot;, \&quot;evidence\&quot;: \&quot;documentation=&#x27;This quantity is the local plasma electrostatic potential at the Langmuir-probe position, relative to a chosen electrical reference. It is the local restriction of [electrostatic potential](name:electrostatic_potential).\\\\n\\\\nThe defining energy relation is\\\\n\\\\n$$\\\\nV_p = \\\\\\\\frac{U_p-U_{\\\\\\\\mathrm{ref}}}{q_t}\\\\n$$\\\\n\\\\nwhere $V_p$ is the local plasma potential relative to the chosen reference, $q_t$ is a positive test charge, $U_p$ is its electrostatic potential energy in the local plasma, and $U_{\\\\\\\\mathrm{ref}}$ is its electrostatic potential energy at the reference.\\\\n\\\\nThe quantity denotes a local value in the boundary plasma, not a spatial average or the collector-surface potential. It is distinct from the [floating electrostatic potential](name:floating_electrostatic_potential), which is the collector potential at zero net current, and is not itself a plasma-to-collector sheath potential difference.\\\\n\\\\nFor a floating collector, the plasma-to-collector sheath potential difference is $V_p-V_f$, where $V_f$ is the floating collector potential relative to the same reference. This difference is governed by sheath current balance and depends on the local electron temperature. Changing the electrical reference shifts both potentials by the same additive constant without changing their difference.\\\\n\\\\nSign convention: Positive when a positive test charge has greater electrostatic potential energy in the local plasma than at the chosen electrical reference.&#x27;; dd_source_docs=[{&#x27;id&#x27;: &#x27;langmuir_probes/reciprocating/plunge/v_plasma&#x27;, &#x27;unit&#x27;: &#x27;V&#x27;, &#x27;description&#x27;: &#x27;Plasma potential (Vp) measured by a reciprocating Langmuir probe during a plunge. Represents the local electrostatic potential of the plasma in the scrape-off layer or boundary region.&#x27;, &#x27;documentation&#x27;: &#x27;Plasma potential&#x27;, &#x27;raw_dd_context&#x27;: {&#x27;path&#x27;: &#x27;langmuir_probes/reciprocating/plunge/v_plasma&#x27;, &#x27;dd_version&#x27;: &#x27;4.1.1&#x27;, &#x27;unit&#x27;: &#x27;V&#x27;, &#x27;documentation&#x27;: &#x27;Plasma potential&#x27;, &#x27;data_type&#x27;: None, &#x27;node_type&#x27;: None, &#x27;physics_domain&#x27;: None, &#x27;cocos_transformation_type&#x27;: None, &#x27;cocos_transformation_expression&#x27;: None, &#x27;coordinates&#x27;: [], &#x27;lifecycle_status&#x27;: None, &#x27;lifecycle_version&#x27;: None, &#x27;parents&#x27;: [], &#x27;members&#x27;: []}, &#x27;published_dd_context&#x27;: {&#x27;path&#x27;: &#x27;langmuir_probes/reciprocating/plunge/v_plasma&#x27;, &#x27;dd_version&#x27;: &#x27;4.1.1&#x27;, &#x27;unit&#x27;: &#x27;V&#x27;, &#x27;documentation&#x27;: &#x27;Plasma potential&#x27;, &#x27;data_type&#x27;: None, &#x27;node_type&#x27;: None, &#x27;physics_domain&#x27;: None, &#x27;cocos_transformation_type&#x27;: None, &#x27;cocos_transformation_expression&#x27;: None, &#x27;coordinates&#x27;: [], &#x27;lifecycle_status&#x27;: None, &#x27;lifecycle_version&#x27;: None, &#x27;parents&#x27;: [], &#x27;members&#x27;: []}, &#x27;dd_resolution_ids&#x27;: [], &#x27;dd_resolution_converged_ids&#x27;: [], &#x27;dd_resolution_manifest_digest&#x27;: &#x27;sha256:02dd37c745ddff3802f6d1fc577e7dbfe0c5b9832f69a149db5f78188ba4361d&#x27;}, {&#x27;id&#x27;: &#x27;langmuir_probes/embedded/v_plasma&#x27;, &#x27;unit&#x27;: &#x27;V&#x27;, &#x27;description&#x27;: &#x27;Plasma potential (Vp) measured at an embedded Langmuir probe position. Represents the local electrostatic potential of the plasma, derived from the probe I-V characteristic, used to characterize the plasma sheath and edge electric fields.&#x27;, &#x27;documentation&#x27;: &#x27;Plasma potential&#x27;, &#x27;raw_dd_context&#x27;: {&#x27;path&#x27;: &#x27;langmuir_probes/embedded/v_plasma&#x27;, &#x27;dd_version&#x27;: &#x27;4.1.1&#x27;, &#x27;unit&#x27;: &#x27;V&#x27;, &#x27;documentation&#x27;: &#x27;Plasma potential&#x27;, &#x27;data_type&#x27;: None, &#x27;node_type&#x27;: None, &#x27;physics_domain&#x27;: None, &#x27;cocos_transformation_type&#x27;: None, &#x27;cocos_transformation_expression&#x27;: None, &#x27;coordinates&#x27;: [], &#x27;lifecycle_status&#x27;: None, &#x27;lifecycle_version&#x27;: None, &#x27;parents&#x27;: [], &#x27;members&#x27;: []}, &#x27;published_dd_context&#x27;: {&#x27;path&#x27;: &#x27;langmuir_probes/embedded/v_plasma&#x27;, &#x27;dd_version&#x27;: &#x27;4.1.1&#x27;, &#x27;unit&#x27;: &#x27;V&#x27;, &#x27;documentation&#x27;: &#x27;Plasma potential&#x27;, &#x27;data_type&#x27;: None, &#x27;node_type&#x27;: None, &#x27;physics_domain&#x27;: None, &#x27;cocos_transformation_type&#x27;: None, &#x27;cocos_transformation_expression&#x27;: None, &#x27;coordinates&#x27;: [], &#x27;lifecycle_status&#x27;: None, &#x27;lifecycle_version&#x27;: None, &#x27;parents&#x27;: [], &#x27;members&#x27;: []}, &#x27;dd_resolution_ids&#x27;: [], &#x27;dd_resolution_converged_ids&#x27;: [], &#x27;dd_resolution_manifest_digest&#x27;: &#x27;sha256:02dd37c745ddff3802f6d1fc577e7dbfe0c5b9832f69a149db5f78188ba4361d&#x27;}]; description=&#x27;Electrostatic potential energy per unit positive test charge in the plasma at a Langmuir-probe position, relative to a chosen electrical reference.&#x27;\&quot;, \&quot;probability\&quot;: 1.0, \&quot;veto\&quot;: false, \&quot;cutoff\&quot;: 0.5, \&quot;judgment_evidence\&quot;: [{\&quot;choice\&quot;: \&quot;supports\&quot;, \&quot;probabilities\&quot;: {\&quot;supports\&quot;: 1.0}, \&quot;bindings\&quot;: 2}, {\&quot;choice\&quot;: \&quot;says nothing\&quot;, \&quot;probabilities\&quot;: {\&quot;says nothing\&quot;: 1.0}, \&quot;bindings\&quot;: 2}, {\&quot;choice\&quot;: \&quot;says nothing\&quot;, \&quot;probabilities\&quot;: {\&quot;says nothing\&quot;: 1.0}, \&quot;bindings\&quot;: 2}, {\&quot;choice\&quot;: \&quot;says nothing\&quot;, \&quot;probabilities\&quot;: {\&quot;says nothing\&quot;: 1.0}, \&quot;bindings\&quot;: 2}, {\&quot;choice\&quot;: \&quot;supports\&quot;, \&quot;probabilities\&quot;: {\&quot;supports\&quot;: 1.0}, \&quot;bindings\&quot;: 2}, {\&quot;choice\&quot;: \&quot;says nothing\&quot;, \&quot;probabilities\&quot;: {\&quot;says nothing\&quot;: 1.0}, \&quot;bindings\&quot;: 2}, {\&quot;choice\&quot;: \&quot;says nothing\&quot;, \&quot;probabilities\&quot;: {\&quot;says nothing\&quot;: 1.0}, \&quot;bindings\&quot;: 2}, {\&quot;choice\&quot;: \&quot;says nothing\&quot;, \&quot;probabilities\&quot;: {\&quot;says nothing\&quot;: 1.0}, \&quot;bindings\&quot;: 2}, {\&quot;choice\&quot;: \&quot;says nothing\&quot;, \&quot;probabilities\&quot;: {\&quot;says nothing\&quot;: 1.0}, \&quot;bindings\&quot;: 2}, {\&quot;choice\&quot;: \&quot;says nothing\&quot;, \&quot;probabilities\&quot;: {\&quot;says nothing\&quot;: 1.0}, \&quot;bindings\&quot;: 2}], \&quot;veto_criterion\&quot;: \&quot;nonconforming check answer\&quot;, \&quot;segment\&quot;: \&quot;\&quot;, \&quot;sentence\&quot;: \&quot;This quantity is the local plasma electrostatic potential at the Langmuir-probe position, relative to a chosen electrical reference. It is the local restriction of [electrostatic potential](name:elect\&quot;}, {\&quot;id\&quot;: \&quot;raw_dd_reference_in_prose\&quot;, \&quot;criterion\&quot;: \&quot;Does the documentation cite a raw DD path or IDS name as storage context?\&quot;, \&quot;evidence\&quot;: \&quot;documentation=&#x27;This quantity is the local plasma electrostatic potential at the Langmuir-probe position, relative to a chosen electrical reference. It is the local restriction of [electrostatic potential](name:electrostatic_potential).\\\\n\\\\nThe defining energy relation is\\\\n\\\\n$$\\\\nV_p = \\\\\\\\frac{U_p-U_{\\\\\\\\mathrm{ref}}}{q_t}\\\\n$$\\\\n\\\\nwhere $V_p$ is the local plasma potential relative to the chosen reference, $q_t$ is a positive test charge, $U_p$ is its electrostatic potential energy in the local plasma, and $U_{\\\\\\\\mathrm{ref}}$ is its electrostatic potential energy at the reference.\\\\n\\\\nThe quantity denotes a local value in the boundary plasma, not a spatial average or the collector-surface potential. It is distinct from the [floating electrostatic potential](name:floating_electrostatic_potential), which is the collector potential at zero net current, and is not itself a plasma-to-collector sheath potential difference.\\\\n\\\\nFor a floating collector, the plasma-to-collector sheath potential difference is $V_p-V_f$, where $V_f$ is the floating collector potential relative to the same reference. This difference is governed by sheath current balance and depends on the local electron temperature. Changing the electrical reference shifts both potentials by the same additive constant without changing their difference.\\\\n\\\\nSign convention: Positive when a positive test charge has greater electrostatic potential energy in the local plasma than at the chosen electrical reference.&#x27;; source_paths=[&#x27;langmuir_probes/reciprocating/plunge/v_plasma&#x27;, &#x27;langmuir_probes/embedded/v_plasma&#x27;]\&quot;, \&quot;probability\&quot;: 0.82, \&quot;veto\&quot;: false, \&quot;cutoff\&quot;: 0.5, \&quot;judgment_evidence\&quot;: {\&quot;type\&quot;: \&quot;noul\&quot;, \&quot;noul\&quot;: 0.82}, \&quot;veto_criterion\&quot;: \&quot;nonconforming check answer\&quot;, \&quot;segment\&quot;: \&quot;\&quot;, \&quot;sentence\&quot;: \&quot;This quantity is the local plasma electrostatic potential at the Langmuir-probe position, relative to a chosen electrical reference. It is the local restriction of [electrostatic potential](name:elect\&quot;}], \&quot;raw_dimension_scores\&quot;: {\&quot;completeness\&quot;: 15.773984096228943, \&quot;description_quality\&quot;: 17.30086124174375, \&quot;documentation_quality\&quot;: 16.27595921913029, \&quot;physics_accuracy\&quot;: 15.406464674242415}, \&quot;acceptance_probability\&quot;: 0.4685368258283137, \&quot;selected_score\&quot;: 0.8094658653918174}&quot;,
+            &quot;reviewer_comments_per_dim_name&quot;: &quot;{\&quot;grammar\&quot;: null, \&quot;semantic\&quot;: null, \&quot;convention\&quot;: null, \&quot;completeness\&quot;: null}&quot;,
+            &quot;reviewer_model_docs&quot;: &quot;typesafe/jev-1.13&quot;,
+            &quot;reviewer_model_name&quot;: &quot;openrouter/x-ai/grok-4.5&quot;,
+            &quot;reviewer_score_docs&quot;: 0.9532784487330858,
+            &quot;reviewer_score_name&quot;: 0.99375,
+            &quot;reviewer_scores_docs&quot;: &quot;{\&quot;completeness\&quot;: 15.773984096228943, \&quot;description_quality\&quot;: 17.30086124174375, \&quot;documentation_quality\&quot;: 16.27595921913029, \&quot;physics_accuracy\&quot;: 15.406464674242415}&quot;,
+            &quot;reviewer_scores_name&quot;: &quot;{\&quot;grammar\&quot;: 20.0, \&quot;semantic\&quot;: 19.5, \&quot;convention\&quot;: 20.0, \&quot;completeness\&quot;: 20.0}&quot;,
+            &quot;run_id&quot;: &quot;5928ae2b-98b4-4d72-b298-85e21305daa5&quot;,
+            &quot;semantic_sim&quot;: 0.9380881786346436,
+            &quot;source_dd_resolution_converged_ids&quot;: [],
+            &quot;source_dd_resolution_ids&quot;: [],
+            &quot;source_dd_resolution_manifest_digest&quot;: &quot;sha256:02dd37c745ddff3802f6d1fc577e7dbfe0c5b9832f69a149db5f78188ba4361d&quot;,
+            &quot;source_dd_resolution_marker&quot;: &quot;resolved-dd-context&quot;,
+            &quot;source_documentation&quot;: &quot;Plasma potential&quot;,
+            &quot;source_domains&quot;: [
+              &quot;edge_plasma_physics&quot;,
+              &quot;particle_measurement_diagnostics&quot;
+            ],
+            &quot;source_path&quot;: &quot;langmuir_probes/reciprocating/plunge/v_plasma&quot;,
+            &quot;source_paths&quot;: [
+              &quot;dd:langmuir_probes/embedded/v_plasma&quot;,
+              &quot;dd:langmuir_probes/reciprocating/plunge/v_plasma&quot;
+            ],
+            &quot;source_raw_documentation&quot;: &quot;Plasma potential&quot;,
+            &quot;source_raw_unit&quot;: &quot;V&quot;,
+            &quot;source_unit&quot;: &quot;V&quot;,
+            &quot;status&quot;: &quot;draft&quot;,
+            &quot;tags&quot;: [],
+            &quot;unit&quot;: &quot;V&quot;,
+            &quot;updated_at&quot;: &quot;2026-10-28T11:44:07.944000000+00:00&quot;,
+            &quot;validated_at&quot;: &quot;2026-09-07T04:09:02.663000000+00:00&quot;,
+            &quot;validation_diagnostics_json&quot;: &quot;[]&quot;,
+            &quot;validation_issues&quot;: [],
+            &quot;validation_status&quot;: &quot;valid&quot;
+          }
+        },
+        &quot;electrostatic_potential_at_outboard_midplane&quot;: {
+          &quot;element_id&quot;: &quot;4:64c142ee-5782-46f9-a287-8df126a67943:1602623&quot;,
+          &quot;labels&quot;: [
+            &quot;StandardName&quot;
+          ],
+          &quot;properties&quot;: {
+            &quot;chain_length&quot;: 2,
+            &quot;claim_seq&quot;: 3,
+            &quot;created_at&quot;: &quot;2026-08-23T15:46:29.498000000+00:00&quot;,
+            &quot;description&quot;: &quot;Quasineutral plasma electrostatic potential at the outboard equatorial midplane, relative to an electrical reference.&quot;,
+            &quot;docs_chain_length&quot;: 0,
+            &quot;docs_stage&quot;: &quot;pending&quot;,
+            &quot;domain_decision_candidates&quot;: [],
+            &quot;embed_text_hash&quot;: &quot;a64b62fadd4c29b0&quot;,
+            &quot;embedded_at&quot;: &quot;2026-10-28T08:53:57.388000000+00:00&quot;,
+            &quot;embedding&quot;: [
+              0.0606689453125,
+              -0.0292510986328125,
+              -0.0200347900390625,
+              0.04443359375,
+              0.0272064208984375,
+              0.17431640625,
+              0.0933837890625,
+              -0.0430908203125,
+              -0.0986328125,
+              -0.12042236328125,
+              -0.0049896240234375,
+              0.144775390625,
+              0.0750732421875,
+              -0.0236358642578125,
+              -0.10198974609375,
+              0.202880859375,
+              0.06317138671875,
+              0.089111328125,
+              -0.0204925537109375,
+              -0.039642333984375,
+              0.029632568359375,
+              0.004817962646484375,
+              -0.10400390625,
+              0.1561279296875,
+              0.09619140625,
+              0.054901123046875,
+              -0.0266571044921875,
+              -0.0299072265625,
+              -0.13427734375,
+              -0.0126800537109375,
+              0.20751953125,
+              0.047882080078125,
+              -0.1082763671875,
+              -0.04498291015625,
+              -0.037841796875,
+              -0.029510498046875,
+              -0.0232696533203125,
+              -0.041107177734375,
+              -0.09173583984375,
+              0.04571533203125,
+              0.035980224609375,
+              0.039581298828125,
+              -0.004619598388671875,
+              0.03277587890625,
+              -0.01049041748046875,
+              0.038665771484375,
+              -0.0015239715576171875,
+              0.082275390625,
+              0.0198974609375,
+              -0.0130157470703125,
+              -0.04229736328125,
+              -0.0168609619140625,
+              -0.00679779052734375,
+              0.01026153564453125,
+              0.0004565715789794922,
+              -0.00727081298828125,
+              0.02239990234375,
+              -0.00992584228515625,
+              0.10198974609375,
+              -0.001667022705078125,
+              -0.00450897216796875,
+              0.0780029296875,
+              -0.125,
+              0.0258636474609375,
+              -0.026397705078125,
+              0.06884765625,
+              0.0662841796875,
+              -0.0086212158203125,
+              -0.0975341796875,
+              -0.005771636962890625,
+              0.006191253662109375,
+              -0.0675048828125,
+              -0.06854248046875,
+              0.0176239013671875,
+              -0.0092010498046875,
+              0.00310516357421875,
+              0.048553466796875,
+              0.01316070556640625,
+              0.034820556640625,
+              0.0404052734375,
+              0.044677734375,
+              0.1385498046875,
+              -0.0207061767578125,
+              -0.0207366943359375,
+              -0.12322998046875,
+              0.034454345703125,
+              0.033538818359375,
+              0.04498291015625,
+              -0.058258056640625,
+              0.0009675025939941406,
+              0.1202392578125,
+              0.0131072998046875,
+              -0.0804443359375,
+              -0.001495361328125,
+              0.08416748046875,
+              -0.0225830078125,
+              -0.00495147705078125,
+              -0.03277587890625,
+              -0.08270263671875,
+              -0.095947265625,
+              0.0341796875,
+              -0.0274658203125,
+              -0.0189971923828125,
+              -0.061431884765625,
+              -0.077392578125,
+              0.121337890625,
+              -0.1090087890625,
+              0.04620361328125,
+              -0.0513916015625,
+              -0.12646484375,
+              -0.020843505859375,
+              0.0245513916015625,
+              0.05291748046875,
+              -0.0433349609375,
+              -0.013916015625,
+              -0.0016126632690429688,
+              -0.076904296875,
+              -0.05419921875,
+              -0.07196044921875,
+              -0.006488800048828125,
+              0.013031005859375,
+              0.002864837646484375,
+              0.0150146484375,
+              -0.052398681640625,
+              0.03759765625,
+              0.042633056640625,
+              -0.08349609375,
+              0.01160430908203125,
+              0.045166015625,
+              -0.08843994140625,
+              0.03631591796875,
+              -0.05023193359375,
+              -0.0240325927734375,
+              -0.10919189453125,
+              0.08026123046875,
+              -0.01229095458984375,
+              -0.005847930908203125,
+              -0.01364898681640625,
+              0.0823974609375,
+              -0.01374053955078125,
+              -0.1568603515625,
+              -0.01154327392578125,
+              -0.06536865234375,
+              -0.011566162109375,
+              -0.00249481201171875,
+              -0.034454345703125,
+              -0.031646728515625,
+              -0.038665771484375,
+              -0.020904541015625,
+              -0.06060791015625,
+              0.004169464111328125,
+              0.0232391357421875,
+              -0.0207366943359375,
+              -0.01239776611328125,
+              -0.01242828369140625,
+              0.0546875,
+              -0.04949951171875,
+              -0.04180908203125,
+              -0.00616455078125,
+              0.0178070068359375,
+              0.06317138671875,
+              -0.08551025390625,
+              -0.0034847259521484375,
+              0.0018148422241210938,
+              -0.036895751953125,
+              0.03424072265625,
+              0.0012655258178710938,
+              -0.080322265625,
+              -0.00884246826171875,
+              -0.031097412109375,
+              -0.01617431640625,
+              0.05413818359375,
+              -0.0288543701171875,
+              -0.055938720703125,
+              0.036895751953125,
+              -0.048797607421875,
+              -0.08648681640625,
+              -0.1112060546875,
+              -0.036590576171875,
+              0.0175018310546875,
+              -0.022796630859375,
+              -0.004283905029296875,
+              -0.0174102783203125,
+              0.01537322998046875,
+              -0.040069580078125,
+              0.0120697021484375,
+              -0.0213623046875,
+              -0.0308990478515625,
+              -0.07421875,
+              -0.0897216796875,
+              0.046844482421875,
+              -0.0931396484375,
+              0.0506591796875,
+              0.0177154541015625,
+              -0.0418701171875,
+              -0.058837890625,
+              0.057830810546875,
+              -0.06640625,
+              0.0202484130859375,
+              -0.0269012451171875,
+              -0.077392578125,
+              -0.01548004150390625,
+              0.049530029296875,
+              0.0191497802734375,
+              -0.012603759765625,
+              -0.0159149169921875,
+              0.039306640625,
+              -0.0299224853515625,
+              -0.073974609375,
+              -0.0726318359375,
+              0.0236663818359375,
+              0.12109375,
+              0.1041259765625,
+              0.04296875,
+              0.0242767333984375,
+              0.08050537109375,
+              -0.08673095703125,
+              -0.004840850830078125,
+              -0.022125244140625,
+              0.087890625,
+              0.046356201171875,
+              0.051483154296875,
+              -0.03302001953125,
+              -0.0489501953125,
+              -0.0623779296875,
+              -0.1138916015625,
+              0.032012939453125,
+              -0.007671356201171875,
+              -0.0897216796875,
+              0.035125732421875,
+              -0.08575439453125,
+              -0.0325927734375,
+              -0.02447509765625,
+              0.0987548828125,
+              0.08203125,
+              -0.0178070068359375,
+              0.074951171875,
+              -0.11767578125,
+              -0.00577545166015625,
+              0.067626953125,
+              0.0274505615234375,
+              -0.041595458984375,
+              -0.00142669677734375,
+              0.0215911865234375,
+              -0.044342041015625,
+              0.02679443359375,
+              -0.00823974609375,
+              -0.080322265625,
+              0.00498199462890625,
+              -0.09906005859375,
+              0.111328125,
+              -0.175537109375,
+              -0.048492431640625,
+              -0.11016845703125,
+              0.03277587890625,
+              0.0386962890625
+            ],
+            &quot;generated_at&quot;: &quot;2026-08-23T15:46:29.498000000+00:00&quot;,
+            &quot;grammar_parse_version&quot;: &quot;0.10.1&quot;,
+            &quot;harmonized_anchor&quot;: &quot;electrostatic_potential_at_langmuir_probe_position&quot;,
+            &quot;id&quot;: &quot;electrostatic_potential_at_outboard_midplane&quot;,
+            &quot;kind&quot;: &quot;scalar&quot;,
+            &quot;llm_cost&quot;: 0.081174346,
+            &quot;llm_cost_review_name&quot;: 0.081174346,
+            &quot;model&quot;: &quot;openrouter/openai/gpt-5.5&quot;,
+            &quot;name_stage&quot;: &quot;exhausted&quot;,
+            &quot;origin&quot;: &quot;pipeline&quot;,
+            &quot;physical_base&quot;: &quot;electrostatic_potential&quot;,
+            &quot;physics_domain&quot;: &quot;edge_plasma_physics&quot;,
+            &quot;position&quot;: &quot;outboard_midplane&quot;,
+            &quot;refine_attempts&quot;: 3,
+            &quot;refine_reason&quot;: &quot;Avoids the invalid plasma-stacked form while using a more specific registered midplane locus for the evaluated field.&quot;,
+            &quot;refine_stop_reason&quot;: &quot;attempts_exhausted&quot;,
+            &quot;refine_stopped_at&quot;: &quot;2026-10-28T08:54:48.413000000+00:00&quot;,
+            &quot;review_count&quot;: 3,
+            &quot;review_disagreement&quot;: false,
+            &quot;review_input_hash&quot;: &quot;e0c18c8cd3340fc9cb274e8a24d087b7bc0ac21283800537e04d3a621d097223&quot;,
+            &quot;review_mean_score&quot;: 0.6416666666666667,
+            &quot;review_name_count&quot;: 2,
+            &quot;review_resolution_method&quot;: &quot;jev_cascade_refine&quot;,
+            &quot;review_resubmit_count&quot;: 0,
+            &quot;reviewed_name_at&quot;: &quot;2026-10-28T08:54:48.413000000+00:00&quot;,
+            &quot;reviewer_comments_name&quot;: &quot;Calibrated Jev route: refine&quot;,
+            &quot;reviewer_comments_per_dim_name&quot;: &quot;{\&quot;failed_checks\&quot;: [{\&quot;id\&quot;: \&quot;bound_to_wrong_object\&quot;, \&quot;criterion\&quot;: \&quot;Which object does the name denote, read against its bound source path?\&quot;, \&quot;evidence\&quot;: \&quot;source_paths=[]; description=&#x27;Quasineutral plasma electrostatic potential at the outboard equatorial midplane, relative to an electrical reference.&#x27;\&quot;, \&quot;probability\&quot;: 0.75, \&quot;veto\&quot;: false, \&quot;cutoff\&quot;: 0.5, \&quot;judgment_evidence\&quot;: {\&quot;type\&quot;: \&quot;choice\&quot;, \&quot;choice\&quot;: \&quot;a different object\&quot;, \&quot;probabilities\&quot;: {\&quot;the bound source object\&quot;: 0.25, \&quot;a different object\&quot;: 0.74, \&quot;one of several bound objects\&quot;: 0.01}, \&quot;confidence\&quot;: 0.61}, \&quot;veto_criterion\&quot;: \&quot;nonconforming check answer\&quot;, \&quot;segment\&quot;: \&quot;electrostatic_potential_at_outboard_midplane\&quot;, \&quot;sentence\&quot;: \&quot;\&quot;}, {\&quot;id\&quot;: \&quot;dropped_distinguishing_axis\&quot;, \&quot;criterion\&quot;: \&quot;Does the name drop a distinguishing axis the source states for the observable?\&quot;, \&quot;evidence\&quot;: \&quot;physical_base=&#x27;electrostatic_potential&#x27;; position=&#x27;outboard_midplane&#x27;; source_paths=[]\&quot;, \&quot;probability\&quot;: 0.6, \&quot;veto\&quot;: false, \&quot;cutoff\&quot;: 0.5, \&quot;judgment_evidence\&quot;: {\&quot;type\&quot;: \&quot;noul\&quot;, \&quot;noul\&quot;: 0.6}, \&quot;veto_criterion\&quot;: \&quot;nonconforming check answer\&quot;, \&quot;segment\&quot;: \&quot;electrostatic_potential_at_outboard_midplane\&quot;, \&quot;sentence\&quot;: \&quot;\&quot;}, {\&quot;id\&quot;: \&quot;missing_required_segment\&quot;, \&quot;criterion\&quot;: \&quot;Is a physically required segment (subject, component) missing?\&quot;, \&quot;evidence\&quot;: \&quot;physical_base=&#x27;electrostatic_potential&#x27;; position=&#x27;outboard_midplane&#x27;\&quot;, \&quot;probability\&quot;: 0.55, \&quot;veto\&quot;: false, \&quot;cutoff\&quot;: 0.5, \&quot;judgment_evidence\&quot;: {\&quot;type\&quot;: \&quot;noul\&quot;, \&quot;noul\&quot;: 0.55}, \&quot;veto_criterion\&quot;: \&quot;nonconforming check answer\&quot;, \&quot;segment\&quot;: \&quot;electrostatic_potential_at_outboard_midplane\&quot;, \&quot;sentence\&quot;: \&quot;\&quot;}, {\&quot;id\&quot;: \&quot;over_qualified_modifier\&quot;, \&quot;criterion\&quot;: \&quot;Does the name add a modifier the source does not state, on a form that makes it a claim?\&quot;, \&quot;evidence\&quot;: \&quot;physical_base=&#x27;electrostatic_potential&#x27;; source_paths=[]\&quot;, \&quot;probability\&quot;: 0.58, \&quot;veto\&quot;: false, \&quot;cutoff\&quot;: 0.5, \&quot;judgment_evidence\&quot;: {\&quot;type\&quot;: \&quot;noul\&quot;, \&quot;noul\&quot;: 0.58}, \&quot;veto_criterion\&quot;: \&quot;nonconforming check answer\&quot;, \&quot;segment\&quot;: \&quot;electrostatic_potential_at_outboard_midplane\&quot;, \&quot;sentence\&quot;: \&quot;\&quot;}], \&quot;raw_dimension_scores\&quot;: {\&quot;completeness\&quot;: 14.05419986415656, \&quot;convention\&quot;: 13.974275916197548, \&quot;grammar\&quot;: 15.830780662099, \&quot;semantic\&quot;: 14.970485860308258}, \&quot;acceptance_probability\&quot;: 0.28680995237667284, \&quot;selected_score\&quot;: 0.28680995237667284}&quot;,
+            &quot;reviewer_model_name&quot;: &quot;typesafe/jev-1.13&quot;,
+            &quot;reviewer_score_name&quot;: 0.7513304202822729,
+            &quot;reviewer_scores_name&quot;: &quot;{\&quot;completeness\&quot;: 14.05419986415656, \&quot;convention\&quot;: 13.974275916197548, \&quot;grammar\&quot;: 15.830780662099, \&quot;semantic\&quot;: 14.970485860308258}&quot;,
+            &quot;run_id&quot;: &quot;sn-rescore-20261028T085435Z&quot;,
+            &quot;semantic_sim&quot;: 0.8588836193084717,
+            &quot;source_domains&quot;: [],
+            &quot;source_paths&quot;: [],
+            &quot;status&quot;: &quot;draft&quot;,
+            &quot;superseded_from_stage&quot;: &quot;refining&quot;,
+            &quot;tags&quot;: [],
+            &quot;unit&quot;: &quot;V&quot;,
+            &quot;updated_at&quot;: &quot;2026-10-28T08:54:48.476000000+00:00&quot;,
+            &quot;validated_at&quot;: &quot;2026-10-28T08:54:36.670000000+00:00&quot;,
+            &quot;validation_diagnostics_json&quot;: &quot;[]&quot;,
+            &quot;validation_issues&quot;: [],
+            &quot;validation_layer_summary&quot;: &quot;{\&quot;pydantic\&quot;: {\&quot;passed\&quot;: true, \&quot;error_count\&quot;: 0}, \&quot;semantic\&quot;: {\&quot;issue_count\&quot;: 0, \&quot;skipped\&quot;: false}, \&quot;description\&quot;: {\&quot;issue_count\&quot;: 0}, \&quot;structural\&quot;: {\&quot;issue_count\&quot;: 0, \&quot;skipped\&quot;: false}, \&quot;canonical\&quot;: {\&quot;issue_count\&quot;: 0}}&quot;,
+            &quot;validation_status&quot;: &quot;valid&quot;
+          }
+        }
+      },
+      &quot;property_fingerprints&quot;: {
+        &quot;electrostatic_potential_at_langmuir_probe_position&quot;: [
+          {
+            &quot;key&quot;: &quot;chain_length&quot;,
+            &quot;type&quot;: &quot;INTEGER NOT NULL&quot;,
+            &quot;value&quot;: &quot;1&quot;
+          },
+          {
+            &quot;key&quot;: &quot;claim_seq&quot;,
+            &quot;type&quot;: &quot;INTEGER NOT NULL&quot;,
+            &quot;value&quot;: &quot;23&quot;
+          },
+          {
+            &quot;key&quot;: &quot;created_at&quot;,
+            &quot;type&quot;: &quot;ZONED DATETIME NOT NULL&quot;,
+            &quot;value&quot;: &quot;1788754142:40000000&quot;
+          },
+          {
+            &quot;key&quot;: &quot;description&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;Electrostatic potential energy per unit positive test charge in the plasma at a Langmuir-probe position, relative to a chosen electrical reference.&quot;
+          },
+          {
+            &quot;key&quot;: &quot;docs_chain_length&quot;,
+            &quot;type&quot;: &quot;INTEGER NOT NULL&quot;,
+            &quot;value&quot;: &quot;0&quot;
+          },
+          {
+            &quot;key&quot;: &quot;docs_generated_at&quot;,
+            &quot;type&quot;: &quot;ZONED DATETIME NOT NULL&quot;,
+            &quot;value&quot;: &quot;1793187707:537000000&quot;
+          },
+          {
+            &quot;key&quot;: &quot;docs_hint&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;The Data Dictionary source this name derives from has changed. Update the documentation to reflect the corrected source.&quot;
+          },
+          {
+            &quot;key&quot;: &quot;docs_model&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;openrouter/openai/gpt-6.1-sol&quot;
+          },
+          {
+            &quot;key&quot;: &quot;docs_stage&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;accepted&quot;
+          },
+          {
+            &quot;key&quot;: &quot;documentation&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;This quantity is the local plasma electrostatic potential at the Langmuir-probe position, relative to a chosen electrical reference. It is the local restriction of [electrostatic potential](name:electrostatic_potential).\n\nThe defining energy relation is\n\n$$\nV_p = \\frac{U_p-U_{\\mathrm{ref}}}{q_t}\n$$\n\nwhere $V_p$ is the local plasma potential relative to the chosen reference, $q_t$ is a positive test charge, $U_p$ is its electrostatic potential energy in the local plasma, and $U_{\\mathrm{ref}}$ is its electrostatic potential energy at the reference.\n\nThe quantity denotes a local value in the boundary plasma, not a spatial average or the collector-surface potential. It is distinct from the [floating electrostatic potential](name:floating_electrostatic_potential), which is the collector potential at zero net current, and is not itself a plasma-to-collector sheath potential difference.\n\nFor a floating collector, the plasma-to-collector sheath potential difference is $V_p-V_f$, where $V_f$ is the floating collector potential relative to the same reference. This difference is governed by sheath current balance and depends on the local electron temperature. Changing the electrical reference shifts both potentials by the same additive constant without changing their difference.\n\nSign convention: Positive when a positive test charge has greater electrostatic potential energy in the local plasma than at the chosen electrical reference.&quot;
+          },
+          {
+            &quot;key&quot;: &quot;domain_decision_candidates&quot;,
+            &quot;type&quot;: &quot;LIST&lt;NOTHING&gt; NOT NULL&quot;,
+            &quot;value&quot;: []
+          },
+          {
+            &quot;key&quot;: &quot;edit_include_accepted&quot;,
+            &quot;type&quot;: &quot;BOOLEAN NOT NULL&quot;,
+            &quot;value&quot;: &quot;false&quot;
+          },
+          {
+            &quot;key&quot;: &quot;edit_mode&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;hint&quot;
+          },
+          {
+            &quot;key&quot;: &quot;edit_origin&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;agent&quot;
+          },
+          {
+            &quot;key&quot;: &quot;edit_override_edits&quot;,
+            &quot;type&quot;: &quot;BOOLEAN NOT NULL&quot;,
+            &quot;value&quot;: &quot;false&quot;
+          },
+          {
+            &quot;key&quot;: &quot;edit_reason&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;DD source drift \u2014 the anchoring Data Dictionary path changed (path changed: &#x27;langmuir_probes/reciprocating/plunge/v_plasma&#x27; \u2192 &#x27;langmuir_probes/embedded/v_plasma&#x27;). Refresh this name&#x27;s documentation to reflect the corrected source; preserve the established intent and family phrasing. This is a targeted source-refresh, not a rewrite.&quot;
+          },
+          {
+            &quot;key&quot;: &quot;edit_requested_at&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;2026-10-28T11:39:42.863621+00:00&quot;
+          },
+          {
+            &quot;key&quot;: &quot;edit_scope&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;only_self&quot;
+          },
+          {
+            &quot;key&quot;: &quot;edit_status&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;applied&quot;
+          },
+          {
+            &quot;key&quot;: &quot;embedded_at&quot;,
+            &quot;type&quot;: &quot;ZONED DATETIME NOT NULL&quot;,
+            &quot;value&quot;: &quot;1792269737:354000000&quot;
+          },
+          {
+            &quot;key&quot;: &quot;embedding&quot;,
+            &quot;type&quot;: &quot;LIST&lt;FLOAT NOT NULL&gt; NOT NULL&quot;,
+            &quot;value&quot;: [
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.05126953125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.03460693359375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0189666748046875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.00888824462890625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0012416839599609375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.23193359375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.02166748046875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.053985595703125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.067138671875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.01641845703125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.01375579833984375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.1077880859375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.05133056640625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.024017333984375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0966796875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.1968994140625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0504150390625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.05316162109375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.06451416015625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.03155517578125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0023097991943359375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.037506103515625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.12115478515625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.1378173828125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.07879638671875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0115203857421875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.041229248046875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.03466796875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.15673828125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0273895263671875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.1961669921875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0278167724609375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.135986328125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0292510986328125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.01873779296875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.02978515625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.045745849609375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0023193359375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.07470703125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.046600341796875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.054901123046875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.059539794921875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.047271728515625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.00557708740234375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.05328369140625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.016571044921875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0183868408203125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.10467529296875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.046142578125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.05224609375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0845947265625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.03369140625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.014862060546875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0233917236328125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.024566650390625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0262603759765625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.047088623046875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0635986328125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.1075439453125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0265960693359375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0212860107421875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.07537841796875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.20068359375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.01666259765625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.046875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0321044921875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.051849365234375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0123443603515625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.137939453125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.018035888671875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.026580810546875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.06988525390625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.054931640625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.02899169921875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.031768798828125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.06805419921875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.055511474609375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.006542205810546875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.045379638671875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.086669921875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.031646728515625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.112548828125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.054412841796875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0257110595703125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0897216796875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0299072265625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.07855224609375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.034698486328125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.032318115234375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-9.984970092773438E-4&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.14404296875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0299072265625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0218048095703125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0014047622680664062&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.055908203125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0158843994140625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.01383209228515625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0131683349609375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.07208251953125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.07666015625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.038421630859375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.012542724609375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0089569091796875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.11083984375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.11871337890625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.124267578125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.128173828125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.033477783203125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.036468505859375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.07611083984375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.03997802734375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.04400634765625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.080078125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.042022705078125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.017669677734375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.041473388671875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.06298828125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.06591796875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.06036376953125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0228424072265625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.063720703125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.019622802734375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.01727294921875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0421142578125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0709228515625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.005153656005859375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.05963134765625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.00969696044921875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.046142578125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.036865234375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.038330078125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0245819091796875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.01004791259765625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.07977294921875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.073486328125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.032989501953125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.00838470458984375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.00862884521484375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.053497314453125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.013885498046875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.10833740234375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.042266845703125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.06341552734375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.011383056640625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.002712249755859375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.040985107421875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.020172119140625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0169677734375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0163726806640625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.061492919921875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.053192138671875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0219879150390625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.00909423828125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.03631591796875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0161285400390625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.08721923828125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.03631591796875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.061553955078125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0136260986328125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0254058837890625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0229949951171875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.06280517578125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;7.872581481933594E-4&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0262298583984375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.050079345703125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.01323699951171875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0174407958984375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.080322265625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-2.422332763671875E-4&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.03179931640625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0250091552734375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.043487548828125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0015687942504882812&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.057098388671875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.048614501953125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0165252685546875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.058502197265625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.07379150390625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.026214599609375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.01287841796875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0013751983642578125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.012359619140625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0032482147216796875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.02545166015625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.036224365234375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0142364501953125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.01508331298828125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.06353759765625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.061126708984375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.08697509765625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0406494140625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.11224365234375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.069580078125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.007312774658203125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0309295654296875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.056549072265625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0075836181640625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.08514404296875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.035125732421875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0679931640625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.06622314453125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.04522705078125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.027008056640625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0206146240234375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0293121337890625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.005859375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.055633544921875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.032806396484375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.06494140625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0670166015625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0288543701171875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.08428955078125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0251312255859375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0144195556640625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.03692626953125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.09918212890625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.054168701171875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.01447296142578125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.041259765625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0859375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.074462890625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.044219970703125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0249481201171875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.051849365234375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.07977294921875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.09747314453125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0303955078125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.00760650634765625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.1165771484375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.030975341796875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.048553466796875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.045318603515625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.019012451171875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.05731201171875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.09259033203125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.003955841064453125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.059967041015625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.099365234375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.031890869140625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.040313720703125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0190582275390625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0484619140625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.006694793701171875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.02685546875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.04193115234375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.052642822265625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.01690673828125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.12078857421875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.003658294677734375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.085693359375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.109375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.209228515625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.08447265625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.06451416015625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0323486328125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.051910400390625&quot;
+              }
+            ]
+          },
+          {
+            &quot;key&quot;: &quot;generate_docs_count&quot;,
+            &quot;type&quot;: &quot;INTEGER NOT NULL&quot;,
+            &quot;value&quot;: &quot;6&quot;
+          },
+          {
+            &quot;key&quot;: &quot;generated_at&quot;,
+            &quot;type&quot;: &quot;ZONED DATETIME NOT NULL&quot;,
+            &quot;value&quot;: &quot;1788754142:40000000&quot;
+          },
+          {
+            &quot;key&quot;: &quot;grammar_parse_version&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;0.8.1.dev32+g12b557363&quot;
+          },
+          {
+            &quot;key&quot;: &quot;harmonized_anchor&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;electrostatic_potential_at_langmuir_probe_position&quot;
+          },
+          {
+            &quot;key&quot;: &quot;id&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;electrostatic_potential_at_langmuir_probe_position&quot;
+          },
+          {
+            &quot;key&quot;: &quot;kind&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;scalar&quot;
+          },
+          {
+            &quot;key&quot;: &quot;link_status&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;resolved&quot;
+          },
+          {
+            &quot;key&quot;: &quot;links&quot;,
+            &quot;type&quot;: &quot;LIST&lt;STRING NOT NULL&gt; NOT NULL&quot;,
+            &quot;value&quot;: [
+              {
+                &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+                &quot;value&quot;: &quot;name:electrostatic_potential&quot;
+              },
+              {
+                &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+                &quot;value&quot;: &quot;name:floating_electrostatic_potential&quot;
+              }
+            ]
+          },
+          {
+            &quot;key&quot;: &quot;llm_cost&quot;,
+            &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+            &quot;value&quot;: &quot;0.278156678&quot;
+          },
+          {
+            &quot;key&quot;: &quot;llm_cost_review_docs&quot;,
+            &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+            &quot;value&quot;: &quot;0.220778598&quot;
+          },
+          {
+            &quot;key&quot;: &quot;llm_cost_review_name&quot;,
+            &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+            &quot;value&quot;: &quot;0.05737808&quot;
+          },
+          {
+            &quot;key&quot;: &quot;model&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;sn-edit&quot;
+          },
+          {
+            &quot;key&quot;: &quot;name_stage&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;accepted&quot;
+          },
+          {
+            &quot;key&quot;: &quot;origin&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;pipeline&quot;
+          },
+          {
+            &quot;key&quot;: &quot;physical_base&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;electrostatic_potential&quot;
+          },
+          {
+            &quot;key&quot;: &quot;position&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;langmuir_probe_position&quot;
+          },
+          {
+            &quot;key&quot;: &quot;refine_attempts&quot;,
+            &quot;type&quot;: &quot;INTEGER NOT NULL&quot;,
+            &quot;value&quot;: &quot;1&quot;
+          },
+          {
+            &quot;key&quot;: &quot;refine_reason&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;Both bound DD paths are Langmuir-probe plasma-potential measurements; langmuir_probe_position is the registered position token naming that same probe locus.&quot;
+          },
+          {
+            &quot;key&quot;: &quot;review_count&quot;,
+            &quot;type&quot;: &quot;INTEGER NOT NULL&quot;,
+            &quot;value&quot;: &quot;6&quot;
+          },
+          {
+            &quot;key&quot;: &quot;review_disagreement&quot;,
+            &quot;type&quot;: &quot;BOOLEAN NOT NULL&quot;,
+            &quot;value&quot;: &quot;false&quot;
+          },
+          {
+            &quot;key&quot;: &quot;review_docs_count&quot;,
+            &quot;type&quot;: &quot;INTEGER NOT NULL&quot;,
+            &quot;value&quot;: &quot;6&quot;
+          },
+          {
+            &quot;key&quot;: &quot;review_mean_score&quot;,
+            &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+            &quot;value&quot;: &quot;0.9583333333333333&quot;
+          },
+          {
+            &quot;key&quot;: &quot;review_name_count&quot;,
+            &quot;type&quot;: &quot;INTEGER NOT NULL&quot;,
+            &quot;value&quot;: &quot;1&quot;
+          },
+          {
+            &quot;key&quot;: &quot;review_resolution_method&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;quorum_consensus&quot;
+          },
+          {
+            &quot;key&quot;: &quot;reviewed_docs_at&quot;,
+            &quot;type&quot;: &quot;ZONED DATETIME NOT NULL&quot;,
+            &quot;value&quot;: &quot;1793187717:734000000&quot;
+          },
+          {
+            &quot;key&quot;: &quot;reviewed_name_at&quot;,
+            &quot;type&quot;: &quot;ZONED DATETIME NOT NULL&quot;,
+            &quot;value&quot;: &quot;1788760092:651000000&quot;
+          },
+          {
+            &quot;key&quot;: &quot;reviewer_comments_docs&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;Calibrated Jev route: accept&quot;
+          },
+          {
+            &quot;key&quot;: &quot;reviewer_comments_name&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;[Primary] Grammar: verified ISN round-trip with physical_base=electrostatic_potential and position=langmuir_probe_position; both tokens registered, _at_ locus correct, no absorption or unregistered-token defects. Semantic: a domain expert reading only the name gets local electrostatic (plasma) potential evaluated at a Langmuir-probe locus; unit V matches; source paths langmuir_probes/.../v_plasma are plasma-potential measurements and expert steering confirms langmuir_probe_position names that same probe locus, so source fidelity holds. Distinct from same_base siblings electrostatic_potential (no locus), electrostatic_potential_amplitude, and electrostatic_potential_imaginary_part, and from hybrid neighbour floating_electrostatic_potential (zero-current bias, not Vp). Minor residual: bare electrostatic_potential does not spell the diagnostic synonym &#x27;plasma potential&#x27;, but that is the accepted base family spelling and does not impair identity. Convention: canonical snake_case and base_at_position order; consistent with effective_area_of_langmuir_probe using object _of_ for a probe property versus _at_ for a field sample. Completeness: scalar needs no component/subject; position segment present; both embedded and reciprocating bound paths share the same probe-locus identity.\n[Secondary] Grammar is fully validated: the name round-trips as physical_base=electrostatic_potential with the registered position langmuir_probe_position and the canonical _at_ locus relation. Semantically, it accurately identifies the plasma&#x27;s local electrostatic potential measured at a Langmuir-probe position, matching the authoritative DD definition and the deliberately supplied embedded/reciprocating probe family. The snake_case ordering and naming style are canonical, with no arbitrary suffixes or sibling clash; the accepted effective_area_of_langmuir_probe establishes consistent Langmuir-probe naming context. All required identity elements\u2014the potential quantity and probe measurement locus\u2014are present, and the V unit is consistent.&quot;
+          },
+          {
+            &quot;key&quot;: &quot;reviewer_comments_per_dim_docs&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;{\&quot;failed_checks\&quot;: [{\&quot;id\&quot;: \&quot;claim_contradicts_source\&quot;, \&quot;criterion\&quot;: \&quot;Which conflict, if any, does this claim have with the DD definitions the name binds?\&quot;, \&quot;evidence\&quot;: \&quot;documentation=&#x27;This quantity is the local plasma electrostatic potential at the Langmuir-probe position, relative to a chosen electrical reference. It is the local restriction of [electrostatic potential](name:electrostatic_potential).\\\\n\\\\nThe defining energy relation is\\\\n\\\\n$$\\\\nV_p = \\\\\\\\frac{U_p-U_{\\\\\\\\mathrm{ref}}}{q_t}\\\\n$$\\\\n\\\\nwhere $V_p$ is the local plasma potential relative to the chosen reference, $q_t$ is a positive test charge, $U_p$ is its electrostatic potential energy in the local plasma, and $U_{\\\\\\\\mathrm{ref}}$ is its electrostatic potential energy at the reference.\\\\n\\\\nThe quantity denotes a local value in the boundary plasma, not a spatial average or the collector-surface potential. It is distinct from the [floating electrostatic potential](name:floating_electrostatic_potential), which is the collector potential at zero net current, and is not itself a plasma-to-collector sheath potential difference.\\\\n\\\\nFor a floating collector, the plasma-to-collector sheath potential difference is $V_p-V_f$, where $V_f$ is the floating collector potential relative to the same reference. This difference is governed by sheath current balance and depends on the local electron temperature. Changing the electrical reference shifts both potentials by the same additive constant without changing their difference.\\\\n\\\\nSign convention: Positive when a positive test charge has greater electrostatic potential energy in the local plasma than at the chosen electrical reference.&#x27;; dd_source_docs=[{&#x27;id&#x27;: &#x27;langmuir_probes/reciprocating/plunge/v_plasma&#x27;, &#x27;unit&#x27;: &#x27;V&#x27;, &#x27;description&#x27;: &#x27;Plasma potential (Vp) measured by a reciprocating Langmuir probe during a plunge. Represents the local electrostatic potential of the plasma in the scrape-off layer or boundary region.&#x27;, &#x27;documentation&#x27;: &#x27;Plasma potential&#x27;, &#x27;raw_dd_context&#x27;: {&#x27;path&#x27;: &#x27;langmuir_probes/reciprocating/plunge/v_plasma&#x27;, &#x27;dd_version&#x27;: &#x27;4.1.1&#x27;, &#x27;unit&#x27;: &#x27;V&#x27;, &#x27;documentation&#x27;: &#x27;Plasma potential&#x27;, &#x27;data_type&#x27;: None, &#x27;node_type&#x27;: None, &#x27;physics_domain&#x27;: None, &#x27;cocos_transformation_type&#x27;: None, &#x27;cocos_transformation_expression&#x27;: None, &#x27;coordinates&#x27;: [], &#x27;lifecycle_status&#x27;: None, &#x27;lifecycle_version&#x27;: None, &#x27;parents&#x27;: [], &#x27;members&#x27;: []}, &#x27;published_dd_context&#x27;: {&#x27;path&#x27;: &#x27;langmuir_probes/reciprocating/plunge/v_plasma&#x27;, &#x27;dd_version&#x27;: &#x27;4.1.1&#x27;, &#x27;unit&#x27;: &#x27;V&#x27;, &#x27;documentation&#x27;: &#x27;Plasma potential&#x27;, &#x27;data_type&#x27;: None, &#x27;node_type&#x27;: None, &#x27;physics_domain&#x27;: None, &#x27;cocos_transformation_type&#x27;: None, &#x27;cocos_transformation_expression&#x27;: None, &#x27;coordinates&#x27;: [], &#x27;lifecycle_status&#x27;: None, &#x27;lifecycle_version&#x27;: None, &#x27;parents&#x27;: [], &#x27;members&#x27;: []}, &#x27;dd_resolution_ids&#x27;: [], &#x27;dd_resolution_converged_ids&#x27;: [], &#x27;dd_resolution_manifest_digest&#x27;: &#x27;sha256:02dd37c745ddff3802f6d1fc577e7dbfe0c5b9832f69a149db5f78188ba4361d&#x27;}, {&#x27;id&#x27;: &#x27;langmuir_probes/embedded/v_plasma&#x27;, &#x27;unit&#x27;: &#x27;V&#x27;, &#x27;description&#x27;: &#x27;Plasma potential (Vp) measured at an embedded Langmuir probe position. Represents the local electrostatic potential of the plasma, derived from the probe I-V characteristic, used to characterize the plasma sheath and edge electric fields.&#x27;, &#x27;documentation&#x27;: &#x27;Plasma potential&#x27;, &#x27;raw_dd_context&#x27;: {&#x27;path&#x27;: &#x27;langmuir_probes/embedded/v_plasma&#x27;, &#x27;dd_version&#x27;: &#x27;4.1.1&#x27;, &#x27;unit&#x27;: &#x27;V&#x27;, &#x27;documentation&#x27;: &#x27;Plasma potential&#x27;, &#x27;data_type&#x27;: None, &#x27;node_type&#x27;: None, &#x27;physics_domain&#x27;: None, &#x27;cocos_transformation_type&#x27;: None, &#x27;cocos_transformation_expression&#x27;: None, &#x27;coordinates&#x27;: [], &#x27;lifecycle_status&#x27;: None, &#x27;lifecycle_version&#x27;: None, &#x27;parents&#x27;: [], &#x27;members&#x27;: []}, &#x27;published_dd_context&#x27;: {&#x27;path&#x27;: &#x27;langmuir_probes/embedded/v_plasma&#x27;, &#x27;dd_version&#x27;: &#x27;4.1.1&#x27;, &#x27;unit&#x27;: &#x27;V&#x27;, &#x27;documentation&#x27;: &#x27;Plasma potential&#x27;, &#x27;data_type&#x27;: None, &#x27;node_type&#x27;: None, &#x27;physics_domain&#x27;: None, &#x27;cocos_transformation_type&#x27;: None, &#x27;cocos_transformation_expression&#x27;: None, &#x27;coordinates&#x27;: [], &#x27;lifecycle_status&#x27;: None, &#x27;lifecycle_version&#x27;: None, &#x27;parents&#x27;: [], &#x27;members&#x27;: []}, &#x27;dd_resolution_ids&#x27;: [], &#x27;dd_resolution_converged_ids&#x27;: [], &#x27;dd_resolution_manifest_digest&#x27;: &#x27;sha256:02dd37c745ddff3802f6d1fc577e7dbfe0c5b9832f69a149db5f78188ba4361d&#x27;}]; description=&#x27;Electrostatic potential energy per unit positive test charge in the plasma at a Langmuir-probe position, relative to a chosen electrical reference.&#x27;\&quot;, \&quot;probability\&quot;: 1.0, \&quot;veto\&quot;: false, \&quot;cutoff\&quot;: 0.5, \&quot;judgment_evidence\&quot;: [{\&quot;choice\&quot;: \&quot;supports\&quot;, \&quot;probabilities\&quot;: {\&quot;supports\&quot;: 1.0}, \&quot;bindings\&quot;: 2}, {\&quot;choice\&quot;: \&quot;says nothing\&quot;, \&quot;probabilities\&quot;: {\&quot;says nothing\&quot;: 1.0}, \&quot;bindings\&quot;: 2}, {\&quot;choice\&quot;: \&quot;says nothing\&quot;, \&quot;probabilities\&quot;: {\&quot;says nothing\&quot;: 1.0}, \&quot;bindings\&quot;: 2}, {\&quot;choice\&quot;: \&quot;says nothing\&quot;, \&quot;probabilities\&quot;: {\&quot;says nothing\&quot;: 1.0}, \&quot;bindings\&quot;: 2}, {\&quot;choice\&quot;: \&quot;supports\&quot;, \&quot;probabilities\&quot;: {\&quot;supports\&quot;: 1.0}, \&quot;bindings\&quot;: 2}, {\&quot;choice\&quot;: \&quot;says nothing\&quot;, \&quot;probabilities\&quot;: {\&quot;says nothing\&quot;: 1.0}, \&quot;bindings\&quot;: 2}, {\&quot;choice\&quot;: \&quot;says nothing\&quot;, \&quot;probabilities\&quot;: {\&quot;says nothing\&quot;: 1.0}, \&quot;bindings\&quot;: 2}, {\&quot;choice\&quot;: \&quot;says nothing\&quot;, \&quot;probabilities\&quot;: {\&quot;says nothing\&quot;: 1.0}, \&quot;bindings\&quot;: 2}, {\&quot;choice\&quot;: \&quot;says nothing\&quot;, \&quot;probabilities\&quot;: {\&quot;says nothing\&quot;: 1.0}, \&quot;bindings\&quot;: 2}, {\&quot;choice\&quot;: \&quot;says nothing\&quot;, \&quot;probabilities\&quot;: {\&quot;says nothing\&quot;: 1.0}, \&quot;bindings\&quot;: 2}], \&quot;veto_criterion\&quot;: \&quot;nonconforming check answer\&quot;, \&quot;segment\&quot;: \&quot;\&quot;, \&quot;sentence\&quot;: \&quot;This quantity is the local plasma electrostatic potential at the Langmuir-probe position, relative to a chosen electrical reference. It is the local restriction of [electrostatic potential](name:elect\&quot;}, {\&quot;id\&quot;: \&quot;raw_dd_reference_in_prose\&quot;, \&quot;criterion\&quot;: \&quot;Does the documentation cite a raw DD path or IDS name as storage context?\&quot;, \&quot;evidence\&quot;: \&quot;documentation=&#x27;This quantity is the local plasma electrostatic potential at the Langmuir-probe position, relative to a chosen electrical reference. It is the local restriction of [electrostatic potential](name:electrostatic_potential).\\\\n\\\\nThe defining energy relation is\\\\n\\\\n$$\\\\nV_p = \\\\\\\\frac{U_p-U_{\\\\\\\\mathrm{ref}}}{q_t}\\\\n$$\\\\n\\\\nwhere $V_p$ is the local plasma potential relative to the chosen reference, $q_t$ is a positive test charge, $U_p$ is its electrostatic potential energy in the local plasma, and $U_{\\\\\\\\mathrm{ref}}$ is its electrostatic potential energy at the reference.\\\\n\\\\nThe quantity denotes a local value in the boundary plasma, not a spatial average or the collector-surface potential. It is distinct from the [floating electrostatic potential](name:floating_electrostatic_potential), which is the collector potential at zero net current, and is not itself a plasma-to-collector sheath potential difference.\\\\n\\\\nFor a floating collector, the plasma-to-collector sheath potential difference is $V_p-V_f$, where $V_f$ is the floating collector potential relative to the same reference. This difference is governed by sheath current balance and depends on the local electron temperature. Changing the electrical reference shifts both potentials by the same additive constant without changing their difference.\\\\n\\\\nSign convention: Positive when a positive test charge has greater electrostatic potential energy in the local plasma than at the chosen electrical reference.&#x27;; source_paths=[&#x27;langmuir_probes/reciprocating/plunge/v_plasma&#x27;, &#x27;langmuir_probes/embedded/v_plasma&#x27;]\&quot;, \&quot;probability\&quot;: 0.82, \&quot;veto\&quot;: false, \&quot;cutoff\&quot;: 0.5, \&quot;judgment_evidence\&quot;: {\&quot;type\&quot;: \&quot;noul\&quot;, \&quot;noul\&quot;: 0.82}, \&quot;veto_criterion\&quot;: \&quot;nonconforming check answer\&quot;, \&quot;segment\&quot;: \&quot;\&quot;, \&quot;sentence\&quot;: \&quot;This quantity is the local plasma electrostatic potential at the Langmuir-probe position, relative to a chosen electrical reference. It is the local restriction of [electrostatic potential](name:elect\&quot;}], \&quot;raw_dimension_scores\&quot;: {\&quot;completeness\&quot;: 15.773984096228943, \&quot;description_quality\&quot;: 17.30086124174375, \&quot;documentation_quality\&quot;: 16.27595921913029, \&quot;physics_accuracy\&quot;: 15.406464674242415}, \&quot;acceptance_probability\&quot;: 0.4685368258283137, \&quot;selected_score\&quot;: 0.8094658653918174}&quot;
+          },
+          {
+            &quot;key&quot;: &quot;reviewer_comments_per_dim_name&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;{\&quot;grammar\&quot;: null, \&quot;semantic\&quot;: null, \&quot;convention\&quot;: null, \&quot;completeness\&quot;: null}&quot;
+          },
+          {
+            &quot;key&quot;: &quot;reviewer_model_docs&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;typesafe/jev-1.13&quot;
+          },
+          {
+            &quot;key&quot;: &quot;reviewer_model_name&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;openrouter/x-ai/grok-4.5&quot;
+          },
+          {
+            &quot;key&quot;: &quot;reviewer_score_docs&quot;,
+            &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+            &quot;value&quot;: &quot;0.9532784487330858&quot;
+          },
+          {
+            &quot;key&quot;: &quot;reviewer_score_name&quot;,
+            &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+            &quot;value&quot;: &quot;0.99375&quot;
+          },
+          {
+            &quot;key&quot;: &quot;reviewer_scores_docs&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;{\&quot;completeness\&quot;: 15.773984096228943, \&quot;description_quality\&quot;: 17.30086124174375, \&quot;documentation_quality\&quot;: 16.27595921913029, \&quot;physics_accuracy\&quot;: 15.406464674242415}&quot;
+          },
+          {
+            &quot;key&quot;: &quot;reviewer_scores_name&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;{\&quot;grammar\&quot;: 20.0, \&quot;semantic\&quot;: 19.5, \&quot;convention\&quot;: 20.0, \&quot;completeness\&quot;: 20.0}&quot;
+          },
+          {
+            &quot;key&quot;: &quot;run_id&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;5928ae2b-98b4-4d72-b298-85e21305daa5&quot;
+          },
+          {
+            &quot;key&quot;: &quot;semantic_sim&quot;,
+            &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+            &quot;value&quot;: &quot;0.9380881786346436&quot;
+          },
+          {
+            &quot;key&quot;: &quot;source_dd_resolution_converged_ids&quot;,
+            &quot;type&quot;: &quot;LIST&lt;NOTHING&gt; NOT NULL&quot;,
+            &quot;value&quot;: []
+          },
+          {
+            &quot;key&quot;: &quot;source_dd_resolution_ids&quot;,
+            &quot;type&quot;: &quot;LIST&lt;NOTHING&gt; NOT NULL&quot;,
+            &quot;value&quot;: []
+          },
+          {
+            &quot;key&quot;: &quot;source_dd_resolution_manifest_digest&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;sha256:02dd37c745ddff3802f6d1fc577e7dbfe0c5b9832f69a149db5f78188ba4361d&quot;
+          },
+          {
+            &quot;key&quot;: &quot;source_dd_resolution_marker&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;resolved-dd-context&quot;
+          },
+          {
+            &quot;key&quot;: &quot;source_documentation&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;Plasma potential&quot;
+          },
+          {
+            &quot;key&quot;: &quot;source_domains&quot;,
+            &quot;type&quot;: &quot;LIST&lt;STRING NOT NULL&gt; NOT NULL&quot;,
+            &quot;value&quot;: [
+              {
+                &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+                &quot;value&quot;: &quot;edge_plasma_physics&quot;
+              },
+              {
+                &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+                &quot;value&quot;: &quot;particle_measurement_diagnostics&quot;
+              }
+            ]
+          },
+          {
+            &quot;key&quot;: &quot;source_path&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;langmuir_probes/reciprocating/plunge/v_plasma&quot;
+          },
+          {
+            &quot;key&quot;: &quot;source_paths&quot;,
+            &quot;type&quot;: &quot;LIST&lt;STRING NOT NULL&gt; NOT NULL&quot;,
+            &quot;value&quot;: [
+              {
+                &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+                &quot;value&quot;: &quot;dd:langmuir_probes/embedded/v_plasma&quot;
+              },
+              {
+                &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+                &quot;value&quot;: &quot;dd:langmuir_probes/reciprocating/plunge/v_plasma&quot;
+              }
+            ]
+          },
+          {
+            &quot;key&quot;: &quot;source_raw_documentation&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;Plasma potential&quot;
+          },
+          {
+            &quot;key&quot;: &quot;source_raw_unit&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;V&quot;
+          },
+          {
+            &quot;key&quot;: &quot;source_unit&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;V&quot;
+          },
+          {
+            &quot;key&quot;: &quot;status&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;draft&quot;
+          },
+          {
+            &quot;key&quot;: &quot;tags&quot;,
+            &quot;type&quot;: &quot;LIST&lt;NOTHING&gt; NOT NULL&quot;,
+            &quot;value&quot;: []
+          },
+          {
+            &quot;key&quot;: &quot;unit&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;V&quot;
+          },
+          {
+            &quot;key&quot;: &quot;updated_at&quot;,
+            &quot;type&quot;: &quot;ZONED DATETIME NOT NULL&quot;,
+            &quot;value&quot;: &quot;1793187847:944000000&quot;
+          },
+          {
+            &quot;key&quot;: &quot;validated_at&quot;,
+            &quot;type&quot;: &quot;ZONED DATETIME NOT NULL&quot;,
+            &quot;value&quot;: &quot;1788754142:663000000&quot;
+          },
+          {
+            &quot;key&quot;: &quot;validation_diagnostics_json&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;[]&quot;
+          },
+          {
+            &quot;key&quot;: &quot;validation_issues&quot;,
+            &quot;type&quot;: &quot;LIST&lt;NOTHING&gt; NOT NULL&quot;,
+            &quot;value&quot;: []
+          },
+          {
+            &quot;key&quot;: &quot;validation_status&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;valid&quot;
+          }
+        ],
+        &quot;electrostatic_potential_at_outboard_midplane&quot;: [
+          {
+            &quot;key&quot;: &quot;chain_length&quot;,
+            &quot;type&quot;: &quot;INTEGER NOT NULL&quot;,
+            &quot;value&quot;: &quot;2&quot;
+          },
+          {
+            &quot;key&quot;: &quot;claim_seq&quot;,
+            &quot;type&quot;: &quot;INTEGER NOT NULL&quot;,
+            &quot;value&quot;: &quot;3&quot;
+          },
+          {
+            &quot;key&quot;: &quot;created_at&quot;,
+            &quot;type&quot;: &quot;ZONED DATETIME NOT NULL&quot;,
+            &quot;value&quot;: &quot;1787499989:498000000&quot;
+          },
+          {
+            &quot;key&quot;: &quot;description&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;Quasineutral plasma electrostatic potential at the outboard equatorial midplane, relative to an electrical reference.&quot;
+          },
+          {
+            &quot;key&quot;: &quot;docs_chain_length&quot;,
+            &quot;type&quot;: &quot;INTEGER NOT NULL&quot;,
+            &quot;value&quot;: &quot;0&quot;
+          },
+          {
+            &quot;key&quot;: &quot;docs_stage&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;pending&quot;
+          },
+          {
+            &quot;key&quot;: &quot;domain_decision_candidates&quot;,
+            &quot;type&quot;: &quot;LIST&lt;NOTHING&gt; NOT NULL&quot;,
+            &quot;value&quot;: []
+          },
+          {
+            &quot;key&quot;: &quot;embed_text_hash&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;a64b62fadd4c29b0&quot;
+          },
+          {
+            &quot;key&quot;: &quot;embedded_at&quot;,
+            &quot;type&quot;: &quot;ZONED DATETIME NOT NULL&quot;,
+            &quot;value&quot;: &quot;1793177637:388000000&quot;
+          },
+          {
+            &quot;key&quot;: &quot;embedding&quot;,
+            &quot;type&quot;: &quot;LIST&lt;FLOAT NOT NULL&gt; NOT NULL&quot;,
+            &quot;value&quot;: [
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0606689453125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0292510986328125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0200347900390625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.04443359375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0272064208984375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.17431640625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0933837890625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0430908203125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0986328125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.12042236328125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0049896240234375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.144775390625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0750732421875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0236358642578125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.10198974609375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.202880859375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.06317138671875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.089111328125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0204925537109375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.039642333984375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.029632568359375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.004817962646484375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.10400390625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.1561279296875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.09619140625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.054901123046875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0266571044921875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0299072265625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.13427734375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0126800537109375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.20751953125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.047882080078125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.1082763671875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.04498291015625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.037841796875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.029510498046875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0232696533203125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.041107177734375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.09173583984375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.04571533203125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.035980224609375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.039581298828125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.004619598388671875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.03277587890625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.01049041748046875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.038665771484375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0015239715576171875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.082275390625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0198974609375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0130157470703125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.04229736328125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0168609619140625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.00679779052734375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.01026153564453125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;4.565715789794922E-4&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.00727081298828125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.02239990234375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.00992584228515625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.10198974609375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.001667022705078125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.00450897216796875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0780029296875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0258636474609375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.026397705078125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.06884765625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0662841796875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0086212158203125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0975341796875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.005771636962890625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.006191253662109375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0675048828125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.06854248046875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0176239013671875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0092010498046875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.00310516357421875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.048553466796875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.01316070556640625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.034820556640625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0404052734375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.044677734375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.1385498046875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0207061767578125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0207366943359375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.12322998046875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.034454345703125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.033538818359375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.04498291015625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.058258056640625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;9.675025939941406E-4&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.1202392578125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0131072998046875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0804443359375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.001495361328125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.08416748046875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0225830078125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.00495147705078125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.03277587890625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.08270263671875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.095947265625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0341796875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0274658203125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0189971923828125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.061431884765625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.077392578125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.121337890625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.1090087890625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.04620361328125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0513916015625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.12646484375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.020843505859375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0245513916015625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.05291748046875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0433349609375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.013916015625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0016126632690429688&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.076904296875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.05419921875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.07196044921875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.006488800048828125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.013031005859375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.002864837646484375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0150146484375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.052398681640625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.03759765625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.042633056640625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.08349609375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.01160430908203125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.045166015625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.08843994140625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.03631591796875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.05023193359375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0240325927734375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.10919189453125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.08026123046875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.01229095458984375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.005847930908203125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.01364898681640625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0823974609375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.01374053955078125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.1568603515625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.01154327392578125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.06536865234375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.011566162109375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.00249481201171875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.034454345703125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.031646728515625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.038665771484375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.020904541015625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.06060791015625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.004169464111328125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0232391357421875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0207366943359375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.01239776611328125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.01242828369140625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0546875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.04949951171875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.04180908203125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.00616455078125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0178070068359375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.06317138671875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.08551025390625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0034847259521484375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0018148422241210938&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.036895751953125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.03424072265625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0012655258178710938&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.080322265625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.00884246826171875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.031097412109375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.01617431640625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.05413818359375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0288543701171875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.055938720703125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.036895751953125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.048797607421875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.08648681640625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.1112060546875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.036590576171875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0175018310546875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.022796630859375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.004283905029296875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0174102783203125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.01537322998046875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.040069580078125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0120697021484375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0213623046875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0308990478515625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.07421875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0897216796875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.046844482421875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0931396484375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0506591796875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0177154541015625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0418701171875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.058837890625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.057830810546875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.06640625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0202484130859375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0269012451171875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.077392578125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.01548004150390625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.049530029296875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0191497802734375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.012603759765625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0159149169921875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.039306640625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0299224853515625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.073974609375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0726318359375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0236663818359375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.12109375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.1041259765625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.04296875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0242767333984375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.08050537109375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.08673095703125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.004840850830078125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.022125244140625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.087890625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.046356201171875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.051483154296875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.03302001953125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0489501953125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0623779296875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.1138916015625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.032012939453125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.007671356201171875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0897216796875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.035125732421875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.08575439453125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0325927734375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.02447509765625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0987548828125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.08203125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.0178070068359375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.074951171875&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.11767578125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.00577545166015625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.067626953125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0274505615234375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.041595458984375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.00142669677734375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0215911865234375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.044342041015625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.02679443359375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.00823974609375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.080322265625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.00498199462890625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.09906005859375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.111328125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.175537109375&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.048492431640625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;-0.11016845703125&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.03277587890625&quot;
+              },
+              {
+                &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+                &quot;value&quot;: &quot;0.0386962890625&quot;
+              }
+            ]
+          },
+          {
+            &quot;key&quot;: &quot;generated_at&quot;,
+            &quot;type&quot;: &quot;ZONED DATETIME NOT NULL&quot;,
+            &quot;value&quot;: &quot;1787499989:498000000&quot;
+          },
+          {
+            &quot;key&quot;: &quot;grammar_parse_version&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;0.10.1&quot;
+          },
+          {
+            &quot;key&quot;: &quot;harmonized_anchor&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;electrostatic_potential_at_langmuir_probe_position&quot;
+          },
+          {
+            &quot;key&quot;: &quot;id&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;electrostatic_potential_at_outboard_midplane&quot;
+          },
+          {
+            &quot;key&quot;: &quot;kind&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;scalar&quot;
+          },
+          {
+            &quot;key&quot;: &quot;llm_cost&quot;,
+            &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+            &quot;value&quot;: &quot;0.081174346&quot;
+          },
+          {
+            &quot;key&quot;: &quot;llm_cost_review_name&quot;,
+            &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+            &quot;value&quot;: &quot;0.081174346&quot;
+          },
+          {
+            &quot;key&quot;: &quot;model&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;openrouter/openai/gpt-5.5&quot;
+          },
+          {
+            &quot;key&quot;: &quot;name_stage&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;exhausted&quot;
+          },
+          {
+            &quot;key&quot;: &quot;origin&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;pipeline&quot;
+          },
+          {
+            &quot;key&quot;: &quot;physical_base&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;electrostatic_potential&quot;
+          },
+          {
+            &quot;key&quot;: &quot;physics_domain&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;edge_plasma_physics&quot;
+          },
+          {
+            &quot;key&quot;: &quot;position&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;outboard_midplane&quot;
+          },
+          {
+            &quot;key&quot;: &quot;refine_attempts&quot;,
+            &quot;type&quot;: &quot;INTEGER NOT NULL&quot;,
+            &quot;value&quot;: &quot;3&quot;
+          },
+          {
+            &quot;key&quot;: &quot;refine_reason&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;Avoids the invalid plasma-stacked form while using a more specific registered midplane locus for the evaluated field.&quot;
+          },
+          {
+            &quot;key&quot;: &quot;refine_stop_reason&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;attempts_exhausted&quot;
+          },
+          {
+            &quot;key&quot;: &quot;refine_stopped_at&quot;,
+            &quot;type&quot;: &quot;ZONED DATETIME NOT NULL&quot;,
+            &quot;value&quot;: &quot;1793177688:413000000&quot;
+          },
+          {
+            &quot;key&quot;: &quot;review_count&quot;,
+            &quot;type&quot;: &quot;INTEGER NOT NULL&quot;,
+            &quot;value&quot;: &quot;3&quot;
+          },
+          {
+            &quot;key&quot;: &quot;review_disagreement&quot;,
+            &quot;type&quot;: &quot;BOOLEAN NOT NULL&quot;,
+            &quot;value&quot;: &quot;false&quot;
+          },
+          {
+            &quot;key&quot;: &quot;review_input_hash&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;e0c18c8cd3340fc9cb274e8a24d087b7bc0ac21283800537e04d3a621d097223&quot;
+          },
+          {
+            &quot;key&quot;: &quot;review_mean_score&quot;,
+            &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+            &quot;value&quot;: &quot;0.6416666666666667&quot;
+          },
+          {
+            &quot;key&quot;: &quot;review_name_count&quot;,
+            &quot;type&quot;: &quot;INTEGER NOT NULL&quot;,
+            &quot;value&quot;: &quot;2&quot;
+          },
+          {
+            &quot;key&quot;: &quot;review_resolution_method&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;jev_cascade_refine&quot;
+          },
+          {
+            &quot;key&quot;: &quot;review_resubmit_count&quot;,
+            &quot;type&quot;: &quot;INTEGER NOT NULL&quot;,
+            &quot;value&quot;: &quot;0&quot;
+          },
+          {
+            &quot;key&quot;: &quot;reviewed_name_at&quot;,
+            &quot;type&quot;: &quot;ZONED DATETIME NOT NULL&quot;,
+            &quot;value&quot;: &quot;1793177688:413000000&quot;
+          },
+          {
+            &quot;key&quot;: &quot;reviewer_comments_name&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;Calibrated Jev route: refine&quot;
+          },
+          {
+            &quot;key&quot;: &quot;reviewer_comments_per_dim_name&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;{\&quot;failed_checks\&quot;: [{\&quot;id\&quot;: \&quot;bound_to_wrong_object\&quot;, \&quot;criterion\&quot;: \&quot;Which object does the name denote, read against its bound source path?\&quot;, \&quot;evidence\&quot;: \&quot;source_paths=[]; description=&#x27;Quasineutral plasma electrostatic potential at the outboard equatorial midplane, relative to an electrical reference.&#x27;\&quot;, \&quot;probability\&quot;: 0.75, \&quot;veto\&quot;: false, \&quot;cutoff\&quot;: 0.5, \&quot;judgment_evidence\&quot;: {\&quot;type\&quot;: \&quot;choice\&quot;, \&quot;choice\&quot;: \&quot;a different object\&quot;, \&quot;probabilities\&quot;: {\&quot;the bound source object\&quot;: 0.25, \&quot;a different object\&quot;: 0.74, \&quot;one of several bound objects\&quot;: 0.01}, \&quot;confidence\&quot;: 0.61}, \&quot;veto_criterion\&quot;: \&quot;nonconforming check answer\&quot;, \&quot;segment\&quot;: \&quot;electrostatic_potential_at_outboard_midplane\&quot;, \&quot;sentence\&quot;: \&quot;\&quot;}, {\&quot;id\&quot;: \&quot;dropped_distinguishing_axis\&quot;, \&quot;criterion\&quot;: \&quot;Does the name drop a distinguishing axis the source states for the observable?\&quot;, \&quot;evidence\&quot;: \&quot;physical_base=&#x27;electrostatic_potential&#x27;; position=&#x27;outboard_midplane&#x27;; source_paths=[]\&quot;, \&quot;probability\&quot;: 0.6, \&quot;veto\&quot;: false, \&quot;cutoff\&quot;: 0.5, \&quot;judgment_evidence\&quot;: {\&quot;type\&quot;: \&quot;noul\&quot;, \&quot;noul\&quot;: 0.6}, \&quot;veto_criterion\&quot;: \&quot;nonconforming check answer\&quot;, \&quot;segment\&quot;: \&quot;electrostatic_potential_at_outboard_midplane\&quot;, \&quot;sentence\&quot;: \&quot;\&quot;}, {\&quot;id\&quot;: \&quot;missing_required_segment\&quot;, \&quot;criterion\&quot;: \&quot;Is a physically required segment (subject, component) missing?\&quot;, \&quot;evidence\&quot;: \&quot;physical_base=&#x27;electrostatic_potential&#x27;; position=&#x27;outboard_midplane&#x27;\&quot;, \&quot;probability\&quot;: 0.55, \&quot;veto\&quot;: false, \&quot;cutoff\&quot;: 0.5, \&quot;judgment_evidence\&quot;: {\&quot;type\&quot;: \&quot;noul\&quot;, \&quot;noul\&quot;: 0.55}, \&quot;veto_criterion\&quot;: \&quot;nonconforming check answer\&quot;, \&quot;segment\&quot;: \&quot;electrostatic_potential_at_outboard_midplane\&quot;, \&quot;sentence\&quot;: \&quot;\&quot;}, {\&quot;id\&quot;: \&quot;over_qualified_modifier\&quot;, \&quot;criterion\&quot;: \&quot;Does the name add a modifier the source does not state, on a form that makes it a claim?\&quot;, \&quot;evidence\&quot;: \&quot;physical_base=&#x27;electrostatic_potential&#x27;; source_paths=[]\&quot;, \&quot;probability\&quot;: 0.58, \&quot;veto\&quot;: false, \&quot;cutoff\&quot;: 0.5, \&quot;judgment_evidence\&quot;: {\&quot;type\&quot;: \&quot;noul\&quot;, \&quot;noul\&quot;: 0.58}, \&quot;veto_criterion\&quot;: \&quot;nonconforming check answer\&quot;, \&quot;segment\&quot;: \&quot;electrostatic_potential_at_outboard_midplane\&quot;, \&quot;sentence\&quot;: \&quot;\&quot;}], \&quot;raw_dimension_scores\&quot;: {\&quot;completeness\&quot;: 14.05419986415656, \&quot;convention\&quot;: 13.974275916197548, \&quot;grammar\&quot;: 15.830780662099, \&quot;semantic\&quot;: 14.970485860308258}, \&quot;acceptance_probability\&quot;: 0.28680995237667284, \&quot;selected_score\&quot;: 0.28680995237667284}&quot;
+          },
+          {
+            &quot;key&quot;: &quot;reviewer_model_name&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;typesafe/jev-1.13&quot;
+          },
+          {
+            &quot;key&quot;: &quot;reviewer_score_name&quot;,
+            &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+            &quot;value&quot;: &quot;0.7513304202822729&quot;
+          },
+          {
+            &quot;key&quot;: &quot;reviewer_scores_name&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;{\&quot;completeness\&quot;: 14.05419986415656, \&quot;convention\&quot;: 13.974275916197548, \&quot;grammar\&quot;: 15.830780662099, \&quot;semantic\&quot;: 14.970485860308258}&quot;
+          },
+          {
+            &quot;key&quot;: &quot;run_id&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;sn-rescore-20261028T085435Z&quot;
+          },
+          {
+            &quot;key&quot;: &quot;semantic_sim&quot;,
+            &quot;type&quot;: &quot;FLOAT NOT NULL&quot;,
+            &quot;value&quot;: &quot;0.8588836193084717&quot;
+          },
+          {
+            &quot;key&quot;: &quot;source_domains&quot;,
+            &quot;type&quot;: &quot;LIST&lt;NOTHING&gt; NOT NULL&quot;,
+            &quot;value&quot;: []
+          },
+          {
+            &quot;key&quot;: &quot;source_paths&quot;,
+            &quot;type&quot;: &quot;LIST&lt;NOTHING&gt; NOT NULL&quot;,
+            &quot;value&quot;: []
+          },
+          {
+            &quot;key&quot;: &quot;status&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;draft&quot;
+          },
+          {
+            &quot;key&quot;: &quot;superseded_from_stage&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;refining&quot;
+          },
+          {
+            &quot;key&quot;: &quot;tags&quot;,
+            &quot;type&quot;: &quot;LIST&lt;NOTHING&gt; NOT NULL&quot;,
+            &quot;value&quot;: []
+          },
+          {
+            &quot;key&quot;: &quot;unit&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;V&quot;
+          },
+          {
+            &quot;key&quot;: &quot;updated_at&quot;,
+            &quot;type&quot;: &quot;ZONED DATETIME NOT NULL&quot;,
+            &quot;value&quot;: &quot;1793177688:476000000&quot;
+          },
+          {
+            &quot;key&quot;: &quot;validated_at&quot;,
+            &quot;type&quot;: &quot;ZONED DATETIME NOT NULL&quot;,
+            &quot;value&quot;: &quot;1793177676:670000000&quot;
+          },
+          {
+            &quot;key&quot;: &quot;validation_diagnostics_json&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;[]&quot;
+          },
+          {
+            &quot;key&quot;: &quot;validation_issues&quot;,
+            &quot;type&quot;: &quot;LIST&lt;NOTHING&gt; NOT NULL&quot;,
+            &quot;value&quot;: []
+          },
+          {
+            &quot;key&quot;: &quot;validation_layer_summary&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;{\&quot;pydantic\&quot;: {\&quot;passed\&quot;: true, \&quot;error_count\&quot;: 0}, \&quot;semantic\&quot;: {\&quot;issue_count\&quot;: 0, \&quot;skipped\&quot;: false}, \&quot;description\&quot;: {\&quot;issue_count\&quot;: 0}, \&quot;structural\&quot;: {\&quot;issue_count\&quot;: 0, \&quot;skipped\&quot;: false}, \&quot;canonical\&quot;: {\&quot;issue_count\&quot;: 0}}&quot;
+          },
+          {
+            &quot;key&quot;: &quot;validation_status&quot;,
+            &quot;type&quot;: &quot;STRING NOT NULL&quot;,
+            &quot;value&quot;: &quot;valid&quot;
+          }
+        ]
+      },
+      &quot;row&quot;: &quot;_LoadedRow(id=&#x27;electrostatic_potential_at_outboard_midplane=&gt;electrostatic_potential_at_langmuir_probe_position&#x27;, identity={&#x27;id&#x27;: &#x27;electrostatic_potential_at_outboard_midplane=&gt;electrostatic_potential_at_langmuir_probe_position&#x27;, &#x27;kind&#x27;: &#x27;standard_name&#x27;, &#x27;target_id&#x27;: &#x27;electrostatic_potential_at_outboard_midplane&#x27;}, participants=({&#x27;graph_label&#x27;: &#x27;StandardName&#x27;, &#x27;id&#x27;: &#x27;electrostatic_potential_at_outboard_midplane&#x27;, &#x27;kind&#x27;: &#x27;node&#x27;}, {&#x27;graph_label&#x27;: &#x27;StandardName&#x27;, &#x27;id&#x27;: &#x27;electrostatic_potential_at_langmuir_probe_position&#x27;, &#x27;kind&#x27;: &#x27;node&#x27;}), mutations=({&#x27;arguments&#x27;: {&#x27;successor_id&#x27;: &#x27;electrostatic_potential_at_langmuir_probe_position&#x27;}, &#x27;id&#x27;: &#x27;electrostatic_potential_at_outboard_midplane:supersede&#x27;, &#x27;kind&#x27;: &#x27;supersede&#x27;, &#x27;order&#x27;: 0, &#x27;participant_id&#x27;: &#x27;electrostatic_potential_at_outboard_midplane&#x27;},), guards=({&#x27;id&#x27;: &#x27;electrostatic_potential_at_outboard_midplane=&gt;electrostatic_potential_at_langmuir_probe_position:structural-legitimacy&#x27;, &#x27;implementation&#x27;: &#x27;structural-legitimacy&#x27;, &#x27;kind&#x27;: &#x27;semantic_authority&#x27;, &#x27;participant_ids&#x27;: [&#x27;electrostatic_potential_at_outboard_midplane&#x27;]}, {&#x27;id&#x27;: &#x27;electrostatic_potential_at_outboard_midplane=&gt;electrostatic_potential_at_langmuir_probe_position:out-of-allowlist-immutability&#x27;, &#x27;implementation&#x27;: &#x27;out-of-allowlist-immutability&#x27;, &#x27;kind&#x27;: &#x27;collateral_immutability&#x27;, &#x27;participant_ids&#x27;: [&#x27;electrostatic_potential_at_outboard_midplane&#x27;, &#x27;electrostatic_potential_at_langmuir_probe_position&#x27;]}), orphan_policy=&#x27;refuse&#x27;)&quot;
+    }
+  ],
+  &quot;authority_file_sha256&quot;: &quot;b6cbc0d1a5981639c4291f5073269bf81f4a0602b3ee0501e608cfe3525aab72&quot;,
+  &quot;authority_payload_sha256&quot;: &quot;5b540d56b289936290adc664d84169bdf6d60a5c63b571a3e067c5d5a75965ab&quot;,
+  &quot;change_ids&quot;: [
+    &quot;sn-change:signed-manifest:276014026907fc6b5a5c901beb62c8bbe99b2649842cd23d485af63e90c4b6c1:6dcd172e227f60da75cb0ca7&quot;
+  ],
+  &quot;changed&quot;: 1,
+  &quot;counts&quot;: {
+    &quot;admitted&quot;: 1,
+    &quot;authority_rows&quot;: 1,
+    &quot;refused&quot;: 0
+  },
+  &quot;manifest_sha256&quot;: &quot;276014026907fc6b5a5c901beb62c8bbe99b2649842cd23d485af63e90c4b6c1&quot;,
+  &quot;mutations&quot;: 1,
+  &quot;outcome&quot;: &quot;applied&quot;,
+  &quot;persistent_writes&quot;: 2,
+  &quot;receipt_rows&quot;: 1,
+  &quot;refusals&quot;: [],
+  &quot;schema&quot;: &quot;imas-codex.signed-repair-receipt.v1&quot;
+}</pre>
+
+<h2 id="shc-locus-wall-rebind-midplane-retire-controls">The refusals this run had to earn</h2>
+<p id="shc-locus-wall-rebind-midplane-retire-controls-p">A preview that accepts
+everything shows nothing. A doctored retirement authority naming the wrong
+successor is refused, the migration's compare-and-set is refused when its
+expected binding is wrong, and the read-back check is refused when a doctored
+expectation is fed to it.</p>
+<pre id="shc-locus-wall-rebind-midplane-retire-stale-pre">stale_authority: rows[0].mutations[0].arguments.successor_id -&gt; electrostatic_potential (a live name with bound sources, not the ruled successor)
+refused=SignedManifestAuthorityError: authority signature does not match canonical signed payload
+EXIT=1
+</pre>
+<pre id="shc-locus-wall-rebind-midplane-retire-cas-pre">stale_cas: old_name=WALL new_name=BASE expected=WALL
+refused=RuntimeError: source migration compare-and-set failed: dd:wall/description_ggd/ggd/phi_potential/values(exists=True, status=&#x27;attached&#x27;, claimed=False, bindings=[&#x27;electrostatic_potential&#x27;], scalar=&#x27;electrostatic_potential&#x27;)
+EXIT=1
+</pre>
+<pre id="shc-locus-wall-rebind-midplane-retire-doctored-pre">doctored_expectation: the wall name holds two paths
+refused=[&quot;electrostatic_potential_at_wall producing sources are [&#x27;dd:wall/description_ggd/ggd/phi_potential/values&#x27;, &#x27;dd:core_profiles/profiles_1d/phi_potential&#x27;]&quot;]
+EXIT=1
+</pre>
+
+<h2 id="shc-locus-wall-rebind-midplane-retire-readback">Read-back</h2>
+<p id="shc-locus-wall-rebind-midplane-retire-readback-p">
+<code>electrostatic_potential_at_wall</code> has exactly one producing source,
+<code>dd:wall/description_ggd/ggd/phi_potential/values</code>, with the DD path's
+<code>HAS_STANDARD_NAME</code> projection and the source's scalar mirror both
+naming it. <code>electrostatic_potential</code> keeps the other six.
+<code>electrostatic_potential_at_outboard_midplane</code> is at
+<code>superseded</code> with
+1 successor edge to <code>electrostatic_potential_at_langmuir_probe_position</code>.
+The sourceless classifier lists 0 of the two
+ruled names and does not list the base.</p>
+<pre id="shc-locus-wall-rebind-midplane-retire-readback-pre">{
+  &quot;base_producers&quot;: [
+    &quot;dd:core_profiles/profiles_1d/phi_potential&quot;,
+    &quot;dd:edge_profiles/ggd/phi_potential/values&quot;,
+    &quot;dd:edge_profiles/profiles_1d/phi_potential&quot;,
+    &quot;dd:mhd/ggd/phi_potential/values&quot;,
+    &quot;dd:plasma_profiles/ggd/phi_potential/values&quot;,
+    &quot;dd:plasma_profiles/profiles_1d/phi_potential&quot;
+  ],
+  &quot;base_source_paths&quot;: [
+    &quot;dd:plasma_profiles/profiles_1d/phi_potential&quot;,
+    &quot;dd:plasma_profiles/ggd/phi_potential/values&quot;,
+    &quot;dd:mhd/ggd/phi_potential/values&quot;,
+    &quot;dd:core_profiles/profiles_1d/phi_potential&quot;,
+    &quot;dd:edge_profiles/profiles_1d/phi_potential&quot;,
+    &quot;dd:edge_profiles/ggd/phi_potential/values&quot;
+  ],
+  &quot;classifier&quot;: {
+    &quot;base_flagged&quot;: false,
+    &quot;flagged&quot;: [],
+    &quot;population&quot;: 126
+  },
+  &quot;midplane&quot;: {
+    &quot;name_stage&quot;: &quot;superseded&quot;,
+    &quot;status&quot;: &quot;superseded&quot;,
+    &quot;successors&quot;: [
+      {
+        &quot;receipt_id&quot;: &quot;sn-change:signed-manifest:276014026907fc6b5a5c901beb62c8bbe99b2649842cd23d485af63e90c4b6c1:6dcd172e227f60da75cb0ca7&quot;,
+        &quot;target&quot;: &quot;electrostatic_potential_at_langmuir_probe_position&quot;,
+        &quot;target_stage&quot;: &quot;accepted&quot;
+      }
+    ]
+  },
+  &quot;retire_receipts&quot;: [
+    {
+      &quot;change_id&quot;: &quot;sn-change:68b52864-b6e4-4f37-950c-88126c29636e&quot;,
+      &quot;manifest_sha256&quot;: null,
+      &quot;operation&quot;: &quot;campaign_docs_refine&quot;,
+      &quot;run_id&quot;: &quot;981af813-f129-4743-97cd-8db13c589a71&quot;
+    },
+    {
+      &quot;change_id&quot;: &quot;sn-change:7eef13ed-9829-40d5-b9b3-517cd87583aa&quot;,
+      &quot;manifest_sha256&quot;: null,
+      &quot;operation&quot;: &quot;fold_identity&quot;,
+      &quot;run_id&quot;: &quot;sn-fold:e51488fa-facb-4796-aa18-20a05b9d4350&quot;
+    },
+    {
+      &quot;change_id&quot;: &quot;sn-change:8c74f04f-7886-41a8-8f43-0debaaea4c44&quot;,
+      &quot;manifest_sha256&quot;: null,
+      &quot;operation&quot;: &quot;refine&quot;,
+      &quot;run_id&quot;: null
+    },
+    {
+      &quot;change_id&quot;: &quot;sn-change:914de622-eb84-4c3b-abcc-36f5506b263e&quot;,
+      &quot;manifest_sha256&quot;: null,
+      &quot;operation&quot;: &quot;campaign_docs_refine&quot;,
+      &quot;run_id&quot;: &quot;c1560b3c-54c7-4a28-b40b-075d97b17acd&quot;
+    },
+    {
+      &quot;change_id&quot;: &quot;sn-change:signed-manifest:276014026907fc6b5a5c901beb62c8bbe99b2649842cd23d485af63e90c4b6c1:6dcd172e227f60da75cb0ca7&quot;,
+      &quot;manifest_sha256&quot;: &quot;276014026907fc6b5a5c901beb62c8bbe99b2649842cd23d485af63e90c4b6c1&quot;,
+      &quot;operation&quot;: &quot;link_signed_successor&quot;,
+      &quot;run_id&quot;: &quot;r-20261028T202206786051-shc-locus-wall-rebind-midplane-retire&quot;
+    },
+    {
+      &quot;change_id&quot;: &quot;sn-change:source-migration:ed753c26f2b0991b94e0dab82f55a1e54d7c5f7c2fe9d1ee7bd3eaf2dbaf5070&quot;,
+      &quot;manifest_sha256&quot;: null,
+      &quot;operation&quot;: &quot;source_migration_manifest&quot;,
+      &quot;run_id&quot;: null
+    }
+  ],
+  &quot;wall_producers&quot;: [
+    &quot;dd:wall/description_ggd/ggd/phi_potential/values&quot;
+  ],
+  &quot;wall_projections&quot;: [
+    &quot;electrostatic_potential_at_wall&quot;
+  ],
+  &quot;wall_receipts&quot;: [
+    {
+      &quot;change_id&quot;: &quot;sn-change:6c400855-6891-428e-98a1-9fccaea008cc&quot;,
+      &quot;manifest_sha256&quot;: null,
+      &quot;operation&quot;: &quot;campaign_docs_refine&quot;,
+      &quot;run_id&quot;: &quot;c1560b3c-54c7-4a28-b40b-075d97b17acd&quot;
+    },
+    {
+      &quot;change_id&quot;: &quot;sn-change:c1ed499e-e5b5-4ec7-869c-8c68220a435e&quot;,
+      &quot;manifest_sha256&quot;: null,
+      &quot;operation&quot;: &quot;campaign_docs_refine&quot;,
+      &quot;run_id&quot;: &quot;3d3ab7a6-19b2-4d5c-a17c-767256d79a6c&quot;
+    },
+    {
+      &quot;change_id&quot;: &quot;sn-change:c4307ec9-c814-4de5-883b-ab2bd43e73ac&quot;,
+      &quot;manifest_sha256&quot;: null,
+      &quot;operation&quot;: &quot;campaign_docs_refine&quot;,
+      &quot;run_id&quot;: &quot;981af813-f129-4743-97cd-8db13c589a71&quot;
+    },
+    {
+      &quot;change_id&quot;: &quot;sn-change:77a619f2-0636-4381-b859-605decd71747&quot;,
+      &quot;manifest_sha256&quot;: null,
+      &quot;operation&quot;: &quot;fold_identity&quot;,
+      &quot;run_id&quot;: &quot;sn-fold:15ce0b13-d671-42c8-b5be-563803af28b6&quot;
+    },
+    {
+      &quot;change_id&quot;: &quot;sn-change:5db538c9-e1cb-4839-a3ba-dd7cc0c2341e&quot;,
+      &quot;manifest_sha256&quot;: null,
+      &quot;operation&quot;: &quot;reconcile_catalog_edit_origin&quot;,
+      &quot;run_id&quot;: null
+    },
+    {
+      &quot;change_id&quot;: &quot;sn-change:65f40770-5d66-4e5a-a934-e5a36e9860b5&quot;,
+      &quot;manifest_sha256&quot;: null,
+      &quot;operation&quot;: &quot;source_migration_manifest&quot;,
+      &quot;run_id&quot;: &quot;r-20261028T202206786051-shc-locus-wall-rebind-midplane-retire&quot;
+    },
+    {
+      &quot;change_id&quot;: &quot;sn-change:source-migration:9a0b20277e998541709c88d8df799529437758956b09b220049f87b797594f0b&quot;,
+      &quot;manifest_sha256&quot;: null,
+      &quot;operation&quot;: &quot;source_migration_manifest&quot;,
+      &quot;run_id&quot;: &quot;r-20261028T202206786051-shc-locus-wall-rebind-midplane-retire&quot;
+    }
+  ],
+  &quot;wall_scalar_target&quot;: &quot;electrostatic_potential_at_wall&quot;,
+  &quot;wall_source_paths&quot;: [
+    &quot;dd:wall/description_ggd/ggd/phi_potential/values&quot;
+  ]
+}</pre>
+
+<h2 id="shc-locus-wall-rebind-midplane-retire-harmonize">Harmonize report for the family</h2>
+<p id="shc-locus-wall-rebind-midplane-retire-harmonize-p"><code>sn harmonize
+--family electrostatic_potential --report --json</code> was run in report mode
+and not applied.</p>
+<pre id="shc-locus-wall-rebind-midplane-retire-harmonize-pre"># command: /home/ITER/mcintos/Code/imas-codex/.venv/bin/imas-codex sn harmonize --family electrostatic_potential --report --json
+# worktree: /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/shc-locus-wall-rebind-midplane-retire
+# report mode only: writes nothing to the graph and is not applied
+harmonize_exit=0
+[{&quot;anchor&quot;: &quot;electrostatic_potential_at_langmuir_probe_position&quot;, &quot;domain_lint&quot;: {}, &quot;drift&quot;: 0.5, &quot;invariant&quot;: [&quot;electrostatic_potential&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;], &quot;lint&quot;: {}, &quot;lint_total&quot;: 0, &quot;members&quot;: [&quot;electrostatic_potential&quot;, &quot;electrostatic_potential_at_langmuir_probe_position&quot;, &quot;electrostatic_potential_at_wall&quot;, &quot;floating_electrostatic_potential&quot;], &quot;n&quot;: 4, &quot;physical_base&quot;: &quot;electrostatic_potential&quot;}]
+EXIT=0
+</pre>
+</main>
+</body>
+</html>

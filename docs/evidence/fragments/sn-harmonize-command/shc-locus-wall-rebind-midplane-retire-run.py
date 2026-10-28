@@ -30,14 +30,14 @@ import subprocess
 import sys
 from pathlib import Path
 
-WORKTREE = Path(__file__).resolve().parents[3]
+WORKTREE = Path(__file__).resolve().parents[4]
 HERE = Path(__file__).resolve().parent
 RUN = Path(
     "/home/ITER/mcintos/.config/reckon/crew/runs/"
     "r-20261028T202206786051-shc-locus-wall-rebind-midplane-retire"
 )
 LOGS = RUN / "logs"
-PYTHON = Path("/home/ITER/mcintos/Code/imas-codex/.venv/bin/python")
+CLI = Path("/home/ITER/mcintos/Code/imas-codex/.venv/bin/imas-codex")
 
 FRAGMENT_HTML = HERE / "shc-locus-wall-rebind-midplane-retire.html"
 EXCHANGE_AUTHORITY = (
@@ -816,9 +816,7 @@ def phase_readback() -> int:
 def phase_harmonize() -> int:
     log = Log(LOGS / "harmonize.log")
     cmd = [
-        str(PYTHON),
-        "-m",
-        "imas_codex.cli",
+        str(CLI),
         "sn",
         "harmonize",
         "--family",
