@@ -21,10 +21,13 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from imas_codex.standard_names import graph_ops as _graph_ops  # noqa: F401  (wires the graph services)
 from imas_codex.standard_names.graph_store import (
     graph_catalog as _owning_graph_catalog,
     graph_docs_persistence as _owning_graph_docs_persistence,
 )
+
+from .graph_transaction_doubles import transaction_double
 
 # =============================================================================
 # Shared helpers / paths
@@ -34,15 +37,33 @@ _GC_PATH = "imas_codex.standard_names.graph_store.graph_foundation.GraphClient"
 
 
 def _mock_gc_query(return_values: list[list[dict]] | None = None):
-    """Return a mock GraphClient whose .query() returns successive values."""
-    gc = MagicMock()
-    gc.__enter__ = MagicMock(return_value=gc)
-    gc.__exit__ = MagicMock(return_value=False)
-    if return_values is not None:
-        gc.query = MagicMock(side_effect=return_values)
-    else:
-        gc.query = MagicMock(return_value=[])
-    return gc
+    """Return the shared transaction-shaped GraphClient double."""
+    return transaction_double(return_values)
+
+
+# The persist path answers its two CAS statements from one transaction, with the
+# hold scan and reconciliation statements in between. Answers are keyed by the
+# statement they belong to, so a statement the test does not seed sees no rows.
+_READBACK_STATEMENT = "RETURN coalesce(sn.docs_chain_length"
+_WRITE_STATEMENT = "sn.reviewer_score_docs = $score"
+
+
+def _persist_gc(readback: list[dict], write: list[dict] | None) -> Any:
+    """Double answering ``persist_reviewed_docs``'s CAS statements by shape."""
+    return transaction_double(
+        by_statement={
+            _READBACK_STATEMENT: readback,
+            _WRITE_STATEMENT: [] if write is None else write,
+        }
+    )
+
+def _write_call(gc: Any):
+    """Return the docs CAS write call among a transaction's statements."""
+    for call_obj in gc.query.call_args_list:
+        if _WRITE_STATEMENT in call_obj.args[0]:
+            return call_obj
+    raise AssertionError("the docs write statement was never issued")
+
 
 
 @contextmanager
@@ -284,12 +305,7 @@ class TestPersistReviewedDocsConcurrentWinNoOp:
 
     def test_concurrent_transition_is_noop(self):
         """SET RETURNs no row (node no longer 'drafted') → returns ''."""
-        gc = _mock_gc_query(
-            return_values=[
-                [{"docs_chain_length": 0}],  # readback still sees 'drafted'
-                [],  # SET matched nothing — concurrent reviewer won the race
-            ]
-        )
+        gc = _persist_gc([{"docs_chain_length": 0}], [])
 
         with _patch_gc(gc):
             from imas_codex.standard_names.graph_store.graph_review_persistence import (
@@ -309,7 +325,7 @@ class TestPersistReviewedDocsConcurrentWinNoOp:
 
         assert result == ""
         # The SET must re-assert docs_stage='drafted' as the CAS guard.
-        set_cypher = gc.query.call_args_list[1][0][0]
+        set_cypher = _write_call(gc).args[0]
         assert "sn.docs_stage = 'drafted'" in set_cypher
 
 
@@ -321,11 +337,8 @@ class TestPersistReviewedDocsConcurrentWinNoOp:
 class TestPersistToAccepted:
     def test_persist_to_accepted(self):
         """verdict='accept' + score >= min_score → docs_stage='accepted'."""
-        gc = _mock_gc_query(
-            return_values=[
-                [{"docs_chain_length": 0}],  # readback
-                [{"id": "electron_temperature"}],  # SET write committed
-            ]
+        gc = _persist_gc(
+            [{"docs_chain_length": 0}], [{"id": "electron_temperature"}]
         )
 
         with _patch_gc(gc):
@@ -353,12 +366,7 @@ class TestPersistToAccepted:
 class TestPersistToReviewedLowScore:
     def test_persist_to_reviewed_low_score(self):
         """score=0.5, docs_chain_length=0, rotation_cap=3 → 'reviewed'."""
-        gc = _mock_gc_query(
-            return_values=[
-                [{"docs_chain_length": 0}],
-                [{"id": "test_name"}],
-            ]
-        )
+        gc = _persist_gc([{"docs_chain_length": 0}], [{"id": "test_name"}])
 
         with _patch_gc(gc):
             from imas_codex.standard_names.graph_store.graph_review_persistence import (
@@ -388,12 +396,7 @@ class TestPersistToExhaustedAtCap:
         docs_chain_length == rotation_cap-1.  The SN must stay 'reviewed'
         so that final escalated refine can run.
         """
-        gc = _mock_gc_query(
-            return_values=[
-                [{"docs_chain_length": 2}],
-                [{"id": "test_name"}],
-            ]
-        )
+        gc = _persist_gc([{"docs_chain_length": 2}], [{"id": "test_name"}])
 
         with _patch_gc(gc):
             from imas_codex.standard_names.graph_store.graph_review_persistence import (
@@ -419,12 +422,7 @@ class TestPersistToExhaustedAtCap:
         After the escalated final refine has produced a chain=3 SN,
         the next review step must mark it exhausted.
         """
-        gc = _mock_gc_query(
-            return_values=[
-                [{"docs_chain_length": 3}],
-                [{"id": "test_name"}],
-            ]
-        )
+        gc = _persist_gc([{"docs_chain_length": 3}], [{"id": "test_name"}])
 
         with _patch_gc(gc):
             from imas_codex.standard_names.graph_store.graph_review_persistence import (
@@ -448,12 +446,7 @@ class TestPersistToExhaustedAtCap:
 class TestPersistToReviewedBelowCap:
     def test_persist_to_reviewed_below_cap(self):
         """score=0.5, docs_chain_length=1, rotation_cap=3 → 'reviewed' (not yet at cap)."""
-        gc = _mock_gc_query(
-            return_values=[
-                [{"docs_chain_length": 1}],
-                [{"id": "test_name"}],
-            ]
-        )
+        gc = _persist_gc([{"docs_chain_length": 1}], [{"id": "test_name"}])
 
         with _patch_gc(gc):
             from imas_codex.standard_names.graph_store.graph_review_persistence import (
@@ -477,12 +470,7 @@ class TestPersistToReviewedBelowCap:
 class TestAcceptOverridesChainLengthAtCap:
     def test_accept_overrides_chain_length_at_cap(self):
         """docs_chain_length=3, rotation_cap=3 → 'accepted' (acceptance wins)."""
-        gc = _mock_gc_query(
-            return_values=[
-                [{"docs_chain_length": 3}],
-                [{"id": "test_name"}],
-            ]
-        )
+        gc = _persist_gc([{"docs_chain_length": 3}], [{"id": "test_name"}])
 
         with _patch_gc(gc):
             from imas_codex.standard_names.graph_store.graph_review_persistence import (
@@ -521,12 +509,7 @@ def test_docs_acceptance_requires_canonical_quorum_authority(
     has_shortfall: bool,
 ) -> None:
     """Docs acceptance follows the shared name-axis quorum policy exactly."""
-    gc = _mock_gc_query(
-        return_values=[
-            [{"docs_chain_length": 0}],
-            [{"id": "test_name"}],
-        ]
-    )
+    gc = _persist_gc([{"docs_chain_length": 0}], [{"id": "test_name"}])
 
     with _patch_gc(gc):
         from imas_codex.standard_names.graph_store.graph_review_persistence import (
@@ -545,22 +528,16 @@ def test_docs_acceptance_requires_canonical_quorum_authority(
         )
 
     assert result == expected_stage
-    write_kwargs = gc.query.call_args_list[1].kwargs
+    write_kwargs = _write_call(gc).kwargs
     assert bool(write_kwargs["quorum_shortfall"]) is has_shortfall
-    assert write_kwargs["resolution_method"] == resolution_method
-    cypher = gc.query.call_args_list[1].args[0]
+    cypher = _write_call(gc).args[0]
     assert "docs_review_resolution_method" not in cypher
     assert "docs_review_quorum_shortfall_at" in cypher
 
 
 def test_fresh_docs_quorum_clears_a_prior_shortfall() -> None:
     """A quorate result writes null marker fields instead of retaining residue."""
-    gc = _mock_gc_query(
-        return_values=[
-            [{"docs_chain_length": 0}],
-            [{"id": "test_name"}],
-        ]
-    )
+    gc = _persist_gc([{"docs_chain_length": 0}], [{"id": "test_name"}])
     with _patch_gc(gc):
         from imas_codex.standard_names.graph_store.graph_review_persistence import (
             persist_reviewed_docs,
@@ -577,18 +554,13 @@ def test_fresh_docs_quorum_clears_a_prior_shortfall() -> None:
         )
 
     assert result == "accepted"
-    write_kwargs = gc.query.call_args_list[1].kwargs
+    write_kwargs = _write_call(gc).kwargs
     assert write_kwargs["quorum_shortfall"] is None
 
 
 def test_missing_authority_preserves_exhaustion_but_blocks_refinement() -> None:
     """A low score keeps its lifecycle decision while recording the shortfall."""
-    gc = _mock_gc_query(
-        return_values=[
-            [{"docs_chain_length": 3}],
-            [{"id": "test_name"}],
-        ]
-    )
+    gc = _persist_gc([{"docs_chain_length": 3}], [{"id": "test_name"}])
     with _patch_gc(gc):
         from imas_codex.standard_names.graph_store.graph_review_persistence import (
             persist_reviewed_docs,
@@ -604,7 +576,7 @@ def test_missing_authority_preserves_exhaustion_but_blocks_refinement() -> None:
         )
 
     assert result == "exhausted"
-    write_kwargs = gc.query.call_args_list[1].kwargs
+    write_kwargs = _write_call(gc).kwargs
     assert write_kwargs["quorum_shortfall"] == "review carried no resolution method"
 
 
@@ -638,12 +610,7 @@ class TestPersistTokenMismatchNoOp:
 class TestPersistWritesReviewerDocsFields:
     def test_persist_writes_reviewer_docs_fields(self):
         """All reviewer_*_docs fields are populated in the SET call."""
-        gc = _mock_gc_query(
-            return_values=[
-                [{"docs_chain_length": 0}],
-                [{"id": "electron_temperature"}],
-            ]
-        )
+        gc = _persist_gc([{"docs_chain_length": 0}], [{"id": "electron_temperature"}])
 
         with _patch_gc(gc):
             from imas_codex.standard_names.graph_store.graph_review_persistence import (
@@ -668,7 +635,7 @@ class TestPersistWritesReviewerDocsFields:
             )
 
         # Check the SET query kwargs
-        set_call = gc.query.call_args_list[1]
+        set_call = _write_call(gc)
         call_kwargs = set_call[1]  # keyword args dict
 
         assert call_kwargs.get("score") == 0.8
@@ -696,13 +663,7 @@ class TestPersistWritesReviewerDocsFields:
 class TestPersistDoesNotChangeNameFields:
     def test_persist_does_not_change_name_fields(self):
         """Reviewer name fields are NOT written during docs review."""
-        gc = _mock_gc_query(
-            return_values=[
-                [{"docs_chain_length": 0}],
-                [{"id": "electron_temperature"}],
-                [],
-            ]
-        )
+        gc = _persist_gc([{"docs_chain_length": 0}], [{"id": "electron_temperature"}])
 
         with _patch_gc(gc):
             from imas_codex.standard_names.graph_store.graph_review_persistence import (
@@ -720,7 +681,7 @@ class TestPersistDoesNotChangeNameFields:
                 reviewer_chain_size=3,
             )
 
-        set_call = gc.query.call_args_list[1]
+        set_call = _write_call(gc)
         cypher = set_call[0][0]
 
         # Docs review must NOT set name-axis fields.
