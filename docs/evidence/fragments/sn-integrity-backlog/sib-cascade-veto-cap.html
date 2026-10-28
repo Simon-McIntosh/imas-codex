@@ -91,27 +91,28 @@ warning names the same path a binding does.
 
 <h2 id="sib-cascade-veto-cap-gate">Gate</h2>
 <p>
-Two archive trees of <code>main</code> (686d448d) and head (9f43f63f7), each with its own
+Two archive trees of <code>main</code> (686d448d) and head (68f5e007f), each with its own
 <code>--basetemp</code> and the five generated files, ran <code>tests/standard_names/</code>
-on default markers with <code>-n 8</code>. Base: <strong>44 failed, 8488 passed, 12
-skipped</strong>. Head: <strong>46 failed, 8489 passed, 12 skipped</strong>. The D1 id
-leaves the failure set; the three additions are named below.
+on default markers with <code>-n 8</code> under <code>OMP_NUM_THREADS=1</code>. Base:
+<strong>44 failed, 8488 passed, 12 skipped</strong> in 252.47 s. Head: <strong>42 failed,
+8493 passed, 12 skipped</strong> in 345.59 s. The failure id sets were diffed, not the
+counts: <strong>zero ids added</strong>, and two leave — the D1 id and
+<code>test_writer_crash_recreation</code>, which is in no file this node touched and is
+order-dependent.
 </p>
-<p id="sib-cascade-veto-cap-blocker">
-Two of the three additions are in <code>tests/standard_names/test_review_cascade.py</code>,
-which this node may not write, and both pin behaviour this node deliberately changes.
-Line 50's <code>_CALIBRATION_SHA256</code> must become
-<code>4ae713f939c94e3a0a47d2ea276b2e9ab5cf9bd2cc6f1ad6e4e5d3908ce5db1f</code>, because a
-refit necessarily changes the artifact digest; the digest the file now carries
-recomputes correctly from its own content. Line 367's
-<code>assert decision.decision_score &gt;= 0.85</code> must become
-<code>&lt; 0.85</code>, because it pins exactly the uncapped score this node removes; the
-rest of that test — refine route, the <code>cascade_contradiction</code> hold, unchanged
-dimension scores, the 0.3 probability detail — still holds. The third addition,
-<code>test_review_writer_requires_successful_owned_transition[None-name]</code>, is a base
-suite id in a file this node did not touch and is attributed as order-dependent. Until the
-two lines change, the head arm adds two failure ids and the node is reported blocked
-rather than complete.
+<p id="sib-cascade-veto-cap-restated">
+Two assertions in <code>tests/standard_names/test_review_cascade.py</code> pinned the
+behaviour this node changes, and both are restated rather than relaxed. The digest pin now
+names the refit artifact's digest
+<code>4ae713f939c94e3a0a47d2ea276b2e9ab5cf9bd2cc6f1ad6e4e5d3908ce5db1f</code>, derived
+by the module's own <code>_assert_calibration_digest</code> expression over
+<code>cascade_thresholds.json</code> and cross-checked against the artifact the build
+wrote. The veto test now asserts that a vetoed document's score <em>is</em> the cap:
+<code>decision.decision_score == math.nextafter(0.85, 0.0)</code>, beside the refine route
+it already asserted — a statement about the value, not the inequality the old line made.
+Run against the main source with the restated file, both fail for the intended reason:
+the score reads <strong>0.99</strong> rather than 0.8499999999999999, and the artifact
+carries the pre-refit digest <code>4e47220f…</code>.
 </p>
 <p>
 Negative control, run before the arms: the new cap test and the D1 id were run against
