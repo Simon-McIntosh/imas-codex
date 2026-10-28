@@ -1,0 +1,57 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate logs rather than from the manifest's lists: 71 distinct FAILED ids in gate-main.log, 66 in gate-head.log, set difference 0 added and 5 removed (test_catalog_layout_hierarchy.py::TestOrderingCycleDetection::test_export_ledgers_cycle_and_writes_packet, test_export_empty_refusal.py::test_export_over_empty_candidate_set_exits_non_zero, and the three test_manifest_generability.py ids), which are exactly the five C4 ids; the manifest's baseline_suite.failure_ids and after_suite.failure_ids match those log-derived sets element for element, so the zero-added claim is now readable from the artefacts alone.",
+  "call_site_count": 1,
+  "call_sites": [],
+  "completed_at": "2026-10-28T09:34:31.043Z",
+  "dispatched_at": "2026-10-28T09:28:40Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-red-export-accounting.html",
+      "line": 80,
+      "severity": "non-blocking",
+      "text": "non-blocking: the sentence states the archive is verified against its revision by hashing imas_codex/standard_names/export.py 'in both places', but only gate-main.log:2 carries that verification note; gate-head.log:2 names the tree and revision with no hash-verification record, so the head arm's claim rests on the header alone and the fragment overstates what the log shows."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none: the gained commit is a documentation fragment with no runtime path; the export entrypoint behind the source node's fix (imas_codex/standard_names/export.py:3029-3039) is unchanged at this head, and the production callers already reviewed (imas_codex/cli/sn.py:4504, imas_codex/cli/sn.py:4635, imas_codex/standard_names/catalog_release.py:2290) are untouched by the delta.",
+    "diff": "Read commit by commit against 60e41670f: the single gained commit 4979b6d2c edits only fragment lines 73-83, moving the base arm from 352e0096a/8452 passed to 282260d6c/8454 passed, adding the FAILED-line counts, and adding the per-arm tree-revision paragraph; no assertion, test or product file is changed in the delta.",
+    "done_when": "The done_when asks that every C4 id pass at head, that the fix be named per id, and that the gate add no failure ids; the gained commit changes no gate, and the re-recorded arms now read '71 failed, 8454 passed, 12 skipped' at gate-main.log:1746 with EXIT=1 at :1747 and '66 failed, 8457 passed, 12 skipped' at gate-head.log:1667 with EXIT=1 at :1668, their FAILED-line sets differing by exactly the five C4 ids.",
+    "goal": "The source node's goal is to settle the five C4 export ids and name a fix per id; the gained commit changes no runtime code and only repairs the landing record's base-arm figures at docs/evidence/fragments/sn-integrity-backlog/sib-red-export-accounting.html:73-83, while imas_codex/standard_names/export.py is byte-identical to the reviewed head (blob 08a7aff98 at both 60e41670f and 4979b6d2c3eb), so the code fix the goal names is untouched by this delta.",
+    "manifest": "Read at the run directory; baseline_suite now names revision 282260d6c on tree gate/main2 with log_path gate-main.log, and that log carries 1747 lines, a summary line, EXIT=1 and 71 FAILED lines whose ids equal baseline_suite.failure_ids exactly; after_suite likewise matches gate-head.log's 66 ids, so the truncation and the revision mismatch the earlier review raised are both repaired.",
+    "write_paths": "The node's declared write paths include docs/evidence/fragments/sn-integrity-backlog/sib-red-export-accounting.html, and git diff --stat 60e41670f..4979b6d2c3eb lists that one file (11 insertions, 3 deletions) and nothing else."
+  },
+  "justifications": {
+    "durability": "no assertion, test or automated check is added or exists that would redden if the fragment's figures drift from the arm logs again; the drift this commit repairs was found by human review, not by a gate.",
+    "evidence": "gate-main.log:1746-1747 now supplies the summary line and EXIT=1 that the earlier review found missing, and its 71 FAILED ids reconcile exactly with baseline_suite.failure_ids, but the delta's own new claim at fragment:80 about the head archive's hash verification is not carried by gate-head.log:2.",
+    "fit": "the new paragraph at docs/evidence/fragments/sn-integrity-backlog/sib-red-export-accounting.html:77-84 follows the fragment's existing id-bearing element style, and neither the diff nor the commit message carries a plan, sprint or ticket identifier.",
+    "goal_fidelity": "docs/evidence/fragments/sn-integrity-backlog/sib-red-export-accounting.html:73-75 now states figures the run's own logs carry (gate-main.log:1746, gate-head.log:1667), which is the 'the fragment records it' half of the source node's done_when.",
+    "reuse": "the delta adds no function, class or module, so there is no capability to duplicate and no owner was forked.",
+    "scope_discipline": "git diff --name-only 60e41670f..4979b6d2c3eb returns only the granted landing fragment, so the delta stays wholly inside the declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source node's goal is to settle the five C4 export ids and name a fix per id; the gained commit changes no runtime code and only repairs the landing record's base-arm figures at docs/evidence/fragments/sn-integrity-backlog/sib-red-export-accounting.html:73-83, while imas_codex/standard_names/export.py is byte-identical to the reviewed head (blob 08a7aff98 at both 60e41670f and 4979b6d2c3eb), so the code fix the goal names is untouched by this delta.\nVERDICT done_when: The done_when asks that every C4 id pass at head, that the fix be named per id, and that the gate add no failure ids; the gained commit changes no gate, and the re-recorded arms now read '71 failed, 8454 passed, 12 skipped' at gate-main.log:1746 with EXIT=1 at :1747 and '66 failed, 8457 passed, 12 skipped' at gate-head.log:1667 with EXIT=1 at :1668, their FAILED-line sets differing by exactly the five C4 ids.\nVERDICT write_paths: The node's declared write paths include docs/evidence/fragments/sn-integrity-backlog/sib-red-export-accounting.html, and git diff --stat 60e41670f..4979b6d2c3eb lists that one file (11 insertions, 3 deletions) and nothing else.\nVERDICT manifest: Read at the run directory; baseline_suite now names revision 282260d6c on tree gate/main2 with log_path gate-main.log, and that log carries 1747 lines, a summary line, EXIT=1 and 71 FAILED lines whose ids equal baseline_suite.failure_ids exactly; after_suite likewise matches gate-head.log's 66 ids, so the truncation and the revision mismatch the earlier review raised are both repaired.\nVERDICT diff: Read commit by commit against 60e41670f: the single gained commit 4979b6d2c edits only fragment lines 73-83, moving the base arm from 352e0096a/8452 passed to 282260d6c/8454 passed, adding the FAILED-line counts, and adding the per-arm tree-revision paragraph; no assertion, test or product file is changed in the delta.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-integrity-backlog/sib-red-export-accounting.html:73-75 now states figures the run's own logs carry (gate-main.log:1746, gate-head.log:1667), which is the 'the fragment records it' half of the source node's done_when.\nSCORE evidence: 16\nJUSTIFICATION evidence: gate-main.log:1746-1747 now supplies the summary line and EXIT=1 that the earlier review found missing, and its 71 FAILED ids reconcile exactly with baseline_suite.failure_ids, but the delta's own new claim at fragment:80 about the head archive's hash verification is not carried by gate-head.log:2.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only 60e41670f..4979b6d2c3eb returns only the granted landing fragment, so the delta stays wholly inside the declared write paths.\nSCORE durability: 6\nJUSTIFICATION durability: no assertion, test or automated check is added or exists that would redden if the fragment's figures drift from the arm logs again; the drift this commit repairs was found by human review, not by a gate.\nSCORE fit: 19\nJUSTIFICATION fit: the new paragraph at docs/evidence/fragments/sn-integrity-backlog/sib-red-export-accounting.html:77-84 follows the fragment's existing id-bearing element style, and neither the diff nor the commit message carries a plan, sprint or ticket identifier.\nSCORE reuse: 20\nJUSTIFICATION reuse: the delta adds no function, class or module, so there is no capability to duplicate and no owner was forked.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-red-export-accounting.html:80 non-blocking: the sentence states the archive is verified against its revision by hashing imas_codex/standard_names/export.py 'in both places', but only gate-main.log:2 carries that verification note; gate-head.log:2 names the tree and revision with no hash-verification record, so the head arm's claim rests on the header alone and the fragment overstates what the log shows.",
+  "review_run_id": "r-20261028T092639454220-review-of-sib-red-export-accounting-4979b6d2c3eb",
+  "reviewed_base_sha": "60e41670ffdb714a11857462a98ed1cab62bd86b",
+  "reviewed_head_sha": "4979b6d2c3ebca460905b584bf798e3ea9c68e71",
+  "reviewed_paths": [
+    "docs/evidence/fragments/sn-integrity-backlog/sib-red-export-accounting.html"
+  ],
+  "reviewed_run_id": "r-20261028T075932338031-sib-red-export-accounting",
+  "scores": {
+    "durability": 6,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T09:36:36.874294+00:00",
+  "total": 98
+}
