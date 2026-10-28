@@ -1,0 +1,61 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "differenced the reviewed run's own arms set-wise: gate-base.log (revision 966f3d965) lists 101 failure ids, gate-head3.log (revision e8e7376a5) lists 65; comm -13 gives zero added ids and comm -23 gives the 36 S1/S2 ids the node repaired. gate-head.log (c464126e3) lists 66 and differs from gate-head3.log by exactly test_harmonize_apply.py::test_apply_reports_no_fall_when_no_member_scores_worse, the id the manifest discloses as an order-dependent flake that passed 6/6 isolated repeats.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-28T09:16:57.922Z",
+  "dispatched_at": "2026-10-28T09:08:48Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-red-sandbox.html",
+      "line": "56",
+      "severity": "non-blocking",
+      "text": "the gate bullet names head e8e7376a5 while the reviewed head is 974669cc9, and the fragment does not say the extra commit is docs-only, so a reader comparing reviewed_head_* against the gate revision sees an unexplained mismatch."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-red-sandbox.html",
+      "line": "66",
+      "severity": "non-blocking",
+      "text": "the arm figures are transcribed by hand with no script or test reconciling them to gate-head3.log, so a later edit can drift from the log without any check noticing."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read both commits against a7a7facbe; e8e7376a5 deletes the single extra blank line at tests/standard_names/test_cli_export.py:73 and 974669cc9 rewrites the Gate section of the fragment to the final arm (65 failed / 8455 passed), to the set-wise zero-added statement, and to a separate flake bullet with its three-per-arm repeat evidence.",
+    "done_when": "the source node's done_when is that all 36 S1/S2 ids pass at head, the gate adds zero failure ids, and the fragment records it; I recomputed the delta from the reviewed run's own arms (gate-base.log 101 ids, gate-head3.log 65 ids) and comm -13 yields zero added ids with exactly 36 removed, and the fragment's 36 id rows parse to exactly that removed set with no member missing and no extra.",
+    "goal": "the source node's goal is to make tests/standard_names/ independent of a read-only /tmp and of a surrounding Git checkout; the two commits gained since the prior review (e8e7376a5, 974669cc9) change only the whitespace before the staging fixture in tests/standard_names/test_cli_export.py:72 and the gate evidence in docs/evidence/fragments/sn-integrity-backlog/sib-red-sandbox.html:54-85, so the delta settles the evidence for that goal without altering the behaviour that achieves it.",
+    "manifest": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T074944888965-sib-red-sandbox/manifest.md; status complete, commits c464126e3 e8e7376a5 974669cc9, after_suite armed at revision e8e7376a5 with 65 failure ids and the literal command, and the head-only harmonize id disclosed under retry_failures.",
+    "write_paths": "the source node declared tests/standard_names/test_cli_export.py and docs/evidence/fragments/sn-integrity-backlog/sib-red-sandbox.html among its write paths, and git diff --stat a7a7facbe..974669cc9 changes exactly those two files (19 insertions, 9 deletions) and nothing else."
+  },
+  "justifications": {
+    "durability": "the delta adds no assertion, so nothing in the suite reddens if the blank line at tests/standard_names/test_cli_export.py:72 returns or if the fragment's transcribed 65/8455 at sib-red-sandbox.html:66 drifts from gate-head3.log \u2014 I verified both today by direct check (ruff format --check EXIT=0 on the head blob, log tail '65 failed, 8455 passed ... EXIT=1') rather than by any test.",
+    "evidence": "I reconciled the fragment's 36 id rows against comm -23 of gate-base.log and gate-head3.log and found an exact bijection, and the flake bullet's claim that test_harmonize_apply.py references no changed module holds (grep over the head blob exits 1), against harmonize-repeats.log's six EXIT=0 rows.",
+    "fit": "at the reviewed head, ruff format --check and ruff check both pass with EXIT=0 on tests/standard_names/test_cli_export.py, resolving the prior finding, and the rewritten Gate section at sib-red-sandbox.html:54 keeps the sibling fragments' prose-and-bullets idiom with no plan, ticket or version label in any id.",
+    "goal_fidelity": "the delta at docs/evidence/fragments/sn-integrity-backlog/sib-red-sandbox.html:66 now states the head figure as 65 failed / 8455 passed, which I confirmed against gate-head3.log:597, so the evidence matches the gate that actually decides the node's done_when.",
+    "reuse": "the delta adds no definition to fork a capability; it keeps the staging fixture on pytest's tmp_path at tests/standard_names/test_cli_export.py:71 and reuses the existing fragment convention.",
+    "scope_discipline": "git diff --stat a7a7facbe..974669cc9 lists only tests/standard_names/test_cli_export.py and the fragment, both inside the source node's declared write paths, with no file under imas_codex/ touched."
+  },
+  "node": "review-of-sib-red-sandbox-974669cc9bd9",
+  "node:reviewed": "sib-red-sandbox",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source node's goal is to make tests/standard_names/ independent of a read-only /tmp and of a surrounding Git checkout; the two commits gained since the prior review (e8e7376a5, 974669cc9) change only the whitespace before the staging fixture in tests/standard_names/test_cli_export.py:72 and the gate evidence in docs/evidence/fragments/sn-integrity-backlog/sib-red-sandbox.html:54-85, so the delta settles the evidence for that goal without altering the behaviour that achieves it.\nVERDICT done_when: the source node's done_when is that all 36 S1/S2 ids pass at head, the gate adds zero failure ids, and the fragment records it; I recomputed the delta from the reviewed run's own arms (gate-base.log 101 ids, gate-head3.log 65 ids) and comm -13 yields zero added ids with exactly 36 removed, and the fragment's 36 id rows parse to exactly that removed set with no member missing and no extra.\nVERDICT write_paths: the source node declared tests/standard_names/test_cli_export.py and docs/evidence/fragments/sn-integrity-backlog/sib-red-sandbox.html among its write paths, and git diff --stat a7a7facbe..974669cc9 changes exactly those two files (19 insertions, 9 deletions) and nothing else.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T074944888965-sib-red-sandbox/manifest.md; status complete, commits c464126e3 e8e7376a5 974669cc9, after_suite armed at revision e8e7376a5 with 65 failure ids and the literal command, and the head-only harmonize id disclosed under retry_failures.\nVERDICT diff: read both commits against a7a7facbe; e8e7376a5 deletes the single extra blank line at tests/standard_names/test_cli_export.py:73 and 974669cc9 rewrites the Gate section of the fragment to the final arm (65 failed / 8455 passed), to the set-wise zero-added statement, and to a separate flake bullet with its three-per-arm repeat evidence.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: the delta at docs/evidence/fragments/sn-integrity-backlog/sib-red-sandbox.html:66 now states the head figure as 65 failed / 8455 passed, which I confirmed against gate-head3.log, so the evidence matches the gate that actually decides the node's done_when.\nSCORE evidence: 19\nJUSTIFICATION evidence: I reconciled the fragment's 36 id rows against comm -23 of gate-base.log and gate-head3.log and found an exact bijection, and the flake bullet's claim that test_harmonize_apply.py references no changed module holds (grep over the head blob exits 1), against harmonize-repeats.log's six EXIT=0 rows.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat a7a7facbe..974669cc9 lists only tests/standard_names/test_cli_export.py and the fragment, both inside the source node's declared write paths, with no file under imas_codex/ touched.\nSCORE durability: 14\nJUSTIFICATION durability: the delta adds no assertion, so nothing in the suite reddens if the blank line at tests/standard_names/test_cli_export.py:72 returns or if the fragment's transcribed 65/8455 at sib-red-sandbox.html:66 drifts from gate-head3.log - I verified both today by direct check (ruff format --check EXIT=0 on the head blob, log tail '65 failed, 8455 passed ... EXIT=1') rather than by any test.\nSCORE fit: 19\nJUSTIFICATION fit: at the reviewed head, ruff format --check and ruff check both pass with EXIT=0 on tests/standard_names/test_cli_export.py, resolving the prior finding, and the rewritten Gate section at sib-red-sandbox.html:54 keeps the sibling fragments' prose-and-bullets idiom with no plan, ticket or version label in any id.\nSCORE reuse: 19\nJUSTIFICATION reuse: the delta adds no definition to fork a capability; it keeps the staging fixture on pytest's tmp_path at tests/standard_names/test_cli_export.py:71 and reuses the existing fragment convention.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-red-sandbox.html:56 non-blocking: the gate bullet names head e8e7376a5 while the reviewed head is 974669cc9, and the fragment does not say the extra commit is docs-only, so a reader comparing reviewed_head_sha against the gate revision sees an unexplained mismatch.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-red-sandbox.html:66 non-blocking: the arm figures are transcribed by hand with no script or test reconciling them to gate-head3.log, so a later edit can drift from the log without any check noticing.",
+  "review_run_id": "r-20261028T090641662409-review-of-sib-red-sandbox-974669cc9bd9",
+  "reviewed_base_sha": "a7a7facbef6586d31273fdb4a27cb8843d4295f3",
+  "reviewed_head_sha": "974669cc9bd9b0b2bb3b96938ab2c26e5cd84afc",
+  "reviewed_run_id": "r-20261028T074944888965-sib-red-sandbox",
+  "scores": {
+    "durability": 14,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-28T09:13:58+00:00",
+  "total": 109
+}
