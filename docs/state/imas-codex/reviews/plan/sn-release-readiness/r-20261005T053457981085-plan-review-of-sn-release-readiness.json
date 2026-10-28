@@ -24,7 +24,24 @@
   "plan_slug": "sn-release-readiness",
   "plan_version": 176,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "finding": "duplicate_owner-1",
+      "reason": "the release leg already reads the export report's candidate/published/exclusion values, the two forms agree, and the plan's design does not rest on where the residue is computed, so extending export.py to publish the residue and having catalog_release.py read it is a cleanup the plan need not carry.",
+      "when": "2026-10-28T05:05:08.449599+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "reason": "the release leg already reads the export report's candidate/published/exclusion values, the two forms agree, and the plan's design does not rest on where the residue is computed, so extending export.py to publish the residue and having catalog_release.py read it is a cleanup the plan need not carry.",
+      "when": "2026-10-28T05:05:08.449599+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-release-readiness/r-20261005T053457981085-plan-review-of-sn-release-readiness.json",
   "review_run_id": "r-20261005T053457981085-plan-review-of-sn-release-readiness",
   "reviewed_blob_sha": "64fae59f18c3400dbb749a94b1c6649c458074b1",
   "rubric": "design",
