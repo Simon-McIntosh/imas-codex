@@ -43,9 +43,7 @@ def _wipe(gc: GraphClient) -> None:
     The DD source id is ``dd:``-namespaced while the name and node ids are not,
     so the wipe matches anywhere in the id rather than at its start.
     """
-    gc.query(
-        "MATCH (n) WHERE n.id CONTAINS 'test_adopt_projection' DETACH DELETE n"
-    )
+    gc.query("MATCH (n) WHERE n.id CONTAINS 'test_adopt_projection' DETACH DELETE n")
 
 
 @pytest.fixture()
@@ -163,26 +161,12 @@ def _candidate() -> dict:
 def test_batch_claim_adopts_an_unowned_projection_stub(graph, services) -> None:
     """The batch compose claim binds a pending projection stub of its own path."""
     from imas_codex.standard_names.graph_store.graph_source_bindings import (
-        _lock_claimed_name_bindings,
         stage_claimed_generated_candidates,
     )
 
     _seed_stub(graph)
-    with GraphClient() as gc:
-        with gc.session() as session:
-            tx = session.begin_transaction()
-            rows = _lock_claimed_name_bindings(
-                services._TransactionQuery(tx),
-                [_candidate()],
-                allow_missing=True,
-                allow_own_pending_reservation=True,
-                allow_dead_end_revival=True,
-                allow_adopt_pending_stub=True,
-            )
-            tx.commit()
-    assert rows[0]["outcome"] == "winner", rows
-    assert rows[0]["binding_kind"] == "adoption", rows
-    assert rows[0]["target_stage"] == "drafted", rows
+    winners = stage_claimed_generated_candidates([_candidate()], services=services)
+    assert winners == [PROBE_SOURCE], "the stub was not adopted: " + str(_stub(graph))
 
     stub = _stub(graph)
     assert stub["name_stage"] == "drafted"
@@ -194,13 +178,6 @@ def test_batch_claim_adopts_an_unowned_projection_stub(graph, services) -> None:
             "adopted_source_id": PROBE_SOURCE,
         }
     ]
-
-    # The same lock runs through the staging entrypoint the compose pool uses.
-    _wipe(graph)
-    _seed_stub(graph)
-    winners = stage_claimed_generated_candidates([_candidate()], services=services)
-    assert winners == [PROBE_SOURCE]
-    assert _stub(graph)["name_stage"] == "drafted"
 
 
 def test_focused_claim_adopts_the_stub_and_writes_the_producing_edge(
@@ -242,26 +219,17 @@ def test_focused_claim_adopts_the_stub_and_writes_the_producing_edge(
 def test_stub_owned_by_another_claim_is_still_refused(graph, services) -> None:
     """An adoption candidate owned by another claim remains a collision."""
     from imas_codex.standard_names.graph_store.graph_source_bindings import (
-        _lock_claimed_name_bindings,
+        stage_claimed_generated_candidates,
     )
 
     _seed_stub(graph, owner_token="test-adopt-projection-other-claim")
-    with GraphClient() as gc:
-        with gc.session() as session:
-            tx = session.begin_transaction()
-            rows = _lock_claimed_name_bindings(
-                services._TransactionQuery(tx),
-                [_candidate()],
-                allow_missing=True,
-                allow_own_pending_reservation=True,
-                allow_dead_end_revival=True,
-                allow_adopt_pending_stub=True,
-            )
-            tx.commit()
-    assert rows[0]["outcome"] == "lifecycle_collision", rows
-    assert rows[0]["target_stage"] == "pending", rows
-    assert _stub(graph)["name_stage"] == "pending"
+    winners = stage_claimed_generated_candidates([_candidate()], services=services)
+    assert winners == []
+    stub = _stub(graph)
+    assert stub["name_stage"] == "pending"
+    assert stub["receipts"] == 0
     assert _adoption_receipts(graph) == []
+    assert _producers(graph) == [OWNER_SOURCE]
 
 
 def test_parked_source_keeps_the_collision_reason_beside_the_cap_message(
