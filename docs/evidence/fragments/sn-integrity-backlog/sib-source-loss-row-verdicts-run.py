@@ -799,6 +799,18 @@ def build() -> dict:
                 }
             ),
             "paths_judged_including_renames": len(paths),
+            "rows_with_pending_composition": sum(
+                any(j["verdict"] == "pending composition" for j in r["judged_paths"])
+                for r in rows
+            ),
+            "rows_with_excluded_paths": sum(
+                any(j["verdict"] == "excluded by design" for j in r["judged_paths"])
+                for r in rows
+            ),
+            "rows_with_stale_sources": sum(
+                any(j["verdict"] == "stale source" for j in r["judged_paths"])
+                for r in rows
+            ),
         },
         "dd_versions_read": {"dd4": list(DD_VERSIONS_4), "dd3": DD_VERSION_3},
         "extraction_rule": EXTRACTION_RULE,
@@ -1048,6 +1060,10 @@ does not read as a loss.</div>
 <ul>{cross}</ul>
 <p>Rows that need a lead ruling, counting true losses, unverified losses and questionable moves:
 {data["rows_needing_lead_ruling"]}.</p>
+<p class="mute">A row's verdict is its most severe path verdict, so a row also holding a moved or kept path shows
+that one. Paths awaiting compose appear in {data["population"]["rows_with_pending_composition"]} rows, paths the
+source gate never admits in {data["population"]["rows_with_excluded_paths"]} rows, and stale source records in
+{data["population"]["rows_with_stale_sources"]} rows.</p>
 
 <h2>Rebind proposals sampled for review</h2>
 <p>{len(data["rebind_sample"])} of the rebind proposals drawn at random (seed {SAMPLE_SEED};
