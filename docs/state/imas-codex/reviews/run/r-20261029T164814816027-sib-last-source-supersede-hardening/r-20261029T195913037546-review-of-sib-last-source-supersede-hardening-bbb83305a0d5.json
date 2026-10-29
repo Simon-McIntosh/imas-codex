@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own arms: baseline_suite failure_ids has one id (test_export_determinism.py::TestManifestDeterminism::test_no_commit_uses_stable_unversioned_timestamp) and after_suite carries the same single id, so the change adds none. The id is the arm scaffolding's SOURCE_DATE_EPOCH, present on both sides.",
+  "call_sites": [
+    "imas_codex/standard_names/graph_store/__init__.py:489",
+    "imas_codex/standard_names/edit.py:1944",
+    "imas_codex/standard_names/graph_store/graph_refinement.py:1329",
+    "imas_codex/standard_names/graph_store/graph_supersession.py:4139",
+    "imas_codex/standard_names/provenance_lifecycle.py:2228",
+    "imas_codex/standard_names/provenance_lifecycle.py:588"
+  ],
+  "completed_at": "2026-10-29T20:06:07.292Z",
+  "dispatched_at": "2026-10-29T20:00:46Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_source_bindings.py",
+      "line": "1678",
+      "severity": "non-blocking",
+      "text": "non-blocking: the receipt-atomicity claim has no negative control - no test makes the receipt write fail and asserts the move rolled back, so reverting the block to the two autocommit queries it replaced leaves every test green and the defect the prior review found would return silently."
+    },
+    {
+      "file": "imas_codex/standard_names/provenance_lifecycle.py",
+      "line": "967",
+      "severity": "non-blocking",
+      "text": "non-blocking: the unconditional drained receipt is unguarded - every test drives retarget_standard_name_sources with record_change defaulting true, while all four production callers at edit.py:1944, graph_refinement.py:1329, graph_supersession.py:4139 and provenance_lifecycle.py:2228 pass false, so reinstating the removed guard reddens nothing."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_source_bindings.py",
+      "line": "1674",
+      "severity": "non-blocking",
+      "text": "non-blocking: the non-GraphClient branch writes the receipt in a second autocommit statement with no warning, so any duck-typed client passed through services silently loses the atomicity the docstring at graph_source_bindings.py:1633 now promises."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "imas_codex/standard_names/graph_store/__init__.py:489, edit.py:1944, graph_refinement.py:1329, graph_supersession.py:4139, provenance_lifecycle.py:2228 and :588",
+    "diff": "read commit by commit against ac6dc98bd - b467ca80c wraps the move, the supersession and the receipts in one explicit transaction and drops the record_change guard at provenance_lifecycle.py:967, and adds graph-read receipt assertions at test_last_source_supersede.py:201,288,321 while removing the value-echo assertion; bbb83305a updates the fragment; every path is inside the declared scope.",
+    "done_when": "the done_when asks that all four points be fixed, that each new test fail on main and pass at head, that the gate add zero failure ids, and that the fragment record it; the recorded arms add no failure id (1 failed on both, the same test_export_determinism id) and logs/negative-control2.log shows only the ordering case failing on the b6bd5682b archive (1 failed, 7 passed), so the receipt assertions added here pass on main too, which the fragment at sib-last-source-supersede-hardening.html:95 discloses.",
+    "goal": "the source node's goal is to close the gaps the last-source supersede landed with (ordering, untested writers, refine driving persist_refined_name, one receipt writer); the commits under review close the two integrity defects the prior review raised, at graph_source_bindings.py:1678 (one transaction) and provenance_lifecycle.py:967 (unconditional drained receipt).",
+    "manifest": "read; after_suite records revision b467ca80c and graph_arm records b467ca80c with 8 passed EXIT=0, which is the delivered code since bbb83305a changes only the evidence fragment; logs/suite-head2.log names its revision as \"head-review-fixes-full\" rather than a sha.",
+    "write_paths": "the source manifest declares five write paths and the four paths in ac6dc98bd..bbb83305a are all inside them (graph_source_bindings.py, provenance_lifecycle.py, test_last_source_supersede.py, the evidence fragment); source_invariant.py is untouched by these two commits."
+  },
+  "justifications": {
+    "durability": "test_last_source_supersede.py:201,288,321 read the receipt back from the graph so a dropped record_supersede_receipts reddens, but nothing reddens if graph_source_bindings.py:1678 reverts to two autocommit statements or if the guard at provenance_lifecycle.py:967 is reinstated.",
+    "evidence": "the arms are whole logs ending in a bare EXIT= line at logs/graph-head-final.log and logs/suite-head2.log, but suite-head2.log header records \"head-review-fixes-full\" rather than the b467ca80c sha the manifest claims for it.",
+    "fit": "graph_source_bindings.py:1674 follows the isinstance/session/begin_transaction idiom already used at provenance_lifecycle.py:582 and adds no plan or ticket name in any symbol, comment or path.",
+    "goal_fidelity": "imas_codex/standard_names/graph_store/graph_source_bindings.py:1678 now commits the move, the retirement and the receipt in one transaction, and provenance_lifecycle.py:967 writes the drained receipt whatever record_change says, which is the base inline behaviour restored.",
+    "reuse": "the change reuses record_supersede_receipts, record_standard_name_change, supersede_drained_name_cypher and foundation._TransactionQuery, but the transactional wrapper it writes at graph_source_bindings.py:1678 is a third inline copy of the same control flow already written at provenance_lifecycle.py:582 and cascade.py:462.",
+    "scope_discipline": "git diff ac6dc98bd..bbb83305a touches only graph_source_bindings.py, provenance_lifecycle.py, test_last_source_supersede.py and the evidence fragment, all inside the source manifest's declared paths."
+  },
+  "node": "review-of-sib-last-source-supersede-hardening-bbb83305a0d5",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source node's goal is to close the gaps the last-source supersede landed with (ordering, untested writers, refine driving persist_refined_name, one receipt writer); the commits under review close the two integrity defects the prior review raised, at imas_codex/standard_names/graph_store/graph_source_bindings.py:1678 (one transaction) and imas_codex/standard_names/provenance_lifecycle.py:967 (unconditional drained receipt).\nVERDICT done_when: the done_when asks that all four points be fixed, that each new test fail on main and pass at head, that the gate add zero failure ids, and that the fragment record it; the recorded arms add no failure id (1 failed on both, the same test_export_determinism id) and logs/negative-control2.log shows only the ordering case failing on the b6bd5682b archive (1 failed, 7 passed), so the receipt assertions added here pass on main too, which docs/evidence/fragments/sn-integrity-backlog/sib-last-source-supersede-hardening.html:95 now discloses.\nVERDICT write_paths: the source manifest declares five write paths and the four paths in ac6dc98bd..bbb83305a are all inside them (graph_source_bindings.py, provenance_lifecycle.py, test_last_source_supersede.py, the evidence fragment); source_invariant.py is untouched by these two commits.\nVERDICT manifest: read; after_suite records revision b467ca80c and graph_arm records b467ca80c with 8 passed EXIT=0, which is the delivered code since bbb83305a changes only the evidence fragment; logs/suite-head2.log names its revision as \"head-review-fixes-full\" rather than a sha.\nVERDICT diff: read commit by commit against ac6dc98bd - b467ca80c wraps the move, the supersession and the receipts in one explicit transaction and drops the record_change guard at provenance_lifecycle.py:967, and adds graph-read receipt assertions at test_last_source_supersede.py:201,288,321 while removing the value-echo assertion; bbb83305a updates the fragment; every path is inside the declared scope.\nCALL_SITES: imas_codex/standard_names/graph_store/__init__.py:489, imas_codex/standard_names/edit.py:1944, imas_codex/standard_names/graph_store/graph_refinement.py:1329, imas_codex/standard_names/graph_store/graph_supersession.py:4139, imas_codex/standard_names/provenance_lifecycle.py:2228, imas_codex/standard_names/provenance_lifecycle.py:588\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/graph_store/graph_source_bindings.py:1678 now commits the move, the retirement and the receipt in one transaction, and provenance_lifecycle.py:967 writes the drained receipt whatever record_change says, which is the base inline behaviour restored.\nSCORE evidence: 17\nJUSTIFICATION evidence: the arms are whole logs ending in a bare EXIT= line at logs/graph-head-final.log and logs/suite-head2.log, but suite-head2.log header records \"head-review-fixes-full\" rather than the b467ca80c sha the manifest claims for it.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff ac6dc98bd..bbb83305a touches only graph_source_bindings.py, provenance_lifecycle.py, test_last_source_supersede.py and the evidence fragment, all inside the source manifest's declared paths.\nSCORE durability: 13\nJUSTIFICATION durability: test_last_source_supersede.py:201,288,321 read the receipt back from the graph so a dropped record_supersede_receipts reddens, but nothing reddens if graph_source_bindings.py:1678 reverts to two autocommit statements or if the guard at provenance_lifecycle.py:967 is reinstated.\nSCORE fit: 18\nJUSTIFICATION fit: graph_source_bindings.py:1674 follows the isinstance/session/begin_transaction idiom already used at provenance_lifecycle.py:582 and adds no plan or ticket name in any symbol, comment or path.\nSCORE reuse: 17\nJUSTIFICATION reuse: the change reuses record_supersede_receipts, record_standard_name_change, supersede_drained_name_cypher and foundation._TransactionQuery, but the transactional wrapper it writes at graph_source_bindings.py:1678 is a third inline copy of the same control flow already written at provenance_lifecycle.py:582 and cascade.py:462.\nFINDING imas_codex/standard_names/graph_store/graph_source_bindings.py:1678 non-blocking: the receipt-atomicity claim has no negative control - no test makes the receipt write fail and asserts the move rolled back, so reverting the block to the two autocommit queries it replaced leaves every test green and the defect the prior review found would return silently.\nFINDING imas_codex/standard_names/provenance_lifecycle.py:967 non-blocking: the unconditional drained receipt is unguarded - every test drives retarget_standard_name_sources with record_change defaulting true, while all four production callers at edit.py:1944, graph_refinement.py:1329, graph_supersession.py:4139 and provenance_lifecycle.py:2228 pass false, so reinstating the removed guard reddens nothing.\nFINDING imas_codex/standard_names/graph_store/graph_source_bindings.py:1674 non-blocking: the non-GraphClient branch writes the receipt in a second autocommit statement with no warning, so any duck-typed client passed through services silently loses the atomicity the docstring at graph_source_bindings.py:1633 now promises.\n",
+  "review_run_id": "r-20261029T195913037546-review-of-sib-last-source-supersede-hardening-bbb83305a0d5",
+  "reviewed_base_sha": "ac6dc98bd16863850223e713a67b82210e874f45",
+  "reviewed_head_sha": "bbb83305a0d58501f9337237a0d54ad739b58249",
+  "reviewed_run_id": "r-20261029T164814816027-sib-last-source-supersede-hardening",
+  "scores": {
+    "durability": 13,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T20:05:16.662729+00:00",
+  "total": 104
+}

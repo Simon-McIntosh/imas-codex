@@ -1,0 +1,84 @@
+{
+  "authority_mode": "external_reviewed",
+  "operation_id": "restore-retired-name-to-recorded-prior-stage",
+  "orphan_policy": "refuse",
+  "receipt_policy": {
+    "cardinality": "per_target",
+    "expected_count": "admitted_rows",
+    "id": "one-per-restored-identity",
+    "link_participant_kind": "standard_name",
+    "operation": "restore_prior_stage",
+    "replay_projection": [
+      "manifest_sha256",
+      "row_id"
+    ]
+  },
+  "repair_rows": [
+    "voltage_of_diagnostic_antenna"
+  ],
+  "rows": [
+    {
+      "guards": [
+        {
+          "id": "voltage_of_diagnostic_antenna:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "voltage_of_diagnostic_antenna"
+          ]
+        },
+        {
+          "id": "voltage_of_diagnostic_antenna:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "voltage_of_diagnostic_antenna"
+          ]
+        }
+      ],
+      "id": "voltage_of_diagnostic_antenna",
+      "identity": {
+        "id": "voltage_of_diagnostic_antenna",
+        "kind": "standard_name",
+        "target_id": "voltage_of_diagnostic_antenna"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "properties": {
+              "name_stage": "exhausted",
+              "status": "draft"
+            }
+          },
+          "id": "voltage_of_diagnostic_antenna:restore-prior-stage",
+          "kind": "set_properties",
+          "order": 0,
+          "participant_id": "voltage_of_diagnostic_antenna"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "voltage_of_diagnostic_antenna",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    }
+  ],
+  "schema": "imas-codex.repair-authority.v1",
+  "selection": {
+    "id": "artifact-rows",
+    "mode": "exact_complete_signed_cohort",
+    "predicate": "artifact-rows"
+  },
+  "signature": {
+    "canonicalization": "json-sort-keys-v1",
+    "sha256": "47db0a5ae5221c304a6fadc6791a0cbe0582a8af6eee55dba6b37d5c82edbc85"
+  }
+}

@@ -918,11 +918,13 @@ def retarget_standard_name_sources(
         CALL (old, new) {
           WITH old AS drained, new AS holder
           __LAST_SOURCE_SUPERSEDE__
-          RETURN count(*) AS superseded
         }
-        RETURN size(moved) AS moved
+        RETURN size(moved) AS moved,
+               superseded_old_id AS superseded_old_id,
+               superseded_new_id AS superseded_new_id
         """
     from imas_codex.standard_names.source_invariant import (
+        record_supersede_receipts,
         supersede_drained_name_cypher,
     )
 
@@ -953,15 +955,23 @@ def retarget_standard_name_sources(
         run_id=run_id,
         retired_name_stages=sorted(_RETIRED_NAME_STAGES),
         expected_binding_names=sorted(comparison_expected_names),
-        supersede_reason=reason,
-        supersede_origin=origin,
-        supersede_run_id=run_id,
     )
     moved = int(rows[0].get("moved", 0)) if rows else 0
     if moved != len(admitted_source_ids):
         raise RuntimeError(
             "source migration compare-and-set changed before mutation: "
             f"expected {len(admitted_source_ids)}, moved {moved}"
+        )
+    drained_old = rows[0].get("superseded_old_id") if rows else None
+    drained_new = rows[0].get("superseded_new_id") if rows else None
+    if drained_old:
+        record_supersede_receipts(
+            gc,
+            [(drained_old, drained_new)],
+            operation="last_source_supersede",
+            reason=reason,
+            origin=origin,
+            run_id=run_id,
         )
     if record_change:
         record_standard_name_change(

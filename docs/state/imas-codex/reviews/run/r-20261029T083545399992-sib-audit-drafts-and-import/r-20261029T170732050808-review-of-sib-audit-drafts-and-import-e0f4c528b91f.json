@@ -1,0 +1,57 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own baseline_suite and after_suite: both arms report failure_count 1 with the same id tests/standard_names/test_export_determinism.py::TestManifestDeterminism::test_no_commit_uses_stable_unversioned_timestamp, so base ids minus head ids is empty. suite-head3.log:739 and suite-base3.log both end in EXIT=1 with that id as their only FAILED line; the manifest attributes it to the SOURCE_DATE_EPOCH pin shared by both arms.",
+  "call_sites": [
+    "imas_codex/standard_names/graph_store/graph_catalog.py:158",
+    "imas_codex/standard_names/graph_store/graph_catalog.py:168",
+    "imas_codex/standard_names/graph_store/graph_catalog.py:2210",
+    "imas_codex/standard_names/graph_store/graph_catalog.py:531"
+  ],
+  "call_sites_emission": "listed",
+  "completed_at": "2026-10-29T17:15:53.741Z",
+  "dispatched_at": "2026-10-29T17:09:18Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-audit-drafts-and-import.html",
+      "id": "f0284999766",
+      "line": 47,
+      "severity": "non-blocking",
+      "text": "The base-arm bullet attributes the one-test difference to 'the added absent-leaf test', but that test is @pytest.mark.graph (tests/standard_names/test_catalog_import_binds_published_paths.py:135) and the default addopts deselect graph (pyproject.toml:1084-1091); the two arms both collect 8548 tests and the difference is a skip-status flip (12 skipped at base vs 11 at head, from the worktree-versus-archive git guard at tests/standard_names/test_pipeline_version.py:53), so line 46's 'both arms run the same way ... so neither depends on a git checkout' is also contradicted by the log headers."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "Verified the int-subclass write result and the binding read through graph_catalog.py:158, :168 and :2210, and confirmed no production module reads result.unbound_paths (only the writer's logger.warning at graph_catalog.py:471 and :531 surfaces it).",
+    "diff": "Read both commits against e48d99642: b5313743a replaces the string-built container leaf with a graph-confirmed one and adds the orphan-array test, e0f4c528b rewrites the fragment's binding and gate sections; no path outside the declared scope.",
+    "done_when": "The done-when asks for both new tests failing on main and passing at head plus zero added failure ids; negative-control-main2.log carries all five new ids failing at base with EXIT=1, head-new7.log carries 5 passed with EXIT=0, and the two suite arms share their single failing id so added ids are 0, though the arms still differ in skip status so they are not strictly like-for-like.",
+    "goal": "The node goal is that the source audit reports sourceless live drafts and the catalog import binds every published DD leaf path or reports it; the reviewed delta advances the import half by refusing to bind a container whose leaf node is absent, and graph_catalog.py:466 now returns reason leaf_not_found on the write result.",
+    "manifest": "Read; it records the gate command verbatim, the three log paths, both suite arms with the shared failure id and an environment attribution for it, the five-test negative control and a rubric line for every dimension.",
+    "write_paths": "The declared paths are export.py, graph_catalog.py, the two new test files, the evidence fragment and the figure directory; git diff --stat e48d99642 e0f4c528b lists only graph_catalog.py, tests/standard_names/test_catalog_import_binds_published_paths.py and the fragment, all inside that set."
+  },
+  "justifications": {
+    "durability": "negative-control-main2.log fails test_container_whose_leaf_is_absent_is_reported at base (EXIT=1) and head-new7.log passes it at head, and its assertion compares against a literal expected dict rather than any value it handed in.",
+    "evidence": "suite-head3.log:739 (1 failed, 8536 passed) and suite-base3.log (1 failed, 8535 passed) share the single failing id, but the arms are 8548 collected both and differ 12 skipped vs 11, so they are not fully like-for-like and the fragment's explanation of the one-test difference is wrong.",
+    "fit": "graph_catalog.py:466-470 names the new reason by mechanism (leaf_not_found / no_bindable_leaf) and both added CYPHER aliases are mechanism-named, matching the module's existing result idiom at graph_catalog.py:27-41.",
+    "goal_fidelity": "graph_catalog.py:440-470 makes a resolved leaf count only when the graph returns it, so the container-with-absent-leaf case the node goal forbids is now reported instead of silently unbound.",
+    "reuse": "_published_dd_paths_by_name now delegates to source_paths.split_source_paths and merge_source_paths (graph_catalog.py:54-72), closing the prior duplication finding; no shared owner exists for the container-to-leaf reduction, which stays inside the pairing read at graph_catalog.py:424-443.",
+    "scope_discipline": "git diff --stat e48d99642 e0f4c528b shows exactly the three declared paths - graph_catalog.py, the import test and the evidence fragment - and nothing else."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The node goal is that the source audit reports sourceless live drafts and the catalog import binds every published DD leaf path or reports it; this delta advances the import half, and imas_codex/standard_names/graph_store/graph_catalog.py:440-470 now reports a container whose leaf node is absent instead of leaving it silently unbound.\nVERDICT done_when: The done-when asks for both new tests failing on main and passing at head with zero added failure ids; negative-control-main2.log carries all five new ids failing at base with EXIT=1, head-new7.log carries 5 passed with EXIT=0, and suite-head3.log:739 and suite-base3.log share their single failing id, but both arms collect 8548 tests and differ 11 vs 12 skipped, so they are not strictly like-for-like.\nVERDICT write_paths: The declared paths are imas_codex/standard_names/export.py, imas_codex/standard_names/graph_store/graph_catalog.py, the two new test files, docs/evidence/fragments/sn-integrity-backlog/sib-audit-drafts-and-import.html and the figure directory; git diff --stat e48d99642 e0f4c528b lists exactly graph_catalog.py, tests/standard_names/test_catalog_import_binds_published_paths.py and the fragment, all inside that set.\nVERDICT manifest: Read; /home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T083545399992-sib-audit-drafts-and-import/manifest.md records the gate command verbatim, both suite arms with their shared failure id and an environment attribution, the five-test negative control at /tmp/reckon-crew-scratch/r-20261029T083545399992-sib-audit-drafts-and-import/negative-control-main2.log, and a rubric line for all six dimensions.\nVERDICT diff: Read both commits against e48d99642: b5313743a (graph_catalog.py:423-470 and tests/standard_names/test_catalog_import_binds_published_paths.py:33-164) confirms the container leaf with a graph lookup and reports leaf_not_found, e0f4c528b rewrites the fragment's binding and gate bullets; no path outside the declared scope.\nCALL_SITES: imas_codex/standard_names/graph_store/graph_catalog.py:158, imas_codex/standard_names/graph_store/graph_catalog.py:168, imas_codex/standard_names/graph_store/graph_catalog.py:2210, imas_codex/standard_names/graph_store/graph_catalog.py:531\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: graph_catalog.py:440-470 makes a resolved leaf count only when the graph returns it, so the absent-leaf container the goal forbids is reported rather than silently unbound.\nSCORE evidence: 15\nJUSTIFICATION evidence: suite-head3.log:739 (1 failed, 8536 passed) and suite-base3.log (1 failed, 8535 passed) share the one failing id, but both collect 8548 tests and differ 12 vs 11 skipped, so the arms are not fully like-for-like and fragment:47 misnames the difference.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat e48d99642 e0f4c528b lists only graph_catalog.py, tests/standard_names/test_catalog_import_binds_published_paths.py and the evidence fragment, all inside the declared write paths.\nSCORE durability: 18\nJUSTIFICATION durability: negative-control-main2.log fails test_container_whose_leaf_is_absent_is_reported at base (EXIT=1) and head-new7.log passes it at head, and its assertion at tests/standard_names/test_catalog_import_binds_published_paths.py:146-148 compares against a literal expected dict rather than a value it handed in.\nSCORE fit: 18\nJUSTIFICATION fit: graph_catalog.py:466-470 names the reasons by mechanism and the change follows the module's existing write-result idiom at graph_catalog.py:27-41.\nSCORE reuse: 19\nJUSTIFICATION reuse: _published_dd_paths_by_name now delegates to source_paths.split_source_paths and merge_source_paths (graph_catalog.py:54-72), closing the prior duplication, and no shared owner exists for the container-to-leaf reduction kept at graph_catalog.py:424-443.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-audit-drafts-and-import.html:47 non-blocking: the base-arm bullet attributes the one-test difference to 'the added absent-leaf test', but that test is @pytest.mark.graph (tests/standard_names/test_catalog_import_binds_published_paths.py:135) and the default addopts deselect graph (pyproject.toml:1084-1091); both arms collect 8548 tests and the difference is a skip-status flip (12 vs 11 skipped, from the git guard at tests/standard_names/test_pipeline_version.py:53), so line 47's explanation and line 46's 'neither depends on a git checkout' are both contradicted by the log headers.\n",
+  "review_run_id": "r-20261029T170732050808-review-of-sib-audit-drafts-and-import-e0f4c528b91f",
+  "reviewed_base_sha": "e48d9964266e48e1e546d234851ec105d8fa4c4f",
+  "reviewed_head_sha": "e0f4c528b91f70f273f044e1de2be32be6d44a55",
+  "reviewed_run_id": "r-20261029T083545399992-sib-audit-drafts-and-import",
+  "scores": {
+    "durability": 18,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T17:19:10.085670+00:00",
+  "total": 108
+}

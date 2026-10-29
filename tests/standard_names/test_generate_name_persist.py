@@ -9,6 +9,7 @@ Tests mock :class:`GraphClient` — no live Neo4j required.
 
 from __future__ import annotations
 
+import re
 from contextlib import contextmanager
 from unittest.mock import MagicMock, call, patch
 
@@ -478,7 +479,14 @@ def test_candidate_stage_reserves_missing_target_under_source_fence() -> None:
     assert "reservation.claim_token = b.claim_token" in lock_cypher
     assert "reservation.claim_seq = b.claim_seq" in lock_cypher
     assert "reservation.created_target = true" in lock_cypher
-    assert "HAS_STANDARD_NAME" not in lock_cypher
+    # The projection exception reads an edge type through a parameter and never
+    # writes one, so the guard is that no write clause names the parameter —
+    # not that the edge's spelling is absent from a statement that must read it.
+    assert lock_cypher.count("$projection_edge") == 1
+    assert "type(projection) = $projection_edge" in lock_cypher
+    assert not re.search(
+        r"(?i)(create|merge|delete)\s*\([^)]*:\s*\$projection_edge", lock_cypher
+    )
     cleanup_cypher = _transaction_call(tx, "b.preserve_current = true").args[0]
     assert "b.preserve_current = true" in cleanup_cypher
     # Target existence probe, binding lock, stale-reservation cleanup.

@@ -219,6 +219,12 @@ _SIDECAR_NAME_FIELDS: tuple[str, ...] = (
 # These identity-specific holds take precedence over generic lifecycle gates.
 # Each reason names the unresolved authority condition so the exclusion ledger
 # stays reviewable and a hold is removed only when that condition is resolved.
+#: Name stages the export population is drawn from. A sourceless name in one
+#: of these stages would ship without a producer, so it blocks the release. A
+#: live name in any other stage is a draft: it does not ship, so its missing
+#: source is reported on the audit and leaves the release outcome unchanged.
+_SHIPPING_NAME_STAGES: frozenset[str] = frozenset({"accepted", "approved"})
+
 _RELEASE_IDENTITY_HOLDS: dict[str, tuple[str, str]] = {
     "fast_ion_charge_state_power_at_inside_flux_surface": (
         "release_hold_dd_recipient_unresolved",
@@ -412,6 +418,10 @@ class ExportReport:
     # rather than a release blocker; they are listed here so the exclusion
     # stays visible in the report.
     dormant_sourceless_names: list[dict[str, Any]] = field(default_factory=list)
+    # Sourceless live names at a stage that does not ship. A draft is work in
+    # progress: it never reaches the export population, so its missing source
+    # is reported here and leaves the release outcome alone.
+    sourceless_draft_names: list[dict[str, Any]] = field(default_factory=list)
 
     def record_exclusions(self, records: list[ExclusionRecord]) -> None:
         """Append identity-bearing exclusions and refresh compatibility counts."""
@@ -493,6 +503,10 @@ class ExportReport:
             "dormant_sourceless": {
                 "count": len(self.dormant_sourceless_names),
                 "names": list(self.dormant_sourceless_names),
+            },
+            "sourceless_drafts": {
+                "count": len(self.sourceless_draft_names),
+                "names": list(self.sourceless_draft_names),
             },
             "role_metadata": {
                 "entries": self.role_entry_count,
@@ -3029,25 +3043,50 @@ def run_export(
     from imas_codex.standard_names.graph_store.graph_supersession import (
         classify_sourceless_standard_names,
     )
+    from imas_codex.standard_names.source_invariant import find_sourceless_live_names
 
     with GraphClient() as gc:
         source_audit = classify_sourceless_standard_names(gc)
-    # The gate counts live names only. An exhausted name never reaches the
-    # export population and is never released, so its missing source is
-    # dormant: it is listed on the report and left out of the gate. A name
-    # listed in _RELEASE_IDENTITY_HOLDS leaves through the release-hold path
-    # instead, so the gate does not count it either. Every other stage still
-    # blocks.
+        # The writer invariant is the authority on which live names are
+        # sourceless; the classifier's population says the same thing from the
+        # source records, and asking the invariant keeps the reported drafts
+        # identical to the set a writer would refuse. Both reads share one
+        # handle and both stay inside it.
+        confirmed_sourceless = set(
+            find_sourceless_live_names(
+                gc,
+                [
+                    row["id"]
+                    for row in source_audit
+                    if row["population"] in {"dropped_edge", "never_bound"}
+                ],
+            )
+        )
+    # The gate counts the stages that ship. A name in a draft stage never
+    # reaches the export population, so a missing source on it is reported and
+    # leaves the release outcome alone — a draft does not ship. An exhausted
+    # name never reaches the export population and is never released, so its
+    # missing source is dormant: it is listed on the report and left out of the
+    # gate. A name listed in _RELEASE_IDENTITY_HOLDS leaves through the
+    # release-hold path instead, so the gate does not count it either. Every
+    # other stage still blocks.
     sourceless = [
         row
         for row in source_audit
         if row["population"] in {"dropped_edge", "never_bound"}
     ]
     dormant_sourceless = [row for row in sourceless if row["name_stage"] == "exhausted"]
+    draft_sourceless = [
+        row
+        for row in sourceless
+        if row["name_stage"] != "exhausted"
+        and row["name_stage"] not in _SHIPPING_NAME_STAGES
+    ]
     source_losses = [
         row
         for row in sourceless
-        if row["name_stage"] != "exhausted" and row["id"] not in _RELEASE_IDENTITY_HOLDS
+        if row["name_stage"] in _SHIPPING_NAME_STAGES
+        and row["id"] not in _RELEASE_IDENTITY_HOLDS
     ]
     report.dormant_sourceless_names = [
         {
@@ -3056,6 +3095,15 @@ def run_export(
             "population": row["population"],
         }
         for row in dormant_sourceless
+    ]
+    report.sourceless_draft_names = [
+        {
+            "name": row["id"],
+            "name_stage": row["name_stage"],
+            "population": row["population"],
+        }
+        for row in draft_sourceless
+        if row["id"] in confirmed_sourceless
     ]
     if source_losses:
         report.gate_results.append(

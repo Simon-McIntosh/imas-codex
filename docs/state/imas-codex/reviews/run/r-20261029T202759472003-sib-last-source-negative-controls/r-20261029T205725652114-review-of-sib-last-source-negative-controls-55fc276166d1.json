@@ -1,0 +1,61 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own arms: baseline_suite at 049597eb5 lists 13 failure ids in test_catalog_layout_hierarchy, test_manifest_generability and test_review_cascade, and after_suite at fc562e019 lists none, so the change adds zero ids and all 13 pre-existing ids are resolved rather than carried.",
+  "call_site_count": 6,
+  "call_sites": [
+    "imas_codex/standard_names/graph_store/graph_source_bindings.py:1707",
+    "imas_codex/standard_names/graph_store/graph_source_bindings.py:1736",
+    "imas_codex/standard_names/edit.py:1936",
+    "imas_codex/standard_names/graph_store/graph_refinement.py:1321",
+    "imas_codex/standard_names/graph_store/graph_supersession.py:4132",
+    "imas_codex/standard_names/provenance_lifecycle.py:2223"
+  ],
+  "completed_at": "2026-10-29T21:04:46.389Z",
+  "dispatched_at": "2026-10-29T20:59:10Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_last_source_supersede.py",
+      "line": "509",
+      "severity": "non-blocking",
+      "text": "non-blocking: the duck-typed test asserts the known non-atomic outcome (the move committed, no receipt) which the brief asked for and which the manifest reports under outside_scope, but that makes it a test of a defect: repairing graph_source_bindings.py:1676 to give that branch a transaction will redden it, so the repair must update this test in the same commit or it will read as a regression."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 6 production call site(s)",
+    "diff": "read commit by commit against 049597ebb5; fc562e019 adds three tests and two helpers to the test file and 55fc27616 adds the evidence fragment, together 236 lines inside the declared scope with no product source touched.",
+    "done_when": "the done_when requires both negative controls recorded and a gate adding zero failure ids; the manifest records logs/negative-control-atomicity.log and logs/negative-control-record-change.log each at 1 failed / EXIT=1 on the named test, and suite-baseline.log at 13 failed against suite-after.log at 0 failed, so zero ids are added.",
+    "goal": "the node's goal is to guard the last-source supersede's atomicity and its drained receipt with tests that fail when reverted, and tests/standard_names/test_last_source_supersede.py:409 and :440 add exactly those two guards plus a third that documents the non-GraphClient branch.",
+    "manifest": "read; it states the -m graph head arm 11 passed EXIT=0, both mutations 1 failed EXIT=1, the base suite 13 failed / 8520 passed and this tree 8537 passed / 0 failed, and reports the duck-typed branch under outside_scope rather than changing product code.",
+    "write_paths": "the manifest declares tests/standard_names/test_last_source_supersede.py, the evidence fragment and a figures directory; the diff touches the first two only, and every path in it is inside them."
+  },
+  "justifications": {
+    "durability": "reinstating the record_change guard around the drained receipt at provenance_lifecycle.py:969 reddens test_retarget_writes_the_drained_receipt_when_no_change_is_recorded (logs/negative-control-record-change.log), and reverting graph_source_bindings.py:1676 to two autocommit queries reddens test_failed_receipt_rolls_back_the_move_and_the_supersession.",
+    "evidence": "both negative-control logs end in a bare EXIT=1 with the named test id under FAILED, and logs/suite-baseline.log records 13 pre-existing ids against 0 in logs/suite-after.log, though logs/graph-head.log's header names revision 049597eb5 rather than the fc562e019 the tests were committed at.",
+    "fit": "the added helpers at test_last_source_supersede.py:390 and :400 follow the file's existing graph-read idiom set by _producer_of at :121 and _receipt_names at :97, and every added name states the behaviour with no plan or ticket label.",
+    "goal_fidelity": "tests/standard_names/test_last_source_supersede.py:409 makes the receipt writer refuse and asserts the move and supersession rolled back, and :440 drives record_change=False as every production retarget caller does, which are the two properties the prior review at graph_source_bindings.py:1678 and provenance_lifecycle.py:967 found unguarded.",
+    "reuse": "the additions reuse _producer_of, _lifecycle, _receipt_names and _claim_seed already in that file, and a capability search over tests/ for a query-only client fake found only tests/graph/test_create_nodes_create_only.py:35 FakeSession, which models MERGE results rather than a transaction-free client, so _DuckTypedClient extends no owner.",
+    "scope_discipline": "the diff against 049597eb5 touches only tests/standard_names/test_last_source_supersede.py and docs/evidence/fragments/sn-integrity-backlog/sib-last-source-negative-controls.html, both declared, and the product-code mutations appear in no commit."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to guard the last-source supersede's atomicity and its drained receipt with tests that fail when reverted, and tests/standard_names/test_last_source_supersede.py:409 and :440 add exactly those two guards plus a third that documents the non-GraphClient branch.\nVERDICT done_when: the done_when requires both negative controls recorded and a gate adding zero failure ids; the manifest records logs/negative-control-atomicity.log and logs/negative-control-record-change.log each at 1 failed / EXIT=1 on the named test, and suite-baseline.log at 13 failed against suite-after.log at 0 failed, so zero ids are added.\nVERDICT write_paths: the manifest declares tests/standard_names/test_last_source_supersede.py, the evidence fragment and a figures directory; the diff touches the first two only, and every path in it is inside them.\nVERDICT manifest: read; it states the -m graph head arm 11 passed EXIT=0, both mutations 1 failed EXIT=1, the base suite 13 failed / 8520 passed and this tree 8537 passed / 0 failed, and reports the duck-typed branch under outside_scope rather than changing product code.\nVERDICT diff: read commit by commit against 049597ebb5; fc562e019 adds three tests and two helpers to the test file and 55fc27616 adds the evidence fragment, together 236 lines inside the declared scope with no product source touched.\nCALL_SITES: imas_codex/standard_names/graph_store/graph_source_bindings.py:1707, imas_codex/standard_names/graph_store/graph_source_bindings.py:1736, imas_codex/standard_names/edit.py:1936, imas_codex/standard_names/graph_store/graph_refinement.py:1321, imas_codex/standard_names/graph_store/graph_supersession.py:4132, imas_codex/standard_names/provenance_lifecycle.py:2223\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: tests/standard_names/test_last_source_supersede.py:409 makes the receipt writer refuse and asserts the move and supersession rolled back, and :440 drives record_change=False as every production retarget caller does, which are the two properties the prior review at graph_source_bindings.py:1678 and provenance_lifecycle.py:967 found unguarded.\nSCORE evidence: 18\nJUSTIFICATION evidence: both negative-control logs end in a bare EXIT=1 with the named test id under FAILED, and logs/suite-baseline.log records 13 pre-existing ids against 0 in logs/suite-after.log, though logs/graph-head.log's header names revision 049597eb5 rather than the fc562e019 the tests were committed at.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff against 049597eb5 touches only tests/standard_names/test_last_source_supersede.py and docs/evidence/fragments/sn-integrity-backlog/sib-last-source-negative-controls.html, both declared, and the product-code mutations appear in no commit.\nSCORE durability: 19\nJUSTIFICATION durability: reinstating the record_change guard around the drained receipt at provenance_lifecycle.py:969 reddens test_retarget_writes_the_drained_receipt_when_no_change_is_recorded (logs/negative-control-record-change.log), and reverting graph_source_bindings.py:1676 to two autocommit queries reddens test_failed_receipt_rolls_back_the_move_and_the_supersession.\nSCORE fit: 18\nJUSTIFICATION fit: the added helpers at test_last_source_supersede.py:390 and :400 follow the file's existing graph-read idiom set by _producer_of at :121 and _receipt_names at :97, and every added name states the behaviour with no plan or ticket label.\nSCORE reuse: 18\nJUSTIFICATION reuse: the additions reuse _producer_of, _lifecycle, _receipt_names and _claim_seed already in that file, and a capability search over tests/ for a query-only client fake found only tests/graph/test_create_nodes_create_only.py:35 FakeSession, which models MERGE results rather than a transaction-free client, so _DuckTypedClient extends no owner.\nFINDING tests/standard_names/test_last_source_supersede.py:509 non-blocking: the duck-typed test asserts the known non-atomic outcome (the move committed, no receipt) which the brief asked for and which the manifest reports under outside_scope, but that makes it a test of a defect: repairing graph_source_bindings.py:1676 to give that branch a transaction will redden it, so the repair must update this test in the same commit or it will read as a regression.",
+  "review_run_id": "r-20261029T205725652114-review-of-sib-last-source-negative-controls-55fc276166d1",
+  "reviewed_base_sha": "049597eb532fe9a84aad964ea1c74d8d3b30d4d7",
+  "reviewed_head_sha": "55fc276166d1c0827e9e016414dc373a264b186f",
+  "reviewed_run_id": "r-20261029T202759472003-sib-last-source-negative-controls",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T21:07:53.184983+00:00",
+  "total": 112
+}

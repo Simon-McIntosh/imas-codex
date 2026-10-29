@@ -113,7 +113,13 @@ _SWEEP_QUERIES: Final[list[tuple[str, str]]] = [
           AND coalesce(s.attempt_count, 0) >= $max_compose_attempts
         SET s.status     = 'failed',
             s.failed_at  = datetime(),
-            s.last_error = 'compose claim-attempt cap reached',
+            s.last_error = CASE
+              WHEN s.last_error IS NULL OR s.last_error = ''
+                OR s.last_error STARTS WITH 'compose claim-attempt cap reached'
+              THEN 'compose claim-attempt cap reached'
+              ELSE 'compose claim-attempt cap reached; last refusal: ' +
+                   s.last_error
+            END,
             s.claim_token = null,
             s.claimed_at  = null
         RETURN count(*) AS n
@@ -162,7 +168,13 @@ def _orphan_sweep_tick(*, timeout_s: int) -> dict[str, int]:
             counts[label] = rows[0]["n"] if rows else 0
 
         if counts.get(_PARKING_LABEL):
-            recorded = record_dispositions_for_undisposed_parks(gc=gc)
+            from imas_codex.standard_names.graph_store.graph_foundation import (
+                get_services,
+            )
+
+            recorded = record_dispositions_for_undisposed_parks(
+                services=get_services(), gc=gc
+            )
             logger.info(
                 "Recorded %d dispositions for sources parked at the compose cap: %s",
                 recorded["written"],
