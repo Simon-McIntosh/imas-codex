@@ -305,6 +305,7 @@ def classify_row(
                 "in_latest_entry": item.get("in_latest_entry"),
                 "verdict": verdict,
                 "why": why,
+                "action": _path_action(verdict, why, live_holders),
                 "dd_data_type": (meta or {}).get("data_type"),
                 "dd_units": (meta or {}).get("units"),
                 "dd_node_type": (meta or {}).get("node_type"),
@@ -462,6 +463,19 @@ def _judge_path(
         "true loss",
         f"DD {meta.get('dd_version')} {meta.get('data_type')} leaf, units {path_unit!r} match the name, and no live name holds it",
     )
+
+
+def _path_action(verdict: str, why: str, live_holders: list[str]) -> str:
+    """The proposal for one published path, so no path is left without one."""
+    if verdict == "true loss":
+        return "rebind"
+    if verdict == "legitimate move":
+        if "not in the name's lineage" in why:
+            return "keep-or-retire-ruling"
+        return "keep"
+    if verdict == "invalid published binding":
+        return "leave-unsourced"
+    return "no-action"
 
 
 def _row_verdict(path_verdicts: list[str]) -> str:
@@ -671,7 +685,7 @@ def render_html(data: dict) -> str:
         paths_html = "<br>".join(
             f"<code>{esc(j['path'])}</code> "
             f"<span class='mute'>[{esc(j['census_class'])}]</span> "
-            f"&rarr; {esc(j['verdict'])}: {esc(j['why'])}"
+            f"&rarr; {esc(j['verdict'])} <span class='mute'>({esc(j['action'])})</span>: {esc(j['why'])}"
             for j in row["judged_paths"]
         )
         res = row["resolution"]
@@ -768,6 +782,7 @@ def compact(data: dict) -> dict:
         "path",
         "census_class",
         "verdict",
+        "action",
         "why",
         "dd_data_type",
         "dd_units",
