@@ -86,8 +86,8 @@ def supersede_drained_name_cypher(
     if embedded:
         return (
             f"""WITH {name}, {successor},
-             CASE WHEN {test} THEN true ELSE false END AS drained
-        FOREACH (_ IN CASE WHEN drained"""
+             CASE WHEN {test} THEN true ELSE false END AS supersedes_predecessor
+        FOREACH (_ IN CASE WHEN supersedes_predecessor"""
             + """ THEN [1] ELSE [] END |
           """
             + update
