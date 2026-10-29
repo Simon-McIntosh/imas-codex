@@ -94,9 +94,14 @@ def census() -> dict:
                 MATCH (sn:StandardName)
                 WHERE sn.id IN $ids
                 OPTIONAL MATCH (src:StandardNameSource)-[:PRODUCED_NAME]->(sn)
+                OPTIONAL MATCH (sn)-[:HAS_INTERNAL_CHANGE]->(
+                    change:StandardNameChange {operation: 'adopt_pending_projection'})
                 RETURN sn.id AS id, sn.name_stage AS name_stage,
                        sn.status AS status,
-                       size([x IN collect(DISTINCT src) WHERE x IS NOT NULL]) AS producers
+                       sn.description AS description, sn.unit AS unit,
+                       size([x IN collect(DISTINCT src) WHERE x IS NOT NULL]) AS producers,
+                       size([x IN collect(DISTINCT change) WHERE x IS NOT NULL])
+                           AS adopt_receipts
                 ORDER BY sn.id
                 """,
                 ids=ROSTER_NAMES,
@@ -125,6 +130,12 @@ def census() -> dict:
         "gate_blocking_ids": blocking_ids,
         "gate_roster_blocking": roster_blocking,
         "gate_audit_population": len(audit),
+        "roster_stubs_with_producer": sorted(
+            row["id"] for row in stubs if row["producers"] > 0
+        ),
+        "roster_stubs_adopted": sorted(
+            row["id"] for row in stubs if row["adopt_receipts"] > 0
+        ),
     }
 
 
@@ -156,7 +167,9 @@ def compose(reset: bool, cost_limit: float, minutes: float, log_path: Path) -> i
         log.write(header)
         log.flush()
         proc = subprocess.run(cmd, stdout=log, stderr=subprocess.STDOUT, env=env)
-        log.write(f"\n# finished: {time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())}\n")
+        log.write(
+            f"\n# finished: {time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())}\n"
+        )
         log.write(f"EXIT={proc.returncode}\n")
     return proc.returncode
 
@@ -182,7 +195,9 @@ def main() -> int:
             f"roster_sources={payload['roster_sources_present']} "
             f"roster_stubs={payload['roster_stubs_present']} "
             f"gate_blocking={payload['gate_blocking_count']} "
-            f"roster_blocking={len(payload['gate_roster_blocking'])}"
+            f"roster_blocking={len(payload['gate_roster_blocking'])} "
+            f"stubs_producing={len(payload['roster_stubs_with_producer'])} "
+            f"stubs_adopted={len(payload['roster_stubs_adopted'])}"
         )
         return 0
     return compose(

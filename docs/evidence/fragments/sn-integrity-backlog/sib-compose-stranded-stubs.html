@@ -1,117 +1,169 @@
-<h2 id="sib-compose-stranded-stubs">sib-compose-stranded-stubs — seven pending stubs whose sources composition cannot bind</h2>
+<h2 id="sib-compose-stranded-stubs">sib-compose-stranded-stubs — composing the seven pending stubs that stranded their DD sources</h2>
 
-<p class="sib-compose-stranded-stubs-status"><strong>Outcome: cause identified and measured; composition not landed.</strong>
-The seven names below block the export source gate and are its <em>entire</em> blocking set. The
-sanctioned scoped run was launched and completed, but it composed nothing: its pools reported
-<code>generate_name processed=0</code>, so no attempt was spent and the stubs remain sourceless.
-The route and the reason are recorded here so a resume needs no re-derivation.</p>
+<p class="sib-compose-stranded-stubs-status"><strong>Outcome: two of the seven landed; five refused again, with the collision now recorded.</strong>
+Composition now adopts an unowned pending projection stub on the path that actually writes a composed
+name, so two sources bound their own stub and reached <code>accepted</code>
+(<code>radial_coordinate_of_reflector</code>, <code>vertical_coordinate_of_reflector</code>). The
+export source gate's blocking set fell from seven to five. The remaining five still refuse with
+<code>candidate "…" has non-bindable name_stage "pending"</code>, and every one of them is a DD path
+whose own IMAS node projects onto that pending stub — so the refusal is not a projection it cannot
+see, and the condition that still fails is answered by neither the graph state nor the recorded
+message. That is the open question, stated below rather than guessed at.</p>
 
 <h3 id="sib-compose-stranded-stubs-cause">The cause, at its file and line</h3>
 
-<p>Each of the nine DD sources is projected onto a <code>pending</code> stub created
-2026-07-28. A composition candidate may bind a <code>pending</code> identity only when the same
-claim created it, and nothing else will adopt it:</p>
+<p>A composition candidate could not bind a <code>pending</code> target unless the claim that created
+it owned it, so each attempt generated a name, collided with the projection stub, released the claim,
+and counted the attempt against the cap. The chain, at the revision this node read (base
+<code>b6bd5682b</code>):</p>
 
 <ul>
-  <li><code>imas_codex/standard_names/graph_store/graph_foundation.py:98-105</code> —
+  <li><code>imas_codex/standard_names/graph_store/graph_foundation.py:98</code> —
       <code>_STABLE_BINDING_NAME_STAGES</code> is <code>{drafted, reviewed, accepted, approved}</code>;
       <code>pending</code> is not among them.</li>
-  <li><code>imas_codex/standard_names/graph_store/graph_source_bindings.py:1026-1036</code> —
-      <code>lifecycle_bindable</code> admits a pending target only when <code>owned.provisional</code>
-      holds and the owned edge carries <em>this</em> claim's token and sequence. A projection stub has
-      no such edge.</li>
-  <li><code>imas_codex/standard_names/graph_store/graph_source_bindings.py:1086-1091</code> —
-      <code>revivable_stages</code> is <code>{superseded, exhausted}</code>, so there is no dead-end
-      revival branch for a pending identity either.</li>
-  <li><code>imas_codex/standard_names/graph_store/graph_source_bindings.py:1183-1187</code> — the
-      refusal releases the claim, <em>retains</em> <code>attempt_count</code>, and writes
-      <code>standard-name binding collision: candidate … has non-bindable name_stage …</code>.</li>
+  <li><code>imas_codex/standard_names/graph_store/graph_source_bindings.py:1026-1036</code> (base
+      revision) — <code>lifecycle_bindable</code> admitted a pending target only through an own
+      provisional reservation, which a projection stub does not carry.</li>
+  <li><code>imas_codex/standard_names/graph_store/graph_source_bindings.py:1237-1266</code> (current
+      revision) — the refusal releases the claim, <em>retains</em> <code>attempt_count</code>, and
+      writes <code>standard-name binding collision: candidate "…" has non-bindable name_stage "…" at
+      composition attempt N</code>.</li>
   <li><code>imas_codex/standard_names/graph_store/graph_cost_and_claims.py:213</code> —
       <code>_MAX_COMPOSE_CLAIM_ATTEMPTS = 5</code>. At the cap,
-      <code>imas_codex/standard_names/orphan_sweep.py:109-123</code> parks the source
-      <code>failed</code> and <strong>overwrites</strong> <code>last_error</code> with
-      <code>compose claim-attempt cap reached</code>, which is why eight of the nine now classify as
-      <code>cause_not_recorded</code> rather than naming the collision that caused it.</li>
-  <li><code>imas_codex/standard_names/graph_store/graph_source_bindings.py:651-679</code> with
-      <code>graph_foundation.py:117-122</code> — the explicit (focused) claim path refuses earlier on
-      the same root: it withholds a source whose <code>PRODUCED_NAME</code> edge reaches a stage
-      outside <code>{superseded, exhausted}</code>.</li>
-  <li><code>imas_codex/standard_names/attachment_audit.py:2785-2790</code> — <code>sn attach</code>
-      cannot adopt them either; it requires a stable target stage, so <code>pending</code> is refused.</li>
+      <code>imas_codex/standard_names/orphan_sweep.py:118-120</code> parks the source
+      <code>failed</code>. Until this node's merge that statement overwrote <code>last_error</code>
+      with the bare cap message; it now appends <code>; last refusal: …</code>, which is why the
+      refusal text below survives parking.</li>
 </ul>
 
-<p>The recorded state carries a trap: <code>attempt_count</code> is <strong>0</strong> on all nine
-while <code>claim_seq</code> is 5–6 and <code>last_error</code> says the cap was reached. Something
-cleared the attempt counter after the parking, leaving the claim cap reading as unused beside a
-parked classification and a cap-reason message that no longer names the collision.</p>
+<p><strong>The sourceless-name generator.</strong> Those three lines compose one loop: a generated
+candidate that lands on its own pending projection stub is refused by the binding lock
+(<code>graph_source_bindings.py:1237-1266</code>), the attempt is charged against the cap
+(<code>graph_cost_and_claims.py:213</code>), and at the cap the source is parked
+(<code>orphan_sweep.py:118-120</code>) — while the stub it collided with keeps no
+<code>PRODUCED_NAME</code> edge and stays in the export gate's blocking set. Every trip round that
+loop manufactures one more live name with no source. The repair belongs to
+<code>sib-adopt-pending-projection-stubs</code>, which this node merged and measured; the loop is
+named here as a finding, not fixed here.</p>
 
-<h3 id="sib-compose-stranded-stubs-before">Before: sources, stubs and the gate</h3>
+<p>The recorded state also carried a trap: <code>attempt_count</code> read <strong>0</strong> on all
+nine sources while <code>claim_seq</code> was 5–6, so the cap read as unused beside a parked
+classification.</p>
+
+<h3 id="sib-compose-stranded-stubs-unpark">Unparking: the sanctioned path</h3>
+
+<p>A parked source is not claimable — <code>claim_generate_name_batch</code> selects
+<code>status='extracted'</code> only — and no reset rewinds a <code>failed</code> row:
+<code>clear_standard_names</code> returns only <code>composed</code>/<code>attached</code> sources to
+<code>extracted</code> (<code>graph_catalog_reset.py:1264-1279</code>). The sanctioned unpark is
+<code>sn retry --failed</code> (<code>imas_codex/cli/sn.py:7626</code> →
+<code>retry_failed_sources</code>), which writes a durable retry event before resetting the counters.
+Run twice, scoped to the roster's own paths and to nothing else:</p>
 
 <table>
-  <thead><tr><th>DD path</th><th>status</th><th>att</th><th>seq</th><th>parked disposition</th><th>producer</th></tr></thead>
+  <thead><tr><th>invocation</th><th>result</th><th>log</th></tr></thead>
   <tbody>
-    <tr><td><code>summary/line_average/n_i/neon/value</code></td><td>extracted</td><td>0</td><td>5</td><td>cause_not_recorded</td><td>none</td></tr>
-    <tr><td><code>spectrometer_x_ray_crystal/channel/reflector/sphere_centre/r</code></td><td>extracted</td><td>0</td><td>6</td><td>cause_not_recorded</td><td>none</td></tr>
-    <tr><td><code>spectrometer_x_ray_crystal/channel/reflector/sphere_centre/z</code></td><td>extracted</td><td>0</td><td>6</td><td>cause_not_recorded</td><td>none</td></tr>
-    <tr><td><code>soft_x_rays/channel/detector/radius</code></td><td>extracted</td><td>0</td><td>5</td><td>compose_not_applicable</td><td>none</td></tr>
-    <tr><td><code>edge_profiles/ggd/vorticity_over_r/diamagnetic</code></td><td>extracted</td><td>0</td><td>5</td><td>cause_not_recorded</td><td>none</td></tr>
-    <tr><td><code>plasma_profiles/ggd/vorticity_over_r/diamagnetic</code></td><td>extracted</td><td>0</td><td>5</td><td>cause_not_recorded</td><td>none</td></tr>
-    <tr><td><code>spectrometer_visible/channel/geometry_matrix/interpolated/phi</code></td><td>extracted</td><td>0</td><td>5</td><td>cause_not_recorded</td><td>none</td></tr>
-    <tr><td><code>summary/local/pedestal/velocity_phi/tritium/value</code></td><td>extracted</td><td>0</td><td>5</td><td>cause_not_recorded</td><td>none</td></tr>
-    <tr><td><code>summary/local/separatrix/velocity_phi/tritium/value</code></td><td>extracted</td><td>0</td><td>5</td><td>cause_not_recorded</td><td>none</td></tr>
+    <tr><td><code>sn retry --failed &lt;6 roster paths&gt; --dry-run</code></td><td>eligible 6 of 6</td><td><code>logs/gate-retry-unpark.log</code></td></tr>
+    <tr><td><code>sn retry --failed &lt;6 roster paths&gt; --reason …</code></td><td>retried 6 of 6</td><td><code>logs/gate-retry-unpark.log</code></td></tr>
+    <tr><td>second <code>sn retry --failed &lt;6 roster paths&gt;</code> before run 3</td><td>retried 6 of 6, the same six ids</td><td>console only; ids recorded in the manifest</td></tr>
   </tbody>
 </table>
 
-<p>Each of the nine paths carries exactly one <code>HAS_STANDARD_NAME</code> edge, to one of the seven
-stubs. Every stub is <code>name_stage=pending</code>, <code>status=draft</code>, with no
-<code>PRODUCED_NAME</code> edge and no <code>reservation_source_id</code>.</p>
+<p>No graph text was edited by hand at any point; every write went through a CLI verb.</p>
 
-<p><strong>Export source gate, before:</strong> <code>gate_blocking_count = 7</code>,
-<code>gate_roster_blocking = 7</code> — the gate's whole blocking set is these seven names and
-nothing else. The gate is read by the same classifier and the same filter
-<code>export.py:3029-3073</code> applies, over a population of
-<code>gate_audit_population = 13</code> live sourceless names. That the gate lists all seven is the
-negative control for the declared mutation: the instrument is shown to see the defect, so a later
-empty roster set would be an absence rather than a blind read.</p>
+<h3 id="sib-compose-stranded-stubs-collision">Did each attempt fail by colliding with its stub?</h3>
 
-<h3 id="sib-compose-stranded-stubs-run">The scoped run: calls and spend</h3>
+<p><strong>Confirmed, and quoted verbatim.</strong> The recorded refusals name the candidate and its
+stage:</p>
 
-<p><code>sn run --focus &lt;9 roster paths&gt; --names-only --cost-limit 1.00 --time 4</code>, seeded
-<code>9 focus source(s)</code> under <code>run_id=1ddea8eb…</code>. Recorded summary:</p>
+<pre>standard-name binding collision: candidate "line_averaged_neon_density" has non-bindable name_stage "pending" at composition attempt 5
+standard-name binding collision: candidate "radius_of_soft_xray_detector" has non-bindable name_stage "pending" at composition attempt 5
+standard-name binding collision: candidate "ratio_of_diamagnetic_vorticity_to_major_radius" has non-bindable name_stage "pending" at composition attempt 5
+standard-name binding collision: candidate "ratio_of_diamagnetic_vorticity_to_major_radius" has non-bindable name_stage "pending" at composition attempt 1</pre>
+
+<p>For the other three (<code>spectrometer_visible/channel/geometry_matrix/interpolated/phi</code>,
+<code>summary/local/pedestal/velocity_phi/tritium/value</code>,
+<code>summary/local/separatrix/velocity_phi/tritium/value</code>) the record is the bare
+<code>compose claim-attempt cap reached</code>: they were parked before the append fix existed, so
+the refusal that caused their attempts was overwritten at parking. Their collision is therefore
+<em>not</em> evidenced from the stored text — it is inferred from the same candidate reaching the
+same stub in the same run, and is recorded as inference rather than as a quotation.</p>
+
+<p><strong>Refuted for two of the seven.</strong> <code>radial_coordinate_of_reflector</code> and
+<code>vertical_coordinate_of_reflector</code> did <em>not</em> fail by colliding: the merged adoption
+exception let the claim take its own projection stub, and both sources finished
+<code>composed</code>.</p>
+
+<h3 id="sib-compose-stranded-stubs-run">The scoped runs: calls and spend</h3>
 
 <table>
-  <thead><tr><th>field</th><th>value</th></tr></thead>
+  <thead><tr><th>run</th><th>scope and caps</th><th>run_id</th><th>generate_name</th><th>review_name</th><th>spend</th></tr></thead>
   <tbody>
-    <tr><td>stop_reason</td><td>interrupted</td></tr>
-    <tr><td>cost_spent</td><td>0.0 USD of a 1.0 limit</td></tr>
-    <tr><td>names_composed</td><td>0</td></tr>
-    <tr><td>elapsed_s</td><td>590.3</td></tr>
-    <tr><td>pool generate_name</td><td>processed=0, spent=$0.0000</td></tr>
-    <tr><td>pool review_name / refine_name / enrich_parents</td><td>processed=0, spent=$0.0000</td></tr>
+    <tr><td>census only (read-only)</td><td>9 roster paths</td><td>—</td><td>—</td><td>—</td><td>$0.0000</td></tr>
+    <tr><td>scoped run 2</td><td><code>--focus &lt;9 paths&gt; --names-only --cost-limit 2.00 --time 15</code></td><td><code>af7b0ef1…</code></td><td>processed=2, spent=$0.0000</td><td>processed=2, spent=$0.0003</td><td>$0.0003 of $2.00</td></tr>
+    <tr><td>scoped run 3</td><td><code>--focus &lt;9 paths&gt; --names-only --cost-limit 2.00 --time 15</code></td><td><em>recorded in the log</em></td><td><em>recorded in the log</em></td><td><em>recorded in the log</em></td><td><em>recorded in the log</em></td></tr>
+  </tbody>
 </table>
 
-<p>Two facts belong together and neither alone explains the outcome. The focus pools did not start
-until 18:26:57Z, roughly 4.5 minutes into a 4-minute budget, because the preflight reconciles
-(vocab-gap, attachment-consistency, source-loss probe) consumed it — so the budget explanation is
-real. But the pools that did run then claimed <strong>zero</strong> sources, and
-<code>claim_seq</code> is unchanged at 5/6, which is a stronger statement: the claim path returned
-nothing while roughly five and a half minutes remained. The explicit claim query
-(<code>graph_source_bindings.py:651-679</code>) reads <code>holding</code> from a
-<code>PRODUCED_NAME</code> edge, and these sources have only a <code>FROM_DD_PATH</code> edge, so
-that is not the withholding either; the mechanism that returned zero is unresolved and is named as
-the open question rather than guessed at.</p>
+<p>Run 2 was interrupted at 00:39:31Z by an outer ten-minute process ceiling, not by its own budget:
+the pools took the stop signal, exited cleanly and reported their counters. Its own summary is
+therefore a partial draw, and it is quoted as such. The spend is under a hundredth of a cent because
+the compose model is served locally (<code>local/deepseek-v4.1-flash</code>), so the cap never
+bound.</p>
 
-<h3 id="sib-compose-stranded-stubs-next">What a resume does</h3>
+<h3 id="sib-compose-stranded-stubs-before">Before and after, per source</h3>
+
+<table>
+  <thead><tr><th>DD path</th><th>before</th><th>after run 2</th><th>producer</th></tr></thead>
+  <tbody>
+    <tr><td><code>spectrometer_x_ray_crystal/channel/reflector/sphere_centre/r</code></td><td>extracted, att 1</td><td>composed</td><td><code>radial_coordinate_of_reflector</code></td></tr>
+    <tr><td><code>spectrometer_x_ray_crystal/channel/reflector/sphere_centre/z</code></td><td>failed, att 5, cap</td><td>composed</td><td><code>vertical_coordinate_of_reflector</code></td></tr>
+    <tr><td><code>edge_profiles/ggd/vorticity_over_r/diamagnetic</code></td><td>extracted, att 2</td><td>extracted, att 3, collision recorded</td><td>none</td></tr>
+    <tr><td><code>plasma_profiles/ggd/vorticity_over_r/diamagnetic</code></td><td>extracted, att 2</td><td>failed, att 5, cap + refusal</td><td>none</td></tr>
+    <tr><td><code>soft_x_rays/channel/detector/radius</code></td><td>failed, att 5, cap</td><td>failed, att 5, cap + refusal</td><td>none</td></tr>
+    <tr><td><code>summary/line_average/n_i/neon/value</code></td><td>failed, att 5, cap</td><td>failed, att 5, cap + refusal</td><td>none</td></tr>
+    <tr><td><code>spectrometer_visible/channel/geometry_matrix/interpolated/phi</code></td><td>failed, att 5, cap</td><td>failed, att 5, cap</td><td>none</td></tr>
+    <tr><td><code>summary/local/pedestal/velocity_phi/tritium/value</code></td><td>failed, att 5, cap</td><td>failed, att 5, cap</td><td>none</td></tr>
+    <tr><td><code>summary/local/separatrix/velocity_phi/tritium/value</code></td><td>failed, att 5, cap</td><td>failed, att 5, cap</td><td>none</td></tr>
+  </tbody>
+</table>
+
+<p><strong>Export source gate, before and after:</strong> <code>gate_blocking_count</code> 7 → 5, and
+<code>gate_roster_blocking</code> 7 → 5. The gate is read by the same classifier and the same filter
+<code>export.py</code> applies, over the same live population. Listing all seven before the run is
+this node's negative control: the instrument is shown to see the defect, so a smaller set afterwards
+is a repair and not a blind read. Five of the seven remain, so the mutation is only partly
+discharged and is recorded as such.</p>
+
+<p><strong>Nothing outside the roster moved.</strong> The only sources written were the nine roster
+paths, and the only names were their seven projected stubs; <code>sn retry</code> was given the
+roster's exact paths and refused none of them, and no other source's <code>status</code>,
+<code>attempt_count</code> or <code>PRODUCED_NAME</code> edge changed.</p>
+
+<h3 id="sib-compose-stranded-stubs-next">What remains, and why</h3>
+
+<p>Five stubs stay pending with no producer, so the gate still lists them. The refused claim emits
+<code>non-bindable name_stage "pending"</code> — the message that means the adoption predicate was
+false — yet every condition that predicate tests reads as satisfied in the graph: the claimed source
+is <code>source_type='dd'</code>, the stub carries no reservation and no claim token, no
+<code>PRODUCED_NAME</code> edge reaches it, and the source's own <code>FROM_DD_PATH</code> node holds
+a <code>HAS_STANDARD_NAME</code> edge to exactly that stub. Two sources passed the same predicate in
+the same run. That contradiction is the open question: the refusal message names the one condition
+the graph says is met, so either the predicate reads a property the census does not, or the exception
+is not granted on the branch that composes those five. Resolving it needs the claim's own batch
+record, not another run.</p>
+
+<p>A second defect surfaced in run 2 and is recorded, not fixed:
+<code>RuntimeError('source claim changed during transactional name persistence')</code> raised ten
+times out of twenty-five generation calls, from
+<code>persist_generated_name_batch</code>'s transactional write. It costs a claim per occurrence and
+is independent of the collision above.</p>
 
 <ol>
-  <li>Re-run the scope with <code>--time 15</code> or more so the focus pools receive budget after
-      the preflight, and read <code>generate_name processed</code> to learn whether the claim
-      succeeds at all.</li>
-  <li>If composition then reports the binding collision, the only sanctioned route that gives the
-      identity a bindable stage is <code>sn run --focus &lt;paths&gt; --reset-to extracted</code>:
-      reset's <code>path_allowlist</code> is exact and fail-closed
-      (<code>graph_catalog_reset.py:851-866</code>), so it clears the seven stubs and nothing else,
-      and composition then creates the identity with a producer.</li>
-  <li>Read back per source that it produces exactly one live name, then re-run the census and require
-      <code>gate_roster_blocking = 0</code>.</li>
+  <li>Answer the open question against the claim's batch record, then re-run the scope with
+      <code>--time 15</code> and read <code>generate_name processed</code>.</li>
+  <li>Read back per source that it produces exactly one live name, and that each adopted stub carries
+      a description, a unit and an <code>adopt_pending_projection</code> receipt.</li>
+  <li>Re-run the census and require <code>gate_roster_blocking = 0</code> before the export source
+      gate is considered clear.</li>
 </ol>
