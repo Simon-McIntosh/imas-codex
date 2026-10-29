@@ -1,0 +1,973 @@
+{
+ "applies": [
+  {
+   "anchor": "electrostatic_potential_at_langmuir_probe_position",
+   "applied": null,
+   "batches_run": 2,
+   "cost": {
+    "calls_total": 9,
+    "per_name_usd": {
+     "electrostatic_potential": 0.09786,
+     "electrostatic_potential_at_langmuir_probe_position": 0.085865,
+     "floating_electrostatic_potential": 0.086354
+    },
+    "phases": {
+     "generate_docs": {
+      "calls": 3,
+      "usd": 0.26652
+     },
+     "review_docs": {
+      "calls": 6,
+      "usd": 0.003559
+     }
+    },
+    "run_ids": [
+     "91f40fdd-1e68-482b-b985-87724dd33b61",
+     "e1b005ab-2a9f-4089-b2f5-4dc7a78c33ad"
+    ],
+    "spend_usd": 0.270079
+   },
+   "cost_limit_unspent_usd": 1.7299,
+   "cost_limit_usd": 2.0,
+   "decision": null,
+   "dry_run_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T215047215974-shc-locus-final-apply/logs/dry-run-before-apply.log",
+   "error_line": null,
+   "exit_line": "EXIT=0",
+   "families_applied": 1,
+   "halt_reasons": null,
+   "halted": false,
+   "held_attachments": [
+    {
+     "dd_path": "ic_antennas/antenna/module/strap/geometry/arcs_of_circle/z",
+     "reason": "locus/source device mismatch: SN 'vertical_coordinate_of_coil_conductor' has hardware locus 'coil_conductor' but path 'ic_antennas/antenna/module/strap/geometry/arcs_of_circle/z' shares no device token with it",
+     "sn_id": "vertical_coordinate_of_coil_conductor"
+    }
+   ],
+   "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T215047215974-shc-locus-final-apply/logs/apply.log",
+   "members_accepted": 3,
+   "members_touched": 3,
+   "output": [
+    "             Run 91f40fdd\u2026              ",
+    "             Run e1b005ab\u2026              ",
+    "family electrostatic_potential  ",
+    "    docs scores: no member below threshold, none fell",
+    "apply: 1 family(ies) applied, 1 stamped.",
+    "docs scores: 0 member(s) below the acceptance threshold, 0 fell.",
+    "    For further information visit https://errors.pydantic.dev/2.12/v/value_error",
+    "    For further information visit https://errors.pydantic.dev/2.12/v/value_error",
+    "    For further information visit https://errors.pydantic.dev/2.12/v/value_error",
+    "    For further information visit https://errors.pydantic.dev/2.12/v/value_error"
+   ],
+   "output_note": "10 line(s) captured; full text in the log",
+   "physical_base": "electrostatic_potential",
+   "produced_summary": false,
+   "run_ids": [
+    "91f40fdd-1e68-482b-b985-87724dd33b61",
+    "e1b005ab-2a9f-4089-b2f5-4dc7a78c33ad"
+   ],
+   "run_ids_source": "selected from the exact LLMCost rows written between the apply log's own '# started' and '# ended' lines; the summary's scope run ids own none",
+   "run_selection": {
+    "all_claimed_names_in_roster": true,
+    "claimed_names": {
+     "91f40fdd-1e68-482b-b985-87724dd33b61": [
+      "electrostatic_potential_at_langmuir_probe_position"
+     ],
+     "e1b005ab-2a9f-4089-b2f5-4dc7a78c33ad": [
+      "electrostatic_potential",
+      "floating_electrostatic_potential"
+     ]
+    },
+    "pool_run_ids": [
+     "91f40fdd-1e68-482b-b985-87724dd33b61",
+     "e1b005ab-2a9f-4089-b2f5-4dc7a78c33ad"
+    ],
+    "pool_run_rows": {
+     "91f40fdd-1e68-482b-b985-87724dd33b61": {
+      "cap": 2.0,
+      "cost_spent": 0.085865,
+      "id": "91f40fdd-1e68-482b-b985-87724dd33b61",
+      "stop_reason": "no_eligible_work"
+     },
+     "e1b005ab-2a9f-4089-b2f5-4dc7a78c33ad": {
+      "cap": 1.914135,
+      "cost_spent": 0.184214,
+      "id": "e1b005ab-2a9f-4089-b2f5-4dc7a78c33ad",
+      "stop_reason": "no_eligible_work"
+     }
+    },
+    "selection": "selected from the exact LLMCost rows written between the apply log's own '# started' and '# ended' lines; the summary's scope run ids own none",
+    "summary_scope_run_ids": []
+   },
+   "scope_check": {
+    "outside_count": 0,
+    "outside_roster": [],
+    "roster": [
+     "electrostatic_potential",
+     "electrostatic_potential_at_langmuir_probe_position",
+     "electrostatic_potential_at_wall",
+     "floating_electrostatic_potential"
+    ],
+    "roster_names_not_touched": [
+     "electrostatic_potential_at_wall"
+    ],
+    "touched_names": [
+     "electrostatic_potential",
+     "electrostatic_potential_at_langmuir_probe_position",
+     "floating_electrostatic_potential"
+    ]
+   },
+   "score_regressions": null,
+   "selection_window_utc": {
+    "ended": "2026-10-28T22:19:54.906152+00:00",
+    "started": "2026-10-28T22:02:46.532145+00:00"
+   },
+   "stamped": true,
+   "summary": null,
+   "summary_scope_run_ids": [],
+   "wall_seconds": 1028.374
+  },
+  {
+   "anchor": null,
+   "applied": null,
+   "batches_run": null,
+   "cost_limit_usd": 0.3,
+   "decision": null,
+   "dry_run_log": null,
+   "error_line": null,
+   "exit_line": "EXIT=0",
+   "families_applied": 0,
+   "halt_reasons": null,
+   "halted": false,
+   "held_attachments": [],
+   "label": "reground",
+   "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T215047215974-shc-locus-final-apply/logs/apply-reground.log",
+   "members_accepted": null,
+   "members_touched": null,
+   "output": [
+    "family electrostatic_potential  harmonized  (no apply)",
+    "apply: 0 family(ies) applied, 0 stamped.",
+    "docs scores: 0 member(s) below the acceptance threshold, 0 fell."
+   ],
+   "output_note": "3 line(s) captured; full text in the log",
+   "physical_base": null,
+   "produced_summary": false,
+   "run_ids": [],
+   "run_ids_source": "selected from the exact LLMCost rows written between the apply log's own '# started' and '# ended' lines; the summary's scope run ids own none",
+   "run_selection": {
+    "all_claimed_names_in_roster": true,
+    "claimed_names": {},
+    "pool_run_ids": [],
+    "pool_run_rows": {},
+    "selection": "selected from the exact LLMCost rows written between the apply log's own '# started' and '# ended' lines; the summary's scope run ids own none",
+    "summary_scope_run_ids": []
+   },
+   "score_regressions": null,
+   "selection_window_utc": {
+    "ended": "2026-10-29T06:44:34.311930+00:00",
+    "started": "2026-10-29T06:44:20.261340+00:00"
+   },
+   "stamped": false,
+   "summary": null,
+   "summary_scope_run_ids": [],
+   "wall_seconds": 14.051
+  }
+ ],
+ "dry_runs": [
+  {
+   "estimated_usd": 1.73,
+   "exit_line": "EXIT=0",
+   "label": "before-apply",
+   "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T215047215974-shc-locus-final-apply/logs/dry-run-before-apply.log",
+   "output": [
+    "family electrostatic_potential  decision=apply  ",
+    "anchor=electrostatic_potential_at_langmuir_probe_position  members=4  calls=3",
+    "Dry run: 1 family(ies), 3 planned call(s), estimated cost $1.73 from 31 recent ",
+    "run(s) and 33 call(s) at $0.58 per call. Wrote nothing."
+   ],
+   "planned_calls": 3
+  },
+  {
+   "estimated_usd": 0.0,
+   "exit_line": "EXIT=0",
+   "label": "after-finalize",
+   "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T215047215974-shc-locus-final-apply/logs/dry-run-after-finalize.log",
+   "output": [
+    "family electrostatic_potential  decision=harmonized  ",
+    "anchor=floating_electrostatic_potential  members=4  calls=0",
+    "Dry run: 1 family(ies), 0 planned call(s), estimated cost $0.00. Wrote nothing."
+   ],
+   "planned_calls": 0
+  },
+  {
+   "estimated_usd": 0.0,
+   "exit_line": "EXIT=0",
+   "label": "after-apply",
+   "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T215047215974-shc-locus-final-apply/logs/dry-run-after-apply.log",
+   "output": [
+    "family electrostatic_potential  decision=harmonized  ",
+    "anchor=floating_electrostatic_potential  members=4  calls=0",
+    "Dry run: 1 family(ies), 0 planned call(s), estimated cost $0.00. Wrote nothing."
+   ],
+   "planned_calls": 0
+  }
+ ],
+ "family": {
+  "members": [
+   "electrostatic_potential",
+   "electrostatic_potential_at_langmuir_probe_position",
+   "electrostatic_potential_at_wall",
+   "floating_electrostatic_potential"
+  ],
+  "seed": "electrostatic_potential"
+ },
+ "finalize": {
+  "command": "sn harmonize --family electrostatic_potential --finalize",
+  "exit_line": "EXIT=0",
+  "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T215047215974-shc-locus-final-apply/logs/finalize.log",
+  "output": [
+   "family electrostatic_potential  stamped  members=4  missing_reverse_pairs=0  ",
+   "calls=0",
+   "finalize: 1 family(ies) stamped; 0 model calls."
+  ],
+  "wall_seconds": 27.973
+ },
+ "node": "shc-locus-final-apply",
+ "phases": {
+  "after": {
+   "anchor": "floating_electrostatic_potential",
+   "decision": "apply",
+   "documentation_scores": {
+    "electrostatic_potential": 0.9307560226249008,
+    "electrostatic_potential_at_langmuir_probe_position": 0.9583472639316845,
+    "electrostatic_potential_at_wall": 0.9502694313333522,
+    "floating_electrostatic_potential": 0.9592662539846679
+   },
+   "drift": 0.5,
+   "estimate_basis": {
+    "calls": 34,
+    "mean_usd_per_call": 0.5692,
+    "runs": 34,
+    "total_usd": 19.3518
+   },
+   "estimate_usd": 2.2767,
+   "harmonized": false,
+   "invariant": [
+    "electrostatic_potential",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "lint": {
+    "link_missing_reverse": 1
+   },
+   "lint_total": 1,
+   "member_status": {
+    "electrostatic_potential": {
+     "docs_stage": "accepted",
+     "id": "electrostatic_potential",
+     "name_stage": "accepted",
+     "reviewer_score_docs": 0.9307560226249008,
+     "validation_status": "valid"
+    },
+    "electrostatic_potential_at_langmuir_probe_position": {
+     "docs_stage": "accepted",
+     "id": "electrostatic_potential_at_langmuir_probe_position",
+     "name_stage": "accepted",
+     "reviewer_score_docs": 0.9583472639316845,
+     "validation_status": "valid"
+    },
+    "electrostatic_potential_at_wall": {
+     "docs_stage": "accepted",
+     "id": "electrostatic_potential_at_wall",
+     "name_stage": "accepted",
+     "reviewer_score_docs": 0.9502694313333522,
+     "validation_status": "valid"
+    },
+    "floating_electrostatic_potential": {
+     "docs_stage": "accepted",
+     "id": "floating_electrostatic_potential",
+     "name_stage": "accepted",
+     "reviewer_score_docs": 0.9592662539846679,
+     "validation_status": "valid"
+    }
+   },
+   "members": [
+    "electrostatic_potential",
+    "electrostatic_potential_at_langmuir_probe_position",
+    "electrostatic_potential_at_wall",
+    "floating_electrostatic_potential"
+   ],
+   "phase": "after",
+   "physical_base": "electrostatic_potential",
+   "planned_calls": 4,
+   "read_at_utc": "2026-10-29T07:03:05.147069+00:00",
+   "refusals": {},
+   "seed": "electrostatic_potential",
+   "status_counts": {
+    "accepted": 4,
+    "other": 0
+   }
+  },
+  "after-finalize": {
+   "anchor": "floating_electrostatic_potential",
+   "decision": "harmonized",
+   "documentation_scores": {
+    "electrostatic_potential": 0.9307560226249008,
+    "electrostatic_potential_at_langmuir_probe_position": 0.9583472639316845,
+    "electrostatic_potential_at_wall": 0.9483395478463891,
+    "floating_electrostatic_potential": 0.9592662539846679
+   },
+   "drift": 0.75,
+   "estimate_basis": {
+    "calls": 34,
+    "mean_usd_per_call": 0.57,
+    "runs": 35,
+    "total_usd": 19.3811
+   },
+   "estimate_usd": 0.0,
+   "harmonized": true,
+   "invariant": [
+    "electrostatic_potential",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "lint": {},
+   "lint_total": 0,
+   "member_status": {
+    "electrostatic_potential": {
+     "docs_stage": "accepted",
+     "id": "electrostatic_potential",
+     "name_stage": "accepted",
+     "reviewer_score_docs": 0.9307560226249008,
+     "validation_status": "valid"
+    },
+    "electrostatic_potential_at_langmuir_probe_position": {
+     "docs_stage": "accepted",
+     "id": "electrostatic_potential_at_langmuir_probe_position",
+     "name_stage": "accepted",
+     "reviewer_score_docs": 0.9583472639316845,
+     "validation_status": "valid"
+    },
+    "electrostatic_potential_at_wall": {
+     "docs_stage": "accepted",
+     "id": "electrostatic_potential_at_wall",
+     "name_stage": "accepted",
+     "reviewer_score_docs": 0.9483395478463891,
+     "validation_status": "valid"
+    },
+    "floating_electrostatic_potential": {
+     "docs_stage": "accepted",
+     "id": "floating_electrostatic_potential",
+     "name_stage": "accepted",
+     "reviewer_score_docs": 0.9592662539846679,
+     "validation_status": "valid"
+    }
+   },
+   "members": [
+    "electrostatic_potential",
+    "electrostatic_potential_at_langmuir_probe_position",
+    "electrostatic_potential_at_wall",
+    "floating_electrostatic_potential"
+   ],
+   "phase": "after-finalize",
+   "physical_base": "electrostatic_potential",
+   "planned_calls": 0,
+   "read_at_utc": "2026-10-29T07:14:10.796904+00:00",
+   "refusals": {},
+   "seed": "electrostatic_potential",
+   "status_counts": {
+    "accepted": 4,
+    "other": 0
+   }
+  },
+  "before": {
+   "anchor": "electrostatic_potential_at_langmuir_probe_position",
+   "decision": "apply",
+   "documentation_scores": {
+    "electrostatic_potential": 0.9233174263318332,
+    "electrostatic_potential_at_langmuir_probe_position": 0.9532784487330858,
+    "electrostatic_potential_at_wall": 0.8625,
+    "floating_electrostatic_potential": 0.95618167852435
+   },
+   "drift": 0.5,
+   "estimate_basis": {
+    "calls": 33,
+    "mean_usd_per_call": 0.5755,
+    "runs": 31,
+    "total_usd": 18.9919
+   },
+   "estimate_usd": 1.7265,
+   "harmonized": false,
+   "invariant": [
+    "electrostatic_potential",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "lint": {},
+   "lint_total": 0,
+   "member_status": {
+    "electrostatic_potential": {
+     "docs_stage": "accepted",
+     "id": "electrostatic_potential",
+     "name_stage": "accepted",
+     "reviewer_score_docs": 0.9233174263318332,
+     "validation_status": "valid"
+    },
+    "electrostatic_potential_at_langmuir_probe_position": {
+     "docs_stage": "accepted",
+     "id": "electrostatic_potential_at_langmuir_probe_position",
+     "name_stage": "accepted",
+     "reviewer_score_docs": 0.9532784487330858,
+     "validation_status": "valid"
+    },
+    "electrostatic_potential_at_wall": {
+     "docs_stage": "accepted",
+     "id": "electrostatic_potential_at_wall",
+     "name_stage": "reviewed",
+     "reviewer_score_docs": 0.8625,
+     "validation_status": "valid"
+    },
+    "floating_electrostatic_potential": {
+     "docs_stage": "accepted",
+     "id": "floating_electrostatic_potential",
+     "name_stage": "accepted",
+     "reviewer_score_docs": 0.95618167852435,
+     "validation_status": "valid"
+    }
+   },
+   "members": [
+    "electrostatic_potential",
+    "electrostatic_potential_at_langmuir_probe_position",
+    "electrostatic_potential_at_wall",
+    "floating_electrostatic_potential"
+   ],
+   "phase": "before",
+   "physical_base": "electrostatic_potential",
+   "planned_calls": 3,
+   "read_at_utc": "2026-10-28T22:02:46.523484+00:00",
+   "refusals": {},
+   "seed": "electrostatic_potential",
+   "status_counts": {
+    "accepted": 4,
+    "other": 0
+   }
+  },
+  "before-reground": {
+   "anchor": "floating_electrostatic_potential",
+   "decision": "harmonized",
+   "documentation_scores": {
+    "electrostatic_potential": 0.9307560226249008,
+    "electrostatic_potential_at_langmuir_probe_position": 0.9583472639316845,
+    "electrostatic_potential_at_wall": 0.8625,
+    "floating_electrostatic_potential": 0.9592662539846679
+   },
+   "drift": 0.75,
+   "estimate_basis": {
+    "calls": 33,
+    "mean_usd_per_call": 0.5837,
+    "runs": 33,
+    "total_usd": 19.262
+   },
+   "estimate_usd": 0.0,
+   "harmonized": true,
+   "invariant": [
+    "electrostatic_potential",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "lint": {},
+   "lint_total": 0,
+   "member_status": {
+    "electrostatic_potential": {
+     "docs_stage": "accepted",
+     "id": "electrostatic_potential",
+     "name_stage": "accepted",
+     "reviewer_score_docs": 0.9307560226249008,
+     "validation_status": "valid"
+    },
+    "electrostatic_potential_at_langmuir_probe_position": {
+     "docs_stage": "accepted",
+     "id": "electrostatic_potential_at_langmuir_probe_position",
+     "name_stage": "accepted",
+     "reviewer_score_docs": 0.9583472639316845,
+     "validation_status": "valid"
+    },
+    "electrostatic_potential_at_wall": {
+     "docs_stage": "accepted",
+     "id": "electrostatic_potential_at_wall",
+     "name_stage": "accepted",
+     "reviewer_score_docs": 0.8625,
+     "validation_status": "valid"
+    },
+    "floating_electrostatic_potential": {
+     "docs_stage": "accepted",
+     "id": "floating_electrostatic_potential",
+     "name_stage": "accepted",
+     "reviewer_score_docs": 0.9592662539846679,
+     "validation_status": "valid"
+    }
+   },
+   "members": [
+    "electrostatic_potential",
+    "electrostatic_potential_at_langmuir_probe_position",
+    "electrostatic_potential_at_wall",
+    "floating_electrostatic_potential"
+   ],
+   "phase": "before-reground",
+   "physical_base": "electrostatic_potential",
+   "planned_calls": 0,
+   "read_at_utc": "2026-10-29T06:44:20.239829+00:00",
+   "refusals": {},
+   "seed": "electrostatic_potential",
+   "status_counts": {
+    "accepted": 4,
+    "other": 0
+   }
+  }
+ },
+ "preflight": {
+  "acceptance_threshold": 0.85,
+  "anchor": "electrostatic_potential_at_langmuir_probe_position",
+  "batches": [
+   [
+    "electrostatic_potential_at_langmuir_probe_position"
+   ],
+   [
+    "electrostatic_potential",
+    "floating_electrostatic_potential"
+   ]
+  ],
+  "decision": "apply",
+  "docs_edit_refusal": {
+   "exit": 2,
+   "lines": [
+    "\u2502 BLOCKED                                                                      \u2502",
+    "\u2502 target name_stage='reviewed' \u2014 docs edits require an accepted name           \u2502",
+    "\u2502 (name_stage='accepted')                                                      \u2502",
+    "- target name_stage='reviewed' \u2014 docs edits require an accepted name",
+    "(name_stage='accepted')"
+   ],
+   "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T215047215974-shc-locus-final-apply/logs/repro-sn-edit-docs.log"
+  },
+  "docs_eligible": [
+   "electrostatic_potential",
+   "electrostatic_potential_at_langmuir_probe_position",
+   "floating_electrostatic_potential"
+  ],
+  "member_scores": {
+   "electrostatic_potential": 0.9233174263318332,
+   "electrostatic_potential_at_langmuir_probe_position": 0.9532784487330858,
+   "electrostatic_potential_at_wall": 0.8625,
+   "floating_electrostatic_potential": 0.95618167852435
+  },
+  "member_state": {
+   "electrostatic_potential": {
+    "docs_stage": "accepted",
+    "id": "electrostatic_potential",
+    "name_stage": "accepted",
+    "reviewer_score_docs": 0.9233174263318332,
+    "reviewer_score_name": 0.9125,
+    "signature": "b1bcdfe53efc602529617a773520c9f3620cf984dba9a0f2bab910f0b64ecc6a",
+    "source_paths": [
+     "dd:plasma_profiles/profiles_1d/phi_potential",
+     "dd:plasma_profiles/ggd/phi_potential/values",
+     "dd:mhd/ggd/phi_potential/values",
+     "dd:core_profiles/profiles_1d/phi_potential",
+     "dd:edge_profiles/profiles_1d/phi_potential",
+     "dd:edge_profiles/ggd/phi_potential/values"
+    ],
+    "validation_status": "valid"
+   },
+   "electrostatic_potential_at_langmuir_probe_position": {
+    "docs_stage": "accepted",
+    "id": "electrostatic_potential_at_langmuir_probe_position",
+    "name_stage": "accepted",
+    "reviewer_score_docs": 0.9532784487330858,
+    "reviewer_score_name": 0.99375,
+    "signature": null,
+    "source_paths": [
+     "dd:langmuir_probes/embedded/v_plasma",
+     "dd:langmuir_probes/reciprocating/plunge/v_plasma"
+    ],
+    "validation_status": "valid"
+   },
+   "electrostatic_potential_at_wall": {
+    "docs_stage": "accepted",
+    "id": "electrostatic_potential_at_wall",
+    "name_stage": "reviewed",
+    "reviewer_score_docs": 0.8625,
+    "reviewer_score_name": 0.5375804071912775,
+    "signature": "6a34602a002f69682a735937a7329313b6fc7a28137040b6dc16289ec8bf8362",
+    "source_paths": [
+     "dd:wall/description_ggd/ggd/phi_potential/values"
+    ],
+    "validation_status": "valid"
+   },
+   "floating_electrostatic_potential": {
+    "docs_stage": "accepted",
+    "id": "floating_electrostatic_potential",
+    "name_stage": "accepted",
+    "reviewer_score_docs": 0.95618167852435,
+    "reviewer_score_name": 0.96875,
+    "signature": "b1bcdfe53efc602529617a773520c9f3620cf984dba9a0f2bab910f0b64ecc6a",
+    "source_paths": [
+     "dd:langmuir_probes/embedded/v_floating",
+     "dd:langmuir_probes/reciprocating/plunge/collector/v_floating"
+    ],
+    "validation_status": "valid"
+   }
+  },
+  "members": [
+   "electrostatic_potential",
+   "electrostatic_potential_at_langmuir_probe_position",
+   "electrostatic_potential_at_wall",
+   "floating_electrostatic_potential"
+  ],
+  "planned_calls": 3,
+  "read_at_utc": "2026-10-28T22:02:20.349232+00:00",
+  "scoped_reset_preview": {
+   "eligible": 0,
+   "reset": 0,
+   "run_id": "2001f760-daaa-4637-9806-5936c6575d67"
+  },
+  "scoped_reset_surface": "imas_codex.standard_names.harmonize.mark_members_for_regen",
+  "skipped": [
+   {
+    "id": "electrostatic_potential_at_wall",
+    "name_stage": "reviewed"
+   }
+  ],
+  "wall_name_stage": "reviewed"
+ },
+ "reground": {
+  "all_at_or_above": true,
+  "calls": 7,
+  "combined_cap_usd": 1.0,
+  "drain_calls": 3,
+  "drain_spend_usd": 0.029303,
+  "interrupted_drain": [
+   {
+    "calls": 3,
+    "note": "a drain attempt whose wrapper was stopped while its CLI had already completed in the graph; counted by run id because its rows sit outside the recorded drain window",
+    "run_id": "8445f79a-679e-489a-aa04-dc8acf4cf0f9",
+    "spend_usd": 0.089812
+   }
+  ],
+  "members": [
+   {
+    "after": 0.9307560226249008,
+    "before": 0.9307560226249008,
+    "delta": 0.0,
+    "id": "electrostatic_potential"
+   },
+   {
+    "after": 0.9583472639316845,
+    "before": 0.9583472639316845,
+    "delta": 0.0,
+    "id": "electrostatic_potential_at_langmuir_probe_position"
+   },
+   {
+    "after": 0.9483395478463891,
+    "before": 0.8625,
+    "delta": 0.08584,
+    "id": "electrostatic_potential_at_wall"
+   },
+   {
+    "after": 0.9592662539846679,
+    "before": 0.9592662539846679,
+    "delta": 0.0,
+    "id": "floating_electrostatic_potential"
+   }
+  ],
+  "name_after": {
+   "checks_name": "{\"failed_checks\": [], \"raw_dimension_scores\": {\"completeness\": 16.52403083855701, \"convention\": 17.256544351580505, \"grammar\": 15.986724752235064, \"semantic\": 17.907114598133493}, \"acceptance_probability\": 0.39147806278980696, \"selected_score\": 0.39147806278980696}",
+   "name_stage": "accepted",
+   "score_name": 0.8648778589216725
+  },
+  "name_before": {
+   "checks_name": "{\"failed_checks\": [{\"id\": \"bound_to_wrong_object\", \"criterion\": \"Which object does the name denote, read against its bound source path?\", \"evidence\": \"source_paths=[]; description='Electrostatic potential at wall is the voltage-valued scalar potential of the plasma immediately adjacent to a plasma-facing wall, relative to a chosen electrical reference.'\", \"probability\": 0.66, \"veto\": false, \"cutoff\": 0.5, \"judgment_evidence\": {\"type\": \"choice\", \"choice\": \"a different object\", \"probabilities\": {\"the bound source object\": 0.34, \"a different object\": 0.65, \"one of several bound objects\": 0.01}, \"confidence\": 0.48}, \"veto_criterion\": \"nonconforming check answer\", \"segment\": \"electrostatic_potential_at_wall\", \"sentence\": \"\"}], \"raw_dimension_scores\": {\"completeness\": 16.449965005772295, \"convention\": 16.35511121477264, \"grammar\": 16.38307885012448, \"semantic\": 16.166031459655564}, \"acceptance_probability\": 0.20521385374924175, \"selected_score\": 0.20521385374924175}",
+   "name_stage": "reviewed",
+   "score_name": 0.5375804071912775
+  },
+  "rescore_accepted": true,
+  "rescore_calls": 1,
+  "rescore_spend_usd": 0.000138,
+  "spend_usd": 0.119253,
+  "threshold": 0.85,
+  "wall": {
+   "after": 0.9483395478463891,
+   "before": 0.8625,
+   "delta": 0.08584,
+   "id": "electrostatic_potential_at_wall"
+  },
+  "wall_docs_after": 0.9483395478463891,
+  "wall_docs_before": 0.8625,
+  "wall_docs_delta": 0.08584,
+  "wall_regenerated": true,
+  "within_combined_cap": true
+ },
+ "rescore": {
+  "accepted": true,
+  "after": {
+   "checks_name": "{\"failed_checks\": [], \"raw_dimension_scores\": {\"completeness\": 16.52403083855701, \"convention\": 17.256544351580505, \"grammar\": 15.986724752235064, \"semantic\": 17.907114598133493}, \"acceptance_probability\": 0.39147806278980696, \"selected_score\": 0.39147806278980696}",
+   "comments_docs": "[Primary] Description quality: precise, voltage-valued, self-describing, and structurally parallel to the accepted sibling electrostatic_potential_at_midplane ('X is the voltage-valued scalar potential of the ... plasma ... relative to a chosen electrical reference'); minor dock for not folding the distinguishing clause into the description itself as midplane does. Documentation quality: opens with 'It is the wall-local restriction of electrostatic_potential', directly mirroring midplane's 'It is the midplane restriction of the plasma ...' \u2014 excellent template fidelity; the E_es = -\u2207\u03a6 equation is correct and standard, the sign convention is stated in prose without referencing COCOS numbers, and the paragraph distinguishing wall-material potential, applied bias, and floating_electrostatic_potential is a strong, correctly-placed exclusion clause; docked only for omitting units on the equation's variables. Completeness: parent link and floating-potential distinction are present and well-integrated, but a cross-reference to the sibling location-variant electrostatic_potential_at_midplane is missing, which same_base/sibling-family context would expect for consistency across the location-restricted potential family. Physics accuracy: all claims verify cleanly \u2014 the potential-energy-based sign convention is standard textbook electrostatics, the -\u2207\u03a6 relation matches the electric_field vector sibling's documented electrostatic contribution, the explicit exclusion of the floating potential (established by zero-net-current) correctly cites that sibling's own definition without contradiction, and there is no implementation leakage (no IDS names, DD paths, or storage references appear in the prose).\n[Secondary] Description quality (17): Opening matches the accepted family template used by electrostatic_potential_at_midplane ('Electrostatic potential at {locus} is the voltage-valued scalar potential of the \u2026 plasma \u2026 relative to a chosen electrical reference'), with only the wall-locus token swapped and quasineutral dropped for genuine near-wall sheath physics. Minor dock versus electron_temperature_at_wall, whose description already packs the material-vs-plasma distinction into the one-liner, and versus electrostatic_potential_at_midplane, whose description also carries the gradient/field clause and an explicit floating/near-wall disambiguation. Documentation quality (16): Section structure parallels the family (definition \u2192 wall-local restriction of electrostatic_potential \u2192 E_es = \u2212\u2207\u03a6 \u2192 contrasts \u2192 sign convention). Equation and sign convention are correct and free of COCOS numbers. Docked because \u03a6 and E_es lack explicit units in the where-clause (siblings that carry gradient equations typically state V and V\u00b7m\u207b\u00b9) and the nexus language 'wall-local restriction' is slightly less parallel than midplane's 'midplane restriction of the plasma \u2026' phrasing. Completeness (16): Parent link, floating_electrostatic_potential contrast, defining relation, and sign convention are present with no IDS/DD leakage. Docked for omitting a cross-reference to electrostatic_potential_at_midplane (that accepted sibling's description already names near-wall plasma potential as the quantity to distinguish) and for leaving the material-bias contrast in prose only without a sibling-style see-also. Physics accuracy (19): Every definitional claim is consistent with electrostatic_potential, floating_electrostatic_potential, and electrostatic_potential_at_midplane: plasma-side potential (not wall-material bias), E_es = \u2212\u2207\u03a6, inductive contribution excluded from this scalar, standard positive = higher potential energy for a positive test charge. Only a negligible under-specification that near-wall 'immediately adjacent' is the plasma side of the sheath rather than a quasineutral evaluation, which is already implicit and physically correct.",
+   "comments_per_dim_docs": "{\"description_quality\": \"Slightly thinner than accepted electrostatic_potential_at_midplane and electron_temperature_at_wall: missing the one-line material-vs-plasma and floating distinctions those siblings pack into the description.\", \"documentation_quality\": \"Equation variables \\u03a6 and E_es lack explicit units; nexus phrasing is a touch less parallel to electrostatic_potential_at_midplane's 'midplane restriction' template.\", \"completeness\": \"Omits a see-also to electrostatic_potential_at_midplane, which already disclaims near-wall plasma potential in its accepted description.\", \"physics_accuracy\": null}",
+   "docs_stage": "accepted",
+   "id": "electrostatic_potential_at_wall",
+   "name_stage": "accepted",
+   "score_docs": 0.8625,
+   "score_name": 0.8648778589216725,
+   "source_paths": [
+    "dd:wall/description_ggd/ggd/phi_potential/values"
+   ],
+   "validation_status": "valid"
+  },
+  "before": {
+   "checks_name": "{\"failed_checks\": [{\"id\": \"bound_to_wrong_object\", \"criterion\": \"Which object does the name denote, read against its bound source path?\", \"evidence\": \"source_paths=[]; description='Electrostatic potential at wall is the voltage-valued scalar potential of the plasma immediately adjacent to a plasma-facing wall, relative to a chosen electrical reference.'\", \"probability\": 0.66, \"veto\": false, \"cutoff\": 0.5, \"judgment_evidence\": {\"type\": \"choice\", \"choice\": \"a different object\", \"probabilities\": {\"the bound source object\": 0.34, \"a different object\": 0.65, \"one of several bound objects\": 0.01}, \"confidence\": 0.48}, \"veto_criterion\": \"nonconforming check answer\", \"segment\": \"electrostatic_potential_at_wall\", \"sentence\": \"\"}], \"raw_dimension_scores\": {\"completeness\": 16.449965005772295, \"convention\": 16.35511121477264, \"grammar\": 16.38307885012448, \"semantic\": 16.166031459655564}, \"acceptance_probability\": 0.20521385374924175, \"selected_score\": 0.20521385374924175}",
+   "comments_docs": "[Primary] Description quality: precise, voltage-valued, self-describing, and structurally parallel to the accepted sibling electrostatic_potential_at_midplane ('X is the voltage-valued scalar potential of the ... plasma ... relative to a chosen electrical reference'); minor dock for not folding the distinguishing clause into the description itself as midplane does. Documentation quality: opens with 'It is the wall-local restriction of electrostatic_potential', directly mirroring midplane's 'It is the midplane restriction of the plasma ...' \u2014 excellent template fidelity; the E_es = -\u2207\u03a6 equation is correct and standard, the sign convention is stated in prose without referencing COCOS numbers, and the paragraph distinguishing wall-material potential, applied bias, and floating_electrostatic_potential is a strong, correctly-placed exclusion clause; docked only for omitting units on the equation's variables. Completeness: parent link and floating-potential distinction are present and well-integrated, but a cross-reference to the sibling location-variant electrostatic_potential_at_midplane is missing, which same_base/sibling-family context would expect for consistency across the location-restricted potential family. Physics accuracy: all claims verify cleanly \u2014 the potential-energy-based sign convention is standard textbook electrostatics, the -\u2207\u03a6 relation matches the electric_field vector sibling's documented electrostatic contribution, the explicit exclusion of the floating potential (established by zero-net-current) correctly cites that sibling's own definition without contradiction, and there is no implementation leakage (no IDS names, DD paths, or storage references appear in the prose).\n[Secondary] Description quality (17): Opening matches the accepted family template used by electrostatic_potential_at_midplane ('Electrostatic potential at {locus} is the voltage-valued scalar potential of the \u2026 plasma \u2026 relative to a chosen electrical reference'), with only the wall-locus token swapped and quasineutral dropped for genuine near-wall sheath physics. Minor dock versus electron_temperature_at_wall, whose description already packs the material-vs-plasma distinction into the one-liner, and versus electrostatic_potential_at_midplane, whose description also carries the gradient/field clause and an explicit floating/near-wall disambiguation. Documentation quality (16): Section structure parallels the family (definition \u2192 wall-local restriction of electrostatic_potential \u2192 E_es = \u2212\u2207\u03a6 \u2192 contrasts \u2192 sign convention). Equation and sign convention are correct and free of COCOS numbers. Docked because \u03a6 and E_es lack explicit units in the where-clause (siblings that carry gradient equations typically state V and V\u00b7m\u207b\u00b9) and the nexus language 'wall-local restriction' is slightly less parallel than midplane's 'midplane restriction of the plasma \u2026' phrasing. Completeness (16): Parent link, floating_electrostatic_potential contrast, defining relation, and sign convention are present with no IDS/DD leakage. Docked for omitting a cross-reference to electrostatic_potential_at_midplane (that accepted sibling's description already names near-wall plasma potential as the quantity to distinguish) and for leaving the material-bias contrast in prose only without a sibling-style see-also. Physics accuracy (19): Every definitional claim is consistent with electrostatic_potential, floating_electrostatic_potential, and electrostatic_potential_at_midplane: plasma-side potential (not wall-material bias), E_es = \u2212\u2207\u03a6, inductive contribution excluded from this scalar, standard positive = higher potential energy for a positive test charge. Only a negligible under-specification that near-wall 'immediately adjacent' is the plasma side of the sheath rather than a quasineutral evaluation, which is already implicit and physically correct.",
+   "comments_per_dim_docs": "{\"description_quality\": \"Slightly thinner than accepted electrostatic_potential_at_midplane and electron_temperature_at_wall: missing the one-line material-vs-plasma and floating distinctions those siblings pack into the description.\", \"documentation_quality\": \"Equation variables \\u03a6 and E_es lack explicit units; nexus phrasing is a touch less parallel to electrostatic_potential_at_midplane's 'midplane restriction' template.\", \"completeness\": \"Omits a see-also to electrostatic_potential_at_midplane, which already disclaims near-wall plasma potential in its accepted description.\", \"physics_accuracy\": null}",
+   "docs_stage": "accepted",
+   "id": "electrostatic_potential_at_wall",
+   "name_stage": "reviewed",
+   "score_docs": 0.8625,
+   "score_name": 0.5375804071912775,
+   "source_paths": [
+    "dd:wall/description_ggd/ggd/phi_potential/values"
+   ],
+   "validation_status": "valid"
+  },
+  "checks_name": "{\"failed_checks\": [], \"raw_dimension_scores\": {\"completeness\": 16.52403083855701, \"convention\": 17.256544351580505, \"grammar\": 15.986724752235064, \"semantic\": 17.907114598133493}, \"acceptance_probability\": 0.39147806278980696, \"selected_score\": 0.39147806278980696}",
+  "command": "sn rescore electrostatic_potential_at_wall -c 0.45",
+  "cost": {
+   "calls": 1,
+   "phases": {
+    "review_name": 1
+   },
+   "run_ids": [
+    "f28253a2-ca2e-4f88-b82a-ddbbcce5dfae"
+   ],
+   "run_ids_source": "LLMCost rows in the rescore's own window naming this member",
+   "selection_window_utc": {
+    "ended": "2026-10-29T06:44:18.578501+00:00",
+    "started": "2026-10-29T06:43:15.729347+00:00"
+   },
+   "spend_usd": 0.000138
+  },
+  "cost_limit_usd": 0.45,
+  "exit_line": "EXIT=0",
+  "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T215047215974-shc-locus-final-apply/logs/rescore.log",
+  "output": [
+   "Re-scoring inline (electrostatic_potential_at_wall, budget=$0.45) \u2026",
+   "rescored electrostatic_potential_at_wall (reviewed \u2192 drafted, run_id=sn-rescore-20261029T064326Z)",
+   "                          Inline review                          ",
+   "\u250f\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2533\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2533\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2533\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2513",
+   "\u2503 StandardName                    \u2503 Outcome  \u2503 Stage    \u2503 Score \u2503",
+   "\u2521\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2547\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2547\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2547\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2529",
+   "\u2502 electrostatic_potential_at_wall \u2502 accepted \u2502 accepted \u2502 0.86  \u2502",
+   "\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518",
+   "Inline review cost: $0.0001"
+  ],
+  "score_line": "rescored electrostatic_potential_at_wall (reviewed \u2192 drafted, run_id=sn-rescore-20261029T064326Z)",
+  "wall_seconds": 62.849
+ },
+ "scores": {
+  "fell": [],
+  "members": [
+   {
+    "after": 0.9307560226249008,
+    "before": 0.9233174263318332,
+    "below_acceptance": false,
+    "delta": 0.007439,
+    "id": "electrostatic_potential",
+    "noise_only": false,
+    "regenerated": true
+   },
+   {
+    "after": 0.9583472639316845,
+    "before": 0.9532784487330858,
+    "below_acceptance": false,
+    "delta": 0.005069,
+    "id": "electrostatic_potential_at_langmuir_probe_position",
+    "noise_only": false,
+    "regenerated": true
+   },
+   {
+    "after": 0.9502694313333522,
+    "before": 0.8625,
+    "below_acceptance": false,
+    "delta": 0.087769,
+    "id": "electrostatic_potential_at_wall",
+    "noise_only": false,
+    "regenerated": false
+   },
+   {
+    "after": 0.9592662539846679,
+    "before": 0.95618167852435,
+    "below_acceptance": false,
+    "delta": 0.003085,
+    "id": "floating_electrostatic_potential",
+    "noise_only": false,
+    "regenerated": true
+   }
+  ],
+  "noise_band": 0.02,
+  "scored_at_or_above": true,
+  "threshold": 0.85,
+  "unscored": []
+ },
+ "seed": "electrostatic_potential",
+ "vetoes": {
+  "held_claim_names_a_supporting_binding": [],
+  "holds": [],
+  "names_vetoed": [],
+  "reviews": [
+   {
+    "binding_count": 2,
+    "binding_labels": [
+     "langmuir_probes/embedded/v_plasma",
+     "langmuir_probes/reciprocating/plunge/v_plasma"
+    ],
+    "claims_read": 11,
+    "claims_with_a_contradicting_binding": [],
+    "claims_with_per_binding_answers": 11,
+    "held_by_a_binding_that_supports_it": [],
+    "model": "typesafe/jev-1.13",
+    "name_id": "electrostatic_potential_at_langmuir_probe_position",
+    "review_id": "electrostatic_potential_at_langmuir_probe_position:typesafe-jev-1-13:2026-10-28T22:09:41.755560+00:00",
+    "reviewed_at": "2026-10-28T22:09:41.75556Z",
+    "veto_count": 0,
+    "vetoed_claims": []
+   },
+   {
+    "binding_count": 6,
+    "binding_labels": [
+     "core_profiles/profiles_1d/phi_potential",
+     "edge_profiles/ggd/phi_potential/values",
+     "edge_profiles/profiles_1d/phi_potential",
+     "mhd/ggd/phi_potential/values",
+     "plasma_profiles/ggd/phi_potential/values",
+     "plasma_profiles/profiles_1d/phi_potential"
+    ],
+    "claims_read": 16,
+    "claims_with_a_contradicting_binding": [],
+    "claims_with_per_binding_answers": 16,
+    "held_by_a_binding_that_supports_it": [],
+    "model": "typesafe/jev-1.13",
+    "name_id": "electrostatic_potential",
+    "review_id": "electrostatic_potential:typesafe-jev-1-13:2026-10-28T22:17:13.575191+00:00",
+    "reviewed_at": "2026-10-28T22:17:13.575191Z",
+    "veto_count": 0,
+    "vetoed_claims": []
+   },
+   {
+    "binding_count": 2,
+    "binding_labels": [
+     "langmuir_probes/embedded/v_floating",
+     "langmuir_probes/reciprocating/plunge/collector/v_floating"
+    ],
+    "claims_read": 10,
+    "claims_with_a_contradicting_binding": [],
+    "claims_with_per_binding_answers": 10,
+    "held_by_a_binding_that_supports_it": [],
+    "model": "typesafe/jev-1.13",
+    "name_id": "floating_electrostatic_potential",
+    "review_id": "floating_electrostatic_potential:typesafe-jev-1-13:2026-10-28T22:17:43.754793+00:00",
+    "reviewed_at": "2026-10-28T22:17:43.754793Z",
+    "veto_count": 0,
+    "vetoed_claims": []
+   }
+  ],
+  "reviews_read": 3,
+  "veto_count": 0,
+  "window_utc": {
+   "ended": "2026-10-28T22:19:54.906152+00:00",
+   "started": "2026-10-28T22:02:46.532145+00:00"
+  }
+ },
+ "wall_drain": {
+  "calls": 3,
+  "command": "sn run --scope-run-id 94f29c7c-0b08-4075-8544-8722be0b83af --docs-only --flush -c 0.50 --time 20",
+  "cost_limit_usd": 0.5,
+  "docs_regenerated": true,
+  "exit_line": "EXIT=0",
+  "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261028T215047215974-shc-locus-final-apply/logs/wall-drain.log",
+  "output": [
+   "08:12:40 - DEBUG - derive_edges rejecting projection edge for 'toroidal_coordinate_of_line_of_sight': inner='coordinate_of_line_of_sight' has locus qualifier",
+   "08:12:40 - DEBUG - derive_edges rejecting projection edge for 'radial_distance_at_midplane': inner='distance_at_midplane' has locus qualifier",
+   "08:12:40 - DEBUG - derive_edges rejecting projection edge for 'normalized_radial_gyrocenter_energy_flux_at_flux_surface_due_to_perturbed_parallel_vector_potential': inner='gyrocenter_energy_flux_at_flux_surface_due_to_perturbed_parallel_vector_potential' has locus qualifier",
+   "08:12:40 - DEBUG - derive_edges rejecting projection edge for 'vertical_velocity_at_current_center': inner='velocity_at_current_center' has locus qualifier",
+   "08:12:40 - DEBUG - derive_edges rejecting projection edge for 'vertical_coordinate_of_line_of_sight': inner='coordinate_of_line_of_sight' has locus qualifier",
+   "08:12:40 - DEBUG - derive_edges rejecting projection edge for 'radial_separatrix_distance_at_outboard_midplane': inner='separatrix_distance_at_outboard_midplane' has locus qualifier",
+   "08:12:40 - DEBUG - derive_edges rejecting projection edge for 'toroidal_angular_width_of_limiter_tile': inner='angular_width_of_limiter_tile' has locus qualifier",
+   "08:12:40 - DEBUG - derive_edges rejecting projection edge for 'poloidal_magnetic_flux_at_measurement_position': inner='magnetic_flux_at_measurement_position' has locus qualifier",
+   "08:12:40 - DEBUG - derive_edges rejecting projection edge for 'radial_outline_of_plasma_boundary': inner='outline_of_plasma_boundary' has locus qualifier",
+   "08:12:40 - DEBUG - derive_edges rejecting projection edge for 'vertical_outline_of_antenna_strap': inner='outline_of_antenna_strap' has locus qualifier",
+   "08:12:40 - DEBUG - derive_edges rejecting projection edge for 'toroidal_diamagnetic_magnetic_flux_at_inside_flux_surface': inner='diamagnetic_magnetic_flux_at_inside_flux_surface' has locus qualifier",
+   "08:12:41 - DEBUG - derive_edges rejecting projection edge for 'poloidal_magnetic_flux_of_flux_loop': inner='magnetic_flux_of_flux_loop' has locus qualifier",
+   "08:13:26 - INFO - Parent admission gate: dropped 1117 HAS_PARENT edges to 515 inadmissible targets (sample: ['absorbed_power_of_calorimetry_component', 'absorbed_wave_power_at_inside_flux_surface', 'absorptivity', 'absorptivity_of_filter', 'ammonia_count'])",
+   "08:13:27 - WARNING - Parent coordinate failed the name-validity oracle \u2014 skipping: coordinate: ERROR - geometric quantity 'coordinate' requires object, geometry, or position qualifier to specify what is being described. Example: coordinate_of_flux_loop or coordinate_at_midplane",
+   "08:13:27 - DEBUG - Parent derivative_of_poloidal_current_function_with_respect_to_poloidal_magnetic_flux_coordinate has only non-seedable edges (['binary']) \u2014 skipping",
+   "08:13:27 - DEBUG - Parent diamagnetic_vorticity has only non-seedable edges (['binary']) \u2014 skipping",
+   "08:13:27 - DEBUG - Parent difference_of_total_neutral_density_and_neutral_density_of_isotope has only non-seedable edges (['binary']) \u2014 skipping",
+   "08:13:27 - DEBUG - Parent fast_neutral_beam_motional_stark_wavelength has only non-seedable edges (['binary']) \u2014 skipping",
+   "08:13:27 - DEBUG - Parent fast_neutral_beam_reference_wavelength_of_spectral_line has only non-seedable edges (['binary']) \u2014 skipping",
+   "08:13:27 - WARNING - Parent flux_surface_normal_non_axisymmetric_vacuum_magnetic_field_at_control_surface failed the name-validity oracle \u2014 skipping: 1 validation error for tagged-union[function-after[_governance_rules(), StandardNameScalarNameOnly],function-after[_governance_rules(), StandardNameVectorNameOnly],function-after[_governance_rules(), StandardNameTensorNameOnly],function-after[_governance_rules(), StandardNameComplexNameOnly],function-after[_governance_rules(), StandardNameMetadataNameOnly]]",
+   "scalar.name",
+   "  Value error, Grammar vocabulary consistency errors:",
+   "  - Token 'flux' used as coordinate prefix is missing from coordinate_axes vocabulary [type=value_error, input_value='flux_surface_normal_non_...ield_at_control_surface', input_type=str]",
+   "    For further information visit https://errors.pydantic.dev/2.12/v/value_error",
+   "08:13:27 - DEBUG - Parent initial_vacuum_poloidal_current_function has only non-seedable edges (['binary']) \u2014 skipping",
+   "08:13:27 - DEBUG - Parent line_averaged_total_hydrogenic_density has only non-seedable edges (['binary']) \u2014 skipping",
+   "08:13:27 - DEBUG - Parent neutral_beam_doppler_wavelength has only non-seedable edges (['binary']) \u2014 skipping",
+   "08:13:27 - DEBUG - Parent particle_reference_temperature has only non-seedable edges (['binary']) \u2014 skipping",
+   "08:13:27 - DEBUG - Parent particle_simulated_count has only non-seedable edges (['binary']) \u2014 skipping",
+   "08:13:27 - DEBUG - Parent plasma_initial_current has only non-seedable edges (['binary']) \u2014 skipping",
+   "08:13:27 - DEBUG - Parent plasma_upper_bound_current has only non-seedable edges (['binary']) \u2014 skipping",
+   "08:13:27 - DEBUG - Parent poloidal_magnetic_field_at_outboard_midplane_separatrix has only non-seedable edges (['binary']) \u2014 skipping",
+   "08:13:27 - DEBUG - Parent poloidal_magnetic_field_at_strike_point has only non-seedable edges (['binary']) \u2014 skipping",
+   "08:13:27 - DEBUG - Parent time_derivative_of_plasma_stored_energy has only non-seedable edges (['binary']) \u2014 skipping",
+   "08:13:27 - DEBUG - Parent volume_averaged_total_hydrogenic_density has only non-seedable edges (['binary']) \u2014 skipping",
+   "08:13:27 - WARNING - Refused 125 missing derived-parent target(s) without complete authority: absorbed_energy_of_calorimetry_component, absorbed_power_at_wall, absorbed_wave_power_density, atomic_fraction_of_neutron_detector_converter, collisionality_at_pedestal_top",
+   "08:13:36 - INFO - rederive_structural_edges: processed 2679 live names, cleared 1 dead-name edges, migrated 0 HAS_PARENT edges",
+   "08:13:37 - WARNING - Parent outline has children with heterogeneous units: {'rad', 'm'} \u2014 skipping (needs manual review)",
+   "08:13:37 - WARNING - Parent particle_temperature has no authoritative unit \u2014 skipping materialization",
+   "08:13:37 - INFO - normalize_derived_parent_lifecycle: repaired 0 derived parent SNs"
+  ],
+  "run_ids": [
+   "46a9088e-fc93-4c4f-bdef-3fe2c73099ff"
+  ],
+  "run_ids_source": "LLMCost rows in the drain's own window naming this member",
+  "scoped_reset": {
+   "eligible": 1,
+   "reset": 1,
+   "run_id": "94f29c7c-0b08-4075-8544-8722be0b83af"
+  },
+  "selection_window_utc": {
+   "ended": "2026-10-29T07:13:40.522891+00:00",
+   "started": "2026-10-29T07:03:27.296162+00:00"
+  },
+  "spend_usd": 0.029303,
+  "state_after": {
+   "checks_name": "{\"failed_checks\": [], \"raw_dimension_scores\": {\"completeness\": 16.52403083855701, \"convention\": 17.256544351580505, \"grammar\": 15.986724752235064, \"semantic\": 17.907114598133493}, \"acceptance_probability\": 0.39147806278980696, \"selected_score\": 0.39147806278980696}",
+   "comments_docs": "Calibrated Jev route: accept",
+   "comments_per_dim_docs": "{\"failed_checks\": [{\"id\": \"claim_contradicts_source\", \"criterion\": \"Which conflict, if any, does this claim have with the DD definitions the name binds?\", \"evidence\": \"documentation='This quantity is the local electrostatic potential at the wall, relative to a chosen electrical reference. It is a location-specific value of [electrostatic potential](name:electrostatic_potential), specifying electrostatic interaction energy per positive test charge.\\\\n\\\\nThe defining energy relation is\\\\n\\\\n$$\\\\nV_{\\\\\\\\mathrm{w}} = \\\\\\\\frac{U_{\\\\\\\\mathrm{w}}-U_{\\\\\\\\mathrm{ref}}}{q_t}\\\\n$$\\\\n\\\\nwhere $V_{\\\\\\\\mathrm{w}}$ is the electrostatic potential at the wall relative to the chosen reference, $q_t$ is a positive test charge, $U_{\\\\\\\\mathrm{w}}$ is its electrostatic potential energy at the wall, and $U_{\\\\\\\\mathrm{ref}}$ is its electrostatic potential energy at the reference.\\\\n\\\\nThis quantity denotes a local wall value, not a wall-surface average or magnetic-flux-surface mean. It is not defined as the [plasma potential at a Langmuir-probe position](name:electrostatic_potential_at_langmuir_probe_position). Unlike the [floating electrostatic potential](name:floating_electrostatic_potential), it does not require zero net collector current, nor does it prescribe an externally applied bias.\\\\n\\\\nThe local electrostatic potential field $V$, whose wall value is $V_{\\\\\\\\mathrm{w}}$, satisfies $\\\\\\\\mathbf{E}_{\\\\\\\\mathrm{es}}=-\\\\\\\\nabla V$, where $\\\\\\\\mathbf{E}_{\\\\\\\\mathrm{es}}$ is the electrostatic electric field and $\\\\\\\\nabla$ is the spatial gradient operator. This relation excludes the inductive electric-field contribution.\\\\n\\\\nSign convention: Positive when a positive test charge has greater electrostatic potential energy at the wall than at the chosen reference.'; dd_source_docs=[{'id': 'wall/description_ggd/ggd/phi_potential/values', 'unit': 'V', 'description': 'Array of values for phi potential.', 'documentation': 'One scalar value is provided per element in the grid subset.', 'raw_dd_context': {'path': 'wall/description_ggd/ggd/phi_potential/values', 'dd_version': '4.1.1', 'unit': 'V', 'documentation': 'One scalar value is provided per element in the grid subset.', 'data_type': None, 'node_type': None, 'physics_domain': None, 'cocos_transformation_type': None, 'cocos_transformation_expression': None, 'coordinates': [], 'lifecycle_status': None, 'lifecycle_version': None, 'parents': [], 'members': []}, 'published_dd_context': {'path': 'wall/description_ggd/ggd/phi_potential/values', 'dd_version': '4.1.1', 'unit': 'V', 'documentation': 'One scalar value is provided per element in the grid subset.', 'data_type': None, 'node_type': None, 'physics_domain': None, 'cocos_transformation_type': None, 'cocos_transformation_expression': None, 'coordinates': [], 'lifecycle_status': None, 'lifecycle_version': None, 'parents': [], 'members': []}, 'dd_resolution_ids': [], 'dd_resolution_converged_ids': [], 'dd_resolution_manifest_digest': 'sha256:02dd37c745ddff3802f6d1fc577e7dbfe0c5b9832f69a149db5f78188ba4361d'}]; description='Electrostatic interaction energy per positive test charge at the wall, relative to a chosen electrical reference.'\", \"probability\": 0.98, \"veto\": false, \"cutoff\": 0.5, \"judgment_evidence\": [{\"type\": \"choice\", \"choice\": \"says nothing\", \"probabilities\": {\"supports\": 0.29, \"contradicts\": 0.08, \"says nothing\": 0.63}, \"confidence\": 0.45}, {\"type\": \"choice\", \"choice\": \"says nothing\", \"probabilities\": {\"supports\": 0.43, \"contradicts\": 0.03, \"says nothing\": 0.54}, \"confidence\": 0.31}, {\"type\": \"choice\", \"choice\": \"says nothing\", \"probabilities\": {\"supports\": 0.14, \"contradicts\": 0.04, \"says nothing\": 0.81}, \"confidence\": 0.72}, {\"type\": \"choice\", \"choice\": \"says nothing\", \"probabilities\": {\"supports\": 0.2, \"contradicts\": 0.06, \"says nothing\": 0.74}, \"confidence\": 0.61}, {\"type\": \"choice\", \"choice\": \"says nothing\", \"probabilities\": {\"supports\": 0.13, \"contradicts\": 0.02, \"says nothing\": 0.85}, \"confidence\": 0.77}, {\"type\": \"choice\", \"choice\": \"says nothing\", \"probabilities\": {\"supports\": 0.02, \"contradicts\": 0.01, \"says nothing\": 0.97}, \"confidence\": 0.95}, {\"type\": \"choice\", \"choice\": \"says nothing\", \"probabilities\": {\"supports\": 0.02, \"contradicts\": 0.01, \"says nothing\": 0.97}, \"confidence\": 0.95}, {\"type\": \"choice\", \"choice\": \"says nothing\", \"probabilities\": {\"supports\": 0.02, \"contradicts\": 0.01, \"says nothing\": 0.97}, \"confidence\": 0.95}, {\"type\": \"choice\", \"choice\": \"says nothing\", \"probabilities\": {\"supports\": 0.02, \"contradicts\": 0, \"says nothing\": 0.98}, \"confidence\": 0.97}, {\"type\": \"choice\", \"choice\": \"says nothing\", \"probabilities\": {\"supports\": 0.06, \"contradicts\": 0.01, \"says nothing\": 0.93}, \"confidence\": 0.89}], \"veto_criterion\": \"nonconforming check answer\", \"segment\": \"\", \"sentence\": \"This quantity is the local electrostatic potential at the wall, relative to a chosen electrical reference. It is a location-specific value of [electrostatic potential](name:electrostatic_potential), s\"}, {\"id\": \"raw_dd_reference_in_prose\", \"criterion\": \"Does the documentation cite a raw DD path or IDS name as storage context?\", \"evidence\": \"documentation='This quantity is the local electrostatic potential at the wall, relative to a chosen electrical reference. It is a location-specific value of [electrostatic potential](name:electrostatic_potential), specifying electrostatic interaction energy per positive test charge.\\\\n\\\\nThe defining energy relation is\\\\n\\\\n$$\\\\nV_{\\\\\\\\mathrm{w}} = \\\\\\\\frac{U_{\\\\\\\\mathrm{w}}-U_{\\\\\\\\mathrm{ref}}}{q_t}\\\\n$$\\\\n\\\\nwhere $V_{\\\\\\\\mathrm{w}}$ is the electrostatic potential at the wall relative to the chosen reference, $q_t$ is a positive test charge, $U_{\\\\\\\\mathrm{w}}$ is its electrostatic potential energy at the wall, and $U_{\\\\\\\\mathrm{ref}}$ is its electrostatic potential energy at the reference.\\\\n\\\\nThis quantity denotes a local wall value, not a wall-surface average or magnetic-flux-surface mean. It is not defined as the [plasma potential at a Langmuir-probe position](name:electrostatic_potential_at_langmuir_probe_position). Unlike the [floating electrostatic potential](name:floating_electrostatic_potential), it does not require zero net collector current, nor does it prescribe an externally applied bias.\\\\n\\\\nThe local electrostatic potential field $V$, whose wall value is $V_{\\\\\\\\mathrm{w}}$, satisfies $\\\\\\\\mathbf{E}_{\\\\\\\\mathrm{es}}=-\\\\\\\\nabla V$, where $\\\\\\\\mathbf{E}_{\\\\\\\\mathrm{es}}$ is the electrostatic electric field and $\\\\\\\\nabla$ is the spatial gradient operator. This relation excludes the inductive electric-field contribution.\\\\n\\\\nSign convention: Positive when a positive test charge has greater electrostatic potential energy at the wall than at the chosen reference.'; source_paths=['wall/description_ggd/ggd/phi_potential/values']\", \"probability\": 0.9, \"veto\": false, \"cutoff\": 0.5, \"judgment_evidence\": {\"type\": \"noul\", \"noul\": 0.9}, \"veto_criterion\": \"nonconforming check answer\", \"segment\": \"\", \"sentence\": \"This quantity is the local electrostatic potential at the wall, relative to a chosen electrical reference. It is a location-specific value of [electrostatic potential](name:electrostatic_potential), s\"}], \"raw_dimension_scores\": {\"completeness\": 14.889498403105264, \"description_quality\": 17.403158928824855, \"documentation_quality\": 14.560420083359586, \"physics_accuracy\": 16.29289393600652}, \"acceptance_probability\": 0.38503307733306397, \"selected_score\": 0.7893246418912028}",
+   "docs_stage": "accepted",
+   "id": "electrostatic_potential_at_wall",
+   "name_stage": "accepted",
+   "score_docs": 0.9483395478463891,
+   "score_name": 0.8648778589216725,
+   "source_paths": [
+    "dd:wall/description_ggd/ggd/phi_potential/values"
+   ],
+   "validation_status": "valid"
+  },
+  "wall_seconds": 613.227
+ }
+}
