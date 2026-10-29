@@ -16,7 +16,7 @@
 <table id="sib-last-source-supersede-hardening-header-table">
 <tbody>
 <tr><th>Base revision</th><td><code>b6bd5682bec73e4058307bdbfb787e07e3053951</code></td></tr>
-<tr><th>Work revision</th><td><code>96ef090ed</code>, <code>0b1962a89</code>, plus the evidence revision listed in the manifest</td></tr>
+<tr><th>Work revision</th><td><code>96ef090ed</code>, <code>0b1962a89</code>, <code>b467ca80c</code>, plus the evidence revision listed in the manifest</td></tr>
 <tr><th>Change</th><td><code>imas_codex/standard_names/source_invariant.py</code>, <code>graph_store/graph_source_bindings.py</code>, <code>provenance_lifecycle.py</code>, <code>tests/standard_names/test_last_source_supersede.py</code></td></tr>
 <tr><th>Posture</th><td>Writers changed; tests run on the disposable graph fixture. No live-graph write, no LLM call, USD 0.</td></tr>
 </tbody>
@@ -58,23 +58,40 @@ superseded. <code>record_supersede_receipts</code> records each pair through
 <code>record_standard_name_change</code>, the repository's single
 <code>StandardNameChange</code> writer, on the caller's transaction, so the
 receipt and the retirement commit together. <code>_MOVE_SOURCE_BINDING_CYPHER</code>
-embeds that clause rather than a copy, and the compose and attach writers run the
-move and its receipts in one transaction.</p>
+embeds that clause rather than a copy.</p>
+<p>Two integrity defects in that first attempt are repaired here.</p>
+<ol>
+<li><b>Receipt atomicity.</b> <code>_move_sources_to_name</code> ran the move and
+its retirement in one autocommit query and then wrote the receipt in a second,
+so a failure between the two left a superseded name with no
+<code>StandardNameChange</code> &mdash; the state the receipt exists to make
+auditable. The move, the supersession and the receipts now run inside one
+transaction opened on the caller's client, and a failure rolls all three back.</li>
+<li><b>A suppressed receipt.</b> The retarget guard skipped the
+<code>last_source_supersede</code> receipt for a drained name whenever the caller
+asked for no ordinary change receipt, which is every refinement and supersession
+retarget. A drained name is its own lifecycle event, so the receipt is written
+whatever <code>record_change</code> says.</li>
+</ol>
 
 <h2 id="sib-last-source-supersede-hardening-tests">Tests</h2>
 <table id="sib-last-source-supersede-hardening-test-table">
 <thead><tr><th>Test</th><th>Writer</th><th>Base arm</th><th>Head arm</th></tr></thead>
 <tbody>
-<tr><td><code>test_staged_candidate_produces_the_source_before_the_holder_is_superseded</code></td><td><code>stage_claimed_generated_candidates</code></td><td>fails: the holder is superseded and the source produces nothing</td><td>passes</td></tr>
+<tr><td><code>test_staged_candidate_produces_the_source_before_the_holder_is_superseded</code></td><td><code>stage_claimed_generated_candidates</code></td><td>fails: the holder is superseded and the source produces nothing</td><td>passes; reads the <code>compose_rebind</code> receipt from the graph</td></tr>
 <tr><td><code>test_claimed_lock_reports_the_binding_it_released</code></td><td><code>_lock_claimed_name_bindings</code> / <code>released_out</code></td><td>passes (coverage gap)</td><td>passes</td></tr>
-<tr><td><code>test_attached_source_moves_and_supersedes_the_drained_holder</code></td><td><code>mark_sources_attached</code></td><td>passes (coverage gap)</td><td>passes</td></tr>
+<tr><td><code>test_attached_source_moves_and_supersedes_the_drained_holder</code></td><td><code>mark_sources_attached</code></td><td>passes (coverage gap)</td><td>passes; reads the <code>attached_source_moved</code> receipt</td></tr>
 <tr><td><code>test_refined_name_moves_the_predecessors_source</code></td><td><code>persist_refined_name</code></td><td>passes (coverage gap)</td><td>passes</td></tr>
+<tr><td><code>test_compose_bind_supersedes_the_drained_holder</code></td><td><code>mark_sources_composed</code></td><td>passes</td><td>passes; reads the <code>composed_source_moved</code> receipt</td></tr>
 </tbody>
 </table>
-<p>One new test fails on the base revision and passes at head, which is the
-ordering defect. The other three cover writers whose behaviour was already correct
-on the base revision: the supersede clause already retired their drained holder,
-so these close the gap where a regression would have reddened nothing.</p>
+<p>One test fails on the base revision and passes at head, which is the ordering
+defect. The others cover writers whose behaviour was already correct on the base
+revision: its inline clause retired the drained holder and wrote a receipt of the
+same shape, so these close the gap where a regression would have reddened
+nothing. Each of the three move cases now reads the receipt back from the graph,
+so dropping <code>record_supersede_receipts</code> reddens them even though the
+retirement itself still happens.</p>
 
 <h2 id="sib-last-source-supersede-hardening-negative-control">Negative control</h2>
 <p>Declared mutation: <em>the ordering test must fail on main with a name
@@ -91,8 +108,9 @@ cases pass on both arms.</p>
 <thead><tr><th>Arm</th><th>Result</th></tr></thead>
 <tbody>
 <tr><td>base <code>b6bd5682b</code> archive, <code>tests/standard_names/</code>, <code>-n 8</code></td><td>1 failed, 8535 passed, 12 skipped, EXIT=1 &mdash; the same <code>test_export_determinism</code> failure id as the head arm, so the change adds no failure id</td></tr>
-<tr><td>head <code>96ef090ed</code>, <code>tests/standard_names/</code>, <code>-n 8</code></td><td>1 failed, 8536 passed, 11 skipped, EXIT=1 &mdash; the single failure is <code>test_export_determinism.py::TestManifestDeterminism::test_no_commit_uses_stable_unversioned_timestamp</code>, which the arm scaffolding's <code>SOURCE_DATE_EPOCH</code> causes and which fails identically on both arms</td></tr>
-<tr><td>head, <code>-m graph tests/standard_names/test_last_source_supersede.py</code></td><td>8 passed, EXIT=0</td></tr>
+<tr><td>head <code>b467ca80c</code>, <code>tests/standard_names/</code>, <code>-n 8</code></td><td>1 failed, 8536 passed, 11 skipped, EXIT=1 &mdash; the single failure is <code>test_export_determinism.py::TestManifestDeterminism::test_no_commit_uses_stable_unversioned_timestamp</code>, which the arm scaffolding's <code>SOURCE_DATE_EPOCH</code> causes and which fails identically on both arms</td></tr>
+<tr><td>head <code>b467ca80c</code>, <code>-m graph tests/standard_names/test_last_source_supersede.py</code></td><td>8 passed, EXIT=0</td></tr>
+<tr><td>base <code>b6bd5682b</code> archive, same <code>-m graph</code> file</td><td>1 failed, 7 passed, EXIT=1 &mdash; the ordering case, at the producer assertion</td></tr>
 </tbody>
 </table>
 <p>Both full-suite arms run from <code>git archive</code> trees with their own
