@@ -10,6 +10,7 @@ import functools
 import json
 import logging
 import re
+from collections.abc import Iterable
 from contextlib import nullcontext, suppress
 from datetime import UTC, datetime
 from pathlib import Path
@@ -22,6 +23,109 @@ from imas_codex.graph.schema import GraphSchema
 from . import graph_foundation as foundation
 
 logger = logging.getLogger(__name__)
+
+
+class StandardNameWriteResult(int):
+    """Written name count with the published paths that could not be bound."""
+
+    unbound_paths: tuple[dict[str, str], ...]
+
+    def __new__(
+        cls,
+        written: int,
+        *,
+        unbound_paths: Iterable[dict[str, str]] = (),
+    ) -> StandardNameWriteResult:
+        result = super().__new__(cls, written)
+        result.unbound_paths = tuple(unbound_paths)
+        return result
+
+
+def _published_dd_paths_by_name(
+    names: list[dict[str, Any]],
+) -> dict[str, list[str]]:
+    """Every published DD path each entry carries, keyed by name id.
+
+    An entry publishes its DD sources both as its originating ``source_id`` and
+    as the union list in ``source_paths``. A ``catalog``-typed entry has no
+    single originating source, so its ``source_paths`` are the only record of
+    the DD paths it published.
+    """
+    from imas_codex.standard_names.source_paths import parse_source_path
+
+    published: dict[str, list[str]] = {}
+    for name in names:
+        source_types = name.get("source_types") or []
+        if "dd" not in source_types and "catalog" not in source_types:
+            continue
+        paths: list[str] = []
+        if "dd" in source_types and name.get("source_id"):
+            paths.append(str(name["source_id"]))
+        for raw in name.get("source_paths") or []:
+            source_type, source_id = parse_source_path(str(raw))
+            if source_type == "dd":
+                paths.append(source_id)
+        if paths:
+            published[name["id"]] = list(dict.fromkeys(paths))
+    return published
+
+
+def _resolve_dd_leaves(
+    query: Any,
+    paths: Iterable[str],
+) -> dict[str, str | None]:
+    """Resolve each published path to the leaf a name can bind.
+
+    A DD path that names a container is not a signal: an array binds through
+    its ``/values`` leaf and a structure through its single component leaf, the
+    same reduction the extraction path applies. ``None`` marks a path that
+    cannot be bound, so the caller reports it rather than dropping it.
+    """
+    unique = sorted(set(paths))
+    if not unique:
+        return {}
+    rows = query.query(
+        """
+        UNWIND $paths AS path
+        MATCH (node:IMASNode {id: path})
+        OPTIONAL MATCH (node)-[:HAS_CHILD]->(child:IMASNode)
+        WITH path, node, [c IN collect(child)
+                          WHERE NOT c.data_type IN ['STRUCTURE', 'STRUCT_ARRAY']
+                          | c.id] AS leaves
+        RETURN path, node.data_type AS data_type, leaves
+        """,
+        paths=unique,
+    )
+    by_path = {row["path"]: row for row in rows or []}
+    resolved: dict[str, str | None] = {}
+    for path in unique:
+        row = by_path.get(path)
+        if row is None:
+            resolved[path] = None
+        elif row["data_type"] == "STRUCT_ARRAY":
+            resolved[path] = f"{path}/values"
+        elif row["data_type"] == "STRUCTURE":
+            leaves = row["leaves"] or []
+            resolved[path] = leaves[0] if len(leaves) == 1 else None
+        else:
+            resolved[path] = path
+    leaves = sorted({leaf for leaf in resolved.values() if leaf})
+    existing = (
+        {
+            row["id"]
+            for row in query.query(
+                "UNWIND $paths AS p MATCH (n:IMASNode {id: p}) RETURN n.id AS id",
+                paths=leaves,
+            )
+            or []
+        }
+        if leaves
+        else set()
+    )
+    for path, leaf in resolved.items():
+        if leaf and leaf not in existing:
+            resolved[path] = None
+    return resolved
 
 
 def write_standard_names(
@@ -75,6 +179,9 @@ def write_standard_names(
 
     # Pipeline protection — strip catalog-owned fields from catalog_edit items
     from imas_codex.standard_names.protection import filter_protected
+
+    # Published DD paths this write could not bind, reported on the result.
+    unbound_paths: list[dict[str, str]] = []
 
     names, skipped = filter_protected(names, override=override)
     if skipped:
@@ -347,16 +454,41 @@ def write_standard_names(
         )
 
         # Create HAS_STANDARD_NAME relationships: entity → concept
-        dd_names = [n for n in names if "dd" in (n.get("source_types") or [])]
+        #
+        # A name binds every published DD path it carries, not only its single
+        # originating source: a published entry records its sources as a union
+        # list, and a catalog-typed entry has no originating source at all. A
+        # container resolves to its bindable leaf; a path that cannot be bound
+        # is reported on the result rather than dropped.
+        from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+            _is_attachment_consistent,
+        )
+
+        published_dd_paths = _published_dd_paths_by_name(names)
         signal_names = [n for n in names if "signals" in (n.get("source_types") or [])]
+        if published_dd_paths:
+            candidate_paths = [
+                path for paths in published_dd_paths.values() for path in paths
+            ]
+            leaves = _resolve_dd_leaves(write_gc, candidate_paths)
+            pairs: list[dict[str, str]] = []
+            for name_id, paths in sorted(published_dd_paths.items()):
+                for path in paths:
+                    leaf = leaves.get(path)
+                    if leaf is None:
+                        unbound_paths.append(
+                            {
+                                "name": name_id,
+                                "path": path,
+                                "reason": "no_bindable_leaf",
+                            }
+                        )
+                        continue
+                    pairs.append({"id": name_id, "source_id": leaf})
 
-        if dd_names:
-            from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
-                _is_attachment_consistent,
-            )
-
-            pairing_rows = write_gc.query(
-                """
+            pairing_rows = (
+                write_gc.query(
+                    """
                 UNWIND $batch AS b
                 MATCH (sn:StandardName {id: b.id})
                 OPTIONAL MATCH (src:IMASNode {id: b.source_id})
@@ -367,16 +499,15 @@ def write_standard_names(
                        sn.unit AS sn_unit,
                        collect(DISTINCT bound.id) AS existing_dd_paths
                 """,
-                batch=[
-                    {"id": n["id"], "source_id": n["source_id"]}
-                    for n in dd_names
-                    if n.get("source_id")
-                ],
+                    batch=pairs,
+                )
+                if pairs
+                else []
             )
             accepted_by_name: dict[str, list[str]] = {}
             accepted_pairs: list[dict[str, str]] = []
             for row in sorted(
-                pairing_rows, key=lambda item: (item["id"], item["source_id"])
+                pairing_rows or [], key=lambda item: (item["id"], item["source_id"])
             ):
                 accepted_paths = accepted_by_name.setdefault(
                     row["id"], sorted(row.get("existing_dd_paths") or [])
@@ -394,21 +525,36 @@ def write_standard_names(
                     )
                     accepted_paths.append(row["source_id"])
                 else:
+                    unbound_paths.append(
+                        {
+                            "name": row["id"],
+                            "path": row["source_id"],
+                            "reason": f"attachment_refused: {reason}",
+                        }
+                    )
                     logger.warning(
                         "write_standard_names: rejected DD pairing %s → %s: %s",
                         row["source_id"],
                         row["id"],
                         reason,
                     )
-            write_gc.query(
-                """
+            if accepted_pairs:
+                write_gc.query(
+                    """
                 UNWIND $batch AS b
                 MATCH (sn:StandardName {id: b.id})
                 MATCH (src:IMASNode {id: b.source_id})
                 MERGE (src)-[:HAS_STANDARD_NAME]->(sn)
                 """,
-                batch=accepted_pairs,
-            )
+                    batch=accepted_pairs,
+                )
+            for entry in unbound_paths:
+                logger.warning(
+                    "write_standard_names: unbound published DD path %s → %s: %s",
+                    entry["path"],
+                    entry["name"],
+                    entry["reason"],
+                )
         if signal_names:
             write_gc.query(
                 """
@@ -589,7 +735,7 @@ def write_standard_names(
     logger.info("Wrote %d StandardName nodes", written)
     if return_written_ids:
         return [name["id"] for name in names]
-    return written
+    return StandardNameWriteResult(written, unbound_paths=unbound_paths)
 
 
 class ReviewWriteResult(int):
