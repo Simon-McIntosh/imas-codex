@@ -2159,11 +2159,14 @@ _RETIRE_FINALIZED_SOURCE_GAPS = """
 """
 
 
-#: Binding kinds whose target name already exists and carries its own content,
-#: so the winner needs no rich write and is finished by the stable finalize
-#: statement alone. ``adoption`` joins ``stable_reuse`` because adopting a
-#: projection stub binds an existing node rather than creating one.
-_STABLE_BINDING_KINDS: Final = frozenset({"stable_reuse", "adoption"})
+#: Binding kinds whose winner must take the composed candidate's content
+#: through the rich name write: a reservation that will become a name, and an
+#: adopted projection stub, which has a name and a provenance edge but no
+#: description or composed columns of its own. Adoption is not added to the
+#: stable finalize batch: the lock moves the stub to ``drafted`` and this write
+#: binds its own source record on the way, so the source finishes through its
+#: own branch rather than the stable one.
+_RICH_WRITE_BINDING_KINDS: Final = frozenset({"owned_reservation", "adoption"})
 
 
 def persist_generated_name_winners(
@@ -2329,30 +2332,30 @@ def persist_generated_name_winners(
                     tx.commit()
                     return []
 
-                reserved_candidates = [
+                rich_write_candidates = [
                     candidate_by_sns[sns_id]
                     for sns_id, kind in binding_kinds.items()
-                    if kind == "owned_reservation"
+                    if kind in _RICH_WRITE_BINDING_KINDS
                 ]
                 stable_candidates = [
                     candidate_by_sns[sns_id]
                     for sns_id, kind in binding_kinds.items()
-                    if kind in _STABLE_BINDING_KINDS
+                    if kind not in _RICH_WRITE_BINDING_KINDS
                 ]
                 written_name_ids = {entry["id"] for entry in stable_candidates}
-                if reserved_candidates:
+                if rich_write_candidates:
                     written_names = services.write_standard_names(
-                        reserved_candidates,
+                        rich_write_candidates,
                         gc=tx_gc,
                         return_written_ids=True,
                     )
                     if isinstance(written_names, int):
-                        if written_names != len(reserved_candidates):
+                        if written_names != len(rich_write_candidates):
                             raise RuntimeError(
                                 "rich standard-name write rejected an exact-claim "
                                 "winner"
                             )
-                        written_names = [entry["id"] for entry in reserved_candidates]
+                        written_names = [entry["id"] for entry in rich_write_candidates]
                     written_name_ids.update(written_names)
                 finalize_batch = [
                     {**item, "binding_kind": binding_kinds[item["sns_id"]]}
@@ -2370,12 +2373,79 @@ def persist_generated_name_winners(
                     for item in finalize_batch
                     if item["binding_kind"] == "owned_reservation"
                 ]
+                adoption_finalize_batch = [
+                    item
+                    for item in finalize_batch
+                    if item["binding_kind"] == "adoption"
+                ]
                 stable_finalize_batch = [
                     item
                     for item in finalize_batch
-                    if item["binding_kind"] in _STABLE_BINDING_KINDS
+                    if item["binding_kind"] == "stable_reuse"
                 ]
                 finalized_rows: list[dict[str, Any]] = []
+                if adoption_finalize_batch:
+                    # The rich write above binds the source's own record, so an
+                    # adopted stub's source may already have left ``extracted``.
+                    # The claim token and sequence are the authority that this
+                    # extraction still owns the write, so the source status is
+                    # not required here.
+                    finalized_rows.extend(
+                        tx_gc.query(
+                            """
+                    UNWIND $batch AS b
+                    MATCH (sns:StandardNameSource {id: b.sns_id})
+                    WHERE sns.claim_token = b.claim_token
+                      AND sns.claim_seq = b.claim_seq
+                    MATCH (sn:StandardName {id: b.sn_id})
+                    WHERE sn.name_stage IN $stable_stages
+                      AND (b.unit IS NULL OR sn.unit IS NULL OR sn.unit = b.unit)
+                    FOREACH (_ IN CASE
+                      WHEN sns.compose_hint_status = 'open' THEN [1] ELSE [] END |
+                      SET sns.compose_hint_status = 'consumed',
+                          sns.compose_hint_consumed_at = datetime()
+                    )
+                    SET sns.claim_token = null,
+                        sns.claimed_at = null,
+                        sns.status = 'composed',
+                        sns.composed_at = coalesce(sns.composed_at, datetime()),
+                        sns.produced_sn_id = sn.id,
+                        sns.last_error = null
+                    MERGE (sns)-[produced:PRODUCED_NAME]->(sn)
+                    REMOVE produced.provisional,
+                           produced.claim_token,
+                           produced.claim_seq,
+                           produced.created_target
+                    WITH sns, sn, b
+                    CALL (b) {
+                      WITH b
+                      WHERE b.source_type = 'dd'
+                      MATCH (source:IMASNode {id: b.source_id})
+                      RETURN source
+                      UNION
+                      WITH b
+                      WHERE b.source_type = 'signals'
+                      MATCH (source:FacilitySignal {id: b.source_id})
+                      RETURN source
+                    }
+                    MERGE (source)-[:HAS_STANDARD_NAME]->(sn)
+                    WITH sns, sn, b, b.source_type + ':' + b.source_id AS uri
+                    SET sn.source_paths = CASE
+                      WHEN uri IN coalesce(sn.source_paths, [])
+                      THEN sn.source_paths
+                      ELSE coalesce(sn.source_paths, []) + uri END,
+                      sn.updated_at = datetime()
+                    __RETIRE_FINALIZED_SOURCE_GAPS__
+                    """.replace(
+                                "__RETIRE_FINALIZED_SOURCE_GAPS__",
+                                _RETIRE_FINALIZED_SOURCE_GAPS,
+                            ),
+                            batch=adoption_finalize_batch,
+                            stable_stages=sorted(
+                                foundation._STABLE_BINDING_NAME_STAGES
+                            ),
+                        )
+                    )
                 if reserved_finalize_batch:
                     finalized_rows.extend(
                         tx_gc.query(

@@ -914,10 +914,11 @@ def _lock_claimed_name_bindings(
     ``HAS_STANDARD_NAME`` projection from the claimed source's own DD path is
     adopted rather than refused, entering ``drafted`` with a linked
     ``StandardNameChange`` in the same transaction. A pending identity owned by
-    another claim is refused exactly as before. Attachments never receive
-    either authority. Refusal is per pairing — one bad source never fails its batch —
-    so this is the single point at which every claimed-source persister
-    inherits the guard.
+    another claim is refused exactly as before. Only ``sn attach`` refuses
+    both authorities: it calls this lock with each exception off, while every
+    composition path grants the one it is entitled to. Refusal is per pairing —
+    one bad source never fails its batch — so this is the single point at which
+    every claimed-source persister inherits the guard.
 
     A non-bindable target releases the exact source claim back to
     ``extracted`` without resetting ``attempt_count``. The retained attempt
@@ -1452,10 +1453,13 @@ def persist_claimed_attachments(
 ) -> list[str]:
     """Attach exact source-claim winners to stable lifecycle targets.
 
-    A terminal, transient, missing, or unowned-pending target releases the
-    source through the same collision path as generated candidates. No source,
-    DD projection, name scalar, or relationship is mutated unless both the
-    exact source fence and stable target predicate survive to the final write.
+    A terminal, transient, or missing target releases the source through the
+    same collision path as generated candidates. An unowned pending stub whose
+    projection is the source's own DD path is adopted instead: the lock moves
+    it to ``drafted`` with a receipt, and it finishes through the stable write
+    below. No source, DD projection, name scalar, or relationship is mutated
+    unless both the exact source fence and the target predicate survive to the
+    final write.
     """
     batch = [
         {**item, "sn_id": item.get("standard_name")}

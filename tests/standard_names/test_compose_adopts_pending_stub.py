@@ -22,7 +22,9 @@ from imas_codex.graph.client import GraphClient
 pytestmark = pytest.mark.graph
 
 PROBE_PATH = "test_adopt_projection/profiles_1d/psi"
-PROBE_STUB = "test_adopt_projection_probe_stub"
+PROBE_STUB = "electron_temperature"
+PROBE_DESCRIPTION = "composed description carried into the adopted projection stub"
+PROBE_UNIT = "eV"
 PROBE_SOURCE = f"dd:{PROBE_PATH}"
 TOKEN = "test-adopt-projection-token"
 SEQ = 4
@@ -40,10 +42,16 @@ def services():
 def _wipe(gc: GraphClient) -> None:
     """Delete every row this suite creates, whatever its id namespace.
 
-    The DD source id is ``dd:``-namespaced while the name and node ids are not,
-    so the wipe matches anywhere in the id rather than at its start.
+    The DD source id is ``dd:``-namespaced while the node ids are not, so the
+    wipe matches anywhere in the id rather than at its start. The stub carries
+    its own grammar-valid identity, which shares no part of that namespace, so
+    it is named as well.
     """
-    gc.query("MATCH (n) WHERE n.id CONTAINS 'test_adopt_projection' DETACH DELETE n")
+    gc.query(
+        "MATCH (n) WHERE n.id CONTAINS 'test_adopt_projection' OR n.id = $stub "
+        "DETACH DELETE n",
+        stub=PROBE_STUB,
+    )
 
 
 @pytest.fixture()
@@ -108,6 +116,7 @@ def _stub(gc: GraphClient) -> dict:
         """
         MATCH (stub:StandardName {id: $stub})
         RETURN stub.name_stage AS name_stage, stub.status AS status,
+               stub.description AS description, stub.unit AS unit,
                COUNT { (stub)-[:HAS_INTERNAL_CHANGE]->(
                  c:StandardNameChange) } AS receipts
         """,
@@ -229,7 +238,8 @@ def test_production_writer_adopts_an_unowned_projection_stub(graph, services) ->
                 "id": PROBE_STUB,
                 "source_id": PROBE_PATH,
                 "source_types": ["dd"],
-                "unit": None,
+                "description": PROBE_DESCRIPTION,
+                "unit": PROBE_UNIT,
                 "source_claim_token": TOKEN,
                 "source_claim_seq": SEQ,
             }
@@ -241,6 +251,10 @@ def test_production_writer_adopts_an_unowned_projection_stub(graph, services) ->
 
     stub = _stub(graph)
     assert stub["name_stage"] == "drafted"
+    assert stub["description"] == PROBE_DESCRIPTION, (
+        "the adopted stub did not take the composed description: " + str(stub)
+    )
+    assert stub["unit"] == PROBE_UNIT
     assert _adoption_receipts(graph) == [
         {
             "from_name": "pending",
