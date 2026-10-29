@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="294">
+<meta name="plan-version" content="295">
 <meta name="plan-modified" content="2026-10-29">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -1062,8 +1062,11 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 <div class="r-comment" data-section="s45" data-id="c-s45-review-corrections" data-who="reckon-build" data-when="2026-10-29T09:00:00Z">
     <div class="r-comment-body"><p>Corrections from the content review.</p><p><b>The invariant already covers drafts.</b> <code>require_producing_sources</code> exempts only superseded names. So the done-when item “the identity-writer invariant covers drafts” measures nothing and is withdrawn. The real gap is that each writer passes the invariant only the names it writes, never the name that loses the source. The per-writer tests in <code>sib-last-source-supersede</code> measure that directly.</p><p><b>The review also proposed requiring a name's whole published path set.</b> That is declined. The row verdicts show those partial losses are mostly catalog container paths whose leaf is bound, or wrong catalog bindings since corrected. A full-set rule would enforce the catalog's noise.</p><p><b>The section's two deliverables run as separate nodes</b> with disjoint write paths: <code>sib-last-source-supersede</code> for the writers, and <code>sib-audit-drafts-and-import</code> for the audit and the import.</p><p><b>The population is 20, not 19.</b> The generators probe counted 20 zero-producer names, and the coordinator's read counted 19. §46 works from the live set at run time, so its read-back is measured against what it finds, not against a fixed count.</p></div>
 </div>
+<div class="r-comment" data-section="s45" data-id="c-run-r-20261029T083356719653-sib-last-source-supersede" data-who="reckon-build" data-when="2026-10-29T09:35:09.970Z">
+    <div class="r-comment-body"><p>The shared supersede clause lands beside the source invariant and is embedded in the compare-and-set source migration, the compose/attach source move, the provisional-edge cleanup, and the recovery re-bind; graph_store/graph_refinement.py needed no edit of its own because persist_refined_name reaches the clause through retarget, and its own statement already retires the predecessor.</p></div>
+</div>
 <div class="r-comment" data-section="s46" data-id="c-run-r-20261029T083805766546-sib-retire-sourceless-drafts" data-who="reckon-build" data-when="2026-10-29T09:00:04.231Z">
-    <div class="r-comment-body"><p>Retired 131 of 132 live exhausted drafts that carry no producing DD source through `apply_signed_manifest` (authority 133 rows, preview 131 admitted / 2 refused, manifest 2f8815c0…), one successor edge to `poloidal_angle_of_plasma_boundary_gap`; read-back lists 17 remaining sourceless live names — 16 non-exhausted recorded for the lead and 1 writer refusal — against a live population of 148 rather than the dispatch&#x27;s 19 (113 exhausted records no source at all; `ion_pressure` and `beta` are derived parents).</p></div>
+    <div class="r-comment-body"><p>Retired 131 of 132 live exhausted drafts that carry no producing DD source through `apply_signed_manifest` (authority 133 rows, preview 131 admitted / 2 refused, manifest 2f8815c0…), one successor edge to `poloidal_angle_of_plasma_boundary_gap`; read-back lists 17 remaining sourceless live names — 16 non-exhausted recorded for the lead and 1 writer refusal — against a live population of 148 rather than the dispatch's 19 (113 exhausted records no source at all; `ion_pressure` and `beta` are derived parents).</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
