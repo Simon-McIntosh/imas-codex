@@ -6,7 +6,7 @@
     "image-0.png (1400x720 RGBA, attached to this review run)": "docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs/adoption-state.svg"
   },
   "attachment_note": "One rendered image was attached and was opened with the review node's own Read tool. It is 1400x720 RGBA. Attribution to the reviewed figure is by content, not by filename (the attachment carries no provenance of its own): the reviewed run's commit 7ab58c22f adds exactly one figure, docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs/adoption-state.svg, and its manifest-level description ('the stub, its adoption ..., the content arriving through the rich write, and the refusal branch that parks a source at the claim cap') matches the attached render's structure -- a three-node top row, a two-node second row, and a two-node final row, with seven boxes and five connectors. No SVG was opened, read, searched, listed, rendered or git-shown by this review; every verdict below is read from the attached PNG's pixels. Measurements were taken with Pillow against that PNG only. The canvas has a fully transparent background (611,823 px of RGBA 0,0,0,0; alpha channel extrema 0-255) and the drawn content occupies bbox (29, 79)-(1211, 651).",
-  "completed_at": "",
+  "completed_at": "2026-10-29T22:47:08.423Z",
   "dispatched_at": "2026-10-29T22:42:37Z",
   "figure_checks": {
     "attachment_alpha": "extrema 0-255; 611,823 fully transparent px (background)",
@@ -108,6 +108,6 @@
   ],
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-10-29T22:47:11.873945+00:00",
+  "timestamp": "2026-10-29T22:53:50.360418+00:00",
   "total": null
 }
