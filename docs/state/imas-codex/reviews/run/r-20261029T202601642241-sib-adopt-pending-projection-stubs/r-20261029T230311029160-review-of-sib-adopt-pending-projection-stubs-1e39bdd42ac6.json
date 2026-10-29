@@ -1,0 +1,82 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "baseline_suite at 049597eb5 records failure_ids ['tests/standard_names/test_export_determinism.py::TestManifestDeterminism::test_no_commit_uses_stable_unversioned_timestamp'] (1 failed, 8535 passed, 12 skipped, EXIT=1); after_suite at bf365e7c6 records the same single id (1 failed, 8536 passed, 11 skipped, EXIT=1); added failure ids = 0. The after_suite arm predates the reviewed head 1e39bdd42, which changes only a documentation SVG and no Python, so its result carries.",
+  "call_sites": [
+    "docs/evidence/fragments/sn-integrity-backlog/sib-adopt-pending-projection-stubs.html:71"
+  ],
+  "completed_at": "2026-10-29T23:14:24.595Z",
+  "dispatched_at": "2026-10-29T23:04:49Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T202601642241-sib-adopt-pending-projection-stubs/logs/figure-render.log",
+      "id": "review-figure-log-fontless-arm",
+      "line": "16",
+      "severity": "non-blocking",
+      "text": "non-blocking: the log describes its fontless arm as FONTCONFIG_FILE pointing at an 'empty fontconfig' file, and that form does not reproduce the recorded control -- a zero-byte fonts.conf fails to load and fontconfig falls back to the host database, so the parent figure renders with its text (I measured 233605 B, identical to the default render) rather than as the recorded 132052 B tofu. The tofu artefact is real and I reproduced it byte-for-byte with a valid config declaring an empty font directory, so the conclusion stands; only the recipe in the log cannot be followed to reach it."
+    },
+    {
+      "file": "docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs/adoption-state.svg",
+      "id": "review-figure-comment-history",
+      "line": "3",
+      "severity": "non-blocking",
+      "text": "non-blocking: the header comment keeps a history clause ('A renderer with no font database used to drop all 41 labels and leave the boxes blank'), the changelog-prose shape the repository's naming rules forbid in a comment; the mechanism sentence in the first line stands alone without it, and the parent commit already records the history."
+    },
+    {
+      "file": "docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs/adoption-state.svg",
+      "id": "review-figure-no-generator",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the file grows from 5703 B to 331868 B of opaque glyph outlines with no generator script committed beside it, against the neighbouring docs/figures/sn-catalog-grouping/scg-ids-domain-refresh/make_figure.py, so a later edit to a label cannot be made by re-running anything and how the outlines were produced survives only as prose in the run's log."
+    },
+    {
+      "file": "docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs/adoption-state.svg",
+      "id": "review-figure-no-regression-guard",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: nothing in tests/ fails if the labels regress to <text> elements, so the defect this commit repairs is guarded by a log rather than by an assertion; a single check that the served SVG contains no <text> node and no font-family attribute would redden on exactly the parent revision and is the cheapest guard this node could have."
+    },
+    {
+      "file": "docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs/adoption-state.svg",
+      "id": "review-figure-off-centre",
+      "line": "2",
+      "severity": "non-blocking",
+      "text": "non-blocking: the drawing still sits off-centre -- the rendered ink bbox is x 29-1210 of a 1400-unit canvas, a 190-unit right margin against 29 on the left -- a composition defect the previous figure review exempted pending exactly this readable render, and this render now shows the imbalance without the distraction of the missing labels."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read against bf365e7c: 20 insertions and 73 deletions in one SVG -- the five font classes leave the style block, the seven rects and three arrow markers are unchanged, and each label becomes a filled path carrying its original colour (#111111 x8, #333333 x28, #2e8b57 x6, #929292 x1).",
+    "done_when": "The reviewed node's done_when names the census, the adoption behaviour and tests/standard_names, none of which this commit touches; the measure this commit has to meet is the figure evidence, and logs/figure-render.log records a three-way comparison that I reproduced independently -- the fixed file renders byte-identical with and without a font database (272226 B both arms) while the parent commit's file renders as seven tofu boxes (132052 B).",
+    "goal": "The gained commit's goal is the repair the previous figure review demanded, a state diagram whose labels draw with no font database; docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs/adoption-state.svg now holds 45 filled glyph paths in place of the 41 <text> elements it carried at bf365e7c, and my own render of it shows every label legible.",
+    "manifest": "Read; status complete, 1e39bdd42 listed as acted fd9fb0c9d27 with three rendered PNGs named by size, and docs/evidence/fragments/sn-integrity-backlog/sib-adopt-pending-projection-stubs.html:71 embeds the figure with a project-absolute src and an alt describing the transition.",
+    "write_paths": "The reviewed run's declared write paths include docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs, and git show --stat 1e39bdd42 changes exactly one file inside it and nothing else."
+  },
+  "justifications": {
+    "durability": "Nothing in the repository fails if the labels regress to <text> elements: no test asserts the no-text property and no generator script is committed beside adoption-state.svg, so the 331868 B outline file can be neither regenerated nor checked except by re-reading a log.",
+    "evidence": "logs/figure-render.log records the three-way comparison and the three PNGs sit on disk at the stated sizes, but the log calls its fontless arm an 'empty fontconfig' (line 16), and a zero-byte FONTCONFIG_FILE falls back to the host fonts -- I measured 233605 B with text that way -- so the 132052 B tofu control reproduces only under a valid config whose font directory is empty.",
+    "fit": "The palette and canvas follow the repository's figure conventions (green #2e8b57, neutral #929292, 1400x720 at 35cm x 18cm), but the header comment at adoption-state.svg:3 carries changelog prose ('used to drop all 41 labels') where the naming rules ask for the mechanism alone, and one label path carries fill=\"#333\" against the 28 that carry \"#333333\".",
+    "goal_fidelity": "adoption-state.svg holds 0 <text> and 0 font-family references against 41 text elements at its parent, and its render is byte-identical whether a font database is present or absent, which is exactly the defect fd9fb0c9d27 named.",
+    "reuse": "No owner of SVG text-to-path conversion exists -- searching imas_codex/ for TextToPath/glyph/savefig and docs/figures for a shared save helper found only per-figure make_figure.py scripts (docs/figures/sn-catalog-grouping/scg-ids-domain-refresh/make_figure.py), none of which converts text to paths, so the conversion duplicates no capability the repository owns.",
+    "scope_discipline": "git show --stat 1e39bdd42 touches only docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs/adoption-state.svg, inside the declared figures directory, and no evidence page, source file or plan is touched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The gained commit's goal is the repair the previous figure review demanded, a state diagram whose labels draw with no font database; docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs/adoption-state.svg now holds 45 filled glyph paths in place of the 41 <text> elements it carried at bf365e7c, and my own render of it shows every label legible.\nVERDICT done_when: The reviewed node's done_when names the census, the adoption behaviour and tests/standard_names, none of which this commit touches; the measure this commit has to meet is the figure evidence, and logs/figure-render.log records a three-way comparison that I reproduced independently -- the fixed file renders byte-identical with and without a font database (272226 B both arms) while the parent commit's file renders as seven tofu boxes (132052 B).\nVERDICT write_paths: The reviewed run's declared write paths include docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs, and git show --stat 1e39bdd42 changes exactly one file inside it and nothing else.\nVERDICT manifest: Read; status complete, 1e39bdd42 listed as acted fd9fb0c9d27 with three rendered PNGs named by size, and docs/evidence/fragments/sn-integrity-backlog/sib-adopt-pending-projection-stubs.html:71 embeds the figure with a project-absolute src and an alt describing the transition.\nVERDICT diff: Read against bf365e7c: 20 insertions and 73 deletions in one SVG -- the five font classes leave the style block, the seven rects and three arrow markers are unchanged, and each label becomes a filled path carrying its original colour (#111111 x8, #333333 x28, #2e8b57 x6, #929292 x1).\nCALL_SITES: docs/evidence/fragments/sn-integrity-backlog/sib-adopt-pending-projection-stubs.html:71\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: adoption-state.svg holds 0 <text> and 0 font-family references against 41 text elements at its parent, and its render is byte-identical whether a font database is present or absent, which is exactly the defect fd9fb0c9d27 named.\nSCORE evidence: 16\nJUSTIFICATION evidence: logs/figure-render.log records the three-way comparison and the three PNGs sit on disk at the stated sizes, but the log calls its fontless arm an \"empty fontconfig\" (line 16), and a zero-byte FONTCONFIG_FILE falls back to the host fonts -- I measured 233605 B with text that way -- so the 132052 B tofu control reproduces only under a valid config whose font directory is empty.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat 1e39bdd42 touches only docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs/adoption-state.svg, inside the declared figures directory, and no evidence page, source file or plan is touched.\nSCORE durability: 8\nJUSTIFICATION durability: Nothing in the repository fails if the labels regress to <text> elements: no test asserts the no-text property and no generator script is committed beside adoption-state.svg, so the 331868 B outline file can be neither regenerated nor checked except by re-reading a log.\nSCORE fit: 15\nJUSTIFICATION fit: The palette and canvas follow the repository's figure conventions (green #2e8b57, neutral #929292, 1400x720 at 35cm x 18cm), but the header comment at adoption-state.svg:3-5 carries changelog prose (\"used to drop all 41 labels\") where the naming rules ask for the mechanism alone, and one label path at adoption-state.svg carries fill=\"#333\" against the 28 that carry \"#333333\".\nSCORE reuse: 20\nJUSTIFICATION reuse: No owner of SVG text-to-path conversion exists -- searching imas_codex/ for TextToPath/glyph/savefig and docs/figures for a shared save helper found only per-figure make_figure.py scripts (docs/figures/sn-catalog-grouping/scg-ids-domain-refresh/make_figure.py), none of which converts text to paths, so the conversion duplicates no capability the repository owns.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T202601642241-sib-adopt-pending-projection-stubs/logs/figure-render.log:16 non-blocking: the log describes its fontless arm as FONTCONFIG_FILE pointing at an 'empty fontconfig' file, and that form does not reproduce the recorded control -- a zero-byte fonts.conf fails to load and fontconfig falls back to the host database, so the parent figure renders with its text (I measured 233605 B, identical to the default render) rather than as the recorded 132052 B tofu. The tofu artefact is real and I reproduced it byte-for-byte with a valid config declaring an empty font directory, so the conclusion stands; only the recipe in the log cannot be followed to reach it.\nFINDING docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs/adoption-state.svg:3 non-blocking: the header comment keeps a history clause ('A renderer with no font database used to drop all 41 labels and leave the boxes blank'), the changelog-prose shape the repository's naming rules forbid in a comment; the mechanism sentence in the first line stands alone without it, and the parent commit already records the history.\nFINDING docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs/adoption-state.svg:1 non-blocking: the file grows from 5703 B to 331868 B of opaque glyph outlines with no generator script committed beside it, against the neighbouring docs/figures/sn-catalog-grouping/scg-ids-domain-refresh/make_figure.py, so a later edit to a label cannot be made by re-running anything and how the outlines were produced survives only as prose in the run's log.\nFINDING docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs/adoption-state.svg:1 non-blocking: nothing in tests/ fails if the labels regress to <text> elements, so the defect this commit repairs is guarded by a log rather than by an assertion; a single check that the served SVG contains no <text> node and no font-family attribute would redden on exactly the parent revision and is the cheapest guard this node could have.\nFINDING docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs/adoption-state.svg:2 non-blocking: the drawing still sits off-centre -- the rendered ink bbox is x 29-1210 of a 1400-unit canvas, a 190-unit right margin against 29 on the left -- a composition defect the previous figure review exempted pending exactly this readable render, and this render now shows the imbalance without the distraction of the missing labels.\n",
+  "review_run_id": "r-20261029T230311029160-review-of-sib-adopt-pending-projection-stubs-1e39bdd42ac6",
+  "reviewed_base_sha": "bf365e7c6e494f3017894b7b0dbb0f7a0a1f1ee9",
+  "reviewed_head_sha": "1e39bdd42ac6bda44bee7854ccb7be279df686c4",
+  "reviewed_run_id": "r-20261029T202601642241-sib-adopt-pending-projection-stubs",
+  "scores": {
+    "durability": 8,
+    "evidence": 16,
+    "fit": 15,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-30T00:20:00Z",
+  "total": 98
+}
