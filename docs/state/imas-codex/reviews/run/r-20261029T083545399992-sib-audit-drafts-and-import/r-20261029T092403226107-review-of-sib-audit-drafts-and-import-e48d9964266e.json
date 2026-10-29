@@ -1,0 +1,87 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own baseline_suite and after_suite: base ids (4) minus head ids (2) leaves tests/standard_names/test_export_layout_stamp.py::test_publish_accepts_the_installed_package_value as the only head-only id; suite-head2.log:143 shows it is 'Failed: Timeout (>30.0s) from pytest-timeout' inside a git init subprocess at fixture setup, and serial-rerun.log:14 records it passing in 0.72 s, so it is a load artefact rather than a code failure and no code-attributable failure id was added.",
+  "call_sites": [
+    "imas_codex/standard_names/graph_store/graph_catalog.py:207",
+    "imas_codex/standard_names/graph_store/graph_catalog.py:217",
+    "imas_codex/standard_names/graph_store/graph_catalog.py:2319",
+    "imas_codex/cli/sn.py:4512",
+    "imas_codex/standard_names/catalog_release.py:2290",
+    "imas_codex/standard_names/graph_ops.py:214"
+  ],
+  "call_sites_emission": "listed",
+  "completed_at": "2026-10-29T09:37:08.577Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "sib-audit-drafts-and-import",
+      "recorded_at": "2026-10-29T16:44:32.328990+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-29T09:25:49Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_catalog.py",
+      "id": "f47ec187002",
+      "line": 426,
+      "severity": "non-blocking",
+      "text": "A STRUCT_ARRAY resolves to b.source_id + '/values' by string construction without a graph lookup, so when that leaf node is absent the row carries source_id equal to the leaf string, passes the null check at line 450, and the MERGE at line 497 matches nothing: the path is neither bound nor reported, which is the silent drop the deliverable forbids."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_catalog.py",
+      "id": "fcde401c17f",
+      "line": 44,
+      "severity": "non-blocking",
+      "text": "_published_dd_paths_by_name re-implements split_source_paths (imas_codex/standard_names/source_paths.py:180) and merge_source_paths (:192) instead of extending them, so a change to how a source path is parsed has two places to land."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-audit-drafts-and-import.html",
+      "id": "f9e6772fff0",
+      "line": 37,
+      "severity": "non-blocking",
+      "text": "The fragment reads the base arm's four failures as 'the same generability id plus three that pass at head' and reports 'Added failure ids: 0', but suite-base.log shows all four are RuntimeError: export provenance timestamp unavailable from an archive tree with no git checkout, so the three pass at head because head ran from a worktree rather than because of the change; only the head arm (two pytest-timeouts, both passing serially) supports the delta claim."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T083545399992-sib-audit-drafts-and-import/manifest.md",
+      "id": "ffcc1ea28fa",
+      "line": 24,
+      "severity": "non-blocking",
+      "text": "The goal_fidelity rubric self-check is concatenated onto the blockers line ('blockers: nonerubric.goal_fidelity: answered'), so the record reads as blockers-not-none and as a missing self-check for goal_fidelity."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "Verified the int-subclass result through the facade and the exact-claim path, and the report JSON through the export CLI and the catalog release wrapper.",
+    "diff": "Read all four commits against 6fff23ede: b8f7b2979 adds the audit split and the multi-path binding, 4046add95 adds the per-leaf StandardNameSource/PRODUCED_NAME/FROM_DD_PATH write, 5d6955d3b resolves leaves inside the existing pairing read, e48d99642 adds the evidence fragment; no path outside the declared scope, and the two head-only failures in suite-head.log are absent from the final arm.",
+    "done_when": "The done-when names tests/standard_names adds no failure id plus a test per deliverable that fails on main; the manifest records the head arm at 5d6955d3b (8535 passed, 1 failed, 1 error, both pytest-timeout under -n 8 and passing serially per serial-rerun.log) and a negative control whose log carries EXIT=1 with all four new ids failing, but its base arm is unusable because all four base failures are the same provenance RuntimeError from a non-git archive tree.",
+    "goal": "The node goal (plan section 45, split for this run) is that the source audit reports sourceless live names at non-shipping stages without blocking a cut, and that a catalog import binds every published DD leaf path it carries or reports the path it cannot bind; export.py:3078-3107 delivers the audit split and graph_catalog.py:401-521 delivers the binding, so both halves landed.",
+    "manifest": "Read; it records the gate command verbatim, four log paths, both suite arms, the negative control and the rubric self-check, but its last line reads 'blockers: nonerubric.goal_fidelity: answered', so the goal_fidelity self-check is not a readable line and blockers is not none (manifest.md:24).",
+    "write_paths": "The declared paths are the two source modules, the two new test files, the evidence fragment and the figure directory; git diff --stat 6fff23ede e48d99642 shows exactly five changed paths, all inside the declared set, and no figure was added."
+  },
+  "justifications": {
+    "durability": "negative-control-main.log fails all four new ids at base (EXIT=1), and tests/standard_names/test_audit_reports_sourceless_drafts.py:96 asserts a literal report body that would redden if the shipping-stage split reverted.",
+    "evidence": "suite-head2.log:143 proves the head failures are pytest-timeout in a subprocess and serial-rerun.log:14 shows both passing, but suite-base.log's four failures are all RuntimeError: export provenance timestamp unavailable from the non-git archive tree, so the base arm compares environments rather than code.",
+    "fit": "graph_catalog.py:27-41 follows the module's existing ReviewWriteResult(int) idiom at graph_catalog.py:704, and both added definitions are private and named for their mechanism.",
+    "goal_fidelity": "export.py:3078-3107 splits the audit on the shipping stages and graph_catalog.py:401-521 binds every published dd path, matching both deliverables in the node brief.",
+    "reuse": "graph_catalog.py:44-71 re-implements the typed split and dedupe that imas_codex/standard_names/source_paths.py:180 and :192 already own.",
+    "scope_discipline": "every changed path is inside the declared set per git diff --stat 6fff23ede e48d99642; the added source-record write at graph_catalog.py:498-509 is the binding's producer edge, which the writers' own invariant requires."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The node goal is that the source audit reports sourceless live names at non-shipping stages without blocking a cut and that a catalog import binds every published DD leaf path it carries or reports it; imas_codex/standard_names/export.py:3078-3107 delivers the audit split and imas_codex/standard_names/graph_store/graph_catalog.py:401-521 delivers the binding, so both halves landed.\nVERDICT done_when: The done-when names 'tests/standard_names adds no failure id' plus a test per deliverable that fails on main; the manifest records the head arm at 5d6955d3b (8535 passed, 1 failed, 1 error, both pytest-timeout under -n 8 and passing serially per serial-rerun.log:14) and a negative control whose log carries EXIT=1 with all four new ids failing (negative-control-main.log:4-7), but its base arm is unusable as a baseline because all four base failures are the same 'RuntimeError: export provenance timestamp unavailable' from a non-git archive tree (suite-base.log).\nVERDICT write_paths: The declared paths are imas_codex/standard_names/export.py, imas_codex/standard_names/graph_store/graph_catalog.py, the two new test files, docs/evidence/fragments/sn-integrity-backlog/sib-audit-drafts-and-import.html and the figure directory; git diff --stat 6fff23ede e48d99642 shows exactly five changed paths, all inside the declared set, and no figure was added.\nVERDICT manifest: Read; it records the gate command verbatim, four log paths, both suite arms, the negative control and the rubric self-check, but its last line reads 'blockers: nonerubric.goal_fidelity: answered', so the goal_fidelity self-check is not a readable line and blockers is not none (manifest.md:24).\nVERDICT diff: Read all four commits against 6fff23ede: b8f7b2979 adds the audit split and the multi-path binding, 4046add95 adds the per-leaf StandardNameSource/PRODUCED_NAME/FROM_DD_PATH write, 5d6955d3b resolves leaves inside the existing pairing read, e48d99642 adds the evidence fragment; no path outside the declared scope, and the two head-only failures in suite-head.log (test_graph_ops, test_facade_closure) are absent from the final arm.\nCALL_SITES: imas_codex/standard_names/graph_store/graph_catalog.py:207, imas_codex/standard_names/graph_store/graph_catalog.py:217, imas_codex/standard_names/graph_store/graph_catalog.py:2319, imas_codex/cli/sn.py:4512, imas_codex/standard_names/catalog_release.py:2290, imas_codex/standard_names/graph_ops.py:214\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: export.py:3078-3107 splits the audit on the shipping stages and graph_catalog.py:401-521 binds every published dd path, matching both deliverables in the node brief.\nSCORE evidence: 13\nJUSTIFICATION evidence: suite-head2.log:143 proves the head failures are pytest-timeout in a subprocess and serial-rerun.log:14 shows both passing, but suite-base.log's four failures are all 'RuntimeError: export provenance timestamp unavailable' from the non-git archive tree, so the base arm compares environments rather than code.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every changed path is inside the declared set per git diff --stat 6fff23ede e48d99642; the added source-record write at graph_catalog.py:498-509 is the binding's producer edge, which the writers' own invariant requires.\nSCORE durability: 17\nJUSTIFICATION durability: negative-control-main.log fails all four new ids at base (EXIT=1), and tests/standard_names/test_audit_reports_sourceless_drafts.py:96 asserts a literal report body that would redden if the shipping-stage split reverted.\nSCORE fit: 17\nJUSTIFICATION fit: graph_catalog.py:27-41 follows the module's existing ReviewWriteResult(int) idiom at graph_catalog.py:704, and both added definitions are private and named for their mechanism.\nSCORE reuse: 5\nJUSTIFICATION reuse: graph_catalog.py:44-71 re-implements the typed split and dedupe that imas_codex/standard_names/source_paths.py:180 and :192 already own.\nFINDING imas_codex/standard_names/graph_store/graph_catalog.py:426 non-blocking: a STRUCT_ARRAY resolves to b.source_id + '/values' by string construction without a graph lookup, so when that leaf node is absent the row carries source_id equal to the leaf string, passes the null check at line 450, and the MERGE at line 497 matches nothing: the path is neither bound nor reported, which is the silent drop the deliverable forbids.\nFINDING imas_codex/standard_names/graph_store/graph_catalog.py:44 non-blocking: _published_dd_paths_by_name re-implements split_source_paths (imas_codex/standard_names/source_paths.py:180) and merge_source_paths (:192) instead of extending them, so a change to how a source path is parsed has two places to land.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-audit-drafts-and-import.html:37 non-blocking: the fragment reads the base arm's four failures as 'the same generability id plus three that pass at head' and reports 'Added failure ids: 0', but suite-base.log shows all four are 'RuntimeError: export provenance timestamp unavailable' from an archive tree with no git checkout, so the three pass at head because head ran from a worktree rather than because of the change; only the head arm (two pytest-timeouts, both passing serially) supports the delta claim.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T083545399992-sib-audit-drafts-and-import/manifest.md:24 non-blocking: the goal_fidelity rubric self-check is concatenated onto the blockers line ('blockers: nonerubric.goal_fidelity: answered'), so the record reads as blockers-not-none and as a missing self-check for goal_fidelity.\n",
+  "review_run_id": "r-20261029T092403226107-review-of-sib-audit-drafts-and-import-e48d9964266e",
+  "reviewed_base_sha": "6fff23edea1ee877fdec7df446312d5c60ad6d03",
+  "reviewed_head_sha": "e48d9964266e48e1e546d234851ec105d8fa4c4f",
+  "reviewed_run_id": "r-20261029T083545399992-sib-audit-drafts-and-import",
+  "scores": {
+    "durability": 17,
+    "evidence": 13,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T16:44:19.842789+00:00",
+  "total": 89
+}
