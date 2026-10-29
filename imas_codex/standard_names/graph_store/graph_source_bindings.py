@@ -888,6 +888,7 @@ def _lock_claimed_name_bindings(
     allow_missing: bool,
     allow_own_pending_reservation: bool,
     allow_dead_end_revival: bool = False,
+    allow_adopt_pending_stub: bool = False,
     released_out: list[dict[str, str]] | None = None,
 ) -> list[dict[str, Any]]:
     """Lock source claims and classify their proposed name bindings.
@@ -907,10 +908,17 @@ def _lock_claimed_name_bindings(
     superseded or exhausted spelling when no successor at any depth is live.
     The identity re-enters at ``drafted`` with pending validation and a linked
     ``StandardNameChange`` recording its prior stage and triggering source.
-    Existing lineage edges remain intact. Attachments never receive that
-    authority. Refusal is per pairing — one bad source never fails its batch —
-    so this is the single point at which every claimed-source persister
-    inherits the guard.
+    Existing lineage edges remain intact. A compose proposal has a second
+    exception, narrower still: an unowned projection stub. A ``pending``
+    identity that carries no producing source, no reservation, and a
+    ``HAS_STANDARD_NAME`` projection from the claimed source's own DD path is
+    adopted rather than refused, entering ``drafted`` with a linked
+    ``StandardNameChange`` in the same transaction. A pending identity owned by
+    another claim is refused exactly as before. Only ``sn attach`` refuses
+    both authorities: it calls this lock with each exception off, while every
+    composition path grants the one it is entitled to. Refusal is per pairing —
+    one bad source never fails its batch — so this is the single point at which
+    every claimed-source persister inherits the guard.
 
     A non-bindable target releases the exact source claim back to
     ``extracted`` without resetting ``attempt_count``. The retained attempt
@@ -997,8 +1005,34 @@ def _lock_claimed_name_bindings(
                     }
                THEN target.name_stage
                ELSE null
-             END AS prior_stage
-        FOREACH (_ IN CASE WHEN prior_stage IS NULL THEN [] ELSE [1] END |
+             END AS prior_stage,
+             CASE
+               WHEN $allow_adopt_pending_stub
+                    AND b.source_type = 'dd'
+                    AND target.name_stage = $pending_stage
+                    AND owned IS NULL
+                    AND target.reservation_source_id IS NULL
+                    AND b.attachment_error IS NULL
+                    AND (b.unit IS NULL OR target.unit IS NULL
+                         OR target.unit = b.unit)
+                    AND NOT EXISTS {
+                      MATCH (:StandardNameSource)-[:PRODUCED_NAME]->(target)
+                    }
+                    AND EXISTS {
+                      MATCH (sns)-[:FROM_DD_PATH]->(projected:IMASNode)-
+                        [projection]->(target)
+                      WHERE type(projection) = $projection_edge
+                    }
+               THEN true
+               ELSE false
+             END AS adopt_projection
+        WITH b, sns, target, owned, prior_stage, adopt_projection,
+             CASE
+               WHEN prior_stage IS NOT NULL THEN prior_stage
+               WHEN adopt_projection THEN $pending_stage
+               ELSE null
+             END AS lifecycle_prior
+        FOREACH (_ IN CASE WHEN lifecycle_prior IS NULL THEN [] ELSE [1] END |
           SET target.name_stage = $reviewable_stage,
               target.status = 'draft',
               target.validation_status = 'pending',
@@ -1036,8 +1070,25 @@ def _lock_claimed_name_bindings(
               change.internal = true
           CREATE (target)-[:HAS_INTERNAL_CHANGE]->(change)
         )
-        WITH b, sns, target, owned
-        WITH b, sns, target, owned,
+        FOREACH (_ IN CASE WHEN adopt_projection THEN [1] ELSE [] END |
+          CREATE (change:StandardNameChange)
+          SET change.id = 'sn-change:' + randomUUID(),
+              change.from_name = lifecycle_prior,
+              change.to_name = $reviewable_stage,
+              change.operation = 'adopt_pending_projection',
+              change.reason = 'source ' + sns.id +
+                ' adopted a pending projection stub carrying its own DD path ' +
+                'and no producing source',
+              change.origin = 'compose',
+              change.run_id = sns.run_id,
+              change.changed_at = datetime(),
+              change.internal = true,
+              change.adopted_source_id = sns.id,
+              change.adopted_projection_path = b.source_id
+          CREATE (target)-[:HAS_INTERNAL_CHANGE]->(change)
+        )
+        WITH b, sns, target, owned, adopt_projection
+        WITH b, sns, target, owned, adopt_projection,
              CASE
                WHEN target.name_stage IN $stable_stages THEN true
                WHEN $allow_own_pending
@@ -1048,7 +1099,7 @@ def _lock_claimed_name_bindings(
                THEN true
                ELSE false
              END AS lifecycle_bindable
-        WITH b, sns, target, owned, lifecycle_bindable,
+        WITH b, sns, target, owned, lifecycle_bindable, adopt_projection,
              CASE
                WHEN target IS NULL OR b.unit IS NULL
                     OR target.unit IS NULL OR target.unit = b.unit
@@ -1060,12 +1111,13 @@ def _lock_claimed_name_bindings(
                ELSE coalesce(target.name_stage, '<unset>')
              END AS target_stage
         WITH b, sns, target, owned, lifecycle_bindable, unit_bindable,
-             attachment_bindable, target_stage,
+             attachment_bindable, target_stage, adopt_projection,
              lifecycle_bindable AND unit_bindable
                AND attachment_bindable AS bindable
         SET sns.claimed_at = datetime()
         WITH b, sns, target, owned, target_stage, bindable,
-             lifecycle_bindable, unit_bindable, attachment_bindable
+             lifecycle_bindable, unit_bindable, attachment_bindable,
+             adopt_projection
         FOREACH (_ IN CASE
           WHEN target.binding_lock_token = b.claim_token
            AND target.binding_lock_seq = b.claim_seq
@@ -1080,6 +1132,7 @@ def _lock_claimed_name_bindings(
                  ELSE 'attachment_collision'
                END AS outcome,
                CASE
+                 WHEN adopt_projection THEN 'adoption'
                  WHEN target.name_stage IN $stable_stages THEN 'stable_reuse'
                  WHEN owned.provisional = true
                       AND owned.claim_token = b.claim_token
@@ -1096,6 +1149,8 @@ def _lock_claimed_name_bindings(
         batch=batch,
         allow_own_pending=allow_own_pending_reservation,
         allow_dead_end_revival=allow_dead_end_revival,
+        allow_adopt_pending_stub=allow_adopt_pending_stub,
+        projection_edge="HAS_STANDARD_NAME",
         stable_stages=sorted(foundation._STABLE_BINDING_NAME_STAGES),
         revivable_stages=sorted(
             {
@@ -1398,10 +1453,13 @@ def persist_claimed_attachments(
 ) -> list[str]:
     """Attach exact source-claim winners to stable lifecycle targets.
 
-    A terminal, transient, missing, or unowned-pending target releases the
-    source through the same collision path as generated candidates. No source,
-    DD projection, name scalar, or relationship is mutated unless both the
-    exact source fence and stable target predicate survive to the final write.
+    A terminal, transient, or missing target releases the source through the
+    same collision path as generated candidates. An unowned pending stub whose
+    projection is the source's own DD path is adopted instead: the lock moves
+    it to ``drafted`` with a receipt, and it finishes through the stable write
+    below. No source, DD projection, name scalar, or relationship is mutated
+    unless both the exact source fence and the target predicate survive to the
+    final write.
     """
     batch = [
         {**item, "sn_id": item.get("standard_name")}
@@ -1423,6 +1481,7 @@ def persist_claimed_attachments(
                     allow_missing=False,
                     allow_own_pending_reservation=False,
                     allow_dead_end_revival=False,
+                    allow_adopt_pending_stub=True,
                     released_out=released,
                 )
                 locked_ids = {
@@ -1519,6 +1578,7 @@ def stage_claimed_generated_candidates(
                     allow_missing=True,
                     allow_own_pending_reservation=True,
                     allow_dead_end_revival=True,
+                    allow_adopt_pending_stub=True,
                     released_out=released,
                 )
                 locked_ids = {
@@ -1945,7 +2005,7 @@ def disposition_parked_sources(
 _CAP_UNDISPOSED_QUERY = """
 MATCH (sns:StandardNameSource)
 WHERE sns.status = 'failed'
-  AND sns.last_error = $cap_reason
+  AND sns.last_error STARTS WITH $cap_reason
   AND sns.parked_disposition IS NULL
 OPTIONAL MATCH (node:IMASNode {id: sns.source_id})
 RETURN sns.id AS id, sns.last_error AS last_error,

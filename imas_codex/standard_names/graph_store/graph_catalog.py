@@ -14,7 +14,7 @@ from collections.abc import Iterable
 from contextlib import nullcontext, suppress
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Final
 
 from imas_codex.discovery.base.claims import retry_on_deadlock
 from imas_codex.graph.client import GraphClient
@@ -2159,6 +2159,21 @@ _RETIRE_FINALIZED_SOURCE_GAPS = """
 """
 
 
+#: Binding kinds whose winner must take the composed candidate's content
+#: through the rich name write: a reservation that will become a name, and an
+#: adopted projection stub, which has a name and a provenance edge but no
+#: description or composed columns of its own.
+_RICH_WRITE_BINDING_KINDS: Final = frozenset({"owned_reservation", "adoption"})
+
+#: Binding kinds the finalize statement finishes. Adoption joins stable reuse:
+#: both targets already exist as names, so the statement binds the source to a
+#: name it does not create. An adopted stub's source may already read
+#: ``attached`` because the rich write above bound it, so that statement accepts
+#: a source outside ``extracted`` for these kinds and keeps its status fence for
+#: the rest.
+_STABLE_FINALIZE_BINDING_KINDS: Final = frozenset({"stable_reuse", "adoption"})
+
+
 def persist_generated_name_winners(
     candidates: list[dict[str, Any]],
     *,
@@ -2293,6 +2308,7 @@ def persist_generated_name_winners(
                     allow_missing=True,
                     allow_own_pending_reservation=True,
                     allow_dead_end_revival=True,
+                    allow_adopt_pending_stub=True,
                 )
                 locked_ids = {
                     row["id"]
@@ -2321,30 +2337,30 @@ def persist_generated_name_winners(
                     tx.commit()
                     return []
 
-                reserved_candidates = [
+                rich_write_candidates = [
                     candidate_by_sns[sns_id]
                     for sns_id, kind in binding_kinds.items()
-                    if kind == "owned_reservation"
+                    if kind in _RICH_WRITE_BINDING_KINDS
                 ]
                 stable_candidates = [
                     candidate_by_sns[sns_id]
                     for sns_id, kind in binding_kinds.items()
-                    if kind == "stable_reuse"
+                    if kind not in _RICH_WRITE_BINDING_KINDS
                 ]
                 written_name_ids = {entry["id"] for entry in stable_candidates}
-                if reserved_candidates:
+                if rich_write_candidates:
                     written_names = services.write_standard_names(
-                        reserved_candidates,
+                        rich_write_candidates,
                         gc=tx_gc,
                         return_written_ids=True,
                     )
                     if isinstance(written_names, int):
-                        if written_names != len(reserved_candidates):
+                        if written_names != len(rich_write_candidates):
                             raise RuntimeError(
                                 "rich standard-name write rejected an exact-claim "
                                 "winner"
                             )
-                        written_names = [entry["id"] for entry in reserved_candidates]
+                        written_names = [entry["id"] for entry in rich_write_candidates]
                     written_name_ids.update(written_names)
                 finalize_batch = [
                     {**item, "binding_kind": binding_kinds[item["sns_id"]]}
@@ -2365,7 +2381,7 @@ def persist_generated_name_winners(
                 stable_finalize_batch = [
                     item
                     for item in finalize_batch
-                    if item["binding_kind"] == "stable_reuse"
+                    if item["binding_kind"] in _STABLE_FINALIZE_BINDING_KINDS
                 ]
                 finalized_rows: list[dict[str, Any]] = []
                 if reserved_finalize_batch:
@@ -2441,7 +2457,7 @@ def persist_generated_name_winners(
                     MATCH (sns:StandardNameSource {id: b.sns_id})
                     WHERE sns.claim_token = b.claim_token
                       AND sns.claim_seq = b.claim_seq
-                      AND sns.status = 'extracted'
+                      AND (sns.status = 'extracted' OR b.binding_kind = 'adoption')
                     MATCH (sn:StandardName {id: b.sn_id})
                     WHERE sn.name_stage IN $stable_stages
                       AND (b.unit IS NULL OR sn.unit IS NULL OR sn.unit = b.unit)
