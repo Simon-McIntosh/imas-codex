@@ -8,6 +8,13 @@
     "docs/evidence/fragments/sn-integrity-backlog/sib-adopt-pending-projection-stubs.html:71"
   ],
   "completed_at": "2026-10-29T23:14:24.595Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "the low score is the state-diagram figure only (glyph-outline SVG with no generator); the code change is guarded by tests that fail on main; the figure is regenerated from a committed script with text labels by a follow-up",
+      "recorded_at": "2026-10-29T23:19:30.242603+00:00"
+    }
+  },
   "dispatched_at": "2026-10-29T23:04:49Z",
   "findings": [
     {
