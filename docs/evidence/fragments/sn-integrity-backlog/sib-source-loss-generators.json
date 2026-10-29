@@ -1,0 +1,3365 @@
+{
+ "population": {
+  "rows": 156,
+  "dropped": 34,
+  "moved": 122,
+  "paths": 852
+ },
+ "generators": [
+  {
+   "id": "import-binds-one-path",
+   "label": "Catalog import binds at most one DD path per name",
+   "event": "catalog import",
+   "detail": "write_standard_names links HAS_STANDARD_NAME only for names whose source_types contain 'dd' or 'signals', and only for the single path each name carries as source_id. A catalog entry lists several published paths per name (2 to 5 in this population); every path other than that one source_id is left unbound at import, and a name typed 'catalog' is skipped by both branches entirely.",
+   "code": [
+    "imas_codex/standard_names/graph_store/graph_catalog.py:350",
+    "imas_codex/standard_names/graph_store/graph_catalog.py:351",
+    "imas_codex/standard_names/graph_store/graph_catalog.py:362"
+   ],
+   "performs_today": true,
+   "guard": null,
+   "guard_note": "require_producing_sources is called at write_standard_names' tail and refuses only a name with zero producers, so it permits the loss of every path but the one source_id bound. The 20 rows that hold no producer at all predate that call and are only repaired when a write touches them.",
+   "rows": 31,
+   "row_names": [
+    "beta",
+    "current_density_due_to_diamagnetic_drift",
+    "current_density_due_to_parallel_viscosity",
+    "current_of_poloidal_field_coil",
+    "electric_field",
+    "electron_density",
+    "electron_energy_flux",
+    "electron_particle_flux",
+    "electron_pressure_at_separatrix",
+    "fast_electron_pressure",
+    "fast_ion_pressure",
+    "frequency_of_ion_cyclotron_heating_antenna",
+    "ion_energy_flux",
+    "ion_temperature",
+    "ion_velocity",
+    "launched_power_of_ion_cyclotron_heating_antenna",
+    "launched_power_of_lower_hybrid_antenna",
+    "magnetic_field",
+    "magnetic_flux",
+    "major_radius",
+    "neutral_temperature",
+    "poloidal_magnetic_flux_of_flux_loop",
+    "power_of_neutral_beam_injector",
+    "power_of_soft_xray_detector",
+    "radial_coordinate",
+    "radial_ion_particle_diffusivity",
+    "toroidal_angle_of_antenna_strap",
+    "total_plasma_radiated_power",
+    "vertical_coordinate_of_antenna_strap",
+    "vertical_neutral_momentum_flux",
+    "voltage_of_poloidal_field_coil"
+   ],
+   "open_today": true,
+   "guard_probe": "20 of 156 names carry zero producers"
+  },
+  {
+   "id": "one-source-per-path",
+   "label": "One canonical source node per DD path, bound to one name",
+   "event": "compose / later bind",
+   "detail": "A DD source's identity is the path itself (id 'dd:<path>'), so the graph holds exactly one StandardNameSource per DD path. When another name is composed for the same path, PRODUCED_NAME is written for that name and the catalog name that also published the path keeps none: the binding is moved, not copied.",
+   "code": [
+    "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+    "imas_codex/standard_names/graph_store/graph_source_bindings.py:653",
+    "imas_codex/standard_names/graph_store/graph_catalog.py:2139"
+   ],
+   "performs_today": true,
+   "guard": null,
+   "guard_note": "No guard pairs the losing name; the single-producer model is the guard's blind spot.",
+   "rows": 122,
+   "row_names": [
+    "accumulated_lithium_prefill_count_due_to_gas_injection",
+    "alpha_parameter",
+    "area_of_poloidal_field_coil",
+    "area_of_toroidal_field_coil",
+    "critical_momentum_due_to_avalanche",
+    "deposited_power_at_divertor_target_due_to_halo_current",
+    "diamagnetic_current_density",
+    "electron_particle_diffusivity",
+    "electron_pressure",
+    "electron_temperature_at_magnetic_axis",
+    "electron_temperature_at_midplane",
+    "electrostatic_potential_at_wall",
+    "elongation_of_plasma_boundary",
+    "energy_confinement_time",
+    "energy_flux_at_wall_due_to_eddy_current",
+    "fast_electron_source_rate",
+    "fast_electron_source_rate_due_to_compton_scattering",
+    "fast_electron_source_rate_due_to_dreicer",
+    "fast_electron_source_rate_due_to_hot_tail",
+    "fast_ion_density",
+    "fast_neutral_density",
+    "fast_particle_power_density_due_to_collisions",
+    "gap_at_plasma_boundary",
+    "gas_flow",
+    "ion_density",
+    "ion_energy_diffusivity",
+    "ion_kinetic_energy_flux_at_wall",
+    "ion_particle_diffusivity",
+    "ion_pressure",
+    "ion_state_momentum_diffusivity",
+    "length_of_passive_structure",
+    "length_of_poloidal_field_coil",
+    "maximum_power_at_inner_divertor_target",
+    "maximum_power_at_outer_divertor_target",
+    "momentum_diffusion_coefficient",
+    "neutral_beam_atomic_number",
+    "neutral_diffusivity",
+    "neutral_particle_flux",
+    "neutral_species_atomic_mass",
+    "outer_radius_of_poloidal_field_coil",
+    "parallel_fast_ion_pressure",
+    "parallel_fast_neutral_pressure",
+    "parallel_fast_particle_pressure",
+    "parallel_ion_energy_diffusivity",
+    "parallel_ion_energy_flux",
+    "parallel_ion_heat_convection_velocity",
+    "parallel_ion_momentum_diffusivity",
+    "parallel_neutral_momentum_diffusivity",
+    "parallel_neutral_momentum_flux",
+    "parallel_normalized_perturbed_magnetic_field",
+    "parallel_plasma_velocity",
+    "parallel_vorticity",
+    "per_toroidal_mode_fast_ion_power_density",
+    "per_toroidal_mode_thermal_ion_power_density",
+    "perpendicular_fast_ion_pressure",
+    "perpendicular_fast_particle_pressure",
+    "plasma_current",
+    "plasma_electrical_conductivity",
+    "plasma_velocity_due_to_diamagnetic_drift",
+    "polarization_angle_at_constraint_position",
+    "poloidal_current_density_due_to_collisions",
+    "poloidal_magnetic_flux",
+    "poloidal_magnetic_flux_at_flux_surface",
+    "poloidal_momentum_flux",
+    "power_at_wall_due_to_conduction",
+    "power_due_to_collisions",
+    "radial_current_density_due_to_perpendicular_viscosity",
+    "radial_electron_convection_velocity",
+    "radial_magnetic_vector_potential",
+    "radial_momentum_source",
+    "radial_neutral_momentum_flux",
+    "radial_particle_convection_velocity",
+    "radial_vorticity",
+    "radial_wave_electric_field",
+    "radiative_temperature",
+    "radius_of_poloidal_field_coil",
+    "resistance_of_toroidal_field_coil",
+    "rotation_frequency_of_neoclassical_tearing_mode",
+    "safety_factor",
+    "safety_factor_at_normalized_poloidal_magnetic_flux_equal_to_0_95",
+    "spectral_wavelength_of_optical_element",
+    "surface_area_of_flux_surface",
+    "surface_area_of_optical_element",
+    "thermal_energy_of_plant_component_port",
+    "thickness_of_passive_loop",
+    "toroidal_angle_of_launching_position",
+    "toroidal_counter_passing_thermal_ion_torque_density_due_to_collisions",
+    "toroidal_current_density",
+    "toroidal_fast_ion_torque_density_due_to_collisions",
+    "toroidal_ion_rotation_frequency",
+    "toroidal_ion_velocity",
+    "toroidal_magnetic_field_at_magnetic_axis",
+    "toroidal_neutral_momentum_convection_velocity",
+    "toroidal_thermal_electron_torque_density_due_to_collisions",
+    "toroidal_thermal_ion_torque_density_due_to_collisions",
+    "toroidal_torque_density",
+    "toroidal_trapped_fast_ion_torque_density_due_to_collisions",
+    "toroidal_trapped_thermal_electron_torque_density_due_to_collisions",
+    "total_ion_energy_flux",
+    "total_ion_number_density",
+    "total_ion_pressure",
+    "total_ion_temperature",
+    "total_neutron_power",
+    "trapped_fast_particle_power_density_due_to_collisions",
+    "upper_triangularity_of_plasma_boundary",
+    "velocity_due_to_e_cross_b_drift",
+    "vertical_coordinate_of_active_limiter_point",
+    "vertical_coordinate_of_closest_wall_point",
+    "vertical_coordinate_of_conductor_cross_section",
+    "vertical_coordinate_of_diagnostic_antenna",
+    "vertical_coordinate_of_diagnostic_aperture",
+    "vertical_coordinate_of_neutral_beam_injector",
+    "vertical_current_density",
+    "vertical_magnetic_field",
+    "vertical_neutral_momentum_diffusivity",
+    "voltage_of_diagnostic_antenna",
+    "volume_averaged_electron_density",
+    "wave_phase_of_antenna_strap",
+    "wavelength_of_detector_pixel",
+    "wetted_area_of_divertor_target",
+    "width_of_diagnostic_aperture",
+    "width_of_filter"
+   ],
+   "open_today": true
+  },
+  {
+   "id": "dd-horizon-removal",
+   "label": "Published path removed at a DD horizon",
+   "event": "DD version update",
+   "detail": "Three published paths are marked lifecycle_status='removed' on their IMASNode. The node survives (never deleted), but no live source is composed from a removed path, so the binding is gone by design.",
+   "code": [
+    "imas_codex/graph/sn_link_guardrail.py:37"
+   ],
+   "performs_today": true,
+   "guard": "imas_codex/graph/sn_link_guardrail.py:146",
+   "guard_note": "check_sn_links_safe asserts edge counts never decrease; a removal that unbinds a catalog name is not measured by it.",
+   "rows": 3,
+   "row_names": [
+    "electron_temperature",
+    "electron_velocity",
+    "poloidal_magnetic_field"
+   ],
+   "open_today": true
+  },
+  {
+   "id": "path-renamed",
+   "label": "Published path renamed in the DD",
+   "event": "DD rename",
+   "detail": "Two published paths carry a RENAMED_TO edge to their successor path. The name keeps no binding on either side, because the successor path was assigned to a different name.",
+   "code": [
+    "imas_codex/standard_names/graph_store/graph_catalog.py:absent"
+   ],
+   "performs_today": true,
+   "guard": null,
+   "guard_note": null,
+   "rows": 0,
+   "row_names": [],
+   "open_today": true
+  },
+  {
+   "id": "compose-never-ran",
+   "label": "Source extracted or stale and never bound",
+   "event": "compose pipeline",
+   "detail": "A StandardNameSource exists for the path in status 'extracted' or 'stale' with no PRODUCED_NAME to any live name. Composition has not run, or the source was marked stale and never requeued.",
+   "code": [
+    "imas_codex/standard_names/graph_store/graph_source_bindings.py:1515",
+    "imas_codex/standard_names/graph_store/graph_source_bindings.py:2238"
+   ],
+   "performs_today": true,
+   "guard": null,
+   "guard_note": null,
+   "rows": 0,
+   "row_names": [],
+   "open_today": true
+  }
+ ],
+ "guards": {
+  "invariant": {
+   "code": "imas_codex/standard_names/source_invariant.py:58",
+   "call_site": "imas_codex/standard_names/graph_store/graph_catalog.py:507",
+   "covers_drafts": true,
+   "covers_drafts_note": "The predicate is a copula condition on the name's own status; it is 'superseded' that is exempt, and a draft with zero producers is refused. Drafts are covered. But the condition is producers = 0, so a draft that kept one of several published paths passes.",
+   "population_probe": {
+    "names": 156,
+    "zero_producer": 20,
+    "min_producers": 0,
+    "max_producers": 20
+   }
+  },
+  "export_population": {
+   "code": "imas_codex/standard_names/export.py:668",
+   "line": 668,
+   "selects": "sn.name_stage IN ['accepted', 'approved']"
+  }
+ },
+ "repairs": [
+  {
+   "node": "sib-import-binds-every-published-path",
+   "goal": "Import every published catalog path for a name, not only its source_id, and type catalog names so they qualify.",
+   "write_paths": [
+    "imas_codex/standard_names/graph_store/graph_catalog.py"
+   ],
+   "guard_test_fails_on_main": "tests/standard_names/test_catalog_import_all_paths.py: an entry listing three DD paths yields three PRODUCED_NAME edges after write_standard_names; on main it yields one."
+  },
+  {
+   "node": "sib-path-source-multi-name-binding",
+   "goal": "Let one DD path's source bind every name whose catalog entry published that path, so a later compose copies rather than moves it.",
+   "write_paths": [
+    "imas_codex/standard_names/graph_store/graph_source_bindings.py",
+    "imas_codex/standard_names/graph_store/graph_catalog.py"
+   ],
+   "guard_test_fails_on_main": "tests/standard_names/test_source_multi_binding.py: composing 'dd:<path>' for a second name leaves the first name's PRODUCED_NAME intact; on main the second compose leaves one edge."
+  },
+  {
+   "node": "sib-source-invariant-carries-published-set",
+   "goal": "Widen the invariant from zero-producer to the recorded published path set, so partial loss is refused rather than only total loss.",
+   "write_paths": [
+    "imas_codex/standard_names/source_invariant.py"
+   ],
+   "guard_test_fails_on_main": "tests/standard_names/test_source_invariant_published_set.py: a draft keeping 1 of 3 recorded paths raises MissingStandardNameSource; on main it returns clean."
+  },
+  {
+   "node": "sib-export-audit-reports-drafts",
+   "goal": "Report sourceless drafts in the audit without letting them block a release.",
+   "write_paths": [
+    "imas_codex/standard_names/export.py"
+   ],
+   "guard_test_fails_on_main": "tests/standard_names/test_export_audit_drafts.py: a draft with no producer appears in the audit's report and does not raise the release gate."
+  }
+ ],
+ "audit_change": {
+  "code": "imas_codex/standard_names/export.py:668",
+  "today": "sn.name_stage IN ['accepted', 'approved']",
+  "should_report": "Report every live name with no producer, whatever its stage, in a separate 'releasable=false' section keyed by stage; only accepted and approved names may contribute to the release refusal."
+ },
+ "rows": [
+  {
+   "name": "accumulated_lithium_prefill_count_due_to_gas_injection",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 2,
+   "missing_paths": 1,
+   "worst_path": "summary/gas_injection_prefill/beryllium/value",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to prefill_count",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "prefill_count"
+   ]
+  },
+  {
+   "name": "alpha_parameter",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 2,
+   "missing_paths": 1,
+   "worst_path": "summary/pedestal_fits/mtanh/stability/bootstrap_current_sauter/alpha_ratio/value",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to ratio_of_critical_alpha_parameter_to_alpha_parameter_at_pedestal",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "ratio_of_critical_alpha_parameter_to_alpha_parameter_at_pedestal"
+   ]
+  },
+  {
+   "name": "area_of_poloidal_field_coil",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 2,
+   "missing_paths": 1,
+   "worst_path": "pf_active/coil/b_field_max",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to maximum_magnetic_field_magnitude",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "maximum_magnetic_field_magnitude"
+   ]
+  },
+  {
+   "name": "area_of_toroidal_field_coil",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 2,
+   "missing_paths": 1,
+   "worst_path": "coils_non_axisymmetric/coil/conductor/cross_section/area",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to area_of_correction_coil",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "area_of_correction_coil"
+   ]
+  },
+  {
+   "name": "beta",
+   "row_class": "dropped",
+   "source_types": [
+    "dd"
+   ],
+   "status": "draft",
+   "imported_at": null,
+   "own_paths_held": 0,
+   "published_paths": 1,
+   "missing_paths": 1,
+   "worst_path": "equilibrium/time_slice/global_quantities",
+   "worst_path_class": "dropped",
+   "causing_generator": "import-binds-one-path",
+   "causing_event": "catalog import bound only the name's source_id",
+   "code": "imas_codex/standard_names/graph_store/graph_catalog.py:350",
+   "holder": []
+  },
+  {
+   "name": "critical_momentum_due_to_avalanche",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 3,
+   "missing_paths": 2,
+   "worst_path": "runaway_electrons/global_quantities/volume_average/momentum_critical_avalanche",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to runaway_electron_critical_momentum_volume_averaged_due_to_avalanche",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "runaway_electron_critical_momentum_volume_averaged_due_to_avalanche"
+   ]
+  },
+  {
+   "name": "current_density_due_to_diamagnetic_drift",
+   "row_class": "dropped",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 7,
+   "missing_paths": 5,
+   "worst_path": "edge_profiles/ggd/j_diamagnetic",
+   "worst_path_class": "dropped",
+   "causing_generator": "import-binds-one-path",
+   "causing_event": "catalog import bound only the name's source_id",
+   "code": "imas_codex/standard_names/graph_store/graph_catalog.py:350",
+   "holder": []
+  },
+  {
+   "name": "current_density_due_to_parallel_viscosity",
+   "row_class": "dropped",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 3,
+   "missing_paths": 2,
+   "worst_path": "edge_profiles/ggd/j_parallel_viscosity",
+   "worst_path_class": "dropped",
+   "causing_generator": "import-binds-one-path",
+   "causing_event": "catalog import bound only the name's source_id",
+   "code": "imas_codex/standard_names/graph_store/graph_catalog.py:350",
+   "holder": []
+  },
+  {
+   "name": "current_of_poloidal_field_coil",
+   "row_class": "dropped",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 5,
+   "missing_paths": 4,
+   "worst_path": "pf_active/coil/current/data",
+   "worst_path_class": "dropped",
+   "causing_generator": "import-binds-one-path",
+   "causing_event": "catalog import bound only the name's source_id",
+   "code": "imas_codex/standard_names/graph_store/graph_catalog.py:350",
+   "holder": []
+  },
+  {
+   "name": "deposited_power_at_divertor_target_due_to_halo_current",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 2,
+   "missing_paths": 1,
+   "worst_path": "divertors/divertor/target/power_incident",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to power_at_divertor_target",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "power_at_divertor_target"
+   ]
+  },
+  {
+   "name": "diamagnetic_current_density",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 4,
+   "missing_paths": 4,
+   "worst_path": "edge_profiles/ggd/j_inertial/diamagnetic",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to inertial_current_density_due_to_diamagnetic_drift",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "inertial_current_density_due_to_diamagnetic_drift"
+   ]
+  },
+  {
+   "name": "electric_field",
+   "row_class": "dropped",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 1,
+   "missing_paths": 1,
+   "worst_path": "core_profiles/profiles_1d/e_field",
+   "worst_path_class": "dropped",
+   "causing_generator": "import-binds-one-path",
+   "causing_event": "catalog import bound only the name's source_id",
+   "code": "imas_codex/standard_names/graph_store/graph_catalog.py:350",
+   "holder": []
+  },
+  {
+   "name": "electron_density",
+   "row_class": "dropped",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 9,
+   "published_paths": 12,
+   "missing_paths": 2,
+   "worst_path": "thomson_scattering/channel/n_e/data",
+   "worst_path_class": "dropped",
+   "causing_generator": "import-binds-one-path",
+   "causing_event": "catalog import bound only the name's source_id",
+   "code": "imas_codex/standard_names/graph_store/graph_catalog.py:350",
+   "holder": []
+  },
+  {
+   "name": "electron_energy_flux",
+   "row_class": "dropped",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 3,
+   "missing_paths": 1,
+   "worst_path": "edge_transport/model/ggd/electrons/energy/flux",
+   "worst_path_class": "dropped",
+   "causing_generator": "import-binds-one-path",
+   "causing_event": "catalog import bound only the name's source_id",
+   "code": "imas_codex/standard_names/graph_store/graph_catalog.py:350",
+   "holder": []
+  },
+  {
+   "name": "electron_particle_diffusivity",
+   "row_class": "moved",
+   "source_types": null,
+   "status": "draft",
+   "imported_at": null,
+   "own_paths_held": 0,
+   "published_paths": 1,
+   "missing_paths": 1,
+   "worst_path": "core_transport/model/profiles_1d/electrons/particles/d",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to effective_electron_diffusivity",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "effective_electron_diffusivity"
+   ]
+  },
+  {
+   "name": "electron_particle_flux",
+   "row_class": "dropped",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 3,
+   "published_paths": 6,
+   "missing_paths": 3,
+   "worst_path": "edge_transport/model/ggd/electrons/particles/flux",
+   "worst_path_class": "dropped",
+   "causing_generator": "import-binds-one-path",
+   "causing_event": "catalog import bound only the name's source_id",
+   "code": "imas_codex/standard_names/graph_store/graph_catalog.py:350",
+   "holder": []
+  },
+  {
+   "name": "electron_pressure",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 5,
+   "missing_paths": 2,
+   "worst_path": "plasma_profiles/ggd/electrons/pressure/values",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to thermal_electron_pressure_at_post_sawtooth_crash",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "thermal_electron_pressure_at_post_sawtooth_crash"
+   ]
+  },
+  {
+   "name": "electron_pressure_at_separatrix",
+   "row_class": "dropped",
+   "source_types": null,
+   "status": "draft",
+   "imported_at": null,
+   "own_paths_held": 2,
+   "published_paths": 2,
+   "missing_paths": 2,
+   "worst_path": "summary/pedestal_fits/mtanh/pressure_electron/offset/value",
+   "worst_path_class": "dropped",
+   "causing_generator": "import-binds-one-path",
+   "causing_event": "catalog import bound only the name's source_id",
+   "code": "imas_codex/standard_names/graph_store/graph_catalog.py:350",
+   "holder": []
+  },
+  {
+   "name": "electron_temperature",
+   "row_class": "dropped",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 13,
+   "published_paths": 19,
+   "missing_paths": 9,
+   "worst_path": "ece/channel/t_e/data",
+   "worst_path_class": "dropped",
+   "causing_generator": "dd-horizon-removal",
+   "causing_event": "DD horizon removed the path, leaving no producer",
+   "code": "imas_codex/graph/sn_link_guardrail.py:37",
+   "holder": []
+  },
+  {
+   "name": "electron_temperature_at_magnetic_axis",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 2,
+   "published_paths": 3,
+   "missing_paths": 1,
+   "worst_path": "ece/t_e_central",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to another name",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "radiative_temperature_at_magnetic_axis"
+   ]
+  },
+  {
+   "name": "electron_temperature_at_midplane",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 0,
+   "published_paths": 2,
+   "missing_paths": 2,
+   "worst_path": "langmuir_probes/reciprocating/plunge/collector/t_e",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to electron_temperature",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "electron_temperature"
+   ]
+  },
+  {
+   "name": "electron_velocity",
+   "row_class": "dropped",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 1,
+   "missing_paths": 1,
+   "worst_path": "core_profiles/profiles_1d/electrons/velocity",
+   "worst_path_class": "dropped",
+   "causing_generator": "dd-horizon-removal",
+   "causing_event": "DD horizon removed the path, leaving no producer",
+   "code": "imas_codex/graph/sn_link_guardrail.py:37",
+   "holder": []
+  },
+  {
+   "name": "electrostatic_potential_at_wall",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 3,
+   "missing_paths": 2,
+   "worst_path": "langmuir_probes/embedded/potential_plasma",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to another name",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "electrostatic_potential_at_langmuir_probe_position"
+   ]
+  },
+  {
+   "name": "elongation_of_plasma_boundary",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 2,
+   "published_paths": 6,
+   "missing_paths": 4,
+   "worst_path": "equilibrium/time_slice/profiles_1d/elongation",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to elongation_of_flux_surface",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "elongation_of_flux_surface"
+   ]
+  },
+  {
+   "name": "energy_confinement_time",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 2,
+   "missing_paths": 1,
+   "worst_path": "summary/global_quantities/tau_energy_98/value",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to ipb98y2_confinement_time",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "ipb98y2_confinement_time"
+   ]
+  },
+  {
+   "name": "energy_flux_at_wall_due_to_eddy_current",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 0,
+   "published_paths": 3,
+   "missing_paths": 3,
+   "worst_path": "wall/description_ggd/ggd/energy_fluxes/current/emitted/values",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to energy_flux_due_to_eddy_current",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "energy_flux_due_to_eddy_current"
+   ]
+  },
+  {
+   "name": "fast_electron_pressure",
+   "row_class": "dropped",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 1,
+   "missing_paths": 1,
+   "worst_path": "core_profiles/profiles_1d/electrons",
+   "worst_path_class": "dropped",
+   "causing_generator": "import-binds-one-path",
+   "causing_event": "catalog import bound only the name's source_id",
+   "code": "imas_codex/standard_names/graph_store/graph_catalog.py:350",
+   "holder": []
+  },
+  {
+   "name": "fast_electron_source_rate",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 0,
+   "published_paths": 2,
+   "missing_paths": 2,
+   "worst_path": "runaway_electrons/global_quantities/volume_average/ddensity_dt_total",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to volume_averaged_total_runaway_electron_source_rate",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "volume_averaged_total_runaway_electron_source_rate"
+   ]
+  },
+  {
+   "name": "fast_electron_source_rate_due_to_compton_scattering",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 0,
+   "published_paths": 2,
+   "missing_paths": 2,
+   "worst_path": "runaway_electrons/profiles_1d/ddensity_dt_compton",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to runaway_electron_source_rate_due_to_compton_scattering",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "runaway_electron_source_rate_due_to_compton_scattering"
+   ]
+  },
+  {
+   "name": "fast_electron_source_rate_due_to_dreicer",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 2,
+   "missing_paths": 1,
+   "worst_path": "runaway_electrons/profiles_1d/ddensity_dt_dreicer",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to runaway_electron_source_rate_due_to_dreicer",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "runaway_electron_source_rate_due_to_dreicer"
+   ]
+  },
+  {
+   "name": "fast_electron_source_rate_due_to_hot_tail",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 0,
+   "published_paths": 2,
+   "missing_paths": 2,
+   "worst_path": "runaway_electrons/profiles_1d/ddensity_dt_hot_tail",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to runaway_electron_source_rate_due_to_hot_tail",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "runaway_electron_source_rate_due_to_hot_tail"
+   ]
+  },
+  {
+   "name": "fast_ion_density",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 7,
+   "published_paths": 8,
+   "missing_paths": 1,
+   "worst_path": "core_profiles/profiles_1d/ion/state/density_fast",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to fast_ion_charge_state_density",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "fast_ion_charge_state_density"
+   ]
+  },
+  {
+   "name": "fast_ion_pressure",
+   "row_class": "dropped",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 5,
+   "missing_paths": 5,
+   "worst_path": "core_profiles/profiles_1d/ion",
+   "worst_path_class": "dropped",
+   "causing_generator": "import-binds-one-path",
+   "causing_event": "catalog import bound only the name's source_id",
+   "code": "imas_codex/standard_names/graph_store/graph_catalog.py:350",
+   "holder": []
+  },
+  {
+   "name": "fast_neutral_density",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 5,
+   "published_paths": 6,
+   "missing_paths": 1,
+   "worst_path": "edge_profiles/ggd/neutral/state/density_fast/values",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to fast_neutral_internal_state_number_density",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "fast_neutral_internal_state_number_density"
+   ]
+  },
+  {
+   "name": "fast_particle_power_density_due_to_collisions",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 2,
+   "missing_paths": 1,
+   "worst_path": "distributions/distribution/profiles_2d/trapped/collisions/electrons/power_fast",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to trapped_fast_electron_power_density_due_to_collisions",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "trapped_fast_electron_power_density_due_to_collisions"
+   ]
+  },
+  {
+   "name": "frequency_of_ion_cyclotron_heating_antenna",
+   "row_class": "dropped",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 3,
+   "published_paths": 4,
+   "missing_paths": 1,
+   "worst_path": "ic_antennas/antenna/frequency/data",
+   "worst_path_class": "dropped",
+   "causing_generator": "import-binds-one-path",
+   "causing_event": "catalog import bound only the name's source_id",
+   "code": "imas_codex/standard_names/graph_store/graph_catalog.py:350",
+   "holder": []
+  },
+  {
+   "name": "gap_at_plasma_boundary",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 1,
+   "missing_paths": 1,
+   "worst_path": "langmuir_probes/embedded/distance_separatrix",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to another name",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "radial_separatrix_distance_at_outboard_midplane"
+   ]
+  },
+  {
+   "name": "gas_flow",
+   "row_class": "moved",
+   "source_types": [
+    "dd"
+   ],
+   "status": "draft",
+   "imported_at": null,
+   "own_paths_held": 1,
+   "published_paths": 5,
+   "missing_paths": 5,
+   "worst_path": "gas_injection/valve/flow_rate",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to gas_flow_of_valve",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "gas_flow_of_valve"
+   ]
+  },
+  {
+   "name": "ion_density",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 1,
+   "missing_paths": 1,
+   "worst_path": "core_profiles/profiles_1d/ion/density",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to total_ion_number_density",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "total_ion_number_density"
+   ]
+  },
+  {
+   "name": "ion_energy_diffusivity",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 2,
+   "published_paths": 2,
+   "missing_paths": 2,
+   "worst_path": "edge_transport/model/ggd/ion/energy/d/values",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to ion_energy_diffusion_coefficient",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "ion_energy_diffusion_coefficient"
+   ]
+  },
+  {
+   "name": "ion_energy_flux",
+   "row_class": "dropped",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 3,
+   "missing_paths": 1,
+   "worst_path": "edge_transport/model/ggd/ion/energy/flux",
+   "worst_path_class": "dropped",
+   "causing_generator": "import-binds-one-path",
+   "causing_event": "catalog import bound only the name's source_id",
+   "code": "imas_codex/standard_names/graph_store/graph_catalog.py:350",
+   "holder": []
+  },
+  {
+   "name": "ion_kinetic_energy_flux_at_wall",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 3,
+   "missing_paths": 2,
+   "worst_path": "wall/description_ggd/ggd/energy_fluxes/kinetic/ion/emitted/values",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to ion_kinetic_energy_flux_at_wall_due_to_surface_emission",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "ion_kinetic_energy_flux_at_wall_due_to_surface_emission"
+   ]
+  },
+  {
+   "name": "ion_particle_diffusivity",
+   "row_class": "moved",
+   "source_types": null,
+   "status": "draft",
+   "imported_at": null,
+   "own_paths_held": 2,
+   "published_paths": 1,
+   "missing_paths": 1,
+   "worst_path": "core_transport/model/profiles_1d/ion/particles/d",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to effective_ion_diffusivity",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "effective_ion_diffusivity"
+   ]
+  },
+  {
+   "name": "ion_pressure",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 0,
+   "published_paths": 3,
+   "missing_paths": 3,
+   "worst_path": "edge_profiles/ggd/ion/state/pressure/values",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to ion_charge_state_pressure",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "ion_charge_state_pressure"
+   ]
+  },
+  {
+   "name": "ion_state_momentum_diffusivity",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 3,
+   "missing_paths": 3,
+   "worst_path": "plasma_transport/model/profiles_1d/ion/state/momentum/parallel/d",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to parallel_ion_charge_state_momentum_diffusivity",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "parallel_ion_charge_state_momentum_diffusivity"
+   ]
+  },
+  {
+   "name": "ion_temperature",
+   "row_class": "dropped",
+   "source_types": [
+    "dd"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 17,
+   "published_paths": 20,
+   "missing_paths": 7,
+   "worst_path": "edge_profiles/ggd/ion/temperature",
+   "worst_path_class": "dropped",
+   "causing_generator": "import-binds-one-path",
+   "causing_event": "catalog import bound only the name's source_id",
+   "code": "imas_codex/standard_names/graph_store/graph_catalog.py:350",
+   "holder": []
+  },
+  {
+   "name": "ion_velocity",
+   "row_class": "dropped",
+   "source_types": [
+    "dd"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 2,
+   "published_paths": 1,
+   "missing_paths": 1,
+   "worst_path": "core_profiles/profiles_1d/ion/velocity",
+   "worst_path_class": "dropped",
+   "causing_generator": "import-binds-one-path",
+   "causing_event": "catalog import bound only the name's source_id",
+   "code": "imas_codex/standard_names/graph_store/graph_catalog.py:350",
+   "holder": []
+  },
+  {
+   "name": "launched_power_of_ion_cyclotron_heating_antenna",
+   "row_class": "dropped",
+   "source_types": null,
+   "status": "draft",
+   "imported_at": null,
+   "own_paths_held": 1,
+   "published_paths": 3,
+   "missing_paths": 3,
+   "worst_path": "ic_antennas/antenna/power_launched/data",
+   "worst_path_class": "dropped",
+   "causing_generator": "import-binds-one-path",
+   "causing_event": "catalog import bound only the name's source_id",
+   "code": "imas_codex/standard_names/graph_store/graph_catalog.py:350",
+   "holder": []
+  },
+  {
+   "name": "launched_power_of_lower_hybrid_antenna",
+   "row_class": "dropped",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 7,
+   "published_paths": 7,
+   "missing_paths": 1,
+   "worst_path": "lh_antennas/antenna/power_launched/data",
+   "worst_path_class": "dropped",
+   "causing_generator": "import-binds-one-path",
+   "causing_event": "catalog import bound only the name's source_id",
+   "code": "imas_codex/standard_names/graph_store/graph_catalog.py:350",
+   "holder": []
+  },
+  {
+   "name": "length_of_passive_structure",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 0,
+   "published_paths": 2,
+   "missing_paths": 2,
+   "worst_path": "pf_passive/loop/element/geometry/oblique/length_alpha",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to major_length_of_passive_loop_element",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "major_length_of_passive_loop_element"
+   ]
+  },
+  {
+   "name": "length_of_poloidal_field_coil",
+   "row_class": "moved",
+   "source_types": [
+    "dd"
+   ],
+   "status": "draft",
+   "imported_at": null,
+   "own_paths_held": 2,
+   "published_paths": 1,
+   "missing_paths": 1,
+   "worst_path": "pf_active/coil/element/geometry/oblique/length",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to major_length_of_coil_conductor_element",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "major_length_of_coil_conductor_element"
+   ]
+  },
+  {
+   "name": "magnetic_field",
+   "row_class": "dropped",
+   "source_types": [
+    "dd"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 1,
+   "missing_paths": 1,
+   "worst_path": "equilibrium/time_slice/profiles_2d",
+   "worst_path_class": "dropped",
+   "causing_generator": "import-binds-one-path",
+   "causing_event": "catalog import bound only the name's source_id",
+   "code": "imas_codex/standard_names/graph_store/graph_catalog.py:350",
+   "holder": []
+  },
+  {
+   "name": "magnetic_flux",
+   "row_class": "dropped",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 1,
+   "missing_paths": 1,
+   "worst_path": "equilibrium/time_slice/profiles_2d",
+   "worst_path_class": "dropped",
+   "causing_generator": "import-binds-one-path",
+   "causing_event": "catalog import bound only the name's source_id",
+   "code": "imas_codex/standard_names/graph_store/graph_catalog.py:350",
+   "holder": []
+  },
+  {
+   "name": "major_radius",
+   "row_class": "dropped",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 3,
+   "missing_paths": 3,
+   "worst_path": "equilibrium/time_slice/ggd/r/values",
+   "worst_path_class": "dropped",
+   "causing_generator": "import-binds-one-path",
+   "causing_event": "catalog import bound only the name's source_id",
+   "code": "imas_codex/standard_names/graph_store/graph_catalog.py:350",
+   "holder": []
+  },
+  {
+   "name": "maximum_power_at_inner_divertor_target",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 0,
+   "published_paths": 1,
+   "missing_paths": 1,
+   "worst_path": "wall/global_quantities/power_density_inner_target_max",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to energy_flux_maximum_at_divertor_target",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "energy_flux_maximum_at_divertor_target"
+   ]
+  },
+  {
+   "name": "maximum_power_at_outer_divertor_target",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 0,
+   "published_paths": 1,
+   "missing_paths": 1,
+   "worst_path": "wall/global_quantities/power_density_outer_target_max",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to energy_flux_maximum_at_divertor_target",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "energy_flux_maximum_at_divertor_target"
+   ]
+  },
+  {
+   "name": "momentum_diffusion_coefficient",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 1,
+   "missing_paths": 1,
+   "worst_path": "plasma_transport/model/profiles_1d/momentum_phi/d",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to toroidal_total_momentum_diffusivity",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "toroidal_total_momentum_diffusivity"
+   ]
+  },
+  {
+   "name": "neutral_beam_atomic_number",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 0,
+   "published_paths": 1,
+   "missing_paths": 1,
+   "worst_path": "charge_exchange/channel/bes/z_ion",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to neutral_beam_charge_number",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "neutral_beam_charge_number"
+   ]
+  },
+  {
+   "name": "neutral_diffusivity",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 2,
+   "missing_paths": 1,
+   "worst_path": "plasma_transport/model/profiles_1d/neutral/particles/d",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to neutral_particle_diffusivity",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "neutral_particle_diffusivity"
+   ]
+  },
+  {
+   "name": "neutral_particle_flux",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 2,
+   "published_paths": 4,
+   "missing_paths": 2,
+   "worst_path": "edge_transport/model/ggd/neutral/state/particles/flux/values",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to neutral_state_particle_flux",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "neutral_state_particle_flux"
+   ]
+  },
+  {
+   "name": "neutral_species_atomic_mass",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 19,
+   "published_paths": 62,
+   "missing_paths": 43,
+   "worst_path": "amns_data/a",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to atomic_mass",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "atomic_mass"
+   ]
+  },
+  {
+   "name": "neutral_temperature",
+   "row_class": "dropped",
+   "source_types": [
+    "dd"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 7,
+   "published_paths": 1,
+   "missing_paths": 1,
+   "worst_path": "edge_profiles/ggd/neutral/temperature",
+   "worst_path_class": "dropped",
+   "causing_generator": "import-binds-one-path",
+   "causing_event": "catalog import bound only the name's source_id",
+   "code": "imas_codex/standard_names/graph_store/graph_catalog.py:350",
+   "holder": []
+  },
+  {
+   "name": "outer_radius_of_poloidal_field_coil",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 2,
+   "published_paths": 3,
+   "missing_paths": 1,
+   "worst_path": "pf_plasma/element/geometry/annulus/radius_outer",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to outer_radius_of_plasma_filament",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "outer_radius_of_plasma_filament"
+   ]
+  },
+  {
+   "name": "parallel_fast_ion_pressure",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 6,
+   "published_paths": 7,
+   "missing_paths": 1,
+   "worst_path": "core_profiles/profiles_1d/ion/state/pressure_fast_parallel",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to parallel_fast_ion_charge_state_pressure",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "parallel_fast_ion_charge_state_pressure"
+   ]
+  },
+  {
+   "name": "parallel_fast_neutral_pressure",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 4,
+   "published_paths": 5,
+   "missing_paths": 1,
+   "worst_path": "core_profiles/profiles_1d/neutral/state/pressure_fast_parallel",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to parallel_fast_neutral_internal_state_pressure",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "parallel_fast_neutral_internal_state_pressure"
+   ]
+  },
+  {
+   "name": "parallel_fast_particle_pressure",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 6,
+   "published_paths": 8,
+   "missing_paths": 2,
+   "worst_path": "edge_profiles/ggd/ion/state/pressure_fast_parallel/values",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to parallel_fast_ion_state_pressure",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "parallel_fast_ion_state_pressure"
+   ]
+  },
+  {
+   "name": "parallel_ion_energy_diffusivity",
+   "row_class": "moved",
+   "source_types": [
+    "dd"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 2,
+   "published_paths": 5,
+   "missing_paths": 3,
+   "worst_path": "edge_transport/model/ggd/ion/energy/d_parallel/values",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to parallel_ion_energy_diffusion_coefficient",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "parallel_ion_energy_diffusion_coefficient"
+   ]
+  },
+  {
+   "name": "parallel_ion_energy_flux",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 2,
+   "missing_paths": 1,
+   "worst_path": "edge_transport/model/ggd/ion/energy/flux_parallel/values",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to parallel_total_ion_energy_flux",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "parallel_total_ion_energy_flux"
+   ]
+  },
+  {
+   "name": "parallel_ion_heat_convection_velocity",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 2,
+   "published_paths": 3,
+   "missing_paths": 1,
+   "worst_path": "edge_transport/model/ggd/electrons/energy/v_parallel/values",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to parallel_electron_energy_convection_velocity",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "parallel_electron_energy_convection_velocity"
+   ]
+  },
+  {
+   "name": "parallel_ion_momentum_diffusivity",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 3,
+   "published_paths": 3,
+   "missing_paths": 1,
+   "worst_path": "edge_transport/model/ggd/ion/state/momentum/d_parallel/values",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to parallel_ion_charge_state_momentum_diffusion_coefficient",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "parallel_ion_charge_state_momentum_diffusion_coefficient"
+   ]
+  },
+  {
+   "name": "parallel_neutral_momentum_diffusivity",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 3,
+   "missing_paths": 2,
+   "worst_path": "edge_transport/model/ggd/neutral/state/momentum/d_parallel/values",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to parallel_neutral_state_momentum_diffusion_coefficient",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "parallel_neutral_state_momentum_diffusion_coefficient"
+   ]
+  },
+  {
+   "name": "parallel_neutral_momentum_flux",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 3,
+   "published_paths": 4,
+   "missing_paths": 1,
+   "worst_path": "edge_transport/model/ggd/neutral/state/momentum/flux_parallel/values",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to parallel_neutral_internal_state_momentum_flux",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "parallel_neutral_internal_state_momentum_flux"
+   ]
+  },
+  {
+   "name": "parallel_normalized_perturbed_magnetic_field",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 0,
+   "published_paths": 3,
+   "missing_paths": 3,
+   "worst_path": "gyrokinetics_local/non_linear/fields_intensity_1d/b_field_parallel_perturbed_norm",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to flux_surface_averaged_time_averaged_normalized_perturbed_parallel_magnetic_field_magnitude",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "flux_surface_averaged_time_averaged_normalized_perturbed_parallel_magnetic_field_magnitude"
+   ]
+  },
+  {
+   "name": "parallel_plasma_velocity",
+   "row_class": "moved",
+   "source_types": [
+    "dd"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 3,
+   "missing_paths": 2,
+   "worst_path": "edge_transport/model/ggd/momentum/v/parallel",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to total_plasma_momentum_field_aligned_convection_velocity",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "total_plasma_momentum_field_aligned_convection_velocity"
+   ]
+  },
+  {
+   "name": "parallel_vorticity",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 2,
+   "published_paths": 3,
+   "missing_paths": 1,
+   "worst_path": "edge_profiles/ggd/vorticity_over_r/parallel",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to ratio_of_plasma_vorticity_to_major_radius, ratio_of_vorticity_to_major_radius",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "ratio_of_plasma_vorticity_to_major_radius",
+    "ratio_of_vorticity_to_major_radius"
+   ]
+  },
+  {
+   "name": "per_toroidal_mode_fast_ion_power_density",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 2,
+   "published_paths": 7,
+   "missing_paths": 3,
+   "worst_path": "waves/coherent_wave/profiles_1d/ion/state/power_density_fast_n_phi",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to per_toroidal_mode_fast_ion_charge_state_power_density",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "per_toroidal_mode_fast_ion_charge_state_power_density"
+   ]
+  },
+  {
+   "name": "per_toroidal_mode_thermal_ion_power_density",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 2,
+   "published_paths": 5,
+   "missing_paths": 1,
+   "worst_path": "waves/coherent_wave/profiles_1d/ion/state/power_density_thermal_n_phi",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to per_toroidal_mode_thermal_ion_charge_state_power_density",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "per_toroidal_mode_thermal_ion_charge_state_power_density"
+   ]
+  },
+  {
+   "name": "perpendicular_fast_ion_pressure",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 7,
+   "published_paths": 8,
+   "missing_paths": 1,
+   "worst_path": "core_profiles/profiles_1d/ion/state/pressure_fast_perpendicular",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to perpendicular_fast_ion_charge_state_pressure",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "perpendicular_fast_ion_charge_state_pressure"
+   ]
+  },
+  {
+   "name": "perpendicular_fast_particle_pressure",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 2,
+   "published_paths": 12,
+   "missing_paths": 10,
+   "worst_path": "distributions/distribution/profiles_1d/co_passing/pressure_fast_perpendicular",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to perpendicular_co_passing_fast_particle_pressure",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "perpendicular_co_passing_fast_particle_pressure"
+   ]
+  },
+  {
+   "name": "plasma_current",
+   "row_class": "moved",
+   "source_types": [
+    "dd"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 9,
+   "published_paths": 7,
+   "missing_paths": 2,
+   "worst_path": "magnetics/rogowski_coil/current",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to current_of_rogowski_coil",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "current_of_rogowski_coil"
+   ]
+  },
+  {
+   "name": "plasma_electrical_conductivity",
+   "row_class": "moved",
+   "source_types": null,
+   "status": "draft",
+   "imported_at": null,
+   "own_paths_held": 1,
+   "published_paths": 1,
+   "missing_paths": 1,
+   "worst_path": "core_profiles/profiles_1d/conductivity_parallel",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to parallel_conductivity",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "parallel_conductivity"
+   ]
+  },
+  {
+   "name": "plasma_velocity_due_to_diamagnetic_drift",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 1,
+   "missing_paths": 1,
+   "worst_path": "plasma_profiles/ggd/velocity_mass_centre/diamagnetic",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to center_of_mass_velocity_due_to_diamagnetic_drift",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "center_of_mass_velocity_due_to_diamagnetic_drift"
+   ]
+  },
+  {
+   "name": "polarization_angle_at_constraint_position",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 2,
+   "published_paths": 5,
+   "missing_paths": 1,
+   "worst_path": "equilibrium/time_slice/constraints/faraday_angle/measured",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to faraday_angle",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "faraday_angle"
+   ]
+  },
+  {
+   "name": "poloidal_current_density_due_to_collisions",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 2,
+   "missing_paths": 1,
+   "worst_path": "edge_profiles/ggd/j_ion_neutral_friction/poloidal",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to poloidal_current_density_due_to_ion_neutral_friction",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "poloidal_current_density_due_to_ion_neutral_friction"
+   ]
+  },
+  {
+   "name": "poloidal_magnetic_field",
+   "row_class": "dropped",
+   "source_types": [
+    "dd"
+   ],
+   "status": "draft",
+   "imported_at": null,
+   "own_paths_held": 5,
+   "published_paths": 8,
+   "missing_paths": 2,
+   "worst_path": "magnetics/bpol_probe/field/data",
+   "worst_path_class": "dropped",
+   "causing_generator": "dd-horizon-removal",
+   "causing_event": "DD horizon removed the path, leaving no producer",
+   "code": "imas_codex/graph/sn_link_guardrail.py:37",
+   "holder": []
+  },
+  {
+   "name": "poloidal_magnetic_flux",
+   "row_class": "moved",
+   "source_types": [
+    "dd"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 20,
+   "published_paths": 52,
+   "missing_paths": 31,
+   "worst_path": "core_profiles/profiles_1d/grid/psi",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to poloidal_magnetic_flux_at_flux_surface",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "poloidal_magnetic_flux_at_flux_surface"
+   ]
+  },
+  {
+   "name": "poloidal_magnetic_flux_at_flux_surface",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 6,
+   "published_paths": 1,
+   "missing_paths": 1,
+   "worst_path": "equilibrium/time_slice/constraints/j_tor/position/psi",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to another name",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "poloidal_magnetic_flux_at_constraint_position"
+   ]
+  },
+  {
+   "name": "poloidal_magnetic_flux_of_flux_loop",
+   "row_class": "dropped",
+   "source_types": [
+    "dd"
+   ],
+   "status": "draft",
+   "imported_at": null,
+   "own_paths_held": 3,
+   "published_paths": 2,
+   "missing_paths": 1,
+   "worst_path": "magnetics/flux_loop/flux/data",
+   "worst_path_class": "dropped",
+   "causing_generator": "import-binds-one-path",
+   "causing_event": "catalog import bound only the name's source_id",
+   "code": "imas_codex/standard_names/graph_store/graph_catalog.py:350",
+   "holder": []
+  },
+  {
+   "name": "poloidal_momentum_flux",
+   "row_class": "moved",
+   "source_types": [
+    "dd"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 6,
+   "published_paths": 13,
+   "missing_paths": 7,
+   "worst_path": "edge_profiles/ggd/a_field/poloidal",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to poloidal_vector_potential",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "poloidal_vector_potential"
+   ]
+  },
+  {
+   "name": "power_at_wall_due_to_conduction",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 2,
+   "missing_paths": 1,
+   "worst_path": "wall/global_quantities/power_to_cooling",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to total_thermal_coolant_absorbed_power_at_wall",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "total_thermal_coolant_absorbed_power_at_wall"
+   ]
+  },
+  {
+   "name": "power_due_to_collisions",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 1,
+   "missing_paths": 1,
+   "worst_path": "distributions/distribution/global_quantities/collisions/electrons/power_fast",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to fast_particle_power_due_to_collisions",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "fast_particle_power_due_to_collisions"
+   ]
+  },
+  {
+   "name": "power_of_neutral_beam_injector",
+   "row_class": "dropped",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 6,
+   "missing_paths": 5,
+   "worst_path": "nbi/unit/power_launched/data",
+   "worst_path_class": "dropped",
+   "causing_generator": "import-binds-one-path",
+   "causing_event": "catalog import bound only the name's source_id",
+   "code": "imas_codex/standard_names/graph_store/graph_catalog.py:350",
+   "holder": []
+  },
+  {
+   "name": "power_of_soft_xray_detector",
+   "row_class": "dropped",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 2,
+   "missing_paths": 1,
+   "worst_path": "soft_x_rays/channel/power/data",
+   "worst_path_class": "dropped",
+   "causing_generator": "import-binds-one-path",
+   "causing_event": "catalog import bound only the name's source_id",
+   "code": "imas_codex/standard_names/graph_store/graph_catalog.py:350",
+   "holder": []
+  },
+  {
+   "name": "radial_coordinate",
+   "row_class": "dropped",
+   "source_types": [
+    "dd"
+   ],
+   "status": "draft",
+   "imported_at": null,
+   "own_paths_held": 1,
+   "published_paths": 5,
+   "missing_paths": 5,
+   "worst_path": "equilibrium/time_slice/ggd/r/values",
+   "worst_path_class": "dropped",
+   "causing_generator": "import-binds-one-path",
+   "causing_event": "catalog import bound only the name's source_id",
+   "code": "imas_codex/standard_names/graph_store/graph_catalog.py:350",
+   "holder": []
+  },
+  {
+   "name": "radial_current_density_due_to_perpendicular_viscosity",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 3,
+   "published_paths": 4,
+   "missing_paths": 1,
+   "worst_path": "edge_profiles/ggd/j_perpendicular_viscosity/r",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to radial_current_density_due_to_parallel_viscosity",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "radial_current_density_due_to_parallel_viscosity"
+   ]
+  },
+  {
+   "name": "radial_electron_convection_velocity",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 5,
+   "published_paths": 6,
+   "missing_paths": 1,
+   "worst_path": "plasma_transport/model/ggd/electrons/particles/v/values",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to poloidal_electron_convection_velocity",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "poloidal_electron_convection_velocity"
+   ]
+  },
+  {
+   "name": "radial_ion_particle_diffusivity",
+   "row_class": "dropped",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 4,
+   "published_paths": 10,
+   "missing_paths": 6,
+   "worst_path": "edge_transport/model/ggd/neutral/state/energy/d_radial/values",
+   "worst_path_class": "dropped",
+   "causing_generator": "import-binds-one-path",
+   "causing_event": "catalog import bound only the name's source_id",
+   "code": "imas_codex/standard_names/graph_store/graph_catalog.py:350",
+   "holder": []
+  },
+  {
+   "name": "radial_magnetic_vector_potential",
+   "row_class": "moved",
+   "source_types": [
+    "dd"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 2,
+   "published_paths": 5,
+   "missing_paths": 3,
+   "worst_path": "edge_profiles/ggd/a_field/r",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to radial_vector_potential",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "radial_vector_potential"
+   ]
+  },
+  {
+   "name": "radial_momentum_source",
+   "row_class": "moved",
+   "source_types": [
+    "dd"
+   ],
+   "status": "draft",
+   "imported_at": null,
+   "own_paths_held": 1,
+   "published_paths": 3,
+   "missing_paths": 3,
+   "worst_path": "edge_sources/source/ggd/momentum/r",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to radial_total_momentum_source",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "radial_total_momentum_source"
+   ]
+  },
+  {
+   "name": "radial_neutral_momentum_flux",
+   "row_class": "moved",
+   "source_types": [
+    "dd"
+   ],
+   "status": "draft",
+   "imported_at": null,
+   "own_paths_held": 2,
+   "published_paths": 1,
+   "missing_paths": 1,
+   "worst_path": "plasma_transport/model/profiles_1d/neutral/state/momentum/flux/r",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to radial_neutral_state_momentum_flux",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "radial_neutral_state_momentum_flux"
+   ]
+  },
+  {
+   "name": "radial_particle_convection_velocity",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 11,
+   "published_paths": 17,
+   "missing_paths": 6,
+   "worst_path": "plasma_transport/model/ggd/ion/state/energy/v_radial/values",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to radial_ion_state_energy_convection_velocity",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "radial_ion_state_energy_convection_velocity"
+   ]
+  },
+  {
+   "name": "radial_vorticity",
+   "row_class": "moved",
+   "source_types": [
+    "dd"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 4,
+   "published_paths": 5,
+   "missing_paths": 1,
+   "worst_path": "mhd/ggd/vorticity_over_r/values",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to ratio_of_vorticity_to_major_radius",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "ratio_of_vorticity_to_major_radius"
+   ]
+  },
+  {
+   "name": "radial_wave_electric_field",
+   "row_class": "moved",
+   "source_types": [
+    "dd"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 2,
+   "missing_paths": 1,
+   "worst_path": "waves/coherent_wave/full_wave/e_field/normal/values",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to normal_wave_electric_field",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "normal_wave_electric_field"
+   ]
+  },
+  {
+   "name": "radiative_temperature",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 0,
+   "published_paths": 3,
+   "missing_paths": 3,
+   "worst_path": "ece/channel/t_radiation",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to radiative_temperature_at_ece_channel",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "radiative_temperature_at_ece_channel"
+   ]
+  },
+  {
+   "name": "radius_of_poloidal_field_coil",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 1,
+   "missing_paths": 1,
+   "worst_path": "pf_active/coil/element/geometry/arcs_of_circle/curvature_radii",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to radius_of_coil_conductor_element",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "radius_of_coil_conductor_element"
+   ]
+  },
+  {
+   "name": "resistance_of_toroidal_field_coil",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 2,
+   "published_paths": 5,
+   "missing_paths": 3,
+   "worst_path": "coils_non_axisymmetric/coil/conductor/resistance",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to resistance_of_correction_coil",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "resistance_of_correction_coil"
+   ]
+  },
+  {
+   "name": "rotation_frequency_of_neoclassical_tearing_mode",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 2,
+   "published_paths": 4,
+   "missing_paths": 2,
+   "worst_path": "ntms/time_slice/mode/detailed_evolution/frequency",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to frequency_of_neoclassical_tearing_mode",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "frequency_of_neoclassical_tearing_mode"
+   ]
+  },
+  {
+   "name": "safety_factor",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 8,
+   "published_paths": 10,
+   "missing_paths": 2,
+   "worst_path": "summary/local/pedestal/q/value",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to safety_factor_at_pedestal",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "safety_factor_at_pedestal"
+   ]
+  },
+  {
+   "name": "safety_factor_at_normalized_poloidal_magnetic_flux_equal_to_0_95",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 2,
+   "published_paths": 4,
+   "missing_paths": 2,
+   "worst_path": "summary/local/separatrix/q/value",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to safety_factor_at_plasma_boundary",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "safety_factor_at_plasma_boundary"
+   ]
+  },
+  {
+   "name": "spectral_wavelength_of_optical_element",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 15,
+   "published_paths": 16,
+   "missing_paths": 1,
+   "worst_path": "spectrometer_x_ray_crystal/channel/wavelength_frames",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to wavelength_of_detector_pixel",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "wavelength_of_detector_pixel"
+   ]
+  },
+  {
+   "name": "surface_area_of_flux_surface",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 20,
+   "published_paths": 22,
+   "missing_paths": 3,
+   "worst_path": "equilibrium/time_slice/profiles_1d/area",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to poloidal_plane_cross_sectional_area_of_flux_surface",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "poloidal_plane_cross_sectional_area_of_flux_surface"
+   ]
+  },
+  {
+   "name": "surface_area_of_optical_element",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 10,
+   "missing_paths": 9,
+   "worst_path": "neutron_diagnostic/detector/geometry/surface",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to surface_area_of_neutron_detector",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "surface_area_of_neutron_detector"
+   ]
+  },
+  {
+   "name": "thermal_energy_of_plant_component_port",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 0,
+   "published_paths": 1,
+   "missing_paths": 1,
+   "worst_path": "calorimetry/group/component/energy_cumulated",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to accumulated_coolant_absorbed_energy_of_calorimetry_component",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "accumulated_coolant_absorbed_energy_of_calorimetry_component"
+   ]
+  },
+  {
+   "name": "thickness_of_passive_loop",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 0,
+   "published_paths": 2,
+   "missing_paths": 2,
+   "worst_path": "pf_passive/loop/element/geometry/thick_line/thickness",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to thickness_of_passive_loop_element",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "thickness_of_passive_loop_element"
+   ]
+  },
+  {
+   "name": "toroidal_angle_of_antenna_strap",
+   "row_class": "dropped",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 4,
+   "missing_paths": 3,
+   "worst_path": "spectrometer_visible/channel/fibre_image/outline/phi",
+   "worst_path_class": "dropped",
+   "causing_generator": "import-binds-one-path",
+   "causing_event": "catalog import bound only the name's source_id",
+   "code": "imas_codex/standard_names/graph_store/graph_catalog.py:350",
+   "holder": []
+  },
+  {
+   "name": "toroidal_angle_of_launching_position",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 3,
+   "missing_paths": 2,
+   "worst_path": "summary/heating_current_drive/ec/angle_tor/value",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to another name",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "toroidal_angle_of_electron_cyclotron_beam"
+   ]
+  },
+  {
+   "name": "toroidal_counter_passing_thermal_ion_torque_density_due_to_collisions",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 3,
+   "missing_paths": 1,
+   "worst_path": "distributions/distribution/profiles_1d/counter_passing/collisions/ion/torque_thermal_tor",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to another name",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "toroidal_thermal_ion_torque_density_due_to_collisions"
+   ]
+  },
+  {
+   "name": "toroidal_current_density",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 24,
+   "missing_paths": 22,
+   "worst_path": "distributions/distribution/profiles_1d/current_tor",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to toroidal_current_density_due_to_distribution_function_driven",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "toroidal_current_density_due_to_distribution_function_driven"
+   ]
+  },
+  {
+   "name": "toroidal_fast_ion_torque_density_due_to_collisions",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 3,
+   "published_paths": 6,
+   "missing_paths": 1,
+   "worst_path": "distributions/distribution/profiles_1d/co_passing/collisions/ion/torque_fast_tor",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to another name",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "toroidal_co_passing_fast_ion_torque_density_due_to_collisions"
+   ]
+  },
+  {
+   "name": "toroidal_ion_rotation_frequency",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 5,
+   "published_paths": 8,
+   "missing_paths": 3,
+   "worst_path": "core_profiles/profiles_1d/ion/state/rotation_frequency_tor",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to toroidal_ion_charge_state_rotation_frequency",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "toroidal_ion_charge_state_rotation_frequency"
+   ]
+  },
+  {
+   "name": "toroidal_ion_velocity",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 10,
+   "published_paths": 20,
+   "missing_paths": 8,
+   "worst_path": "plasma_profiles/ggd/ion/velocity_over_b_field/phi",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to toroidal_ion_velocity_due_to_diamagnetic_drift",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "toroidal_ion_velocity_due_to_diamagnetic_drift"
+   ]
+  },
+  {
+   "name": "toroidal_magnetic_field_at_magnetic_axis",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 3,
+   "published_paths": 6,
+   "missing_paths": 2,
+   "worst_path": "equilibrium/vacuum_toroidal_field/b0",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to toroidal_vacuum_magnetic_field",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "toroidal_vacuum_magnetic_field"
+   ]
+  },
+  {
+   "name": "toroidal_neutral_momentum_convection_velocity",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 10,
+   "missing_paths": 9,
+   "worst_path": "edge_profiles/ggd/neutral/velocity/phi",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to toroidal_neutral_velocity",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "toroidal_neutral_velocity"
+   ]
+  },
+  {
+   "name": "toroidal_thermal_electron_torque_density_due_to_collisions",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 2,
+   "published_paths": 6,
+   "missing_paths": 2,
+   "worst_path": "distributions/distribution/profiles_1d/counter_passing/collisions/electrons/torque_thermal_tor",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to another name",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "toroidal_counter_passing_thermal_electron_torque_density_due_to_collisions"
+   ]
+  },
+  {
+   "name": "toroidal_thermal_ion_torque_density_due_to_collisions",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 2,
+   "published_paths": 6,
+   "missing_paths": 3,
+   "worst_path": "distributions/distribution/profiles_1d/co_passing/collisions/ion/torque_thermal_tor",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to another name",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "toroidal_co_passing_thermal_ion_torque_density_due_to_collisions"
+   ]
+  },
+  {
+   "name": "toroidal_torque_density",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 3,
+   "published_paths": 7,
+   "missing_paths": 4,
+   "worst_path": "distributions/distribution/profiles_1d/co_passing/source/momentum_tor",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to another name",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "toroidal_co_passing_torque_density"
+   ]
+  },
+  {
+   "name": "toroidal_trapped_fast_ion_torque_density_due_to_collisions",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 3,
+   "missing_paths": 1,
+   "worst_path": "distributions/distribution/profiles_1d/trapped/collisions/ion/torque_fast_tor",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to another name",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "toroidal_fast_ion_torque_density_due_to_collisions"
+   ]
+  },
+  {
+   "name": "toroidal_trapped_thermal_electron_torque_density_due_to_collisions",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 3,
+   "missing_paths": 1,
+   "worst_path": "distributions/distribution/profiles_2d/trapped/collisions/electrons/torque_thermal_tor",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to another name",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "toroidal_trapped_thermal_electron_torque_density_due_to_coulomb_collisions_with_electrons"
+   ]
+  },
+  {
+   "name": "total_ion_energy_flux",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 2,
+   "missing_paths": 1,
+   "worst_path": "core_transport/model/profiles_1d/ion/energy/flux",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to radial_ion_energy_flux",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "radial_ion_energy_flux"
+   ]
+  },
+  {
+   "name": "total_ion_number_density",
+   "row_class": "moved",
+   "source_types": null,
+   "status": "draft",
+   "imported_at": null,
+   "own_paths_held": 11,
+   "published_paths": 2,
+   "missing_paths": 1,
+   "worst_path": "core_profiles/profiles_1d/n_i_thermal_total",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to total_thermal_ion_density",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "total_thermal_ion_density"
+   ]
+  },
+  {
+   "name": "total_ion_pressure",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 8,
+   "missing_paths": 7,
+   "worst_path": "core_profiles/profiles_1d/pressure_ion_total",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to thermal_ion_pressure",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "thermal_ion_pressure"
+   ]
+  },
+  {
+   "name": "total_ion_temperature",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 1,
+   "missing_paths": 1,
+   "worst_path": "core_profiles/profiles_1d/t_i_average",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to ion_average_temperature",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "ion_average_temperature"
+   ]
+  },
+  {
+   "name": "total_neutron_power",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 2,
+   "missing_paths": 1,
+   "worst_path": "neutron_diagnostic/fusion_power",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to total_power_due_to_fusion",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "total_power_due_to_fusion"
+   ]
+  },
+  {
+   "name": "total_plasma_radiated_power",
+   "row_class": "dropped",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 2,
+   "published_paths": 5,
+   "missing_paths": 3,
+   "worst_path": "summary/global_quantities/power_radiated",
+   "worst_path_class": "dropped",
+   "causing_generator": "import-binds-one-path",
+   "causing_event": "catalog import bound only the name's source_id",
+   "code": "imas_codex/standard_names/graph_store/graph_catalog.py:350",
+   "holder": []
+  },
+  {
+   "name": "trapped_fast_particle_power_density_due_to_collisions",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 0,
+   "published_paths": 1,
+   "missing_paths": 1,
+   "worst_path": "distributions/distribution/profiles_1d/trapped/collisions/electrons/power_fast",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to trapped_fast_electron_power_density_due_to_collisions",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "trapped_fast_electron_power_density_due_to_collisions"
+   ]
+  },
+  {
+   "name": "upper_triangularity_of_plasma_boundary",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 2,
+   "published_paths": 4,
+   "missing_paths": 2,
+   "worst_path": "equilibrium/time_slice/profiles_1d/triangularity_upper",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to upper_triangularity_of_flux_surface",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "upper_triangularity_of_flux_surface"
+   ]
+  },
+  {
+   "name": "velocity_due_to_e_cross_b_drift",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 1,
+   "missing_paths": 1,
+   "worst_path": "plasma_profiles/ggd/neutral/state/velocity_exb/diamagnetic",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to effective_neutral_internal_state_velocity_due_to_e_cross_b_drift",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "effective_neutral_internal_state_velocity_due_to_e_cross_b_drift"
+   ]
+  },
+  {
+   "name": "vertical_coordinate_of_active_limiter_point",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 0,
+   "published_paths": 3,
+   "missing_paths": 3,
+   "worst_path": "plasma_transport/model/profiles_1d/neutral/state/momentum/flux_limiter/z",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to vertical_neutral_state_momentum_flux_limiter_coefficient",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "vertical_neutral_state_momentum_flux_limiter_coefficient"
+   ]
+  },
+  {
+   "name": "vertical_coordinate_of_antenna_strap",
+   "row_class": "dropped",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 3,
+   "published_paths": 2,
+   "missing_paths": 1,
+   "worst_path": "ic_antennas/antenna/module/strap/geometry/outline/z",
+   "worst_path_class": "dropped",
+   "causing_generator": "import-binds-one-path",
+   "causing_event": "catalog import bound only the name's source_id",
+   "code": "imas_codex/standard_names/graph_store/graph_catalog.py:350",
+   "holder": []
+  },
+  {
+   "name": "vertical_coordinate_of_closest_wall_point",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 4,
+   "missing_paths": 3,
+   "worst_path": "disruption/halo_currents/active_wall_point/z",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to vertical_coordinate_of_active_wall_point",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "vertical_coordinate_of_active_wall_point"
+   ]
+  },
+  {
+   "name": "vertical_coordinate_of_conductor_cross_section",
+   "row_class": "moved",
+   "source_types": [
+    "dd"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 4,
+   "published_paths": 20,
+   "missing_paths": 13,
+   "worst_path": "ic_antennas/antenna/module/strap/geometry/annulus/z",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to vertical_coordinate_of_antenna_strap",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "vertical_coordinate_of_antenna_strap"
+   ]
+  },
+  {
+   "name": "vertical_coordinate_of_diagnostic_antenna",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 4,
+   "published_paths": 9,
+   "missing_paths": 5,
+   "worst_path": "ece/polarizer/centre/z",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to vertical_coordinate_of_measurement_position",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "vertical_coordinate_of_measurement_position"
+   ]
+  },
+  {
+   "name": "vertical_coordinate_of_diagnostic_aperture",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 12,
+   "published_paths": 16,
+   "missing_paths": 3,
+   "worst_path": "nbi/unit/aperture/centre/z",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to vertical_coordinate_of_aperture",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "vertical_coordinate_of_aperture"
+   ]
+  },
+  {
+   "name": "vertical_coordinate_of_neutral_beam_injector",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 3,
+   "missing_paths": 2,
+   "worst_path": "nbi/unit/aperture/centre/z",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to vertical_coordinate_of_aperture",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "vertical_coordinate_of_aperture"
+   ]
+  },
+  {
+   "name": "vertical_current_density",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 6,
+   "missing_paths": 5,
+   "worst_path": "edge_profiles/ggd/j_total/z",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to vertical_total_current_density",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "vertical_total_current_density"
+   ]
+  },
+  {
+   "name": "vertical_magnetic_field",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 7,
+   "published_paths": 9,
+   "missing_paths": 2,
+   "worst_path": "plasma_profiles/ggd/a_field/z",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to vertical_magnetic_vector_potential",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "vertical_magnetic_vector_potential"
+   ]
+  },
+  {
+   "name": "vertical_neutral_momentum_diffusivity",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 3,
+   "missing_paths": 2,
+   "worst_path": "edge_transport/model/ggd/neutral/momentum/d/z",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to vertical_plasma_momentum_diffusivity",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "vertical_plasma_momentum_diffusivity"
+   ]
+  },
+  {
+   "name": "vertical_neutral_momentum_flux",
+   "row_class": "dropped",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 11,
+   "published_paths": 21,
+   "missing_paths": 10,
+   "worst_path": "edge_transport/model/ggd/neutral/state/momentum/flux/z",
+   "worst_path_class": "dropped",
+   "causing_generator": "import-binds-one-path",
+   "causing_event": "catalog import bound only the name's source_id",
+   "code": "imas_codex/standard_names/graph_store/graph_catalog.py:350",
+   "holder": []
+  },
+  {
+   "name": "voltage_of_diagnostic_antenna",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 0,
+   "published_paths": 2,
+   "missing_paths": 2,
+   "worst_path": "ece/channel/t_e_voltage",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to another name",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "voltage_of_spectrometer_channel"
+   ]
+  },
+  {
+   "name": "voltage_of_poloidal_field_coil",
+   "row_class": "dropped",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 2,
+   "missing_paths": 1,
+   "worst_path": "pf_active/coil/voltage/data",
+   "worst_path_class": "dropped",
+   "causing_generator": "import-binds-one-path",
+   "causing_event": "catalog import bound only the name's source_id",
+   "code": "imas_codex/standard_names/graph_store/graph_catalog.py:350",
+   "holder": []
+  },
+  {
+   "name": "volume_averaged_electron_density",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 5,
+   "published_paths": 6,
+   "missing_paths": 1,
+   "worst_path": "summary/volume_average/dn_e_dt/value",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to volume_averaged_time_derivative_of_electron_density",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "volume_averaged_time_derivative_of_electron_density"
+   ]
+  },
+  {
+   "name": "wave_phase_of_antenna_strap",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 1,
+   "missing_paths": 1,
+   "worst_path": "summary/heating_current_drive/ic/phase/value",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to ion_cyclotron_heating_antenna_phase",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "ion_cyclotron_heating_antenna_phase"
+   ]
+  },
+  {
+   "name": "wavelength_of_detector_pixel",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 4,
+   "missing_paths": 3,
+   "worst_path": "spectrometer_x_ray_crystal/channel/crystal/wavelength_bragg",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to wavelength_of_bragg_crystal",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "wavelength_of_bragg_crystal"
+   ]
+  },
+  {
+   "name": "wetted_area_of_divertor_target",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 2,
+   "missing_paths": 1,
+   "worst_path": "divertors/divertor/wetted_area",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to wetted_area_of_divertor",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "wetted_area_of_divertor"
+   ]
+  },
+  {
+   "name": "width_of_diagnostic_aperture",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 25,
+   "missing_paths": 24,
+   "worst_path": "bolometer/camera/channel/aperture/x1_width",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to first_local_tangential_width_of_diagnostic_aperture",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "first_local_tangential_width_of_diagnostic_aperture"
+   ]
+  },
+  {
+   "name": "width_of_filter",
+   "row_class": "moved",
+   "source_types": [
+    "catalog"
+   ],
+   "status": "draft",
+   "imported_at": "2026-07-04T21:21:17.079Z",
+   "own_paths_held": 1,
+   "published_paths": 4,
+   "missing_paths": 3,
+   "worst_path": "soft_x_rays/channel/filter_window/x1_width",
+   "worst_path_class": "moved",
+   "causing_generator": "one-source-per-path",
+   "causing_event": "a later compose bound the path to first_local_tangential_width_of_filter_window",
+   "code": "imas_codex/standard_names/graph_store/graph_source_bindings.py:111",
+   "holder": [
+    "first_local_tangential_width_of_filter_window"
+   ]
+  }
+ ],
+ "counts": {
+  "rows_by_class": {
+   "moved": 122,
+   "dropped": 34
+  },
+  "rows_by_generator": {
+   "one-source-per-path": 122,
+   "import-binds-one-path": 31,
+   "dd-horizon-removal": 3
+  },
+  "published_paths_total": 870,
+  "own_paths_total": 438
+ }
+}

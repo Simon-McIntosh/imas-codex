@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="35cm" height="19cm" viewBox="0 0 1400 760" font-family="sans-serif">
+<title>DD source-binding lifecycle and the five generators that lose or move a binding</title>
+<style>
+ .box{fill:#f4f4f4;stroke:#555;stroke-width:1.5}
+ .lose{fill:#fdecec;stroke:#b03030;stroke-width:2}
+ .move{fill:#fff6e0;stroke:#a07010;stroke-width:2}
+ .t{font-size:16px;fill:#111}
+ .lbl{font-size:14px;fill:#222}
+ .gen{font-size:14px;fill:#8a1f1f;font-weight:bold}
+ .note{font-size:13px;fill:#555}
+ .flow{stroke:#333;stroke-width:2;fill:none;marker-end:url(#a)}
+ .bad{stroke:#b03030;stroke-width:2;fill:none;marker-end:url(#b);stroke-dasharray:7 4}
+</style>
+<defs>
+ <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#333"/></marker>
+ <marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#b03030"/></marker>
+</defs>
+
+<text class="t" x="700" y="34" text-anchor="middle" font-size="18">DD source-binding lifecycle — where a binding is lost or moved</text>
+
+<!-- row 1 -->
+<rect class="box" x="40" y="80" width="190" height="86" rx="6"/>
+<text class="t" x="135" y="108" text-anchor="middle">catalog entry</text>
+<text class="lbl" x="135" y="130" text-anchor="middle">lists N DD paths</text>
+<text class="lbl" x="135" y="150" text-anchor="middle">per name</text>
+
+<rect class="box" x="310" y="80" width="210" height="86" rx="6"/>
+<text class="t" x="415" y="108" text-anchor="middle">catalog import</text>
+<text class="lbl" x="415" y="130" text-anchor="middle">graph_catalog.py:350</text>
+<text class="lbl" x="415" y="150" text-anchor="middle">binds source_id only</text>
+
+<rect class="box" x="600" y="80" width="210" height="86" rx="6"/>
+<text class="t" x="705" y="108" text-anchor="middle">source node</text>
+<text class="lbl" x="705" y="130" text-anchor="middle">id dd:&lt;path&gt; — one</text>
+<text class="lbl" x="705" y="150" text-anchor="middle">node per DD path</text>
+
+<rect class="box" x="890" y="80" width="210" height="86" rx="6"/>
+<text class="t" x="995" y="108" text-anchor="middle">PRODUCED_NAME</text>
+<text class="lbl" x="995" y="130" text-anchor="middle">to one live name</text>
+<text class="lbl" x="995" y="150" text-anchor="middle">(the carrying identity)</text>
+
+<path class="flow" d="M230,123 L305,123"/>
+<path class="flow" d="M520,123 L595,123"/>
+<path class="flow" d="M810,123 L885,123"/>
+
+<!-- G1 -->
+<path class="bad" d="M415,166 L300,235"/>
+<rect class="lose" x="120" y="235" width="300" height="86" rx="6"/>
+<text class="gen" x="270" y="262" text-anchor="middle">G1 import binds one path</text>
+<text class="lbl" x="270" y="284" text-anchor="middle">31 rows · every other</text>
+<text class="lbl" x="270" y="304" text-anchor="middle">published path left unbound</text>
+
+<!-- G2 -->
+<path class="bad" d="M705,166 L705,235"/>
+<rect class="move" x="555" y="235" width="300" height="86" rx="6"/>
+<text class="gen" x="705" y="262" text-anchor="middle">G2 one source, one name</text>
+<text class="lbl" x="705" y="284" text-anchor="middle">122 rows · a later compose</text>
+<text class="lbl" x="705" y="304" text-anchor="middle">moves the binding to another name</text>
+
+<!-- G3/G4 -->
+<path class="bad" d="M995,166 L1010,235"/>
+<rect class="lose" x="870" y="235" width="330" height="86" rx="6"/>
+<text class="gen" x="1035" y="262" text-anchor="middle">G3 / G4 horizon and rename</text>
+<text class="lbl" x="1035" y="284" text-anchor="middle">3 rows · path removed or</text>
+<text class="lbl" x="1035" y="304" text-anchor="middle">renamed in the DD</text>
+
+<!-- identity writers row -->
+<rect class="box" x="310" y="390" width="400" height="86" rx="6"/>
+<text class="t" x="510" y="418" text-anchor="middle">identity writers</text>
+<text class="lbl" x="510" y="440" text-anchor="middle">rename · fold · supersede · refine · create</text>
+<text class="lbl" x="510" y="460" text-anchor="middle">§36 invariant: source_invariant.py:58</text>
+
+<path class="flow" d="M995,321 C995,370 800,390 715,425"/>
+
+<rect class="box" x="800" y="390" width="440" height="86" rx="6"/>
+<text class="t" x="1020" y="418" text-anchor="middle">guard: require_producing_sources</text>
+<text class="lbl" x="1020" y="440" text-anchor="middle">refuses producers = 0 only</text>
+<text class="lbl" x="1020" y="460" text-anchor="middle">drafts covered · partial loss invisible</text>
+
+<!-- G5 -->
+<rect class="move" x="40" y="390" width="240" height="86" rx="6"/>
+<text class="gen" x="160" y="418" text-anchor="middle">G5 compose never ran</text>
+<text class="lbl" x="160" y="440" text-anchor="middle">source extracted or stale,</text>
+<text class="lbl" x="160" y="460" text-anchor="middle">no PRODUCED_NAME</text>
+<path class="bad" d="M600,166 C420,210 250,300 170,385"/>
+
+<!-- audit -->
+<rect class="box" x="420" y="580" width="560" height="86" rx="6"/>
+<text class="t" x="700" y="608" text-anchor="middle">audit / export population</text>
+<text class="lbl" x="700" y="630" text-anchor="middle">export.py:668 admits only accepted/approved</text>
+<text class="lbl" x="700" y="650" text-anchor="middle">draft loss reported by nobody</text>
+<path class="flow" d="M1020,476 C1020,540 860,580 810,620"/>
+
+<text class="note" x="40" y="710">Grey boxes are the healthy path. Red boxes lose the binding outright; amber boxes move it. Counts are the 156 census rows
+traced in sib-source-loss-generators.json.</text>
+<text class="note" x="40" y="732">All 156 rows are status=draft; 20 of them hold no producer at all and are only revisited when a write touches them.</text>
+</svg>
