@@ -30,7 +30,8 @@ which is the second defect this node closes.</p>
 
 <p><code>_lock_claimed_name_bindings</code> already had two lifecycle exceptions: reuse of a stable
 stage, and revival of a superseded or exhausted spelling with no live successor. A third joins them,
-and it is granted only to the composition claim paths — never to an attachment:</p>
+and it is granted only to the composition claim paths. <code>sn attach</code> keeps both exceptions
+off — it calls the lock with each one false — so the same stub is still a collision on that path:</p>
 
 <ul>
   <li>the candidate target is at <code>pending</code>;</li>
@@ -56,12 +57,24 @@ in the wrong place: the enabling call sat on a staging helper no production path
 <code>persist_generated_name_batch</code>. The live writer now grants it, so the path that actually
 composes adopts the stub instead of colliding and parking.</p>
 
-<p>Its winner split treats the resulting <code>adoption</code> binding as stable reuse, which is what
-it is: an adopted stub already exists as a node and carries its own content, so it needs no rich
-write, and the stable finalize statement binds the source's <code>PRODUCED_NAME</code> edge, marks
-the source <code>composed</code> and clears its claim. Without that mapping the adopted winner fell
-into neither the reserved nor the stable list and the write aborted on its own exact-claim
-assertion.</p>
+<p>A second defect sat behind the first: the winner split routed <code>adoption</code> to the stable
+finalize branch, and a projection stub carries a name and a provenance edge but no content. The
+stable statement binds the source and clears the claim, so the source finished <code>composed</code>
+while the name stayed <code>drafted</code> with no description, no unit and none of the composed
+grammar columns — the generated content was discarded at the last step. Adoption now takes the rich
+name write the reserved path uses, in the same transaction, so the stub enters <code>drafted</code>
+with the receipt <em>and</em> the candidate's description, unit and composed columns. Only
+<code>stable_reuse</code> remains in the no-rich-write split, where it is still correct: that target
+is a live name with its own content.</p>
+
+<figure>
+  <img src="/imas-codex/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs/adoption-state.svg"
+       alt="State diagram: a pending projection stub with no producer, projected onto by the claimed source's own DD path, is adopted into drafted with a receipt and written by the rich name write, after which its source finishes composed; a stub owned by another claim is refused and the source parks at the claim cap keeping its last refusal"/>
+  <figcaption>Adoption as a state transition. The claim adopts the stub only when the projection is the
+  source's own DD path and no producer holds it; the content comes from the rich write, not the stable
+  finalize; a stub owned by another claim is still a collision, and a source that reaches the attempt
+  cap is parked with the refusal that led there.</figcaption>
+</figure>
 
 <h3 id="sib-adopt-pending-projection-stubs-park">The cause survives parking</h3>
 
@@ -80,7 +93,7 @@ passes at both revisions, as a regression guard rather than a discriminator.</p>
   <tr><th>case</th><th>main</th><th>head</th></tr>
   <tr><td>batch claim adopts an unowned projection stub</td><td>fails: stub stays pending, no winner</td><td>passes: drafted, receipt carries the source</td></tr>
   <tr><td>focused claim adopts and writes the producing edge</td><td>fails: no edge, source stays extracted</td><td>passes: edge written, source attached</td></tr>
-  <tr><td>production writer adopts and finalizes the source</td><td>fails: stub stays pending, no winner</td><td>passes: drafted, producing edge, source composed</td></tr>
+  <tr><td>production writer adopts, writes the content and finalizes the source</td><td>fails: stub stays pending, no winner</td><td>passes: drafted with the description and unit, producing edge, source composed</td></tr>
   <tr><td>stub owned by another claim</td><td>passes: refused (control)</td><td>passes: refused</td></tr>
   <tr><td>parked source keeps its collision reason</td><td>fails: only the cap message survives</td><td>passes: cap message plus the refusal</td></tr>
 </table>
@@ -88,6 +101,11 @@ passes at both revisions, as a regression guard rather than a discriminator.</p>
 <p>Deleting the exception from the production writer alone, with everything else at head, turns the
 production-writer case red again with the same signature — the stub stays <code>pending</code> and
 no source is finalized.</p>
+
+<p>The content assertion is what catches the second defect, and it is the case's discriminator now: on
+the revision that adopted the stub through the stable finalize branch, that case fails with
+<code>{'name_stage': 'drafted', 'description': None, 'unit': None, 'receipts': 1}</code> — adopted,
+receipted, and empty.</p>
 
 <p><code>tests/standard_names</code> on the default markers adds no failure id against main: one
 failure at both revisions (<code>test_export_determinism.py::TestManifestDeterminism::test_no_commit_uses_stable_unversioned_timestamp</code>),

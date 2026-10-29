@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="35cm" height="18cm" viewBox="0 0 1400 720" font-family="sans-serif">
+<title>A compose claim adopts a pending projection stub of its own DD path</title>
+<style>
+ .box{fill:#fafafa;stroke:#929292;stroke-width:1.6}
+ .taken{fill:#f2faf5;stroke:#2e8b57;stroke-width:2}
+ .parked{fill:#fafafa;stroke:#929292;stroke-width:1.6;stroke-dasharray:6 4}
+ .t{font-size:16px;fill:#111}
+ .h{font-size:15px;fill:#111;font-weight:bold}
+ .lbl{font-size:13px;fill:#333}
+ .step-lbl{font-size:12px;fill:#2e8b57}
+ .step{stroke:#2e8b57;stroke-width:2.2;fill:none;marker-end:url(#pick)}
+ .flow{stroke:#333;stroke-width:1.8;fill:none;marker-end:url(#plain)}
+ .refuse{stroke:#929292;stroke-width:1.6;fill:none;marker-end:url(#grey);stroke-dasharray:7 4}
+ .note{font-size:13px;fill:#333}
+</style>
+<defs>
+ <marker id="pick" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#2e8b57"/></marker>
+ <marker id="plain" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#333"/></marker>
+ <marker id="grey" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#929292"/></marker>
+</defs>
+
+<text class="t" x="700" y="36" text-anchor="middle" font-size="18">A compose claim adopts a pending projection stub of its own DD path</text>
+
+<!-- adoption path -->
+<rect class="box" x="30" y="80" width="310" height="150" rx="6"/>
+<text class="h" x="185" y="110" text-anchor="middle">projection stub</text>
+<text class="lbl" x="185" y="138" text-anchor="middle">StandardName :pending</text>
+<text class="lbl" x="185" y="162" text-anchor="middle">HAS_STANDARD_NAME &#8592; IMASNode</text>
+<text class="lbl" x="185" y="186" text-anchor="middle">no PRODUCED_NAME</text>
+<text class="lbl" x="185" y="210" text-anchor="middle">no description, no unit</text>
+
+<text class="step-lbl" x="425" y="106" text-anchor="middle">compose claim:</text>
+<text class="step-lbl" x="425" y="126" text-anchor="middle">projection is the</text>
+<text class="step-lbl" x="425" y="146" text-anchor="middle">source's own DD path</text>
+<text class="step-lbl" x="425" y="166" text-anchor="middle">and no producer</text>
+<text class="step-lbl" x="425" y="186" text-anchor="middle">holds it</text>
+<path class="step" d="M344,215 L498,215"/>
+
+<rect class="taken" x="502" y="80" width="300" height="150" rx="6"/>
+<text class="h" x="652" y="110" text-anchor="middle">drafted, with a receipt</text>
+<text class="lbl" x="652" y="138" text-anchor="middle">name_stage pending &#8594; drafted</text>
+<text class="lbl" x="652" y="162" text-anchor="middle">StandardNameChange</text>
+<text class="lbl" x="652" y="184" text-anchor="middle">adopt_pending_projection</text>
+<text class="lbl" x="652" y="208" text-anchor="middle">rich write carries the content</text>
+
+<text class="lbl" x="852" y="196" text-anchor="middle">finalize</text>
+<path class="flow" d="M806,215 L876,215"/>
+
+<rect class="box" x="880" y="80" width="330" height="150" rx="6"/>
+<text class="h" x="1045" y="110" text-anchor="middle">source composed</text>
+<text class="lbl" x="1045" y="138" text-anchor="middle">PRODUCED_NAME &#8594; stub</text>
+<text class="lbl" x="1045" y="162" text-anchor="middle">provisional marker removed</text>
+<text class="lbl" x="1045" y="186" text-anchor="middle">claim token and seq cleared</text>
+<text class="lbl" x="1045" y="210" text-anchor="middle">status composed</text>
+
+<!-- refusal branch -->
+<path class="refuse" d="M185,234 L185,330"/>
+<text class="lbl" x="198" y="285">another claim owns the stub</text>
+
+<rect class="box" x="30" y="330" width="310" height="120" rx="6"/>
+<text class="h" x="185" y="360" text-anchor="middle">refused as a collision</text>
+<text class="lbl" x="185" y="388" text-anchor="middle">reservation_source_id names</text>
+<text class="lbl" x="185" y="410" text-anchor="middle">a different claim token</text>
+<text class="lbl" x="185" y="432" text-anchor="middle">stub stays pending</text>
+
+<path class="refuse" d="M344,390 L470,390"/>
+
+<rect class="parked" x="474" y="330" width="328" height="120" rx="6"/>
+<text class="h" x="638" y="360" text-anchor="middle">source parked at the cap</text>
+<text class="lbl" x="638" y="388" text-anchor="middle">status failed once attempts</text>
+<text class="lbl" x="638" y="410" text-anchor="middle">reach the compose cap</text>
+<text class="lbl" x="638" y="432" text-anchor="middle">last refusal kept in last_error</text>
+
+<!-- notes -->
+<rect class="box" x="30" y="500" width="650" height="150" rx="6"/>
+<text class="h" x="62" y="532">The rich write, not the stable finalize</text>
+<text class="note" x="62" y="560">The lock moves the stub to drafted, then the winner takes the candidate's</text>
+<text class="note" x="62" y="582">description, unit and composed columns through the same rich name write the</text>
+<text class="note" x="62" y="604">reserved path uses. The stable finalize binds the source and clears the claim,</text>
+<text class="note" x="62" y="626">but writes none of that content, so an adopted stub routed there stays empty.</text>
+
+<rect class="box" x="724" y="500" width="486" height="150" rx="6"/>
+<text class="h" x="756" y="532">sn attach keeps both exceptions off</text>
+<text class="note" x="756" y="560">Attachment passes allow_dead_end_revival and</text>
+<text class="note" x="756" y="582">allow_adopt_pending_stub as false, so this same stub</text>
+<text class="note" x="756" y="604">is still a collision there. Every composition persister</text>
+<text class="note" x="756" y="626">grants the exceptions it is entitled to.</text>
+</svg>
