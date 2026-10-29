@@ -1,0 +1,66 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own arms rather than from its manifest: logs/gate-base.log header names revision 049597eb, ends 'FAILED tests/standard_names/test_export_determinism.py::TestManifestDeterminism::test_no_commit_uses_stable_unversioned_timestamp', '1 failed, 8535 passed, 12 skipped', 'EXIT=1'; logs/gate-head.log names 29a6b415d and ends with the same single failure id, '1 failed, 8536 passed, 11 skipped', 'EXIT=1'; the id sets are equal, so added_failure_count is 0. The head arm predates the docs-only head commit 9ca2e7315, which changes no code.",
+  "call_sites": [
+    "imas_codex/standard_names/worker_tasks/worker_compose_and_validate.py:901",
+    "imas_codex/standard_names/worker_tasks/worker_compose_and_validate.py:939",
+    "imas_codex/standard_names/worker_tasks/worker_common.py:938",
+    "imas_codex/standard_names/worker_tasks/worker_common.py:1041",
+    "imas_codex/standard_names/graph_store/graph_catalog.py:2603"
+  ],
+  "completed_at": "2026-10-29T22:01:00.479Z",
+  "dispatched_at": "2026-10-29T21:52:05Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-adopt-pending-projection-stubs.html",
+      "id": "adopt-fragment-attachment-claim",
+      "line": "33",
+      "severity": "non-blocking",
+      "text": "non-blocking: the sentence this commit edited still reads that the exception 'is granted only to the composition claim paths \u2014 never to an attachment', but the focused composition claim path is persist_claimed_attachments, which grants allow_adopt_pending_stub=True at graph_source_bindings.py:1480; only sn attach refuses, so a reader cannot tell which 'attachment' the sentence excludes, and the same run leaves the function-level docstring at graph_source_bindings.py:917 saying 'Attachments never receive either authority'. The fragment should name the refusing mechanism (sn attach) rather than the word 'attachment'."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-adopt-pending-projection-stubs.html",
+      "id": "adopt-fragment-writer-sentence",
+      "line": "55",
+      "severity": "non-blocking",
+      "text": "non-blocking: the new section's opening sentence has no predicate \u2014 'persist_generated_name_winners \u2014 the writer the compose worker reaches through persist_generated_name_batch.' ends before saying what the writer did, so the paragraph's point (that the enabling call sat on an unreachable helper) only arrives in the next sentence; add the verb so the em-dash clause reads as a statement about the writer."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "persist_generated_name_winners is reached at graph_catalog.py:2603 from persist_generated_name_batch, which worker_common.py:938 and :1041 and worker_compose_and_validate.py:901 and :939 call; the focused path at graph_source_bindings.py:1480 and the staging helper at :1577 are unchanged by this diff.",
+    "diff": "Read both gained commits against 39fe0d031: 29a6b415d adds _STABLE_BINDING_KINDS (graph_catalog.py:2166), grants the flag at :2303 and applies the set at :2340 and :2376, and adds the production-writer case to the test file; 9ca2e7315 rewrites the fragment's writer section and its proof table; no path outside the granted scope is touched.",
+    "done_when": "The repair round's done_when requires the finding answered by a commit and a negative control per answering commit; git log 39fe0d031..9ca2e7315 shows 29a6b415d answering it and 9ca2e7315 recording it, and logs/negative-control.log removes allow_adopt_pending_stub=True from persist_generated_name_winners alone and records 1 failed ... EXIT=1 with the stub still 'pending' and no winner, while logs/production-writer.log at head records 1 passed and logs/base-production-writer.log records the same failure at base 049597eb.",
+    "goal": "The goal is that composition adopts an unowned pending projection stub carrying its own DD path instead of colliding with it until the source parks; the gained commits close the production half by granting allow_adopt_pending_stub=True at imas_codex/standard_names/graph_store/graph_catalog.py:2303 in persist_generated_name_winners (the writer reached from worker_compose_and_validate.py:901/939 through worker_common.py:938/1041 and persist_generated_name_batch at graph_catalog.py:2603), which is the exact defect the previous review's blocking finding f4cd67a41b2 named.",
+    "manifest": "Read; status complete, six commits listed, the answering finding recorded as 'acted f4cd67a41b2: 29a6b415d40de6cf5e015aab69b6fde4a78433a9', both suite arms with literal commands, log paths, completed=true and one shared failure id, negative_control_log as a bare path, and rubric self-check lines for all six dimensions; its blockers field records that the live pointer still lacks graph_catalog.py and that the widen must be recorded by the coordinator.",
+    "write_paths": "The repair round's granted scope (resume-1-advice.txt) covers graph_foundation.py, graph_source_bindings.py, orphan_sweep.py, the new test, the evidence fragment, its figures directory and graph_catalog.py; git diff --stat 39fe0d031..9ca2e7315 touches exactly the fragment, graph_catalog.py and tests/standard_names/test_compose_adopts_pending_stub.py, all inside that grant."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_compose_adopts_pending_stub.py:240 asserts the winner, :243 the drafted stage, :244 the adoption receipt, :251 the PRODUCED_NAME edge and :256 the composed source, all read back from the graph; logs/negative-control.log reinstates the removed flag and reddens :240, and removing 'adoption' from _STABLE_BINDING_KINDS would raise the exact-claim RuntimeError at graph_catalog.py:2352 before the test could pass.",
+    "evidence": "Both arms are on disk with header lines, summary lines and bare EXIT lines (gate-base.log '1 failed, 8535 passed', gate-head.log '1 failed, 8536 passed', same single failure id), the negative control names the exact reverted line, and the head-of-file gate arm ran at 29a6b415d rather than the docs-only 9ca2e7315.",
+    "fit": "_STABLE_BINDING_KINDS at graph_catalog.py:2166 is named by mechanism and documented in the surrounding comment style, but the same function still compares 'owned_reservation' as a bare literal at :2327, :2363 and :2558, and the fragment at :33 keeps a phrasing its own focused path contradicts.",
+    "goal_fidelity": "graph_catalog.py:2303 grants the exception on the writer the compose worker actually reaches, so the production compose path now adopts instead of colliding; the only shortfall is documentary, in the fragment phrasing at sib-adopt-pending-projection-stubs.html:33.",
+    "reuse": "The added set is a local filter over the binding_kind values the lock emits at graph_source_bindings.py:1128-1136; a search over imas_codex/standard_names found no existing constant owning that vocabulary, so the addition neither forks nor duplicates a mechanism.",
+    "scope_discipline": "git diff --stat 39fe0d031..9ca2e7315 lists only docs/evidence/fragments/sn-integrity-backlog/sib-adopt-pending-projection-stubs.html, imas_codex/standard_names/graph_store/graph_catalog.py and tests/standard_names/test_compose_adopts_pending_stub.py, all inside the repair round's granted write scope."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is that composition adopts an unowned pending projection stub of its own DD path rather than colliding with it until the source parks; the gained commits grant allow_adopt_pending_stub=True at imas_codex/standard_names/graph_store/graph_catalog.py:2303 in persist_generated_name_winners, the writer reached from worker_compose_and_validate.py:901/939 through persist_generated_name_batch, answering the previous review's blocking finding f4cd67a41b2.\nVERDICT done_when: the repair round's done_when requires the finding answered by a commit plus a negative control; 29a6b415d answers it and logs/negative-control.log removes that one flag and records '1 failed ... EXIT=1' with the stub still pending, while production-writer.log records 1 passed at head and base-production-writer.log the same failure at 049597eb.\nVERDICT write_paths: the repair round grants graph_catalog.py alongside the original paths (resume-1-advice.txt); git diff --stat 39fe0d031..9ca2e7315 touches exactly the fragment, graph_catalog.py and the new test, all inside that grant.\nVERDICT manifest: read; status complete, six commits, the finding recorded as 'acted f4cd67a41b2: 29a6b415d40de6cf5e015aab69b6fde4a78433a9', both arms with literal commands and log paths, negative_control_log as a bare path, and all six rubric lines.\nVERDICT diff: read both gained commits against 39fe0d031: 29a6b415d adds _STABLE_BINDING_KINDS (graph_catalog.py:2166), the flag at :2303 and its two uses at :2340/:2376 plus the production-writer case; 9ca2e7315 rewrites the fragment's writer section and proof table; nothing outside the granted scope.\nCALL_SITES: imas_codex/standard_names/worker_tasks/worker_compose_and_validate.py:901, imas_codex/standard_names/worker_tasks/worker_compose_and_validate.py:939, imas_codex/standard_names/worker_tasks/worker_common.py:938, imas_codex/standard_names/worker_tasks/worker_common.py:1041, imas_codex/standard_names/graph_store/graph_catalog.py:2603\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: graph_catalog.py:2303 grants the exception on the writer the compose worker reaches, so the production compose path now adopts; the shortfall is documentary at sib-adopt-pending-projection-stubs.html:33.\nSCORE evidence: 18\nJUSTIFICATION evidence: both arms carry headers, summaries and bare EXIT lines with one shared failure id, and the negative control names the exact reverted line, though the head arm ran at 29a6b415d rather than the docs-only 9ca2e7315.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 39fe0d031..9ca2e7315 lists only the fragment, graph_catalog.py and test_compose_adopts_pending_stub.py, all inside the repair round's granted scope.\nSCORE durability: 18\nJUSTIFICATION durability: test_compose_adopts_pending_stub.py:240 is reddened by reinstating the removed flag per logs/negative-control.log, and the added assertions at :243-256 read graph state back rather than the values handed in.\nSCORE fit: 17\nJUSTIFICATION fit: _STABLE_BINDING_KINDS at graph_catalog.py:2166 follows the module's comment and typing idiom, but the same function keeps 'owned_reservation' as a bare literal at :2327 and :2363 while the fragment at :33 keeps a phrasing its own focused path contradicts.\nSCORE reuse: 18\nJUSTIFICATION reuse: the added set filters the binding_kind values emitted at graph_source_bindings.py:1128-1136, and no existing constant owns that vocabulary, so nothing is forked.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-adopt-pending-projection-stubs.html:33 non-blocking: the sentence this commit edited still says the exception is 'never to an attachment', while the focused composition path persist_claimed_attachments grants it at graph_source_bindings.py:1480 and only sn attach refuses.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-adopt-pending-projection-stubs.html:55 non-blocking: the new writer section's opening sentence has no predicate, so the paragraph's point only arrives in the next sentence.\n",
+  "review_run_id": "r-20261029T215016127790-review-of-sib-adopt-pending-projection-stubs-9ca2e731580c",
+  "reviewed_base_sha": "39fe0d0317cad71022a913f8604cf0707d5de439",
+  "reviewed_head_sha": "9ca2e731580c68191ae66db117063f579c816f01",
+  "reviewed_run_id": "r-20261029T202601642241-sib-adopt-pending-projection-stubs",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T22:58:00Z",
+  "total": 110
+}
