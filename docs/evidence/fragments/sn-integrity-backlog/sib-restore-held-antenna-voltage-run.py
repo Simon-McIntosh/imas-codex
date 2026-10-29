@@ -313,6 +313,17 @@ def readback() -> dict:
             ORDER BY id
             """
         )
+        # Every identity this authority wrote. One row is the whole scope, so
+        # the engine's own ledger is the proof that no other name moved.
+        written = graph.query(
+            """
+            MATCH (c:StandardNameChange)
+            WHERE c.authority_file_sha256 = $sha
+            RETURN c.row_id AS row_id, c.operation AS operation
+            ORDER BY row_id
+            """,
+            sha=file_sha,
+        )
         live = [r["id"] for r in rows]
         sourceless = find_sourceless_live_names(graph, live)
     digest = _names_digest(rows)
@@ -322,6 +333,7 @@ def readback() -> dict:
         "state": dict(node),
         "successor_edges": [dict(r) for r in successor],
         "change_receipts": [dict(r) for r in receipts],
+        "identities_written_by_this_authority": [dict(r) for r in written],
         "live_names": len(rows),
         "names_digest": digest,
         "names_digest_before": before.get("digest"),
@@ -332,6 +344,54 @@ def readback() -> dict:
         "named_live": NAME in live,
         "sourceless_live_count": len(sourceless),
         "sourceless_includes_name": NAME in sourceless,
+    }
+
+
+def gate() -> dict:
+    """Show the release gate holding the restored name, and the source audit.
+
+    The identity hold is read before any eligibility test, so a restored name
+    leaves through the release-hold path whatever its stage. The source audit
+    counts a live name with no producer, so the measurement is that this name
+    lands in its dormant set with no blocking source loss.
+    """
+    from imas_codex.standard_names.export import (
+        _RELEASE_IDENTITY_HOLDS,
+        _classify_export_population,
+    )
+    from imas_codex.standard_names.graph_store.graph_supersession import (
+        classify_sourceless_standard_names,
+    )
+
+    with _graph() as graph:
+        node = graph.query(
+            "MATCH (n:StandardName {id: $id}) RETURN n.name_stage AS name_stage",
+            id=NAME,
+        )[0]
+        eligible, excluded = _classify_export_population(
+            [{"id": NAME, "name_stage": node["name_stage"]}],
+            domain=None,
+            names_only=False,
+        )
+        audit = classify_sourceless_standard_names(graph)
+    mine = [row for row in audit if row["id"] == NAME]
+    losses = [
+        row
+        for row in audit
+        if row["population"] in {"dropped_edge", "never_bound"}
+        and row["name_stage"] != "exhausted"
+        and row["id"] not in _RELEASE_IDENTITY_HOLDS
+    ]
+    return {
+        "hold_declared": list(_RELEASE_IDENTITY_HOLDS[NAME]),
+        "export_eligible_rows": eligible,
+        "export_exclusions": [
+            dict(e.__dict__) if hasattr(e, "__dict__") else e for e in excluded
+        ],
+        "export_exclusion_count": len(excluded),
+        "source_audit_row": [dict(r) for r in mine],
+        "blocking_source_losses": len(losses),
+        "blocking_source_loss_ids": sorted(row["id"] for row in losses),
     }
 
 
@@ -359,6 +419,8 @@ def main() -> None:
         print(json.dumps(_call(True, sys.argv[2]), indent=1, default=str)[:8000])
     elif mode == "readback":
         print(json.dumps(readback(), indent=1, default=str)[:8000])
+    elif mode == "gate":
+        print(json.dumps(gate(), indent=1, default=str)[:8000])
     elif mode == "negative":
         print(json.dumps(negative(), indent=1, default=str)[:4000])
     else:
