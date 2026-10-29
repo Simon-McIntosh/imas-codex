@@ -216,6 +216,46 @@ def test_focused_claim_adopts_the_stub_and_writes_the_producing_edge(
     assert status[0]["status"] == "attached"
 
 
+def test_production_writer_adopts_an_unowned_projection_stub(graph, services) -> None:
+    """The live compose writer adopts the stub and finalizes its source."""
+    from imas_codex.standard_names.graph_store.graph_catalog import (
+        persist_generated_name_batch,
+    )
+
+    _seed_stub(graph)
+    winners = persist_generated_name_batch(
+        [
+            {
+                "id": PROBE_STUB,
+                "source_id": PROBE_PATH,
+                "source_types": ["dd"],
+                "unit": None,
+                "source_claim_token": TOKEN,
+                "source_claim_seq": SEQ,
+            }
+        ],
+        compose_model="test-adopt-projection-model",
+        return_winner_ids=True,
+    )
+    assert winners == [PROBE_SOURCE], "the stub was not adopted: " + str(_stub(graph))
+
+    stub = _stub(graph)
+    assert stub["name_stage"] == "drafted"
+    assert _adoption_receipts(graph) == [
+        {
+            "from_name": "pending",
+            "to_name": "drafted",
+            "adopted_source_id": PROBE_SOURCE,
+        }
+    ]
+    assert _producers(graph) == [PROBE_SOURCE]
+    status = graph.query(
+        "MATCH (src:StandardNameSource {id: $id}) RETURN src.status AS status",
+        id=PROBE_SOURCE,
+    )
+    assert status[0]["status"] == "composed"
+
+
 def test_stub_owned_by_another_claim_is_still_refused(graph, services) -> None:
     """An adoption candidate owned by another claim remains a collision."""
     from imas_codex.standard_names.graph_store.graph_source_bindings import (

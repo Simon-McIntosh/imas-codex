@@ -14,7 +14,7 @@ from collections.abc import Iterable
 from contextlib import nullcontext, suppress
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Final
 
 from imas_codex.discovery.base.claims import retry_on_deadlock
 from imas_codex.graph.client import GraphClient
@@ -2159,6 +2159,13 @@ _RETIRE_FINALIZED_SOURCE_GAPS = """
 """
 
 
+#: Binding kinds whose target name already exists and carries its own content,
+#: so the winner needs no rich write and is finished by the stable finalize
+#: statement alone. ``adoption`` joins ``stable_reuse`` because adopting a
+#: projection stub binds an existing node rather than creating one.
+_STABLE_BINDING_KINDS: Final = frozenset({"stable_reuse", "adoption"})
+
+
 def persist_generated_name_winners(
     candidates: list[dict[str, Any]],
     *,
@@ -2293,6 +2300,7 @@ def persist_generated_name_winners(
                     allow_missing=True,
                     allow_own_pending_reservation=True,
                     allow_dead_end_revival=True,
+                    allow_adopt_pending_stub=True,
                 )
                 locked_ids = {
                     row["id"]
@@ -2329,7 +2337,7 @@ def persist_generated_name_winners(
                 stable_candidates = [
                     candidate_by_sns[sns_id]
                     for sns_id, kind in binding_kinds.items()
-                    if kind == "stable_reuse"
+                    if kind in _STABLE_BINDING_KINDS
                 ]
                 written_name_ids = {entry["id"] for entry in stable_candidates}
                 if reserved_candidates:
@@ -2365,7 +2373,7 @@ def persist_generated_name_winners(
                 stable_finalize_batch = [
                     item
                     for item in finalize_batch
-                    if item["binding_kind"] == "stable_reuse"
+                    if item["binding_kind"] in _STABLE_BINDING_KINDS
                 ]
                 finalized_rows: list[dict[str, Any]] = []
                 if reserved_finalize_batch:
