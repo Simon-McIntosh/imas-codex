@@ -91,15 +91,16 @@ def _lifecycle(name_id: str) -> dict:
         return dict(rows[0]) if rows else {}
 
 
-def _receipt_names() -> list[tuple[str, str]]:
+def _receipt_names(operation: str = "last_source_supersede") -> list[tuple[str, str]]:
     with GraphClient() as gc:
         rows = gc.query(
             """
             MATCH (c:StandardNameChange)
-            WHERE c.operation = 'last_source_supersede'
+            WHERE c.operation = $operation
             RETURN c.from_name AS from_name, c.to_name AS to_name
             ORDER BY from_name
-            """
+            """,
+            operation=operation,
         )
         return [(str(r["from_name"]), str(r["to_name"])) for r in rows]
 
@@ -130,9 +131,8 @@ def _producer_of(source_id: str) -> str | None:
         return str(rows[0]["id"]) if rows else None
 
 
-@pytest.mark.parametrize("operation", ["retarget", "refine"])
 def test_source_migration_supersedes_the_drained_holder(
-    disposable_neo4j_uri: str, operation: str
+    disposable_neo4j_uri: str,
 ) -> None:
     """The shared move primitive supersedes a holder it leaves sourceless."""
     _seed()
@@ -141,7 +141,7 @@ def test_source_migration_supersedes_the_drained_holder(
             gc,
             OLD,
             NEW,
-            operation=operation,
+            operation="retarget",
             source_ids=["dd:test/last_source/one"],
             expected_current_bindings={"dd:test/last_source/one": OLD},
             enforce_consistency=False,
@@ -198,6 +198,7 @@ def test_compose_bind_supersedes_the_drained_holder(
     assert _lifecycle(OLD)["name_stage"] == "superseded"
     assert _lifecycle(OLD)["successors"] == 1
     assert _successor_id(OLD) == NEW
+    assert _receipt_names("composed_source_moved") == [(OLD, NEW)]
 
 
 def test_control_holder_with_another_source_stays_live(
@@ -220,3 +221,167 @@ def test_control_holder_with_another_source_stays_live(
     assert _lifecycle(OLD)["name_stage"] == "drafted"
     assert _lifecycle(OLD)["successors"] == 0
     assert _producer_of("dd:test/last_source/two") == OLD
+
+
+def _claim_seed(*, provisional: bool = True) -> None:
+    """Seed a fenced, extracted claim whose provisional edge points at OLD."""
+    _seed(source_status="extracted", claim_token="tok", claim_seq=3)
+    with GraphClient() as gc:
+        gc.query(
+            """
+            MATCH (s:StandardNameSource {id: 'dd:test/last_source/one'})
+                  -[p:PRODUCED_NAME]->(:StandardName)
+            SET p.provisional = $provisional,
+                p.claim_token = 'tok', p.claim_seq = 3,
+                p.created_target = true
+            """,
+            provisional=provisional,
+        )
+
+
+class _Services(types.SimpleNamespace):
+    """Collaborators the claimed-binding writers reach through ``services``."""
+
+    def __getattr__(self, name: str):
+        from imas_codex.standard_names.graph_store import (
+            graph_audits,
+            graph_source_bindings,
+        )
+
+        for module in (graph_source_bindings, graph_audits):
+            if hasattr(module, name):
+                return getattr(module, name)
+        raise AttributeError(name)
+
+
+def _services():
+    from imas_codex.standard_names.graph_store import graph_foundation
+
+    return _Services(
+        GraphClient=GraphClient,
+        NameStage=graph_foundation.NameStage,
+        _STABLE_BINDING_NAME_STAGES=graph_foundation._STABLE_BINDING_NAME_STAGES,
+        _TransactionQuery=graph_foundation._TransactionQuery,
+    )
+
+
+def test_attached_source_moves_and_supersedes_the_drained_holder(
+    disposable_neo4j_uri: str,
+) -> None:
+    """An attach that moves an extracted source drains its former holder."""
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        mark_sources_attached,
+    )
+
+    _claim_seed()
+    affected = mark_sources_attached(
+        token="tok",
+        claim_seq=3,
+        source_ids=["dd:test/last_source/one"],
+        standard_name_id=NEW,
+        services=types.SimpleNamespace(GraphClient=GraphClient),
+    )
+    assert affected == 1
+    assert _producer_of("dd:test/last_source/one") == NEW
+    assert _lifecycle(OLD)["name_stage"] == "superseded"
+    assert _successor_id(OLD) == NEW
+    assert _receipt_names("attached_source_moved") == [(OLD, NEW)]
+
+
+def test_staged_candidate_produces_the_source_before_the_holder_is_superseded(
+    disposable_neo4j_uri: str,
+) -> None:
+    """A staged candidate must produce the source it is named successor for.
+
+    The supersession is written in the same transaction as the staging, so the
+    binding has to exist first: otherwise a later rich write that fails leaves
+    the former holder superseded towards a candidate that produces nothing.
+    """
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        stage_claimed_generated_candidates,
+    )
+
+    _claim_seed()
+    stage_claimed_generated_candidates(
+        [
+            {
+                "sns_id": "dd:test/last_source/one",
+                "source_id": "test/last_source/one",
+                "sn_id": NEW,
+                "model": "test/model",
+                "claim_token": "tok",
+                "claim_seq": 3,
+            }
+        ],
+        services=_services(),
+    )
+    assert _lifecycle(OLD)["name_stage"] == "superseded"
+    assert _successor_id(OLD) == NEW
+    assert _producer_of("dd:test/last_source/one") == NEW
+    assert _receipt_names("compose_rebind") == [(OLD, NEW)]
+
+
+def test_claimed_lock_reports_the_binding_it_released(
+    disposable_neo4j_uri: str,
+) -> None:
+    """The released-out plumbing reports each provisional edge it removed."""
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        _lock_claimed_name_bindings,
+    )
+
+    _claim_seed()
+    released: list[dict[str, str]] = []
+    with GraphClient() as gc:
+        with gc.session() as session:
+            tx = session.begin_transaction()
+            from imas_codex.standard_names.graph_store import graph_foundation
+
+            handle = graph_foundation._TransactionQuery(tx)
+            _lock_claimed_name_bindings(
+                handle,
+                [
+                    {
+                        "sns_id": "dd:test/last_source/one",
+                        "source_id": "test/last_source/one",
+                        "sn_id": NEW,
+                        "claim_token": "tok",
+                        "claim_seq": 3,
+                    }
+                ],
+                services=_services(),
+                allow_missing=True,
+                allow_own_pending_reservation=True,
+                released_out=released,
+            )
+            tx.commit()
+    assert released == [{"old_id": OLD, "sns_id": "dd:test/last_source/one"}]
+
+
+def test_refined_name_moves_the_predecessors_source(
+    disposable_neo4j_uri: str,
+) -> None:
+    """The refine writer itself is what moves the predecessor's source.
+
+    Driving ``persist_refined_name`` directly keeps this case measuring the
+    refine writer rather than the retarget primitive it is built on.
+    """
+    from imas_codex.standard_names.graph_store.graph_refinement import (
+        persist_refined_name,
+    )
+    from imas_codex.standard_names.kind_derivation import derive_kind
+
+    _seed()
+    with GraphClient() as gc:
+        gc.query("MATCH (n:StandardName {id: $new}) DETACH DELETE n", new=NEW)
+    persist_refined_name(
+        old_name=OLD,
+        new_name=NEW,
+        description="A refined name for the last-source test.",
+        kind=derive_kind(NEW),
+        expected_old_stage="drafted",
+        services=_Services(GraphClient=GraphClient),
+    )
+    assert _producer_of("dd:test/last_source/one") == NEW
+    assert _lifecycle(OLD)["name_stage"] == "superseded"
+    assert _lifecycle(OLD)["successors"] == 1
+    assert _successor_id(OLD) == NEW

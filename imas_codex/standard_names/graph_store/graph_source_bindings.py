@@ -8,6 +8,7 @@ from __future__ import annotations
 import logging
 import uuid
 from collections import Counter
+from contextlib import suppress
 from typing import Any
 
 from imas_codex.discovery.base.claims import retry_on_deadlock
@@ -847,8 +848,15 @@ def _supersede_released_bindings(
     *,
     operation: str,
     reason: str,
+    claims: list[dict[str, str]] | None = None,
 ) -> list[str]:
-    """Supersede names a rebind drained of their last producing source."""
+    """Supersede names a rebind drained of their last producing source.
+
+    ``claims`` names the source/name bindings the caller is about to write but
+    has not written yet. They are written by the same statement, so the
+    successor named as the drained name's successor already produces the
+    source when the supersession is decided.
+    """
     from imas_codex.standard_names.source_invariant import (
         supersede_names_losing_last_source,
     )
@@ -862,7 +870,13 @@ def _supersede_released_bindings(
     if not moves:
         return []
     return supersede_names_losing_last_source(
-        gc, moves, operation=operation, reason=reason
+        gc,
+        moves,
+        operation=operation,
+        reason=reason,
+        bindings=[
+            (row["sns_id"], row["sn_id"]) for row in (claims or []) if row.get("sn_id")
+        ],
     )
 
 
@@ -1513,16 +1527,14 @@ def stage_claimed_generated_candidates(
                     if row.get("outcome", "winner") == "winner"
                 }
                 winner_ids = list(locked_ids)
+                winner_batch = [item for item in batch if item["sns_id"] in locked_ids]
                 _supersede_released_bindings(
                     tx_gc,
                     released,
-                    {
-                        item["sns_id"]: item["sn_id"]
-                        for item in batch
-                        if item["sns_id"] in locked_ids
-                    },
+                    {item["sns_id"]: item["sn_id"] for item in winner_batch},
                     operation="compose_rebind",
                     reason="compose re-bound the source of a drained name",
+                    claims=winner_batch,
                 )
                 tx.commit()
             except BaseException:
@@ -1585,37 +1597,96 @@ _MOVE_SOURCE_BINDING_CYPHER = """
             MERGE (sns)-[:PRODUCED_NAME]->(sn)
             WITH DISTINCT sns, sn, prior_ids
             CALL (sns, sn, prior_ids) {
-              UNWIND prior_ids AS prior_id
-              MATCH (sns)-[move:PRODUCED_NAME]->(old:StandardName {id: prior_id})
-              DELETE move
+              WITH sns, sn, prior_ids
+              OPTIONAL MATCH (sns)-[move:PRODUCED_NAME]->(old:StandardName)
+              WHERE old.id IN prior_ids
+              FOREACH (_ IN CASE WHEN move IS NULL THEN [] ELSE [1] END |
+                DELETE move
+              )
               WITH DISTINCT sn, old
-              WITH sn, old,
-                   COUNT {
-                     (source:StandardNameSource)-[:PRODUCED_NAME]->(old)
-                     WHERE coalesce(source.status, '') <> 'stale'
-                   } AS producers
-              WHERE producers = 0
-                AND NOT coalesce(old.name_stage, '') IN
-                    ['superseded', 'exhausted', 'contested']
-                AND NOT coalesce(old.status, '') IN
-                    ['deprecated', 'superseded']
-                AND NOT (sn)-[:REFINED_FROM*1..]->(old)
-              SET old.updated_at = datetime(),
-                  old.name_stage = 'superseded',
-                  old.status = 'superseded',
-                  old.claimed_at = null,
-                  old.claim_token = null
-              MERGE (sn)-[:REFINED_FROM]->(old)
-              CREATE (change:StandardNameChange {
-                id: 'sn-change:' + randomUUID(),
-                from_name: old.id, to_name: sn.id,
-                operation: $supersede_operation,
-                reason: $supersede_reason, origin: 'compose',
-                run_id: null, changed_at: datetime(), internal: true})
-              CREATE (sn)-[:HAS_INTERNAL_CHANGE]->(change)
+              WITH sn, CASE WHEN old IS NULL THEN [null] ELSE [old] END
+                        AS drained_nodes
+              UNWIND drained_nodes AS old
+              __LAST_SOURCE_SUPERSEDE__
             }
-            RETURN count(DISTINCT sns) AS affected
+            RETURN count(DISTINCT sns) AS affected,
+                   [id IN collect(superseded_old_id) WHERE id IS NOT NULL]
+                     AS drained_old_ids,
+                   [id IN collect(superseded_new_id) WHERE id IS NOT NULL]
+                     AS drained_new_ids
             """
+
+
+def _move_sources_to_name(
+    *,
+    token: str,
+    claim_seq: int,
+    source_ids: list[str],
+    standard_name_id: str,
+    bound_status: str,
+    operation: str,
+    reason: str,
+    services: Any,
+) -> int:
+    """Move fenced sources onto one name and supersede whoever they drained.
+
+    The supersession and its receipt commit with the move: the builder embedded
+    in the statement retires each drained holder and reports the pair, and the
+    receipt is written through the repository's single change writer inside the
+    same transaction.  A failure after the retirement therefore rolls it back
+    rather than leaving a superseded name with no ``StandardNameChange``.
+    """
+    from imas_codex.standard_names.source_invariant import (
+        record_supersede_receipts,
+        supersede_drained_name_cypher,
+    )
+
+    statement = _MOVE_SOURCE_BINDING_CYPHER.replace(
+        "__LAST_SOURCE_SUPERSEDE__",
+        supersede_drained_name_cypher(name="old", successor="sn", embedded=True),
+    )
+    parameters = {
+        "source_ids": source_ids,
+        "token": token,
+        "claim_seq": claim_seq,
+        "supersede_operation": operation,
+        "supersede_reason": reason,
+        "sn_id": standard_name_id,
+        "bound_status": bound_status,
+    }
+
+    def record_drained(handle: Any, rows: list[dict[str, Any]]) -> None:
+        if not rows:
+            return
+        record_supersede_receipts(
+            handle,
+            zip(
+                rows[0].get("drained_old_ids") or [],
+                rows[0].get("drained_new_ids") or [],
+                strict=False,
+            ),
+            operation=operation,
+            reason=reason,
+            origin="compose",
+        )
+
+    with services.GraphClient() as gc:
+        if not isinstance(gc, GraphClient):
+            rows = gc.query(statement, **parameters)
+            record_drained(gc, rows)
+            return rows[0]["affected"] if rows else 0
+        with gc.session() as session:
+            transaction = session.begin_transaction()
+            try:
+                handle = foundation._TransactionQuery(transaction)
+                rows = handle.query(statement, **parameters)
+                record_drained(handle, rows)
+                transaction.commit()
+            except BaseException:
+                with suppress(Exception):
+                    transaction.rollback()
+                raise
+    return rows[0]["affected"] if rows else 0
 
 
 def mark_sources_composed(
@@ -1633,21 +1704,19 @@ def mark_sources_composed(
     with no producer is superseded in the same statement.
     Returns count of updated sources.
     """
-    with services.GraphClient() as gc:
-        result = gc.query(
-            _MOVE_SOURCE_BINDING_CYPHER,
-            source_ids=source_ids,
-            token=token,
-            claim_seq=claim_seq,
-            sn_id=standard_name_id,
-            bound_status="composed",
-            supersede_operation="composed_source_moved",
-            supersede_reason=(
-                "compose moved this source to the composed name, leaving the "
-                "former holder without a producer"
-            ),
-        )
-        return result[0]["affected"] if result else 0
+    return _move_sources_to_name(
+        token=token,
+        claim_seq=claim_seq,
+        source_ids=source_ids,
+        standard_name_id=standard_name_id,
+        bound_status="composed",
+        operation="composed_source_moved",
+        reason=(
+            "compose moved this source to the composed name, leaving the "
+            "former holder without a producer"
+        ),
+        services=services,
+    )
 
 
 def mark_sources_attached(
@@ -1664,21 +1733,19 @@ def mark_sources_attached(
     Exact-fence verified. Creates PRODUCED_NAME relationship.
     Returns count of updated sources.
     """
-    with services.GraphClient() as gc:
-        result = gc.query(
-            _MOVE_SOURCE_BINDING_CYPHER,
-            source_ids=source_ids,
-            token=token,
-            claim_seq=claim_seq,
-            sn_id=standard_name_id,
-            bound_status="attached",
-            supersede_operation="attached_source_moved",
-            supersede_reason=(
-                "attach moved this source to the matched name, leaving the "
-                "former holder without a producer"
-            ),
-        )
-        return result[0]["affected"] if result else 0
+    return _move_sources_to_name(
+        token=token,
+        claim_seq=claim_seq,
+        source_ids=source_ids,
+        standard_name_id=standard_name_id,
+        bound_status="attached",
+        operation="attached_source_moved",
+        reason=(
+            "attach moved this source to the matched name, leaving the "
+            "former holder without a producer"
+        ),
+        services=services,
+    )
 
 
 #: Reason recorded when a source spends its claim budget without a name. It
