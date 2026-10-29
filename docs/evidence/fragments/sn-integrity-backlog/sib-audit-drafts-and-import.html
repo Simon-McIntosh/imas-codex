@@ -1,0 +1,56 @@
+<section id="sib-audit-drafts-and-import" class="r-evidence">
+<h2>sib-audit-drafts-and-import — the audit reports sourceless drafts; the import binds every published leaf</h2>
+
+<p>The source audit split live sourceless names into two buckets, dormant
+(<code>exhausted</code>) and blocking (everything else), so a live draft with no
+producer either refused a release it could never affect or went unreported. The
+split now follows whether the stage ships. A name in <code>accepted</code> or
+<code>approved</code> still blocks the cut; a draft is listed on the report with
+its stage and leaves the release outcome alone, because a draft does not ship.
+The reported set is confirmed through <code>find_sourceless_live_names</code>, so
+the audit and a refused write agree on what "sourceless" means.</p>
+
+<table>
+<thead><tr><th>subject</th><th>before</th><th>after</th></tr></thead>
+<tbody>
+<tr><td>sourceless draft at <code>drafted</code></td><td>refused the export (<code>source_audit</code> gate failed)</td><td>listed in <code>sourceless_drafts</code> with its stage; export passes</td></tr>
+<tr><td>sourceless name at <code>accepted</code></td><td>refused the export</td><td>refused, unchanged</td></tr>
+<tr><td>import of a <code>catalog</code>-typed entry</td><td>no binding at all (31 names)</td><td>every published DD path bound</td></tr>
+<tr><td>import of an entry with several published paths</td><td>only its single <code>source_id</code></td><td>all of them, containers reduced to their leaf</td></tr>
+<tr><td>container whose leaf node is absent</td><td>bound to a path that does not exist, or silently skipped</td><td>reported as <code>leaf_not_found</code>, nothing bound</td></tr>
+</tbody>
+</table>
+
+<p>The catalog import bound only each entry's single <code>source_id</code>, and
+only for <code>dd</code> or <code>signals</code> types. It now binds every
+published DD path an entry carries, read from <code>source_id</code> and from
+the union list in <code>source_paths</code> through
+<code>split_source_paths</code> and <code>merge_source_paths</code>, so path
+syntax has one definition in the codebase. A <code>STRUCT_ARRAY</code> resolves
+to its <code>/values</code> leaf and a <code>STRUCTURE</code> to its single
+component leaf, the reduction the extraction path applies; both run inside the
+pairing read the writer already issued, so a write costs no extra query. A
+resolved leaf counts only when the graph lookup finds it: a container whose leaf
+node is absent is reported as <code>leaf_not_found</code> instead of being bound
+by string construction, which left the path neither bound nor reported. Each
+bound leaf carries its <code>StandardNameSource</code>, its
+<code>PRODUCED_NAME</code> edge and its <code>FROM_DD_PATH</code> edge, which is
+what makes the name genuinely sourced rather than only projected. A path that
+cannot be bound is returned on the write result
+(<code>unbound_paths</code>, reason <code>no_bindable_leaf</code>,
+<code>leaf_not_found</code> or <code>attachment_refused</code>) and logged,
+never dropped.</p>
+
+<h3>Evidence</h3>
+<ul>
+<li id="sib-audit-drafts-and-import-gate">Gate, <code>tests/standard_names/</code> default markers, <code>-n 8</code>, both arms run the same way in a source tree with <code>SOURCE_DATE_EPOCH=1783591200</code> so neither depends on a git checkout. Head: <strong>8536 passed, 1 failed</strong> (<code>test_export_determinism.py::TestManifestDeterminism::test_no_commit_uses_stable_unversioned_timestamp</code>, which asserts the epoch-0 fallback a pinned stamp replaces).</li>
+<li id="sib-audit-drafts-and-import-base">Base arm at <code>6fff23ea</code>: <strong>8535 passed, 1 failed</strong>, the same id. <strong>Added failure ids: 0</strong>; the one failure is shared, and the one-test difference is the added absent-leaf test.</li>
+<li id="sib-audit-drafts-and-import-negative">Negative control: the five new tests run against an archive tree of the base revision fail — <strong>5 failed, EXIT=1</strong> — and pass at head (<strong>5 passed, EXIT=0</strong>).</li>
+<li id="sib-audit-drafts-and-import-newtests">New tests: <code>tests/standard_names/test_audit_reports_sourceless_drafts.py</code> and <code>tests/standard_names/test_catalog_import_binds_published_paths.py</code>.</li>
+</ul>
+
+<p>Source change: <code>imas_codex/standard_names/export.py</code> and
+<code>imas_codex/standard_names/graph_store/graph_catalog.py</code>. The writer
+side and <code>source_invariant.py</code> belong to
+<code>sib-last-source-supersede</code> and are untouched here.</p>
+</section>

@@ -10,6 +10,7 @@ import functools
 import json
 import logging
 import re
+from collections.abc import Iterable
 from contextlib import nullcontext, suppress
 from datetime import UTC, datetime
 from pathlib import Path
@@ -22,6 +23,55 @@ from imas_codex.graph.schema import GraphSchema
 from . import graph_foundation as foundation
 
 logger = logging.getLogger(__name__)
+
+
+class _StandardNameWriteResult(int):
+    """Written name count with the published paths that could not be bound."""
+
+    unbound_paths: tuple[dict[str, str], ...]
+
+    def __new__(
+        cls,
+        written: int,
+        *,
+        unbound_paths: Iterable[dict[str, str]] = (),
+    ) -> _StandardNameWriteResult:
+        result = super().__new__(cls, written)
+        result.unbound_paths = tuple(unbound_paths)
+        return result
+
+
+def _published_dd_paths_by_name(
+    names: list[dict[str, Any]],
+) -> dict[str, list[str]]:
+    """Every published DD path each entry carries, keyed by name id.
+
+    An entry publishes its DD sources both as its originating ``source_id`` and
+    as the union list in ``source_paths``. A ``catalog``-typed entry has no
+    single originating source, so its ``source_paths`` are the only record of
+    the DD paths it published.
+    """
+    from imas_codex.standard_names.source_paths import (
+        DD_PREFIX,
+        merge_source_paths,
+        split_source_paths,
+    )
+
+    published: dict[str, list[str]] = {}
+    for name in names:
+        source_types = name.get("source_types") or []
+        if "dd" not in source_types and "catalog" not in source_types:
+            continue
+        declared = (
+            [f"{DD_PREFIX}{name['source_id']}"]
+            if "dd" in source_types and name.get("source_id")
+            else []
+        )
+        declared.extend(str(raw) for raw in name.get("source_paths") or [])
+        paths = split_source_paths(declared).get("dd", [])
+        if paths:
+            published[name["id"]] = merge_source_paths([], paths)
+    return published
 
 
 def write_standard_names(
@@ -75,6 +125,9 @@ def write_standard_names(
 
     # Pipeline protection — strip catalog-owned fields from catalog_edit items
     from imas_codex.standard_names.protection import filter_protected
+
+    # Published DD paths this write could not bind, reported on the result.
+    unbound_paths: list[dict[str, str]] = []
 
     names, skipped = filter_protected(names, override=override)
     if skipped:
@@ -347,37 +400,82 @@ def write_standard_names(
         )
 
         # Create HAS_STANDARD_NAME relationships: entity → concept
-        dd_names = [n for n in names if "dd" in (n.get("source_types") or [])]
+        #
+        # A name binds every published DD path it carries, not only its single
+        # originating source: a published entry records its sources as a union
+        # list, and a catalog-typed entry has no originating source at all. A
+        # container resolves to its bindable leaf; a path that cannot be bound
+        # is reported on the result rather than dropped.
+        from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+            _is_attachment_consistent,
+        )
+
+        published_dd_paths = _published_dd_paths_by_name(names)
         signal_names = [n for n in names if "signals" in (n.get("source_types") or [])]
-
-        if dd_names:
-            from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
-                _is_attachment_consistent,
-            )
-
+        if published_dd_paths:
             pairing_rows = write_gc.query(
                 """
                 UNWIND $batch AS b
                 MATCH (sn:StandardName {id: b.id})
-                OPTIONAL MATCH (src:IMASNode {id: b.source_id})
+                OPTIONAL MATCH (candidate:IMASNode {id: b.source_id})
+                OPTIONAL MATCH (candidate)-[:HAS_CHILD]->(child:IMASNode)
+                WITH b, sn, candidate,
+                     [c IN collect(child)
+                      WHERE NOT c.data_type IN ['STRUCTURE', 'STRUCT_ARRAY']
+                      | c.id] AS component_leaves
+                WITH b, sn, candidate,
+                     CASE
+                       WHEN candidate IS NULL THEN null
+                       WHEN candidate.data_type = 'STRUCT_ARRAY'
+                         THEN b.source_id + '/values'
+                       WHEN candidate.data_type = 'STRUCTURE'
+                            AND size(component_leaves) = 1
+                         THEN component_leaves[0]
+                       WHEN candidate.data_type = 'STRUCTURE' THEN null
+                       ELSE b.source_id
+                     END AS leaf
+                OPTIONAL MATCH (src:IMASNode {id: leaf})
                 OPTIONAL MATCH (src)-[:HAS_UNIT]->(du:Unit)
                 OPTIONAL MATCH (bound:IMASNode)-[:HAS_STANDARD_NAME]->(sn)
-                RETURN b.id AS id, b.source_id AS source_id,
+                RETURN b.id AS id, b.source_id AS requested,
+                       CASE WHEN src IS NULL THEN null ELSE leaf END AS source_id,
+                       candidate IS NOT NULL AS requested_exists,
+                       leaf IS NULL AS leaf_undetermined,
                        coalesce(du.id, src.unit) AS dd_unit,
                        sn.unit AS sn_unit,
                        collect(DISTINCT bound.id) AS existing_dd_paths
                 """,
                 batch=[
-                    {"id": n["id"], "source_id": n["source_id"]}
-                    for n in dd_names
-                    if n.get("source_id")
+                    {"id": name_id, "source_id": path}
+                    for name_id, paths in sorted(published_dd_paths.items())
+                    for path in paths
                 ],
             )
             accepted_by_name: dict[str, list[str]] = {}
             accepted_pairs: list[dict[str, str]] = []
             for row in sorted(
-                pairing_rows, key=lambda item: (item["id"], item["source_id"])
+                pairing_rows or [],
+                key=lambda item: (item["id"], item.get("requested") or ""),
             ):
+                if not row.get("source_id"):
+                    unbound_paths.append(
+                        {
+                            "name": row["id"],
+                            "path": row.get("requested"),
+                            "reason": (
+                                "leaf_not_found"
+                                if row.get("requested_exists")
+                                and not row.get("leaf_undetermined")
+                                else "no_bindable_leaf"
+                            ),
+                        }
+                    )
+                    logger.warning(
+                        "write_standard_names: no leaf for DD path %s on %s",
+                        row.get("requested"),
+                        row["id"],
+                    )
+                    continue
                 accepted_paths = accepted_by_name.setdefault(
                     row["id"], sorted(row.get("existing_dd_paths") or [])
                 )
@@ -394,21 +492,49 @@ def write_standard_names(
                     )
                     accepted_paths.append(row["source_id"])
                 else:
+                    unbound_paths.append(
+                        {
+                            "name": row["id"],
+                            "path": row["source_id"],
+                            "reason": f"attachment_refused: {reason}",
+                        }
+                    )
                     logger.warning(
                         "write_standard_names: rejected DD pairing %s → %s: %s",
                         row["source_id"],
                         row["id"],
                         reason,
                     )
+            # Each bound leaf carries its own source record. A name that
+            # published a path without one is a live name with no producer,
+            # which the write's own invariant refuses at the end of this
+            # function; the source is the binding, the projection is its edge.
             write_gc.query(
                 """
                 UNWIND $batch AS b
                 MATCH (sn:StandardName {id: b.id})
                 MATCH (src:IMASNode {id: b.source_id})
+                MERGE (sns:StandardNameSource {id: 'dd:' + b.source_id})
+                  ON CREATE SET sns.created_at = datetime(),
+                                sns.attempt_count = 0
+                SET sns.source_type = 'dd',
+                    sns.source_id = b.source_id,
+                    sns.status = 'attached',
+                    sns.produced_sn_id = sn.id,
+                    sns.composed_at = coalesce(sns.composed_at, datetime())
+                MERGE (sns)-[:PRODUCED_NAME]->(sn)
+                MERGE (sns)-[:FROM_DD_PATH]->(src)
                 MERGE (src)-[:HAS_STANDARD_NAME]->(sn)
                 """,
                 batch=accepted_pairs,
             )
+            for entry in unbound_paths:
+                logger.warning(
+                    "write_standard_names: unbound published DD path %s → %s: %s",
+                    entry["path"],
+                    entry["name"],
+                    entry["reason"],
+                )
         if signal_names:
             write_gc.query(
                 """
@@ -589,7 +715,7 @@ def write_standard_names(
     logger.info("Wrote %d StandardName nodes", written)
     if return_written_ids:
         return [name["id"] for name in names]
-    return written
+    return _StandardNameWriteResult(written, unbound_paths=unbound_paths)
 
 
 class ReviewWriteResult(int):
