@@ -24,34 +24,25 @@ def _derived_parent_cypher(parent: str = "sn") -> str:
     return f"coalesce({parent}.origin, '') = 'derived' AND {_live_child_cypher(parent)}"
 
 
-def supersede_drained_name_cypher(
-    *,
-    name: str = "sn",
-    successor: str = "new",
-    operation: str = "last_source_supersede",
-    reason: str = "$supersede_reason",
-    origin: str = "$supersede_origin",
-    run_id: str = "$supersede_run_id",
-) -> str:
-    """Return the clause that supersedes a drained name in the caller's write.
+def _drained_test(name: str, successor: str) -> str:
+    """Return the predicate that says the predecessor has nothing left."""
+    return f"""(
+            NOT coalesce({name}.name_stage, '') IN
+                  ['superseded', 'exhausted', 'contested']
+        AND NOT coalesce({name}.status, '') IN ['deprecated', 'superseded']
+        AND NOT ({_derived_parent_cypher(name)})
+        AND NOT ({name})-[:REFINED_FROM*1..]->({successor})
+        AND COUNT {{
+              (source:StandardNameSource)-[:PRODUCED_NAME]->({name})
+              WHERE coalesce(source.status, '') <> 'stale'
+            }} = 0
+      )"""
 
-    A writer that must stay a single statement embeds this clause; a writer
-    that can afford a statement of its own runs it as one.  Keeping the text in
-    one builder means the successor edge and its receipt are written the same
-    way wherever the supersession happens, and it commits or rolls back with
-    the write that moved the source.
-    """
-    return f"""
-        WHERE NOT coalesce({name}.name_stage, '') IN
-                ['superseded', 'exhausted', 'contested']
-          AND NOT coalesce({name}.status, '') IN ['deprecated', 'superseded']
-          AND NOT ({_derived_parent_cypher(name)})
-          AND NOT ({name})-[:REFINED_FROM*1..]->({successor})
-          AND COUNT {{
-                (source:StandardNameSource)-[:PRODUCED_NAME]->({name})
-                WHERE coalesce(source.status, '') <> 'stale'
-              }} = 0
-        SET {name}.updated_at = datetime(),
+
+def _supersede_update(
+    name: str, successor: str, operation: str, reason: str, origin: str, run_id: str
+) -> str:
+    return f"""SET {name}.updated_at = datetime(),
             {name}.name_stage = 'superseded',
             {name}.status = 'superseded',
             {name}.claimed_at = null,
@@ -64,8 +55,46 @@ def supersede_drained_name_cypher(
           reason: {reason}, origin: {origin}, run_id: {run_id},
           changed_at: datetime(), internal: true
         }})
-        CREATE ({successor})-[:HAS_INTERNAL_CHANGE]->(change)
+        CREATE ({successor})-[:HAS_INTERNAL_CHANGE]->(change)"""
+
+
+def supersede_drained_name_cypher(
+    *,
+    name: str = "sn",
+    successor: str = "new",
+    operation: str = "last_source_supersede",
+    reason: str = "$supersede_reason",
+    origin: str = "$supersede_origin",
+    run_id: str = "$supersede_run_id",
+    embedded: bool = False,
+) -> str:
+    """Return the clause that supersedes a drained name in the caller's write.
+
+    A writer that must stay a single statement embeds this clause; a writer
+    that can afford a statement of its own runs it as one.  Keeping the text in
+    one builder means the successor edge and its receipt are written the same
+    way wherever the supersession happens, and it commits or rolls back with
+    the write that moved the source.
+
+    ``embedded`` wraps the guard in a ``FOREACH`` over a computed flag instead
+    of a ``WHERE`` filter. A filtering clause inside a ``CALL`` subquery removes
+    the pair from the enclosing statement too, so the write that did move its
+    sources would then report none moved at all.
     """
+    update = _supersede_update(name, successor, operation, reason, origin, run_id)
+    test = _drained_test(name, successor)
+    if embedded:
+        return (
+            f"""WITH {name}, {successor},
+             CASE WHEN {test} THEN true ELSE false END AS drained
+        FOREACH (_ IN CASE WHEN drained"""
+            + """ THEN [1] ELSE [] END |
+          """
+            + update
+            + """
+        )"""
+        )
+    return f"WHERE {test}\n        " + update
 
 
 def find_sourceless_live_names(

@@ -916,7 +916,7 @@ def retarget_standard_name_sources(
             new.updated_at = datetime()
         WITH old, new, moved, old_paths, new_paths
         CALL (old, new) {
-          WITH old, new
+          WITH old AS drained, new AS holder
           __LAST_SOURCE_SUPERSEDE__
           RETURN count(*) AS superseded
         }
@@ -929,7 +929,9 @@ def retarget_standard_name_sources(
     migration_query = (
         migration_query.replace(
             "__LAST_SOURCE_SUPERSEDE__",
-            supersede_drained_name_cypher(name="old", successor="new"),
+            supersede_drained_name_cypher(
+                name="drained", successor="holder", embedded=True
+            ),
         )
         .replace(
             "__SOURCE_BINDING_GUARD__",
