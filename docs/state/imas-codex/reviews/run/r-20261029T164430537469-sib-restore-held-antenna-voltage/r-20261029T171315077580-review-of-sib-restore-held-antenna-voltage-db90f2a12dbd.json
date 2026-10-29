@@ -11,6 +11,13 @@
     "imas_codex/standard_names/source_invariant.py:find_sourceless_live_names"
   ],
   "completed_at": "2026-10-29T17:24:19.877Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "one-off signed restore whose receipt is the durable record; the runner restating the export gate predicate is an evidence-script duplication, not product code",
+      "recorded_at": "2026-10-29T17:29:36.450184+00:00"
+    }
+  },
   "dispatched_at": "2026-10-29T17:14:58Z",
   "findings": [
     {
