@@ -1,0 +1,87 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own arms: baseline_suite failure_ids has one id (test_export_determinism.py::TestManifestDeterminism::test_no_commit_uses_stable_unversioned_timestamp) and after_suite carries the same single id, so the change adds none. The id is the arm scaffolding's SOURCE_DATE_EPOCH, present on both sides.",
+  "call_sites": [
+    "imas_codex/standard_names/provenance_lifecycle.py:588",
+    "imas_codex/standard_names/provenance_lifecycle.py:2226",
+    "imas_codex/standard_names/graph_store/graph_supersession.py:251",
+    "imas_codex/standard_names/graph_store/graph_supersession.py:587",
+    "imas_codex/standard_names/graph_store/graph_supersession.py:4132",
+    "imas_codex/standard_names/graph_store/graph_refinement.py:1321",
+    "imas_codex/standard_names/edit.py:1936",
+    "imas_codex/standard_names/provenance_rebuild.py:314",
+    "imas_codex/standard_names/graph_store/__init__.py:489"
+  ],
+  "completed_at": "2026-10-29T17:48:04.744Z",
+  "dispatched_at": "2026-10-29T17:37:03Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_source_bindings.py",
+      "line": "1659",
+      "severity": "non-blocking",
+      "text": "non-blocking: _move_sources_to_name runs the move and supersession through services.GraphClient().query and then records the receipts in a second autocommit query, so the docstring at graph_source_bindings.py:1632 and the evidence fragment's claim that the compose and attach writers run the move and its receipts in one transaction are false; a failure between the two leaves a superseded name with no StandardNameChange, which the inline CREATE it replaced did not allow."
+    },
+    {
+      "file": "imas_codex/standard_names/provenance_lifecycle.py",
+      "line": "967",
+      "severity": "non-blocking",
+      "text": "non-blocking: the guard suppresses the last_source_supersede receipt on every record_change=False retarget (edit.py:1944, graph_refinement.py:1329, graph_supersession.py:4139, provenance_lifecycle.py:2231), where the base wrote it inline; the drained pair is always (old_name, new_name), so the second condition is unreachable and the guard means drained_old and record_change while reading as though it excepted a different pair."
+    },
+    {
+      "file": "tests/standard_names/test_last_source_supersede.py",
+      "line": "315",
+      "severity": "non-blocking",
+      "text": "non-blocking: assert winners == [\"dd:test/last_source/one\"] compares the return against the same sns_id the test passed in, so it holds whatever the writer does with the binding; the real guard for this case is the graph read at tests/standard_names/test_last_source_supersede.py:318."
+    },
+    {
+      "file": "tests/standard_names/test_last_source_supersede.py",
+      "line": "199",
+      "severity": "non-blocking",
+      "text": "non-blocking: the compose, attach and staged cases assert the lifecycle and the producer but never read the receipt, so the receipt half of the one-receipt change is unguarded on the three writers it rewrote and a dropped record_supersede_receipts call there would redden nothing."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-last-source-supersede-hardening.html",
+      "line": "95",
+      "severity": "non-blocking",
+      "text": "non-blocking: the gate table credits the graph arm to a head that is not the delivered head - graph-head.log's own header reads revision head-graph-96ef090ed - so the recorded gate does not cover 0b1962a89's rewrite of _MOVE_SOURCE_BINDING_CYPHER and the attach/compose writers; re-run at ac6dc98bd it passes 8/8."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "verified the retarget primitive against provenance_lifecycle.py:588/2226, graph_supersession.py:251/587/4132, graph_refinement.py:1321 and edit.py:1936, the supersede helper against provenance_rebuild.py:314, and the writers against their facade export at graph_store/__init__.py:489.",
+    "diff": "read commit by commit against b6bd5682b: 96ef090ed binds first and routes receipts through record_standard_name_change, 0b1962a89 embeds the builder and unifies the attach/compose writers, ac6dc98bd adds the evidence fragment.",
+    "done_when": "the arms add no failure id and the negative control reddens only the ordering test, but three of the four new tests pass on main, which the fragment at sib-last-source-supersede-hardening.html:76 discloses rather than meeting the done_when's each-new-test clause.",
+    "goal": "the node goal is to close the four gaps its predecessor's review raised; the diff closes all four, with the ordering fix at graph_source_bindings.py:1536, the writer tests at test_last_source_supersede.py:266-354, persist_refined_name driven at :357, and one receipt writer at source_invariant.py:105.",
+    "manifest": "read; its graph_arm and graph-head.log are at 96ef090ed, not at head ac6dc98bd; I re-ran the same command at head and got 8 passed, EXIT=0.",
+    "write_paths": "all five paths in 96ef090ed..ac6dc98bd are inside the manifest's declared write paths."
+  },
+  "justifications": {
+    "durability": "the ordering test reddens on the base archive at tests/standard_names/test_last_source_supersede.py:318, but the compose, attach and staging cases end at the successor edge (tests/standard_names/test_last_source_supersede.py:199), so removing record_supersede_receipts from graph_source_bindings.py:1659 would leave the suite green.",
+    "evidence": "both full-suite arms and the negative control are whole logs ending in a bare EXIT= line, but the recorded graph arm ran at 96ef090ed before 0b1962a89 rewrote _MOVE_SOURCE_BINDING_CYPHER; this review's re-run at ac6dc98bd passes 8/8.",
+    "fit": "the change keeps the module's builder idiom - supersede_drained_name_cypher returns clause text that the caller embeds, as graph_source_bindings.py:1643 now does - and introduces no plan, sprint or ticket name in any symbol or comment.",
+    "goal_fidelity": "imas_codex/standard_names/graph_store/graph_source_bindings.py:1536 passes the winner's binding into the supersede statement as claims, which closes the ordering defect at the write itself rather than a step later.",
+    "reuse": "record_supersede_receipts at imas_codex/standard_names/source_invariant.py:105 wraps the repository's single change writer record_standard_name_change at imas_codex/standard_names/provenance_lifecycle.py:2016, and a search of graph_supersession.py, provenance_lifecycle.py and source_invariant.py found no existing batch-receipt owner it forked.",
+    "scope_discipline": "git diff b6bd5682b..ac6dc98bd touches only the five declared write paths, and each of the three commits stays inside them."
+  },
+  "node": "review-of-sib-last-source-supersede-hardening-ac6dc98bd168",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to close the four gaps its predecessor's review raised; the diff closes all four \u2014 the winner's binding is merged before the drained test through winner_batch at imas_codex/standard_names/graph_store/graph_source_bindings.py:1536, tests for _supersede_released_bindings, the released_out plumbing and mark_sources_attached are at tests/standard_names/test_last_source_supersede.py:266-354, persist_refined_name is driven directly at tests/standard_names/test_last_source_supersede.py:357, and the receipt now goes through record_standard_name_change via source_invariant.py:105 with the builder embedded at graph_source_bindings.py:1643.\nVERDICT done_when: the done_when asks that each new test fail on main and pass at head, that the gate add zero failure ids, and that the fragment record it; the full-suite arms add no failure id (1 failed on both, the same test_export_determinism id), but negative-control.log shows only the ordering test failing on the b6bd5682b archive (1 failed, 7 passed), so three of the four new tests pass on main, which docs/evidence/fragments/sn-integrity-backlog/sib-last-source-supersede-hardening.html:76 itself discloses as coverage of already-correct writers.\nVERDICT write_paths: the manifest declares five write paths and every path in 96ef090ed..ac6dc98bd is inside them \u2014 imas_codex/standard_names/source_invariant.py, imas_codex/standard_names/graph_store/graph_source_bindings.py, imas_codex/standard_names/provenance_lifecycle.py, tests/standard_names/test_last_source_supersede.py and the evidence fragment.\nVERDICT manifest: read; it records both full-suite arms with matching failure ids, the negative control and its note, but its graph_arm entry and logs/graph-head.log are marked revision head-graph-96ef090ed while head is ac6dc98bd; I re-ran the same command at head and got 8 passed with EXIT=0.\nVERDICT diff: read commit by commit against b6bd5682b \u2014 96ef090ed binds the staged candidate first and moves every receipt onto record_standard_name_change, 0b1962a89 embeds supersede_drained_name_cypher in _MOVE_SOURCE_BINDING_CYPHER and unifies mark_sources_composed/mark_sources_attached onto _move_sources_to_name, ac6dc98bd adds the evidence fragment; all five files are inside the declared scope.\nCALL_SITES: imas_codex/standard_names/provenance_lifecycle.py:588, imas_codex/standard_names/provenance_lifecycle.py:2226, imas_codex/standard_names/graph_store/graph_supersession.py:251, imas_codex/standard_names/graph_store/graph_supersession.py:587, imas_codex/standard_names/graph_store/graph_supersession.py:4132, imas_codex/standard_names/graph_store/graph_refinement.py:1321, imas_codex/standard_names/edit.py:1936, imas_codex/standard_names/provenance_rebuild.py:314, imas_codex/standard_names/graph_store/__init__.py:489\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/graph_store/graph_source_bindings.py:1536 passes the winner's binding into the supersede statement as claims, which closes the ordering defect at the write itself rather than a step later.\nSCORE evidence: 16\nJUSTIFICATION evidence: both full-suite arms and the negative control are whole logs ending in a bare EXIT= line, but the recorded graph arm ran at 96ef090ed before 0b1962a89 rewrote _MOVE_SOURCE_BINDING_CYPHER, so the node's own gate does not cover the delivered head; this review's re-run at ac6dc98bd passes 8/8.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff b6bd5682b..ac6dc98bd touches only the five declared write paths, and each of the three commits stays inside them.\nSCORE durability: 14\nJUSTIFICATION durability: the ordering test reddens on the base archive at tests/standard_names/test_last_source_supersede.py:318, but the compose, attach and staging cases end at the successor edge (tests/standard_names/test_last_source_supersede.py:199), so removing record_supersede_receipts from graph_source_bindings.py:1659 would leave the suite green.\nSCORE fit: 19\nJUSTIFICATION fit: the change keeps the module's builder idiom \u2014 supersede_drained_name_cypher returns clause text that the caller embeds, as graph_source_bindings.py:1643 now does \u2014 and introduces no plan, sprint or ticket name in any symbol or comment.\nSCORE reuse: 20\nJUSTIFICATION reuse: record_supersede_receipts at imas_codex/standard_names/source_invariant.py:105 wraps the repository's single change writer record_standard_name_change at imas_codex/standard_names/provenance_lifecycle.py:2016, and a search of graph_supersession.py, provenance_lifecycle.py and source_invariant.py found no existing batch-receipt owner it forked.\nFINDING imas_codex/standard_names/graph_store/graph_source_bindings.py:1659 non-blocking: _move_sources_to_name runs the move and supersession through services.GraphClient().query and then records the receipts in a second autocommit query, so the docstring at graph_source_bindings.py:1632 and the evidence fragment's claim that the compose and attach writers run the move and its receipts in one transaction are false \u2014 a failure between the two leaves a superseded name with no StandardNameChange, which the inline CREATE it replaced did not allow.\nFINDING imas_codex/standard_names/provenance_lifecycle.py:967 non-blocking: the guard suppresses the last_source_supersede receipt on every record_change=False retarget (edit.py:1944, graph_refinement.py:1329, graph_supersession.py:4139, provenance_lifecycle.py:2231), where the base wrote it inline; the clause reads as though it excepted a different pair, but the drained pair is always (old_name, new_name), so it means drained_old and record_change and the second condition is unreachable.\nFINDING tests/standard_names/test_last_source_supersede.py:315 non-blocking: assert winners == [\"dd:test/last_source/one\"] compares the return against the same sns_id the test passed in, so it holds whatever the writer does with the binding; the real guard for this case is the graph read at tests/standard_names/test_last_source_supersede.py:318.\nFINDING tests/standard_names/test_last_source_supersede.py:199 non-blocking: the compose, attach and staged cases assert the lifecycle and the producer but never read the receipt, so the receipt half of the one-receipt change is unguarded on the three writers it rewrote and a dropped record_supersede_receipts call there would redden nothing.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-last-source-supersede-hardening.html:95 non-blocking: the gate table credits the graph arm to a head that is not the delivered head \u2014 graph-head.log's own header reads revision head-graph-96ef090ed \u2014 so the recorded gate does not cover 0b1962a89's rewrite of _MOVE_SOURCE_BINDING_CYPHER and the attach/compose writers; re-run at ac6dc98bd it passes 8/8.",
+  "review_run_id": "r-20261029T173458384937-review-of-sib-last-source-supersede-hardening-ac6dc98bd168",
+  "reviewed_base_sha": "b6bd5682bec73e4058307bdbfb787e07e3053951",
+  "reviewed_head_sha": "ac6dc98bd16863850223e713a67b82210e874f45",
+  "reviewed_run_id": "r-20261029T164814816027-sib-last-source-supersede-hardening",
+  "scores": {
+    "durability": 14,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T17:47:03.190982+00:00",
+  "total": 108
+}
