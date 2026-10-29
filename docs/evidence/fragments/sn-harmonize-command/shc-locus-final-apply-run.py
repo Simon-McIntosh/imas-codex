@@ -42,6 +42,13 @@ PRIOR_RUNNER = HERE / "shc-locus-reapply-all-bindings-run.py"
 SEED = "electrostatic_potential"
 WALL = "electrostatic_potential_at_wall"
 COST_CAP_USD = 2.00
+#: The regrounding leg's own caps. Each command is given its own ceiling and
+#: their sum is the authorised combined ceiling, so neither can borrow headroom
+#: from the other at run time.
+RESCORE_CAP_USD = 0.45
+FAMILY_APPLY_CAP_USD = 0.30
+DRAIN_CAP_USD = 0.50
+COMBINED_CAP_USD = 1.00
 ACCEPTANCE = 0.85
 #: A member whose documentation was NOT regenerated may still move by rescoring
 #: noise; at or below this the move is recorded as noise, never as a fall.
@@ -251,6 +258,368 @@ def apply() -> dict:
     return payload["applies"][-1]
 
 
+def _exit_line(log: Path) -> str:
+    return log.read_text().splitlines()[-1]
+
+
+def _name_state(graph, name: str) -> dict:
+    """One name's two axes, read whole so no verdict is inferred from a count."""
+    rows = graph.query(
+        """
+        MATCH (sn:StandardName {id: $name})
+        RETURN sn.id AS id, sn.name_stage AS name_stage,
+               sn.docs_stage AS docs_stage,
+               sn.reviewer_score_name AS score_name,
+               sn.reviewer_score_docs AS score_docs,
+               sn.validation_status AS validation_status,
+               sn.reviewer_comments_per_dim_name AS checks_name,
+               sn.reviewer_comments_docs AS comments_docs,
+               sn.reviewer_comments_per_dim_docs AS comments_per_dim_docs,
+               sn.source_paths AS source_paths
+        """,
+        name=name,
+    )
+    return dict(rows[0]) if rows else {}
+
+
+def rescore() -> dict:
+    """Re-run the name quorum on the wall member against its restored source.
+
+    The verdict this replaces was written when the name carried no producing
+    source, so the failing check's own evidence was ``source_paths=[]``. The
+    rescore runs the ordinary review pipeline over the bound source; nothing is
+    edited on the name axis, so a second failure leaves the stored verdict and
+    its checks untouched and is recorded verbatim.
+    """
+    from imas_codex.graph.client import GraphClient
+
+    with GraphClient() as graph:
+        before = _name_state(graph, WALL)
+    log, text, wall = _cli(
+        ["sn", "rescore", WALL, "-c", f"{RESCORE_CAP_USD:.2f}"],
+        "rescore.log",
+    )
+    with GraphClient() as graph:
+        after = _name_state(graph, WALL)
+    accepted = after.get("name_stage") == "accepted"
+    score_line = next(
+        (ln.strip() for ln in text.splitlines() if "score" in ln.lower()),
+        None,
+    )
+    payload = read_results()
+    payload["rescore"] = {
+        "command": f"sn rescore {WALL} -c {RESCORE_CAP_USD:.2f}",
+        "log": str(log),
+        "exit_line": _exit_line(log),
+        "wall_seconds": round(wall, 3),
+        "cost_limit_usd": RESCORE_CAP_USD,
+        "before": before,
+        "after": after,
+        "accepted": accepted,
+        "checks_name": after.get("checks_name"),
+        "score_line": score_line,
+        "output": [ln for ln in text.splitlines() if ln.strip()][-40:],
+    }
+    write_results(payload)
+    print(
+        json.dumps(
+            {
+                "accepted": accepted,
+                "score_name_before": before.get("score_name"),
+                "score_name_after": after.get("score_name"),
+                "name_stage_after": after.get("name_stage"),
+                "exit_line": _exit_line(log),
+            },
+            sort_keys=True,
+        )
+    )
+    return payload["rescore"]
+
+
+def family_apply(label: str, cap: float, log_name: str) -> dict:
+    """One capped family apply, recorded like the first one."""
+    prior = _prior()
+    dry = next(
+        (d for d in read_results().get("dry_runs") or [] if d.get("label") == label),
+        None,
+    )
+    log, text, wall = _cli([*FAMILY_CMD, "-c", f"{cap:.2f}"], log_name)
+    prior.record_apply(str(log), wall, cap, (dry or {}).get("log"))
+    payload = read_results()
+    entry = payload["applies"][-1]
+    entry["label"] = label
+    entry["wall_seconds"] = round(wall, 3)
+    entry["output"] = [ln for ln in text.splitlines() if ln.strip()]
+    write_results(payload)
+    print(
+        json.dumps(
+            {
+                "label": label,
+                "decision": entry.get("decision"),
+                "applied": entry.get("applied"),
+                "stamped": entry.get("stamped"),
+                "exit_line": entry.get("exit_line"),
+            },
+            sort_keys=True,
+        )
+    )
+    return entry
+
+
+def wall_drain() -> dict:
+    """Regenerate the wall member's docs through the scoped reset and drain.
+
+    The family is stamped and no member's text has changed since, so a family
+    apply plans no batch and cannot claim this member. The surface that
+    regenerates one member is the one the apply itself uses: the reset that
+    snapshots the current docs and sets ``docs_stage='pending'`` under a fresh
+    scope id, then a drain restricted to that id.
+    """
+    from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        aggregate_calls_per_phase,
+        aggregate_spend_per_phase,
+    )
+    from imas_codex.standard_names.harmonize import mark_members_for_regen
+
+    scope = mark_members_for_regen([WALL])
+    payload = read_results()
+    entry: dict = {
+        "scoped_reset": scope,
+        "docs_regenerated": False,
+    }
+    if scope.get("reset"):
+        run_id = scope["run_id"]
+        log, text, wall = _cli(
+            [
+                "sn",
+                "run",
+                "--scope-run-id",
+                run_id,
+                "--docs-only",
+                "--flush",
+                "-c",
+                f"{DRAIN_CAP_USD:.2f}",
+                "--time",
+                "20",
+            ],
+            "wall-drain.log",
+        )
+        started, ended = _prior()._window(str(log))
+        from imas_codex.graph.client import GraphClient
+
+        with GraphClient() as graph:
+            rows = graph.query(
+                """
+                MATCH (c:LLMCost)
+                WHERE c.llm_at >= datetime($started) AND c.llm_at <= datetime($ended)
+                  AND any(g IN coalesce(c.standard_name_ids, []) WHERE $name IN g)
+                RETURN c.run_id AS run_id, count(c) AS calls
+                ORDER BY run_id
+                """,
+                started=started,
+                ended=ended,
+                name=WALL,
+            )
+            run_ids = [row["run_id"] for row in rows or []]
+            state = _name_state(graph, WALL)
+            services = type("Svc", (), {"GraphClient": GraphClient})
+            calls = 0
+            spend = 0.0
+            for rid in run_ids:
+                per_phase = aggregate_calls_per_phase(rid, services=services)
+                calls += sum(int(value) for value in per_phase.values())
+                spend += sum(
+                    float(value)
+                    for value in aggregate_spend_per_phase(
+                        rid, services=services
+                    ).values()
+                )
+        entry.update(
+            {
+                "command": (
+                    f"sn run --scope-run-id {run_id} --docs-only --flush "
+                    f"-c {DRAIN_CAP_USD:.2f} --time 20"
+                ),
+                "log": str(log),
+                "exit_line": _exit_line(log),
+                "wall_seconds": round(wall, 3),
+                "cost_limit_usd": DRAIN_CAP_USD,
+                "run_ids": run_ids,
+                "run_ids_source": "LLMCost rows in the drain's own window naming this member",
+                "selection_window_utc": {"started": started, "ended": ended},
+                "calls": calls,
+                "spend_usd": round(spend, 6),
+                "state_after": state,
+                "docs_regenerated": state.get("docs_stage") == "accepted",
+                "output": [ln for ln in text.splitlines() if ln.strip()][-40:],
+            }
+        )
+    else:
+        entry["skipped"] = "the scoped reset admitted no member"
+    payload["wall_drain"] = entry
+    write_results(payload)
+    print(
+        json.dumps(
+            {
+                "reset": scope.get("reset"),
+                "run_ids": entry.get("run_ids"),
+                "calls": entry.get("calls"),
+                "spend_usd": entry.get("spend_usd"),
+                "docs_regenerated": entry.get("docs_regenerated"),
+                "exit_line": entry.get("exit_line"),
+            },
+            sort_keys=True,
+        )
+    )
+    return entry
+
+
+def finalize_family() -> dict:
+    """Re-stamp the family on its new text, with no model calls."""
+    log, text, wall = _cli(
+        ["sn", "harmonize", "--family", SEED, "--finalize"],
+        "finalize.log",
+    )
+    payload = read_results()
+    entry = {
+        "command": f"sn harmonize --family {SEED} --finalize",
+        "log": str(log),
+        "exit_line": _exit_line(log),
+        "wall_seconds": round(wall, 3),
+        "output": [ln for ln in text.splitlines() if ln.strip()][-20:],
+    }
+    payload["finalize"] = entry
+    write_results(payload)
+    print(json.dumps(entry, sort_keys=True))
+    return entry
+
+
+def rescore_cost() -> dict:
+    """Read the rescore's own cost rows, selected by its window and the name."""
+    from imas_codex.graph.client import GraphClient
+    from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        aggregate_calls_per_phase,
+        aggregate_spend_per_phase,
+    )
+
+    payload = read_results()
+    block = payload.get("rescore") or {}
+    if not block.get("log"):
+        raise RuntimeError("record the rescore before its cost")
+    started, ended = _prior()._window(block["log"])
+    with GraphClient() as graph:
+        rows = graph.query(
+            """
+            MATCH (c:LLMCost)
+            WHERE c.llm_at >= datetime($started) AND c.llm_at <= datetime($ended)
+              AND any(g IN coalesce(c.standard_name_ids, []) WHERE $name IN g)
+            RETURN c.run_id AS run_id, count(c) AS calls
+            ORDER BY run_id
+            """,
+            started=started,
+            ended=ended,
+            name=WALL,
+        )
+        run_ids = [row["run_id"] for row in rows or []]
+        services = type("Svc", (), {"GraphClient": GraphClient})
+        calls = 0
+        spend = 0.0
+        phases: dict[str, int] = {}
+        for rid in run_ids:
+            per_phase = aggregate_calls_per_phase(rid, services=services)
+            for phase, value in per_phase.items():
+                phases[phase] = phases.get(phase, 0) + int(value)
+                calls += int(value)
+            spend += sum(
+                float(value)
+                for value in aggregate_spend_per_phase(rid, services=services).values()
+            )
+    block["cost"] = {
+        "run_ids": run_ids,
+        "run_ids_source": "LLMCost rows in the rescore's own window naming this member",
+        "selection_window_utc": {"started": started, "ended": ended},
+        "phases": phases,
+        "calls": calls,
+        "spend_usd": round(spend, 6),
+    }
+    payload["rescore"] = block
+    write_results(payload)
+    print(json.dumps(block["cost"], sort_keys=True))
+    return block["cost"]
+
+
+def reground_scores() -> dict:
+    """The wall member's documentation score across the regrounding, and the family's."""
+    payload = read_results()
+    before_phase = (payload.get("phases") or {}).get("before-reground") or {}
+    after_phase = (payload.get("phases") or {}).get("after-finalize") or {}
+    scores_before = before_phase.get("documentation_scores") or {}
+    scores_after = after_phase.get("documentation_scores") or {}
+    members = payload.get("preflight", {}).get("members") or []
+    rows = []
+    for member in members:
+        b = scores_before.get(member)
+        a = scores_after.get(member)
+        rows.append(
+            {
+                "id": member,
+                "before": b,
+                "after": a,
+                "delta": None if (b is None or a is None) else round(a - b, 6),
+            }
+        )
+    wall = next((row for row in rows if row["id"] == WALL), {})
+    drain = payload.get("wall_drain") or {}
+    rescore_block = payload.get("rescore") or {}
+    reground_apply = next(
+        (a for a in payload.get("applies") or [] if a.get("label") == "reground"),
+        {},
+    )
+    rescore_cost_block = rescore_block.get("cost") or {}
+    spend = (
+        float((reground_apply.get("cost") or {}).get("spend_usd") or 0.0)
+        + float(drain.get("spend_usd") or 0.0)
+        + float(rescore_cost_block.get("spend_usd") or 0.0)
+    )
+    block = {
+        "threshold": ACCEPTANCE,
+        "members": rows,
+        "wall": wall,
+        "wall_regenerated": bool(drain.get("docs_regenerated")),
+        "wall_docs_before": wall.get("before"),
+        "wall_docs_after": wall.get("after"),
+        "wall_docs_delta": wall.get("delta"),
+        "name_before": {
+            "name_stage": (rescore_block.get("before") or {}).get("name_stage"),
+            "score_name": (rescore_block.get("before") or {}).get("score_name"),
+            "checks_name": (rescore_block.get("before") or {}).get("checks_name"),
+        },
+        "name_after": {
+            "name_stage": (rescore_block.get("after") or {}).get("name_stage"),
+            "score_name": (rescore_block.get("after") or {}).get("score_name"),
+            "checks_name": (rescore_block.get("after") or {}).get("checks_name"),
+        },
+        "rescore_accepted": bool(rescore_block.get("accepted")),
+        "calls": int((reground_apply.get("cost") or {}).get("calls_total") or 0)
+        + int(drain.get("calls") or 0)
+        + int(rescore_cost_block.get("calls") or 0),
+        "rescore_calls": int(rescore_cost_block.get("calls") or 0),
+        "rescore_spend_usd": float(rescore_cost_block.get("spend_usd") or 0.0),
+        "drain_calls": int(drain.get("calls") or 0),
+        "drain_spend_usd": float(drain.get("spend_usd") or 0.0),
+        "spend_usd": round(spend, 6),
+        "combined_cap_usd": COMBINED_CAP_USD,
+        "within_combined_cap": spend <= COMBINED_CAP_USD,
+        "all_at_or_above": all(
+            row["after"] is not None and row["after"] >= ACCEPTANCE for row in rows
+        ),
+    }
+    payload["reground"] = block
+    write_results(payload)
+    print(json.dumps(block, sort_keys=True))
+    return block
+
+
 def _trim_apply_output(payload: dict) -> None:
     """Keep the apply's summary lines; the full transcript stays in its log.
 
@@ -327,10 +696,22 @@ def post() -> dict:
 
 
 def cost() -> dict:
-    """Select the apply's own run ids and read its calls, spend and scope."""
+    """Select the first apply's run ids and read its calls, spend and scope.
+
+    The cost reader reads the record's last apply, so it runs while the first
+    apply is still the last one. Once a later apply is appended the first apply
+    already carries its cost block and there is nothing left to select.
+    """
     prior = _prior()
     payload = read_results()
-    log = payload["applies"][-1]["log"]
+    first = next(
+        (a for a in payload.get("applies") or [] if a.get("label") in (None, "first")),
+        None,
+    )
+    if first is None or first.get("cost"):
+        print("cost already recorded for the first apply; not re-selected")
+        return first or {}
+    log = first["log"]
     prior.select_runs(log)
     prior.record_cost()
     prior.record_vetoes(log)
@@ -609,6 +990,113 @@ def render() -> None:
         f"<code>{_cell(json.dumps(scope.get('roster_names_not_touched') or []))}</code>.</p>",
     ]
 
+    # --- the authorised regrounding
+    reground = payload.get("reground") or {}
+    if reground:
+        rescore_block = payload.get("rescore") or {}
+        drain = payload.get("wall_drain") or {}
+        finalize_block = payload.get("finalize") or {}
+        reground_apply = next(
+            (a for a in payload.get("applies") or [] if a.get("label") == "reground"),
+            {},
+        )
+        # The apply's own stdout names the decision on an apply that runs no
+        # batch; the summary line only exists when a family was applied.
+        reground_decision = reground_apply.get("decision") or next(
+            (
+                line.split()[2]
+                for line in reground_apply.get("output") or []
+                if line.startswith("family ") and len(line.split()) > 2
+            ),
+            None,
+        )
+        after_finalize = next(
+            (d for d in dry if d["label"] == "after-finalize"), {}
+        )
+        name_before = reground.get("name_before") or {}
+        name_after = reground.get("name_after") or {}
+        lines += [
+            f"<h2 {uid('reground')}>The authorised regrounding</h2>",
+            f"<p {uid('reground-p')}>The wall member's stale name verdict rested on "
+            f"a missing producer — its failing check's own evidence was "
+            f"<code>source_paths=[]</code>. With the source restored, the name "
+            f"quorum was re-run through <code>sn rescore</code>, then the member's "
+            f"documentation was regenerated against "
+            f"<code>wall/description_ggd/ggd/phi_potential/values</code> and the "
+            f"family re-stamped. Combined spend was <strong>USD "
+            f"{_cell(reground.get('spend_usd'))}</strong> across "
+            f"<strong>{_cell(reground.get('calls'))}</strong> call(s), inside the "
+            f"USD {COMBINED_CAP_USD:.2f} ceiling: "
+            f"<strong>{_cell(reground.get('within_combined_cap'))}</strong>.</p>",
+            f"<h3 {uid('name-axis')}>The name axis</h3>",
+            f"<table {uid('name-table')}>",
+            "<caption>The wall member's name-axis verdict before and after the rescore</caption>",
+            "<thead><tr><th>measure</th><th>before</th><th>after</th></tr></thead>",
+            "<tbody>",
+            f"<tr><td><code>name_stage</code></td>"
+            f"<td><code>{_cell(name_before.get('name_stage'))}</code></td>"
+            f"<td><code>{_cell(name_after.get('name_stage'))}</code></td></tr>",
+            f"<tr><td><code>reviewer_score_name</code></td>"
+            f"<td>{_cell(name_before.get('score_name'))}</td>"
+            f"<td>{_cell(name_after.get('score_name'))}</td></tr>",
+            "</tbody>",
+            "</table>",
+            f"<pre {uid('checks-before')}>{_cell(name_before.get('checks_name'))}</pre>",
+            f"<pre {uid('checks-after')}>{_cell(name_after.get('checks_name'))}</pre>",
+            f"<p {uid('rescore-p')}>The rescore ran <code>"
+            f"{_cell(rescore_block.get('command'))}</code> in the foreground and "
+            f"exited <code>{_cell(rescore_block.get('exit_line'))}</code> after "
+            f"{_cell(rescore_block.get('wall_seconds'))} s. Accepted: "
+            f"<strong>{_cell(reground.get('rescore_accepted'))}</strong>. The name "
+            f"text was not edited.</p>",
+            f"<h3 {uid('docs-axis')}>The documentation axis</h3>",
+            f"<p {uid('apply-p2')}>The family apply re-planned after the rescore and "
+            f"returned <code>decision={_cell(reground_decision)}</code> "
+            f"with <code>applied={_cell(reground_apply.get('applied'))}</code> and "
+            f"<code>calls={_cell((reground_apply.get('cost') or {}).get('calls_total') or 0)}</code>"
+            f": a stamped family plans no batch, and no member's text had changed, "
+            f"so that surface cannot claim the member. The member was therefore "
+            f"regenerated through the surface the apply itself uses — the scoped "
+            f"reset that snapshots the old text and sets "
+            f"<code>docs_stage='pending'</code> under a fresh scope id, then a drain "
+            f"restricted to that id:</p>",
+            f"<table {uid('drain-table')}>",
+            "<caption>The scoped reset and drain, with the drain's own cost rows</caption>",
+            "<thead><tr><th>measure</th><th>value</th></tr></thead>",
+            "<tbody>",
+            f"<tr><td>scoped reset (eligible / reset)</td><td>{_cell((drain.get('scoped_reset') or {}).get('eligible'))} / "
+            f"{_cell((drain.get('scoped_reset') or {}).get('reset'))}</td></tr>",
+            f"<tr><td>scope run id</td><td><code>{_cell((drain.get('scoped_reset') or {}).get('run_id'))}</code></td></tr>",
+            f"<tr><td>command</td><td><code>{_cell(drain.get('command'))}</code></td></tr>",
+            f"<tr><td>calls / spend</td><td>{_cell(drain.get('calls'))} / USD "
+            f"{_cell(drain.get('spend_usd'))}</td></tr>",
+            f"<tr><td>wall time</td><td>{_cell(drain.get('wall_seconds'))} s</td></tr>",
+            f"<tr><td>exit</td><td><code>{_cell(drain.get('exit_line'))}</code></td></tr>",
+            f"<tr><td>docs regenerated and accepted</td>"
+            f"<td><strong>{_cell(drain.get('docs_regenerated'))}</strong></td></tr>",
+            "</tbody>",
+            "</table>",
+            f"<table {uid('wall-score-table')}>",
+            "<caption>The wall member's documentation score before and after regeneration</caption>",
+            "<thead><tr><th>member</th><th>docs score before</th><th>docs score after</th>"
+            "<th>delta</th><th>regenerated</th></tr></thead>",
+            "<tbody>",
+            f"<tr><td><code>{WALL}</code></td>"
+            f"<td>{_cell(reground.get('wall_docs_before'))}</td>"
+            f"<td>{_cell(reground.get('wall_docs_after'))}</td>"
+            f"<td>{_cell(reground.get('wall_docs_delta'))}</td>"
+            f"<td>{_cell(reground.get('wall_regenerated'))}</td></tr>",
+            "</tbody>",
+            "</table>",
+            f"<p {uid('finalize-p')}>The family was then re-stamped on its new text "
+            f"with <code>{_cell(finalize_block.get('command'))}</code> "
+            f"(<code>{_cell(finalize_block.get('exit_line'))}</code>), which makes no "
+            f"model calls, and the follow-up dry run planned "
+            f"<strong>{_cell(after_finalize.get('planned_calls'))}</strong> call(s). "
+            f"Every member is at or above {ACCEPTANCE} with the family stamped: "
+            f"<strong>{_cell(reground.get('all_at_or_above'))}</strong>.</p>",
+        ]
+
     lines += ["</main>", "</body>", "</html>"]
     HTML.write_text("\n".join(lines) + "\n")
     print(f"rendered {HTML}")
@@ -618,7 +1106,11 @@ def verify() -> int:
     payload = read_results()
     problems: list[str] = []
     pre = payload.get("preflight") or {}
-    entry = (payload.get("applies") or [{}])[-1]
+    applies = payload.get("applies") or [{}]
+    entry = next(
+        (a for a in reversed(applies) if a.get("stamped")),
+        applies[-1],
+    )
     cost = entry.get("cost") or {}
     scores = payload.get("scores") or {}
     dry = payload.get("dry_runs") or []
@@ -650,6 +1142,34 @@ def verify() -> int:
         and not scores.get("unscored")
         and second.get("planned_calls") == 0
     )
+    reg = payload.get("reground") or {}
+    drain = payload.get("wall_drain") or {}
+    finalize_block = payload.get("finalize") or {}
+    after_finalize = next((d for d in dry if d["label"] == "after-finalize"), {})
+    if reg:
+        if not reg.get("rescore_accepted"):
+            problems.append("the name quorum did not accept the wall member")
+        if not reg.get("within_combined_cap"):
+            problems.append(
+                f"the regrounding spent USD {reg.get('spend_usd')}, over the "
+                f"USD {COMBINED_CAP_USD:.2f} combined ceiling"
+            )
+        if not reg.get("wall_regenerated"):
+            problems.append("the wall member's documentation was not regenerated")
+        if drain.get("exit_line") != "EXIT=0":
+            problems.append(f"the drain did not exit 0: {drain.get('exit_line')}")
+        if finalize_block.get("exit_line") != "EXIT=0":
+            problems.append(
+                f"the finalize did not exit 0: {finalize_block.get('exit_line')}"
+            )
+        if after_finalize.get("planned_calls") != 0:
+            problems.append(
+                "the family plans calls after finalize: "
+                f"{after_finalize.get('planned_calls')}"
+            )
+        if not reg.get("all_at_or_above"):
+            problems.append("a member's documentation score is below acceptance")
+
     print(
         json.dumps(
             {
@@ -699,6 +1219,45 @@ def run() -> None:
         print("apply already recorded; not re-run")
     post()
     cost()
+
+    # --- the authorised regrounding, each step bounded and resumable
+    payload = read_results()
+    if "rescore" not in payload:
+        rescore()
+    payload = read_results()
+    if not (payload.get("rescore") or {}).get("accepted"):
+        print("the name quorum did not accept the wall member; stopping as directed")
+        render()
+        sys.exit(verify())
+    if "before-reground" not in (payload.get("phases") or {}):
+        _prior().snapshot("before-reground")
+    if not any(a.get("label") == "reground" for a in payload.get("applies") or []):
+        family_apply("reground", FAMILY_APPLY_CAP_USD, "apply-reground.log")
+    payload = read_results()
+    reground_entry = next(
+        (a for a in payload.get("applies") or [] if a.get("label") == "reground"), {}
+    )
+    if reground_entry.get("applied") and "cost" not in reground_entry:
+        prior = _prior()
+        try:
+            prior.select_runs(reground_entry["log"])
+            prior.record_cost()
+            prior.record_vetoes(reground_entry["log"])
+        except Exception as exc:  # noqa: BLE001 - recorded, never swallowed silently
+            payload = read_results()
+            payload["applies"][-1]["cost_note"] = f"cost not recorded: {exc}"
+            write_results(payload)
+    if "wall_drain" not in read_results():
+        wall_drain()
+    if "finalize" not in read_results():
+        finalize_family()
+    if "after-finalize" not in (read_results().get("phases") or {}):
+        _prior().snapshot("after-finalize")
+    if not any(
+        d.get("label") == "after-finalize" for d in read_results().get("dry_runs") or []
+    ):
+        dry_run("after-finalize")
+    reground_scores()
     render()
     sys.exit(verify())
 
@@ -712,6 +1271,11 @@ def main() -> None:
     sub_snap = subs.add_parser("snapshot")
     sub_snap.add_argument("phase")
     subs.add_parser("apply")
+    subs.add_parser("rescore")
+    subs.add_parser("wall-drain")
+    subs.add_parser("finalize")
+    subs.add_parser("reground-scores")
+    subs.add_parser("rescore-cost")
     subs.add_parser("post")
     subs.add_parser("cost")
     subs.add_parser("render")
@@ -726,6 +1290,16 @@ def main() -> None:
         _prior().snapshot(args.phase)
     elif args.command == "apply":
         apply()
+    elif args.command == "rescore":
+        rescore()
+    elif args.command == "wall-drain":
+        wall_drain()
+    elif args.command == "finalize":
+        finalize_family()
+    elif args.command == "reground-scores":
+        reground_scores()
+    elif args.command == "rescore-cost":
+        rescore_cost()
     elif args.command == "post":
         post()
     elif args.command == "cost":
