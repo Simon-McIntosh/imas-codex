@@ -1,0 +1,78 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed node is role implement and was not armed as a test role, so its manifest records baseline_suite and after_suite as null and it ran no pytest suite; there are therefore no suite gate logs from which to derive added failures, and both arms are absent rather than empty. Its gate is the readback log gate-readback.log (EXIT=0), not a test suite.",
+  "call_sites": [],
+  "call_sites_emission": "none",
+  "completed_at": "2026-10-29T09:16:25.770Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "one-off signed operation whose receipts are the durable record; the runner's hard-coded population path is a single-use evidence script, not product code",
+      "recorded_at": "2026-10-29T16:44:02.865506+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-29T09:04:50Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "non-blocking, noted at landing",
+      "recorded_at": "2026-10-29T14:21:44.862319+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "non-blocking, noted at landing",
+      "recorded_at": "2026-10-29T14:21:44.869080+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-retire-sourceless-drafts-run.py",
+      "id": "f28edacbf48",
+      "line": 78,
+      "severity": "non-blocking",
+      "text": "the HOLDERS query requires the holder's own source to be non-stale, stricter than the plan's \"holds its recorded source\", so 18 of the 19 in-scope names that record a DD source receive a receipt with no successor edge; the criterion is documented but narrows successor coverage compared with the plan."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-retire-sourceless-drafts-run.py",
+      "id": "f856bf3bde2",
+      "line": 33,
+      "severity": "non-blocking",
+      "text": "POPULATION is a hard-coded absolute path naming one run's directory, so the committed runner cannot be re-run for another cohort without editing source."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "No production call site reaches a docs/evidence fragment runner; the change calls into production owners but nothing imports it.",
+    "diff": "Read commit by commit against base 6fff23ede: 675e86b8c adds the runner and authority, 8ae632cd8 adds the html fragment, reusing the sibling signed-retirement idiom.",
+    "done_when": "The gate is the readback run; its log ends EXIT=0 with still_superseded 131, receipt_names 131, successor_edges 1 and remaining_sourceless_live 17, and the fragment records population, holder evidence, previews, receipts and read-back.",
+    "goal": "The node goal is to retire the live drafts carrying no producing DD source; the runner retired 131 of 132 live exhausted drafts with signed receipts and one successor edge, left 1 refused, and recorded 16 non-exhausted names for the lead without writing them.",
+    "manifest": "Read; it reports the population mismatch (148 not 19), the apply receipt and read-back, and names its logs, consistent with the logs it cites.",
+    "write_paths": "git show --stat of the two commits shows exactly three files, all inside the declared fragment/runner/authority paths; no product source or test touched."
+  },
+  "justifications": {
+    "durability": "The runner adds no test or assertion; the only check is the runtime negative() preview refusal in sib-retire-sourceless-drafts-run.py:196, and no added assertion reddens if the retirement logic regresses.",
+    "evidence": "The read-back log gate-readback.log ends EXIT=0 with still_superseded 131, receipt_names 131, successor_edges 1 and remaining_sourceless_live 17, so the gate measures the done_when and records the shortfall rather than claiming success.",
+    "fit": "The runner follows the sibling idiom of sib-retire-unlinked-refine-products-run.py:69 but hard-codes this run's directory at sib-retire-sourceless-drafts-run.py:33 and leaves an unused population variable at line 191.",
+    "goal_fidelity": "docs/evidence/fragments/sn-integrity-backlog/sib-retire-sourceless-drafts.html records the cohort retired with receipts, but the plan read-back condition (only held and derived names sourceless) is not met: 12 non-held non-exhausted names remain sourceless pending the lead.",
+    "reuse": "The runner imports find_sourceless_live_names, build_repair_authority, apply_signed_manifest and signed_payload_sha256 rather than reimplementing them, but duplicates the ~50-line build_row from sib-retire-unlinked-refine-products-run.py:69.",
+    "scope_discipline": "git show --stat lists only sib-retire-sourceless-drafts-run.py, -authority.json and .html, all inside the declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The node goal is to retire the live drafts carrying no producing DD source; the landed runner docs/evidence/fragments/sn-integrity-backlog/sib-retire-sourceless-drafts-run.py retired 131 of 132 live exhausted drafts with signed receipts (one successor edge to poloidal_angle_of_plasma_boundary_gap), left 1 refused by the writer, and recorded 16 non-exhausted sourceless names for the lead without writing them.\nVERDICT done_when: The brief's gate asks that the exhausted names are retired with receipts and read back, the two accepted names recorded, and the fragment hold population, holder evidence, previews, receipts and read-back with a real EXIT=; the read-back log /home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T083805766546-sib-retire-sourceless-drafts/logs/gate-readback.log ends EXIT=0 and prints still_superseded 131, receipt_names 131, successor_edges 1, remaining_sourceless_live 17.\nVERDICT write_paths: The declared paths were the fragment html, the runner py, the authority json and the figures directory; `git show --stat` of the two commits shows exactly three files, all inside them, and no product source or test touched.\nVERDICT manifest: The manifest at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T083805766546-sib-retire-sourceless-drafts/manifest.md reports status complete, the population mismatch (148 live sourceless, not 19), the apply receipt and the read-back, and names its logs; it is consistent with the logs it cites.\nVERDICT diff: Read commit by commit against base 6fff23ede: 675e86b8c adds the runner (334 lines) and authority (6423 lines), 8ae632cd8 adds the html fragment (130 lines); the runner reuses the sibling signed-retirement idiom and the production owners.\nCALL_SITES: none\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-integrity-backlog/sib-retire-sourceless-drafts.html records the cohort retired with receipts, but the plan read-back condition (only held and derived names sourceless) is not met: 12 non-held non-exhausted names remain sourceless pending the lead.\nSCORE evidence: 16\nJUSTIFICATION evidence: The read-back log gate-readback.log ends EXIT=0 with still_superseded 131, receipt_names 131, successor_edges 1 and remaining_sourceless_live 17, so the gate measures the done_when and records the shortfall rather than claiming success.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: `git show --stat` lists only sib-retire-sourceless-drafts-run.py, -authority.json and .html, all inside the declared write paths.\nSCORE durability: 7\nJUSTIFICATION durability: The runner adds no test or assertion; the only check is the runtime negative() preview refusal in sib-retire-sourceless-drafts-run.py:196, and no added assertion reddens if the retirement logic regresses.\nSCORE fit: 15\nJUSTIFICATION fit: The runner follows the sibling idiom of sib-retire-unlinked-refine-products-run.py:69 but hard-codes this run's directory at sib-retire-sourceless-drafts-run.py:33 and leaves an unused population variable at line 191.\nSCORE reuse: 16\nJUSTIFICATION reuse: The runner imports find_sourceless_live_names, build_repair_authority, apply_signed_manifest and signed_payload_sha256 rather than reimplementing them, but duplicates the ~50-line build_row from sib-retire-unlinked-refine-products-run.py:69.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-retire-sourceless-drafts-run.py:78 non-blocking: the HOLDERS query requires the holder's own source to be non-stale, stricter than the plan's \"holds its recorded source\", so 18 of the 19 in-scope names that record a DD source receive a receipt with no successor edge; the criterion is documented but narrows successor coverage compared with the plan.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-retire-sourceless-drafts-run.py:33 non-blocking: POPULATION is a hard-coded absolute path naming one run's directory, so the committed runner cannot be re-run for another cohort without editing source.\n",
+  "review_run_id": "r-20261029T090134598105-review-of-sib-retire-sourceless-drafts-8ae632cd8d14",
+  "reviewed_base_sha": "6fff23edea1ee877fdec7df446312d5c60ad6d03",
+  "reviewed_head_sha": "8ae632cd8d14390f103621f9e964733ecc0198c0",
+  "reviewed_run_id": "r-20261029T083805766546-sib-retire-sourceless-drafts",
+  "scores": {
+    "durability": 7,
+    "evidence": 16,
+    "fit": 15,
+    "goal_fidelity": 15,
+    "reuse": 16,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T09:16:29.720834+00:00",
+  "total": 87
+}
