@@ -54,8 +54,8 @@ refused exactly as before.</p>
 <p>An exception is worth nothing where composition refuses to grant it, and the first cut granted it
 in the wrong place: the enabling call sat on a staging helper no production path reaches, while
 <code>persist_generated_name_winners</code> — the writer the compose worker reaches through
-<code>persist_generated_name_batch</code>. The live writer now grants it, so the path that actually
-composes adopts the stub instead of colliding and parking.</p>
+<code>persist_generated_name_batch</code> — still called the lock without it. The live writer now
+grants it, so the path that actually composes adopts the stub instead of colliding and parking.</p>
 
 <p>A second defect sat behind the first: the winner split routed <code>adoption</code> to the stable
 finalize branch, and a projection stub carries a name and a provenance edge but no content. The
