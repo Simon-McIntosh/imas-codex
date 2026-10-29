@@ -1,0 +1,48 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest and classification carry baseline_suite: null and after_suite: null and the run wrote no armed baseline/after gate logs, so an empty added-failure list here is an absence of measurement, not a measured zero",
+  "call_site_count": 3,
+  "call_sites": [
+    "reckon/evidence.py:570",
+    "reckon/doccheck.py:1871",
+    "reckon/resources.py:52"
+  ],
+  "completed_at": "2026-10-29T08:02:18.482Z",
+  "dispatched_at": "2026-10-29T07:53:57Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-final-apply-run.py",
+      "line": "1227",
+      "severity": "non-blocking",
+      "text": "non-blocking: verify() computes stamped and converged only to print them and never compares the rendered fragment to the record; in a scratch copy reinstating the pre-fix entry = applies[-1] at line 798, render() reproduced \"Verdict: not converged\" and \"0-member roster: -\" while verify() still printed OK with EXIT=0, so the commit's own repair has no assertion that reddens if it is reverted."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-final-apply-run.py",
+      "line": "557",
+      "severity": "non-blocking",
+      "text": "non-blocking: _run_cost returns (0, 0.0) when the hardcoded INTERRUPTED_DRAINS run id has no LLMCost rows, so a re-run of reground-scores after graph retention would silently drop the USD 0.089812 with exit 0 - the same total-drop the commit set out to remove - instead of failing when the commit's fault cannot be found."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The node goal (brief.md:1-6,44-51) is to reground nothing else but to reground electrostatic_potential_at_wall on its restored source and stamp the locus family with the figures held in the fragment and its JSON; the gained revision 35d60ab34 renders that final verdict and, re-rendered in a scratch copy, the committed shc-locus-final-apply.html reproduces byte-for-byte, so the page is genuine generator output.\nVERDICT done_when: The brief requires the HTML and JSON to hold the dry runs, the figures and whether the family converged and stamped, from a log ending in a real EXIT=; gate.log ends EXIT=0 and shc-locus-final-apply.html:12 now reads \"converged and stamped, wall member regrounded\", matching the reground block at shc-locus-final-apply.json (calls 7, spend USD 0.119253, all_at_or_above true).\nVERDICT write_paths: manifest.md orientation_write_paths grants the three evidence files (html, json, runner); `git show --stat 35d60ab34` changes exactly those three under docs/evidence/fragments/sn-harmonize-command/ and nothing else.\nVERDICT manifest: Read manifest.md; it records status complete, revision stamps 35d60ab34/37f1b7f3f/ec79188e7, the literal verify command, gate.log, and repair_negative_control describing the pre-fix reproduction; it carries no baseline_suite or after_suite block, so added failures are unmeasured rather than zero.\nVERDICT diff: Read the single gained revision 35d60ab34 against the prior reviewed head 37f1b7f3f; it makes render() select the stamped apply (shc-locus-final-apply-run.py:798) instead of applies[-1], adds _run_cost and INTERRUPTED_DRAINS and an interrupted-drain list in reground_scores, reframes the name-stage blockade as the first apply's state, and re-renders the HTML and JSON; all four prior blocking findings are resolved.\nCALL_SITES: reckon/evidence.py:570, reckon/doccheck.py:1871, reckon/resources.py:52\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: shc-locus-final-apply-run.py:798 now takes the apply that stamped the family, so the rendered verdict at shc-locus-final-apply.html:12 matches the record's stamped state, spend and scope rather than the no-op reground apply.\nSCORE evidence: 15\nJUSTIFICATION evidence: gate.log records an EXIT=0 verify whose printed calls 9 / spend 0.270079 / stamped true match shc-locus-final-apply.json, and the reground block (7 calls, USD 0.119253) is now reproducible by reground_scores, but the gate still asserts none of the fragment's content and the USD 0.089812 interrupted-drain figure rests on a live-graph query I did not re-run.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: `git show --stat 35d60ab34` changes only the three files under docs/evidence/fragments/sn-harmonize-command/ that manifest.md declares, adding no product source and no out-of-scope write.\nSCORE durability: 6\nJUSTIFICATION durability: reinstating the pre-fix `entry = applies[-1]` at shc-locus-final-apply-run.py:798 in a scratch copy makes render() reproduce \"not converged\" and \"0-member roster: -\" while verify() at line 1227 still prints OK and exits 0, so no assertion reddens when this fix regresses.\nSCORE fit: 18\nJUSTIFICATION fit: the additions at shc-locus-final-apply-run.py:557 and :606 follow the file's existing services-shim and cost-aggregation idiom and introduce no plan, stage or ticket label.\nSCORE reuse: 17\nJUSTIFICATION reuse: _run_cost at shc-locus-final-apply-run.py:557 delegates to the owners aggregate_calls_per_phase/aggregate_spend_per_phase rather than re-implementing the query, though it is a third inline copy of the type-Svc services shim the same file already carries at lines 431 and 530 and the sibling runners express as _CostServices.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-locus-final-apply-run.py:1227 non-blocking: verify() computes stamped and converged only to print them and never compares the rendered fragment to the record; in a scratch copy reinstating the pre-fix entry = applies[-1] at line 798, render() reproduced \"Verdict: not converged\" and \"0-member roster: -\" while verify() still printed OK with EXIT=0, so the commit's own repair has no assertion that reddens if it is reverted.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-locus-final-apply-run.py:557 non-blocking: _run_cost returns (0, 0.0) when the hardcoded INTERRUPTED_DRAINS run id has no LLMCost rows, so a re-run of reground-scores after graph retention would silently drop the USD 0.089812 with exit 0 - the same total-drop the commit set out to remove - instead of failing when the commit's fault cannot be found.",
+  "review_run_id": "r-20261029T075033092279-review-of-shc-locus-final-apply-35d60ab34fa1",
+  "reviewed_base_sha": "37f1b7f3f8afdf290b643c336d108a208e0226a4",
+  "reviewed_head_sha": "35d60ab34fa18659ce7018541040254c52ccf9e6",
+  "reviewed_revisions": [
+    "35d60ab34fa18659ce7018541040254c52ccf9e6"
+  ],
+  "reviewed_run_id": "r-20261028T215047215974-shc-locus-final-apply",
+  "scores": {
+    "durability": 6,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T08:58:00Z",
+  "total": 95
+}
