@@ -30,7 +30,7 @@ which is the second defect this node closes.</p>
 
 <p><code>_lock_claimed_name_bindings</code> already had two lifecycle exceptions: reuse of a stable
 stage, and revival of a superseded or exhausted spelling with no live successor. A third joins them,
-and it is granted only to the two composition claim paths — never to an attachment:</p>
+and it is granted only to the composition claim paths — never to an attachment:</p>
 
 <ul>
   <li>the candidate target is at <code>pending</code>;</li>
@@ -48,6 +48,21 @@ rich write binds <code>PRODUCED_NAME</code>; the focused path writes that edge i
 transaction. A pending identity owned by another live claim matches none of the conditions and is
 refused exactly as before.</p>
 
+<h3 id="sib-adopt-pending-projection-stubs-writer">The writer that actually composes</h3>
+
+<p>An exception is worth nothing where composition refuses to grant it, and the first cut granted it
+in the wrong place: the enabling call sat on a staging helper no production path reaches, while
+<code>persist_generated_name_winners</code> — the writer the compose worker reaches through
+<code>persist_generated_name_batch</code>. The live writer now grants it, so the path that actually
+composes adopts the stub instead of colliding and parking.</p>
+
+<p>Its winner split treats the resulting <code>adoption</code> binding as stable reuse, which is what
+it is: an adopted stub already exists as a node and carries its own content, so it needs no rich
+write, and the stable finalize statement binds the source's <code>PRODUCED_NAME</code> edge, marks
+the source <code>composed</code> and clears its claim. Without that mapping the adopted winner fell
+into neither the reserved nor the stable list and the write aborted on its own exact-claim
+assertion.</p>
+
 <h3 id="sib-adopt-pending-projection-stubs-park">The cause survives parking</h3>
 
 <p>The orphan sweep's parking statement now appends the recorded refusal to the cap message
@@ -57,19 +72,24 @@ disposition write, which it previously called without them.</p>
 
 <h3 id="sib-adopt-pending-projection-stubs-proof">Proof</h3>
 
-<p><code>tests/standard_names/test_compose_adopts_pending_stub.py</code> drives both claim paths on
-the disposable graph. At main three cases fail and at head all four pass; the owned-stub control
+<p><code>tests/standard_names/test_compose_adopts_pending_stub.py</code> drives the three claim paths on
+the disposable graph. At main four cases fail and at head all five pass; the owned-stub control
 passes at both revisions, as a regression guard rather than a discriminator.</p>
 
 <table>
   <tr><th>case</th><th>main</th><th>head</th></tr>
   <tr><td>batch claim adopts an unowned projection stub</td><td>fails: stub stays pending, no winner</td><td>passes: drafted, receipt carries the source</td></tr>
   <tr><td>focused claim adopts and writes the producing edge</td><td>fails: no edge, source stays extracted</td><td>passes: edge written, source attached</td></tr>
+  <tr><td>production writer adopts and finalizes the source</td><td>fails: stub stays pending, no winner</td><td>passes: drafted, producing edge, source composed</td></tr>
   <tr><td>stub owned by another claim</td><td>passes: refused (control)</td><td>passes: refused</td></tr>
   <tr><td>parked source keeps its collision reason</td><td>fails: only the cap message survives</td><td>passes: cap message plus the refusal</td></tr>
 </table>
 
+<p>Deleting the exception from the production writer alone, with everything else at head, turns the
+production-writer case red again with the same signature — the stub stays <code>pending</code> and
+no source is finalized.</p>
+
 <p><code>tests/standard_names</code> on the default markers adds no failure id against main: one
 failure at both revisions (<code>test_export_determinism.py::TestManifestDeterminism::test_no_commit_uses_stable_unversioned_timestamp</code>),
 so the added count is zero. The <code>-m graph</code> run over the new file and
-<code>test_last_source_supersede.py</code> is 12 passed.</p>
+<code>test_last_source_supersede.py</code> is 13 passed.</p>
