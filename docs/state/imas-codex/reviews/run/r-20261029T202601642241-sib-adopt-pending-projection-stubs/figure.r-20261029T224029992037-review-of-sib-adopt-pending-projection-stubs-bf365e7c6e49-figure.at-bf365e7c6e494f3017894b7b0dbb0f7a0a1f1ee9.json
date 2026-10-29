@@ -52,6 +52,13 @@
       }
     }
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-sib-adopt-pending-projection-stubs-bf365e7c6e49",
+      "recorded_at": "2026-10-29T22:59:49.270273+00:00"
+    }
+  },
   "findings": [
     {
       "disposition": null,
