@@ -1,0 +1,122 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "A figure review runs no suite; the zero and the empty list are declared rather than measured.",
+  "attachment_map": {
+    "image-0.png (1400x720 RGBA, attached to this review run)": "docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs/adoption-state.svg"
+  },
+  "attachment_note": "One rendered image was attached and was opened with this review node's own Read tool. It is 1400x720 RGBA. Attribution to the reviewed figure is by content, not by filename (the attachment carries no provenance of its own): the reviewed run adds exactly one figure, adoption-state.svg, and the render shows the state diagram its caption describes -- a three-node top row (projection stub -> drafted, with a receipt -> source composed), a two-node refusal row (refused as a collision -> source parked at the cap), and two prose panels. No SVG was opened, read, searched, listed, rendered or git-shown by this review; every verdict below is read from the attached PNG's pixels with Pillow against that PNG only. This head is the repair of the previous round's blocking finding, in which the same figure rendered as seven blank rectangles with zero glyphs: measured now, the canvas carries 22,904 dark mark pixels (alpha > 16, luminance < 120) spanning bbox (62,22)-(1134,628), against 2,551 confined to two arrowheads in the prior render, and every box interior holds 48-56 distinct RGBA values where it previously held exactly one. The labels render.",
+  "completed_at": "2026-10-29T23:18:31.921Z",
+  "dispatched_at": "2026-10-29T23:06:45Z",
+  "figure_checks": {
+    "attachment_alpha": "extrema 0-255; 605,504 fully transparent px (background)",
+    "attachment_format": "PNG 1400x720 RGBA",
+    "attachment_opened": true,
+    "caption_repeats_title": false,
+    "content_bbox": [
+      29,
+      22,
+      1210,
+      650
+    ],
+    "dark_mark_bbox": [
+      62,
+      22,
+      1134,
+      628
+    ],
+    "dark_mark_pixels_lum_lt_120": 22904,
+    "distinct_rgba_values": 288,
+    "distinct_rgba_values_in_box_interiors": [
+      49,
+      56,
+      48,
+      49,
+      49,
+      49,
+      49
+    ],
+    "prior_render_comparison": "previous round at bf365e7c6: 2,551 dark mark px inside (344,79)-(876,230) and exactly 1 RGBA value per box interior (blank boxes); this head: 22,904 dark mark px spanning (62,22)-(1134,628) and 48-56 RGBA values per interior",
+    "svg_read_by_this_review": false,
+    "text_colours": {
+      "body": "#333333 (12.6:1)",
+      "condition_note": "#2e8b57 (4.24:1)",
+      "title_and_headings": "#111111 (18.9:1 on white)"
+    }
+  },
+  "figure_verdicts": [
+    {
+      "attachment": "image-0.png",
+      "figure": "docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs/adoption-state.svg",
+      "rubric": {
+        "contrast": "PASS on every text run except one, recorded as finding 1 (non-blocking): the title and box headings are #111111 (18.9:1 on white), box and panel body text is #333333 (12.6:1), the connector labels are #333333, and the body text inside the mint box clears comfortably against #f2faf5. The exception is the green condition note, #2e8b57 on white, at 4.24:1 -- readable but just under the 4.5:1 floor for text of its ~13 px size.",
+        "data_ink": "PASS. The information this figure carries is its labels and its two-branch topology, and both carry the visual weight. The marks are text, seven thin box outlines, five connectors and two arrowheads; nothing competes with them. The single mint fill (#f2faf5 with a #2e8b57 border) sits on the 'drafted, with a receipt' node, which is the state the figure argues for, so the emphasis is on the subject rather than spread across the canvas.",
+        "decoration": "PASS. There is no gradient, shadow, grid, band or themed styling. Fills are flat (six boxes #fafafa, the highlighted one #f2faf5) on a transparent background, and the parked node in the second row is distinguished by a dashed border rather than by a fill or a colour, which reads as a state marker.",
+        "label_collision": "PASS. Nothing is clipped: the whole content bbox (29,22)-(1210,650) sits inside the 1400x720 canvas with margin on every side, and no glyph touches an edge. Nothing overlaps. Measured clearances: the green condition note ends at x 489 against the highlighted box's left border at x 503 (14 px); its first line starts at y 97 against the box top at y 79; the 'finalize' label occupies y 186-195 above an arrow drawn at y 214 (18 px); and the 'another claim owns the stub' label starts at x 199, 14 px right of the dashed connector at x 185-186, which continues visibly above (y 256-262) and below (y 289-295) it rather than running under the text. No label sits on a connector or on another label.",
+        "legibility": "PASS. All seven nodes are labelled and readable: the title ('A compose claim adopts a pending projection stub of its own DD path', glyph band 18 px tall), each box heading (~18 px), each box body (~14 px), the two connector labels ('finalize', 'another claim owns the stub') and the five-line green condition note beside the adopted edge (~13 px). Ink is #111111 for the title and headings and #333333 for body text, on #fafafa box fills and a transparent canvas; no word is clipped, truncated or set at a size that forces the reader to guess. The previous round's blank-box defect is gone.",
+        "table_form": "PASS. The subject is a state transition with one refusal branch and two explanatory panels, which is genuinely diagrammatic; there is no tabular content drawn as a picture. A flow diagram is the right form for 'this stub is adopted under this condition, that one is refused, and a source that reaches the cap is parked'."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "disposition": {
+        "outcome": "exempted",
+        "reason": "Recorded rather than acted on because this review is read-only and the note is readable as rendered; it is the smallest text on the canvas and matters chiefly to low-vision readers. Cheap to fold into the next revision that touches this diagram, but not worth holding promotion."
+      },
+      "file": "docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs/adoption-state.svg",
+      "id": "fd9fb0c9d27",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The green condition note beside the adopted edge ('compose claim: projection is the source's own DD path and no producer holds it') is set in #2e8b57 on white, which measures 4.24:1 -- just under the 4.5:1 floor for text at its measured size (glyph bands 11-12 px, about 13 px type). It is legible in the render, so a reader is not stopped, but it is the only text on the canvas that does not clear the floor, while every other run clears it by a wide margin (#333333 body text at 12.6:1). Darkening the green towards #2e7d4f, or setting the note in the #333333 used elsewhere, would put it over the line without changing the diagram."
+    },
+    {
+      "disposition": {
+        "outcome": "exempted",
+        "reason": "Cosmetic white space only. The figure is readable and complete at its rendered geometry and no label is forced towards an edge by the right-hand margin; the empty area sits where the eye rests after the bottom panels. Not worth redrawing the figure on its own."
+      },
+      "file": "docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs/adoption-state.svg",
+      "id": "fd9fb0c9d27",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The drawing sits left of the canvas centre: the content bbox (29,22)-(1210,650) leaves 29 px on the left against 190 px on the right and a 70 px band below, so the diagram reads left-heavy when placed at full column width. The previous round deferred this item because the layout would change once the labels rendered; the labels now render and the geometry is unchanged, so it is re-judged here on the repaired render. Nothing is clipped and no reader loses information, so it does not hold the node."
+    }
+  ],
+  "item_verdicts": {
+    "contrast": "pass",
+    "data_ink": "pass",
+    "decoration": "pass",
+    "label_collision": "pass",
+    "legibility": "pass",
+    "table_form": "pass"
+  },
+  "justifications": {
+    "contrast": "Computed from the composited pixel colours: #111111 18.9:1, #333333 12.6:1, #2e8b57 4.24:1.",
+    "data_ink": "No element other than labels, outlines and connectors carries ink; the mint fill marks the adopted node.",
+    "decoration": "Every fill is flat and the background is transparent; no gradient or styling exists among the 288 distinct RGBA values.",
+    "label_collision": "Clearances measured between text extents and the nearest border or connector; no overlap and nothing clipped.",
+    "legibility": "Glyph bands measured from the PNG: title 18 px, box headings 18 px, body 13-14 px, condition note 11-12 px; every box interior now holds 48-56 RGBA values, so text is drawn.",
+    "table_form": "The content is a transition graph with a branch, correctly drawn as a diagram."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261029T230506456574-review-of-sib-adopt-pending-projection-stubs-1e39bdd42ac6-figure",
+  "reviewed_base_sha": "049597eb532fe9a84aad964ea1c74d8d3b30d4d7",
+  "reviewed_figures": [
+    "docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs/adoption-state.svg"
+  ],
+  "reviewed_head_sha": "1e39bdd42ac6bda44bee7854ccb7be279df686c4",
+  "reviewed_run_id": "r-20261029T202601642241-sib-adopt-pending-projection-stubs",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: PASS - all seven nodes carry labels (title 18 px, headings and body 13-18 px) and every word is readable; the previous round's blank-box defect is repaired (2,551 -> 22,904 dark mark px, and 48-56 RGBA values per box interior where there was exactly 1).",
+    "RUBRIC data_ink: PASS - text, seven thin outlines and five connectors are the whole mark, and the one mint fill sits on the node the figure argues for.",
+    "RUBRIC decoration: PASS - flat fills on a transparent canvas, no gradient, shadow, grid or band; the parked state is marked by a dashed border rather than by decoration.",
+    "RUBRIC contrast: PASS except the green condition note, #2e8b57 on white at 4.24:1 against a 4.5:1 floor for ~13 px text (finding 1, non-blocking); title and headings measure 18.9:1 and body text 12.6:1.",
+    "RUBRIC table_form: PASS - a state transition with a refusal branch is properly a diagram, not tabular content drawn as a picture.",
+    "RUBRIC label_collision: PASS - content bbox (29,22)-(1210,650) inside the 1400x720 canvas, no glyph on an edge, and measured clearances of 14-18 px wherever a label approaches a border or a connector."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T23:19:49.511997+00:00",
+  "total": null
+}
