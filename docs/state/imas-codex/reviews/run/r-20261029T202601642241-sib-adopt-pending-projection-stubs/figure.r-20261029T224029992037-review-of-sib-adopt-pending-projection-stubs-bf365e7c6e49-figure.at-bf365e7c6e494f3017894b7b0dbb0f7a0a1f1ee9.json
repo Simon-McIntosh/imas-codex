@@ -1,0 +1,113 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "A figure review runs no suite; the zero and the empty list are declared rather than measured.",
+  "attachment_map": {
+    "image-0.png (1400x720 RGBA, attached to this review run)": "docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs/adoption-state.svg"
+  },
+  "attachment_note": "One rendered image was attached and was opened with the review node's own Read tool. It is 1400x720 RGBA. Attribution to the reviewed figure is by content, not by filename (the attachment carries no provenance of its own): the reviewed run's commit 7ab58c22f adds exactly one figure, docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs/adoption-state.svg, and its manifest-level description ('the stub, its adoption ..., the content arriving through the rich write, and the refusal branch that parks a source at the claim cap') matches the attached render's structure -- a three-node top row, a two-node second row, and a two-node final row, with seven boxes and five connectors. No SVG was opened, read, searched, listed, rendered or git-shown by this review; every verdict below is read from the attached PNG's pixels. Measurements were taken with Pillow against that PNG only. The canvas has a fully transparent background (611,823 px of RGBA 0,0,0,0; alpha channel extrema 0-255) and the drawn content occupies bbox (29, 79)-(1211, 651).",
+  "completed_at": "",
+  "dispatched_at": "2026-10-29T22:42:37Z",
+  "figure_checks": {
+    "attachment_alpha": "extrema 0-255; 611,823 fully transparent px (background)",
+    "attachment_format": "PNG 1400x720 RGBA",
+    "attachment_opened": true,
+    "caption_repeats_title": false,
+    "content_bbox": [
+      29,
+      79,
+      1211,
+      651
+    ],
+    "distinct_rgba_values": 133,
+    "distinct_rgba_values_in_box_interiors": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "mark_pixels_bbox": [
+      344,
+      79,
+      876,
+      230
+    ],
+    "mark_pixels_lum_lt_120": 2551,
+    "svg_read_by_this_review": false
+  },
+  "figure_verdicts": [
+    {
+      "attachment": "image-0.png",
+      "figure": "docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs/adoption-state.svg",
+      "rubric": {
+        "contrast": "FAIL by absence, reported against the same defect as finding 1. Text contrast cannot be assessed because no text is drawn: there are zero text pixels to measure, so nothing here can clear or fail 4.5:1. The non-text marks that do exist are legible in themselves -- box borders #929292 on white are about 3.5:1 and the accent #2e8b57 is about 4.3:1, both adequate for a 2-3 px stroke -- so the defect is the absent text, not a contrast failure in what is drawn.",
+        "data_ink": "FAIL, by the same single cause as finding 1: the data this figure exists to carry are its labels, and there are none, so no data ink is on the canvas. The ink that IS drawn is clean and correctly minimal -- seven flat box fills, four connector strokes, one accent border and one mint highlight fill, with no gradient, no shadow and no band -- but outlines of unlabelled boxes are not information. Recorded against this item as well as against legibility because the item asks that the data carry the visual weight, and here the data are entirely missing rather than merely outweighed.",
+        "decoration": "PASS. Nothing decorative is present. The canvas is transparent, not filled with a background band; there is no gradient, drop shadow, bevel, grid or themed styling anywhere in the 133 distinct RGBA values, all of which are flat fills, flat strokes and their antialiasing edges. The one non-neutral fill (mint #f2faf5 with a #2e8b57 border, 44,067 px) marks the highlighted node rather than decorating it, which is the correct use of a single accent.",
+        "label_collision": "PASS on the evidence available, vacuously: no label is clipped, overlapping a label, or lying on the data, because no label exists. Nothing on the canvas is clipped either -- the content bbox (29, 79)-(1211, 651) sits wholly inside the 1400x720 canvas -- and the connectors do not run over any box. Whether labels WOULD collide once they render cannot be determined from this attachment.",
+        "legibility": "FAIL, and this is the blocking defect (finding 1). Seven rectangles and five connectors are drawn and NOT ONE GLYPH IS PRESENT anywhere on the 1400x720 canvas. Measured: every one of the seven box interiors is a single uniform colour with exactly one distinct RGBA value and no other pixel in it -- boxes 1, 3, 4, 5, 6 and 7 are (#fafafa, alpha 255), box 2 (the highlighted one) is (#f2faf5, alpha 255); the interiors hold 32,184 to 91,234 pixels each and contain zero pixels differing from the fill. A whole-canvas scan for mark-like pixels (alpha > 16 and mean luminance < 120) returns 2,551 points, and their bounding box is x 344-876, y 79-230 -- the arrowheads of the two solid top-row connectors only. Outside that rectangle the image contains no dark ink at all. A reader therefore receives seven blank white boxes joined by five arrows: the figure's entire content -- which stub is adopted, on what condition, what the rich write adds, and which branch refuses and parks the source -- is absent, so the caption's account cannot be checked against the picture at all. The run's committed caption (docs/evidence/fragments/sn-integrity-backlog/sib-adopt-pending-projection-stubs.html:73-76) is substantive and correct in itself; it is the only place the reader can learn what the diagram says.",
+        "table_form": "PASS. The content is a state transition with one refusal branch, which is genuinely diagrammatic; it is not tabular information rendered as a picture. A flow diagram is the right form for 'this stub is adopted, this one is refused and parks its source'."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "disposition": null,
+      "file": "docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs/adoption-state.svg",
+      "id": "fd9fb0c9d27",
+      "line": null,
+      "severity": "blocking",
+      "summary": "The figure renders as seven blank rectangles: not one glyph is present anywhere on the 1400x720 canvas, so the diagram conveys nothing to a reader. Measured from the attached PNG: each of the seven box interiors is exactly one distinct RGBA value with no other pixel in it (#fafafa for six, #f2faf5 for the highlighted box), and a whole-canvas scan for mark-like pixels (alpha > 16, mean luminance < 120) finds 2,551 points whose bounding box is x 344-876, y 79-230 -- the two solid top-row arrowheads and nothing else. The connectors, the highlight and the box geometry show the drawing was made; only the text is missing. This blocks the node because every claim the caption makes depends on the labels: which node is the pending stub, which is 'drafted', what the rich write contributes, and which branch is the refusal that parks the source at the claim cap. The cause cannot be determined from the PNG alone and is not asserted here: a rasteriser that dropped the glyphs (an unavailable font family, or text carried in a construct the converter does not support) and a source whose text colour matches its fill look identical in the raster. What is certain, and what the reader receives from this render, is a blank diagram. Repair is on the figure's owner: confirm the text renders under the renderer the evidence page actually uses, then re-attach a PNG in which the labels are visible; if the source is sound and only the conversion is at fault, the finding is answered by a correct render, not by editing the diagram."
+    },
+    {
+      "disposition": {
+        "outcome": "exempted",
+        "reason": "Not actionable while the figure renders without text: the layout will change when labels are restored and sized, so the margins should be re-judged on the repaired render rather than corrected blind. Folded into the repair the blocking finding already requires of this figure's owner."
+      },
+      "file": "docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs/adoption-state.svg",
+      "id": "fd9fb0c9d27",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The drawing sits off-centre in its canvas: the content bbox is (29, 79, 1211, 651) in a 1400x720 canvas, leaving a 29 px margin on the left against 189 px on the right and a 69 px band below. The diagram reads left-heavy and slightly high when placed at full column width, and the bottom row of boxes -- the refusal branch -- sits furthest from any edge while the top row touches the left. Nothing is clipped, so this does not stop a reader; it is a composition defect that will be obvious once the labels make the figure readable, and it is cheapest to fix at the same time as the text."
+    }
+  ],
+  "item_verdicts": {
+    "contrast": "fail",
+    "data_ink": "fail",
+    "decoration": "pass",
+    "label_collision": "pass",
+    "legibility": "fail",
+    "table_form": "pass"
+  },
+  "justifications": {
+    "contrast": "No text pixels exist to assess; the drawn strokes are adequate, so the failure is the missing text.",
+    "data_ink": "Same root cause as legibility; the figure's information is its labels, which are absent.",
+    "decoration": "Only flat fills and strokes; transparent background; the mint highlight marks the subject rather than decorating.",
+    "label_collision": "Nothing is clipped; equality of absence rather than a positive check, stated as such.",
+    "legibility": "Measured from the attached PNG: seven uniform single-colour box interiors, zero glyph pixels anywhere, dark ink confined to two arrowheads.",
+    "table_form": "A state transition with a branch is correctly drawn as a diagram."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261029T224029992037-review-of-sib-adopt-pending-projection-stubs-bf365e7c6e49-figure",
+  "reviewed_base_sha": "049597eb532fe9a84aad964ea1c74d8d3b30d4d7",
+  "reviewed_figures": [
+    "docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs/adoption-state.svg"
+  ],
+  "reviewed_head_sha": "bf365e7c6e494f3017894b7b0dbb0f7a0a1f1ee9",
+  "reviewed_run_id": "r-20261029T202601642241-sib-adopt-pending-projection-stubs",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: FAIL (blocking) - the render carries zero glyphs; all seven box interiors are a single uniform fill colour and the only dark ink on the canvas is the two top-row arrowheads (2,551 px inside x 344-876, y 79-230). A reader sees seven blank rectangles.",
+    "RUBRIC data_ink: FAIL - the labels are the data and none are drawn; the ink present (flat fills, connector strokes, one accent) is correctly minimal but carries no information.",
+    "RUBRIC decoration: PASS - transparent background, no gradient/decoration, one meaningful accent fill.",
+    "RUBRIC contrast: FAIL by absence - no text exists to contrast; the strokes that are drawn clear their thresholds.",
+    "RUBRIC table_form: PASS - a state transition with a refusal branch is properly a diagram, not tabular content drawn as a picture.",
+    "RUBRIC label_collision: PASS (vacuous) - nothing is clipped (content bbox inside the canvas) and no label overlaps; there are no labels to collide."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T22:47:11.873945+00:00",
+  "total": null
+}

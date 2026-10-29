@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "baseline_suite at 049597eb5 records failure_ids ['tests/standard_names/test_export_determinism.py::TestManifestDeterminism::test_no_commit_uses_stable_unversioned_timestamp'] (1 failed, 8535 passed, 12 skipped); after_suite at bf365e7c6 records the same single id (1 failed, 8536 passed, 11 skipped); added failure ids = 0.",
+  "call_sites": [
+    "imas_codex/standard_names/worker_tasks/worker_compose_and_validate.py:901",
+    "imas_codex/standard_names/worker_tasks/worker_compose_and_validate.py:939",
+    "imas_codex/standard_names/worker_tasks/worker_common.py:938",
+    "imas_codex/standard_names/worker_tasks/worker_common.py:1041",
+    "imas_codex/standard_names/graph_store/graph_catalog.py:2595"
+  ],
+  "completed_at": "2026-10-29T22:47:15.122Z",
+  "dispatched_at": "2026-10-29T22:40:20Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T202601642241-sib-adopt-pending-projection-stubs/logs/gate-head.log",
+      "id": "review-head-log-provenance",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the after_suite log names no revision on its first line and ends on the pytest summary rather than a bare 'EXIT=' line, so the head arm's result cannot be read off the log the manifest points at; the base arm (logs/gate-base.log) carries both, so the two arms are not recorded to the same standard, and the revision and exit status survive only in the manifest's after_suite JSON."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_catalog.py",
+      "id": "review-stable-finalize-kind-literal",
+      "line": "2460",
+      "severity": "non-blocking",
+      "text": "non-blocking: the shared finalize statement hardcodes 'b.binding_kind = 'adoption'' while _STABLE_FINALIZE_BINDING_KINDS at :2174 declares that same membership, so a third kind added to the frozenset would be selected into the batch and then silently dropped by the statement's WHERE clause, failing later on the finalized-ids assertion rather than where the kind was declared."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit against 9ca2e731580c68191ae66db117063f579c816f01: 26d1673e8 moves adoption from _STABLE_BINDING_KINDS into _RICH_WRITE_BINDING_KINDS and _STABLE_FINALIZE_BINDING_KINDS, adds the description/unit assertions and rewrites two docstrings; 7ab58c22f rewrites the fragment's winner-split paragraph and adds the state diagram; bf365e7c6 deletes the duplicated finalize statement and lets the shared one accept a source outside 'extracted' for adoption only.",
+    "done_when": "The done_when requires the production writer to adopt and write the stub on both claim paths, the owned-stub refusal to survive, and the parked-source reason to survive keyed to the case names in tests/standard_names/test_compose_adopts_pending_stub.py; the manifest records exactly those five graph cases and the default-marker suite delta, and logs/negative-control.log shows the production-writer case red when adoption is dropped from _RICH_WRITE_BINDING_KINDS, so the gate asserts the measure rather than a proxy.",
+    "goal": "The node goal is that a compose claim adopts an unowned pending projection stub of its own DD path instead of colliding with it until the source parks; the three gained commits (26d1673e8, 7ab58c22f, bf365e7c6) close the production half that the earlier review found unreachable and make the adopted name carry the composed content, routed at imas_codex/standard_names/graph_store/graph_catalog.py:2343/2384 into the rich name write and the shared finalize statement.",
+    "manifest": "Read; status complete, nine commits listed with the three gained ones named, both suite arms carry literal commands with absolute paths, log paths, completed=true, exit_status 1 and the same single failure id, negative_control_log is a bare path, and all six rubric self-check lines are present; its blockers field honestly records that reckon's node record still lacks graph_catalog.py so the coordinator must run `crew widen`.",
+    "write_paths": "The granted scope for this round (resume-1-advice.txt items 4 and 5, resume-2-advice.txt items 1-3) covers graph_catalog.py, graph_source_bindings.py, tests/standard_names/test_generate_name_persist.py, tests/standard_names/test_compose_adopts_pending_stub.py, the evidence fragment and its figures directory; git diff --stat 9ca2e731580c68191ae66db117063f579c816f01..bf365e7c6e494f3017894b7b0dbb0f7a0a1f1ee9 touches exactly those six paths and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_compose_adopts_pending_stub.py:254-257 asserts the adopted stub's description and unit against the values the candidate carried, and logs/negative-control.log reinstates the regression (adoption out of the rich-write set) and reddens exactly that assertion with {'description': None, 'unit': None}.",
+    "evidence": "The suite arms in the manifest are recorded with literal commands and completed=true, but the head arm's log (logs/gate-head.log) carries neither a '# revision' header nor a terminal 'EXIT=' line, so the log alone cannot be tied to bf365e7c6e494f3017894b7b0dbb0f7a0a1f1ee9.",
+    "fit": "The two new constants at imas_codex/standard_names/graph_store/graph_catalog.py:2166 and :2174 name what they gate, but the statement at :2460 repeats the 'adoption' literal that _STABLE_FINALIZE_BINDING_KINDS already declares.",
+    "goal_fidelity": "imas_codex/standard_names/graph_store/graph_catalog.py:2343 routes an adopted winner through services.write_standard_names so the stub takes the candidate's description and unit, and :2384 finishes it on the shared finalize statement, which is the whole goal of the node.",
+    "reuse": "bf365e7c6 removes the copied finalize statement entirely and reuses the reserve path's rich write (write_standard_names) and the one stable finalize statement, rather than adding a third binding statement the hint-lifecycle guard would then have to count.",
+    "scope_discipline": "Every path in git diff --stat 9ca2e731580c68191ae66db117063f579c816f01..bf365e7c6e494f3017894b7b0dbb0f7a0a1f1ee9 is inside the coordinator's granted set and no plan or sprint file is touched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The node goal is that a compose claim adopts an unowned pending projection stub of its own DD path instead of colliding with it until the source parks; the three gained commits (26d1673e8, 7ab58c22f, bf365e7c6) close the production half that the earlier review found unreachable and make the adopted name carry the composed content, routed at imas_codex/standard_names/graph_store/graph_catalog.py:2343/2384 into the rich name write and the shared finalize statement.\nVERDICT done_when: The done_when requires the production writer to adopt and write the stub on both claim paths, the owned-stub refusal to survive, and the parked-source reason to survive keyed to the case names in tests/standard_names/test_compose_adopts_pending_stub.py; the manifest records exactly those five graph cases and the default-marker suite delta, and logs/negative-control.log shows the production-writer case red when adoption is dropped from _RICH_WRITE_BINDING_KINDS, so the gate asserts the measure rather than a proxy.\nVERDICT write_paths: The granted scope for this round (resume-1-advice.txt items 4 and 5, resume-2-advice.txt items 1-3) covers graph_catalog.py, graph_source_bindings.py, tests/standard_names/test_generate_name_persist.py, tests/standard_names/test_compose_adopts_pending_stub.py, the evidence fragment and its figures directory; git diff --stat 9ca2e731580c68191ae66db117063f579c816f01..bf365e7c6e494f3017894b7b0dbb0f7a0a1f1ee9 touches exactly those six paths and nothing else.\nVERDICT manifest: Read; status complete, nine commits listed with the three gained ones named, both suite arms carry literal commands with absolute paths, log paths, completed=true, exit_status 1 and the same single failure id, negative_control_log is a bare path, and all six rubric self-check lines are present; its blockers field honestly records that reckon's node record still lacks graph_catalog.py so the coordinator must run `crew widen`.\nVERDICT diff: Read commit by commit against 9ca2e731580c68191ae66db117063f579c816f01: 26d1673e8 moves adoption from _STABLE_BINDING_KINDS into _RICH_WRITE_BINDING_KINDS and _STABLE_FINALIZE_BINDING_KINDS, adds the description/unit assertions and rewrites two docstrings; 7ab58c22f rewrites the fragment's winner-split paragraph and adds the state diagram; bf365e7c6 deletes the duplicated finalize statement and lets the shared one accept a source outside 'extracted' for adoption only.\nCALL_SITES: imas_codex/standard_names/worker_tasks/worker_compose_and_validate.py:901, imas_codex/standard_names/worker_tasks/worker_compose_and_validate.py:939, imas_codex/standard_names/worker_tasks/worker_common.py:938, imas_codex/standard_names/worker_tasks/worker_common.py:1041, imas_codex/standard_names/graph_store/graph_catalog.py:2595\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/graph_store/graph_catalog.py:2343 routes an adopted winner through services.write_standard_names so the stub takes the candidate's description and unit, and :2384 finishes it on the shared finalize statement, which is the whole goal of the node.\nSCORE evidence: 17\nJUSTIFICATION evidence: The suite arms in the manifest are recorded with literal commands and completed=true, but the head arm's log (logs/gate-head.log) carries neither a '# revision' header nor a terminal 'EXIT=' line, so the log alone cannot be tied to bf365e7c6e494f3017894b7b0dbb0f7a0a1f1ee9.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: Every path in git diff --stat 9ca2e731580c68191ae66db117063f579c816f01..bf365e7c6e494f3017894b7b0dbb0f7a0a1f1ee9 is inside the coordinator's granted set and no plan or sprint file is touched.\nSCORE durability: 19\nJUSTIFICATION durability: tests/standard_names/test_compose_adopts_pending_stub.py:254-257 asserts the adopted stub's description and unit against the values the candidate carried, and logs/negative-control.log reinstates the regression (adoption out of the rich-write set) and reddens exactly that assertion with {'description': None, 'unit': None}.\nSCORE fit: 17\nJUSTIFICATION fit: The two new constants at imas_codex/standard_names/graph_store/graph_catalog.py:2166 and :2174 name what they gate, but the statement at :2460 repeats the 'adoption' literal that _STABLE_FINALIZE_BINDING_KINDS already declares.\nSCORE reuse: 20\nJUSTIFICATION reuse: bf365e7c6 removes the copied finalize statement entirely and reuses the reserve path's rich write (write_standard_names) and the one stable finalize statement, rather than adding a third binding statement the hint-lifecycle guard would then have to count.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T202601642241-sib-adopt-pending-projection-stubs/logs/gate-head.log:1 non-blocking: the after_suite log names no revision on its first line and ends on the pytest summary rather than a bare 'EXIT=' line, so the head arm's result cannot be read off the log the manifest points at; the base arm (logs/gate-base.log) carries both, so the two arms are not recorded to the same standard, and the revision and exit status survive only in the manifest's after_suite JSON.\nFINDING imas_codex/standard_names/graph_store/graph_catalog.py:2460 non-blocking: the shared finalize statement hardcodes 'b.binding_kind = 'adoption'' while _STABLE_FINALIZE_BINDING_KINDS at :2174 declares that same membership, so a third kind added to the frozenset would be selected into the batch and then silently dropped by the statement's WHERE clause, failing later on the finalized-ids assertion rather than where the kind was declared.",
+  "review_run_id": "r-20261029T223826713485-review-of-sib-adopt-pending-projection-stubs-bf365e7c6e49",
+  "reviewed_base_sha": "9ca2e731580c68191ae66db117063f579c816f01",
+  "reviewed_head_sha": "bf365e7c6e494f3017894b7b0dbb0f7a0a1f1ee9",
+  "reviewed_run_id": "r-20261029T202601642241-sib-adopt-pending-projection-stubs",
+  "scores": {
+    "durability": 19,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T23:50:00Z",
+  "total": 111
+}
