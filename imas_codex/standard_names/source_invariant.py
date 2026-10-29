@@ -39,49 +39,44 @@ def _drained_test(name: str, successor: str) -> str:
       )"""
 
 
-def _supersede_update(
-    name: str, successor: str, operation: str, reason: str, origin: str, run_id: str
-) -> str:
+def _supersede_update(name: str, successor: str) -> str:
+    """Retire a drained name and point the successor edge to its new holder.
+
+    The receipt for this lifecycle event is written by
+    :func:`record_supersede_receipts` through the repository's single
+    ``StandardNameChange`` writer, so this clause carries the retirement and the
+    successor edge and nothing else.
+    """
     return f"""SET {name}.updated_at = datetime(),
             {name}.name_stage = 'superseded',
             {name}.status = 'superseded',
             {name}.claimed_at = null,
             {name}.claim_token = null
-        MERGE ({successor})-[:REFINED_FROM]->({name})
-        CREATE (change:StandardNameChange {{
-          id: 'sn-change:' + randomUUID(),
-          from_name: {name}.id, to_name: {successor}.id,
-          operation: '{operation}',
-          reason: {reason}, origin: {origin}, run_id: {run_id},
-          changed_at: datetime(), internal: true
-        }})
-        CREATE ({successor})-[:HAS_INTERNAL_CHANGE]->(change)"""
+        MERGE ({successor})-[:REFINED_FROM]->({name})"""
 
 
 def supersede_drained_name_cypher(
     *,
     name: str = "sn",
     successor: str = "new",
-    operation: str = "last_source_supersede",
-    reason: str = "$supersede_reason",
-    origin: str = "$supersede_origin",
-    run_id: str = "$supersede_run_id",
     embedded: bool = False,
 ) -> str:
     """Return the clause that supersedes a drained name in the caller's write.
 
     A writer that must stay a single statement embeds this clause; a writer
     that can afford a statement of its own runs it as one.  Keeping the text in
-    one builder means the successor edge and its receipt are written the same
-    way wherever the supersession happens, and it commits or rolls back with
-    the write that moved the source.
+    one builder means the successor edge is written the same way wherever the
+    supersession happens, and it commits or rolls back with the write that
+    moved the source.  The clause returns the pair it superseded as
+    ``superseded_old_id`` and ``superseded_new_id``, or two nulls, so the
+    caller can record the receipt with :func:`record_supersede_receipts`.
 
     ``embedded`` wraps the guard in a ``FOREACH`` over a computed flag instead
     of a ``WHERE`` filter. A filtering clause inside a ``CALL`` subquery removes
     the pair from the enclosing statement too, so the write that did move its
     sources would then report none moved at all.
     """
-    update = _supersede_update(name, successor, operation, reason, origin, run_id)
+    update = _supersede_update(name, successor)
     test = _drained_test(name, successor)
     if embedded:
         return (
@@ -92,9 +87,59 @@ def supersede_drained_name_cypher(
           """
             + update
             + """
-        )"""
         )
-    return f"WHERE {test}\n        " + update
+        RETURN CASE WHEN supersedes_predecessor THEN """
+            + f"{name}.id ELSE null END AS superseded_old_id,"
+            + f"""
+               CASE WHEN supersedes_predecessor THEN {successor}.id
+                    ELSE null END AS superseded_new_id"""
+        )
+    return (
+        f"WHERE {test}\n        "
+        + update
+        + f"\n        RETURN {name}.id AS superseded_old_id,"
+        + f"\n               {successor}.id AS superseded_new_id"
+    )
+
+
+def record_supersede_receipts(
+    query: Any,
+    pairs: Iterable[tuple[Any, Any]],
+    *,
+    operation: str = "last_source_supersede",
+    reason: str | None = None,
+    origin: str | None = None,
+    run_id: str | None = None,
+) -> list[str]:
+    """Write one standard internal receipt per superseded name.
+
+    ``query`` is the caller's graph handle or transaction wrapper, so the
+    receipt lands in the transaction that retired the name.  The receipt is the
+    usual ``StandardNameChange`` event, written by its single owner, rather than
+    a shape of its own.
+    """
+    from imas_codex.standard_names.provenance_lifecycle import (
+        record_standard_name_change,
+    )
+
+    kept = sorted(
+        {
+            (str(old), str(new))
+            for old, new in pairs
+            if old and new and str(old) != str(new)
+        }
+    )
+    for old, new in kept:
+        record_standard_name_change(
+            query,
+            old,
+            new,
+            operation=operation,
+            reason=reason,
+            origin=origin,
+            run_id=run_id,
+        )
+    return [old for old, _ in kept]
 
 
 def find_sourceless_live_names(
@@ -173,23 +218,31 @@ def supersede_names_losing_last_source(
     )
     if not pairs:
         return []
-    rows = query.query(
-        f"""
-        // LAST_SOURCE_SUPERSEDE
-        UNWIND $pairs AS pair
-        MATCH (sn:StandardName {{id: pair.old_name}}),
-              (new:StandardName {{id: pair.new_name}})
-        {supersede_drained_name_cypher(operation=operation)}
-        RETURN sn.id AS old_id, new.id AS new_id
-        ORDER BY old_id
-        """,
-        pairs=[{"old_name": old, "new_name": new} for old, new in pairs],
-        supersede_reason=reason,
-        supersede_origin=origin,
-        supersede_run_id=run_id,
+    rows = [
+        dict(row)
+        for row in query.query(
+            f"""
+            // LAST_SOURCE_SUPERSEDE
+            UNWIND $pairs AS pair
+            MATCH (sn:StandardName {{id: pair.old_name}}),
+                  (new:StandardName {{id: pair.new_name}})
+            {supersede_drained_name_cypher()}
+            ORDER BY superseded_old_id
+            """,
+            pairs=[{"old_name": old, "new_name": new} for old, new in pairs],
+        )
+        or []
+    ]
+    record_supersede_receipts(
+        query,
+        [(row.get("superseded_old_id"), row.get("superseded_new_id")) for row in rows],
+        operation=operation,
+        reason=reason,
+        origin=origin,
+        run_id=run_id,
     )
     return [
-        str(row["old_id"]) for row in rows or [] if "old_id" in row and "new_id" in row
+        str(row["superseded_old_id"]) for row in rows if row.get("superseded_old_id")
     ]
 
 
