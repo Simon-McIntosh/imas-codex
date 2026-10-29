@@ -914,14 +914,31 @@ def retarget_standard_name_sources(
             new.source_paths = [path IN new_paths WHERE path IS NOT NULL],
             old.updated_at = datetime(),
             new.updated_at = datetime()
+        WITH old, new, moved, old_paths, new_paths
+        CALL (old, new) {
+          WITH old, new
+          __LAST_SOURCE_SUPERSEDE__
+          RETURN count(*) AS superseded
+        }
         RETURN size(moved) AS moved
         """
-    migration_query = migration_query.replace(
-        "__SOURCE_BINDING_GUARD__",
-        _guard_comparison_binding_cypher("source_binding").strip(),
-    ).replace(
-        "__MOVED_BINDING_GUARD__",
-        _guard_comparison_binding_cypher("moved_binding").strip(),
+    from imas_codex.standard_names.source_invariant import (
+        supersede_drained_name_cypher,
+    )
+
+    migration_query = (
+        migration_query.replace(
+            "__LAST_SOURCE_SUPERSEDE__",
+            supersede_drained_name_cypher(name="old", successor="new"),
+        )
+        .replace(
+            "__SOURCE_BINDING_GUARD__",
+            _guard_comparison_binding_cypher("source_binding").strip(),
+        )
+        .replace(
+            "__MOVED_BINDING_GUARD__",
+            _guard_comparison_binding_cypher("moved_binding").strip(),
+        )
     )
     rows = gc.query(
         migration_query,
@@ -934,6 +951,9 @@ def retarget_standard_name_sources(
         run_id=run_id,
         retired_name_stages=sorted(_RETIRED_NAME_STAGES),
         expected_binding_names=sorted(comparison_expected_names),
+        supersede_reason=reason,
+        supersede_origin=origin,
+        supersede_run_id=run_id,
     )
     moved = int(rows[0].get("moved", 0)) if rows else 0
     if moved != len(admitted_source_ids):
