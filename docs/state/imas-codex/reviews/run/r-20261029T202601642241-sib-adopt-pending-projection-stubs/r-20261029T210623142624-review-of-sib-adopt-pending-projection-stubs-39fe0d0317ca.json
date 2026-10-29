@@ -19,6 +19,13 @@
     }
   },
   "dispatched_at": "2026-10-29T21:08:07Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-sib-adopt-pending-projection-stubs-39fe0d0317ca",
+      "recorded_at": "2026-10-29T21:46:38.860543+00:00"
+    }
+  },
   "findings": [
     {
       "file": "imas_codex/standard_names/graph_store/graph_catalog.py",
