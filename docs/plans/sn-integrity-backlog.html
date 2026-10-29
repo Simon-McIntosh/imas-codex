@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="306">
+<meta name="plan-version" content="307">
 <meta name="plan-modified" content="2026-10-29">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -1084,7 +1084,10 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
     <div class="r-comment-body"><p>reviewed the two commits r-20261029T164814816027-sib-last-source-supersede-hardening gained since ac6dc98bd and stored a parsed record at the head bbb83305a: scores goal_fidelity 19, evidence 17, scope_discipline 20, durability 13, fit 18, reuse 17, zero added failure ids, three non-blocking findings on the unguarded atomicity block, the unguarded record_change=False receipt, and the silent non-GraphClient fallback.</p></div>
 </div>
 <div class="r-comment" data-section="s45" data-id="c-run-r-20261029T164814816027-sib-last-source-supersede-hardening" data-who="reckon-build" data-when="2026-10-29T19:57:55Z">
-    <div class="r-comment-body"><p>hardened the last-source supersede: the staged writer binds the winner&#x27;s PRODUCED_NAME in the statement that decides the supersession, the compose and attach writers now run the move, its retirement and its StandardNameChange receipt in one transaction, a drained name gets its last_source_supersede receipt whatever record_change says, and the covered writers each gain a test that reads the receipt back from the graph.</p></div>
+    <div class="r-comment-body"><p>hardened the last-source supersede: the staged writer binds the winner's PRODUCED_NAME in the statement that decides the supersession, the compose and attach writers now run the move, its retirement and its StandardNameChange receipt in one transaction, a drained name gets its last_source_supersede receipt whatever record_change says, and the covered writers each gain a test that reads the receipt back from the graph.</p></div>
+</div>
+<div class="r-comment" data-section="s45" data-id="c-run-r-20261029T205725652114-review-of-sib-last-source-negative-controls-55fc276166d1" data-who="reckon-build" data-when="2026-10-29T21:04:46.389Z">
+    <div class="r-comment-body"><p>review of r-20261029T202759472003-sib-last-source-negative-controls at base 049597eb5 -&gt; head 55fc27616 scores 112/120 (goal_fidelity 19, evidence 18, scope_discipline 20, durability 19, fit 18, reuse 18) with one non-blocking finding: the duck-typed path test at test_last_source_supersede.py:509 asserts the known non-atomic outcome and will redden when that branch is repaired.</p></div>
 </div>
 <div class="r-comment" data-section="s46" data-id="c-run-r-20261029T083805766546-sib-retire-sourceless-drafts" data-who="reckon-build" data-when="2026-10-29T09:00:04.231Z">
     <div class="r-comment-body"><p>Retired 131 of 132 live exhausted drafts that carry no producing DD source through `apply_signed_manifest` (authority 133 rows, preview 131 admitted / 2 refused, manifest 2f8815c0…), one successor edge to `poloidal_angle_of_plasma_boundary_gap`; read-back lists 17 remaining sourceless live names — 16 non-exhausted recorded for the lead and 1 writer refusal — against a live population of 148 rather than the dispatch's 19 (113 exhausted records no source at all; `ion_pressure` and `beta` are derived parents).</p></div>
