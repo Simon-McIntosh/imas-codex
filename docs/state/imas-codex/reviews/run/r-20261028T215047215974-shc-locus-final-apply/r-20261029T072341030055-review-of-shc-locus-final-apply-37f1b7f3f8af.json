@@ -1,0 +1,85 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest carries no baseline_suite or after_suite block and the run wrote no armed gate logs; an empty failure list here is not a measured zero",
+  "call_site_count": 3,
+  "call_sites": [
+    "reckon/_plan_html.py:1353",
+    "reckon/doccheck.py:1623",
+    "reckon/_store.py:1568"
+  ],
+  "completed_at": "2026-10-29T07:37:00.990Z",
+  "dispatched_at": "2026-10-29T07:26:49Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-final-apply.html",
+      "line": "12",
+      "severity": "blocking",
+      "text": "blocking: The verdict heading and paragraph read \"not converged\", \"USD \u2014\", \"\u2014 call(s)\", 14.0510 s and \"stamped False\" because render() takes `entry = applies[-1]` (shc-locus-final-apply-run.py:751) while verify() takes the last stamped apply (line 1110), and applies[-1] is the reground entry that applied nothing; the fragment therefore reports the opposite of the record at shc-locus-final-apply.json:600-720 and of the worker's manifest."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-final-apply.html",
+      "line": "14",
+      "severity": "blocking",
+      "text": "blocking: The verdict-blocker paragraph still states that electrostatic_potential_at_wall sits at name_stage=reviewed and that no surface can touch it, directly contradicted later in the same fragment by the accepted rescore, the regenerated documentation and the four-member stamp."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-final-apply.html",
+      "line": "71",
+      "severity": "blocking",
+      "text": "blocking: The out-of-family check renders \"0 name(s)\" and a \"0-member roster\" with outside names \"\u2014\" because it reads the reground entry's null scope_check, discarding the first apply's recorded check at shc-locus-final-apply.json:applies[0].scope_check (four-member roster, outside_count 0), so the one guard the brief asks for is rendered empty."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-final-apply.json",
+      "line": "651",
+      "severity": "blocking",
+      "text": "blocking: The reground block records calls 7 and spend USD 0.119253 plus an `interrupted_drain` key, none of which shc-locus-final-apply-run.py can write: reground_scores sums 0 + 0.029303 + 0.000138 = 0.029441 over 4 calls and never mentions interrupted_drain, so the record was amended outside its generator and a re-run of `reground-scores` would silently drop the USD 0.089812 the amendment accounts for."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-final-apply.json",
+      "line": "806",
+      "severity": "non-blocking",
+      "text": "non-blocking: The wall member carries \"regenerated\": false in `scores.members` because the vector derives that flag from preflight.docs_eligible, while reground.wall_regenerated (and shc-locus-final-apply.html:105) say True for the member whose regeneration is the node's whole purpose."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-final-apply-run.py",
+      "line": "1105",
+      "severity": "non-blocking",
+      "text": "non-blocking: verify() never asserts `stamped` or `converged` and never compares the rendered fragment to the record, which is why the false verdict at shc-locus-final-apply.html:12-13 passed a green gate; the two dry-run checks at lines 1120 and 1136 also accept a recorded 0 as long as the field is not None."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-final-apply-run.py",
+      "line": "135",
+      "severity": "non-blocking",
+      "text": "non-blocking: `_member_state` re-implements the StandardName state query already inlined at shc-locus-reapply-all-bindings-run.py:131 rather than extending it, so a change to the member-state read has to be made twice."
+    },
+    {
+      "file": "",
+      "line": "docs/evidence/fragments/sn-harmonize-command/shc-locus",
+      "severity": "",
+      "text": ": "
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The node brief.md:1-6 asks for the wall member regrounded on its restored source and the locus family stamped; shc-locus-final-apply.json:600-720 records the accepted rescore (0.5376 -> 0.8649), the regenerated documentation (0.8625 -> 0.9483) and a four-member stamp, but shc-locus-final-apply.html:12-13 states \"not converged\" and stamped False.\nVERDICT done_when: The brief's done-when requires the fragment and its JSON to hold the dry runs, the figures and whether the family converged and stamped, with a log ending in a real EXIT=; gate.log carries an EXIT=0 from `verify`, but the fragment half of that deliverable reports the opposite outcome at shc-locus-final-apply.html:12-14,71.\nVERDICT write_paths: manifest.md orientation_write_paths grants the fragment, its JSON, its runner and a figures directory; `git diff --stat cca7ae49c 37f1b7f3f` changes exactly three files under docs/evidence/fragments/sn-harmonize-command/, all inside the grant, and no figure was written to the granted directory.\nVERDICT manifest: Read manifest.md; it records status complete, commits ec79188e7 and 37f1b7f3f, the literal verify command, gate.log, 9 calls / USD 0.270079 for the first apply and 7 calls / USD 0.119253 for the regrounding, and states that the interrupted drain's rows sit outside every recorded window and are counted by run id.\nVERDICT diff: Read both commits against base cca7ae49c; ec79188e7 adds a 736-line runner plus fragment and JSON for the capped family apply, 37f1b7f3f adds the rescore, scoped reset, drain and finalize phases and re-renders (+577 lines in the runner), and neither touches product source.\nCALL_SITES: reckon/_plan_html.py:1353, reckon/doccheck.py:1623, reckon/_store.py:1568\nSCORE goal_fidelity: 10\nJUSTIFICATION goal_fidelity: The graph outcome is reached (shc-locus-final-apply.json:600-720), but the deliverable that reports it, shc-locus-final-apply.html:12-13, tells the reader the family is not converged and not stamped.\nSCORE evidence: 7\nJUSTIFICATION evidence: gate.log records an EXIT=0 verify over the payload, yet shc-locus-final-apply.json:651,655,700 hold a calls/spend/interrupted_drain block the committed runner cannot produce (it computes 4 calls and USD 0.029441 from the stored parts) and shc-locus-final-apply.html:12-14 renders a false verdict the gate never compared against the record.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: `git diff --stat cca7ae49c 37f1b7f3f` changes only the three files under docs/evidence/fragments/sn-harmonize-command/ that manifest.md declares.\nSCORE durability: 6\nJUSTIFICATION durability: shc-locus-final-apply-run.py:1138 computes stamped and converged only to print them and never adds them to `problems`, and no assertion anywhere compares the rendered fragment to the record, so the regression that made shc-locus-final-apply.html:12-13 false passed the gate green.\nSCORE fit: 14\nJUSTIFICATION fit: The file follows its sibling runner's structure and the shc- evidence-fragment convention, but shc-locus-final-apply-run.py:17 still states that the family cannot stamp.\nSCORE reuse: 14\nJUSTIFICATION reuse: The runner reuses the sibling runner's snapshot, cost, veto and window readers and the library owners `mark_members_for_regen` (shc-locus-final-apply-run.py:376) and `aggregate_calls_per_phase` (line 372), but re-implements the member-state query at shc-locus-final-apply-run.py:135 instead of extending the one inlined at shc-locus-reapply-all-bindings-run.py:131.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-locus-final-apply.html:12 blocking: The verdict heading and paragraph read \"not converged\", \"USD \u2014\", \"\u2014 call(s)\", 14.0510 s and \"stamped False\" because render() takes `entry = applies[-1]` (shc-locus-final-apply-run.py:751) while verify() takes the last stamped apply (line 1110), and applies[-1] is the reground entry that applied nothing; the fragment therefore reports the opposite of the record at shc-locus-final-apply.json:600-720 and of the worker's manifest.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-locus-final-apply.html:14 blocking: The verdict-blocker paragraph still states that electrostatic_potential_at_wall sits at name_stage=reviewed and that no surface can touch it, directly contradicted later in the same fragment by the accepted rescore, the regenerated documentation and the four-member stamp.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-locus-final-apply.html:71 blocking: The out-of-family check renders \"0 name(s)\" and a \"0-member roster\" with outside names \"\u2014\" because it reads the reground entry's null scope_check, discarding the first apply's recorded check at shc-locus-final-apply.json:applies[0].scope_check (four-member roster, outside_count 0), so the one guard the brief asks for is rendered empty.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-locus-final-apply.json:651 blocking: The reground block records calls 7 and spend USD 0.119253 plus an `interrupted_drain` key, none of which shc-locus-final-apply-run.py can write: reground_scores sums 0 + 0.029303 + 0.000138 = 0.029441 over 4 calls and never mentions interrupted_drain, so the record was amended outside its generator and a re-run of `reground-scores` would silently drop the USD 0.089812 the amendment accounts for.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-locus-final-apply.json:806 non-blocking: The wall member carries \"regenerated\": false in `scores.members` because the vector derives that flag from preflight.docs_eligible, while reground.wall_regenerated (and shc-locus-final-apply.html:105) say True for the member whose regeneration is the node's whole purpose.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-locus-final-apply-run.py:1105 non-blocking: verify() never asserts `stamped` or `converged` and never compares the rendered fragment to the record, which is why the false verdict at shc-locus-final-apply.html:12-13 passed a green gate; the two dry-run checks at lines 1120 and 1136 also accept a recorded 0 as long as the field is not None.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-locus-final-apply-run.py:135 non-blocking: `_member_state` re-implements the StandardName state query already inlined at shc-locus-reapply-all-bindings-run.py:131 rather than extending it, so a change to the member-state read has to be made twice.\nFINDING docs/evidence/fragments/sn-harmonize-command/shc-locus",
+  "review_run_id": "r-20261029T072341030055-review-of-shc-locus-final-apply-37f1b7f3f8af",
+  "reviewed_base_sha": "cca7ae49c8ba9b313e814714e4be38adff1714d0",
+  "reviewed_commits": [
+    "ec79188e74327430a242e443684593f25bcf09d4",
+    "37f1b7f3f8afdf290b643c336d108a208e0226a4"
+  ],
+  "reviewed_head_sha": "37f1b7f3f8afdf290b643c336d108a208e0226a4",
+  "reviewed_run_id": "r-20261028T215047215974-shc-locus-final-apply",
+  "scores": {
+    "durability": 6,
+    "evidence": 7,
+    "fit": 14,
+    "goal_fidelity": 10,
+    "reuse": 14,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T07:33:58Z",
+  "total": 71
+}
