@@ -1,0 +1,79 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own arms rather than from its manifest: gate-base.log header names revision 049597eb and ends 'FAILED tests/standard_names/test_export_determinism.py::TestManifestDeterminism::test_no_commit_uses_stable_unversioned_timestamp', '1 failed, 8535 passed, 12 skipped', 'EXIT=1'; gate-head.log names b461145ba and ends with the same single failure id, '1 failed, 8536 passed, 11 skipped', 'EXIT=1'; the id sets are equal, so no failure id is added and added_failure_count is 0.",
+  "call_sites": [
+    "imas_codex/standard_names/graph_store/graph_catalog.py:2290",
+    "imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py:1467",
+    "imas_codex/standard_names/loop.py:2412",
+    "imas_codex/standard_names/graph_store/graph_source_bindings.py:1577"
+  ],
+  "completed_at": "2026-10-29T21:19:16.831Z",
+  "dispatched_at": "2026-10-29T21:08:07Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_catalog.py",
+      "id": "adopt-production-batch-writer",
+      "line": "2290",
+      "severity": "blocking",
+      "text": "blocking: the production compose writer persist_generated_name_winners (reached from worker_compose_and_validate.py:901/939 via persist_generated_name_batch) calls _lock_claimed_name_bindings without allow_adopt_pending_stub, so the flag defaults to False at graph_source_bindings.py:891 and a pending projection stub is still refused there is no adoption on the path that actually composes; the only enabling batch call site, stage_claimed_generated_candidates (graph_source_bindings.py:1577), has no production caller in the repository (search over imas_codex/ finds only its definition and the graph_store/__init__.py export), so the done_when's batch clause is met by a test-only function while the live writer keeps colliding and parking."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_source_bindings.py",
+      "id": "adopt-docstring-contradiction",
+      "line": "917",
+      "severity": "non-blocking",
+      "text": "non-blocking: the extended docstring states 'Attachments never receive either authority' immediately after describing adoption, but persist_claimed_attachments passes allow_adopt_pending_stub=True at graph_source_bindings.py:1480, and that function's own docstring at :1455 still says an unowned-pending target 'releases the source through the same collision path', which is now the opposite of what it does; a reader of either docstring is told the focused claim path refuses exactly what this change makes it accept."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_source_bindings.py",
+      "id": "adopt-projection-edge-guard-parameter",
+      "line": "1151",
+      "severity": "non-blocking",
+      "text": "non-blocking: the projection edge is now passed as $projection_edge so that tests/standard_names/test_generate_name_persist.py:481's guard asserts 'HAS_STANDARD_NAME' not in the emitted statement still passes; the guard was written to stop the lock statement touching the projection edge, and it now cannot tell a read (the EXISTS subquery added at :1012-1021) from a write reached through the same parameter, so a future MERGE of that edge in the lock statement would keep the suite green; the guard should assert the absence of a write against the projection variable rather than of a literal."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-adopt-pending-projection-stubs.html",
+      "id": "adopt-evidence-fragment-figure",
+      "line": "29",
+      "severity": "non-blocking",
+      "text": "non-blocking: the fragment declares docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs in the node's write paths but carries no figure, and the rule section is a three-condition lifecycle transition (pending stub plus no producer plus own-DD projection yielding drafted with a receipt) that a state diagram states at a glance where the bullet list takes a paragraph."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "Stage-claimed batch arm: imas_codex/standard_names/graph_store/graph_source_bindings.py:1577 (allow_adopt_pending_stub=True) has no production caller, and the production compose writer imas_codex/standard_names/graph_store/graph_catalog.py:2290 omits the flag; focused path: worker_extraction_and_enrichment.py:1467; sweep: loop.py:2412 into orphan_sweep.py:175.",
+    "diff": "Read all four commits against 049597eb: 23a258e2e adds the predicate, the stage move and the receipt, 56f09fa0f adds the four disposable-graph tests, b461145ba names the projection edge as a query parameter and extends the docstring, 39fe0d031 adds the evidence fragment; no path outside the declared scope is touched.",
+    "done_when": "The done_when measures adoption on both claim paths, refusal of a stub owned by another claim, a surviving park reason, red tests on main, zero added failure ids and recorded census counts; baseline_suite and after_suite logs both end '1 failed ... EXIT=1' with the same failure id, negative-control.log records 3 failed / 2 controls' worth of behaviour at 049597eb with a bare EXIT=1, gate-graph-targets.log records '12 passed ... EXIT=0', and the census prints 'live unowned pending projection stubs: 7' and 'parked sources whose target is such a stub: 6' in the run stream; the batch clause is measured on stage_claimed_generated_candidates, which no production code calls.",
+    "goal": "The goal is that composition adopts an unowned pending projection stub carrying its own DD path instead of colliding with it until the source parks; graph_source_bindings.py:1005-1030 adds the adopt_projection predicate and :1040-1075 the lifecycle move with an adopt_pending_projection receipt, and the focused production claim path (worker_extraction_and_enrichment.py:1467 into graph_source_bindings.py:1477) turns it on, but the production batch compose writer (graph_catalog.py:2290) leaves the flag off, so the batch arm is reachable only from a function with no production caller.",
+    "manifest": "Read; status complete, four commits listed, both suite arms recorded with literal commands, log paths, completed=true and one shared failure id, negative_control_log given as a bare path, and rubric self-check lines for all six dimensions.",
+    "write_paths": "The manifest declares graph_foundation.py, graph_source_bindings.py, orphan_sweep.py, tests/standard_names/test_compose_adopts_pending_stub.py, the evidence fragment and its figures directory; git diff --stat 049597eb..39fe0d031 touches graph_source_bindings.py, orphan_sweep.py, the new test and the fragment, all inside them, with graph_foundation.py declared but unused."
+  },
+  "justifications": {
+    "durability": "negative-control.log reddens three cases at 049597eb on behaviour (the stub stays pending, the focused claim writes no producing edge, the reason is overwritten) and keeps the owned-stub control green, so a regression reddens them; the initial reading of each added assertion is that it compares graph state read back from the fixture against the expected outcome rather than against a value handed to the code, and no assertion was found to be self-satisfying \u2014 the gap is that nothing drives graph_catalog.py:2290 or asserts the batch arm's PRODUCED_NAME edge.",
+    "evidence": "Both suite arms and the negative control are on disk with header lines, summary lines and bare EXIT lines, and the delta derives to zero added failure ids, but the batch measurement exercises graph_source_bindings.py:1577 whose only callers are tests, so the evidence does not reach the compose writer the census was taken against.",
+    "fit": "The rule joins the existing lifecycle-exception chain inside _lock_claimed_name_bindings (graph_source_bindings.py:1005) and reuses the revival's StandardNameChange receipt shape, and every added symbol names a mechanism, but the docstrings at graph_source_bindings.py:917 and :1455 now contradict the behaviour they describe.",
+    "goal_fidelity": "Adoption is correct and narrow where the flag is on (graph_source_bindings.py:1005-1030), but graph_catalog.py:2290 leaves it off on the writer that composes in production, so the batch half of the goal is unreachable, and the batch arm moves the stub to drafted without any producing edge until a later rich write, which test_compose_adopts_pending_stub.py:169 does not assert.",
+    "reuse": "The adoption lives once inside the single lock function that every claimed-source writer calls, so no second adoption path exists; a capability search over imas_codex/standard_names for an existing adoption mechanism returned only unrelated prose at context.py:1015 and prompt_tools.py:14.",
+    "scope_discipline": "Every path in git diff --stat 049597eb..39fe0d031 lies inside the manifest's declared write paths, with the orphan-sweep services fix at orphan_sweep.py:175 beyond the park-reason clause but inside a declared file and named in the manifest's evidence_inputs."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is that composition adopts an unowned pending projection stub carrying its own DD path instead of colliding with it until the source parks; graph_source_bindings.py:1005-1075 implements the predicate, the stage move and the receipt, and worker_extraction_and_enrichment.py:1467 into graph_source_bindings.py:1477 turns it on for the focused path, but graph_catalog.py:2290 leaves it off for the production batch writer.\nVERDICT done_when: the done_when measures adoption on both claim paths, refusal of a stub owned by another claim, a surviving park reason, red tests on main, zero added failure ids and recorded census counts; both suite logs end '1 failed ... EXIT=1' with the same failure id, negative-control.log records '3 failed, 1 passed ... EXIT=1' at 049597eb, gate-graph-targets.log records '12 passed ... EXIT=0', and the run stream prints the census as 7 stubs and 6 parked sources, though the batch clause is measured on a function no production code calls.\nVERDICT write_paths: the manifest declares graph_foundation.py, graph_source_bindings.py, orphan_sweep.py, the new test, the evidence fragment and its figures directory; git diff --stat 049597eb..39fe0d031 touches graph_source_bindings.py, orphan_sweep.py, tests/standard_names/test_compose_adopts_pending_stub.py and the fragment, all inside them.\nVERDICT manifest: read; status complete, four commits, both suite arms with literal commands, log paths, completed=true and one shared failure id, negative_control_log as a bare path, and rubric self-check lines for all six dimensions.\nVERDICT diff: read the four commits against 049597eb: 23a258e2e the predicate and receipt, 56f09fa0f the four disposable-graph tests, b461145ba the projection-edge parameter and docstring, 39fe0d031 the evidence fragment; nothing outside the declared scope.\nCALL_SITES: imas_codex/standard_names/graph_store/graph_catalog.py:2290, imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py:1467, imas_codex/standard_names/loop.py:2412, imas_codex/standard_names/graph_store/graph_source_bindings.py:1577\nSCORE goal_fidelity: 9\nJUSTIFICATION goal_fidelity: adoption is correct and narrow at graph_source_bindings.py:1005-1030, but graph_catalog.py:2290 omits allow_adopt_pending_stub so the compose writer that runs in production still refuses, and test_compose_adopts_pending_stub.py:169 does not assert the batch arm's producing edge.\nSCORE evidence: 13\nJUSTIFICATION evidence: both suite arms and the negative control carry headers, summaries and bare EXIT lines from which the delta derives to zero added ids, but the batch measurement exercises graph_source_bindings.py:1577, whose only callers are tests.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every path in git diff --stat 049597eb..39fe0d031 lies inside the manifest's declared write paths, and the orphan-sweep services fix at orphan_sweep.py:175 is inside a declared file.\nSCORE durability: 14\nJUSTIFICATION durability: negative-control.log reddens three cases at 049597eb on behaviour (stub stays pending at test_compose_adopts_pending_stub.py:169, no producing edge at :207, reason overwritten at :272) and keeps the owned-stub control green, but nothing drives graph_catalog.py:2290.\nSCORE fit: 17\nJUSTIFICATION fit: the rule joins the existing exception chain at graph_source_bindings.py:1005 with the revival's receipt shape, though the docstrings at :917 and :1455 now describe behaviour the code no longer has.\nSCORE reuse: 20\nJUSTIFICATION reuse: the adoption exists once inside the single lock function every claimed-source writer calls (graph_source_bindings.py:1005), and a capability search over imas_codex/standard_names found no other adoption mechanism.\nFINDING imas_codex/standard_names/graph_store/graph_catalog.py:2290 blocking: the production compose writer persist_generated_name_winners calls _lock_claimed_name_bindings without allow_adopt_pending_stub, so a pending projection stub is still refused on the path that composes, while the only enabling batch call site (graph_source_bindings.py:1577) has no production caller.\nFINDING imas_codex/standard_names/graph_store/graph_source_bindings.py:917 non-blocking: the docstring says attachments never receive the adoption authority although persist_claimed_attachments passes it at :1480, and its own docstring at :1455 still says an unowned-pending target is released.\nFINDING imas_codex/standard_names/graph_store/graph_source_bindings.py:1151 non-blocking: naming the projection edge as a parameter keeps test_generate_name_persist.py:481's literal-absence guard green, so the guard can no longer tell a read of that edge from a write.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-adopt-pending-projection-stubs.html:29 non-blocking: the fragment carries no figure although a figures path is declared, and the lifecycle rule is a state transition a diagram would state at a glance.",
+  "review_run_id": "r-20261029T210623142624-review-of-sib-adopt-pending-projection-stubs-39fe0d0317ca",
+  "reviewed_base_sha": "049597eb532fe9a84aad964ea1c74d8d3b30d4d7",
+  "reviewed_head_sha": "39fe0d0317cad71022a913f8604cf0707d5de439",
+  "reviewed_run_id": "r-20261029T202601642241-sib-adopt-pending-projection-stubs",
+  "scores": {
+    "durability": 14,
+    "evidence": 13,
+    "fit": 17,
+    "goal_fidelity": 9,
+    "reuse": 20,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T21:30:00Z",
+  "total": 91
+}

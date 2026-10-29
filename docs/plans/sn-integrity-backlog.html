@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="308">
+<meta name="plan-version" content="309">
 <meta name="plan-modified" content="2026-10-29">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -1090,7 +1090,10 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
     <div class="r-comment-body"><p>review of r-20261029T202759472003-sib-last-source-negative-controls at base 049597eb5 -&gt; head 55fc27616 scores 112/120 (goal_fidelity 19, evidence 18, scope_discipline 20, durability 19, fit 18, reuse 18) with one non-blocking finding: the duck-typed path test at test_last_source_supersede.py:509 asserts the known non-atomic outcome and will redden when that branch is repaired.</p></div>
 </div>
 <div class="r-comment" data-section="s45" data-id="c-run-r-20261029T202759472003-sib-last-source-negative-controls" data-who="reckon-build" data-when="2026-10-29T20:55:59.780Z">
-    <div class="r-comment-body"><p>node sib-last-source-negative-controls adds three tests to tests/standard_names/test_last_source_supersede.py that fail when the last-source supersede&#x27;s atomicity (reverted to two autocommit queries) or its record_change=False drained receipt (guard reinstated) is undone; head arm 11 passed EXIT=0, each mutation 1 failed EXIT=1, default-marker suite over tests/standard_names/ adds zero failure ids against the base archive tree</p></div>
+    <div class="r-comment-body"><p>node sib-last-source-negative-controls adds three tests to tests/standard_names/test_last_source_supersede.py that fail when the last-source supersede's atomicity (reverted to two autocommit queries) or its record_change=False drained receipt (guard reinstated) is undone; head arm 11 passed EXIT=0, each mutation 1 failed EXIT=1, default-marker suite over tests/standard_names/ adds zero failure ids against the base archive tree</p></div>
+</div>
+<div class="r-comment" data-section="s45" data-id="c-run-r-20261029T210623142624-review-of-sib-adopt-pending-projection-stubs-39fe0d0317ca" data-who="reckon-build" data-when="2026-10-29T21:19:16.831Z">
+    <div class="r-comment-body"><p>review of r-20261029T202601642241-sib-adopt-pending-projection-stubs at head 39fe0d0317cad71022a913f8604cf0707d5de439: parsed record, total 91/120 (goal_fidelity 9, evidence 13, scope_discipline 18, durability 14, fit 17, reuse 20), added_failure_count 0; one blocking finding — the production compose writer graph_catalog.py:2290 calls _lock_claimed_name_bindings without allow_adopt_pending_stub, so the batch half of the goal is met only by stage_claimed_generated_candidates, which has no production caller</p></div>
 </div>
 <div class="r-comment" data-section="s46" data-id="c-run-r-20261029T083805766546-sib-retire-sourceless-drafts" data-who="reckon-build" data-when="2026-10-29T09:00:04.231Z">
     <div class="r-comment-body"><p>Retired 131 of 132 live exhausted drafts that carry no producing DD source through `apply_signed_manifest` (authority 133 rows, preview 131 admitted / 2 refused, manifest 2f8815c0…), one successor edge to `poloidal_angle_of_plasma_boundary_gap`; read-back lists 17 remaining sourceless live names — 16 non-exhausted recorded for the lead and 1 writer refusal — against a live population of 148 rather than the dispatch's 19 (113 exhausted records no source at all; `ion_pressure` and `beta` are derived parents).</p></div>
