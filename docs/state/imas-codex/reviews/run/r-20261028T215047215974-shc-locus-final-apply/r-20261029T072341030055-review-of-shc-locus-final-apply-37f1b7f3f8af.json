@@ -22,6 +22,13 @@
     }
   },
   "dispatched_at": "2026-10-29T07:26:49Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-shc-locus-final-apply-37f1b7f3f8af",
+      "recorded_at": "2026-10-29T07:47:41.051580+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-harmonize-command/shc-locus-final-apply.html",
