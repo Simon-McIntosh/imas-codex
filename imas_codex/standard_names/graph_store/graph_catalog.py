@@ -538,16 +538,29 @@ def write_standard_names(
                         row["id"],
                         reason,
                     )
-            if accepted_pairs:
-                write_gc.query(
-                    """
+            # Each bound leaf carries its own source record. A name that
+            # published a path without one is a live name with no producer,
+            # which the write's own invariant refuses at the end of this
+            # function; the source is the binding, the projection is its edge.
+            write_gc.query(
+                """
                 UNWIND $batch AS b
                 MATCH (sn:StandardName {id: b.id})
                 MATCH (src:IMASNode {id: b.source_id})
+                MERGE (sns:StandardNameSource {id: 'dd:' + b.source_id})
+                  ON CREATE SET sns.created_at = datetime(),
+                                sns.attempt_count = 0
+                SET sns.source_type = 'dd',
+                    sns.source_id = b.source_id,
+                    sns.status = 'attached',
+                    sns.produced_sn_id = sn.id,
+                    sns.composed_at = coalesce(sns.composed_at, datetime())
+                MERGE (sns)-[:PRODUCED_NAME]->(sn)
+                MERGE (sns)-[:FROM_DD_PATH]->(src)
                 MERGE (src)-[:HAS_STANDARD_NAME]->(sn)
                 """,
-                    batch=accepted_pairs,
-                )
+                batch=accepted_pairs,
+            )
             for entry in unbound_paths:
                 logger.warning(
                     "write_standard_names: unbound published DD path %s → %s: %s",

@@ -26,7 +26,7 @@ _SOURCED = "audit_sourced_live"
 
 @pytest.fixture()
 def planted_graph(disposable_neo4j_uri: str) -> Iterator[GraphClient]:
-    """One sourceless draft and one sourced live name, nothing else."""
+    """One sourceless live draft, nothing else."""
     client = GraphClient(
         uri=disposable_neo4j_uri,
         username="neo4j",
@@ -34,34 +34,22 @@ def planted_graph(disposable_neo4j_uri: str) -> Iterator[GraphClient]:
         graph_name="audit-drafts-fixture",
     )
     client.query(
-        """UNWIND [
-          {id:$draft, stage:'drafted'},
-          {id:$sourced, stage:'accepted'}
-        ] AS row
-        CREATE (:StandardName {id:row.id, name_stage:row.stage,
+        """CREATE (:StandardName {id:$draft, name_stage:'drafted',
           origin:'pipeline', source_paths:[], status:'draft'})""",
         draft=_DRAFT,
-        sourced=_SOURCED,
-    )
-    client.query(
-        """MATCH (name:StandardName {id:$sourced})
-        CREATE (source:StandardNameSource {id:'dd:audit/sourced',
-          source_id:'audit/sourced', source_type:'dd', status:'composed'})
-        CREATE (source)-[:PRODUCED_NAME]->(name)""",
-        sourced=_SOURCED,
     )
     try:
         yield client
     finally:
         client.query(
-            "MATCH (node) WHERE node.id STARTS WITH 'audit_' "
-            "OR node.id STARTS WITH 'dd:audit/' DETACH DELETE node"
+            "MATCH (node) WHERE node.id STARTS WITH 'audit_' DETACH DELETE node"
         )
         client.close()
 
 
 def _export_report(staging_dir: Path, graph: GraphClient):
     from imas_codex.standard_names.export import run_export
+    from tests.standard_names.test_source_audit_gate import _candidate
 
     with (
         patch(
@@ -74,8 +62,21 @@ def _export_report(staging_dir: Path, graph: GraphClient):
         ),
         patch(
             "imas_codex.standard_names.export._fetch_export_population",
+            return_value=[_candidate(_SOURCED)],
+        ),
+        patch(
+            "imas_codex.standard_names.export._validate_entry",
+            side_effect=lambda entry: entry,
+        ),
+        patch(
+            "imas_codex.standard_names.export._fetch_deprecation_stubs",
             return_value=[],
         ),
+        patch(
+            "imas_codex.standard_names.export._fetch_ordering_edges_for_domain",
+            return_value=([], set()),
+        ),
+        patch("imas_codex.standard_names.export._write_domain_yaml"),
     ):
         return run_export(staging_dir, skip_gate=True, force=True)
 
@@ -86,7 +87,7 @@ def test_sourceless_draft_is_reported_and_does_not_block(
 ) -> None:
     # The audit's own notion of sourceless, asserted first so a report that
     # lists nothing cannot pass on an empty population.
-    assert find_sourceless_live_names(planted_graph, [_DRAFT, _SOURCED]) == [_DRAFT]
+    assert find_sourceless_live_names(planted_graph, [_DRAFT]) == [_DRAFT]
 
     report = _export_report(tmp_path / "draft", planted_graph)
 
