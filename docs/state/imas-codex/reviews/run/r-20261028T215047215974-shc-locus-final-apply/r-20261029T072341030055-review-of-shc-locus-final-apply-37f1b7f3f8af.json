@@ -10,6 +10,11 @@
   ],
   "completed_at": "2026-10-29T07:37:00.990Z",
   "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "shc-locus-final-apply",
+      "recorded_at": "2026-10-29T07:42:51.812334+00:00"
+    },
     "evidence": {
       "kind": "folded",
       "node": "shc-locus-final-apply",
