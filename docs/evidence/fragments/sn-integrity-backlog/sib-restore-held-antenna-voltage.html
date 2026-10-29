@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-restore-held-antenna-voltage">
+<title>voltage_of_diagnostic_antenna returned to its release hold</title>
+</head>
+<body>
+<main>
+<h1 id="sib-restore-held-antenna-voltage-title">voltage_of_diagnostic_antenna returned to its release hold</h1>
+<p id="sib-restore-held-antenna-voltage-context">The sourceless-draft sweep retired 131 exhausted drafts on 2026-10-29T08:57:38Z. <code>voltage_of_diagnostic_antenna</code> was one of them, and it is a name §38 holds from release on purpose: <code>export.py</code> lists it under <code>release_hold_exhausted_antenna_identity</code> because the exhausted predecessor has no sanctioned successor transition. The lead's ruling of 2026-10-29 keeps the other 130 retirements and restores this one. The sweep's <code>HELD</code> set carried four of the six <code>release_hold_no_dd_source</code> entries and none of the other <code>_RELEASE_IDENTITY_HOLDS</code> entries, which is how a held identity reached the retirement cohort at all.</p>
+
+<h2 id="sib-restore-held-antenna-voltage-prior-title">The state the retirement replaced</h2>
+<table id="sib-restore-held-antenna-voltage-prior">
+<thead><tr><th>Field</th><th>Before the retirement</th><th>Where it was read</th></tr></thead>
+<tbody>
+<tr><td><code>name_stage</code></td><td><code>exhausted</code></td><td>the node's own <code>superseded_from_stage</code>, written by the retirement, and the sweep's pre-write read</td></tr>
+<tr><td><code>status</code></td><td><code>draft</code></td><td>the sweep's pre-write read of 2026-10-29, before its apply</td></tr>
+<tr><td>producing sources, <code>source_paths</code></td><td>0 producers, <code>[]</code></td><td>the same pre-write read</td></tr>
+<tr><td>successor edge</td><td>none</td><td>the retirement's authority row carried no <code>successor_id</code>, and the read-back finds no <code>HAS_SUCCESSOR</code></td></tr>
+<tr><td>documentation</td><td><code>docs_stage=accepted</code>, <code>validation_status=quarantined</code>, 8 <code>HAS_REVIEW</code>, 1 <code>DOCS_REVISION_OF</code>, 12 <code>LLMCost</code> rows</td><td>live read; the retirement touched none of these and neither does the restore</td></tr>
+</tbody>
+</table>
+<p id="sib-restore-held-antenna-voltage-receipt">The retirement receipt is <code>sn-change:signed-manifest:2f8815c048174aa3b0be84cb43aca1a2b4d530600bc76f5d7f4e6ba3570f4e7f:53b6893f1aea1fd7370a7619</code>, operation <code>supersede_exhausted_orphan</code>, changed at <code>2026-10-29T08:57:38.341Z</code>, under authority file <code>1097e766d8b7c95273a2682df863b5a1e65b833e8c349d2165ca933edd593f50</code>. The name was retired by that run, with a receipt, which is the condition this node's first step requires.</p>
+
+<h2 id="sib-restore-held-antenna-voltage-routes-title">Which sanctioned path can reverse a signed retirement</h2>
+<p id="sib-restore-held-antenna-voltage-routes">There is no command that un-supersedes a tombstone on its own. The two adjacent paths were read and neither reaches this state:</p>
+<ul>
+<li><code>sn restore</code> (<code>imas_codex/cli/sn.py:8890</code>, <code>8932</code>, <code>8982</code>) reconstructs an <em>absent</em> identity from an archived extraction. It composes an authority that creates the node and its edges; it is the adapter §8 used to rebuild deleted identities, and it does not restore a present tombstone's stage.</li>
+<li><code>sn supersede --into</code> (<code>imas_codex/cli/sn.py:7469</code>) revives a tombstoned target only as the destination of a fold that carries a live source onto it. A revival writes what the repository's own revival rule restores: <code>name_stage</code> from <code>superseded_from_stage</code> capped by <code>_FOLD_REVIVAL_STAGE_CAP</code>, and <code>status='draft'</code> (<code>imas_codex/standard_names/edit.py:2214-2235</code>, <code>2935-2949</code>). This name carries no source to fold, so no fold can reach it.</li>
+</ul>
+<p>The write therefore used the repository's generic signed path, <code>set_properties</code> under <code>apply_signed_manifest</code> (<code>imas_codex/standard_names/signed_manifest.py:4850-4893</code>), writing exactly the two properties the revival rule writes: <code>name_stage='exhausted'</code> and <code>status='draft'</code>. It leaves <code>superseded_from_stage='exhausted'</code> in place as the record of what the retirement replaced, which is also what the fold revival leaves.</p>
+
+<h2 id="sib-restore-held-antenna-voltage-write-title">The signed write, previewed then applied</h2>
+<table id="sib-restore-held-antenna-voltage-write">
+<thead><tr><th>Step</th><th>Receipt</th></tr></thead>
+<tbody>
+<tr><td>Authority</td><td><code>sib-restore-held-antenna-voltage-authority.json</code>, one row, file SHA-256 <code>50967ff6944078bf545838855134a87c70f9e4d616ae7f86dc39aaaee0f364ef</code>, payload SHA-256 <code>47db0a5ae5221c304a6fadc6791a0cbe0582a8af6eee55dba6b37d5c82edbc85</code></td></tr>
+<tr><td>Preview</td><td><code>would_apply</code>, 1 admitted, 0 refused, <code>would_change=1</code>, manifest digest <code>a2d51c6f6e0180ebd0e54ec79cbea4c9110381f2a971a69f6e645d2b4e4451c9</code></td></tr>
+<tr><td>Apply</td><td><code>applied</code> under the same digest: 1 changed, 1 mutation, 1 receipt row, 2 persistent writes. Restoration receipt <code>sn-change:signed-manifest:a2d51c6f6e0180ebd0e54ec79cbea4c9110381f2a971a69f6e645d2b4e4451c9:53b6893f1aea1fd7370a7619</code>, operation <code>restore_prior_stage</code>, changed at <code>2026-10-29T16:59:25.787Z</code>.</td></tr>
+</tbody>
+</table>
+<p id="sib-restore-held-antenna-voltage-negative">Negative control, verbatim: the preview of an authority naming a second identity returned <code>{"status": "refused", "refusal": "restore scope refused: this authority restores exactly 'voltage_of_diagnostic_antenna'; it also names ['voltage_of_spectrometer_channel']"}</code> with <code>EXIT=0</code> and no graph write. The single-row authority above was admitted under the same check, so the refusal is the scope guard firing rather than a blanket refusal. That guard answers the shape of the overreach this node repairs: a multi-row authority applied where a handful of names were approved.</p>
+
+<h2 id="sib-restore-held-antenna-voltage-readback-title">Read-back</h2>
+<table id="sib-restore-held-antenna-voltage-readback">
+<thead><tr><th>Check</th><th>Observed</th></tr></thead>
+<tbody>
+<tr><td>live in its prior stage</td><td><code>name_stage=exhausted</code>, <code>status=draft</code>, <code>source_paths=[]</code></td></tr>
+<tr><td>successor edge</td><td>none; the retirement minted none and the restore writes none</td></tr>
+<tr><td>both receipts</td><td>the retirement <code>supersede_exhausted_orphan</code> and the restoration <code>restore_prior_stage</code>, listed above</td></tr>
+<tr><td>no other name changed</td><td>every <code>StandardNameChange</code> whose <code>authority_file_sha256</code> is this authority's names exactly one row: <code>voltage_of_diagnostic_antenna</code></td></tr>
+<tr><td>population</td><td>5,137 live names before the write and 5,137 after: the restore moved one name's lifecycle pair, not the population</td></tr>
+<tr><td>source audit</td><td>the name is a live sourceless draft again, which is the state §38 holds it in; 18 live names are sourceless</td></tr>
+</tbody>
+</table>
+
+<h2 id="sib-restore-held-antenna-voltage-gate-title">The release gate still holds it</h2>
+<p id="sib-restore-held-antenna-voltage-gate-body">The identity hold is read before any eligibility test, so a restored name leaves through the release-hold path whatever its stage. Measured on the restored state, <code>_classify_export_population</code> returned zero eligible rows and one exclusion: stage <code>release_authority</code>, reason <code>release_hold_exhausted_antenna_identity</code>, detail "the exhausted predecessor has no sanctioned successor transition".</p>
+<p id="sib-restore-held-antenna-voltage-gate-audit">The source audit places the name at population <code>dropped_edge</code>, <code>name_stage=exhausted</code>, with recorded sources <code>dd:ece/channel/t_e_voltage</code> and <code>dd:ece/channel/voltage_t_radiation</code> and one unchained holder, <code>voltage_of_spectrometer_channel</code>. An exhausted name is dormant there: it is listed on the report and left out of the gate, so restoring it adds no blocking source loss. The gate's blocking set at the same measurement holds 7 names, none of them this one; they are pre-existing and outside this node's scope.</p>
+
+<h2 id="sib-restore-held-antenna-voltage-outside-title">Outside this node's scope</h2>
+<p id="sib-restore-held-antenna-voltage-outside">The export source gate's blocking set is 7 live, non-exhausted sourceless names: <code>line_averaged_neon_density</code>, <code>radial_coordinate_of_reflector</code>, <code>radius_of_soft_xray_detector</code>, <code>ratio_of_diamagnetic_vorticity_to_major_radius</code>, <code>toroidal_coordinate_of_spectrometer</code>, <code>toroidal_tritium_velocity</code> and <code>vertical_coordinate_of_reflector</code>. None was written by this node and none is in its write scope. The sweep's covering set for release holds is also worth a follow-on: it reads four of the six <code>release_hold_no_dd_source</code> entries, so any future sweep of this shape should select from <code>_RELEASE_IDENTITY_HOLDS</code> rather than restating a subset of it.</p>
+</main>
+</body>
+</html>
