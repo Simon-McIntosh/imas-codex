@@ -26,6 +26,7 @@ Known COCOS values from the paper:
 from __future__ import annotations
 
 import math
+from collections.abc import Iterator
 from dataclasses import dataclass
 from typing import Literal
 
@@ -155,6 +156,147 @@ def cocos_from_dd_version(version: str) -> int:
     return 17 if v >= Version("4.0.0") else 11
 
 
+@dataclass(frozen=True)
+class SignObservation:
+    """A measured sign from one shot, before any convention is assigned.
+
+    ``kind`` identifies the relation being measured. Flux and psi gradients
+    have sign σIp σBp; pressure gradients have its opposite. The q sign is
+    σIp σB0 σρθφ. A zero or missing sign is not a measurement.
+    """
+
+    shot: int
+    ip_sign: Literal[-1, 1]
+    kind: Literal["flux_loop_response", "psi_gradient", "dp_dpsi", "q"]
+    sign: Literal[-1, 1]
+    b0_sign: Literal[-1, 1] | None = None
+
+    def __post_init__(self) -> None:
+        if self.ip_sign not in (-1, 1) or self.sign not in (-1, 1):
+            raise ValueError("Observed signs and plasma-current signs must be ±1")
+        if self.kind == "q" and self.b0_sign not in (-1, 1):
+            raise ValueError("A q observation needs a measured toroidal-field sign")
+
+
+@dataclass(frozen=True)
+class COCOSSurvivorResult:
+    """Conventions consistent with every observation and declaration."""
+
+    survivors: frozenset[int]
+    status: Literal["consistent", "polarity-incomplete", "not-cocos-expressible"]
+    confidence: float
+    coefficient_basis: dict[str, str]
+    declarations: dict[str, int]
+
+    @property
+    def cocos(self) -> int | None:
+        """The convention only when all evidence identifies one."""
+        return next(iter(self.survivors)) if len(self.survivors) == 1 else None
+
+    def factor_for_class(self, label: str, *, cocos_out: int) -> int | float | None:
+        """Return a conversion factor only when every survivor agrees."""
+        from imas_codex.ids.transforms import cocos_sign
+
+        factors = {
+            cocos_sign(label, cocos_in=cocos, cocos_out=cocos_out)
+            for cocos in self.survivors
+        }
+        return next(iter(factors)) if len(factors) == 1 else None
+
+
+def score_cocos_survivors(
+    observations: list[SignObservation],
+    *,
+    e_bp: Literal[0, 1] | None = None,
+    sigma_r_phi_z: Literal[-1, 1] | None = None,
+    sigma_rho_theta_phi: Literal[-1, 1] | None = None,
+) -> COCOSSurvivorResult:
+    """Filter all canonical conventions using measured signs and declarations.
+
+    Flux normalisation and toroidal handedness require declarations; values
+    cannot establish either. An empty survivor set is reported explicitly.
+    """
+    if e_bp not in (None, 0, 1):
+        raise ValueError("e_bp must be 0 or 1")
+    if sigma_r_phi_z not in (None, -1, 1):
+        raise ValueError("sigma_r_phi_z must be ±1")
+    if sigma_rho_theta_phi not in (None, -1, 1):
+        raise ValueError("sigma_rho_theta_phi must be ±1")
+
+    declarations = {
+        name: value
+        for name, value in (
+            ("e_bp", e_bp),
+            ("sigma_r_phi_z", sigma_r_phi_z),
+            ("sigma_rho_theta_phi", sigma_rho_theta_phi),
+        )
+        if value is not None
+    }
+    survivors = set(VALID_COCOS)
+    for cocos in tuple(survivors):
+        params = cocos_to_parameters(cocos)
+        if any(getattr(params, name) != value for name, value in declarations.items()):
+            survivors.discard(cocos)
+            continue
+        for obs in observations:
+            if obs.kind == "q":
+                expected = obs.ip_sign * obs.b0_sign * params.sigma_rho_theta_phi
+            else:
+                expected = obs.ip_sign * params.sigma_bp
+                if obs.kind == "dp_dpsi":
+                    expected = -expected
+            if obs.sign != expected:
+                survivors.discard(cocos)
+                break
+
+    measured = {obs.kind for obs in observations}
+    basis = {
+        "sigma_bp": "measured"
+        if measured & {"flux_loop_response", "psi_gradient", "dp_dpsi"}
+        else "unmeasured",
+        "sigma_rho_theta_phi": "measurable-as-product"
+        if "q" in measured
+        else "unmeasured",
+        "e_bp": "declared" if e_bp is not None else "requires-declaration",
+        "sigma_r_phi_z": "declared"
+        if sigma_r_phi_z is not None
+        else "requires-declaration",
+    }
+    polarities = {obs.ip_sign for obs in observations}
+    if not survivors:
+        status = "not-cocos-expressible"
+        confidence = 0.0
+    elif len(polarities) < 2:
+        status = "polarity-incomplete"
+        confidence = 0.75
+    else:
+        status = "consistent"
+        confidence = 0.85
+    if survivors:
+        confidence -= 0.1 * (e_bp is None)
+        confidence -= 0.1 * (sigma_r_phi_z is None)
+        confidence -= 0.1 * (not measured & {"q"} and sigma_rho_theta_phi is None)
+    return COCOSSurvivorResult(
+        frozenset(survivors), status, max(0.0, confidence), basis, declarations
+    )
+
+
+@dataclass(frozen=True)
+class COCOSDetermination:
+    """A unique convention with the assumptions used to obtain it.
+
+    Iteration preserves the existing ``cocos, confidence`` call pattern.
+    """
+
+    cocos: int
+    confidence: float
+    assumed_declarations: dict[str, int]
+
+    def __iter__(self) -> Iterator[int | float]:
+        yield self.cocos
+        yield self.confidence
+
+
 def determine_cocos(
     psi_axis: float,
     psi_edge: float,
@@ -164,85 +306,55 @@ def determine_cocos(
     dp_dpsi: float | None = None,
     *,
     assume_r_phi_z_right_handed: bool = True,
-) -> tuple[int, float]:
-    """Determine COCOS from equilibrium quantities.
+    e_bp: Literal[0, 1] | None = None,
+) -> COCOSDetermination:
+    """Identify one convention while exposing declarations that data cannot make.
 
-    Uses Eq. 23 from Sauter & Medvedev to infer COCOS from physics:
-    - sign(ψ_edge - ψ_axis) = σIp × σBp
-    - sign(dp/dψ) = -σIp × σBp
-    - sign(q) = σIp × σB0 × σρθφ
-
-    Args:
-        psi_axis: Poloidal flux at magnetic axis [Wb or Wb/2π]
-        psi_edge: Poloidal flux at plasma edge [Wb or Wb/2π]
-        ip: Plasma current [A] (sign matters)
-        b0: Toroidal field at axis [T] (sign matters)
-        q: Safety factor at mid-radius (optional, improves confidence)
-        dp_dpsi: Pressure gradient dp/dψ at mid-radius (optional, validates σBp)
-        assume_r_phi_z_right_handed: Assume (R,φ,Z) right-handed (most common)
-
-    Returns:
-        Tuple of (cocos, confidence) where:
-        - cocos: Determined COCOS value (1-8 or 11-18)
-        - confidence: Confidence score (0.0-1.0)
-
-    Example:
-        >>> cocos, conf = determine_cocos(
-        ...     psi_axis=0.5, psi_edge=-0.2,  # decreasing from axis
-        ...     ip=-1e6, b0=-5.0,  # negative current and field
-        ...     q=3.0,
-        ... )
-        >>> print(f"COCOS={cocos} (confidence={conf:.2f})")
-        COCOS=17 (confidence=0.70)
+    The optional ``e_bp`` is an external declaration. For older callers that
+    omit it, the magnitude heuristic is retained as a named, low-confidence
+    assumption. Toroidal handedness is likewise an explicit assumption.
     """
-    # Determine signs
-    sigma_ip = 1 if ip >= 0 else -1
-    sigma_b0 = 1 if b0 >= 0 else -1
-
-    # Determine σBp from psi gradient (Eq. 23, line 5)
-    # sign(ψ_edge - ψ_axis) = σIp × σBp
-    psi_diff = psi_edge - psi_axis
-    psi_sign = 1 if psi_diff >= 0 else -1
-    sigma_bp = psi_sign * sigma_ip
-
-    # Determine eBp from magnitude heuristic
-    # If |ψ| > ~0.5 Weber, probably full ψ (not divided by 2π)
-    max_psi = max(abs(psi_axis), abs(psi_edge))
-    e_bp = 1 if max_psi > 0.5 else 0
-
-    confidence = 0.5  # Base confidence with just psi
-
-    # Validate with dp/dpsi if available (Eq. 23, line 6)
-    # sign(dp/dψ) = -σIp × σBp
-    if dp_dpsi is not None and not math.isnan(dp_dpsi):
-        expected_sign = -sigma_ip * sigma_bp
-        actual_sign = 1 if dp_dpsi >= 0 else -1
-        if actual_sign == expected_sign:
-            confidence += 0.15
-        else:
-            confidence -= 0.25  # Inconsistent - reduce confidence
-
-    # Determine σρθφ from q if available (Eq. 23, line 8)
-    # sign(q) = σIp × σB0 × σρθφ
-    if q is not None and not math.isnan(q):
-        q_sign = 1 if q >= 0 else -1
-        sigma_rho_theta_phi = q_sign * sigma_ip * sigma_b0
-        confidence += 0.2
+    values = (psi_axis, psi_edge, ip, b0)
+    if not all(math.isfinite(value) for value in values) or ip == 0 or b0 == 0:
+        raise ValueError(
+            "Finite nonzero plasma-current and field references are required"
+        )
+    gradient = psi_edge - psi_axis
+    if gradient == 0:
+        raise ValueError("A zero psi gradient cannot determine its sign")
+    ip_sign = 1 if ip > 0 else -1
+    b0_sign = 1 if b0 > 0 else -1
+    observations = [
+        SignObservation(0, ip_sign, "psi_gradient", 1 if gradient > 0 else -1)
+    ]
+    if dp_dpsi is not None and math.isfinite(dp_dpsi) and dp_dpsi != 0:
+        observations.append(
+            SignObservation(0, ip_sign, "dp_dpsi", 1 if dp_dpsi > 0 else -1)
+        )
+    assumed: dict[str, int] = {}
+    if e_bp is None:
+        e_bp = 1 if max(abs(psi_axis), abs(psi_edge)) > 0.5 else 0
+        assumed["e_bp"] = e_bp
+    handedness = 1 if assume_r_phi_z_right_handed else -1
+    assumed["sigma_r_phi_z"] = handedness
+    rho_handedness = None
+    if q is not None and math.isfinite(q) and q != 0:
+        observations.append(
+            SignObservation(0, ip_sign, "q", 1 if q > 0 else -1, b0_sign)
+        )
     else:
-        # Default to right-handed (most common)
-        sigma_rho_theta_phi = 1
-
-    # σRφZ - from assumption or geometry
-    sigma_r_phi_z = 1 if assume_r_phi_z_right_handed else -1
-
-    params = COCOSParameters(
-        sigma_bp=sigma_bp,
+        rho_handedness = 1
+        assumed["sigma_rho_theta_phi"] = rho_handedness
+    result = score_cocos_survivors(
+        observations,
         e_bp=e_bp,
-        sigma_r_phi_z=sigma_r_phi_z,
-        sigma_rho_theta_phi=sigma_rho_theta_phi,
+        sigma_r_phi_z=handedness,
+        sigma_rho_theta_phi=rho_handedness,
     )
-
-    return params.cocos, min(1.0, max(0.0, confidence))
+    if result.cocos is None:
+        raise ValueError(f"Equilibrium observations are {result.status}")
+    confidence = max(0.0, result.confidence - 0.1 * len(assumed))
+    return COCOSDetermination(result.cocos, confidence, assumed)
 
 
 def validate_cocos_consistency(
@@ -330,14 +442,15 @@ class ValidationResult:
     Attributes:
         is_consistent: Whether declared COCOS matches physics data
         declared_cocos: The COCOS value being validated
-        calculated_cocos: COCOS inferred from physics quantities
+        calculated_cocos: COCOS inferred from physics quantities, or None when
+            the observations cannot identify a convention
         confidence: Confidence in calculated COCOS (0.0-1.0)
         inconsistencies: List of specific physics inconsistencies
     """
 
     is_consistent: bool
     declared_cocos: int
-    calculated_cocos: int
+    calculated_cocos: int | None
     confidence: float
     inconsistencies: list[str]
 
@@ -387,16 +500,6 @@ def validate_cocos_from_data(
         ...     for error in result.inconsistencies:
         ...         print(f"  - {error}")
     """
-    # Calculate COCOS from physics
-    calculated, confidence = determine_cocos(
-        psi_axis=psi_axis,
-        psi_edge=psi_edge,
-        ip=ip,
-        b0=b0,
-        q=q,
-        dp_dpsi=dp_dpsi,
-    )
-
     # Validate declared COCOS against physics
     inconsistencies = validate_cocos_consistency(
         cocos=declared_cocos,
@@ -407,6 +510,18 @@ def validate_cocos_from_data(
         q=q,
         dp_dpsi=dp_dpsi,
     )
+    try:
+        calculated, confidence = determine_cocos(
+            psi_axis=psi_axis,
+            psi_edge=psi_edge,
+            ip=ip,
+            b0=b0,
+            q=q,
+            dp_dpsi=dp_dpsi,
+        )
+    except ValueError as exc:
+        calculated, confidence = None, 0.0
+        inconsistencies.append(str(exc))
 
     return ValidationResult(
         is_consistent=len(inconsistencies) == 0,

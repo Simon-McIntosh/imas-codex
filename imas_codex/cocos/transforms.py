@@ -9,6 +9,37 @@ from __future__ import annotations
 from functools import lru_cache
 
 
+@lru_cache(maxsize=4096)
+def dd_cocos_class(path: str) -> str | None:
+    """Read the deepest COCOS-labelled DD path or ancestor from the graph.
+
+    ``path`` includes the IDS name. A signal's ``data`` leaf inherits the
+    class of its enclosing structure when it has no class of its own.
+    """
+    from imas_codex.graph.client import GraphClient
+
+    parts = path.strip("/").split("/")
+    if not parts or not parts[0]:
+        return None
+    prefixes = [
+        {"id": "/".join(parts[:depth]), "depth": depth}
+        for depth in range(1, len(parts) + 1)
+    ]
+    with GraphClient() as graph:
+        rows = graph.query(
+            """
+            UNWIND $paths AS candidate
+            MATCH (node:IMASNode {id: candidate.id})
+            WHERE node.cocos_transformation_type IS NOT NULL
+            RETURN node.cocos_transformation_type AS label
+            ORDER BY candidate.depth DESC
+            LIMIT 1
+            """,
+            paths=prefixes,
+        )
+    return rows[0]["label"] if rows else None
+
+
 @lru_cache(maxsize=1)
 def _get_sign_flip_paths() -> dict[str, frozenset[str]]:
     """Load sign flip paths from imas-python.
