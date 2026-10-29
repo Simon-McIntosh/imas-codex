@@ -1,0 +1,62 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run is a signed-graph-write evidence node with no armed test suite: its manifest carries no baseline_suite or after_suite arm, and its gate is the runner's all mode at db90f2a ending EXIT=0, so no failure id is added or removed.",
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/standard_names/signed_manifest.py:apply_signed_manifest",
+    "imas_codex/standard_names/repair_authority.py:build_repair_authority",
+    "imas_codex/standard_names/export.py:_classify_export_population",
+    "imas_codex/standard_names/graph_store/graph_supersession.py:classify_sourceless_standard_names",
+    "imas_codex/standard_names/source_invariant.py:find_sourceless_live_names"
+  ],
+  "completed_at": "2026-10-29T17:24:19.877Z",
+  "dispatched_at": "2026-10-29T17:14:58Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-restore-held-antenna-voltage.html",
+      "line": "13",
+      "severity": "non-blocking",
+      "text": "non-blocking: the fragment says the sweep's HELD set carried four of the six release_hold_no_dd_source entries, repeated at line 65; HELD in sib-retire-sourceless-drafts-run.py:38-45 names exactly all six, so the count is wrong although the conclusion that HELD omits the other _RELEASE_IDENTITY_HOLDS entries still stands."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-restore-held-antenna-voltage-run.py",
+      "line": "379",
+      "severity": "non-blocking",
+      "text": "non-blocking: gate() restates the blocking-source-loss predicate inlined at imas_codex/standard_names/export.py:3045-3057 instead of calling an owner, so the two can drift silently."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "five commits read; all inside docs/evidence/fragments/sn-integrity-backlog/",
+    "done_when": "the runner's all mode at db90f2a ends EXIT=0 and the fragment names every measure the done_when lists",
+    "goal": "read goal and the read-back; the restored pair exhausted/draft matches the retiring run's own pre-write read",
+    "manifest": "read; complete, with both receipts, the read-back counts and the gate result",
+    "write_paths": "three files changed, every one inside the declared write paths"
+  },
+  "justifications": {
+    "durability": "the scope refusal recorded in negative.log would redden if _scope_refusal were removed from the runner, but no test under tests/ pins it and the node's write paths hold no test file.",
+    "evidence": "gate.log and final.log report export_eligible_rows empty with the release_hold_exhausted_antenna_identity exclusion and one identity written by authority a2d51c6f, measured live from the graph and the export classifier, though the preview and prior-state steps sit at earlier revisions (274f43c, 964d2dc).",
+    "fit": "the runner follows the mode-per-measure shape of sibling evidence runners such as docs/evidence/fragments/sn-integrity-backlog/sib-retire-sourceless-drafts-run.py:38, and every commit carries a conventional subject with a body.",
+    "goal_fidelity": "final.log's readback at db90f2a records stage=exhausted, status=draft and prior_stage=exhausted, matching the retiring run's own pre-write read in r-20261029T083805766546-sib-retire-sourceless-drafts/population.json.",
+    "reuse": "the write reuses build_repair_authority, apply_signed_manifest and classify_sourceless_standard_names rather than hand-editing the graph, but gate() restates export.py:3045-3057's blocking-source-loss predicate because no extracted owner of it exists.",
+    "scope_discipline": "git diff 274f43c..db90f2a touches only the three files under docs/evidence/fragments/sn-integrity-backlog/ that the manifest declares."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to return voltage_of_diagnostic_antenna to the stage and status it held before the sourceless-draft sweep retired it; final.log records name_stage=exhausted and status=draft, the same pair the retiring run read pre-write in r-20261029T083805766546-sib-retire-sourceless-drafts/population.json and its stream.\nVERDICT done_when: the done_when names the fragment, its runner and its authority file holding prior state, preview, receipts and read-back with a real EXIT=; final.log at db90f2a runs the runner's all mode and ends EXIT=0, and preview.log and apply.log carry would_apply and applied receipts.\nVERDICT write_paths: the declared paths are the fragment html, its -run.py, its -authority.json and a figures directory; git diff 274f43c36a2d4ecaed2ad2e3671f178de045340f..db90f2a12dbd touches exactly those three files, 591 inserted lines and nothing else.\nVERDICT manifest: read; status complete, five commits, restoration receipt sn-change:signed-manifest:a2d51c6f..., read-back of 5137 live names before and after with one identity written by the authority, and 7 pre-existing blocking source losses none of which is this name.\nVERDICT diff: read commit by commit from 274f43c36a2d4ecaed2ad2e3671f178de045340f; 964d2dc adds the authority and runner, 455a9ab widens readback and adds the gate mode, 1a3eeff adds the fragment, 1eb5248 adds the all mode, db90f2a rewrites one docstring sentence, all inside docs/evidence/fragments/sn-integrity-backlog/.\nCALL_SITES: imas_codex/standard_names/signed_manifest.py:apply_signed_manifest, imas_codex/standard_names/repair_authority.py:build_repair_authority, imas_codex/standard_names/export.py:_classify_export_population, imas_codex/standard_names/graph_store/graph_supersession.py:classify_sourceless_standard_names, imas_codex/standard_names/source_invariant.py:find_sourceless_live_names\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: final.log's readback at db90f2a records stage=exhausted, status=draft and prior_stage=exhausted, matching the retiring run's own pre-write read in r-20261029T083805766546-sib-retire-sourceless-drafts/population.json.\nSCORE evidence: 18\nJUSTIFICATION evidence: gate.log and final.log report export_eligible_rows empty with the release_hold_exhausted_antenna_identity exclusion and one identity written by authority a2d51c6f, measured live from the graph and the export classifier, though the preview and prior-state steps sit at earlier revisions (274f43c, 964d2dc).\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 274f43c..db90f2a touches only the three files under docs/evidence/fragments/sn-integrity-backlog/ that the manifest declares.\nSCORE durability: 12\nJUSTIFICATION durability: the scope refusal recorded in negative.log would redden if _scope_refusal were removed from the runner, but no test under tests/ pins it and the node's write paths hold no test file.\nSCORE fit: 18\nJUSTIFICATION fit: the runner follows the mode-per-measure shape of sibling evidence runners such as docs/evidence/fragments/sn-integrity-backlog/sib-retire-sourceless-drafts-run.py:38, and every commit carries a conventional subject with a body.\nSCORE reuse: 16\nJUSTIFICATION reuse: the write reuses build_repair_authority, apply_signed_manifest and classify_sourceless_standard_names rather than hand-editing the graph, but gate() restates export.py:3045-3057's blocking-source-loss predicate because no extracted owner of it exists.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-restore-held-antenna-voltage.html:13 non-blocking: the fragment says the sweep's HELD set carried four of the six release_hold_no_dd_source entries, repeated at line 65; HELD in sib-retire-sourceless-drafts-run.py:38-45 names exactly all six, so the count is wrong although the conclusion that HELD omits the other _RELEASE_IDENTITY_HOLDS entries still stands.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-restore-held-antenna-voltage-run.py:379 non-blocking: gate() restates the blocking-source-loss predicate inlined at imas_codex/standard_names/export.py:3045-3057 instead of calling an owner, so the two can drift silently.\n",
+  "review_run_id": "r-20261029T171315077580-review-of-sib-restore-held-antenna-voltage-db90f2a12dbd",
+  "reviewed_base_sha": "274f43c36a2d4ecaed2ad2e3671f178de045340f",
+  "reviewed_head_sha": "db90f2a12dbd6fbcd570575b0b5d8fb6890ed79a",
+  "reviewed_run_id": "r-20261029T164430537469-sib-restore-held-antenna-voltage",
+  "scores": {
+    "durability": 12,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 16,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T17:22:16.709321+00:00",
+  "total": 103
+}
