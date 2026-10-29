@@ -9,6 +9,13 @@
     "reckon/resources.py:52"
   ],
   "completed_at": "2026-10-29T08:02:18.482Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "one-off evidence runner whose record now matches the graph and its generator; verify() not asserting the rendered verdict is a runner-quality gap, not a risk to the stamped family, and the family's state is read back from the graph",
+      "recorded_at": "2026-10-29T08:32:27.169399+00:00"
+    }
+  },
   "dispatched_at": "2026-10-29T07:53:57Z",
   "findings": [
     {
