@@ -840,6 +840,32 @@ def _guard_existing_target_pairings(
     return refusals
 
 
+def _supersede_released_bindings(
+    gc: Any,
+    released: list[dict[str, str]],
+    holder_by_source: dict[str, str],
+    *,
+    operation: str,
+    reason: str,
+) -> list[str]:
+    """Supersede names a rebind drained of their last producing source."""
+    from imas_codex.standard_names.source_invariant import (
+        supersede_names_losing_last_source,
+    )
+
+    moves = [
+        (row["old_id"], holder_by_source[row["sns_id"]])
+        for row in released
+        if holder_by_source.get(row["sns_id"])
+        and holder_by_source[row["sns_id"]] != row["old_id"]
+    ]
+    if not moves:
+        return []
+    return supersede_names_losing_last_source(
+        gc, moves, operation=operation, reason=reason
+    )
+
+
 def _lock_claimed_name_bindings(
     gc: Any,
     batch: list[dict[str, Any]],
@@ -848,6 +874,7 @@ def _lock_claimed_name_bindings(
     allow_missing: bool,
     allow_own_pending_reservation: bool,
     allow_dead_end_revival: bool = False,
+    released_out: list[dict[str, str]] | None = None,
 ) -> list[dict[str, Any]]:
     """Lock source claims and classify their proposed name bindings.
 
@@ -1083,7 +1110,7 @@ def _lock_claimed_name_bindings(
         # other provisional edge is stale. Projections and source-path mirrors
         # are never inferred to belong to a reservation because older writers
         # created those assertions without ownership metadata.
-        gc.query(
+        released_rows = gc.query(
             """
             UNWIND $batch AS b
             MATCH (sns:StandardNameSource {id: b.sns_id})
@@ -1100,15 +1127,16 @@ def _lock_claimed_name_bindings(
                 AND stale.claim_token = b.claim_token
                 AND stale.claim_seq = b.claim_seq
               )
-            WITH old, collect(DISTINCT stale) AS stale_edges
-            WITH old, stale_edges,
+            WITH old, collect(DISTINCT stale) AS stale_edges,
+                 collect(DISTINCT b.sns_id) AS released_source_ids
+            WITH old, stale_edges, released_source_ids,
                  any(edge IN stale_edges
                      WHERE edge.created_target = true) AS owns_target
             FOREACH (stale_edge IN stale_edges |
               DELETE stale_edge
             )
-            WITH DISTINCT old, owns_target
-            WITH old,
+            WITH DISTINCT old, owns_target, released_source_ids
+            WITH old, owns_target, released_source_ids,
                  owns_target
                    AND old.name_stage = $pending_stage
                    AND coalesce(old.source_paths, []) = []
@@ -1118,10 +1146,15 @@ def _lock_claimed_name_bindings(
               WHEN delete_owned_orphan THEN [old] ELSE [] END |
               DELETE owned_target
             )
+            RETURN old.id AS old_id, released_source_ids
             """,
             batch=fenced_batch,
             pending_stage=services.NameStage.pending.value,
         )
+        if released_out is not None:
+            for row in released_rows or []:
+                for source_id in row.get("released_source_ids") or []:
+                    released_out.append({"old_id": row["old_id"], "sns_id": source_id})
 
     collision_ids = {
         row["id"] for row in rows if row.get("outcome", "winner") != "winner"
@@ -1369,12 +1402,14 @@ def persist_claimed_attachments(
             tx = session.begin_transaction()
             tx_gc = services._TransactionQuery(tx)
             try:
+                released: list[dict[str, str]] = []
                 locked_rows = services._lock_claimed_name_bindings(
                     tx_gc,
                     batch,
                     allow_missing=False,
                     allow_own_pending_reservation=False,
                     allow_dead_end_revival=False,
+                    released_out=released,
                 )
                 locked_ids = {
                     row["id"]
@@ -1427,6 +1462,13 @@ def persist_claimed_attachments(
                             "source claim or target lifecycle changed during "
                             "transactional attachment persistence"
                         )
+                    _supersede_released_bindings(
+                        tx_gc,
+                        released,
+                        {item["sns_id"]: item["sn_id"] for item in winner_batch},
+                        operation="compose_rebind",
+                        reason="compose re-bound the source of a drained name",
+                    )
                 tx.commit()
             except BaseException:
                 if tx.closed is False:
@@ -1456,12 +1498,14 @@ def stage_claimed_generated_candidates(
             tx = session.begin_transaction()
             tx_gc = services._TransactionQuery(tx)
             try:
+                released: list[dict[str, str]] = []
                 locked_rows = services._lock_claimed_name_bindings(
                     tx_gc,
                     batch,
                     allow_missing=True,
                     allow_own_pending_reservation=True,
                     allow_dead_end_revival=True,
+                    released_out=released,
                 )
                 locked_ids = {
                     row["id"]
@@ -1469,6 +1513,17 @@ def stage_claimed_generated_candidates(
                     if row.get("outcome", "winner") == "winner"
                 }
                 winner_ids = list(locked_ids)
+                _supersede_released_bindings(
+                    tx_gc,
+                    released,
+                    {
+                        item["sns_id"]: item["sn_id"]
+                        for item in batch
+                        if item["sns_id"] in locked_ids
+                    },
+                    operation="compose_rebind",
+                    reason="compose re-bound the source of a drained name",
+                )
                 tx.commit()
             except BaseException:
                 if tx.closed is False:
@@ -1512,6 +1567,57 @@ def fetch_claimed_source_metadata(token: str, *, services: Any) -> list[dict]:
         )
 
 
+_MOVE_SOURCE_BINDING_CYPHER = """
+            UNWIND $source_ids AS sid
+            MATCH (sns:StandardNameSource {id: sid})
+            WHERE sns.claim_token = $token
+              AND sns.claim_seq = $claim_seq
+              AND sns.status = 'extracted'
+            MATCH (sn:StandardName {id: $sn_id})
+            WITH sns, sn,
+                 [(sns)-[:PRODUCED_NAME]->(prior:StandardName)
+                  WHERE prior.id <> sn.id | prior.id] AS prior_ids
+            SET sns.status = $bound_status,
+                sns.composed_at = datetime(),
+                sns.claimed_at = null,
+                sns.claim_token = null,
+                sns.produced_sn_id = sn.id
+            MERGE (sns)-[:PRODUCED_NAME]->(sn)
+            WITH DISTINCT sns, sn, prior_ids
+            CALL (sns, sn, prior_ids) {
+              UNWIND prior_ids AS prior_id
+              MATCH (sns)-[move:PRODUCED_NAME]->(old:StandardName {id: prior_id})
+              DELETE move
+              WITH DISTINCT sn, old
+              WITH sn, old,
+                   COUNT {
+                     (source:StandardNameSource)-[:PRODUCED_NAME]->(old)
+                     WHERE coalesce(source.status, '') <> 'stale'
+                   } AS producers
+              WHERE producers = 0
+                AND NOT coalesce(old.name_stage, '') IN
+                    ['superseded', 'exhausted', 'contested']
+                AND NOT coalesce(old.status, '') IN
+                    ['deprecated', 'superseded']
+                AND NOT (sn)-[:REFINED_FROM*1..]->(old)
+              SET old.updated_at = datetime(),
+                  old.name_stage = 'superseded',
+                  old.status = 'superseded',
+                  old.claimed_at = null,
+                  old.claim_token = null
+              MERGE (sn)-[:REFINED_FROM]->(old)
+              CREATE (change:StandardNameChange {
+                id: 'sn-change:' + randomUUID(),
+                from_name: old.id, to_name: sn.id,
+                operation: $supersede_operation,
+                reason: $supersede_reason, origin: 'compose',
+                run_id: null, changed_at: datetime(), internal: true})
+              CREATE (sn)-[:HAS_INTERNAL_CHANGE]->(change)
+            }
+            RETURN count(DISTINCT sns) AS affected
+            """
+
+
 def mark_sources_composed(
     token: str,
     claim_seq: int,
@@ -1523,31 +1629,23 @@ def mark_sources_composed(
     """Mark sources as composed and link to the produced StandardName.
 
     Fence-verified: only updates extracted sources matching the claim token and
-    sequence.
-    Creates PRODUCED_NAME relationship to the StandardName.
+    sequence. The source moves to the name that now holds it, and a holder left
+    with no producer is superseded in the same statement.
     Returns count of updated sources.
     """
     with services.GraphClient() as gc:
         result = gc.query(
-            """
-            UNWIND $source_ids AS sid
-            MATCH (sns:StandardNameSource {id: sid})
-            WHERE sns.claim_token = $token
-              AND sns.claim_seq = $claim_seq
-              AND sns.status = 'extracted'
-            MATCH (sn:StandardName {id: $sn_id})
-            SET sns.status = 'composed',
-                sns.composed_at = datetime(),
-                sns.claimed_at = null,
-                sns.claim_token = null,
-                sns.produced_sn_id = sn.id
-            MERGE (sns)-[:PRODUCED_NAME]->(sn)
-            RETURN count(sns) AS affected
-            """,
+            _MOVE_SOURCE_BINDING_CYPHER,
             source_ids=source_ids,
             token=token,
             claim_seq=claim_seq,
             sn_id=standard_name_id,
+            bound_status="composed",
+            supersede_operation="composed_source_moved",
+            supersede_reason=(
+                "compose moved this source to the composed name, leaving the "
+                "former holder without a producer"
+            ),
         )
         return result[0]["affected"] if result else 0
 
@@ -1568,25 +1666,17 @@ def mark_sources_attached(
     """
     with services.GraphClient() as gc:
         result = gc.query(
-            """
-            UNWIND $source_ids AS sid
-            MATCH (sns:StandardNameSource {id: sid})
-            WHERE sns.claim_token = $token
-              AND sns.claim_seq = $claim_seq
-              AND sns.status = 'extracted'
-            MATCH (sn:StandardName {id: $sn_id})
-            SET sns.status = 'attached',
-                sns.composed_at = datetime(),
-                sns.claimed_at = null,
-                sns.claim_token = null,
-                sns.produced_sn_id = sn.id
-            MERGE (sns)-[:PRODUCED_NAME]->(sn)
-            RETURN count(sns) AS affected
-            """,
+            _MOVE_SOURCE_BINDING_CYPHER,
             source_ids=source_ids,
             token=token,
             claim_seq=claim_seq,
             sn_id=standard_name_id,
+            bound_status="attached",
+            supersede_operation="attached_source_moved",
+            supersede_reason=(
+                "attach moved this source to the matched name, leaving the "
+                "former holder without a producer"
+            ),
         )
         return result[0]["affected"] if result else 0
 

@@ -258,8 +258,71 @@ def bind_recovery_sources(
     owns = gc is None
     gc = gc or GraphClient()
     try:
-        rows = gc.query(_BIND_SOURCES, name_id=name_id, specs=specs)
-        return int(rows[0]["bound"]) if rows else 0
+        if not isinstance(gc, GraphClient):
+            rows = gc.query(_BIND_SOURCES, name_id=name_id, specs=specs)
+            return int(rows[0]["bound"]) if rows else 0
+
+        from imas_codex.standard_names.cascade import _TransactionQueryAdapter
+        from imas_codex.standard_names.source_invariant import (
+            supersede_names_losing_last_source,
+        )
+
+        with gc.session() as session:
+            tx = session.begin_transaction()
+            try:
+                tx_query = _TransactionQueryAdapter(tx)
+                # A recovery spec names the canonical source node for its
+                # upstream path, so re-binding one that already produces another
+                # name moves the binding rather than adding one.
+                prior_rows = tx_query.query(
+                    """
+                    UNWIND $spec_ids AS spec_id
+                    MATCH (sns:StandardNameSource {id: spec_id})
+                    MATCH (sns)-[:PRODUCED_NAME]->(prior:StandardName)
+                    WHERE prior.id <> $name_id
+                    RETURN DISTINCT prior.id AS id
+                    """,
+                    spec_ids=[str(spec["id"]) for spec in specs],
+                    name_id=name_id,
+                )
+                prior_ids = [str(row["id"]) for row in prior_rows]
+                rows = tx_query.query(_BIND_SOURCES, name_id=name_id, specs=specs)
+                bound = int(rows[0]["bound"]) if rows else 0
+                if prior_ids:
+                    # The canonical binding is one source to one live name, so
+                    # the stale edge is retired with the supersession rather
+                    # than left competing with the recovered one.
+                    tx_query.query(
+                        """
+                        UNWIND $moved AS pair
+                        MATCH (sns:StandardNameSource {id: pair.source_id})
+                              -[prior:PRODUCED_NAME]->(old:StandardName {id: pair.old_id})
+                        MATCH (sns)-[:PRODUCED_NAME]->(new:StandardName {id: pair.new_id})
+                        DELETE prior
+                        RETURN count(prior) AS dropped
+                        """,
+                        moved=[
+                            {
+                                "source_id": str(spec["id"]),
+                                "old_id": old_id,
+                                "new_id": name_id,
+                            }
+                            for spec in specs
+                            for old_id in prior_ids
+                        ],
+                    )
+                    supersede_names_losing_last_source(
+                        tx_query,
+                        [(old_id, name_id) for old_id in prior_ids],
+                        operation="recovery_bind",
+                        reason="recovery re-bound the source that produced this name",
+                    )
+                tx.commit()
+                return bound
+            except BaseException:
+                if not tx.closed:
+                    tx.rollback()
+                raise
     finally:
         if owns:
             gc.close()

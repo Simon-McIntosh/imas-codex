@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-last-source-supersede">
+<title>Supersede at the moment the last source moves</title>
+</head>
+<body>
+<main>
+
+<h1 id="sib-last-source-supersede-title">Supersede at the moment the last source moves</h1>
+
+<h2 id="sib-last-source-supersede-header">Header</h2>
+<table id="sib-last-source-supersede-header-table">
+<tbody>
+<tr><th>Base revision</th><td><code>d534430649b37d1561b2611e18ee37dff3114571</code></td></tr>
+<tr><th>Work revision</th><td><code>HEAD</code> of the node branch in the node worktree (see the manifest's <code>commits</code>)</td></tr>
+<tr><th>Change</th><td><code>imas_codex/standard_names/source_invariant.py</code>, <code>graph_store/graph_source_bindings.py</code>, <code>provenance_lifecycle.py</code>, <code>provenance_rebuild.py</code></td></tr>
+<tr><th>Test</th><td><code>tests/standard_names/test_last_source_supersede.py</code></td></tr>
+<tr><th>Posture</th><td>Writers changed; tests run on the disposable graph fixture. No live-graph write, no LLM call.</td></tr>
+</tbody>
+</table>
+
+<h2 id="sib-last-source-supersede-gap">The gap this closes</h2>
+<p><code>source_invariant.require_producing_sources</code> already refuses a write
+that leaves a live name without a producer, but every writer passed it only the
+names it was writing, never the name losing the source. A writer that moved a
+name's last source therefore reported success while the former holder stayed
+live, non-derived and sourceless &mdash; the shape that produced 122 of the 156
+lost catalog sources.</p>
+
+<h2 id="sib-last-source-supersede-mechanism">Mechanism</h2>
+<p>One builder, <code>supersede_drained_name_cypher</code> in
+<code>source_invariant.py</code>, writes the whole supersession: it filters the
+names a write touched down to those the graph agrees are live, non-derived, have
+no successor path to the new holder and have no non-stale
+<code>PRODUCED_NAME</code> source left; then it retires them
+(<code>name_stage</code> and <code>status</code> = <code>superseded</code>,
+claim fence cleared), merges <code>(new)-[:REFINED_FROM]-&gt;(old)</code> and
+creates the <code>StandardNameChange</code> receipt linked by
+<code>HAS_INTERNAL_CHANGE</code> &mdash; the successor edge that carries its own
+receipt. It never refuses the write: the ruling is that the write happens and the
+drained name is superseded.</p>
+<p>The builder is embedded where each writer already runs, so the supersession
+commits or rolls back with the write that caused it and no writer gains a second
+statement. Where it is embedded it evaluates the guard into a flag and applies the
+update through a <code>FOREACH</code>, because a filtering clause inside a
+<code>CALL</code> subquery also removes the pair from the enclosing statement, and
+the write would then report that it moved nothing at all:</p>
+<table id="sib-last-source-supersede-writers">
+<thead><tr><th>Writer</th><th>Where the clause runs</th></tr></thead>
+<tbody>
+<tr><td><code>retarget_standard_name_sources</code></td><td>fused into the compare-and-set migration statement, after it has moved the admitted cohort</td></tr>
+<tr><td><code>mark_sources_composed</code> / <code>mark_sources_attached</code></td><td>fused into the source-move statement, which also drops the predecessor's stale <code>PRODUCED_NAME</code> edge so the move is a move</td></tr>
+<tr><td><code>_lock_claimed_name_bindings</code> callers (<code>persist_claimed_attachments</code>, <code>stage_claimed_generated_candidates</code>)</td><td>the provisional-edge cleanup now reports the drained source ids, and the same transaction supersedes each former holder</td></tr>
+<tr><td><code>bind_recovery_sources</code></td><td>inside the write transaction: prior holders are captured, the stale edge is deleted, then each is superseded</td></tr>
+<tr><td><code>persist_refined_name</code></td><td>reaches it through the retarget above; the refine statement already retires its predecessor, so the clause is a no-op there rather than a second retirement</td></tr>
+</tbody>
+</table>
+<p>Derived parents stay exempt, for the same reason the invariant exempts them: a
+structural parent has children, not sources.</p>
+
+<h2 id="sib-last-source-supersede-negative-control">Negative control</h2>
+<p>Declared control: <em>each per-writer test must fail on main because the losing
+name stays live with no source</em>. A <code>git archive</code> tree of the base
+revision runs the same test file with the same fixture; the per-writer cases fail
+there and the keep-another-source control passes on both arms, which is what
+separates "the write is wrong" from "the test is wrong".</p>
+<pre id="sib-last-source-supersede-control-log">see manifest key negative_control_log for the whole log</pre>
+
+<h2 id="sib-last-source-supersede-gate">Gate</h2>
+<p><code>tests/standard_names/</code> on default markers with <code>-n 8</code>,
+each arm with its own basetemp and the five generated model files, judged by
+delta of failure ids against the base arm rather than by absolute green.</p>
+<table id="sib-last-source-supersede-gate-table">
+<thead><tr><th>Arm</th><th>Result</th><th>Failure ids</th></tr></thead>
+<tr><td>base <code>d5344306</code> archive, <code>-n 8</code></td><td>4 failed, 8532 passed, 12 skipped, EXIT=1</td><td>4, none of them in a file this change touches</td></tr>
+<tr><td>head working tree, <code>-n 4</code></td><td>8537 passed, 11 skipped, EXIT=0</td><td>0 &mdash; zero added</td></tr>
+<tr><td>head <code>-m graph</code>, new file plus <code>test_source_invariants.py</code></td><td>5 passed, EXIT=0</td><td>0</td></tr>
+</table>
+<p>The head arm ran the whole directory, so the four base failures are gone rather
+than merely matched; the added-id count is zero either way, which is the measure.
+The two arms differ in worker count because the base arm was sized to the whole
+fleet node and the head arm shared the allocation with a graph arm running beside
+it.</p>
+
+</main>
+</body>
+</html>

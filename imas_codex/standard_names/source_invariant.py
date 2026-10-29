@@ -8,20 +8,93 @@ class MissingStandardNameSource(ValueError):
     """A live name would have no producing source after a write."""
 
 
-def _live_child_cypher() -> str:
+def _live_child_cypher(parent: str = "sn") -> str:
     """Return the evidence-bearing child test shared by writers and export."""
-    return """EXISTS {
-              MATCH (child:StandardName)-[:HAS_PARENT]->(sn)
+    return f"""EXISTS {{
+              MATCH (child:StandardName)-[:HAS_PARENT]->({parent})
               WHERE NOT coalesce(child.name_stage, '') IN
                 ['superseded', 'exhausted', 'contested']
                 AND NOT coalesce(child.status, '') IN
                   ['deprecated', 'superseded']
-          }"""
+          }}"""
 
 
-def _derived_parent_cypher() -> str:
+def _derived_parent_cypher(parent: str = "sn") -> str:
     """Return a two-valued derived-parent test for the graph predicate."""
-    return f"coalesce(sn.origin, '') = 'derived' AND {_live_child_cypher()}"
+    return f"coalesce({parent}.origin, '') = 'derived' AND {_live_child_cypher(parent)}"
+
+
+def _drained_test(name: str, successor: str) -> str:
+    """Return the predicate that says the predecessor has nothing left."""
+    return f"""(
+            NOT coalesce({name}.name_stage, '') IN
+                  ['superseded', 'exhausted', 'contested']
+        AND NOT coalesce({name}.status, '') IN ['deprecated', 'superseded']
+        AND NOT ({_derived_parent_cypher(name)})
+        AND NOT ({name})-[:REFINED_FROM*1..]->({successor})
+        AND COUNT {{
+              (source:StandardNameSource)-[:PRODUCED_NAME]->({name})
+              WHERE coalesce(source.status, '') <> 'stale'
+            }} = 0
+      )"""
+
+
+def _supersede_update(
+    name: str, successor: str, operation: str, reason: str, origin: str, run_id: str
+) -> str:
+    return f"""SET {name}.updated_at = datetime(),
+            {name}.name_stage = 'superseded',
+            {name}.status = 'superseded',
+            {name}.claimed_at = null,
+            {name}.claim_token = null
+        MERGE ({successor})-[:REFINED_FROM]->({name})
+        CREATE (change:StandardNameChange {{
+          id: 'sn-change:' + randomUUID(),
+          from_name: {name}.id, to_name: {successor}.id,
+          operation: '{operation}',
+          reason: {reason}, origin: {origin}, run_id: {run_id},
+          changed_at: datetime(), internal: true
+        }})
+        CREATE ({successor})-[:HAS_INTERNAL_CHANGE]->(change)"""
+
+
+def supersede_drained_name_cypher(
+    *,
+    name: str = "sn",
+    successor: str = "new",
+    operation: str = "last_source_supersede",
+    reason: str = "$supersede_reason",
+    origin: str = "$supersede_origin",
+    run_id: str = "$supersede_run_id",
+    embedded: bool = False,
+) -> str:
+    """Return the clause that supersedes a drained name in the caller's write.
+
+    A writer that must stay a single statement embeds this clause; a writer
+    that can afford a statement of its own runs it as one.  Keeping the text in
+    one builder means the successor edge and its receipt are written the same
+    way wherever the supersession happens, and it commits or rolls back with
+    the write that moved the source.
+
+    ``embedded`` wraps the guard in a ``FOREACH`` over a computed flag instead
+    of a ``WHERE`` filter. A filtering clause inside a ``CALL`` subquery removes
+    the pair from the enclosing statement too, so the write that did move its
+    sources would then report none moved at all.
+    """
+    update = _supersede_update(name, successor, operation, reason, origin, run_id)
+    test = _drained_test(name, successor)
+    if embedded:
+        return (
+            f"""WITH {name}, {successor},
+             CASE WHEN {test} THEN true ELSE false END AS supersedes_predecessor
+        FOREACH (_ IN CASE WHEN supersedes_predecessor"""
+            + """ THEN [1] ELSE [] END |
+          """
+            + update
+            + """
+        )"""
+        )
+    return f"WHERE {test}\n        " + update
 
 
 def find_sourceless_live_names(
@@ -62,9 +135,62 @@ def find_sourceless_live_names(
         """,
         ids=ids,
         retired_is_exempt=retired_is_exempt,
-        exempt_ids=exempt
+        exempt_ids=exempt,
     )
     return [str(row["id"]) for row in rows]
+
+
+def supersede_names_losing_last_source(
+    query: Any,
+    moves: Iterable[tuple[str, str]],
+    *,
+    operation: str = "last_source_supersede",
+    reason: str | None = None,
+    origin: str | None = None,
+    run_id: str | None = None,
+) -> list[str]:
+    """Supersede a name a write has just left with no producing source.
+
+    ``moves`` pairs each name whose sources a write moved away with the name
+    that now holds them.  A pair supersedes its predecessor only when the graph
+    agrees it is live and has no remaining producer, so a caller may pass every
+    name it touched without deciding which ones drained.  Derived parents are
+    exempt for the same reason the invariant exempts them: a structural parent
+    has children, not sources.
+
+    Runs on the caller's own graph handle and transaction, so the supersession
+    commits or rolls back with the write that caused it.  The successor edge is
+    ``(new)-[:REFINED_FROM]->(old)`` and the receipt is the standard internal
+    ``StandardNameChange`` event, so history stays on the usual chain.
+    Returns the ids superseded, in output order.
+    """
+    pairs = sorted(
+        {
+            (str(old), str(new))
+            for old, new in moves
+            if old and new and str(old) != str(new)
+        }
+    )
+    if not pairs:
+        return []
+    rows = query.query(
+        f"""
+        // LAST_SOURCE_SUPERSEDE
+        UNWIND $pairs AS pair
+        MATCH (sn:StandardName {{id: pair.old_name}}),
+              (new:StandardName {{id: pair.new_name}})
+        {supersede_drained_name_cypher(operation=operation)}
+        RETURN sn.id AS old_id, new.id AS new_id
+        ORDER BY old_id
+        """,
+        pairs=[{"old_name": old, "new_name": new} for old, new in pairs],
+        supersede_reason=reason,
+        supersede_origin=origin,
+        supersede_run_id=run_id,
+    )
+    return [
+        str(row["old_id"]) for row in rows or [] if "old_id" in row and "new_id" in row
+    ]
 
 
 def require_producing_sources(
