@@ -11,6 +11,13 @@
     "imas_codex/standard_names/graph_store/graph_source_bindings.py:1577"
   ],
   "completed_at": "2026-10-29T21:19:16.831Z",
+  "dimension_dispositions": {
+    "goal_fidelity": {
+      "kind": "folded",
+      "node": "sib-adopt-pending-projection-stubs",
+      "recorded_at": "2026-10-29T21:23:20.603519+00:00"
+    }
+  },
   "dispatched_at": "2026-10-29T21:08:07Z",
   "findings": [
     {
