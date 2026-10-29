@@ -1018,8 +1018,9 @@ def _lock_claimed_name_bindings(
                       MATCH (:StandardNameSource)-[:PRODUCED_NAME]->(target)
                     }
                     AND EXISTS {
-                      MATCH (sns)-[:FROM_DD_PATH]->(:IMASNode)-
-                        [:HAS_STANDARD_NAME]->(target)
+                      MATCH (sns)-[:FROM_DD_PATH]->(projected:IMASNode)-
+                        [projection]->(target)
+                      WHERE type(projection) = $projection_edge
                     }
                THEN true
                ELSE false
@@ -1148,6 +1149,7 @@ def _lock_claimed_name_bindings(
         allow_own_pending=allow_own_pending_reservation,
         allow_dead_end_revival=allow_dead_end_revival,
         allow_adopt_pending_stub=allow_adopt_pending_stub,
+        projection_edge="HAS_STANDARD_NAME",
         stable_stages=sorted(foundation._STABLE_BINDING_NAME_STAGES),
         revivable_stages=sorted(
             {
