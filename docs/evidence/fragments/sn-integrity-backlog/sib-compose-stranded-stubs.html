@@ -1,6 +1,6 @@
 <h2 id="sib-compose-stranded-stubs">sib-compose-stranded-stubs — composing the seven pending stubs that stranded their DD sources</h2>
 
-<p class="sib-compose-stranded-stubs-status"><strong>Outcome: two of the seven landed; five refused again, with the collision now recorded.</strong>
+<p class="sib-compose-stranded-stubs-status"><strong>Outcome: blocked — two of the seven landed; the remaining five are refused by a binding collision, and a second scoped attempt landed nothing because every claim aborted in the transactional finalize.</strong>
 Composition now adopts an unowned pending projection stub on the path that actually writes a composed
 name, so two sources bound their own stub and reached <code>accepted</code>
 (<code>radial_coordinate_of_reflector</code>, <code>vertical_coordinate_of_reflector</code>). The
@@ -8,7 +8,10 @@ export source gate's blocking set fell from seven to five. The remaining five st
 <code>candidate "…" has non-bindable name_stage "pending"</code>, and every one of them is a DD path
 whose own IMAS node projects onto that pending stub — so the refusal is not a projection it cannot
 see, and the condition that still fails is answered by neither the graph state nor the recorded
-message. That is the open question, stated below rather than guessed at.</p>
+message. A second scoped attempt, after unparking the six again, landed nothing at all: every
+<code>generate_name</code> batch died in the transactional finalize
+(<code>RuntimeError('source claim changed during transactional name persistence')</code>, nine of
+nine). Both are recorded below rather than guessed at; neither is a doubled read.</p>
 
 <h3 id="sib-compose-stranded-stubs-cause">The cause, at its file and line</h3>
 
@@ -101,7 +104,7 @@ exception let the claim take its own projection stub, and both sources finished
   <tbody>
     <tr><td>census only (read-only)</td><td>9 roster paths</td><td>—</td><td>—</td><td>—</td><td>$0.0000</td></tr>
     <tr><td>scoped run 2</td><td><code>--focus &lt;9 paths&gt; --names-only --cost-limit 2.00 --time 15</code></td><td><code>af7b0ef1…</code></td><td>processed=2, spent=$0.0000</td><td>processed=2, spent=$0.0003</td><td>$0.0003 of $2.00</td></tr>
-    <tr><td>scoped run 3</td><td><code>--focus &lt;9 paths&gt; --names-only --cost-limit 2.00 --time 15</code></td><td><em>recorded in the log</em></td><td><em>recorded in the log</em></td><td><em>recorded in the log</em></td><td><em>recorded in the log</em></td></tr>
+    <tr><td>scoped run 3</td><td><code>--focus &lt;9 paths&gt; --names-only --cost-limit 2.00 --time 15</code></td><td><code>885d314f…</code> (7 focus sources seeded — the two composed paths carry live accepted names and are gap-only by default)</td><td>processed=0, spent=$0.0000, error_count=9</td><td>processed=0, spent=$0.0000</td><td>$0.0000 of $2.00, <code>EXIT=1</code></td></tr>
   </tbody>
 </table>
 
@@ -114,11 +117,11 @@ bound.</p>
 <h3 id="sib-compose-stranded-stubs-before">Before and after, per source</h3>
 
 <table>
-  <thead><tr><th>DD path</th><th>before</th><th>after run 2</th><th>producer</th></tr></thead>
+  <thead><tr><th>DD path</th><th>before</th><th>final</th><th>producer</th></tr></thead>
   <tbody>
     <tr><td><code>spectrometer_x_ray_crystal/channel/reflector/sphere_centre/r</code></td><td>extracted, att 1</td><td>composed</td><td><code>radial_coordinate_of_reflector</code></td></tr>
     <tr><td><code>spectrometer_x_ray_crystal/channel/reflector/sphere_centre/z</code></td><td>failed, att 5, cap</td><td>composed</td><td><code>vertical_coordinate_of_reflector</code></td></tr>
-    <tr><td><code>edge_profiles/ggd/vorticity_over_r/diamagnetic</code></td><td>extracted, att 2</td><td>extracted, att 3, collision recorded</td><td>none</td></tr>
+    <tr><td><code>edge_profiles/ggd/vorticity_over_r/diamagnetic</code></td><td>extracted, att 2</td><td>failed, att 5, cap + refusal</td><td>none</td></tr>
     <tr><td><code>plasma_profiles/ggd/vorticity_over_r/diamagnetic</code></td><td>extracted, att 2</td><td>failed, att 5, cap + refusal</td><td>none</td></tr>
     <tr><td><code>soft_x_rays/channel/detector/radius</code></td><td>failed, att 5, cap</td><td>failed, att 5, cap + refusal</td><td>none</td></tr>
     <tr><td><code>summary/line_average/n_i/neon/value</code></td><td>failed, att 5, cap</td><td>failed, att 5, cap + refusal</td><td>none</td></tr>
@@ -153,17 +156,40 @@ the graph says is met, so either the predicate reads a property the census does 
 is not granted on the branch that composes those five. Resolving it needs the claim's own batch
 record, not another run.</p>
 
-<p>A second defect surfaced in run 2 and is recorded, not fixed:
-<code>RuntimeError('source claim changed during transactional name persistence')</code> raised ten
-times out of twenty-five generation calls, from
-<code>persist_generated_name_batch</code>'s transactional write. It costs a claim per occurrence and
-is independent of the collision above.</p>
+<p>A second defect surfaced in run 2 and then stopped run 3 completely:
+<code>RuntimeError('source claim changed during transactional name persistence')</code> — raised at
+<code>imas_codex/standard_names/graph_store/graph_catalog.py:2510-2513</code>, where the batch
+finalize asserts that the set of sources it just finalized equals the set it intended. In run 2 it
+fired ten times against twenty-five generation calls; in run 3 it fired nine times and every
+<code>generate_name</code> batch aborted, so <code>processed</code> was 0 and the run exited 1. It
+is the reason the second attempt landed nothing new, and it is independent of the collision above:
+the sources reach the persistence write and are then lost by the finalize, which is also what the
+five pending stubs' absent producing edges look like from the graph side.</p>
+
+<h3 id="sib-compose-stranded-stubs-readback">Read-back</h3>
+
+<table>
+  <thead><tr><th>criterion</th><th>state</th></tr></thead>
+  <tbody>
+    <tr><td>each source produces exactly one live name</td><td>met for 2 of 9 (<code>radial_coordinate_of_reflector</code>, <code>vertical_coordinate_of_reflector</code>): one <code>PRODUCED_NAME</code> edge each, one producer each, no source with two. Not met for the other 7, which produce none.</td></tr>
+    <tr><td>each adopted stub carries its content and a receipt</td><td>met for 2 of 2: both carry a description, a unit (<code>m</code>) and one <code>StandardNameChange</code> with <code>operation='adopt_pending_projection'</code>. Their stage is <code>accepted</code>, not <code>drafted</code> — they passed review and approval inside the same run, so the criterion is met in the stronger form.</td></tr>
+    <tr><td>the export gate's blocking set no longer lists the seven</td><td>partly met: 7 → 5 (<code>gate_blocking_count</code> 5, <code>gate_roster_blocking</code> 5). The two adopted names left the set; five remain.</td></tr>
+    <tr><td>nothing outside the roster was touched</td><td>met: the only sources written are the nine roster paths, the only names their seven projected stubs, and <code>sn retry</code> was given the roster's exact paths.</td></tr>
+  </tbody>
+</table>
 
 <ol>
-  <li>Answer the open question against the claim's batch record, then re-run the scope with
-      <code>--time 15</code> and read <code>generate_name processed</code>.</li>
-  <li>Read back per source that it produces exactly one live name, and that each adopted stub carries
-      a description, a unit and an <code>adopt_pending_projection</code> receipt.</li>
-  <li>Re-run the census and require <code>gate_roster_blocking = 0</code> before the export source
+  <li>Repair the finalize guard at <code>graph_catalog.py:2510-2513</code> first: until it holds, no
+      scoped run can compose anything, and the five parked sources will re-park on every attempt.
+      The predicate that must hold is that the finalized set equals the intended set — so the
+      question is which intended source the finalize query drops, not whether the claim was
+      released.</li>
+  <li>Then answer the collision question against the same batch: the refusal names the one condition
+      the graph reports as met, so either the predicate reads a property the census does not, or the
+      adoption exception is not granted on the branch that composes those five.</li>
+  <li>After each attempt the sources re-park at the cap; unpark with
+      <code>sn retry --failed &lt;the same six paths&gt; --reason …</code>, never by editing rows.</li>
+  <li>Re-run the scope with <code>--time 15</code>, read <code>generate_name processed</code>, then
+      re-run the census and require <code>gate_roster_blocking = 0</code> before the export source
       gate is considered clear.</li>
 </ol>
