@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="298">
+<meta name="plan-version" content="299">
 <meta name="plan-modified" content="2026-10-29">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -1067,6 +1067,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s45" data-id="c-run-r-20261029T092403226107-review-of-sib-audit-drafts-and-import-e48d9964266e" data-who="reckon-build" data-when="2026-10-29T09:37:08.577Z">
     <div class="r-comment-body"><p>review of r-20261029T083545399992-sib-audit-drafts-and-import at head e48d99642 from base 6fff23ede, scored 79/120 (goal_fidelity 19, evidence 13, scope_discipline 18, durability 17, fit 17, reuse 5) with four non-blocking findings and zero code-attributable added failure ids.</p></div>
+</div>
+<div class="r-comment" data-section="s45" data-id="c-run-r-20261029T093740896274-review-of-sib-last-source-supersede-d929ce6cb35a" data-who="reckon-build" data-when="2026-10-29T09:46:57.399Z">
+    <div class="r-comment-body"><p>Review of r-20261029T083356719653-sib-last-source-supersede at head d929ce6cb (base d534430649b37d1561b2611e18ee37dff3114571): the writer coverage is real and the negative control reproduces, so the node is sound; the one structural objection is that the supersede clause and its receipt writer were forked beside the repository&#x27;s existing owners (reuse 5), recorded as a non-blocking finding on graph_source_bindings.py:1570 and source_invariant.py:42.</p></div>
 </div>
 <div class="r-comment" data-section="s46" data-id="c-run-r-20261029T083805766546-sib-retire-sourceless-drafts" data-who="reckon-build" data-when="2026-10-29T09:00:04.231Z">
     <div class="r-comment-body"><p>Retired 131 of 132 live exhausted drafts that carry no producing DD source through `apply_signed_manifest` (authority 133 rows, preview 131 admitted / 2 refused, manifest 2f8815c0…), one successor edge to `poloidal_angle_of_plasma_boundary_gap`; read-back lists 17 remaining sourceless live names — 16 non-exhausted recorded for the lead and 1 writer refusal — against a live population of 148 rather than the dispatch's 19 (113 exhausted records no source at all; `ion_pressure` and `beta` are derived parents).</p></div>

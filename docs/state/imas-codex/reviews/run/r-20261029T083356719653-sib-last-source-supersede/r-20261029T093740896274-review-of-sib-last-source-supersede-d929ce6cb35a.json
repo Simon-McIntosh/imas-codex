@@ -1,0 +1,118 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own arms: baseline_suite failure_ids has 4 ids (test_manifest_generability x3, test_catalog_layout_hierarchy x1) and after_suite has none, so no failure id is added by the change.",
+  "call_sites": [
+    "imas_codex/standard_names/graph_store/graph_refinement.py:1321",
+    "imas_codex/standard_names/catalog_reconcile.py:234",
+    "imas_codex/standard_names/provenance_rebuild.py:732",
+    "imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py:1467",
+    "imas_codex/standard_names/graph_store/graph_supersession.py:251",
+    "imas_codex/standard_names/graph_store/graph_supersession.py:587",
+    "imas_codex/standard_names/provenance_lifecycle.py:588",
+    "imas_codex/standard_names/edit.py:1936"
+  ],
+  "completed_at": "2026-10-29T09:46:57.399Z",
+  "dispatched_at": "2026-10-29T09:39:31Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "non-blocking, noted at landing",
+      "recorded_at": "2026-10-29T15:22:22.512916+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "non-blocking, noted at landing",
+      "recorded_at": "2026-10-29T15:22:22.712331+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "non-blocking, noted at landing",
+      "recorded_at": "2026-10-29T15:22:25.376445+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "non-blocking, noted at landing",
+      "recorded_at": "2026-10-29T15:22:25.460541+00:00"
+    },
+    "4": {
+      "kind": "exempted",
+      "reason": "non-blocking, noted at landing",
+      "recorded_at": "2026-10-29T15:22:25.529567+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_source_bindings.py",
+      "id": "f1dc64caf92",
+      "line": "1570",
+      "severity": "non-blocking",
+      "text": "non-blocking: _MOVE_SOURCE_BINDING_CYPHER writes a second copy of the drained test and of the supersede-plus-receipt update instead of embedding supersede_drained_name_cypher, so the 'one builder' the run's own docstring and evidence fragment claim does not cover the compose/attach move; the copy already differs (origin hardcoded 'compose', run_id null) and can drift from source_invariant.py:61."
+    },
+    {
+      "file": "imas_codex/standard_names/source_invariant.py",
+      "id": "f1fa6ef72c6",
+      "line": "42",
+      "severity": "non-blocking",
+      "text": "non-blocking: _supersede_update creates the StandardNameChange receipt itself with randomUUID() and a literal operation interpolated into the query text, duplicating record_standard_name_change (provenance_lifecycle.py:1981), which already accepts a transaction query handle and is the receipt writer the other supersession paths use; the repository now has a fourth receipt shape for one lifecycle event."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_source_bindings.py",
+      "id": "fd3323fd3b1",
+      "line": "843",
+      "severity": "non-blocking",
+      "text": "non-blocking: _supersede_released_bindings and the released_out plumbing added to _lock_claimed_name_bindings have no test at all; test_last_source_supersede.py drives retarget, recovery and mark_sources_composed only, so a regression in both claimed-attachment writers or in mark_sources_attached would redden nothing while the suite stays green."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_source_bindings.py",
+      "id": "f5109e38ebf",
+      "line": "1516",
+      "severity": "non-blocking",
+      "text": "non-blocking: in stage_claimed_generated_candidates the supersession names the staged candidate as successor without ever writing its PRODUCED_NAME edge in that transaction, unlike persist_claimed_attachments (line 1465) which MERGEs the binding first; a rich write that then fails leaves the former holder superseded pointing at a candidate that produces nothing."
+    },
+    {
+      "file": "tests/standard_names/test_last_source_supersede.py",
+      "id": "f12f7b6b9c3",
+      "line": "133",
+      "severity": "non-blocking",
+      "text": "non-blocking: the [refine] parametrisation only changes the operation label on the same retarget_standard_name_sources call, so it re-runs the retarget case under a different name and never enters persist_refined_name; the coverage it appears to add to the refine writer is the retarget primitive, already covered by the [retarget] case."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "the retarget primitive is reached from graph_refinement.py:1321, graph_supersession.py:251/587/4132, provenance_lifecycle.py:588/2191 and edit.py:1936; bind_recovery_sources from catalog_reconcile.py:234 and provenance_rebuild.py:732; persist_claimed_attachments from worker_extraction_and_enrichment.py:1467.",
+    "diff": "read commit by commit: 4b3ed7b1b adds the clause and wires the writers, 84256d521 fixes the migration's row count with a FOREACH flag, 43e85e102 renames the flag column, d929ce6cb adds the evidence fragment; all six files are inside the declared scope.",
+    "done_when": "read the done_when and the arms: baseline_suite/after_suite show zero added failure ids, graph-gate.log shows '5 passed, 16 deselected, EXIT=0', and negative-control.log shows 4 failed / 1 passed / EXIT=1 on the d5344306 archive, which is every clause of the measure.",
+    "goal": "read the node goal and the diff: a name whose last producing source moves is superseded inside the writing transaction, with (new)-[:REFINED_FROM]->(old) and a StandardNameChange receipt, at source_invariant.py:61 and the four writer call sites.",
+    "manifest": "read: status complete, four commits, both suite arms plus a graph arm recorded with log paths, negative_control_log named bare, and the four base failures explained as gone at head.",
+    "write_paths": "read the manifest's declared paths; every path in git diff --stat d5344306..d929ce6cb is inside them, and no file outside them is touched."
+  },
+  "justifications": {
+    "durability": "negative-control.log fails exactly the four per-writer cases on the base archive and passes the keep-another-source control on both arms, so a regression that leaves the name live reddens the tests; the gap is the released-out path (graph_source_bindings.py:843) which the new test file never drives.",
+    "evidence": "the done_when's measure is the suite delta plus the new tests failing on base; the manifest records baseline_suite 4 failed/8532 passed EXIT=1 and after_suite 0 failed/8537 passed EXIT=0, and negative-control.log header names d5344306 with '4 failed, 1 passed' and a bare EXIT=1, so a recorded result exists for every arm rather than a claim.",
+    "fit": "source_invariant.py:61 follows the existing text-builder idiom in the same package (_guard_comparison_binding_cypher) and every added name states its mechanism, with no plan, sprint or ticket label in a symbol, comment or filename.",
+    "goal_fidelity": "source_invariant.py:61 builds the supersede clause and each listed writer embeds it in its own statement (graph_source_bindings.py:1570, provenance_lifecycle.py:920, provenance_rebuild.py:258+), so a write that drains a name supersedes, never refuses. The goal's own words are 'the same transaction', and supersede is derived from post-write graph state rather than from an enumerated losing-name set, which is the intent but a looser form.",
+    "reuse": "the repository already owns supersede-with-reuse of StandardNameChange via record_standard_name_change (provenance_lifecycle.py:1981) and tombstone_supersede_into (graph_supersession.py:462); source_invariant.py:42 writes a fourth receipt variant and graph_source_bindings.py:1570 a second copy of the clause instead of extending either owner.",
+    "scope_discipline": "git diff --stat d5344306..d929ce6cb lists six files, every one inside the manifest's declared write paths; graph_refinement.py was declared and needed no edit because its persist_refined_name reaches the clause through retarget at graph_refinement.py:1321."
+  },
+  "node": "sib-last-source-supersede",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is that every writer which moves a name's last DD source supersedes that name in the same transaction; source_invariant.py:61 builds the clause and graph_source_bindings.py:1570, provenance_lifecycle.py:920 and provenance_rebuild.py:258 embed it in the writing statement.\nVERDICT done_when: the done_when measures zero added failure ids plus tests that fail on main; baseline_suite (4 failed, EXIT=1) and after_suite (0 failed, 8537 passed, EXIT=0) record it, negative-control.log reddens the four per-writer cases on the d5344306 archive with EXIT=1, and graph-gate.log shows 5 passed EXIT=0.\nVERDICT write_paths: every path in git diff --stat d5344306..d929ce6cb is inside the manifest's declared write paths; graph_refinement.py was declared and left unedited because graph_refinement.py:1321 reaches the clause through retarget.\nVERDICT manifest: read; status complete, four commits, both suite arms and the graph arm recorded with log paths, negative_control_log named bare, four base failures recorded as gone at head.\nVERDICT diff: read commit by commit; 4b3ed7b1b adds the clause and wires four writers, 84256d521 and 43e85e102 repair the embedded form's row count and column name, d929ce6cb lands the evidence fragment.\nCALL_SITES: imas_codex/standard_names/graph_store/graph_refinement.py:1321, imas_codex/standard_names/catalog_reconcile.py:234, imas_codex/standard_names/provenance_rebuild.py:732, imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py:1467, imas_codex/standard_names/graph_store/graph_supersession.py:251, imas_codex/standard_names/graph_store/graph_supersession.py:587, imas_codex/standard_names/provenance_lifecycle.py:588, imas_codex/standard_names/edit.py:1936\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: source_invariant.py:61 plus the four embedded call sites cover every writer the brief names, and the supersede is derived from post-write graph state rather than from an enumerated losing set.\nSCORE evidence: 17\nJUSTIFICATION evidence: baseline_suite at d5344306 and after_suite at 43e85e102 both record completed runs with exit status and failure ids, and negative-control.log's header names the base revision it ran.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: all six paths in git diff --stat d5344306..d929ce6cb are declared write paths and graph_refinement.py's absence is justified at graph_refinement.py:1321.\nSCORE durability: 14\nJUSTIFICATION durability: negative-control.log fails test_last_source_supersede.py:134/157/180 on the base archive and passes the control, so a regression reddens them, but graph_source_bindings.py:843 is untested.\nSCORE fit: 17\nJUSTIFICATION fit: source_invariant.py:61 follows the package's existing Cypher-fragment builder idiom and no added name carries a plan or ticket label.\nSCORE reuse: 5\nJUSTIFICATION reuse: source_invariant.py:42 duplicates the receipt writer owned by provenance_lifecycle.py:1981 and graph_source_bindings.py:1570 duplicates the clause, neither extending the owner.\nFINDING imas_codex/standard_names/graph_store/graph_source_bindings.py:1570 non-blocking: a second copy of the drained test and supersede update, already diverging from source_invariant.py:61.\nFINDING imas_codex/standard_names/source_invariant.py:42 non-blocking: the receipt is written here rather than through record_standard_name_change at provenance_lifecycle.py:1981.\nFINDING imas_codex/standard_names/graph_store/graph_source_bindings.py:843 non-blocking: the released-bindings supersede path has no test.\nFINDING imas_codex/standard_names/graph_store/graph_source_bindings.py:1516 non-blocking: the staged-candidate supersede names a successor whose PRODUCED_NAME edge is never written.\nFINDING tests/standard_names/test_last_source_supersede.py:133 non-blocking: the [refine] case is the retarget case under another operation label.",
+  "review_run_id": "r-20261029T093740896274-review-of-sib-last-source-supersede-d929ce6cb35a",
+  "reviewed_base_sha": "d534430649b37d1561b2611e18ee37dff3114571",
+  "reviewed_head_sha": "d929ce6cb35af5ad68220008d6fe7ba5b63ce5bd",
+  "reviewed_run_id": "r-20261029T083356719653-sib-last-source-supersede",
+  "scores": {
+    "durability": 14,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-29T10:34:00+00:00",
+  "total": 90
+}
