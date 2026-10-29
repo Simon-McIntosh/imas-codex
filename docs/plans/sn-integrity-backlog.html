@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="295">
+<meta name="plan-version" content="297">
 <meta name="plan-modified" content="2026-10-29">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -1067,6 +1067,12 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s46" data-id="c-run-r-20261029T083805766546-sib-retire-sourceless-drafts" data-who="reckon-build" data-when="2026-10-29T09:00:04.231Z">
     <div class="r-comment-body"><p>Retired 131 of 132 live exhausted drafts that carry no producing DD source through `apply_signed_manifest` (authority 133 rows, preview 131 admitted / 2 refused, manifest 2f8815c0…), one successor edge to `poloidal_angle_of_plasma_boundary_gap`; read-back lists 17 remaining sourceless live names — 16 non-exhausted recorded for the lead and 1 writer refusal — against a live population of 148 rather than the dispatch's 19 (113 exhausted records no source at all; `ion_pressure` and `beta` are derived parents).</p></div>
+</div>
+<div class="r-comment" data-section="s46" data-id="c-s46-lead-ruling-keep-131" data-who="reckon-build" data-when="2026-10-29T17:30:00Z">
+    <div class="r-comment-body"><p><code>sib-retire-sourceless-drafts</code> found 148 live names with no producing DD source across the whole catalog, not the 19 measured among the catalog-import population. It retired 131 exhausted drafts through <code>apply_signed_manifest</code>:</p><ul><li>each retirement carries a receipt;</li><li>only one got a successor edge, because the holder query required a non-stale source;</li><li>23 had paid documentation, whose history is kept;</li><li>none had recorded LLM spend of its own.</li></ul><p>The coordinator's brief caused the overreach: it told the node to “work from the live set” when the count differed, where it should have told it to stop and report. The lead approved 19, and the run wrote 131.</p><p><b>Lead ruling, 2026-10-29:</b> keep the retirements, which apply the last-source rule to dead-end drafts, and restore <code>voltage_of_diagnostic_antenna</code> to its §38 release hold. Node <code>sib-restore-held-antenna-voltage</code> applies the restore.</p><p>Still for the lead:</p><ul><li>16 non-exhausted sourceless names (6 accepted, 8 pending, 2 reviewed), recorded and not written;</li><li><code>deposited_power_at_divertor_target</code>, refused by the writer because it has a live structural child.</li></ul><p><code>ion_pressure</code> and <code>beta</code> are derived parents the invariant exempts.</p></div>
+</div>
+<div class="r-comment" data-section="s46" data-id="c-run-r-20261029T090134598105-review-of-sib-retire-sourceless-drafts-8ae632cd8d14" data-who="reckon-build" data-when="2026-10-29T09:16:25.770Z">
+    <div class="r-comment-body"><p>Reviewed r-20261029T083805766546-sib-retire-sourceless-drafts at head 8ae632cd8 (base 6fff23ede): parsed record scoring goal_fidelity 15, evidence 16, scope_discipline 18, durability 7, fit 15, reuse 16; added_failure_count 0; two non-blocking findings (HOLDERS non-stale criterion narrows successor coverage, and a hard-coded run-directory path in the committed runner); no blocking findings.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
