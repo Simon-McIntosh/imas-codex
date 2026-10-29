@@ -193,6 +193,7 @@ def supersede_names_losing_last_source(
     reason: str | None = None,
     origin: str | None = None,
     run_id: str | None = None,
+    bindings: Iterable[tuple[str, str]] = (),
 ) -> list[str]:
     """Supersede a name a write has just left with no producing source.
 
@@ -202,6 +203,11 @@ def supersede_names_losing_last_source(
     name it touched without deciding which ones drained.  Derived parents are
     exempt for the same reason the invariant exempts them: a structural parent
     has children, not sources.
+
+    ``bindings`` pairs a source with the name that now claims it. Each such
+    binding is written before the drained test is evaluated, so a caller that
+    supersedes towards a staged candidate proves the successor produces the
+    source in the same statement that names it.
 
     Runs on the caller's own graph handle and transaction, so the supersession
     commits or rolls back with the write that caused it.  The successor edge is
@@ -218,11 +224,27 @@ def supersede_names_losing_last_source(
     )
     if not pairs:
         return []
+    claimed = sorted(
+        {
+            (str(source), str(name))
+            for source, name in bindings
+            if source and name
+        }
+    )
     rows = [
         dict(row)
         for row in query.query(
             f"""
             // LAST_SOURCE_SUPERSEDE
+            UNWIND CASE WHEN size($bindings) = 0 THEN [null]
+                        ELSE $bindings END AS b
+            OPTIONAL MATCH (bsns:StandardNameSource {{id: b.source_id}})
+            OPTIONAL MATCH (bsn:StandardName {{id: b.sn_id}})
+            FOREACH (_ IN CASE WHEN bsns IS NULL OR bsn IS NULL
+                               THEN [] ELSE [1] END |
+              MERGE (bsns)-[:PRODUCED_NAME]->(bsn)
+            )
+            WITH DISTINCT 1 AS bound
             UNWIND $pairs AS pair
             MATCH (sn:StandardName {{id: pair.old_name}}),
                   (new:StandardName {{id: pair.new_name}})
@@ -230,6 +252,9 @@ def supersede_names_losing_last_source(
             ORDER BY superseded_old_id
             """,
             pairs=[{"old_name": old, "new_name": new} for old, new in pairs],
+            bindings=[
+                {"source_id": source, "sn_id": name} for source, name in claimed
+            ],
         )
         or []
     ]

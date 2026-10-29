@@ -847,8 +847,15 @@ def _supersede_released_bindings(
     *,
     operation: str,
     reason: str,
+    claims: list[dict[str, str]] | None = None,
 ) -> list[str]:
-    """Supersede names a rebind drained of their last producing source."""
+    """Supersede names a rebind drained of their last producing source.
+
+    ``claims`` names the source/name bindings the caller is about to write but
+    has not written yet. They are written by the same statement, so the
+    successor named as the drained name's successor already produces the
+    source when the supersession is decided.
+    """
     from imas_codex.standard_names.source_invariant import (
         supersede_names_losing_last_source,
     )
@@ -862,7 +869,13 @@ def _supersede_released_bindings(
     if not moves:
         return []
     return supersede_names_losing_last_source(
-        gc, moves, operation=operation, reason=reason
+        gc,
+        moves,
+        operation=operation,
+        reason=reason,
+        bindings=[
+            (row["sns_id"], row["sn_id"]) for row in (claims or []) if row.get("sn_id")
+        ],
     )
 
 
@@ -1514,36 +1527,13 @@ def stage_claimed_generated_candidates(
                 }
                 winner_ids = list(locked_ids)
                 winner_batch = [item for item in batch if item["sns_id"] in locked_ids]
-                if winner_batch:
-                    # The candidate the supersession names as successor must
-                    # already produce the source in this transaction, or a
-                    # rich write that then fails leaves the former holder
-                    # superseded towards a candidate that produces nothing.
-                    # Bind first, as the attachment writer does; the claim
-                    # stays extracted, so the rich write consumes the same
-                    # fence it always did.
-                    tx_gc.query(
-                        """
-                        UNWIND $batch AS b
-                        MATCH (sns:StandardNameSource {id: b.sns_id})
-                        WHERE sns.claim_token = b.claim_token
-                          AND sns.claim_seq = b.claim_seq
-                          AND sns.status = 'extracted'
-                        MATCH (sn:StandardName {id: b.sn_id})
-                        MERGE (sns)-[produced:PRODUCED_NAME]->(sn)
-                        ON CREATE SET produced.provisional = true,
-                            produced.claim_token = b.claim_token,
-                            produced.claim_seq = b.claim_seq,
-                            produced.created_target = true
-                        """,
-                        batch=winner_batch,
-                    )
                 _supersede_released_bindings(
                     tx_gc,
                     released,
                     {item["sns_id"]: item["sn_id"] for item in winner_batch},
                     operation="compose_rebind",
                     reason="compose re-bound the source of a drained name",
+                    claims=winner_batch,
                 )
                 tx.commit()
             except BaseException:
@@ -1654,37 +1644,30 @@ def _move_sources_to_name(
         supersede_drained_name_cypher(name="old", successor="sn", embedded=True),
     )
     with services.GraphClient() as gc:
-        with gc.session() as session:
-            tx = session.begin_transaction()
-            try:
-                handle = foundation._TransactionQuery(tx)
-                rows = handle.query(
-                    statement,
-                    source_ids=source_ids,
-                    token=token,
-                    claim_seq=claim_seq,
-                    supersede_operation=operation,
-                    supersede_reason=reason,
-                    sn_id=standard_name_id,
-                    bound_status=bound_status,
-                )
-                record_supersede_receipts(
-                    handle,
-                    zip(
-                        rows[0].get("drained_old_ids") or [],
-                        rows[0].get("drained_new_ids") or [],
-                        strict=False,
-                    ),
-                    operation=operation,
-                    reason=reason,
-                    origin="compose",
-                )
-                tx.commit()
-            except BaseException:
-                if tx.closed is False:
-                    tx.close()
-                raise
-        return rows[0]["affected"] if rows else 0
+        rows = gc.query(
+            statement,
+            source_ids=source_ids,
+            token=token,
+            claim_seq=claim_seq,
+            supersede_operation=operation,
+            supersede_reason=reason,
+            sn_id=standard_name_id,
+            bound_status=bound_status,
+        )
+        if not rows:
+            return 0
+        record_supersede_receipts(
+            gc,
+            zip(
+                rows[0].get("drained_old_ids") or [],
+                rows[0].get("drained_new_ids") or [],
+                strict=False,
+            ),
+            operation=operation,
+            reason=reason,
+            origin="compose",
+        )
+        return rows[0]["affected"]
 
 
 def mark_sources_composed(
