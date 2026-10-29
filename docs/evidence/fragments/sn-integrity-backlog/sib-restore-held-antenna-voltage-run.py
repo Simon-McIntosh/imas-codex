@@ -407,7 +407,14 @@ def negative() -> dict:
 
 def main() -> None:
     mode = sys.argv[1] if len(sys.argv) > 1 else "state"
-    if mode == "state":
+    if mode == "all":
+        print("## readback")
+        print(json.dumps(readback(), indent=1, default=str)[:8000])
+        print("## gate")
+        print(json.dumps(gate(), indent=1, default=str)[:8000])
+        print("## negative")
+        print(json.dumps(negative(), indent=1, default=str)[:4000])
+    elif mode == "state":
         print(json.dumps(read_state(), indent=1, default=str))
     elif mode == "snapshot":
         print(json.dumps(snapshot_names(), indent=1))
