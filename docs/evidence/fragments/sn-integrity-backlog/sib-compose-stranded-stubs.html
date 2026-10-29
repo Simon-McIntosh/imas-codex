@@ -1,0 +1,117 @@
+<h2 id="sib-compose-stranded-stubs">sib-compose-stranded-stubs — seven pending stubs whose sources composition cannot bind</h2>
+
+<p class="sib-compose-stranded-stubs-status"><strong>Outcome: cause identified and measured; composition not landed.</strong>
+The seven names below block the export source gate and are its <em>entire</em> blocking set. The
+sanctioned scoped run was launched and completed, but it composed nothing: its pools reported
+<code>generate_name processed=0</code>, so no attempt was spent and the stubs remain sourceless.
+The route and the reason are recorded here so a resume needs no re-derivation.</p>
+
+<h3 id="sib-compose-stranded-stubs-cause">The cause, at its file and line</h3>
+
+<p>Each of the nine DD sources is projected onto a <code>pending</code> stub created
+2026-07-28. A composition candidate may bind a <code>pending</code> identity only when the same
+claim created it, and nothing else will adopt it:</p>
+
+<ul>
+  <li><code>imas_codex/standard_names/graph_store/graph_foundation.py:98-105</code> —
+      <code>_STABLE_BINDING_NAME_STAGES</code> is <code>{drafted, reviewed, accepted, approved}</code>;
+      <code>pending</code> is not among them.</li>
+  <li><code>imas_codex/standard_names/graph_store/graph_source_bindings.py:1026-1036</code> —
+      <code>lifecycle_bindable</code> admits a pending target only when <code>owned.provisional</code>
+      holds and the owned edge carries <em>this</em> claim's token and sequence. A projection stub has
+      no such edge.</li>
+  <li><code>imas_codex/standard_names/graph_store/graph_source_bindings.py:1086-1091</code> —
+      <code>revivable_stages</code> is <code>{superseded, exhausted}</code>, so there is no dead-end
+      revival branch for a pending identity either.</li>
+  <li><code>imas_codex/standard_names/graph_store/graph_source_bindings.py:1183-1187</code> — the
+      refusal releases the claim, <em>retains</em> <code>attempt_count</code>, and writes
+      <code>standard-name binding collision: candidate … has non-bindable name_stage …</code>.</li>
+  <li><code>imas_codex/standard_names/graph_store/graph_cost_and_claims.py:213</code> —
+      <code>_MAX_COMPOSE_CLAIM_ATTEMPTS = 5</code>. At the cap,
+      <code>imas_codex/standard_names/orphan_sweep.py:109-123</code> parks the source
+      <code>failed</code> and <strong>overwrites</strong> <code>last_error</code> with
+      <code>compose claim-attempt cap reached</code>, which is why eight of the nine now classify as
+      <code>cause_not_recorded</code> rather than naming the collision that caused it.</li>
+  <li><code>imas_codex/standard_names/graph_store/graph_source_bindings.py:651-679</code> with
+      <code>graph_foundation.py:117-122</code> — the explicit (focused) claim path refuses earlier on
+      the same root: it withholds a source whose <code>PRODUCED_NAME</code> edge reaches a stage
+      outside <code>{superseded, exhausted}</code>.</li>
+  <li><code>imas_codex/standard_names/attachment_audit.py:2785-2790</code> — <code>sn attach</code>
+      cannot adopt them either; it requires a stable target stage, so <code>pending</code> is refused.</li>
+</ul>
+
+<p>The recorded state carries a trap: <code>attempt_count</code> is <strong>0</strong> on all nine
+while <code>claim_seq</code> is 5–6 and <code>last_error</code> says the cap was reached. Something
+cleared the attempt counter after the parking, leaving the claim cap reading as unused beside a
+parked classification and a cap-reason message that no longer names the collision.</p>
+
+<h3 id="sib-compose-stranded-stubs-before">Before: sources, stubs and the gate</h3>
+
+<table>
+  <thead><tr><th>DD path</th><th>status</th><th>att</th><th>seq</th><th>parked disposition</th><th>producer</th></tr></thead>
+  <tbody>
+    <tr><td><code>summary/line_average/n_i/neon/value</code></td><td>extracted</td><td>0</td><td>5</td><td>cause_not_recorded</td><td>none</td></tr>
+    <tr><td><code>spectrometer_x_ray_crystal/channel/reflector/sphere_centre/r</code></td><td>extracted</td><td>0</td><td>6</td><td>cause_not_recorded</td><td>none</td></tr>
+    <tr><td><code>spectrometer_x_ray_crystal/channel/reflector/sphere_centre/z</code></td><td>extracted</td><td>0</td><td>6</td><td>cause_not_recorded</td><td>none</td></tr>
+    <tr><td><code>soft_x_rays/channel/detector/radius</code></td><td>extracted</td><td>0</td><td>5</td><td>compose_not_applicable</td><td>none</td></tr>
+    <tr><td><code>edge_profiles/ggd/vorticity_over_r/diamagnetic</code></td><td>extracted</td><td>0</td><td>5</td><td>cause_not_recorded</td><td>none</td></tr>
+    <tr><td><code>plasma_profiles/ggd/vorticity_over_r/diamagnetic</code></td><td>extracted</td><td>0</td><td>5</td><td>cause_not_recorded</td><td>none</td></tr>
+    <tr><td><code>spectrometer_visible/channel/geometry_matrix/interpolated/phi</code></td><td>extracted</td><td>0</td><td>5</td><td>cause_not_recorded</td><td>none</td></tr>
+    <tr><td><code>summary/local/pedestal/velocity_phi/tritium/value</code></td><td>extracted</td><td>0</td><td>5</td><td>cause_not_recorded</td><td>none</td></tr>
+    <tr><td><code>summary/local/separatrix/velocity_phi/tritium/value</code></td><td>extracted</td><td>0</td><td>5</td><td>cause_not_recorded</td><td>none</td></tr>
+  </tbody>
+</table>
+
+<p>Each of the nine paths carries exactly one <code>HAS_STANDARD_NAME</code> edge, to one of the seven
+stubs. Every stub is <code>name_stage=pending</code>, <code>status=draft</code>, with no
+<code>PRODUCED_NAME</code> edge and no <code>reservation_source_id</code>.</p>
+
+<p><strong>Export source gate, before:</strong> <code>gate_blocking_count = 7</code>,
+<code>gate_roster_blocking = 7</code> — the gate's whole blocking set is these seven names and
+nothing else. The gate is read by the same classifier and the same filter
+<code>export.py:3029-3073</code> applies, over a population of
+<code>gate_audit_population = 13</code> live sourceless names. That the gate lists all seven is the
+negative control for the declared mutation: the instrument is shown to see the defect, so a later
+empty roster set would be an absence rather than a blind read.</p>
+
+<h3 id="sib-compose-stranded-stubs-run">The scoped run: calls and spend</h3>
+
+<p><code>sn run --focus &lt;9 roster paths&gt; --names-only --cost-limit 1.00 --time 4</code>, seeded
+<code>9 focus source(s)</code> under <code>run_id=1ddea8eb…</code>. Recorded summary:</p>
+
+<table>
+  <thead><tr><th>field</th><th>value</th></tr></thead>
+  <tbody>
+    <tr><td>stop_reason</td><td>interrupted</td></tr>
+    <tr><td>cost_spent</td><td>0.0 USD of a 1.0 limit</td></tr>
+    <tr><td>names_composed</td><td>0</td></tr>
+    <tr><td>elapsed_s</td><td>590.3</td></tr>
+    <tr><td>pool generate_name</td><td>processed=0, spent=$0.0000</td></tr>
+    <tr><td>pool review_name / refine_name / enrich_parents</td><td>processed=0, spent=$0.0000</td></tr>
+</table>
+
+<p>Two facts belong together and neither alone explains the outcome. The focus pools did not start
+until 18:26:57Z, roughly 4.5 minutes into a 4-minute budget, because the preflight reconciles
+(vocab-gap, attachment-consistency, source-loss probe) consumed it — so the budget explanation is
+real. But the pools that did run then claimed <strong>zero</strong> sources, and
+<code>claim_seq</code> is unchanged at 5/6, which is a stronger statement: the claim path returned
+nothing while roughly five and a half minutes remained. The explicit claim query
+(<code>graph_source_bindings.py:651-679</code>) reads <code>holding</code> from a
+<code>PRODUCED_NAME</code> edge, and these sources have only a <code>FROM_DD_PATH</code> edge, so
+that is not the withholding either; the mechanism that returned zero is unresolved and is named as
+the open question rather than guessed at.</p>
+
+<h3 id="sib-compose-stranded-stubs-next">What a resume does</h3>
+
+<ol>
+  <li>Re-run the scope with <code>--time 15</code> or more so the focus pools receive budget after
+      the preflight, and read <code>generate_name processed</code> to learn whether the claim
+      succeeds at all.</li>
+  <li>If composition then reports the binding collision, the only sanctioned route that gives the
+      identity a bindable stage is <code>sn run --focus &lt;paths&gt; --reset-to extracted</code>:
+      reset's <code>path_allowlist</code> is exact and fail-closed
+      (<code>graph_catalog_reset.py:851-866</code>), so it clears the seven stubs and nothing else,
+      and composition then creates the identity with a producer.</li>
+  <li>Read back per source that it produces exactly one live name, then re-run the census and require
+      <code>gate_roster_blocking = 0</code>.</li>
+</ol>
