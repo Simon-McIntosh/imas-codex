@@ -49,6 +49,12 @@ RESCORE_CAP_USD = 0.45
 FAMILY_APPLY_CAP_USD = 0.30
 DRAIN_CAP_USD = 0.50
 COMBINED_CAP_USD = 1.00
+#: Drains whose wrapper process was stopped while the CLI it started had
+#: already finished in the graph. Their cost rows fall outside every window this
+#: record selects on, so they are counted by run id instead - declared here, so
+#: recomputing the score block reproduces the total rather than dropping what
+#: the windows cannot see.
+INTERRUPTED_DRAINS = ["8445f79a-679e-489a-aa04-dc8acf4cf0f9"]
 ACCEPTANCE = 0.85
 #: A member whose documentation was NOT regenerated may still move by rescoring
 #: noise; at or below this the move is recorded as noise, never as a fall.
@@ -548,6 +554,26 @@ def rescore_cost() -> dict:
     return block["cost"]
 
 
+def _run_cost(run_id: str) -> tuple[int, float]:
+    """One run's calls and spend, read from its own cost rows."""
+    from imas_codex.graph.client import GraphClient
+    from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        aggregate_calls_per_phase,
+        aggregate_spend_per_phase,
+    )
+
+    services = type("Svc", (), {"GraphClient": GraphClient})
+    calls = sum(
+        int(value)
+        for value in aggregate_calls_per_phase(run_id, services=services).values()
+    )
+    spend = sum(
+        float(value)
+        for value in aggregate_spend_per_phase(run_id, services=services).values()
+    )
+    return calls, spend
+
+
 def reground_scores() -> dict:
     """The wall member's documentation score across the regrounding, and the family's."""
     payload = read_results()
@@ -576,10 +602,26 @@ def reground_scores() -> dict:
         {},
     )
     rescore_cost_block = rescore_block.get("cost") or {}
+    interrupted = []
+    for run_id in INTERRUPTED_DRAINS:
+        calls, usd = _run_cost(run_id)
+        interrupted.append(
+            {
+                "run_id": run_id,
+                "calls": calls,
+                "spend_usd": round(usd, 6),
+                "note": (
+                    "a drain attempt whose wrapper was stopped while its CLI had "
+                    "already completed in the graph; counted by run id because its "
+                    "rows sit outside the recorded drain window"
+                ),
+            }
+        )
     spend = (
         float((reground_apply.get("cost") or {}).get("spend_usd") or 0.0)
         + float(drain.get("spend_usd") or 0.0)
         + float(rescore_cost_block.get("spend_usd") or 0.0)
+        + sum(float(item["spend_usd"]) for item in interrupted)
     )
     block = {
         "threshold": ACCEPTANCE,
@@ -602,7 +644,9 @@ def reground_scores() -> dict:
         "rescore_accepted": bool(rescore_block.get("accepted")),
         "calls": int((reground_apply.get("cost") or {}).get("calls_total") or 0)
         + int(drain.get("calls") or 0)
-        + int(rescore_cost_block.get("calls") or 0),
+        + int(rescore_cost_block.get("calls") or 0)
+        + sum(int(item["calls"]) for item in interrupted),
+        "interrupted_drain": interrupted,
         "rescore_calls": int(rescore_cost_block.get("calls") or 0),
         "rescore_spend_usd": float(rescore_cost_block.get("spend_usd") or 0.0),
         "drain_calls": int(drain.get("calls") or 0),
@@ -748,7 +792,10 @@ def render() -> None:
     payload = read_results()
     pre = payload.get("preflight", {})
     applies = payload.get("applies") or [{}]
-    entry = applies[-1]
+    # The verdict belongs to the apply that stamped the family. A later apply
+    # that planned no batch stamps nothing, so taking it as the family's state
+    # reports a stamp it never made and a scope it never measured.
+    entry = next((a for a in reversed(applies) if a.get("stamped")), applies[-1])
     cost_block = entry.get("cost") or {}
     scope = entry.get("scope_check") or {}
     scores = payload.get("scores") or {}
@@ -757,13 +804,20 @@ def render() -> None:
     first = next((d for d in dry if d["label"] == "before-apply"), {})
     second = next((d for d in dry if d["label"] == "after-apply"), {})
 
+    regrounded = payload.get("reground") or {}
     converged = bool(
         scores.get("scored_at_or_above")
         and entry.get("stamped")
         and not scores.get("unscored")
         and (second.get("planned_calls") == 0)
+        and (not regrounded or regrounded.get("all_at_or_above"))
     )
-    verdict = "converged and stamped" if converged else "not converged"
+    if converged and regrounded.get("wall_regenerated"):
+        verdict = "converged and stamped, wall member regrounded"
+    elif converged:
+        verdict = "converged and stamped"
+    else:
+        verdict = "not converged"
 
     def uid(slug: str) -> str:
         return f'id="{NODE}-{slug}"'
@@ -790,12 +844,39 @@ def render() -> None:
         f"<strong>{_cell(entry.get('stamped'))}</strong>. Convergence is defined as "
         f"every member scored at or above {ACCEPTANCE} and the family stamped: "
         f"that is <strong>{verdict}</strong>.</p>",
-        f"<p {uid('verdict-blocker')}>The name that holds the family is "
-        f"<code>{WALL}</code>, at <code>name_stage="
-        f"{_cell(pre.get('wall_name_stage'))}</code>. The documentation pools claim "
-        f"a name only at <code>name_stage='accepted'</code>, so neither the apply "
-        f"nor either surface the brief names for making it eligible can touch it. "
-        f"Both refusals are reproduced below.</p>",
+        (
+            f"<p {uid('verdict-regrounded')}>The wall member's documentation was "
+            f"then regrounded on its restored source in a second, separately "
+            f"capped leg: the name quorum re-ran and accepted it "
+            f"({_cell((regrounded.get('name_before') or {}).get('score_name'))} → "
+            f"{_cell((regrounded.get('name_after') or {}).get('score_name'))}), its "
+            f"documentation score moved "
+            f"{_cell(regrounded.get('wall_docs_before'))} → "
+            f"{_cell(regrounded.get('wall_docs_after'))}, and the family was "
+            f"re-stamped on the new text for "
+            f"{_cell(regrounded.get('calls'))} call(s) and USD "
+            f"{_cell(regrounded.get('spend_usd'))} of the USD "
+            f"{COMBINED_CAP_USD:.2f} ceiling. That leg is recorded in full under "
+            f"<em>The authorised regrounding</em> below.</p>"
+            if regrounded
+            else ""
+        ),
+        (
+            f"<p {uid('verdict-note')}>At the time this apply ran the wall member "
+            f"sat at <code>name_stage={_cell(pre.get('wall_name_stage'))}</code>, so "
+            f"the documentation pools could not claim it and the apply covered "
+            f"{len(pre.get('docs_eligible') or [])} of the family's "
+            f"{len(pre.get('members') or [])} members. Both surfaces the brief "
+            f"named for making it eligible were reproduced and refused; that "
+            f"blockade is what the regrounding below resolves.</p>"
+            if regrounded
+            else f"<p {uid('verdict-blocker')}>The name that holds the family is "
+            f"<code>{WALL}</code>, at <code>name_stage="
+            f"{_cell(pre.get('wall_name_stage'))}</code>. The documentation pools "
+            f"claim a name only at <code>name_stage='accepted'</code>, so neither "
+            f"the apply nor either surface the brief names for making it eligible "
+            f"can touch it. Both refusals are reproduced below.</p>"
+        ),
     ]
 
     # --- dry runs
@@ -828,12 +909,15 @@ def render() -> None:
     reset = pre.get("scoped_reset_preview") or {}
     edit = pre.get("docs_edit_refusal") or {}
     lines += [
-        f"<h2 {uid('eligibility')}>Why the wall member could not be regenerated</h2>",
-        f"<p {uid('eligibility-p')}>The brief names two sanctioned surfaces for "
-        f"making the wall member's documentation eligible for regeneration. Both "
-        f"require <code>name_stage='accepted'</code>; this member rests at "
+        f"<h2 {uid('eligibility')}>Why the first apply could not reach the wall "
+        f"member</h2>",
+        f"<p {uid('eligibility-p')}>This is the state the first apply met. The "
+        f"brief names two sanctioned surfaces for making the wall member's "
+        f"documentation eligible for regeneration. Both require "
+        f"<code>name_stage='accepted'</code>; at that point the member rested at "
         f"<code>{_cell(pre.get('wall_name_stage'))}</code>. Both were reproduced "
-        f"against the live graph, and both wrote nothing.</p>",
+        f"against the live graph, and both wrote nothing. The regrounding below "
+        f"records what changed that precondition and what followed.</p>",
         f"<table {uid('eligibility-table')}>",
         "<caption>The two named surfaces, each run as a preview, with its own refusal</caption>",
         "<thead><tr><th>surface</th><th>arguments</th><th>outcome</th></tr></thead>",
@@ -1010,9 +1094,7 @@ def render() -> None:
             ),
             None,
         )
-        after_finalize = next(
-            (d for d in dry if d["label"] == "after-finalize"), {}
-        )
+        after_finalize = next((d for d in dry if d["label"] == "after-finalize"), {})
         name_before = reground.get("name_before") or {}
         name_after = reground.get("name_after") or {}
         lines += [
@@ -1074,6 +1156,13 @@ def render() -> None:
             f"<tr><td>exit</td><td><code>{_cell(drain.get('exit_line'))}</code></td></tr>",
             f"<tr><td>docs regenerated and accepted</td>"
             f"<td><strong>{_cell(drain.get('docs_regenerated'))}</strong></td></tr>",
+            *[
+                f"<tr><td>interrupted attempt <code>{_cell(item['run_id'][:8])}</code>"
+                f"</td><td>{_cell(item['calls'])} call(s) / USD "
+                f"{_cell(item['spend_usd'])} — counted by run id, outside the "
+                f"recorded window</td></tr>"
+                for item in reground.get("interrupted_drain") or []
+            ],
             "</tbody>",
             "</table>",
             f"<table {uid('wall-score-table')}>",

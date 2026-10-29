@@ -652,12 +652,14 @@
   "combined_cap_usd": 1.0,
   "drain_calls": 3,
   "drain_spend_usd": 0.029303,
-  "interrupted_drain": {
-   "calls": 3,
-   "note": "a first drain attempt: its wrapper process was stopped at its background time limit while the CLI had already completed in the graph, so its rows sit outside the recorded drain window and are counted here by run id",
-   "run_id": "8445f79a-679e-489a-aa04-dc8acf4cf0f9",
-   "spend_usd": 0.089812
-  },
+  "interrupted_drain": [
+   {
+    "calls": 3,
+    "note": "a drain attempt whose wrapper was stopped while its CLI had already completed in the graph; counted by run id because its rows sit outside the recorded drain window",
+    "run_id": "8445f79a-679e-489a-aa04-dc8acf4cf0f9",
+    "spend_usd": 0.089812
+   }
+  ],
   "members": [
    {
     "after": 0.9307560226249008,
