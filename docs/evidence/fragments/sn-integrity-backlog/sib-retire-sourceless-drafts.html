@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Retire the live drafts that carry no producing DD source</title>
+</head>
+<body>
+<section id="sib-retire-sourceless-drafts-record">
+<h1>Retire the live drafts that carry no producing DD source</h1>
+<p id="sib-retire-sourceless-drafts-scope">The population is the live (<code>name_stage</code> and <code>status</code> not
+<code>superseded</code>) standard name with no producing <code>StandardNameSource</code>, read through
+<code>find_sourceless_live_names</code> over all live names. The instrument exempts derived parents. The six names
+held from release under §38 are excluded from the retirement cohort and stay untouched. Every write goes through
+<code>apply_signed_manifest</code>: an authority is built by <code>build_repair_authority</code>, previewed, applied
+under the preview's digest, then read back. Spend is USD 0 — no LLM call was made.</p>
+
+<h2 id="sib-retire-sourceless-drafts-population">Population, and where it differs from the dispatch</h2>
+<p id="sib-retire-sourceless-drafts-population-counts">The live graph holds <strong>2945</strong> live names, of which
+<strong>148</strong> carry no producing source: <strong>132</strong> at <code>name_stage=exhausted</code>,
+6 accepted, 8 pending and 2 reviewed. The dispatch expected 19 (17 exhausted and 2 accepted); the live set is
+larger, and the difference is recorded here rather than worked around. Two facts account for it:</p>
+<ul>
+<li id="sib-retire-sourceless-drafts-population-derived">The two accepted names the plan names as examples,
+<code>ion_pressure</code> and <code>beta</code>, are <em>derived parents</em> (<code>origin=derived</code>, with 2 and
+3 live children). The invariant exempts derived parents, so neither is in the sourceless set at all.</li>
+<li id="sib-retire-sourceless-drafts-population-neverbound">113 of the 132 exhausted names record no source of any
+kind (<code>source_paths</code> empty and no <code>StandardNameSource</code> edge). They are the dormant
+never-bound or wholly dropped-edge cohort §38 left unretired. The gate this node is measured against retires
+<em>every</em> live exhausted draft with no producing source, so they are in scope; the 19 names carrying a
+recorded DD source (a stale producer) are a subset of them.</li>
+</ul>
+
+<h2 id="sib-retire-sourceless-drafts-holders">The live name holding a recorded source</h2>
+<p id="sib-retire-sourceless-drafts-holders-count">A holder must itself carry a <em>producing</em> (non-stale) source
+on the recorded path, and must not itself be sourceless. Exactly <strong>one</strong> of the 132 in-scope names has
+one; the other 131 get a retirement receipt with no successor edge.</p>
+<table id="sib-retire-sourceless-drafts-holders-table">
+<thead><tr><th>retired name</th><th>holder</th><th>recorded path</th></tr></thead>
+<tbody>
+<tr><td><code>angle_of_plasma_boundary_gap</code></td><td><code>poloidal_angle_of_plasma_boundary_gap</code>
+(accepted)</td><td><code>dd:pulse_schedule/position_control/gap/angle</code></td></tr>
+</tbody>
+</table>
+<p id="sib-retire-sourceless-drafts-holders-semantics">Both descriptions denote the same quantity — the orientation
+of a plasma-boundary gap vector, measured clockwise from grad R:</p>
+<blockquote id="sib-retire-sourceless-drafts-holders-retired-desc">retired: “Angle of the plasma boundary gap vector,
+defining the direction of the gap measurement relative to the radial cylindrical direction.”</blockquote>
+<blockquote id="sib-retire-sourceless-drafts-holders-holder-desc">holder: “Orientation of a plasma-boundary gap
+vector directed away from its reference point, measured clockwise from the radial cylindrical direction (grad R) in
+the right-handed toroidal frame.”</blockquote>
+<p id="sib-retire-sourceless-drafts-holders-pair">The two <code>wave_curvature_*</code> names name each other's path
+through a <em>stale</em> source, so neither holds the quantity: both are retired with a receipt and no successor.</p>
+
+<h2 id="sib-retire-sourceless-drafts-preview">Preview, refusals and the negative control</h2>
+<p id="sib-retire-sourceless-drafts-preview-counts">The authority carries 133 rows: the 131 retirements with a
+successor where one exists, and one control row — an accepted name with a live structural child — that must be
+refused. The preview returned <code>would_apply</code> with <strong>131 admitted and 2 refused</strong>:</p>
+<pre id="sib-retire-sourceless-drafts-preview-refusals">absorbed_power_of_beam_tracing_beam        target has a live structural child   (control — expected)
+deposited_power_at_divertor_target        target has a live structural child   (genuine)
+manifest_sha256 2f8815c048174aa3b0be84cb43aca1a2b4d530600bc76f5d7f4e6ba3570f4e7f</pre>
+<p id="sib-retire-sourceless-drafts-preview-refusal-why">The second refusal is the writer doing its job:
+<code>deposited_power_at_divertor_target</code> still carries the live structural child
+<code>ratio_of_deposited_power_at_divertor_target_to_total_incident_power_of_divertor</code>, and retiring the
+parent would orphan it. It is reported, not forced; the row is left live and sourceless.</p>
+<p id="sib-retire-sourceless-drafts-negative">The negative control mutates the authority payload after its digest is
+taken and previews it. The preview refuses before any write happens:</p>
+<pre id="sib-retire-sourceless-drafts-negative-log">{"refused": true, "error": "SignedManifestAuthorityError: canonical signed-payload SHA-256 mismatch"}</pre>
+
+<h2 id="sib-retire-sourceless-drafts-apply">Apply and read-back</h2>
+<pre id="sib-retire-sourceless-drafts-apply-receipt">outcome applied · changed 131 · mutations 131 · receipt_rows 131 · persistent_writes 262
+counts {authority_rows: 133, admitted: 131, refused: 2}
+manifest_sha256 2f8815c048174aa3b0be84cb43aca1a2b4d530600bc76f5d7f4e6ba3570f4e7f
+authority_file_sha256 1097e766d8b7c95273a2682df863b5a1e65b833e8c349d2165ca933edd593f50</pre>
+<pre id="sib-retire-sourceless-drafts-readback">expected 132 · present 132 · still_superseded 131 · receipt_names 131
+receipts_per_name min 1 max 1 · names_without_receipt [deposited_power_at_divertor_target]
+successor_edges [{id: angle_of_plasma_boundary_gap, successor: poloidal_angle_of_plasma_boundary_gap,
+                   receipt: sn-change:signed-manifest:2f8815c0…:6ec879eebb49a17679371e95}]
+remaining_sourceless_live 17</pre>
+<p id="sib-retire-sourceless-drafts-readback-meaning">The 17 still sourceless are the 16 names that are not exhausted
+(6 accepted, 8 pending, 2 reviewed — recorded for the lead above) and the one exhausted name the writer refused
+because a live structural child depends on it. No other live sourceless name remains: derived parents are exempt by
+the invariant, and the four §38 release holds that are sourceless are inside the 16.</p>
+
+<h2 id="sib-retire-sourceless-drafts-lead">Names recorded for the lead</h2>
+<p id="sib-retire-sourceless-drafts-lead-intro">Nothing below was written. Each row is a live sourceless name that is
+<em>not</em> exhausted, with what it would need.</p>
+<table id="sib-retire-sourceless-drafts-lead-table">
+<thead><tr><th>name</th><th>stage</th><th>description</th><th>recorded source / hold</th></tr></thead>
+<tbody>
+<tr><td><code>radial_coordinate_of_flux_surface</code></td><td>accepted</td>
+<td>Major-radius coordinate assigned to the selected flux surface, defined as the midpoint between its minimum and maximum cylindrical R values.</td>
+<td><code>dd:gyrokinetics/normalizing_quantities/r</code> — the only edge is stale; no live producer</td></tr>
+<tr><td><code>radial_coordinate_of_launching_position</code></td><td>accepted</td>
+<td>Major-radius coordinate locating the electron-cyclotron beam launching position relative to the toroidal symmetry axis.</td>
+<td><code>dd:ec_launchers/launcher/launching_position/r</code> — stale only</td></tr>
+<tr><td><code>toroidal_current_density_due_to_distribution_function_driven</code></td><td>accepted</td>
+<td>Toroidal component of the total current density from the full kinetic distribution, including fast-particle current and electron and thermal-ion back-current.</td>
+<td><code>dd:distributions/distribution/profiles_1d/current_tor</code> and <code>profiles_2d/current_tor</code> — both stale</td></tr>
+<tr><td><code>deuterium_tritium_flux</code></td><td>reviewed</td>
+<td>Total neutron emission rate from deuterium-tritium fusion reactions, including thermal, beam-thermal, and beam-beam contributions.</td>
+<td><code>dd:summary/fusion/neutron_fluxes/dt/total/value</code> — stale only</td></tr>
+<tr><td><code>flux_surface_average_magnetic_field_magnitude</code></td><td>pending</td>
+<td>Flux-surface average of the total magnetic-field magnitude.</td>
+<td><code>dd:equilibrium/time_slice/profiles_1d/b_average</code> — stale only</td></tr>
+<tr><td><code>line_averaged_neon_density</code></td><td>pending</td>
+<td>no description</td><td><code>dd:summary/line_average/n_i/neon/value</code> — no source edge at all</td></tr>
+<tr><td>
+<tr><td><code>radial_coordinate_of_reflector</code></td><td>pending</td><td>no description</td>
+<td><code>dd:spectrometer_x_ray_crystal/channel/reflector/sphere_centre/r</code> — no source edge</td></tr>
+<tr><td><code>radius_of_soft_xray_detector</code></td><td>pending</td><td>no description</td>
+<td><code>dd:soft_x_rays/channel/detector/radius</code> — no source edge</td></tr>
+<tr><td><code>ratio_of_diamagnetic_vorticity_to_major_radius</code></td><td>pending</td><td>no description</td>
+<td><code>dd:edge_profiles/ggd/vorticity_over_r/diamagnetic</code>, <code>dd:plasma_profiles/ggd/vorticity_over_r/diamagnetic</code> — no source edge</td></tr>
+<tr><td><code>toroidal_coordinate_of_spectrometer</code></td><td>pending</td><td>no description</td>
+<td><code>dd:spectrometer_visible/channel/geometry_matrix/interpolated/phi</code> — no source edge</td></tr>
+<tr><td><code>toroidal_tritium_*</code></td><td>pending</td><td>no description</td>
+<td><code>dd:summary/local/{pedestal,separatrix}/velocity_phi/tritium/value</code> — no source edge</td></tr>
+<tr><td><code>vertical_coordinate_of_reflector</code></td><td>pending</td><td>no description</td>
+<td><code>dd:spectrometer_x_ray_crystal/channel/reflector/sphere_centre/z</code> — no source edge</td></tr>
+</tbody>
+</table>
+<p id="sib-retire-sourceless-drafts-lead-held">Held from release under §38 and therefore untouched:
+<code>coolant_absorbed_energy_accumulated_of_plasma_facing_component</code>,
+<code>count_normalized_at_detector_pixel</code>,
+<code>root_mean_square_spectral_width_of_spectrometer_channel</code>,
+<code>volume_averaged_electron_number_density_over_scrape_off_layer</code>.
+The other two §38 holds are not sourceless.</p>
+</section>
+</body>
+</html>
