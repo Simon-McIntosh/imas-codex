@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-last-source-negative-controls">
+<title>Negative controls for the last-source supersede</title>
+</head>
+<body>
+<main>
+
+<h1 id="sib-last-source-negative-controls-title">Negative controls for the last-source supersede</h1>
+
+<h2 id="sib-last-source-negative-controls-header">Header</h2>
+<table id="sib-last-source-negative-controls-header-table">
+<tbody>
+<tr><th>Base revision</th><td><code>049597eb532fe9a84aad964ea1c74d8d3b30d4d7</code></td></tr>
+<tr><th>Change</th><td><code>tests/standard_names/test_last_source_supersede.py</code> only; no product source</td></tr>
+<tr><th>Posture</th><td>Tests on the disposable Neo4j fixture; the mutations were applied to this worktree, run, and reverted before the commit. No live-graph write, USD 0.</td></tr>
+</tbody>
+</table>
+
+<h2 id="sib-last-source-negative-controls-gaps">Two properties no test guarded</h2>
+<p>The hardening that made the last-source supersede atomic
+(<code>graph_store/graph_source_bindings.py</code>) and made the drained receipt
+unconditional (<code>provenance_lifecycle.py</code>) landed with neither property
+guarded. Its review found that reverting either left every test green: the move
+primitive had no test that makes the receipt write fail, and
+<code>retarget_standard_name_sources</code> was only ever driven with
+<code>record_change=True</code> while all four production callers pass
+<code>False</code>, so reinstating the removed guard reddened nothing.</p>
+
+<h2 id="sib-last-source-negative-controls-tests">The three tests added</h2>
+<ol>
+<li><b>Atomicity.</b>
+<code>test_failed_receipt_rolls_back_the_move_and_the_supersession</code> patches
+<code>source_invariant.record_supersede_receipts</code> to raise, drives
+<code>mark_sources_composed</code>, and asserts the exception propagated while the
+source still produces the former holder (status still <code>extracted</code>), the
+holder is still <code>drafted</code> with no successor, and no
+<code>composed_source_moved</code> receipt exists.</li>
+<li><b>The receipt under <code>record_change=False</code>.</b>
+<code>test_retarget_writes_the_drained_receipt_when_no_change_is_recorded</code>
+drives the retarget primitive exactly as the four production callers do and asserts
+the drained holder is superseded and carries its
+<code>last_source_supersede</code> receipt, while the operation receipt is absent &mdash;
+which is what the flag suppresses.</li>
+<li><b>The non-<code>GraphClient</code> branch.</b>
+<code>test_duck_typed_client_leaves_the_move_committed_when_the_receipt_fails</code>
+passes a client offering only <code>query</code>. It documents that this branch has
+no transaction to enlist in, so a refusing receipt writer leaves the source moved
+and the holder superseded with no receipt. Recorded under
+<code>outside_scope</code>; no product change was made.</li>
+</ol>
+
+<h2 id="sib-last-source-negative-controls-negatives">Negative controls</h2>
+<p>Each mutation was applied to this worktree, the named test run, and the tree
+reverted before the commit. Both logs end in a bare <code>EXIT=1</code>.</p>
+<table id="sib-last-source-negative-controls-negative-table">
+<thead>
+<tr><th>Mutation</th><th>Test reddened</th><th>Log</th></tr>
+</thead>
+<tbody>
+<tr>
+<td><code>_move_sources_to_name</code> reverted to two autocommit queries</td>
+<td><code>test_failed_receipt_rolls_back_the_move_and_the_supersession</code></td>
+<td><code>logs/negative-control-atomicity.log</code></td>
+</tr>
+<tr>
+<td><code>record_change</code> guard reinstated around the drained receipt</td>
+<td><code>test_retarget_writes_the_drained_receipt_when_no_change_is_recorded</code></td>
+<td><code>logs/negative-control-record-change.log</code></td>
+</tr>
+</tbody>
+</table>
+<p>The head arm over the same file is <code>11 passed</code>,
+<code>EXIT=0</code> (<code>logs/graph-head.log</code>).</p>
+
+<h2 id="sib-last-source-negative-controls-gate">Gate</h2>
+<p>The default-marker run over <code>tests/standard_names/</code> with
+<code>-n 8</code> is measured on this tree and against an archive tree of the base
+revision, so the failure ids read as a delta rather than as an absolute count.</p>
+<table id="sib-last-source-negative-controls-gate-table">
+<thead>
+<tr><th>Arm</th><th>Result</th><th>Log</th></tr>
+</thead>
+<tbody>
+<tr><td><code>049597eb5</code>, archive tree</td><td>13 failed, 8520 passed, 15 skipped, <code>EXIT=1</code></td><td><code>logs/suite-baseline.log</code></td></tr>
+<tr><td>this tree</td><td>8537 passed, 11 skipped, <code>EXIT=0</code></td><td><code>logs/suite-after.log</code></td></tr>
+</tbody>
+</table>
+<p><b>Zero failure ids added.</b> The base arm's 13 ids
+(<code>test_catalog_layout_hierarchy</code>: 1,
+<code>test_manifest_generability</code>: 3, <code>test_review_cascade</code>: 9)
+reproduce in a clean re-run, so they are pre-existing rather than an artefact of
+the earlier collided arm, which is kept at
+<code>logs/suite-baseline-collided.log</code> and is not the measurement.</p>
+
+<h2 id="sib-last-source-negative-controls-outside">Outside this node's scope</h2>
+<p><code>graph_source_bindings.py:1674</code>, the non-<code>GraphClient</code>
+branch of <code>_move_sources_to_name</code>, has no transaction to enlist in: it
+runs the move statement and then the receipt as two autocommit queries. A receipt
+failure there leaves the source moved and the former holder superseded with no
+record of why, which is the defect the transactional branch was added to close,
+still reachable through any duck-typed client passed in through
+<code>services</code>. Reported rather than changed; this node's write scope is
+tests.</p>
+
+</main>
+</body>
+</html>
