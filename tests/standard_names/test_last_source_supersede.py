@@ -385,3 +385,127 @@ def test_refined_name_moves_the_predecessors_source(
     assert _lifecycle(OLD)["name_stage"] == "superseded"
     assert _lifecycle(OLD)["successors"] == 1
     assert _successor_id(OLD) == NEW
+
+
+def _refuse_receipt_writes(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Make the supersession receipt writer fail where the writer calls it."""
+    from imas_codex.standard_names import source_invariant
+
+    def _refuse(*args: object, **kwargs: object) -> list[str]:
+        raise RuntimeError("receipt writer refused")
+
+    monkeypatch.setattr(source_invariant, "record_supersede_receipts", _refuse)
+
+
+def _source_status(source_id: str) -> str | None:
+    with GraphClient() as gc:
+        rows = gc.query(
+            "MATCH (s:StandardNameSource {id: $sid}) RETURN s.status AS status",
+            sid=source_id,
+        )
+        return str(rows[0]["status"]) if rows else None
+
+
+def test_failed_receipt_rolls_back_the_move_and_the_supersession(
+    disposable_neo4j_uri: str,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The receipt commits with the move, so its failure undoes both.
+
+    A receipt writer that refuses must leave no trace: the source still
+    produces the former holder and that holder is still live and unsourced-
+    free, rather than superseded towards a successor with no record of why.
+    """
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        mark_sources_composed,
+    )
+
+    _claim_seed()
+    _refuse_receipt_writes(monkeypatch)
+    with pytest.raises(RuntimeError, match="receipt writer refused"):
+        mark_sources_composed(
+            token="tok",
+            claim_seq=3,
+            source_ids=["dd:test/last_source/one"],
+            standard_name_id=NEW,
+            services=types.SimpleNamespace(GraphClient=GraphClient),
+        )
+    assert _producer_of("dd:test/last_source/one") == OLD
+    assert _source_status("dd:test/last_source/one") == "extracted"
+    assert _lifecycle(OLD)["name_stage"] == "drafted"
+    assert _lifecycle(OLD)["successors"] == 0
+    assert _receipt_names("composed_source_moved") == []
+
+
+def test_retarget_writes_the_drained_receipt_when_no_change_is_recorded(
+    disposable_neo4j_uri: str,
+) -> None:
+    """``record_change=False`` suppresses the move event, not the receipt.
+
+    Every production caller moves sources with ``record_change=False``, so the
+    drained holder's receipt must not be conditional on that flag: without it,
+    a superseded name carries no record of the move that retired it.
+    """
+    _seed()
+    with GraphClient() as gc:
+        moved = retarget_standard_name_sources(
+            gc,
+            OLD,
+            NEW,
+            operation="retarget",
+            source_ids=["dd:test/last_source/one"],
+            expected_current_bindings={"dd:test/last_source/one": OLD},
+            enforce_consistency=False,
+            record_change=False,
+        )
+    assert moved == 1
+    assert _lifecycle(OLD)["name_stage"] == "superseded"
+    assert _receipt_names("last_source_supersede") == [(OLD, NEW)]
+    assert _receipt_names("retarget") == []
+
+
+class _DuckTypedClient:
+    """A client offering ``query`` alone: no ``session()``, no transaction."""
+
+    def __init__(self) -> None:
+        self._client = GraphClient()
+
+    def __enter__(self) -> _DuckTypedClient:
+        self._client.__enter__()
+        return self
+
+    def __exit__(self, *exc: object) -> object:
+        return self._client.__exit__(*exc)
+
+    def query(self, statement: str, **parameters: object) -> list[dict]:
+        return self._client.query(statement, **parameters)
+
+
+def test_duck_typed_client_leaves_the_move_committed_when_the_receipt_fails(
+    disposable_neo4j_uri: str,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Documents the non-``GraphClient`` path: the move lands before the receipt.
+
+    That branch has no transaction to enlist in, so it runs the statement and
+    then the receipt as two autocommit queries. A receipt failure therefore
+    leaves the source moved and the former holder superseded with no
+    ``StandardNameChange``: the receipt is not atomic on this path.
+    """
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        mark_sources_composed,
+    )
+
+    _claim_seed()
+    _refuse_receipt_writes(monkeypatch)
+    with pytest.raises(RuntimeError, match="receipt writer refused"):
+        mark_sources_composed(
+            token="tok",
+            claim_seq=3,
+            source_ids=["dd:test/last_source/one"],
+            standard_name_id=NEW,
+            services=types.SimpleNamespace(GraphClient=_DuckTypedClient),
+        )
+    assert _producer_of("dd:test/last_source/one") == NEW
+    assert _lifecycle(OLD)["name_stage"] == "superseded"
+    assert _receipt_names("composed_source_moved") == []
