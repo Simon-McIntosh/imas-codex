@@ -3,9 +3,10 @@
 The name was retired on 2026-10-29T08:57:38Z by a signed ``supersede`` row of the
 ``sib-retire-sourceless-drafts`` manifest. Its recorded prior stage is
 ``superseded_from_stage='exhausted'``; the retiring run read ``status='draft'``,
-``source_paths=[]`` and no producer immediately before it wrote. The lead's
-2026-10-29 ruling keeps the other 130 retirements and restores this one, because
-§38 holds it from release.
+``source_paths=[]`` and no producer immediately before it wrote. The other 130
+retirements stand; this one is reversed, because the release gate holds the name
+on purpose: its exhausted predecessor has no sanctioned successor transition, so
+the identity must stay live and excluded rather than disappear.
 
 The repository has no command that un-supersedes a tombstone on its own: ``sn
 restore`` reconstructs an absent identity from an archive, and ``sn supersede
