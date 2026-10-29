@@ -25,7 +25,7 @@ from . import graph_foundation as foundation
 logger = logging.getLogger(__name__)
 
 
-class StandardNameWriteResult(int):
+class _StandardNameWriteResult(int):
     """Written name count with the published paths that could not be bound."""
 
     unbound_paths: tuple[dict[str, str], ...]
@@ -35,7 +35,7 @@ class StandardNameWriteResult(int):
         written: int,
         *,
         unbound_paths: Iterable[dict[str, str]] = (),
-    ) -> StandardNameWriteResult:
+    ) -> _StandardNameWriteResult:
         result = super().__new__(cls, written)
         result.unbound_paths = tuple(unbound_paths)
         return result
@@ -68,64 +68,6 @@ def _published_dd_paths_by_name(
         if paths:
             published[name["id"]] = list(dict.fromkeys(paths))
     return published
-
-
-def _resolve_dd_leaves(
-    query: Any,
-    paths: Iterable[str],
-) -> dict[str, str | None]:
-    """Resolve each published path to the leaf a name can bind.
-
-    A DD path that names a container is not a signal: an array binds through
-    its ``/values`` leaf and a structure through its single component leaf, the
-    same reduction the extraction path applies. ``None`` marks a path that
-    cannot be bound, so the caller reports it rather than dropping it.
-    """
-    unique = sorted(set(paths))
-    if not unique:
-        return {}
-    rows = query.query(
-        """
-        UNWIND $paths AS path
-        MATCH (node:IMASNode {id: path})
-        OPTIONAL MATCH (node)-[:HAS_CHILD]->(child:IMASNode)
-        WITH path, node, [c IN collect(child)
-                          WHERE NOT c.data_type IN ['STRUCTURE', 'STRUCT_ARRAY']
-                          | c.id] AS leaves
-        RETURN path, node.data_type AS data_type, leaves
-        """,
-        paths=unique,
-    )
-    by_path = {row["path"]: row for row in rows or []}
-    resolved: dict[str, str | None] = {}
-    for path in unique:
-        row = by_path.get(path)
-        if row is None:
-            resolved[path] = None
-        elif row["data_type"] == "STRUCT_ARRAY":
-            resolved[path] = f"{path}/values"
-        elif row["data_type"] == "STRUCTURE":
-            leaves = row["leaves"] or []
-            resolved[path] = leaves[0] if len(leaves) == 1 else None
-        else:
-            resolved[path] = path
-    leaves = sorted({leaf for leaf in resolved.values() if leaf})
-    existing = (
-        {
-            row["id"]
-            for row in query.query(
-                "UNWIND $paths AS p MATCH (n:IMASNode {id: p}) RETURN n.id AS id",
-                paths=leaves,
-            )
-            or []
-        }
-        if leaves
-        else set()
-    )
-    for path, leaf in resolved.items():
-        if leaf and leaf not in existing:
-            resolved[path] = None
-    return resolved
 
 
 def write_standard_names(
@@ -467,48 +409,56 @@ def write_standard_names(
         published_dd_paths = _published_dd_paths_by_name(names)
         signal_names = [n for n in names if "signals" in (n.get("source_types") or [])]
         if published_dd_paths:
-            candidate_paths = [
-                path for paths in published_dd_paths.values() for path in paths
-            ]
-            leaves = _resolve_dd_leaves(write_gc, candidate_paths)
-            pairs: list[dict[str, str]] = []
-            for name_id, paths in sorted(published_dd_paths.items()):
-                for path in paths:
-                    leaf = leaves.get(path)
-                    if leaf is None:
-                        unbound_paths.append(
-                            {
-                                "name": name_id,
-                                "path": path,
-                                "reason": "no_bindable_leaf",
-                            }
-                        )
-                        continue
-                    pairs.append({"id": name_id, "source_id": leaf})
-
-            pairing_rows = (
-                write_gc.query(
-                    """
+            pairing_rows = write_gc.query(
+                """
                 UNWIND $batch AS b
                 MATCH (sn:StandardName {id: b.id})
-                OPTIONAL MATCH (src:IMASNode {id: b.source_id})
+                OPTIONAL MATCH (candidate:IMASNode {id: b.source_id})
+                OPTIONAL MATCH (candidate)-[:HAS_CHILD]->(child:IMASNode)
+                WITH b, sn, candidate,
+                     [c IN collect(child)
+                      WHERE NOT c.data_type IN ['STRUCTURE', 'STRUCT_ARRAY']
+                      | c.id] AS component_leaves
+                WITH b, sn,
+                     CASE
+                       WHEN candidate IS NULL THEN null
+                       WHEN candidate.data_type = 'STRUCT_ARRAY'
+                         THEN b.source_id + '/values'
+                       WHEN candidate.data_type = 'STRUCTURE'
+                            AND size(component_leaves) = 1
+                         THEN component_leaves[0]
+                       WHEN candidate.data_type = 'STRUCTURE' THEN null
+                       ELSE b.source_id
+                     END AS leaf
+                OPTIONAL MATCH (src:IMASNode {id: leaf})
                 OPTIONAL MATCH (src)-[:HAS_UNIT]->(du:Unit)
                 OPTIONAL MATCH (bound:IMASNode)-[:HAS_STANDARD_NAME]->(sn)
-                RETURN b.id AS id, b.source_id AS source_id,
+                RETURN b.id AS id, b.source_id AS requested, leaf AS source_id,
                        coalesce(du.id, src.unit) AS dd_unit,
                        sn.unit AS sn_unit,
                        collect(DISTINCT bound.id) AS existing_dd_paths
                 """,
-                    batch=pairs,
-                )
-                if pairs
-                else []
+                batch=[
+                    {"id": name_id, "source_id": path}
+                    for name_id, paths in sorted(published_dd_paths.items())
+                    for path in paths
+                ],
             )
             accepted_by_name: dict[str, list[str]] = {}
             accepted_pairs: list[dict[str, str]] = []
             for row in sorted(
-                pairing_rows or [], key=lambda item: (item["id"], item["source_id"])
+                pairing_rows or [],
+                key=lambda item: (item["id"], item.get("requested") or ""),
             ):
+                if not row.get("source_id"):
+                    unbound_paths.append(
+                        {
+                            "name": row["id"],
+                            "path": row.get("requested"),
+                            "reason": "no_bindable_leaf",
+                        }
+                    )
+                    continue
                 accepted_paths = accepted_by_name.setdefault(
                     row["id"], sorted(row.get("existing_dd_paths") or [])
                 )
@@ -748,7 +698,7 @@ def write_standard_names(
     logger.info("Wrote %d StandardName nodes", written)
     if return_written_ids:
         return [name["id"] for name in names]
-    return StandardNameWriteResult(written, unbound_paths=unbound_paths)
+    return _StandardNameWriteResult(written, unbound_paths=unbound_paths)
 
 
 class ReviewWriteResult(int):
