@@ -51,22 +51,26 @@ def _published_dd_paths_by_name(
     single originating source, so its ``source_paths`` are the only record of
     the DD paths it published.
     """
-    from imas_codex.standard_names.source_paths import parse_source_path
+    from imas_codex.standard_names.source_paths import (
+        DD_PREFIX,
+        merge_source_paths,
+        split_source_paths,
+    )
 
     published: dict[str, list[str]] = {}
     for name in names:
         source_types = name.get("source_types") or []
         if "dd" not in source_types and "catalog" not in source_types:
             continue
-        paths: list[str] = []
-        if "dd" in source_types and name.get("source_id"):
-            paths.append(str(name["source_id"]))
-        for raw in name.get("source_paths") or []:
-            source_type, source_id = parse_source_path(str(raw))
-            if source_type == "dd":
-                paths.append(source_id)
+        declared = (
+            [f"{DD_PREFIX}{name['source_id']}"]
+            if "dd" in source_types and name.get("source_id")
+            else []
+        )
+        declared.extend(str(raw) for raw in name.get("source_paths") or [])
+        paths = split_source_paths(declared).get("dd", [])
         if paths:
-            published[name["id"]] = list(dict.fromkeys(paths))
+            published[name["id"]] = merge_source_paths([], paths)
     return published
 
 
@@ -419,7 +423,7 @@ def write_standard_names(
                      [c IN collect(child)
                       WHERE NOT c.data_type IN ['STRUCTURE', 'STRUCT_ARRAY']
                       | c.id] AS component_leaves
-                WITH b, sn,
+                WITH b, sn, candidate,
                      CASE
                        WHEN candidate IS NULL THEN null
                        WHEN candidate.data_type = 'STRUCT_ARRAY'
@@ -433,7 +437,10 @@ def write_standard_names(
                 OPTIONAL MATCH (src:IMASNode {id: leaf})
                 OPTIONAL MATCH (src)-[:HAS_UNIT]->(du:Unit)
                 OPTIONAL MATCH (bound:IMASNode)-[:HAS_STANDARD_NAME]->(sn)
-                RETURN b.id AS id, b.source_id AS requested, leaf AS source_id,
+                RETURN b.id AS id, b.source_id AS requested,
+                       CASE WHEN src IS NULL THEN null ELSE leaf END AS source_id,
+                       candidate IS NOT NULL AS requested_exists,
+                       leaf IS NULL AS leaf_undetermined,
                        coalesce(du.id, src.unit) AS dd_unit,
                        sn.unit AS sn_unit,
                        collect(DISTINCT bound.id) AS existing_dd_paths
@@ -455,8 +462,18 @@ def write_standard_names(
                         {
                             "name": row["id"],
                             "path": row.get("requested"),
-                            "reason": "no_bindable_leaf",
+                            "reason": (
+                                "leaf_not_found"
+                                if row.get("requested_exists")
+                                and not row.get("leaf_undetermined")
+                                else "no_bindable_leaf"
+                            ),
                         }
+                    )
+                    logger.warning(
+                        "write_standard_names: no leaf for DD path %s on %s",
+                        row.get("requested"),
+                        row["id"],
                     )
                     continue
                 accepted_paths = accepted_by_name.setdefault(

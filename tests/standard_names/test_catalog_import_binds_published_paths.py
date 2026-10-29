@@ -21,6 +21,7 @@ _SCALAR = "import/bound"
 _ARRAY = "import/array"
 _STRUCTURE = "import/structure"
 _MISSING = "import/missing"
+_ORPHAN_ARRAY = "import/orphan_array"
 
 
 @pytest.fixture()
@@ -38,7 +39,8 @@ def planted_graph(disposable_neo4j_uri: str) -> Iterator[GraphClient]:
           {id:$array, type:'STRUCT_ARRAY'},
           {id:$array_values, type:'FLT_1D'},
           {id:$structure, type:'STRUCTURE'},
-          {id:$component, type:'FLT_0D'}
+          {id:$component, type:'FLT_0D'},
+          {id:$orphan, type:'STRUCT_ARRAY'}
         ] AS row
         CREATE (:IMASNode {id:row.id, data_type:row.type})""",
         scalar=_SCALAR,
@@ -46,6 +48,7 @@ def planted_graph(disposable_neo4j_uri: str) -> Iterator[GraphClient]:
         array_values=f"{_ARRAY}/values",
         structure=_STRUCTURE,
         component=f"{_STRUCTURE}/component",
+        orphan=_ORPHAN_ARRAY,
     )
     client.query(
         """MATCH (array:IMASNode {id:$array}), (values:IMASNode {id:$values})
@@ -127,3 +130,35 @@ def test_container_path_does_not_bind_the_container(
         name=_NAME,
     )
     assert containers == []
+
+
+@pytest.mark.graph
+def test_container_whose_leaf_is_absent_is_reported(
+    planted_graph: GraphClient,
+) -> None:
+    """A container with no leaf node is reported, never quietly left unbound."""
+    from imas_codex.standard_names.graph_store.graph_catalog import (
+        write_standard_names,
+    )
+
+    entry = {
+        "id": _NAME,
+        "source_types": ["catalog"],
+        "source_paths": [f"dd:{_ORPHAN_ARRAY}"],
+        "unit": "eV",
+    }
+
+    result = write_standard_names([entry], gc=planted_graph)
+
+    assert list(result.unbound_paths) == [
+        {"name": _NAME, "path": _ORPHAN_ARRAY, "reason": "leaf_not_found"}
+    ]
+    assert (
+        planted_graph.query(
+            """MATCH (path:IMASNode)-[:HAS_STANDARD_NAME]->(
+                   name:StandardName {id: $name})
+            RETURN path.id AS path""",
+            name=_NAME,
+        )
+        == []
+    )
