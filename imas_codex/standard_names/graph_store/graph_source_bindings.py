@@ -8,6 +8,7 @@ from __future__ import annotations
 import logging
 import uuid
 from collections import Counter
+from contextlib import suppress
 from typing import Any
 
 from imas_codex.discovery.base.claims import retry_on_deadlock
@@ -1632,7 +1633,8 @@ def _move_sources_to_name(
     The supersession and its receipt commit with the move: the builder embedded
     in the statement retires each drained holder and reports the pair, and the
     receipt is written through the repository's single change writer inside the
-    same transaction.
+    same transaction.  A failure after the retirement therefore rolls it back
+    rather than leaving a superseded name with no ``StandardNameChange``.
     """
     from imas_codex.standard_names.source_invariant import (
         record_supersede_receipts,
@@ -1643,21 +1645,21 @@ def _move_sources_to_name(
         "__LAST_SOURCE_SUPERSEDE__",
         supersede_drained_name_cypher(name="old", successor="sn", embedded=True),
     )
-    with services.GraphClient() as gc:
-        rows = gc.query(
-            statement,
-            source_ids=source_ids,
-            token=token,
-            claim_seq=claim_seq,
-            supersede_operation=operation,
-            supersede_reason=reason,
-            sn_id=standard_name_id,
-            bound_status=bound_status,
-        )
+    parameters = {
+        "source_ids": source_ids,
+        "token": token,
+        "claim_seq": claim_seq,
+        "supersede_operation": operation,
+        "supersede_reason": reason,
+        "sn_id": standard_name_id,
+        "bound_status": bound_status,
+    }
+
+    def record_drained(handle: Any, rows: list[dict[str, Any]]) -> None:
         if not rows:
-            return 0
+            return
         record_supersede_receipts(
-            gc,
+            handle,
             zip(
                 rows[0].get("drained_old_ids") or [],
                 rows[0].get("drained_new_ids") or [],
@@ -1667,7 +1669,24 @@ def _move_sources_to_name(
             reason=reason,
             origin="compose",
         )
-        return rows[0]["affected"]
+
+    with services.GraphClient() as gc:
+        if not isinstance(gc, GraphClient):
+            rows = gc.query(statement, **parameters)
+            record_drained(gc, rows)
+            return rows[0]["affected"] if rows else 0
+        with gc.session() as session:
+            transaction = session.begin_transaction()
+            try:
+                handle = foundation._TransactionQuery(transaction)
+                rows = handle.query(statement, **parameters)
+                record_drained(handle, rows)
+                transaction.commit()
+            except BaseException:
+                with suppress(Exception):
+                    transaction.rollback()
+                raise
+    return rows[0]["affected"] if rows else 0
 
 
 def mark_sources_composed(

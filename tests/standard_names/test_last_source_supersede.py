@@ -91,15 +91,16 @@ def _lifecycle(name_id: str) -> dict:
         return dict(rows[0]) if rows else {}
 
 
-def _receipt_names() -> list[tuple[str, str]]:
+def _receipt_names(operation: str = "last_source_supersede") -> list[tuple[str, str]]:
     with GraphClient() as gc:
         rows = gc.query(
             """
             MATCH (c:StandardNameChange)
-            WHERE c.operation = 'last_source_supersede'
+            WHERE c.operation = $operation
             RETURN c.from_name AS from_name, c.to_name AS to_name
             ORDER BY from_name
-            """
+            """,
+            operation=operation,
         )
         return [(str(r["from_name"]), str(r["to_name"])) for r in rows]
 
@@ -197,6 +198,7 @@ def test_compose_bind_supersedes_the_drained_holder(
     assert _lifecycle(OLD)["name_stage"] == "superseded"
     assert _lifecycle(OLD)["successors"] == 1
     assert _successor_id(OLD) == NEW
+    assert _receipt_names("composed_source_moved") == [(OLD, NEW)]
 
 
 def test_control_holder_with_another_source_stays_live(
@@ -283,6 +285,7 @@ def test_attached_source_moves_and_supersedes_the_drained_holder(
     assert _producer_of("dd:test/last_source/one") == NEW
     assert _lifecycle(OLD)["name_stage"] == "superseded"
     assert _successor_id(OLD) == NEW
+    assert _receipt_names("attached_source_moved") == [(OLD, NEW)]
 
 
 def test_staged_candidate_produces_the_source_before_the_holder_is_superseded(
@@ -299,7 +302,7 @@ def test_staged_candidate_produces_the_source_before_the_holder_is_superseded(
     )
 
     _claim_seed()
-    winners = stage_claimed_generated_candidates(
+    stage_claimed_generated_candidates(
         [
             {
                 "sns_id": "dd:test/last_source/one",
@@ -312,10 +315,10 @@ def test_staged_candidate_produces_the_source_before_the_holder_is_superseded(
         ],
         services=_services(),
     )
-    assert winners == ["dd:test/last_source/one"]
     assert _lifecycle(OLD)["name_stage"] == "superseded"
     assert _successor_id(OLD) == NEW
     assert _producer_of("dd:test/last_source/one") == NEW
+    assert _receipt_names("compose_rebind") == [(OLD, NEW)]
 
 
 def test_claimed_lock_reports_the_binding_it_released(

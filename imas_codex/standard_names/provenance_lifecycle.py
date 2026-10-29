@@ -964,10 +964,7 @@ def retarget_standard_name_sources(
         )
     drained_old = rows[0].get("superseded_old_id") if rows else None
     drained_new = rows[0].get("superseded_new_id") if rows else None
-    if drained_old and not (
-        not record_change
-        and (str(drained_old), str(drained_new)) == (old_name, new_name)
-    ):
+    if drained_old:
         record_supersede_receipts(
             gc,
             [(drained_old, drained_new)],
