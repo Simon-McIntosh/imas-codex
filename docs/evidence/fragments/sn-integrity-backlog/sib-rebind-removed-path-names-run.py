@@ -242,6 +242,32 @@ def signed_call(phase: str, *, apply: bool, manifest_sha256: str | None = None) 
     return result
 
 
+def expected_successor_edges() -> tuple[int, str]:
+    preview = json.loads((RUN / "retire_with_successor-preview.json").read_text())
+    outcome = preview.get("outcome")
+    if (
+        outcome == "would_apply"
+        and preview.get("would_change") == 1
+        and not preview.get("refusals")
+    ):
+        return 1, outcome
+    refusals = preview.get("refusals") or []
+    if (
+        outcome == "refused"
+        and preview.get("changed") == 0
+        and preview.get("would_change") == 0
+        and len(refusals) == 1
+        and refusals[0].get("row_id") == OLD
+        and refusals[0].get("reason")
+        == (
+            f"supersede of {OLD!r} onto {SUCCESSOR!r} shares no "
+            "bound source path with the predecessor"
+        )
+    ):
+        return 0, outcome
+    raise RuntimeError("signed successor preview has no admissible interpretation")
+
+
 def operate(action: str, phase: str | None) -> dict:
     if action == "baseline":
         with GraphClient() as gc:
@@ -341,6 +367,7 @@ def operate(action: str, phase: str | None) -> dict:
         )
         return result
     if action == "readback":
+        expected_edges, successor_preview_outcome = expected_successor_edges()
         with GraphClient() as gc:
             after = snapshot(gc)
             before = json.loads((RUN / "before-names.json").read_text())
@@ -388,6 +415,8 @@ def operate(action: str, phase: str | None) -> dict:
                 "names_before": len(before),
                 "names_after": len(after),
                 "magnetic_field_pair": pair,
+                "expected_successor_edges": expected_edges,
+                "signed_successor_preview_outcome": successor_preview_outcome,
                 "retirement_receipt": receipt,
             }
         (RUN / "after.json").write_text(json.dumps(result, indent=2, default=str))
@@ -415,7 +444,7 @@ def operate(action: str, phase: str | None) -> dict:
             or len(pair) != 1
             or pair[0]["old_stage"] != "superseded"
             or pair[0]["successor_stage"] != "accepted"
-            or pair[0]["successor_edges"] != 0
+            or pair[0]["successor_edges"] != expected_edges
             or pair[0]["refined_edges"] != 0
             or len(receipt) != 1
             or receipt[0]["row_id"] != OLD
