@@ -1,0 +1,78 @@
+{
+  "authority_mode": "external_reviewed",
+  "operation_id": "retire-removed-dd-path-name",
+  "orphan_policy": "refuse",
+  "receipt_policy": {
+    "cardinality": "per_target",
+    "expected_count": "admitted_rows",
+    "id": "one-per-retired-identity",
+    "link_participant_kind": "standard_name",
+    "operation": "supersede_exhausted_orphan",
+    "replay_projection": [
+      "manifest_sha256",
+      "row_id"
+    ]
+  },
+  "repair_rows": [
+    "flux_surface_average_magnetic_field_magnitude"
+  ],
+  "rows": [
+    {
+      "guards": [
+        {
+          "id": "flux_surface_average_magnetic_field_magnitude:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "flux_surface_average_magnetic_field_magnitude"
+          ]
+        },
+        {
+          "id": "flux_surface_average_magnetic_field_magnitude:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "flux_surface_average_magnetic_field_magnitude"
+          ]
+        }
+      ],
+      "id": "flux_surface_average_magnetic_field_magnitude",
+      "identity": {
+        "id": "flux_surface_average_magnetic_field_magnitude",
+        "kind": "standard_name",
+        "target_id": "flux_surface_average_magnetic_field_magnitude"
+      },
+      "mutations": [
+        {
+          "id": "flux_surface_average_magnetic_field_magnitude:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "flux_surface_average_magnetic_field_magnitude"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "flux_surface_average_magnetic_field_magnitude",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    }
+  ],
+  "schema": "imas-codex.repair-authority.v1",
+  "selection": {
+    "id": "artifact-rows",
+    "mode": "exact_complete_signed_cohort",
+    "predicate": "artifact-rows"
+  },
+  "signature": {
+    "canonicalization": "json-sort-keys-v1",
+    "sha256": "91b08e8ff2eea16832ddacbbf1a9f51ed1c44d9e4875cdb49f07f26b2b841953"
+  }
+}
