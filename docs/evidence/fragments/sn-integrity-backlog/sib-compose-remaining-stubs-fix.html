@@ -1,20 +1,20 @@
-<h2 id="sib-compose-remaining-stubs-fix">Pending projection composition: unpark repaired, refusal verification blocked</h2>
+<h2 id="sib-compose-remaining-stubs-fix">Pending projection composition: migration and refusal gates pass</h2>
 
-<p><strong>Incomplete; do not promote as complete.</strong> Product head
-<code>882ad4989130b3c3a95e310b4525afe65f3e1ad5</code> completes the second claim after unpark,
-including migration from a projection-only predecessor. The same test fails on main
-<code>c59ac227a60e23702eaf865b987b3027fbb0f590</code>. However, four direct-retarget
-non-stub refusal cases fail at head. The resumed round reached its repeated-failure stop rule;
-no further repair or gate was started. The latest product head has no completed default-suite
-measurement.</p>
+<p><strong>The revised code-and-test requirements are complete.</strong> Source/test head
+<code>918a877727911a13d2229214852df6c0ef7a94c7</code> completes the second claim after unpark
+and refuses all eight non-stub migration cases. The graph gate passes all 18 cases. Both
+fresh default-suite arms have the same 10 failure IDs, 8523 passes and 15 skips:
+<strong>zero added failure IDs</strong> against
+<code>c59ac227a60e23702eaf865b987b3027fbb0f590</code>. This is a disposable-fixture result;
+no production graph write or LLM call ran, and no live stub is claimed to have composed.</p>
 
-<h3 id="sib-compose-remaining-stubs-fix-live-state">Read-only live evidence</h3>
+<h3 id="sib-compose-remaining-stubs-fix-live-state">Earlier read-only live evidence</h3>
 
 <p>The bounded live read in this run found seven named identities and nine DD source-path
 bindings. Five identities were pending, with zero producers and no reservation or name claim.
 Their DD units, source snapshot units and stub units agreed. The same instrument found one
 producer for each accepted reflector, providing a positive control. These are observations
-before any fixture repair, not evidence of a production change. The query and rows are in
+from the earlier read, not a refreshed production census. The query and rows are in
 <code>live-state.json</code> in the run directory.</p>
 
 <table>
@@ -36,34 +36,69 @@ before any fixture repair, not evidence of a production change. The query and ro
 <h3 id="sib-compose-remaining-stubs-fix-causes">Reproduced causes and implemented changes</h3>
 
 <p>The real retry sequence uses the sanctioned unpark function, obtains a new claim sequence,
-and composes <code>ion_temperature</code> for <code>test_adopt_projection/profiles_1d/psi</code>
-while <code>electron_temperature</code> remains a pending projection. On main, it fails with:</p>
+and composes <code>ion_temperature</code> for the fixture's
+<code>test_adopt_projection/profiles_1d/psi</code> while <code>electron_temperature</code>
+remains a pending projection. On main, it fails with:</p>
 <pre>graph_catalog.py:2511: RuntimeError: source claim changed during transactional name persistence</pre>
 <p>The token and sequence need not change. Main's <code>graph_catalog.py:522</code> overwrites
 <code>extracted</code> with <code>attached</code> during the rich write; reservation finalization
 at main line 2395 requires <code>extracted</code>. Head lines 522–524 preserve lifecycle status
-while a claim token exists. The final head test observes unchanged claim token and sequence
+while a claim token exists. The passing head test observes the same token and sequence
 through the rich write, then composed status with the claim released. The stolen-claim test
-still forces a token and sequence change, observes the refusal, and verifies rollback.</p>
+forces a token and sequence change, requires the refusal, and verifies rollback of the name,
+producer and adoption receipt.</p>
 
-<p>A later guard originally received the projection-only predecessor as the expected producer:
+<p>A later migration guard received the projection-only predecessor as the expected producer:
 main <code>graph_supersession.py:251</code> supplies that mapping, and
 <code>provenance_lifecycle.py:806</code> refuses the already-finalized successor binding.
-Head <code>graph_supersession.py:251–268</code> instead reads the actual successor binding for
-an unowned pending projection. The shared predicate at
+Head <code>graph_supersession.py:251–268</code> reads the actual successor binding for an
+unowned pending projection. The shared predicate at
 <code>provenance_lifecycle.py:505–546</code> requires a pending, unpublished, non-derived,
 unclaimed, unreserved predecessor with no producer, plus the exact source's DD projection and
 finalized successor binding. Mutation rechecks it. The ordinary migration path retains its
 predecessor expectation. The outer lifecycle finalization recognizes the shared last-source
-retirement receipt on the successor. The passing unpark test verifies one successor producer,
-one successor DD projection, the superseded stub, one migration receipt, and a zero-change
-repeat of the exact manifest.</p>
+retirement receipt on the successor.</p>
+
+<p>The unpark test verifies one successor producer, one successor DD projection, the
+superseded stub, one migration-manifest receipt, and a zero-change repeat of the exact
+manifest. Both entrypoints refuse drafted, reviewed, accepted and owned-pending predecessors.
+The passing log records the guard's actual messages:</p>
+<pre>retarget/drafted refused: source migration requires an unowned pending projection-only predecessor
+supersession/drafted refused: source migration compare-and-set failed: dd:test_adopt_projection/profiles_1d/psi(exists=True, status='composed', claimed=False, bindings=['ion_temperature'], scalar='ion_temperature')</pre>
+
+<h3 id="sib-compose-remaining-stubs-fix-isolation">The four missing refusals were fixture contamination</h3>
+
+<p>The completed-receipt return at <code>provenance_lifecycle.py:863</code> precedes the
+pending-stub eligibility check. The receipt key already includes expected bindings at lines
+616–628. The fixture deleted names and sources but retained hashed migration receipts,
+then recreated the same identities. A matching receipt consequently described the next
+case as already completed.</p>
+
+<p>The unchanged product at <code>7574a51bc</code>, running only the four direct-retarget
+cases on a newly started and emptied disposable graph, produced <strong>4 passed,
+14 deselected</strong>. The full contaminated file had produced four
+<code>DID NOT RAISE</code> failures. This settles the requested branch: the fresh requests
+are refused, so fixture isolation required repair.</p>
+
+<p><code>test_compose_adopts_pending_stub.py:42</code> now resets the disposable receipt
+ledger as well as the fixture's named nodes. The fixture at line 67 asserts zero receipts
+before and after each case. The count sees three receipts after unpark composition and
+zero after cleanup; all 18 cases start and end with no receipts. Adoption cases also show one receipt before
+cleanup and zero afterward. An intermediate cleanup using only name endpoints left an
+adoption receipt because those endpoints contain lifecycle states; its two failed-arm logs
+are retained, and the complete ledger reset addresses that measured omission.</p>
+
+<p>All three edited product-source files are byte-identical between the clean four-case
+probe and the final passing graph arm. The isolation repair changes the fixture only;
+it does not loosen the production refusal or replace the completed-manifest behavior.
+<code>receipt-verification.json</code> records these hashes, the eight refusal messages,
+and the 18 receipt counts.</p>
 
 <h3 id="sib-compose-remaining-stubs-fix-adoption">The adoption premise was not reproduced</h3>
 
-<p>The requested rich-write-then-adoption probe produces these observations:</p>
+<p>The requested rich-write-then-adoption probe records:</p>
 <table>
-  <thead><tr><th>Revision</th><th>Source status after rich write</th><th>Producer</th><th>Adoption winners</th></tr></thead>
+  <thead><tr><th>Revision</th><th>Status after rich write</th><th>Producer</th><th>Adoption winners</th></tr></thead>
   <tbody>
     <tr><td>Main</td><td><code>attached</code></td><td><code>dd:test_adopt_projection/profiles_1d/psi</code></td><td>None</td></tr>
     <tr><td>Head</td><td><code>extracted</code></td><td><code>dd:test_adopt_projection/profiles_1d/psi</code></td><td>None</td></tr>
@@ -71,46 +106,34 @@ repeat of the exact manifest.</p>
 </table>
 <p><strong>This does not reproduce a main-only adoption defect.</strong> The rich write creates
 a producing source, so the unowned-stub condition refuses both revisions. The two-path and
-structural-parent fixtures also pass on both revisions. No adoption predicate was changed,
-and no further search or real-unit replay was undertaken after the resumed instruction.
+structural-parent fixtures pass on both revisions. No adoption predicate was changed,
+and no further search or real-unit replay was undertaken after the revised instruction.
 The cause of the five historical collisions is not established by this work.</p>
 
-<h3 id="sib-compose-remaining-stubs-fix-gates">Measured gates and stop</h3>
+<h3 id="sib-compose-remaining-stubs-fix-gates">Completed measurements</h3>
 
 <table>
-  <thead><tr><th>Arm</th><th>Revision</th><th>Completed result</th></tr></thead>
+  <thead><tr><th>Arm and log</th><th>Revision</th><th>Completed result</th></tr></thead>
   <tbody>
-    <tr><td>Final graph baseline</td><td><code>c59ac227a</code> with the delivered test file</td><td>1 failed, 17 passed, 1 warning in 262.68s; <code>EXIT=1</code></td></tr>
-    <tr><td>Final graph head</td><td><code>882ad4989</code></td><td>4 failed, 14 passed, 1 warning in 194.49s; <code>EXIT=1</code></td></tr>
-    <tr><td>Default baseline, eight workers</td><td><code>c59ac227a</code></td><td>10 failed, 8523 passed, 15 skipped, 274 warnings in 267.12s; <code>EXIT=1</code></td></tr>
-    <tr><td>Latest completed default arm, eight workers</td><td><code>c0dc854bc</code></td><td>11 failed, 8522 passed, 15 skipped, 274 warnings in 338.40s; <code>EXIT=1</code></td></tr>
-    <tr><td>Default at delivered product head</td><td><code>882ad4989</code></td><td>Not run after stop; zero added failure IDs is not established</td></tr>
+    <tr><td>Fresh refusal probe; <code>clean-retarget-probe.log</code></td><td><code>7574a51bc</code></td><td>4 passed, 14 deselected, 1 warning in 45.47s; <code>EXIT=0</code></td></tr>
+    <tr><td>Graph baseline; <code>receipt-base-graph.log</code></td><td><code>c59ac227a</code> with delivered tests</td><td>1 failed, 17 passed, 1 warning in 62.28s; <code>EXIT=1</code></td></tr>
+    <tr><td>Graph head; <code>receipt-head-graph.log</code></td><td><code>918a87772</code></td><td>18 passed, 1 warning in 59.21s; <code>EXIT=0</code></td></tr>
+    <tr><td>Default baseline, eight workers; <code>receipt-base-default.log</code></td><td><code>c59ac227a</code></td><td>10 failed, 8523 passed, 15 skipped, 274 warnings in 292.93s; <code>EXIT=1</code></td></tr>
+    <tr><td>Default head, eight workers; <code>receipt-head-default.log</code></td><td><code>918a87772</code></td><td>10 failed, 8523 passed, 15 skipped, 274 warnings in 272.57s; <code>EXIT=1</code></td></tr>
   </tbody>
 </table>
 
-<p>The negative control is <code>test_second_claim_after_unpark_finalizes</code>: it is the
-sole failing ID in <code>verified-base-graph.log</code> and passes in
-<code>verified-head-graph.log</code>. The graph delta adds four IDs:
-<code>test_non_stub_predecessor_is_still_refused[retarget-drafted]</code>,
-<code>[retarget-reviewed]</code>, <code>[retarget-accepted]</code> and
-<code>[retarget-pending]</code>. Each reports <code>DID NOT RAISE</code>.
-All four corresponding supersession-entry cases pass.</p>
+<p>The revised negative control is <code>test_second_claim_after_unpark_finalizes</code>:
+it is the sole failing ID on main and passes at head. Both graph and default comparisons
+add zero failure IDs. The complete machine-readable comparison is
+<code>completed-comparison.json</code>. The manifest preserves the exact existing default
+failure IDs and the intermediate fixture failures.</p>
 
-<p>Static inspection suggests retained fixture receipts may explain the four failures:
-<code>test_compose_adopts_pending_stub.py:45–61</code> removes names and namespaced nodes
-but not hashed migration-event IDs; <code>provenance_lifecycle.py:746</code> recognizes a
-matching receipt and line 863 returns before the stub predicate. This explanation has not
-been tested. These failures reached product code and are counted; they are not excluded as
-scaffolding. The next authorized attempt must distinguish fixture isolation from guard
-behavior before changing either. The latest default-arm payload mismatch was repaired in
-<code>882ad4989</code>, but that repair has no subsequent default-suite receipt.</p>
-
-<p>Every measured arm used an archive tree, a separate basetemp, the five generated files,
-and <code>SOURCE_DATE_EPOCH</code>. Final graph arms used the identical regression file
-(SHA-256 <code>773faebb859c5596643dea6142aa1e2804db5433ca7d4d54ee8e11384c4305e1</code>).
+<p>Every arm used an archive tree, separate basetemp, the five generated files, and
+<code>SOURCE_DATE_EPOCH</code>. The graph arms used the identical delivered test file
+(SHA-256 <code>902c5e8b3696f94a655cd2c1a4b1f09a1e1c7d455385a10bc01c0bdc616af008</code>).
 Logs carry revision, command, tree, imported module, resolved working directory, summary and
 a final bare exit-code line. The durable run directory is
 <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T064233498406-sib-compose-remaining-stubs-fix</code>.
-No production graph write or LLM call ran. Spend was USD 0 against the authorized USD 0.
-The manifest enumerates all local commits and changed paths; the coordinator owns resumption
-and landing.</p>
+Spend is USD 0 against the authorized USD 0. The manifest enumerates the local commits and
+changed paths; the coordinator owns review, integration and plan closure.</p>
