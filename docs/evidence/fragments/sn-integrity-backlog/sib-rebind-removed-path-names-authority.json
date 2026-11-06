@@ -14,38 +14,11 @@
     ]
   },
   "repair_rows": [
-    "radial_coordinate_of_flux_surface",
-    "radial_coordinate_of_launching_position",
-    "toroidal_current_density_due_to_distribution_function_driven",
-    "deuterium_tritium_flux"
+    "toroidal_current_density_due_to_distribution_function_driven"
   ],
   "rows": [
     {
-      "given_source_id": "dd:gyrokinetics/normalizing_quantities/r",
-      "id": "radial_coordinate_of_flux_surface",
-      "name_id": "radial_coordinate_of_flux_surface",
-      "receiving_name_id": null,
-      "selection": {
-        "id": "artifact-rows",
-        "mode": "exact_complete_signed_cohort",
-        "predicate": "artifact-rows"
-      },
-      "taken_source_id": "dd:gyrokinetics_local/normalizing_quantities/r"
-    },
-    {
-      "given_source_id": "dd:ec_launchers/launcher/launching_position/r",
-      "id": "radial_coordinate_of_launching_position",
-      "name_id": "radial_coordinate_of_launching_position",
-      "receiving_name_id": null,
-      "selection": {
-        "id": "artifact-rows",
-        "mode": "exact_complete_signed_cohort",
-        "predicate": "artifact-rows"
-      },
-      "taken_source_id": "dd:ec_launchers/beam/launching_position/r"
-    },
-    {
-      "given_source_id": "dd:distributions/distribution/profiles_1d/current_tor",
+      "given_source_id": "dd:distributions/distribution/profiles_2d/current_tor",
       "id": "toroidal_current_density_due_to_distribution_function_driven",
       "name_id": "toroidal_current_density_due_to_distribution_function_driven",
       "receiving_name_id": null,
@@ -54,19 +27,7 @@
         "mode": "exact_complete_signed_cohort",
         "predicate": "artifact-rows"
       },
-      "taken_source_id": "dd:distributions/distribution/profiles_1d/current_phi"
-    },
-    {
-      "given_source_id": "dd:summary/fusion/neutron_fluxes/dt/total/value",
-      "id": "deuterium_tritium_flux",
-      "name_id": "deuterium_tritium_flux",
-      "receiving_name_id": null,
-      "selection": {
-        "id": "artifact-rows",
-        "mode": "exact_complete_signed_cohort",
-        "predicate": "artifact-rows"
-      },
-      "taken_source_id": "dd:summary/fusion/neutron_rates/dt/total/value"
+      "taken_source_id": "dd:distributions/distribution/profiles_2d/current_phi"
     }
   ],
   "schema": "imas-codex.repair-authority.v1",
@@ -77,6 +38,6 @@
   },
   "signature": {
     "canonicalization": "json-sort-keys-v1",
-    "sha256": "e1681d86565e4f8bed9d1b4f78164a72251e521e1175a2d26f826bbb335aa275"
+    "sha256": "709143980ce096fb5df75a2dab831f5c079fb0a10bb3a41c696938ea1c45ec18"
   }
 }
