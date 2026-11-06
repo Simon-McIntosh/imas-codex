@@ -1,0 +1,79 @@
+<h2 id="sib-compose-remaining-stubs-fix">Pending projection composition: partial repair, blocked delivery</h2>
+
+<p><strong>The node is incomplete.</strong> Commit <code>ba7f00e93e5366d8b86e2e394dc16956b42ab792</code>
+preserves an active source claim's lifecycle through the rich name write. The retry regression
+gets past the recorded finalize abort and then fails a subsequent source-migration guard.
+No adoption-predicate change is delivered: simple two-path and structural-parent fixtures
+already adopt on the assigned main revision. The required two-path negative control has not
+been established.</p>
+
+<h3 id="sib-compose-remaining-stubs-fix-live-state">Read-only live evidence</h3>
+
+<p>The bounded read found all seven named identities and nine source-path bindings. Five
+identities remain <code>pending</code>, with zero producers and no reservation or name claim.
+Their DD units, source snapshot units and stub units agree. The same read sees the two accepted
+reflector names and their producing sources, providing a positive control for the producer
+query. The complete query and rows are in the run's <code>live-state.json</code>.</p>
+
+<table>
+  <thead><tr><th>Name</th><th>DD source path</th><th>Unit</th><th>Observed state</th></tr></thead>
+  <tbody>
+    <tr><td><code>line_averaged_neon_density</code></td><td><code>summary/line_average/n_i/neon/value</code></td><td><code>m^-3</code></td><td>Pending; parent <code>neon_density</code>; structural authority</td></tr>
+    <tr><td><code>radius_of_soft_xray_detector</code></td><td><code>soft_x_rays/channel/detector/radius</code></td><td><code>m</code></td><td>Pending; no parent or structural authority</td></tr>
+    <tr><td><code>ratio_of_diamagnetic_vorticity_to_major_radius</code></td><td><code>edge_profiles/ggd/vorticity_over_r/diamagnetic</code><br><code>plasma_profiles/ggd/vorticity_over_r/diamagnetic</code></td><td><code>m^-1.s^-1</code></td><td>Pending; two projections; parent <code>major_radius</code>; structural authority</td></tr>
+    <tr><td><code>toroidal_coordinate_of_spectrometer</code></td><td><code>spectrometer_visible/channel/geometry_matrix/interpolated/phi</code></td><td><code>rad</code></td><td>Pending; no parent or structural authority</td></tr>
+    <tr><td><code>toroidal_tritium_velocity</code></td><td><code>summary/local/pedestal/velocity_phi/tritium/value</code><br><code>summary/local/separatrix/velocity_phi/tritium/value</code></td><td><code>m.s^-1</code></td><td>Pending; two projections; parent <code>tritium_velocity</code></td></tr>
+    <tr><td><code>radial_coordinate_of_reflector</code></td><td><code>spectrometer_x_ray_crystal/channel/reflector/sphere_centre/r</code></td><td><code>m</code></td><td>Accepted; one producer</td></tr>
+    <tr><td><code>vertical_coordinate_of_reflector</code></td><td><code>spectrometer_x_ray_crystal/channel/reflector/sphere_centre/z</code></td><td><code>m</code></td><td>Accepted; one producer</td></tr>
+  </tbody>
+</table>
+
+<p>The stored refusal for the neon source still reads:</p>
+<pre>compose claim-attempt cap reached; last refusal: standard-name binding collision: candidate "line_averaged_neon_density" has non-bindable name_stage "pending" at composition attempt 5</pre>
+<p>This is historical source state, not a new execution of the adoption predicate.
+At the assigned base, <code>graph_source_bindings.py:1010–1027</code> requires the DD source,
+pending target, no owning producer or reservation, a consistent pairing and unit, and its
+own DD projection. Neither an additional projecting path nor a structural edge is prohibited.
+The simple fixture cases pass on main. A more literal replay with real DD units stopped on
+missing resolution authority, then on an invalid fixture resolution that bridged no change;
+it establishes no conclusion about which clause failed in production.</p>
+
+<h3 id="sib-compose-remaining-stubs-fix-finalize">The reproduced finalize defect</h3>
+
+<p>On base <code>c59ac227a60e23702eaf865b987b3027fbb0f590</code>, the new
+<code>test_second_claim_after_unpark_finalizes</code> calls the sanctioned retry function,
+claims the source again with a higher sequence, and composes a different identity. It fails:</p>
+<pre>graph_catalog.py:2511: RuntimeError: source claim changed during transactional name persistence</pre>
+
+<p>The cause is the unconditional <code>sns.status = 'attached'</code> at base
+<code>graph_catalog.py:522</code> inside <code>write_standard_names</code>. It executes between
+the exact-claim lock and reservation finalization, whose predicate at base line 2395 requires
+<code>sns.status = 'extracted'</code>. The token and sequence need not change for this guard to
+abort. The repair at head lines 522–524 preserves status while a claim token exists. Adoption
+finalization also requires <code>extracted</code> again; its previous status exception is no
+longer needed.</p>
+
+<p>The graph gate at this head is <strong>1 failed, 19 passed</strong>. The unpark case reaches a
+later source-migration compare-and-set refusal; it is not a completed repair of recomposition.
+The manifest records the exact scope extension required. The stolen-claim fixture still raises
+and rolls back the adoption receipt, name lifecycle and producer edge. The two-path and
+structural-parent cases pass on both revisions.</p>
+
+<h3 id="sib-compose-remaining-stubs-fix-gates">Measurements and remaining work</h3>
+
+<table>
+  <thead><tr><th>Measurement</th><th>Result</th></tr></thead>
+  <tbody>
+    <tr><td>Main, four new fixture cases</td><td>1 failed, 3 passed, 5 deselected; <code>EXIT=1</code></td></tr>
+    <tr><td>Head, adoption and last-source graph files</td><td>1 failed, 19 passed; <code>EXIT=1</code></td></tr>
+    <tr><td>Main, default standard-names suite, eight workers</td><td>10 failed, 8523 passed, 15 skipped; <code>EXIT=1</code></td></tr>
+    <tr><td>Head, default standard-names suite, eight workers</td><td>10 failed, 8523 passed, 15 skipped; <code>EXIT=1</code>; zero added failure IDs</td></tr>
+  </tbody>
+</table>
+
+<p>All test arms use archive trees, separate basetemps, the five generated model/reference files,
+and <code>SOURCE_DATE_EPOCH</code>. Logs identify revision, tree, imported module, command and
+completion exit code. No production graph write or LLM call ran; spend is USD 0 against the
+authorized USD 0. Repairs stopped under the dispatch's repeated-failure and scope rules.
+The coordinator must authorize the next scope and establish the missing adoption reproduction
+before treating this node as delivered.</p>
