@@ -1542,6 +1542,110 @@ def _detect_renames(added: set[str], removed: set[str], new_paths: dict) -> list
     return renames
 
 
+#: Structure node types a container rename can move.
+_STRUCTURE_DATA_TYPES = frozenset({"STRUCTURE", "STRUCT_ARRAY"})
+#: Minimum shared descendant paths before a removed and an added structure are
+#: read as one renamed structure rather than as an unrelated removal/addition.
+_CONTAINER_MIN_COMMON = 3
+#: Minimum share of the smaller subtree the two must have in common.
+_CONTAINER_MIN_RATIO = 0.5
+#: How far the best candidate must beat the runner-up for the same parent.
+_CONTAINER_BEST_MARGIN = 1.3
+
+
+def _relative_descendants(paths: dict[str, dict], root: str) -> set[str]:
+    """Paths below *root* expressed relative to it."""
+    prefix = f"{root}/"
+    return {p[len(prefix) :] for p in paths if p.startswith(prefix)}
+
+
+def _detect_container_renames(
+    old_paths: dict[str, dict], new_paths: dict[str, dict]
+) -> dict[str, str]:
+    """Detect renamed structures and struct arrays across a version pair.
+
+    A container rename (an array of structures gaining a new name, e.g.
+    ``ec_launchers/launcher`` -> ``ec_launchers/beam``) carries no
+    ``change_nbc_previous_name``: the DD replaces the node. It is recognised
+    structurally — a removed and an added structure under the same parent that
+    share most of their descendant paths. Each side's best match must be unique
+    and clearly ahead of the runner-up, otherwise the pair is left alone rather
+    than guessed.
+
+    Returns ``old_path -> new_path`` for each renamed container and for every
+    descendant path both subtrees share.
+    """
+    removed = set(old_paths) - set(new_paths)
+    added = set(new_paths) - set(old_paths)
+    removed_containers = {
+        p for p in removed if old_paths[p].get("data_type") in _STRUCTURE_DATA_TYPES
+    }
+    added_containers = {
+        p for p in added if new_paths[p].get("data_type") in _STRUCTURE_DATA_TYPES
+    }
+
+    old_desc = {c: _relative_descendants(old_paths, c) for c in removed_containers}
+    new_desc = {c: _relative_descendants(new_paths, c) for c in added_containers}
+
+    candidates: dict[str, list[tuple[float, float, int, str]]] = {}
+    for old_c, old_rel in old_desc.items():
+        if not old_rel:
+            continue
+        parent = old_c.rsplit("/", 1)[0]
+        for new_c, new_rel in new_desc.items():
+            if new_c.rsplit("/", 1)[0] != parent:
+                continue
+            common = old_rel & new_rel
+            if len(common) < _CONTAINER_MIN_COMMON:
+                continue
+            ratio = len(common) / min(len(old_rel), len(new_rel))
+            if ratio < _CONTAINER_MIN_RATIO:
+                continue
+            jaccard = len(common) / len(old_rel | new_rel)
+            candidates.setdefault(old_c, []).append(
+                (ratio, jaccard, len(common), new_c)
+            )
+
+    renames: dict[str, str] = {}
+    claimed: set[str] = set()
+    for old_c, scored in candidates.items():
+        scored.sort(reverse=True)
+        best = scored[0]
+        if best[3] in claimed:
+            continue
+        if len(scored) > 1 and scored[1][0] > best[0] / _CONTAINER_BEST_MARGIN:
+            continue
+        claimed.add(best[3])
+        renames[old_c] = best[3]
+        for rel in sorted(old_desc[old_c] & new_desc[best[3]]):
+            renames[f"{old_c}/{rel}"] = f"{best[3]}/{rel}"
+    return renames
+
+
+def collect_renamed_to_mappings(
+    *,
+    version_renames: dict[str, str],
+    path_mappings: dict,
+    dd_renames: dict[str, str],
+) -> dict[str, dict]:
+    """Merge every rename source into the shape the RENAMED_TO writer consumes.
+
+    Sources, lowest precedence first: the packaged path map, container renames
+    detected while diffing the built versions, and the current DD's
+    ``change_nbc_previous_name`` renames (which include a renamed IDS).
+    """
+    merged: dict[str, dict] = {}
+    for old_path, mapping in (path_mappings.get("old_to_new") or {}).items():
+        new_path = mapping.get("new_path") if isinstance(mapping, dict) else None
+        if new_path:
+            merged[old_path] = {"new_path": new_path}
+    for old_path, new_path in version_renames.items():
+        merged.setdefault(old_path, {"new_path": new_path})
+    for old_path, new_path in dd_renames.items():
+        merged.setdefault(old_path, {"new_path": new_path})
+    return merged
+
+
 def compute_version_changes(
     old_paths: dict[str, dict],
     new_paths: dict[str, dict],
@@ -1565,8 +1669,22 @@ def compute_version_changes(
 
     # Detect renames from NBC metadata
     renames = _detect_renames(added, removed, new_paths)
-    matched_added = {r["new_path"] for r in renames}
-    matched_removed = {r["old_path"] for r in renames}
+    # A renamed container carries no NBC annotation; recognise it structurally.
+    container_renames = _detect_container_renames(old_paths, new_paths)
+    for old_path, new_path in container_renames.items():
+        # One event per renamed subtree root, not one per moved path.
+        parent = old_path.rsplit("/", 1)[0]
+        if parent in container_renames:
+            continue
+        renames.append(
+            {
+                "old_path": old_path,
+                "new_path": new_path,
+                "source": "container_rename",
+            }
+        )
+    matched_added = {r["new_path"] for r in renames} | set(container_renames.values())
+    matched_removed = {r["old_path"] for r in renames} | set(container_renames)
 
     # Check for metadata changes in common paths
     changed: dict[str, list[dict]] = {}
@@ -1688,6 +1806,7 @@ def compute_version_changes(
         "added": added,
         "removed": removed,
         "changed": changed,
+        "renamed_paths": container_renames,
     }
 
 
@@ -1939,6 +2058,7 @@ def phase_build(
 
     # Per-version: IDS + IMASNode + relationships + path changes
     prev_paths: dict[str, dict] = {}
+    container_renames: dict[str, str] = {}
     total_paths = sum(
         len(version_data[v]["paths"]) for v in versions if v in version_data
     )
@@ -1956,6 +2076,7 @@ def phase_build(
 
         data = version_data[version]
         changes = compute_version_changes(prev_paths, data["paths"])
+        container_renames.update(changes["renamed_paths"])
 
         if not dry_run:
             _batch_upsert_ids_nodes(client, data["ids_info"], version, i == 0)
@@ -1987,8 +2108,18 @@ def phase_build(
 
     # RENAMED_TO relationships
     if not dry_run:
+        from imas_codex.graph.dd_lifecycle import dd_path_index
+
         mappings = load_path_mappings(current_dd_version)
-        _batch_create_renamed_to(client, mappings.get("old_to_new", {}))
+        _, dd_renames = dd_path_index()
+        _batch_create_renamed_to(
+            client,
+            collect_renamed_to_mappings(
+                version_renames=container_renames,
+                path_mappings=mappings,
+                dd_renames=dd_renames,
+            ),
+        )
 
     # Lifecycle gate: DEPRECATED_IN edges alone are invisible to extraction —
     # stamp nodes absent from the current DD as lifecycle_status='removed'

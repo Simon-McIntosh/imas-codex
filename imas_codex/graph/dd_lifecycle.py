@@ -42,7 +42,9 @@ def dd_path_index(
     ``valid_paths`` holds every machine path (``<ids>/<path>``) plus the bare
     IDS names. ``old_to_new`` maps pre-rename paths to their current spelling,
     derived from ``change_nbc_previous_name`` and propagated to descendants
-    (a renamed structure moves its whole subtree).
+    (a renamed structure moves its whole subtree). The annotation appears on
+    the IDS element for a renamed IDS as well as on a field for a renamed
+    structure, so both spellings of the whole subtree map.
     """
     import imas_data_dictionaries as idd
 
@@ -55,7 +57,11 @@ def dd_path_index(
     old_to_new: dict[str, str] = {}
 
     def walk(
-        el: ET.Element, new_segs: list[str], old_segs: list[str], ids: str
+        el: ET.Element,
+        new_segs: list[str],
+        old_segs: list[str],
+        ids: str,
+        old_ids: str,
     ) -> None:
         for f in el.findall("field"):
             name = f.get("name")
@@ -65,17 +71,19 @@ def dd_path_index(
             ns = [*new_segs, name]
             os_ = [*old_segs, *(prev.split("/") if prev else [name])]
             new_path = f"{ids}/{'/'.join(ns)}"
+            old_path = f"{old_ids}/{'/'.join(os_)}"
             valid.add(new_path)
-            if os_ != ns:
-                old_to_new[f"{ids}/{'/'.join(os_)}"] = new_path
-            walk(f, ns, os_, ids)
+            if old_path != new_path:
+                old_to_new[old_path] = new_path
+            walk(f, ns, os_, ids, old_ids)
 
     for ids_el in root.iter("IDS"):
         ids_name = ids_el.get("name")
         if not ids_name:
             continue
         valid.add(ids_name)
-        walk(ids_el, [], [], ids_name)
+        old_ids = ids_el.get("change_nbc_previous_name") or ids_name
+        walk(ids_el, [], [], ids_name, old_ids)
 
     return frozenset(valid), old_to_new
 
