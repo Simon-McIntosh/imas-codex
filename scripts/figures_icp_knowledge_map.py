@@ -1050,6 +1050,10 @@ def wrap(text: str, width: int) -> str:
 
 # --------------------------------------------------------------------------- grid
 
+# Names too wide for a card at presentation size, broken over two lines.
+GRID_NAMES = {"ncr": "Non-Conformance\nReports"}
+GRID_SYSTEMS = {"cad": "CATIA\nDassault Systèmes"}
+
 # Repositories in reading order for the full-width grid: five above, four below.
 GRID_ORDER = ["doc", "cad", "ncr", "drw", "ana", "cmp", "pbs", "req", "con"]
 
@@ -1131,7 +1135,7 @@ def grid_figure(thumbnails: Path | None) -> Path:
     plt.style.use("data-ink")
     fig = plt.figure(figsize=(SLIDE_WIDTH, HEIGHT), dpi=100)
     card_w, gap, image_h = 2.4, 0.3, 2.05
-    row_top = (HEIGHT - 0.45, HEIGHT - 0.45 - image_h - 1.25)
+    row_top = (HEIGHT - 0.3, HEIGHT - 0.3 - image_h - 1.5)
     texts = []
     for i, key in enumerate(GRID_ORDER):
         row, col = (0, i) if i < 5 else (1, i - 5)
@@ -1149,9 +1153,8 @@ def grid_figure(thumbnails: Path | None) -> Path:
         cell.set_yticks([])
         cell.axis("off")
         town = next(t for t in TOWNS if t.key == key)
-        source = None
         if thumbnails is not None and key in THUMBNAILS:
-            stem, source, (a, b, c, d), mode = THUMBNAILS[key]
+            stem, _, (a, b, c, d), mode = THUMBNAILS[key]
             page = Image.open(thumbnails / f"{stem}.png").convert("RGB")
             w, h = page.size
             crop = page.crop((int(a * w), int(b * h), int(c * w), int(d * h)))
@@ -1170,42 +1173,33 @@ def grid_figure(thumbnails: Path | None) -> Path:
             draw_icon(cell, ICON_KIND[key], 0.0, 0.0, s=0.62)
         cx = (x0 + card_w / 2) / SLIDE_WIDTH
         name_y = (top - image_h - 0.12) / HEIGHT
+        name = GRID_NAMES.get(key, town.name)
+        lines = name.count("\n") + 1
         texts.append(
             fig.text(
                 cx,
                 name_y,
-                town.name,
+                name,
                 ha="center",
                 va="top",
-                fontsize=15,
+                fontsize=20,
                 fontweight="bold",
                 color=INK,
+                linespacing=1.1,
             )
         )
         texts.append(
             fig.text(
                 cx,
-                name_y - 0.042,
-                town.system,
+                name_y - 0.052 * lines - 0.006,
+                GRID_SYSTEMS.get(key, town.system),
                 ha="center",
                 va="top",
-                fontsize=13,
+                fontsize=16,
+                linespacing=1.15,
                 color=MUTED,
             )
         )
-        if source:
-            texts.append(
-                fig.text(
-                    cx,
-                    name_y - 0.078,
-                    f"ITER_D_{source}",
-                    ha="center",
-                    va="top",
-                    fontsize=10.5,
-                    color=MUTED,
-                    family="DejaVu Sans Mono",
-                )
-            )
     check_layout(fig, texts)
     if thumbnails is None:
         out = FIGURES / "icp-map-repositories.svg"
