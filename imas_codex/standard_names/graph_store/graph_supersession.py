@@ -243,11 +243,21 @@ def supersede_prior_source_names(
                 )
 
         from imas_codex.standard_names.provenance_lifecycle import (
+            _projection_stub_source_bindings,
             record_standard_name_change,
             retarget_standard_name_sources,
         )
 
         for plan in plans:
+            expected_bindings = dict.fromkeys(plan["source_ids"], plan["old_name"])
+            plan["projection_stub"] = False
+            if plan["old_stage"] == "pending":
+                projected = _projection_stub_source_bindings(
+                    query_handle, plan["old_name"], plan["new_name"], plan["source_ids"]
+                )
+                if set(projected) == set(plan["source_ids"]):
+                    expected_bindings = projected
+                    plan["projection_stub"] = True
             moved = retarget_standard_name_sources(
                 query_handle,
                 plan["old_name"],
@@ -255,9 +265,7 @@ def supersede_prior_source_names(
                 operation="regenerate",
                 enforce_consistency=False,
                 source_ids=plan["source_ids"],
-                expected_current_bindings=dict.fromkeys(
-                    plan["source_ids"], plan["old_name"]
-                ),
+                expected_current_bindings=expected_bindings,
             )
             expected = len(plan["source_ids"])
             if moved != expected:
@@ -326,10 +334,20 @@ def supersede_prior_source_names(
                 UNWIND $plans AS plan
                 MATCH (old:StandardName {id: plan.old_name}),
                       (new:StandardName {id: plan.new_name})
-                WHERE coalesce(old.name_stage, '') =
-                      coalesce(plan.old_stage, '')
-                  AND NOT coalesce(old.name_stage, '') IN
-                      ['superseded', 'exhausted', 'contested', 'approved']
+                WHERE (
+                    (coalesce(old.name_stage, '') = coalesce(plan.old_stage, '')
+                     AND NOT coalesce(old.name_stage, '') IN
+                       ['superseded', 'exhausted', 'contested', 'approved'])
+                    OR (plan.projection_stub = true
+                        AND plan.old_stage = 'pending'
+                        AND old.name_stage = 'superseded'
+                        AND EXISTS { (new)-[:REFINED_FROM]->(old) }
+                        AND EXISTS {
+                          (old)-[:HAS_INTERNAL_CHANGE]->(receipt:StandardNameChange)
+                          WHERE receipt.operation = 'last_source_supersede'
+                            AND receipt.to_name = new.id
+                        })
+                  )
                   AND old.catalog_pr_number IS NULL
                   AND coalesce(old.origin, 'pipeline') <> 'derived'
                   AND new.id <> old.id
@@ -355,7 +373,8 @@ def supersede_prior_source_names(
                 // successor — it is no longer stuck 'open').
                 WITH old, new,
                      (coalesce(old.edit_status, '') = 'open') AS carry_edit,
-                     old.name_stage AS o_prior_stage,
+                     CASE WHEN plan.projection_stub = true THEN plan.old_stage
+                          ELSE old.name_stage END AS o_prior_stage,
                      old.edit_mode AS o_edit_mode,
                      old.name_hint AS o_name_hint,
                      old.docs_hint AS o_docs_hint,
@@ -416,6 +435,7 @@ def supersede_prior_source_names(
                         "old_name": plan["old_name"],
                         "new_name": plan["new_name"],
                         "old_stage": plan["old_stage"],
+                        "projection_stub": plan["projection_stub"],
                         "source_ids": plan["source_ids"],
                     }
                     for plan in drained

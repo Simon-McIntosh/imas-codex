@@ -278,6 +278,124 @@ def test_second_claim_after_unpark_finalizes(graph, services, monkeypatch):
         source=PROBE_SOURCE,
     )[0]
     assert row == {"status": "composed", "token": None}
+    assert _stub(graph)["name_stage"] == "superseded"
+    assert graph.query(
+        "MATCH (src:StandardNameSource {id: $source})-[:PRODUCED_NAME]->(name) "
+        "RETURN collect(name.id) AS names",
+        source=PROBE_SOURCE,
+    )[0]["names"] == ["ion_temperature"]
+    assert graph.query(
+        "MATCH (dd:IMASNode {id: $path})-[:HAS_STANDARD_NAME]->(name) "
+        "RETURN collect(name.id) AS names",
+        path=PROBE_PATH,
+    )[0]["names"] == ["ion_temperature"]
+    assert (
+        graph.query(
+            "MATCH (name:StandardName {id: 'ion_temperature'})-[:HAS_INTERNAL_CHANGE]->(event) "
+            "WHERE event.operation = 'source_migration_manifest' "
+            "RETURN count(event) AS count"
+        )[0]["count"]
+        == 1
+    )
+
+
+def _seed_finalized_successor(graph):
+    _seed_stub(graph)
+    graph.query(
+        "MATCH (src:StandardNameSource {id: $source})-[:FROM_DD_PATH]->(dd) "
+        "CREATE (name:StandardName {id: 'ion_temperature', name_stage: 'drafted', "
+        "status: 'draft', unit: $unit}) "
+        "SET src.status = 'composed', src.claim_token = null, "
+        "src.claimed_at = null, src.produced_sn_id = name.id "
+        "CREATE (src)-[:PRODUCED_NAME]->(name) "
+        "CREATE (dd)-[:HAS_STANDARD_NAME]->(name)",
+        source=PROBE_SOURCE,
+        unit=PROBE_UNIT,
+    )
+
+
+@pytest.mark.parametrize("stage", ["drafted", "reviewed", "accepted", "pending"])
+@pytest.mark.parametrize("entrypoint", ["supersession", "retarget"])
+def test_non_stub_predecessor_is_still_refused(graph, services, stage, entrypoint):
+    from imas_codex.standard_names.graph_store.graph_supersession import (
+        supersede_prior_source_names,
+    )
+    from imas_codex.standard_names.provenance_lifecycle import (
+        retarget_standard_name_sources,
+    )
+
+    _seed_finalized_successor(graph)
+    graph.query(
+        "MATCH (stub:StandardName {id: $stub}) SET stub.name_stage = $stage",
+        stub=PROBE_STUB,
+        stage=stage,
+    )
+    if stage == "pending":
+        graph.query(
+            "MATCH (stub:StandardName {id: $stub}) "
+            "CREATE (owner:StandardNameSource {id: $owner, status: 'composed'}) "
+            "CREATE (owner)-[:PRODUCED_NAME]->(stub)",
+            stub=PROBE_STUB,
+            owner=OWNER_SOURCE,
+        )
+    refusal = (
+        "source migration compare-and-set"
+        if entrypoint == "supersession"
+        else "heterogeneous|unowned pending projection-only predecessor"
+    )
+    with pytest.raises((ValueError, RuntimeError), match=refusal):
+        if entrypoint == "supersession":
+            supersede_prior_source_names(
+                [{"new_name": "ion_temperature", "source_id": PROBE_PATH}], gc=graph
+            )
+        else:
+            retarget_standard_name_sources(
+                graph,
+                PROBE_STUB,
+                "ion_temperature",
+                operation="regenerate",
+                source_ids=[PROBE_SOURCE],
+                expected_current_bindings={PROBE_SOURCE: "ion_temperature"},
+            )
+    assert _stub(graph)["name_stage"] == stage
+    assert _stub(graph)["receipts"] == 0
+    assert _producers(graph) == ([OWNER_SOURCE] if stage == "pending" else [])
+
+
+def test_rich_write_then_adoption_keeps_the_ownership_guard(graph, services):
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        stage_claimed_generated_candidates,
+    )
+
+    _seed_stub(graph)
+    assert services.write_standard_names(
+        [
+            {
+                "id": PROBE_STUB,
+                "source_types": ["dd"],
+                "source_id": PROBE_PATH,
+                "unit": PROBE_UNIT,
+                "description": PROBE_DESCRIPTION,
+            }
+        ],
+        gc=graph,
+        return_written_ids=True,
+    ) == [PROBE_STUB]
+    after_write = graph.query(
+        "MATCH (src:StandardNameSource {id: $source}) "
+        "RETURN src.status AS status, src.claim_token AS token, src.claim_seq AS seq",
+        source=PROBE_SOURCE,
+    )[0]
+    assert after_write["token"] == TOKEN
+    assert after_write["seq"] == SEQ
+    assert _producers(graph) == [PROBE_SOURCE]
+    winners = stage_claimed_generated_candidates([_candidate()], services=services)
+    print(
+        f"rich_write_status={after_write['status']}; producers={[PROBE_SOURCE]}; adoption_winners={winners}"
+    )
+    assert winners == []
+    assert _stub(graph)["name_stage"] == "pending"
+    assert _adoption_receipts(graph) == []
 
 
 def test_stolen_claim_aborts_transaction(graph, services, monkeypatch):
