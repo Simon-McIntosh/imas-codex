@@ -7,6 +7,13 @@
   "call_site_count": 0,
   "call_sites": [],
   "completed_at": "2026-11-06T07:01:59.721Z",
+  "dimension_dispositions": {
+    "evidence": {
+      "kind": "folded",
+      "node": "sib-compose-stranded-stubs",
+      "recorded_at": "2026-11-06T07:14:08.483371+00:00"
+    }
+  },
   "dispatched_at": "2026-11-06T06:50:03Z",
   "findings": [
     {
