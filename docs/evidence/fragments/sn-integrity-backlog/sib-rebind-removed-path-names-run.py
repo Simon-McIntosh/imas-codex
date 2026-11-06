@@ -254,6 +254,39 @@ def operate(action: str, phase: str | None) -> dict:
     if action == "authority":
         assert phase is not None
         return authority(phase)
+    if action == "control":
+        specification = json.loads(AUTHORITY.read_text())
+        specification.pop("signature")
+        specification["rows"][0]["taken_source_id"] = (
+            "dd:equilibrium/time_slice/profiles_1d/b_field_average"
+        )
+        built = build_repair_authority(specification)
+        control_path = RUN / "held-source-control-authority.json"
+        control_path.write_bytes(built.content)
+        with GraphClient() as gc:
+            result = signed.apply_signed_manifest(
+                control_path,
+                authority_adapter=signed._SOURCE_EXCHANGE_ADAPTER,
+                authority_file_sha256=built.file_sha256,
+                authority_payload_sha256=built.payload_sha256,
+                guard_set=signed._SOURCE_EXCHANGE_GUARDS,
+                reason="Prove that a source held by another name is refused",
+                apply=False,
+                gc=gc,
+            )
+        if (
+            result.get("outcome") != "refused"
+            or result.get("changed") != 0
+            or not any(
+                item.get("reason") == "taken source already has a live owner"
+                for item in result.get("refusals", [])
+            )
+        ):
+            raise RuntimeError(f"held-source control did not refuse: {result}")
+        (RUN / "held-source-control.json").write_text(
+            json.dumps(result, indent=2, default=str)
+        )
+        return result
     if action == "preview":
         assert phase is not None
         result = signed_call(phase, apply=False)
