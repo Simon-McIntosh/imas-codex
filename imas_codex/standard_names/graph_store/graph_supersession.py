@@ -343,8 +343,9 @@ def supersede_prior_source_names(
                         AND old.name_stage = 'superseded'
                         AND EXISTS { (new)-[:REFINED_FROM]->(old) }
                         AND EXISTS {
-                          (old)-[:HAS_INTERNAL_CHANGE]->(receipt:StandardNameChange)
+                          (new)-[:HAS_INTERNAL_CHANGE]->(receipt:StandardNameChange)
                           WHERE receipt.operation = 'last_source_supersede'
+                            AND receipt.from_name = old.id
                             AND receipt.to_name = new.id
                         })
                   )

@@ -1,10 +1,10 @@
 """A compose claim adopts an unowned pending projection stub of its own DD path.
 
 A projection pass mints ``pending`` identities that carry a
-``HAS_STANDARD_NAME`` edge from a DD node and no producing source. Composition
-cannot bind such an identity — a pending name is a private reservation — so
-every attempt collides, the source climbs to the claim cap, and the stub stays
-live and sourceless for good.
+``HAS_STANDARD_NAME`` edge from a DD node and no producing source. An exact
+claim may adopt an unowned projection, while a pending reservation remains
+private to its owner. A different composed identity can replace the projection
+only after the source's successor binding and the stub's ownership are checked.
 
 These tests drive the two binding paths on the disposable graph: the batch
 compose claim and the focused (explicit) claim. An unowned stub of the claimed
@@ -192,6 +192,7 @@ def _persist_candidate(**overrides):
     )
 
 
+@pytest.mark.timeout(60)
 def test_two_path_projection_stub_is_adopted(graph, services):
     _seed_stub(graph)
     graph.query(
