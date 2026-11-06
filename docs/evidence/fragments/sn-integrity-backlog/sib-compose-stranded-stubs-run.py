@@ -6,8 +6,13 @@ Two subcommands, both writing one JSON document to ``--out``:
 ``census``
     Read-only. Reports, for the nine roster DD paths: each source's claim
     state, whether it has a producing name, and the pending stub that holds the
-    path; and the export source gate's blocking set, computed by the same
-    classifier and the same filter ``export.py`` applies.
+    path. It also splits the sourceless population exactly as ``export.py``
+    does, because those sets are not interchangeable: only a name in
+    ``_SHIPPING_NAME_STAGES`` (``accepted``, ``approved``) blocks the export
+    source gate, a draft-stage name is reported as ``sourceless_draft_names``
+    and does not block, and an ``exhausted`` name is dormant. Both constants
+    and the writer invariant are imported from ``export`` rather than restated
+    here, so this census cannot drift from the gate it describes.
 
 ``compose``
     Invokes the sanctioned pipeline, ``sn run``, scoped by ``--focus`` to the
@@ -60,10 +65,14 @@ ROSTER_PATHS = [
 
 def census() -> dict:
     from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.export import _RELEASE_IDENTITY_HOLDS
+    from imas_codex.standard_names.export import (
+        _RELEASE_IDENTITY_HOLDS,
+        _SHIPPING_NAME_STAGES,
+    )
     from imas_codex.standard_names.graph_store.graph_supersession import (
         classify_sourceless_standard_names,
     )
+    from imas_codex.standard_names.source_invariant import find_sourceless_live_names
 
     with GraphClient() as gc:
         sources = [
@@ -108,18 +117,40 @@ def census() -> dict:
             )
         ]
         audit = classify_sourceless_standard_names(gc)
+        sourceless = [
+            row
+            for row in audit
+            if row["population"] in {"dropped_edge", "never_bound"}
+        ]
+        # Reproduce the export source gate as it is written, not as it reads:
+        # only a shipping-stage name blocks (export.py's source_losses), a
+        # non-shipping name is reported and does not, and an exhausted name is
+        # dormant. The writer invariant is the authority on which of these are
+        # genuinely sourceless, and export intersects the two reads, so this
+        # does too rather than trusting the classifier alone.
+        confirmed = set(
+            find_sourceless_live_names(gc, [row["id"] for row in sourceless])
+        )
 
+    dormant = [r for r in sourceless if r["name_stage"] == "exhausted"]
+    draft = [
+        r
+        for r in sourceless
+        if r["name_stage"] != "exhausted"
+        and r["name_stage"] not in _SHIPPING_NAME_STAGES
+    ]
     blocking = [
-        row
-        for row in audit
-        if row["population"] in {"dropped_edge", "never_bound"}
-        and row.get("name_stage") != "exhausted"
-        and row["id"] not in _RELEASE_IDENTITY_HOLDS
+        r
+        for r in sourceless
+        if r["name_stage"] in _SHIPPING_NAME_STAGES
+        and r["id"] not in _RELEASE_IDENTITY_HOLDS
+        and r["id"] in confirmed
     ]
     blocking_ids = sorted(row["id"] for row in blocking)
-    roster_blocking = sorted(set(blocking_ids) & set(ROSTER_NAMES))
+    draft_ids = sorted(row["id"] for row in draft)
     return {
         "observed_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "shipping_name_stages": sorted(_SHIPPING_NAME_STAGES),
         "roster_paths": ROSTER_PATHS,
         "roster_names": ROSTER_NAMES,
         "sources": sources,
@@ -128,7 +159,13 @@ def census() -> dict:
         "roster_stubs_present": len(stubs),
         "gate_blocking_count": len(blocking_ids),
         "gate_blocking_ids": blocking_ids,
-        "gate_roster_blocking": roster_blocking,
+        "gate_roster_blocking": sorted(set(blocking_ids) & set(ROSTER_NAMES)),
+        "draft_sourceless_count": len(draft_ids),
+        "draft_sourceless_ids": draft_ids,
+        "draft_roster_sourceless": sorted(set(draft_ids) & set(ROSTER_NAMES)),
+        "dormant_sourceless_count": len(dormant),
+        "sourceless_population": len(sourceless),
+        "confirmed_sourceless": len(confirmed),
         "gate_audit_population": len(audit),
         "roster_stubs_with_producer": sorted(
             row["id"] for row in stubs if row["producers"] > 0
@@ -195,7 +232,9 @@ def main() -> int:
             f"roster_sources={payload['roster_sources_present']} "
             f"roster_stubs={payload['roster_stubs_present']} "
             f"gate_blocking={payload['gate_blocking_count']} "
-            f"roster_blocking={len(payload['gate_roster_blocking'])} "
+            f"gate_roster_blocking={len(payload['gate_roster_blocking'])} "
+            f"draft_sourceless={payload['draft_sourceless_count']} "
+            f"draft_roster={len(payload['draft_roster_sourceless'])} "
             f"stubs_producing={len(payload['roster_stubs_with_producer'])} "
             f"stubs_adopted={len(payload['roster_stubs_adopted'])}"
         )
