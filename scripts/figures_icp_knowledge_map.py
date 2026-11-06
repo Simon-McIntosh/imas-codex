@@ -114,8 +114,8 @@ TOWNS = [
         "ana", "Analysis Results", "simulation archive", 3.88, 43.61, (-4, -14, "left")
     ),
     Town("con", "Contracts", "procurement · SAP", -1.68, 48.11, (-4, -14, "center")),
-    Town("req", "Requirements", "RQM", 7.75, 48.57, (-10, -12, "right")),
-    Town("pbs", "Plant Breakdown", "PBS", 5.04, 47.32, (0, 10, "center")),
+    Town("req", "Requirements", "RQM", 7.75, 48.57, (12, 2, "left")),
+    Town("pbs", "Plant Breakdown", "PBS", 5.04, 47.32, (8, 6, "left")),
 ]
 
 # Whoever asks, at ITER or at a Domestic Agency: east of France, off the data map,
@@ -131,14 +131,12 @@ RELATIONS = [
     ("cad", "is drawn as", "drw", (0.5, 0, 0)),
     ("ncr", "cites", "doc", (0.5, 0, 0)),
     ("drw", "depicts", "cmp", (0.5, 0, 0)),
-    ("con", "delivers", "doc", (0.3, -34, 0)),
+    ("con", "delivers", "doc", (0.28, 0, 0)),
     ("doc", "specifies", "req", (0.5, 0, 0)),
-    ("cmp", "is part of", "pbs", (0.5, 0, 0)),
+    ("cmp", "is part of", "pbs", (0.55, 0, 0)),
     ("ana", "assesses", "cmp", (0.5, 0, 0)),
-    ("doc", "is filed under", "pbs", (0.24, 10, -4)),
+    ("doc", "is filed under", "pbs", (0.5, 0, 0)),
 ]
-
-ARROWS = "→↗↑↖←↙↓↘"
 
 
 def project(lon: float, lat: float) -> tuple[float, float]:
@@ -536,17 +534,29 @@ def draw_town_labels(ax, land) -> list[Text]:
     return labels
 
 
-def draw_relation_labels(ax, routes, land) -> list[Text]:
+def heading_at(points, s: float, window: float = 0.1) -> float:
+    """The road's local direction at distance ``s``, from a short chord around it."""
+    total = length(points)
+    x0, y0, _ = along(points, max(0.0, s - window) / total)
+    x1, y1, _ = along(points, min(total, s + window) / total)
+    return math.atan2(y1 - y0, x1 - x0)
+
+
+CHEVRON = [(1.0, 0.0), (-0.7, 0.8), (-0.25, 0.0), (-0.7, -0.8)]  # a ">" arrowhead
+
+
+def draw_relation_labels(ax, routes, others: list[Text]) -> list[Text]:
+    """Each verb on its own road, with a ">" beside it on the road pointing from
+    subject to object along the road's local direction; both in the highlight.
+
+    An arrowhead takes the nearest place on its road, either side of its verb,
+    where it touches no text at all."""
+    renderer = ax.figure.canvas.get_renderer()
     labels = []
-    for (subject, verb, obj, (f, nx, ny)), points in zip(
-        RELATIONS, routes, strict=True
-    ):
+    for (_, verb, _, (f, nx, ny)), points in zip(RELATIONS, routes, strict=True):
         x, y, _ = along(points, f)
-        sx, sy = place(subject)
-        ox, oy = place(obj)
-        sector = round(math.atan2(oy - sy, ox - sx) / (math.pi / 4)) % 8
         label = ax.annotate(
-            f"{verb} {ARROWS[sector]}",
+            verb,
             (x, y),
             xytext=(nx, ny),
             textcoords="offset points",
@@ -556,9 +566,42 @@ def draw_relation_labels(ax, routes, land) -> list[Text]:
             fontweight="bold",
             color=RELATION,
             zorder=11,
+            # a white backing, so the road stops cleanly either side of the verb
+            bbox={
+                "boxstyle": "round,pad=0.12",
+                "facecolor": "white",
+                "edgecolor": "none",
+            },
         )
-        halo_over_land(ax, label, land, 5)
         labels.append(label)
+    boxes = [t.get_window_extent(renderer).padded(3) for t in [*others, *labels]]
+    arrows = []
+    for (_, _, _, (f, _, _)), points in zip(RELATIONS, routes, strict=True):
+        total, start = length(points), f * length(points)
+        for step in range(120):  # 0.03 map units at a time, alternating sides
+            s = start + 0.03 * (step // 2 + 1) * (1 if step % 2 == 0 else -1)
+            if not 0.2 < s < total - 0.2:
+                continue
+            xa, ya, _ = along(points, s / total)
+            arrow = Polygon(
+                place_shape(CHEVRON, xa, ya, heading_at(points, s), 0.17),
+                closed=True,
+                facecolor=RELATION,
+                edgecolor="white",
+                linewidth=1.0,
+                zorder=10,
+            )
+            ax.add_patch(arrow)
+            extent = arrow.get_window_extent(renderer)
+            if not any(extent.overlaps(b) for b in boxes):
+                arrows.append(arrow)
+                break
+            arrow.remove()
+        else:
+            raise SystemExit(
+                f"no clear place on its road for the arrowhead of {points[0]}"
+            )
+    ax.figure.relation_arrows = arrows
     return labels
 
 
@@ -578,16 +621,15 @@ def base(stage: str):
     ax.set(
         xlim=[v * COS_LAT for v in LON], ylim=LAT, aspect="equal", autoscale_on=False
     )
-    land = None
     routes = []
+    land = land_patch()
+    for patch in land:
+        patch.set(facecolor=LAND, edgecolor=COAST, linewidth=1.0, zorder=1)
+        ax.add_patch(patch)
     if stage == "a":
         for town in TOWNS:
             draw_icon(ax, ICON_KIND[town.key], *place(town.key))
     else:
-        land = land_patch()
-        for patch in land:
-            patch.set(facecolor=LAND, edgecolor=COAST, linewidth=1.0, zorder=1)
-            ax.add_patch(patch)
         for town in TOWNS:
             x, y = place(town.key)
             hub = town.key == "doc"
@@ -607,15 +649,10 @@ def base(stage: str):
     labels = draw_town_labels(ax, land)
     if stage == "c":
         routes = relation_routes(load_roads())
-        for k, points in enumerate(routes):
+        for points in routes:
             xs, ys = zip(*points, strict=True)
-            colour = (
-                RELATION if k < len(RELATIONS) else INK
-            )  # the last is ITER's on-ramp
-            ax.plot(
-                xs, ys, color=colour, linewidth=3.0, solid_capstyle="round", zorder=3
-            )
-        labels += draw_relation_labels(ax, routes[: len(RELATIONS)], land)
+            ax.plot(xs, ys, color=INK, linewidth=3.0, solid_capstyle="round", zorder=3)
+        labels += draw_relation_labels(ax, routes[: len(RELATIONS)], labels)
     return fig, ax, labels, routes
 
 
@@ -634,6 +671,13 @@ def check_layout(fig, labels, *, refuse: bool = True) -> None:
         for (t1, b1), (t2, b2) in combinations(boxes, 2)
         if b1.overlaps(b2)
     ]
+    for arrow in getattr(fig, "relation_arrows", []):
+        extent = arrow.get_window_extent(renderer)
+        faults += [
+            f"arrowhead on text: {t.get_text()!r}"
+            for t, b in boxes
+            if extent.overlaps(b)
+        ]
     if faults:
         message = "layout check refused the figure:\n  " + "\n  ".join(faults)
         if refuse:
