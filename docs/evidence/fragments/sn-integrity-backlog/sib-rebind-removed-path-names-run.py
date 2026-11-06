@@ -355,8 +355,7 @@ def operate(action: str, phase: str | None) -> dict:
             retirement_other_changed = sorted(
                 id
                 for id in retirement_before.keys() | after.keys()
-                if id not in {OLD, SUCCESSOR}
-                and retirement_before.get(id) != after.get(id)
+                if id != OLD and retirement_before.get(id) != after.get(id)
             )
             pair = gc.query(
                 """
@@ -370,6 +369,17 @@ def operate(action: str, phase: str | None) -> dict:
                 old=OLD,
                 successor=SUCCESSOR,
             )
+            receipt = gc.query(
+                """
+                MATCH (old:StandardName {id:$old})-[:HAS_INTERNAL_CHANGE]->
+                      (change:StandardNameChange {authority_file_sha256:$file_sha})
+                RETURN change.id AS id, change.row_id AS row_id,
+                       change.operation AS operation, change.reason AS reason,
+                       change.manifest_sha256 AS manifest_sha256
+                """,
+                old=OLD,
+                file_sha=hashlib.sha256(AUTHORITY.read_bytes()).hexdigest(),
+            )
             result = {
                 "names": targeted(gc),
                 "blocking": blocking(gc),
@@ -378,8 +388,53 @@ def operate(action: str, phase: str | None) -> dict:
                 "names_before": len(before),
                 "names_after": len(after),
                 "magnetic_field_pair": pair,
+                "retirement_receipt": receipt,
             }
         (RUN / "after.json").write_text(json.dumps(result, indent=2, default=str))
+        names_by_id = {row["id"]: row for row in result["names"]}
+        expected_paths: dict[str, list[str]] = {}
+        for name, _, path in EXCHANGES:
+            expected_paths.setdefault(name, []).append("dd:" + path)
+        for name, paths in expected_paths.items():
+            row = names_by_id[name]
+            expected_stage = (
+                "reviewed" if name == "deuterium_tritium_flux" else "accepted"
+            )
+            actual = sorted(
+                source["source"]
+                for source in row["producers"]
+                if source["status"] != "stale"
+            )
+            if row["stage"] != expected_stage or actual != sorted(paths):
+                raise RuntimeError(f"source-move read-back changed: {name}")
+        if (
+            other_changed
+            or retirement_other_changed
+            or len(before) != len(after)
+            or len(retirement_before) != len(after)
+            or len(pair) != 1
+            or pair[0]["old_stage"] != "superseded"
+            or pair[0]["successor_stage"] != "accepted"
+            or pair[0]["successor_edges"] != 0
+            or pair[0]["refined_edges"] != 0
+            or len(receipt) != 1
+            or receipt[0]["row_id"] != OLD
+            or receipt[0]["operation"] != "supersede_exhausted_orphan"
+            or receipt[0]["reason"] != RETIRE_REASON
+            or receipt[0]["manifest_sha256"]
+            != json.loads((RUN / "retire_without_successor-preview.json").read_text())[
+                "manifest_sha256"
+            ]
+            or any(
+                name in result["blocking"]
+                for name in (
+                    "radial_coordinate_of_flux_surface",
+                    "radial_coordinate_of_launching_position",
+                    "toroidal_current_density_due_to_distribution_function_driven",
+                )
+            )
+        ):
+            raise RuntimeError("retirement read-back did not meet the signed measure")
         return result
     raise ValueError(action)
 
