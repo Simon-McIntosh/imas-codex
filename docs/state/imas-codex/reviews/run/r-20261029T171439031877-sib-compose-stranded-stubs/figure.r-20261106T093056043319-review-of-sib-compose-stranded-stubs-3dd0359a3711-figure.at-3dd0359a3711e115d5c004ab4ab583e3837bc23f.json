@@ -1,0 +1,108 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-06T09:49:34.395Z",
+  "dispatched_at": "2026-11-06T09:32:53Z",
+  "figures": [
+    {
+      "attachment": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T093056043319-review-of-sib-compose-stranded-stubs-3dd0359a3711-figure/image-0.png",
+      "attribution": "Not the figure this reviewed run adds. The reviewed commit 3dd0359a touches exactly one path, sourceless-roster-and-graph.svg, and this run's evidence fragment (docs/evidence/fragments/sn-integrity-backlog/sib-compose-stranded-stubs.html:243) embeds only that one figure. This attachment is byte-identical (md5 380a15b0eb75ed439d9a14d2852a35a7) to the attachment reviewed in the three earlier figure rounds of this run, and its content is the adoption state diagram of the sibling run r-20261029T202601642241-sib-adopt-pending-projection-stubs. It is judged here because it was attached, not because this head changed it; every verdict below is unchanged from the earlier rounds.",
+      "caption_checked": "The caption under its own embed names the adoption precondition, the content source (the rich write, not the stable finalize) and both failure branches; it does not merely repeat the in-figure title, so it is not a finding.",
+      "embedded_by": "docs/evidence/fragments/sn-integrity-backlog/sib-adopt-pending-projection-stubs.html",
+      "rendered": "1400x720 RGBA, 8-bit; 605,504 of 1,008,000 pixels fully transparent (60.07%, alpha 0); opaque ink spans x 29-1210, y 22-650, so no ink touches any canvas edge (right margin 189 px, bottom margin 69 px)",
+      "repository_path": "docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs/adoption-state.svg"
+    },
+    {
+      "attachment": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T093056043319-review-of-sib-compose-stranded-stubs-3dd0359a3711-figure/image-1.png",
+      "attribution": "This is the figure the reviewed head changes. The attachment differs from the render at the previous head c29addfc3 in 81,006 pixels spanning the whole canvas, matching the regeneration the reviewed commit describes.",
+      "caption_checked": "The caption under the embed (\"The roster's seven stubs under the gate's own predicate, and the population the scope control is about. The gate's blocking set is empty before and after ... while the draft set loses two names to the composed set ... On the right, the whole graph outside the roster: 10,067 sources, none created and none composed among the 624 that carry a creation timestamp, and no name change in the window\") states the claim the picture is evidence for, the direction of the change and the denominator behind the dated rows; it does not merely repeat the panel titles, so it is not a finding.",
+      "embedded_by": "docs/evidence/fragments/sn-integrity-backlog/sib-compose-stranded-stubs.html",
+      "rendered": "1400x720, fully opaque white canvas (0 of 1,008,000 pixels transparent); ink spans x 63-1392, y 46-660; measured bar rectangles: landed now-2 x 182-272 rows 126-183, draft before-7 x 183-501 rows 265-321, draft now-5 x 182-409 rows 297-354, non-roster bars x 787-1264/1128/1077/1005/1004",
+      "repository_path": "docs/figures/sn-integrity-backlog/sib-compose-stranded-stubs/sourceless-roster-and-graph.svg"
+    }
+  ],
+  "figures_rubric_lines": {
+    "image-0.png": [
+      "RUBRIC legibility: pass \u2014 the six-state chain reads left to right in one scan and every card title and body line is legible at the canvas's native size; the two marks that name the transitions are the smallest in the figure at 10 px glyph height (about 7 pt on a 100 dpi canvas), which finding 2 records.",
+      "RUBRIC data_ink: pass \u2014 six cards, four arrows and their own labels carry all the ink; there is no grid, key or repeated series, and the single tinted card (242,250,245) is the adopted state the figure exists to show. The two bottom panels carry 100 px of paragraph prose inside the picture rather than data marks, which finding 3 records.",
+      "RUBRIC decoration: pass \u2014 card fills are #FAFAFA (1.04:1 on white) and borders #C8C8C8, strokes are 1 px, and the green #2E8B57 appears only on the adopt path and the card it reaches; no gradient, background wash, shadow or styled theme is present.",
+      "RUBRIC contrast: pass on text, defect on canvas \u2014 every label measures 12.63:1 (#333) or 18.88:1 (#111) on white and the green annotation 4.25:1, so no glyph falls under AA; but the canvas is 60.07% fully transparent, so those readings hold only against a white surface and the card tints at 1.04:1 and 1.06:1 vanish on white, leaving 1.67:1 borders as the only card edge. Finding 1 records that.",
+      "RUBRIC table_form: pass \u2014 a two-branch state transition carrying per-state fields is what a diagram is for; nothing in the image is a row-and-column comparison a table would carry better.",
+      "RUBRIC label_collision: pass \u2014 no ink reaches the canvas border; measured clearances are 6 px from the \"finalize\" label to the next card's border (x 874 to 880), 17 px from \"another claim owns the stub\" to the vertical dashed arrow at x 184-185, and 27 px from \"finalize\" to the card it leaves.",
+      "RUBRIC caption_form: pass \u2014 the caption beneath the embed states what the picture shows and why it matters rather than restating the in-figure title."
+    ],
+    "image-1.png": [
+      "RUBRIC legibility: pass \u2014 both panel titles (23 px glyph height, 16 pt), every category label and both axis labels read at a glance, and the two 14 pt label sets render 16-19 px tall.",
+      "RUBRIC data_ink: pass \u2014 bars and their value labels carry all the ink; spines are reduced to the two that carry a scale, there is no grid, key or background fill, and the right panel's uniform neutral grey is the correct treatment for a population rather than one highlighted row.",
+      "RUBRIC decoration: pass \u2014 opaque white canvas, no gradient, no fill band, no shadow; the only non-neutral colour is the per-category series colour in the left panel.",
+      "RUBRIC contrast: pass on text, defect on one mark \u2014 every glyph clears AA (#0B0B0B 19.68:1, #2A6F97 5.50:1, #2E8B57 4.25:1, #B03A2E 6.01:1 on white), but the before bars are drawn at 45% alpha and render as (159,190,208), 1.95:1 against white, under the 3:1 the style guide asks of a data mark. Finding 3 records it.",
+      "RUBRIC table_form: pass \u2014 two counts-by-status bar charts are what the comparison is; the seven right-panel values could be tabulated but the figure's subject is their shape against each other, not a lookup.",
+      "RUBRIC label_collision: pass \u2014 no dark text pixel sits inside any of the ten measured bar rectangles (the label-over-bar defects the previous round recorded at script lines 79 and 83 are gone from the render), no label is clipped by the canvas, and no label overlaps another; the tightest clearance is the third x-label line, which ends at x 1392 of 1399, which finding 5 records.",
+      "RUBRIC caption_form: pass \u2014 the caption states the gate's before/after split, the two names that moved to composed, and the 624-of-10,067 denominator behind the dated rows; it is not a restatement of the titles."
+    ]
+  },
+  "findings": [
+    {
+      "file": "docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs/adoption-state.svg",
+      "id": "fd9fb0c9d27",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The rendered canvas is 60.07% fully transparent (605,504 of 1,008,000 pixels at alpha 0), so the figure owns no background: every #111 and #333 label is composited against whatever surface the page supplies, and against a dark surface the title and body text fall to roughly 1.1:1. The card tints at 1.04:1 (#FAFAFA) and 1.06:1 (242,250,245) are invisible on white as well, so the cards are bounded only by their 1.67:1 borders. The same defect was recorded in each earlier figure round of this run and is unchanged."
+    },
+    {
+      "file": "docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs/adoption-state.svg",
+      "id": "fd9fb0c9d27",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The two labels that name the transitions are the smallest marks in the figure: \"finalize\" and \"another claim owns the stub\" render at 10 px glyph height, about 7 pt on the 1400 px canvas, so at the page's roughly 900 px column they are about 6 px tall. \"finalize\" also sits 46 px wide in a 77 px gap between two cards, 6 px from the right card's border, so it reads as crowded against the structure it labels."
+    },
+    {
+      "file": "docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs/adoption-state.svg",
+      "id": "fd9fb0c9d27",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The two bottom panels carry their content as paragraph prose baked into the picture (100 px of body text each). That text is raster and unselectable in the page, is not searchable, and duplicates what the evidence page's own prose could carry with the page's typography."
+    },
+    {
+      "file": "docs/figures/sn-integrity-backlog/sib-compose-stranded-stubs/sourceless-roster-and-graph.py",
+      "id": "f2a46c5f4b0",
+      "line": 132,
+      "severity": "non-blocking",
+      "summary": "The before bars are drawn with alpha=0.45, which renders the draft before-bar as (159,190,208), 1.95:1 against the white canvas, under the 3:1 the style guide asks of a data mark. The largest number in the left panel is the \"before 7\" bar, and it is the faintest mark in the figure, while the smaller \"now 5\" bar in the same row is drawn solid."
+    },
+    {
+      "file": "docs/figures/sn-integrity-backlog/sib-compose-stranded-stubs/sourceless-roster-and-graph.py",
+      "id": "f727cae5974",
+      "line": 129,
+      "severity": "non-blocking",
+      "summary": "Both labels of a row are placed at rowmax + 0.25, so a row's \"now\" label does not sit at its own bar's end: in the draft row the \"now 5\" label starts at x 516 while its bar ends at x 409, roughly 107 px of whitespace to its left, and it pairs with \"before 7\" only by vertical offset. A reader scanning left to right can attach the number to the wrong bar."
+    },
+    {
+      "file": "docs/figures/sn-integrity-backlog/sib-compose-stranded-stubs/sourceless-roster-and-graph.py",
+      "id": "f951fcca35e",
+      "line": 199,
+      "severity": "non-blocking",
+      "summary": "The right panel's x-axis label is three lines of annotation prose, and its third line (\"creation datable on 624 of 10,067\") ends at x 1392 of a 1400 px canvas, 7 px of margin from the edge. Nothing is clipped, but the figure carries no right margin and the widest line of a label is what sets the bound."
+    }
+  ],
+  "item_verdicts": {
+    "contrast": "defect in both, non-blocking \u2014 image-0's canvas is 60.07% fully transparent, so its text contrast is only true against a white page; image-1's before bars render at 1.95:1, under the 3:1 asked of a data mark. No text falls below AA in either figure.",
+    "data_ink": "pass for both \u2014 neither carries a grid, key, gradient or decorative fill; every mark either encodes a value or names a state.",
+    "decoration": "pass for both \u2014 a #FAFAFA card tint and 1 px neutral strokes in image-0, an opaque white canvas with reduced spines in image-1; no gradient, shadow or styled theme anywhere.",
+    "label_collision": "pass for both \u2014 nothing is clipped at any canvas edge in either figure, no label overlaps another label, and no label is drawn over a bar (verified against all ten measured bar rectangles in image-1).",
+    "legibility": "pass for both figures \u2014 image-1 reads at a glance at every size; image-0 reads at its native 1400 px, with its two transition labels at 10 px glyph height the weakest marks in either figure.",
+    "table_form": "pass for both \u2014 a state diagram and a pair of status-count bar charts; neither depicts a row-and-column comparison a table would carry better."
+  },
+  "method": "Read only. Both attachments were opened with this review node's own Read tool and judged from their pixels, measured with Pillow loading nothing but those two PNGs. No SVG, and no image other than the two named attachments, was opened, read, listed, searched, list-rendered, git-shown or otherwise inspected; the drawing script docs/figures/sn-integrity-backlog/sib-compose-stranded-stubs/sourceless-roster-and-graph.py was read at the reviewed head 3dd0359a only to anchor findings to its lines, and no line of generated markup was used for any verdict. Contrast figures are WCAG ratios computed from the rendered RGB values (relative luminance, sRGB transfer) against the white the figure renders on. Collision verdicts come from measuring the ink: no non-white pixel touches any border of either canvas, and for image-1 each of the ten bar rectangles was measured by contiguous run length and then tested for dark text pixels inside it, of which there were none. Attribution was settled by content plus hash: image-0 is byte-identical (md5 380a15b0eb75ed439d9a14d2852a35a7) to the attachment of the three earlier figure rounds and depicts the sibling run's adoption diagram, and image-1 is the figure the reviewed commit regenerates (81,006 pixels changed against the c29addfc3 render). No figure, script, caption, page or plan was edited, moved, deleted, redrawn, relabelled or reformatted.",
+  "notes": "No finding blocks. Nothing is clipped in either figure, no label overlaps another label, and no label is drawn over a bar. Two things the previous round recorded as defects in this run's figure are resolved at this head and verified in the render rather than in the script: the \"before 0\" label no longer sits above a neighbouring bar and the \"now 5\" label no longer crosses into the before bar, because no dark text pixel falls inside any of the ten measured bar rectangles. The remaining defects in image-1 are matters of emphasis and margin (a faint before bar, a detached label, a 7 px right margin), not of encoding. Image-0 is not this run's figure: it is attached but byte-identical to earlier rounds and belongs to the sibling adoption run, so its three findings are carried forward unchanged rather than newly found.",
+  "project": "imas-codex",
+  "review_run_id": "r-20261106T093056043319-review-of-sib-compose-stranded-stubs-3dd0359a3711-figure",
+  "reviewed_base_sha": "b6bd5682bec73e4058307bdbfb787e07e3053951",
+  "reviewed_head_sha": "3dd0359a3711e115d5c004ab4ab583e3837bc23f",
+  "reviewed_run_id": "r-20261029T171439031877-sib-compose-stranded-stubs",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T09:49:36.309055+00:00",
+  "total": null
+}
