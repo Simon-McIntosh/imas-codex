@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-magnetic-successor-edge">
+<title>One signed successor edge for the retired flux-surface magnetic-field average</title>
+</head>
+<body>
+<main>
+
+<h1 id="sib-magnetic-successor-edge-title">One signed successor edge for the retired flux-surface magnetic-field average</h1>
+
+<h2 id="sib-magnetic-successor-edge-header">Header</h2>
+<table id="sib-magnetic-successor-edge-header-table">
+<tbody>
+<tr><th>Base revision</th><td><code>fb854ea1c9b160825815056cdd757292ebd6acd2</code></td></tr>
+<tr><th>Authority</th><td><code>sib-magnetic-successor-edge-authority.json</code>, operation <code>give-retired-name-one-signed-successor</code>, payload sha256 <code>6d29e25c44f0c36c45c568d7a9ce0cf5fc2772c0f1dec35ec4ccfb1b68f1e8cf</code></td></tr>
+<tr><th>Preview</th><td>manifest sha256 <code>8f25a71f5332bd49f6018fa36868ed049187b04994b4aa1e1b83b32b1cd3bb57</code>, admitted 1, refused 0, <code>would_apply</code></td></tr>
+<tr><th>Writer</th><td><code>apply_signed_manifest</code> under the authority built by <code>build_repair_authority</code>; no hand Cypher</td></tr>
+<tr><th>Spend</th><td>USD 0 &mdash; no LLM call on this path</td></tr>
+</tbody>
+</table>
+
+<h2 id="sib-magnetic-successor-edge-before">The state before the write</h2>
+<p><code>flux_surface_average_magnetic_field_magnitude</code> lost its DD path
+<code>equilibrium/time_slice/profiles_1d/b_average</code> at DD 4. A prior
+retirement signed it <code>superseded</code> with a receipt but recorded no
+successor, so the retired identity resolved nowhere. Its live sibling
+<code>flux_surface_averaged_magnetic_field_magnitude</code> is
+<code>accepted</code>, <code>valid</code>, and holds the renamed path
+<code>b_field_average</code>.</p>
+<p>The read at <code>01-read.log</code> shows the predecessor carrying one
+<code>REFINED_FROM</code> parent (its own historical lineage) and
+<strong>zero</strong> successor edges, which is the defect the independent
+review recorded.</p>
+
+<h2 id="sib-magnetic-successor-edge-what">What the signed apply wrote</h2>
+<p>One receipt-stamped <code>HAS_SUCCESSOR</code> edge and its receipt, in one
+transaction, and nothing else:</p>
+<table id="sib-magnetic-successor-edge-edge-table">
+<thead><tr><th>Measurement</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td><code>HAS_SUCCESSOR</code> edges from the predecessor</td><td>1</td></tr>
+<tr><td>its successor</td><td><code>flux_surface_averaged_magnetic_field_magnitude</code></td></tr>
+<tr><td>edge <code>receipt_id</code></td><td><code>sn-change:signed-manifest:8f25a71f5332bd49f6018fa36868ed049187b04994b4aa1e1b83b32b1cd3bb57:43f44939dda24eca8d79bad8</code></td></tr>
+<tr><td>receipt <code>operation</code></td><td><code>link_signed_successor</code></td></tr>
+<tr><td>predecessor stage / status after</td><td><code>superseded</code> / <code>superseded</code> (unchanged)</td></tr>
+<tr><td>successor stage / status / validation after</td><td><code>accepted</code> / <code>draft</code> / <code>valid</code> (unchanged)</td></tr>
+<tr><td>predecessor sources after</td><td><code>dd:.../b_average|stale</code> (unchanged)</td></tr>
+<tr><td>successor sources after</td><td><code>dd:.../b_field_average|composed</code> (unchanged)</td></tr>
+</tbody>
+</table>
+<p>A second apply of the same manifest returns <code>already_applied</code>
+with <code>persistent_writes: 0</code>, so the write is idempotent on the
+receipt.</p>
+
+<h2 id="sib-magnetic-successor-edge-deviation">The edge type, stated plainly</h2>
+<p>The dispatch note names this measure as a <code>REFINED_FROM</code> edge.
+The write is <code>HAS_SUCCESSOR</code>, and the difference is the graph's, not
+a shortcut. <code>REFINED_FROM</code> is the refinement lineage and is scalar
+per name: the schema documents <code>refined_from</code> as &ldquo;a refined
+name has exactly one direct predecessor&rdquo;. The accepted successor already
+carries its own <code>REFINED_FROM</code> parent, so a second one would break
+that cardinality. <code>HAS_SUCCESSOR</code> is the schema's supersession
+lineage &mdash; &ldquo;the target of the receipt-stamped
+<code>HAS_SUCCESSOR</code> edge written by a signed supersede mutation&rdquo;
+&mdash; which is exactly what §48 asks for: a signed supersede with a
+receipt-carrying successor edge. The prior read-back counted zero successor
+edges on this name while it already carried one <code>REFINED_FROM</code>, so
+the measure has been counted on <code>HAS_SUCCESSOR</code> throughout.</p>
+
+<h2 id="sib-magnetic-successor-edge-gate">Gate: the export blocking set</h2>
+<p>Computed by importing the gate's own predicate
+(<code>source_invariant.find_sourceless_live_names</code>, the shipping-stage
+filter and release holds from <code>export.py</code>), not by re-deriving it:</p>
+<table id="sib-magnetic-successor-edge-gate-table">
+<thead><tr><th>Measurement</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>blocking set</td><td><strong>empty</strong> (0 rows)</td></tr>
+<tr><td>control: shipping-stage sourceless names before the release holds subtract</td><td>3</td></tr>
+<tr><td>those three, all named in <code>_RELEASE_IDENTITY_HOLDS</code></td><td><code>coolant_absorbed_energy_accumulated_of_plasma_facing_component</code>, <code>root_mean_square_spectral_width_of_spectrometer_channel</code>, <code>volume_averaged_electron_number_density_over_scrape_off_layer</code></td></tr>
+<tr><td>predecessor sourceless</td><td>false</td></tr>
+<tr><td>successor sourceless</td><td>false</td></tr>
+</tbody>
+</table>
+<p>The empty blocking set is the measured result, and the three held rows are
+the control that the predicate saw a non-empty population rather than
+nothing.</p>
+
+</main>
+</body>
+</html>

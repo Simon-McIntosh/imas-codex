@@ -1,0 +1,87 @@
+{
+  "authority_mode": "external_reviewed",
+  "operation_id": "give-retired-name-one-signed-successor",
+  "orphan_policy": "refuse",
+  "receipt_policy": {
+    "cardinality": "per_target",
+    "expected_count": "admitted_rows",
+    "id": "one-per-superseded-identity",
+    "link_participant_kind": "standard_name",
+    "operation": "link_signed_successor",
+    "replay_projection": [
+      "manifest_sha256",
+      "row_id"
+    ]
+  },
+  "repair_rows": [
+    "flux_surface_average_magnetic_field_magnitude=>flux_surface_averaged_magnetic_field_magnitude"
+  ],
+  "rows": [
+    {
+      "guards": [
+        {
+          "id": "flux_surface_average_magnetic_field_magnitude=>flux_surface_averaged_magnetic_field_magnitude:structural-legitimacy",
+          "implementation": "structural-legitimacy",
+          "kind": "semantic_authority",
+          "participant_ids": [
+            "flux_surface_average_magnetic_field_magnitude"
+          ]
+        },
+        {
+          "id": "flux_surface_average_magnetic_field_magnitude=>flux_surface_averaged_magnetic_field_magnitude:out-of-allowlist-immutability",
+          "implementation": "out-of-allowlist-immutability",
+          "kind": "collateral_immutability",
+          "participant_ids": [
+            "flux_surface_average_magnetic_field_magnitude",
+            "flux_surface_averaged_magnetic_field_magnitude"
+          ]
+        }
+      ],
+      "id": "flux_surface_average_magnetic_field_magnitude=>flux_surface_averaged_magnetic_field_magnitude",
+      "identity": {
+        "id": "flux_surface_average_magnetic_field_magnitude=>flux_surface_averaged_magnetic_field_magnitude",
+        "kind": "standard_name",
+        "target_id": "flux_surface_average_magnetic_field_magnitude"
+      },
+      "mutations": [
+        {
+          "arguments": {
+            "successor_id": "flux_surface_averaged_magnetic_field_magnitude"
+          },
+          "id": "flux_surface_average_magnetic_field_magnitude:supersede",
+          "kind": "supersede",
+          "order": 0,
+          "participant_id": "flux_surface_average_magnetic_field_magnitude"
+        }
+      ],
+      "orphan_policy": "refuse",
+      "participants": [
+        {
+          "graph_label": "StandardName",
+          "id": "flux_surface_average_magnetic_field_magnitude",
+          "kind": "node"
+        },
+        {
+          "graph_label": "StandardName",
+          "id": "flux_surface_averaged_magnetic_field_magnitude",
+          "kind": "node"
+        }
+      ],
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      }
+    }
+  ],
+  "schema": "imas-codex.repair-authority.v1",
+  "selection": {
+    "id": "artifact-rows",
+    "mode": "exact_complete_signed_cohort",
+    "predicate": "artifact-rows"
+  },
+  "signature": {
+    "canonicalization": "json-sort-keys-v1",
+    "sha256": "6d29e25c44f0c36c45c568d7a9ce0cf5fc2772c0f1dec35ec4ccfb1b68f1e8cf"
+  }
+}
