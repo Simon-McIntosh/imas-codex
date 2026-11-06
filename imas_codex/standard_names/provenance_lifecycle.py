@@ -502,20 +502,25 @@ def fetch_public_semantic_sources(gc: Any, name: str) -> list[dict[str, Any]]:
     return sources
 
 
-_UNOWNED_PENDING_PROJECTION = """
-    old.name_stage = 'pending'
-    AND coalesce(old.origin, '') <> 'derived'
-    AND old.catalog_pr_number IS NULL
-    AND old.claim_token IS NULL
-    AND old.claimed_at IS NULL
-    AND old.reservation_source_id IS NULL
-    AND old.reservation_claim_token IS NULL
-    AND old.reservation_claim_seq IS NULL
-    AND NOT EXISTS {
-      MATCH (owner:StandardNameSource)
-      WHERE (owner)-[:PRODUCED_NAME]->(old) OR owner.produced_sn_id = old.id
-    }
-"""
+def _projection_migration_predicate() -> str:
+    """Use binding eligibility with the extra fences for retiring a projection."""
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        _pending_projection_stub_predicate,
+    )
+
+    return f"""
+        ({_pending_projection_stub_predicate("source", "old")})
+        AND coalesce(old.origin, '') <> 'derived'
+        AND old.catalog_pr_number IS NULL
+        AND old.claim_token IS NULL
+        AND old.claimed_at IS NULL
+        AND old.reservation_claim_token IS NULL
+        AND old.reservation_claim_seq IS NULL
+        AND NOT EXISTS {{
+          MATCH (owner:StandardNameSource)
+          WHERE owner.produced_sn_id = old.id
+        }}
+    """
 
 
 def _projection_stub_source_bindings(
@@ -526,16 +531,14 @@ def _projection_stub_source_bindings(
         f"""
         MATCH (old:StandardName {{id: $old_name}}),
               (new:StandardName {{id: $new_name}})
-        WHERE {_UNOWNED_PENDING_PROJECTION}
         UNWIND $source_ids AS source_id
         MATCH (source:StandardNameSource {{id: source_id}})
-              -[:FROM_DD_PATH]->(:IMASNode)-[:HAS_STANDARD_NAME]->(old)
-        WHERE source.source_type = 'dd'
-          AND source.status = 'composed'
+        WHERE source.status = 'composed'
           AND source.claim_token IS NULL
           AND source.claimed_at IS NULL
           AND source.produced_sn_id = new.id
           AND EXISTS {{ (source)-[:PRODUCED_NAME]->(new) }}
+          AND {_projection_migration_predicate()}
         RETURN DISTINCT source.id AS source_id, new.id AS current_binding
         """,
         old_name=old_name,
@@ -899,13 +902,9 @@ def retarget_standard_name_sources(
     if projection_stub:
         current_binding_guard = f"""
           source.produced_sn_id = $new_name
-          AND source.source_type = 'dd'
           AND source.status = 'composed'
           AND EXISTS {{ (source)-[:PRODUCED_NAME]->(new) }}
-          AND EXISTS {{
-            (source)-[:FROM_DD_PATH]->(:IMASNode)-[:HAS_STANDARD_NAME]->(old)
-          }}
-          AND {_UNOWNED_PENDING_PROJECTION}
+          AND {_projection_migration_predicate()}
         """
         prior_binding_delete = ""
 

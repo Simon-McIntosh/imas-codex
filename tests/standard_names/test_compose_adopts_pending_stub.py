@@ -346,6 +346,49 @@ def _seed_finalized_successor(graph):
     )
 
 
+def test_projection_migration_refuses_a_mismatched_dd_unit(graph, services):
+    from imas_codex.standard_names.provenance_lifecycle import (
+        retarget_standard_name_sources,
+    )
+
+    _seed_finalized_successor(graph)
+    graph.query(
+        "MATCH (dd:IMASNode {id: $path}), (stub:StandardName {id: $stub}) "
+        "SET dd.unit = $unit, stub.unit = 'V'",
+        path=PROBE_PATH,
+        stub=PROBE_STUB,
+        unit=PROBE_UNIT,
+    )
+    assert graph.query(
+        "MATCH (dd:IMASNode {id: $path})-[:HAS_STANDARD_NAME]->(stub:StandardName {id: $stub}) "
+        "RETURN dd.unit AS dd_unit, stub.unit AS stub_unit",
+        path=PROBE_PATH,
+        stub=PROBE_STUB,
+    ) == [{"dd_unit": "eV", "stub_unit": "V"}]
+    with pytest.raises(
+        (ValueError, RuntimeError),
+        match="heterogeneous|unowned pending projection-only predecessor",
+    ) as rejected:
+        retarget_standard_name_sources(
+            graph,
+            PROBE_STUB,
+            "ion_temperature",
+            operation="regenerate",
+            source_ids=[PROBE_SOURCE],
+            expected_current_bindings={PROBE_SOURCE: "ion_temperature"},
+            enforce_consistency=False,
+        )
+    print(f"stub unit V versus DD unit eV refused: {rejected.value}")
+    assert _stub(graph)["name_stage"] == "pending"
+    assert _receipt_count(graph) == 0
+    assert _producers(graph) == []
+    assert graph.query(
+        "MATCH (dd:IMASNode {id: $path})-[:HAS_STANDARD_NAME]->(name) "
+        "RETURN name.id AS id ORDER BY id",
+        path=PROBE_PATH,
+    ) == [{"id": PROBE_STUB}, {"id": "ion_temperature"}]
+
+
 @pytest.mark.parametrize("stage", ["drafted", "reviewed", "accepted", "pending"])
 @pytest.mark.parametrize("entrypoint", ["supersession", "retarget"])
 def test_non_stub_predecessor_is_still_refused(graph, services, stage, entrypoint):
