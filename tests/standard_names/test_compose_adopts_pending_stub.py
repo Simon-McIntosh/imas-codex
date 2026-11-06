@@ -297,6 +297,21 @@ def test_second_claim_after_unpark_finalizes(graph, services, monkeypatch):
         )[0]["count"]
         == 1
     )
+    from imas_codex.standard_names.provenance_lifecycle import (
+        retarget_standard_name_sources,
+    )
+
+    assert (
+        retarget_standard_name_sources(
+            graph,
+            PROBE_STUB,
+            "ion_temperature",
+            operation="regenerate",
+            source_ids=[PROBE_SOURCE],
+            expected_current_bindings={PROBE_SOURCE: "ion_temperature"},
+        )
+        == 0
+    )
 
 
 def _seed_finalized_successor(graph):

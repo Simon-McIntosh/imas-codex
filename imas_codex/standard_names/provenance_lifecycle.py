@@ -658,17 +658,6 @@ def retarget_standard_name_sources(
                     tx.rollback()
                     raise
 
-    if (
-        projection_stub
-        and _projection_stub_source_bindings(
-            gc, old_name, new_name, admitted_source_ids
-        )
-        != expected
-    ):
-        raise RuntimeError(
-            "source migration requires an unowned pending projection-only predecessor"
-        )
-
     preflight_rows = (
         []
         if empty_noop
@@ -752,19 +741,19 @@ def retarget_standard_name_sources(
         scalar = row.get("scalar_binding")
         if (
             row.get("source_exists")
+            and bindings == [new_name]
+            and scalar == new_name
+            and row.get("manifest_recorded")
+        ):
+            completed.append(source_id)
+        elif (
+            row.get("source_exists")
             and row.get("source_status") != "stale"
             and not row.get("actively_claimed")
             and bindings == [expected[source_id]]
             and scalar == expected[source_id]
         ):
             pending.append(source_id)
-        elif (
-            row.get("source_exists")
-            and bindings == [new_name]
-            and scalar == new_name
-            and row.get("manifest_recorded")
-        ):
-            completed.append(source_id)
         elif (
             row.get("source_exists")
             and row.get("source_status") != "stale"
@@ -873,6 +862,17 @@ def retarget_standard_name_sources(
         raise SourceRetiredSuccessorConflictError(retired_conflicts)
     if completed:
         return 0
+
+    if (
+        projection_stub
+        and _projection_stub_source_bindings(
+            gc, old_name, new_name, admitted_source_ids
+        )
+        != expected
+    ):
+        raise RuntimeError(
+            "source migration requires an unowned pending projection-only predecessor"
+        )
 
     if enforce_consistency and not empty_noop:
         from imas_codex.standard_names.attachment_audit import guard_source_pairings
