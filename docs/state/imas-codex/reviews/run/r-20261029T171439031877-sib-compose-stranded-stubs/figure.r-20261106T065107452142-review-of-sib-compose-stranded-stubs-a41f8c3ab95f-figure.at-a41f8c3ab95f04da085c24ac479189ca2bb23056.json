@@ -1,7 +1,7 @@
 {
   "added_failure_count": 0,
   "added_failure_ids": [],
-  "completed_at": "",
+  "completed_at": "2026-11-06T07:04:00.170Z",
   "dispatched_at": "2026-11-06T06:53:17Z",
   "figures": [
     {
@@ -60,6 +60,6 @@
   "rubric": "figure",
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-06T07:04:03.291688+00:00",
+  "timestamp": "2026-11-06T07:11:37.238825+00:00",
   "total": null
 }
