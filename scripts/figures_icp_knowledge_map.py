@@ -12,20 +12,18 @@ every label. Whatever the vehicle, the roads stay ours. ITER sits east of
 the map, joined to it by one on-ramp: each burst of vehicles is a question
 leaving ITER, and each vehicle's return is an answer coming back.
 
-The build sequence shares one map, at one size and position, so the images stack:
+The sequence opens on a full-width grid of the repositories as cards (``--grid``;
+with ``--thumbnails`` it carries example IDM pages and is written to a gitignored
+``private`` folder, because those pages are internal documents). The stages that
+follow share one slide canvas with France centred at one size and position, so
+each image builds on the last:
 
 a. the data systems: town names with an icon each, on white;
 b. France beneath them, a dot per town and the ITER emblem, no links;
-c. the road network with each relationship and its verb;
+c. the relationships, each along its route with its verb;
 d. live traffic: many concurrent requests, one model;
 e. the same traffic driven by several models, one colour each;
-f. the whole fleet: several models and kinds of vehicle, under heavier load;
-g. a question typed into Lucy's chat sends traversals into the busy graph,
-   and the answer streams back (full slide width, the map on the left).
-
-A separate full-width grid shows the same repositories as cards (``--grid``); with
-``--thumbnails`` it carries example IDM pages and is written to a gitignored
-``private`` folder, because those pages are internal documents.
+f. the whole fleet: several models and kinds of vehicle, under heavier load.
 
 Geography: the metropolitan outline is the simplified ``france-geojson``
 (Licence Ouverte / Etalab); the roads are Natural Earth 10m major highways
@@ -48,7 +46,6 @@ import json
 import math
 import random
 import re
-import textwrap
 from dataclasses import dataclass
 from itertools import combinations
 from pathlib import Path
@@ -572,12 +569,11 @@ SLIDE_WIDTH = 14.0  # in: the full-width slide canvas
 
 
 def base(stage: str):
-    """Draw one stage on the full-width slide canvas, the map always on the left
-    at one size and position, so every image and animation stacks on the last.
-    The right of the slide stays free, for the chat panel or slide text."""
+    """Draw one stage on the full-width slide canvas with France centred, at one
+    size and position, so every image and animation stacks on the last."""
     plt.style.use("data-ink")
     fig = plt.figure(figsize=(SLIDE_WIDTH, HEIGHT), dpi=100)
-    ax = fig.add_axes((0, 0, WIDTH / SLIDE_WIDTH, 1))
+    ax = fig.add_axes(((1 - WIDTH / SLIDE_WIDTH) / 2, 0, WIDTH / SLIDE_WIDTH, 1))
     ax.axis("off")
     ax.set(
         xlim=[v * COS_LAT for v in LON], ylim=LAT, aspect="equal", autoscale_on=False
@@ -652,7 +648,6 @@ STEMS = {
     "d": "icp-map-d-live-graph",
     "e": "icp-map-e-many-models",
     "f": "icp-map-f-whole-fleet",
-    "g": "icp-map-g-lucy-chat",
 }
 
 
@@ -688,7 +683,6 @@ SPEED = 7.0  # map units per second: a hop across France takes about a second
 LOOP_SECONDS = 10.0
 PULSE_SECONDS = 0.45  # how long a node glows after it is read
 SEED = 11
-OTHERS = "#9a9893"  # requests from other users, receding behind the subject's
 
 
 @dataclass
@@ -757,9 +751,8 @@ FLEETS = {
         [(LOCAL, "car"), (LOCAL, "truck")],
         [(LOCAL_SECOND, "bike"), (LOCAL_SECOND, "car")],
     ],
-    "g": [[(OTHERS, "car")]],
 }
-BURSTS = {"d": 4, "e": 4, "f": 6, "g": 5}  # questions per loop
+BURSTS = {"d": 4, "e": 4, "f": 6}  # questions per loop
 
 
 def shortest_walk(graph, start: str, target: str) -> list[str]:
@@ -941,151 +934,6 @@ def save_traffic(stage: str, draft: Path | None) -> Path:
         plt.close(fig)
         return draft
     return save_gif(fig, lambda f: layer.update(f / FPS), frames, STEMS[stage])
-
-
-# --------------------------------------------------------------------------- lucy
-
-LUCY_TYPE = 1.6  # seconds to type the question
-LUCY_DISPATCH = 2.0  # the request reaches the graph
-LUCY_STREAM = 1.4  # seconds to stream the answer
-LUCY_HOLD = 3.0
-CHAT_GREY = "#ecebe8"
-
-# The question, and the traversals Lucy sends from ITER in parallel to answer it.
-LUCY_QUESTION = "How do we close NCR-0421, and what has been done so far?"
-LUCY_WALKS = [
-    (["iter", "pbs", "doc", "ncr"], "NCR-0421 is at stage 1b; rework agreed"),
-    (
-        ["iter", "pbs", "doc", "cad", "drw"],
-        "rework report v2 approved; as-built drawing not updated",
-    ),
-    (["iter", "pbs", "doc", "req"], "acceptance requirements met"),
-]
-LUCY_ANSWER = (
-    "Rework is done and evidenced. To close: update the as-built drawing, "
-    "then file the stage 2 closure."
-)
-
-
-def save_lucy(draft: Path | None) -> Path:
-    """A question typed into Lucy sends traversals into a graph busy with other users."""
-    fig, ax, labels, routes = base("c")
-    graph = relation_graph(routes)
-    ours = [
-        make_trip(walk, graph, LUCY_DISPATCH + 0.2 * k, CLAUDE, "car")
-        for k, (walk, _) in enumerate(LUCY_WALKS)
-    ]
-    back = max(t.start + t.duration for t in ours)
-    total = back + 0.4 + LUCY_STREAM + LUCY_HOLD
-    others = TrafficLayer(ax, traffic("g", graph), loop=LOOP_SECONDS, zorder=4.6)
-    mine = TrafficLayer(ax, ours, loop=None, zorder=5.2)
-    for ring in mine.pulses.values():
-        ring.set_zorder(6.2)
-
-    p = fig.add_axes(
-        (WIDTH / SLIDE_WIDTH + 0.03, 0.04, 1 - WIDTH / SLIDE_WIDTH - 0.05, 0.92)
-    )
-    p.axis("off")
-    p.set(xlim=(0, 1), ylim=(0, 1))
-    texts = [
-        p.text(
-            0.0,
-            0.965,
-            "Lucy",
-            va="center",
-            ha="left",
-            fontsize=18,
-            fontweight="bold",
-            color=INK,
-        ),
-        p.text(
-            0.13,
-            0.962,
-            "ITER engineering assistant",
-            va="center",
-            ha="left",
-            fontsize=13,
-            color=MUTED,
-        ),
-    ]
-    question = wrap(LUCY_QUESTION, 34)
-    asked = p.text(
-        0.99,
-        0.87,
-        question,
-        va="top",
-        ha="right",
-        fontsize=14,
-        color=INK,
-        linespacing=1.25,
-        bbox={"boxstyle": "round,pad=0.7", "facecolor": CHAT_GREY, "edgecolor": "none"},
-    )
-    status = p.text(
-        0.01,
-        0.70,
-        f"Sending {len(ours)} requests into the graph",
-        va="top",
-        ha="left",
-        fontsize=13,
-        fontstyle="italic",
-        color=MUTED,
-    )
-    returns = [
-        p.text(
-            0.01,
-            0.635 - 0.075 * k,
-            wrap(f"✓ {found}", 46),
-            va="top",
-            ha="left",
-            fontsize=13,
-            color=INK,
-            linespacing=1.2,
-        )
-        for k, (_, found) in enumerate(LUCY_WALKS)
-    ]
-    reply = wrap(LUCY_ANSWER, 40)
-    answer = p.text(
-        0.01,
-        0.36,
-        reply,
-        va="top",
-        ha="left",
-        fontsize=15,
-        fontweight="bold",
-        color=CLAUDE,
-        linespacing=1.3,
-    )
-    texts += [asked, status, *returns, answer]
-
-    def update(frame: int):
-        t = frame / FPS
-        others.update(t)
-        mine.update(t)
-        shown = int(len(question) * min(1.0, max(0.0, t - 0.2) / LUCY_TYPE))
-        asked.set_text(question[:shown] or " ")
-        asked.set_visible(t > 0.2)
-        status.set_visible(t >= LUCY_DISPATCH - 0.3)
-        for trip, line in zip(ours, returns, strict=True):
-            line.set_visible(t >= trip.start + trip.duration)
-        streamed = int(len(reply) * min(1.0, max(0.0, t - back - 0.4) / LUCY_STREAM))
-        answer.set_text(reply[:streamed])
-        answer.set_visible(streamed > 0)
-        return []
-
-    frames = int(total * FPS)
-    update(frames - 1)
-    if draft is not None:
-        check_layout(fig, labels + texts, refuse=False)
-        update(int((LUCY_DISPATCH + 0.8) * FPS))
-        fig.savefig(draft, dpi=100, facecolor="white")
-        plt.close(fig)
-        return draft
-    check_layout(fig, labels + texts)
-    return save_gif(fig, update, frames, STEMS["g"])
-
-
-def wrap(text: str, width: int) -> str:
-    return "\n".join(textwrap.wrap(text, width))
 
 
 # --------------------------------------------------------------------------- grid
@@ -1280,8 +1128,6 @@ def main() -> None:
     for stage in [args.only] if args.only else sorted(STEMS):
         if stage in "abc":
             save_static(stage, args.draft)
-        elif stage == "g":
-            save_lucy(args.draft)
         else:
             save_traffic(stage, args.draft)
 
