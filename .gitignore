@@ -115,3 +115,6 @@ sn_bench_*.json
 # which IS committed — sn merge resolves it from a branch name later.)
 campaign-manifest*.json
 *-campaign-manifest.json
+
+# Figures built from internal ITER documents: served by the docs SPA, never pushed.
+docs/figures/**/private/
