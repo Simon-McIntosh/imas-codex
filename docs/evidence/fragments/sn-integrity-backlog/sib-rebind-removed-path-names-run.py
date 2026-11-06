@@ -315,12 +315,25 @@ def operate(action: str, phase: str | None) -> dict:
                 for id in before.keys() | after.keys()
                 if id not in NAMES and before.get(id) != after.get(id)
             )
+            pair = gc.query(
+                """
+                MATCH (old:StandardName {id:$old})
+                MATCH (successor:StandardName {id:$successor})
+                RETURN count { (old)-[:HAS_SUCCESSOR]->(successor) } AS successor_edges,
+                       count { (successor)-[:REFINED_FROM]->(old) } AS refined_edges,
+                       old.name_stage AS old_stage,
+                       successor.name_stage AS successor_stage
+                """,
+                old=OLD,
+                successor=SUCCESSOR,
+            )
             result = {
                 "names": targeted(gc),
                 "blocking": blocking(gc),
                 "other_names_changed": other_changed,
                 "names_before": len(before),
                 "names_after": len(after),
+                "magnetic_field_pair": pair,
             }
         (RUN / "after.json").write_text(json.dumps(result, indent=2, default=str))
         return result
