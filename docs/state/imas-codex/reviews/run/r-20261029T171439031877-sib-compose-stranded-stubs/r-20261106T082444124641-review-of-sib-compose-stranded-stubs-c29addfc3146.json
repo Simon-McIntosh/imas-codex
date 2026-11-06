@@ -1,0 +1,67 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run declares no baseline_suite and no after_suite arm: it is a docs node whose declared write paths carry no test file and whose manifest carries neither key. With no arms there are no failure ids to subtract, so 0 derived ids and 0 added; this records the absence rather than a measurement.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-06T08:43:27.105Z",
+  "dispatched_at": "2026-11-06T08:30:37Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-compose-stranded-stubs.html",
+      "line": "58",
+      "text": "blocking: the corrected attempt-counter paragraph says \"the four sources sitting at 2 were the ones with headroom left\", but logs/census-before.json holds two sources at attempt_count 2 (one at 1, six at 5) and the same paragraph states two, so the correction introduces a fresh numeric error into the page whose purpose is a corrected accounting."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-compose-stranded-stubs.html",
+      "line": "273",
+      "text": "non-blocking: the page asserts \"what is dated is source creation and composition, and neither moved outside the roster\", but logs/outofroster.json reports sources_with_created_at=624 of 10,067, so \"0 created since the cut-off\" is measured on 6 percent of the population and the coverage limitation is stated nowhere while the attempt_count limitation is."
+    },
+    {
+      "file": "docs/figures/sn-integrity-backlog/sib-compose-stranded-stubs/sourceless-roster-and-graph.py",
+      "line": "27",
+      "text": "non-blocking: BEFORE, NOW and STATUS are hard-coded literals rather than read from logs/replay-before.json and logs/outofroster.json, so regenerating the figure cannot re-derive its numbers and the figure will silently drift from the artifacts it depicts."
+    },
+    {
+      "file": "docs/figures/sn-integrity-backlog/sib-compose-stranded-stubs/sourceless-roster-and-graph.py",
+      "line": "41",
+      "text": "non-blocking: check() tests only canvas bounds and label-to-label overlap, so it passes a label drawn over plotted data; in the rendered SVG the dormant row's \"before 0\" sits on the now-2 bar at sourceless-roster-and-graph.py:78-82, which the repository figure rules treat as a defect."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read c29addfc3 against bb0ec22eb commit by commit: four files, 2082 insertions and 9 deletions, adding replay and outofroster subcommands, correcting the attempt-counter and gate-blocking prose, and adding one generated figure, all inside the declared scope.",
+    "done_when": "brief.md:40-47 asks for the cause at file:line, the scoped run's calls and spend, per-source producers before and after, the export gate's blocking set before and after, and an out-of-roster check ending in a real EXIT=; the fragment carries all five sections (html:108-121, 127-160, 254-265) and logs/gate-replay-before.log and logs/gate-outofroster.log both end EXIT=0.",
+    "goal": "brief.md:1-3 sets the goal as composing the seven pending stubs whose DD sources were never composed; the delta at sib-compose-stranded-stubs.html:302-305 leaves two of nine sources producing a live name, so the goal remains unmet and the commit's own subject is evidence correction.",
+    "manifest": "read manifest.md; it records status complete, names commits bb0ec22eb and c29addfc3, quotes the replay and outofroster summary lines, and lists the five gate logs.",
+    "write_paths": "manifest.md:3 declares the fragment, its runner and the figure directory; commit c29addfc3 touches docs/evidence/fragments/sn-integrity-backlog/sib-compose-stranded-stubs-run.py, .../sib-compose-stranded-stubs.html and the new figure .py and .svg, all inside that scope."
+  },
+  "justifications": {
+    "durability": "the diff adds no test and no reusable assertion; the only guard is the figure script's check() at docs/figures/sn-integrity-backlog/sib-compose-stranded-stubs/sourceless-roster-and-graph.py:41-62, which raises on clipped or overlapping labels but is never run by a suite and does not guard the evidence numbers.",
+    "evidence": "docs/evidence/fragments/sn-integrity-backlog/sib-compose-stranded-stubs-run.py:194-219 replays the before-column through the constants imported from imas_codex/standard_names/export.py:226-228 and 3085-3090, but sib-compose-stranded-stubs.html:58 misstates the census it replayed and :273 claims source creation is dated when logs/outofroster.json records sources_with_created_at=624 of 10,067.",
+    "fit": "the runner and the figure script follow the sibling evidence idiom under docs/evidence/fragments/sn-integrity-backlog/, and no added symbol, filename or comment carries a plan, stage or ticket label, though the new figure script ends without a trailing newline.",
+    "goal_fidelity": "docs/evidence/fragments/sn-integrity-backlog/sib-compose-stranded-stubs.html:302-305 still records two of nine sources producing a live name against a goal of seven composed, so c29addfc3 corrects the accounting of the outcome rather than advancing it.",
+    "reuse": "docs/evidence/fragments/sn-integrity-backlog/sib-compose-stranded-stubs-run.py:195-198 imports _RELEASE_IDENTITY_HOLDS and _SHIPPING_NAME_STAGES from export.py rather than restating them, and searching imas_codex/ for a shared label-overlap save guard found none to extend.",
+    "scope_discipline": "every path in commit c29addfc3 is one of the two fragment files or the declared figure directory recorded at manifest.md:3, and no product source, plan file or graph text is touched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: brief.md:1-3 sets the goal as composing the seven pending stubs whose DD sources were never composed; the delta at sib-compose-stranded-stubs.html:302-305 leaves two of nine sources producing a live name, so the goal remains unmet and the commit's own subject is evidence correction.\nVERDICT done_when: brief.md:40-47 asks for the cause at file:line, the scoped run's calls and spend, per-source producers before and after, the export gate's blocking set before and after, and an out-of-roster check ending in a real EXIT=; the fragment carries all five sections (html:108-121, 127-160, 254-265) and logs/gate-replay-before.log and logs/gate-outofroster.log both end EXIT=0.\nVERDICT write_paths: manifest.md:3 declares the fragment, its runner and the figure directory; commit c29addfc3 touches docs/evidence/fragments/sn-integrity-backlog/sib-compose-stranded-stubs-run.py, .../sib-compose-stranded-stubs.html and the scope.\nVERDICT manifest: read manifest.md; it records status complete, names commits bb0ec22eb and c29addfc3, quotes the replay and outofroster summary lines, and lists the five gate logs.\nVERDICT diff: read c29addfc3 against bb0ec22eb commit by commit: four files, 2085 insertions and 9 deletions, adding replay and outofroster subcommands, correcting the attempt-counter and gate-blocking prose, and adding one generated figure, all inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 12\nJUSTIFICATION goal_fidelity: sib-compose-stranded-stubs.html:302-305 still records two of nine sources producing a live name against a goal of seven composed, so c29addfc3 corrects the accounting of the outcome rather than advancing it.\nSCORE evidence: 13\nJUSTIFICATION evidence: sib-compose-stranded-stubs-run.py:194-219 replays the before-column through constants imported from export.py:226-228, but sib-compose-stranded-stubs.html:58 misstates the census it replayed and :273 claims source creation is dated when outofroster.json records sources_with_created_at=624 of 10,067.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in commit c29addfc3 is one of the two fragment files or the declared figure directory recorded at manifest.md:3.\nSCORE durability: 9\nJUSTIFICATION durability: the diff adds no test; its only guard is sourceless-roster-and-graph.py:41-62, a label-layout check a suite never runs and which guards no evidence number.\nSCORE fit: 17\nJUSTIFICATION fit: the runner and figure script follow the sibling evidence idiom under docs/evidence/fragments/sn-integrity-backlog and carry no plan or stage label, though sourceless-roster-and-graph.py ends without a trailing newline.\nSCORE reuse: 18\nJUSTIFICATION reuse: sib-compose-stranded-stubs-run.py:195-198 imports _RELEASE_IDENTITY_HOLDS and _SHIPPING_NAME_STAGES from export.py rather than restating them, and a search of imas_codex/ found no shared label-overlap save guard to extend.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-compose-stranded-stubs.html:58 blocking: the corrected attempt-counter paragraph says \"the four sources sitting at 2 were the ones with headroom left\", but logs/census-before.json holds two sources at attempt_count 2 and the same paragraph states two, so the correction introduces a fresh numeric error into the page whose purpose is a corrected accounting.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-compose-stranded-stubs.html:273 non-blocking: the page asserts source creation and composition are both dated, but logs/outofroster.json reports sources_with_created_at=624 of 10,067, so \"0 created since the cut-off\" is measured on 6 percent of the population and that coverage limitation is stated nowhere.\nFINDING docs/figures/sn-integrity-backlog/sib-compose-stranded-stubs/sourceless-roster-and-graph.py:27 non-blocking: BEFORE, NOW and STATUS are hard-coded literals rather than read from logs/replay-before.json and logs/outofroster.json, so the figure cannot re-derive its numbers and will silently drift from the artifacts it depicts.\nFINDING docs/figures/sn-integrity-backlog/sib-compose-stranded-stubs/sourceless-roster-and-graph.py:41 non-blocking: check() tests only canvas bounds and label-to-label overlap, so it passes a label drawn over plotted data; the rendered SVG puts the dormant row's \"before 0\" on the now-2 bar.",
+  "review_run_id": "r-20261106T082444124641-review-of-sib-compose-stranded-stubs-c29addfc3146",
+  "reviewed_base_sha": "bb0ec22ebe044cec80f2552888547db70ba2eef8",
+  "reviewed_head_sha": "c29addfc314677f18bdee1116114d452dcb3b052",
+  "reviewed_run_id": "r-20261029T171439031877-sib-compose-stranded-stubs",
+  "scores": {
+    "durability": 9,
+    "evidence": 13,
+    "fit": 17,
+    "goal_fidelity": 12,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T09:00:33.203872+00:00",
+  "total": 89
+}

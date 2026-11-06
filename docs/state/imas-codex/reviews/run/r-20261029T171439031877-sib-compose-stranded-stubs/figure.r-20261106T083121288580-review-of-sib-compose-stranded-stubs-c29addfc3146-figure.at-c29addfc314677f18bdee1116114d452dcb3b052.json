@@ -1,0 +1,126 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-06T08:35:26Z",
+  "figures": [
+    {
+      "attachment": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T083121288580-review-of-sib-compose-stranded-stubs-c29addfc3146-figure/image-0.png",
+      "caption_checked": "The caption under the embed (\"Adoption as a state transition. The claim adopts the stub only when the projection is the source's own DD path and no producer holds it; the content comes from the rich write, not the stable finalize; a stub owned by another claim is still a collision, and a source that reaches the attempt cap is parked with the refusal that led there.\") names the precondition, the content source and both failure branches; it does not merely repeat the in-figure title, so it is not a finding.",
+      "embedded_by": "docs/evidence/fragments/sn-integrity-backlog/sib-adopt-pending-projection-stubs.html",
+      "rendered": "1400x720 RGBA, 8-bit; 605,504 of 1,008,000 pixels fully transparent (60.07%, alpha 0); opaque content ink spans x 29-1210, y 22-650",
+      "repository_path": "docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs/adoption-state.svg"
+    },
+    {
+      "attachment": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T083121288580-review-of-sib-compose-stranded-stubs-c29addfc3146-figure/image-1.png",
+      "caption_checked": "The caption under the embed (\"The roster's seven stubs under the gate's own predicate, and the population the scope control is about. The gate's blocking set is empty before and after \u2014 the seven were sourceless live drafts, never release blockers \u2014 while the draft set loses two names and the dormant set gains them. On the right, the whole graph outside the roster: 10,067 sources, none created, none composed and no name changed in the window.\") names both panels and the deltas; it does not merely repeat the panel titles, so it is not a finding.",
+      "drawing_script": "docs/figures/sn-integrity-backlog/sib-compose-stranded-stubs/sourceless-roster-and-graph.py",
+      "embedded_by": "docs/evidence/fragments/sn-integrity-backlog/sib-compose-stranded-stubs.html",
+      "rendered": "1400x720 RGBA, fully opaque white canvas (0 of 1,008,000 pixels transparent); ink spans x 62-1392, y 46-650, so the right-most value label ends 8 px from the canvas edge",
+      "repository_path": "docs/figures/sn-integrity-backlog/sib-compose-stranded-stubs/sourceless-roster-and-graph.svg"
+    }
+  ],
+  "figures_rubric_lines": {
+    "image-0.png": [
+      "RUBRIC legibility: pass \u2014 the six-state chain reads left to right in one scan and every card title and body line is legible in the 1400x720 PNG; the green annotation between the first two cards is the smallest element in the figure (glyph height 11-12 px) and remains readable on a light surface, but it is the one label whose reading depends on the surface it lands on, which the contrast line and finding 2 record.",
+      "RUBRIC data_ink: pass \u2014 six cards, four arrows and their labels carry all the ink; there is no grid, key, repeated series or filled area, and the single tinted card is the adopted state the figure exists to show.",
+      "RUBRIC decoration: pass \u2014 strokes are 1 px neutral with #FAFAFA card fills, and the only colour is #2E8B57 on the adopt path and on the card it reaches; no gradient, shadow, background wash, drop shadow or styled theme is present.",
+      "RUBRIC contrast: defect \u2014 body text #333 on #FAFAFA measures 12.1:1 and titles #111 18.1:1, but the green annotation #2E8B57 measures 4.24:1 on white and 4.07:1 on the card tint, under the 4.5:1 AA threshold for text at its 11-12 px glyph height; and the canvas is 60.07% fully transparent (605,504 of 1,008,000 pixels at alpha 0), so every black and grey label is judged against whatever surface the page supplies rather than against a background the figure owns.",
+      "RUBRIC table_form: pass \u2014 a two-branch state transition carrying per-state fields is what a diagram is for; nothing in the image is a row-and-column comparison that a table would carry better.",
+      "RUBRIC label_collision: pass \u2014 opaque ink spans x 29-1210 and y 22-650 inside the 1400x720 canvas, so nothing is clipped at any edge, and no label touches another label, a card border or an arrow."
+    ],
+    "image-1.png": [
+      "RUBRIC legibility: pass \u2014 both panel titles, every category label, both axis labels and every value label read at a glance in the 1400x720 PNG, and at the page's ~900 px column the 14 pt labels render at about 9 px and remain readable; the reading that needs care is which bar a before/now label belongs to in the left panel, which the label_collision line and findings 1 and 2 record.",
+      "RUBRIC data_ink: pass \u2014 the bars and their value labels carry all the ink; there is no grid, key, background fill, gradient or traffic-light colouring, and the right panel's uniform neutral grey is the correct treatment for a population whose subject is a single total rather than one highlighted row.",
+      "RUBRIC decoration: pass \u2014 the canvas is opaque white, spines are reduced to the two that carry a scale, and the only non-neutral colour is the series colour in the left panel; the red category colour is a colour-semantics problem rather than decorative styling and is recorded as finding 3.",
+      "RUBRIC contrast: defect \u2014 the dormant group's two labels (#929292) measure 3.11:1 against the white canvas, under the 4.5:1 AA threshold for 14 pt text, and that grey is pixel-identical to the neutral bar beside them (both 146,146,146), so where a label and the bar meet the contrast is 1:1; every other label clears AA comfortably (#B03A2E 6.02:1, #2A6F97 6.83:1 on white, value labels #0B0B0B 19.7:1).",
+      "RUBRIC table_form: pass \u2014 two horizontal bar charts of counts by status are what the comparison is; the left panel's six values are small enough to tabulate, but the before/after split is a chart question rather than a table question, and the defect there is the encoding, recorded under label_collision.",
+      "RUBRIC label_collision: defect \u2014 in the left panel the dormant group's \"before 0\" label has no bar of its own and sits 2 px above the top edge of the grey \"now 2\" bar in that bar's own grey, so in the render its lower edge merges with the bar and it reads as labelling the bar beneath it; the glyph tops of \"now 5\" cross 3 px into the bottom edge of the light-blue \"before 7\" bar. No label is clipped by the canvas and no label overlaps another label."
+    ]
+  },
+  "findings": [
+    {
+      "file": "docs/figures/sn-integrity-backlog/sib-compose-stranded-stubs/sourceless-roster-and-graph.py",
+      "id": "f42abe1b469",
+      "line": 79,
+      "severity": "non-blocking",
+      "summary": "In the left panel's dormant group the \"before 0\" label is drawn at the zero-length before bar's own row, which places it 2 px above the top edge of the \"now 2\" bar and in exactly that bar's colour (#929292 on both the text and the fill). In the render the label's lower edge merges into the bar, so it reads as a caption for the bar beneath it rather than as the count of an invisible zero-length bar, and the one thing the group exists to show \u2014 that the dormant set went from 0 to 2 \u2014 is the reading the placement obscures. A zero-length bar needs its label anchored in a position that does not coincide with the neighbouring series' bar."
+    },
+    {
+      "file": "docs/figures/sn-integrity-backlog/sib-compose-stranded-stubs/sourceless-roster-and-graph.py",
+      "id": "f6946c8375d",
+      "line": 83,
+      "severity": "non-blocking",
+      "summary": "The draft group's \"now 5\" label is placed at x = 5.12 in the now bar's row, which puts its glyph tops 3 px inside the bottom edge of the light-blue \"before 7\" bar and sets dark blue #2A6F97 on that bar's #9FBED0 at 3.5:1 for those pixels. It stays readable, but the label sits over data belonging to the other series, which is the one placement the drawing script's own overlap guard cannot see."
+    },
+    {
+      "file": "docs/figures/sn-integrity-backlog/sib-compose-stranded-stubs/sourceless-roster-and-graph.py",
+      "id": "f42abe1b469",
+      "line": 79,
+      "severity": "non-blocking",
+      "summary": "The dormant group's \"before 0\" and \"now 2\" labels are both #929292 and measure 3.11:1 against the white canvas, under the 4.5:1 AA threshold for 14 pt text. They are the two labels that carry the panel's good-news delta, and they are the least legible text in the figure while every value in the right panel is near-black at 19.7:1."
+    },
+    {
+      "file": "docs/figures/sn-integrity-backlog/sib-compose-stranded-stubs/sourceless-roster-and-graph.py",
+      "id": "f7ba25d711b",
+      "line": 21,
+      "severity": "non-blocking",
+      "summary": "GATE = \"#b03a2e\" is the colour of the export-gate category, and in this panel that category's two values are both zero, so the figure's single strongest alarm colour lands on the best news in the drawing. Red is the repository's colour for a limit being broken; using it for a category makes a reader who knows that convention look for a failure that is not there."
+    },
+    {
+      "file": "docs/figures/sn-integrity-backlog/sib-compose-stranded-stubs/sourceless-roster-and-graph.py",
+      "id": "f3291a2c18c",
+      "line": 57,
+      "severity": "non-blocking",
+      "summary": "The draw-time guard asserts only that each label's box lies inside the canvas and that no two label boxes overlap; it never compares a label against the bars, so a label drawn in the bar's own colour against the bar's edge passes every assertion the script makes. Both placements recorded above are exactly that case, which is why a figure whose script refuses to write on a misbehaving label shipped with a label merged into a bar."
+    },
+    {
+      "file": "docs/figures/sn-integrity-backlog/sib-compose-stranded-stubs/sourceless-roster-and-graph.py",
+      "id": "fc2f3f86bdd",
+      "line": 66,
+      "severity": "non-blocking",
+      "summary": "right=0.985 leaves 8 px between the right-most value label (\"3,069\") and the canvas edge at 1400 px wide, about 5 px once the figure is served at the page's ~900 px column. The label is inside the canvas and the guard proves it, so nothing is clipped, but at that margin the largest number in the figure reads as running off the panel rather than sitting in it."
+    },
+    {
+      "file": "docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs/adoption-state.svg",
+      "id": "fd9fb0c9d27",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The rendered image has no backdrop: 605,504 of its 1,008,000 pixels are fully transparent, so the contrast a reader gets is decided by the surface the figure lands on rather than by the figure. On white the black and grey text is strong (#111 titles 18.1:1, #333 body 12.1:1); composited over a dark surface the same text falls below 2:1 and the near-black arrows disappear. One opaque light rectangle behind the content would settle it without changing the drawing."
+    },
+    {
+      "file": "docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs/adoption-state.svg",
+      "id": "fd9fb0c9d27",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The adoption precondition, \"compose claim: projection is the source's own DD path and no producer holds it\", is set in #2E8B57 at an 11-12 px glyph height and measures 4.24:1 against white and 4.07:1 against the tinted card it is stacked beside, both under the 4.5:1 AA threshold for normal-size text. It is the smallest and lowest-contrast label in the figure and it is the sentence that separates adoption from the refused collision drawn beneath it, so the least legible label carries the most load-bearing condition."
+    },
+    {
+      "file": "docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs/adoption-state.svg",
+      "id": "fd9fb0c9d27",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The two lower cards place about 55 words of running prose inside the image (the rich-write versus stable-finalize explanation and the two attach exception flags). Text inside an image cannot be selected, searched, translated or reflowed, and a screen reader receives only the alt text, which describes the state chain and its two branches but not these two paragraphs."
+    }
+  ],
+  "item_verdicts": {
+    "contrast": "defect in both figures \u2014 image-0: the green annotation #2E8B57 measures 4.24:1 on white and 4.07:1 on the card tint, under AA at its 11-12 px size, and the canvas is 60.07% fully transparent so no label owns the background it is read against; image-1: the dormant group's #929292 labels measure 3.11:1 on white and 1:1 against the bar they touch.",
+    "data_ink": "pass for both figures \u2014 image-0: six cards, four arrows and their labels carry all the ink with no key or grid; image-1: bars and value labels carry all the ink, and the right panel's uniform neutral grey correctly treats 10,067 sources as a population with no subset to highlight.",
+    "decoration": "pass for both figures \u2014 neither carries a gradient, background wash, shadow or styled theme; image-0's only colour is the green adopt path, image-1's only non-neutral colour is the left panel's series colour, and image-1's red category colour is recorded as a finding rather than as decoration.",
+    "label_collision": "pass for image-0, whose opaque ink spans x 29-1210, y 22-650 inside a 1400x720 canvas with no label touching anything; defect for image-1, where the dormant group's \"before 0\" sits 2 px above the grey \"now 2\" bar in the same grey and \"now 5\" crosses 3 px into the light \"before 7\" bar, with nothing clipped by the canvas.",
+    "legibility": "pass for both figures \u2014 image-0: the state chain reads left to right and every card line is legible, with the green annotation the weakest element at 11-12 px glyph height; image-1: both panels read at a glance at native size and at the page's ~900 px column, with the before/now label attribution the one reading that needs care.",
+    "table_form": "pass for both figures \u2014 image-0 is a two-branch state diagram and image-1 is a pair of status-count bar charts; neither depicts a row-and-column comparison that a table would carry better."
+  },
+  "method": "Read only: no figure, script, caption or page was edited, moved, deleted or reformatted. Both attachments named in this review were opened with the Read tool and judged at native size and at the page's served width; the only derived images were straight crops and enlargements of those same two PNGs, written to the run's scratch directory. Pixel measurements taken from the two PNGs: exact size and alpha histogram, the opaque ink bounding box against the canvas, per-region colour histograms at glyph cores, WCAG contrast ratios against the background each label actually sits on, and the vertical and horizontal extents of every label against the bar rectangles beside it. No SVG and no other image was opened, read, listed for content, rendered or git-shown. The drawing script sourceless-roster-and-graph.py is read from the reviewed commit because the reviewed run's diff adds it, and the findings in that script are anchored to its lines. The adoption-state figure has no drawing script in the reviewed run's diff, so its findings are anchored to the figure's own repository path with a null line.",
+  "notes": "No finding blocks. Nothing is clipped in either figure, no label overlaps another label, and every label reads on a white surface. The two figures carry the same defect shape from opposite directions: image-0 leaves the background to the page and then places its smallest label in the lowest-contrast colour, while image-1 fixes the background and then encodes a before/after split only through bar lightness, placing a zero-length series' label in the neighbouring bar's own colour. The cheapest repairs, none of which this review performs: an opaque light backdrop and a darker green for the annotation in adoption-state.svg; and in the drawing script, a per-series label offset that keeps a zero-length bar's label clear of the neighbouring bar, a neutral or darker grey for those two labels, and a guard that compares label boxes against the bar rectangles as well as against each other.",
+  "project": "imas-codex",
+  "review_run_id": "r-20261106T083121288580-review-of-sib-compose-stranded-stubs-c29addfc3146-figure",
+  "reviewed_base_sha": "b6bd5682bec73e4058307bdbfb787e07e3053951",
+  "reviewed_head_sha": "c29addfc314677f18bdee1116114d452dcb3b052",
+  "reviewed_run_id": "r-20261029T171439031877-sib-compose-stranded-stubs",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T08:53:53.168091+00:00",
+  "total": null
+}
