@@ -1,0 +1,46 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-06T22:57:55.076Z",
+  "dispatched_at": "2026-11-06T22:51:20Z",
+  "findings": [
+    {
+      "file": "imas_codex/graph/build_dd.py",
+      "line": 1633,
+      "severity": "non-blocking",
+      "text": "non-blocking: the collect_renamed_to_mappings docstring says the sources are listed 'lowest precedence first' (packaged path map, container renames, DD renames), but every source is merged with merged.setdefault (build_dd.py:1642-1646), so the first source added wins and the packaged path map actually has the highest precedence while the current DD's change_nbc_previous_name renames have the lowest; a stale packaged mapping for a path would shadow the DD's own annotation and write the wrong RENAMED_TO target. Value is unaffected for the two pairs in this node (the packaged 4.1.0/4.1.1 maps carry neither), so it does not hold the node."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-dd-rename-records.html",
+      "line": 85,
+      "severity": "non-blocking",
+      "text": "non-blocking: the run's gate never performs the done_when's first clause, 'a DD build on the disposable graph records ... RENAMED_TO'; the fourth test exercises _batch_create_renamed_to against a unittest.mock.MagicMock client (tests/graph/test_dd_container_renames.py:80-103) and the fragment itself records that a full build on a disposable graph was left to the coordinator, so nothing in this run shows a real build writing either edge. The detection and mapping path is proven end to end at the writer-argument boundary and the tests/graph delta is zero added, so the change is sound; the integration arm is what is unproven."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "pass \u2014 phase_build at imas_codex/graph/build_dd.py:2109-2119 reaches both added functions in a real build and compute_version_changes at build_dd.py:1672-1687 reaches the detector; reconcile_node_lifecycle at imas_codex/graph/dd_lifecycle.py:101 calls the modified dd_path_index.",
+    "diff": "pass \u2014 read d02cb25e5, c430251ec and 4be56f9d7..583607456 commit by commit; d02cb25e5 adds _detect_container_renames and collect_renamed_to_mappings plus the IDS-prefix change in dd_path_index, c430251ec adds the four-assertion test file, 583607456 adds only the evidence fragment.",
+    "done_when": "fail \u2014 the done_when names a DD build on the disposable graph; the run recorded a unit gate (4 passed at head, 3 failed at base) and a zero-added tests/graph delta, but no build arm, so its first clause is unmeasured.",
+    "goal": "pass \u2014 the goal is to record IDS-level and array-of-structures DD renames as RENAMED_TO edges, and build_dd.py:2109-2119 now merges container-detected and DD-annotated renames into the _batch_create_renamed_to call that MERGEs the edges at build_dd.py:4262.",
+    "manifest": "pass \u2014 the source manifest states the node gate as 4 passed/EXIT=0 at head against 3 failed/EXIT=1 at base, the tests/graph delta as 9 failed/640 passed to 3 failed/650 passed, and names a negative-control log whose recorded result is 3 failed/1 passed.",
+    "write_paths": "pass \u2014 all four changed paths (imas_codex/graph/build_dd.py, imas_codex/graph/dd_lifecycle.py, tests/graph/test_dd_container_renames.py, docs/evidence/fragments/sn-integrity-backlog/sib-dd-rename-records.html) are inside the declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: pass \u2014 the node goal is to record IDS-level and array-of-structures DD renames as RENAMED_TO edges; imas_codex/graph/build_dd.py:2109-2119 merges container-detected and DD-annotated renames into _batch_create_renamed_to, which MERGEs the edges at build_dd.py:4262.\nVERDICT done_when: fail \u2014 the done_when's first clause names a DD build on the disposable graph, which was not run; the recorded gate is the unit test file (4 passed at head, 3 failed at base) plus a tests/graph delta of zero added failure ids, both of which the logs support.\nVERDICT write_paths: pass \u2014 every path in the diff (imas_codex/graph/build_dd.py, imas_codex/graph/dd_lifecycle.py, tests/graph/test_dd_container_renames.py, docs/evidence/fragments/sn-integrity-backlog/sib-dd-rename-records.html) is inside the declared write paths.\nVERDICT manifest: pass \u2014 the source manifest records the node gate, the tests/graph base and after suites with their log paths, and a negative control reading 3 failed/1 passed.\nVERDICT diff: pass \u2014 read the three commits against base 4be56f9d7; the production change is the detector, the merge helper and the IDS-prefix seed in dd_path_index, with no unrelated edit.\nCALL_SITES: imas_codex/graph/build_dd.py:phase_build, imas_codex/graph/build_dd.py:compute_version_changes, imas_codex/graph/dd_lifecycle.py:reconcile_node_lifecycle\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/graph/build_dd.py:2114-2119 feeds collect_renamed_to_mappings, carrying both detected container renames and dd_path_index renames, to the writer whose Cypher MERGEs RENAMED_TO at build_dd.py:4262.\nSCORE evidence: 11\nJUSTIFICATION evidence: the done_when's disposable-graph build was not run; the recorded evidence is the unit gate in tests/graph/test_dd_container_renames.py and the zero-added tests/graph delta in the manifest's after_suite block.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the diff at 4be56f9d7..583607456 touches only the four declared paths, and the unused declared figures directory is left untouched.\nSCORE durability: 18\nJUSTIFICATION durability: tests/graph/test_dd_container_renames.py:52 fails with no mapping if _detect_container_renames is emptied, and the negative-control log shows exactly those three container assertions red while the IDS assertion stays green.\nSCORE fit: 17\nJUSTIFICATION fit: the additions sit beside the existing _detect_renames at imas_codex/graph/build_dd.py:1500 and reuse the existing writer, with a local import matching the module's existing lazy-import idiom.\nSCORE reuse: 19\nJUSTIFICATION reuse: no existing owner computes a structural container rename or merges the three rename sources; _detect_renames at build_dd.py:1500 handles only change_nbc_previous_name and is extended, not duplicated.\nFINDING imas_codex/graph/build_dd.py:1633 non-blocking: the docstring says the sources are listed lowest precedence first, but the setdefault merges at build_dd.py:1642-1646 give the packaged path map the highest precedence and the current DD's renames the lowest, so a stale packaged target would shadow the DD annotation.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-dd-rename-records.html:85 non-blocking: the done_when's disposable-graph build was not run; tests/graph/test_dd_container_renames.py:80-103 asserts the writer's argument against a MagicMock client, so no recorded evidence shows a real build writing either edge.\n",
+  "review_run_id": "r-20261106T225005051485-review-of-sib-dd-rename-records-58360745636a",
+  "reviewed_base_sha": "4be56f9d7f86005574f1658eb6a79d299fb4ed06",
+  "reviewed_head_sha": "58360745636ad80811ece29ccca89888232f1add",
+  "reviewed_run_id": "r-20261106T222411766263-sib-dd-rename-records",
+  "scores": {
+    "durability": 18,
+    "evidence": 11,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T23:05:16.360506+00:00",
+  "total": 102
+}
