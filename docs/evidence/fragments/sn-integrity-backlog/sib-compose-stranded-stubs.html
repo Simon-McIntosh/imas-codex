@@ -53,9 +53,10 @@ named here as a finding, not fixed here.</p>
 
 <p><strong>The attempt counter before the unpark</strong>, read from
 <code>logs/census-before.json</code> (observed 2026-10-29T17:36:28Z): <code>attempt_count</code> is
-<strong>1, 2 or 5</strong> — one source at 1, two at 2, and the remaining six at 5, which is
-<code>_MAX_COMPOSE_CLAIM_ATTEMPTS</code> — with <code>claim_seq</code> between <strong>7 and 11</strong>.
-So the cap was used, and the four sources sitting at 2 were the ones with headroom left. An earlier
+<strong>1, 2 or 5</strong> — <strong>one</strong> source at 1, <strong>two</strong> at 2, and the
+remaining <strong>six</strong> at 5 (1 + 2 + 6 = 9), which is <code>_MAX_COMPOSE_CLAIM_ATTEMPTS</code>
+— with <code>claim_seq</code> between <strong>7 and 11</strong>. So the cap was used, and only the two
+sources sitting at 2 had headroom left. An earlier
 cut of this page reported <code>attempt_count</code> as 0 on all nine; that reading is real but it is
 the state <em>after</em> the unpark, when <code>sn retry</code> returns each row to
 <code>extracted</code> and the counter restarts, and it was written up here as the before-state. The
@@ -178,7 +179,8 @@ draft_roster_sourceless=[7 names]  # sourceless live drafts, reported and not bl
 dormant_roster=[]</pre>
 
 <p>After the run the same split reads <code>gate_roster_blocking=[]</code>,
-<code>draft_roster_sourceless</code> five names, and two of the seven dormant. The export gate's
+<code>draft_roster_sourceless</code> five names, and the two the draft set lost have landed as
+composed names. The export gate's
 blocking set is therefore <strong>empty before and empty after</strong>; it was never the set that
 changed, and any page that says it fell by two is describing the draft population.</p>
 
@@ -194,7 +196,7 @@ intersected with <code>find_sourceless_live_names</code> exactly as the gate doe
     <tr><td><code>draft_sourceless_count</code> — reported, not blocking</td><td>7</td><td>6</td></tr>
     <tr><td><code>draft_roster_sourceless</code> — of the seven</td><td>7</td><td>5</td></tr>
     <tr><td>sourceless population / confirmed sourceless</td><td>13 classified</td><td>11 / 11</td></tr>
-    <tr><td>dormant (<code>exhausted</code>)</td><td>—</td><td>2</td></tr>
+    <tr><td>dormant (<code>exhausted</code>), whole graph</td><td>—</td><td>2</td></tr>
   </tbody>
 </table>
 
@@ -239,13 +241,27 @@ the sources that carry no <code>dd_path</code> at all, which a naive exclusion d
 
 <figure>
   <img src="/imas-codex/figures/sn-integrity-backlog/sib-compose-stranded-stubs/sourceless-roster-and-graph.svg"
-       alt="Left: the seven roster stubs split into export-gate, draft and dormant before and now. Right: every non-roster source by status.">
+       alt="Left: the seven roster stubs split into export gate, draft and composed, before and now. Right: every non-roster source by status.">
   <figcaption>The roster's seven stubs under the gate's own predicate, and the population the scope
   control is about. The gate's blocking set is empty before and after — the seven were sourceless
-  live <em>drafts</em>, never release blockers — while the draft set loses two names and the dormant
-  set gains them. On the right, the whole graph outside the roster: 10,067 sources, none created,
-  none composed and no name changed in the window.</figcaption>
+  live <em>drafts</em>, never release blockers — while the draft set loses two names to the
+  composed set, where they landed with a producer. On the right, the whole graph outside the roster: 10,067 sources, none created and
+  none composed among the 624 that carry a creation timestamp, and no name change in the window
+  across the full change ledger.</figcaption>
 </figure>
+
+<p><strong>Every number in that figure is read from the artifacts above</strong>, not written into the
+plotting script: it loads <code>replay-before.json</code>, <code>census-current.json</code> and
+<code>outofroster.json</code> and refuses to draw if any is missing, so a drifted artifact shows as a
+drifted figure rather than as a stale picture of corrected data. Reproduce it with</p>
+
+<pre>UV_PROJECT_ENVIRONMENT=&lt;main-checkout&gt;/.venv uv run --no-sync python \
+  docs/figures/sn-integrity-backlog/sib-compose-stranded-stubs/sourceless-roster-and-graph.py \
+  --logs &lt;run-logs&gt;</pre>
+
+<p>The script also refuses to save a figure whose own labels leave the canvas, collide with one
+another, or sit on a plotted bar, so the two <code>0</code> rows cannot again be drawn as text on top
+of a neighbouring bar.</p>
 
 <p>From <code>logs/outofroster.json</code>, cut off at the before-census stamp and read on
 2026-11-06T08:10Z — a window that is a week wide rather than the run's ninety minutes, so it is an
@@ -255,6 +271,7 @@ upper bound on anything that could have moved:</p>
   <thead><tr><th>whole graph, roster excluded</th><th>value</th></tr></thead>
   <tbody>
     <tr><td>sources</td><td>10,067</td></tr>
+    <tr><td>sources carrying <code>created_at</code> at all — the denominator for the two rows below</td><td>624 of 10,067 (6.2%)</td></tr>
     <tr><td>sources created since the cut-off</td><td>0</td></tr>
     <tr><td>sources composed since the cut-off</td><td>0</td></tr>
     <tr><td>producing edges now</td><td>5,611 across 5,508 sources</td></tr>
@@ -270,8 +287,18 @@ absence and not an empty query. And <code>attempt_count</code> has no audit trai
 change record — so the only honest form of that comparison is the after-total above; a whole-graph
 <em>before</em> value for it does not exist in any recorded snapshot, and inventing one from today's
 numbers would be the same error this page is repairing. The same caveat applies to
-<code>produced_sn_id</code> edges, which carry no properties: they are counted, not dated. What is
-dated is source creation and composition, and neither moved outside the roster.</p>
+<code>produced_sn_id</code> edges, which carry no properties: they are counted, not dated.</p>
+
+<p><strong>The dated rows are not the whole population, and the coverage is stated here rather than
+left to be inferred.</strong> Only 624 of the 10,067 non-roster sources carry
+<code>created_at</code> — 6.2 percent — so "0 created since the cut-off" is a statement about those
+624, not about the graph. A source created in the window without a timestamp would not appear in it.
+What the row does establish is one-directional and still worth having: among the sources the graph
+can date, nothing outside the roster moved. The claim this page may make is therefore that narrow one,
+not the unqualified "neither moved" it made before. The change ledger is unaffected by this
+limitation — <code>changed_at</code> is present on every <code>StandardNameChange</code> row, and the
+roster's own two adoptions appear in it, so the zero outside the roster there is a measured absence
+over the full ledger rather than a partial one.</p>
 
 <h3 id="sib-compose-stranded-stubs-next">What remains, and why</h3>
 

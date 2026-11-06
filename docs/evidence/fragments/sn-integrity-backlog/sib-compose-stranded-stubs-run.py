@@ -133,9 +133,7 @@ def census() -> dict:
         ]
         audit = classify_sourceless_standard_names(gc)
         sourceless = [
-            row
-            for row in audit
-            if row["population"] in {"dropped_edge", "never_bound"}
+            row for row in audit if row["population"] in {"dropped_edge", "never_bound"}
         ]
         # Reproduce the export source gate as it is written, not as it reads:
         # only a shipping-stage name blocks (export.py's source_losses), a
@@ -179,6 +177,9 @@ def census() -> dict:
         "draft_sourceless_ids": draft_ids,
         "draft_roster_sourceless": sorted(set(draft_ids) & set(ROSTER_NAMES)),
         "dormant_sourceless_count": len(dormant),
+        "dormant_roster": sorted(
+            row["id"] for row in dormant if row["id"] in set(ROSTER_NAMES)
+        ),
         "sourceless_population": len(sourceless),
         "confirmed_sourceless": len(confirmed),
         "gate_audit_population": len(audit),
@@ -213,9 +214,7 @@ def replay(path: Path) -> dict:
         and row["name_stage"] not in _SHIPPING_NAME_STAGES
         and row["producers"] == 0
     ]
-    dormant = [
-        row for row in stubs if row["name_stage"] == "exhausted"
-    ]
+    dormant = [row for row in stubs if row["name_stage"] == "exhausted"]
     return {
         "replayed_from": str(path),
         "recorded_at": recorded.get("observed_at"),
@@ -225,6 +224,7 @@ def replay(path: Path) -> dict:
         "gate_roster_blocking": sorted(row["id"] for row in blocking),
         "draft_roster_sourceless": sorted(row["id"] for row in draft),
         "dormant_roster": sorted(row["id"] for row in dormant),
+        "composed_roster": sorted(row["id"] for row in stubs if row["producers"] > 0),
     }
 
 
