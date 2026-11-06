@@ -1,0 +1,68 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "imas_codex/standard_names/graph_store/graph_catalog.py:2307 (_lock_claimed_name_bindings in persist_generated_name_winners)",
+    "imas_codex/standard_names/graph_store/graph_catalog.py:2590 (supersede_prior_source_names in the compose transaction)",
+    "imas_codex/standard_names/graph_store/graph_catalog.py:2613 (persist_generated_name_winners)",
+    "imas_codex/standard_names/graph_store/graph_source_bindings.py:1515 (_lock_claimed_name_bindings, claimed-name path)",
+    "imas_codex/standard_names/graph_store/graph_source_bindings.py:1612 (_lock_claimed_name_bindings, claimed-name path)",
+    "imas_codex/standard_names/graph_store/graph_refinement.py:1321 (retarget_standard_name_sources)",
+    "imas_codex/standard_names/edit.py:1936 (retarget_standard_name_sources)"
+  ],
+  "completed_at": "2026-11-06T23:50:52.013Z",
+  "dispatched_at": "2026-11-06T23:41:34Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_source_bindings.py",
+      "line": 883,
+      "severity": "blocking",
+      "text": "Defect 1 is neither reproduced nor fixed: _pending_projection_stub_predicate carries the same clauses as the base predicate at c59ac227a:1010-1036, so the five named stubs still fail with 'has non-bindable name_stage pending' and the node's fragment states 'No production composition result is claimed'. The coordinator's resume-3 advice deferred this ('Do not chase the original adoption cause'), so the finding records that the stated node goal is undelivered rather than that the repair was unknown to the coordinator."
+    },
+    {
+      "file": "tests/standard_names/test_compose_adopts_pending_stub.py",
+      "line": 212,
+      "severity": "non-blocking",
+      "text": "Three of the four cases the brief required to fail on main pass on the base arm: test_two_path_projection_stub_is_adopted (:212), test_structural_parent_projection_stub_is_adopted (:226) and test_stolen_claim_aborts_transaction (:477); unit-base-graph.log fails only test_*second_claim_after_unpark_finalizes*, so the adoption and stolen-claim cases are regression coverage rather than the main-failing controls the done_when asks for."
+    },
+    {
+      "file": "tests/standard_names/test_compose_adopts_pending_stub.py",
+      "line": 441,
+      "severity": "non-blocking",
+      "text": "test_rich_write_then_adoption_keeps_the_ownership_guard asserts that a rich write followed by an adoption attempt yields winners == [] and leaves the stub pending, which pins the exact refusal that keeps the five stubs from composing; it must be revisited in the scoped compose the coordinator now owns, because a fix that lets the claimed source's own producer be adopted will make this test fail."
+    }
+  ],
+  "justifications": {
+    "durability": "tests/standard_names/test_compose_adopts_pending_stub.py:349 fails DID NOT RAISE with the copied predicate restored (unit-copy-negative.log EXIT=1) and tests/standard_names/test_compose_adopts_pending_stub.py:244 is the one case that reddens on c59ac227a, but the adoption cases at :212 and :226 pass on the base arm and no test reddens if the five-stub adoption defect is left in place.",
+    "evidence": "unit-head-graph.log ends '19 passed' with EXIT=0 and unit-base-graph.log records complete and is two logs, but the done_when's adoption measure is not asserted: unit-base-graph.log fails exactly one of nineteen cases on c59ac227a and the fragment records that the two-path and structural-parent adoption cases also pass on main.",
+    "fit": "Every commit from ba7f00e93 to 118e18d18 carries a conventional subject with a body and no attribution trailer, and the added symbols (_pending_projection_stub_predicate, _projection_migration_predicate, _projection_stub_source_bindings) name the mechanism without plan or ticket identifiers.",
+    "goal_fidelity": "imas_codex/standard_names/graph_store/graph_source_bindings.py:883 restates the base predicate at c59ac227a:1010-1036 with identical clauses, so the five named stubs still reach the 'has non-bindable name_stage pending' refusal and none of them is shown composable.",
+    "reuse": "imas_codex/standard_names/provenance_lifecycle.py:505 now delegates to the binding owner's predicate at imas_codex/standard_names/graph_store/graph_source_bindings.py:883 and appends only migration-specific retirement fences, so the duplicate predicate the prior review scored 5 no longer exists.",
+    "scope_discipline": "git diff c59ac227a..118e18d18 changes only graph_catalog.py, graph_source_bindings.py, graph_supersession.py, provenance_lifecycle.py, the assigned test file and the assigned fragment, all inside the manifest's declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is 'Make the five remaining pending projection stubs composable by their own DD sources'; at head the five named stubs still have no demonstrated composition path and the node's own fragment at docs/evidence/fragments/sn-integrity-backlog/sib-compose-remaining-stubs-fix.html states 'No production composition result is claimed'.\nVERDICT done_when: the done_when asks that both causes be named at file:line with live-state evidence and that every new case fail on main; unit-base-graph.log records 1 failed / 18 passed on c59ac227a, so only test_second_claim_after_unpark_finalizes is main-failing, the adoption cause is named nowhere, and the zero-added-id half is met with identical 10-failure default arms.\nVERDICT write_paths: the grant covered graph_source_bindings.py, graph_catalog.py, graph_foundation.py, graph_supersession.py, provenance_lifecycle.py, the adoption test, the fragment and a figures directory; all six changed paths lie inside it.\nVERDICT manifest: read; it records status complete at twelve commits ba7f00e93..118e18d18 with unit-head-graph.log 19 passed, unit-base-graph.log 1 failed / 18 passed, both default arms 10 failed / 8523 passed / 15 skipped with identical ids, and the restored-copy negative control.\nVERDICT diff: read commit by commit from c59ac227a; ba7f00e93 preserves a claimed source's status through the rich write (graph_catalog.py:522) and requires extracted at finalization (:2459), four commits build the projection-stub migration path, two reset the fixture receipt ledger, three record evidence, 26b90b96f extracts the shared predicate into the binding owner, and 118e18d18 is docs-only.\nCALL_SITES: imas_codex/standard_names/graph_store/graph_catalog.py:2307, imas_codex/standard_names/graph_store/graph_catalog.py:2590, imas_codex/standard_names/graph_store/graph_catalog.py:2613, imas_codex/standard_names/graph_store/graph_source_bindings.py:1515, imas_codex/standard_names/graph_store/graph_source_bindings.py:1612, imas_codex/standard_names/graph_store/graph_refinement.py:1321, imas_codex/standard_names/edit.py:1936\nSCORE goal_fidelity: 7\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/graph_store/graph_source_bindings.py:883 restates the base predicate at c59ac227a:1010-1036 with identical clauses, so the five named stubs still reach the 'has non-bindable name_stage pending' refusal and none is shown composable.\nSCORE evidence: 12\nJUSTIFICATION evidence: unit-head-graph.log ends '19 passed' with EXIT=0 and unit-base-graph.log records complete and is two logs, but the done_when's adoption measure is not asserted: unit-base-graph.log fails exactly one of nineteen cases on c59ac227a and the fragment records that the two-path and structural-parent adoption cases also pass on main.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff c59ac227a..118e18d18 changes only graph_catalog.py, graph_source_bindings.py, graph_supersession.py, provenance_lifecycle.py, the assigned test file and the assigned fragment, all inside the manifest's declared write paths.\nSCORE durability: 14\nJUSTIFICATION durability: tests/standard_names/test_compose_adopts_pending_stub.py:349 fails DID NOT RAISE with the copied predicate restored (unit-copy-negative.log EXIT=1) and :244 is the one case that reddens on c59ac227a, but the adoption cases at :212 and :226 pass on the base arm and no test reddens if the five-stub adoption defect remains.\nSCORE fit: 18\nJUSTIFICATION fit: every commit from ba7f00e93 to 118e18d18 carries a conventional subject with a body and no attribution trailer, and the added symbols (_pending_projection_stub_predicate, _projection_migration_predicate, _projection_stub_source_bindings) name the mechanism without plan or ticket identifiers.\nSCORE reuse: 19\nJUSTIFICATION reuse: imas_codex/standard_names/provenance_lifecycle.py:505 now delegates to the binding owner's predicate at imas_codex/standard_names/graph_store/graph_source_bindings.py:883 and appends only migration-specific retirement fences, so the duplicate predicate no longer exists.\nFINDING imas_codex/standard_names/graph_store/graph_source_bindings.py:883 blocking: Defect 1 is neither reproduced nor fixed; the predicate carries the same clauses as c59ac227a:1010-1036, so the five named stubs still fail with 'has non-bindable name_stage pending' and the node's fragment states no production composition result is claimed.\nFINDING tests/standard_names/test_compose_adopts_pending_stub.py:212 non-blocking: three of the four cases the brief required to fail on main pass on the base arm (two-path at :212, structural-parent at :226, stolen-claim at :477), so they are regression coverage rather than main-failing controls.\nFINDING tests/standard_names/test_compose_adopts_pending_stub.py:441 non-blocking: test_rich_write_then_adoption_keeps_the_ownership_guard pins the refusal that keeps the five stubs from composing and must be revisited in the scoped compose the coordinator now owns.\n",
+  "review_run_id": "r-20261106T234017182115-review-of-sib-compose-remaining-stubs-fix-118e18d1805b",
+  "reviewed_base_sha": "c59ac227a60e23702eaf865b987b3027fbb0f590",
+  "reviewed_head_sha": "118e18d1805b05ad12de3479fd6af108eb1d4781",
+  "reviewed_run_id": "r-20261106T064233498406-sib-compose-remaining-stubs-fix",
+  "scores": {
+    "durability": 14,
+    "evidence": 12,
+    "fit": 18,
+    "goal_fidelity": 7,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T23:54:08.596341+00:00",
+  "total": 89,
+  "verdicts": {
+    "diff": "Read commit by commit from c59ac227a: ba7f00e93 keeps a claimed source at extracted through the rich write (graph_catalog.py:522) and requires extracted status at finalization (graph_catalog.py:2459); c0dc854bc/84d91c7f8/ee1b300fd/882ad4989 build the projection-stub migration path across graph_supersession.py and provenance_lifecycle.py; 99e970cae/918a87772 reset the fixture receipt ledger; 7574a51bc/d938a02ef/6bf053818 record evidence; 26b90b96f extracts _pending_projection_stub_predicate into the binding owner and deletes the copied predicate; 118e18d18 is docs-only.",
+    "done_when": "The done_when asks that both causes be named at file:line with live-state evidence for the five, that both be fixed, that the new cases fail on main and pass at head, and that the gate add zero failure ids; unit-base-graph.log shows only 1 failed / 18 passed on c59ac227a, so only test_second_claim_after_unpark_finalizes is main-failing, the adoption cause is named nowhere, and the zero-added-id half is genuinely met (unit-base-default.log and unit-head-default.log are each 10 failed / 8523 passed / 15 skipped with an identical id set).",
+    "goal": "The node goal is 'Make the five remaining pending projection stubs composable by their own DD sources'; at head the five named stubs (line_averaged_neon_density, radius_of_soft_xray_detector, ratio_of_diamagnetic_vorticity_to_major_radius, toroidal_coordinate_of_spectrometer, toroidal_tritium_velocity) still have no demonstrated composition path, and the node's own fragment (docs/evidence/fragments/sn-integrity-backlog/sib-compose-remaining-stubs-fix.html) states 'No production composition result is claimed' and 'The coordinator owns review, landing and subsequent scoped composition of the five stubs'.",
+    "manifest": "Read; it records status complete, twelve commits from ba7f00e93 to 118e18d18, unit-head-graph.log 19 passed, unit-base-graph.log 1 failed / 18 passed, both default arms 10 failed / 8523 passed / 15 skipped with identical ids, and the restored-copy negative control in unit-copy-negative.log.",
+    "write_paths": "The grant was graph_source_bindings.py, graph_catalog.py, graph_foundation.py, graph_supersession.py, provenance_lifecycle.py, tests/standard_names/test_compose_adopts_pending_stub.py, the fragment and a figures directory; every one of the six changed paths in the diff lies inside that set and nothing else is touched."
+  }
+}
