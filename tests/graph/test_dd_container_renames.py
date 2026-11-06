@@ -66,3 +66,38 @@ def test_rename_record_builder_carries_both_container_renames():
         mappings["gyrokinetics/normalizing_quantities/r"]["new_path"]
         == "gyrokinetics_local/normalizing_quantities/r"
     )
+
+
+def test_renamed_to_writer_receives_both_container_pairs():
+    from unittest.mock import MagicMock
+
+    from imas_codex.graph.build_dd import (
+        _batch_create_renamed_to,
+        _detect_container_renames,
+        collect_renamed_to_mappings,
+        extract_paths_for_version,
+    )
+
+    old = extract_paths_for_version("3.36.0")["paths"]
+    new = extract_paths_for_version("3.37.0")["paths"]
+    _, dd_renames = dd_path_index()
+    mappings = collect_renamed_to_mappings(
+        version_renames=_detect_container_renames(old, new),
+        path_mappings={"old_to_new": {}},
+        dd_renames=dd_renames,
+    )
+
+    client = MagicMock()
+    _batch_create_renamed_to(client, mappings)
+
+    written = {
+        (r["old_path"], r["new_path"]) for r in client.query.call_args.kwargs["renames"]
+    }
+    assert (
+        "gyrokinetics/normalizing_quantities/r",
+        "gyrokinetics_local/normalizing_quantities/r",
+    ) in written
+    assert (
+        "ec_launchers/launcher/launching_position/r",
+        "ec_launchers/beam/launching_position/r",
+    ) in written
