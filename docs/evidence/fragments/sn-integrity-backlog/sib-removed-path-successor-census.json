@@ -1,0 +1,2198 @@
+{
+  "census": {
+    "population": 40,
+    "rows": [
+      {
+        "id": "angle_of_plasma_boundary_gap",
+        "stage": "superseded",
+        "status": "superseded",
+        "origin": null,
+        "unit": "rad",
+        "sources": [
+          {
+            "id": "dd:equilibrium/time_slice/boundary_separatrix/gap/angle",
+            "source_id": "equilibrium/time_slice/boundary_separatrix/gap/angle",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "equilibrium/time_slice/boundary_separatrix/gap/angle",
+            "removed_in": "4.0.0",
+            "introduced_in": "3.31.0",
+            "lifecycle_status": "removed",
+            "unit": "rad",
+            "successor": "equilibrium/time_slice/boundary/gap/angle",
+            "successor_method": "structural_inference",
+            "successor_present": true,
+            "successor_lifecycle": null,
+            "successor_unit": "rad",
+            "successor_source_status": "attached",
+            "successor_source_id": "dd:equilibrium/time_slice/boundary/gap/angle",
+            "successor_produced_by": [
+              "poloidal_angle_of_plasma_boundary_gap"
+            ]
+          }
+        ],
+        "proposals": [
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          }
+        ]
+      },
+      {
+        "id": "curvature_of_bragg_crystal",
+        "stage": "superseded",
+        "status": "superseded",
+        "origin": null,
+        "unit": "m",
+        "sources": [
+          {
+            "id": "dd:spectrometer_x_ray_crystal/crystal/curvature_vertical",
+            "source_id": "spectrometer_x_ray_crystal/crystal/curvature_vertical",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "spectrometer_x_ray_crystal/crystal/curvature_vertical",
+            "removed_in": "3.34.0",
+            "introduced_in": "3.25.0",
+            "lifecycle_status": "removed",
+            "unit": "m",
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          }
+        ],
+        "proposals": [
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          }
+        ]
+      },
+      {
+        "id": "deuterium_tritium_flux",
+        "stage": "reviewed",
+        "status": "draft",
+        "origin": null,
+        "unit": "Hz",
+        "sources": [
+          {
+            "id": "dd:summary/fusion/neutron_fluxes/dt/total/value",
+            "source_id": "summary/fusion/neutron_fluxes/dt/total/value",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "summary/fusion/neutron_fluxes/dt/total/value",
+            "removed_in": "4.0.0",
+            "introduced_in": "3.22.0",
+            "lifecycle_status": "removed",
+            "unit": "Hz",
+            "successor": "summary/fusion/neutron_rates/dt/total/value",
+            "successor_method": "renamed_to_edge",
+            "successor_present": true,
+            "successor_lifecycle": null,
+            "successor_unit": "Hz",
+            "successor_source_status": "extracted",
+            "successor_source_id": "dd:summary/fusion/neutron_rates/dt/total/value",
+            "successor_produced_by": []
+          }
+        ],
+        "proposals": [
+          {
+            "action": "rebind",
+            "reason": "the successor exists with matching units and no name holds it; rebind through a signed source move and retire this name with a successor link"
+          }
+        ]
+      },
+      {
+        "id": "flux_surface_average_magnetic_field_magnitude",
+        "stage": "pending",
+        "status": "draft",
+        "origin": "pipeline",
+        "unit": "T",
+        "sources": [
+          {
+            "id": "dd:equilibrium/time_slice/profiles_1d/b_average",
+            "source_id": "equilibrium/time_slice/profiles_1d/b_average",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "equilibrium/time_slice/profiles_1d/b_average",
+            "removed_in": "4.0.0",
+            "introduced_in": "3.22.0",
+            "lifecycle_status": "removed",
+            "unit": "T",
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          }
+        ],
+        "proposals": [
+          {
+            "action": "hold or retire",
+            "reason": "no DD 4 successor was found for the removed path"
+          }
+        ]
+      },
+      {
+        "id": "flux_surface_averaged_velocity",
+        "stage": "superseded",
+        "status": "superseded",
+        "origin": null,
+        "unit": "m.s^-1",
+        "sources": [
+          {
+            "id": "dd:summary/local/separatrix_average/velocity_tor/nitrogen/value",
+            "source_id": "summary/local/separatrix_average/velocity_tor/nitrogen/value",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "summary/local/separatrix_average/velocity_tor/nitrogen/value",
+            "removed_in": "4.0.0",
+            "introduced_in": "3.37.0",
+            "lifecycle_status": "removed",
+            "unit": "m.s^-1",
+            "successor": "summary/local/separatrix_average/velocity_phi/nitrogen/value",
+            "successor_method": "renamed_to_edge",
+            "successor_present": true,
+            "successor_lifecycle": null,
+            "successor_unit": "m.s^-1",
+            "successor_source_status": "composed",
+            "successor_source_id": "dd:summary/local/separatrix_average/velocity_phi/nitrogen/value",
+            "successor_produced_by": [
+              "flux_surface_averaged_toroidal_nitrogen_velocity_at_plasma_boundary"
+            ]
+          }
+        ],
+        "proposals": [
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          }
+        ]
+      },
+      {
+        "id": "gap_at_plasma_boundary",
+        "stage": "superseded",
+        "status": "superseded",
+        "origin": "pipeline",
+        "unit": "m",
+        "sources": [
+          {
+            "id": "dd:equilibrium/time_slice/boundary_separatrix/closest_wall_point/distance",
+            "source_id": "equilibrium/time_slice/boundary_separatrix/closest_wall_point/distance",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "equilibrium/time_slice/boundary_separatrix/closest_wall_point/distance",
+            "removed_in": "4.0.0",
+            "introduced_in": "3.33.0",
+            "lifecycle_status": "removed",
+            "unit": "m",
+            "successor": "equilibrium/time_slice/boundary/closest_wall_point/distance",
+            "successor_method": "structural_inference",
+            "successor_present": true,
+            "successor_lifecycle": null,
+            "successor_unit": "m",
+            "successor_source_status": "extracted",
+            "successor_source_id": "dd:equilibrium/time_slice/boundary/closest_wall_point/distance",
+            "successor_produced_by": []
+          }
+        ],
+        "proposals": [
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          }
+        ]
+      },
+      {
+        "id": "gradient_of_normalized_pressure_at_flux_surface",
+        "stage": "superseded",
+        "status": "superseded",
+        "origin": "pipeline",
+        "unit": "1",
+        "sources": [
+          {
+            "id": "dd:gyrokinetics/flux_surface/pressure_gradient_norm",
+            "source_id": "gyrokinetics/flux_surface/pressure_gradient_norm",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "gyrokinetics/flux_surface/pressure_gradient_norm",
+            "removed_in": "3.40.0",
+            "introduced_in": "3.22.0",
+            "lifecycle_status": "removed",
+            "unit": "1",
+            "successor": "gyrokinetics_local/flux_surface/pressure_gradient_norm",
+            "successor_method": "ids_rename_dd_xml",
+            "successor_present": true,
+            "successor_lifecycle": "alpha",
+            "successor_unit": "1",
+            "successor_source_status": "extracted",
+            "successor_source_id": "dd:gyrokinetics_local/flux_surface/pressure_gradient_norm",
+            "successor_produced_by": []
+          }
+        ],
+        "proposals": [
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          }
+        ]
+      },
+      {
+        "id": "height_of_bragg_crystal",
+        "stage": "superseded",
+        "status": "superseded",
+        "origin": null,
+        "unit": "m",
+        "sources": [
+          {
+            "id": "dd:spectrometer_x_ray_crystal/crystal/height",
+            "source_id": "spectrometer_x_ray_crystal/crystal/height",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "spectrometer_x_ray_crystal/crystal/height",
+            "removed_in": "3.34.0",
+            "introduced_in": "3.25.0",
+            "lifecycle_status": "removed",
+            "unit": "m",
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          }
+        ],
+        "proposals": [
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          }
+        ]
+      },
+      {
+        "id": "ion_average_temperature_at_plasma_boundary",
+        "stage": "superseded",
+        "status": "superseded",
+        "origin": null,
+        "unit": "eV",
+        "sources": [
+          {
+            "id": "dd:langmuir_probes/probe/t_i",
+            "source_id": "langmuir_probes/probe/t_i",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "langmuir_probes/probe/t_i",
+            "removed_in": "3.24.0",
+            "introduced_in": "3.22.0",
+            "lifecycle_status": "removed",
+            "unit": "eV",
+            "successor": "langmuir_probes/embedded/t_i",
+            "successor_method": "structural_inference",
+            "successor_present": true,
+            "successor_lifecycle": null,
+            "successor_unit": "eV",
+            "successor_source_status": "attached",
+            "successor_source_id": "dd:langmuir_probes/embedded/t_i",
+            "successor_produced_by": [
+              "ion_temperature"
+            ]
+          }
+        ],
+        "proposals": [
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          }
+        ]
+      },
+      {
+        "id": "ion_state_average_charge",
+        "stage": "superseded",
+        "status": "superseded",
+        "origin": null,
+        "unit": "1",
+        "sources": [
+          {
+            "id": "dd:edge_profiles/ggd/ion/state/ionization_potential/values",
+            "source_id": "edge_profiles/ggd/ion/state/ionization_potential/values",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "edge_profiles/ggd/ion/state/ionization_potential/values",
+            "removed_in": "4.1.0",
+            "introduced_in": "4.0.0",
+            "lifecycle_status": "removed",
+            "unit": "Elementary Charge Unit",
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          }
+        ],
+        "proposals": [
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          }
+        ]
+      },
+      {
+        "id": "major_length_of_coil_conductor_element",
+        "stage": "superseded",
+        "status": "superseded",
+        "origin": null,
+        "unit": "m",
+        "sources": [
+          {
+            "id": "dd:pf_active/coil/element/geometry/oblique/length",
+            "source_id": "pf_active/coil/element/geometry/oblique/length",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "pf_active/coil/element/geometry/oblique/length",
+            "removed_in": "3.32.1",
+            "introduced_in": "3.22.0",
+            "lifecycle_status": "removed",
+            "unit": "m",
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          }
+        ],
+        "proposals": [
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          }
+        ]
+      },
+      {
+        "id": "mutual_inductance",
+        "stage": "superseded",
+        "status": "superseded",
+        "origin": null,
+        "unit": "H",
+        "sources": [
+          {
+            "id": "dd:em_coupling/mutual_loops_grid",
+            "source_id": "em_coupling/mutual_loops_grid",
+            "status": "stale"
+          },
+          {
+            "id": "dd:em_coupling/mutual_grid_active",
+            "source_id": "em_coupling/mutual_grid_active",
+            "status": "stale"
+          },
+          {
+            "id": "dd:em_coupling/mutual_plasma_passive",
+            "source_id": "em_coupling/mutual_plasma_passive",
+            "status": "stale"
+          },
+          {
+            "id": "dd:em_coupling/mutual_loops_active",
+            "source_id": "em_coupling/mutual_loops_active",
+            "status": "stale"
+          },
+          {
+            "id": "dd:em_coupling/mutual_plasma_active",
+            "source_id": "em_coupling/mutual_plasma_active",
+            "status": "stale"
+          },
+          {
+            "id": "dd:em_coupling/mutual_passive_active",
+            "source_id": "em_coupling/mutual_passive_active",
+            "status": "stale"
+          },
+          {
+            "id": "dd:em_coupling/mutual_active_active",
+            "source_id": "em_coupling/mutual_active_active",
+            "status": "stale"
+          },
+          {
+            "id": "dd:em_coupling/mutual_loops_passive",
+            "source_id": "em_coupling/mutual_loops_passive",
+            "status": "stale"
+          },
+          {
+            "id": "dd:em_coupling/mutual_grid_passive",
+            "source_id": "em_coupling/mutual_grid_passive",
+            "status": "stale"
+          },
+          {
+            "id": "dd:em_coupling/mutual_plasma_plasma",
+            "source_id": "em_coupling/mutual_plasma_plasma",
+            "status": "stale"
+          },
+          {
+            "id": "dd:em_coupling/mutual_passive_passive",
+            "source_id": "em_coupling/mutual_passive_passive",
+            "status": "stale"
+          },
+          {
+            "id": "dd:em_coupling/mutual_grid_grid",
+            "source_id": "em_coupling/mutual_grid_grid",
+            "status": "stale"
+          },
+          {
+            "id": "dd:em_coupling/mutual_loops_plasma",
+            "source_id": "em_coupling/mutual_loops_plasma",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "em_coupling/mutual_loops_grid",
+            "removed_in": "3.40.0",
+            "introduced_in": "3.22.0",
+            "lifecycle_status": "removed",
+            "unit": "H",
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          },
+          {
+            "path": "em_coupling/mutual_grid_active",
+            "removed_in": "3.40.0",
+            "introduced_in": "3.22.0",
+            "lifecycle_status": "removed",
+            "unit": "H",
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          },
+          {
+            "path": "em_coupling/mutual_plasma_passive",
+            "removed_in": "4.0.0",
+            "introduced_in": "3.40.0",
+            "lifecycle_status": "removed",
+            "unit": "H",
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          },
+          {
+            "path": "em_coupling/mutual_loops_active",
+            "removed_in": "4.0.0",
+            "introduced_in": "3.22.0",
+            "lifecycle_status": "removed",
+            "unit": "H",
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          },
+          {
+            "path": "em_coupling/mutual_plasma_active",
+            "removed_in": "4.0.0",
+            "introduced_in": "3.40.0",
+            "lifecycle_status": "removed",
+            "unit": "H",
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          },
+          {
+            "path": "em_coupling/mutual_passive_active",
+            "removed_in": "4.0.0",
+            "introduced_in": "3.22.0",
+            "lifecycle_status": "removed",
+            "unit": "H",
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          },
+          {
+            "path": "em_coupling/mutual_active_active",
+            "removed_in": "4.0.0",
+            "introduced_in": "3.22.0",
+            "lifecycle_status": "removed",
+            "unit": "H",
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          },
+          {
+            "path": "em_coupling/mutual_loops_passive",
+            "removed_in": "4.0.0",
+            "introduced_in": "3.22.0",
+            "lifecycle_status": "removed",
+            "unit": "H",
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          },
+          {
+            "path": "em_coupling/mutual_grid_passive",
+            "removed_in": "3.40.0",
+            "introduced_in": "3.22.0",
+            "lifecycle_status": "removed",
+            "unit": "H",
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          },
+          {
+            "path": "em_coupling/mutual_plasma_plasma",
+            "removed_in": "4.0.0",
+            "introduced_in": "3.40.0",
+            "lifecycle_status": "removed",
+            "unit": "H",
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          },
+          {
+            "path": "em_coupling/mutual_passive_passive",
+            "removed_in": "4.0.0",
+            "introduced_in": "3.22.0",
+            "lifecycle_status": "removed",
+            "unit": "H",
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          },
+          {
+            "path": "em_coupling/mutual_grid_grid",
+            "removed_in": "3.40.0",
+            "introduced_in": "3.22.0",
+            "lifecycle_status": "removed",
+            "unit": "H",
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          },
+          {
+            "path": "em_coupling/mutual_loops_plasma",
+            "removed_in": "4.0.0",
+            "introduced_in": "3.40.0",
+            "lifecycle_status": "removed",
+            "unit": "H",
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          }
+        ],
+        "proposals": [
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          },
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          },
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          },
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          },
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          },
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          },
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          },
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          },
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          },
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          },
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          },
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          },
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          }
+        ]
+      },
+      {
+        "id": "neutral_state_energy_convection_velocity",
+        "stage": "superseded",
+        "status": "superseded",
+        "origin": "derived",
+        "unit": "m.s^-1",
+        "sources": [
+          {
+            "id": "derived:neutral_state_energy_convection_velocity",
+            "source_id": "neutral_state_energy_convection_velocity",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "neutral_state_energy_convection_velocity",
+            "removed_in": null,
+            "introduced_in": null,
+            "lifecycle_status": null,
+            "unit": null,
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          }
+        ],
+        "proposals": [
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          }
+        ]
+      },
+      {
+        "id": "neutron_flux_due_to_thermal_fusion",
+        "stage": "superseded",
+        "status": "superseded",
+        "origin": null,
+        "unit": "Hz",
+        "sources": [
+          {
+            "id": "dd:summary/fusion/neutron_fluxes/dt/thermal/value",
+            "source_id": "summary/fusion/neutron_fluxes/dt/thermal/value",
+            "status": "stale"
+          },
+          {
+            "id": "dd:summary/fusion/neutron_fluxes/dd/thermal/value",
+            "source_id": "summary/fusion/neutron_fluxes/dd/thermal/value",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "summary/fusion/neutron_fluxes/dt/thermal/value",
+            "removed_in": "4.0.0",
+            "introduced_in": "3.22.0",
+            "lifecycle_status": "removed",
+            "unit": "Hz",
+            "successor": "summary/fusion/neutron_rates/dt/thermal/value",
+            "successor_method": "renamed_to_edge",
+            "successor_present": true,
+            "successor_lifecycle": null,
+            "successor_unit": "Hz",
+            "successor_source_status": "extracted",
+            "successor_source_id": "dd:summary/fusion/neutron_rates/dt/thermal/value",
+            "successor_produced_by": []
+          },
+          {
+            "path": "summary/fusion/neutron_fluxes/dd/thermal/value",
+            "removed_in": "4.0.0",
+            "introduced_in": "3.22.0",
+            "lifecycle_status": "removed",
+            "unit": "Hz",
+            "successor": "summary/fusion/neutron_rates/dd/thermal/value",
+            "successor_method": "renamed_to_edge",
+            "successor_present": true,
+            "successor_lifecycle": null,
+            "successor_unit": "Hz",
+            "successor_source_status": "extracted",
+            "successor_source_id": "dd:summary/fusion/neutron_rates/dd/thermal/value",
+            "successor_produced_by": []
+          }
+        ],
+        "proposals": [
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          },
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          }
+        ]
+      },
+      {
+        "id": "normalized_neutron_flux",
+        "stage": "superseded",
+        "status": "superseded",
+        "origin": null,
+        "unit": "m^-2",
+        "sources": [
+          {
+            "id": "dd:neutron_diagnostic/unit_source/radiation/reaction/flux",
+            "source_id": "neutron_diagnostic/unit_source/radiation/reaction/flux",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "neutron_diagnostic/unit_source/radiation/reaction/flux",
+            "removed_in": "3.41.0",
+            "introduced_in": "3.22.0",
+            "lifecycle_status": "removed",
+            "unit": "m^-2",
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          }
+        ],
+        "proposals": [
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          }
+        ]
+      },
+      {
+        "id": "normalized_parallel_perturbed_heat_flux",
+        "stage": "superseded",
+        "status": "superseded",
+        "origin": null,
+        "unit": "1",
+        "sources": [
+          {
+            "id": "dd:gyrokinetics/wavevector/eigenmode/fluxes_moments/moments_norm_gyrocenter/heat_flux_parallel",
+            "source_id": "gyrokinetics/wavevector/eigenmode/fluxes_moments/moments_norm_gyrocenter/heat_flux_parallel",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "gyrokinetics/wavevector/eigenmode/fluxes_moments/moments_norm_gyrocenter/heat_flux_parallel",
+            "removed_in": "3.40.0",
+            "introduced_in": "3.32.0",
+            "lifecycle_status": "removed",
+            "unit": "1",
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          }
+        ],
+        "proposals": [
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          }
+        ]
+      },
+      {
+        "id": "normalized_perpendicular_gyroaveraged_perturbed_energy",
+        "stage": "superseded",
+        "status": "superseded",
+        "origin": null,
+        "unit": "1",
+        "sources": [
+          {
+            "id": "dd:gyrokinetics/wavevector/eigenmode/fluxes_moments/moments_norm_gyrocenter/v_perpendicular_square_energy_gyroav",
+            "source_id": "gyrokinetics/wavevector/eigenmode/fluxes_moments/moments_norm_gyrocenter/v_perpendicular_square_energy_gyroav",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "gyrokinetics/wavevector/eigenmode/fluxes_moments/moments_norm_gyrocenter/v_perpendicular_square_energy_gyroav",
+            "removed_in": "3.40.0",
+            "introduced_in": "3.32.0",
+            "lifecycle_status": "removed",
+            "unit": "1",
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          }
+        ],
+        "proposals": [
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          }
+        ]
+      },
+      {
+        "id": "normalized_perpendicular_perturbed_energy",
+        "stage": "superseded",
+        "status": "superseded",
+        "origin": null,
+        "unit": "1",
+        "sources": [
+          {
+            "id": "dd:gyrokinetics/wavevector/eigenmode/fluxes_moments/moments_norm_gyrocenter/v_perpendicular_square_energy",
+            "source_id": "gyrokinetics/wavevector/eigenmode/fluxes_moments/moments_norm_gyrocenter/v_perpendicular_square_energy",
+            "status": "stale"
+          },
+          {
+            "id": "dd:gyrokinetics/wavevector/eigenmode/fluxes_moments/moments_norm_particle/v_perpendicular_square_energy",
+            "source_id": "gyrokinetics/wavevector/eigenmode/fluxes_moments/moments_norm_particle/v_perpendicular_square_energy",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "gyrokinetics/wavevector/eigenmode/fluxes_moments/moments_norm_gyrocenter/v_perpendicular_square_energy",
+            "removed_in": "3.40.0",
+            "introduced_in": "3.32.0",
+            "lifecycle_status": "removed",
+            "unit": "1",
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          },
+          {
+            "path": "gyrokinetics/wavevector/eigenmode/fluxes_moments/moments_norm_particle/v_perpendicular_square_energy",
+            "removed_in": "3.40.0",
+            "introduced_in": "3.32.0",
+            "lifecycle_status": "removed",
+            "unit": "1",
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          }
+        ],
+        "proposals": [
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          },
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          }
+        ]
+      },
+      {
+        "id": "parallel_neutral_state_particle_convection_velocity",
+        "stage": "superseded",
+        "status": "superseded",
+        "origin": "pipeline",
+        "unit": "m.s^-1",
+        "sources": [
+          {
+            "id": "dd:edge_profiles/profiles_1d/neutral/state/velocity/parallel",
+            "source_id": "edge_profiles/profiles_1d/neutral/state/velocity/parallel",
+            "status": "stale"
+          },
+          {
+            "id": "dd:plasma_profiles/profiles_1d/neutral/state/velocity/parallel",
+            "source_id": "plasma_profiles/profiles_1d/neutral/state/velocity/parallel",
+            "status": "stale"
+          },
+          {
+            "id": "dd:core_profiles/profiles_1d/neutral/state/velocity/parallel",
+            "source_id": "core_profiles/profiles_1d/neutral/state/velocity/parallel",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "edge_profiles/profiles_1d/neutral/state/velocity/parallel",
+            "removed_in": "4.0.0",
+            "introduced_in": "3.22.0",
+            "lifecycle_status": "removed",
+            "unit": "m.s^-1",
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          },
+          {
+            "path": "plasma_profiles/profiles_1d/neutral/state/velocity/parallel",
+            "removed_in": "4.0.0",
+            "introduced_in": "3.42.0",
+            "lifecycle_status": "removed",
+            "unit": "m.s^-1",
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          },
+          {
+            "path": "core_profiles/profiles_1d/neutral/state/velocity/parallel",
+            "removed_in": "4.0.0",
+            "introduced_in": "3.22.0",
+            "lifecycle_status": "removed",
+            "unit": "m.s^-1",
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          }
+        ],
+        "proposals": [
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          },
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          },
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          }
+        ]
+      },
+      {
+        "id": "plasma_power_at_wall",
+        "stage": "superseded",
+        "status": "superseded",
+        "origin": null,
+        "unit": "W",
+        "sources": [
+          {
+            "id": "dd:wall/global_quantities/power_from_plasma",
+            "source_id": "wall/global_quantities/power_from_plasma",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "wall/global_quantities/power_from_plasma",
+            "removed_in": "3.31.0",
+            "introduced_in": "3.22.0",
+            "lifecycle_status": "removed",
+            "unit": "W",
+            "successor": "wall/global_quantities/power_incident",
+            "successor_method": "renamed_to_edge",
+            "successor_present": true,
+            "successor_lifecycle": null,
+            "successor_unit": "W",
+            "successor_source_status": "composed",
+            "successor_source_id": "dd:wall/global_quantities/power_incident",
+            "successor_produced_by": [
+              "total_incident_power_at_wall"
+            ]
+          }
+        ],
+        "proposals": [
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          }
+        ]
+      },
+      {
+        "id": "polarization_angle",
+        "stage": "superseded",
+        "status": "superseded",
+        "origin": null,
+        "unit": "rad",
+        "sources": [
+          {
+            "id": "dd:mse/channel/polarisation_angle",
+            "source_id": "mse/channel/polarisation_angle",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "mse/channel/polarisation_angle",
+            "removed_in": "4.0.0",
+            "introduced_in": "3.22.0",
+            "lifecycle_status": "removed",
+            "unit": "rad",
+            "successor": "mse/channel/polarization_angle",
+            "successor_method": "renamed_to_edge",
+            "successor_present": true,
+            "successor_lifecycle": null,
+            "successor_unit": "rad",
+            "successor_source_status": "extracted",
+            "successor_source_id": "dd:mse/channel/polarization_angle",
+            "successor_produced_by": []
+          }
+        ],
+        "proposals": [
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          }
+        ]
+      },
+      {
+        "id": "radial_coordinate_of_flux_surface",
+        "stage": "accepted",
+        "status": "draft",
+        "origin": null,
+        "unit": "m",
+        "sources": [
+          {
+            "id": "dd:gyrokinetics/normalizing_quantities/r",
+            "source_id": "gyrokinetics/normalizing_quantities/r",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "gyrokinetics/normalizing_quantities/r",
+            "removed_in": "3.40.0",
+            "introduced_in": "3.32.0",
+            "lifecycle_status": "removed",
+            "unit": "m",
+            "successor": "gyrokinetics_local/normalizing_quantities/r",
+            "successor_method": "ids_rename_dd_xml",
+            "successor_present": true,
+            "successor_lifecycle": "alpha",
+            "successor_unit": "m",
+            "successor_source_status": "extracted",
+            "successor_source_id": "dd:gyrokinetics_local/normalizing_quantities/r",
+            "successor_produced_by": []
+          }
+        ],
+        "proposals": [
+          {
+            "action": "rebind",
+            "reason": "the successor exists with matching units and no name holds it; rebind through a signed source move and retire this name with a successor link"
+          }
+        ]
+      },
+      {
+        "id": "radial_coordinate_of_launching_position",
+        "stage": "accepted",
+        "status": "draft",
+        "origin": null,
+        "unit": "m",
+        "sources": [
+          {
+            "id": "dd:ec_launchers/launcher/launching_position/r",
+            "source_id": "ec_launchers/launcher/launching_position/r",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "ec_launchers/launcher/launching_position/r",
+            "removed_in": "3.37.0",
+            "introduced_in": "3.25.0",
+            "lifecycle_status": "removed",
+            "unit": "m",
+            "successor": "ec_launchers/beam/launching_position/r",
+            "successor_method": "structural_inference",
+            "successor_present": true,
+            "successor_lifecycle": null,
+            "successor_unit": "m",
+            "successor_source_status": "extracted",
+            "successor_source_id": "dd:ec_launchers/beam/launching_position/r",
+            "successor_produced_by": []
+          }
+        ],
+        "proposals": [
+          {
+            "action": "rebind",
+            "reason": "the successor exists with matching units and no name holds it; rebind through a signed source move and retire this name with a successor link"
+          }
+        ]
+      },
+      {
+        "id": "radial_derivative_of_coefficient_of_flux_surface",
+        "stage": "superseded",
+        "status": "superseded",
+        "origin": null,
+        "unit": "1",
+        "sources": [
+          {
+            "id": "dd:gyrokinetics/flux_surface/delongation_dr_minor_norm",
+            "source_id": "gyrokinetics/flux_surface/delongation_dr_minor_norm",
+            "status": "stale"
+          },
+          {
+            "id": "dd:gyrokinetics/flux_surface/ds_dr_minor_norm",
+            "source_id": "gyrokinetics/flux_surface/ds_dr_minor_norm",
+            "status": "stale"
+          },
+          {
+            "id": "dd:gyrokinetics/flux_surface/dc_dr_minor_norm",
+            "source_id": "gyrokinetics/flux_surface/dc_dr_minor_norm",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "gyrokinetics/flux_surface/delongation_dr_minor_norm",
+            "removed_in": "3.40.0",
+            "introduced_in": "3.37.0",
+            "lifecycle_status": "removed",
+            "unit": "1",
+            "successor": "gyrokinetics_local/flux_surface/delongation_dr_minor_norm",
+            "successor_method": "ids_rename_dd_xml",
+            "successor_present": true,
+            "successor_lifecycle": null,
+            "successor_unit": "1",
+            "successor_source_status": "extracted",
+            "successor_source_id": "dd:gyrokinetics_local/flux_surface/delongation_dr_minor_norm",
+            "successor_produced_by": []
+          },
+          {
+            "path": "gyrokinetics/flux_surface/ds_dr_minor_norm",
+            "removed_in": "3.40.0",
+            "introduced_in": "3.22.0",
+            "lifecycle_status": "removed",
+            "unit": "1",
+            "successor": "gyrokinetics_local/flux_surface/ds_dr_minor_norm",
+            "successor_method": "ids_rename_dd_xml",
+            "successor_present": true,
+            "successor_lifecycle": null,
+            "successor_unit": "1",
+            "successor_source_status": "extracted",
+            "successor_source_id": "dd:gyrokinetics_local/flux_surface/ds_dr_minor_norm",
+            "successor_produced_by": []
+          },
+          {
+            "path": "gyrokinetics/flux_surface/dc_dr_minor_norm",
+            "removed_in": "3.40.0",
+            "introduced_in": "3.22.0",
+            "lifecycle_status": "removed",
+            "unit": "1",
+            "successor": "gyrokinetics_local/flux_surface/dc_dr_minor_norm",
+            "successor_method": "ids_rename_dd_xml",
+            "successor_present": true,
+            "successor_lifecycle": null,
+            "successor_unit": "1",
+            "successor_source_status": "extracted",
+            "successor_source_id": "dd:gyrokinetics_local/flux_surface/dc_dr_minor_norm",
+            "successor_produced_by": []
+          }
+        ],
+        "proposals": [
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          },
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          },
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          }
+        ]
+      },
+      {
+        "id": "radial_derivative_of_major_radius_of_geometric_axis",
+        "stage": "superseded",
+        "status": "superseded",
+        "origin": null,
+        "unit": "1",
+        "sources": [
+          {
+            "id": "dd:gyrokinetics/flux_surface/dgeometric_axis_r_dr_minor",
+            "source_id": "gyrokinetics/flux_surface/dgeometric_axis_r_dr_minor",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "gyrokinetics/flux_surface/dgeometric_axis_r_dr_minor",
+            "removed_in": "3.40.0",
+            "introduced_in": "3.37.0",
+            "lifecycle_status": "removed",
+            "unit": "1",
+            "successor": "gyrokinetics_local/flux_surface/dgeometric_axis_r_dr_minor",
+            "successor_method": "ids_rename_dd_xml",
+            "successor_present": true,
+            "successor_lifecycle": null,
+            "successor_unit": "1",
+            "successor_source_status": "extracted",
+            "successor_source_id": "dd:gyrokinetics_local/flux_surface/dgeometric_axis_r_dr_minor",
+            "successor_produced_by": []
+          }
+        ],
+        "proposals": [
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          }
+        ]
+      },
+      {
+        "id": "radial_derivative_of_toroidal_particle_velocity",
+        "stage": "superseded",
+        "status": "superseded",
+        "origin": null,
+        "unit": "1",
+        "sources": [
+          {
+            "id": "dd:gyrokinetics_local/species/velocity_tor_gradient_norm",
+            "source_id": "gyrokinetics_local/species/velocity_tor_gradient_norm",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "gyrokinetics_local/species/velocity_tor_gradient_norm",
+            "removed_in": "4.0.0",
+            "introduced_in": "3.40.0",
+            "lifecycle_status": "removed",
+            "unit": "1",
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          }
+        ],
+        "proposals": [
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          }
+        ]
+      },
+      {
+        "id": "radiated_power",
+        "stage": "superseded",
+        "status": "superseded",
+        "origin": null,
+        "unit": "W",
+        "sources": [
+          {
+            "id": "dd:bolometer/channel/power",
+            "source_id": "bolometer/channel/power",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "bolometer/channel/power",
+            "removed_in": "4.1.0",
+            "introduced_in": "3.22.0",
+            "lifecycle_status": "removed",
+            "unit": "W",
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          }
+        ],
+        "proposals": [
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          }
+        ]
+      },
+      {
+        "id": "ratio_of_magnetic_field_to_current_of_poloidal_field_coil",
+        "stage": "superseded",
+        "status": "superseded",
+        "origin": "pipeline",
+        "unit": "A^-1.T",
+        "sources": [
+          {
+            "id": "dd:em_coupling/b_field_pol_probes_plasma",
+            "source_id": "em_coupling/b_field_pol_probes_plasma",
+            "status": "stale"
+          },
+          {
+            "id": "dd:em_coupling/field_probes_passive",
+            "source_id": "em_coupling/field_probes_passive",
+            "status": "stale"
+          },
+          {
+            "id": "dd:em_coupling/field_probes_grid",
+            "source_id": "em_coupling/field_probes_grid",
+            "status": "stale"
+          },
+          {
+            "id": "dd:em_coupling/b_field_pol_probes_active",
+            "source_id": "em_coupling/b_field_pol_probes_active",
+            "status": "stale"
+          },
+          {
+            "id": "dd:em_coupling/field_probes_active",
+            "source_id": "em_coupling/field_probes_active",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "em_coupling/b_field_pol_probes_plasma",
+            "removed_in": "4.0.0",
+            "introduced_in": "3.40.0",
+            "lifecycle_status": "removed",
+            "unit": "A^-1.T",
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          },
+          {
+            "path": "em_coupling/field_probes_passive",
+            "removed_in": "3.40.0",
+            "introduced_in": "3.22.0",
+            "lifecycle_status": "removed",
+            "unit": "A^-1.T",
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          },
+          {
+            "path": "em_coupling/field_probes_grid",
+            "removed_in": "3.40.0",
+            "introduced_in": "3.22.0",
+            "lifecycle_status": "removed",
+            "unit": "A^-1.T",
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          },
+          {
+            "path": "em_coupling/b_field_pol_probes_active",
+            "removed_in": "4.0.0",
+            "introduced_in": "3.40.0",
+            "lifecycle_status": "removed",
+            "unit": "A^-1.T",
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          },
+          {
+            "path": "em_coupling/field_probes_active",
+            "removed_in": "3.40.0",
+            "introduced_in": "3.22.0",
+            "lifecycle_status": "removed",
+            "unit": "A^-1.T",
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          }
+        ],
+        "proposals": [
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          },
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          },
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          },
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          },
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          }
+        ]
+      },
+      {
+        "id": "reference_beta",
+        "stage": "superseded",
+        "status": "superseded",
+        "origin": null,
+        "unit": "1",
+        "sources": [
+          {
+            "id": "dd:gyrokinetics/species_all/beta_reference",
+            "source_id": "gyrokinetics/species_all/beta_reference",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "gyrokinetics/species_all/beta_reference",
+            "removed_in": "3.40.0",
+            "introduced_in": "3.22.0",
+            "lifecycle_status": "removed",
+            "unit": "1",
+            "successor": "gyrokinetics_local/species_all/beta_reference",
+            "successor_method": "ids_rename_dd_xml",
+            "successor_present": true,
+            "successor_lifecycle": "alpha",
+            "successor_unit": "1",
+            "successor_source_status": "extracted",
+            "successor_source_id": "dd:gyrokinetics_local/species_all/beta_reference",
+            "successor_produced_by": []
+          }
+        ],
+        "proposals": [
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          }
+        ]
+      },
+      {
+        "id": "spun_wavelength_of_fiber_optic_current_sensor",
+        "stage": "superseded",
+        "status": "superseded",
+        "origin": "pipeline",
+        "unit": "m",
+        "sources": [
+          {
+            "id": "dd:focs/spun",
+            "source_id": "focs/spun",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "focs/spun",
+            "removed_in": "3.40.0",
+            "introduced_in": "3.39.0",
+            "lifecycle_status": "removed",
+            "unit": "m",
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          }
+        ],
+        "proposals": [
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          }
+        ]
+      },
+      {
+        "id": "toroidal_angle_of_secondary_x_point",
+        "stage": "superseded",
+        "status": "superseded",
+        "origin": "pipeline",
+        "unit": "m",
+        "sources": [
+          {
+            "id": "dd:equilibrium/time_slice/boundary_secondary_separatrix/x_point/r",
+            "source_id": "equilibrium/time_slice/boundary_secondary_separatrix/x_point/r",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "equilibrium/time_slice/boundary_secondary_separatrix/x_point/r",
+            "removed_in": "4.0.0",
+            "introduced_in": "3.32.0",
+            "lifecycle_status": "removed",
+            "unit": "m",
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          }
+        ],
+        "proposals": [
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          }
+        ]
+      },
+      {
+        "id": "toroidal_current_density_due_to_distribution_function_driven",
+        "stage": "accepted",
+        "status": "draft",
+        "origin": null,
+        "unit": "A.m^-2",
+        "sources": [
+          {
+            "id": "dd:distributions/distribution/profiles_2d/current_tor",
+            "source_id": "distributions/distribution/profiles_2d/current_tor",
+            "status": "stale"
+          },
+          {
+            "id": "dd:distributions/distribution/profiles_1d/current_tor",
+            "source_id": "distributions/distribution/profiles_1d/current_tor",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "distributions/distribution/profiles_2d/current_tor",
+            "removed_in": "4.0.0",
+            "introduced_in": "3.22.0",
+            "lifecycle_status": "removed",
+            "unit": "A.m^-2",
+            "successor": "distributions/distribution/profiles_2d/current_phi",
+            "successor_method": "renamed_to_edge",
+            "successor_present": true,
+            "successor_lifecycle": null,
+            "successor_unit": "A.m^-2",
+            "successor_source_status": "extracted",
+            "successor_source_id": "dd:distributions/distribution/profiles_2d/current_phi",
+            "successor_produced_by": []
+          },
+          {
+            "path": "distributions/distribution/profiles_1d/current_tor",
+            "removed_in": "4.0.0",
+            "introduced_in": "3.22.0",
+            "lifecycle_status": "removed",
+            "unit": "A.m^-2",
+            "successor": "distributions/distribution/profiles_1d/current_phi",
+            "successor_method": "renamed_to_edge",
+            "successor_present": true,
+            "successor_lifecycle": null,
+            "successor_unit": "A.m^-2",
+            "successor_source_status": "extracted",
+            "successor_source_id": "dd:distributions/distribution/profiles_1d/current_phi",
+            "successor_produced_by": []
+          }
+        ],
+        "proposals": [
+          {
+            "action": "rebind",
+            "reason": "the successor exists with matching units and no name holds it; rebind through a signed source move and retire this name with a successor link"
+          },
+          {
+            "action": "rebind",
+            "reason": "the successor exists with matching units and no name holds it; rebind through a signed source move and retire this name with a successor link"
+          }
+        ]
+      },
+      {
+        "id": "toroidal_lithium_velocity_at_separatrix",
+        "stage": "superseded",
+        "status": "superseded",
+        "origin": null,
+        "unit": "m.s^-1",
+        "sources": [
+          {
+            "id": "dd:summary/local/separatrix/velocity_tor/lithium/value",
+            "source_id": "summary/local/separatrix/velocity_tor/lithium/value",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "summary/local/separatrix/velocity_tor/lithium/value",
+            "removed_in": "4.0.0",
+            "introduced_in": "3.22.0",
+            "lifecycle_status": "removed",
+            "unit": "m.s^-1",
+            "successor": "summary/local/separatrix/velocity_phi/lithium/value",
+            "successor_method": "renamed_to_edge",
+            "successor_present": true,
+            "successor_lifecycle": null,
+            "successor_unit": "m.s^-1",
+            "successor_source_status": "extracted",
+            "successor_source_id": "dd:summary/local/separatrix/velocity_phi/lithium/value",
+            "successor_produced_by": []
+          }
+        ],
+        "proposals": [
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          }
+        ]
+      },
+      {
+        "id": "toroidal_particle_current",
+        "stage": "superseded",
+        "status": "superseded",
+        "origin": null,
+        "unit": "A",
+        "sources": [
+          {
+            "id": "dd:distributions/distribution/global_quantities/current_tor",
+            "source_id": "distributions/distribution/global_quantities/current_tor",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "distributions/distribution/global_quantities/current_tor",
+            "removed_in": "4.0.0",
+            "introduced_in": "3.22.0",
+            "lifecycle_status": "removed",
+            "unit": "N.m",
+            "successor": "distributions/distribution/global_quantities/current_phi",
+            "successor_method": "renamed_to_edge",
+            "successor_present": true,
+            "successor_lifecycle": null,
+            "successor_unit": "A",
+            "successor_source_status": "extracted",
+            "successor_source_id": "dd:distributions/distribution/global_quantities/current_phi",
+            "successor_produced_by": []
+          }
+        ],
+        "proposals": [
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          }
+        ]
+      },
+      {
+        "id": "toroidal_thermal_torque_due_to_collisions",
+        "stage": "superseded",
+        "status": "superseded",
+        "origin": null,
+        "unit": "N.m",
+        "sources": [
+          {
+            "id": "dd:distributions/distribution/global_quantities/thermalisation/torque",
+            "source_id": "distributions/distribution/global_quantities/thermalisation/torque",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "distributions/distribution/global_quantities/thermalisation/torque",
+            "removed_in": "4.0.0",
+            "introduced_in": "3.31.0",
+            "lifecycle_status": "removed",
+            "unit": "N.m",
+            "successor": "distributions/distribution/global_quantities/thermalization/torque",
+            "successor_method": "renamed_to_edge",
+            "successor_present": true,
+            "successor_lifecycle": null,
+            "successor_unit": "N.m",
+            "successor_source_status": "extracted",
+            "successor_source_id": "dd:distributions/distribution/global_quantities/thermalization/torque",
+            "successor_produced_by": []
+          }
+        ],
+        "proposals": [
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          }
+        ]
+      },
+      {
+        "id": "toroidal_total_plasma_momentum_at_internal_transport_barrier",
+        "stage": "superseded",
+        "status": "superseded",
+        "origin": null,
+        "unit": "kg.m.s^-1",
+        "sources": [
+          {
+            "id": "dd:summary/local/itb/momentum_tor/value",
+            "source_id": "summary/local/itb/momentum_tor/value",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "summary/local/itb/momentum_tor/value",
+            "removed_in": "4.0.0",
+            "introduced_in": "3.22.0",
+            "lifecycle_status": "removed",
+            "unit": "kg.m.s^-1",
+            "successor": "summary/local/itb/momentum_phi/value",
+            "successor_method": "renamed_to_edge",
+            "successor_present": true,
+            "successor_lifecycle": null,
+            "successor_unit": "kg.m.s^-1",
+            "successor_source_status": "extracted",
+            "successor_source_id": "dd:summary/local/itb/momentum_phi/value",
+            "successor_produced_by": []
+          }
+        ],
+        "proposals": [
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          }
+        ]
+      },
+      {
+        "id": "toroidal_vector_potential",
+        "stage": "superseded",
+        "status": "superseded",
+        "origin": null,
+        "unit": "T.m",
+        "sources": [
+          {
+            "id": "dd:wall/description_ggd/ggd/a_field/toroidal",
+            "source_id": "wall/description_ggd/ggd/a_field/toroidal",
+            "status": "stale"
+          },
+          {
+            "id": "dd:mhd/ggd/a_field_tor/values",
+            "source_id": "mhd/ggd/a_field_tor/values",
+            "status": "stale"
+          },
+          {
+            "id": "dd:plasma_profiles/ggd/a_field/toroidal",
+            "source_id": "plasma_profiles/ggd/a_field/toroidal",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "wall/description_ggd/ggd/a_field/toroidal",
+            "removed_in": "4.0.0",
+            "introduced_in": "3.40.0",
+            "lifecycle_status": "removed",
+            "unit": "T.m",
+            "successor": "wall/description_ggd/ggd/a_field/phi",
+            "successor_method": "renamed_to_edge",
+            "successor_present": true,
+            "successor_lifecycle": null,
+            "successor_unit": "T.m",
+            "successor_source_status": "extracted",
+            "successor_source_id": "dd:wall/description_ggd/ggd/a_field/phi",
+            "successor_produced_by": []
+          },
+          {
+            "path": "mhd/ggd/a_field_tor/values",
+            "removed_in": "4.0.0",
+            "introduced_in": "3.22.0",
+            "lifecycle_status": "removed",
+            "unit": "T.m",
+            "successor": "mhd/ggd/a_field_phi/values",
+            "successor_method": "renamed_to_edge",
+            "successor_present": true,
+            "successor_lifecycle": null,
+            "successor_unit": "T.m",
+            "successor_source_status": "extracted",
+            "successor_source_id": "dd:mhd/ggd/a_field_phi/values",
+            "successor_produced_by": []
+          },
+          {
+            "path": "plasma_profiles/ggd/a_field/toroidal",
+            "removed_in": "4.0.0",
+            "introduced_in": "3.42.0",
+            "lifecycle_status": "removed",
+            "unit": "T.m",
+            "successor": "plasma_profiles/ggd/a_field/phi",
+            "successor_method": "renamed_to_edge",
+            "successor_present": true,
+            "successor_lifecycle": null,
+            "successor_unit": "T.m",
+            "successor_source_status": "extracted",
+            "successor_source_id": "dd:plasma_profiles/ggd/a_field/phi",
+            "successor_produced_by": []
+          }
+        ],
+        "proposals": [
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          },
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          },
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          }
+        ]
+      },
+      {
+        "id": "vertical_total_force_of_poloidal_field_coil",
+        "stage": "superseded",
+        "status": "superseded",
+        "origin": "pipeline",
+        "unit": "N",
+        "sources": [
+          {
+            "id": "dd:pf_active/vertical_force/force",
+            "source_id": "pf_active/vertical_force/force",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "pf_active/vertical_force/force",
+            "removed_in": "4.0.0",
+            "introduced_in": "3.22.0",
+            "lifecycle_status": "removed",
+            "unit": "N",
+            "successor": "pf_active/force_limits/force",
+            "successor_method": "structural_inference",
+            "successor_present": true,
+            "successor_lifecycle": "alpha",
+            "successor_unit": "N",
+            "successor_source_status": "composed",
+            "successor_source_id": "dd:pf_active/force_limits/force",
+            "successor_produced_by": [
+              "force_of_poloidal_field_coil"
+            ]
+          }
+        ],
+        "proposals": [
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          }
+        ]
+      },
+      {
+        "id": "wave_curvature_of_beam_tracing_beam",
+        "stage": "superseded",
+        "status": "superseded",
+        "origin": null,
+        "unit": "m^-1",
+        "sources": [
+          {
+            "id": "dd:ec_launchers/launcher/beam/phase/curvature",
+            "source_id": "ec_launchers/launcher/beam/phase/curvature",
+            "status": "stale"
+          },
+          {
+            "id": "dd:ec_antennas/antenna/beam/phase/curvature",
+            "source_id": "ec_antennas/antenna/beam/phase/curvature",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "ec_launchers/launcher/beam/phase/curvature",
+            "removed_in": "3.37.0",
+            "introduced_in": "3.25.0",
+            "lifecycle_status": "removed",
+            "unit": "m^-1",
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          },
+          {
+            "path": "ec_antennas/antenna/beam/phase/curvature",
+            "removed_in": "3.25.0",
+            "introduced_in": "3.22.0",
+            "lifecycle_status": "removed",
+            "unit": "m^-1",
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          }
+        ],
+        "proposals": [
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          },
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          }
+        ]
+      },
+      {
+        "id": "wave_curvature_of_wave_beam",
+        "stage": "superseded",
+        "status": "superseded",
+        "origin": null,
+        "unit": "m^-1",
+        "sources": [
+          {
+            "id": "dd:ec_launchers/launcher/beam/phase/curvature",
+            "source_id": "ec_launchers/launcher/beam/phase/curvature",
+            "status": "stale"
+          }
+        ],
+        "sources_detail": [
+          {
+            "path": "ec_launchers/launcher/beam/phase/curvature",
+            "removed_in": "3.37.0",
+            "introduced_in": "3.25.0",
+            "lifecycle_status": "removed",
+            "unit": "m^-1",
+            "successor": null,
+            "successor_method": "none",
+            "successor_present": false,
+            "successor_lifecycle": null,
+            "successor_unit": null,
+            "successor_source_status": null,
+            "successor_source_id": null,
+            "successor_produced_by": []
+          }
+        ],
+        "proposals": [
+          {
+            "action": "none: already retired",
+            "reason": "the name is superseded/superseded; the source removal cost it nothing that is still live"
+          }
+        ]
+      }
+    ],
+    "successor_methods": {
+      "structural_inference": 5,
+      "none": 39,
+      "renamed_to_edge": 15,
+      "ids_rename_dd_xml": 7
+    },
+    "live_count": 5,
+    "live_names": [
+      "deuterium_tritium_flux",
+      "flux_surface_average_magnetic_field_magnitude",
+      "radial_coordinate_of_flux_surface",
+      "radial_coordinate_of_launching_position",
+      "toroidal_current_density_due_to_distribution_function_driven"
+    ],
+    "accepted_count": 3,
+    "accepted_names": [
+      "radial_coordinate_of_flux_surface",
+      "radial_coordinate_of_launching_position",
+      "toroidal_current_density_due_to_distribution_function_driven"
+    ],
+    "distinct_stale_paths": 65
+  },
+  "generator": {
+    "id": "dd-removal-stale-mark",
+    "label": "DD-version removal marks the source stale and leaves the name",
+    "trigger": "A DD rebuild stamps the path absent from the current DD with lifecycle_status='removed'; the next reconcile run marks every source still pointing at it stale.",
+    "stale_marking": "imas_codex/standard_names/graph_store/graph_audits.py:539",
+    "stale_query": "imas_codex/standard_names/graph_store/graph_audits.py:600",
+    "stale_write": "imas_codex/standard_names/graph_store/graph_source_bindings.py:2455",
+    "stale_write_set": "imas_codex/standard_names/graph_store/graph_source_bindings.py:2468",
+    "lifecycle_marking": "imas_codex/graph/dd_lifecycle.py:110",
+    "name_handling": "Nothing. reconcile_standard_name_sources returns stale_marked, revived and relinked counts; it never reads the name that PRODUCED_NAME pointed at and never writes a supersession.",
+    "not_called": [
+      "imas_codex/standard_names/source_invariant.py:58",
+      "imas_codex/standard_names/source_invariant.py:27"
+    ],
+    "why_the_invariant_does_not_fire": "The invariant runs inside a writer's transaction. Reconcile marks the source stale by setting a property; no writer runs, so the name is never tested for having lost its last producer.",
+    "rename_records": {
+      "builder": "imas_codex/graph/build_dd.py:4115",
+      "source": "DDChange entries of type path_renamed",
+      "ids_rename_reconciler": "imas_codex/graph/dd_lifecycle.py:37",
+      "ids_rename_skip": "dd_path_index walks only <field> elements and reads change_nbc_previous_name from them; the renamed <IDS> element's own change_nbc_previous_name is never read, so an IDS rename has no RENAMED_TO edge and no renamed_to property.",
+      "aos_rename_skip": "An array-of-structures rename is not carried by the DD 4.1.1 XML's change_nbc_previous_name either; it surfaces only by structural inference over the current DD's own paths."
+    }
+  },
+  "fixture": {
+    "reconcile": {
+      "stale_marked": 1,
+      "revived": 0,
+      "relinked": 0
+    },
+    "name_stage_after": "accepted",
+    "name_status_after": "draft",
+    "sources_after": {
+      "dd:gyrokinetics/normalizing_quantities/r": "stale"
+    },
+    "control_source_status": "extracted",
+    "control_name_producers": [
+      {
+        "status": "extracted"
+      }
+    ],
+    "orphan_source_status": "stale",
+    "successor_edges_written": [],
+    "all_edges": [],
+    "live_producers_after": 0,
+    "sourceless_after": true
+  },
+  "repair": {
+    "goal": "Supersede a standard name in the same transaction that marks its last live source stale, so a DD removal can no longer leave a live name sourceless.",
+    "write_paths": [
+      "imas_codex/standard_names/graph_store/graph_audits.py",
+      "imas_codex/standard_names/graph_store/graph_source_bindings.py",
+      "tests/standard_names/test_source_invariants.py"
+    ],
+    "guard_test": "tests/standard_names/test_source_invariants.py::test_removal_marks_last_source_stale_and_supersedes_its_name -- seeds a live accepted name with one source pointing at a removed DD path, runs reconcile_standard_name_sources, and asserts the name carries a successor edge and no non-stale producer. It fails on main: the fixture section below runs that exact scenario against today's code and the name keeps accepted/draft with zero non-stale producers.",
+    "note": "Where the source has no recorded successor, the name is retired without a successor link rather than rebound to a guess; where another live name already holds the successor path, the edge points at that holder."
+  }
+}
