@@ -1064,8 +1064,43 @@ THUMBNAILS = {
     "ncr": ("ncr-86NKDC-p4", "86NKDC v1.1 p4", (0.07, 0.555, 0.93, 0.762), "fill"),
     "pbs": ("pbs-PLB8KW-p3", "PLB8KW v1.1 p3", (0.03, 0.04, 0.56, 0.86), "fill"),
     "req": ("req-X3Y95E-p13", "X3Y95E v2.2 p13", (0.08, 0.03, 0.92, 0.36), "fill"),
+    "cmp": ("cmp-7VLKY2-p12", "7VLKY2 v1.0 p12", (0.05, 0.22, 0.42, 0.955), "fit"),
+    "con": ("con-4F6AQ8-p1", "4F6AQ8 v1.0 p1", (0.04, 0.02, 0.96, 0.42), "fit"),
 }
 PRIVATE = FIGURES / "private"  # gitignored: served by the docs SPA, never pushed
+
+
+# Contract pages keep their header and lose their body: from this fraction of the
+# crop's height down, every line of text becomes a solid bar.
+REDACT_FROM: dict[str, float] = {"con": 0.695}
+
+
+def redact_lines(image, start: float, ink: int = 150, bar: str = "#3a3a3a"):
+    """Blank each line of text below ``start`` with a bar spanning its extent."""
+    from PIL import ImageDraw
+
+    grey = image.convert("L")
+    w, h = grey.size
+    px = grey.load()
+    dark_rows = [
+        y for y in range(int(start * h), h) if sum(px[x, y] < ink for x in range(w)) > 2
+    ]
+    lines, run = [], []
+    for y in dark_rows:
+        if run and y > run[-1] + 2:
+            lines.append(run)
+            run = []
+        run.append(y)
+    if run:
+        lines.append(run)
+    out = image.copy()
+    draw = ImageDraw.Draw(out)
+    for rows in lines:
+        cols = [x for x in range(w) if any(px[x, y] < ink for y in rows)]
+        if len(rows) < 3 or not cols:
+            continue  # a rule or a speck, not a line of text
+        draw.rectangle((min(cols), rows[0] - 1, max(cols), rows[-1] + 1), fill=bar)
+    return out
 
 
 def fit_box(image, box_aspect: float):
@@ -1120,6 +1155,8 @@ def grid_figure(thumbnails: Path | None) -> Path:
             page = Image.open(thumbnails / f"{stem}.png").convert("RGB")
             w, h = page.size
             crop = page.crop((int(a * w), int(b * h), int(c * w), int(d * h)))
+            if key in REDACT_FROM:
+                crop = redact_lines(crop, REDACT_FROM[key])
             shape = fill_box if mode == "fill" else fit_box
             cell.imshow(shape(crop, card_w / image_h), interpolation="lanczos")
             cell.set_aspect("auto")
