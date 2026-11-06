@@ -1,0 +1,76 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run declares no baseline_suite and no after_suite arms: it is a docs node whose declared write paths carry no test file, and its recorded gate is the read-only census (logs/gate-census-final.log, EXIT=0). With no arms there are no failure ids to subtract, so 0 derived ids and 0 added; the note records the absence rather than claiming a measured zero.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-06T07:01:59.721Z",
+  "dispatched_at": "2026-11-06T06:50:03Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-compose-stranded-stubs-run.py",
+      "id": "f1c0a1e2b3d4",
+      "line": "116",
+      "severity": "blocking",
+      "text": "blocking: the census's blocking set selects `row.get(\"name_stage\") != \"exhausted\"` while the export gate it claims to reproduce (imas_codex/standard_names/export.py:3085-3090) requires `name_stage in _SHIPPING_NAME_STAGES` = {accepted, approved}; every roster name is name_stage 'pending' in logs/census-before.json, so none of the seven can sit in the export gate's blocking set at all, and the fragment's headline 'gate_blocking 7 -> 5' (sib-compose-stranded-stubs.html:134-135) measures draft-stage sourceless names rather than the gate. The docstring at run.py:38-40 and the sentence at .html:135 both assert 'the same filter export.py applies', which is false. The 2-name delta is real progress through the sourceless population; the label and the claim about the gate are what is wrong."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-compose-stranded-stubs.html",
+      "id": "f2a7d3c9e5b1",
+      "line": "52",
+      "severity": "non-blocking",
+      "text": "non-blocking: the paragraph states attempt_count read 0 on all nine sources while claim_seq was 5-6, but the run's own earliest census (logs/census-before.json, observed 2026-10-29T17:36:28Z) records attempt_count 1, 2 and 5 with claim_seq 7-11; the only all-zero attempt_count reading in the run is logs/census-after-unpark.json, taken after `sn retry` deliberately reset the counters. The claim is contradicted by the artefacts it summarises."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-compose-stranded-stubs.html",
+      "id": "f3b9e4a6c2d8",
+      "line": "141",
+      "severity": "non-blocking",
+      "text": "non-blocking: 'Nothing outside the roster moved' is the brief's out-of-roster check, but the runner never performs one: both census queries are scoped, the source read by `s.dd_path IN $paths` (run.py:67-78). The only whole-graph signal is gate_audit_population 15 -> 13, which counts sourceless names only and says nothing about another source's status, attempt_count or PRODUCED_NAME edge."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T171439031877-sib-compose-stranded-stubs/manifest.md",
+      "id": "f4d2f5b8a6c0",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the manifest's `commits:` line lists 5377e75b8, c116b14d1 and a41f8c3ab but omits 8e953008f, the node's own first commit, which authors the initial runner and fragment (314 of the node's 512 authored lines). A coordinator auditing the run against its manifest cannot account for those paths."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call site: the change is two files under docs/evidence/fragments/ that nothing imports",
+    "diff": "read commit by commit against b6bd5682: 8e953008f adds 197 lines of runner and 117 of fragment, 5377e75b8 merges origin/main so the adoption exception is live, c116b14d1 adds producer and receipt reads plus the refusal record, a41f8c3ab adds the finalize-guard record; no product source is authored by this node",
+    "done_when": "the brief's done-when asks the fragment for the cause, the scoped run's calls and spend, per-source producers before and after, the export gate's before and after, and an out-of-roster check, with a real EXIT=; sib-compose-stranded-stubs.html supplies all five sections and logs/gate-census-final.log ends EXIT=0, but the gate figure at .html:134 rests on a filter that is not the export gate's",
+    "goal": "the node's goal is to compose the seven pending projection stubs whose DD sources never composed; the delivered fragment records two composed and five still refused, with the refusal named at imas_codex/standard_names/graph_store/graph_source_bindings.py:1237-1266",
+    "manifest": "read; it records the census command with its summary line, names gate-census-final.log, gate-retry-unpark.log and gate-scoped-run-3.log, and marks status complete while its blockers line names the five unrepaired sources and graph_catalog.py:2510-2513",
+    "write_paths": "the declared scope is the two fragment files plus docs/figures/sn-integrity-backlog/sib-compose-stranded-stubs; 8e953008f, c116b14d1 and a41f8c3ab touch only the two fragment files, and the figure path is unused"
+  },
+  "justifications": {
+    "durability": "no assertion exists that reddens on regression: the census at sib-compose-stranded-stubs-run.py:112 reports numbers without asserting them, which is how the wrong gate filter survived to the delivered fragment.",
+    "evidence": "sib-compose-stranded-stubs-run.py:116 computes the headline gate count from a name_stage test the export gate at imas_codex/standard_names/export.py:3088 does not use, so the record's central quantitative claim about the gate is miscomputed.",
+    "fit": "sib-compose-stranded-stubs.html:1-7 follows the sibling convention set by docs/evidence/fragments/sn-integrity-backlog/sib-adopt-pending-projection-stubs.html:1-7, ids are node-prefixed, and the runner uses the repository's GraphClient idiom; importing the private _RELEASE_IDENTITY_HOLDS at run.py:63 is the one seam.",
+    "goal_fidelity": "docs/evidence/fragments/sn-integrity-backlog/sib-compose-stranded-stubs.html:3 states two of seven landed against a goal of seven, so the central measure is unmet though the brief's fallback guard (record the cause at file and line) is discharged.",
+    "reuse": "the census reuses classify_sourceless_standard_names and _RELEASE_IDENTITY_HOLDS from their owners, but at run.py:112-118 it re-implements the gate membership test owned by imas_codex/standard_names/export.py:3085-3090 instead of importing _SHIPPING_NAME_STAGES, and the import was not made, which is what produced the divergence.",
+    "scope_discipline": "every path c116b14d1 and a41f8c3ab touch (git show --stat) is inside the declared write path list, and no product source, plan file or graph text is authored."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to compose the seven pending projection stubs whose DD sources never composed; docs/evidence/fragments/sn-integrity-backlog/sib-compose-stranded-stubs.html records that two composed and five still refuse, with the refusal named at imas_codex/standard_names/graph_store/graph_source_bindings.py:1237-1266.\nVERDICT done_when: the brief's done-when asks the fragment for the cause, the scoped run's calls and spend, per-source producers before and after, the export gate before and after, and an out-of-roster check with a real EXIT=; sib-compose-stranded-stubs.html supplies all five and logs/gate-census-final.log ends EXIT=0, but the gate figure at sib-compose-stranded-stubs.html:134 rests on a filter that is not the export gate's.\nVERDICT write_paths: the declared scope is docs/evidence/fragments/sn-integrity-backlog/sib-compose-stranded-stubs.html, its -run.py beside it, and docs/figures/sn-integrity-backlog/sib-compose-stranded-stubs; 8e953008f, c116b14d1 and a41f8c3ab touch only the two fragment files and the figure path is unused.\nVERDICT manifest: read the reviewed manifest; it records the census command with its summary line, names gate-census-final.log, gate-retry-unpark.log and gate-scoped-run-3.log, and sets status complete while its blockers line names the five unrepaired sources and graph_catalog.py:2510-2513.\nVERDICT diff: read 8e953008f, merge 5377e75b8, c116b14d1 and a41f8c3ab against b6bd5682 commit by commit; the node authors 512 lines across the two docs files and no product source.\nCALL_SITES: none\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: sib-compose-stranded-stubs.html:3 states two of seven landed against a seven-stub goal, so the central measure is unmet though the brief's record-the-cause fallback is discharged.\nSCORE evidence: 8\nJUSTIFICATION evidence: sib-compose-stranded-stubs-run.py:116 computes the headline gate count from a name_stage test that imas_codex/standard_names/export.py:3088 does not use, so the record's central quantitative claim about the gate is miscomputed.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path c116b14d1 and a41f8c3ab touch is inside the declared write path list, and no product source, plan file or graph text is authored.\nSCORE durability: 8\nJUSTIFICATION durability: no assertion reddens on regression; the census at sib-compose-stranded-stubs-run.py:112 reports numbers without asserting them, which is how the wrong gate filter survived into the delivered fragment.\nSCORE fit: 17\nJUSTIFICATION fit: sib-compose-stranded-stubs.html:1-7 follows the sibling convention of docs/evidence/fragments/sn-integrity-backlog/sib-adopt-pending-projection-stubs.html:1-7 and the runner uses the repository GraphClient idiom, with the private _RELEASE_IDENTITY_HOLDS import at run.py:63 the one seam.\nSCORE reuse: 8\nJUSTIFICATION reuse: the census reuses classify_sourceless_standard_names and _RELEASE_IDENTITY_HOLDS from their owners, but sib-compose-stranded-stubs-run.py:112-118 re-implements the gate membership test owned by imas_codex/standard_names/export.py:3085-3090 instead of importing _SHIPPING_NAME_STAGES, and the copy diverged.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-compose-stranded-stubs-run.py:116 blocking: the census's blocking set selects name_stage != \"exhausted\" while the export gate it claims to reproduce (imas_codex/standard_names/export.py:3085-3090) requires name_stage in _SHIPPING_NAME_STAGES = {accepted, approved}; every roster name is name_stage pending in logs/census-before.json, so none of the seven can sit in the export gate's blocking set, and the headline 7 -> 5 at sib-compose-stranded-stubs.html:134-135 measures draft-stage sourceless names rather than the gate. The 2-name delta is real progress through the sourceless population; the filter, the docstring at run.py:38-40 and the same-filter sentence at .html:135 are what is wrong.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-compose-stranded-stubs.html:52 non-blocking: the paragraph states attempt_count read 0 on all nine sources while claim_seq was 5-6, but the run's own earliest census logs/census-before.json records attempt_count 1, 2 and 5 with claim_seq 7-11; the only all-zero reading is logs/census-after-unpark.json, taken after sn retry deliberately reset the counters.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-compose-stranded-stubs.html:141 non-blocking: \"Nothing outside the roster moved\" is the brief's out-of-roster check, but the runner never performs one: both census queries are scoped, the source read by s.dd_path IN $paths at run.py:67-78. The only whole-graph signal is gate_audit_population 15 -> 13, which counts sourceless names only and says nothing about another source's status, attempt_count or PRODUCED_NAME edge.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261029T171439031877-sib-compose-stranded-stubs/manifest.md:1 non-blocking: the manifest's commits line lists 8e953008f nowhere, omitting the node's own first commit, which authors the initial runner and fragment (314 of the node's 512 authored lines), so a coordinator auditing the run against its manifest cannot account for those paths.",
+  "review_run_id": "r-20261106T064737274887-review-of-sib-compose-stranded-stubs-a41f8c3ab95f",
+  "reviewed_base_sha": "b6bd5682bec73e4058307bdbfb787e07e3053951",
+  "reviewed_head_sha": "a41f8c3ab95f04da085c24ac479189ca2bb23056",
+  "reviewed_run_id": "r-20261029T171439031877-sib-compose-stranded-stubs",
+  "scores": {
+    "durability": 8,
+    "evidence": 8,
+    "fit": 17,
+    "goal_fidelity": 13,
+    "reuse": 8,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T07:10:00.000000+00:00",
+  "total": 73
+}
