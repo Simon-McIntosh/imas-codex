@@ -76,9 +76,9 @@ LON, LAT = (-4.95, 8.35), (42.25, 51.2)  # mainland France, Corsica outside
 HEIGHT = 7.2  # in; the width follows France so the country fills the frame
 WIDTH = round(HEIGHT * (LON[1] - LON[0]) * COS_LAT / (LAT[1] - LAT[0]), 2)
 
-LAND = "#f2f1ee"
+LAND = "white"  # France as an outline: no fill, so nothing competes with the links
+RELATION = "#8e3a8e"  # every relationship, route and verb: the network ITER owns
 COAST = "#b4b1aa"
-ROAD = "#b9b6b0"
 INK = "#2b2b2b"
 EMBLEM_YELLOW = "#FDBB30"  # ITER Noon Yellow, as the emblem file carries it
 MUTED = "#6b6b6b"
@@ -138,7 +138,7 @@ RELATIONS = [
     ("doc", "specifies", "req", (0.5, 0, 0)),
     ("cmp", "is part of", "pbs", (0.5, 0, 0)),
     ("ana", "assesses", "cmp", (0.5, 0, 0)),
-    ("doc", "is filed under", "pbs", (0.32, 0, 0)),
+    ("doc", "is filed under", "pbs", (0.24, 10, -4)),
 ]
 
 ARROWS = "→↗↑↖←↙↓↘"
@@ -555,12 +555,12 @@ def draw_relation_labels(ax, routes, land) -> list[Text]:
             textcoords="offset points",
             ha="center",
             va="center",
-            fontsize=12,
-            fontstyle="italic",
-            color=INK,
+            fontsize=16,
+            fontweight="bold",
+            color=RELATION,
             zorder=11,
         )
-        halo_over_land(ax, label, land, 4)
+        halo_over_land(ax, label, land, 5)
         labels.append(label)
     return labels
 
@@ -571,15 +571,13 @@ def draw_relation_labels(ax, routes, land) -> list[Text]:
 SLIDE_WIDTH = 14.0  # in: the full-width slide canvas
 
 
-def base(stage: str, *, wide: bool = False):
-    """Draw one static stage; every stage shares the map's size and frame.
-
-    ``wide`` puts the same map, at the same size, on the left of a full-width
-    slide canvas, leaving the right for a panel.
-    """
+def base(stage: str):
+    """Draw one stage on the full-width slide canvas, the map always on the left
+    at one size and position, so every image and animation stacks on the last.
+    The right of the slide stays free, for the chat panel or slide text."""
     plt.style.use("data-ink")
-    fig = plt.figure(figsize=(SLIDE_WIDTH if wide else WIDTH, HEIGHT), dpi=100)
-    ax = fig.add_axes((0, 0, WIDTH / SLIDE_WIDTH if wide else 1, 1))
+    fig = plt.figure(figsize=(SLIDE_WIDTH, HEIGHT), dpi=100)
+    ax = fig.add_axes((0, 0, WIDTH / SLIDE_WIDTH, 1))
     ax.axis("off")
     ax.set(
         xlim=[v * COS_LAT for v in LON], ylim=LAT, aspect="equal", autoscale_on=False
@@ -612,14 +610,15 @@ def base(stage: str, *, wide: bool = False):
         draw_emblem(ax)
     labels = draw_town_labels(ax, land)
     if stage == "c":
-        roads = load_roads()
-        for line in roads:
-            xs, ys = zip(*line, strict=True)
-            ax.plot(xs, ys, color=ROAD, linewidth=1.2, solid_capstyle="round", zorder=2)
-        routes = relation_routes(roads)
-        for points in routes:
+        routes = relation_routes(load_roads())
+        for k, points in enumerate(routes):
             xs, ys = zip(*points, strict=True)
-            ax.plot(xs, ys, color=INK, linewidth=2.6, solid_capstyle="round", zorder=3)
+            colour = (
+                RELATION if k < len(RELATIONS) else INK
+            )  # the last is ITER's on-ramp
+            ax.plot(
+                xs, ys, color=colour, linewidth=3.0, solid_capstyle="round", zorder=3
+            )
         labels += draw_relation_labels(ax, routes[: len(RELATIONS)], land)
     return fig, ax, labels, routes
 
@@ -670,9 +669,7 @@ def save_static(stage: str, draft: Path | None) -> Path:
     fig.savefig(svg, format="svg", metadata={"Date": None}, facecolor="white")
     text = svg.read_text()
     # declared at slide height (16 cm) so it drops onto a slide at that size
-    text = text.replace(
-        f'width="{WIDTH * 72:g}pt"', f'width="{16 * WIDTH / HEIGHT:.1f}cm"', 1
-    )
+    text = text.replace(f'width="{SLIDE_WIDTH * 72:g}pt"', 'width="31.1cm"', 1)
     text = text.replace(f'height="{HEIGHT * 72:g}pt"', 'height="16cm"', 1)
     svg.write_text("\n".join(line.rstrip() for line in text.splitlines()) + "\n")
     plt.close(fig)
@@ -765,20 +762,63 @@ FLEETS = {
 BURSTS = {"d": 4, "e": 4, "f": 6, "g": 5}  # questions per loop
 
 
+def shortest_walk(graph, start: str, target: str) -> list[str]:
+    """The fewest relationships from ``start`` to ``target``, as a list of towns."""
+    previous, frontier = {start: None}, [start]
+    while frontier and target not in previous:
+        reached = []
+        for town in frontier:
+            for n, _ in graph[town]:
+                if n not in previous:
+                    previous[n] = town
+                    reached.append(n)
+        frontier = reached
+    walk, town = [], target
+    while town is not None:
+        walk.append(town)
+        town = previous[town]
+    return list(reversed(walk))
+
+
+def planned_walk(graph, rng, target: str) -> list[str]:
+    """A question aimed at one repository, sometimes reading one step beyond it."""
+    walk = ["iter", *shortest_walk(graph, ON_RAMP, target)]
+    onward = [n for n, _ in graph[target] if n not in walk]
+    if onward and rng.random() < 0.35:
+        walk.append(rng.choice(onward))
+    return walk
+
+
 def traffic(stage: str, graph) -> list[Trip]:
     """Bursts of requests: each question sends a few vehicles out from ITER at once,
-    each on its own traversal, and every one brings its answer back to ITER."""
+    each on its own traversal, and every one brings its answer back to ITER.
+
+    The traffic is staged: within each loop the questions are aimed so that every
+    repository is read at least once, and the loop is refused if one is missed."""
     rng = random.Random(SEED + ord(stage))
+    unread = sorted(t.key for t in TOWNS if t.key != ON_RAMP)
+    rng.shuffle(unread)
+    per_burst = math.ceil(len(unread) / BURSTS[stage])
     trips = []
     for q in range(BURSTS[stage]):
         fleet = FLEETS[stage][q % len(FLEETS[stage])]
         depart = LOOP_SECONDS * (q + 0.1 + 0.3 * rng.random()) / BURSTS[stage]
+        aimed = 0
         for k in range(rng.randint(3, 5)):
             colour, kind = fleet[k % len(fleet)]
-            walk = random_walk(graph, rng)
+            if unread and aimed < per_burst:
+                walk = planned_walk(graph, rng, unread[0])
+                aimed += 1
+            else:
+                walk = random_walk(graph, rng)
             trip = make_trip(walk, graph, depart + 0.18 * k, colour, kind)
             if trip.duration < LOOP_SECONDS * 0.9:
                 trips.append(trip)
+                unread = [t for t in unread if t not in walk]
+    read = {town for trip in trips for _, town in trip.visits}
+    missed = sorted({t.key for t in TOWNS} - read)
+    if missed:
+        raise SystemExit(f"traffic for stage {stage} never reads: {', '.join(missed)}")
     return trips
 
 
@@ -929,7 +969,7 @@ LUCY_ANSWER = (
 
 def save_lucy(draft: Path | None) -> Path:
     """A question typed into Lucy sends traversals into a graph busy with other users."""
-    fig, ax, labels, routes = base("c", wide=True)
+    fig, ax, labels, routes = base("c")
     graph = relation_graph(routes)
     ours = [
         make_trip(walk, graph, LUCY_DISPATCH + 0.2 * k, CLAUDE, "car")
