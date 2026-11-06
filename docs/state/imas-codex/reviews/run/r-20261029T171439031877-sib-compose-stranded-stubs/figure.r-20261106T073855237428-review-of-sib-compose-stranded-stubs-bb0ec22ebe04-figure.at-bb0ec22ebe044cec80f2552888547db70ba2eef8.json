@@ -1,0 +1,66 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-06T07:40:14Z",
+  "figures": [
+    {
+      "attachment": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T073855237428-review-of-sib-compose-stranded-stubs-bb0ec22ebe04-figure/image-0.png",
+      "caption_checked": "The caption under the embed (\"Adoption as a state transition. The claim adopts the stub only when the projection is the source's own DD path and no producer holds it; the content comes from the rich write, not the stable finalize; a stub owned by another claim is still a collision, and a source that reaches the attempt cap is parked with the refusal that led there.\") names the condition, the content source and both failure branches. It does not merely repeat the in-figure title, so it is not a finding.",
+      "embedded_by": "docs/evidence/fragments/sn-integrity-backlog/sib-adopt-pending-projection-stubs.html",
+      "rendered": "1400x720 RGBA, 8-bit; 605,504 of 1,008,000 pixels fully transparent (alpha 0)",
+      "repository_path": "docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs/adoption-state.svg"
+    }
+  ],
+  "findings": [
+    {
+      "file": "docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs/adoption-state.svg",
+      "id": "fd9fb0c9d27",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The rendered image has no backdrop: 605,504 of its 1,008,000 pixels are fully transparent (alpha 0), so the contrast a reader gets is decided by the surface the figure lands on rather than by the figure. Over white the text is strong (body #333 12.1:1, title #111 18.1:1); composited over a dark surface the same text falls to about 1.7:1 and 1.1:1 and the near-black arrows disappear entirely. A single opaque light rectangle behind the content would fix it at no cost to the drawing."
+    },
+    {
+      "file": "docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs/adoption-state.svg",
+      "id": "fd9fb0c9d27",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The adoption precondition, \"compose claim: projection is the source's own DD path and no producer holds it\", is set in #2E8B57 at about 12 px and measures 4.25:1 against white (4.07:1 against the tinted card beside it), under the 4.5:1 AA threshold for normal-size text. It is the smallest and lowest-contrast label in the figure, and it is the sentence that separates adoption from the refused collision drawn beneath it, so it should be the most legible label rather than the least."
+    },
+    {
+      "file": "docs/figures/sn-integrity-backlog/sib-adopt-pending-projection-stubs/adoption-state.svg",
+      "id": "fd9fb0c9d27",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The two lower cards place roughly 55 words of running prose inside the image (the rich-write versus stable-finalize explanation, and the two attach exception flags). Text in an image cannot be selected, searched, translated or reflowed, and a screen reader receives only the alt text, which describes the state chain and the two branches but not these two paragraphs."
+    }
+  ],
+  "item_verdicts": {
+    "contrast": "defect \u2014 body text #333 on #FAFAFA measures 12.1:1 and the title #111 18.1:1, but the green annotation #2E8B57 measures 4.25:1 on white and 4.07:1 on the card tint, under the 4.5:1 AA threshold for text at its ~12 px size; and the canvas is fully transparent (605,504 of 1,008,000 pixels alpha 0), so on any non-light surface the dark text loses the background it was judged against.",
+    "data_ink": "pass \u2014 six cards, four arrows and their labels carry all the ink; there is no grid, key, gradient or repeated series, and the single tinted card is the adopted state the figure exists to show.",
+    "decoration": "pass \u2014 strokes are 1 px neutral grey (#ACACAC) with #FAFAFA cards, and the only colour is the green on the adopt path and on the card it reaches; no gradient, shadow, background wash or styled theme.",
+    "label_collision": "pass \u2014 ink spans x 29-1210 and y 22-650 inside the 1400x720 canvas, so nothing is clipped at any edge; the tightest clearances are the green annotation 21 px and 18 px from the two card edges it sits between and \"finalize\" ending 6 px short of the source-composed card's border, and no label touches a card, another label or an arrow.",
+    "legibility": "pass \u2014 the state chain reads left to right in one scan, and when the 1400x720 PNG is flattened to the page's ~900 px column (900x463) every label still reads: card body ~14 px, card titles ~16 px, the in-figure title ~24 px, and the green annotation the smallest at ~12 px.",
+    "table_form": "pass \u2014 a two-branch state transition carrying per-state fields is what a diagram is for; nothing in the image is a row-and-column comparison that a table would carry better."
+  },
+  "method": "Read only; no figure, caption or page was edited. The attachment named in this review was opened with the Read tool and judged at native size and as a 900x463 flattening of the same PNG to the width the page serves it at. Pixel measurements taken from that same PNG: text colours at their glyph cores, WCAG contrast ratios against the background each text sits on, per-card text bounding boxes against card borders for clipping, pairwise clearances between labels and between labels and arrows, the overall ink bounding box against the canvas, and the alpha channel's transparent fraction. The only derived images were crops and a downscale of the named PNG written to the run's scratch directory. No SVG and no other image was opened, read, listed for content, rendered or `git show`n. The figure's repository path is established from the reviewed tree at bb0ec22eb (the file is present there) and from its embed and caption in docs/evidence/fragments/sn-integrity-backlog/sib-adopt-pending-projection-stubs.html.",
+  "notes": "No finding blocks: nothing is clipped, no label overlaps another label, a card or an arrow, and every label reads on the light surface the figure is embedded on. The figure is not drawn by any script in the reviewed run's diff (bb0ec22eb touches only the fragment HTML and its runner), so findings are anchored to the figure's repository path rather than to a script line. The two contrast items and the prose-in-image item are cheap to fold into a redraw: an opaque light backdrop, a darker green or #333 for the annotation, and moving the two explanatory paragraphs into the page body where the text becomes selectable and searchable.",
+  "project": "imas-codex",
+  "review_run_id": "r-20261106T073855237428-review-of-sib-compose-stranded-stubs-bb0ec22ebe04-figure",
+  "reviewed_base_sha": "b6bd5682bec73e4058307bdbfb787e07e3053951",
+  "reviewed_head_sha": "bb0ec22ebe044cec80f2552888547db70ba2eef8",
+  "reviewed_run_id": "r-20261029T171439031877-sib-compose-stranded-stubs",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: pass \u2014 the state chain reads left to right in one scan, and when the 1400x720 PNG is flattened to the page's ~900 px column (900x463) every label still reads: card body ~14 px, card titles ~16 px, the in-figure title ~24 px, and the green annotation the smallest at ~12 px.",
+    "RUBRIC data_ink: pass \u2014 six cards, four arrows and their labels carry all the ink; there is no grid, key, gradient or repeated series, and the single tinted card is the adopted state the figure exists to show.",
+    "RUBRIC decoration: pass \u2014 strokes are 1 px neutral grey (#ACACAC) with #FAFAFA cards, and the only colour is the green on the adopt path and on the card it reaches; no gradient, shadow, background wash or styled theme.",
+    "RUBRIC contrast: defect \u2014 body text #333 on #FAFAFA measures 12.1:1 and the title #111 18.1:1, but the green annotation #2E8B57 measures 4.25:1 on white and 4.07:1 on the card tint, under the 4.5:1 AA threshold for text at its ~12 px size; and the canvas is fully transparent (605,504 of 1,008,000 pixels alpha 0), so on any non-light surface the dark text loses the background it was judged against.",
+    "RUBRIC table_form: pass \u2014 a two-branch state transition carrying per-state fields is what a diagram is for; nothing in the image is a row-and-column comparison that a table would carry better.",
+    "RUBRIC label_collision: pass \u2014 ink spans x 29-1210 and y 22-650 inside the 1400x720 canvas, so nothing is clipped at any edge; the tightest clearances are the green annotation 21 px and 18 px from the two card edges it sits between and \"finalize\" ending 6 px short of the source-composed card's border, and no label touches a card, another label or an arrow."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T07:54:08.775331+00:00",
+  "total": null
+}

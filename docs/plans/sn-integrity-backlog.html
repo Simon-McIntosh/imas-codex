@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="317">
+<meta name="plan-version" content="318">
 <meta name="plan-modified" content="2026-11-06">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -1040,6 +1040,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s46" data-id="c-run-r-20261106T065107452142-review-of-sib-compose-stranded-stubs-a41f8c3ab95f-figure" data-who="reckon-build" data-when="2026-11-06T07:04:00.170Z">
     <div class="r-comment-body"><p>figure review of r-20261029T171439031877-sib-compose-stranded-stubs (head a41f8c3ab95f) is stored as a parsed read-only record with all 6 rubric items and 4 non-blocking findings: nothing is clipped or overlapping and the diagram reads on the white page, but the rendered PNG is fully transparent behind its content (so title and body text fall to 1.11:1 and 1.66:1 over a dark surface), the adoption-precondition annotation in #2E8B57 measures 4.25:1 against white, box body text is about 10 pt on the 1400 px canvas, and two prose panels carry their words as raster text only</p></div>
+</div>
+<div class="r-comment" data-section="s46" data-id="c-run-r-20261106T073659521688-review-of-sib-compose-stranded-stubs-bb0ec22ebe04" data-who="reckon-build" data-when="2026-11-06T07:48:36.485Z">
+    <div class="r-comment-body"><p>independent review of r-20261029T171439031877-sib-compose-stranded-stubs over base b6bd5682bec73e4058307bdbfb787e07e3053951 / head bb0ec22ebe044cec80f2552888547db70ba2eef8, status parsed, six dimensions scored (goal_fidelity 12, evidence 12, scope_discipline 20, durability 8, fit 18, reuse 16; total 86) with six non-blocking findings and none blocking — the repair now reads the export gate&#x27;s real predicate for the headline (gate blocking 0 -&gt; 0, draft roster 7 -&gt; 5, with a negative control that runs the pre-repair runner and gets 5/5), but the census still intersects its blocking set with find_sourceless_live_names where imas_codex/standard_names/export.py:3085-3090 does not, the page still asserts attempt_count 0 on all nine sources against its own census JSON, the out-of-roster check remains unmeasured, and the gate log names a revision that predates the repair.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261012T162346807302-review-of-sib-row-census" data-who="reckon-build" data-when="2026-10-12T16:39:58.712Z">
     <div class="r-comment-body"><p>reviewed r-20261012T145528571333-sib-row-census at a7a70db00 against c7b4c626e; total 93/120 (goal_fidelity 15, evidence 13, scope_discipline 19, durability 11, fit 15, reuse 20); two blocking findings — the landing record's verdict tallies and the manifest's row-count both disagree with the 38 rows the census file holds.</p></div>
