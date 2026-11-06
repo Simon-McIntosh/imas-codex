@@ -45,15 +45,13 @@ def _wipe(gc: GraphClient) -> None:
     The DD source id is ``dd:``-namespaced while the node ids are not, so the
     wipe matches anywhere in the id rather than at its start. The stub carries
     its own grammar-valid identity, which shares no part of that namespace, so
-    it is named as well. Receipts have hashed ids, so their name references
-    identify them even after their owning name has been deleted.
+    it is named as well. The disposable graph's receipt ledger is reset too:
+    receipt ids are hashed or random, and their endpoints can be stage names.
     """
     gc.query(
         "MATCH (n) WHERE n.id CONTAINS 'test_adopt_projection' "
         "OR n.id IN [$stub, 'ion_temperature'] "
-        "OR (n:StandardNameChange AND "
-        "(n.from_name IN [$stub, 'ion_temperature'] "
-        "OR n.to_name IN [$stub, 'ion_temperature'])) "
+        "OR n:StandardNameChange "
         "DETACH DELETE n",
         stub=PROBE_STUB,
     )
