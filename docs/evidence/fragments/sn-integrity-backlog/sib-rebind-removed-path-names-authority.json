@@ -32,8 +32,7 @@
           "implementation": "out-of-allowlist-immutability",
           "kind": "collateral_immutability",
           "participant_ids": [
-            "flux_surface_average_magnetic_field_magnitude",
-            "flux_surface_averaged_magnetic_field_magnitude"
+            "flux_surface_average_magnetic_field_magnitude"
           ]
         }
       ],
@@ -45,9 +44,6 @@
       },
       "mutations": [
         {
-          "arguments": {
-            "successor_id": "flux_surface_averaged_magnetic_field_magnitude"
-          },
           "id": "flux_surface_average_magnetic_field_magnitude:supersede",
           "kind": "supersede",
           "order": 0,
@@ -59,11 +55,6 @@
         {
           "graph_label": "StandardName",
           "id": "flux_surface_average_magnetic_field_magnitude",
-          "kind": "node"
-        },
-        {
-          "graph_label": "StandardName",
-          "id": "flux_surface_averaged_magnetic_field_magnitude",
           "kind": "node"
         }
       ],
@@ -82,6 +73,6 @@
   },
   "signature": {
     "canonicalization": "json-sort-keys-v1",
-    "sha256": "8b86143ed5a9fe902e13d0e691f2692891f357b23894d75121cff95aab0e08ee"
+    "sha256": "91b08e8ff2eea16832ddacbbf1a9f51ed1c44d9e4875cdb49f07f26b2b841953"
   }
 }
