@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="329">
+<meta name="plan-version" content="330">
 <meta name="plan-modified" content="2026-11-07">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -1079,6 +1079,12 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 <div class="r-comment" data-section="s47" data-id="c-run-r-20261106T222411766263-sib-dd-rename-records" data-who="reckon-build" data-when="2026-11-06T22:45:12.529Z">
     <div class="r-comment-body"><p>sib-dd-rename-records — DD builds now record IDS-level and array-of-structures renames as RENAMED_TO edges: gyrokinetics/normalizing_quantities/r -&gt; gyrokinetics_local/normalizing_quantities/r and ec_launchers/launcher/launching_position/r -&gt; ec_launchers/beam/launching_position/r; the node gate is 4 passed at head against 3 failed at base, and tests/graph adds no failure id (base 9 failed/640 passed, head 3 failed/650 passed).</p></div>
 </div>
+<div class="r-comment" data-section="s48" data-id="c-run-r-20261106T231022458778-review-of-sib-rebind-removed-path-names-645423c1a56d" data-who="reckon-build" data-when="2026-11-06T23:23:43.847Z">
+    <div class="r-comment-body"><p>Independent review of r-20261106T222618682261-sib-rebind-removed-path-names at 645423c1a scores 92/120 across the six dimensions with one blocking finding: the readback gate asserts zero successor edges where §48's done_when requires one, so the superseded name's measured state does not meet the node's stated measure.</p></div>
+</div>
+<div class="r-comment" data-section="s48" data-id="c-run-r-20261106T222618682261-sib-rebind-removed-path-names" data-who="reckon-build" data-when="2026-11-06T23:33:10Z">
+    <div class="r-comment-body"><p>Four names retain stage and now use five DD successor paths; the magnetic-field spelling is superseded by a signed receipt-only retirement after the signed successor preview refused disjoint paths; accepted stale-only blockers 8 to 5, 0 other names changed, spend USD 0.</p></div>
+</div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261012T162346807302-review-of-sib-row-census" data-who="reckon-build" data-when="2026-10-12T16:39:58.712Z">
     <div class="r-comment-body"><p>reviewed r-20261012T145528571333-sib-row-census at a7a70db00 against c7b4c626e; total 93/120 (goal_fidelity 15, evidence 13, scope_discipline 19, durability 11, fit 15, reuse 20); two blocking findings — the landing record's verdict tallies and the manifest's row-count both disagree with the 38 rows the census file holds.</p></div>
 </div>
@@ -1171,9 +1177,6 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s9" data-id="c-run-r-20261012T195012490344-review-of-sib-restore-archived-origin" data-who="reckon-build" data-when="2026-10-12T20:01:10.018Z">
     <div class="r-comment-body"><p>reviewed run r-20261012T194341934507-sib-restore-archived-origin at f4dffef72 (base c51cf292f): the added case at tests/standard_names/test_archive_reconstruction_entry_point.py:203 correctly pins the composer's refusal of an archive's own origin and closes the coverage gap the prior review named; scores goal_fidelity 20, evidence 19, scope_discipline 20, durability 19, fit 19, reuse 20 (total 117); no blocking findings, one follow-on on the gate-log revision header.</p></div>
-</div>
-<div class="r-comment" data-section="s48" data-id="c-run-r-20261106T231022458778-review-of-sib-rebind-removed-path-names-645423c1a56d" data-who="reckon-build" data-when="2026-11-06T23:23:43.847Z">
-    <div class="r-comment-body"><p>Independent review of r-20261106T222618682261-sib-rebind-removed-path-names at 645423c1a scores 92/120 across the six dimensions with one blocking finding: the readback gate asserts zero successor edges where §48&#x27;s done_when requires one, so the superseded name&#x27;s measured state does not meet the node&#x27;s stated measure.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
