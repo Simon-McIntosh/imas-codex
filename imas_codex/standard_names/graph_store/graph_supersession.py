@@ -436,7 +436,9 @@ def supersede_prior_source_names(
                         "old_name": plan["old_name"],
                         "new_name": plan["new_name"],
                         "old_stage": plan["old_stage"],
-                        "projection_stub": plan["projection_stub"],
+                        **(
+                            {"projection_stub": True} if plan["projection_stub"] else {}
+                        ),
                         "source_ids": plan["source_ids"],
                     }
                     for plan in drained
