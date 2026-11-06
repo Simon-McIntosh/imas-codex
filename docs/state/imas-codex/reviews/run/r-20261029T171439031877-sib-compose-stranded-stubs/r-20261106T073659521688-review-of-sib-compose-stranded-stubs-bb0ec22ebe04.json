@@ -7,6 +7,13 @@
   "call_site_count": 0,
   "call_sites": [],
   "completed_at": "2026-11-06T07:48:36.485Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "repair-of-sib-compose-stranded-stubs-bb0ec22ebe04",
+      "recorded_at": "2026-11-06T08:36:20.530982+00:00"
+    }
+  },
   "dispatched_at": "2026-11-06T07:38:18Z",
   "findings": [
     {
