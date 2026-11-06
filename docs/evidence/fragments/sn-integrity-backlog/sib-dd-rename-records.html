@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-dd-rename-records">
+<title>A DD build now records IDS and array-of-structures renames as RENAMED_TO edges</title>
+</head>
+<body>
+<main>
+<h1 id="sib-dd-rename-records-title">A DD build now records IDS and array-of-structures renames as RENAMED_TO edges</h1>
+
+<p id="sib-dd-rename-records-summary">
+The rename record read only a field's <code>change_nbc_previous_name</code>, so
+a whole IDS renamed between DD releases (<code>gyrokinetics</code> to
+<code>gyrokinetics_local</code>) and an array of structures renamed between
+releases (<code>ec_launchers/launcher</code> to <code>ec_launchers/beam</code>)
+left no <code>RENAMED_TO</code> edge. The old node existed, its successor
+existed, and nothing connected them, so a name whose producing source sat on
+the old path had no successor to move to.
+</p>
+
+<h2 id="sib-dd-rename-records-repro">Reproduction at base</h2>
+<p>
+The new test file run against <code>4be56f9d7</code>
+(log <code>baseline_container_renames.log</code>):
+</p>
+<pre><code>UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH="$PWD" \
+  /home/ITER/mcintos/Code/imas-codex/.venv/bin/python -m pytest -p no:cacheprovider \
+  tests/graph/test_dd_container_renames.py</code></pre>
+<p>
+<strong>3 failed</strong> (<code>EXIT=1</code>). The IDS-level assertion fails with
+<code>KeyError: 'gyrokinetics/normalizing_quantities/r'</code>; the two
+container assertions fail because no rename record for a container existed.
+</p>
+
+<h2 id="sib-dd-rename-records-change">What changed</h2>
+<ul>
+<li><code>imas_codex/graph/dd_lifecycle.py</code>: <code>dd_path_index</code> reads the
+IDS element's <code>change_nbc_previous_name</code> and seeds the old prefix with
+it, so every descendant path of a renamed IDS maps to its new spelling exactly as
+a renamed structure already did.</li>
+<li><code>imas_codex/graph/build_dd.py</code>: <code>_detect_container_renames</code>
+matches a removed and an added <code>STRUCTURE</code>/<code>STRUCT_ARRAY</code>
+node under the same parent by their shared descendant paths. A pair is accepted
+only when the match is unique on both sides and clearly ahead of the runner-up,
+so an ambiguous pair is left alone rather than guessed. Matched paths become one
+<code>path_renamed</code> event at the subtree root and stay out of the
+add/remove events. <code>collect_renamed_to_mappings</code> merges the packaged
+path map, the detected container renames and the DD-derived renames into the
+shape <code>_batch_create_renamed_to</code> writes.</li>
+</ul>
+
+<table id="sib-dd-rename-records-pairs">
+<thead><tr><th>Old path</th><th>New path</th><th>Source</th></tr></thead>
+<tbody>
+<tr><td><code>gyrokinetics/normalizing_quantities/r</code></td><td><code>gyrokinetics_local/normalizing_quantities/r</code></td><td>IDS-level annotation (DD 4.1.x)</td></tr>
+<tr><td><code>ec_launchers/launcher/launching_position/r</code></td><td><code>ec_launchers/beam/launching_position/r</code></td><td>structural match, 3.36.0 to 3.37.0</td></tr>
+</tbody>
+</table>
+
+<h2 id="sib-dd-rename-records-head">Result at head</h2>
+<p>
+Logs <code>head_container_renames.log</code> and <code>negative_control_container_renames.log</code>:
+</p>
+<ul>
+<li>Node gate: <strong>4 passed</strong> (<code>EXIT=0</code>), including the
+writer test that inspects the query parameters
+<code>_batch_create_renamed_to</code> would send.</li>
+<li>Negative control (container-rename branch removed):
+<strong>3 failed, 1 passed</strong> (<code>EXIT=1</code>) — the three
+<code>RENAMED_TO</code> assertions fail, the IDS-only assertion still passes
+because it comes from the other source.</li>
+<li><code>tests/graph</code> delta: base <strong>9 failed, 640 passed</strong>;
+head <strong>3 failed, 650 passed</strong>; <strong>zero added failure ids</strong>.
+The three remaining failures are pre-existing and outside this node's paths.</li>
+</ul>
+
+<h2 id="sib-dd-rename-records-scope">Scope</h2>
+<p>
+This node records the edges. Moving a binding onto the successor, or
+superseding when a live name already holds it, is the reconcile-side rule and
+belongs to a separate node. The DD build was exercised through its rename-record
+and writer functions; a full build on a disposable graph is the integration
+check the coordinator owns.
+</p>
+</main>
+</body>
+</html>
