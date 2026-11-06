@@ -45,22 +45,40 @@ def _wipe(gc: GraphClient) -> None:
     The DD source id is ``dd:``-namespaced while the node ids are not, so the
     wipe matches anywhere in the id rather than at its start. The stub carries
     its own grammar-valid identity, which shares no part of that namespace, so
-    it is named as well.
+    it is named as well. Receipts have hashed ids, so their name references
+    identify them even after their owning name has been deleted.
     """
     gc.query(
         "MATCH (n) WHERE n.id CONTAINS 'test_adopt_projection' "
         "OR n.id IN [$stub, 'ion_temperature'] "
+        "OR (n:StandardNameChange AND "
+        "(n.from_name IN [$stub, 'ion_temperature'] "
+        "OR n.to_name IN [$stub, 'ion_temperature'])) "
         "DETACH DELETE n",
         stub=PROBE_STUB,
     )
+
+
+def _receipt_count(gc: GraphClient) -> int:
+    return gc.query(
+        "MATCH (receipt:StandardNameChange) RETURN count(receipt) AS count"
+    )[0]["count"]
 
 
 @pytest.fixture()
 def graph(disposable_neo4j_uri: str):
     with GraphClient() as gc:
         _wipe(gc)
+        assert _receipt_count(gc) == 0
         yield gc
+        before_cleanup = _receipt_count(gc)
         _wipe(gc)
+        after_cleanup = _receipt_count(gc)
+        assert after_cleanup == 0
+        print(
+            f"fixture_receipts: before_cleanup={before_cleanup}; "
+            f"after_cleanup={after_cleanup}"
+        )
 
 
 def _seed_stub(gc: GraphClient, *, owner_token: str | None = None) -> None:
@@ -359,7 +377,7 @@ def test_non_stub_predecessor_is_still_refused(graph, services, stage, entrypoin
         if entrypoint == "supersession"
         else "heterogeneous|unowned pending projection-only predecessor"
     )
-    with pytest.raises((ValueError, RuntimeError), match=refusal):
+    with pytest.raises((ValueError, RuntimeError), match=refusal) as rejected:
         if entrypoint == "supersession":
             supersede_prior_source_names(
                 [{"new_name": "ion_temperature", "source_id": PROBE_PATH}], gc=graph
@@ -373,6 +391,7 @@ def test_non_stub_predecessor_is_still_refused(graph, services, stage, entrypoin
                 source_ids=[PROBE_SOURCE],
                 expected_current_bindings={PROBE_SOURCE: "ion_temperature"},
             )
+    print(f"{entrypoint}/{stage} refused: {rejected.value}")
     assert _stub(graph)["name_stage"] == stage
     assert _stub(graph)["receipts"] == 0
     assert _producers(graph) == ([OWNER_SOURCE] if stage == "pending" else [])
