@@ -51,9 +51,15 @@ export reports. Every trip round that loop manufactures one more live name with 
 <code>sib-adopt-pending-projection-stubs</code>, which this node merged and measured; the loop is
 named here as a finding, not fixed here.</p>
 
-<p>The recorded state also carried a trap: <code>attempt_count</code> read <strong>0</strong> on all
-nine sources while <code>claim_seq</code> was 5–6, so the cap read as unused beside a parked
-classification.</p>
+<p><strong>The attempt counter before the unpark</strong>, read from
+<code>logs/census-before.json</code> (observed 2026-10-29T17:36:28Z): <code>attempt_count</code> is
+<strong>1, 2 or 5</strong> — one source at 1, two at 2, and the remaining six at 5, which is
+<code>_MAX_COMPOSE_CLAIM_ATTEMPTS</code> — with <code>claim_seq</code> between <strong>7 and 11</strong>.
+So the cap was used, and the four sources sitting at 2 were the ones with headroom left. An earlier
+cut of this page reported <code>attempt_count</code> as 0 on all nine; that reading is real but it is
+the state <em>after</em> the unpark, when <code>sn retry</code> returns each row to
+<code>extracted</code> and the counter restarts, and it was written up here as the before-state. The
+before-state is the one above.</p>
 
 <h3 id="sib-compose-stranded-stubs-unpark">Unparking: the sanctioned path</h3>
 
@@ -158,7 +164,23 @@ on <code>source_losses</code> — <code>imas_codex/standard_names/export.py:3085
 <code>exhausted</code> name is dormant (<code>export.py:3091-3098</code>). The seven were all
 <code>pending</code> — a draft stage — so none of them could sit in the gate's blocking set at all,
 and the earlier headline <q>gate_blocking 7 → 5</q> on this page measured the draft population under
-the gate's name.</p>
+the gate's name. <strong>Stated plainly: the seven were sourceless live drafts, not release
+blockers.</strong></p>
+
+<p>The before-number is not asserted, it is replayed. <code>runner replay</code> reads the recorded
+before-census and reclassifies its stubs with the same imported constants the live census uses, so
+both columns come from one predicate and no database is consulted for the before side
+(<code>logs/gate-replay-before.log</code>):</p>
+
+<pre>replayed_stages=['pending']
+gate_roster_blocking=[]            # the true export blocking set, before
+draft_roster_sourceless=[7 names]  # sourceless live drafts, reported and not blocking
+dormant_roster=[]</pre>
+
+<p>After the run the same split reads <code>gate_roster_blocking=[]</code>,
+<code>draft_roster_sourceless</code> five names, and two of the seven dormant. The export gate's
+blocking set is therefore <strong>empty before and empty after</strong>; it was never the set that
+changed, and any page that says it fell by two is describing the draft population.</p>
 
 <p><strong>Corrected measurement</strong>, from <code>logs/census-corrected.json</code>, with the
 gate's constants imported from <code>export</code> rather than restated and the blocking set
@@ -207,10 +229,49 @@ so the corrected read is shown to see the roster rather than returning an empty 
 blindness. The progress is real and it is progress through the draft population; it is not a gate
 repair, and this page used to say it was.</p>
 
-<p><strong>Nothing outside the roster moved.</strong> The only sources written were the nine roster
-paths, and the only names were their seven projected stubs; <code>sn retry</code> was given the
-roster's exact paths and refused none of them, and no other source's <code>status</code>,
-<code>attempt_count</code> or <code>PRODUCED_NAME</code> edge changed.</p>
+<p><strong>Nothing outside the roster moved</strong> — and here is the whole graph saying so, rather
+than the roster saying it about itself. A first cut of this section made that claim from the roster
+alone, which cannot test it. The check now runs over every node the roster does not name, with the
+roster excluded by both of its identifiers: its nine <code>dd_path</code>s and its seven names, plus
+the sources that carry no <code>dd_path</code> at all, which a naive exclusion drops silently
+(1,335 such sources exist, so a
+<code>NOT s.dd_path IN $paths</code> predicate alone hides a seventh of the graph).</p>
+
+<figure>
+  <img src="/imas-codex/figures/sn-integrity-backlog/sib-compose-stranded-stubs/sourceless-roster-and-graph.svg"
+       alt="Left: the seven roster stubs split into export-gate, draft and dormant before and now. Right: every non-roster source by status.">
+  <figcaption>The roster's seven stubs under the gate's own predicate, and the population the scope
+  control is about. The gate's blocking set is empty before and after — the seven were sourceless
+  live <em>drafts</em>, never release blockers — while the draft set loses two names and the dormant
+  set gains them. On the right, the whole graph outside the roster: 10,067 sources, none created,
+  none composed and no name changed in the window.</figcaption>
+</figure>
+
+<p>From <code>logs/outofroster.json</code>, cut off at the before-census stamp and read on
+2026-11-06T08:10Z — a window that is a week wide rather than the run's ninety minutes, so it is an
+upper bound on anything that could have moved:</p>
+
+<table>
+  <thead><tr><th>whole graph, roster excluded</th><th>value</th></tr></thead>
+  <tbody>
+    <tr><td>sources</td><td>10,067</td></tr>
+    <tr><td>sources created since the cut-off</td><td>0</td></tr>
+    <tr><td>sources composed since the cut-off</td><td>0</td></tr>
+    <tr><td>producing edges now</td><td>5,611 across 5,508 sources</td></tr>
+    <tr><td><code>StandardNameChange</code> rows since the cut-off, outside the roster</td><td>0</td></tr>
+    <tr><td><code>StandardNameChange</code> rows since the cut-off, roster</td><td>2 (<code>adopt_pending_projection</code>)</td></tr>
+    <tr><td><code>attempt_count</code> now</td><td>5,609 across 2,849 sources</td></tr>
+  </tbody>
+</table>
+
+<p>Two lines carry the weight and one limitation is stated rather than hidden. The change ledger is a
+positive control: it shows the roster's own two adoptions, so a zero outside the roster is a real
+absence and not an empty query. And <code>attempt_count</code> has no audit trail — no timestamp, no
+change record — so the only honest form of that comparison is the after-total above; a whole-graph
+<em>before</em> value for it does not exist in any recorded snapshot, and inventing one from today's
+numbers would be the same error this page is repairing. The same caveat applies to
+<code>produced_sn_id</code> edges, which carry no properties: they are counted, not dated. What is
+dated is source creation and composition, and neither moved outside the roster.</p>
 
 <h3 id="sib-compose-stranded-stubs-next">What remains, and why</h3>
 
