@@ -1,0 +1,68 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "imas_codex/standard_names/graph_store/graph_catalog.py:2588 (supersede_prior_source_names from the compose writer)",
+    "imas_codex/standard_names/graph_store/graph_refinement.py:1321",
+    "imas_codex/standard_names/edit.py:1936",
+    "imas_codex/standard_names/provenance_lifecycle.py:2223",
+    "imas_codex/standard_names/worker_tasks/worker_common.py:938",
+    "imas_codex/standard_names/worker_tasks/worker_common.py:1041"
+  ],
+  "completed_at": "2026-11-06T22:56:15.478Z",
+  "dispatched_at": "2026-11-06T22:49:48Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_source_bindings.py",
+      "line": 1009,
+      "severity": "blocking",
+      "text": "The adoption predicate the node was dispatched to fix is untouched: the five named stubs (line_averaged_neon_density, radius_of_soft_xray_detector, ratio_of_diamagnetic_vorticity_to_major_radius, toroidal_coordinate_of_spectrometer, toroidal_tritium_velocity) still have no demonstrated path to composition, and the node's own fragment records that the cause was not established, so the node goal is not delivered."
+    },
+    {
+      "file": "imas_codex/standard_names/provenance_lifecycle.py",
+      "line": 505,
+      "severity": "non-blocking",
+      "text": "_UNOWNED_PENDING_PROJECTION restates the unowned-pending-projection eligibility already owned at graph_source_bindings.py:1009-1028 instead of extending it, and the copy drops that owner's unit-agreement check while graph_supersession.py:265 passes enforce_consistency=False, so the two predicates can drift and the migration path is left without the unit guard."
+    },
+    {
+      "file": "tests/standard_names/test_compose_adopts_pending_stub.py",
+      "line": 212,
+      "severity": "non-blocking",
+      "text": "test_two_path_projection_stub_is_adopted and test_structural_parent_projection_stub_is_adopted (line 226) both pass on the c59ac227a base arm per receipt-base-graph.log, so they are regression coverage rather than the main-failing negative controls the brief required; only test_second_claim_after_unpark_finalizes reddens on main."
+    }
+  ],
+  "justifications": {
+    "durability": "tests/standard_names/test_compose_adopts_pending_stub.py:212 and :226 pass on the c59ac227a base arm, and the adoption-escape removal at imas_codex/standard_names/graph_store/graph_catalog.py:2459 has no assertion that reddens if it is restored.",
+    "evidence": "receipt-base-graph.log and receipt-head-graph.log are complete with revision headers and EXIT lines, but the base arm fails only 1 of the 18 cases, so three of the four mandated new cases are not the main-failing evidence the done_when requires.",
+    "fit": "The added names (_UNOWNED_PENDING_PROJECTION, projection_stub, _projection_stub_source_bindings) describe the mechanism, and every commit carries a conventional subject with a body and no attribution trailer.",
+    "goal_fidelity": "imas_codex/standard_names/graph_store/graph_source_bindings.py:1009-1028 still carries the adoption predicate unchanged, so none of the five named stubs is made composable.",
+    "reuse": "imas_codex/standard_names/provenance_lifecycle.py:505-520 is a second definition of the unowned-pending-projection predicate the repository already owns at imas_codex/standard_names/graph_store/graph_source_bindings.py:1009-1028, and it does not extend that owner.",
+    "scope_discipline": "Every changed path in the diff is inside the grant widened by resume-1-advice.txt, and no plan, index or production graph was written."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to make the five remaining pending projection stubs composable by their own DD sources; the diff at 6bf053818f78 touches none of imas_codex/standard_names/graph_store/graph_source_bindings.py:1009-1028 and the node's own fragment records that the cause was not established.\nVERDICT done_when: the done_when asks that both causes be named at file:line with live-state evidence for the five and that every new case fail on main; receipt-base-graph.log records 1 failed / 17 passed on c59ac227a, so only the unpark case is main-failing and the adoption cause is named nowhere.\nVERDICT write_paths: the original grant was graph_source_bindings.py, graph_catalog.py, graph_foundation.py, the adoption test and the fragment; resume-1-advice.txt widened it to graph_supersession.py and provenance_lifecycle.py, and all five changed files lie inside that widened set.\nVERDICT manifest: read; it records status complete at commits ba7f00e93..6bf053818 with receipt-head-graph.log 18 passed and receipt-head-default.log 10 failed / 8523 passed identical to base, and it states that the five historical adoption collisions remain unproved.\nVERDICT diff: read commit by commit from c59ac227a; ba7f00e93 keeps a claimed source at extracted through the rich write (graph_catalog.py:522) and drops the adoption escape (:2459), four commits build the projection-stub binding path in graph_supersession.py and provenance_lifecycle.py, two reset the fixture receipt ledger, two record evidence.\nCALL_SITES: imas_codex/standard_names/graph_store/graph_catalog.py:2588, imas_codex/standard_names/graph_store/graph_refinement.py:1321, imas_codex/standard_names/edit.py:1936, imas_codex/standard_names/provenance_lifecycle.py:2223, imas_codex/standard_names/worker_tasks/worker_common.py:938, imas_codex/standard_names/worker_tasks/worker_common.py:1041\nSCORE goal_fidelity: 6\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/graph_store/graph_source_bindings.py:1009-1028 still carries the adoption predicate unchanged, so none of the five named stubs is made composable.\nSCORE evidence: 11\nJUSTIFICATION evidence: receipt-base-graph.log and receipt-head-graph.log are complete with revision headers and EXIT lines, but the base arm fails only 1 of 18 cases, so three of the four mandated new cases are not the main-failing evidence the done_when requires.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every changed path in the diff is inside the grant widened by resume-1-advice.txt, and no plan, index or production graph was written.\nSCORE durability: 12\nJUSTIFICATION durability: tests/standard_names/test_compose_adopts_pending_stub.py:212 and :226 pass on the c59ac227a base arm, and the adoption-escape removal at graph_catalog.py:2459 has no assertion that reddens if it is restored.\nSCORE fit: 17\nJUSTIFICATION fit: the added names (_UNOWNED_PENDING_PROJECTION, projection_stub, _projection_stub_source_bindings) describe the mechanism, and every commit carries a conventional subject with a body and no attribution trailer.\nSCORE reuse: 5\nJUSTIFICATION reuse: imas_codex/standard_names/provenance_lifecycle.py:505-520 is a second definition of the unowned-pending-projection predicate already owned at imas_codex/standard_names/graph_store/graph_source_bindings.py:1009-1028 and does not extend that owner.\nFINDING imas_codex/standard_names/graph_store/graph_source_bindings.py:1009 blocking: the adoption predicate the node was dispatched to fix is untouched, so the five named stubs have no demonstrated path to composition and the node goal is not delivered.\nFINDING imas_codex/standard_names/provenance_lifecycle.py:505 non-blocking: _UNOWNED_PENDING_PROJECTION restates the eligibility owned at graph_source_bindings.py:1009-1028 instead of extending it and drops that owner's unit-agreement check while supersede passes enforce_consistency=False.\nFINDING tests/standard_names/test_compose_adopts_pending_stub.py:212 non-blocking: the two-path and structural-parent adoption cases pass on the c59ac227a base arm, so they are regression coverage rather than main-failing negative controls.\n",
+  "review_run_id": "r-20261106T224818596878-review-of-sib-compose-remaining-stubs-fix-6bf053818f78",
+  "reviewed_base_sha": "c59ac227a60e23702eaf865b987b3027fbb0f590",
+  "reviewed_head_sha": "6bf053818f784127b23ac005684d7c753b8ea9b4",
+  "reviewed_run_id": "r-20261106T064233498406-sib-compose-remaining-stubs-fix",
+  "scores": {
+    "durability": 12,
+    "evidence": 11,
+    "fit": 17,
+    "goal_fidelity": 6,
+    "reuse": 5,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T23:00:11.087549+00:00",
+  "total": 69,
+  "verdicts": {
+    "call_sites": "See CALL_SITES line.",
+    "diff": "Read commit by commit: ba7f00e93 (graph_catalog.py:522 keeps a claimed source at extracted through the rich write and :2459 drops the adoption escape), c0dc854bc/84d91c7f8/ee1b300fd/882ad4989 (projection-stub binding, completed-first ordering, successor receipt, scoped plan marker), 99e970cae/918a87772 (fixture receipt-ledger reset), plus two docs commits.",
+    "done_when": "The done_when asks that both causes be named at file:line with live-state evidence for the five, that the new cases fail on main and pass at head, and that the gate add zero failure ids; receipt-base-graph.log records 1 failed / 17 passed on c59ac227a, so only test_second_claim_after_unpark_finalizes is main-failing and the adoption cause is named nowhere, while receipt-head-default.log and receipt-base-default.log both report 10 failed / 8523 passed / 15 skipped with identical ids.",
+    "goal": "The node goal is to make the five remaining pending projection stubs composable by their own DD sources; the diff at 6bf053818f78 touches none of the adoption predicate in imas_codex/standard_names/graph_store/graph_source_bindings.py:1009-1028, and the node's own fragment (docs/evidence/fragments/sn-integrity-backlog/sib-compose-remaining-stubs-fix.html) states 'The cause of the five historical collisions is not established by this work'.",
+    "manifest": "Read; it states status complete with commits ba7f00e93..6bf053818, records receipt-head-graph.log 18 passed and receipt-head-default.log 10 failed / 8523 passed as identical to base, and its evidence_inputs states plainly that 'the five historical adoption collisions remain unproved'.",
+    "write_paths": "The original grant was graph_source_bindings.py, graph_catalog.py, graph_foundation.py, the adoption test and the fragment; resume-1-advice.txt widened it to graph_supersession.py and provenance_lifecycle.py, and every path in the diff (five files) lies inside that widened set."
+  }
+}

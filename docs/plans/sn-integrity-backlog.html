@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="325">
+<meta name="plan-version" content="326">
 <meta name="plan-modified" content="2026-11-06">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -1027,6 +1027,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s45" data-id="c-run-r-20261029T202601642241-sib-adopt-pending-projection-stubs" data-who="reckon-build" data-when="2026-10-29T22:59:08Z">
     <div class="r-comment-body"><p>sib-adopt-pending-projection-stubs landed: composition adopts an unowned pending projection stub of its own DD path on the batch claim, the focused claim and the production compose writer (persist_generated_name_winners, reached through persist_generated_name_batch); the stub enters drafted with an adopt_pending_projection receipt and takes the candidate's description, unit and composed columns through the rich name write, the source takes PRODUCED_NAME and is finalized composed, a stub owned by another claim is still refused, and a source parked at the claim cap keeps its collision reason beside the cap message; live census 7 unowned stubs and 6 sources parked against them; tests/standard_names adds zero failure ids against main (1 failure at both revisions) and the new test file is red at main, red again with adoption routed back to the stable finalize, and green at head (5 passed); the state diagram's labels are vector outlines so the figure renders identically with or without fonts</p></div>
+</div>
+<div class="r-comment" data-section="s45" data-id="c-run-r-20261106T224818596878-review-of-sib-compose-remaining-stubs-fix-6bf053818f78" data-who="reckon-build" data-when="2026-11-06T22:56:15.478Z">
+    <div class="r-comment-body"><p>Independent review of r-20261106T064233498406-sib-compose-remaining-stubs-fix at base c59ac227a60e23702eaf865b987b3027fbb0f590 / head 6bf053818f784127b23ac005684d7c753b8ea9b4: scores goal_fidelity 6, evidence 11, scope_discipline 18, durability 12, fit 17, reuse 5 (total 69); zero added failure ids; one blocking finding that the adoption predicate in graph_source_bindings.py:1009 is untouched so the five named stubs are still not composable, plus two non-blocking findings on a duplicated eligibility predicate and on adoption cases that pass on the base arm.</p></div>
 </div>
 <div class="r-comment" data-section="s46" data-id="c-run-r-20261029T083805766546-sib-retire-sourceless-drafts" data-who="reckon-build" data-when="2026-10-29T09:00:04.231Z">
     <div class="r-comment-body"><p>Retired 131 of 132 live exhausted drafts that carry no producing DD source through `apply_signed_manifest` (authority 133 rows, preview 131 admitted / 2 refused, manifest 2f8815c0…), one successor edge to `poloidal_angle_of_plasma_boundary_gap`; read-back lists 17 remaining sourceless live names — 16 non-exhausted recorded for the lead and 1 writer refusal — against a live population of 148 rather than the dispatch's 19 (113 exhausted records no source at all; `ion_pressure` and `beta` are derived parents).</p></div>
