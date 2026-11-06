@@ -48,7 +48,8 @@ def _wipe(gc: GraphClient) -> None:
     it is named as well.
     """
     gc.query(
-        "MATCH (n) WHERE n.id CONTAINS 'test_adopt_projection' OR n.id = $stub "
+        "MATCH (n) WHERE n.id CONTAINS 'test_adopt_projection' "
+        "OR n.id IN [$stub, 'ion_temperature'] "
         "DETACH DELETE n",
         stub=PROBE_STUB,
     )
@@ -71,11 +72,12 @@ def _seed_stub(gc: GraphClient, *, owner_token: str | None = None) -> None:
                       node.lifecycle_status = 'active'
         MERGE (stub:StandardName {id: $stub})
         ON CREATE SET stub.name_stage = 'pending', stub.status = 'draft',
-                      stub.origin = 'projection'
+                      stub.origin = 'projection', stub.unit = $unit
         MERGE (node)-[:HAS_STANDARD_NAME]->(stub)
         """,
         path=PROBE_PATH,
         stub=PROBE_STUB,
+        unit=PROBE_UNIT,
     )
     gc.query(
         """
@@ -165,6 +167,138 @@ def _candidate() -> dict:
         "claim_seq": SEQ,
         "unit": None,
     }
+
+
+def _persist_candidate(**overrides):
+    from imas_codex.standard_names.graph_store.graph_catalog import (
+        persist_generated_name_batch,
+    )
+
+    return persist_generated_name_batch(
+        [
+            {
+                "id": PROBE_STUB,
+                "source_id": PROBE_PATH,
+                "source_types": ["dd"],
+                "description": PROBE_DESCRIPTION,
+                "unit": PROBE_UNIT,
+                "source_claim_token": TOKEN,
+                "source_claim_seq": SEQ,
+                **overrides,
+            }
+        ],
+        compose_model="test-adopt-projection-model",
+        return_winner_ids=True,
+    )
+
+
+def test_two_path_projection_stub_is_adopted(graph, services):
+    _seed_stub(graph)
+    graph.query(
+        "MATCH (stub:StandardName {id: $stub}) "
+        "MERGE (other:IMASNode {id: $path}) "
+        "MERGE (other)-[:HAS_STANDARD_NAME]->(stub)",
+        stub=PROBE_STUB,
+        path=PROBE_PATH + "_other",
+    )
+    assert _persist_candidate() == [PROBE_SOURCE]
+    assert _stub(graph)["name_stage"] == "drafted"
+    assert len(_adoption_receipts(graph)) == 1
+
+
+def test_structural_parent_projection_stub_is_adopted(graph, services):
+    _seed_stub(graph)
+    graph.query(
+        "MATCH (stub:StandardName {id: $stub}) "
+        "MERGE (parent:StandardName {id: $parent}) "
+        "SET parent.origin = 'derived', parent.name_stage = 'accepted' "
+        "MERGE (stub)-[:HAS_PARENT]->(parent) "
+        "MERGE (authority:StructuralNameAuthority {id: $authority}) "
+        "MERGE (authority)-[:ENTAILED_FROM_CHILD]->(stub)",
+        stub=PROBE_STUB,
+        parent="test_adopt_projection_parent",
+        authority="test_adopt_projection_authority",
+    )
+    assert _persist_candidate() == [PROBE_SOURCE]
+    assert _stub(graph)["name_stage"] == "drafted"
+    assert len(_adoption_receipts(graph)) == 1
+
+
+def test_second_claim_after_unpark_finalizes(graph, services, monkeypatch):
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        claim_explicit_standard_name_sources,
+        retry_failed_sources,
+    )
+
+    _seed_stub(graph)
+    graph.query(
+        "MATCH (src:StandardNameSource {id: $source}) "
+        "SET src.status = 'failed', src.attempt_count = 5, "
+        "src.claim_token = null, src.claimed_at = null",
+        source=PROBE_SOURCE,
+    )
+    result = retry_failed_sources(
+        [PROBE_PATH], reason="retry fixture source", gc=graph, services=services
+    )
+    assert result["retried"] == 1
+    claimed = claim_explicit_standard_name_sources([PROBE_PATH], services=services)
+    assert len(claimed) == 1
+    claim = claimed[0]
+    assert claim["claim_seq"] > SEQ
+    write = services.write_standard_names
+    observed = []
+
+    def observe_claim(names, **kwargs):
+        result = write(names, **kwargs)
+        observed.extend(
+            kwargs["gc"].query(
+                "MATCH (src:StandardNameSource {id: $source}) "
+                "RETURN src.status AS status, src.claim_token AS token, src.claim_seq AS seq",
+                source=PROBE_SOURCE,
+            )
+        )
+        return result
+
+    monkeypatch.setattr(services, "write_standard_names", observe_claim)
+    assert _persist_candidate(
+        id="ion_temperature",
+        source_claim_token=claim["claim_token"],
+        source_claim_seq=claim["claim_seq"],
+    ) == [PROBE_SOURCE]
+    assert observed == [
+        {
+            "status": "extracted",
+            "token": claim["claim_token"],
+            "seq": claim["claim_seq"],
+        }
+    ]
+    row = graph.query(
+        "MATCH (src:StandardNameSource {id: $source}) "
+        "RETURN src.status AS status, src.claim_token AS token",
+        source=PROBE_SOURCE,
+    )[0]
+    assert row == {"status": "composed", "token": None}
+
+
+def test_stolen_claim_aborts_transaction(graph, services, monkeypatch):
+    _seed_stub(graph)
+    write = services.write_standard_names
+
+    def steal_claim(names, **kwargs):
+        result = write(names, **kwargs)
+        kwargs["gc"].query(
+            "MATCH (src:StandardNameSource {id: $source}) "
+            "SET src.claim_token = 'another-owner', src.claim_seq = src.claim_seq + 1",
+            source=PROBE_SOURCE,
+        )
+        return result
+
+    monkeypatch.setattr(services, "write_standard_names", steal_claim)
+    with pytest.raises(RuntimeError, match="source claim changed"):
+        _persist_candidate()
+    assert _stub(graph)["name_stage"] == "pending"
+    assert _producers(graph) == []
+    assert _adoption_receipts(graph) == []
 
 
 def test_batch_claim_adopts_an_unowned_projection_stub(graph, services) -> None:
