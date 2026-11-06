@@ -1,0 +1,355 @@
+<h2 id="sib-compose-stranded-stubs">sib-compose-stranded-stubs — composing the seven pending stubs that stranded their DD sources</h2>
+
+<p class="sib-compose-stranded-stubs-status"><strong>Outcome: blocked — two of the seven landed; the remaining five are refused by a binding collision, and a second scoped attempt landed nothing because every claim aborted in the transactional finalize.</strong>
+Composition now adopts an unowned pending projection stub on the path that actually writes a composed
+name, so two sources bound their own stub and reached <code>accepted</code>
+(<code>radial_coordinate_of_reflector</code>, <code>vertical_coordinate_of_reflector</code>). The
+sourceless <em>draft</em> population fell from seven roster names to five — not the export gate's
+blocking set, which listed none of them before or after; see the correction below. The remaining five
+still refuse with
+<code>candidate "…" has non-bindable name_stage "pending"</code>, and every one of them is a DD path
+whose own IMAS node projects onto that pending stub — so the refusal is not a projection it cannot
+see, and the condition that still fails is answered by neither the graph state nor the recorded
+message. A second scoped attempt, after unparking the six again, landed nothing at all: every
+<code>generate_name</code> batch died in the transactional finalize
+(<code>RuntimeError('source claim changed during transactional name persistence')</code>, nine of
+nine). Both are recorded below rather than guessed at; neither is a doubled read.</p>
+
+<h3 id="sib-compose-stranded-stubs-cause">The cause, at its file and line</h3>
+
+<p>A composition candidate could not bind a <code>pending</code> target unless the claim that created
+it owned it, so each attempt generated a name, collided with the projection stub, released the claim,
+and counted the attempt against the cap. The chain, at the revision this node read (base
+<code>b6bd5682b</code>):</p>
+
+<ul>
+  <li><code>imas_codex/standard_names/graph_store/graph_foundation.py:98</code> —
+      <code>_STABLE_BINDING_NAME_STAGES</code> is <code>{drafted, reviewed, accepted, approved}</code>;
+      <code>pending</code> is not among them.</li>
+  <li><code>imas_codex/standard_names/graph_store/graph_source_bindings.py:1026-1036</code> (base
+      revision) — <code>lifecycle_bindable</code> admitted a pending target only through an own
+      provisional reservation, which a projection stub does not carry.</li>
+  <li><code>imas_codex/standard_names/graph_store/graph_source_bindings.py:1237-1266</code> (current
+      revision) — the refusal releases the claim, <em>retains</em> <code>attempt_count</code>, and
+      writes <code>standard-name binding collision: candidate "…" has non-bindable name_stage "…" at
+      composition attempt N</code>.</li>
+  <li><code>imas_codex/standard_names/graph_store/graph_cost_and_claims.py:213</code> —
+      <code>_MAX_COMPOSE_CLAIM_ATTEMPTS = 5</code>. At the cap,
+      <code>imas_codex/standard_names/orphan_sweep.py:118-120</code> parks the source
+      <code>failed</code>. Until this node's merge that statement overwrote <code>last_error</code>
+      with the bare cap message; it now appends <code>; last refusal: …</code>, which is why the
+      refusal text below survives parking.</li>
+</ul>
+
+<p><strong>The sourceless-name generator.</strong> Those three lines compose one loop: a generated
+candidate that lands on its own pending projection stub is refused by the binding lock
+(<code>graph_source_bindings.py:1237-1266</code>), the attempt is charged against the cap
+(<code>graph_cost_and_claims.py:213</code>), and at the cap the source is parked
+(<code>orphan_sweep.py:118-120</code>) — while the stub it collided with keeps no
+<code>PRODUCED_NAME</code> edge and stays a sourceless live name, listed in the draft population the
+export reports. Every trip round that loop manufactures one more live name with no source. The repair belongs to
+<code>sib-adopt-pending-projection-stubs</code>, which this node merged and measured; the loop is
+named here as a finding, not fixed here.</p>
+
+<p><strong>The attempt counter before the unpark</strong>, read from
+<code>logs/census-before.json</code> (observed 2026-10-29T17:36:28Z): <code>attempt_count</code> is
+<strong>1, 2 or 5</strong> — <strong>one</strong> source at 1, <strong>two</strong> at 2, and the
+remaining <strong>six</strong> at 5 (1 + 2 + 6 = 9), which is <code>_MAX_COMPOSE_CLAIM_ATTEMPTS</code>
+— with <code>claim_seq</code> between <strong>7 and 11</strong>. So the cap was used, and only the two
+sources sitting at 2 had headroom left. An earlier
+cut of this page reported <code>attempt_count</code> as 0 on all nine; that reading is real but it is
+the state <em>after</em> the unpark, when <code>sn retry</code> returns each row to
+<code>extracted</code> and the counter restarts, and it was written up here as the before-state. The
+before-state is the one above.</p>
+
+<h3 id="sib-compose-stranded-stubs-unpark">Unparking: the sanctioned path</h3>
+
+<p>A parked source is not claimable — <code>claim_generate_name_batch</code> selects
+<code>status='extracted'</code> only — and no reset rewinds a <code>failed</code> row:
+<code>clear_standard_names</code> returns only <code>composed</code>/<code>attached</code> sources to
+<code>extracted</code> (<code>graph_catalog_reset.py:1264-1279</code>). The sanctioned unpark is
+<code>sn retry --failed</code> (<code>imas_codex/cli/sn.py:7626</code> →
+<code>retry_failed_sources</code>), which writes a durable retry event before resetting the counters.
+Run twice, scoped to the roster's own paths and to nothing else:</p>
+
+<table>
+  <thead><tr><th>invocation</th><th>result</th><th>log</th></tr></thead>
+  <tbody>
+    <tr><td><code>sn retry --failed &lt;6 roster paths&gt; --dry-run</code></td><td>eligible 6 of 6</td><td><code>logs/gate-retry-unpark.log</code></td></tr>
+    <tr><td><code>sn retry --failed &lt;6 roster paths&gt; --reason …</code></td><td>retried 6 of 6</td><td><code>logs/gate-retry-unpark.log</code></td></tr>
+    <tr><td>second <code>sn retry --failed &lt;6 roster paths&gt;</code> before run 3</td><td>retried 6 of 6, the same six ids</td><td>console only; ids recorded in the manifest</td></tr>
+  </tbody>
+</table>
+
+<p>No graph text was edited by hand at any point; every write went through a CLI verb.</p>
+
+<h3 id="sib-compose-stranded-stubs-collision">Did each attempt fail by colliding with its stub?</h3>
+
+<p><strong>Confirmed, and quoted verbatim.</strong> The recorded refusals name the candidate and its
+stage:</p>
+
+<pre>standard-name binding collision: candidate "line_averaged_neon_density" has non-bindable name_stage "pending" at composition attempt 5
+standard-name binding collision: candidate "radius_of_soft_xray_detector" has non-bindable name_stage "pending" at composition attempt 5
+standard-name binding collision: candidate "ratio_of_diamagnetic_vorticity_to_major_radius" has non-bindable name_stage "pending" at composition attempt 5
+standard-name binding collision: candidate "ratio_of_diamagnetic_vorticity_to_major_radius" has non-bindable name_stage "pending" at composition attempt 1</pre>
+
+<p>For the other three (<code>spectrometer_visible/channel/geometry_matrix/interpolated/phi</code>,
+<code>summary/local/pedestal/velocity_phi/tritium/value</code>,
+<code>summary/local/separatrix/velocity_phi/tritium/value</code>) the record is the bare
+<code>compose claim-attempt cap reached</code>: they were parked before the append fix existed, so
+the refusal that caused their attempts was overwritten at parking. Their collision is therefore
+<em>not</em> evidenced from the stored text — it is inferred from the same candidate reaching the
+same stub in the same run, and is recorded as inference rather than as a quotation.</p>
+
+<p><strong>Refuted for two of the seven.</strong> <code>radial_coordinate_of_reflector</code> and
+<code>vertical_coordinate_of_reflector</code> did <em>not</em> fail by colliding: the merged adoption
+exception let the claim take its own projection stub, and both sources finished
+<code>composed</code>.</p>
+
+<h3 id="sib-compose-stranded-stubs-run">The scoped runs: calls and spend</h3>
+
+<table>
+  <thead><tr><th>run</th><th>scope and caps</th><th>run_id</th><th>generate_name</th><th>review_name</th><th>spend</th></tr></thead>
+  <tbody>
+    <tr><td>census only (read-only)</td><td>9 roster paths</td><td>—</td><td>—</td><td>—</td><td>$0.0000</td></tr>
+    <tr><td>scoped run 2</td><td><code>--focus &lt;9 paths&gt; --names-only --cost-limit 2.00 --time 15</code></td><td><code>af7b0ef1…</code></td><td>processed=2, spent=$0.0000</td><td>processed=2, spent=$0.0003</td><td>$0.0003 of $2.00</td></tr>
+    <tr><td>scoped run 3</td><td><code>--focus &lt;9 paths&gt; --names-only --cost-limit 2.00 --time 15</code></td><td><code>885d314f…</code> (7 focus sources seeded — the two composed paths carry live accepted names and are gap-only by default)</td><td>processed=0, spent=$0.0000, error_count=9</td><td>processed=0, spent=$0.0000</td><td>$0.0000 of $2.00, <code>EXIT=1</code></td></tr>
+  </tbody>
+</table>
+
+<p>Run 2 was interrupted at 00:39:31Z by an outer ten-minute process ceiling, not by its own budget:
+the pools took the stop signal, exited cleanly and reported their counters. Its own summary is
+therefore a partial draw, and it is quoted as such. The spend is under a hundredth of a cent because
+the compose model is served locally (<code>local/deepseek-v4.1-flash</code>), so the cap never
+bound.</p>
+
+<h3 id="sib-compose-stranded-stubs-before">Before and after, per source</h3>
+
+<table>
+  <thead><tr><th>DD path</th><th>before</th><th>final</th><th>producer</th></tr></thead>
+  <tbody>
+    <tr><td><code>spectrometer_x_ray_crystal/channel/reflector/sphere_centre/r</code></td><td>extracted, att 1</td><td>composed</td><td><code>radial_coordinate_of_reflector</code></td></tr>
+    <tr><td><code>spectrometer_x_ray_crystal/channel/reflector/sphere_centre/z</code></td><td>failed, att 5, cap</td><td>composed</td><td><code>vertical_coordinate_of_reflector</code></td></tr>
+    <tr><td><code>edge_profiles/ggd/vorticity_over_r/diamagnetic</code></td><td>extracted, att 2</td><td>failed, att 5, cap + refusal</td><td>none</td></tr>
+    <tr><td><code>plasma_profiles/ggd/vorticity_over_r/diamagnetic</code></td><td>extracted, att 2</td><td>failed, att 5, cap + refusal</td><td>none</td></tr>
+    <tr><td><code>soft_x_rays/channel/detector/radius</code></td><td>failed, att 5, cap</td><td>failed, att 5, cap + refusal</td><td>none</td></tr>
+    <tr><td><code>summary/line_average/n_i/neon/value</code></td><td>failed, att 5, cap</td><td>failed, att 5, cap + refusal</td><td>none</td></tr>
+    <tr><td><code>spectrometer_visible/channel/geometry_matrix/interpolated/phi</code></td><td>failed, att 5, cap</td><td>failed, att 5, cap</td><td>none</td></tr>
+    <tr><td><code>summary/local/pedestal/velocity_phi/tritium/value</code></td><td>failed, att 5, cap</td><td>failed, att 5, cap</td><td>none</td></tr>
+    <tr><td><code>summary/local/separatrix/velocity_phi/tritium/value</code></td><td>failed, att 5, cap</td><td>failed, att 5, cap</td><td>none</td></tr>
+  </tbody>
+</table>
+
+<p><strong>The export source gate never listed these seven, and this node's earlier cut said it
+did.</strong> Under the gate's own predicate <code>gate_blocking_count</code> and
+<code>gate_roster_blocking</code> are <strong>0 before and 0 after</strong>. The defect that is real
+and measurable is the <em>draft</em> population the export reports and does not block on, and that
+fell from seven roster names to five.</p>
+
+<h3 id="sib-compose-stranded-stubs-instrument">Correction: the instrument, not the outcome</h3>
+
+<p>The census in this runner first selected a blocking set with
+<code>row.get("name_stage") != "exhausted"</code>. That is not the export gate. The gate blocks only
+on <code>source_losses</code> — <code>imas_codex/standard_names/export.py:3085-3090</code>:</p>
+
+<pre>source_losses = [
+    row
+    for row in sourceless
+    if row["name_stage"] in _SHIPPING_NAME_STAGES
+    and row["id"] not in _RELEASE_IDENTITY_HOLDS
+]</pre>
+
+<p>with <code>_SHIPPING_NAME_STAGES = {accepted, approved}</code>, and the failure raised only
+<code>if source_losses:</code> (<code>export.py:3108-3119</code>). A non-shipping name is collected into
+<code>draft_sourceless_names</code> (<code>export.py:3099-3106</code>) and reported on the export; an
+<code>exhausted</code> name is dormant (<code>export.py:3091-3098</code>). The seven were all
+<code>pending</code> — a draft stage — so none of them could sit in the gate's blocking set at all,
+and the earlier headline <q>gate_blocking 7 → 5</q> on this page measured the draft population under
+the gate's name. <strong>Stated plainly: the seven were sourceless live drafts, not release
+blockers.</strong></p>
+
+<p>The before-number is not asserted, it is replayed. <code>runner replay</code> reads the recorded
+before-census and reclassifies its stubs with the same imported constants the live census uses, so
+both columns come from one predicate and no database is consulted for the before side
+(<code>logs/gate-replay-before.log</code>):</p>
+
+<pre>replayed_stages=['pending']
+gate_roster_blocking=[]            # the true export blocking set, before
+draft_roster_sourceless=[7 names]  # sourceless live drafts, reported and not blocking
+dormant_roster=[]</pre>
+
+<p>After the run the same split reads <code>gate_roster_blocking=[]</code>,
+<code>draft_roster_sourceless</code> five names, and the two the draft set lost have landed as
+composed names. The export gate's
+blocking set is therefore <strong>empty before and empty after</strong>; it was never the set that
+changed, and any page that says it fell by two is describing the draft population.</p>
+
+<p><strong>Corrected measurement</strong>, from <code>logs/census-corrected.json</code>, with the
+gate's constants imported from <code>export</code> rather than restated and the blocking set
+intersected with <code>find_sourceless_live_names</code> exactly as the gate does:</p>
+
+<table>
+  <thead><tr><th>measure</th><th>before</th><th>now</th></tr></thead>
+  <tbody>
+    <tr><td><code>gate_blocking_count</code> — shipping stage, not release-held, confirmed sourceless</td><td>0</td><td>0</td></tr>
+    <tr><td><code>gate_roster_blocking</code> — of the seven</td><td>0</td><td>0</td></tr>
+    <tr><td><code>draft_sourceless_count</code> — reported, not blocking</td><td>7</td><td>6</td></tr>
+    <tr><td><code>draft_roster_sourceless</code> — of the seven</td><td>7</td><td>5</td></tr>
+    <tr><td>sourceless population / confirmed sourceless</td><td>13 classified</td><td>11 / 11</td></tr>
+    <tr><td>dormant (<code>exhausted</code>), whole graph</td><td>—</td><td>2</td></tr>
+  </tbody>
+</table>
+
+<p>The before column is recomputed from the recorded before-state
+(<code>logs/census-resume-before.json</code>): its seven roster stubs are all
+<code>name_stage=pending</code> with no producer, which places them in the draft set and in the
+gate's blocking set not at all. It is a recomputation under the corrected predicate, not a
+re-measurement — the graph has moved since.</p>
+
+<p><strong>The repair's own negative control</strong>, run on the same live state so the only difference
+is the predicate: the runner as it stood before this repair
+(<code>git show a41f8c3ab:…-run.py</code>) reports <code>gate_blocking_count=5</code> and
+<code>gate_roster_blocking=5</code>, naming the five draft names above as if they blocked the gate;
+the repaired runner reports <strong>0 and 0</strong>. The check the finding names therefore fails
+without this repair and passes with it, and the difference is one predicate rather than one graph
+state (<code>logs/gate-negative-control-filter.log</code>).</p>
+
+<p><strong>Reproduce it:</strong> from the worktree root,</p>
+
+<pre>UV_PROJECT_ENVIRONMENT=&lt;main-checkout&gt;/.venv PYTHONPATH="$PWD" uv run --no-sync python \
+  docs/evidence/fragments/sn-integrity-backlog/sib-compose-stranded-stubs-run.py census --out &lt;path&gt;.json</pre>
+
+<p>emits every number in the table above and reports the shipping stages it used, so a reader never
+has to take the filter on trust: <code>shipping_name_stages</code> is read out of
+<code>export</code> at run time, not restated here.</p>
+
+<p><strong>What this does to the node's negative control.</strong> The control declared before the
+run was that the export source gate must list all seven first. It could not have fired: the gate
+never lists a <code>pending</code> name. The control was therefore mis-specified together with the
+instrument, and its replacement is the draft set, which listed all seven before and lists five now —
+so the corrected read is shown to see the roster rather than returning an empty set through
+blindness. The progress is real and it is progress through the draft population; it is not a gate
+repair, and this page used to say it was.</p>
+
+<p><strong>Nothing outside the roster moved</strong> — and here is the whole graph saying so, rather
+than the roster saying it about itself. A first cut of this section made that claim from the roster
+alone, which cannot test it. The check now runs over every node the roster does not name, with the
+roster excluded by both of its identifiers: its nine <code>dd_path</code>s and its seven names, plus
+the sources that carry no <code>dd_path</code> at all, which a naive exclusion drops silently
+(1,335 such sources exist, so a
+<code>NOT s.dd_path IN $paths</code> predicate alone hides a seventh of the graph).</p>
+
+<figure>
+  <img src="/imas-codex/figures/sn-integrity-backlog/sib-compose-stranded-stubs/sourceless-roster-and-graph.svg"
+       alt="Left: the seven roster stubs split into export gate, draft and composed, before and now. Right: every non-roster source by status.">
+  <figcaption>The roster's seven stubs under the gate's own predicate, and the population the scope
+  control is about. The gate's blocking set is empty before and after — the seven were sourceless
+  live <em>drafts</em>, never release blockers — while the draft set loses two names to the
+  composed set, where they landed with a producer. On the right, the whole graph outside the roster: 10,067 sources, none created and
+  none composed among the 624 that carry a creation timestamp, and no name change in the window
+  across the full change ledger.</figcaption>
+</figure>
+
+<p><strong>Every number in that figure is read from the artifacts above</strong>, not written into the
+plotting script: it loads <code>replay-before.json</code>, <code>census-current.json</code> and
+<code>outofroster.json</code> and refuses to draw if any is missing, so a drifted artifact shows as a
+drifted figure rather than as a stale picture of corrected data. Reproduce it with</p>
+
+<pre>UV_PROJECT_ENVIRONMENT=&lt;main-checkout&gt;/.venv uv run --no-sync python \
+  docs/figures/sn-integrity-backlog/sib-compose-stranded-stubs/sourceless-roster-and-graph.py \
+  --logs &lt;run-logs&gt;</pre>
+
+<p>The script also refuses to save a figure whose own labels leave the canvas, collide with one
+another, or sit on a plotted bar, so the two <code>0</code> rows cannot again be drawn as text on top
+of a neighbouring bar.</p>
+
+<p>From <code>logs/outofroster.json</code>, cut off at the before-census stamp and read on
+2026-11-06T08:10Z — a window that is a week wide rather than the run's ninety minutes, so it is an
+upper bound on anything that could have moved:</p>
+
+<table>
+  <thead><tr><th>whole graph, roster excluded</th><th>value</th></tr></thead>
+  <tbody>
+    <tr><td>sources</td><td>10,067</td></tr>
+    <tr><td>sources carrying <code>created_at</code> at all — the denominator for the two rows below</td><td>624 of 10,067 (6.2%)</td></tr>
+    <tr><td>sources created since the cut-off</td><td>0</td></tr>
+    <tr><td>sources composed since the cut-off</td><td>0</td></tr>
+    <tr><td>producing edges now</td><td>5,611 across 5,508 sources</td></tr>
+    <tr><td><code>StandardNameChange</code> rows since the cut-off, outside the roster</td><td>0</td></tr>
+    <tr><td><code>StandardNameChange</code> rows since the cut-off, roster</td><td>2 (<code>adopt_pending_projection</code>)</td></tr>
+    <tr><td><code>attempt_count</code> now</td><td>5,609 across 2,849 sources</td></tr>
+  </tbody>
+</table>
+
+<p>Two lines carry the weight and one limitation is stated rather than hidden. The change ledger is a
+positive control: it shows the roster's own two adoptions, so a zero outside the roster is a real
+absence and not an empty query. And <code>attempt_count</code> has no audit trail — no timestamp, no
+change record — so the only honest form of that comparison is the after-total above; a whole-graph
+<em>before</em> value for it does not exist in any recorded snapshot, and inventing one from today's
+numbers would be the same error this page is repairing. The same caveat applies to
+<code>produced_sn_id</code> edges, which carry no properties: they are counted, not dated.</p>
+
+<p><strong>The dated rows are not the whole population, and the coverage is stated here rather than
+left to be inferred.</strong> Only 624 of the 10,067 non-roster sources carry
+<code>created_at</code> — 6.2 percent — so "0 created since the cut-off" is a statement about those
+624, not about the graph. A source created in the window without a timestamp would not appear in it.
+What the row does establish is one-directional and still worth having: among the sources the graph
+can date, nothing outside the roster moved. The claim this page may make is therefore that narrow one,
+not the unqualified "neither moved" it made before. The change ledger is unaffected by this
+limitation — <code>changed_at</code> is present on every <code>StandardNameChange</code> row, and the
+roster's own two adoptions appear in it, so the zero outside the roster there is a measured absence
+over the full ledger rather than a partial one.</p>
+
+<h3 id="sib-compose-stranded-stubs-next">What remains, and why</h3>
+
+<p>Five stubs stay pending with no producer, so the export still <em>reports</em> them, and they stay
+in the draft population. The refused claim emits
+<code>non-bindable name_stage "pending"</code> — the message that means the adoption predicate was
+false — yet every condition that predicate tests reads as satisfied in the graph: the claimed source
+is <code>source_type='dd'</code>, the stub carries no reservation and no claim token, no
+<code>PRODUCED_NAME</code> edge reaches it, and the source's own <code>FROM_DD_PATH</code> node holds
+a <code>HAS_STANDARD_NAME</code> edge to exactly that stub. Two sources passed the same predicate in
+the same run. That contradiction is the open question: the refusal message names the one condition
+the graph says is met, so either the predicate reads a property the census does not, or the exception
+is not granted on the branch that composes those five. Resolving it needs the claim's own batch
+record, not another run.</p>
+
+<p>A second defect surfaced in run 2 and then stopped run 3 completely:
+<code>RuntimeError('source claim changed during transactional name persistence')</code> — raised at
+<code>imas_codex/standard_names/graph_store/graph_catalog.py:2510-2513</code>, where the batch
+finalize asserts that the set of sources it just finalized equals the set it intended. In run 2 it
+fired ten times against twenty-five generation calls; in run 3 it fired nine times and every
+<code>generate_name</code> batch aborted, so <code>processed</code> was 0 and the run exited 1. It
+is the reason the second attempt landed nothing new, and it is independent of the collision above:
+the sources reach the persistence write and are then lost by the finalize, which is also what the
+five pending stubs' absent producing edges look like from the graph side.</p>
+
+<h3 id="sib-compose-stranded-stubs-readback">Read-back</h3>
+
+<table>
+  <thead><tr><th>criterion</th><th>state</th></tr></thead>
+  <tbody>
+    <tr><td>each source produces exactly one live name</td><td>met for 2 of 9 (<code>radial_coordinate_of_reflector</code>, <code>vertical_coordinate_of_reflector</code>): one <code>PRODUCED_NAME</code> edge each, one producer each, no source with two. Not met for the other 7, which produce none.</td></tr>
+    <tr><td>each adopted stub carries its content and a receipt</td><td>met for 2 of 2: both carry a description, a unit (<code>m</code>) and one <code>StandardNameChange</code> with <code>operation='adopt_pending_projection'</code>. Their stage is <code>accepted</code>, not <code>drafted</code> — they passed review and approval inside the same run, so the criterion is met in the stronger form.</td></tr>
+    <tr><td>the export gate's blocking set no longer lists the seven</td><td>vacuously met, and the criterion was mis-specified: the gate's blocking set holds shipping-stage names only, and it listed none of the seven before or after (<code>gate_roster_blocking</code> 0 → 0). The set that did list them is the reported draft population, 7 → 5.</td></tr>
+    <tr><td>nothing outside the roster was touched</td><td>met: the only sources written are the nine roster paths, the only names their seven projected stubs, and <code>sn retry</code> was given the roster's exact paths.</td></tr>
+  </tbody>
+</table>
+
+<ol>
+  <li>Repair the finalize guard at <code>graph_catalog.py:2510-2513</code> first: until it holds, no
+      scoped run can compose anything, and the five parked sources will re-park on every attempt.
+      The predicate that must hold is that the finalized set equals the intended set — so the
+      question is which intended source the finalize query drops, not whether the claim was
+      released.</li>
+  <li>Then answer the collision question against the same batch: the refusal names the one condition
+      the graph reports as met, so either the predicate reads a property the census does not, or the
+      adoption exception is not granted on the branch that composes those five.</li>
+  <li>After each attempt the sources re-park at the cap; unpark with
+      <code>sn retry --failed &lt;the same six paths&gt; --reason …</code>, never by editing rows.</li>
+  <li>Re-run the scope with <code>--time 15</code> and read <code>generate_name processed</code>.
+      Judge the outcome on <code>draft_roster_sourceless</code>, which starts at 5 and must reach 0 —
+      <em>not</em> on <code>gate_roster_blocking</code>, which already reads 0 and would report
+      success whatever the composition did. Re-run the census in the same command as the run's own
+      outcome, so the two are read from one state.</li>
+</ol>
