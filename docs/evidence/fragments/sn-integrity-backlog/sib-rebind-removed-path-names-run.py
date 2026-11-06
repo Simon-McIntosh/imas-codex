@@ -63,6 +63,11 @@ SUCCESSOR = "flux_surface_averaged_magnetic_field_magnitude"
 REASON = (
     "Move each reviewed name's producing DD source to its documented successor path"
 )
+RETIRE_REASON = (
+    "b_average ('Flux surface averaged B') was carried in parallel with "
+    "b_field_average ('Flux surface averaged modulus of B') and removed in "
+    "DD 4.0.0, so the accepted name holds the same quantity"
+)
 
 
 def snapshot(gc: GraphClient) -> dict:
@@ -143,48 +148,45 @@ def authority(phase: str) -> dict:
             },
             "orphan_policy": "refuse",
         }
-    elif phase == "supersede":
-        row_id = OLD + "=>" + SUCCESSOR
+    elif phase in {"retire_with_successor", "retire_without_successor"}:
+        with_successor = phase == "retire_with_successor"
+        participants = [{"id": OLD, "kind": "node", "graph_label": "StandardName"}]
+        mutation = {
+            "id": OLD + ":supersede",
+            "order": 0,
+            "kind": "supersede",
+            "participant_id": OLD,
+        }
+        if with_successor:
+            participants.append(
+                {"id": SUCCESSOR, "kind": "node", "graph_label": "StandardName"}
+            )
+            mutation["arguments"] = {"successor_id": SUCCESSOR}
         spec = {
-            "operation_id": "retire-duplicate-magnetic-field-average",
+            "operation_id": "retire-removed-dd-path-name",
             "authority_mode": "external_reviewed",
             "rows": [
                 {
-                    "id": row_id,
+                    "id": OLD,
                     "identity": {
-                        "id": row_id,
+                        "id": OLD,
                         "kind": "standard_name",
                         "target_id": OLD,
                     },
-                    "participants": [
-                        {"id": OLD, "kind": "node", "graph_label": "StandardName"},
-                        {
-                            "id": SUCCESSOR,
-                            "kind": "node",
-                            "graph_label": "StandardName",
-                        },
-                    ],
-                    "mutations": [
-                        {
-                            "id": OLD + ":supersede",
-                            "order": 0,
-                            "kind": "supersede",
-                            "participant_id": OLD,
-                            "arguments": {"successor_id": SUCCESSOR},
-                        }
-                    ],
+                    "participants": participants,
+                    "mutations": [mutation],
                     "guards": [
                         {
-                            "id": row_id + ":structural-legitimacy",
+                            "id": OLD + ":structural-legitimacy",
                             "kind": "semantic_authority",
                             "implementation": "structural-legitimacy",
                             "participant_ids": [OLD],
                         },
                         {
-                            "id": row_id + ":out-of-allowlist-immutability",
+                            "id": OLD + ":out-of-allowlist-immutability",
                             "kind": "collateral_immutability",
                             "implementation": "out-of-allowlist-immutability",
-                            "participant_ids": [OLD, SUCCESSOR],
+                            "participant_ids": [p["id"] for p in participants],
                         },
                     ],
                     "orphan_policy": "refuse",
@@ -192,7 +194,7 @@ def authority(phase: str) -> dict:
             ],
             "receipt_policy": {
                 "id": "one-per-retired-identity",
-                "operation": "link_signed_successor",
+                "operation": "supersede_exhausted_orphan",
                 "cardinality": "per_target",
                 "link_participant_kind": "standard_name",
                 "replay_projection": ["manifest_sha256", "row_id"],
@@ -221,7 +223,7 @@ def signed_call(phase: str, *, apply: bool, manifest_sha256: str | None = None) 
             "authority_adapter": adapter,
             "guard_set": signed._SOURCE_EXCHANGE_GUARDS,
         }
-    elif phase == "supersede":
+    elif phase in {"retire_with_successor", "retire_without_successor"}:
         kwargs = {}
     else:
         raise ValueError(phase)
@@ -230,9 +232,7 @@ def signed_call(phase: str, *, apply: bool, manifest_sha256: str | None = None) 
             AUTHORITY,
             authority_file_sha256=hashlib.sha256(raw).hexdigest(),
             authority_payload_sha256=signed.signed_payload_sha256(document),
-            reason=REASON
-            if phase != "supersede"
-            else "Retire the duplicate spelling in favour of the accepted identity for averaged magnetic-field magnitude",
+            reason=RETIRE_REASON if phase.startswith("retire_") else REASON,
             apply=apply,
             manifest_sha256=manifest_sha256,
             run_id=RUN.name,
@@ -250,6 +250,36 @@ def operate(action: str, phase: str | None) -> dict:
                 json.dumps(snapshot(gc), sort_keys=True, default=str)
             )
         (RUN / "before.json").write_text(json.dumps(result, indent=2, default=str))
+        return result
+    if action == "retirement_baseline":
+        with GraphClient() as gc:
+            names = targeted(gc)
+            pair = gc.query(
+                """
+                MATCH (old:StandardName {id:$old})
+                MATCH (successor:StandardName {id:$successor})
+                RETURN count { (old)-[:HAS_SUCCESSOR]->(successor) } AS successor_edges,
+                       old.name_stage AS old_stage
+                """,
+                old=OLD,
+                successor=SUCCESSOR,
+            )
+            (RUN / "before-retirement-names.json").write_text(
+                json.dumps(snapshot(gc), sort_keys=True)
+            )
+        if (
+            len(pair) != 1
+            or pair[0]["old_stage"] != "pending"
+            or pair[0]["successor_edges"] != 0
+            or not any(
+                row["id"] == OLD
+                and [source["status"] for source in row["producers"]] == ["stale"]
+                for row in names
+            )
+        ):
+            raise RuntimeError("pending removed-path name no longer reproduces")
+        result = {"name": OLD, "pair": pair, "names": names}
+        (RUN / "before-retirement.json").write_text(json.dumps(result, indent=2))
         return result
     if action == "authority":
         assert phase is not None
@@ -293,7 +323,11 @@ def operate(action: str, phase: str | None) -> dict:
         (RUN / f"{phase}-preview.json").write_text(
             json.dumps(result, indent=2, default=str)
         )
-        return result
+        return {
+            key: value
+            for key, value in result.items()
+            if key not in {"manifest", "admitted_actions"}
+        }
     if action == "apply":
         assert phase is not None
         preview = json.loads((RUN / f"{phase}-preview.json").read_text())
@@ -315,6 +349,15 @@ def operate(action: str, phase: str | None) -> dict:
                 for id in before.keys() | after.keys()
                 if id not in NAMES and before.get(id) != after.get(id)
             )
+            retirement_before = json.loads(
+                (RUN / "before-retirement-names.json").read_text()
+            )
+            retirement_other_changed = sorted(
+                id
+                for id in retirement_before.keys() | after.keys()
+                if id not in {OLD, SUCCESSOR}
+                and retirement_before.get(id) != after.get(id)
+            )
             pair = gc.query(
                 """
                 MATCH (old:StandardName {id:$old})
@@ -331,6 +374,7 @@ def operate(action: str, phase: str | None) -> dict:
                 "names": targeted(gc),
                 "blocking": blocking(gc),
                 "other_names_changed": other_changed,
+                "retirement_other_names_changed": retirement_other_changed,
                 "names_before": len(before),
                 "names_after": len(after),
                 "magnetic_field_pair": pair,

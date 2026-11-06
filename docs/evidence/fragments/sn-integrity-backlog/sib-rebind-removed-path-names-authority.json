@@ -1,26 +1,26 @@
 {
   "authority_mode": "external_reviewed",
-  "operation_id": "retire-duplicate-magnetic-field-average",
+  "operation_id": "retire-removed-dd-path-name",
   "orphan_policy": "refuse",
   "receipt_policy": {
     "cardinality": "per_target",
     "expected_count": "admitted_rows",
     "id": "one-per-retired-identity",
     "link_participant_kind": "standard_name",
-    "operation": "link_signed_successor",
+    "operation": "supersede_exhausted_orphan",
     "replay_projection": [
       "manifest_sha256",
       "row_id"
     ]
   },
   "repair_rows": [
-    "flux_surface_average_magnetic_field_magnitude=>flux_surface_averaged_magnetic_field_magnitude"
+    "flux_surface_average_magnetic_field_magnitude"
   ],
   "rows": [
     {
       "guards": [
         {
-          "id": "flux_surface_average_magnetic_field_magnitude=>flux_surface_averaged_magnetic_field_magnitude:structural-legitimacy",
+          "id": "flux_surface_average_magnetic_field_magnitude:structural-legitimacy",
           "implementation": "structural-legitimacy",
           "kind": "semantic_authority",
           "participant_ids": [
@@ -28,7 +28,7 @@
           ]
         },
         {
-          "id": "flux_surface_average_magnetic_field_magnitude=>flux_surface_averaged_magnetic_field_magnitude:out-of-allowlist-immutability",
+          "id": "flux_surface_average_magnetic_field_magnitude:out-of-allowlist-immutability",
           "implementation": "out-of-allowlist-immutability",
           "kind": "collateral_immutability",
           "participant_ids": [
@@ -37,9 +37,9 @@
           ]
         }
       ],
-      "id": "flux_surface_average_magnetic_field_magnitude=>flux_surface_averaged_magnetic_field_magnitude",
+      "id": "flux_surface_average_magnetic_field_magnitude",
       "identity": {
-        "id": "flux_surface_average_magnetic_field_magnitude=>flux_surface_averaged_magnetic_field_magnitude",
+        "id": "flux_surface_average_magnetic_field_magnitude",
         "kind": "standard_name",
         "target_id": "flux_surface_average_magnetic_field_magnitude"
       },
@@ -82,6 +82,6 @@
   },
   "signature": {
     "canonicalization": "json-sort-keys-v1",
-    "sha256": "63bd1a05ff24e14e58777e4f7a1f9cb6239aa6adec5d6c3d14ccbcf69b90ab79"
+    "sha256": "8b86143ed5a9fe902e13d0e691f2692891f357b23894d75121cff95aab0e08ee"
   }
 }
