@@ -8,6 +8,13 @@
   "call_sites": [],
   "completed_at": "2026-11-06T23:23:43.847Z",
   "dispatched_at": "2026-11-06T23:11:59Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-sib-rebind-removed-path-names-645423c1a56d",
+      "recorded_at": "2026-11-06T23:36:23.838088+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-integrity-backlog/sib-rebind-removed-path-names-run.py",
