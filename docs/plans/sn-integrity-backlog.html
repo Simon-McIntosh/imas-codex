@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="328">
+<meta name="plan-version" content="329">
 <meta name="plan-modified" content="2026-11-07">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -1171,6 +1171,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s9" data-id="c-run-r-20261012T195012490344-review-of-sib-restore-archived-origin" data-who="reckon-build" data-when="2026-10-12T20:01:10.018Z">
     <div class="r-comment-body"><p>reviewed run r-20261012T194341934507-sib-restore-archived-origin at f4dffef72 (base c51cf292f): the added case at tests/standard_names/test_archive_reconstruction_entry_point.py:203 correctly pins the composer's refusal of an archive's own origin and closes the coverage gap the prior review named; scores goal_fidelity 20, evidence 19, scope_discipline 20, durability 19, fit 19, reuse 20 (total 117); no blocking findings, one follow-on on the gate-log revision header.</p></div>
+</div>
+<div class="r-comment" data-section="s48" data-id="c-run-r-20261106T231022458778-review-of-sib-rebind-removed-path-names-645423c1a56d" data-who="reckon-build" data-when="2026-11-06T23:23:43.847Z">
+    <div class="r-comment-body"><p>Independent review of r-20261106T222618682261-sib-rebind-removed-path-names at 645423c1a scores 92/120 across the six dimensions with one blocking finding: the readback gate asserts zero successor edges where §48&#x27;s done_when requires one, so the superseded name&#x27;s measured state does not meet the node&#x27;s stated measure.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

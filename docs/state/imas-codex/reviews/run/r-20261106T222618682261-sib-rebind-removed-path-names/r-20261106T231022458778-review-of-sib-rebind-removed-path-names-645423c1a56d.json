@@ -1,0 +1,66 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no baseline_suite or after_suite gate log, so no suite delta exists for this docs-only live-graph node",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-06T23:23:43.847Z",
+  "dispatched_at": "2026-11-06T23:11:59Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-rebind-removed-path-names-run.py",
+      "line": "418",
+      "severity": "blocking",
+      "text": "blocking: the readback gate raises unless `pair[0][\"successor_edges\"] == 0`, inverting the done_when clause that the superseded name carries one successor edge to flux_surface_averaged_magnetic_field_magnitude; logs/readback.log records `successor_edges: 0`, so the node's stated measure is unmet and its gate certifies the unmet state."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-rebind-removed-path-names-run.py",
+      "line": "197",
+      "severity": "non-blocking",
+      "text": "non-blocking: the retirement was signed as receipt-only `supersede_exhausted_orphan` with no `successor_id`, while imas_codex/standard_names/source_invariant.py:190 (`supersede_names_losing_last_source`) already writes the `(successor)-[:REFINED_FROM]->(predecessor)` edge plus the StandardNameChange receipt, and the signed guard at imas_codex/standard_names/signed_manifest.py:3328-3355 refuses only while the predecessor still holds a bound path, so the refusal quoted at sib-rebind-removed-path-names.html:23 does not establish that no signed route carries the edge."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-rebind-removed-path-names-run.py",
+      "line": "111",
+      "severity": "non-blocking",
+      "text": "non-blocking: `blocking()` re-derives the export gate's sourceless predicate inline (`size(statuses) = 0 OR all(stale)`) without the derived-parent and superseded exemptions the owner applies at imas_codex/standard_names/source_invariant.py:145-186, so the reported 8-to-5 figure is a local proxy rather than the export gate's own blocking set the done_when names."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read all eight commits against base 4be56f9d7; the change is 578 insertions and no deletions across the authority JSON, a 472-line run script and a 28-line landing fragment, all inside scope.",
+    "done_when": "read the done_when against the `readback` action at docs/evidence/fragments/sn-integrity-backlog/sib-rebind-removed-path-names-run.py:390-440; it asserts per-name stage and non-stale producers, zero other-name changes, the retirement receipt and the three accepted names absent from its blocking set, but line 418 requires `successor_edges == 0` where the done_when requires one successor edge, no assertion fixes the blocking-set count, and the previews and receipts live in the run directory rather than being committed as the first clause states.",
+    "goal": "read the node goal (\"Rebind four names to their DD 4 successor paths through the signed source-move path\") against docs/evidence/fragments/sn-integrity-backlog/sib-rebind-removed-path-names-run.py:34-61 and the readback log; all four names carry exactly the five successor paths the plan's rows name.",
+    "manifest": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T222618682261-sib-rebind-removed-path-names/manifest.md; it reports status complete with the readback command at head 645423c1a and eleven gate logs, and `reckon crew check --manifest` returns ok with no findings, though its baseline_suite and after_suite arms are empty and its landing line states a receipt-only retirement.",
+    "write_paths": "read the four declared write paths against `git log --name-status 4be56f9d7..645423c1a`; all three changed files are declared paths and the declared figures directory is untouched."
+  },
+  "justifications": {
+    "durability": "the committed docs/evidence/fragments/sn-integrity-backlog/sib-rebind-removed-path-names-run.py readback re-asserts live graph state and would fail on a regressed binding, but it hard-codes `successor_edges == 0` at line 418 and so would redden on the edge the plan requires.",
+    "evidence": "the readback gate at docs/evidence/fragments/sn-integrity-backlog/sib-rebind-removed-path-names-run.py:408-440 asserts four done_when clauses and records EXIT=0, but line 418 enforces `successor_edges == 0`, so the gate cannot show the one-successor-edge clause it must satisfy.",
+    "fit": "docs/evidence/fragments/sn-integrity-backlog/sib-rebind-removed-path-names-run.py:442-468 writes the revision/tree/command header and bare `EXIT=` line its sibling evidence scripts use, and every fragment element id begins with the node id.",
+    "goal_fidelity": "docs/evidence/fragments/sn-integrity-backlog/sib-rebind-removed-path-names-run.py:34-61 encodes exactly the plan's five rebind rows, and logs/readback.log shows all five attached with stages retained.",
+    "reuse": "docs/evidence/fragments/sn-integrity-backlog/sib-rebind-removed-path-names-run.py:111-120 re-derives the sourceless predicate owned by imas_codex/standard_names/source_invariant.py:145, and the retirement at line 197 skips the successor-edge owner at imas_codex/standard_names/source_invariant.py:190.",
+    "scope_discipline": "`git log --name-status 4be56f9d7..645423c1a` shows only the three declared docs paths changed across the eight commits."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: read the node goal (\"Rebind four names to their DD 4 successor paths through the signed source-move path\") against docs/evidence/fragments/sn-integrity-backlog/sib-rebind-removed-path-names-run.py:34-61 and the readback log; all four names carry exactly the five successor paths the plan's rows name.\nVERDICT done_when: read the done_when against the `readback` action at docs/evidence/fragments/sn-integrity-backlog/sib-rebind-removed-path-names-run.py:390-440; it asserts per-name stage and non-stale producers, zero other-name changes, the retirement receipt and the three accepted names absent from its blocking set, but line 418 requires `successor_edges == 0` where the done_when requires one successor edge, no assertion fixes the blocking-set count, and the previews and receipts live in the run directory rather than being committed as the first clause states.\nVERDICT write_paths: read the four declared write paths against `git log --name-status 4be56f9d7..645423c1a`; all three changed files are declared paths and the declared figures directory is untouched.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T222618682261-sib-rebind-removed-path-names/manifest.md; it reports status complete with the readback command at head 645423c1a and eleven gate logs, and `reckon crew check --manifest` returns ok with no findings, though its baseline_suite and after_suite arms are empty and its landing line states a receipt-only retirement.\nVERDICT diff: read all eight commits against base 4be56f9d7; the change is 578 insertions and no deletions across the authority JSON, a 472-line run script and a 28-line landing fragment, all inside scope.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-integrity-backlog/sib-rebind-removed-path-names-run.py:34-61 encodes exactly the plan's five rebind rows, and logs/readback.log shows all five attached with stages retained.\nSCORE evidence: 11\nJUSTIFICATION evidence: the readback gate at docs/evidence/fragments/sn-integrity-backlog/sib-rebind-removed-path-names-run.py:408-440 asserts four done_when clauses and records EXIT=0, but line 418 enforces `successor_edges == 0`, so the gate cannot show the one-successor-edge clause it must satisfy.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: `git log --name-status 4be56f9d7..645423c1a` shows only the three declared docs paths changed across the eight commits.\nSCORE durability: 13\nJUSTIFICATION durability: the committed docs/evidence/fragments/sn-integrity-backlog/sib-rebind-removed-path-names-run.py readback re-asserts live graph state and would fail on a regressed binding, but it hard-codes `successor_edges == 0` at line 418 and so would redden on the edge the plan requires.\nSCORE fit: 18\nJUSTIFICATION fit: docs/evidence/fragments/sn-integrity-backlog/sib-rebind-removed-path-names-run.py:442-468 writes the revision/tree/command header and bare `EXIT=` line its sibling evidence scripts use, and every fragment element id begins with the node id.\nSCORE reuse: 12\nJUSTIFICATION reuse: docs/evidence/fragments/sn-integrity-backlog/sib-rebind-removed-path-names-run.py:111-120 re-derives the sourceless predicate owned by imas_codex/standard_names/source_invariant.py:145, and the retirement at line 197 skips the successor-edge owner at imas_codex/standard_names/source_invariant.py:190.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-rebind-removed-path-names-run.py:418 blocking: the readback gate raises unless `pair[0][\"successor_edges\"] == 0`, inverting the done_when clause that the superseded name carries one successor edge to flux_surface_averaged_magnetic_field_magnitude; logs/readback.log records `successor_edges: 0`, so the node's stated measure is unmet and its gate certifies the unmet state.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-rebind-removed-path-names-run.py:197 non-blocking: the retirement was signed as receipt-only `supersede_exhausted_orphan` with no `successor_id`, while imas_codex/standard_names/source_invariant.py:190 (`supersede_names_losing_last_source`) already writes the `(successor)-[:REFINED_FROM]->(predecessor)` edge plus the StandardNameChange receipt, and the signed guard at imas_codex/standard_names/signed_manifest.py:3328-3355 refuses only while the predecessor still holds a bound path, so the refusal quoted at sib-rebind-removed-path-names.html:23 does not establish that no signed route carries the edge.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-rebind-removed-path-names-run.py:111 non-blocking: `blocking()` re-derives the export gate's sourceless predicate inline (`size(statuses) = 0 OR all(stale)`) without the derived-parent and superseded exemptions the owner applies at imas_codex/standard_names/source_invariant.py:145-186, so the reported 8-to-5 figure is a local proxy rather than the export gate's own blocking set the done_when names.",
+  "review_run_id": "r-20261106T231022458778-review-of-sib-rebind-removed-path-names-645423c1a56d",
+  "reviewed_base_sha": "4be56f9d7f86005574f1658eb6a79d299fb4ed06",
+  "reviewed_head_sha": "645423c1a56d4313730690649cc30404d6fc3861",
+  "reviewed_run_id": "r-20261106T222618682261-sib-rebind-removed-path-names",
+  "scores": {
+    "durability": 13,
+    "evidence": 11,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 12,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-06T23:28:19.142011+00:00",
+  "total": 92
+}
