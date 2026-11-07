@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="349">
+<meta name="plan-version" content="350">
 <meta name="plan-modified" content="2026-11-07">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -1145,6 +1145,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s49" data-id="c-s49-lead-ruling-reclaim" data-who="reckon-build" data-when="2026-11-07T14:40:00Z">
     <div class="r-comment-body"><p>The apply <code>sib-separatrix-suffix-apply</code> (merge <code>9d2db9274</code>) landed 4 signed renames, and 86 of the 98 census names now conform. It stopped on 12 cases and on the tritium names. Eleven ruled targets are superseded tombstones. In nine of them, the tombstone's lineage ends on the renaming name itself: an earlier refine renamed <code>X_at_plasma_boundary</code> to <code>X_at_separatrix</code>, for example <code>effective_charge_at_plasma_boundary</code> → … → <code>effective_charge_at_separatrix</code>. One case was vacated by this apply's own rename (<code>normalized_toroidal_flux_coordinate_at_plasma_boundary</code>). <code>toroidal_tritium_velocity_at_plasma_boundary</code> is a tombstone folded into the averaged <code>flux_surface_averaged_toroidal_tritium_velocity_at_plasma_boundary</code>, a local value folded into an average.</p><p>Lead ruling, 2026-11-07: “Add a reclaim route.”</p><p>Node <code>sib-reclaim-superseded-spelling</code> extends the <code>sn edit</code> rename (<code>imas_codex/standard_names/edit.py</code>, refusal at about <code>3199-3215</code>). A live name may take the id of a superseded tombstone in exactly two cases:</p><ul><li>the tombstone's successor lineage ends on the renaming name;</li><li>the tombstone's current holder is a name for a different DD locus than the tombstone's own source path.</li></ul><p>The reclaim is signed. It keeps the tombstone's history and paid reviews, and writes a receipt naming the case. Every other tombstone target is still refused. A fresh apply then conforms the remaining cases and composes the tritium names. The two cases that end on a different live concept, starting with <code>electron_temperature_at_separatrix</code> → <code>thermal_electron_temperature_at_plasma_boundary</code>, return to the lead.</p></div>
+</div>
+<div class="r-comment" data-section="s49" data-id="c-run-r-20261107T143804637970-review-of-sib-reclaim-superseded-spelling-99567b9a0958" data-who="reckon-build" data-when="2026-11-07T15:14:08.141Z">
+    <div class="r-comment-body"><p>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T133317139144-sib-reclaim-superseded-spelling/review-records/r-20261107T133317139144-sib-reclaim-superseded-spelling.at-99567b9a0958edffcb85dcdaf6746018be821b25.json — parsed review of base 2c9ea5cbd to head 99567b9a0; six scores total 103 (goal 19, evidence 13, scope 20, durability 14, fit 18, reuse 19), zero added failures, no blocking findings and three non-blocking findings.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261012T162346807302-review-of-sib-row-census" data-who="reckon-build" data-when="2026-10-12T16:39:58.712Z">
     <div class="r-comment-body"><p>reviewed r-20261012T145528571333-sib-row-census at a7a70db00 against c7b4c626e; total 93/120 (goal_fidelity 15, evidence 13, scope_discipline 19, durability 11, fit 15, reuse 20); two blocking findings — the landing record's verdict tallies and the manifest's row-count both disagree with the 38 rows the census file holds.</p></div>

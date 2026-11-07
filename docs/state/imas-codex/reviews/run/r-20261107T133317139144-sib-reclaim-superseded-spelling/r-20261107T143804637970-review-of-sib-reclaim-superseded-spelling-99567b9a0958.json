@@ -1,0 +1,53 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 6,
+  "call_sites": [
+    "imas_codex/cli/sn.py:7179",
+    "imas_codex/llm/sn_tools.py:918",
+    "imas_codex/standard_names/promote.py:1241",
+    "imas_codex/standard_names/review_triage.py:337",
+    "imas_codex/standard_names/source_refresh.py:476",
+    "imas_codex/standard_names/edit.py:990"
+  ],
+  "completed_at": "2026-11-07T15:14:08.141Z",
+  "dispatched_at": "2026-11-07T14:56:25Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/edit.py",
+      "line": "3299",
+      "severity": "non-blocking",
+      "text": "the reclaim records the retired name's prior stage as coalesce(old.superseded_from_stage, old.name_stage) AFTER old.name_stage = 'superseded' at edit.py:3298 in the same SET clause, whereas every sibling writer captures it before the assignment (signed_manifest.py:4906, graph_refinement.py:878) or from a captured parameter (edit.py:1528); if SET items apply in order the retired name records 'superseded' as its prior stage, and a later _fold_revival_stage on that name (edit.py:2232) revives it to name_stage='superseded' with status reset to 'draft', live by status and still excluded by stage."
+    },
+    {
+      "file": "tests/standard_names/test_reclaim_superseded_spelling.py",
+      "line": "145",
+      "severity": "non-blocking",
+      "text": "no case asserts the receipt the route's purpose rests on \u2014 the assertions read name_stage, documentation, docs_stage, sources and successors only, so deleting the CREATE (change:StandardNameChange ...) at edit.py:3323, or dropping the case from its reason, leaves all three cases green and the ruling's signed-and-receipted property unguarded."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T133317139144-sib-reclaim-superseded-spelling/manifest.md",
+      "line": "23",
+      "severity": "non-blocking",
+      "text": "the done_when requires the default tests/standard_names suite to add no failure id against the base, and outside_scope records that the pair was not run (base arm header-only, after arm stopped at 54%), so one named clause of the node's measure rests on no recorded result and is deferred to the separate test node."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source goal is to let `sn edit --rename` reclaim a superseded tombstone's id in the two ruled cases through a signed, receipted route; the lead ruling at docs/plans/sn-integrity-backlog.html:1147 names exactly those two cases, and imas_codex/standard_names/edit.py:3536-3556 now asks `_reclaim_spelling_case` before refusing, dispatching to `_apply_reclaim_rename` (edit.py:3341) while every other tombstone target keeps the existing refusal.\nVERDICT done_when: The done_when names three disposable-graph cases, a red base arm, the sn-edit skill, and \"no failure id against the base\" for test_edit_engine.py and the default tests/standard_names suite; gate-reclaim.log ends \"3 passed\" EXIT=0, negative-control-reclaim.log ends \"2 failed, 1 passed\" EXIT=1 with both reclaim cases red at the base writer, both edit-engine arms end \"72 passed\" EXIT=0, and the default tests/standard_names pair is unmeasured \u2014 base-default-sn.log is a bare header while after-default-sn.log stops at 54% with no FAILED line.\nVERDICT write_paths: The source brief grants imas_codex/standard_names/edit.py, tests/standard_names/test_reclaim_superseded_spelling.py, .claude/skills/sn-edit/SKILL.md, docs/evidence/fragments/sn-integrity-backlog/sib-reclaim-superseded-spelling.html and the docs/figures directory of the same name; git diff 2c9ea5cbdb..99567b9a0 changes exactly four of those, leaving the figures directory unused and touching no other path.\nVERDICT manifest: Read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T133317139144-sib-reclaim-superseded-spelling/manifest.md; it records commits f2d466185 and 99567b9a0, the three-passing gate with its negative control, two edit-engine arms at 72 passed each, and states in outside_scope that the default tests/standard_names pair was not completed; its retry_failures line is empty although gate-reclaim.log holds a first run that failed on a truncated path and a second that dumped a 60s setup stack before the passing third.\nVERDICT diff: Read commit by commit from 2c9ea5cbdb to 99567b9a0; f2d466185 adds the case reader, the atomic revive-and-retire mutation with a StandardNameChange receipt, the postflight run_id assertion and the collision-branch dispatch (edit.py:3153-3474) and rewrites the refusal message, while 99567b9a0 adds the evidence fragment and the skill route; 609 insertions, 21 deletions, no unrelated change.\nCALL_SITES: imas_codex/cli/sn.py:7179, imas_codex/llm/sn_tools.py:918, imas_codex/standard_names/promote.py:1241, imas_codex/standard_names/review_triage.py:337, imas_codex/standard_names/source_refresh.py:476, imas_codex/standard_names/edit.py:990\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/edit.py:3536-3556 admits exactly the two ruled cases and routes them to _apply_reclaim_rename at edit.py:3341, whose postflight at edit.py:3448 refuses a revival that did not take.\nSCORE evidence: 13\nJUSTIFICATION evidence: gate-reclaim.log records \"3 passed\" EXIT=0 and negative-control-reclaim.log records \"2 failed, 1 passed\" EXIT=1 at the base writer, but the done_when's default tests/standard_names clause is unmeasured \u2014 base-default-sn.log is a bare header while after-default-sn.log stops at 54%.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 2c9ea5cbdb..99567b9a0 changes only the four declared paths, and no plan file is modified.\nSCORE durability: 14\nJUSTIFICATION durability: tests/standard_names/test_reclaim_superseded_spelling.py:142-148 reddens at the base writer for both reclaim cases, but neither the StandardNameChange receipt at imas_codex/standard_names/edit.py:3323 nor the retired name's recorded prior stage is asserted by any case.\nSCORE fit: 18\nJUSTIFICATION fit: edit.py:3235-3320 names the mechanism (_reclaim_spelling_case, _dd_locus, _reclaim_successor_tips) with docstrings in the file's existing idiom and carries no plan, ticket or author identifier.\nSCORE reuse: 19\nJUSTIFICATION reuse: edit.py:3421 reuses _fold_revival_stage and edit.py:3444 reuses _carry_rename_sources, which moves sources through retarget_standard_name_sources at provenance_lifecycle.py:551; a search for \"reclaim\", \"superseded_from_stage\" and revival across imas_codex/ found no prior reclaim-spelling owner.\nFINDING imas_codex/standard_names/edit.py:3299 non-blocking: the reclaim records the retired name's prior stage as coalesce(old.superseded_from_stage, old.name_stage) AFTER old.name_stage = 'superseded' at edit.py:3298 in the same SET clause, whereas every sibling writer captures it before the assignment (signed_manifest.py:4906, graph_refinement.py:878) or from a captured parameter (edit.py:1528); if SET items apply in order the retired name records 'superseded' as its prior stage, and a later _fold_revival_stage on that name (edit.py:2232) revives it to name_stage='superseded' with status reset to 'draft', live by status and still excluded by stage.\nFINDING tests/standard_names/test_reclaim_superseded_spelling.py:145 non-blocking: no case asserts the receipt the route's purpose rests on \u2014 the assertions read name_stage, documentation, docs_stage, sources and successors only, so deleting the CREATE (change:StandardNameChange ...) at edit.py:3323, or dropping the case from its reason, leaves all three cases green and the ruling's \"signed and receipted\" property unguarded.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T133317139144-sib-reclaim-superseded-spelling/manifest.md:23 non-blocking: the done_when requires the default tests/standard_names suite to add no failure id against the base, and outside_scope records that the pair was not run (base arm header-only, after arm stopped at 54%), so one named clause of the node's measure rests on no recorded result and is deferred to the separate test node.\n",
+  "review_run_id": "r-20261107T143804637970-review-of-sib-reclaim-superseded-spelling-99567b9a0958",
+  "reviewed_base_sha": "2c9ea5cbdb33687b268a19c204fe1aa55465bff5",
+  "reviewed_head_sha": "99567b9a0958edffcb85dcdaf6746018be821b25",
+  "reviewed_run_id": "r-20261107T133317139144-sib-reclaim-superseded-spelling",
+  "scores": {
+    "durability": 14,
+    "evidence": 13,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T15:05:39.232212+00:00",
+  "total": 103
+}
