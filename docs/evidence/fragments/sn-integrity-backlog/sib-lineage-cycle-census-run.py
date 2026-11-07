@@ -33,6 +33,16 @@ RUN = Path(
 )
 HERE = Path(__file__).resolve().parent
 STEM = Path(__file__).stem.removesuffix("-run")
+SPECIAL = {
+    "argon_density_at_plasma_boundary",
+    "argon_density_at_separatrix",
+    "tungsten_density_at_plasma_boundary",
+    "tungsten_density_at_separatrix",
+    "flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary",
+    "deuterium_tritium_density_flux_surface_averaged_at_plasma_boundary",
+    "normalized_toroidal_flux_coordinate_at_plasma_boundary",
+    "normalized_toroidal_flux_coordinate_at_separatrix",
+}
 
 
 def reachable(start, adjacency):
@@ -182,18 +192,10 @@ def capture():
             for c in components
             if c["cycle_names"]
             or len(c["live_tips"]) > 1
-            or any(
-                n in by_id
-                and (
-                    "argon" in n
-                    or "tungsten" in n
-                    or "deuterium_tritium" in n
-                    or "normalized_toroidal_flux_coordinate_at_plasma_boundary" == n
-                )
-                for n in c["members"]
-            )
+            or SPECIAL.intersection(c["members"])
         ]
         selected = sorted({n for c in cases for n in c["members"]})
+        assert SPECIAL <= set(selected)
         changes = query(
             "selected-change-ledgers",
             """MATCH (c:StandardNameChange)
@@ -213,6 +215,8 @@ def capture():
           ORDER BY name, source LIMIT 30000""",
             ids=selected,
         )
+        for result_rows in [changes, sources]:
+            assert len(result_rows) < 30000, "supporting evidence reached its row cap"
         projections = query(
             "selected-projections",
             """MATCH (dd:IMASNode)-[:HAS_STANDARD_NAME]->(n:StandardName)
@@ -467,16 +471,674 @@ def reproduce():
     print(f"WRITERS scenarios={len(results)} confirmed_open=3 refused_controls=2")
 
 
+WRITERS = {
+    "fold_identity": {
+        "file": "imas_codex/standard_names/edit.py",
+        "line": 1553,
+        "guard_line": 2323,
+        "receipt_line": 1469,
+        "status": "open: tombstoned-ancestor fold creates a reciprocal cycle; accepted ancestor is refused",
+        "reproduction": "fold_tombstoned_ancestor",
+        "history": "a4b21a4e6d190063f9ab8169723ef35b73ea162a: edit.py:1241 writes the edge; :1654 exempts closing_straight_chain from the cycle refusal",
+    },
+    "refinement": {
+        "file": "imas_codex/standard_names/graph_store/graph_refinement.py",
+        "line": 1181,
+        "guard_line": 822,
+        "receipt_line": 1350,
+        "status": "partly open: superseded/accepted targets refuse; a pending ancestor can cycle; an existing live branch can gain another tip",
+        "reproduction": "refine_pending_ancestor; refine_existing_live_branch",
+        "history": "1f95b7565be13a6355d24d8299bf213d77b67315: imas_codex/standard_names/graph_ops.py:9526; atomic persistence added in b045fa23e; current owner extracted by ec4257ab3",
+    },
+    "regeneration": {
+        "file": "imas_codex/standard_names/graph_store/graph_supersession.py",
+        "line": 431,
+        "guard_line": 355,
+        "receipt_line": 265,
+        "status": "cycle predicate present in transaction; not independently exercised in this census",
+        "reproduction": None,
+        "history": "1f95b7565be13a6355d24d8299bf213d77b67315: imas_codex/standard_names/graph_ops.py:9814",
+    },
+    "fold": {
+        "file": "imas_codex/standard_names/graph_store/graph_supersession.py",
+        "line": 636,
+        "guard_line": 624,
+        "receipt_line": 614,
+        "status": "cycle predicate present in transaction; not independently exercised in this census",
+        "reproduction": None,
+    },
+    "reclaim": {
+        "file": "imas_codex/standard_names/edit.py",
+        "line": 3333,
+        "guard_line": 3434,
+        "receipt_line": 3334,
+        "status": "closing-lineage reclaim omits the reverse edge; different-locus cycle refuses before mutation; two existing disposable tests pass",
+        "reproduction": "reclaim-controls.log",
+    },
+    "unresolved": {
+        "file": None,
+        "line": None,
+        "status": "original creator cannot be identified from the surviving graph records; no stamped edge properties",
+        "reproduction": None,
+    },
+}
+
+# These are proposed semantic dispositions, never an authorization to write.
+BRANCH_REPAIRS = {
+    "breakdown_initial_time": "Keep breakdown_initial_time; propose signed supersession of exhausted plasma_breakdown_time onto it after checking the shared summary/time_breakdown/value binding. Preserve both ledgers.",
+    "cumulative_inside_flux_surface_electron_particle_source_rate": "Keep the integrated particle source rate and the volumetric source rate as separate quantities. Split the shared historical ancestry into distinct identity histories; do not fold the tips together.",
+    "peak_wave_current_of_antenna_strap_amplitude": "Adjudicate peak versus RMS against the strap-current DD definition; both currently bind the same path. Keep module-current amplitude distinct. Prefer the accepted RMS holder only if the DD confirms RMS, then supersede the exhausted peak candidate with a signed source disposition.",
+    "derivative_of_volume_of_flux_surface_with_respect_to_toroidal_flux_coordinate": "Split volume derivative, inverse major radius and metric component histories by their actual DD fields. Keep accepted dvolume_drho_tor and gm9 holders; adjudicate the exhausted derived metric against its derivation authority before retiring it. Remove the two cyclic subgraphs only under their per-edge history receipt.",
+    "energy_flux_normalized_due_to_e_cross_b_drift": "Keep electrostatic and magnetic-flutter energy-flux channels separate; their DD leaves name different mechanisms. Archive the shared generic ancestry as history rather than declaring either tip the other's successor.",
+    "energy_flux_normalized_due_to_perturbed_parallel_vector_potential": "Compare the two parallel-vector-potential energy-flux names against all frame and integration dimensions shown in the binding table. If equivalent, propose the shorter accepted energy_flux_normalized_due_to_perturbed_parallel_vector_potential with a signed source union; otherwise split the histories. Do not infer equivalence from their shared ancestor.",
+    "extent_of_soft_xray_detector": "The two tips bind camera_dimensions. Rule whether the stored quantity is a detector extent or camera dimension, then signed-supersede exhausted total_size_of_camera onto the confirmed holder. Its name score is 0.525 versus 0.975 on extent_of_soft_xray_detector, which supports review priority but does not settle the physics.",
+    "first_measurement_direction_unit_vector_of_shatter_cone": "Keep direction/x and unit_vector_major/x separate: one is the measurement direction, the other the major-axis direction. Split the shared x-unit-vector ancestry, preserving reviews on the quantity they assessed.",
+    "flux_surface_averaged_toroidal_current_density": "Keep equilibrium j_phi and source j_parallel distinct. Separate the generic current-density ancestry; review the exhausted parallel wave-driven source spelling against its source/channel before any rename.",
+    "flux_surface_averaged_tungsten_density_at_plasma_boundary": "Keep local tungsten density and its flux-surface average as distinct holders. Archive the ambiguous tungsten_density_at_plasma_boundary tombstone with the average history, restore its lost recorded-path evidence from receipts if available, then reclaim its spelling for tungsten_density_at_separatrix with history kept apart. Do not fold the local value into the average.",
+    "radial_ion_charge_state_momentum_flux": "Split ion-state transport flux, total-ion transport flux, ion source, neutral source and neutral-state source by species, charge-state aggregation and DD source/transport role. Keep all distinct bound quantities; adjudicate the total-ion flux holder's mixed source and transport bindings before any fold.",
+    "length_of_poloidal_magnetic_field_probe": "Keep poloidal and toroidal magnetic probe lengths separate. Replace the generic predecessor's ambiguous successor history with separate component histories, retaining each current producer.",
+    "particle_flux_normalized_due_to_e_cross_b_drift": "Keep electrostatic and magnetic-flutter particle-flux channels separate; split their generic normalized_particle_flux ancestry. The exhausted electrostatic candidate needs its own review, not supersession into the magnetic channel.",
+    "poloidal_ion_charge_state_energy_convection_velocity": "Compare removed edge_transport and current plasma_transport v_pol paths via DD rename history. If they are the same quantity across DD versions, move sources and signed-supersede the reviewed older spelling onto accepted poloidal_ion_charge_state_energy_convection_velocity; preserve a distinct quantity if the DD definitions differ.",
+    "spectral_calibration_factor_of_spectrometer_channel": "Separate optical etendue from instrument/calibration response. Audit the calibration holder's wavelength-gain and instrument-intensity paths individually, and preserve the derived etendue parent with its children. Do not fold those two quantities together.",
+    "toroidal_angle_of_measurement_position": "Keep the general measurement-position toroidal angle and launcher-mirror geometry coordinate distinct until their full DD source semantics are adjudicated. Split misleading generic ancestry; do not transfer all 25 measurement bindings onto the mirror.",
+    "vertical_coordinate_of_camera": "Keep camera-centre vertical coordinate and camera-direction unit-vector component separate (different physical dimensions). Archive the reciprocal direction-spelling history independently of the positional name.",
+    "vertical_ion_charge_state_momentum_flux": "Keep transport momentum flux and volumetric momentum source separate; their DD branches are plasma_transport and plasma_sources. Split the shared state-momentum ancestry without moving either source set.",
+}
+
+
+def draw_topology():
+    """Show two measured components, with arrow direction matching the graph."""
+    import re
+    import textwrap
+
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import FancyArrowPatch
+
+    plt.style.use(Path.home() / ".config/matplotlib/stylelib/data-ink.mplstyle")
+    observed = json.loads((RUN / "graph-snapshot.json").read_text())
+    observed_names = {n["id"]: n["stage"] for n in observed["nodes"]}
+    fig = plt.figure(figsize=(14, 7.2), dpi=100)
+    ax = fig.add_axes((0, 0, 1, 1))
+    ax.set(xlim=(0, 1400), ylim=(0, 720))
+    ax.axis("off")
+    labels = []
+
+    def label(x, y, identifier, stage, width=32):
+        assert observed_names[identifier] == stage, identifier
+        wrapped = "\n".join(textwrap.wrap(identifier.replace("_", " "), width=width))
+        artist = ax.text(
+            x,
+            y,
+            wrapped + "\n[" + stage + "]",
+            ha="center",
+            va="center",
+            fontsize=14,
+            color="#303030" if stage != "superseded" else "#666666",
+        )
+        labels.append(artist)
+
+    def arrow(a, b, curve=0):
+        ax.add_patch(
+            FancyArrowPatch(
+                a,
+                b,
+                arrowstyle="-|>",
+                mutation_scale=17,
+                linewidth=1.8,
+                color="#929292",
+                connectionstyle=f"arc3,rad={curve}",
+                zorder=1,
+            )
+        )
+
+    label(300, 560, "accumulated_carbon_count_due_to_gas_injection", "accepted")
+    label(300, 175, "carbon_count_accumulated_due_to_gas_injection", "superseded")
+    arrow((245, 490), (245, 248), 0.18)
+    arrow((355, 248), (355, 490), 0.18)
+    label(1010, 610, "tungsten_density_at_plasma_boundary", "superseded", 29)
+    label(795, 365, "tungsten_density_at_separatrix", "accepted", 27)
+    label(
+        1190,
+        365,
+        "flux_surface_averaged_tungsten_density_at_plasma_boundary",
+        "reviewed",
+        29,
+    )
+    label(
+        1190,
+        105,
+        "tungsten_density_flux_surface_averaged_at_plasma_boundary",
+        "superseded",
+        29,
+    )
+    arrow((800, 425), (955, 555))
+    arrow((1165, 440), (1055, 555))
+    arrow((1190, 184), (1190, 283))
+    fig.canvas.draw()
+    renderer = fig.canvas.get_renderer()
+    boxes = [(a, a.get_window_extent(renderer)) for a in labels]
+    for a, box in boxes:
+        if (
+            box.x0 < 0
+            or box.y0 < 0
+            or box.x1 > fig.bbox.width
+            or box.y1 > fig.bbox.height
+        ):
+            raise AssertionError("clipped figure label: " + a.get_text())
+    for i, (a, box) in enumerate(boxes):
+        for b, other in boxes[i + 1 :]:
+            if box.overlaps(other):
+                raise AssertionError(
+                    "overlapping figure labels: " + a.get_text() + " / " + b.get_text()
+                )
+        for arrow_artist in ax.patches:
+            if box.overlaps(arrow_artist.get_window_extent(renderer)):
+                raise AssertionError("figure label overlaps an arrow: " + a.get_text())
+    target = ROOT / "docs/figures/sn-integrity-backlog" / STEM / "topology.svg"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with plt.rc_context({"svg.fonttype": "none"}):
+        fig.savefig(target, format="svg")
+    svg = target.read_text()
+    svg = re.sub(
+        r'width="[^"]+pt" height="[^"]+pt"',
+        'width="31.1cm" height="16cm"',
+        svg,
+        count=1,
+    )
+    target.write_text(svg)
+    fig.savefig(RUN / "topology-preview.png", dpi=100)
+    plt.close(fig)
+    print(
+        "FIGURE labels=6 clipping=0 overlap=0 arrows=5 preview="
+        + str(RUN / "topology-preview.png")
+    )
+
+
+def report():
+    """Write a normalized, lossless case index and a readable landing fragment."""
+    import hashlib
+    from collections import Counter
+    from html import escape
+
+    raw_path = RUN / "graph-snapshot.json"
+    raw_bytes = raw_path.read_bytes()
+    data = json.loads(raw_bytes)
+    reproductions = json.loads((RUN / "writer-reproductions.json").read_text())
+    assert len(reproductions) == 5
+    assert (RUN / "reproduce-scratch.log").read_text().rstrip().endswith("EXIT=0")
+    reclaim_log = (RUN / "reclaim-controls.log").read_text()
+    assert "2 passed" in reclaim_log and reclaim_log.rstrip().endswith("EXIT=0")
+    nodes = {n["id"]: n for n in data["nodes"]}
+    cases = data["cases"]
+    selected = sorted({n for c in cases for n in c["members"]})
+    name_index = {n: i for i, n in enumerate(selected)}
+    changes = defaultdict(list)
+    for i, row in enumerate(data["changes"]):
+        c = row["properties"]
+        changes[c.get("to_name"), c.get("from_name")].append((i, c))
+    sources = defaultdict(list)
+    for s in data["sources"]:
+        sources[s["name"]].append(s)
+    projections = defaultdict(list)
+    for p in data["projections"]:
+        projections[p["name"]].append(p["path"])
+    receipts, receipt_index, edges = [], {}, []
+    for e in data["edges"]:
+        if e["successor"] not in name_index:
+            continue
+        relevant = changes[e["successor"], e["predecessor"]]
+        refs = []
+        for raw_index, c in relevant:
+            if c["id"] not in receipt_index:
+                receipt_index[c["id"]] = len(receipts)
+                receipts.append(
+                    [
+                        c["id"],
+                        c.get("operation"),
+                        c.get("changed_at"),
+                        c.get("run_id"),
+                        c.get("manifest_sha256"),
+                        raw_index,
+                    ]
+                )
+            refs.append(receipt_index[c["id"]])
+        producers = [
+            (i, c)
+            for i, c in relevant
+            if c["operation"]
+            in {"fold_identity", "human_edit", "refine", "regenerate", "fold"}
+        ]
+        if producers:
+            _, creator = min(
+                producers, key=lambda item: str(item[1].get("changed_at", ""))
+            )
+            operation = creator["operation"]
+            writer = (
+                "refinement"
+                if operation in {"refine", "human_edit"}
+                else ("regeneration" if operation == "regenerate" else operation)
+            )
+            evidence = "matching_operation_receipt"
+            if operation == "fold_identity":
+                detail = json.loads(creator["reason"])
+                was_there = any(
+                    r.get("type") == "REFINED_FROM"
+                    and r.get("start_id") == e["successor"]
+                    and r.get("end_id") == e["predecessor"]
+                    for r in detail["before"]["relationships"]
+                )
+                if not was_there:
+                    evidence = "before_after_proves_edge_created"
+                else:
+                    evidence = "receipt_reuses_preexisting_edge"
+        elif any(c["operation"] == "backfill_refine" for _, c in relevant):
+            writer = "unresolved"
+            evidence = "backfill_records_direction_but_not_original_creator"
+        else:
+            writer = "unresolved"
+            evidence = (
+                "no_creation_receipt" if not relevant else "noncreating_change_only"
+            )
+        edges.append(
+            [
+                name_index[e["successor"]],
+                name_index[e["predecessor"]],
+                writer,
+                evidence,
+                refs,
+                e["edge_id"],
+            ]
+        )
+    names = []
+    for n in selected:
+        row = nodes[n]
+        names.append(
+            [
+                n,
+                row["stage"],
+                row.get("unit"),
+                row.get("name_score"),
+                row.get("docs_score"),
+                row.get("recorded_paths") or [],
+                [
+                    [s["source"], s["path"], s["status"], s["source_type"]]
+                    for s in sources[n]
+                ],
+                projections[n],
+                (
+                    (row.get("description") or "")
+                    if row["stage"] != "superseded" or n in SPECIAL
+                    else None
+                ),
+            ]
+        )
+    repair_cases = []
+    for c in cases:
+        members = set(c["members"])
+        case_edges = [i for i, e in enumerate(edges) if selected[e[0]] in members]
+        cycle_groups = [group for group in data["cycles"] if set(group) <= members]
+        proposals = []
+        suggested_remove = []
+        for group in cycle_groups:
+            live = [n for n in group if nodes[n]["stage"] != "superseded"]
+            if len(live) == 1:
+                holder = live[0]
+                stale = [
+                    i
+                    for i in case_edges
+                    if selected[edges[i][1]] == holder
+                    and selected[edges[i][0]] in group
+                ]
+                suggested_remove.extend(stale)
+                proposals.append(
+                    "Retain "
+                    + holder
+                    + " as the current identity. After ruling, archive the historical reverse edge(s) into a signed change receipt and remove the listed edge(s) pointing from a superseded member onto this live identity; keep sources, documents and paid reviews on their current meanings. Recheck the whole component for cycles and source loss."
+                )
+            elif not live:
+                proposals.append(
+                    "This cyclic group has no live member: "
+                    + ", ".join(group)
+                    + ". Preserve the full edge snapshot and reconstruct chronology from receipts/backups; propose archiving enough obsolete edges to make the ancestry acyclic, retaining a route to "
+                    + (
+                        ", ".join(c["live_tips"])
+                        or "an explicitly adjudicated successor"
+                    )
+                    + ". Do not choose an edge from lexicographic order or a backfill timestamp."
+                )
+            else:
+                proposals.append(
+                    "Several live names lie on this cycle: "
+                    + ", ".join(live)
+                    + ". Rule each source/meaning first, split distinct identities and archive obsolete history edges; no automatic single-tip fold is justified."
+                )
+        for key, text in BRANCH_REPAIRS.items():
+            if key in c["live_tips"]:
+                proposals.append(text)
+                break
+        if "argon_density_at_plasma_boundary" in members:
+            proposals.append(
+                "Argon: the tombstone records separatrix_average and its live averaged holder has that same locus. Propose history-apart archival of this tombstone before reclaiming argon_density_at_plasma_boundary for the local argon_density_at_separatrix. Keep the accepted averaged holder and its review history separate. Resolve its reciprocal average-spelling cycle independently."
+            )
+        if "argon_density_at_separatrix" in members:
+            proposals.append(
+                "Argon local value: keep its separatrix/n_i/argon/value source and propose the ruled argon_density_at_plasma_boundary spelling only after the average tombstone history is archived separately; the local and averaged names must not be folded."
+            )
+        if (
+            "flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary"
+            in members
+        ):
+            proposals.append(
+                "Deuterium-tritium: both prefix ancestors are superseded, while the infix holder is exhausted (name score 0.70) and its DD source is extracted. Preserve the source and histories, break the old reciprocal ancestry under a signed edge disposition, then reclaim flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary through the sanctioned route and rerun review. Do not promote it from the stale 0.96875 ancestor score."
+            )
+        if "normalized_toroidal_flux_coordinate_at_plasma_boundary" in members:
+            proposals.append(
+                "Normalized coordinate: the source-migration receipt and human_edit receipt from 2026-11-07 identify the rename to flux_surface_averaged_normalized_toroidal_flux_coordinate_at_plasma_boundary. The tombstone now has an empty source_paths cache, not absent provenance. Recover its source from that receipt and the successor's separatrix_average/position/rho_tor_norm binding. Rule whether a flux-surface label evaluated at a surface should carry an averaging prefix before the history-apart reclaim; preserve both recorded DD fields."
+            )
+        if "normalized_toroidal_flux_coordinate_at_separatrix" in members:
+            proposals.append(
+                "Normalized local coordinate: keep the separatrix/position/rho_tor_norm producer; propose the ruled normalized_toroidal_flux_coordinate_at_plasma_boundary spelling after adjudicating the occupied target's recorded source and whether the two DD location labels are semantically equivalent. Do not infer a different quantity solely from the average container."
+            )
+        assert proposals, c
+        repair_cases.append(
+            {
+                "anchor": STEM
+                + "-"
+                + hashlib.sha256("\0".join(c["members"]).encode()).hexdigest()[:10],
+                "members": [name_index[n] for n in c["members"]],
+                "live_members": [name_index[n] for n in c["live_members"]],
+                "live_tips": [name_index[n] for n in c["live_tips"]],
+                "cycles": [[name_index[n] for n in group] for group in cycle_groups],
+                "edges": case_edges,
+                "proposed_archive_edges": sorted(set(suggested_remove)),
+                "proposed_repair": proposals,
+            }
+        )
+    counts = Counter(e[3] for e in edges)
+    pairs = {(e["successor"], e["predecessor"]) for e in data["edges"]}
+    summary = {
+        **data["inventory"],
+        "cycle_components": len(data["cycles"]),
+        "cycle_names": sum(map(len, data["cycles"])),
+        "reciprocal_pairs": sum((b, a) in pairs for a, b in pairs) // 2,
+        "multi_tip_components": sum(
+            len(c["live_tips"]) > 1 for c in data["components"]
+        ),
+        "reported_components": len(cases),
+        "reported_names": len(names),
+        "reported_edges": len(edges),
+        "edge_attribution": dict(counts),
+        "unresolved_creator_edges": sum(e[2] == "unresolved" for e in edges),
+        "spend_usd": 0,
+        "live_graph_writes": 0,
+    }
+    report_data = {
+        "observed_at": data["observed_at"],
+        "source_revision": data["revision"],
+        "raw_snapshot": str(raw_path),
+        "raw_snapshot_sha256": hashlib.sha256(raw_bytes).hexdigest(),
+        "summary": summary,
+        "definitions": {
+            "direction": "successor -> predecessor",
+            "lineage": "weakly connected component of StandardName REFINED_FROM edges",
+            "live": "name_stage != superseded, including exhausted; status is not substituted",
+            "live_tip": "live member with no other live descendant in reverse REFINED_FROM traversal",
+            "cycle": "strongly connected group; every member returns to itself on one or more edges",
+            "provenance": "matching event receipts identify operation-level writers, not the exact deployed commit; a backfill is not an edge creation event",
+        },
+        "columns": {
+            "names": [
+                "id",
+                "stage",
+                "unit",
+                "name_score",
+                "docs_score",
+                "recorded_paths",
+                "producers(source_id,path,status,type)",
+                "projections",
+                "description",
+            ],
+            "edges": [
+                "successor_name_index",
+                "predecessor_name_index",
+                "writer_key",
+                "evidence",
+                "receipt_indices",
+                "element_id",
+            ],
+            "receipts": [
+                "id",
+                "operation",
+                "changed_at",
+                "run_id",
+                "manifest_sha256",
+                "raw_changes_index",
+            ],
+        },
+        "names": names,
+        "edges": edges,
+        "receipts": receipts,
+        "writers": WRITERS,
+        "cases": repair_cases,
+        "cycle_cross_check": {
+            "query": next(
+                q["cypher"]
+                for q in data["queries"]
+                if q["label"] == "cycle-path-cross-check"
+            ),
+            "count": len(data["cycle_cross_check"]),
+            "agrees": True,
+        },
+        "tip_cross_check": {
+            "query": next(
+                q["cypher"]
+                for q in data["queries"]
+                if q["label"] == "live-tip-cross-check"
+            ),
+            "count": len(data["tip_cross_check"]),
+            "agrees": True,
+        },
+        "reproduction_file": str(RUN / "writer-reproductions.json"),
+        "limitations": [
+            "Every live REFINED_FROM edge has an empty property map; no writer id, receipt id or creation timestamp is stamped on any of the 1859 edges.",
+            "Unresolved creators are explicit missing evidence, never inferred from a name, later maintenance event or backfill timestamp.",
+            "This snapshot is time-bounded; graph writers may change the corpus after observed_at. Inventory before/after and independent traversals agreed during capture.",
+            "Proposed repairs require lead adjudication. No live identity, source, edge, review or documentation was changed.",
+            "Descriptions of superseded names outside the named special cases are retained in the raw snapshot, omitted from the compact name table.",
+        ],
+    }
+    encoded = json.dumps(report_data, separators=(",", ":"), ensure_ascii=False) + "\n"
+    assert len(encoded.encode()) <= 300000, (
+        f"report JSON too large: {len(encoded.encode())}"
+    )
+    (HERE / f"{STEM}.json").write_text(encoded)
+    (RUN / "census-expanded.json").write_text(
+        json.dumps(report_data, indent=2, ensure_ascii=False) + "\n"
+    )
+
+    def code(s):
+        return "<code>" + escape(str(s)) + "</code>"
+
+    def name(i):
+        return code(names[i][0])
+
+    html = [
+        f'<section id="{STEM}">',
+        "<h2>Refinement cycles and live-tip lineage census</h2>",
+        f"<p>Read-only graph snapshot at {escape(data['observed_at'])}: <strong>{summary['cycle_names']} names in {summary['cycle_components']} cyclic components</strong> ({summary['reciprocal_pairs']} reciprocal pairs), and <strong>{summary['multi_tip_components']} lineages with more than one live tip</strong>, across {summary['names']} StandardNames and {summary['edges']} REFINED_FROM edges. The plan recorded 17 reciprocal cases; this graph-wide instrument finds the larger population reported here. Independent Cypher finds the same 144 cycle members and 2748 live tips. Spend USD 0 of USD 0; live writes 0.</p>",
+        f'<p>This record lists {len(cases)} components and {len(names)} names, including all cycle and multiple-tip cases plus the four specifically requested families. The <a href="/imas-codex/evidence/fragments/sn-integrity-backlog/{STEM}.json">machine-readable census</a> holds every name, chain edge, producing source, recorded source path, review score, receipt reference, writer location and proposed action. Numeric name and receipt indices refer to its declared column tables.</p>',
+        f"<p><strong>Attribution limit:</strong> {summary['unresolved_creator_edges']} of the {len(edges)} reported edges have no original creation receipt that identifies their writer. All 1859 graph edges have empty property maps. Backfilled refinement records establish a historical direction but do not identify who originally wrote an edge. Every such edge is marked unresolved below. A matching receipt maps an operation to today's writer; it does not prove which deployed source revision ran then.</p>",
+        "<p>Arrows below follow the stored direction, successor → predecessor. A lineage is a weakly connected component. “Live” means name_stage is not superseded, so exhausted names are included. A live tip has no other live descendant; all live members are listed as well, because reclaimed ancestors and intermediate live identities need not be terminal tips. Cycles are strongly connected groups rather than an exponentially large listing of equivalent closed walks.</p>",
+        f'<figure><img src="/imas-codex/figures/sn-integrity-backlog/{STEM}/topology.svg" alt="Reciprocal carbon spelling edges and the branched tungsten lineage"/><figcaption>Arrows are stored REFINED_FROM edges, from successor to predecessor. Left: the carbon spelling reversal retains both directions. Right: tungsten has separate local and averaged live holders; the average is currently reviewed after reclaim while its infix spelling is superseded. A graph leaf and a live tip differ here: the infix node is a superseded leaf. Names are spaced for readability; exact identifiers are in the tables.</figcaption></figure>',
+        "<h3>Writers and the history they retain</h3>",
+        '<p>The September fold design deliberately retained reversed rename edges as complete history, as documented in <a href="/imas-codex/evidence/sn-grammar-refinement/fold-guard-divergence.md">the fold guard evidence</a>. The current reclaim requires acyclic ancestry. Repair therefore needs to distinguish a current successor from historical succession: retain immutable change records and paid reviews, then archive only the obsolete lineage edges under a signed disposition. A blanket deletion of every newest edge would sometimes discard the current identity.</p>',
+        "<table><thead><tr><th>Writer</th><th>Current code</th><th>Measured state</th></tr></thead><tbody>",
+    ]
+    for key, w in WRITERS.items():
+        if key == "unresolved":
+            continue
+        html.append(
+            "<tr><td>"
+            + code(key)
+            + "</td><td>"
+            + code(f"{w['file']}:{w['line']}")
+            + "<br>guard "
+            + str(w["guard_line"])
+            + "</td><td>"
+            + escape(w["status"])
+            + "</td></tr>"
+        )
+    html += [
+        "</tbody></table>",
+        "<p>Disposable production-writer probe: five scenarios, three open behaviors and two refusing controls, EXIT=0. The accepted-ancestor fold refused with “already descends … (REFINED_FROM cycle)”; the superseded-target refine refused with “reason=successor_lifecycle_collision”. Changing only the fold target to a tombstone admitted the write and committed both directions with a fold_identity receipt. A pending ancestor passed refinement and committed both directions; a predecessor with an existing live descendant gained a second live tip. No attachment or lineage writer was stubbed; only the unused run-counter callback was inert.</p>",
+        "<p>The two focused existing reclaim tests also exercise successful closing-lineage reclaim and in-transaction refusal of a different-locus cycle. Their log is retained beside the writer probe. Regeneration and stub-fold cycle guards were inspected at their mutation predicates; no new live behavior is claimed for those paths.</p>",
+        "<h3>Per-component chains, evidence and proposed repairs</h3>",
+    ]
+    for c in repair_cases:
+        title = (
+            "cycle"
+            if c["cycles"]
+            else "multiple tips"
+            if len(c["live_tips"]) > 1
+            else "requested family"
+        )
+        html.append(
+            f'<details id="{c["anchor"]}"><summary>{escape(title)}: {escape(names[c["members"][0]][0])} ({len(c["members"])} names)</summary>'
+        )
+        html.append(
+            "<p>Live tips: "
+            + (", ".join(name(i) for i in c["live_tips"]) or "none")
+            + ". All live members: "
+            + (", ".join(name(i) for i in c["live_members"]) or "none")
+            + ".</p>"
+        )
+        if c["cycles"]:
+            html.append(
+                "<p>Cycle members: "
+                + "; ".join(", ".join(name(i) for i in group) for group in c["cycles"])
+                + ".</p>"
+            )
+        html.append("<ul>")
+        for i in c["members"]:
+            n = names[i]
+            paths = [p[1] for p in n[6]]
+            shown = ", ".join(code(p) for p in paths[:3]) or "none"
+            if len(paths) > 3:
+                shown += f"; {len(paths) - 3} further bindings in JSON"
+            html.append(
+                "<li>"
+                + name(i)
+                + " — "
+                + escape(n[1])
+                + f"; name/docs scores {n[3]}/{n[4]}; producers: "
+                + shown
+                + ".</li>"
+            )
+        html.append(
+            "</ul><table><thead><tr><th>Stored edge (successor → predecessor)</th><th>Writer / evidence</th><th>Change receipts</th></tr></thead><tbody>"
+        )
+        for ei in c["edges"]:
+            e = edges[ei]
+            refs = (
+                ", ".join(f'<a href="#{STEM}-receipt-{r}">{r}</a>' for r in e[4])
+                or "none"
+            )
+            html.append(
+                "<tr><td>"
+                + name(e[0])
+                + " → "
+                + name(e[1])
+                + "</td><td>"
+                + escape(e[2] + "; " + e[3].replace("_", " "))
+                + "</td><td>"
+                + refs
+                + "</td></tr>"
+            )
+        html.append("</tbody></table>")
+        for proposal in c["proposed_repair"]:
+            html.append("<p><strong>Proposed:</strong> " + escape(proposal) + "</p>")
+        if c["proposed_archive_edges"]:
+            html.append(
+                "<p>Candidate obsolete edges for signed archival: "
+                + "; ".join(
+                    name(edges[i][0]) + " → " + name(edges[i][1])
+                    for i in c["proposed_archive_edges"]
+                )
+                + ". These are candidates, not an executable authority.</p>"
+            )
+        html.append("</details>")
+    html += [
+        f'<h3 id="{STEM}-receipts">Receipt index</h3>',
+        "<p>Full reasons and before/after snapshots remain in "
+        + code(raw_path)
+        + ". Each JSON receipt records the exact index into that snapshot's changes array. The snapshot SHA-256 is "
+        + code(report_data["raw_snapshot_sha256"])
+        + ". Noncreating maintenance receipts are retained as context, never promoted to edge creators.</p>",
+        "<ul>",
+    ]
+    for i, r in enumerate(receipts):
+        html.append(
+            f'<li id="{STEM}-receipt-{i}">{i}: '
+            + code(r[0])
+            + " "
+            + escape(str(r[1]))
+            + "; "
+            + escape(str(r[2])[:10])
+            + ".</li>"
+        )
+    html += [
+        "</ul>",
+        f'<h3 id="{STEM}-verification">Verification and durable artifacts</h3>',
+        "<p>Inventory, cycle membership and live-tip membership are independently checked. Planted controls cover a two-node cycle, a self-loop, a two-tip branch and an isolated clean identity. Every graph read uses a ten-second transaction timeout and rolls back. Capture counters agree before and after; no source or lifecycle writes are present in capture mode.</p>",
+        "<pre>" + escape(report_data["cycle_cross_check"]["query"]) + "</pre>",
+        "<pre>" + escape(report_data["tip_cross_check"]["query"]) + "</pre>",
+        "<p>Run record: "
+        + code(RUN)
+        + ". Logs: "
+        + code("capture-complete.log")
+        + ", "
+        + code("reproduce-scratch.log")
+        + ", "
+        + code("reclaim-controls.log")
+        + " and "
+        + code("report-final.log")
+        + ". The invocation revision and imported source paths are recorded in the logs. Large snapshots and raw receipts are retained in the run directory, not duplicated into the repository.</p>",
+        "</section>",
+    ]
+    html_text = "\n".join(html) + "\n"
+    assert len(html_text.encode()) <= 300000, "fragment exceeds artifact size ceiling"
+    (HERE / f"{STEM}.html").write_text(html_text)
+    assert all(c["anchor"].startswith(STEM) for c in repair_cases)
+    assert {names[n][0] for c in repair_cases for g in c["cycles"] for n in g} == {
+        r["id"] for r in data["cycle_cross_check"]
+    }
+    assert (
+        sum(len(c["live_tips"]) > 1 for c in repair_cases)
+        == summary["multi_tip_components"]
+    )
+    print("REPORT " + json.dumps(summary, sort_keys=True), flush=True)
+    print(
+        f"ARTIFACT json_bytes={len(encoded.encode())} html_bytes={len(html_text.encode())} complete_chains={len(cases)} receipts={len(receipts)}"
+    )
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--capture", action="store_true")
     parser.add_argument("--reproduce", action="store_true")
+    parser.add_argument("--report", action="store_true")
     args = parser.parse_args()
     controls()
     if args.capture:
         capture()
     if args.reproduce:
         reproduce()
+    if args.report:
+        draw_topology()
+        report()
     return 0
 
 
