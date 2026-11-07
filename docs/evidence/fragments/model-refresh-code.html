@@ -51,20 +51,34 @@
   zero lines afterwards. Test fixtures that use <code>jev-1.13</code> as a plain
   string in other suites are left alone, as the brief directs.</p>
 
-  <h4>Release tracking: the alias branch does not apply</h4>
-  <p>The brief's third item — every Jev cost record carries the release that
-  answered — is conditional on an alias being in use, because that is the case
-  where a silent upgrade can arrive without anyone editing a file. With the id
-  pinned, a Jev upgrade requires an edit to the four seats, so the change is
-  visible in review by construction.</p>
-  <p>What the probe does establish is that the field exists and is populated:
-  <code>typesafe/jev-1.14</code> answers as <code>typesafe/jev-1.14-20261014</code>,
-  a build stamp the pin alone does not show. Recording that build in the cost
-  record is therefore possible without an alias, and it would surface a
-  re-point of the same version name. That is a change to the decisions cost-booking
-  path (<code>_book_cost</code> books only the dollar amount today, and the
-  per-call <code>LLMCostEvent</code> is built elsewhere), which is outside this
-  node's write scope; it is reported as a follow-up rather than half-built here.</p>
+  <h4>Release tracking: the dated build is recorded beside the spend</h4>
+  <p>The pinned id fixes what a seat <em>asks for</em>, not what answers. The
+  probe above shows the endpoint reporting its build in the response's own
+  <code>model</code> field (<code>typesafe/jev-1.14-20261014</code>), and that
+  field was being discarded by
+  <code>_parse_decisions_response</code>. A re-point of the same id at a newer
+  build would then have left every cost record unchanged.</p>
+  <p>It now reaches the cost record. <code>call_decisions</code> and
+  <code>acall_decisions</code> hand the reported build to an optional
+  <code>record_release</code> sink, and
+  <code>judgment._book_cost</code> — the single place a decisions call's cost
+  becomes a tracker entry — books it under the same step as the spend. The
+  return value stays a two-tuple, so no caller had to change, and a tracker
+  that keeps no releases still books the spend. <code>PipelineCost</code>
+  carries the pair in <code>steps</code> and <code>releases</code>.</p>
+  <p>The decisive property is the one a test can state: the same pinned id
+  served by two different builds leaves <code>steps</code> bit-identical and
+  shows only in <code>releases</code>.</p>
+  <table><thead><tr><th>Surface</th><th>Before</th><th>After</th></tr></thead><tbody>
+    <tr><td><code>_parse_decisions_response</code></td><td><code>(answers, cost)</code>, <code>model</code> dropped</td><td><code>(answers, cost, release)</code></td></tr>
+    <tr><td><code>call_decisions</code> / <code>acall_decisions</code></td><td>no release channel</td><td><code>record_release=</code> sink; return unchanged</td></tr>
+    <tr><td><code>_book_cost</code> / <code>PipelineCost</code></td><td>dollars and tokens only</td><td><code>releases[step]</code> beside <code>steps[step]</code></td></tr>
+    <tr><td><code>tests/discovery/test_decisions_release_tracking.py</code></td><td>&mdash;</td><td>7 tests, both seams, sync and batch, plus a spend-only tracker</td></tr>
+  </tbody></table>
+  <p>This also closes the conditional item the earlier round reported as
+  outside its scope: the release is tracked even though the seats pin a
+  release id, which is exactly when a silent build change is otherwise
+  invisible.</p>
 
   <h4>Gate</h4>
   <p><code>tests/core</code>, <code>tests/discovery/test_llm_decisions.py</code>,
@@ -91,4 +105,26 @@
   <code>tests/standard_names/test_pool_batch_processors.py</code> and
   <code>tests/standard_names/test_pool_registry_imports.py</code> &mdash; reported rather than
   triaged, since each also fails at the base.</p>
+
+  <h4>Gate, release-tracking round</h4>
+  <p>The same selection was run again on both arms after the release-tracking
+  change, in parallel, with the base arm taken from a <code>git archive</code>
+  of the parent revision and given the main checkout's <code>.env</code> link,
+  so a missing credential cannot masquerade as a regression:</p>
+  <table><thead><tr><th>Arm</th><th>Revision / tree</th><th>Result</th></tr></thead><tbody>
+    <tr><td>base</td><td><code>844d598f</code> source, snapshot tree</td><td>66 failed, 9501 passed, 13 skipped, <code>EXIT=1</code></td></tr>
+    <tr><td>after</td><td><code>33331ed6</code>, this worktree</td><td>66 failed, 9501 passed, 13 skipped, <code>EXIT=1</code></td></tr>
+  </tbody></table>
+  <p><strong>Zero added failures and zero base-only failures:</strong> the two
+  failing-id sets are identical, 66 apiece, so no test changed state between
+  the arms. The count is larger than the earlier round's because both arms now
+  carry the same graph-backed state and run at the same concurrency; the
+  comparison that matters is by id, and it is empty in both directions. Logs:
+  <code>gate-release-base.log</code> and <code>gate-release-after.log</code> in
+  the run directory, each with its revision, tree, command and
+  <code>EXIT=</code> line.</p>
+  <p>The new tests sit outside that selection, so they were also run on their
+  own &mdash; <code>tests/discovery/test_decisions_release_tracking.py</code>
+  plus the gpt-5.x guard &mdash; <strong>8 passed</strong>,
+  <code>EXIT=0</code> (<code>gate-release-tracking.log</code>).</p>
 </section>
