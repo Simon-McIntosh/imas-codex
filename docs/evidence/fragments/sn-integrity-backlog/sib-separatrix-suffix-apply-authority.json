@@ -1,0 +1,2218 @@
+{
+ "node": "sib-separatrix-suffix-apply",
+ "generated_at": "2026-11-07T11:36:35.265046Z",
+ "convention": {
+  "separatrix": "X_at_plasma_boundary",
+  "separatrix_average": "flux_surface_averaged_X_at_plasma_boundary",
+  "source": "lead ruling 2026-11-07, comment c-s49-lead-ruling-convention"
+ },
+ "totals": {
+  "population": 98,
+  "by_action": {
+   "blocked_target_occupied": 16,
+   "keep": 82
+  },
+  "by_locus": {
+   "separatrix": 40,
+   "separatrix_average": 44,
+   "unresolved": 8,
+   "mixed": 4,
+   "diagnostic": 2
+  }
+ },
+ "names": [
+  {
+   "id": "argon_density_at_separatrix",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix/n_i/argon/value"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "argon_density_at_separatrix",
+   "target": "argon_density_at_plasma_boundary",
+   "tombstones": [],
+   "action": "blocked_target_occupied",
+   "occupant": {
+    "id": "argon_density_at_plasma_boundary",
+    "stage": "superseded",
+    "status": "superseded",
+    "successors": [
+     "flux_surface_averaged_argon_density_at_plasma_boundary"
+    ]
+   },
+   "target_state": {
+    "id": "argon_density_at_plasma_boundary",
+    "stage": "superseded",
+    "status": "superseded",
+    "successors": [
+     "flux_surface_averaged_argon_density_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "boron_density_flux_surface_averaged_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix_average/n_i/boron/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "boron_density_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_boron_density_at_plasma_boundary",
+   "tombstones": [
+    "flux_surface_averaged_boron_density_at_plasma_boundary"
+   ],
+   "action": "blocked_target_occupied",
+   "occupant": {
+    "id": "flux_surface_averaged_boron_density_at_plasma_boundary",
+    "stage": "superseded",
+    "status": "superseded",
+    "successors": [
+     "boron_density_flux_surface_averaged_at_plasma_boundary"
+    ]
+   },
+   "target_state": {
+    "id": "flux_surface_averaged_boron_density_at_plasma_boundary",
+    "stage": "superseded",
+    "status": "superseded",
+    "successors": [
+     "boron_density_flux_surface_averaged_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "bulk_electron_temperature_flux_surface_averaged_at_last_closed_flux_surface",
+   "unit": "eV",
+   "paths": [
+    "summary/local/separatrix_average/t_e/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "bulk_electron_temperature_flux_surface_averaged_at_last_closed_flux_surface",
+   "target": "flux_surface_averaged_bulk_electron_temperature_at_plasma_boundary",
+   "tombstones": [
+    "flux_surface_averaged_bulk_electron_temperature_at_last_closed_flux_surface"
+   ],
+   "action": "blocked_target_occupied",
+   "occupant": {
+    "id": "flux_surface_averaged_bulk_electron_temperature_at_plasma_boundary",
+    "stage": "drafted",
+    "status": "draft",
+    "successors": []
+   },
+   "target_state": {
+    "id": "flux_surface_averaged_bulk_electron_temperature_at_plasma_boundary",
+    "stage": "drafted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "deuterium_tritium_density_flux_surface_averaged_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix_average/n_i/deuterium_tritium/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "deuterium_tritium_density_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary",
+   "tombstones": [
+    "flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary"
+   ],
+   "action": "blocked_target_occupied",
+   "occupant": {
+    "id": "flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary",
+    "stage": "superseded",
+    "status": "superseded",
+    "successors": [
+     "flux_surface_averaged_deuterium_tritium_density",
+     "deuterium_tritium_density_flux_surface_averaged_at_plasma_boundary"
+    ]
+   },
+   "target_state": {
+    "id": "flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary",
+    "stage": "superseded",
+    "status": "superseded",
+    "successors": [
+     "flux_surface_averaged_deuterium_tritium_density",
+     "deuterium_tritium_density_flux_surface_averaged_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "effective_charge_at_separatrix",
+   "unit": "1",
+   "paths": [
+    "summary/local/separatrix/zeff/value"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "effective_charge_at_separatrix",
+   "target": "effective_charge_at_plasma_boundary",
+   "tombstones": [
+    "effective_charge_number_at_plasma_boundary"
+   ],
+   "action": "blocked_target_occupied",
+   "occupant": {
+    "id": "effective_charge_at_plasma_boundary",
+    "stage": "superseded",
+    "status": "superseded",
+    "successors": [
+     "effective_charge_number_at_plasma_boundary"
+    ]
+   },
+   "target_state": {
+    "id": "effective_charge_at_plasma_boundary",
+    "stage": "superseded",
+    "status": "superseded",
+    "successors": [
+     "effective_charge_number_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "effective_charge_flux_surface_averaged_at_plasma_boundary",
+   "unit": "1",
+   "paths": [
+    "summary/local/separatrix_average/zeff/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "effective_charge_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_effective_charge_at_plasma_boundary",
+   "tombstones": [
+    "flux_surface_averaged_effective_charge_at_plasma_boundary"
+   ],
+   "action": "blocked_target_occupied",
+   "occupant": {
+    "id": "flux_surface_averaged_effective_charge_at_plasma_boundary",
+    "stage": "superseded",
+    "status": "superseded",
+    "successors": [
+     "effective_charge_flux_surface_averaged_at_plasma_boundary"
+    ]
+   },
+   "target_state": {
+    "id": "flux_surface_averaged_effective_charge_at_plasma_boundary",
+    "stage": "superseded",
+    "status": "superseded",
+    "successors": [
+     "effective_charge_flux_surface_averaged_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "electron_pressure_at_separatrix",
+   "unit": "Pa",
+   "paths": [
+    "summary/pedestal_fits/linear/pressure_electron/separatrix/value",
+    "summary/pedestal_fits/mtanh/pressure_electron/separatrix/value"
+   ],
+   "census_locus": "pedestal_fit_separatrix",
+   "locus": "separatrix",
+   "census_target": "electron_pressure_at_separatrix",
+   "target": "electron_pressure_at_plasma_boundary",
+   "tombstones": [
+    "electron_pressure_at_plasma_boundary"
+   ],
+   "action": "blocked_target_occupied",
+   "occupant": {
+    "id": "electron_pressure_at_plasma_boundary",
+    "stage": "superseded",
+    "status": "superseded",
+    "successors": [
+     "electron_pressure_at_separatrix"
+    ]
+   },
+   "target_state": {
+    "id": "electron_pressure_at_plasma_boundary",
+    "stage": "superseded",
+    "status": "superseded",
+    "successors": [
+     "electron_pressure_at_separatrix"
+    ]
+   }
+  },
+  {
+   "id": "electron_temperature_at_separatrix",
+   "unit": "eV",
+   "paths": [
+    "summary/local/separatrix/t_e/value"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "electron_temperature_at_separatrix",
+   "target": "electron_temperature_at_plasma_boundary",
+   "tombstones": [
+    "thermal_electron_temperature_at_plasma_boundary"
+   ],
+   "action": "blocked_target_occupied",
+   "occupant": {
+    "id": "electron_temperature_at_plasma_boundary",
+    "stage": "superseded",
+    "status": "superseded",
+    "successors": [
+     "bulk_electron_temperature_at_plasma_boundary"
+    ]
+   },
+   "target_state": {
+    "id": "electron_temperature_at_plasma_boundary",
+    "stage": "superseded",
+    "status": "superseded",
+    "successors": [
+     "bulk_electron_temperature_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "flux_surface_averaged_parallel_electric_field_at_separatrix",
+   "unit": "V.m^-1",
+   "paths": [
+    "summary/local/separatrix_average/e_field_parallel/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "flux_surface_averaged_parallel_electric_field_at_separatrix",
+   "target": "flux_surface_averaged_parallel_electric_field_at_plasma_boundary",
+   "tombstones": [
+    "parallel_electric_field_flux_surface_averaged_at_separatrix"
+   ],
+   "action": "blocked_target_occupied",
+   "occupant": {
+    "id": "flux_surface_averaged_parallel_electric_field_at_plasma_boundary",
+    "stage": "drafted",
+    "status": "draft",
+    "successors": []
+   },
+   "target_state": {
+    "id": "flux_surface_averaged_parallel_electric_field_at_plasma_boundary",
+    "stage": "drafted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "krypton_density_flux_surface_averaged_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix_average/n_i/krypton/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "krypton_density_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_krypton_density_at_plasma_boundary",
+   "tombstones": [
+    "flux_surface_averaged_krypton_density_at_plasma_boundary"
+   ],
+   "action": "blocked_target_occupied",
+   "occupant": {
+    "id": "flux_surface_averaged_krypton_density_at_plasma_boundary",
+    "stage": "superseded",
+    "status": "superseded",
+    "successors": [
+     "krypton_density_flux_surface_averaged_at_plasma_boundary"
+    ]
+   },
+   "target_state": {
+    "id": "flux_surface_averaged_krypton_density_at_plasma_boundary",
+    "stage": "superseded",
+    "status": "superseded",
+    "successors": [
+     "krypton_density_flux_surface_averaged_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "normalized_toroidal_flux_coordinate_at_plasma_boundary",
+   "unit": "1",
+   "paths": [
+    "summary/local/separatrix_average/position/rho_tor_norm"
+   ],
+   "census_locus": "diagnostic_separatrix_distance",
+   "locus": "separatrix_average",
+   "census_target": "normalized_toroidal_flux_coordinate_at_plasma_boundary",
+   "target": "flux_surface_averaged_normalized_toroidal_flux_coordinate_at_plasma_boundary",
+   "tombstones": [],
+   "action": "blocked_target_occupied",
+   "occupant": {
+    "id": "flux_surface_averaged_normalized_toroidal_flux_coordinate_at_plasma_boundary",
+    "stage": "drafted",
+    "status": "draft",
+    "successors": []
+   },
+   "target_state": {
+    "id": "flux_surface_averaged_normalized_toroidal_flux_coordinate_at_plasma_boundary",
+    "stage": "drafted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "normalized_toroidal_flux_coordinate_at_separatrix",
+   "unit": "1",
+   "paths": [
+    "summary/local/separatrix/position/rho_tor_norm"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "normalized_toroidal_flux_coordinate_at_separatrix",
+   "target": "normalized_toroidal_flux_coordinate_at_plasma_boundary",
+   "tombstones": [],
+   "action": "blocked_target_occupied",
+   "occupant": {
+    "id": "normalized_toroidal_flux_coordinate_at_plasma_boundary",
+    "stage": "superseded",
+    "status": "draft",
+    "successors": [
+     "flux_surface_averaged_normalized_toroidal_flux_coordinate_at_plasma_boundary"
+    ]
+   },
+   "target_state": {
+    "id": "normalized_toroidal_flux_coordinate_at_plasma_boundary",
+    "stage": "superseded",
+    "status": "draft",
+    "successors": [
+     "flux_surface_averaged_normalized_toroidal_flux_coordinate_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "toroidal_total_plasma_momentum_flux_surface_averaged_at_plasma_boundary",
+   "unit": "kg.m.s^-1",
+   "paths": [
+    "summary/local/separatrix_average/momentum_phi/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "toroidal_total_plasma_momentum_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_toroidal_total_plasma_momentum_at_plasma_boundary",
+   "tombstones": [
+    "toroidal_flux_surface_averaged_total_plasma_momentum_at_plasma_boundary"
+   ],
+   "action": "blocked_target_occupied",
+   "occupant": {
+    "id": "flux_surface_averaged_toroidal_total_plasma_momentum_at_plasma_boundary",
+    "stage": "drafted",
+    "status": "draft",
+    "successors": []
+   },
+   "target_state": {
+    "id": "flux_surface_averaged_toroidal_total_plasma_momentum_at_plasma_boundary",
+    "stage": "drafted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "toroidal_tritium_velocity",
+   "unit": "m.s^-1",
+   "paths": [
+    "summary/local/separatrix/velocity_phi/tritium/value"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "toroidal_tritium_velocity",
+   "target": "toroidal_tritium_velocity_at_plasma_boundary",
+   "tombstones": [],
+   "action": "blocked_target_occupied",
+   "occupant": {
+    "id": "toroidal_tritium_velocity_at_plasma_boundary",
+    "stage": "superseded",
+    "status": "superseded",
+    "successors": [
+     "toroidal_flux_surface_averaged_tritium_velocity_at_plasma_boundary"
+    ]
+   },
+   "target_state": {
+    "id": "toroidal_tritium_velocity_at_plasma_boundary",
+    "stage": "superseded",
+    "status": "superseded",
+    "successors": [
+     "toroidal_flux_surface_averaged_tritium_velocity_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "tungsten_density_at_separatrix",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix/n_i/tungsten/value"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "tungsten_density_at_separatrix",
+   "target": "tungsten_density_at_plasma_boundary",
+   "tombstones": [
+    "tungsten_density_at_plasma_boundary"
+   ],
+   "action": "blocked_target_occupied",
+   "occupant": {
+    "id": "tungsten_density_at_plasma_boundary",
+    "stage": "superseded",
+    "status": "superseded",
+    "successors": [
+     "flux_surface_averaged_tungsten_density_at_plasma_boundary",
+     "tungsten_density_at_separatrix"
+    ]
+   },
+   "target_state": {
+    "id": "tungsten_density_at_plasma_boundary",
+    "stage": "superseded",
+    "status": "superseded",
+    "successors": [
+     "flux_surface_averaged_tungsten_density_at_plasma_boundary",
+     "tungsten_density_at_separatrix"
+    ]
+   }
+  },
+  {
+   "id": "tungsten_density_flux_surface_averaged_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix_average/n_i/tungsten/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "tungsten_density_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_tungsten_density_at_plasma_boundary",
+   "tombstones": [
+    "flux_surface_averaged_tungsten_density_at_plasma_boundary"
+   ],
+   "action": "blocked_target_occupied",
+   "occupant": {
+    "id": "flux_surface_averaged_tungsten_density_at_plasma_boundary",
+    "stage": "superseded",
+    "status": "superseded",
+    "successors": [
+     "tungsten_density_flux_surface_averaged_at_plasma_boundary"
+    ]
+   },
+   "target_state": {
+    "id": "flux_surface_averaged_tungsten_density_at_plasma_boundary",
+    "stage": "superseded",
+    "status": "superseded",
+    "successors": [
+     "tungsten_density_flux_surface_averaged_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "beryllium_density_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix/n_i/beryllium/value"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "beryllium_density_at_separatrix",
+   "target": "beryllium_density_at_plasma_boundary",
+   "tombstones": [],
+   "action": "keep",
+   "target_state": {
+    "id": "beryllium_density_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": [
+     "flux_surface_averaged_beryllium_density_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "boron_density_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix/n_i/boron/value"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "boron_density_at_separatrix",
+   "target": "boron_density_at_plasma_boundary",
+   "tombstones": [
+    "flux_surface_averaged_boron_density_at_plasma_boundary"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "boron_density_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": [
+     "flux_surface_averaged_boron_density_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "carbon_density_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix/n_i/carbon/value"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "carbon_density_at_separatrix",
+   "target": "carbon_density_at_plasma_boundary",
+   "tombstones": [],
+   "action": "keep",
+   "target_state": {
+    "id": "carbon_density_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": [
+     "flux_surface_averaged_carbon_density_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "density_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [],
+   "census_locus": "unresolved",
+   "locus": "unresolved",
+   "census_target": "density_at_plasma_boundary",
+   "target": "density_at_plasma_boundary",
+   "tombstones": [],
+   "action": "keep",
+   "target_state": {
+    "id": "density_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "deuterium_density_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix/n_i/deuterium/value"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "deuterium_density_at_separatrix",
+   "target": "deuterium_density_at_plasma_boundary",
+   "tombstones": [],
+   "action": "keep",
+   "target_state": {
+    "id": "deuterium_density_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": [
+     "flux_surface_averaged_deuterium_density_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "deuterium_tritium_density_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix/n_i/deuterium_tritium/value"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "deuterium_tritium_density_at_separatrix",
+   "target": "deuterium_tritium_density_at_plasma_boundary",
+   "tombstones": [
+    "flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "deuterium_tritium_density_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": [
+     "flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "electron_density_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix/n_e/value",
+    "summary/pedestal_fits/linear/n_e/separatrix/value",
+    "summary/pedestal_fits/mtanh/n_e/separatrix/value"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "electron_density_at_separatrix",
+   "target": "electron_density_at_plasma_boundary",
+   "tombstones": [],
+   "action": "keep",
+   "target_state": {
+    "id": "electron_density_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "flux_surface_averaged_argon_density_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix_average/n_i/argon/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "argon_density_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_argon_density_at_plasma_boundary",
+   "tombstones": [
+    "argon_density_at_plasma_boundary",
+    "argon_density_flux_surface_averaged_at_plasma_boundary"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "flux_surface_averaged_argon_density_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": [
+     "argon_density_flux_surface_averaged_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "flux_surface_averaged_beryllium_density_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix_average/n_i/beryllium/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "beryllium_density_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_beryllium_density_at_plasma_boundary",
+   "tombstones": [
+    "beryllium_density_flux_surface_averaged_at_plasma_boundary"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "flux_surface_averaged_beryllium_density_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": [
+     "beryllium_density_flux_surface_averaged_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "flux_surface_averaged_carbon_density_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix_average/n_i/carbon/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "carbon_density_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_carbon_density_at_plasma_boundary",
+   "tombstones": [
+    "carbon_density_flux_surface_averaged_at_plasma_boundary",
+    "flux_surface_averaged_carbon_density"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "flux_surface_averaged_carbon_density_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": [
+     "carbon_density_flux_surface_averaged_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "flux_surface_averaged_deuterium_density_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix_average/n_i/deuterium/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "deuterium_density_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_deuterium_density_at_plasma_boundary",
+   "tombstones": [
+    "deuterium_density_flux_surface_averaged_at_plasma_boundary"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "flux_surface_averaged_deuterium_density_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": [
+     "deuterium_density_flux_surface_averaged_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "flux_surface_averaged_electron_density_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix_average/n_e/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "electron_density_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_electron_density_at_plasma_boundary",
+   "tombstones": [
+    "electron_density_flux_surface_averaged_at_plasma_boundary"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "flux_surface_averaged_electron_density_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": [
+     "electron_density_flux_surface_averaged_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "flux_surface_averaged_helium_3_density_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix_average/n_i/helium_3/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "helium_3_density_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_helium_3_density_at_plasma_boundary",
+   "tombstones": [
+    "helium_3_density_flux_surface_averaged_at_plasma_boundary"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "flux_surface_averaged_helium_3_density_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": [
+     "helium_3_density_flux_surface_averaged_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "flux_surface_averaged_helium_4_density_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix_average/n_i/helium_4/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "helium_4_density_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_helium_4_density_at_plasma_boundary",
+   "tombstones": [
+    "helium_4_density_flux_surface_averaged_at_plasma_boundary"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "flux_surface_averaged_helium_4_density_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": [
+     "helium_4_density_flux_surface_averaged_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "flux_surface_averaged_hydrogen_density_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix_average/n_i/hydrogen/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "hydrogen_density_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_hydrogen_density_at_plasma_boundary",
+   "tombstones": [
+    "flux_surface_averaged_hydrogen_density",
+    "hydrogen_density_flux_surface_averaged_at_plasma_boundary"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "flux_surface_averaged_hydrogen_density_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": [
+     "hydrogen_density_flux_surface_averaged_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "flux_surface_averaged_ion_density_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix_average/n_i"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "ion_density_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_ion_density_at_plasma_boundary",
+   "tombstones": [
+    "density_at_separatrix"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "flux_surface_averaged_ion_density_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "flux_surface_averaged_iron_density_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix_average/n_i/iron/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "iron_density_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_iron_density_at_plasma_boundary",
+   "tombstones": [
+    "flux_surface_averaged_iron_density",
+    "iron_density_flux_surface_averaged_at_plasma_boundary"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "flux_surface_averaged_iron_density_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": [
+     "iron_density_flux_surface_averaged_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "flux_surface_averaged_lithium_density_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix_average/n_i/lithium/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "lithium_density_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_lithium_density_at_plasma_boundary",
+   "tombstones": [
+    "lithium_density",
+    "lithium_density_flux_surface_averaged_at_plasma_boundary"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "flux_surface_averaged_lithium_density_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": [
+     "lithium_density_flux_surface_averaged_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "flux_surface_averaged_neon_density_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix_average/n_i/neon/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "neon_density_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_neon_density_at_plasma_boundary",
+   "tombstones": [
+    "neon_density_flux_surface_averaged_at_plasma_boundary"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "flux_surface_averaged_neon_density_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": [
+     "neon_density_flux_surface_averaged_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "flux_surface_averaged_nitrogen_density_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix_average/n_i/nitrogen/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "nitrogen_density_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_nitrogen_density_at_plasma_boundary",
+   "tombstones": [
+    "nitrogen_density_flux_surface_averaged_at_plasma_boundary"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "flux_surface_averaged_nitrogen_density_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": [
+     "nitrogen_density_flux_surface_averaged_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "flux_surface_averaged_oxygen_density_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix_average/n_i/oxygen/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "oxygen_density_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_oxygen_density_at_plasma_boundary",
+   "tombstones": [
+    "oxygen_density_flux_surface_averaged_at_plasma_boundary"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "flux_surface_averaged_oxygen_density_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": [
+     "oxygen_density_flux_surface_averaged_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "flux_surface_averaged_toroidal_argon_velocity_at_plasma_boundary",
+   "unit": "m.s^-1",
+   "paths": [
+    "summary/local/separatrix_average/velocity_phi/argon/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "toroidal_argon_velocity_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_toroidal_argon_velocity_at_plasma_boundary",
+   "tombstones": [
+    "toroidal_argon_velocity_flux_surface_averaged_at_plasma_boundary"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "flux_surface_averaged_toroidal_argon_velocity_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "flux_surface_averaged_toroidal_beryllium_velocity_at_plasma_boundary",
+   "unit": "m.s^-1",
+   "paths": [
+    "summary/local/separatrix_average/velocity_phi/beryllium/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "toroidal_beryllium_velocity_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_toroidal_beryllium_velocity_at_plasma_boundary",
+   "tombstones": [
+    "toroidal_flux_surface_averaged_beryllium_velocity_at_plasma_boundary"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "flux_surface_averaged_toroidal_beryllium_velocity_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "flux_surface_averaged_toroidal_carbon_velocity_at_plasma_boundary",
+   "unit": "m.s^-1",
+   "paths": [
+    "summary/local/separatrix_average/velocity_phi/carbon/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "toroidal_carbon_velocity_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_toroidal_carbon_velocity_at_plasma_boundary",
+   "tombstones": [
+    "toroidal_carbon_velocity_flux_surface_averaged_at_plasma_boundary"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "flux_surface_averaged_toroidal_carbon_velocity_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "flux_surface_averaged_toroidal_deuterium_tritium_velocity_at_plasma_boundary",
+   "unit": "m.s^-1",
+   "paths": [
+    "summary/local/separatrix_average/velocity_phi/deuterium_tritium/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "toroidal_deuterium_tritium_velocity_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_toroidal_deuterium_tritium_velocity_at_plasma_boundary",
+   "tombstones": [
+    "toroidal_deuterium_tritium_velocity_flux_surface_averaged_at_plasma_boundary"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "flux_surface_averaged_toroidal_deuterium_tritium_velocity_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "flux_surface_averaged_toroidal_deuterium_velocity_at_plasma_boundary",
+   "unit": "m.s^-1",
+   "paths": [
+    "summary/local/separatrix_average/velocity_phi/deuterium/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "toroidal_deuterium_velocity_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_toroidal_deuterium_velocity_at_plasma_boundary",
+   "tombstones": [
+    "toroidal_deuterium_velocity_flux_surface_averaged_at_plasma_boundary"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "flux_surface_averaged_toroidal_deuterium_velocity_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "flux_surface_averaged_toroidal_helium_3_velocity_at_plasma_boundary",
+   "unit": "m.s^-1",
+   "paths": [
+    "summary/local/separatrix_average/velocity_phi/helium_3/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "toroidal_helium_3_velocity_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_toroidal_helium_3_velocity_at_plasma_boundary",
+   "tombstones": [
+    "toroidal_helium_3_velocity_flux_surface_averaged_at_plasma_boundary"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "flux_surface_averaged_toroidal_helium_3_velocity_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "flux_surface_averaged_toroidal_helium_4_velocity_at_plasma_boundary",
+   "unit": "m.s^-1",
+   "paths": [
+    "summary/local/separatrix_average/velocity_phi/helium_4/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "toroidal_helium_4_velocity_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_toroidal_helium_4_velocity_at_plasma_boundary",
+   "tombstones": [
+    "toroidal_flux_surface_averaged_helium_4_velocity_at_plasma_boundary"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "flux_surface_averaged_toroidal_helium_4_velocity_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "flux_surface_averaged_toroidal_hydrogen_velocity_at_plasma_boundary",
+   "unit": "m.s^-1",
+   "paths": [
+    "summary/local/separatrix_average/velocity_phi/hydrogen/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "toroidal_hydrogen_velocity_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_toroidal_hydrogen_velocity_at_plasma_boundary",
+   "tombstones": [
+    "toroidal_hydrogen_velocity_flux_surface_averaged_at_plasma_boundary"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "flux_surface_averaged_toroidal_hydrogen_velocity_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "flux_surface_averaged_toroidal_ion_velocity_at_plasma_boundary",
+   "unit": "m.s^-1",
+   "paths": [
+    "summary/local/separatrix_average/velocity_phi"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "toroidal_ion_velocity_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_toroidal_ion_velocity_at_plasma_boundary",
+   "tombstones": [
+    "toroidal_ion_velocity_flux_surface_averaged_at_plasma_boundary"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "flux_surface_averaged_toroidal_ion_velocity_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "flux_surface_averaged_toroidal_iron_velocity_at_plasma_boundary",
+   "unit": "m.s^-1",
+   "paths": [
+    "summary/local/separatrix_average/velocity_phi/iron/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "toroidal_iron_velocity_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_toroidal_iron_velocity_at_plasma_boundary",
+   "tombstones": [
+    "toroidal_iron_velocity_flux_surface_averaged_at_plasma_boundary"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "flux_surface_averaged_toroidal_iron_velocity_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "flux_surface_averaged_toroidal_krypton_velocity_at_plasma_boundary",
+   "unit": "m.s^-1",
+   "paths": [
+    "summary/local/separatrix_average/velocity_phi/krypton/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "toroidal_krypton_velocity_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_toroidal_krypton_velocity_at_plasma_boundary",
+   "tombstones": [
+    "toroidal_flux_surface_averaged_krypton_velocity_at_plasma_boundary"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "flux_surface_averaged_toroidal_krypton_velocity_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "flux_surface_averaged_toroidal_lithium_velocity_at_plasma_boundary",
+   "unit": "m.s^-1",
+   "paths": [
+    "summary/local/separatrix_average/velocity_phi/lithium/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "toroidal_lithium_velocity_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_toroidal_lithium_velocity_at_plasma_boundary",
+   "tombstones": [
+    "toroidal_flux_surface_averaged_lithium_velocity_at_plasma_boundary"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "flux_surface_averaged_toroidal_lithium_velocity_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "flux_surface_averaged_toroidal_neon_velocity_at_plasma_boundary",
+   "unit": "m.s^-1",
+   "paths": [
+    "summary/local/separatrix_average/velocity_phi/neon/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "toroidal_neon_velocity_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_toroidal_neon_velocity_at_plasma_boundary",
+   "tombstones": [
+    "toroidal_neon_velocity_flux_surface_averaged_at_plasma_boundary"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "flux_surface_averaged_toroidal_neon_velocity_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "flux_surface_averaged_toroidal_nitrogen_velocity_at_plasma_boundary",
+   "unit": "m.s^-1",
+   "paths": [
+    "summary/local/separatrix_average/velocity_phi/nitrogen/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "toroidal_nitrogen_velocity_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_toroidal_nitrogen_velocity_at_plasma_boundary",
+   "tombstones": [
+    "toroidal_nitrogen_velocity_flux_surface_averaged_at_plasma_boundary"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "flux_surface_averaged_toroidal_nitrogen_velocity_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "flux_surface_averaged_toroidal_oxygen_velocity_at_plasma_boundary",
+   "unit": "m.s^-1",
+   "paths": [
+    "summary/local/separatrix_average/velocity_phi/oxygen/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "toroidal_oxygen_velocity_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_toroidal_oxygen_velocity_at_plasma_boundary",
+   "tombstones": [
+    "toroidal_oxygen_velocity_flux_surface_averaged_at_plasma_boundary"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "flux_surface_averaged_toroidal_oxygen_velocity_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "flux_surface_averaged_toroidal_tritium_velocity_at_plasma_boundary",
+   "unit": "m.s^-1",
+   "paths": [
+    "summary/local/separatrix_average/velocity_phi/tritium/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "toroidal_tritium_velocity_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_toroidal_tritium_velocity_at_plasma_boundary",
+   "tombstones": [
+    "toroidal_tritium_velocity_flux_surface_averaged_at_plasma_boundary"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "flux_surface_averaged_toroidal_tritium_velocity_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "flux_surface_averaged_toroidal_tungsten_velocity_at_plasma_boundary",
+   "unit": "m.s^-1",
+   "paths": [
+    "summary/local/separatrix_average/velocity_phi/tungsten/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "toroidal_tungsten_velocity_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_toroidal_tungsten_velocity_at_plasma_boundary",
+   "tombstones": [
+    "toroidal_tungsten_velocity_flux_surface_averaged_at_plasma_boundary"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "flux_surface_averaged_toroidal_tungsten_velocity_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "flux_surface_averaged_toroidal_xenon_velocity_at_plasma_boundary",
+   "unit": "m.s^-1",
+   "paths": [
+    "summary/local/separatrix_average/velocity_phi/xenon/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "toroidal_xenon_velocity_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_toroidal_xenon_velocity_at_plasma_boundary",
+   "tombstones": [
+    "toroidal_xenon_velocity_flux_surface_averaged_at_plasma_boundary"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "flux_surface_averaged_toroidal_xenon_velocity_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "flux_surface_averaged_total_ion_density_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix_average/n_i_total/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "total_ion_density_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_total_ion_density_at_plasma_boundary",
+   "tombstones": [
+    "total_ion_density_flux_surface_averaged_at_plasma_boundary"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "flux_surface_averaged_total_ion_density_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": [
+     "total_ion_density_flux_surface_averaged_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "flux_surface_averaged_tritium_density_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix_average/n_i/tritium/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "tritium_density_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_tritium_density_at_plasma_boundary",
+   "tombstones": [
+    "flux_surface_average_tritium_density_at_plasma_boundary",
+    "tritium_density_flux_surface_averaged_at_plasma_boundary"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "flux_surface_averaged_tritium_density_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": [
+     "tritium_density_flux_surface_averaged_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "flux_surface_averaged_xenon_density_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix_average/n_i/xenon/value"
+   ],
+   "census_locus": "separatrix_average",
+   "locus": "separatrix_average",
+   "census_target": "xenon_density_flux_surface_averaged_at_separatrix",
+   "target": "flux_surface_averaged_xenon_density_at_plasma_boundary",
+   "tombstones": [
+    "xenon_density_flux_surface_averaged_at_plasma_boundary"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "flux_surface_averaged_xenon_density_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": [
+     "xenon_density_flux_surface_averaged_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "helium_3_density_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix/n_i/helium_3/value"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "helium_3_density_at_separatrix",
+   "target": "helium_3_density_at_plasma_boundary",
+   "tombstones": [],
+   "action": "keep",
+   "target_state": {
+    "id": "helium_3_density_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": [
+     "flux_surface_averaged_helium_3_density_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "helium_4_density_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix/n_i/helium_4/value"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "helium_4_density_at_separatrix",
+   "target": "helium_4_density_at_plasma_boundary",
+   "tombstones": [],
+   "action": "keep",
+   "target_state": {
+    "id": "helium_4_density_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": [
+     "flux_surface_averaged_helium_4_density_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "hot_neutral_temperature_at_plasma_boundary",
+   "unit": "eV",
+   "paths": [],
+   "census_locus": "unresolved",
+   "locus": "unresolved",
+   "census_target": "hot_neutral_temperature_at_plasma_boundary",
+   "target": "hot_neutral_temperature_at_plasma_boundary",
+   "tombstones": [
+    "hot_neutral_temperature_at_plasma_edge"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "hot_neutral_temperature_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "hydrogen_density_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix/n_i/hydrogen/value"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "hydrogen_density_at_separatrix",
+   "target": "hydrogen_density_at_plasma_boundary",
+   "tombstones": [],
+   "action": "keep",
+   "target_state": {
+    "id": "hydrogen_density_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": [
+     "flux_surface_averaged_hydrogen_density_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "ion_density_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [],
+   "census_locus": "unresolved",
+   "locus": "unresolved",
+   "census_target": "ion_density_at_plasma_boundary",
+   "target": "ion_density_at_plasma_boundary",
+   "tombstones": [],
+   "action": "keep",
+   "target_state": {
+    "id": "ion_density_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "iron_density_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix/n_i/iron/value"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "iron_density_at_separatrix",
+   "target": "iron_density_at_plasma_boundary",
+   "tombstones": [],
+   "action": "keep",
+   "target_state": {
+    "id": "iron_density_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "krypton_density_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix/n_i/krypton/value"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "krypton_density_at_separatrix",
+   "target": "krypton_density_at_plasma_boundary",
+   "tombstones": [],
+   "action": "keep",
+   "target_state": {
+    "id": "krypton_density_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "lithium_density_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix/n_i/lithium/value"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "lithium_density_at_separatrix",
+   "target": "lithium_density_at_plasma_boundary",
+   "tombstones": [],
+   "action": "keep",
+   "target_state": {
+    "id": "lithium_density_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": [
+     "flux_surface_averaged_lithium_density_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "loop_voltage_at_plasma_boundary",
+   "unit": "V",
+   "paths": [],
+   "census_locus": "unresolved",
+   "locus": "unresolved",
+   "census_target": "loop_voltage_at_plasma_boundary",
+   "target": "loop_voltage_at_plasma_boundary",
+   "tombstones": [],
+   "action": "keep",
+   "target_state": {
+    "id": "loop_voltage_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "magnetic_shear_at_plasma_boundary",
+   "unit": "1",
+   "paths": [
+    "summary/local/separatrix/magnetic_shear/value",
+    "summary/local/separatrix_average/magnetic_shear/value"
+   ],
+   "census_locus": "mixed",
+   "locus": "mixed",
+   "census_target": "magnetic_shear_at_plasma_boundary",
+   "target": "magnetic_shear_at_plasma_boundary",
+   "tombstones": [
+    "flux_surface_averaged_magnetic_shear"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "magnetic_shear_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "neon_density_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix/n_i/neon/value"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "neon_density_at_separatrix",
+   "target": "neon_density_at_plasma_boundary",
+   "tombstones": [],
+   "action": "keep",
+   "target_state": {
+    "id": "neon_density_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": [
+     "flux_surface_averaged_neon_density_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "nitrogen_density_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix/n_i/nitrogen/value"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "nitrogen_density_at_separatrix",
+   "target": "nitrogen_density_at_plasma_boundary",
+   "tombstones": [],
+   "action": "keep",
+   "target_state": {
+    "id": "nitrogen_density_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "oxygen_density_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix/n_i/oxygen/value"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "oxygen_density_at_separatrix",
+   "target": "oxygen_density_at_plasma_boundary",
+   "tombstones": [],
+   "action": "keep",
+   "target_state": {
+    "id": "oxygen_density_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "parallel_electric_field_at_plasma_boundary",
+   "unit": "V.m^-1",
+   "paths": [
+    "summary/local/separatrix/e_field_parallel/value"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "parallel_electric_field_at_plasma_boundary",
+   "target": "parallel_electric_field_at_plasma_boundary",
+   "tombstones": [],
+   "action": "keep",
+   "target_state": {
+    "id": "parallel_electric_field_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "parallel_electric_field_at_separatrix",
+   "unit": "V.m^-1",
+   "paths": [],
+   "census_locus": "unresolved",
+   "locus": "unresolved",
+   "census_target": "parallel_electric_field_at_plasma_boundary",
+   "target": "parallel_electric_field_at_separatrix",
+   "tombstones": [],
+   "action": "keep",
+   "target_state": {
+    "id": "parallel_electric_field_at_separatrix",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "poloidal_magnetic_flux_at_plasma_boundary",
+   "unit": "Wb",
+   "paths": [
+    "summary/local/separatrix/position/psi",
+    "summary/local/separatrix_average/position/psi"
+   ],
+   "census_locus": "separatrix",
+   "locus": "mixed",
+   "census_target": "poloidal_magnetic_flux_at_separatrix",
+   "target": "poloidal_magnetic_flux_at_plasma_boundary",
+   "tombstones": [],
+   "action": "keep",
+   "target_state": {
+    "id": "poloidal_magnetic_flux_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "radial_coordinate_of_plasma_boundary_gap_reference_point",
+   "unit": "m",
+   "paths": [
+    "equilibrium/time_slice/boundary_separatrix/gap/r"
+   ],
+   "census_locus": "diagnostic_separatrix_distance",
+   "locus": "diagnostic",
+   "census_target": "radial_coordinate_of_plasma_boundary_gap_reference_point",
+   "target": "radial_coordinate_of_plasma_boundary_gap_reference_point",
+   "tombstones": [
+    "radial_coordinate_of_plasma_boundary_gap"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "radial_coordinate_of_plasma_boundary_gap_reference_point",
+    "stage": "drafted",
+    "status": "draft",
+    "successors": [
+     "radial_coordinate_of_plasma_boundary_gap"
+    ]
+   }
+  },
+  {
+   "id": "radial_separatrix_distance_at_outboard_midplane",
+   "unit": "m",
+   "paths": [
+    "langmuir_probes/embedded/distance_separatrix_midplane",
+    "langmuir_probes/reciprocating/plunge/distance_separatrix_midplane",
+    "thomson_scattering/channel/distance_separatrix_midplane"
+   ],
+   "census_locus": "diagnostic_separatrix_distance",
+   "locus": "diagnostic",
+   "census_target": "radial_separatrix_distance_at_outboard_midplane",
+   "target": "radial_separatrix_distance_at_outboard_midplane",
+   "tombstones": [
+    "distance_at_outboard_midplane"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "radial_separatrix_distance_at_outboard_midplane",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "safety_factor_at_plasma_boundary",
+   "unit": "1",
+   "paths": [
+    "summary/local/separatrix/q/value",
+    "summary/local/separatrix_average/q/value"
+   ],
+   "census_locus": "mixed",
+   "locus": "mixed",
+   "census_target": "safety_factor_at_plasma_boundary",
+   "target": "safety_factor_at_plasma_boundary",
+   "tombstones": [],
+   "action": "keep",
+   "target_state": {
+    "id": "safety_factor_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "toroidal_argon_velocity_at_plasma_boundary",
+   "unit": "m.s^-1",
+   "paths": [
+    "summary/local/separatrix/velocity_phi/argon/value"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "toroidal_argon_velocity_at_separatrix",
+   "target": "toroidal_argon_velocity_at_plasma_boundary",
+   "tombstones": [],
+   "action": "keep",
+   "target_state": {
+    "id": "toroidal_argon_velocity_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "toroidal_carbon_velocity_at_plasma_boundary",
+   "unit": "m.s^-1",
+   "paths": [
+    "summary/local/separatrix/velocity_phi/carbon/value"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "toroidal_carbon_velocity_at_separatrix",
+   "target": "toroidal_carbon_velocity_at_plasma_boundary",
+   "tombstones": [],
+   "action": "keep",
+   "target_state": {
+    "id": "toroidal_carbon_velocity_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "toroidal_deuterium_tritium_velocity_at_plasma_boundary",
+   "unit": "m.s^-1",
+   "paths": [
+    "summary/local/separatrix/velocity_phi/deuterium_tritium/value"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "toroidal_deuterium_tritium_velocity_at_plasma_boundary",
+   "target": "toroidal_deuterium_tritium_velocity_at_plasma_boundary",
+   "tombstones": [],
+   "action": "keep",
+   "target_state": {
+    "id": "toroidal_deuterium_tritium_velocity_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "toroidal_deuterium_velocity_at_plasma_boundary",
+   "unit": "m.s^-1",
+   "paths": [
+    "summary/local/separatrix/velocity_phi/deuterium/value"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "toroidal_deuterium_velocity_at_separatrix",
+   "target": "toroidal_deuterium_velocity_at_plasma_boundary",
+   "tombstones": [],
+   "action": "keep",
+   "target_state": {
+    "id": "toroidal_deuterium_velocity_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "toroidal_flux_coordinate_at_plasma_boundary",
+   "unit": "m",
+   "paths": [
+    "summary/local/separatrix/position/rho_tor",
+    "summary/local/separatrix_average/position/rho_tor"
+   ],
+   "census_locus": "separatrix",
+   "locus": "mixed",
+   "census_target": "toroidal_flux_coordinate_at_separatrix",
+   "target": "toroidal_flux_coordinate_at_plasma_boundary",
+   "tombstones": [],
+   "action": "keep",
+   "target_state": {
+    "id": "toroidal_flux_coordinate_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "toroidal_helium_3_velocity_at_plasma_boundary",
+   "unit": "m.s^-1",
+   "paths": [
+    "summary/local/separatrix/velocity_phi/helium_3/value"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "toroidal_helium_3_velocity_at_separatrix",
+   "target": "toroidal_helium_3_velocity_at_plasma_boundary",
+   "tombstones": [
+    "toroidal_flux_surface_averaged_helium_3_velocity_at_plasma_boundary"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "toroidal_helium_3_velocity_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": [
+     "toroidal_flux_surface_averaged_helium_3_velocity_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "toroidal_helium_4_velocity_at_plasma_boundary",
+   "unit": "m.s^-1",
+   "paths": [
+    "summary/local/separatrix/velocity_phi/helium_4/value"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "toroidal_helium_4_velocity_at_plasma_boundary",
+   "target": "toroidal_helium_4_velocity_at_plasma_boundary",
+   "tombstones": [
+    "toroidal_flux_surface_averaged_helium_4_velocity_at_plasma_boundary",
+    "toroidal_helium_4_velocity_at_separatrix"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "toroidal_helium_4_velocity_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": [
+     "toroidal_flux_surface_averaged_helium_4_velocity_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "toroidal_hydrogen_velocity_at_plasma_boundary",
+   "unit": "m.s^-1",
+   "paths": [
+    "summary/local/separatrix/velocity_phi/hydrogen/value"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "toroidal_hydrogen_velocity_at_separatrix",
+   "target": "toroidal_hydrogen_velocity_at_plasma_boundary",
+   "tombstones": [
+    "toroidal_flux_surface_averaged_hydrogen_velocity_at_plasma_boundary"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "toroidal_hydrogen_velocity_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": [
+     "toroidal_flux_surface_averaged_hydrogen_velocity_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "toroidal_ion_velocity_at_plasma_boundary",
+   "unit": "m.s^-1",
+   "paths": [],
+   "census_locus": "unresolved",
+   "locus": "unresolved",
+   "census_target": "toroidal_ion_velocity_at_plasma_boundary",
+   "target": "toroidal_ion_velocity_at_plasma_boundary",
+   "tombstones": [],
+   "action": "keep",
+   "target_state": {
+    "id": "toroidal_ion_velocity_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "toroidal_iron_velocity_at_plasma_boundary",
+   "unit": "m.s^-1",
+   "paths": [
+    "summary/local/separatrix/velocity_phi/iron/value"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "toroidal_iron_velocity_at_separatrix",
+   "target": "toroidal_iron_velocity_at_plasma_boundary",
+   "tombstones": [],
+   "action": "keep",
+   "target_state": {
+    "id": "toroidal_iron_velocity_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "toroidal_krypton_velocity_at_plasma_boundary",
+   "unit": "m.s^-1",
+   "paths": [
+    "summary/local/separatrix/velocity_phi/krypton/value"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "toroidal_krypton_velocity_at_plasma_boundary",
+   "target": "toroidal_krypton_velocity_at_plasma_boundary",
+   "tombstones": [
+    "toroidal_flux_surface_averaged_krypton_velocity_at_plasma_boundary",
+    "toroidal_krypton_velocity_at_separatrix"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "toroidal_krypton_velocity_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": [
+     "toroidal_flux_surface_averaged_krypton_velocity_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "toroidal_magnetic_flux_at_plasma_boundary",
+   "unit": "Wb",
+   "paths": [],
+   "census_locus": "equilibrium_boundary",
+   "locus": "unresolved",
+   "census_target": "toroidal_magnetic_flux_at_plasma_boundary",
+   "target": "toroidal_magnetic_flux_at_plasma_boundary",
+   "tombstones": [],
+   "action": "keep",
+   "target_state": {
+    "id": "toroidal_magnetic_flux_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "toroidal_neon_velocity_at_plasma_boundary",
+   "unit": "m.s^-1",
+   "paths": [
+    "summary/local/separatrix/velocity_phi/neon/value"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "toroidal_neon_velocity_at_separatrix",
+   "target": "toroidal_neon_velocity_at_plasma_boundary",
+   "tombstones": [],
+   "action": "keep",
+   "target_state": {
+    "id": "toroidal_neon_velocity_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "toroidal_nitrogen_velocity_at_plasma_boundary",
+   "unit": "m.s^-1",
+   "paths": [
+    "summary/local/separatrix/velocity_phi/nitrogen/value"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "toroidal_nitrogen_velocity_at_separatrix",
+   "target": "toroidal_nitrogen_velocity_at_plasma_boundary",
+   "tombstones": [
+    "toroidal_flux_surface_averaged_nitrogen_velocity_at_plasma_boundary"
+   ],
+   "action": "keep",
+   "target_state": {
+    "id": "toroidal_nitrogen_velocity_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": [
+     "toroidal_flux_surface_averaged_nitrogen_velocity_at_plasma_boundary"
+    ]
+   }
+  },
+  {
+   "id": "toroidal_oxygen_velocity_at_plasma_boundary",
+   "unit": "m.s^-1",
+   "paths": [
+    "summary/local/separatrix/velocity_phi/oxygen/value"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "toroidal_oxygen_velocity_at_separatrix",
+   "target": "toroidal_oxygen_velocity_at_plasma_boundary",
+   "tombstones": [],
+   "action": "keep",
+   "target_state": {
+    "id": "toroidal_oxygen_velocity_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "toroidal_tungsten_velocity_at_plasma_boundary",
+   "unit": "m.s^-1",
+   "paths": [
+    "summary/local/separatrix/velocity_phi/tungsten/value"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "toroidal_tungsten_velocity_at_separatrix",
+   "target": "toroidal_tungsten_velocity_at_plasma_boundary",
+   "tombstones": [],
+   "action": "keep",
+   "target_state": {
+    "id": "toroidal_tungsten_velocity_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "toroidal_xenon_velocity_at_plasma_boundary",
+   "unit": "m.s^-1",
+   "paths": [
+    "summary/local/separatrix/velocity_phi/xenon/value"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "toroidal_xenon_velocity_at_separatrix",
+   "target": "toroidal_xenon_velocity_at_plasma_boundary",
+   "tombstones": [],
+   "action": "keep",
+   "target_state": {
+    "id": "toroidal_xenon_velocity_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "total_ion_density_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix/n_i_total/value"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "total_ion_density_at_separatrix",
+   "target": "total_ion_density_at_plasma_boundary",
+   "tombstones": [],
+   "action": "keep",
+   "target_state": {
+    "id": "total_ion_density_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "total_power_at_separatrix",
+   "unit": "W",
+   "paths": [],
+   "census_locus": "unresolved",
+   "locus": "unresolved",
+   "census_target": "total_power_at_separatrix",
+   "target": "total_power_at_separatrix",
+   "tombstones": [],
+   "action": "keep",
+   "target_state": {
+    "id": "total_power_at_separatrix",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "tritium_density_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix/n_i/tritium/value"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "tritium_density_at_separatrix",
+   "target": "tritium_density_at_plasma_boundary",
+   "tombstones": [],
+   "action": "keep",
+   "target_state": {
+    "id": "tritium_density_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": []
+   }
+  },
+  {
+   "id": "xenon_density_at_plasma_boundary",
+   "unit": "m^-3",
+   "paths": [
+    "summary/local/separatrix/n_i/xenon/value"
+   ],
+   "census_locus": "separatrix",
+   "locus": "separatrix",
+   "census_target": "xenon_density_at_separatrix",
+   "target": "xenon_density_at_plasma_boundary",
+   "tombstones": [],
+   "action": "keep",
+   "target_state": {
+    "id": "xenon_density_at_plasma_boundary",
+    "stage": "accepted",
+    "status": "draft",
+    "successors": [
+     "flux_surface_averaged_xenon_density_at_plasma_boundary"
+    ]
+   }
+  }
+ ]
+}
