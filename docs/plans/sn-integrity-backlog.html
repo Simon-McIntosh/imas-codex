@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="354">
+<meta name="plan-version" content="355">
 <meta name="plan-modified" content="2026-11-07">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -1055,6 +1055,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s45" data-id="c-run-r-20261107T141527694860-sib-dd-completion-estimate" data-who="reckon-build" data-when="2026-11-07T15:01:34.770Z">
     <div class="r-comment-body"><p>estimated the remaining DD workload at 1,308 extraction candidates and 1,397 sources parked in the compose queue, of which the 1,240 extracted DD sources split 1,185 eligible leaves, 37 signal-STRUCTURE, 18 structure and 0 error paths; measured per-phase cost over the last 30 days is USD 0.0225/name generate_docs, USD 0.0257 review_name, USD 0.0479 review_docs, USD 0.1096 refine and USD 0 compose (free local seat); the whole-remaining-DD projection is 11,698 calls / USD 664 under the catalog reuse yield (0.4726 names/source) to 23,153 calls / USD 1,317 under the 90-day yield (0.9374), or 18.5-36.6 h at the 90-day 633 calls per productive hour</p></div>
+</div>
+<div class="r-comment" data-section="s45" data-id="c-run-r-20261107T150508424018-review-of-sib-dd-completion-estimate-b1191a9a54f6" data-who="reckon-build" data-when="2026-11-07T16:05:11.284Z">
+    <div class="r-comment-body"><p>reviewed r-20261107T141527694860-sib-dd-completion-estimate at head b1191a9a5 against base 2c9ea5cb, scoring goal_fidelity 10, evidence 14, scope_discipline 20, durability 6, fit 14, reuse 5, with one blocking finding (spend() multiplies the phase call count by the sum of each configured seat&#x27;s per-call cost, overstating review_name and review_docs roughly 3-4x and the USD 664 headline about 2.4x) and four non-blocking findings and 0 added failures</p></div>
 </div>
 <div class="r-comment" data-section="s46" data-id="c-run-r-20261029T083805766546-sib-retire-sourceless-drafts" data-who="reckon-build" data-when="2026-10-29T09:00:04.231Z">
     <div class="r-comment-body"><p>Retired 131 of 132 live exhausted drafts that carry no producing DD source through `apply_signed_manifest` (authority 133 rows, preview 131 admitted / 2 refused, manifest 2f8815c0…), one successor edge to `poloidal_angle_of_plasma_boundary_gap`; read-back lists 17 remaining sourceless live names — 16 non-exhausted recorded for the lead and 1 writer refusal — against a live population of 148 rather than the dispatch's 19 (113 exhausted records no source at all; `ion_pressure` and `beta` are derived parents).</p></div>
