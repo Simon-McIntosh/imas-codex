@@ -1,0 +1,66 @@
+{
+  "added_failure_count": 0,
+  "added_failure_derivation": "The reviewed run's manifest carries no baseline_suite and no after_suite arms: it is a read-only docs census whose gate is the -run.py exit status, recorded in census-gate.log's final line as EXIT=0. With no suite arms there are no failure ids to diff, so the added failure count is 0 by absence of arms rather than by measurement.",
+  "added_failure_ids": [],
+  "call_sites": "none",
+  "call_sites_note": "The change adds a docs/evidence fragment, its JSON and a standalone run script under docs/; no module under imas_codex/ or tests/ references them, so there is no production call site to check. The nearest owned code read for the reuse judgement was imas_codex/standard_names/review/consolidation.py (position suffixes), imas_codex/standard_names/coverage.py (separatrix pair gaps) and imas_codex/standard_names/harmonize.py (family drift), none of which owns a locus-to-suffix mapping.",
+  "completed_at": "2026-11-07T08:53:11.735Z",
+  "dispatched_at": "2026-11-07T08:42:51Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-locus-census-run.py",
+      "line": 482,
+      "severity": "blocking",
+      "text": "agrees is computed from sourced_live and named_live, both selected out of rows by the same predicates that built rows, so it is true for any non-empty census and can never fail; the HTML at run.py:721-741 then publishes census_live_count as the 'union of the two independent readings 98' while the two independent counts it records (87 and 94) can have a union of at most 94, so the declared negative control verifies nothing."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-locus-census-run.py",
+      "line": 383,
+      "severity": "blocking",
+      "text": "a rename whose target is a superseded tombstone is emitted as signed_rename with proposed_target set to that tombstone name (flux_surface_averaged_parallel_electric_field_at_separatrix, toroidal_deuterium_tritium_velocity_at_plasma_boundary, toroidal_helium_4_velocity_at_plasma_boundary, toroidal_krypton_velocity_at_plasma_boundary), contradicting the done_when's 'never targets a superseded tombstone' and leaving only a free-text collision note to tell a fresh composition from a revival."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-locus-census-run.py",
+      "line": 352,
+      "severity": "non-blocking",
+      "text": "the bare toroidal_tritium_velocity stub is emitted as supersede_onto_holder targeting toroidal_tritium_velocity_at_separatrix, but the node's own tritium block records existing null for that name, so the action claims a holder the graph does not have and the guard at run.py:394 only refuses a superseded holder, never an absent one."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-locus-census-run.py",
+      "line": 426,
+      "severity": "non-blocking",
+      "text": "the tombstone loop reads required, which is assigned only inside the live loop at run.py:314, so each tombstone's locus depends on the last live name examined and the loop raises NameError whenever there are no live names; the present run is masked because that last value happened to select no mixed locus."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-locus-census.json",
+      "line": 3,
+      "severity": "non-blocking",
+      "text": "the head commit regenerated this file and the HTML (generated_at 08:39:40) after editing render(), but census-gate.log's header names revision df1f9d2e5, so the delivered revision has no logged run of its own; the head diff touches only generated_at, which is what carries the count agreement."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "pass \u2014 two commits against 0a6996aa8, both inside the declared paths; the head commit changes render() only.",
+    "done_when": "fail \u2014 four proposed_target values are superseded tombstones, against the done_when's 'never targets a superseded tombstone'; the log ends EXIT=0.",
+    "goal": "pass \u2014 sib-separatrix-locus-census.json carries 98 live names across six loci plus a suffix_by_locus block and the tritium section.",
+    "manifest": "fail \u2014 read; its evidence_inputs present the 87/94/98 cross-check as independent corroboration the code does not compute.",
+    "write_paths": "pass \u2014 the three changed files are all declared write paths and the figures path was left unused."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: pass \u2014 the goal is a census of every live name tied to the separatrix or plasma-boundary loci with a one-suffix-per-locus mapping, and sib-separatrix-locus-census.json totals carry 98 live names with locus, unit, DD paths, chain and tombstones plus a six-entry suffix_by_locus block and the tritium section.\nVERDICT done_when: fail \u2014 done_when requires proposed actions that never target a superseded tombstone, and four rows in sib-separatrix-locus-census.json carry proposed_target equal to a superseded tombstone; census-gate.log does end EXIT=0.\nVERDICT write_paths: pass \u2014 the declared paths are the .html, .json, -run.py and the figures directory, and all three files in the diff are inside them while the figures path was left unused as the contract requires for a node naming no artifact.\nVERDICT manifest: fail \u2014 read; it records commits df1f9d2e5 and 03bb7cfff, the tests line and census-gate.log, but its evidence_inputs present the cross-check union 98 (87 and 94) as corroboration the code never computes.\nVERDICT diff: pass \u2014 read commit by commit against 0a6996aa8: df1f9d2e5 adds the 738-line script, 254 HTML lines and the 5365-line JSON, and 03bb7cfff changes 24 script lines in render(), the HTML, and one JSON line that is generated_at alone, so no count moved.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: sib-separatrix-locus-census.json carries 98 live rows across six loci and a suffix_by_locus block, so both halves of the goal are present, though two action classes are wrong.\nSCORE evidence: 9\nJUSTIFICATION evidence: sib-separatrix-locus-census-run.py:476-482 sets agrees by comparing two sets both derived from rows, so the gate cannot contradict the census it claims to check.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: all three changed files are declared write paths and the second commit stays inside them.\nSCORE durability: 5\nJUSTIFICATION durability: the only executable guard is the agrees flag at sib-separatrix-locus-census-run.py:482, true for any non-empty rows, so no regression in locus or action derivation would redden it.\nSCORE fit: 14\nJUSTIFICATION fit: the script follows the sibling evidence idiom of sib-source-loss-census-run.py:1074, but leaves suffix_ok (line 135), current (line 316) and occupant (line 369) unused and leaks required across loops at line 426.\nSCORE reuse: 17\nJUSTIFICATION reuse: no owner of a locus-to-suffix mapping exists; the nearest owned vocabulary is _POSITION_SUFFIXES at imas_codex/standard_names/review/consolidation.py:27, private and narrower, and the script uses the shared GraphClient rather than a second graph path.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-locus-census-run.py:482 blocking: agrees is computed from sourced_live and named_live, both selected out of rows by the same predicates that built rows, so it is true for any non-empty census and can never fail; the HTML at run.py:721-741 then publishes census_live_count as the \"union of the two independent readings 98\" while the two independent counts it records (87 and 94) can have a union of at most 94, so the declared negative control (\"the counts are cross-checked by an independent query\") verifies nothing.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-locus-census-run.py:383 blocking: a rename whose target is a superseded tombstone is emitted as signed_rename with proposed_target set to that tombstone name (flux_surface_averaged_parallel_electric_field_at_separatrix, toroidal_deuterium_tritium_velocity_at_plasma_boundary, toroidal_helium_4_velocity_at_plasma_boundary, toroidal_krypton_velocity_at_plasma_boundary), contradicting the done_when's \"never targets a superseded tombstone\" and leaving only a free-text collision note to tell a fresh composition from a revival.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-locus-census-run.py:352 non-blocking: the bare toroidal_tritium_velocity stub is emitted as supersede_onto_holder targeting toroidal_tritium_velocity_at_separatrix, but the node's own tritium block records existing null for that name, so the action claims a holder the graph does not have and the guard at run.py:394 only refuses a superseded holder, never an absent one.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-locus-census-run.py:426 non-blocking: the tombstone loop reads required, which is assigned only inside the live loop at run.py:314, so each tombstone's locus depends on the last live name examined and the loop raises NameError whenever there are no live names; the present run is masked because that last value happened to select no mixed locus.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-locus-census.json:3 non-blocking: the head commit regenerated this file and the HTML (generated_at 08:39:40) after editing render(), but census-gate.log's header names revision df1f9d2e5, so the delivered revision has no logged run of its own; the head diff touches only generated_at, which is what carries the count agreement.\n",
+  "review_run_id": "r-20261107T084110715474-review-of-sib-separatrix-locus-census-03bb7cfff8d9",
+  "reviewed_base_sha": "0a6996aa877126760b350e2619980edb8a45e90d",
+  "reviewed_head_sha": "03bb7cfff8d984fe54cf05dbef17794d9edbc96f",
+  "reviewed_run_id": "r-20261107T082155378735-sib-separatrix-locus-census",
+  "scores": {
+    "durability": 5,
+    "evidence": 9,
+    "fit": 14,
+    "goal_fidelity": 16,
+    "reuse": 17,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T08:57:20.042105+00:00",
+  "total": 80
+}
