@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="350">
+<meta name="plan-version" content="352">
 <meta name="plan-modified" content="2026-11-07">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -1109,6 +1109,12 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s47" data-id="c-close-s47" data-who="reckon-build" data-when="2026-11-07T10:45:00Z">
     <div class="r-comment-body"><p>§47 closed, spend USD 0.</p><ul><li>DD builds record IDS-level and array-of-structures renames as <code>RENAMED_TO</code> edges: <code>gyrokinetics/normalizing_quantities/r</code> to <code>gyrokinetics_local/...</code> and <code>ec_launchers/launcher/launching_position/r</code> to <code>ec_launchers/beam/...</code> (merge <code>b9c18fb85</code>, review 102). Its node gate went from 3 failed to 4 passed, and <code>tests/graph</code> added no failure id.</li><li>Marking a removed path's source stale now resolves the name it produced in the same statement. The binding moves to an unheld successor with matching units, or the name is superseded onto the successor's holder with a receipt and successor edge, or it is retired with a receipt. The dead-end revival guard reads the graph node's source type (merge <code>7aaddf9d3</code>, review 106). Four disposable-graph tests fail with the old stale-mark-only behaviour. <code>tests/standard_names</code> added no failure id.</li></ul><p>Follow-ons: the reconcile node did not record a <code>tests/graph</code> arm; its lifecycle write at <code>graph_source_bindings.py:2599-2607</code> still restates the owner's supersede fields; and the container-rename precedence in <code>build_dd.py:1633</code> lets the packaged map shadow the DD's own annotation.</p></div>
+</div>
+<div class="r-comment" data-section="s47" data-id="c-run-r-20261107T144924477366-review-of-sib-rename-record-precedence-851bc4478b99" data-who="reckon-build" data-when="2026-11-07T15:20:00.485Z">
+    <div class="r-comment-body"><p>Review of r-20261107T141528404307-sib-rename-record-precedence at 851bc4478 (base 2c9ea5cb): parsed, scores goal_fidelity 20 evidence 20 scope_discipline 19 durability 19 fit 20 reuse 20, added_failure_count 0, one non-blocking finding that the same edit also reverses the packaged-versus-container precedence on docstring authority alone.</p></div>
+</div>
+<div class="r-comment" data-section="s47" data-id="c-run-r-20261107T141528404307-sib-rename-record-precedence" data-who="reckon-build" data-when="2026-11-07T14:48:25.916Z">
+    <div class="r-comment-body"><p>collect_renamed_to_mappings now assigns the container renames and the DD&#x27;s change_nbc_previous_name annotations over the packaged path map instead of setdefault-ing into it, so precedence runs packaged &lt; container &lt; DD annotation and a stale packaged target can no longer shadow the DD&#x27;s own rename; head arm of tests/graph/test_dd_rename_precedence.py is 5 passed, base arm 3 failed, and tests/graph shows the same 3 failure ids in both arms.</p></div>
 </div>
 <div class="r-comment" data-section="s48" data-id="c-run-r-20261106T231022458778-review-of-sib-rebind-removed-path-names-645423c1a56d" data-who="reckon-build" data-when="2026-11-06T23:23:43.847Z">
     <div class="r-comment-body"><p>Independent review of r-20261106T222618682261-sib-rebind-removed-path-names at 645423c1a scores 92/120 across the six dimensions with one blocking finding: the readback gate asserts zero successor edges where §48's done_when requires one, so the superseded name's measured state does not meet the node's stated measure.</p></div>
