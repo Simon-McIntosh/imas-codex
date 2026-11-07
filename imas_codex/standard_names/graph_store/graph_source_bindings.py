@@ -884,7 +884,6 @@ def _pending_projection_stub_predicate(
     source: str,
     target: str,
     *,
-    source_type: str | None = None,
     unit: str | None = None,
     attachment_error: str = "null",
     pending_stage: str = "'pending'",
@@ -892,17 +891,17 @@ def _pending_projection_stub_predicate(
 ) -> str:
     """Build the shared eligibility guard for adopting a DD projection stub.
 
-    Arguments are trusted Cypher expressions. A claimed source supplies its
-    pinned unit; other callers read the unit from the projecting DD path,
-    including its canonical unit edge when the scalar property is absent.
+    Arguments are trusted Cypher expressions. The source node owns its type;
+    fenced worker outcomes need not repeat that metadata. A claimed source
+    supplies its pinned unit; other callers read the unit from the projecting
+    DD path, including its canonical unit edge when the scalar is absent.
     """
-    source_type = source_type or f"{source}.source_type"
     unit = unit or (
         "coalesce(projected.unit, head([(projected)-[:HAS_UNIT]->"
         "(projection_unit:Unit) | projection_unit.id]))"
     )
     return f"""
-        {source_type} = 'dd'
+        {source}.source_type = 'dd'
         AND {target}.name_stage = {pending_stage}
         AND {target}.reservation_source_id IS NULL
         AND {attachment_error} IS NULL
@@ -1174,7 +1173,6 @@ def _lock_claimed_name_bindings(
         _pending_projection_stub_predicate(
             "sns",
             "target",
-            source_type="b.source_type",
             unit="b.unit",
             attachment_error="b.attachment_error",
             pending_stage="$pending_stage",
