@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="347">
+<meta name="plan-version" content="348">
 <meta name="plan-modified" content="2026-11-07">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -1139,6 +1139,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s49" data-id="c-s49-lead-ruling-convention" data-who="reckon-build" data-when="2026-11-07T10:45:00Z">
     <div class="r-comment-body"><p>Lead ruling, 2026-11-07, on the census <code>sib-separatrix-locus-census</code> (merge <code>f1a5d6d10</code>; 98 live names, 105 tombstones): “plasma_boundary + prefix”.</p><ul><li>A value at the separatrix (<code>summary/local/separatrix</code>, <code>summary/pedestal_fits/*/separatrix</code>) is named <code>X_at_plasma_boundary</code>.</li><li>A separatrix average (<code>summary/local/separatrix_average</code>) is named <code>flux_surface_averaged_X_at_plasma_boundary</code>.</li></ul><p>This matches the catalog majority on both axes: 82 accepted <code>_at_plasma_boundary</code> against 9 <code>_at_separatrix</code>, and 51 prefix <code>flux_surface_averaged_</code> against 11 infix. The census proposal of 77 renames toward <code>_at_separatrix</code> is declined.</p><p>The apply node renames each off-convention live name through the signed rename path. Where the target is a superseded tombstone, it supersedes onto the live holder of that tombstone's lineage, or reports the case, and never revives a tombstone. It retires the bare <code>toroidal_tritium_velocity</code> stub with a signed receipt and composes <code>toroidal_tritium_velocity_at_pedestal_top</code> and <code>toroidal_tritium_velocity_at_plasma_boundary</code>. The cap is USD 2.</p></div>
+</div>
+<div class="r-comment" data-section="s49" data-id="c-run-r-20261107T112153959080-sib-separatrix-suffix-apply" data-who="reckon-build" data-when="2026-11-07T11:41:34.428Z">
+    <div class="r-comment-body"><p>Applied the ruled separatrix suffix convention through the sanctioned rename writer — 4 signed renames landed (each receipt verifying its producing source), 11 names whose ruled target is a superseded tombstone reported with their lineage and none revived, 1 name blocked by a live accepted spelling that this apply itself turned into a tombstone; live read-back shows 86 of 98 census names conforming; the tritium retire-and-compose is blocked on a lineage conflict and needs a ruling.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261012T162346807302-review-of-sib-row-census" data-who="reckon-build" data-when="2026-10-12T16:39:58.712Z">
     <div class="r-comment-body"><p>reviewed r-20261012T145528571333-sib-row-census at a7a70db00 against c7b4c626e; total 93/120 (goal_fidelity 15, evidence 13, scope_discipline 19, durability 11, fit 15, reuse 20); two blocking findings — the landing record's verdict tallies and the manifest's row-count both disagree with the 38 rows the census file holds.</p></div>

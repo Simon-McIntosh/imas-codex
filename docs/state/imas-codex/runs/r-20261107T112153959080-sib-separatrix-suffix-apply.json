@@ -1,0 +1,406 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "fa9760664aa2fd78c98d4e4b3607dbe873b585af",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 6404587,
+      "input_tokens_cumulative": 6404587,
+      "output_tokens": 36003,
+      "output_tokens_cumulative": 36003,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 2664,
+    "files": 3,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "sample_ids_data",
+        "path": "tests/clusters/test_extractor.py"
+      },
+      "run_function": {
+        "line": 158,
+        "name": "build_map",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-suffix-apply-run.py"
+      },
+      "window_line": 180
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "__init__",
+        "path": "tests/graph/test_refresh_physics_domains.py"
+      },
+      "run_function": {
+        "line": 158,
+        "name": "build_map",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-suffix-apply-run.py"
+      },
+      "window_line": 180
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "f03d5ec87d7d605585eb369b39a716eee694a77f"
+  ],
+  "completed_at": "2026-11-07T11:41:34.428Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-11-07T11:23:14Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.919722678343368,
+    "plan": "sn-integrity-backlog",
+    "reason": "gate-not-passing",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-11-07T12:21:55.482621+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-11-07T11:21:55Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 1,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 5,
+    "headroom": 6,
+    "mean_context": 106667,
+    "observed_at": "2026-11-07T11:22:00Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 1,
+      "aggregate_tokens_per_second": 507.593,
+      "detail": "",
+      "mean_tokens_per_second": 79.311,
+      "observed_at": "2026-11-07T11:22:00Z",
+      "runs": 6.4,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-07T11:41:34.428Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T112153959080-sib-separatrix-suffix-apply/manifest.md",
+  "member": "disposable-r-20261107T112153959080-sib-separatrix-suffix-apply",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "sib-separatrix-suffix-apply",
+  "node_definition": {
+    "after": [],
+    "anchor_paths": [],
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "elevated",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1259,
+          "cached_input_tokens": 462490,
+          "input_tokens": 463751,
+          "output_tokens": 62,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 463813,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+      "session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea"
+    },
+    "done_when": "docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-suffix-apply.html, docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-suffix-apply-run.py and docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-suffix-apply-authority.json hold the committed authority, preview, receipts and live read-back: every live name sourced from the DD local separatrix locus or a pedestal-fit separatrix value ends _at_plasma_boundary, and every live name sourced from the DD separatrix-average locus takes the flux_surface_averaged_ prefix and ends _at_plasma_boundary, per comment c-s49-lead-ruling-convention; no superseded tombstone is revived (each tombstone-target case superseded onto the live holder or listed as unresolved with its chain); the bare toroidal_tritium_velocity is retired with a receipt and toroidal_tritium_velocity_at_pedestal_top and toroidal_tritium_velocity_at_plasma_boundary are composed with producing sources; every renamed name keeps its producing sources; spend at most USD 2.00 selected by the run's own id; runner log ends in EXIT=",
+    "estimated_hours": null,
+    "goal": "Apply the ruled separatrix name convention through signed renames and supersedes",
+    "id": "sib-separatrix-suffix-apply",
+    "images": [],
+    "inputs": [
+      "docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-locus-census.json"
+    ],
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-11-07T11:21:55Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 1,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 5,
+      "headroom": 6,
+      "mean_context": 106667,
+      "observed_at": "2026-11-07T11:22:00Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 1,
+        "aggregate_tokens_per_second": 507.593,
+        "detail": "",
+        "mean_tokens_per_second": 79.311,
+        "observed_at": "2026-11-07T11:22:00Z",
+        "runs": 6.4,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T112153959080-sib-separatrix-suffix-apply/manifest.md",
+    "negative_control": "none: one-time signed live operation; the signed preview before each apply and the before-state census (merge f1a5d6d10) are the control",
+    "plan": "sn-integrity-backlog",
+    "regenerate_paths": [],
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§49",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-suffix-apply.html",
+      "docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-suffix-apply-run.py",
+      "docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-suffix-apply-authority.json",
+      "docs/figures/sn-integrity-backlog/sib-separatrix-suffix-apply"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 3338394.0,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "sib-separatrix-suffix-apply",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-11-07T11:22:47.693070+00:00",
+    "score": 0.8125,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "applies the lead's ruling recorded as c-s49-lead-ruling-convention; local lane because codex is on a budget hold",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.502,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {}
+  },
+  "plan": "sn-integrity-backlog",
+  "plan_impl_at_dispatch": 0.919722678343368,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "f03d5ec87d7d605585eb369b39a716eee694a77f",
+  "resume_waiver": null,
+  "review": null,
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261107T112153959080-sib-separatrix-suffix-apply",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§49",
+  "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+  "session_harness": "claude",
+  "session_id": "3e0cd2bc-f2d3-413c-bc66-1643f1d2bdcc",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 6404587,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 1076.504,
+    "generated_tokens": 36003,
+    "generation_seconds": 864.938,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 64.7,
+    "machine_seconds": 211.566,
+    "peak_input_tokens": 148911,
+    "tokens_per_second": 41.62,
+    "wall_tokens_per_second": 33.44
+  },
+  "time_budget": "60m",
+  "tool_steps": 74.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 1100,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-07T11:41:40Z",
+    "last_record_type": "result",
+    "launched_at": "2026-11-07T11:23:21Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [],
+    "run_id": "r-20261107T112153959080-sib-separatrix-suffix-apply",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 5550,
+    "worker_pid": 2919361
+  },
+  "worker_seconds": 1028,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
