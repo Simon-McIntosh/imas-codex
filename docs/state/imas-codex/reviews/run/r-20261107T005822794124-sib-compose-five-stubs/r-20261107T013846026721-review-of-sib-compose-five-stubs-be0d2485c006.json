@@ -1,0 +1,63 @@
+{
+  "added_failure_basis": "The reviewed run records no baseline_suite/after_suite arms: it is an evidence node whose declared gate is a live compose, not a test suite. The landed diff is docs-only and independently checked with `git diff --name-status 114b727ea14c79358c494bc6513e2c5007076871 be0d2485c006072005299f7c09c6482af5d83dc7`, which returns two added files under docs/evidence/fragments/sn-integrity-backlog/ and no test or product source, so no test outcome can be added or broken by this change. Zero is asserted from that file set rather than read from an arm.",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 1,
+  "call_sites": [
+    "reckon/evidence.py:570 compose_landed_record"
+  ],
+  "completed_at": "2026-11-07T01:49:40.381Z",
+  "dispatched_at": "2026-11-07T01:40:58Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-compose-five-stubs-run.py",
+      "line": 240,
+      "severity": "non-blocking",
+      "text": "compose() duplicates the capability already owned by docs/evidence/fragments/sn-integrity-backlog/sib-compose-stranded-stubs-run.py:312 \u2014 the same ten-element `uv run --no-sync imas-codex sn run --focus ... --names-only --cost-limit ... --time ...` vector, the same log header and EXIT footer \u2014 and ROSTER_NAMES/ROSTER_PATHS are a strict subset of that sibling's roster (5 of 7 names, 7 of 9 paths), landed before this node at base 114b727ea; the new file adds run selection and name-change listing on top, so it extends the sibling rather than wrapping it, but two runners in one directory carry one capability where a parameterised roster would have served both."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-compose-five-stubs.html",
+      "line": 30,
+      "severity": "non-blocking",
+      "text": "the before-state sentence attributes the `candidate \"...\" has non-bindable name_stage \"pending\"` refusal to all seven sources, but logs/before-state.json records that last_error on only three of the seven (neon value, detector radius, both vorticity paths); the spectrometer phi path and both tritium paths store only `compose claim-attempt cap reached`, so the prose claims more than the retained evidence holds."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-compose-five-stubs.html",
+      "line": 51,
+      "severity": "non-blocking",
+      "text": "the citation `imas_codex/cli/sn.py:2702` for 'the --focus branch has already returned' lands on the `override_edits=` keyword argument inside that branch's call; the branch's return is at sn.py:2709 and the --reset-to handling it skips begins at sn.py:2711, so the claim is right and the pointer is seven lines short."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-compose-five-stubs.html",
+      "line": 65,
+      "severity": "non-blocking",
+      "text": "the done-when asks each adopted stub to carry a producing source, a description and a unit; logs/readback.json holds no description property on any of the three adopted names, and the table records that absence rather than a description, so one clause of the stated measure is unmet by the pipeline at drafted stage even though it is honestly reported."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "the fragment is read at runtime by reckon/evidence.py:570 compose_landed_record, which composes docs/evidence/fragments/<plan>/*.html into the plan's cumulative evidence record; the runner is invoked by hand and has no importing call site.",
+    "diff": "read all four commits commit by commit against base 114b727ea; 496 inserted lines across two files \u2014 the 346-line runner and the 150-line fragment, with three later corrections in one- or nine-line commits \u2014 all inside the declared scope.",
+    "done_when": "the done-when (prompt.txt:98-100) asks for a dry run, an apply under a USD 2.00 cap with its log path quoted, a per-stub live read-back, spend selected by the run's own id, no name outside the five changed, a sourceless census through find_sourceless_live_names, and a runner log ending in EXIT=; the fragment records each, and I checked dry-run.log, compose-apply-3.log, before-state.json and readback.json against it.",
+    "goal": "the goal is to compose the five pending projection stubs through one scoped sn run now that adoption reads the graph source type; docs/evidence/fragments/sn-integrity-backlog/sib-compose-five-stubs.html:57-82 records that run's per-stub read-back \u2014 three adopted, one composed under the generated successor name, one still refused.",
+    "manifest": "read the reviewed run's manifest.md; it states the runner gate command, four log paths on disk, the per-stub outcome and the 11-of-2814 to 7-of-2814 census, and every figure in it reconciles with the log or JSON file I opened.",
+    "write_paths": "the declared paths are the fragment html, the runner .py and a figures directory; `git diff --name-status 114b727ea14c79358c494bc6513e2c5007076871 be0d2485c006072005299f7c09c6482af5d83dc7` returns only the html and the .py, and each of the four commits stays inside them."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to compose the five pending projection stubs through one scoped sn run now that adoption reads the graph's source type; docs/evidence/fragments/sn-integrity-backlog/sib-compose-five-stubs.html:57-82 records that run's per-stub read-back \u2014 three adopted, one composed under the generated successor name, one still refused.\nVERDICT done_when: the done-when (prompt.txt:98-100) asks for a dry run, an apply under a USD 2.00 cap with its log path quoted, a per-stub live read-back, spend selected by the run's own id, no name outside the five changed, a sourceless census through find_sourceless_live_names, and a runner log ending in EXIT=; the fragment records each, and I checked dry-run.log, compose-apply-3.log, before-state.json and readback.json against it.\nVERDICT write_paths: the declared paths are the fragment html, the runner .py and a figures directory; git diff --name-status 114b727ea..be0d2485c returns only the html and the .py, and each of the four commits stays inside them.\nVERDICT manifest: read the reviewed run's manifest.md; it states the runner gate command, four log paths on disk, the per-stub outcome and the 11-of-2814 to 7-of-2814 census, and every figure in it reconciles with the log or JSON file I opened.\nVERDICT diff: read all four commits commit by commit against base 114b727ea; 496 inserted lines across two files \u2014 the 346-line runner and the 150-line fragment, with three later corrections in one- or nine-line commits \u2014 all inside the declared scope.\nCALL_SITES: reckon/evidence.py:570 compose_landed_record\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-integrity-backlog/sib-compose-five-stubs.html:57-82 reports three of five stubs drafted with their producing source and unit, the fourth superseded onto the pipeline's own successor name, and the fifth refused with the raising frames, so the goal is met as far as the sanctioned pipeline allows and the shortfall is reported rather than claimed.\nSCORE evidence: 16\nJUSTIFICATION evidence: the read-back in logs/readback.json selects the compose row by id and lists every StandardNameChange since the cut-off, which both confirmed the successor change outside the five and the 11-to-7 sourceless fall, so the instrument could have shown a false claim and did not.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-status 114b727ea..be0d2485c carries only the two declared paths, and the one out-of-roster name change is reported under outside_scope in manifest.md:18 rather than worked on.\nSCORE durability: 10\nJUSTIFICATION durability: no assertion was added by this docs-only diff, and the numbers it states live in run-directory logs rather than in a checked artefact, so only the committed runner at sib-compose-five-stubs-run.py:146 can re-derive them, and only against a live graph whose state has moved on.\nSCORE fit: 18\nJUSTIFICATION fit: the fragment follows the sibling fragment idiom of docs/evidence/fragments/sn-integrity-backlog/sib-compose-remaining-stubs-fix.html and every element id at sib-compose-five-stubs.html:1-131 begins with the node id, with no plan, ticket or author reference in either file.\nSCORE reuse: 10\nJUSTIFICATION reuse: sib-compose-five-stubs-run.py:109 imports find_sourceless_live_names from its owner imas_codex/standard_names/source_invariant.py:145 rather than restating it, but sib-compose-five-stubs-run.py:240 duplicates sib-compose-stranded-stubs-run.py:312's compose invocation and its roster is a subset of that sibling's.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-compose-five-stubs-run.py:240 non-blocking: compose() duplicates the capability owned by docs/evidence/fragments/sn-integrity-backlog/sib-compose-stranded-stubs-run.py:312 and the roster is a strict subset of that sibling's, so one parameterised runner would have served both nodes.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-compose-five-stubs.html:30 non-blocking: the before-state sentence attributes the non-bindable name_stage refusal to all seven sources, but logs/before-state.json records it on three of the seven and only the claim-attempt cap on the other four.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-compose-five-stubs.html:51 non-blocking: the sn.py:2702 citation lands on a keyword argument; the focus branch returns at sn.py:2709 and the --reset-to handling it skips begins at sn.py:2711.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-compose-five-stubs.html:65 non-blocking: the done-when asks for a description on each adopted stub and none of the three adopted names carries one, which the table reports but which leaves that clause of the measure unmet.",
+  "review_run_id": "r-20261107T013846026721-review-of-sib-compose-five-stubs-be0d2485c006",
+  "reviewed_base_sha": "114b727ea14c79358c494bc6513e2c5007076871",
+  "reviewed_head_sha": "be0d2485c006072005299f7c09c6482af5d83dc7",
+  "reviewed_run_id": "r-20261107T005822794124-sib-compose-five-stubs",
+  "scores": {
+    "durability": 10,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 10,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T01:53:31.430774+00:00",
+  "total": 91
+}
