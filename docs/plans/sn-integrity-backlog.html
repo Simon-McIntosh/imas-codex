@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="352">
+<meta name="plan-version" content="353">
 <meta name="plan-modified" content="2026-11-07">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -1050,6 +1050,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 <div class="r-comment" data-section="s45" data-id="c-run-r-20261107T005822794124-sib-compose-five-stubs" data-who="reckon-build" data-when="2026-11-07T01:35:29.247Z">
     <div class="r-comment-body"><p>scoped compose of the five pending projection stubs over their seven DD paths: three adopted with a producing source and matching unit (line_averaged_neon_density, radius_of_soft_xray_detector, ratio_of_diamagnetic_vorticity_to_major_radius), one composed under the generated successor toroidal_coordinate_of_spectrometer_channel, one still refused by graph_supersession.py:215-217 routing one predecessor to two successors (toroidal_tritium_velocity); sourceless live drafts 11 -&gt; 7 of 2814 live names; spend $0.000128 of $2.00 from run 99655491-34f1-4733-bfd2-3dfe26e2f7c3</p></div>
 </div>
+<div class="r-comment" data-section="s45" data-id="c-run-r-20261107T151449773713-review-of-sib-dd-completion-estimate-b1191a9a54f6" data-who="reckon-build" data-when="2026-11-07T15:38:30.146Z">
+    <div class="r-comment-body"><p>reviewed r-20261107T141527694860-sib-dd-completion-estimate at head b1191a9a5 against base 2c9ea5cb, scoring goal_fidelity 17, evidence 17, scope_discipline 20, durability 8, fit 15, reuse 5, with five non-blocking findings and 0 added failures</p></div>
+</div>
 <div class="r-comment" data-section="s46" data-id="c-run-r-20261029T083805766546-sib-retire-sourceless-drafts" data-who="reckon-build" data-when="2026-10-29T09:00:04.231Z">
     <div class="r-comment-body"><p>Retired 131 of 132 live exhausted drafts that carry no producing DD source through `apply_signed_manifest` (authority 133 rows, preview 131 admitted / 2 refused, manifest 2f8815c0…), one successor edge to `poloidal_angle_of_plasma_boundary_gap`; read-back lists 17 remaining sourceless live names — 16 non-exhausted recorded for the lead and 1 writer refusal — against a live population of 148 rather than the dispatch's 19 (113 exhausted records no source at all; `ion_pressure` and `beta` are derived parents).</p></div>
 </div>
@@ -1114,7 +1117,7 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
     <div class="r-comment-body"><p>Review of r-20261107T141528404307-sib-rename-record-precedence at 851bc4478 (base 2c9ea5cb): parsed, scores goal_fidelity 20 evidence 20 scope_discipline 19 durability 19 fit 20 reuse 20, added_failure_count 0, one non-blocking finding that the same edit also reverses the packaged-versus-container precedence on docstring authority alone.</p></div>
 </div>
 <div class="r-comment" data-section="s47" data-id="c-run-r-20261107T141528404307-sib-rename-record-precedence" data-who="reckon-build" data-when="2026-11-07T14:48:25.916Z">
-    <div class="r-comment-body"><p>collect_renamed_to_mappings now assigns the container renames and the DD&#x27;s change_nbc_previous_name annotations over the packaged path map instead of setdefault-ing into it, so precedence runs packaged &lt; container &lt; DD annotation and a stale packaged target can no longer shadow the DD&#x27;s own rename; head arm of tests/graph/test_dd_rename_precedence.py is 5 passed, base arm 3 failed, and tests/graph shows the same 3 failure ids in both arms.</p></div>
+    <div class="r-comment-body"><p>collect_renamed_to_mappings now assigns the container renames and the DD's change_nbc_previous_name annotations over the packaged path map instead of setdefault-ing into it, so precedence runs packaged &lt; container &lt; DD annotation and a stale packaged target can no longer shadow the DD's own rename; head arm of tests/graph/test_dd_rename_precedence.py is 5 passed, base arm 3 failed, and tests/graph shows the same 3 failure ids in both arms.</p></div>
 </div>
 <div class="r-comment" data-section="s48" data-id="c-run-r-20261106T231022458778-review-of-sib-rebind-removed-path-names-645423c1a56d" data-who="reckon-build" data-when="2026-11-06T23:23:43.847Z">
     <div class="r-comment-body"><p>Independent review of r-20261106T222618682261-sib-rebind-removed-path-names at 645423c1a scores 92/120 across the six dimensions with one blocking finding: the readback gate asserts zero successor edges where §48's done_when requires one, so the superseded name's measured state does not meet the node's stated measure.</p></div>

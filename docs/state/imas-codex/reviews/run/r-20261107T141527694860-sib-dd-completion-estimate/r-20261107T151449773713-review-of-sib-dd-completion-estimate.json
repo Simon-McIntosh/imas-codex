@@ -1,0 +1,110 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_note": "No production call site exists: the three landed paths are a docs evidence fragment, its data JSON and a standalone script; grep over imas_codex/ for sib-dd-completion-estimate returns nothing.",
+  "call_sites": [],
+  "completed_at": "",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "read-only estimate whose runner is evidence, not product code; its figures fed one lead decision (sol docs, USD 350 cap) and nothing reuses the runner",
+      "recorded_at": "2026-11-07T15:43:54.048227+00:00"
+    },
+    "reuse": {
+      "kind": "exempted",
+      "reason": "read-only estimate whose runner is evidence, not product code; its figures fed one lead decision (sol docs, USD 350 cap) and nothing reuses the runner",
+      "recorded_at": "2026-11-07T15:44:00.117637+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-07T14:18:48Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-dd-completion-estimate.html",
+      "id": "f281e1c491e",
+      "line": 21,
+      "severity": "non-blocking",
+      "text": "The 90-day measured table renders two different phases under the same label 'refine' (600 calls at USD 83.29 and 1608 at USD 150.08; the JSON keys are refine_name and refine_docs), so a reader cannot tell which row is which, while the neighbouring refine_name+fanout row is left unmapped and inconsistently labelled."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-dd-completion-estimate-run.py",
+      "id": "fec60a59921",
+      "line": 317,
+      "severity": "non-blocking",
+      "text": "spend() multiplies each span phase's cost_per_call by the whole phase's call count, so if the configured refine seat had been observed in more than one of refine_name/refine_docs/refine_name+fanout the refine spend would be multiplied once per span; today gpt-6-luna appears only in refine_docs, which is why the figure is not already wrong."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-dd-completion-estimate.html",
+      "id": "f455085e9e0",
+      "line": 15,
+      "severity": "non-blocking",
+      "text": "The text states compose is the only phase whose call count 'comes from the queue directly', but the 53 batches are computed from the 1308 extraction candidates while the dry run's generate_name queue holds 1397 pending (56 batches), so the wording and the number disagree and compose is understated by three calls."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-dd-completion-estimate.html",
+      "id": "f5090392171",
+      "line": 25,
+      "severity": "non-blocking",
+      "text": "The refine estimate is USD 23.56 against 6827 calls, 58 percent of all planned calls, priced from gpt-6-luna's seven observed 90-day refine_docs calls; the caveats list does not say that the largest call block carries the thinnest price sample, so a reader takes the narrowest confidence band for the widest one."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T141527694860-sib-dd-completion-estimate/manifest.md",
+      "id": "f610229d2f5",
+      "line": 13,
+      "severity": "non-blocking",
+      "text": "negative_control_log names logs/estimate-gate.log, which is a green EXIT=0 gate run, while the node's declared negative control is 'none: read-only estimate'; populated with a passing log rather than omitted, the field names a log no admission rule can read as a red control and may be refused at promotion."
+    }
+  ],
+  "justifications": {
+    "durability": "No test is added and negative_control is declared none, so nothing in the repository fails if the estimator's filter, yield basis or cost arithmetic regresses; only the committed runner lets a later reader regenerate the figures.",
+    "evidence": "logs/estimate-gate.log records the exact command, tree and EXIT=0, and the head commit differs from the gate revision only in generated_at, so the figures are the ones the gate measured.",
+    "fit": "The fragment follows the sibling evidence fragments' shape with node-prefixed element ids, but sib-dd-completion-estimate.html:21 labels two different phases 'refine' (600 and 1608 calls).",
+    "goal_fidelity": "The fragment reports calls, spend and wall time from its own committed runner at sib-dd-completion-estimate.html:25, but the compose call count uses the 1308 extraction candidates while line 15 claims it 'comes from the queue directly', where the queue holds 1397.",
+    "reuse": "The runner imports SN_SOURCE_CATEGORIES from its owner but re-implements the DD extraction candidate filter that imas_codex/standard_names/graph_store/graph_claim_scope.py:186 owns, rather than extending it.",
+    "scope_discipline": "git diff --stat 2c9ea5cb..b1191a9a5 -- docs/ lists only the three declared fragment paths, and the tree is otherwise clean."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261107T151449773713-review-of-sib-dd-completion-estimate",
+  "reviewed_base_sha": "2c9ea5cbdb33687b268a19c204fe1aa55465bff5",
+  "reviewed_diff_stat": "3 files changed, 1034 insertions(+), 0 deletions(-)",
+  "reviewed_head_sha": "b1191a9a54f678413666d9c3c6e83a874da2cb7c",
+  "reviewed_run_id": "r-20261107T141527694860-sib-dd-completion-estimate",
+  "scores": {
+    "durability": 8,
+    "evidence": 17,
+    "fit": 15,
+    "goal_fidelity": 17,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "suite_arms": {
+    "after_suite": null,
+    "baseline_suite": null,
+    "note": "The reviewed run records no baseline_suite or after_suite arms; it is a docs/evidence node whose write paths carry no test file and whose declared negative control is 'none: read-only estimate'. added_failure_count is therefore 0 with no ids rather than an unmeasured count."
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T15:43:38.778456+00:00",
+  "total": 82,
+  "verdicts": [
+    {
+      "item": "goal",
+      "text": "The node goal is to estimate calls, spend and wall time to compose, document and review every remaining DD source; docs/evidence/fragments/sn-integrity-backlog/sib-dd-completion-estimate.html reports all three (11,698-23,153 calls, USD 664-1,317, 18.5-36.6 h) from figures in its committed JSON."
+    },
+    {
+      "item": "done_when",
+      "text": "The done_when names docs/evidence/fragments/sn-integrity-backlog/sib-dd-completion-estimate-run.py and a log ending in EXIT=; logs/estimate-gate.log carries the identical command line, revision eee64e7cd, tree path and EXIT=0, and every element it asserts is present in the output (population by status and stage, the 1185/18/0/37 extracted split, dry-run pools, 30-day per-phase cost, SNRun throughput)."
+    },
+    {
+      "item": "write_paths",
+      "text": "The declared scope is the .html, .json and -run.py fragment paths plus docs/figures/...; git diff --stat 2c9ea5cb..b1191a9a5 over docs/ shows exactly those three files, 1034 insertions, and no figure or plan file."
+    },
+    {
+      "item": "manifest",
+      "text": "Read; it records commits e57894503/eee64e7cd/b1191a9a5, the three changed paths, the gate command literally, and status complete, and its landing line states the headline figures that the fragment reproduces."
+    },
+    {
+      "item": "diff",
+      "text": "Read commit by commit: e57894503 adds the 474-line read-only runner plus the fragment and JSON, eee64e7cd and b1191a9a5 only re-emit the JSON, and the head-to-gate-revision diff is a single generated_at line, so the committed artifact and the gate log come from the same execution."
+    }
+  ]
+}
