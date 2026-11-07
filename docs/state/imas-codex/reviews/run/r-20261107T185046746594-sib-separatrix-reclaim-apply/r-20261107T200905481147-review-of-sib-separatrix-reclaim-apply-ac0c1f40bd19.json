@@ -1,0 +1,44 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-07T20:22:05.409Z",
+  "dispatched_at": "2026-11-07T20:10:58Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-reclaim-apply-run.py",
+      "line": 668,
+      "severity": "non-blocking",
+      "text": "the complete flag is computed from receipt-file presence, cycle freedom, tritium sources and cost, but never from the conformance figure computed at :647, so a later revert of one of the seven reclaims would leave the readback green while the published 93/98 is no longer checked"
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-reclaim-apply-run.py",
+      "line": 706,
+      "severity": "non-blocking",
+      "text": "the assertion that ended the recorded gate ran at revision 71f8533 (readback-cycles.log header line) while the delivered head is ac0c1f40b, whose run.py delta is a docstring only, so no arm reads the exact delivered revision"
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-reclaim-apply-run.py",
+      "line": 446,
+      "severity": "non-blocking",
+      "text": "compose_batch's returned name is never compared against the name_hint set at :443, so the redirect of the local separatrix source from toroidal_tritium_velocity_at_plasma_boundary to toroidal_tritium_velocity_at_separatrix passed every runner assertion and surfaced only in the later readback"
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: read the node goal (apply the separatrix convention through the sanctioned rename, reclaiming superseded spellings in the two ruled cases) against the landed authority; its applied_reclaims block holds seven closing_lineage reclaims written by edit.apply_edit, and the four different-concept names plus the tritium boundary spelling are reported rather than written.\nVERDICT done_when: the done_when requires toroidal_tritium_velocity_at_pedestal_top and toroidal_tritium_velocity_at_plasma_boundary to carry producing sources; readback.json records tritium_producing_sources [true, false] with the boundary name still superseded, so the measure is unmet and the run's own gate log (readback-cycles.log) ends EXIT=1 on exactly that outcome.\nVERDICT write_paths: git diff --numstat bbac3e3f7..ac0c1f40b lists only the three declared files (authority JSON, runner, evidence fragment); the fourth granted path, docs/figures/sn-integrity-backlog/sib-separatrix-reclaim-apply, is unused and no file outside the declaration was touched.\nVERDICT manifest: read; it carries status complete after a recorded coordinator repair from blocked, a tests line naming the readback command, seven gate logs, and empty baseline_suite and after_suite arms (the node runs no test suite).\nVERDICT diff: read all eight commits against base bbac3e3f79741ff48bf7ae1f401e0ec68fed701f; 6323 added lines, 0 deleted, across the evidence authority JSON, the one-off runner and the HTML fragment, with no product source or test file changed.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: the seven reclaims in docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-reclaim-apply-authority.json applied_reclaims carry closing_lineage receipts and preserved sources, and the five remaining names are reported per the plan's ruling rather than silently rewritten.\nSCORE evidence: 13\nJUSTIFICATION evidence: sib-separatrix-reclaim-apply-run.py:627-675 measures every clause of the done_when and the red result is recorded verbatim in readback-cycles.log, but the one named producing-source requirement for the boundary spelling is unmet and the gate ran at revision 71f8533 rather than the delivered head ac0c1f40b.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff (authority JSON, run.py, HTML fragment) is one of the three files declared in the manifest's orientation_write_paths at sib-separatrix-reclaim-apply.html:1, and no product code or test was touched.\nSCORE durability: 12\nJUSTIFICATION durability: sib-separatrix-reclaim-apply-run.py:668-675 gates the readback on receipt-file count, cycles, tritium sources and cost but never on the conformance figure computed at :647, so a later revert of any reclaim leaves the runner green.\nSCORE fit: 16\nJUSTIFICATION fit: the fragment at sib-separatrix-reclaim-apply.html:1 follows the sibling fragment convention (node-prefixed element ids) and the runner at run.py:24-40 matches the neighbouring sib-*-run.py idiom, with conventional subjects and bodies on all eight commits.\nSCORE reuse: 17\nJUSTIFICATION reuse: every mutation goes through its owner \u2014 edit.apply_edit at run.py:168, apply_signed_manifest at :382, retry_failed_sources at :401, set_source_compose_hint at :413 and compose_batch at :446 \u2014 and the only local definitions (write, snapshot, lineage) are read helpers with no public owner; chain_history.py:20 renders a different shape.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-reclaim-apply-run.py:668 non-blocking: the complete flag is computed from receipt-file presence, cycle freedom, tritium sources and cost, but never from the conformance figure computed at :647, so a later revert of one of the seven reclaims would leave the readback green and the published 93/98 unchanged-checked.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-reclaim-apply-run.py:706 non-blocking: the assertion that ended the recorded gate ran at revision 71f8533 (readback-cycles.log header line) while the delivered head is ac0c1f40b, whose run.py delta is a docstring only, so no arm reads the exact delivered revision.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-reclaim-apply-run.py:446 non-blocking: compose_batch's returned name is never compared against the name_hint set at :443, so the redirect of the local separatrix source from toroidal_tritium_velocity_at_plasma_boundary to toroidal_tritium_velocity_at_separatrix passed every runner assertion and surfaced only in the later readback.\n",
+  "review_run_id": "r-20261107T200905481147-review-of-sib-separatrix-reclaim-apply-ac0c1f40bd19",
+  "reviewed_base_sha": "bbac3e3f79741ff48bf7ae1f401e0ec68fed701f",
+  "reviewed_head_sha": "ac0c1f40bd195b7e8921970cfc8f0a64d32903c5",
+  "reviewed_run_id": "r-20261107T185046746594-sib-separatrix-reclaim-apply",
+  "scores": {
+    "durability": 12,
+    "evidence": 13,
+    "fit": 16,
+    "goal_fidelity": 16,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T20:30:14.801774+00:00",
+  "total": 94
+}
