@@ -371,7 +371,7 @@ class TestDiscoveryFunctionSeats:
         """
         settings._load_pyproject_settings.cache_clear()
 
-        assert settings.get_model("sn-judge") == "typesafe/jev-1.13"
+        assert settings.get_model("sn-judge") == "typesafe/jev-1.14"
 
     def test_discovery_seats_register_local_endpoint(self):
         """The discovery seats bind their model to the ambix-local route."""

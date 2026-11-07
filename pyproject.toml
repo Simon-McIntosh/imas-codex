@@ -378,7 +378,7 @@ model = "openrouter/openai/gpt-6-luna"
 # the chat classifier; 0.8 is the bar the tree re-run measured on the
 # rule-labelled paths, where it settles 112 of 201 and beats chat in the
 # 0.8–0.9 band.
-model = "typesafe/jev-1.13"
+model = "typesafe/jev-1.14"
 threshold = 0.8
 
 [tool.imas-codex.sn-prose-adjudicator]
@@ -447,14 +447,14 @@ endpoint-class = "local-free"
 # The endpoint takes its own request/response shape and is called directly by
 # the decisions call layer, so this seat carries no chat route and its cost is
 # read from the response usage rather than priced in configuration.
-model = "typesafe/jev-1.13"
+model = "typesafe/jev-1.14"
 
 [tool.imas-codex.mapping-candidates]
 # Pair judgment and IDS routing over a retrieved DD shortlist, through the same
 # OpenRouter alpha decisions endpoint. A seat separate from discovery-relevance
 # so the candidate stage's model changes alone. Called directly by the
 # decisions call layer; cost is read from the response usage.
-model = "typesafe/jev-1.13"
+model = "typesafe/jev-1.14"
 
 [tool.imas-codex.sn-judge]
 # Standard-name judgements — name and documentation review, family and
@@ -463,7 +463,7 @@ model = "typesafe/jev-1.13"
 # independently of the discovery and mapping seats. Called directly by the
 # decisions call layer; cost is read from the response usage. The service tag
 # is the runtime ``service`` argument of the call, not a key here.
-model = "typesafe/jev-1.13"
+model = "typesafe/jev-1.14"
 
 [tool.imas-codex.cluster-labels]
 # Cluster labelling. Keeps the OpenRouter model so nothing outside discovery

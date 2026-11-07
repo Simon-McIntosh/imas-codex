@@ -3572,7 +3572,7 @@ def call_decisions(
     value reported in ``usage.cost``.
 
     Args:
-        model: Decisions model id (e.g. ``typesafe/jev-1.13``).
+        model: Decisions model id (e.g. ``typesafe/jev-1.14``).
         state: The judgement context (facility, file, optional content).
         questions: Question definitions keyed by question name.
         service: Service tag for the API key and the ``X-Title`` header.
