@@ -6,6 +6,13 @@
   "call_sites_note": "The change adds a docs/evidence fragment, its JSON and a standalone run script under docs/; no module under imas_codex/ or tests/ references them, so there is no production call site to check. The nearest owned code read for the reuse judgement was imas_codex/standard_names/review/consolidation.py (position suffixes), imas_codex/standard_names/coverage.py (separatrix pair gaps) and imas_codex/standard_names/harmonize.py (family drift), none of which owns a locus-to-suffix mapping.",
   "completed_at": "2026-11-07T08:53:11.735Z",
   "dispatched_at": "2026-11-07T08:42:51Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-sib-separatrix-locus-census-03bb7cfff8d9",
+      "recorded_at": "2026-11-07T09:30:25.926301+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-locus-census-run.py",
