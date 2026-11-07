@@ -1,0 +1,50 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-07T14:48:25.916Z",
+  "dispatched_at": "2026-11-07T14:18:48Z",
+  "findings": [
+    {
+      "file": "imas_codex/graph/build_dd.py",
+      "id": "fbe5d2e4b22",
+      "line": 1643,
+      "severity": "non-blocking",
+      "summary": "The same edit also reverses the packaged-versus-container precedence, so a heuristic subtree-shape match now overrides a curated packaged entry; the goal sentence names only the DD annotation, and this leg rests solely on the pre-existing docstring and is not measured against a real packaged map."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "pass \u2014 collect_renamed_to_mappings has one production caller, the RENAMED_TO block inside phase_build at imas_codex/graph/build_dd.py:2114-2119, whose result reaches _batch_create_renamed_to at build_dd.py:4247; I read that block and the writer.",
+    "diff": "pass \u2014 one commit, 851bc4478, three files and 174 insertions against 2 deletions; the production change is the two setdefault calls at build_dd.py:1643 and :1645 replaced by assignment, with the new test file and the evidence fragment alongside.",
+    "done_when": "pass \u2014 the done_when asks for precedence over container renames and the packaged map, a test proving a stale packaged entry no longer shadows the annotation that fails on main, and no added tests/graph failure id; the head arm, the mutation arm and the two tests/graph arms assert each of those.",
+    "goal": "pass \u2014 the goal is to make the DD's own rename annotation outrank the packaged path map when building RENAMED_TO edges, and build_dd.py:1644-1645 now assigns the dd_renames over the packaged map, matching the docstring's stated order.",
+    "manifest": "pass \u2014 the manifest records status complete, commit 851bc4478, the gate command literally, five test logs, baseline_suite and after_suite as parsed JSON, and its stated summaries reconcile with the logs I opened.",
+    "write_paths": "pass \u2014 the declared paths are imas_codex/graph/build_dd.py, tests/graph/test_dd_rename_precedence.py, docs/evidence/fragments/sn-integrity-backlog/sib-rename-record-precedence.html and the figures directory; the diff touches only the first three."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: pass \u2014 the goal is to make the DD's own rename annotation outrank the packaged path map when building RENAMED_TO edges, and build_dd.py:1644-1645 now assigns the dd_renames over the packaged map, matching the docstring's stated order.\nVERDICT done_when: pass \u2014 the done_when asks for precedence over container renames and the packaged map, a test proving a stale packaged entry no longer shadows the annotation that fails on main, and no added tests/graph failure id; the head arm, the mutation arm and the two tests/graph arms assert each of those.\nVERDICT write_paths: pass \u2014 the declared paths are imas_codex/graph/build_dd.py, tests/graph/test_dd_rename_precedence.py, docs/evidence/fragments/sn-integrity-backlog/sib-rename-record-precedence.html and the figures directory; the diff touches only the first three.\nVERDICT manifest: pass \u2014 the manifest records status complete, commit 851bc4478, the gate command literally, five test logs, baseline_suite and after_suite as parsed JSON, and its stated summaries reconcile with the logs I opened.\nVERDICT diff: pass \u2014 one commit, 851bc4478, three files and 174 insertions against 2 deletions; the production change is the two setdefault calls at build_dd.py:1643 and :1645 replaced by assignment, with the new test file and the evidence fragment alongside.\nCALL_SITES: imas_codex/graph/build_dd.py:2117 (phase_build, RENAMED_TO block), imas_codex/graph/build_dd.py:4247 (_batch_create_renamed_to)\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/graph/build_dd.py:1645 now writes the DD annotation last so it wins, which is exactly the follow-on the plan's \u00a747 closing comment names at build_dd.py:1633.\nSCORE evidence: 20\nJUSTIFICATION evidence: gate-base-tests-graph.log and gate-after-tests-graph.log carry the same three failing ids at 650 and 655 passed, and gate-negative-control.log shows the three precedence assertions red with their literal expected values.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the diff is one two-line production change plus its test and permitted fragment, all inside the manifest's declared write paths.\nSCORE durability: 19\nJUSTIFICATION durability: tests/graph/test_dd_rename_precedence.py:26 reddens under the recorded mutation ('summary/energy_old' == 'summary/energy'), so it fails if the setdefault precedence returns.\nSCORE fit: 20\nJUSTIFICATION fit: the change restores the order the pre-existing docstring at imas_codex/graph/build_dd.py:1631-1634 already states, adds no symbol, and the new test file follows the module idiom of tests/graph/test_dd_container_renames.py:1.\nSCORE reuse: 20\nJUSTIFICATION reuse: collect_renamed_to_mappings at imas_codex/graph/build_dd.py:1625 is the sole owner of the merge; the nearest neighbours, dd_lifecycle.dd_path_index and mappings/PathMappings, build and load one source rather than merging three, so nothing is forked.\nFINDING imas_codex/graph/build_dd.py:1643 non-blocking: the same edit also reverses the packaged-versus-container precedence, so a heuristic subtree-shape match now overrides a curated packaged entry; the goal sentence names only the DD annotation, and this leg rests solely on the pre-existing docstring and is not measured against a real packaged map.\n",
+  "review_run_id": "r-20261107T144924477366-review-of-sib-rename-record-precedence",
+  "reviewed_base_sha": "2c9ea5cbdb33687b268a19c204fe1aa55465bff5",
+  "reviewed_head_sha": "851bc4478b99595e33392fa71dcf706b85b49001",
+  "reviewed_run_id": "r-20261107T141528404307-sib-rename-record-precedence",
+  "rubric": "review",
+  "scores": {
+    "durability": 19,
+    "evidence": 20,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T15:33:38.006421+00:00",
+  "total": 118,
+  "verdicts": {
+    "call_sites": "pass \u2014 collect_renamed_to_mappings has one production caller, the RENAMED_TO block inside phase_build at imas_codex/graph/build_dd.py:2114-2119, whose result reaches _batch_create_renamed_to at build_dd.py:4247.",
+    "diff": "pass \u2014 one commit, 851bc4478, three files and 174 insertions against 2 deletions; the production change is the two setdefault calls at build_dd.py:1643 and :1645 replaced by assignment, with the new test file and the evidence fragment alongside.",
+    "done_when": "pass \u2014 the done_when asks for precedence over container renames and the packaged map, a test proving a stale packaged entry no longer shadows the annotation that fails on main, and no added tests/graph failure id; the head arm, the mutation arm and the two tests/graph arms assert each of those.",
+    "goal": "pass \u2014 the goal is to make the DD's own rename annotation outrank the packaged path map when building RENAMED_TO edges, and build_dd.py:1644-1645 now assigns the dd_renames over the packaged map, matching the docstring's stated order.",
+    "manifest": "pass \u2014 the manifest records status complete, commit 851bc4478, the gate command literally, five test logs, baseline_suite and after_suite as parsed JSON, and its stated summaries reconcile with the logs I opened.",
+    "write_paths": "pass \u2014 the declared paths are imas_codex/graph/build_dd.py, tests/graph/test_dd_rename_precedence.py, docs/evidence/fragments/sn-integrity-backlog/sib-rename-record-precedence.html and the figures directory; the diff touches only the first three."
+  }
+}
