@@ -1,0 +1,94 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "blocking_findings_count": 1,
+  "call_sites": [
+    "imas_codex/discovery/base/judgment.py:160 decide_one calls call_decisions with record_release",
+    "imas_codex/discovery/base/judgment.py:283 decide_batch calls acall_decisions with record_release",
+    "imas_codex/discovery/base/judgment.py:70 _book_cost calls PipelineCost.note_release",
+    "imas_codex/ids/mapping.py:93 PipelineCost.note_release",
+    "imas_codex/cli/map.py:630 prints result.cost.steps (never releases)",
+    "imas_codex/ids/progress.py:292 and :317 read cost.steps for display",
+    "imas_codex/settings.py:2006/2015/2046 benchmark slate accessors read _SN_BENCHMARK_DEFAULTS",
+    "imas_codex/cli/llm_cli.py:195 launches the proxy from imas_codex/config/litellm_config.yaml",
+    "imas_codex/settings.py:87 get_openrouter_pricing prices every configured route"
+  ],
+  "completed_at": "2026-11-07T17:47:08.309Z",
+  "dispatched_at": "2026-11-07T17:32:43Z",
+  "findings": [
+    {
+      "file": "imas_codex/ids/mapping.py",
+      "line": "100",
+      "severity": "blocking",
+      "text": "PipelineCost.releases is written there and read by nothing in production: imas_codex/cli/map.py:630 prints result.cost.steps only, imas_codex/ids/progress.py:292-317 reads steps only, and the persisted figure is total_usd, so a silent re-point of typesafe/jev-1.14 produces no visible or durable record and the tracking the resume brief asked for (a new date that shows) cannot be observed anywhere outside the tests."
+    },
+    {
+      "file": "imas_codex/ids/mapping.py",
+      "line": "83",
+      "severity": "non-blocking",
+      "text": "releases is keyed by cost step rather than per call, so decide_batch over many states (imas_codex/discovery/base/judgment.py:283) and any two models booked under one step collapse to the last value, so 'every decisions cost record' is not attained even in memory."
+    },
+    {
+      "file": "pyproject.toml",
+      "line": "904",
+      "severity": "non-blocking",
+      "text": "The openrouter-pricing entries for gpt-5.6-luna (:904), gpt-5.5 (:952) and gpt-5.4 (:963) remain, so the done-when's 'pyproject.toml references no OpenAI model older than the newest of its tier' is literally unmet; the brief's own removal rule (only entries referenced nowhere in imas_codex/ or tests/) and the manifest's outside_scope line together justify leaving them."
+    },
+    {
+      "file": "gate-release-base.log",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "The base arm ran at revision 844d598fb, which already contains commit 737edff17 that introduces the release-tracking feature, so this two-arm run cannot show that the feature added no suite failures; base..after measures only 33331ed6f's test fix."
+    }
+  ],
+  "findings_count": 4,
+  "justifications": {
+    "durability": "tests/discovery/test_decisions_release_tracking.py:127 and :158 key on tracker.releases, so dropping judgment._book_cost's note_release call raises KeyError there, and tests/core/test_settings.py:609 asserts an empty stale list over the module constants and packaged route table rather than over the accessor.",
+    "evidence": "gate-base.log and gate-after.log record 114 passed EXIT=0 on both arms at 6c73f17/8471b89, and gate-release-base.log/gate-release-after.log record 66/66 failure ids whose set difference is empty in both directions (verified), but the release arm's baseline is 844d598fb, which postdates the release-tracking commit 737edff17.",
+    "fit": "The optional sink at imas_codex/discovery/base/llm.py:3584 keeps the two-value return and follows the module's existing docstring-per-argument idiom, and no changed path or symbol carries a plan, sprint or ticket identifier.",
+    "goal_fidelity": "imas_codex/config/litellm_config.yaml:88-104 and imas_codex/settings.py:1971-2000 do carry the newest model of every OpenAI tier, but pyproject.toml:904, :952 and :963 still reference gpt-5.6-luna, gpt-5.5 and gpt-5.4.",
+    "reuse": "PipelineCost.note_release at imas_codex/ids/mapping.py:93 extends the accumulator the decisions path already books into, but the repository's durable cost-record owner (LLMCost with llm_model at imas_codex/standard_names/graph_store/graph_cost_and_claims.py:75, event at imas_codex/standard_names/budget.py:148) is not extended, so the served build is held in a second, unpersisted store.",
+    "scope_discipline": "Every path in git diff --stat 6c73f17..0097269ac is inside the eleven declared write paths, and the Jev and release-tracking work was each instructed by a resume advice file in the run directory."
+  },
+  "outside_scope": "The run's own note of a truncated imas_codex/llm/prompts/sn/generate_name_system.md during a standard-names gate run is a test-side defect outside this diff; the file is restored to HEAD (799 lines) and no changed path in the diff touches it.",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the brief's goal is to point every stale OpenAI model reference at the newest model of its tier after probing each; imas_codex/config/litellm_config.yaml:88-104 carries gpt-6.1-sol, gpt-6.1-terra and gpt-6-luna, imas_codex/settings.py:1971-2000 carries the same three with no gpt-5.x name, and imas_codex/cli/sn.py:3572-3573 matches.\nVERDICT done_when: the done-when asks for an evidence fragment recording three probe calls with completion/tokens/cost, the before/after list and the gate; docs/evidence/fragments/openai-model-refresh-code.html carries the three rows (13/5/18 tokens; USD 0.000076013/0.000038013/0.000003813), the before/after table and gate-base.log/gate-after.log at 114 passed EXIT=0 each, but pyproject.toml:904, :952 and :963 still name gpt-5.6-luna, gpt-5.5 and gpt-5.4.\nVERDICT write_paths: the declared paths are the eleven files listed in the manifest's orientation line, and git diff --stat 6c73f17..0097269ac touches exactly those eleven.\nVERDICT manifest: read; status complete, nine commits, 66 failed / 9501 passed / 13 skipped on both arms with EXIT=1, and 8 passed on the new suites, with failure_ids recorded as prose rather than ids.\nVERDICT diff: read commit by commit from 6c73f1747 to 0097269ac; 8471b89e2 moves the routes and slate, 6f5564b9d adds the OpenAI fragment, 7c0bfd269 pins the Jev seats, 737edff17 threads the served build into PipelineCost.releases, 393caa869/844d598fb/33331ed6f reshape the settings guard, 0097269ac adds the second fragment.\nCALL_SITES: imas_codex/discovery/base/judgment.py:160, imas_codex/discovery/base/judgment.py:283, imas_codex/discovery/base/judgment.py:70, imas_codex/ids/mapping.py:93, imas_codex/cli/map.py:630, imas_codex/ids/progress.py:292, imas_codex/settings.py:2006, imas_codex/settings.py:87\nSCORE goal_fidelity: 14\nSCORE evidence: 15\nSCORE scope_discipline: 18\nSCORE durability: 15\nSCORE fit: 17\nSCORE reuse: 10\nFINDING imas_codex/ids/mapping.py:100 blocking: PipelineCost.releases is written and read by nothing in production, so a silent re-point of typesafe/jev-1.14 produces no visible or durable record.\nFINDING imas_codex/ids/mapping.py:83 non-blocking: releases is keyed by step, so multiple calls and models under one step collapse to the last value.\nFINDING pyproject.toml:904 non-blocking: gpt-5.6-luna, gpt-5.5 and gpt-5.4 pricing rows remain, so the done-when's pyproject clause is literally unmet; the brief's removal rule and the manifest's disclosure justify keeping them.\nFINDING gate-release-base.log:1 non-blocking: the base arm at 844d598fb already contains the release-tracking feature commit, so the two-arm run measures only the later test fix.\n",
+  "review_evidence": {
+    "added_failure_derivation": "FAILED lines 66 per arm; comm of the sorted id sets is empty in both directions",
+    "base_sha": "6c73f1747b4d64f1943a82ef6bfaaebd91f6c6a5",
+    "gate_logs": [
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T150107307022-openai-model-refresh-code/gate-base.log",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T150107307022-openai-model-refresh-code/gate-after.log",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T150107307022-openai-model-refresh-code/gate-jev-base.log",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T150107307022-openai-model-refresh-code/gate-jev-after.log",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T150107307022-openai-model-refresh-code/gate-release-base.log",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T150107307022-openai-model-refresh-code/gate-release-after.log",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T150107307022-openai-model-refresh-code/gate-release-tracking.log"
+    ],
+    "head_sha": "0097269aca135022db1fc1a4a3567536b66fe19b",
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/review-of-openai-model-refresh-code-0097269aca13"
+  },
+  "review_run_id": "r-20261107T173053529173-review-of-openai-model-refresh-code-0097269aca13",
+  "reviewed_base_sha": "6c73f1747b4d64f1943a82ef6bfaaebd91f6c6a5",
+  "reviewed_head_sha": "0097269aca135022db1fc1a4a3567536b66fe19b",
+  "reviewed_run_id": "r-20261107T150107307022-openai-model-refresh-code",
+  "scores": {
+    "durability": 15,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 14,
+    "reuse": 10,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T17:52:26.894121+00:00",
+  "total": 89,
+  "verdicts": {
+    "diff": "Read commit by commit from 6c73f1747 to 0097269ac: 8471b89e2 collapses six GPT-5 proxy routes to three and repoints the fallback slate and bench docstrings, 6f5564b9d adds the OpenAI fragment, 7c0bfd269 pins four Jev seats to typesafe/jev-1.14; 737edff17 threads the served build through record_release into PipelineCost.releases, 393caa869/844d598fb/33331ed6f reshape the settings pricing guard, and 0097269ac adds the second fragment.",
+    "done_when": "The done-when asks for an evidence fragment recording three probe calls with completion/tokens/cost, the before/after reference list and the gate, plus no stale OpenAI reference in pyproject.toml; the committed docs/evidence/fragments/openai-model-refresh-code.html carries the three probe rows (13/5/18 tokens; USD 0.000076013/0.000038013/0.000003813), the surface-by-surface before/after and gate-base.log/gate-after.log at 114 passed EXIT=0 each, but pyproject.toml:904, :952 and :963 still name gpt-5.6-luna, gpt-5.5 and gpt-5.4.",
+    "goal": "The brief's goal is to point every stale OpenAI model reference at the newest model of its tier, after probing each; at head 0097269ac imas_codex/config/litellm_config.yaml:88-104 carries three routes (gpt-6.1-sol, gpt-6.1-terra, gpt-6-luna), imas_codex/settings.py:1971-2000 carries the same three in the fallback slate with no gpt-5.x name, and imas_codex/cli/sn.py:3572-3573 matches, while pyproject.toml already named the current tiers at base 6c73f17 except in its pricing table.",
+    "manifest": "Read; it reports status complete, nine commits 8471b89e2..0097269ac, 66 failed / 9501 passed / 13 skipped on both gate arms with EXIT=1, and 8 passed on the new suites, though its baseline_suite.failure_ids and after_suite.failure_ids fields hold prose rather than ids, so the id set had to be derived from the logs.",
+    "write_paths": "The declared write paths are the eleven files the manifest's orientation line lists (imas_codex/settings.py, imas_codex/config/litellm_config.yaml, imas_codex/cli/sn.py, pyproject.toml, imas_codex/discovery/base/llm.py, imas_codex/discovery/base/judgment.py, imas_codex/ids/mapping.py, tests/core/test_settings.py, tests/discovery/test_decisions_release_tracking.py and the two evidence fragments), and git diff --stat 6c73f17..0097269ac touches exactly those eleven."
+  }
+}
