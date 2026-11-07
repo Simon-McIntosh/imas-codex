@@ -10,6 +10,13 @@
   "completed_at": "2026-11-07T20:59:25Z",
   "dispatched_at": "2026-11-07T20:50:38Z",
   "durability_note": "The only new refusal, at runner.py:26-27, would fire for zero StandardNames or missing ids; it does not exercise the accepted, draft, or blocking-set calculations, and no test was added.",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-sib-full-dd-run-5f5026ac94f3",
+      "recorded_at": "2026-11-07T21:36:33.171462+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run.html",
