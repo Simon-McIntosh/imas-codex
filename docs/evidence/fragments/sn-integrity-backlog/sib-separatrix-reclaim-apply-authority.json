@@ -4590,5 +4590,947 @@
         }
       }
     }
-  ]
+  ],
+  "live_readback": {
+    "observed_at": "2026-11-07T19:33:44.657484+00:00",
+    "census_count": 98,
+    "conforming": 93,
+    "conforming_with_all_recorded_sources": 93,
+    "reclaim_receipts": 7,
+    "tritium_producing_sources": [
+      true,
+      false
+    ],
+    "costs": [
+      {
+        "run_id": "r-20261107T185046746594-sib-separatrix-reclaim-apply",
+        "events": 1,
+        "priced_events": 1,
+        "usd": 0.0,
+        "status": "completed"
+      }
+    ],
+    "cycle_names_in_cohort": [
+      "flux_surface_averaged_argon_density_at_plasma_boundary",
+      "flux_surface_averaged_beryllium_density_at_plasma_boundary",
+      "flux_surface_averaged_carbon_density_at_plasma_boundary",
+      "flux_surface_averaged_deuterium_density_at_plasma_boundary",
+      "flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary",
+      "flux_surface_averaged_electron_density_at_plasma_boundary",
+      "flux_surface_averaged_helium_3_density_at_plasma_boundary",
+      "flux_surface_averaged_helium_4_density_at_plasma_boundary",
+      "flux_surface_averaged_hydrogen_density_at_plasma_boundary",
+      "flux_surface_averaged_iron_density_at_plasma_boundary",
+      "flux_surface_averaged_lithium_density_at_plasma_boundary",
+      "flux_surface_averaged_neon_density_at_plasma_boundary",
+      "flux_surface_averaged_nitrogen_density_at_plasma_boundary",
+      "flux_surface_averaged_oxygen_density_at_plasma_boundary",
+      "flux_surface_averaged_total_ion_density_at_plasma_boundary",
+      "flux_surface_averaged_tritium_density_at_plasma_boundary",
+      "flux_surface_averaged_xenon_density_at_plasma_boundary"
+    ],
+    "cycles_through_reclaimed_names": [],
+    "cycle_checked_changed_names": [
+      "electron_temperature_at_plasma_boundary",
+      "flux_surface_averaged_tungsten_density_at_plasma_boundary",
+      "flux_surface_averaged_effective_charge_at_plasma_boundary",
+      "electron_pressure_at_plasma_boundary",
+      "flux_surface_averaged_krypton_density_at_plasma_boundary",
+      "effective_charge_at_plasma_boundary",
+      "flux_surface_averaged_boron_density_at_plasma_boundary",
+      "toroidal_tritium_velocity_at_pedestal_top",
+      "toroidal_tritium_velocity_at_separatrix"
+    ],
+    "cycles_already_recorded_in_census": {
+      "flux_surface_averaged_argon_density_at_plasma_boundary": [
+        "argon_density_flux_surface_averaged_at_plasma_boundary"
+      ],
+      "flux_surface_averaged_beryllium_density_at_plasma_boundary": [
+        "beryllium_density_flux_surface_averaged_at_plasma_boundary"
+      ],
+      "flux_surface_averaged_carbon_density_at_plasma_boundary": [
+        "carbon_density_flux_surface_averaged_at_plasma_boundary"
+      ],
+      "flux_surface_averaged_deuterium_density_at_plasma_boundary": [
+        "deuterium_density_flux_surface_averaged_at_plasma_boundary"
+      ],
+      "flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary": [
+        "flux_surface_averaged_deuterium_tritium_density"
+      ],
+      "flux_surface_averaged_electron_density_at_plasma_boundary": [
+        "electron_density_flux_surface_averaged_at_plasma_boundary"
+      ],
+      "flux_surface_averaged_helium_3_density_at_plasma_boundary": [
+        "helium_3_density_flux_surface_averaged_at_plasma_boundary"
+      ],
+      "flux_surface_averaged_helium_4_density_at_plasma_boundary": [
+        "helium_4_density_flux_surface_averaged_at_plasma_boundary"
+      ],
+      "flux_surface_averaged_hydrogen_density_at_plasma_boundary": [
+        "hydrogen_density_flux_surface_averaged_at_plasma_boundary"
+      ],
+      "flux_surface_averaged_iron_density_at_plasma_boundary": [
+        "iron_density_flux_surface_averaged_at_plasma_boundary"
+      ],
+      "flux_surface_averaged_lithium_density_at_plasma_boundary": [
+        "lithium_density_flux_surface_averaged_at_plasma_boundary"
+      ],
+      "flux_surface_averaged_neon_density_at_plasma_boundary": [
+        "neon_density_flux_surface_averaged_at_plasma_boundary"
+      ],
+      "flux_surface_averaged_nitrogen_density_at_plasma_boundary": [
+        "nitrogen_density_flux_surface_averaged_at_plasma_boundary"
+      ],
+      "flux_surface_averaged_oxygen_density_at_plasma_boundary": [
+        "oxygen_density_flux_surface_averaged_at_plasma_boundary"
+      ],
+      "flux_surface_averaged_total_ion_density_at_plasma_boundary": [
+        "total_ion_density_flux_surface_averaged_at_plasma_boundary"
+      ],
+      "flux_surface_averaged_tritium_density_at_plasma_boundary": [
+        "tritium_density_flux_surface_averaged_at_plasma_boundary"
+      ],
+      "flux_surface_averaged_xenon_density_at_plasma_boundary": [
+        "xenon_density_flux_surface_averaged_at_plasma_boundary"
+      ]
+    },
+    "cycle_names_not_in_recorded_cycles": [],
+    "complete": false,
+    "retirement_receipts": [
+      {
+        "receipt": {
+          "reason": "The unlocated stub mixes pedestal-top and separatrix values. Retire it and compose the two independently located quantities.",
+          "internal": true,
+          "run_id": "r-20261107T185046746594-sib-separatrix-reclaim-apply",
+          "to_name": "toroidal_tritium_velocity",
+          "manifest_sha256": "b5dc1f202dd3e7734e6698e2eea4c759f5efa80f3fdb595d6cc4802b2b9089d5",
+          "origin": "signed_manifest",
+          "changed_at": "2026-11-07T19:25:40.685000000+00:00",
+          "from_name": "toroidal_tritium_velocity",
+          "authority_file_sha256": "351f763d0a7139ce353f8a9b3b9af6e044da164626d646ce1289ceb15e64b5e2",
+          "authority_payload_sha256": "de2df371ffc5a15f35b3be6fd37d9b890405bf1fb62d9f1b9b6bf68b3ccb660f",
+          "mutation_kinds": [
+            "supersede"
+          ],
+          "cohort_admitted_ids": [
+            "toroidal_tritium_velocity"
+          ],
+          "id": "sn-change:signed-manifest:b5dc1f202dd3e7734e6698e2eea4c759f5efa80f3fdb595d6cc4802b2b9089d5:b97fefa7b51e16eabb4d2752",
+          "row_id": "toroidal_tritium_velocity",
+          "operation": "retire_unlocated_tritium_stub"
+        }
+      }
+    ],
+    "produced_tritium_names": {
+      "toroidal_tritium_velocity_at_pedestal_top": {
+        "id": "toroidal_tritium_velocity_at_pedestal_top",
+        "stage": "drafted",
+        "status": "draft",
+        "paths": [
+          "dd:summary/local/pedestal/velocity_phi/tritium/value"
+        ],
+        "description": "Toroidal rotation velocity of tritium ions evaluated at the H-mode pedestal top.",
+        "score": null,
+        "unit": "m.s^-1",
+        "run_id": "aa59ccfd-57ca-4e44-8f6a-b05f470993a7",
+        "sources": [
+          "dd:summary/local/pedestal/velocity_phi/tritium/value"
+        ],
+        "reviews": []
+      },
+      "toroidal_tritium_velocity_at_separatrix": {
+        "id": "toroidal_tritium_velocity_at_separatrix",
+        "stage": "drafted",
+        "status": "draft",
+        "paths": [
+          "dd:summary/local/separatrix/velocity_phi/tritium/value"
+        ],
+        "description": "Toroidal rotation velocity of tritium ions evaluated at the separatrix.",
+        "score": null,
+        "unit": "m.s^-1",
+        "run_id": "aa59ccfd-57ca-4e44-8f6a-b05f470993a7",
+        "sources": [
+          "dd:summary/local/separatrix/velocity_phi/tritium/value"
+        ],
+        "reviews": []
+      }
+    },
+    "census_readback": [
+      {
+        "id": "argon_density_at_separatrix",
+        "target": "argon_density_at_plasma_boundary",
+        "conforms": false,
+        "all_recorded_sources_on_target": false
+      },
+      {
+        "id": "boron_density_flux_surface_averaged_at_plasma_boundary",
+        "target": "flux_surface_averaged_boron_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "bulk_electron_temperature_flux_surface_averaged_at_last_closed_flux_surface",
+        "target": "flux_surface_averaged_bulk_electron_temperature_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "deuterium_tritium_density_flux_surface_averaged_at_plasma_boundary",
+        "target": "flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary",
+        "conforms": false,
+        "all_recorded_sources_on_target": false
+      },
+      {
+        "id": "effective_charge_at_separatrix",
+        "target": "effective_charge_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "effective_charge_flux_surface_averaged_at_plasma_boundary",
+        "target": "flux_surface_averaged_effective_charge_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "electron_pressure_at_separatrix",
+        "target": "electron_pressure_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "electron_temperature_at_separatrix",
+        "target": "electron_temperature_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "flux_surface_averaged_parallel_electric_field_at_separatrix",
+        "target": "flux_surface_averaged_parallel_electric_field_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "krypton_density_flux_surface_averaged_at_plasma_boundary",
+        "target": "flux_surface_averaged_krypton_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "normalized_toroidal_flux_coordinate_at_plasma_boundary",
+        "target": "flux_surface_averaged_normalized_toroidal_flux_coordinate_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "normalized_toroidal_flux_coordinate_at_separatrix",
+        "target": "normalized_toroidal_flux_coordinate_at_plasma_boundary",
+        "conforms": false,
+        "all_recorded_sources_on_target": false
+      },
+      {
+        "id": "toroidal_total_plasma_momentum_flux_surface_averaged_at_plasma_boundary",
+        "target": "flux_surface_averaged_toroidal_total_plasma_momentum_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "toroidal_tritium_velocity",
+        "target": "toroidal_tritium_velocity_at_plasma_boundary",
+        "conforms": false,
+        "all_recorded_sources_on_target": false
+      },
+      {
+        "id": "tungsten_density_at_separatrix",
+        "target": "tungsten_density_at_plasma_boundary",
+        "conforms": false,
+        "all_recorded_sources_on_target": false
+      },
+      {
+        "id": "tungsten_density_flux_surface_averaged_at_plasma_boundary",
+        "target": "flux_surface_averaged_tungsten_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "beryllium_density_at_plasma_boundary",
+        "target": "beryllium_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "boron_density_at_plasma_boundary",
+        "target": "boron_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "carbon_density_at_plasma_boundary",
+        "target": "carbon_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "density_at_plasma_boundary",
+        "target": "density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "deuterium_density_at_plasma_boundary",
+        "target": "deuterium_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "deuterium_tritium_density_at_plasma_boundary",
+        "target": "deuterium_tritium_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "electron_density_at_plasma_boundary",
+        "target": "electron_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "flux_surface_averaged_argon_density_at_plasma_boundary",
+        "target": "flux_surface_averaged_argon_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "flux_surface_averaged_beryllium_density_at_plasma_boundary",
+        "target": "flux_surface_averaged_beryllium_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "flux_surface_averaged_carbon_density_at_plasma_boundary",
+        "target": "flux_surface_averaged_carbon_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "flux_surface_averaged_deuterium_density_at_plasma_boundary",
+        "target": "flux_surface_averaged_deuterium_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "flux_surface_averaged_electron_density_at_plasma_boundary",
+        "target": "flux_surface_averaged_electron_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "flux_surface_averaged_helium_3_density_at_plasma_boundary",
+        "target": "flux_surface_averaged_helium_3_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "flux_surface_averaged_helium_4_density_at_plasma_boundary",
+        "target": "flux_surface_averaged_helium_4_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "flux_surface_averaged_hydrogen_density_at_plasma_boundary",
+        "target": "flux_surface_averaged_hydrogen_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "flux_surface_averaged_ion_density_at_plasma_boundary",
+        "target": "flux_surface_averaged_ion_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "flux_surface_averaged_iron_density_at_plasma_boundary",
+        "target": "flux_surface_averaged_iron_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "flux_surface_averaged_lithium_density_at_plasma_boundary",
+        "target": "flux_surface_averaged_lithium_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "flux_surface_averaged_neon_density_at_plasma_boundary",
+        "target": "flux_surface_averaged_neon_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "flux_surface_averaged_nitrogen_density_at_plasma_boundary",
+        "target": "flux_surface_averaged_nitrogen_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "flux_surface_averaged_oxygen_density_at_plasma_boundary",
+        "target": "flux_surface_averaged_oxygen_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "flux_surface_averaged_toroidal_argon_velocity_at_plasma_boundary",
+        "target": "flux_surface_averaged_toroidal_argon_velocity_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "flux_surface_averaged_toroidal_beryllium_velocity_at_plasma_boundary",
+        "target": "flux_surface_averaged_toroidal_beryllium_velocity_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "flux_surface_averaged_toroidal_carbon_velocity_at_plasma_boundary",
+        "target": "flux_surface_averaged_toroidal_carbon_velocity_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "flux_surface_averaged_toroidal_deuterium_tritium_velocity_at_plasma_boundary",
+        "target": "flux_surface_averaged_toroidal_deuterium_tritium_velocity_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "flux_surface_averaged_toroidal_deuterium_velocity_at_plasma_boundary",
+        "target": "flux_surface_averaged_toroidal_deuterium_velocity_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "flux_surface_averaged_toroidal_helium_3_velocity_at_plasma_boundary",
+        "target": "flux_surface_averaged_toroidal_helium_3_velocity_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "flux_surface_averaged_toroidal_helium_4_velocity_at_plasma_boundary",
+        "target": "flux_surface_averaged_toroidal_helium_4_velocity_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "flux_surface_averaged_toroidal_hydrogen_velocity_at_plasma_boundary",
+        "target": "flux_surface_averaged_toroidal_hydrogen_velocity_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "flux_surface_averaged_toroidal_ion_velocity_at_plasma_boundary",
+        "target": "flux_surface_averaged_toroidal_ion_velocity_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "flux_surface_averaged_toroidal_iron_velocity_at_plasma_boundary",
+        "target": "flux_surface_averaged_toroidal_iron_velocity_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "flux_surface_averaged_toroidal_krypton_velocity_at_plasma_boundary",
+        "target": "flux_surface_averaged_toroidal_krypton_velocity_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "flux_surface_averaged_toroidal_lithium_velocity_at_plasma_boundary",
+        "target": "flux_surface_averaged_toroidal_lithium_velocity_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "flux_surface_averaged_toroidal_neon_velocity_at_plasma_boundary",
+        "target": "flux_surface_averaged_toroidal_neon_velocity_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "flux_surface_averaged_toroidal_nitrogen_velocity_at_plasma_boundary",
+        "target": "flux_surface_averaged_toroidal_nitrogen_velocity_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "flux_surface_averaged_toroidal_oxygen_velocity_at_plasma_boundary",
+        "target": "flux_surface_averaged_toroidal_oxygen_velocity_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "flux_surface_averaged_toroidal_tritium_velocity_at_plasma_boundary",
+        "target": "flux_surface_averaged_toroidal_tritium_velocity_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "flux_surface_averaged_toroidal_tungsten_velocity_at_plasma_boundary",
+        "target": "flux_surface_averaged_toroidal_tungsten_velocity_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "flux_surface_averaged_toroidal_xenon_velocity_at_plasma_boundary",
+        "target": "flux_surface_averaged_toroidal_xenon_velocity_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "flux_surface_averaged_total_ion_density_at_plasma_boundary",
+        "target": "flux_surface_averaged_total_ion_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "flux_surface_averaged_tritium_density_at_plasma_boundary",
+        "target": "flux_surface_averaged_tritium_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "flux_surface_averaged_xenon_density_at_plasma_boundary",
+        "target": "flux_surface_averaged_xenon_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "helium_3_density_at_plasma_boundary",
+        "target": "helium_3_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "helium_4_density_at_plasma_boundary",
+        "target": "helium_4_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "hot_neutral_temperature_at_plasma_boundary",
+        "target": "hot_neutral_temperature_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "hydrogen_density_at_plasma_boundary",
+        "target": "hydrogen_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "ion_density_at_plasma_boundary",
+        "target": "ion_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "iron_density_at_plasma_boundary",
+        "target": "iron_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "krypton_density_at_plasma_boundary",
+        "target": "krypton_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "lithium_density_at_plasma_boundary",
+        "target": "lithium_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "loop_voltage_at_plasma_boundary",
+        "target": "loop_voltage_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "magnetic_shear_at_plasma_boundary",
+        "target": "magnetic_shear_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "neon_density_at_plasma_boundary",
+        "target": "neon_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "nitrogen_density_at_plasma_boundary",
+        "target": "nitrogen_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "oxygen_density_at_plasma_boundary",
+        "target": "oxygen_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "parallel_electric_field_at_plasma_boundary",
+        "target": "parallel_electric_field_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "parallel_electric_field_at_separatrix",
+        "target": "parallel_electric_field_at_separatrix",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "poloidal_magnetic_flux_at_plasma_boundary",
+        "target": "poloidal_magnetic_flux_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "radial_coordinate_of_plasma_boundary_gap_reference_point",
+        "target": "radial_coordinate_of_plasma_boundary_gap_reference_point",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "radial_separatrix_distance_at_outboard_midplane",
+        "target": "radial_separatrix_distance_at_outboard_midplane",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "safety_factor_at_plasma_boundary",
+        "target": "safety_factor_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "toroidal_argon_velocity_at_plasma_boundary",
+        "target": "toroidal_argon_velocity_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "toroidal_carbon_velocity_at_plasma_boundary",
+        "target": "toroidal_carbon_velocity_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "toroidal_deuterium_tritium_velocity_at_plasma_boundary",
+        "target": "toroidal_deuterium_tritium_velocity_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "toroidal_deuterium_velocity_at_plasma_boundary",
+        "target": "toroidal_deuterium_velocity_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "toroidal_flux_coordinate_at_plasma_boundary",
+        "target": "toroidal_flux_coordinate_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "toroidal_helium_3_velocity_at_plasma_boundary",
+        "target": "toroidal_helium_3_velocity_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "toroidal_helium_4_velocity_at_plasma_boundary",
+        "target": "toroidal_helium_4_velocity_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "toroidal_hydrogen_velocity_at_plasma_boundary",
+        "target": "toroidal_hydrogen_velocity_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "toroidal_ion_velocity_at_plasma_boundary",
+        "target": "toroidal_ion_velocity_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "toroidal_iron_velocity_at_plasma_boundary",
+        "target": "toroidal_iron_velocity_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "toroidal_krypton_velocity_at_plasma_boundary",
+        "target": "toroidal_krypton_velocity_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "toroidal_magnetic_flux_at_plasma_boundary",
+        "target": "toroidal_magnetic_flux_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "toroidal_neon_velocity_at_plasma_boundary",
+        "target": "toroidal_neon_velocity_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "toroidal_nitrogen_velocity_at_plasma_boundary",
+        "target": "toroidal_nitrogen_velocity_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "toroidal_oxygen_velocity_at_plasma_boundary",
+        "target": "toroidal_oxygen_velocity_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "toroidal_tungsten_velocity_at_plasma_boundary",
+        "target": "toroidal_tungsten_velocity_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "toroidal_xenon_velocity_at_plasma_boundary",
+        "target": "toroidal_xenon_velocity_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "total_ion_density_at_plasma_boundary",
+        "target": "total_ion_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "total_power_at_separatrix",
+        "target": "total_power_at_separatrix",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "tritium_density_at_plasma_boundary",
+        "target": "tritium_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      },
+      {
+        "id": "xenon_density_at_plasma_boundary",
+        "target": "xenon_density_at_plasma_boundary",
+        "conforms": true,
+        "all_recorded_sources_on_target": true
+      }
+    ],
+    "operation_source_readback": [
+      {
+        "path": "summary/local/pedestal/velocity_phi/tritium/value",
+        "id": "dd:summary/local/pedestal/velocity_phi/tritium/value",
+        "status": "composed",
+        "last_error": null,
+        "names": [
+          {
+            "stage": "drafted",
+            "id": "toroidal_tritium_velocity_at_pedestal_top"
+          }
+        ]
+      },
+      {
+        "path": "summary/local/separatrix/n_i/argon/value",
+        "id": "dd:summary/local/separatrix/n_i/argon/value",
+        "status": "composed",
+        "last_error": null,
+        "names": [
+          {
+            "stage": "accepted",
+            "id": "argon_density_at_separatrix"
+          }
+        ]
+      },
+      {
+        "path": "summary/local/separatrix/n_i/tungsten/value",
+        "id": "dd:summary/local/separatrix/n_i/tungsten/value",
+        "status": "composed",
+        "last_error": null,
+        "names": [
+          {
+            "stage": "accepted",
+            "id": "tungsten_density_at_separatrix"
+          }
+        ]
+      },
+      {
+        "path": "summary/local/separatrix/position/rho_tor_norm",
+        "id": "dd:summary/local/separatrix/position/rho_tor_norm",
+        "status": "composed",
+        "last_error": null,
+        "names": [
+          {
+            "stage": "accepted",
+            "id": "normalized_toroidal_flux_coordinate_at_separatrix"
+          }
+        ]
+      },
+      {
+        "path": "summary/local/separatrix/t_e/value",
+        "id": "dd:summary/local/separatrix/t_e/value",
+        "status": "attached",
+        "last_error": null,
+        "names": [
+          {
+            "stage": "refining",
+            "id": "electron_temperature_at_plasma_boundary"
+          }
+        ]
+      },
+      {
+        "path": "summary/local/separatrix/velocity_phi/tritium/value",
+        "id": "dd:summary/local/separatrix/velocity_phi/tritium/value",
+        "status": "composed",
+        "last_error": null,
+        "names": [
+          {
+            "stage": "drafted",
+            "id": "toroidal_tritium_velocity_at_separatrix"
+          }
+        ]
+      },
+      {
+        "path": "summary/local/separatrix/zeff/value",
+        "id": "dd:summary/local/separatrix/zeff/value",
+        "status": "composed",
+        "last_error": null,
+        "names": [
+          {
+            "stage": "refining",
+            "id": "effective_charge_at_plasma_boundary"
+          }
+        ]
+      },
+      {
+        "path": "summary/local/separatrix_average/n_i/boron/value",
+        "id": "dd:summary/local/separatrix_average/n_i/boron/value",
+        "status": "composed",
+        "last_error": null,
+        "names": [
+          {
+            "stage": "reviewed",
+            "id": "flux_surface_averaged_boron_density_at_plasma_boundary"
+          }
+        ]
+      },
+      {
+        "path": "summary/local/separatrix_average/n_i/deuterium_tritium/value",
+        "id": "dd:summary/local/separatrix_average/n_i/deuterium_tritium/value",
+        "status": "extracted",
+        "last_error": null,
+        "names": [
+          {
+            "stage": "exhausted",
+            "id": "deuterium_tritium_density_flux_surface_averaged_at_plasma_boundary"
+          }
+        ]
+      },
+      {
+        "path": "summary/local/separatrix_average/n_i/krypton/value",
+        "id": "dd:summary/local/separatrix_average/n_i/krypton/value",
+        "status": "composed",
+        "last_error": null,
+        "names": [
+          {
+            "stage": "reviewed",
+            "id": "flux_surface_averaged_krypton_density_at_plasma_boundary"
+          }
+        ]
+      },
+      {
+        "path": "summary/local/separatrix_average/n_i/tungsten/value",
+        "id": "dd:summary/local/separatrix_average/n_i/tungsten/value",
+        "status": "attached",
+        "last_error": null,
+        "names": [
+          {
+            "stage": "reviewed",
+            "id": "flux_surface_averaged_tungsten_density_at_plasma_boundary"
+          }
+        ]
+      },
+      {
+        "path": "summary/local/separatrix_average/velocity_phi/tritium/value",
+        "id": "dd:summary/local/separatrix_average/velocity_phi/tritium/value",
+        "status": "composed",
+        "last_error": null,
+        "names": [
+          {
+            "stage": "accepted",
+            "id": "flux_surface_averaged_toroidal_tritium_velocity_at_plasma_boundary"
+          }
+        ]
+      },
+      {
+        "path": "summary/local/separatrix_average/zeff/value",
+        "id": "dd:summary/local/separatrix_average/zeff/value",
+        "status": "composed",
+        "last_error": null,
+        "names": [
+          {
+            "stage": "reviewed",
+            "id": "flux_surface_averaged_effective_charge_at_plasma_boundary"
+          }
+        ]
+      },
+      {
+        "path": "summary/pedestal_fits/linear/pressure_electron/separatrix/value",
+        "id": "dd:summary/pedestal_fits/linear/pressure_electron/separatrix/value",
+        "status": "composed",
+        "last_error": null,
+        "names": [
+          {
+            "stage": "refining",
+            "id": "electron_pressure_at_plasma_boundary"
+          }
+        ]
+      },
+      {
+        "path": "summary/pedestal_fits/mtanh/pressure_electron/separatrix/value",
+        "id": "dd:summary/pedestal_fits/mtanh/pressure_electron/separatrix/value",
+        "status": "composed",
+        "last_error": null,
+        "names": [
+          {
+            "stage": "refining",
+            "id": "electron_pressure_at_plasma_boundary"
+          }
+        ]
+      }
+    ],
+    "full_readback": {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T185046746594-sib-separatrix-reclaim-apply/readback.json",
+      "sha256": "1ad65700414d02a4abbaab96b948c2ce88b69f23b4c5ae6ef50ad1da41cc948e"
+    }
+  },
+  "outcome": "blocked: exact tritium boundary spelling remains refused"
 }

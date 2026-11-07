@@ -459,7 +459,7 @@ async def tritium():
 
 
 async def compose_held_sources():
-    """Finish composition from persisted claims after input-shape repair."""
+    """Compose the persisted source cohort while preserving its claim fences."""
     from imas_codex.standard_names.budget import BudgetManager
     from imas_codex.standard_names.graph_store.graph_audits import finalize_sn_run
     from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
