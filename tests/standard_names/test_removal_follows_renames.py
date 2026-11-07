@@ -150,7 +150,7 @@ def test_removed_path_with_unheld_successor_moves_the_binding(_gc, _clean):
         MERGE (sns:StandardNameSource {id: 'dd:' + $successor})
         MERGE (sns)-[:FROM_DD_PATH]->(succ)
         SET sns.source_type = 'dd', sns.source_id = $successor,
-            sns.status = 'extracted' 
+            sns.status = 'extracted'
         """,
         successor=successor,
     )
