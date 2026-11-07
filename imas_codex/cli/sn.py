@@ -3569,8 +3569,8 @@ def sn_bench(
     Examples:
       imas-codex sn bench
       imas-codex sn bench --max-candidates 5
-      imas-codex sn bench --models anthropic/claude-sonnet-4.6 --models openai/gpt-5.4
-      imas-codex sn bench --models anthropic/claude-sonnet-4.6,openai/gpt-5.4
+      imas-codex sn bench --models anthropic/claude-sonnet-4.6 --models openai/gpt-6.1-sol
+      imas-codex sn bench --models anthropic/claude-sonnet-4.6,openai/gpt-6.1-sol
       imas-codex sn bench --include-docs
     """
     from imas_codex.cli.discover.common import setup_logging
