@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="340">
+<meta name="plan-version" content="341">
 <meta name="plan-modified" content="2026-11-07">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -1097,6 +1097,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s47" data-id="c-run-r-20261106T222411766263-sib-dd-rename-records" data-who="reckon-build" data-when="2026-11-06T22:45:12.529Z">
     <div class="r-comment-body"><p>sib-dd-rename-records — DD builds now record IDS-level and array-of-structures renames as RENAMED_TO edges: gyrokinetics/normalizing_quantities/r -&gt; gyrokinetics_local/normalizing_quantities/r and ec_launchers/launcher/launching_position/r -&gt; ec_launchers/beam/launching_position/r; the node gate is 4 passed at head against 3 failed at base, and tests/graph adds no failure id (base 9 failed/640 passed, head 3 failed/650 passed).</p></div>
+</div>
+<div class="r-comment" data-section="s47" data-id="c-run-r-20261107T083846627566-review-of-sib-removal-follows-renames-f10b2b2e8ffa" data-who="reckon-build" data-when="2026-11-07T08:50:33.464Z">
+    <div class="r-comment-body"><p>independent review of r-20261107T005812559314-sib-removal-follows-renames at base 114b727ea14c79358c494bc6513e2c5007076871 / head f10b2b2e8ffaa8f79bd1c6f19d7f2ef8f6aab219 — parsed record, six dimensions scored (goal_fidelity 17, evidence 13, scope_discipline 13, durability 16, fit 17, reuse 5; total 81), added_failure_count 0 with no added ids, one blocking finding (the retire branch carries no source_type guard, so a signals source — whose source_id never matches an IMASNode — always lands on retire and supersedes its name with a DD-worded removed_path_retirement receipt when its FacilitySignal disappears) and three non-blocking findings (the inline supersede duplicates imas_codex/standard_names/source_invariant.py, no tests/graph arm despite the done-when, and an unsubstituted placeholder in the manifest&#x27;s tests: line)</p></div>
 </div>
 <div class="r-comment" data-section="s48" data-id="c-run-r-20261106T231022458778-review-of-sib-rebind-removed-path-names-645423c1a56d" data-who="reckon-build" data-when="2026-11-06T23:23:43.847Z">
     <div class="r-comment-body"><p>Independent review of r-20261106T222618682261-sib-rebind-removed-path-names at 645423c1a scores 92/120 across the six dimensions with one blocking finding: the readback gate asserts zero successor edges where §48's done_when requires one, so the superseded name's measured state does not meet the node's stated measure.</p></div>
