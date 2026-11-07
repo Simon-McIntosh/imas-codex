@@ -2488,9 +2488,9 @@ def mark_source_skipped(
 
 
 #: The branch a removed path resolves to, keyed by what it does to the name.
-REMOVAL_MOVE = "move"
-REMOVAL_SUPERSEDE_HOLDER = "supersede_holder"
-REMOVAL_RETIRE = "retire"
+_REMOVAL_MOVE = "move"
+_REMOVAL_SUPERSEDE_HOLDER = "supersede_holder"
+_REMOVAL_RETIRE = "retire"
 
 
 def mark_sources_stale(source_ids: list[str], *, services: Any) -> int:
@@ -2617,9 +2617,9 @@ def mark_sources_stale(source_ids: list[str], *, services: Any) -> int:
             """,
             source_ids=source_ids,
             terminal_stages=sorted(foundation._TERMINAL_BINDING_NAME_STAGES),
-            move=REMOVAL_MOVE,
-            supersede_holder=REMOVAL_SUPERSEDE_HOLDER,
-            retire=REMOVAL_RETIRE,
+            move=_REMOVAL_MOVE,
+            supersede_holder=_REMOVAL_SUPERSEDE_HOLDER,
+            retire=_REMOVAL_RETIRE,
         )
         if not result:
             return 0
@@ -2636,7 +2636,7 @@ def mark_sources_stale(source_ids: list[str], *, services: Any) -> int:
             (
                 (row["name_id"], row["holder_id"])
                 for row in outcomes
-                if row["branch"] == REMOVAL_SUPERSEDE_HOLDER
+                if row["branch"] == _REMOVAL_SUPERSEDE_HOLDER
             ),
             operation="removed_path_successor_holder",
             reason="the removed path's successor is held by a live name",
@@ -2644,7 +2644,7 @@ def mark_sources_stale(source_ids: list[str], *, services: Any) -> int:
         # A retirement names no successor, so its receipt is the name's own
         # event; the wrapper above drops self-pairs.
         for row in outcomes:
-            if row["branch"] != REMOVAL_RETIRE:
+            if row["branch"] != _REMOVAL_RETIRE:
                 continue
             record_standard_name_change(
                 gc,
