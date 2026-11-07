@@ -1,0 +1,43 @@
+{
+  "added_failure_count": 0,
+  "added_failure_derivation": "The reviewed run's manifest carries no baseline_suite and no after_suite arms: this node is a read-only docs census whose gate is the -run.py exit status, recorded in census-gate.log's last line as EXIT=0, with negative-control.log documenting six refusal/crash arms. With no suite arms there are no failure ids to diff, so added_failure_count is 0 by absence of arms rather than by a measured delta.",
+  "added_failure_ids": [],
+  "call_sites": "none",
+  "call_sites_note": "The change adds a docs/evidence fragment, its JSON and a standalone run script under docs/; a grep over imas_codex/, tests/, agents/ and pyproject.toml finds no reference to sib-separatrix-locus-census, so there is no production call site to check. For the reuse judgement the nearest owned code read was imas_codex/standard_names/coverage.py:363 (separatrix_pair_gaps), which owns species pair-gap reporting rather than a locus-to-suffix mapping, and imas_codex/standard_names/advisory_benchmark.py:125, which owns the atomic record publish the fragment re-implements locally.",
+  "completed_at": "2026-11-07T09:50:14.377Z",
+  "dispatched_at": "2026-11-07T09:35:02Z",
+  "findings": [
+    {
+      "disposition_hint": "fold into a shared atomic-publish helper used by the evidence fragments",
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-locus-census-run.py",
+      "line": 165,
+      "severity": "non-blocking",
+      "text": "write_atomic uses a fixed '<name>.partial' sibling path and never fsyncs before Path.replace, duplicating the atomic publish already owned by imas_codex/standard_names/advisory_benchmark.py:125 (publish_atomic) and imas_codex/standard_names/benchmark.py:243 (save_atomic) without extending either. Two concurrent runs would write the same temp path and can rename a partially overwritten file, and a machine crash can leave a renamed record whose bytes are not on disk; the demonstrated guarantee covers only a process interruption of a single run (negative-control.log arms 5-6)."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "pass - eight commits against 03bb7cfff, all inside the declared paths, reviewed commit by commit.",
+    "done_when": "pass - zero of the 98 proposed targets fall in the 105 recorded tombstones, the cross-check is a set difference empty in both directions, and census-gate.log ends EXIT=0.",
+    "goal": "pass - the census carries 98 live names across seven loci with locus, unit, DD paths, chain, tombstones and one action each, plus suffix_by_locus and the tritium block; both prior blocking defects are repaired.",
+    "manifest": "pass - read; its counts match the JSON exactly and it names both gate and negative-control logs; its tests line carries env prefixes the log's command header omits.",
+    "write_paths": "pass - the three changed files are all declared write paths and the figures path was left unused."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is a census of every live name tied to the separatrix or plasma-boundary loci with one suffix per DD locus; sib-separatrix-locus-census.json carries 98 live rows across seven loci with locus, unit, DD paths, chain, tombstones and one action each, plus suffix_by_locus and the tritium block, and both prior blocking defects are repaired.\nVERDICT done_when: the done_when forbids a proposed action that targets a superseded tombstone; reading all 98 rows against the 105 recorded tombstones finds zero such targets, cross_check.in_graph_not_in_census and .json list both empty against a set-difference check, and census-gate.log ends EXIT=0.\nVERDICT write_paths: the declared paths are the .py, .html and .json fragments plus an unused figures directory; git diff 03bb7cfff..3366d5134 touches exactly the three files and nothing else.\nVERDICT manifest: read; it records the eight commits, the gate script invocation, census-gate.log and negative-control.log, and its headline counts (203/98/105, keep 25, signed_rename 72, supersede 1, 5 blocked) match the JSON exactly; its tests line carries env prefixes the log's own command header omits.\nVERDICT diff: read commit by commit from 03bb7cfff to 3366d5134: an independent id-set cross-check, a keep-with-blocked_spelling rule for taken targets, atomic publish, per-loop tombstone locators, dead-binding removal, a format-only sweep, and two republished records whose sha256 match the gate log.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: sib-separatrix-locus-census.json carries 98 live rows with all required fields and a suffix per locus, and the five blocked spellings are published as keep in docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-locus-census-run.py:465 rather than as invented renames.\nSCORE evidence: 16\nJUSTIFICATION evidence: census-gate.log records revision d879be700, the query row counts, cross_check_agrees=True and EXIT=0, and the sha256 lines in that log match the committed JSON (35ae38ff...) and HTML (079f6d1d...) bytes at HEAD.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in git diff 03bb7cfff..3366d5134 is inside the three declared fragment paths, the figures directory is unused, and the script makes no graph write.\nSCORE durability: 15\nJUSTIFICATION durability: run.py:172 assert_invariants refuses a tombstone target and a roster disagreement, and negative-control.log arms 1-4 show each refusal firing plus the pre-repair script publishing four tombstone targets.\nSCORE fit: 17\nJUSTIFICATION fit: the fragment follows the sibling census idiom (GraphClient, JSON beside HTML, one run.py) and passes ruff; the only oddity is the docstring phrase 'the rules the fence states' at run.py:174, which carries dispatch vocabulary into source.\nSCORE reuse: 15\nJUSTIFICATION reuse: the census reuses imas_codex/graph/client.py and duplicates no locus owner (imas_codex/standard_names/coverage.py:363 separatrix_pair_gaps covers species pair gaps, not locus suffixes), but run.py:165 write_atomic re-implements the atomic publish owned by imas_codex/standard_names/advisory_benchmark.py:125 without its fsync or unique temp file.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-locus-census-run.py:165 non-blocking: write_atomic uses a fixed '<name>.partial' sibling and no fsync, duplicating imas_codex/standard_names/advisory_benchmark.py:125 publish_atomic without extending it; two concurrent runs share one temp path and a machine crash can leave a renamed-but-unsynced record, so the durability guarantee holds only for a process interruption of a single run.\n",
+  "review_run_id": "r-20261107T093332980803-review-of-sib-separatrix-locus-census-3366d5134c13",
+  "reviewed_base_sha": "03bb7cfff8d984fe54cf05dbef17794d9edbc96f",
+  "reviewed_head_sha": "3366d5134c13abe081ce1bfda3717a182cc769ff",
+  "reviewed_run_id": "r-20261107T082155378735-sib-separatrix-locus-census",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 15,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T09:59:56.577749+00:00",
+  "total": 99
+}
