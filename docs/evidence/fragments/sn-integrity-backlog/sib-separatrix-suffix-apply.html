@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>sib-separatrix-suffix-apply — apply the ruled separatrix name convention</title>
+<style>
+ body { font-family: system-ui, sans-serif; max-width: 68rem; margin: 2rem auto; line-height: 1.5; }
+ table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+ th, td { border-bottom: 1px solid #ddd; text-align: left; padding: .35rem .5rem; vertical-align: top; }
+ code { font-size: .92em; }
+ .num { text-align: right; }
+</style>
+</head>
+<body>
+<h1 id="sib-separatrix-suffix-apply-title">Separatrix name convention — applied</h1>
+<p>The lead ruled one suffix per data-dictionary locus (comment
+<code>c-s49-lead-ruling-convention</code>): a value at the separatrix is
+<code>X_at_plasma_boundary</code>; a separatrix average is
+<code>flux_surface_averaged_X_at_plasma_boundary</code>. This record applies that
+ruling through the sanctioned rename writer
+(<code>imas_codex.standard_names.edit.apply_edit</code>), which mints the
+successor, supersedes the predecessor, carries the producing sources and raises
+if any source is left behind.</p>
+
+<h2 id="sib-separatrix-suffix-apply-method">Method</h2>
+<p>Locus is derived from each name's producing DD path, not from the census's
+locus label. That matters for one row: the census labels
+<code>normalized_toroidal_flux_coordinate_at_plasma_boundary</code> a diagnostic
+distance although its only path is
+<code>summary/local/separatrix_average/position/rho_tor_norm</code>, a summary
+path and the average locus. Deriving from the path puts that name under the same
+rule as its sibling.</p>
+
+<h2 id="sib-separatrix-suffix-apply-totals">Population and outcome</h2>
+<table>
+<tr><th>Measure</th><th class="num">Count</th></tr>
+<tr><td>Live names in the census population</td><td class="num">98</td></tr>
+<tr><td>Ruled target free — renamed</td><td class="num">4</td></tr>
+<tr><td>Ruled target occupied by a superseded tombstone</td><td class="num">11</td></tr>
+<tr><td>Ruled target occupied by a live name</td><td class="num">1</td></tr>
+<tr><td>Already conforming — kept</td><td class="num">82</td></tr>
+<tr><td>Live names conforming after the apply (of 98)</td><td class="num">86</td></tr>
+</table>
+
+<h2 id="sib-separatrix-suffix-apply-renames">Renames applied</h2>
+<p>Each receipt below is the writer's own line, and each reports the producing
+evidence that the producing source survived the rename.</p>
+<table>
+<tr><th>From</th><th>To</th><th>Receipt</th></tr>
+<tr><td><code>bulk_electron_temperature_flux_surface_averaged_at_last_closed_flux_surface</code></td><td><code>flux_surface_averaged_bulk_electron_temperature_at_plasma_boundary</code></td><td>verified 1 producing source</td></tr>
+<tr><td><code>flux_surface_averaged_parallel_electric_field_at_separatrix</code></td><td><code>flux_surface_averaged_parallel_electric_field_at_plasma_boundary</code></td><td>verified 1 producing source</td></tr>
+<tr><td><code>normalized_toroidal_flux_coordinate_at_plasma_boundary</code></td><td><code>flux_surface_averaged_normalized_toroidal_flux_coordinate_at_plasma_boundary</code></td><td>verified 1 producing source</td></tr>
+<tr><td><code>toroidal_total_plasma_momentum_flux_surface_averaged_at_plasma_boundary</code></td><td><code>flux_surface_averaged_toroidal_total_plasma_momentum_at_plasma_boundary</code></td><td>verified 1 producing source</td></tr>
+</table>
+
+<h2 id="sib-separatrix-suffix-apply-blocked">Targets held by a tombstone — reported, not revived</h2>
+<p>Eleven names require a spelling the graph already holds as a superseded
+tombstone. Renaming onto a tombstone would revive it, so each is reported with
+its lineage rather than written. Nine of the eleven resolve back onto the name
+itself — the name is already the live holder of the tombstone's lineage, so the
+ruling's spelling cannot be reached without reviving history and the name stands
+as the lineage tip.</p>
+<table>
+<tr><th>Name</th><th>Ruled target</th><th>Target's lineage</th><th>Outcome</th></tr>
+<tr><td><code>argon_density_at_separatrix</code></td><td><code>argon_density_at_plasma_boundary</code></td><td>&rarr; <code>flux_surface_averaged_argon_density_at_plasma_boundary</code> (live, average locus)</td><td>reported — superseding a local value onto the average would conflate two loci</td></tr>
+<tr><td><code>boron_density_flux_surface_averaged_at_plasma_boundary</code></td><td><code>flux_surface_averaged_boron_density_at_plasma_boundary</code></td><td>&rarr; itself</td><td>reported — the name is the lineage tip</td></tr>
+<tr><td><code>deuterium_tritium_density_flux_surface_averaged_at_plasma_boundary</code></td><td><code>flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary</code></td><td>&rarr; itself and <code>flux_surface_averaged_deuterium_tritium_density</code></td><td>reported — two live successors</td></tr>
+<tr><td><code>effective_charge_at_separatrix</code></td><td><code>effective_charge_at_plasma_boundary</code></td><td>&rarr; <code>effective_charge_number_at_plasma_boundary</code> (tombstone) &rarr; itself</td><td>reported — the name is the lineage tip</td></tr>
+<tr><td><code>effective_charge_flux_surface_averaged_at_plasma_boundary</code></td><td><code>flux_surface_averaged_effective_charge_at_plasma_boundary</code></td><td>&rarr; itself</td><td>reported — the name is the lineage tip</td></tr>
+<tr><td><code>electron_pressure_at_separatrix</code></td><td><code>electron_pressure_at_plasma_boundary</code></td><td>&rarr; itself</td><td>reported — the name is the lineage tip</td></tr>
+<tr><td><code>electron_temperature_at_separatrix</code></td><td><code>electron_temperature_at_plasma_boundary</code></td><td>&rarr; <code>bulk_electron_temperature_at_plasma_boundary</code> (tombstone) &rarr; <code>thermal_electron_temperature_at_plasma_boundary</code></td><td>reported — the live holder is a different concept spelling; superseding needs the deferred source swap</td></tr>
+<tr><td><code>krypton_density_flux_surface_averaged_at_plasma_boundary</code></td><td><code>flux_surface_averaged_krypton_density_at_plasma_boundary</code></td><td>&rarr; itself</td><td>reported — the name is the lineage tip</td></tr>
+<tr><td><code>normalized_toroidal_flux_coordinate_at_separatrix</code></td><td><code>normalized_toroidal_flux_coordinate_at_plasma_boundary</code></td><td>occupied by a live <em>accepted</em> name until this apply renamed it to the averaged spelling; the vacated id is now a tombstone</td><td>reported — the freed spelling is held by the tombstone this apply created, so the local name cannot take it without reviving history</td></tr>
+<tr><td><code>tungsten_density_at_separatrix</code></td><td><code>tungsten_density_at_plasma_boundary</code></td><td>&rarr; <code>flux_surface_averaged_tungsten_density_at_plasma_boundary</code> and itself</td><td>reported — two live successors</td></tr>
+<tr><td><code>tungsten_density_flux_surface_averaged_at_plasma_boundary</code></td><td><code>flux_surface_averaged_tungsten_density_at_plasma_boundary</code></td><td>&rarr; itself</td><td>reported — the name is the lineage tip</td></tr>
+</table>
+
+<h2 id="sib-separatrix-suffix-apply-tritium">Tritium — retire and compose blocked on a lineage conflict</h2>
+<p>The ruling retires the bare <code>toroidal_tritium_velocity</code> stub with a
+signed receipt and composes <code>toroidal_tritium_velocity_at_pedestal_top</code>
+and <code>toroidal_tritium_velocity_at_plasma_boundary</code>. The graph does not
+allow the second target to be composed: it is a superseded tombstone whose
+lineage runs four links deep,</p>
+<pre>toroidal_tritium_velocity_at_plasma_boundary
+  &rarr; toroidal_flux_surface_averaged_tritium_velocity_at_plasma_boundary
+  &rarr; toroidal_tritium_velocity_flux_surface_averaged_at_plasma_boundary
+  &rarr; flux_surface_averaged_toroidal_tritium_velocity_at_plasma_boundary (live)</pre>
+<p>and every link terminates on a name at the <em>average</em> locus. Composing the
+separatrix value under the ruling's spelling would revive a tombstone; composing
+it onto the live tip would file a local value under an averaged name. Both are
+forbidden by this section's own constraints, so the retire-and-compose is
+reported for a ruling instead of written. The bare stub is still live and still
+carries both paths.</p>
+
+<h2 id="sib-separatrix-suffix-apply-readback">Live read-back</h2>
+<p>The graph was re-read after the apply: 86 of the 98 census names now end in
+the ruled suffix for their own DD locus (separatrix 33/40, separatrix_average
+39/44, unresolved 8/8, mixed 4/4, diagnostic 2/2). The twelve that do not are
+the rows above. A separate observation: the live graph holds 118 names whose id
+carries <code>separatrix</code> or <code>plasma_boundary</code> against the
+census's 98 — the census bounded its population by produced source path, and
+that gap is recorded here rather than resolved.</p>
+
+<p id="sib-separatrix-suffix-apply-artifacts">Artifacts:
+<code>sib-separatrix-suffix-apply-authority.json</code> (per-name locus, ruled
+target, live occupant and action),
+<code>sib-separatrix-suffix-apply-run.py</code> (the runner; modes
+<code>map</code>, <code>renames</code>, <code>readback</code>).</p>
+</body>
+</html>
