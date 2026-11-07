@@ -1,0 +1,561 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "fb854ea1c9b160825815056cdd757292ebd6acd2",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 3052576,
+      "input_tokens_cumulative": 3052576,
+      "output_tokens": 10078,
+      "output_tokens_cumulative": 10078,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 595,
+    "files": 3,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 164,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_dd_residue_release.py"
+      },
+      "run_function": {
+        "line": 145,
+        "name": "build_authority",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-magnetic-successor-edge-run.py"
+      },
+      "window_line": 157
+    },
+    {
+      "existing_function": {
+        "line": 112,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_ordinary_source_migration.py"
+      },
+      "run_function": {
+        "line": 145,
+        "name": "build_authority",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-magnetic-successor-edge-run.py"
+      },
+      "window_line": 157
+    },
+    {
+      "existing_function": {
+        "line": 204,
+        "name": "_specification",
+        "path": "tests/standard_names/test_repair_authority_builder.py"
+      },
+      "run_function": {
+        "line": 145,
+        "name": "build_authority",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-magnetic-successor-edge-run.py"
+      },
+      "window_line": 158
+    },
+    {
+      "existing_function": {
+        "line": 241,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_rewire_relocation_retire.py"
+      },
+      "run_function": {
+        "line": 145,
+        "name": "build_authority",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-magnetic-successor-edge-run.py"
+      },
+      "window_line": 157
+    },
+    {
+      "existing_function": {
+        "line": 93,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_signed_manifest_operator.py"
+      },
+      "run_function": {
+        "line": 145,
+        "name": "build_authority",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-magnetic-successor-edge-run.py"
+      },
+      "window_line": 157
+    },
+    {
+      "existing_function": {
+        "line": 266,
+        "name": "_authority",
+        "path": "tests/standard_names/test_signed_source_exchange.py"
+      },
+      "run_function": {
+        "line": 145,
+        "name": "build_authority",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-magnetic-successor-edge-run.py"
+      },
+      "window_line": 157
+    },
+    {
+      "existing_function": {
+        "line": 72,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_signed_supersede_edge.py"
+      },
+      "run_function": {
+        "line": 145,
+        "name": "build_authority",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-magnetic-successor-edge-run.py"
+      },
+      "window_line": 157
+    },
+    {
+      "existing_function": {
+        "line": 39,
+        "name": "_authority",
+        "path": "tests/standard_names/test_signed_supersede_replay.py"
+      },
+      "run_function": {
+        "line": 145,
+        "name": "build_authority",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-magnetic-successor-edge-run.py"
+      },
+      "window_line": 157
+    },
+    {
+      "existing_function": {
+        "line": 108,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_source_target_reconciliation.py"
+      },
+      "run_function": {
+        "line": 145,
+        "name": "build_authority",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-magnetic-successor-edge-run.py"
+      },
+      "window_line": 157
+    },
+    {
+      "existing_function": {
+        "line": 133,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_structural_release.py"
+      },
+      "run_function": {
+        "line": 145,
+        "name": "build_authority",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-magnetic-successor-edge-run.py"
+      },
+      "window_line": 157
+    },
+    {
+      "existing_function": {
+        "line": 91,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_structural_reparent.py"
+      },
+      "run_function": {
+        "line": 145,
+        "name": "build_authority",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-magnetic-successor-edge-run.py"
+      },
+      "window_line": 157
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_structural_source_revival.py"
+      },
+      "run_function": {
+        "line": 145,
+        "name": "build_authority",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-magnetic-successor-edge-run.py"
+      },
+      "window_line": 157
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_supersede_successor_scalar.py"
+      },
+      "run_function": {
+        "line": 145,
+        "name": "build_authority",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-magnetic-successor-edge-run.py"
+      },
+      "window_line": 157
+    },
+    {
+      "existing_function": {
+        "line": 96,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_unbound_source_attachment.py"
+      },
+      "run_function": {
+        "line": 145,
+        "name": "build_authority",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-magnetic-successor-edge-run.py"
+      },
+      "window_line": 157
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "0956b225f5babe33f5358e96a198eaa2f9ce5c02",
+    "f3c4dd2597e91e019a255cc5d5e30a4a84966693"
+  ],
+  "completed_at": "2026-11-07T00:15:18Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-11-06T23:39:00Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.8880918220946915,
+    "plan": "sn-integrity-backlog",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-11-07T00:22:48.199626+00:00",
+    "horizon_seconds": 2700,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-11-06T23:37:48Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 1,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 0,
+    "headroom": 11,
+    "mean_context": 160000,
+    "observed_at": "2026-11-06T23:37:51Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 1,
+      "aggregate_tokens_per_second": 115.947,
+      "detail": "",
+      "mean_tokens_per_second": 289.869,
+      "observed_at": "2026-11-06T23:37:51Z",
+      "runs": 0.4,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-07T00:15:18Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T233746846226-sib-magnetic-successor-edge/manifest.md",
+  "member": "disposable-r-20261106T233746846226-sib-magnetic-successor-edge",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "sib-magnetic-successor-edge",
+  "node_definition": {
+    "after": [],
+    "anchor_paths": [],
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "elevated",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1514,
+          "cached_input_tokens": 354272,
+          "input_tokens": 355788,
+          "output_tokens": 828,
+          "reasoning_output_tokens": 51,
+          "total_tokens": 356616,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+      "session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea"
+    },
+    "done_when": "docs/evidence/fragments/sn-integrity-backlog/sib-magnetic-successor-edge.html and docs/evidence/fragments/sn-integrity-backlog/sib-magnetic-successor-edge-authority.json hold the committed authority, preview, receipt and live read-back: exactly one REFINED_FROM successor edge from flux_surface_averaged_magnetic_field_magnitude to flux_surface_average_magnetic_field_magnitude with a receipt, no other name changed, and the export gate's blocking set computed by importing the gate's own predicate (source_invariant.py:145-186, export.py:3085-3090); spend USD 0; runner log ends in EXIT=",
+    "estimated_hours": null,
+    "goal": "Give the retired flux_surface_average_magnetic_field_magnitude one signed successor edge to flux_surface_averaged_magnetic_field_magnitude",
+    "id": "sib-magnetic-successor-edge",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-11-06T23:37:48Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 1,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 0,
+      "headroom": 11,
+      "mean_context": 160000,
+      "observed_at": "2026-11-06T23:37:51Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 1,
+        "aggregate_tokens_per_second": 115.947,
+        "detail": "",
+        "mean_tokens_per_second": 289.869,
+        "observed_at": "2026-11-06T23:37:51Z",
+        "runs": 0.4,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T233746846226-sib-magnetic-successor-edge/manifest.md",
+    "negative_control": "none: a one-time signed write on one live row; the signed preview of the same edge before the apply is the control",
+    "plan": "sn-integrity-backlog",
+    "regenerate_paths": [],
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§48",
+    "spec_level": "exact",
+    "time_budget": "45m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/evidence/fragments/sn-integrity-backlog/sib-magnetic-successor-edge.html",
+      "docs/evidence/fragments/sn-integrity-backlog/sib-magnetic-successor-edge-run.py",
+      "docs/evidence/fragments/sn-integrity-backlog/sib-magnetic-successor-edge-authority.json",
+      "docs/figures/sn-integrity-backlog/sib-magnetic-successor-edge"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 4288987.0,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "sib-magnetic-successor-edge",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-11-06T23:38:43.293677+00:00",
+    "score": 0.64375,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "§48 remainder after review 92/120 of sib-rebind-removed-path-names; the guard at signed_manifest.py:3328-3355 refuses only while the predecessor holds a bound path, which it no longer does; use the signed supersede with successor_id or source_invariant.supersede_names_losing_last_source (source_invariant.py:190). Local lane: codex is on a budget hold.",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.664,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {}
+  },
+  "plan": "sn-integrity-backlog",
+  "plan_impl_at_dispatch": 0.8880918220946915,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "f3c4dd2597e91e019a255cc5d5e30a4a84966693",
+  "resume_waiver": null,
+  "review": null,
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261106T233746846226-sib-magnetic-successor-edge",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§48",
+  "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+  "session_harness": "claude",
+  "session_id": "1d70d96a-a58d-4d1e-b828-a9bdee3d01f6",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 11912944,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 238.157,
+    "generated_tokens": 51315,
+    "generation_seconds": 142.021,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 72.7,
+    "machine_seconds": 96.136,
+    "peak_input_tokens": 167318,
+    "tokens_per_second": 361.32,
+    "wall_tokens_per_second": 215.47
+  },
+  "time_budget": "45m",
+  "tool_steps": 90.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 2178,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-07T00:15:22Z",
+    "last_record_type": "result",
+    "launched_at": "2026-11-07T00:11:15Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [],
+    "run_id": "r-20261106T233746846226-sib-magnetic-successor-edge",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 6715,
+    "worker_pid": 2866875
+  },
+  "worker_seconds": 1180,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
