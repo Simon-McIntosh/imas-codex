@@ -1,0 +1,67 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Unmeasured: the reviewed source manifest leaves baseline_suite and after_suite blank. Zero records no newly established failure id, not a measured base/head suite delta; repair_test.log shows only its focused head test passed.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "call_sites_note": "No product runtime code imports the evidence runner; its __main__ block at lines 289-310 is the standalone entry.",
+  "completed_at": "2026-11-07T21:53:33Z",
+  "dispatched_at": "2026-11-07T21:44:26Z",
+  "durability_note": "The new fixed expected snapshot would fail on wrong accepted, draft, or blocker values; the planted-loss arm would fail if the export blocker were suppressed or require_clear_export became a no-op. The virtual-parent log is not a valid mutation sensitivity check because the test does not exist there.",
+  "findings": [
+    {
+      "disposition": "exempted",
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run-run.py",
+      "line": "120",
+      "severity": "non-blocking",
+      "text": "the staging assertion compares the forwarded path with the same variable passed to read_back, so it cannot establish the caller chose a valid staging location; exempted because caller-selected staging is the helper's stated contract."
+    },
+    {
+      "disposition": "exempted",
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run-run.py",
+      "line": "83",
+      "severity": "non-blocking",
+      "text": "repair_negative_control.log's virtual parent fails with pytest exit 4 because the new test is absent, so that log does not show the new assertions reddening under a restored regression; exempted because the head test plants the source loss and its fixed expectations at lines 152-158 would fail if the blocker or refusal were removed."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found; the evidence runner is a standalone CLI",
+    "diff": "reviewed commit c0f2822e3773e99a543bd77f54b28d442d13bbb6 against 5f5026ac94f307a22c918d466f928e46a8b0cbf7; docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run-run.py:21-310 changes the runner and test, and docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run.html:16,33 adds the evidence explanation.",
+    "done_when": "the source prompt's launch measure is supported by the earlier archive and job receipts, while repair_test.log records 1 passed and repair_provenance.log records EXIT=0; source manifest.md has no completed baseline_suite or after_suite arms.",
+    "goal": "the source prompt requires a verified graph checkpoint, whole-DD preview, and capped job submission; the repair in docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run.html:16,32 keeps those receipts and adds provenance and gate checks.",
+    "manifest": "source manifest.md records commit c0f2822e3773e99a543bd77f54b28d442d13bbb6, the focused passing gate, provenance receipt, and a virtual-parent control, with baseline_suite and after_suite blank.",
+    "write_paths": "the source prompt declares docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run-run.py and docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run.html; the sole gained commit changes exactly those two paths."
+  },
+  "justifications": {
+    "durability": "docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run-run.py:121-158 has fixed expected counts and a planted accepted-name blocker that would fail if the blocker were omitted or refusal removed, though the virtual-parent log only proves the test is absent there.",
+    "evidence": "docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run-run.py:166-286 checks the baseline log against stream events and a committed runner blob, while the source manifest's blank suite arms leave the added-failure delta unmeasured.",
+    "fit": "docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run-run.py:21-80 follows the graph-client and gate-only export idioms and introduces no forbidden symbol name.",
+    "goal_fidelity": "docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run.html:16 connects the pre-run baseline to the runner, and docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run-run.py:289-305 preserves a standalone command for the later read-back.",
+    "reuse": "docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run-run.py:56-65 calls the export owner's gate and :292-293 calls live_graph_activity; imas_codex/standard_names/export.py:3049-3127 and imas_codex/graph/offsite.py:128-155 own those capabilities.",
+    "scope_discipline": "the c0f2822e3773e99a543bd77f54b28d442d13bbb6 diff changes only docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run-run.py and docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run.html, both declared write paths."
+  },
+  "node": "sib-full-dd-run",
+  "plan": "sn-integrity-backlog",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source prompt requires a verified graph checkpoint, whole-DD preview, and capped job submission; the repair in docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run.html:16,32 keeps those receipts and adds provenance and gate checks.\nVERDICT done_when: the source prompt's launch measure is supported by the earlier archive and job receipts, while repair_test.log records 1 passed and repair_provenance.log records EXIT=0; source manifest.md has no completed baseline_suite or after_suite arms.\nVERDICT write_paths: the source prompt declares docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run-run.py and docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run.html; the sole gained commit changes exactly those two paths.\nVERDICT manifest: source manifest.md records commit c0f2822e3773e99a543bd77f54b28d442d13bbb6, the focused passing gate, provenance receipt, and a virtual-parent control, with baseline_suite and after_suite blank.\nVERDICT diff: reviewed commit c0f2822e3773e99a543bd77f54b28d442d13bbb6 against 5f5026ac94f307a22c918d466f928e46a8b0cbf7; docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run-run.py:21-310 changes the runner and test, and docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run.html:16,33 adds the evidence explanation.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run.html:16 connects the pre-run baseline to the runner, and docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run-run.py:289-305 preserves a standalone command for the later read-back.\nSCORE evidence: 15\nJUSTIFICATION evidence: docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run-run.py:166-286 checks the baseline log against stream events and a committed runner blob, while the source manifest's blank suite arms leave the added-failure delta unmeasured.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the c0f2822e3773e99a543bd77f54b28d442d13bbb6 diff changes only docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run-run.py and docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run.html, both declared write paths.\nSCORE durability: 15\nJUSTIFICATION durability: docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run-run.py:121-158 has fixed expected counts and a planted accepted-name blocker that would fail if the blocker were omitted or refusal removed, though the virtual-parent log only proves the test is absent there.\nSCORE fit: 18\nJUSTIFICATION fit: docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run-run.py:21-80 follows the graph-client and gate-only export idioms and introduces no forbidden symbol name.\nSCORE reuse: 19\nJUSTIFICATION reuse: docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run-run.py:56-65 calls the export owner's gate and :292-293 calls live_graph_activity; imas_codex/standard_names/export.py:3049-3127 and imas_codex/graph/offsite.py:128-155 own those capabilities.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run-run.py:120 non-blocking: the staging assertion compares the forwarded path with the same variable passed to read_back, so it cannot establish the caller chose a valid staging location; exempted because caller-selected staging is the helper's stated contract.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run-run.py:83 non-blocking: repair_negative_control.log's virtual parent fails with pytest exit 4 because the new test is absent, so that log does not show the new assertions reddening under a restored regression; exempted because the head test plants the source loss and its fixed expectations at lines 152-158 would fail if the blocker or refusal were removed.\n",
+  "reuse_note": "The owner search found run_export in imas_codex/standard_names/export.py:2947-3127 and live_graph_activity in imas_codex/graph/offsite.py:128-155; the repair delegates to both.",
+  "review_run_id": "r-20261107T214313486822-review-of-sib-full-dd-run-c0f2822e3773",
+  "reviewed_base_sha": "5f5026ac94f307a22c918d466f928e46a8b0cbf7",
+  "reviewed_head_sha": "c0f2822e3773e99a543bd77f54b28d442d13bbb6",
+  "reviewed_run_id": "r-20261107T200959160712-sib-full-dd-run",
+  "scores": {
+    "durability": 15,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T21:58:44.148917+00:00",
+  "total": 106
+}

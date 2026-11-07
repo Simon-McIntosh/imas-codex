@@ -1,0 +1,553 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "read-only"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex",
+  "base_sha": "6186a94447fc9466b2349a5d46c1fb1a72175604",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T214313486822-review-of-sib-full-dd-run-c0f2822e3773/brief.md",
+    "sha256": "3b6c417231abd1f81477dd55030146a1dfc929dc7f9af03fe9fba9d9639284ed"
+  },
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 2907008,
+      "cached_input_tokens_cumulative": 2907008,
+      "input_tokens": 3040041,
+      "input_tokens_cumulative": 3040041,
+      "output_tokens": 14676,
+      "output_tokens_cumulative": 14676,
+      "reasoning_output_tokens": 6344,
+      "reasoning_output_tokens_cumulative": 6344
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": null,
+  "clone_matches": {
+    "reason": "the run asserted no revision pair to compare",
+    "status": "unmeasured"
+  },
+  "commit_resolution": null,
+  "commits": [],
+  "completed_at": "2026-11-07T21:53:33Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-11-07T21:44:26Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": false,
+    "matched_measure": null,
+    "override": false,
+    "role": "review",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.9231621092086209,
+    "plan": "sn-integrity-backlog",
+    "reason": "role-not-enforced:review",
+    "verdict": "exempt"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'codex'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-11-07T22:43:19.975371+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-11-07T21:43:18Z",
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": "2026-11-14T15:28:13Z",
+    "seconds_until_reset": 582294,
+    "state": "quiet",
+    "utilisation_pct": 5.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-11-07T21:43:18Z",
+    "read_at": "2026-11-07T21:43:19Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 5.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": 380000,
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-07T21:53:33Z",
+    "quota_state": "measured",
+    "quota_windows": [
+      {
+        "observed_at": "2026-11-07T21:53:33Z",
+        "resets_at": 1794670093,
+        "used_percent": 6.0,
+        "window_minutes": 10080
+      }
+    ],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "notional_cost_usd": "no_dated_rate",
+      "rate_basis": "no_dated_rate"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T214313486822-review-of-sib-full-dd-run-c0f2822e3773/manifest.md",
+  "member": "disposable-r-20261107T214313486822-review-of-sib-full-dd-run-c0f2822e3773",
+  "model_key": "sol",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "review-of-sib-full-dd-run-c0f2822e3773",
+  "node_definition": {
+    "after": [],
+    "anchor_paths": [],
+    "brief": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T200959160712-sib-full-dd-run/review-brief.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T214313486822-review-of-sib-full-dd-run-c0f2822e3773/brief.md",
+    "brief_sha256": "3b6c417231abd1f81477dd55030146a1dfc929dc7f9af03fe9fba9d9639284ed",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "elevated",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "detail": "the dispatching harness exposed no authoring-turn token usage",
+        "status": "unknown",
+        "tokens": null
+      },
+      "harness": null,
+      "runtime_session_id": null,
+      "session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea"
+    },
+    "done_when": "the review for r-20261107T200959160712-sib-full-dd-run stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run's own baseline_suite and after_suite gate logs; the record is written at one of this run's declared write paths, under review-records/ inside the directory of run r-20261107T200959160712-sib-full-dd-run, and never in the worktree; the turn ends once that record is stored and the manifest reads complete",
+    "estimated_hours": null,
+    "goal": "attach an independent review to run r-20261107T200959160712-sib-full-dd-run covering only the commits it gained since it was reviewed: docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run-run.py, docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run.html",
+    "id": "review-of-sib-full-dd-run-c0f2822e3773",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-11-07T21:43:18Z",
+      "read_at": "2026-11-07T21:43:19Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 5.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T214313486822-review-of-sib-full-dd-run-c0f2822e3773/manifest.md",
+    "negative_control": "",
+    "plan": "sn-integrity-backlog",
+    "regenerate_paths": [],
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "review",
+    "section": "§50",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T200959160712-sib-full-dd-run/review-records/r-20261107T200959160712-sib-full-dd-run.json",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T200959160712-sib-full-dd-run/review-records/r-20261107T200959160712-sib-full-dd-run.at-c0f2822e3773e99a543bd77f54b28d442d13bbb6.json"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "outside_scope_paths": [
+    "base/head"
+  ],
+  "pace": {
+    "allowance": {
+      "advisory": true,
+      "burn_multiple": null,
+      "derived": null,
+      "drain_hours": 168.0,
+      "effective_limit": null,
+      "elapsed_fraction": 0.03724548943948423,
+      "elapsed_hours": 6.257242225833352,
+      "group": "codex-sub",
+      "lift": {
+        "ends_at": "2026-11-11T09:00:01+00:00",
+        "ends_on": "time",
+        "form": "uncapped",
+        "group": "codex-sub",
+        "id": "codex-sub-1794082577-c029e5",
+        "pace_multiple": null,
+        "remaining_seconds": 299781.927987,
+        "scope": "global"
+      },
+      "lift_hold": {
+        "held": false,
+        "kind": "uncapped"
+      },
+      "limited_by": null,
+      "observed_at": "2026-11-07T21:43:39+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": "window too young to project: burn evidence is quantised too coarsely: 3.72% elapsed is below the 5% floor",
+      "remaining_budget": 0.95,
+      "remaining_windows": null,
+      "resets_at": "2026-11-14T15:28:13Z",
+      "state": "observed",
+      "utilisation": 0.05,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.007250000000000001,
+      "decided_by": "window",
+      "margin": 0.61775,
+      "name": "review-of-sib-full-dd-run-c0f2822e3773",
+      "score": 0.625,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.05
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.072013,
+        "observed_at": "2026-11-07T21:43:39+00:00",
+        "period": "primary",
+        "resets_at": "2026-11-14T15:28:13Z",
+        "state": "observed",
+        "utilisation": 0.05,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "lift_id": "codex-sub-1794082577-c029e5",
+    "member": "codex",
+    "node": "review-of-sib-full-dd-run-c0f2822e3773",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-11-07T21:43:39.072013+00:00",
+    "score": 0.625,
+    "session": null,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:snapshot",
+    "family": null,
+    "jev_model": "~typesafe/jev-latest",
+    "latency_ms": 5002.621,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 1666.478,
+      "context-estimate": 65.119,
+      "records": 1518.528,
+      "verdict-inputs": 894.325
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.9231621092086209,
+  "plan_link": null,
+  "promoted_by": "review-self",
+  "promoted_revision": "6186a94447fc9466b2349a5d46c1fb1a72175604",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "id": "r-20261107T214313486822-review-of-sib-full-dd-run-c0f2822e3773",
+    "reviewed_base_sha": "5f5026ac94f307a22c918d466f928e46a8b0cbf7",
+    "reviewed_head_sha": "c0f2822e3773e99a543bd77f54b28d442d13bbb6",
+    "scores": {
+      "durability": 15,
+      "evidence": 15,
+      "fit": 18,
+      "goal_fidelity": 19,
+      "reuse": 19,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 106
+  },
+  "review_tier": "full",
+  "role": "review",
+  "route_mode": "explicit",
+  "run_id": "r-20261107T214313486822-review-of-sib-full-dd-run-c0f2822e3773",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§50",
+  "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+  "session_harness": "codex",
+  "session_id": "01a1b7f9-2c81-7d71-a5fb-94883fddc2e8",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 2907008,
+    "cumulative_input_tokens": 5947049,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 21020
+  },
+  "time_budget": "60m",
+  "tool_steps": 53.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "backend": "codex",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 1467,
+        "budget_seconds": 3600,
+        "classification": "blocked",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports blocked: Full done-when requires an original writer for every edge. Surviving graph evidence cannot identify 138 creators: 49 retrospective backfills; 87 edges without creation receipts; 2 with only noncreating records. Need additional historical evidence or explicit coordinator/lead acceptance of unresolved attribution; no writer identity is guessed.",
+        "effective_phase": "blocked",
+        "elapsed_seconds": 5067,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-07T20:45:15Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-11-07T20:19:31Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [
+            {
+              "bytes": 63812760,
+              "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T201632402746-sib-lineage-cycle-census/codex-home/cache"
+            },
+            {
+              "bytes": 28836794,
+              "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T201632402746-sib-lineage-cycle-census/codex-home/plugins"
+            }
+          ],
+          "run_id": "r-20261107T201632402746-sib-lineage-cycle-census",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 528,
+          "worker_pid": 3856454
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "Full done-when requires an original writer for every edge. Surviving graph evidence cannot identify 138 creators: 49 retrospective backfills; 87 edges without creation receipts; 2 with only noncreating records. Need additional historical evidence or explicit coordinator/lead acceptance of unresolved attribution; no writer identity is guessed.",
+          "lifting_condition": null,
+          "recovery": "decide",
+          "recovery_classification": "blocked",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "blocked"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-07T20:45:15Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 3500,
+        "log_fresh": false,
+        "manifest_commits": [
+          "c4024120a15c23a5066723324b836e1725f11f0e",
+          "6ec3df6b92f057419ff7b8678637e1a5e88d0685",
+          "4215ded8de35b06a2f81bd2842a4f825460b8363"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "2ba293b18830cc5369f5ed720df3648b1d7dd4493110f99e9233ce1abc59774d",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T201632402746-sib-lineage-cycle-census/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "blocked",
+        "manifest_status": "blocked",
+        "marker": "!",
+        "model_key": "astra",
+        "needs_help_complete": false,
+        "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T201632402746-sib-lineage-cycle-census/manifest.md; resolve the blocker before resuming the run",
+        "node": "sib-lineage-cycle-census",
+        "phase": "blocked",
+        "plan": "sn-integrity-backlog",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "imas-codex",
+        "recovery": "decide",
+        "recovery_classification": "blocked",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261107T201632402746-sib-lineage-cycle-census",
+        "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+        "session_resolution": {
+          "consulted": [
+            "pointer",
+            "stream",
+            "ledger"
+          ],
+          "resolved": true,
+          "run_id": "r-20261107T201632402746-sib-lineage-cycle-census",
+          "session_id": "01a1b7aa-da52-7101-8aad-d194451ef910",
+          "source": "stream"
+        },
+        "stored_phase": "blocked",
+        "terminal_age_seconds": 3552,
+        "terminal_at": "2026-11-07T20:44:19Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-lineage-cycle-census"
+      }
+    ]
+  },
+  "wall_seconds": 547,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-07T21:53:36Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-11-07T21:45:03Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [
+      {
+        "bytes": 63838054,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T214313486822-review-of-sib-full-dd-run-c0f2822e3773/codex-home/cache"
+      },
+      {
+        "bytes": 28836794,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T214313486822-review-of-sib-full-dd-run-c0f2822e3773/codex-home/plugins"
+      }
+    ],
+    "run_id": "r-20261107T214313486822-review-of-sib-full-dd-run-c0f2822e3773",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 146,
+    "worker_pid": 416025
+  },
+  "worker_seconds": 547,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}
