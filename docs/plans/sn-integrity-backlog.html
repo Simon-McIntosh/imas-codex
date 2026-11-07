@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="344">
+<meta name="plan-version" content="345">
 <meta name="plan-modified" content="2026-11-07">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -1103,6 +1103,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s47" data-id="c-run-r-20261107T093716208547-review-of-sib-removal-follows-renames-6d24c7d98e32" data-who="reckon-build" data-when="2026-11-07T09:50:02.292Z">
     <div class="r-comment-body"><p>Independent review of r-20261107T005812559314-sib-removal-follows-renames gained commits f10b2b2e8..6d24c7d98 (6af983443, d457a1e03, 52291bc03, 6d24c7d98): the prior blocking finding is repaired — graph_source_bindings.py:2541 scopes removed-path resolution to DD sources, so a signals source is marked stale and its name stays live, backed by a negative control at EXIT=1 — and the supersede-holder receipts now go through record_supersede_receipts. All six dimensions scored (goal_fidelity 18, evidence 14, scope_discipline 20, durability 19, fit 18, reuse 17; total 106), added_failure_count 0 derived from the run's own arms, two non-blocking findings (the inline supersede SET still duplicates _supersede_update, and the done-when's tests/graph arm remains unmeasured).</p></div>
+</div>
+<div class="r-comment" data-section="s47" data-id="c-run-r-20261107T005812559314-sib-removal-follows-renames" data-who="reckon-build" data-when="2026-11-07T09:26:12Z">
+    <div class="r-comment-body"><p>§47 implemented: marking a removed path&#x27;s source stale now resolves the name it produced in the same statement, and only for DD sources — move to an unheld RENAMED_TO successor with matching units (name stays live, one non-stale producer), supersede onto a live successor&#x27;s holder with a `removed_path_successor_holder` receipt and REFINED_FROM edge, or retire with a `removed_path_retirement` receipt when no successor exists or units disagree. A signals source names a FacilitySignal rather than an IMASNode, so it is marked stale and its name is left to the signal-side lifecycle. The dead-end revival guard now reads the source node&#x27;s type. Evidence: the target file passes 6/6 including the signals case, tests/standard_names is 8538 passed / 0 failed against a base arm of 4 failed / 8532 passed, and both negative controls fail as specified.</p></div>
 </div>
 <div class="r-comment" data-section="s48" data-id="c-run-r-20261106T231022458778-review-of-sib-rebind-removed-path-names-645423c1a56d" data-who="reckon-build" data-when="2026-11-06T23:23:43.847Z">
     <div class="r-comment-body"><p>Independent review of r-20261106T222618682261-sib-rebind-removed-path-names at 645423c1a scores 92/120 across the six dimensions with one blocking finding: the readback gate asserts zero successor edges where §48's done_when requires one, so the superseded name's measured state does not meet the node's stated measure.</p></div>
