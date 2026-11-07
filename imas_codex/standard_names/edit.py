@@ -3184,6 +3184,8 @@ class _ReclaimCase:
     case: str | None
     tombstone: dict[str, Any] = field(default_factory=dict)
     revived_stage: str | None = None
+    # The live name a history-apart reclaim moves the tombstone's history to.
+    holder: str | None = None
     detail: str = ""
 
 
@@ -3223,6 +3225,14 @@ def _reclaim_spelling_case(
       third locus would move an unrelated quantity onto the spelling. A
       holder at the same locus also keeps the spelling load-bearing, and both
       of those shapes are refused.
+    * ``history_apart`` — the tombstone's quantity is already held by a live
+      successor sitting at the tombstone's own locus, and the renaming name
+      comes from a different locus. The spelling is free to name the other
+      quantity only because the history it carries still reads true somewhere
+      else, so that history moves to an archived identity rather than
+      travelling with the id. The reclaim then renames the live name onto the
+      freed spelling exactly as an ordinary rename would, inheriting none of
+      the archived quantity's rows.
 
     The lineage is read by :func:`_fold_lineage_walk`, the walk the fold
     writer uses, so a spelling is reclaimable on exactly the terms a
@@ -3274,6 +3284,22 @@ def _reclaim_spelling_case(
         target_locus = (
             _dd_locus(target_rows[0].get("source_paths") or ()) if target_rows else None
         )
+        if (
+            holder_locus is not None
+            and holder_locus == tomb_locus
+            and target_locus is not None
+            and target_locus != tomb_locus
+        ):
+            return _ReclaimCase(
+                case="history_apart",
+                tombstone=tombstone,
+                holder=holder,
+                detail=(
+                    f"holder {holder!r} already holds the tombstone's quantity "
+                    f"at locus {tomb_locus!r}, and {target!r} sits at the "
+                    f"different locus {target_locus!r}"
+                ),
+            )
         if (
             holder_locus is not None
             and holder_locus != tomb_locus
@@ -3537,6 +3563,161 @@ def _apply_reclaim_rename(
     )
 
 
+_ARCHIVE_RECLAIM_HISTORY_QUERY = """
+// ATOMIC_ARCHIVE_RECLAIM_HISTORY
+MATCH (tomb:StandardName {id: $tomb_id}), (holder:StandardName {id: $holder_id})
+WHERE tomb.name_stage = 'superseded'
+  AND coalesce(holder.name_stage, '') <> 'superseded'
+SET tomb.id = $archive_id,
+    tomb.archived_from = $tomb_id,
+    tomb.archived_at = datetime($changed_at),
+    tomb.archived_for = $reclaiming_name,
+    tomb.name_stage = 'archived',
+    tomb.status = 'archived',
+    tomb.updated_at = datetime($changed_at)
+REMOVE tomb:StandardName
+SET tomb:ArchivedStandardName
+MERGE (holder)-[:HAS_ARCHIVED_HISTORY]->(tomb)
+CREATE (change:StandardNameChange {
+  id: $change_id,
+  from_name: $tomb_id,
+  to_name: $archive_id,
+  operation: 'archive_reclaim_history',
+  reason: $receipt,
+  origin: $origin,
+  run_id: $run_id,
+  changed_at: datetime($changed_at),
+  internal: true
+})
+MERGE (holder)-[:HAS_INTERNAL_CHANGE]->(change)
+MERGE (tomb)-[:HAS_INTERNAL_CHANGE]->(change)
+RETURN tomb.id AS archive_id, holder.id AS holder_id
+"""
+
+_RESTORE_ARCHIVE_RECLAIM_QUERY = """
+// ATOMIC_RESTORE_ARCHIVE_RECLAIM
+MATCH (archived:ArchivedStandardName {id: $archive_id})
+WHERE archived.archived_from = $tomb_id
+REMOVE archived:ArchivedStandardName
+SET archived:StandardName,
+    archived.id = $tomb_id,
+    archived.name_stage = 'superseded',
+    archived.status = 'superseded',
+    archived.archived_from = null,
+    archived.archived_at = null,
+    archived.archived_for = null,
+    archived.updated_at = datetime($changed_at)
+WITH archived
+OPTIONAL MATCH (holder)-[link:HAS_ARCHIVED_HISTORY]->(archived)
+DELETE link
+WITH archived
+OPTIONAL MATCH (archived)-[:HAS_INTERNAL_CHANGE]->(change:StandardNameChange {
+  operation: 'archive_reclaim_history', to_name: $archive_id
+})
+DETACH DELETE change
+"""
+
+
+def _archive_history_for_reclaim(
+    gc: GraphClient,
+    *,
+    reclaim: _ReclaimCase,
+    target: str,
+    tombstone_id: str,
+    reason: str,
+    origin: str,
+    run_id: str,
+) -> tuple[str, str]:
+    """Move a tombstone's history onto an archived identity beside its holder.
+
+    The tombstone's quantity is already held by a live successor, so the
+    spelling may pass to a name for a different quantity — but the history,
+    reviews and lineage recorded under it describe the successor's quantity
+    and must stay with it. The tombstone node is re-keyed to an archive id,
+    leaves the ``StandardName`` label (so no live query reads it as a name),
+    and is linked to that successor. Its incident edges, including the
+    ``REFINED_FROM`` lineage and every paid review, travel with it.
+
+    Returns ``(archive_id, change_id)``. A fresh archive id is minted per
+    reclaim so no archived identity stands in for another.
+    """
+    assert reclaim.holder is not None, "a history-apart reclaim names its holder"
+    archive_id = f"archived:{tombstone_id}:{uuid.uuid4().hex[:12]}"
+    change_id = f"sn-change:archive-reclaim-history:{uuid.uuid4().hex}"
+    tomb_locus = _dd_locus(reclaim.tombstone.get("source_paths") or ())
+    receipt = json.dumps(
+        {
+            "case": reclaim.case,
+            "detail": reclaim.detail,
+            "tombstone": tombstone_id,
+            "archive": archive_id,
+            "holder": reclaim.holder,
+            "reclaiming_name": target,
+            "tombstone_locus": tomb_locus,
+            "reason": reason,
+        },
+        sort_keys=False,
+    )
+    changed_at = _now_iso()
+    with gc.session() as session:
+        transaction = session.begin_transaction()
+        try:
+            rows = [
+                dict(row)
+                for row in transaction.run(
+                    _ARCHIVE_RECLAIM_HISTORY_QUERY,
+                    tomb_id=tombstone_id,
+                    holder_id=reclaim.holder,
+                    archive_id=archive_id,
+                    reclaiming_name=target,
+                    change_id=change_id,
+                    receipt=receipt,
+                    origin=origin,
+                    run_id=run_id,
+                    changed_at=changed_at,
+                )
+            ]
+            if not rows:
+                raise RuntimeError(
+                    f"cannot archive {tombstone_id!r}: it is no longer a "
+                    "superseded tombstone, or its holder is not live"
+                )
+            transaction.commit()
+        except BaseException:
+            with suppress(Exception):
+                transaction.rollback()
+            raise
+    return archive_id, change_id
+
+
+def _restore_archived_history(
+    gc: GraphClient, *, archive_id: str, tombstone_id: str
+) -> None:
+    """Undo :func:`_archive_history_for_reclaim.
+
+    The archive runs before the rename that frees and claims the spelling, so
+    a rename that then fails leaves the spelling unclaimed and the history
+    parked beside its holder. Restoring puts the tombstone back exactly as it
+    was, so a refused reclaim writes nothing either side.
+    """
+    with gc.session() as session:
+        transaction = session.begin_transaction()
+        try:
+            list(
+                transaction.run(
+                    _RESTORE_ARCHIVE_RECLAIM_QUERY,
+                    archive_id=archive_id,
+                    tomb_id=tombstone_id,
+                    changed_at=_now_iso(),
+                )
+            )
+            transaction.commit()
+        except BaseException:
+            with suppress(Exception):
+                transaction.rollback()
+            raise
+
+
 def _apply_rename(
     gc: GraphClient,
     *,
@@ -3571,6 +3752,10 @@ def _apply_rename(
     #    occupant's own route: a successor-less superseded tombstone owns the
     #    spelling as history, so the refusal names the two ways to reach it
     #    rather than restating bare id uniqueness.
+    #: Set when the requested id is a tombstone whose recorded quantity a
+    #: live successor already holds; its history is archived and the ordinary
+    #: rename below takes the freed spelling.
+    history_apart: _ReclaimCase | None = None
     coll = gc.query(
         """
         // EDIT_CHECK_COLLISION
@@ -3589,7 +3774,12 @@ def _apply_rename(
             # both of which move this identity's own spelling back onto the id
             # rather than reviving history nobody holds.
             reclaim = _reclaim_spelling_case(gc, target=target, new_name=new_name)
-            if reclaim.case is not None:
+            if reclaim.case == "history_apart":
+                # The tombstone's history moves beside its holder before the
+                # spelling is freed, so the rename below mints the live name
+                # on an id that no longer carries that history.
+                history_apart = reclaim
+            elif reclaim.case is not None:
                 return _apply_reclaim_rename(
                     gc,
                     target=target,
@@ -3619,13 +3809,14 @@ def _apply_rename(
                     "imas_codex/standard_names/signed_manifest.py, then fold "
                     "this name into it with sn supersede",
                 )
-        return _blocked(
-            target,
-            "rename",
-            "name",
-            scope,
-            f"a StandardName {new_name!r} already exists",
-        )
+        if history_apart is None:
+            return _blocked(
+                target,
+                "rename",
+                "name",
+                scope,
+                f"a StandardName {new_name!r} already exists",
+            )
 
     # 3. Shared-base guard (leaf targets only — a
     #    parent target's own siblings are unaffected by renaming it, since
@@ -3777,6 +3968,13 @@ def _apply_rename(
     require_producing_sources(gc, [refine_root_old], retired_is_exempt=False)
 
     if dry_run:
+        if history_apart is not None:
+            actions.append(
+                f"[dry-run] would archive tombstone {refine_root_new!r} beside "
+                f"its live holder {history_apart.holder!r}, carrying its "
+                "history, reviews and lineage off the spelling before the "
+                "rename takes the freed id"
+            )
         actions.append(
             f"[dry-run] would carry {len(producing_source_ids)} producing "
             f"source(s) to {refine_root_new!r}"
@@ -3803,29 +4001,56 @@ def _apply_rename(
 
     # 6. Apply: enter REVIEW_NAME by creating the refined successor node.
     run_id = _new_run_id()
-    result = persist_refined_name(
-        old_name=refine_root_old,
-        new_name=refine_root_new,
-        description=root_row.get("description") or "",
-        kind=derive_kind(refine_root_new),
-        unit=successor_unit,
-        physics_domain=root_row.get("physics_domain"),
-        tags=root_row.get("tags") or [],
-        old_chain_length=root_row.get("chain_length") or 0,
-        model="sn-edit",
-        reason=reason,
-        run_id=run_id,
-        edit_mode=EditMode.rename.value,
-        name_hint=refine_root_new,
-        edit_reason=reason,
-        edit_origin=origin,
-        edit_scope=scope,
-        edit_status=EditStatus.open.value,
-        edit_requested_at=_now_iso(),
-        edit_override_edits=override_edits,
-        edit_include_accepted=include_accepted,
-        expected_old_stage=root_stage,
-    )
+    archived: tuple[str, str] | None = None
+    if history_apart is not None:
+        archived = _archive_history_for_reclaim(
+            gc,
+            reclaim=history_apart,
+            target=refine_root_old,
+            tombstone_id=refine_root_new,
+            reason=reason,
+            origin=origin,
+            run_id=run_id,
+        )
+        actions.append(
+            f"archived the history of tombstone {refine_root_new!r} as "
+            f"{archived[0]!r}, linked to its live holder "
+            f"{history_apart.holder!r} (receipt {archived[1]})"
+        )
+    try:
+        result = persist_refined_name(
+            old_name=refine_root_old,
+            new_name=refine_root_new,
+            description=root_row.get("description") or "",
+            kind=derive_kind(refine_root_new),
+            unit=successor_unit,
+            physics_domain=root_row.get("physics_domain"),
+            tags=root_row.get("tags") or [],
+            old_chain_length=root_row.get("chain_length") or 0,
+            model="sn-edit",
+            reason=reason,
+            run_id=run_id,
+            edit_mode=EditMode.rename.value,
+            name_hint=refine_root_new,
+            edit_reason=reason,
+            edit_origin=origin,
+            edit_scope=scope,
+            edit_status=EditStatus.open.value,
+            edit_requested_at=_now_iso(),
+            edit_override_edits=override_edits,
+            edit_include_accepted=include_accepted,
+            expected_old_stage=root_stage,
+        )
+    except BaseException:
+        # The archive is the only write that precedes the rename's own
+        # transaction, so a refused rename hands the tombstone back instead of
+        # leaving its history parked beside the holder and the spelling
+        # unclaimed.
+        if archived is not None:
+            _restore_archived_history(
+                gc, archive_id=archived[0], tombstone_id=refine_root_new
+            )
+        raise
     successor = result["new_name"]
 
     # Stamp the parsed ISN segment decomposition on the successor so the
