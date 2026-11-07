@@ -2627,19 +2627,22 @@ def mark_sources_stale(source_ids: list[str], *, services: Any) -> int:
         from imas_codex.standard_names.provenance_lifecycle import (
             record_standard_name_change,
         )
-        superseded = [
-            (row["name_id"], row["holder_id"])
-            for row in outcomes
-            if row["branch"] == REMOVAL_SUPERSEDE_HOLDER
-        ]
-        for old, new in superseded:
-            record_standard_name_change(
-                gc,
-                old,
-                new,
-                operation="removed_path_successor_holder",
-                reason="the removed path's successor is held by a live name",
-            )
+        from imas_codex.standard_names.source_invariant import (
+            record_supersede_receipts,
+        )
+
+        record_supersede_receipts(
+            gc,
+            (
+                (row["name_id"], row["holder_id"])
+                for row in outcomes
+                if row["branch"] == REMOVAL_SUPERSEDE_HOLDER
+            ),
+            operation="removed_path_successor_holder",
+            reason="the removed path's successor is held by a live name",
+        )
+        # A retirement names no successor, so its receipt is the name's own
+        # event; the wrapper above drops self-pairs.
         for row in outcomes:
             if row["branch"] != REMOVAL_RETIRE:
                 continue
