@@ -573,6 +573,7 @@ class TestIdsMappingReasoningEffortForwarding:
         assert captured["reasoning_effort"] == "high"
 
 
+@pytest.mark.timeout(120)
 def test_no_gpt5_name_survives_in_the_fallback_slate_or_proxy_routes():
     """The newest model of each OpenAI tier is the only one a fallback names.
 
