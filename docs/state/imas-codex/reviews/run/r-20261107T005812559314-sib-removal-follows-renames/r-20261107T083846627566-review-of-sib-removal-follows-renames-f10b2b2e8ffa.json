@@ -12,6 +12,13 @@
     "imas_codex/standard_names/graph_store/graph_catalog.py:2312 _lock_claimed_name_bindings(allow_dead_end_revival=True)"
   ],
   "completed_at": "2026-11-07T08:50:33.464Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "repair-of-sib-removal-follows-renames-f10b2b2e8ffa",
+      "recorded_at": "2026-11-07T09:33:23.232623+00:00"
+    }
+  },
   "dispatched_at": "2026-11-07T08:40:57Z",
   "finding_dispositions": {
     "0": {
