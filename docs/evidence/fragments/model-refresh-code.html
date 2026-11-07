@@ -161,6 +161,25 @@ ORDER BY day DESC, llm_model, release</code></pre>
   <code>gate-release-base.log</code> and <code>gate-release-after.log</code> in
   the run directory, each with its revision, tree, command and
   <code>EXIT=</code> line.</p>
+  <h4>Gate, durable-release round</h4>
+  <p>Re-measured after the release was written to the graph, with the base arm
+  taken at <code>566ee7678</code> — the commit before the feature — so the two
+  arms span everything this node changed rather than one round of it:</p>
+  <table><thead><tr><th>Arm</th><th>Revision / tree</th><th>Result</th></tr></thead><tbody>
+    <tr><td>base</td><td><code>566ee7678</code>, <code>git archive</code> snapshot with the main checkout's <code>.env</code></td><td>4 failed, 9605 passed, 13 skipped, <code>EXIT=1</code></td></tr>
+    <tr><td>after</td><td><code>f69d08072</code>, this worktree</td><td>2 failed, 9607 passed, 13 skipped, <code>EXIT=1</code></td></tr>
+  </tbody></table>
+  <p>One failure is after-only:
+  <code>tests/core/test_catalog_input_limits.py::test_docs_review_escalator_accepts_rotated_breaker</code>
+  &mdash; a concurrency-sensitive review-escalator test that <strong>passes alone
+  at the same revision</strong> (<code>gate-single-after.log</code>, 1 passed,
+  <code>EXIT=0</code>), so it is a parallel-load flake rather than a state
+  change. Three failures are base-only
+  (<code>test_pool_batch_processors</code>, <code>test_pool_registry_imports</code>,
+  <code>test_review_pipeline</code>), and one fails on both arms. Logs:
+  <code>gate-durable-base.log</code> and <code>gate-durable-after.log</code>, each
+  opening with its revision, tree and command and closing with its
+  <code>EXIT=</code> line.</p>
   <p>The new tests sit outside that selection, so they were also run on their
   own &mdash; <code>tests/discovery/test_decisions_release_tracking.py</code>
   plus the gpt-5.x guard &mdash; <strong>8 passed</strong>,
