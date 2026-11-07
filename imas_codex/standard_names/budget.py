@@ -174,6 +174,14 @@ class LLMCostEvent:
     The field is intentionally unstructured — callers pick the
     encoding that suits their analytics query.
     """
+    model_release: str | None = None
+    """The dated build the provider reported answering this call.
+
+    A pinned model id does not fix the build behind it, so this is the only
+    field that shows a re-point of the same id: two calls under one id with two
+    releases are two different builds. Written to the ``LLMCost`` row beside
+    ``llm_model``.
+    """
     cycle: str | None = None  # e.g. "c0", "c1", "c2"
     phase: str = ""  # generate|regen|enrich|review_names|review_docs
     service: str = "standard-names"
@@ -840,6 +848,7 @@ class BudgetManager:
                         cycle=item.event.cycle,
                         sn_ids=list(item.event.sn_ids) if item.event.sn_ids else None,
                         model=item.event.model,
+                        model_release=item.event.model_release,
                         cost=item.cost,
                         tokens_in=item.event.tokens_in,
                         tokens_out=item.event.tokens_out,

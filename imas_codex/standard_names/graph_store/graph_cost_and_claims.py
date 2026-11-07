@@ -34,6 +34,7 @@ def record_llm_cost(
     cycle: str | None = None,
     sn_ids: list[str] | None = None,
     model: str,
+    model_release: str | None = None,
     cost: float,
     tokens_in: int,
     tokens_out: int,
@@ -72,7 +73,7 @@ def record_llm_cost(
             phase,
         )
         return spend_id
-    cypher = "\n        CREATE (c:LLMCost {\n            id: $id,\n            run_id: $run_id,\n            phase: $phase,\n            pool: $pool,\n            event_type: $event_type,\n            cycle: $cycle,\n            standard_name_ids: $standard_name_ids,\n            batch_id: $batch_id,\n            overspend: $overspend,\n            llm_model: $llm_model,\n            llm_cost: $llm_cost,\n            llm_tokens_in: $llm_tokens_in,\n            llm_tokens_out: $llm_tokens_out,\n            llm_tokens_cached_read: $llm_tokens_cached_read,\n            llm_tokens_cached_write: $llm_tokens_cached_write,\n            llm_service: $llm_service,\n            llm_at: datetime($llm_at),\n            for_run: $run_id\n        })\n        WITH c\n        MATCH (rr:SNRun {id: $run_id})\n        MERGE (c)-[:FOR_RUN]->(rr)\n    "
+    cypher = "\n        CREATE (c:LLMCost {\n            id: $id,\n            run_id: $run_id,\n            phase: $phase,\n            pool: $pool,\n            event_type: $event_type,\n            cycle: $cycle,\n            standard_name_ids: $standard_name_ids,\n            batch_id: $batch_id,\n            overspend: $overspend,\n            llm_model: $llm_model,\n            llm_model_release: $llm_model_release,\n            llm_cost: $llm_cost,\n            llm_tokens_in: $llm_tokens_in,\n            llm_tokens_out: $llm_tokens_out,\n            llm_tokens_cached_read: $llm_tokens_cached_read,\n            llm_tokens_cached_write: $llm_tokens_cached_write,\n            llm_service: $llm_service,\n            llm_at: datetime($llm_at),\n            for_run: $run_id\n        })\n        WITH c\n        MATCH (rr:SNRun {id: $run_id})\n        MERGE (c)-[:FOR_RUN]->(rr)\n    "
     params = {
         "id": spend_id,
         "run_id": run_id,
@@ -84,6 +85,7 @@ def record_llm_cost(
         "batch_id": batch_id,
         "overspend": round(overspend, 6),
         "llm_model": model,
+        "llm_model_release": model_release,
         "llm_cost": round(cost, 6),
         "llm_tokens_in": tokens_in,
         "llm_tokens_out": tokens_out,

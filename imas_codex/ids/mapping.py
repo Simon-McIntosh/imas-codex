@@ -81,6 +81,13 @@ class PipelineCost:
     steps: dict[str, float] = field(default_factory=dict)
     total_tokens: int = 0
     releases: dict[str, str | None] = field(default_factory=dict)
+    charge: Callable[[str, float, str | None, str | None], None] | None = None
+    """Optional per-call sink for a tracker bound to a run's budget pool.
+
+    A tracker alone accumulates in memory. A caller that owns a run binds this
+    so every decisions call is persisted as its own cost record, carrying the
+    model id and the dated build that answered it.
+    """
 
     @property
     def total_usd(self) -> float:
@@ -98,6 +105,23 @@ class PipelineCost:
         while the spend line is unchanged.
         """
         self.releases[step] = release
+
+    def record_llm_call(
+        self,
+        *,
+        step: str,
+        spent: float,
+        model: str | None,
+        release: str | None,
+    ) -> None:
+        """Persist one call through the bound sink, when a run is bound.
+
+        The step's running total is not what gets written: one record per call
+        keeps the model and the release of that call, so a batch whose states
+        were served by two builds does not collapse into one row.
+        """
+        if self.charge is not None:
+            self.charge(step, spent, model, release)
 
 
 # ---------------------------------------------------------------------------

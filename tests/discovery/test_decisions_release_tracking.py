@@ -173,3 +173,79 @@ def test_a_tracker_without_release_storage_still_books_the_spend(monkeypatch):
     tracker = SpendOnly()
     judgment.decide_one(PINNED_MODEL, {}, QUESTIONS, service=SERVICE, cost=tracker)
     assert tracker.steps["decision"] == COST
+
+
+def test_a_stored_llm_cost_carries_the_release():
+    """The graph row, not just the tracker, holds the build that answered.
+
+    ``record_llm_cost`` is the only writer of a ``:LLMCost`` node, so the
+    property is asserted where the row is built: the release travels through
+    the event and lands as its own property beside ``llm_model``.
+    """
+    import os
+    import uuid
+    from datetime import datetime
+
+    from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        record_llm_cost,
+    )
+
+    captured: dict = {}
+
+    class _Graph:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_exc):
+            return False
+
+        def query(self, cypher, **params):
+            captured["cypher"] = cypher
+            captured["params"] = params
+
+    class _Services:
+        GraphClient = _Graph
+
+        @staticmethod
+        def _normalize_pool(phase):
+            return phase
+
+    _Services.datetime = datetime
+    _Services.uuid = uuid
+    _Services.os = os
+
+    record_llm_cost(
+        run_id="run-1",
+        phase="sn_judge",
+        model=PINNED_MODEL,
+        model_release=MODEL_RELEASE,
+        cost=COST,
+        tokens_in=0,
+        tokens_out=0,
+        services=_Services,
+    )
+    assert captured["params"]["llm_model"] == PINNED_MODEL
+    assert captured["params"]["llm_model_release"] == MODEL_RELEASE
+    assert "llm_model_release" in captured["cypher"]
+
+
+def test_each_call_charges_its_own_record_with_its_own_release(monkeypatch):
+    """A batch is many records, not one: the releases never collapse."""
+    charged: list[tuple[str, str | None, str | None]] = []
+    tracker = PipelineCost(
+        charge=lambda step, spent, model, release: charged.append(
+            (step, model, release)
+        )
+    )
+    for release in (MODEL_RELEASE, LATER_RELEASE):
+        monkeypatch.setattr(
+            llm,
+            "_post_decisions",
+            lambda h, b, t, r=release: _FakeResponse(_payload(r)),
+        )
+        judgment.decide_one(
+            PINNED_MODEL, {}, QUESTIONS, service=SERVICE, cost=tracker, step="sn_judge"
+        )
+    assert [record[2] for record in charged] == [MODEL_RELEASE, LATER_RELEASE]
+    assert {record[0] for record in charged} == {"sn_judge"}
+    assert {record[1] for record in charged} == {PINNED_MODEL}

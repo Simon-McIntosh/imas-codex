@@ -731,8 +731,13 @@ async def _documentation_contradiction_note(
         return "claim comparison unavailable: run budget refused the call"
     try:
         model = get_model("sn-judge")
+        releases: list[str] = []
         results, _ = await jev_review.decide_batch(
-            [state], questions, model=model, service=jev_review.SERVICE
+            [state],
+            questions,
+            model=model,
+            service=jev_review.SERVICE,
+            reported=releases,
         )
         if len(results) != 1:
             logger.warning("review_docs: claim result count differs for %s", item["id"])
@@ -750,6 +755,7 @@ async def _documentation_contradiction_note(
             spent,
             LLMCostEvent(
                 model=model,
+                model_release=releases[0] if releases else None,
                 tokens_in=0,
                 tokens_out=0,
                 sn_ids=(item["id"],),
