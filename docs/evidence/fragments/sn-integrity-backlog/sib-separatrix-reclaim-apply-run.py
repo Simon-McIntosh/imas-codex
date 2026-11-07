@@ -457,11 +457,171 @@ async def tritium():
     assert outcome["spend_usd"] <= 2.0, outcome
 
 
+def readback():
+    authority = json.loads(AUTHORITY.read_text())
+    census = authority["census"]
+    ids = sorted(
+        {n for row in census for n in (row["id"], row["target"])}
+        | set(authority["tritium"]["compose"])
+    )
+    receipts = [
+        json.loads(path.read_text()) for path in sorted(RUN.glob("reclaim-*.json"))
+    ]
+    changed = [r["apply"]["successor"] for r in receipts]
+    paths = sorted(
+        {p.removeprefix("dd:") for r in census for p in r["paths"]} | set(TRITIUM_PATHS)
+    )
+    with GraphClient() as gc:
+        state = snapshot(gc, ids)
+        assert len(state) >= 98 and len(census) == 98
+        sources = gc.query(
+            """
+          UNWIND $paths AS path
+          OPTIONAL MATCH (s:StandardNameSource {id:'dd:'+path})
+          OPTIONAL MATCH (s)-[:PRODUCED_NAME]->(n:StandardName)
+          RETURN path,s.id AS id,s.status AS status,s.last_error AS last_error,
+            collect(CASE WHEN n IS NULL THEN null ELSE {id:n.id,stage:n.name_stage} END) AS names
+        """,
+            paths=paths,
+        )
+        source_by_path = {r["path"]: r for r in sources}
+        assert source_by_path["summary/local/separatrix/zeff/value"]["id"]
+        cycle_rows = gc.query(
+            """
+          UNWIND $ids AS id MATCH (n:StandardName {id:id})
+          RETURN id, EXISTS { MATCH (n)-[:REFINED_FROM*1..64]->(n) } AS cycle,
+            COUNT { (n)-[:REFINED_FROM]->(:StandardName) } AS predecessor_edges
+        """,
+            ids=ids,
+        )
+        assert any(r["predecessor_edges"] for r in cycle_rows), (
+            "lineage instrument sees no known edge"
+        )
+        cycles = sorted(r["id"] for r in cycle_rows if r["cycle"])
+        changed_cycles = sorted(set(cycles) & set(changed))
+        costs = gc.query(
+            """
+          MATCH (r:SNRun {id:$id})
+          OPTIONAL MATCH (c:LLMCost {run_id:$id})
+          RETURN r.id AS run_id,count(c) AS events,count(c.llm_cost) AS priced_events,
+            coalesce(sum(c.llm_cost),0.0) AS usd,r.status AS status
+        """,
+            id=RUN.name,
+        )
+        remaining = []
+        conforms = []
+        for row in census:
+            old = state.get(row["id"])
+            target = state.get(row["target"])
+            live_old = old and old["stage"] != "superseded"
+            live_target = target and target["stage"] != "superseded"
+            lexical = bool(
+                (live_old and row["id"] == row["target"])
+                or (not live_old and live_target)
+            )
+            bindings = all(
+                any(
+                    n["id"] == row["target"] and n["stage"] != "superseded"
+                    for n in source_by_path[p.removeprefix("dd:")]["names"]
+                )
+                for p in row["paths"]
+            )
+            result = {
+                **row,
+                "conforms": lexical,
+                "all_recorded_sources_on_target": bindings,
+            }
+            conforms.append(result)
+            if not lexical:
+                result["lineage"] = lineage(gc, row["target"])
+                remaining.append(result)
+        tritium_state = {
+            n: state.get(n) for n in [BARE, *authority["tritium"]["compose"]]
+        }
+        produced = [
+            any(
+                n["id"] == target and n["stage"] != "superseded"
+                for n in source_by_path[path]["names"]
+            )
+            for path, target in zip(
+                TRITIUM_PATHS, authority["tritium"]["compose"], strict=True
+            )
+        ]
+        retirement = gc.query(
+            "MATCH (c:StandardNameChange {run_id:$id}) WHERE c.operation=$operation RETURN properties(c) AS receipt",
+            id=RUN.name,
+            operation="retire_unlocated_tritium_stub",
+        )
+    result = {
+        "observed_at": datetime.now(UTC).isoformat(),
+        "census_count": 98,
+        "conforming": sum(r["conforms"] for r in conforms),
+        "conforming_with_all_recorded_sources": sum(
+            r["conforms"] and r["all_recorded_sources_on_target"] for r in conforms
+        ),
+        "non_conforming": remaining,
+        "census_readback": conforms,
+        "sources": sources,
+        "tritium": tritium_state,
+        "tritium_producing_sources": produced,
+        "retirement_receipts": retirement,
+        "costs": costs,
+        "cycle_names_in_cohort": cycles,
+        "cycles_through_reclaimed_names": changed_cycles,
+        "reclaim_receipts": len(receipts),
+    }
+    result["complete"] = bool(
+        len(receipts) == 7
+        and not changed_cycles
+        and all(produced)
+        and retirement
+        and costs
+        and costs[0]["usd"] <= 2.0
+    )
+    write(RUN / "readback.json", result)
+    print(
+        "SUMMARY "
+        + json.dumps(
+            {
+                k: result[k]
+                for k in (
+                    "census_count",
+                    "conforming",
+                    "conforming_with_all_recorded_sources",
+                    "reclaim_receipts",
+                    "tritium_producing_sources",
+                    "cycle_names_in_cohort",
+                    "cycles_through_reclaimed_names",
+                    "costs",
+                    "complete",
+                )
+            }
+        ),
+        flush=True,
+    )
+    assert not changed_cycles, changed_cycles
+    assert (
+        costs
+        and costs[0]["events"] == costs[0]["priced_events"]
+        and costs[0]["usd"] <= 2.0
+    ), costs
+    assert result["complete"], (
+        "Read-back records an incomplete tritium outcome; inspect the source-specific refusals."
+    )
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument(
         "mode",
-        choices=["prepare", "apply", "apply-all", "tritium-authority", "tritium"],
+        choices=[
+            "prepare",
+            "apply",
+            "apply-all",
+            "tritium-authority",
+            "tritium",
+            "readback",
+        ],
     )
     p.add_argument("--name")
     args = p.parse_args()
@@ -481,6 +641,8 @@ def main():
         tritium_authority()
     elif args.mode == "tritium":
         asyncio.run(tritium())
+    elif args.mode == "readback":
+        readback()
     else:
         authority = json.loads(AUTHORITY.read_text())
         for row in authority["operations"]:
