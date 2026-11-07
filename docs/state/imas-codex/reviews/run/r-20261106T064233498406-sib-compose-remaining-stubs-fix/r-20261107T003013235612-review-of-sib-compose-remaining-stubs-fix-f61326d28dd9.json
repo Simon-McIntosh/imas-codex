@@ -1,0 +1,70 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "imas_codex/standard_names/graph_store/graph_source_bindings.py:1513 (persist_claimed_attachments)",
+    "imas_codex/standard_names/graph_store/graph_source_bindings.py:1610 (stage_claimed_generated_candidates)",
+    "imas_codex/standard_names/graph_store/graph_catalog.py:2307 (persist_generated_name_winners)",
+    "imas_codex/standard_names/graph_store/graph_catalog.py:2590 (supersede_prior_source_names)",
+    "imas_codex/standard_names/graph_store/graph_supersession.py:261 (retarget_standard_name_sources)",
+    "imas_codex/standard_names/graph_store/graph_supersession.py:610 (retarget_standard_name_sources)",
+    "imas_codex/standard_names/graph_refinement.py:1321 (retarget_standard_name_sources)",
+    "imas_codex/standard_names/edit.py:1936 (retarget_standard_name_sources)",
+    "imas_codex/standard_names/provenance_lifecycle.py:643 (retarget_standard_name_sources)"
+  ],
+  "completed_at": "2026-11-07T00:41:07.164Z",
+  "dispatched_at": "2026-11-07T00:31:52Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_compose_adopts_pending_stub.py",
+      "line": 57,
+      "severity": "non-blocking",
+      "text": "_wipe now deletes every StandardNameChange node in the session-scoped disposable graph (conftest.py:613 describes it as 'the one empty graph this package's real-Cypher tests share'), so a module-scoped receipt another test file seeded can be destroyed when this file's tests interleave with it in one -n 8 worker; the reset is correct for this file but its blast radius is the whole ledger."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_source_bindings.py",
+      "line": 1024,
+      "severity": "non-blocking",
+      "text": "The dead-end-revival exception in the same lock query still tests b.source_type, the exact batch field this node established is absent from worker outcomes; it is latent because persist_claimed_attachments passes allow_dead_end_revival=False, but the same clause-level defect survives one caller away in the query the node edited."
+    },
+    {
+      "file": "tests/standard_names/test_compose_adopts_pending_stub.py",
+      "line": 271,
+      "severity": "non-blocking",
+      "text": "Nineteen of the twenty-one cases the head graph arm runs already pass against main (attachment-base-graph.log, 2 failed/19 passed), including test_two_path_projection_stub_is_adopted at :271 and test_structural_parent_projection_stub_is_adopted at :285, so the done_when's 'the new cases fail on main' is met by two cases only; the fragment states this accurately but the measure itself reads as met."
+    }
+  ],
+  "justifications": {
+    "durability": "tests/standard_names/test_compose_adopts_pending_stub.py:215 reddens with the answering commit reversed (attachment-negative.log, EXIT=1) and :303 reddens on c59ac227a while passing at head, so both repaired defects carry a test that fails if the repair regresses, and :536 keeps the stolen-claim abort independent of them.",
+    "evidence": "The gate measures the done_when's zero-added-id half on both arms with completed archive-tree logs (attachment-base-default.log and attachment-head-default.log, 10 failed each, identical ids), but attachment-base-graph.log records 19 of 21 delivered cases passing on main, so the bullet 'the new cases fail on main' is measured as true for only test_worker_attachment_uses_the_graph_source_type[False] and test_second_claim_after_unpark_finalizes.",
+    "fit": "The added symbols (_pending_projection_stub_predicate, _projection_migration_predicate, _projection_stub_source_bindings) name the mechanism, explain their trusted-Cypher arguments, follow the surrounding guard style at imas_codex/standard_names/graph_store/graph_source_bindings.py:921, and every commit carries a conventional subject with a body and no attribution trailer.",
+    "goal_fidelity": "imas_codex/standard_names/graph_store/graph_source_bindings.py:904 now reads {source}.source_type from the fenced graph node, which the pointed live probe shows is the only place the seven DD paths of the five pending names carry the type, so the worker attachment that brief.md:35-41 describes now adopts.",
+    "reuse": "imas_codex/standard_names/provenance_lifecycle.py:505 delegates to the binding owner's predicate at imas_codex/standard_names/graph_store/graph_source_bindings.py:883 and appends only migration-specific retirement fences, replacing the duplicate _UNOWNED_PENDING_PROJECTION that the prior review scored for capability duplication.",
+    "scope_discipline": "git diff c59ac227a..f61326d28 changes only graph_catalog.py, graph_source_bindings.py, graph_supersession.py, provenance_lifecycle.py, tests/standard_names/test_compose_adopts_pending_stub.py and the assigned fragment, every one of them inside the manifest's declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is 'Make the five remaining pending projection stubs composable by their own DD sources' (brief.md:1); the landed change names the failing clause at imas_codex/standard_names/graph_store/graph_source_bindings.py:904 and the finalize cause at imas_codex/standard_names/graph_store/graph_catalog.py:522, and fixes both.\nVERDICT done_when: the done_when (brief.md:61-67) is measured by attachment-base-graph.log, attachment-head-graph.log and both default arms; both causes are named and fixed with live-state evidence, the zero-added-id half holds on identical 10-failure suites, but only two of the delivered cases fail on main.\nVERDICT write_paths: the grant at manifest.md:3 covers five source modules, the adoption test, the fragment and a figures directory; all six changed paths lie inside it and the figures directory is empty.\nVERDICT manifest: read; twenty-seven keys record fifteen commits ba7f00e93..f61326d28, a complete head graph arm at 21 passed, a complete base graph arm at 2 failed/19 passed, two complete default arms with identical failure ids, and the whole-answering-commit reversal.\nVERDICT diff: read commit by commit from c59ac227a; ba7f00e93 fixes the claim/status interaction at graph_catalog.py:522, five commits build the projection migration path, 26b90b96f and ceaba7b13 consolidate the predicate into graph_source_bindings.py:883 and switch it to the persisted type, 976b8eebb adds the worker regression, and f61326d28 is docs-only.\nCALL_SITES: imas_codex/standard_names/graph_store/graph_source_bindings.py:1513 (persist_claimed_attachments), imas_codex/standard_names/graph_store/graph_source_bindings.py:1610 (stage_claimed_generated_candidates), imas_codex/standard_names/graph_store/graph_catalog.py:2307 (persist_generated_name_winners), imas_codex/standard_names/graph_store/graph_catalog.py:2590 (supersede_prior_source_names), imas_codex/standard_names/graph_store/graph_supersession.py:261 (retarget_standard_name_sources), imas_codex/standard_names/graph_supersession.py:610, imas_codex/standard_names/graph_refinement.py:1321, imas_codex/standard_names/edit.py:1936, imas_codex/standard_names/provenance_lifecycle.py:643\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/graph_store/graph_source_bindings.py:904 reads the fenced graph node's source type, so the worker attachment path that brief.md:35-41 names now adopts the five stubs' own projections.\nSCORE evidence: 16\nJUSTIFICATION evidence: attachment-base-default.log and attachment-head-default.log record complete arms of 10 failed/8523 passed with identical ids, but attachment-base-graph.log shows 19 of 21 delivered cases already passing on main.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every path in git diff c59ac227a..f61326d28 is inside the declared write paths at manifest.md:3; the granted figures directory carries no file.\nSCORE durability: 17\nJUSTIFICATION durability: tests/standard_names/test_compose_adopts_pending_stub.py:215 reddens when the answering commit is reversed (attachment-negative.log, EXIT=1) and :303 reddens against c59ac227a while passing at head.\nSCORE fit: 18\nJUSTIFICATION fit: the added helpers at imas_codex/standard_names/graph_store/graph_source_bindings.py:883 and imas_codex/standard_names/provenance_lifecycle.py:505 name the mechanism and follow the guard style of the surrounding query.\nSCORE reuse: 19\nJUSTIFICATION reuse: imas_codex/standard_names/provenance_lifecycle.py:505 delegates to the binding owner at imas_codex/standard_names/graph_store/graph_source_bindings.py:883 instead of carrying its own copy.\nFINDING tests/standard_names/test_compose_adopts_pending_stub.py:57 non-blocking: _wipe deletes every StandardNameChange in the session-shared disposable graph, so another test module's seeded receipts can be destroyed when tests interleave in one -n 8 worker.\nFINDING imas_codex/standard_names/graph_store/graph_source_bindings.py:1024 non-blocking: the dead-end-revival exception still reads b.source_type, the batch field this node established worker outcomes omit; it is latent under allow_dead_end_revival=False but the same defect survives in the edited query.\nFINDING tests/standard_names/test_compose_adopts_pending_stub.py:271 non-blocking: nineteen of the twenty-one delivered cases already pass on main, so the done_when's 'the new cases fail on main' is met by two cases only.\n",
+  "review_run_id": "r-20261107T003013235612-review-of-sib-compose-remaining-stubs-fix-f61326d28dd9",
+  "reviewed_base_sha": "c59ac227a60e23702eaf865b987b3027fbb0f590",
+  "reviewed_head_sha": "f61326d28dd939d95b25d9f4d2c460947906090c",
+  "reviewed_run_id": "r-20261106T064233498406-sib-compose-remaining-stubs-fix",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T00:49:17.158090+00:00",
+  "total": 106,
+  "verdicts": {
+    "diff": "Read commit by commit from c59ac227a: ba7f00e93 keeps a claimed source's status through the rich write (graph_catalog.py:522) and requires extracted at finalization (graph_catalog.py:2462); c0dc854bc/84d91c7f8/ee1b300fd/882ad4989/26b90b96f build the projection migration path and extract the shared predicate into the binding owner; 976b8eebb adds the worker regression; ceaba7b13 switches the predicate to the persisted source type; the two remaining commits reset the fixture receipt ledger and record evidence.",
+    "done_when": "The done_when (brief.md:61-67) asks that both causes be named at file:line with live-state evidence for the five, that both be fixed, that the new cases fail on main and pass at head, that the gate add zero failure ids, and that the fragment record it; attachment-base-graph.log and attachment-head-graph.log give new-tests-over-main 2 failed/19 passed and new-tests-over-head 21 passed, so only two of the delivered cases are main-failing, while the zero-added-id half is measured on both default arms (10 failed/8523 passed/15 skipped each, identical id sets) and the fragment records every cause.",
+    "goal": "The node goal is 'Make the five remaining pending projection stubs composable by their own DD sources' (brief.md:1); the landed change names the failing clause at graph_source_bindings.py:904 (the predicate read b.source_type, which worker_common.py _claimed_source_outcome never emits) and fixes it by reading the fenced graph node, and it names and fixes the finalize cause at graph_catalog.py:522, so the goal is delivered.",
+    "manifest": "Read; it records status complete over fifteen commits ba7f00e93..f61326d28 with both suite arms at 10 failed/8523 passed/15 skipped and identical failure ids, the head graph arm 21 passed, the base graph arm 2 failed/19 passed, and the whole-answering-commit reversal in attachment-negative.log at 1 failed/1 passed/19 deselected.",
+    "write_paths": "The grant was graph_source_bindings.py, graph_catalog.py, graph_foundation.py, graph_supersession.py, provenance_lifecycle.py, the adoption test, the fragment and a figures directory (manifest.md:3); the six changed paths in the diff all lie inside that set, graph_foundation.py is untouched, and the granted figures directory carries no file."
+  }
+}
