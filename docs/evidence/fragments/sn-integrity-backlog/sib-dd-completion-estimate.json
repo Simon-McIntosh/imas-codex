@@ -1,0 +1,521 @@
+{
+  "generated_at": "2026-11-07T15:00:05.205181+00:00",
+  "dry_run": {
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T141527694860-sib-dd-completion-estimate/logs/dryrun.log",
+    "extraction_candidates": 1308,
+    "pools_pending": {
+      "generate_name": 1397,
+      "review_name": 3,
+      "refine_name": 3,
+      "generate_docs": 4,
+      "review_docs": 5,
+      "refine_docs": 0,
+      "enrich_parents": 0
+    }
+  },
+  "population": {
+    "source_status_by_type": [
+      {
+        "source_type": "catalog",
+        "status": "attached",
+        "c": 1
+      },
+      {
+        "source_type": "dd",
+        "status": "attached",
+        "c": 2193
+      },
+      {
+        "source_type": "dd",
+        "status": "composed",
+        "c": 2593
+      },
+      {
+        "source_type": "dd",
+        "status": "extracted",
+        "c": 1240
+      },
+      {
+        "source_type": "dd",
+        "status": "failed",
+        "c": 102
+      },
+      {
+        "source_type": "dd",
+        "status": "not_physical_quantity",
+        "c": 10
+      },
+      {
+        "source_type": "dd",
+        "status": "skipped",
+        "c": 1410
+      },
+      {
+        "source_type": "dd",
+        "status": "stale",
+        "c": 1863
+      },
+      {
+        "source_type": "derived",
+        "status": "attached",
+        "c": 18
+      },
+      {
+        "source_type": "derived",
+        "status": "composed",
+        "c": 479
+      },
+      {
+        "source_type": "derived",
+        "status": "extracted",
+        "c": 154
+      },
+      {
+        "source_type": "derived",
+        "status": "stale",
+        "c": 10
+      },
+      {
+        "source_type": "manual",
+        "status": "extracted",
+        "c": 3
+      }
+    ],
+    "dd_sources_by_status": {
+      "attached": 2193,
+      "composed": 2593,
+      "extracted": 1240,
+      "failed": 102,
+      "not_physical_quantity": 10,
+      "skipped": 1410,
+      "stale": 1863
+    },
+    "names_by_stage": {
+      "accepted": 2534,
+      "superseded": 2328,
+      "exhausted": 136,
+      "reviewed": 111,
+      "drafted": 30,
+      "pending": 3
+    },
+    "extracted_dd_sources": {
+      "total": 1240,
+      "classification": {
+        "eligible_leaf": 1185,
+        "signal_structure": 37,
+        "structure": 18,
+        "error_path": 0,
+        "no_dd_node": 0
+      }
+    }
+  },
+  "cross_check": {
+    "extraction_filter_count": 1311,
+    "dry_run_candidates": 1308,
+    "delta": -3,
+    "note": "the dry run applies unit-override and qualification filters after the extraction query, so a small negative delta is expected"
+  },
+  "measured_cost_30d": {
+    "generate_docs": {
+      "calls": 108,
+      "cost_usd": 2.428908,
+      "name_slots": 108,
+      "cost_per_name_slot": 0.02249,
+      "distinct_names": 40,
+      "calls_per_name": 2.7
+    },
+    "review_docs": {
+      "calls": 502,
+      "cost_usd": 24.06333,
+      "name_slots": 502,
+      "cost_per_name_slot": 0.047935,
+      "distinct_names": 36,
+      "calls_per_name": 13.944
+    },
+    "refine_docs": {
+      "calls": 22,
+      "cost_usd": 2.411466,
+      "name_slots": 22,
+      "cost_per_name_slot": 0.109612,
+      "distinct_names": 13,
+      "calls_per_name": 1.692
+    },
+    "review_name": {
+      "calls": 21,
+      "cost_usd": 0.539485,
+      "name_slots": 21,
+      "cost_per_name_slot": 0.02569,
+      "distinct_names": 11,
+      "calls_per_name": 1.909
+    },
+    "generate_name": {
+      "calls": 85,
+      "cost_usd": 0.0,
+      "name_slots": 61,
+      "cost_per_name_slot": 0.0,
+      "distinct_names": 6,
+      "calls_per_name": 14.167
+    }
+  },
+  "measured_cost_90d": {
+    "generate_docs": {
+      "calls": 1798,
+      "cost_usd": 9.302735,
+      "name_slots": 1798,
+      "cost_per_name_slot": 0.005174,
+      "distinct_names": 1401,
+      "calls_per_name": 1.283
+    },
+    "review_docs": {
+      "calls": 6121,
+      "cost_usd": 390.892962,
+      "name_slots": 6121,
+      "cost_per_name_slot": 0.063861,
+      "distinct_names": 1533,
+      "calls_per_name": 3.993
+    },
+    "refine_docs": {
+      "calls": 600,
+      "cost_usd": 83.293778,
+      "name_slots": 600,
+      "cost_per_name_slot": 0.138823,
+      "distinct_names": 479,
+      "calls_per_name": 1.253
+    },
+    "review_name": {
+      "calls": 5952,
+      "cost_usd": 173.713159,
+      "name_slots": 5952,
+      "cost_per_name_slot": 0.029186,
+      "distinct_names": 2363,
+      "calls_per_name": 2.519
+    },
+    "generate_name": {
+      "calls": 1091,
+      "cost_usd": 4.356897,
+      "name_slots": 1281,
+      "cost_per_name_slot": 0.003401,
+      "distinct_names": 523,
+      "calls_per_name": 2.086
+    },
+    "refine_name": {
+      "calls": 1608,
+      "cost_usd": 150.084191,
+      "name_slots": 1608,
+      "cost_per_name_slot": 0.093336,
+      "distinct_names": 581,
+      "calls_per_name": 2.768
+    },
+    "enrich_parents": {
+      "calls": 181,
+      "cost_usd": 0.172729,
+      "name_slots": 181,
+      "cost_per_name_slot": 0.000954,
+      "distinct_names": 169,
+      "calls_per_name": 1.071
+    },
+    "refine_name+fanout": {
+      "calls": 274,
+      "cost_usd": 27.288049,
+      "name_slots": 274,
+      "cost_per_name_slot": 0.099591,
+      "distinct_names": 39,
+      "calls_per_name": 7.026
+    },
+    "sn_fanout_refine_proposer": {
+      "calls": 65,
+      "cost_usd": 0.049435,
+      "name_slots": 65,
+      "cost_per_name_slot": 0.000761,
+      "distinct_names": 20,
+      "calls_per_name": 3.25
+    }
+  },
+  "model_costs_90d": {
+    "generate_docs": {
+      "openrouter/openai/gpt-6.1-sol": {
+        "calls": 24,
+        "cost_usd": 1.94328,
+        "cost_per_call": 0.08097
+      },
+      "openrouter/openai/gpt-5.6-luna": {
+        "calls": 1774,
+        "cost_usd": 7.359455,
+        "cost_per_call": 0.004149
+      }
+    },
+    "review_docs": {
+      "typesafe/jev-1.13": {
+        "calls": 230,
+        "cost_usd": 0.046631,
+        "cost_per_call": 0.000203
+      },
+      "openrouter/anthropic/claude-sonnet-5": {
+        "calls": 2760,
+        "cost_usd": 205.656706,
+        "cost_per_call": 0.074513
+      },
+      "openrouter/x-ai/grok-4.5": {
+        "calls": 2620,
+        "cost_usd": 98.221443,
+        "cost_per_call": 0.037489
+      },
+      "openrouter/openai/gpt-5.5": {
+        "calls": 503,
+        "cost_usd": 86.613839,
+        "cost_per_call": 0.172195
+      },
+      "openrouter/openai/gpt-6.1-sol": {
+        "calls": 8,
+        "cost_usd": 0.354343,
+        "cost_per_call": 0.044293
+      }
+    },
+    "refine_docs": {
+      "openrouter/openai/gpt-5.5": {
+        "calls": 577,
+        "cost_usd": 79.097262,
+        "cost_per_call": 0.137084
+      },
+      "openrouter/anthropic/claude-fable-5": {
+        "calls": 16,
+        "cost_usd": 4.17236,
+        "cost_per_call": 0.260773
+      },
+      "openrouter/openai/gpt-6-luna": {
+        "calls": 7,
+        "cost_usd": 0.024156,
+        "cost_per_call": 0.003451
+      }
+    },
+    "review_name": {
+      "typesafe/jev-1.13": {
+        "calls": 7,
+        "cost_usd": 0.000922,
+        "cost_per_call": 0.000132
+      },
+      "openrouter/x-ai/grok-4.5": {
+        "calls": 2572,
+        "cost_usd": 112.404114,
+        "cost_per_call": 0.043703
+      },
+      "openrouter/openai/gpt-5.6-luna": {
+        "calls": 2697,
+        "cost_usd": 10.337451,
+        "cost_per_call": 0.003833
+      },
+      "openrouter/anthropic/claude-sonnet-5": {
+        "calls": 675,
+        "cost_usd": 50.967473,
+        "cost_per_call": 0.075507
+      },
+      "openrouter/openai/gpt-6-luna": {
+        "calls": 1,
+        "cost_usd": 0.003199,
+        "cost_per_call": 0.003199
+      }
+    },
+    "generate_name": {
+      "hosted_vllm/deepseek-v4-flash": {
+        "calls": 948,
+        "cost_usd": 0.0,
+        "cost_per_call": 0.0
+      },
+      "local/deepseek-v4-flash": {
+        "calls": 39,
+        "cost_usd": 0.0,
+        "cost_per_call": 0.0
+      },
+      "openrouter/anthropic/claude-fable-5": {
+        "calls": 10,
+        "cost_usd": 4.356897,
+        "cost_per_call": 0.43569
+      },
+      "local/deepseek-v4.1-flash": {
+        "calls": 94,
+        "cost_usd": 0.0,
+        "cost_per_call": 0.0
+      }
+    },
+    "refine_name": {
+      "openrouter/anthropic/claude-fable-5": {
+        "calls": 386,
+        "cost_usd": 56.729277,
+        "cost_per_call": 0.146967
+      },
+      "openrouter/openai/gpt-5.5": {
+        "calls": 1222,
+        "cost_usd": 93.354914,
+        "cost_per_call": 0.076395
+      }
+    },
+    "enrich_parents": {
+      "openrouter/deepseek/deepseek-v4-flash": {
+        "calls": 178,
+        "cost_usd": 0.172729,
+        "cost_per_call": 0.00097
+      },
+      "local/deepseek-v4-flash": {
+        "calls": 3,
+        "cost_usd": 0.0,
+        "cost_per_call": 0.0
+      }
+    },
+    "refine_name+fanout": {
+      "openrouter/openai/gpt-5.5": {
+        "calls": 172,
+        "cost_usd": 6.95581,
+        "cost_per_call": 0.040441
+      },
+      "openrouter/anthropic/claude-fable-5": {
+        "calls": 102,
+        "cost_usd": 20.332239,
+        "cost_per_call": 0.199336
+      }
+    },
+    "sn_fanout_refine_proposer": {
+      "openrouter/deepseek/deepseek-v4-flash": {
+        "calls": 65,
+        "cost_usd": 0.049435,
+        "cost_per_call": 0.000761
+      }
+    }
+  },
+  "seats": {
+    "compose": [
+      "local/deepseek-v4.1-flash"
+    ],
+    "generate_docs": [
+      "openrouter/openai/gpt-6.1-sol"
+    ],
+    "review_name": [
+      "openrouter/x-ai/grok-4.5",
+      "openrouter/openai/gpt-6-luna",
+      "openrouter/anthropic/claude-sonnet-5"
+    ],
+    "review_docs": [
+      "openrouter/anthropic/claude-sonnet-5",
+      "openrouter/x-ai/grok-4.5",
+      "openrouter/openai/gpt-6.1-sol"
+    ],
+    "refine": [
+      "openrouter/openai/gpt-6-luna"
+    ]
+  },
+  "throughput": {
+    "30d": {
+      "days": 30,
+      "runs": 70,
+      "productive_runs": 47,
+      "elapsed_hours": 7.133,
+      "productive_hours": 6.088,
+      "llm_calls": 738,
+      "calls_per_productive_hour": 121.2,
+      "names_created": 9,
+      "names_created_per_productive_hour": 1.48,
+      "names_composed_counter": 3,
+      "counter_note": "SNRun.names_composed counts only counter bumps and under-reports the names created; created_at is the throughput basis"
+    },
+    "90d": {
+      "days": 90,
+      "runs": 327,
+      "productive_runs": 183,
+      "elapsed_hours": 32.85,
+      "productive_hours": 27.929,
+      "llm_calls": 17690,
+      "calls_per_productive_hour": 633.4,
+      "names_created": 923,
+      "names_created_per_productive_hour": 33.05,
+      "names_composed_counter": 340,
+      "counter_note": "SNRun.names_composed counts only counter bumps and under-reports the names created; created_at is the throughput basis"
+    }
+  },
+  "yield_basis": {
+    "names_per_source_catalog": 0.4726,
+    "names_per_source_90d": 0.9374,
+    "catalog": "2262 names / 4786 attached-or-composed dd sources",
+    "window_90d": "599 pipeline names created / 639 dd sources composed"
+  },
+  "estimate": {
+    "arms": {
+      "low_reuse": {
+        "names_per_source": 0.4726,
+        "expected_new_names": 618,
+        "planned_calls_total": 11698,
+        "estimated_spend_usd": 664.0961,
+        "phases": {
+          "compose": {
+            "calls": 53,
+            "basis": "1308 sources / batch size 25",
+            "spend_usd": 0.0
+          },
+          "generate_docs": {
+            "calls": 793,
+            "basis": "measured 90d calls per distinct name",
+            "spend_usd": 64.2092
+          },
+          "review_name": {
+            "calls": 1557,
+            "basis": "measured 90d calls per distinct name",
+            "spend_usd": 190.5908
+          },
+          "review_docs": {
+            "calls": 2468,
+            "basis": "measured 90d calls per distinct name",
+            "spend_usd": 385.7361
+          },
+          "refine": {
+            "calls": 6827,
+            "basis": "measured 90d calls per distinct name",
+            "spend_usd": 23.56
+          }
+        }
+      },
+      "high_yield": {
+        "names_per_source": 0.9374,
+        "expected_new_names": 1226,
+        "planned_calls_total": 23153,
+        "estimated_spend_usd": 1317.1691,
+        "phases": {
+          "compose": {
+            "calls": 53,
+            "basis": "1308 sources / batch size 25",
+            "spend_usd": 0.0
+          },
+          "generate_docs": {
+            "calls": 1573,
+            "basis": "measured 90d calls per distinct name",
+            "spend_usd": 127.3658
+          },
+          "review_name": {
+            "calls": 3088,
+            "basis": "measured 90d calls per distinct name",
+            "spend_usd": 377.999
+          },
+          "review_docs": {
+            "calls": 4895,
+            "basis": "measured 90d calls per distinct name",
+            "spend_usd": 765.064
+          },
+          "refine": {
+            "calls": 13544,
+            "basis": "measured 90d calls per distinct name",
+            "spend_usd": 46.7403
+          }
+        }
+      }
+    },
+    "wall_time": {
+      "30d": {
+        "basis": "121.2 LLM calls per productive hour over 6.088 h (70 runs)",
+        "hours_low_reuse": 96.5,
+        "hours_high_yield": 191.0
+      },
+      "90d": {
+        "basis": "633.4 LLM calls per productive hour over 27.929 h (327 runs)",
+        "hours_low_reuse": 18.5,
+        "hours_high_yield": 36.6
+      }
+    }
+  }
+}
