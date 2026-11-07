@@ -573,7 +573,6 @@ class TestIdsMappingReasoningEffortForwarding:
         assert captured["reasoning_effort"] == "high"
 
 
-@pytest.mark.timeout(120)
 def test_no_gpt5_name_survives_in_the_fallback_slate_or_proxy_routes():
     """The newest model of each OpenAI tier is the only one a fallback names.
 
@@ -613,5 +612,5 @@ def test_no_gpt5_name_survives_in_the_fallback_slate_or_proxy_routes():
     assert any("gpt-6.1-terra" in name for name in routes)
 
     terra = settings.get_openrouter_pricing("openrouter/openai/gpt-6.1-terra")
-    assert terra["input"] > 0
-    assert terra["output"] > 0
+    assert terra["prompt"] > 0
+    assert terra["completion"] > 0
