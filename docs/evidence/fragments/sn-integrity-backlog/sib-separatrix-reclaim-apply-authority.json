@@ -1,0 +1,286 @@
+{
+  "status": "blocked",
+  "base_sha": "bbac3e3f79741ff48bf7ae1f401e0ec68fed701f",
+  "run_id": "r-20261107T185046746594-sib-separatrix-reclaim-apply",
+  "authority": {
+    "plan": "imas-codex:sn-integrity-backlog",
+    "section": "49",
+    "convention": "plasma_boundary + flux_surface_averaged prefix",
+    "reclaim_cases": [
+      "closing_lineage",
+      "different_locus"
+    ],
+    "explicitly_reserved_name": "electron_temperature_at_separatrix",
+    "mutation_authorized_by_this_record": false
+  },
+  "partial_preview": [
+    {
+      "id": "argon_density_at_separatrix",
+      "target": "argon_density_at_plasma_boundary",
+      "state": [
+        {
+          "id": "argon_density_at_separatrix",
+          "stage": "accepted",
+          "paths": [
+            "dd:summary/local/separatrix/n_i/argon/value"
+          ],
+          "description": "Charge-state-summed number density of argon ions, excluding neutral argon, evaluated locally on the magnetic separatrix."
+        }
+      ],
+      "preview": {
+        "target": "argon_density_at_separatrix",
+        "mode": "rename",
+        "axis": "name",
+        "scope": "only_self",
+        "entry": "review_name",
+        "successor": null,
+        "cascade_deferred": [],
+        "blocked": "a StandardName 'argon_density_at_plasma_boundary' already exists",
+        "actions": [
+          "a StandardName 'argon_density_at_plasma_boundary' already exists"
+        ],
+        "applied": false,
+        "run_id": null
+      }
+    },
+    {
+      "id": "boron_density_flux_surface_averaged_at_plasma_boundary",
+      "target": "flux_surface_averaged_boron_density_at_plasma_boundary",
+      "state": [
+        {
+          "id": "boron_density_flux_surface_averaged_at_plasma_boundary",
+          "stage": "accepted",
+          "paths": [
+            "dd:summary/local/separatrix_average/n_i/boron/value"
+          ],
+          "description": "Flux-surface-averaged number density of boron, including neutral atoms and all ionization states, evaluated on the plasma boundary."
+        }
+      ],
+      "preview": {
+        "target": "boron_density_flux_surface_averaged_at_plasma_boundary",
+        "mode": "rename",
+        "axis": "name",
+        "scope": "only_self",
+        "entry": "review_name",
+        "successor": "flux_surface_averaged_boron_density_at_plasma_boundary",
+        "cascade_deferred": [],
+        "blocked": null,
+        "actions": [
+          "reclaim case closing_lineage: successor lineage closes on 'boron_density_flux_surface_averaged_at_plasma_boundary'",
+          "[dry-run] would revive tombstone 'flux_surface_averaged_boron_density_at_plasma_boundary' at name_stage='reviewed', carry 1 producing source(s) from 'boron_density_flux_surface_averaged_at_plasma_boundary', and retire 'boron_density_flux_surface_averaged_at_plasma_boundary' onto it"
+        ],
+        "applied": false,
+        "run_id": null
+      }
+    },
+    {
+      "id": "deuterium_tritium_density_flux_surface_averaged_at_plasma_boundary",
+      "target": "flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary",
+      "state": [
+        {
+          "id": "deuterium_tritium_density_flux_surface_averaged_at_plasma_boundary",
+          "stage": "exhausted",
+          "paths": [],
+          "description": "Flux-surface-averaged number density of deuterium-tritium pseudo-species ions at the plasma boundary (separatrix)."
+        }
+      ],
+      "preview": {
+        "target": "deuterium_tritium_density_flux_surface_averaged_at_plasma_boundary",
+        "mode": "rename",
+        "axis": "name",
+        "scope": "only_self",
+        "entry": "review_name",
+        "successor": null,
+        "cascade_deferred": [],
+        "blocked": "a StandardName 'flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary' already exists",
+        "actions": [
+          "a StandardName 'flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary' already exists"
+        ],
+        "applied": false,
+        "run_id": null
+      }
+    },
+    {
+      "id": "effective_charge_at_separatrix",
+      "target": "effective_charge_at_plasma_boundary",
+      "state": [
+        {
+          "id": "effective_charge_at_separatrix",
+          "stage": "accepted",
+          "paths": [
+            "dd:summary/local/separatrix/zeff/value"
+          ],
+          "description": "Local effective ionic charge of the plasma mixture at the separatrix, reflecting charge-squared weighting across all contributing ion species and charge states."
+        }
+      ],
+      "preview": {
+        "target": "effective_charge_at_separatrix",
+        "mode": "rename",
+        "axis": "name",
+        "scope": "only_self",
+        "entry": "review_name",
+        "successor": "effective_charge_at_plasma_boundary",
+        "cascade_deferred": [],
+        "blocked": null,
+        "actions": [
+          "reclaim case closing_lineage: successor lineage closes on 'effective_charge_at_separatrix'",
+          "[dry-run] would revive tombstone 'effective_charge_at_plasma_boundary' at name_stage='refining', carry 1 producing source(s) from 'effective_charge_at_separatrix', and retire 'effective_charge_at_separatrix' onto it"
+        ],
+        "applied": false,
+        "run_id": null
+      }
+    },
+    {
+      "id": "effective_charge_flux_surface_averaged_at_plasma_boundary",
+      "target": "flux_surface_averaged_effective_charge_at_plasma_boundary",
+      "state": [
+        {
+          "id": "effective_charge_flux_surface_averaged_at_plasma_boundary",
+          "stage": "reviewed",
+          "paths": [
+            "dd:summary/local/separatrix_average/zeff/value"
+          ],
+          "description": "Flux-surface average of the ion-mixture effective charge over the entire plasma-boundary surface, distinct from the local boundary value."
+        }
+      ],
+      "preview": {
+        "target": "effective_charge_flux_surface_averaged_at_plasma_boundary",
+        "mode": "rename",
+        "axis": "name",
+        "scope": "only_self",
+        "entry": "review_name",
+        "successor": "flux_surface_averaged_effective_charge_at_plasma_boundary",
+        "cascade_deferred": [],
+        "blocked": null,
+        "actions": [
+          "reclaim case closing_lineage: successor lineage closes on 'effective_charge_flux_surface_averaged_at_plasma_boundary'",
+          "[dry-run] would revive tombstone 'flux_surface_averaged_effective_charge_at_plasma_boundary' at name_stage='reviewed', carry 1 producing source(s) from 'effective_charge_flux_surface_averaged_at_plasma_boundary', and retire 'effective_charge_flux_surface_averaged_at_plasma_boundary' onto it"
+        ],
+        "applied": false,
+        "run_id": null
+      }
+    },
+    {
+      "id": "electron_pressure_at_separatrix",
+      "target": "electron_pressure_at_plasma_boundary",
+      "state": [
+        {
+          "id": "electron_pressure_at_separatrix",
+          "stage": "accepted",
+          "paths": [
+            "dd:summary/pedestal_fits/linear/pressure_electron/separatrix/value",
+            "dd:summary/pedestal_fits/mtanh/pressure_electron/separatrix/value"
+          ],
+          "description": "Local kinetic pressure carried by the electron population at the magnetic separatrix, marking the boundary between confined plasma and open-field-line scrape-off-layer plasma."
+        }
+      ],
+      "preview": {
+        "target": "electron_pressure_at_separatrix",
+        "mode": "rename",
+        "axis": "name",
+        "scope": "only_self",
+        "entry": "review_name",
+        "successor": "electron_pressure_at_plasma_boundary",
+        "cascade_deferred": [],
+        "blocked": null,
+        "actions": [
+          "reclaim case closing_lineage: successor lineage closes on 'electron_pressure_at_separatrix'",
+          "[dry-run] would revive tombstone 'electron_pressure_at_plasma_boundary' at name_stage='refining', carry 2 producing source(s) from 'electron_pressure_at_separatrix', and retire 'electron_pressure_at_separatrix' onto it"
+        ],
+        "applied": false,
+        "run_id": null
+      }
+    },
+    {
+      "id": "electron_temperature_at_separatrix",
+      "target": "electron_temperature_at_plasma_boundary",
+      "state": [
+        {
+          "id": "electron_temperature_at_separatrix",
+          "stage": "accepted",
+          "paths": [
+            "dd:summary/local/separatrix/t_e/value"
+          ],
+          "description": "Temperature of electrons at the separatrix measures their mean random kinetic energy relative to the local mean electron flow."
+        }
+      ],
+      "preview": {
+        "target": "electron_temperature_at_separatrix",
+        "mode": "rename",
+        "axis": "name",
+        "scope": "only_self",
+        "entry": "review_name",
+        "successor": "electron_temperature_at_plasma_boundary",
+        "cascade_deferred": [],
+        "blocked": null,
+        "actions": [
+          "reclaim case closing_lineage: successor lineage closes on 'electron_temperature_at_separatrix'",
+          "[dry-run] would revive tombstone 'electron_temperature_at_plasma_boundary' at name_stage='refining', carry 1 producing source(s) from 'electron_temperature_at_separatrix', and retire 'electron_temperature_at_separatrix' onto it"
+        ],
+        "applied": false,
+        "run_id": null
+      }
+    },
+    {
+      "id": "krypton_density_flux_surface_averaged_at_plasma_boundary",
+      "target": "flux_surface_averaged_krypton_density_at_plasma_boundary",
+      "state": [
+        {
+          "id": "krypton_density_flux_surface_averaged_at_plasma_boundary",
+          "stage": "accepted",
+          "paths": [
+            "dd:summary/local/separatrix_average/n_i/krypton/value"
+          ],
+          "description": "Charge-state-summed krypton ion number density averaged over the complete separatrix, distinguishing a flux-surface value from the local boundary value."
+        }
+      ],
+      "preview": {
+        "target": "krypton_density_flux_surface_averaged_at_plasma_boundary",
+        "mode": "rename",
+        "axis": "name",
+        "scope": "only_self",
+        "entry": "review_name",
+        "successor": "flux_surface_averaged_krypton_density_at_plasma_boundary",
+        "cascade_deferred": [],
+        "blocked": null,
+        "actions": [
+          "reclaim case closing_lineage: successor lineage closes on 'krypton_density_flux_surface_averaged_at_plasma_boundary'",
+          "[dry-run] would revive tombstone 'flux_surface_averaged_krypton_density_at_plasma_boundary' at name_stage='reviewed', carry 1 producing source(s) from 'krypton_density_flux_surface_averaged_at_plasma_boundary', and retire 'krypton_density_flux_surface_averaged_at_plasma_boundary' onto it"
+        ],
+        "applied": false,
+        "run_id": null
+      }
+    }
+  ],
+  "preview_summary": {
+    "observed_names": 8,
+    "admitted_previews": 6,
+    "refused_previews": 2,
+    "applied": 0,
+    "complete": false
+  },
+  "authority_mismatch": "The preview admits electron_temperature_at_separatrix as closing_lineage; the live plan explicitly reserves that case for the lead. No apply was attempted.",
+  "provisioning": {
+    "missing_before_import": [
+      "imas_codex/graph/models.py",
+      "imas_codex/graph/dd_models.py",
+      "imas_codex/config/models.py",
+      "imas_codex/graph/schema_context_data.py",
+      "agents/schema-reference.md"
+    ],
+    "automatic_generation_observed": true,
+    "files_staged": false,
+    "imported_module": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-separatrix-reclaim-apply/imas_codex/standard_names/edit.py"
+  },
+  "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T185046746594-sib-separatrix-reclaim-apply/preview-interrupted.log",
+  "runner_exit": 143,
+  "live_conformity_census": null,
+  "lineage_cycle_check": null,
+  "receipts": [],
+  "spend": {
+    "ceiling_usd": 2.0,
+    "llm_calls_invoked": 0,
+    "run_selected_graph_measurement": null
+  },
+  "remaining": "Resolve provisioning scope and inspect the reserved electron-temperature lineage; then resume the complete preview and authorized application."
+}
