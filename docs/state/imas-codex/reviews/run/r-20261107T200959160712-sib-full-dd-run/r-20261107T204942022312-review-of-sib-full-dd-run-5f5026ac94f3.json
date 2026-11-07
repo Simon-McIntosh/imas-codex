@@ -8,6 +8,13 @@
   "call_sites": [],
   "call_sites_note": "No product runtime code imports the evidence runner; docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run-run.py:69-75 is its standalone CLI entry.",
   "completed_at": "2026-11-07T20:59:25Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "repair-of-sib-full-dd-run-5f5026ac94f3",
+      "recorded_at": "2026-11-07T21:36:34.931045+00:00"
+    }
+  },
   "dispatched_at": "2026-11-07T20:50:38Z",
   "durability_note": "The only new refusal, at runner.py:26-27, would fire for zero StandardNames or missing ids; it does not exercise the accepted, draft, or blocking-set calculations, and no test was added.",
   "finding_dispositions": {
