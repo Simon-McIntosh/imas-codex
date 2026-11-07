@@ -172,6 +172,13 @@ class CensusInvariantViolated(RuntimeError):
     """A published record contradicts the graph or its own stated rule."""
 
 
+def write_atomic(path: Path, text: str) -> None:
+    """Replace ``path`` with ``text`` in one rename, never in place."""
+    tmp = path.with_name(path.name + ".partial")
+    tmp.write_text(text)
+    tmp.replace(path)
+
+
 def assert_invariants(data: dict, status_of: dict[str, str]) -> list[str]:
     """Check the record against the rules the fence states. Returns violations.
 
@@ -645,8 +652,11 @@ def main(argv: list[str] | None = None) -> int:
         print("nothing written: a failing record must not replace a passing one")
         return 1
 
-    JSON_PATH.write_text(json.dumps(out, indent=1) + "\n")
-    HTML_PATH.write_text(render(out))
+    # Durability: the JSON is the record and lands first, and each file is
+    # written beside its target and renamed into place, so an interrupted run
+    # leaves the previous record intact rather than a truncated one.
+    write_atomic(JSON_PATH, json.dumps(out, indent=1) + "\n")
+    write_atomic(HTML_PATH, render(out))
     print(
         f"population={len(population)} live={len(rows)} tombstones={len(tomb_rows)} "
         f"loci={dict(by_locus)} actions={dict(actions)} "
