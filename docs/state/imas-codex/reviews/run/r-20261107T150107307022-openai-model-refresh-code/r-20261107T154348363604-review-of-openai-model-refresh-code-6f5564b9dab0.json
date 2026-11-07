@@ -1,0 +1,104 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "blocking_findings_count": 1,
+  "call_sites": [
+    "imas_codex/settings.py:2006 get_sn_benchmark_compose_models (reads _SN_BENCHMARK_DEFAULTS['compose-models'])",
+    "imas_codex/settings.py:529 _sn_benchmark_models prefix resolution ('compose', 'reviewers', 'candidates')",
+    "imas_codex/cli/sn.py:3652 sn bench default model list via get_sn_benchmark_compose_models",
+    "imas_codex/cli/llm_cli.py:195 and :1015 litellm proxy launched with imas_codex/config/litellm_config.yaml",
+    "imas_codex/settings.py:87 get_openrouter_pricing (fail-closed price lookup for the three surviving routes)"
+  ],
+  "completed_at": "2026-11-07T16:18:14.143Z",
+  "dispatched_at": "2026-11-07T15:58:53Z",
+  "findings": [
+    {
+      "file": "pyproject.toml",
+      "id": "fc901b7e761",
+      "line": 447,
+      "severity": "blocking",
+      "text": "The reviewed head 7c0bfd269 carries the Jev 1.13->1.14 pin in pyproject.toml, imas_codex/discovery/base/llm.py and tests/core/test_settings.py, outside the declared write paths, and the run's own gate log for it (gate-jev-after.log) stops at 24% of collection with no summary or EXIT line while its evidence fragment docs/evidence/fragments/model-refresh-code.html is untracked, so the head contains ungated, uncommitted-deliverable content that the manifest's commits list does not name."
+    },
+    {
+      "file": "tests/core/test_gpt6_model_support.py",
+      "id": "fa881fa9fa8",
+      "line": 99,
+      "severity": "non-blocking",
+      "text": "No assertion was added for this change: the only test touching the fallback slate checks gpt-6.1-sol and gpt-6-luna, so a regression that restores gpt-5.6-terra in candidate-models, the six removed proxy routes, or the gpt-6.1-terra pricing entry leaves the suite green."
+    },
+    {
+      "file": "docs/evidence/fragments/openai-model-refresh-code.html",
+      "id": "fdb56b4512c",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "The done-when asks that each new proxy route be probed once, but the fragment records that the LiteLLM proxy was not running and all three calls took the call layer's direct OpenRouter branch, so the three route names were never exercised as the proxy serves them."
+    }
+  ],
+  "findings_count": 3,
+  "gate_arms": {
+    "after": {
+      "exit_status": 0,
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T150107307022-openai-model-refresh-code/gate-after.log",
+      "result": "114 passed, 1 warning",
+      "revision": "8471b89e2da3fed5dd7da6091cfaf14ccc3b4a54"
+    },
+    "baseline": {
+      "exit_status": 0,
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T150107307022-openai-model-refresh-code/gate-base.log",
+      "result": "114 passed, 1 warning",
+      "revision": "6c73f1747b4d64f1943a82ef6bfaaebd91f6c6a5"
+    }
+  },
+  "justifications": {
+    "durability": "The strongest existing assertion, tests/core/test_gpt6_model_support.py:99-103, checks only gpt-6.1-sol and gpt-6-luna in compose-models, so restoring gpt-5.6-terra or the six removed proxy routes leaves it green.",
+    "evidence": "The gate is recorded, not claimed (gate-base.log and gate-after.log each end EXIT=0 with 114 passed), but the fragment's own admission that all three probes took the call layer's direct OpenRouter branch means the three proxy routes themselves were never exercised.",
+    "fit": "The rewritten comment at imas_codex/config/litellm_config.yaml:85-87 states the max_completion_tokens mechanism instead of naming a model generation, and no changed path carries a plan or ticket identifier.",
+    "goal_fidelity": "imas_codex/config/litellm_config.yaml:88-111 keeps one route per tier and imas_codex/settings.py:1971-1999 drops every gpt-5.* entry, so the stale defaults are genuinely replaced rather than renamed.",
+    "reuse": "The change adds no definition; it edits existing configuration surfaces (imas_codex/config/litellm_config.yaml, _SN_BENCHMARK_DEFAULTS in imas_codex/settings.py) rather than forking a capability the repository already owns.",
+    "scope_discipline": "The head 7c0bfd269 writes pyproject.toml, tests/core/test_settings.py and imas_codex/discovery/base/llm.py, none of which appears in the declared write paths, and the manifest's commits list omits that commit."
+  },
+  "outside_scope": "The Jev 1.13->1.14 pin (head commit 7c0bfd269) plus the untracked docs/evidence/fragments/model-refresh-code.html belong to a resume brief that this node's manifest never records.",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to point the GPT-5 model names in code defaults and proxy routes at the newest model of their tier; imas_codex/config/litellm_config.yaml:88-111 now carries three GPT routes (gpt-6.1-sol, gpt-6.1-terra, gpt-6-luna) and imas_codex/settings.py:1971-1999 with imas_codex/cli/sn.py:3572-3573 name the same three, zero gpt-5.x left in the node's three code files.\nVERDICT done_when: the done-when asks for a fragment recording three probe calls with completion, tokens and cost, the before/after list and the gate; docs/evidence/fragments/openai-model-refresh-code.html carries all three and the gate logs record 114 passed EXIT=0 on both arms, but the fragment admits the proxy was not running so the routes were probed on the call layer's direct branch.\nVERDICT write_paths: the declared paths are imas_codex/settings.py, imas_codex/config/litellm_config.yaml, imas_codex/cli/sn.py and docs/evidence/fragments/openai-model-refresh-code.html; commits 8471b89e2 and 6f5564b9d stay inside them, while head 7c0bfd269 also writes pyproject.toml, tests/core/test_settings.py and imas_codex/discovery/base/llm.py.\nVERDICT manifest: read; it reports status in-progress, commits 8471b89e2 and 6f5564b9d, and 114 passed on both arms, and it records neither 7c0bfd269 nor the untracked docs/evidence/fragments/model-refresh-code.html.\nVERDICT diff: read commit by commit against 6c73f1747; 8471b89e2 collapses six GPT-5 proxy routes to three and repoints the fallback slate, reviewer-models, candidate-models and two bench docstring examples; 6f5564b9d adds the evidence fragment; 7c0bfd269 pins four Jev seats to typesafe/jev-1.14 outside the declared scope.\nCALL_SITES: imas_codex/settings.py:2006, imas_codex/settings.py:529, imas_codex/cli/sn.py:3652, imas_codex/cli/llm_cli.py:195, imas_codex/settings.py:87\nSCORE goal_fidelity: 17\nSCORE evidence: 14\nSCORE scope_discipline: 9\nSCORE durability: 5\nSCORE fit: 17\nSCORE reuse: 20\nFINDING pyproject.toml:447 blocking: head 7c0bfd269 carries an out-of-scope Jev pin and its gate log gate-jev-after.log stops at 24% with no summary or EXIT line, and its evidence fragment is untracked, so the promoted head contains ungated/unmanifested content.\nFINDING tests/core/test_gpt6_model_support.py:99 non-blocking: no assertion covers the changed slate, routes or pricing, so restoring gpt-5.6-terra or the removed routes leaves the suite green.\nFINDING docs/evidence/fragments/model-refresh-code.html:1 non-blocking: the proxy was not running so the three new routes were probed on the call layer's direct branch rather than as the proxy serves them.\n",
+  "review_evidence": {
+    "base_sha": "6c73f1747b4d64f1943a82ef6bfaaebd91f6c6a5",
+    "gate_logs": [
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T150107307022-openai-model-refresh-code/gate-base.log",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T150107307022-openai-model-refresh-code/gate-after.log",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T150107307022-openai-model-refresh-code/gate-jev-after.log"
+    ],
+    "head_sha": "7c0bfd2697c8e10ac7c4c8c0ec4910927e4f4850",
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/openai-model-refresh-code"
+  },
+  "review_run_id": "r-20261107T154348363604-review-of-openai-model-refresh-code-6f5564b9dab0",
+  "reviewed_base_sha": "6c73f1747b4d64f1943a82ef6bfaaebd91f6c6a5",
+  "reviewed_head_sha": "7c0bfd2697c8e10ac7c4c8c0ec4910927e4f4850",
+  "reviewed_run_id": "r-20261107T150107307022-openai-model-refresh-code",
+  "rubric": {
+    "durability": "answered",
+    "evidence": "answered",
+    "fit": "answered",
+    "goal_fidelity": "answered",
+    "reuse": "answered",
+    "scope_discipline": "answered"
+  },
+  "scores": {
+    "durability": 5,
+    "evidence": 14,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 9
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T16:35:47.035664+00:00",
+  "total": 82,
+  "verdicts": {
+    "diff": "Read commit by commit against 6c73f1747: 8471b89e2 collapses six GPT-5 proxy routes to three, adds gpt-6.1-terra to the fallback slate, repoints reviewer-models gpt-5.4 to gpt-6.1-sol, candidate-models gpt-5.6-terra to gpt-6.1-terra and two sn bench docstring examples to gpt-6.1-sol; 6f5564b9d adds the 90-line evidence fragment; 7c0bfd269 pins four Jev seats to typesafe/jev-1.14 in pyproject.toml, imas_codex/settings.py, imas_codex/discovery/base/llm.py and tests/core/test_settings.py.",
+    "done_when": "The done-when asks for an evidence fragment recording the three probe calls with completion/tokens/cost, the before/after reference list and the gate; docs/evidence/fragments/openai-model-refresh-code.html carries all three and the gate the worker ran (gate-base.log 114 passed EXIT=0 at 6c73f1747, gate-after.log 114 passed EXIT=0 at 8471b89e2) measures the 'no added failure id' half, but the fragment itself never states the proxy-probe substitution as a deviation from 'each new proxy route probed once'.",
+    "goal": "The goal is to point the GPT-5 model names in code defaults and proxy routes at the newest model of their tier; imas_codex/config/litellm_config.yaml:88-111 now carries exactly three GPT routes (gpt-6.1-sol, gpt-6.1-terra, gpt-6-luna) and imas_codex/settings.py:1971-1999 plus imas_codex/cli/sn.py:3572-3573 name the same three, with no gpt-5.x left in the node's three code files (grep count 0).",
+    "manifest": "The manifest (status in-progress, commits 8471b89e2 and 6f5564b9d, 114 passed on both arms) describes the model refresh only and records neither the head commit 7c0bfd269 nor its evidence fragment docs/evidence/fragments/model-refresh-code.html, which is untracked in the worktree.",
+    "write_paths": "The declared write paths are imas_codex/settings.py, imas_codex/config/litellm_config.yaml, imas_codex/cli/sn.py and docs/evidence/fragments/openai-model-refresh-code.html; commits 8471b89e2 and 6f5564b9d stay inside them, but the reviewed head 7c0bfd269 also carries pyproject.toml, tests/core/test_settings.py and imas_codex/discovery/base/llm.py, none of which is declared."
+  }
+}
