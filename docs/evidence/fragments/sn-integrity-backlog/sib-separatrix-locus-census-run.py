@@ -769,7 +769,7 @@ def render(d: dict) -> str:
         if r["blocked_spelling"]:
             target_cell = (
                 f"<s><code>{_u(r['blocked_spelling'])}</code></s>"
-                '<div class="why">tombstone, never a target</div>'
+                f'<div class="why">{_u(r["collision"])}, so never a target</div>'
             )
         parts.append(
             '<tr><td><code>{}</code><div class="why">{}</div></td>'
@@ -804,7 +804,7 @@ def render(d: dict) -> str:
             parts.append(
                 "<tr><td><code>{}</code></td><td><code>{}</code></td>"
                 "<td>{}</td></tr>".format(
-                    _u(r["id"]), _u(r["proposed_target"]), _u(r["collision"])
+                    _u(r["id"]), _u(r["blocked_spelling"]), _u(r["collision"])
                 )
             )
         parts.append("</tbody></table>")
