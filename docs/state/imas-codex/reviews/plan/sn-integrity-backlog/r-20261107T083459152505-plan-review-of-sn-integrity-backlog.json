@@ -49,7 +49,24 @@
   "plan_slug": "sn-integrity-backlog",
   "plan_version": 340,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "finding": "done_when-2",
+      "reason": "\u00a748 now delivers no work to a node, so an imprecise measure on a closed section cannot direct a dispatch; the change that matters would be to \u00a749, not to this text.",
+      "when": "2026-11-07T11:14:20.316581+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-2": {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "reason": "\u00a748 now delivers no work to a node, so an imprecise measure on a closed section cannot direct a dispatch; the change that matters would be to \u00a749, not to this text.",
+      "when": "2026-11-07T11:14:20.316581+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-integrity-backlog/r-20261107T083459152505-plan-review-of-sn-integrity-backlog.json",
   "review_run_id": "r-20261107T083459152505-plan-review-of-sn-integrity-backlog",
   "reviewed_blob_sha": "2cc6bc39414e0423baa8f07a1e92a6d311fd8c21",
   "rubric": "content",
