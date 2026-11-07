@@ -1,0 +1,71 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest carries no baseline_suite or after_suite gate log; this node's gate is the live-graph runner log 06-gate.log, not a test suite, so no suite delta exists",
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/standard_names/export.py:2871 (HAS_SUCCESSOR chain)",
+    "imas_codex/standard_names/search.py:669 (one-hop successor fetch)",
+    "imas_codex/standard_names/graph_store/graph_audits.py:731 (terminal successor resolution)",
+    "imas_codex/standard_names/signed_manifest.py:4258 (_verify_postconditions successor clause)"
+  ],
+  "completed_at": "2026-11-07T00:27:40.941Z",
+  "dispatched_at": "2026-11-07T00:18:46Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/signed_manifest.py",
+      "line": "4258",
+      "severity": "non-blocking",
+      "text": "non-blocking: the runner's require_successor re-implements the successor-edge postcondition that _verify_postconditions already asserts (the same check is what makes 07-reapply.log report already_applied) instead of extending the owner, so the repository now carries two copies of the assertion; the node's write fence excludes imas_codex/, so a shared reader needs a section that owns product code."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T233746846226-sib-magnetic-successor-edge/logs/08-negctl-base-runner.log",
+      "line": "4",
+      "severity": "non-blocking",
+      "text": "non-blocking: the pre-repair revert arm records its header and a bare EXIT=0 with no payload between them, so the log evidences an exit code but not that the pre-repair runner read the live graph and printed the state it saw."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T233746846226-sib-magnetic-successor-edge/logs/06-gate.log",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the gate log's revision header names 0956b225f because the repaired runner was still uncommitted when the log was written, so a reader pairing the manifest's tests line with f3c4dd259 cannot tell from the log which runner produced its EXIT=0 (05b-readback.log:1 carries the same mismatch)."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read commit by commit against 0956b225f; one commit f3c4dd259 adds require_successor, checked_readback and checked_gate to the runner, removes the duplicated sourceless key, and adds the assertion section and the 07-reapply.log citation to the fragment \u2014 +90/-7, all inside scope.",
+    "done_when": "read \u00a748's done-when and the prompt's FENCE-EVIDENCE against 06-gate.log and 05b-readback.log; the gate named in the manifest's tests line now runs checked_gate, which calls require_successor before the export-blocking-set measurement, so the stated measure is asserted instead of only printed.",
+    "goal": "read the node goal against the run prompt and 05b-readback.log; one receipt-stamped HAS_SUCCESSOR edge from flux_surface_average_magnetic_field_magnitude to flux_surface_averaged_magnetic_field_magnitude is recorded, and the gained commit adds the assertion that keeps that state measurable.",
+    "manifest": "read; it records commits 0956b225f and f3c4dd259, names the gate command in tests, names 06-gate.log/05b-readback.log/07-reapply.log plus both negation arms in test_logs, and answers all six rubric dimensions.",
+    "write_paths": "read the manifest's declared paths; the diff of 0956b225f..f3c4dd259 touches only sib-magnetic-successor-edge-run.py and sib-magnetic-successor-edge.html, both inside the four declared paths, and leaves the authority JSON untouched."
+  },
+  "justifications": {
+    "durability": "sib-magnetic-successor-edge-run.py:259-304 raises SystemExit naming each violated clause, and deleting the HAS_SUCCESSOR edge would drive successor_edges at line 269 to 0 and redden it; 09-negctl-negated-expectation.log shows the clauses firing.",
+    "evidence": "docs/evidence/fragments/sn-integrity-backlog/sib-magnetic-successor-edge-run.py:358-361 makes checked_gate run require_successor before gate, so 06-gate.log's EXIT=0 now depends on the edge; the log's revision header still names 0956b225f.",
+    "fit": "the added helpers follow the module's existing mode-plus-JSON idiom at sib-magnetic-successor-edge-run.py:364-386, and the change also removes the duplicate sourceless_live_ids key and the noqa that suppressed nothing at line 342.",
+    "goal_fidelity": "the edge the goal names is read back at 05b-readback.log:41-52 with successor_edges 1 and receipt sn-change:signed-manifest:8f25a71f...:43f44939, and the gained commit adds the guard rather than a second write.",
+    "reuse": "require_successor at sib-magnetic-successor-edge-run.py:259 duplicates the edge-count, receipt-id and successor-id postcondition already asserted at imas_codex/standard_names/signed_manifest.py:4258 without calling or extending that owner.",
+    "scope_discipline": "the diff of f3c4dd259 touches sib-magnetic-successor-edge-run.py and sib-magnetic-successor-edge.html only, both inside the declared paths at prompt.txt FENCE-SCOPE, and neither the authority JSON nor any other file changes."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: read the node goal against the run prompt and 05b-readback.log; one receipt-stamped HAS_SUCCESSOR edge from flux_surface_average_magnetic_field_magnitude to flux_surface_averaged_magnetic_field_magnitude is recorded, and the gained commit adds the assertion that keeps that state measurable.\nVERDICT done_when: read \u00a748's done-when and the prompt's FENCE-EVIDENCE against 06-gate.log and 05b-readback.log; the gate named in the manifest's tests line now runs checked_gate, which calls require_successor before the export-blocking-set measurement, so the stated measure is asserted instead of only printed.\nVERDICT write_paths: read the manifest's declared paths; the diff of 0956b225f..f3c4dd259 touches only sib-magnetic-successor-edge-run.py and sib-magnetic-successor-edge.html, both inside the four declared paths, and leaves the authority JSON untouched.\nVERDICT manifest: read; it records commits 0956b225f and f3c4dd259, names the gate command in tests, names 06-gate.log/05b-readback.log/07-reapply.log plus both negation arms in test_logs, and answers all six rubric dimensions.\nVERDICT diff: read commit by commit against 0956b225f; one commit f3c4dd259 adds require_successor, checked_readback and checked_gate to the runner, removes the duplicated sourceless key, and adds the assertion section and the 07-reapply.log citation to the fragment \u2014 +90/-7, all inside scope.\nCALL_SITES: imas_codex/standard_names/export.py:2871 (HAS_SUCCESSOR chain), imas_codex/standard_names/search.py:669 (one-hop successor fetch), imas_codex/standard_names/graph_store/graph_audits.py:731 (terminal successor resolution), imas_codex/standard_names/signed_manifest.py:4258 (_verify_postconditions successor clause)\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: the edge the goal names is read back at 05b-readback.log:41-52 with successor_edges 1 and receipt sn-change:signed-manifest:8f25a71f...:43f44939, and the gained commit adds the guard rather than a second write.\nSCORE evidence: 16\nJUSTIFICATION evidence: docs/evidence/fragments/sn-integrity-backlog/sib-magnetic-successor-edge-run.py:358-361 makes checked_gate run require_successor before gate, so 06-gate.log's EXIT=0 now depends on the edge; the log's revision header still names 0956b225f.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff of f3c4dd259 touches sib-magnetic-successor-edge-run.py and sib-magnetic-successor-edge.html only, both inside the declared paths at prompt.txt FENCE-SCOPE, and neither the authority JSON nor any other file changes.\nSCORE durability: 16\nJUSTIFICATION durability: sib-magnetic-successor-edge-run.py:259-304 raises SystemExit naming each violated clause, and deleting the HAS_SUCCESSOR edge would drive successor_edges at line 269 to 0 and redden it; 09-negctl-negated-expectation.log shows the clauses firing.\nSCORE fit: 18\nJUSTIFICATION fit: the added helpers follow the module's existing mode-plus-JSON idiom at sib-magnetic-successor-edge-run.py:364-386, and the change also removes the duplicate sourceless_live_ids key and the noqa that suppressed nothing at line 342.\nSCORE reuse: 5\nJUSTIFICATION reuse: require_successor at sib-magnetic-successor-edge-run.py:259 duplicates the edge-count, receipt-id and successor-id postcondition already asserted at imas_codex/standard_names/signed_manifest.py:4258 without calling or extending that owner.\nFINDING imas_codex/standard_names/signed_manifest.py:4258 non-blocking: the runner's require_successor re-implements the successor-edge postcondition that _verify_postconditions already asserts (the same check is what makes 07-reapply.log report already_applied) instead of extending the owner, so the repository now carries two copies of the assertion; the node's write fence excludes imas_codex/, so a shared reader needs a section that owns product code.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T233746846226-sib-magnetic-successor-edge/logs/08-negctl-base-runner.log:4 non-blocking: the pre-repair revert arm records its header and a bare EXIT=0 with no payload between them, so the log evidences an exit code but not that the pre-repair runner read the live graph and printed the state it saw.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T233746846226-sib-magnetic-successor-edge/logs/06-gate.log:1 non-blocking: the gate log's revision header names 0956b225f because the repaired runner was still uncommitted when the log was written, so a reader pairing the manifest's tests line with f3c4dd259 cannot tell from the log which runner produced its EXIT=0 (05b-readback.log:1 carries the same mismatch).",
+  "review_run_id": "r-20261107T001712770700-review-of-sib-magnetic-successor-edge-f3c4dd2597e9",
+  "reviewed_base_sha": "0956b225f5babe33f5358e96a198eaa2f9ce5c02",
+  "reviewed_head_sha": "f3c4dd2597e91e019a255cc5d5e30a4a84966693",
+  "reviewed_run_id": "r-20261106T233746846226-sib-magnetic-successor-edge",
+  "scores": {
+    "durability": 16,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T00:25:50.506183+00:00",
+  "total": 92
+}
