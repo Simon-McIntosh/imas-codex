@@ -100,6 +100,17 @@
   nothing collapses into a step total. The suite asserts it directly — two calls
   under one step through a bound tracker produce two charges with two different
   releases.</p>
+  <p>A free answer is still an answer. The endpoint admits a zero
+  <code>usage.cost</code>, and pricing a reservation from a spend already
+  reported as zero is meaningless — the pool refuses an amount of zero
+  outright, so a successful free response would have crashed the stage after
+  the provider had replied. <code>BudgetManager.record_llm_cost_event</code>
+  writes such a call straight to the writer queue: no reservation, no
+  overspend, and the row still carries the build. A negative cost remains an
+  error. Two tests guard the wiring rather than the intent — the enrich
+  worker's tracker must be constructed with a <code>charge</code> sink, and
+  the review_docs Jev charge must stamp <code>model_release</code> — and each
+  turns red when its line is reverted.</p>
   <p>The stored row is asserted where it is built: <code>record_llm_cost</code> is
   the only writer of a <code>:LLMCost</code> node, and the test reads the Cypher
   parameter set it computes, requiring both <code>llm_model</code> and
