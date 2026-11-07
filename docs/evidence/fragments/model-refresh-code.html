@@ -172,6 +172,29 @@ ORDER BY day DESC, llm_model, release</code></pre>
   <code>gate-release-base.log</code> and <code>gate-release-after.log</code> in
   the run directory, each with its revision, tree, command and
   <code>EXIT=</code> line.</p>
+  <h4>Gate, final round</h4>
+  <p>The base arm is now a <code>git archive</code> of <code>566ee7678</code>
+  unpacked outside the worktree, with the five generated model files copied in
+  from the main checkout and <code>--rootdir</code> pointing at that tree, so
+  the two arms can only be the two revisions and not two views of one
+  directory. The selection collects 9622 items on head; on
+  <code>tests/discovery</code> alone the archived tree collects 1590 against
+  head's 1605, which is the fifteen tests this node added and the check that
+  the two arms really are different trees.</p>
+  <table><thead><tr><th>Arm</th><th>Revision / tree</th><th>Result</th></tr></thead><tbody>
+    <tr><td>base</td><td><code>566ee7678</code>, archived into <code>/dev/shm/crew-base-566ee7678</code></td><td>6 failed, 9601 passed, 14 skipped, <code>EXIT=1</code></td></tr>
+    <tr><td>after</td><td><code>73acefa34</code>, this worktree</td><td>2 failed, 9607 passed, 13 skipped, <code>EXIT=1</code></td></tr>
+  </tbody></table>
+  <p>Both after-arm failures pass in isolation at the same revision
+  (<code>gate-fix-single.log</code>: 5 passed, <code>EXIT=0</code>), so both are
+  parallel-load flakes rather than state changes. The six base-only failures
+  are path-dependent (<code>test_offsite_push</code>,
+  <code>test_manifest_generability</code>,
+  <code>test_catalog_layout_hierarchy</code>) and follow from running the
+  archived tree outside the repository; they fail there and not on head, so
+  the delta is stated by id and each direction is named. Logs:
+  <code>gate-fix-base.log</code> and <code>gate-fix-after.log</code>, each with
+  revision, tree, command and <code>EXIT=</code> line.</p>
   <h4>Gate, durable-release round</h4>
   <p>Re-measured after the release was written to the graph, with the base arm
   taken at <code>566ee7678</code> — the commit before the feature — so the two
