@@ -439,6 +439,7 @@ async def tritium():
             authority["tritium"]["compose"],
             strict=True,
         ):
+            item["id"] = "dd:" + item["path"]
             item["name_hint"] = target
             item["edit_reason"] = kwargs["reason"]
             item["edit_origin"] = "human"
@@ -455,6 +456,50 @@ async def tritium():
         )
     print("composition=" + json.dumps(outcome), flush=True)
     assert outcome["spend_usd"] <= 2.0, outcome
+
+
+async def compose_held_sources():
+    """Finish composition from persisted claims after input-shape repair."""
+    from imas_codex.standard_names.budget import BudgetManager
+    from imas_codex.standard_names.graph_store.graph_audits import finalize_sn_run
+    from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+        compose_batch,
+    )
+
+    authority = json.loads(AUTHORITY.read_text())
+    items = json.loads((RUN / "tritium-claimed-items.json").read_text())
+    assert sorted(item["path"] for item in items) == sorted(TRITIUM_PATHS)
+    for item, target in zip(
+        sorted(items, key=lambda r: r["path"]),
+        authority["tritium"]["compose"],
+        strict=True,
+    ):
+        item["id"] = "dd:" + item["path"]
+        item["name_hint"] = target
+        item["edit_reason"] = (
+            "Compose separate local tritium velocities at pedestal top and plasma boundary."
+        )
+        item["edit_origin"] = "human"
+    mgr = BudgetManager(total_budget=2.0, run_id=RUN.name)
+    await mgr.start()
+    assert await mgr.get_total_spent(force_refresh=True) == 0.0
+    previous = RUN / "tritium-compose-result.json"
+    (RUN / "tritium-compose-input-refusal.json").write_bytes(previous.read_bytes())
+    result = {"run_id": RUN.name, "sources": TRITIUM_PATHS}
+    try:
+        result["composed"] = await compose_batch(items, mgr, asyncio.Event())
+    finally:
+        result["ledger_drained"] = await mgr.drain_pending(raise_on_failure=True)
+        result["spend_usd"] = await mgr.get_total_spent(force_refresh=True)
+        write(previous, result)
+        finalize_sn_run(
+            RUN.name,
+            status="completed" if "composed" in result else "failed",
+            cost_spent=result["spend_usd"],
+            stopped_at=datetime.now(UTC),
+        )
+    print("composition=" + json.dumps(result), flush=True)
+    assert result["spend_usd"] <= 2.0, result
 
 
 def readback():
@@ -621,6 +666,7 @@ def main():
             "tritium-authority",
             "tritium",
             "readback",
+            "compose-held",
         ],
     )
     p.add_argument("--name")
@@ -643,6 +689,8 @@ def main():
         asyncio.run(tritium())
     elif args.mode == "readback":
         readback()
+    elif args.mode == "compose-held":
+        asyncio.run(compose_held_sources())
     else:
         authority = json.loads(AUTHORITY.read_text())
         for row in authority["operations"]:
