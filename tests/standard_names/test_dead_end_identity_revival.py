@@ -78,7 +78,7 @@ def test_composed_dead_end_identity_is_revived_for_review(
     assert params["revivable_stages"] == ["exhausted", "superseded"]
     assert params["reviewable_stage"] == "drafted"
     assert "target.name_stage IN $revivable_stages" in cypher
-    assert "b.source_type = 'dd'" in cypher
+    assert "sns.source_type = 'dd'" in cypher
     assert "MATCH (sns)-[:FROM_DD_PATH]->(:IMASNode)" in cypher
     assert "[:HAS_SUCCESSOR*1..]" in cypher
     assert "[:REFINED_FROM*1..]" in cypher
