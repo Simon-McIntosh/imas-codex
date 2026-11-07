@@ -612,26 +612,36 @@ def render(d: dict) -> str:
     parts.append("<h3>Every live name</h3>")
     parts.append(
         "<table><thead><tr><th>name</th><th>locus</th><th>unit</th>"
-        "<th>DD locus path</th><th>action</th><th>target</th>"
-        "<th>tombstones adjacent</th></tr></thead><tbody>"
+        "<th>DD locus path</th><th>lineage</th><th>tombstones adjacent</th>"
+        "<th>action</th><th>target</th></tr></thead><tbody>"
     )
     for r in d["names"]:
         rowsrc = "<br>".join(f"<code>{_u(p)}</code>" for p in r["locus_paths"][:6]) or "—"
         tomb = ", ".join(r["tombstones"]) or "—"
+        ch = r["chain"]
+        bits = []
+        if ch["refined_from"]:
+            bits.append("refined from " + ", ".join(ch["refined_from"]))
+        if ch["refined_into"]:
+            bits.append("refined into " + ", ".join(ch["refined_into"]))
+        if ch["has_successor"]:
+            bits.append("successor " + ", ".join(ch["has_successor"]))
+        if ch["parent_children"]:
+            bits.append("children " + str(len(ch["parent_children"])))
         parts.append(
-            "<tr><td><code>{}</code>{}<div class=\"why\">{}</div></td>"
+            "<tr><td><code>{}</code><div class=\"why\">{}</div></td>"
             "<td><code>{}</code></td><td><code>{}</code></td>"
-            "<td>{}</td><td><code>{}</code></td><td><code>{}</code></td>"
-            "<td>{}</td></tr>".format(
+            "<td>{}</td><td>{}</td><td>{}</td>"
+            "<td><code>{}</code></td><td><code>{}</code></td></tr>".format(
                 _u(r["id"]),
-                " <span class=\"badge\">avg</span>" if "flux_surface_averaged" in r["id"] else "",
                 _u(r["rationale"]),
                 _u(r["locus"]),
                 _u(r["unit"] or "—"),
                 rowsrc,
+                _u("; ".join(bits) or "—"),
+                _u(tomb),
                 _u(r["proposed_action"]),
                 _u(r["proposed_target"]),
-                _u(tomb),
             )
         )
     parts.append("</tbody></table>")
