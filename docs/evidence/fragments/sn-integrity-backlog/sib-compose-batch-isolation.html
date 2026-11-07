@@ -76,3 +76,12 @@ cases over fakes: a refused candidate beside a valid sibling, and the transport 
   <tr><td>negative control</td><td>head module with the grammar guard removed</td>
       <td>the isolation case fails, <code>EXIT=1</code></td></tr>
 </table>
+
+<p>The gate is <code>pytest tests/standard_names</code> on both arms. <b>Head (8541 passed, 11
+skipped, 460 deselected, 0 failed, <code>EXIT=0</code>)</b> against <b>base (8533 passed, 12
+skipped, 460 deselected, 7 failed, <code>EXIT=1</code>)</b>. No failure id is added: the head arm
+has none. Three of the base arm's seven are the three new cases, red as intended. The other four
+are an artefact of the base arm's tree — it was extracted with <code>git archive</code> into a
+scratch directory and is not a Git checkout, so the export's provenance stamp refuses with
+<em>run from an imas-codex Git checkout or set SOURCE_DATE_EPOCH</em>; the head arm runs inside a
+real worktree and passes the same four.</p>
