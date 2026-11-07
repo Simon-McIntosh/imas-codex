@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="360">
+<meta name="plan-version" content="361">
 <meta name="plan-modified" content="2026-11-07">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -1178,7 +1178,10 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
     <div class="r-comment-body"><p>reviewed r-20261107T133317139144-sib-reclaim-superseded-spelling at base 2c9ea5cbdb to head af95e02dd, scores goal_fidelity 18, evidence 15, scope_discipline 19, durability 14, fit 17, reuse 5; one blocking finding (the different-locus reclaim's MERGE at edit.py:3451 commits at :3460 before the cycle readback at :3495, so a target already descending from the different-locus holder closes a REFINED_FROM cycle and the refusal leaves it committed) and three non-blocking; added_failure_count 1 from the run's own recorded arms.</p></div>
 </div>
 <div class="r-comment" data-section="s49" data-id="c-run-r-20261107T182523745611-review-of-sib-reclaim-superseded-spelling-24c65e51b3b0" data-who="reckon-build" data-when="2026-11-07T18:42:09.151Z">
-    <div class="r-comment-body"><p>reviewed r-20261107T133317139144-sib-reclaim-superseded-spelling at base 2c9ea5cbdb to head 24c65e51b, scores goal_fidelity 19, evidence 18, scope_discipline 20, durability 19, fit 17, reuse 16; both prior blocking findings are repaired (no edge in the closing-lineage case; the cycle guard reads and rolls back inside the write transaction before any write, shown red by two negative controls) and two non-blocking findings remain (the reclaim_spelling operation is absent from _FOLD_LINEAGE_OPERATIONS at edit.py:2243, and the &#x27;Rename mode&#x27; banner at edit.py:3148 is left bodiless); added_failure_count 0 because the head set is a subset of the base set in the run&#x27;s own arms.</p></div>
+    <div class="r-comment-body"><p>reviewed r-20261107T133317139144-sib-reclaim-superseded-spelling at base 2c9ea5cbdb to head 24c65e51b, scores goal_fidelity 19, evidence 18, scope_discipline 20, durability 19, fit 17, reuse 16; both prior blocking findings are repaired (no edge in the closing-lineage case; the cycle guard reads and rolls back inside the write transaction before any write, shown red by two negative controls) and two non-blocking findings remain (the reclaim_spelling operation is absent from _FOLD_LINEAGE_OPERATIONS at edit.py:2243, and the 'Rename mode' banner at edit.py:3148 is left bodiless); added_failure_count 0 because the head set is a subset of the base set in the run's own arms.</p></div>
+</div>
+<div class="r-comment" data-section="s49" data-id="c-run-r-20261107T133317139144-sib-reclaim-superseded-spelling" data-who="reckon-build" data-when="2026-11-07T18:19:59Z">
+    <div class="r-comment-body"><p>added two signed, receipted reclaim cases to `sn edit --rename` (lineage closing on the renaming name, writing no new lineage edge; holder at a different DD locus with the renaming name required at the tombstone&#x27;s own locus) that revive the tombstone with its reviews and documentation and carry the sources — 5 of 5 disposable-graph cases pass, a would-be cycle refuses inside the write transaction with nothing written, the case detector runs on the fold writer&#x27;s own lineage walk, and the default tests/standard_names suite adds no failure id on either arm, USD 0.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261012T162346807302-review-of-sib-row-census" data-who="reckon-build" data-when="2026-10-12T16:39:58.712Z">
     <div class="r-comment-body"><p>reviewed r-20261012T145528571333-sib-row-census at a7a70db00 against c7b4c626e; total 93/120 (goal_fidelity 15, evidence 13, scope_discipline 19, durability 11, fit 15, reuse 20); two blocking findings — the landing record's verdict tallies and the manifest's row-count both disagree with the 38 rows the census file holds.</p></div>

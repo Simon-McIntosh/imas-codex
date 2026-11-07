@@ -1,0 +1,1098 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 4,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "2c9ea5cbdb33687b268a19c204fe1aa55465bff5",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 6549119,
+      "input_tokens_cumulative": 6549119,
+      "output_tokens": 20115,
+      "output_tokens_cumulative": 20115,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 811,
+    "files": 4,
+    "removed": 21
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 342,
+        "name": "test_all_expands_to_known_nodes_minus_the_primary",
+        "path": "tests/core/test_tunnel_cli.py"
+      },
+      "run_function": {
+        "line": 4667,
+        "name": "restage_accepted_names_for_review",
+        "path": "imas_codex/standard_names/edit.py"
+      },
+      "window_line": 4747
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "_relevance",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "run_function": {
+        "line": 4667,
+        "name": "restage_accepted_names_for_review",
+        "path": "imas_codex/standard_names/edit.py"
+      },
+      "window_line": 4747
+    },
+    {
+      "existing_function": {
+        "line": 58,
+        "name": "_facet",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "run_function": {
+        "line": 4667,
+        "name": "restage_accepted_names_for_review",
+        "path": "imas_codex/standard_names/edit.py"
+      },
+      "window_line": 4748
+    },
+    {
+      "existing_function": {
+        "line": 58,
+        "name": "test_resolution_graph_record_carries_bridge_provenance",
+        "path": "tests/graph/test_dd_resolution_schema.py"
+      },
+      "run_function": {
+        "line": 4667,
+        "name": "restage_accepted_names_for_review",
+        "path": "imas_codex/standard_names/edit.py"
+      },
+      "window_line": 4746
+    },
+    {
+      "existing_function": {
+        "line": 158,
+        "name": "test_hits_are_related_path_hit_instances",
+        "path": "tests/graph/test_dd_search.py"
+      },
+      "run_function": {
+        "line": 4667,
+        "name": "restage_accepted_names_for_review",
+        "path": "imas_codex/standard_names/edit.py"
+      },
+      "window_line": 4747
+    },
+    {
+      "existing_function": {
+        "line": 318,
+        "name": "test_runner_has_no_graph_write_or_persistence_dependency",
+        "path": "tests/standard_names/test_advisory_benchmark.py"
+      },
+      "run_function": {
+        "line": 4667,
+        "name": "restage_accepted_names_for_review",
+        "path": "imas_codex/standard_names/edit.py"
+      },
+      "window_line": 4748
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_governed_description_omits_storage_rank",
+        "path": "tests/standard_names/test_audit_check_precision.py"
+      },
+      "run_function": {
+        "line": 4667,
+        "name": "restage_accepted_names_for_review",
+        "path": "imas_codex/standard_names/edit.py"
+      },
+      "window_line": 4778
+    },
+    {
+      "existing_function": {
+        "line": 1198,
+        "name": "_get_review_context",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 4667,
+        "name": "restage_accepted_names_for_review",
+        "path": "imas_codex/standard_names/edit.py"
+      },
+      "window_line": 4747
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_flush_membership_is_explicit",
+        "path": "tests/standard_names/test_display_wiring.py"
+      },
+      "run_function": {
+        "line": 4667,
+        "name": "restage_accepted_names_for_review",
+        "path": "imas_codex/standard_names/edit.py"
+      },
+      "window_line": 4747
+    },
+    {
+      "existing_function": {
+        "line": 198,
+        "name": "test_documentation_gate_names_are_exact",
+        "path": "tests/standard_names/test_docs_gates.py"
+      },
+      "run_function": {
+        "line": 4667,
+        "name": "restage_accepted_names_for_review",
+        "path": "imas_codex/standard_names/edit.py"
+      },
+      "window_line": 4747
+    },
+    {
+      "existing_function": {
+        "line": 142,
+        "name": "test_pending_count_and_claim_use_the_same_atomic_predicate",
+        "path": "tests/standard_names/test_docs_review_eligibility.py"
+      },
+      "run_function": {
+        "line": 4667,
+        "name": "restage_accepted_names_for_review",
+        "path": "imas_codex/standard_names/edit.py"
+      },
+      "window_line": 4747
+    },
+    {
+      "existing_function": {
+        "line": 613,
+        "name": "_tx_run",
+        "path": "tests/standard_names/test_edit_engine.py"
+      },
+      "run_function": {
+        "line": 4667,
+        "name": "restage_accepted_names_for_review",
+        "path": "imas_codex/standard_names/edit.py"
+      },
+      "window_line": 4747
+    },
+    {
+      "existing_function": {
+        "line": 1022,
+        "name": "test_existing_stable_same_id_is_provenance_only",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 4667,
+        "name": "restage_accepted_names_for_review",
+        "path": "imas_codex/standard_names/edit.py"
+      },
+      "window_line": 4747
+    },
+    {
+      "existing_function": {
+        "line": 2051,
+        "name": "test_guard_rejection_rolls_back_before_any_mutation",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 4667,
+        "name": "restage_accepted_names_for_review",
+        "path": "imas_codex/standard_names/edit.py"
+      },
+      "window_line": 4747
+    },
+    {
+      "existing_function": {
+        "line": 440,
+        "name": "test_merge_cypher_sets_cost_fields",
+        "path": "tests/standard_names/test_integration.py"
+      },
+      "run_function": {
+        "line": 4667,
+        "name": "restage_accepted_names_for_review",
+        "path": "imas_codex/standard_names/edit.py"
+      },
+      "window_line": 4746
+    },
+    {
+      "existing_function": {
+        "line": 110,
+        "name": "test_five_way_classification_is_exhaustive",
+        "path": "tests/standard_names/test_manifest_drain.py"
+      },
+      "run_function": {
+        "line": 4667,
+        "name": "restage_accepted_names_for_review",
+        "path": "imas_codex/standard_names/edit.py"
+      },
+      "window_line": 4747
+    },
+    {
+      "existing_function": {
+        "line": 661,
+        "name": "test_progress_generate_count_requires_actionable_scope",
+        "path": "tests/standard_names/test_manifest_drain.py"
+      },
+      "run_function": {
+        "line": 4667,
+        "name": "restage_accepted_names_for_review",
+        "path": "imas_codex/standard_names/edit.py"
+      },
+      "window_line": 4747
+    },
+    {
+      "existing_function": {
+        "line": 30,
+        "name": "test_all_pools_budget_saturated_fires_at_threshold",
+        "path": "tests/standard_names/test_no_turn_shutdown.py"
+      },
+      "run_function": {
+        "line": 4667,
+        "name": "restage_accepted_names_for_review",
+        "path": "imas_codex/standard_names/edit.py"
+      },
+      "window_line": 4747
+    },
+    {
+      "existing_function": {
+        "line": 251,
+        "name": "test_variation_axes_are_the_non_locus_owner_segments",
+        "path": "tests/standard_names/test_pattern_families.py"
+      },
+      "run_function": {
+        "line": 4667,
+        "name": "restage_accepted_names_for_review",
+        "path": "imas_codex/standard_names/edit.py"
+      },
+      "window_line": 4747
+    },
+    {
+      "existing_function": {
+        "line": 579,
+        "name": "test_cli_pending_progress_uses_the_same_edit_scope",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 4667,
+        "name": "restage_accepted_names_for_review",
+        "path": "imas_codex/standard_names/edit.py"
+      },
+      "window_line": 4747
+    },
+    {
+      "existing_function": {
+        "line": 429,
+        "name": "test_a_name_axis_pass_leaves_a_documentation_contradiction_hold_open",
+        "path": "tests/standard_names/test_review_holds.py"
+      },
+      "run_function": {
+        "line": 4667,
+        "name": "restage_accepted_names_for_review",
+        "path": "imas_codex/standard_names/edit.py"
+      },
+      "window_line": 4747
+    },
+    {
+      "existing_function": {
+        "line": 617,
+        "name": "test_dismissal_does_not_accept_a_document_without_a_winning_review",
+        "path": "tests/standard_names/test_review_holds.py"
+      },
+      "run_function": {
+        "line": 4667,
+        "name": "restage_accepted_names_for_review",
+        "path": "imas_codex/standard_names/edit.py"
+      },
+      "window_line": 4747
+    },
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "test_skipped_source_retry_is_exact_audited_and_context_preserving",
+        "path": "tests/standard_names/test_skipped_source_retry_graph.py"
+      },
+      "run_function": {
+        "line": 4667,
+        "name": "restage_accepted_names_for_review",
+        "path": "imas_codex/standard_names/edit.py"
+      },
+      "window_line": 4747
+    },
+    {
+      "existing_function": {
+        "line": 111,
+        "name": "query",
+        "path": "tests/standard_names/test_sn_approve.py"
+      },
+      "run_function": {
+        "line": 4667,
+        "name": "restage_accepted_names_for_review",
+        "path": "imas_codex/standard_names/edit.py"
+      },
+      "window_line": 4746
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_dry_run_prints_plan_without_writes_claims_or_llm_calls",
+        "path": "tests/standard_names/test_sn_run_dry_run.py"
+      },
+      "run_function": {
+        "line": 4667,
+        "name": "restage_accepted_names_for_review",
+        "path": "imas_codex/standard_names/edit.py"
+      },
+      "window_line": 4747
+    },
+    {
+      "existing_function": {
+        "line": 303,
+        "name": "test_claim_readback_returns_both_source_and_name_steering",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 4667,
+        "name": "restage_accepted_names_for_review",
+        "path": "imas_codex/standard_names/edit.py"
+      },
+      "window_line": 4746
+    },
+    {
+      "existing_function": {
+        "line": 64,
+        "name": "test_write_reviews_clears_only_non_distinct_or_unparseable_suggestions",
+        "path": "tests/standard_names/test_suggestion_persist_gate.py"
+      },
+      "run_function": {
+        "line": 4667,
+        "name": "restage_accepted_names_for_review",
+        "path": "imas_codex/standard_names/edit.py"
+      },
+      "window_line": 4747
+    },
+    {
+      "existing_function": {
+        "line": 78,
+        "name": "_lifecycle",
+        "path": "tests/standard_names/test_last_source_supersede.py"
+      },
+      "run_function": {
+        "line": 93,
+        "name": "_read",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "window_line": 94
+    },
+    {
+      "existing_function": {
+        "line": 108,
+        "name": "_successor_id",
+        "path": "tests/standard_names/test_last_source_supersede.py"
+      },
+      "run_function": {
+        "line": 93,
+        "name": "_read",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "window_line": 94
+    },
+    {
+      "existing_function": {
+        "line": 115,
+        "name": "_cycle_reached",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "run_function": {
+        "line": 93,
+        "name": "_read",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "window_line": 94
+    },
+    {
+      "existing_function": {
+        "line": 78,
+        "name": "_lifecycle",
+        "path": "tests/standard_names/test_last_source_supersede.py"
+      },
+      "run_function": {
+        "line": 115,
+        "name": "_cycle_reached",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "window_line": 117
+    },
+    {
+      "existing_function": {
+        "line": 108,
+        "name": "_successor_id",
+        "path": "tests/standard_names/test_last_source_supersede.py"
+      },
+      "run_function": {
+        "line": 115,
+        "name": "_cycle_reached",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "window_line": 117
+    },
+    {
+      "existing_function": {
+        "line": 93,
+        "name": "_read",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "run_function": {
+        "line": 115,
+        "name": "_cycle_reached",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "window_line": 117
+    },
+    {
+      "existing_function": {
+        "line": 209,
+        "name": "test_different_locus_holder_reclaims_the_tombstone",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "run_function": {
+        "line": 152,
+        "name": "test_closing_lineage_reclaims_the_tombstone_with_its_history",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "window_line": 172
+    },
+    {
+      "existing_function": {
+        "line": 249,
+        "name": "test_name_from_a_third_locus_cannot_take_the_spelling",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "run_function": {
+        "line": 152,
+        "name": "test_closing_lineage_reclaims_the_tombstone_with_its_history",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "window_line": 172
+    },
+    {
+      "existing_function": {
+        "line": 275,
+        "name": "test_a_reclaim_that_would_close_a_cycle_refuses_with_nothing_written",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "run_function": {
+        "line": 152,
+        "name": "test_closing_lineage_reclaims_the_tombstone_with_its_history",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "window_line": 172
+    },
+    {
+      "existing_function": {
+        "line": 313,
+        "name": "test_unrelated_tombstone_lineage_is_still_refused",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "run_function": {
+        "line": 152,
+        "name": "test_closing_lineage_reclaims_the_tombstone_with_its_history",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "window_line": 172
+    },
+    {
+      "existing_function": {
+        "line": 152,
+        "name": "test_closing_lineage_reclaims_the_tombstone_with_its_history",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "run_function": {
+        "line": 209,
+        "name": "test_different_locus_holder_reclaims_the_tombstone",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "window_line": 220
+    },
+    {
+      "existing_function": {
+        "line": 249,
+        "name": "test_name_from_a_third_locus_cannot_take_the_spelling",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "run_function": {
+        "line": 209,
+        "name": "test_different_locus_holder_reclaims_the_tombstone",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "window_line": 218
+    },
+    {
+      "existing_function": {
+        "line": 275,
+        "name": "test_a_reclaim_that_would_close_a_cycle_refuses_with_nothing_written",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "run_function": {
+        "line": 209,
+        "name": "test_different_locus_holder_reclaims_the_tombstone",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "window_line": 211
+    },
+    {
+      "existing_function": {
+        "line": 313,
+        "name": "test_unrelated_tombstone_lineage_is_still_refused",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "run_function": {
+        "line": 209,
+        "name": "test_different_locus_holder_reclaims_the_tombstone",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "window_line": 220
+    },
+    {
+      "existing_function": {
+        "line": 152,
+        "name": "test_closing_lineage_reclaims_the_tombstone_with_its_history",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "run_function": {
+        "line": 249,
+        "name": "test_name_from_a_third_locus_cannot_take_the_spelling",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "window_line": 260
+    },
+    {
+      "existing_function": {
+        "line": 209,
+        "name": "test_different_locus_holder_reclaims_the_tombstone",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "run_function": {
+        "line": 249,
+        "name": "test_name_from_a_third_locus_cannot_take_the_spelling",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "window_line": 258
+    },
+    {
+      "existing_function": {
+        "line": 275,
+        "name": "test_a_reclaim_that_would_close_a_cycle_refuses_with_nothing_written",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "run_function": {
+        "line": 249,
+        "name": "test_name_from_a_third_locus_cannot_take_the_spelling",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "window_line": 258
+    },
+    {
+      "existing_function": {
+        "line": 313,
+        "name": "test_unrelated_tombstone_lineage_is_still_refused",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "run_function": {
+        "line": 249,
+        "name": "test_name_from_a_third_locus_cannot_take_the_spelling",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "window_line": 260
+    },
+    {
+      "existing_function": {
+        "line": 152,
+        "name": "test_closing_lineage_reclaims_the_tombstone_with_its_history",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "run_function": {
+        "line": 275,
+        "name": "test_a_reclaim_that_would_close_a_cycle_refuses_with_nothing_written",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "window_line": 291
+    },
+    {
+      "existing_function": {
+        "line": 209,
+        "name": "test_different_locus_holder_reclaims_the_tombstone",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "run_function": {
+        "line": 275,
+        "name": "test_a_reclaim_that_would_close_a_cycle_refuses_with_nothing_written",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "window_line": 277
+    },
+    {
+      "existing_function": {
+        "line": 249,
+        "name": "test_name_from_a_third_locus_cannot_take_the_spelling",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "run_function": {
+        "line": 275,
+        "name": "test_a_reclaim_that_would_close_a_cycle_refuses_with_nothing_written",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "window_line": 289
+    },
+    {
+      "existing_function": {
+        "line": 313,
+        "name": "test_unrelated_tombstone_lineage_is_still_refused",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "run_function": {
+        "line": 275,
+        "name": "test_a_reclaim_that_would_close_a_cycle_refuses_with_nothing_written",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "window_line": 291
+    },
+    {
+      "existing_function": {
+        "line": 152,
+        "name": "test_closing_lineage_reclaims_the_tombstone_with_its_history",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "run_function": {
+        "line": 313,
+        "name": "test_unrelated_tombstone_lineage_is_still_refused",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "window_line": 324
+    },
+    {
+      "existing_function": {
+        "line": 209,
+        "name": "test_different_locus_holder_reclaims_the_tombstone",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "run_function": {
+        "line": 313,
+        "name": "test_unrelated_tombstone_lineage_is_still_refused",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "window_line": 324
+    },
+    {
+      "existing_function": {
+        "line": 249,
+        "name": "test_name_from_a_third_locus_cannot_take_the_spelling",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "run_function": {
+        "line": 313,
+        "name": "test_unrelated_tombstone_lineage_is_still_refused",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "window_line": 324
+    },
+    {
+      "existing_function": {
+        "line": 275,
+        "name": "test_a_reclaim_that_would_close_a_cycle_refuses_with_nothing_written",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "run_function": {
+        "line": 313,
+        "name": "test_unrelated_tombstone_lineage_is_still_refused",
+        "path": "tests/standard_names/test_reclaim_superseded_spelling.py"
+      },
+      "window_line": 324
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "f2d4661852cdfd1b7c79224b6814014d23ce6f4b",
+    "99567b9a0958edffcb85dcdaf6746018be821b25",
+    "ddb434957cb5f54385d77048b949ba0ae4a3b474",
+    "7538a4d8541307da32f30a627bfc6ea67ffd30f6",
+    "a62c2fc8c8130d7aa9ed6ebce68862a871301268",
+    "d8d03cd89e1936e5dce78291a0a5de68bf36ebc4",
+    "af95e02dd9278f373487666d6b38d153fd91004c",
+    "a0c440b5c84b450a95849ad986b9c905bb277b16",
+    "24c65e51b3b04692d4012b6eb6ba2d123ec01586"
+  ],
+  "completed_at": "2026-11-07T18:19:59Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-11-07T13:51:06Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": "pre-existing-failure",
+  "gate": "failed",
+  "gate_check": {
+    "command": "uv run --no-sync pytest -p no:cacheprovider -n 8 tests/standard_names",
+    "exit_status": 1,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T133317139144-sib-reclaim-superseded-spelling/logs/after-suite-a0c440b5c.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.919722678343368,
+    "plan": "sn-integrity-backlog",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-11-07T14:49:41.472359+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-11-07T13:49:41Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 21,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 5,
+    "headroom": 6,
+    "mean_context": 126667,
+    "observed_at": "2026-11-07T13:49:32Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 21,
+      "aggregate_tokens_per_second": 276.276,
+      "detail": "",
+      "mean_tokens_per_second": 49.335,
+      "observed_at": "2026-11-07T13:49:32Z",
+      "runs": 5.6,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-07T18:19:59Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T133317139144-sib-reclaim-superseded-spelling/manifest.md",
+  "member": "disposable-r-20261107T133317139144-sib-reclaim-superseded-spelling",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "gate-not-passing",
+    "test_paths": [
+      "tests/standard_names/test_reclaim_superseded_spelling.py"
+    ],
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "sib-reclaim-superseded-spelling",
+  "node_definition": {
+    "after": [],
+    "anchor_paths": [],
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "elevated",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "detail": "the dispatching harness exposed no authoring-turn token usage",
+        "status": "unknown",
+        "tokens": null
+      },
+      "harness": null,
+      "runtime_session_id": null,
+      "session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea"
+    },
+    "done_when": "per comment c-s49-lead-ruling-reclaim: tests/standard_names/test_reclaim_superseded_spelling.py proves on the disposable graph that (1) a name whose tombstone ancestor's lineage ends on it reclaims that id with the tombstone's history and paid reviews kept and a receipt naming the case, (2) a name reclaims a tombstone folded into a different DD locus, and (3) a tombstone whose lineage ends on an unrelated live name is still refused with the existing message; cases 1 and 2 fail on main; the sn-edit skill documents the route; tests/standard_names/test_edit_engine.py and tests/standard_names default add no failure id against the base; USD 0",
+    "estimated_hours": null,
+    "goal": "Let sn edit rename reclaim a superseded tombstone's id in the two ruled cases through a signed, receipted route",
+    "id": "sib-reclaim-superseded-spelling",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-11-07T13:49:41Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 21,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 5,
+      "headroom": 6,
+      "mean_context": 126667,
+      "observed_at": "2026-11-07T13:49:32Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 21,
+        "aggregate_tokens_per_second": 276.276,
+        "detail": "",
+        "mean_tokens_per_second": 49.335,
+        "observed_at": "2026-11-07T13:49:32Z",
+        "runs": 5.6,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T133317139144-sib-reclaim-superseded-spelling/manifest.md",
+    "negative_control": "remove the reclaim branch; cases 1 and 2 must fail with the existing tombstone refusal",
+    "plan": "sn-integrity-backlog",
+    "regenerate_paths": [],
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§49",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "imas_codex/standard_names/edit.py",
+      "tests/standard_names/test_reclaim_superseded_spelling.py",
+      ".claude/skills/sn-edit/SKILL.md",
+      "docs/evidence/fragments/sn-integrity-backlog/sib-reclaim-superseded-spelling.html",
+      "docs/figures/sn-integrity-backlog/sib-reclaim-superseded-spelling"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 2894239.0,
+  "outcome": "",
+  "outside_scope_paths": [
+    "tests/standard_names"
+  ],
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "sib-reclaim-superseded-spelling",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-11-07T13:50:37.129652+00:00",
+    "score": 0.7375,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "lead ruling c-s49-lead-ruling-reclaim; local lane because codex is on a budget hold",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.544,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {}
+  },
+  "plan": "sn-integrity-backlog",
+  "plan_impl_at_dispatch": 0.919722678343368,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "24c65e51b3b04692d4012b6eb6ba2d123ec01586",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "2c9ea5cbdb33687b268a19c204fe1aa55465bff5",
+    "reviewed_head_sha": "24c65e51b3b04692d4012b6eb6ba2d123ec01586",
+    "scores": {
+      "durability": 19,
+      "evidence": 18,
+      "fit": 17,
+      "goal_fidelity": 19,
+      "reuse": 16,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 109
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261107T133317139144-sib-reclaim-superseded-spelling",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§49",
+  "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+  "session_harness": "claude",
+  "session_id": "e1cbaaba-887b-4abc-92e0-25525458ffe4",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": 3,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 33268090,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 1392.107,
+    "generated_tokens": 140258,
+    "generation_seconds": 451.411,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 76.7,
+    "machine_seconds": 940.696,
+    "peak_input_tokens": 176579,
+    "tokens_per_second": 310.71,
+    "wall_tokens_per_second": 100.75
+  },
+  "time_budget": "60m",
+  "tool_steps": 108.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 16133,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 4,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-07T18:20:03Z",
+    "last_record_type": "result",
+    "launched_at": "2026-11-07T17:56:32Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [],
+    "run_id": "r-20261107T133317139144-sib-reclaim-superseded-spelling",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 17975,
+    "worker_pid": 2368554
+  },
+  "worker_seconds": 8148,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": {
+    "classification": "retained-for-resume",
+    "retained_at": "2026-11-07T18:19:59Z",
+    "session_id": "e1cbaaba-887b-4abc-92e0-25525458ffe4",
+    "session_source": "stream",
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-reclaim-superseded-spelling"
+  }
+}
