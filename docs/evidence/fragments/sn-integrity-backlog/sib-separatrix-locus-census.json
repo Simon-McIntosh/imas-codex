@@ -1,6 +1,6 @@
 {
  "node": "sib-separatrix-locus-census",
- "generated_at": "2026-11-07T09:22:33+00:00",
+ "generated_at": "2026-11-07T09:26:38+00:00",
  "read_only": true,
  "population_rule": "live StandardName with a produced DD path carrying 'separatrix' on either source edge, or a name ending _at_separatrix / _at_plasma_boundary",
  "totals": {
