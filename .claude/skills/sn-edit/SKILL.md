@@ -107,10 +107,29 @@ Attaching an edit does not score it — it just enters the queue.
 Eligible rename targets include names in terminal stages: a `superseded`
 name with **no successor** (an orphaned DD path) can be resurrected by a
 redesign edit. Renaming another name *onto* a tombstone's spelling is
-refused — the tombstone owns that id as history. To proceed, either rename
-the tombstone itself to a free spelling (the route above), or return it to
-`draft` with a signed transition and fold the other name into it with
-`sn supersede`.
+refused — the tombstone owns that id as history, with two ruled exceptions:
+
+- the tombstone's successor lineage ends on the name being renamed, so an
+  earlier rename moved this identity off the case and moving it back
+  reverses that hop;
+- the tombstone's current holder names a different data-dictionary locus
+  than the tombstone's own source path, so the spelling still means what the
+  tombstone recorded (a value spelling vacated onto an average holder). The
+  name being renamed must itself sit at the tombstone's locus — a name from
+  a third locus would move an unrelated quantity onto the spelling and is
+  refused.
+
+Those reclaims are signed and receipted: the tombstone is revived with the
+stage its own reviews earned, keeps its documentation and ledger, and
+receives the renaming name's producing sources. The renaming name is retired
+and the receipt names the case. A closing-lineage reclaim writes no new
+lineage edge — the chain already runs from the tombstone to the renaming
+name — while a different-locus reclaim links the retired name onto the
+revived id. A dry run names the case it would
+use, so the route can be checked before writing. Every other tombstone
+target is still refused; there, either rename the tombstone itself to a
+free spelling (the route above), or return it to `draft` with a signed
+transition and fold the other name into it with `sn supersede`.
 
 ## Worked example
 

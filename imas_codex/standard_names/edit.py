@@ -3150,6 +3150,393 @@ def supersede_into(
 # ---------------------------------------------------------------------------
 
 
+# ---------------------------------------------------------------------------
+# Reclaiming a superseded spelling
+# ---------------------------------------------------------------------------
+
+_RECLAIM_TOMBSTONE_QUERY = """
+// EDIT_RECLAIM_TOMBSTONE
+MATCH (tomb:StandardName {id: $id})
+WHERE tomb.name_stage = 'superseded'
+RETURN properties(tomb) AS properties
+"""
+
+_RECLAIM_NAME_PATHS_QUERY = """
+// EDIT_RECLAIM_NAME_PATHS
+MATCH (sn:StandardName {id: $id})
+RETURN sn.source_paths AS source_paths
+"""
+
+# The reclaim adds (tomb)-[:REFINED_FROM]->(old), so a cycle appears when a
+# path from the retired name already reaches the tombstone. Read inside the
+# write transaction, before anything is written.
+_RECLAIM_CYCLE_QUERY = """
+// EDIT_RECLAIM_WOULD_CYCLE
+MATCH (old:StandardName {id: $old_id}), (tomb:StandardName {id: $new_id})
+RETURN EXISTS { MATCH (old)-[:REFINED_FROM*1..]->(tomb) } AS would_cycle
+"""
+
+
+@dataclass
+class _ReclaimCase:
+    """Verdict on whether a rename may take a tombstoned spelling back."""
+
+    case: str | None
+    tombstone: dict[str, Any] = field(default_factory=dict)
+    revived_stage: str | None = None
+    detail: str = ""
+
+
+def _dd_locus(source_paths: Iterable[Any]) -> str | None:
+    """The data-dictionary container a set of source paths sits in.
+
+    A locus is a path's parent container, so ``summary/local/separatrix/value``
+    and ``summary/local/separatrix_average/value`` are two loci while two
+    siblings under one container share one. A name whose paths span more than
+    one container has no single locus and yields ``None``; a name with none
+    has nothing to compare either.
+    """
+    containers = {
+        path.rsplit("/", 1)[0]
+        for path in source_paths or ()
+        if isinstance(path, str) and "/" in path
+    }
+    return containers.pop() if len(containers) == 1 else None
+
+
+def _reclaim_spelling_case(
+    gc: GraphClient, *, target: str, new_name: str
+) -> _ReclaimCase:
+    """Decide whether ``target`` may rename onto the tombstone ``new_name``.
+
+    Exactly two cases are admitted, and both keep the tombstone's recorded
+    history and paid reviews rather than minting a fresh identity:
+
+    * ``closing_lineage`` — the tombstone's successor lineage ends on the
+      renaming name itself. An earlier rename moved this identity off the
+      spelling, so moving it back reverses that hop rather than reviving a
+      stranger's id.
+    * ``different_locus`` — the tombstone's current holder is a name for a
+      different data-dictionary locus than the tombstone's own source path,
+      so the spelling still names the quantity the tombstone recorded. The
+      renaming name must itself sit at the tombstone's locus: a name from a
+      third locus would move an unrelated quantity onto the spelling. A
+      holder at the same locus also keeps the spelling load-bearing, and both
+      of those shapes are refused.
+
+    The lineage is read by :func:`_fold_lineage_walk`, the walk the fold
+    writer uses, so a spelling is reclaimable on exactly the terms a
+    tombstone is foldable: the edges decide, not a scalar summary.
+    """
+    rows = gc.query(_RECLAIM_TOMBSTONE_QUERY, id=new_name)
+    if not rows:
+        return _ReclaimCase(case=None, detail="no superseded tombstone")
+    tombstone = dict(rows[0].get("properties") or {})
+    with gc.session() as session:
+        transaction = session.begin_transaction()
+        try:
+            snapshot = _fold_snapshot(transaction, target, new_name)
+            lineage = (
+                _fold_lineage_walk(transaction, snapshot, target, new_name)
+                if snapshot is not None
+                else None
+            )
+        finally:
+            transaction.rollback()
+    if lineage is None:
+        return _ReclaimCase(
+            case=None,
+            tombstone=tombstone,
+            detail="the tombstone and the renaming name cannot be read together",
+        )
+    if lineage.over_depth:
+        return _ReclaimCase(
+            case=None,
+            tombstone=tombstone,
+            detail="successor lineage is unreadable: the walk ran past its bound",
+        )
+    if lineage.closes_on_old:
+        return _ReclaimCase(
+            case="closing_lineage",
+            tombstone=tombstone,
+            revived_stage=_fold_revival_stage(tombstone),
+            detail=f"successor lineage closes on {target!r}",
+        )
+    tips = lineage.successors
+    tomb_locus = _dd_locus(tombstone.get("source_paths") or ())
+    if len(tips) == 1 and tomb_locus is not None:
+        holder = tips[0]
+        holder_rows = gc.query(_RECLAIM_NAME_PATHS_QUERY, id=holder)
+        holder_locus = (
+            _dd_locus(holder_rows[0].get("source_paths") or ()) if holder_rows else None
+        )
+        target_rows = gc.query(_RECLAIM_NAME_PATHS_QUERY, id=target)
+        target_locus = (
+            _dd_locus(target_rows[0].get("source_paths") or ()) if target_rows else None
+        )
+        if (
+            holder_locus is not None
+            and holder_locus != tomb_locus
+            and target_locus == tomb_locus
+        ):
+            return _ReclaimCase(
+                case="different_locus",
+                tombstone=tombstone,
+                revived_stage=_fold_revival_stage(tombstone),
+                detail=(
+                    f"holder {holder!r} sits at locus {holder_locus!r}, the "
+                    f"tombstone's own path at {tomb_locus!r} and {target!r} at "
+                    "the same locus"
+                ),
+            )
+    return _ReclaimCase(
+        case=None,
+        tombstone=tombstone,
+        detail="neither reclaim case holds",
+    )
+
+
+_RECLAIM_MUTATION_QUERY = """
+// ATOMIC_RECLAIM_SPELLING
+MATCH (old:StandardName {id: $old_id}),
+      (tomb:StandardName {id: $new_id})
+WHERE old.name_stage = $old_stage
+  AND tomb.name_stage = 'superseded'
+WITH old, tomb, old.name_stage AS prior_stage
+SET old.name_stage = 'superseded',
+    // The prior stage is bound before the SET, so the tombstone records the
+    // stage the name held rather than 'superseded' written by this same SET.
+    old.superseded_from_stage = coalesce(old.superseded_from_stage, prior_stage),
+    old.claim_token = null,
+    old.claimed_at = null,
+    old.source_paths = [],
+    old.edit_status = CASE
+      WHEN old.edit_status = 'open' AND old.edit_mode = 'rename'
+      THEN 'applied' ELSE old.edit_status END,
+    old.updated_at = datetime($changed_at),
+    tomb.name_stage = $revived_stage,
+    tomb.status = 'draft',
+    tomb.description = CASE
+      WHEN coalesce(tomb.description, '') = ''
+      THEN $description ELSE tomb.description END,
+    tomb.unit = coalesce(tomb.unit, $unit),
+    tomb.edit_mode = 'rename',
+    tomb.name_hint = $new_id,
+    tomb.edit_reason = $reason,
+    tomb.edit_origin = $origin,
+    tomb.edit_scope = $scope,
+    tomb.edit_status = 'applied',
+    tomb.edit_requested_at = datetime($changed_at),
+    tomb.run_id = $run_id,
+    tomb.updated_at = datetime($changed_at)
+FOREACH (_ IN CASE WHEN $link_lineage THEN [1] ELSE [] END |
+  MERGE (tomb)-[:REFINED_FROM]->(old))
+CREATE (change:StandardNameChange {
+  id: $change_id,
+  from_name: $old_id,
+  to_name: $new_id,
+  operation: 'reclaim_spelling',
+  reason: $receipt,
+  origin: $origin,
+  run_id: $run_id,
+  changed_at: datetime($changed_at),
+  internal: true
+})
+MERGE (old)-[:HAS_INTERNAL_CHANGE]->(change)
+MERGE (tomb)-[:HAS_INTERNAL_CHANGE]->(change)
+RETURN tomb.name_stage AS revived_stage,
+       old.name_stage AS retired_stage
+"""
+
+
+def _apply_reclaim_rename(
+    gc: GraphClient,
+    *,
+    target: str,
+    target_row: dict[str, Any],
+    new_name: str,
+    reclaim: _ReclaimCase,
+    reason: str,
+    origin: str,
+    scope: str,
+    dry_run: bool,
+    actions: list[str],
+) -> EditPlan:
+    """Move a live identity onto a tombstoned spelling, signed and receipted.
+
+    The tombstone is revived with the stage its own reviews earned, keeps its
+    documentation and ledger, and receives the renaming name's producing
+    sources. The renaming name is retired onto it with a lineage edge, and a
+    receipt naming which reclaim case admitted the write lands in the change
+    ledger, so the decision is auditable without parsing prose. No other
+    tombstone target reaches this path: :func:`_reclaim_spelling_case` admits
+    only the two ruled cases.
+    """
+    revived_stage = reclaim.revived_stage or "drafted"
+    producing_source_ids = _producing_source_ids(target_row)
+    actions = list(actions)
+    actions.append(f"reclaim case {reclaim.case}: {reclaim.detail}")
+    if dry_run:
+        actions.append(
+            f"[dry-run] would revive tombstone {new_name!r} at "
+            f"name_stage={revived_stage!r}, carry "
+            f"{len(producing_source_ids)} producing source(s) from {target!r}, "
+            f"and retire {target!r} onto it"
+        )
+        return EditPlan(
+            target=target,
+            mode="rename",
+            axis="name",
+            scope=scope,
+            entry="review_name",
+            successor=new_name,
+            cascade_deferred=[],
+            blocked=None,
+            actions=actions,
+            applied=False,
+        )
+
+    run_id = _new_run_id()
+    change_id = f"sn-change:reclaim-spelling:{uuid.uuid4().hex}"
+    # The stage the renaming name held, observed on the pre-write fetch. The
+    # mutation binds the same value before its SET, so the retired name records
+    # where it came from rather than the 'superseded' that SET writes.
+    prior_stage = target_row.get("name_stage")
+    receipt = json.dumps(
+        {
+            "case": reclaim.case,
+            "detail": reclaim.detail,
+            "from_name": target,
+            "to_name": new_name,
+            "revived_stage": revived_stage,
+            "prior_stage": prior_stage,
+            "sources": producing_source_ids,
+        },
+        sort_keys=False,
+    )
+    changed_at = _now_iso()
+    link_lineage = reclaim.case != "closing_lineage"
+    with gc.session() as session:
+        transaction = session.begin_transaction()
+        try:
+            if link_lineage:
+                # The edge this reclaim adds runs tombstone -> retired name, so
+                # it closes a directed cycle whenever a lineage path already
+                # runs from the retired name back to the tombstone. Read that
+                # inside the transaction: a would-be cycle refuses the edit
+                # with nothing written.
+                guard = [
+                    dict(row)
+                    for row in transaction.run(
+                        _RECLAIM_CYCLE_QUERY, old_id=target, new_id=new_name
+                    )
+                ]
+                if guard and guard[0].get("would_cycle"):
+                    transaction.rollback()
+                    return _blocked(
+                        target,
+                        "rename",
+                        "name",
+                        scope,
+                        f"reclaim of {new_name!r} would close a directed "
+                        f"REFINED_FROM cycle: {target!r} already descends from "
+                        "the tombstone, so its lineage would stop resolving",
+                    )
+            rows = [
+                dict(row)
+                for row in transaction.run(
+                    _RECLAIM_MUTATION_QUERY,
+                    old_id=target,
+                    new_id=new_name,
+                    old_stage=target_row.get("name_stage"),
+                    revived_stage=revived_stage,
+                    description=target_row.get("description") or "",
+                    unit=target_row.get("unit"),
+                    reason=reason,
+                    origin=origin,
+                    scope=scope,
+                    run_id=run_id,
+                    change_id=change_id,
+                    receipt=receipt,
+                    changed_at=changed_at,
+                    # A closing lineage already descends from the tombstone, so
+                    # an edge back to the renaming name would close a directed
+                    # cycle. That case moves the identity and records it on the
+                    # existing chain and the receipt, and writes no new edge.
+                    link_lineage=link_lineage,
+                )
+            ]
+            if not rows:
+                raise RuntimeError(
+                    f"reclaim of {new_name!r} from {target!r} was refused by "
+                    "the graph: the tombstone or the renaming name changed "
+                    "under the write"
+                )
+            transaction.commit()
+        except BaseException:
+            with suppress(Exception):
+                transaction.rollback()
+            raise
+
+    carried = _carry_rename_sources(
+        gc,
+        old_name=target,
+        new_name=new_name,
+        expected_source_ids=producing_source_ids,
+        reason=reason,
+        origin=origin,
+        run_id=run_id,
+    )
+    actions.append(carried)
+
+    readback = gc.query(
+        """
+        // EDIT_RECLAIM_POSTFLIGHT
+        MATCH (tomb:StandardName {id: $id})
+        RETURN tomb.name_stage AS name_stage, tomb.status AS status,
+               tomb.run_id AS run_id,
+               EXISTS {
+                 MATCH path = (tomb)-[:REFINED_FROM*2..]->(tomb)
+                 RETURN path LIMIT 1
+               } AS closes_cycle
+        """,
+        id=new_name,
+    )
+    if not readback or readback[0].get("name_stage") == "superseded":
+        raise RuntimeError(
+            f"reclaim postflight: {new_name!r} did not revive — it is missing "
+            "or still a superseded tombstone"
+        )
+    if readback[0].get("closes_cycle"):
+        raise RuntimeError(
+            f"reclaim postflight: {new_name!r} now sits on a directed "
+            "REFINED_FROM cycle, so its lineage no longer reads"
+        )
+    if readback[0].get("run_id") != run_id:
+        raise RuntimeError(
+            f"reclaim postflight: {new_name!r} carries run_id "
+            f"{readback[0].get('run_id')!r}, not this reclaim's {run_id!r}"
+        )
+    actions.append(
+        f"revived {new_name!r} at name_stage={revived_stage!r} with the "
+        f"tombstone's documentation and ledger kept, and retired {target!r} "
+        f"onto it (receipt {change_id})"
+    )
+    return EditPlan(
+        target=target,
+        mode="rename",
+        axis="name",
+        scope=scope,
+        entry="review_name",
+        successor=new_name,
+        cascade_deferred=[],
+        blocked=None,
+        actions=actions,
+        applied=True,
+        run_id=run_id,
+    )
+
+
 def _apply_rename(
     gc: GraphClient,
     *,
@@ -3197,23 +3584,41 @@ def _apply_rename(
         id=new_name,
     )
     if coll and coll[0].get("n"):
-        if coll[0].get("occupant_stage") == "superseded" and not coll[0].get(
-            "occupant_has_successor"
-        ):
-            return _blocked(
-                target,
-                "rename",
-                "name",
-                scope,
-                f"a StandardName {new_name!r} already exists as a successor-less "
-                "superseded tombstone — renaming onto it is refused (the id and "
-                "the tombstone's recorded history are protected). Two routes: "
-                f"(1) bring the tombstone back by renaming it to a free spelling "
-                f"(sn edit {new_name!r} --rename <free spelling>); or (2) return "
-                "it to draft with a signed transition in "
-                "imas_codex/standard_names/signed_manifest.py, then fold this "
-                f"name into it with sn supersede",
-            )
+        if coll[0].get("occupant_stage") == "superseded":
+            # A tombstoned spelling is reclaimable in exactly two ruled cases,
+            # both of which move this identity's own spelling back onto the id
+            # rather than reviving history nobody holds.
+            reclaim = _reclaim_spelling_case(gc, target=target, new_name=new_name)
+            if reclaim.case is not None:
+                return _apply_reclaim_rename(
+                    gc,
+                    target=target,
+                    target_row=target_row,
+                    new_name=new_name,
+                    reclaim=reclaim,
+                    reason=reason,
+                    origin=origin,
+                    scope=scope,
+                    dry_run=dry_run,
+                    actions=[],
+                )
+            if not coll[0].get("occupant_has_successor"):
+                return _blocked(
+                    target,
+                    "rename",
+                    "name",
+                    scope,
+                    f"a StandardName {new_name!r} already exists as a "
+                    "successor-less superseded tombstone — renaming onto it is "
+                    "refused (the id and the tombstone's recorded history are "
+                    "protected). The reclaim route does not apply: "
+                    f"{reclaim.detail}. Two routes remain: (1) bring the "
+                    "tombstone back by renaming it to a free spelling "
+                    f"(sn edit {new_name!r} --rename <free spelling>); or "
+                    "(2) return it to draft with a signed transition in "
+                    "imas_codex/standard_names/signed_manifest.py, then fold "
+                    "this name into it with sn supersede",
+                )
         return _blocked(
             target,
             "rename",
