@@ -1,0 +1,36 @@
+<section id="sib-full-dd-run-record">
+  <h3 id="sib-full-dd-run-title">Full Data Dictionary run handoff</h3>
+  <p>The graph was checkpointed before the unscoped run. This node spent USD 0; the submitted run has its own USD 350 cap. The run's accepted-name yield and phase spend remain to be measured after it finishes.</p>
+
+  <h4 id="sib-full-dd-run-checkpoint">Graph checkpoint and controls</h4>
+  <p>Immediately before export, <code>reckon crew view live --project imas-codex</code> showed the separatrix implementation completed and the remaining reviews read only; <code>squeue -u "$USER"</code> showed no active standard-name job. <code>SHOW TRANSACTIONS</code> returned only the probe transaction (<code>neo4j-transaction-38046</code>). No other process was observed writing the graph.</p>
+  <p>The full archive is <code>/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-be4c7ee-20261107T202004Z.tar.gz</code> (2,543.9 MB). An offline <code>tar -tzvf</code> completed with exit 0 and found a non-empty <code>graph.dump</code> member of 2,669,791,910 bytes. The archive manifest recorded 1,773,313 graph nodes and 5,144 StandardNames before stop; live read-back after restart returned exactly those counts. Neo4j restarted as SLURM job <code>1308068</code>.</p>
+
+  <h4 id="sib-full-dd-run-before">Before-run read-back</h4>
+  <table id="sib-full-dd-run-before-table"><thead><tr><th>Measure</th><th>Value</th></tr></thead><tbody>
+    <tr><td>Accepted StandardNames</td><td>2,528</td></tr>
+    <tr><td>Sourceless live drafts by <code>find_sourceless_live_names</code></td><td>1: <code>count_normalized_at_detector_pixel</code></td></tr>
+    <tr><td>Sourceless invariant population</td><td>6 names; the source audit also classified 6</td></tr>
+    <tr><td>Export gate blocking set</td><td>0, using the export predicate: dropped-edge or never-bound names in accepted/approved states, excluding release identity holds</td></tr>
+  </tbody></table>
+
+  <h4 id="sib-full-dd-run-preview">Whole-DD dry run</h4>
+  <p><code>uv run --no-sync imas-codex sn run --dry-run</code> ran from the main checkout at <code>be4c7ee6c9cd7a42c313fd79d68dadabffc2a9e7</code> and exited 0. Its terminal receipt reported <strong>1,306 DD extraction candidates</strong> across all eligible domains and these planned pool claims:</p>
+  <table id="sib-full-dd-run-pools"><thead><tr><th>Pool</th><th>Pending</th></tr></thead><tbody>
+    <tr><td><code>generate_name</code></td><td>1,397</td></tr>
+    <tr><td><code>review_name</code></td><td>5</td></tr>
+    <tr><td><code>refine_name</code></td><td>3</td></tr>
+    <tr><td><code>generate_docs</code></td><td>4</td></tr>
+    <tr><td><code>review_docs</code></td><td>5</td></tr>
+    <tr><td><code>refine_docs</code></td><td>0</td></tr>
+    <tr><td><code>enrich_parents</code></td><td>0</td></tr>
+  </tbody></table>
+  <p>The dry run reported “Graph writes: 0; claims: 0; LLM calls: 0; planned spend: $0.00”. These are preview counts, not the eventual number of provider calls.</p>
+
+  <h4 id="sib-full-dd-run-suite">Suite precondition</h4>
+  <p>The 8,549 selected standard-name tests produced 8,535 passes, 11 skips and 3 failures. Two tests hit their 30-second limit while the 2.5 GB archive was being made; both passed in a focused run after archive completion (2/2). The third tried to modify a prompt in the fenced, read-only main checkout; it passed in a writable scratch snapshot of the same revision (1/1, module and cwd recorded in its log). No product source changed between the suite and rechecks. The full-suite log remains red, so it is not represented as an all-green receipt.</p>
+
+  <h4 id="sib-full-dd-run-job">Submitted run</h4>
+  <p>SLURM job <code>1308077</code> was submitted to <code>all</code> with <code>--time=2-00:00:00</code>, 4 CPUs and 32 GB. It ran from <code>/home/ITER/mcintos/Code/imas-codex</code> at <code>1eafc2b1ede528213027eab34eafa906d4d0c776</code> using <code>uv run --no-sync imas-codex sn run -c 350</code>. Main had no changes to standard-name, LLM or project configuration source since the preview revision. The job log is <code>/home/ITER/mcintos/.cache/imas-codex-full-dd-run/sn-run-1308077.log</code>.</p>
+  <p>The first-minute log, snapshotted at <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T200959160712-sib-full-dd-run/job_start.log</code>, prints <code>SN pipeline (budget=$350.00, min_score=0.85)</code>, <code>run_sn_pools: reconciling sources (source=dd)</code>, and a writer-loop heartbeat after 61 seconds. <code>squeue</code> reported the job <code>RUNNING</code> at 1:17 on <code>98dci4-clu-3016</code>. The job is left running for the coordinator to monitor; the eventual acceptance, spend-by-phase and after-run source read-back are separate measurements.</p>
+</section>
