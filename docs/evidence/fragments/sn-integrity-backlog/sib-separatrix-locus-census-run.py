@@ -44,7 +44,7 @@ import json
 import sys
 import time
 from collections import Counter, defaultdict
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from html import escape
 from pathlib import Path
 
@@ -131,19 +131,6 @@ def locus_of(paths: list[str], name: str) -> tuple[list[str], list[str]]:
     if not loci and not telling:
         loci = ["unresolved"]
     return loci, telling
-
-
-def suffix_ok(name: str, locus: str) -> bool:
-    """Whether the name already ends in its locus's locator token sequence."""
-    if locus == "separatrix" or locus == "pedestal_fit_separatrix":
-        return name.endswith("_at_separatrix")
-    if locus == "separatrix_average":
-        return name.endswith("_at_separatrix") and "flux_surface_averaged" in name
-    if locus == "equilibrium_boundary":
-        return name.endswith("_at_plasma_boundary")
-    if locus == "diagnostic_separatrix_distance":
-        return "separatrix" in name
-    return True
 
 
 def strip_locator(name: str) -> str:
@@ -247,7 +234,7 @@ def main(argv: list[str] | None = None) -> int:
         help="introduce a known defect so the invariant check can be shown refusing it",
     )
     args = parser.parse_args(argv)
-    started = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    started = datetime.now(UTC).isoformat(timespec="seconds")
     out: dict = {"node": NODE, "generated_at": started, "read_only": True}
 
     with GraphClient() as gc:
@@ -329,7 +316,6 @@ def main(argv: list[str] | None = None) -> int:
 
         status_of = {r["id"]: r["status"] for r in names}
         unit_of = {r["id"]: r["unit"] for r in names}
-        desc_of = {r["id"]: r["description"] for r in names}
         domain_of = {r["id"]: r["domain"] for r in names}
 
         paths_of: dict[str, set[str]] = defaultdict(set)
@@ -390,9 +376,8 @@ def main(argv: list[str] | None = None) -> int:
     for nid in sorted(live):
         paths = all_paths(nid)
         loci, telling = locus_of(paths, nid)
-        required = sorted({LOCUS_SUFFIX[l] for l in loci if LOCUS_SUFFIX[l]})
+        required = sorted({LOCUS_SUFFIX[locus_id] for locus_id in loci if LOCUS_SUFFIX[locus_id]})
         locus = loci[0] if len(set(required)) <= 1 else "mixed"
-        current = [x for x in (locator_of(nid) or "") and [locator_of(nid)] if x]
         chain = {
             "refined_from": sorted(refined_by.get(nid, set())),
             "refined_into": sorted(refined_of.get(nid, set())),
@@ -447,7 +432,6 @@ def main(argv: list[str] | None = None) -> int:
             if target == nid:
                 action, why = "keep", f"already ends in the {locus} locator"
             elif target in live_set:
-                occupant = [r for r in rows if r["id"] == target]
                 sourced_here = any(is_separatrix_path(p) for p in paths)
                 occupant_paths = all_paths(target)
                 occupant_sourced = any(is_separatrix_path(p) for p in occupant_paths)
@@ -491,7 +475,7 @@ def main(argv: list[str] | None = None) -> int:
                 "physics_domain": domain_of.get(nid),
                 "locus": locus,
                 "loci_present": loci,
-                "locus_meaning": "; ".join(LOCUS_MEANING[l] for l in loci),
+                "locus_meaning": "; ".join(LOCUS_MEANING[locus_id] for locus_id in loci),
                 "locus_paths": telling,
                 "all_paths": paths,
                 "current_locator": locator_of(nid),
@@ -512,13 +496,14 @@ def main(argv: list[str] | None = None) -> int:
     for nid in sorted(tombstones):
         paths = all_paths(nid)
         loci, telling = locus_of(paths, nid)
+        required = sorted({LOCUS_SUFFIX[locus_id] for locus_id in loci if LOCUS_SUFFIX[locus_id]})
         locus = loci[0] if len(set(required)) <= 1 else "mixed"
         tomb_rows.append(
             {
                 "id": nid,
                 "status": status_of[nid],
                 "locus": locus,
-                "locus_meaning": "; ".join(LOCUS_MEANING[l] for l in loci),
+                "locus_meaning": "; ".join(LOCUS_MEANING[locus_id] for locus_id in loci),
                 "locus_paths": telling,
                 "refined_from": sorted(refined_by.get(nid, set())),
                 "refined_into": sorted(refined_of.get(nid, set())),
@@ -767,7 +752,7 @@ def render(d: dict) -> str:
         )
     parts.append("</tbody></table>")
 
-    blocked = [r for r in d["collisions"]]
+    blocked = list(d["collisions"])
     if blocked:
         parts.append("<h3>Renames that cannot land as a plain rename</h3>")
         parts.append(
