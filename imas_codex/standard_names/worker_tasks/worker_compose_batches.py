@@ -20,6 +20,43 @@ if TYPE_CHECKING:
     from imas_codex.standard_names.budget import BudgetManager
 
 
+async def _acall_retrying_transport_faults(
+    acall: Callable[..., Any],
+    /,
+    *,
+    attempts: int,
+    base_delay: float,
+    **kwargs: Any,
+) -> Any:
+    """Call the compose seat, retrying a transport fault under the LLM policy.
+
+    ``acall_llm_structured`` decides retryability from the error *message*: a
+    dropped connection carries an empty one (``httpx.ReadError``) or a host
+    phrase its patterns do not match (``httpx.ConnectError``), so the fault
+    leaves that loop on its first occurrence. Retrying here keeps one network
+    blip from failing the whole batch — the response it already paid for holds
+    every candidate, and none of them is at fault.
+    """
+    import httpx
+
+    for attempt in range(attempts):
+        try:
+            return await acall(**kwargs)
+        except httpx.TransportError as transport_exc:
+            if attempt == attempts - 1:
+                raise
+            delay = base_delay * (2**attempt)
+            logger.warning(
+                "compose transport error (attempt %d/%d): %s — retrying in %.1fs",
+                attempt + 1,
+                attempts,
+                str(transport_exc) or type(transport_exc).__name__,
+                delay,
+            )
+            await asyncio.sleep(delay)
+    raise AssertionError("unreachable: attempts must be at least 1")
+
+
 async def compose_batch(
     _worker_dependency,
     /,
@@ -57,7 +94,11 @@ async def compose_batch(
     Returns:
         Count of successfully composed/regenerated candidates.
     """
-    from imas_codex.discovery.base.llm import acall_llm_structured
+    from imas_codex.discovery.base.llm import (
+        DEFAULT_MAX_RETRIES as _transport_attempts,
+        DEFAULT_RETRY_BASE_DELAY as _transport_delay,
+        acall_llm_structured,
+    )
     from imas_codex.llm.prompt_loader import render_prompt
     from imas_codex.settings import (
         get_compose_self_refine,
@@ -335,7 +376,10 @@ async def compose_batch(
 
         for _compose_attempt in range(_max_retries + 1):
             try:
-                llm_out = await acall_llm_structured(
+                llm_out = await _acall_retrying_transport_faults(
+                    acall_llm_structured,
+                    attempts=_transport_attempts,
+                    base_delay=_transport_delay,
                     model=model,
                     messages=messages,
                     response_model=StandardNameComposeBatch,
@@ -605,7 +649,44 @@ async def compose_batch(
             # Pre-validation gate — reject malformed LLM output
             # before MERGE.  Mark the source as 'failed' so it is not
             # re-claimed forever.
-            name_id = _worker_dependency("normalize_spelling")(c.compose_name())
+            try:
+                name_id = _worker_dependency("normalize_spelling")(c.compose_name())
+            except Exception as compose_exc:
+                # One candidate whose name cannot be composed is a per-source
+                # outcome, not a batch failure: the grammar rejects what the
+                # model proposed for THIS source, while every other candidate
+                # in the same paid response is composable. Record the refusal
+                # on the source and drop the candidate.
+                _base_token = (
+                    getattr(getattr(c, "segments", None), "base_token", "") or ""
+                )
+                wlog.warning(
+                    "Pool %s: grammar validation refused source=%s (%s): %s",
+                    phase_tag,
+                    c.source_id,
+                    _base_token or "no base token",
+                    compose_exc,
+                )
+                if c.source_id:
+                    try:
+                        failed = _worker_dependency(
+                            "_mark_source_prevalidation_failed"
+                        )(
+                            c.source_id,
+                            source_type=source_kind,
+                            candidate_name=_base_token or "<uncompisable>",
+                            reason=f"grammar validation: {compose_exc}",
+                            claim_token=(source_item or {}).get("claim_token"),
+                            claim_seq=(source_item or {}).get("claim_seq"),
+                        )
+                        if failed:
+                            disposition_winner_ids.add(f"{source_kind}:{c.source_id}")
+                    except Exception:
+                        wlog.debug(
+                            "Failed to mark grammar-refused source %s",
+                            c.source_id,
+                        )
+                continue
             # Provenance collapse: estimator facets of one quantity share the
             # canonical name (MERGE identity) regardless of per-facet drift.
             _pterm, _pbase = _worker_dependency("detect_value_provenance")(
