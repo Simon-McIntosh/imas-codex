@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Unmeasured: the reviewed manifest leaves baseline_suite and after_suite blank, so zero means no added failure was established, not that a base/head suite delta passed; its one full-suite log has three failures and the focused rechecks pass.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "call_sites_note": "No product runtime code imports the evidence runner; docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run-run.py:69-75 is its standalone CLI entry.",
+  "completed_at": "2026-11-07T20:59:25Z",
+  "dispatched_at": "2026-11-07T20:50:38Z",
+  "durability_note": "The only new refusal, at runner.py:26-27, would fire for zero StandardNames or missing ids; it does not exercise the accepted, draft, or blocking-set calculations, and no test was added.",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run.html",
+      "line": "11",
+      "severity": "blocking",
+      "text": "blocking: the before-run counts rely on before_readback.log, whose header names main at be4c7ee6c9cd7a42c313fd79d68dadabffc2a9e7, but that revision has no relative read-back script named by manifest.md:15; the script bytes that produced the baseline cannot be attributed to the reviewed change."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run-run.py",
+      "line": "44",
+      "severity": "non-blocking",
+      "text": "non-blocking: the export blocking predicate is copied from imas_codex/standard_names/export.py:3085-3090 rather than called through its owner, so a gate change can make this count drift; fold the shared predicate into the subsequent catalog-consistency node."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "commit b9de20a8a6e23ecd2d7f664cfe7e5e22772934dd adds the 75-line graph read-back runner, and commit 5f5026ac94f307a22c918d466f928e46a8b0cbf7 adds the 36-line evidence fragment against base 50bcd5a7542237f72d71e4797f94dfb8dfc316b4.",
+    "done_when": "the source prompt's done_when requires a verified archive, pre-run counts, dry-run planned calls, and a running two-day USD 350 job; archive_verify.log and job_start.log end or start with the relevant receipts, but before_readback.log does not establish which script tree produced its counts.",
+    "goal": "the dispatched goal in the source prompt is checkpoint, whole-DD preview, and capped SLURM submission; docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run.html:5-35 records all three and leaves later yield to the coordinator.",
+    "manifest": "the source manifest.md:5-28 says complete, names both commits, the archive and job receipts, and a red 8535-pass/3-fail suite with focused rechecks, while baseline_suite and after_suite are blank.",
+    "write_paths": "the source prompt declares the fragment, runner, and figure directory; git show of b9de20a8a6e23ecd2d7f664cfe7e5e22772934dd and 5f5026ac94f307a22c918d466f928e46a8b0cbf7 changes only the first two paths."
+  },
+  "justifications": {
+    "durability": "docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run-run.py:26-27 would reject an empty or id-less StandardName population, but no added test would fail if accepted counts, sourceless drafts, or the blocking set regressed.",
+    "evidence": "before_readback.log reports 2528 accepted names and a nonempty source population, but its header names a main revision that lacks the script used by the manifest.md:15 command; archive_verify.log and job_start.log carry direct receipts.",
+    "fit": "docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run-run.py:17-75 uses the graph client's context and a small CLI entry point, with no newly introduced forbidden symbol.",
+    "goal_fidelity": "docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run.html:5-35 records the graph checkpoint, 1306-candidate dry run, and running job 1308077 at the USD 350 cap.",
+    "reuse": "docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run-run.py:44-49 duplicates the source-loss gate already owned by imas_codex/standard_names/export.py:3085-3090, while graph activity already has an owner in imas_codex/graph/offsite.py:135-155.",
+    "scope_discipline": "git show of both commits changes only docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run-run.py and sib-full-dd-run.html, both declared in the source prompt's write paths."
+  },
+  "node": "sib-full-dd-run",
+  "plan": "sn-integrity-backlog",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the dispatched goal in the source prompt is checkpoint, whole-DD preview, and capped SLURM submission; docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run.html:5-35 records all three and leaves later yield to the coordinator.\nVERDICT done_when: the source prompt's done_when requires a verified archive, pre-run counts, dry-run planned calls, and a running two-day USD 350 job; archive_verify.log and job_start.log end or start with the relevant receipts, but before_readback.log does not establish which script tree produced its counts.\nVERDICT write_paths: the source prompt declares the fragment, runner, and figure directory; git show of b9de20a8a6e23ecd2d7f664cfe7e5e22772934dd and 5f5026ac94f307a22c918d466f928e46a8b0cbf7 changes only the first two paths.\nVERDICT manifest: the source manifest.md:5-28 says complete, names both commits, the archive and job receipts, and a red 8535-pass/3-fail suite with focused rechecks, while baseline_suite and after_suite are blank.\nVERDICT diff: commit b9de20a8a6e23ecd2d7f664cfe7e5e22772934dd adds the 75-line graph read-back runner, and commit 5f5026ac94f307a22c918d466f928e46a8b0cbf7 adds the 36-line evidence fragment against base 50bcd5a7542237f72d71e4797f94dfb8dfc316b4.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run.html:5-35 records the graph checkpoint, 1306-candidate dry run, and running job 1308077 at the USD 350 cap.\nSCORE evidence: 10\nJUSTIFICATION evidence: before_readback.log reports 2528 accepted names and a nonempty source population, but its header names a main revision that lacks the script used by the manifest.md:15 command; archive_verify.log and job_start.log carry direct receipts.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show of both commits changes only docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run-run.py and sib-full-dd-run.html, both declared in the source prompt's write paths.\nSCORE durability: 2\nJUSTIFICATION durability: docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run-run.py:26-27 would reject an empty or id-less StandardName population, but no added test would fail if accepted counts, sourceless drafts, or the blocking set regressed.\nSCORE fit: 18\nJUSTIFICATION fit: docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run-run.py:17-75 uses the graph client's context and a small CLI entry point, with no newly introduced forbidden symbol.\nSCORE reuse: 5\nJUSTIFICATION reuse: docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run-run.py:44-49 duplicates the source-loss gate already owned by imas_codex/standard_names/export.py:3085-3090, while graph activity already has an owner in imas_codex/graph/offsite.py:135-155.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run.html:11 blocking: the before-run counts rely on before_readback.log, whose header names main at be4c7ee6c9cd7a42c313fd79d68dadabffc2a9e7, but that revision has no relative read-back script named by manifest.md:15; the script bytes that produced the baseline cannot be attributed to the reviewed change.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run-run.py:44 non-blocking: the export blocking predicate is copied from imas_codex/standard_names/export.py:3085-3090 rather than called through its owner, so a gate change can make this count drift; fold the shared predicate into the subsequent catalog-consistency node.\n",
+  "reuse_note": "Capability searches found imas_codex/standard_names/export.py:3049-3112 owning the source-audit gate, an older evidence runner repeating it in docs/evidence/fragments/sn-integrity-backlog/sib-compose-stranded-stubs-run.py:134-164, and imas_codex/graph/offsite.py:135-155 owning live graph activity.",
+  "review_run_id": "r-20261107T204942022312-review-of-sib-full-dd-run-5f5026ac94f3",
+  "reviewed_base_sha": "50bcd5a7542237f72d71e4797f94dfb8dfc316b4",
+  "reviewed_head_sha": "5f5026ac94f307a22c918d466f928e46a8b0cbf7",
+  "reviewed_run_id": "r-20261107T200959160712-sib-full-dd-run",
+  "scores": {
+    "durability": 2,
+    "evidence": 10,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T21:11:23.020531+00:00",
+  "total": 74
+}
