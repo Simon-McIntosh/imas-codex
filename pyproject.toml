@@ -495,7 +495,7 @@ max-concurrency = 256
 # Compose uses a high-throughput model behind deterministic grammar validation
 # and a vendor-diverse review quorum. Selection evidence belongs in benchmark
 # result artifacts.
-# Switch-back: model="openrouter/openai/gpt-5.5", reasoning-effort="high".
+# Switch-back: model="openrouter/openai/gpt-6.1-sol", reasoning-effort="high".
 model = "local/deepseek-v4.1-flash"
 model-route = "ambix-local"
 api-key-env = "AMBIX_API_KEY"
@@ -727,7 +727,7 @@ disagreement-threshold = 1.0
 # Alternative quality-cost-balanced profile (requires OpenRouter credits).
 models = [
   "openrouter/anthropic/claude-sonnet-4.6",
-  "openrouter/openai/gpt-5.4",
+  "openrouter/openai/gpt-6.1-sol",
   "openrouter/google/gemini-3.1-pro-preview",
 ]
 disagreement-threshold = 0.20
@@ -756,11 +756,9 @@ compose-models = [
     "openrouter/anthropic/claude-opus-4.8",
     "openrouter/anthropic/claude-sonnet-5",
     "openrouter/anthropic/claude-haiku-4.5",
-    "openrouter/openai/gpt-5.6-sol",
-    "openrouter/openai/gpt-5.6-terra",
-    "openrouter/openai/gpt-5.6-luna",
-    "openrouter/openai/gpt-5.5",
-    "openrouter/openai/gpt-5.4",
+    "openrouter/openai/gpt-6.1-sol",
+    "openrouter/openai/gpt-6.1-terra",
+    "openrouter/openai/gpt-6-luna",
     "openrouter/x-ai/grok-4.5",
     "openrouter/google/gemini-3.5-flash",
     "openrouter/google/gemini-3.1-pro-preview",
@@ -784,7 +782,7 @@ candidate-models = [
     "openrouter/x-ai/grok-4.5",
     "openrouter/google/gemini-3.5-flash",
     "openrouter/google/gemini-3.1-pro-preview",
-    "openrouter/openai/gpt-5.6-terra",
+    "openrouter/openai/gpt-6.1-terra",
     "openrouter/anthropic/claude-sonnet-5",
 ]
 # Frontier model used as independent judge for quality scoring.
@@ -800,7 +798,7 @@ reviewer-models = [
     # Models whose endpoints violate the account data policy, return empty
     # content, or throttle under pool concurrency stay outside this slate.
     "openrouter/google/gemini-3.5-flash",       # Google   $1.50/$9.00
-    "openrouter/openai/gpt-5.5",                # OpenAI — vendor diversity in judge panel
+    "openrouter/openai/gpt-6.1-sol",            # OpenAI — vendor diversity in judge panel
     "openrouter/x-ai/grok-4.5",                 # xAI      $2/$6
     # Quorum-breaker candidates / calibrated anchors
     "openrouter/google/gemini-3.1-pro-preview", # escalator $2/$12
@@ -832,7 +830,7 @@ evidence-token-cap-escalation = 800
 # Higher-capability alternatives (require OpenRouter credits, retain
 # for switch-back / A-B benchmarking):
 #   proposer-model = "openrouter/google/gemini-3.1-pro-preview"
-#   proposer-model = "openrouter/openai/gpt-5.5"
+#   proposer-model = "openrouter/openai/gpt-6.1-sol"
 #
 # Note: Anthropic's structured-output API rejects schemas with ``oneOf``
 # (``FanoutPlan`` is a discriminated union over ``fn_id``); Gemini and
@@ -925,6 +923,18 @@ verified-at = "2026-10-18"
 max-input-tokens = 1050000
 overrides = [
   { min-input-tokens = 272000, prompt = 4.0, completion = 15.0, cache-read = 0.20, cache-write = 5.0 },
+]
+
+[tool.imas-codex.llm.openrouter-pricing."openrouter/openai/gpt-6.1-terra"]
+prompt = 1.0
+completion = 5.0
+cache-read = 0.05
+cache-write = 1.25
+source = "https://openrouter.ai/api/v1/model/openai/gpt-6.1-terra"
+verified-at = "2026-11-07"
+max-input-tokens = 1050000
+overrides = [
+  { min-input-tokens = 272000, prompt = 2.0, completion = 7.5, cache-read = 0.10, cache-write = 2.50 },
 ]
 
 [tool.imas-codex.llm.openrouter-pricing."openrouter/openai/gpt-6-luna"]
