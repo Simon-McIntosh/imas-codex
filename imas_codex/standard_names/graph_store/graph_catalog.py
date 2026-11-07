@@ -519,7 +519,9 @@ def write_standard_names(
                                 sns.attempt_count = 0
                 SET sns.source_type = 'dd',
                     sns.source_id = b.source_id,
-                    sns.status = 'attached',
+                    // The claim owner finalizes its lifecycle after the rich write.
+                    sns.status = CASE WHEN sns.claim_token IS NULL
+                                      THEN 'attached' ELSE sns.status END,
                     sns.produced_sn_id = sn.id,
                     sns.composed_at = coalesce(sns.composed_at, datetime())
                 MERGE (sns)-[:PRODUCED_NAME]->(sn)
@@ -2457,7 +2459,7 @@ def persist_generated_name_winners(
                     MATCH (sns:StandardNameSource {id: b.sns_id})
                     WHERE sns.claim_token = b.claim_token
                       AND sns.claim_seq = b.claim_seq
-                      AND (sns.status = 'extracted' OR b.binding_kind = 'adoption')
+                      AND sns.status = 'extracted'
                     MATCH (sn:StandardName {id: b.sn_id})
                     WHERE sn.name_stage IN $stable_stages
                       AND (b.unit IS NULL OR sn.unit IS NULL OR sn.unit = b.unit)

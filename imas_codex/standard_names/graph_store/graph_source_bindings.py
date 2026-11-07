@@ -880,6 +880,44 @@ def _supersede_released_bindings(
     )
 
 
+def _pending_projection_stub_predicate(
+    source: str,
+    target: str,
+    *,
+    unit: str | None = None,
+    attachment_error: str = "null",
+    pending_stage: str = "'pending'",
+    projection_edge: str = "'HAS_STANDARD_NAME'",
+) -> str:
+    """Build the shared eligibility guard for adopting a DD projection stub.
+
+    Arguments are trusted Cypher expressions. The source node owns its type;
+    fenced worker outcomes need not repeat that metadata. A claimed source
+    supplies its pinned unit; other callers read the unit from the projecting
+    DD path, including its canonical unit edge when the scalar is absent.
+    """
+    unit = unit or (
+        "coalesce(projected.unit, head([(projected)-[:HAS_UNIT]->"
+        "(projection_unit:Unit) | projection_unit.id]))"
+    )
+    return f"""
+        {source}.source_type = 'dd'
+        AND {target}.name_stage = {pending_stage}
+        AND {target}.reservation_source_id IS NULL
+        AND {attachment_error} IS NULL
+        AND NOT EXISTS {{
+          MATCH (:StandardNameSource)-[:PRODUCED_NAME]->({target})
+        }}
+        AND EXISTS {{
+          MATCH ({source})-[:FROM_DD_PATH]->(projected:IMASNode)-
+            [projection]->({target})
+          WHERE type(projection) = {projection_edge}
+            AND ({unit} IS NULL OR {target}.unit IS NULL
+                 OR {target}.unit = {unit})
+        }}
+    """
+
+
 def _lock_claimed_name_bindings(
     gc: Any,
     batch: list[dict[str, Any]],
@@ -1008,21 +1046,8 @@ def _lock_claimed_name_bindings(
              END AS prior_stage,
              CASE
                WHEN $allow_adopt_pending_stub
-                    AND b.source_type = 'dd'
-                    AND target.name_stage = $pending_stage
                     AND owned IS NULL
-                    AND target.reservation_source_id IS NULL
-                    AND b.attachment_error IS NULL
-                    AND (b.unit IS NULL OR target.unit IS NULL
-                         OR target.unit = b.unit)
-                    AND NOT EXISTS {
-                      MATCH (:StandardNameSource)-[:PRODUCED_NAME]->(target)
-                    }
-                    AND EXISTS {
-                      MATCH (sns)-[:FROM_DD_PATH]->(projected:IMASNode)-
-                        [projection]->(target)
-                      WHERE type(projection) = $projection_edge
-                    }
+                    AND __PENDING_PROJECTION_PREDICATE__
                THEN true
                ELSE false
              END AS adopt_projection
@@ -1143,7 +1168,17 @@ def _lock_claimed_name_bindings(
                b.sn_id AS candidate_id,
                target_stage,
                coalesce(sns.attempt_count, 0) AS attempt_count
-        """.replace("__TARGET_CLAUSE__", target_clause)
+        """.replace("__TARGET_CLAUSE__", target_clause).replace(
+        "__PENDING_PROJECTION_PREDICATE__",
+        _pending_projection_stub_predicate(
+            "sns",
+            "target",
+            unit="b.unit",
+            attachment_error="b.attachment_error",
+            pending_stage="$pending_stage",
+            projection_edge="$projection_edge",
+        ),
+    )
     rows = gc.query(
         binding_query,
         batch=batch,

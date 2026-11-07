@@ -502,6 +502,52 @@ def fetch_public_semantic_sources(gc: Any, name: str) -> list[dict[str, Any]]:
     return sources
 
 
+def _projection_migration_predicate() -> str:
+    """Use binding eligibility with the extra fences for retiring a projection."""
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        _pending_projection_stub_predicate,
+    )
+
+    return f"""
+        ({_pending_projection_stub_predicate("source", "old")})
+        AND coalesce(old.origin, '') <> 'derived'
+        AND old.catalog_pr_number IS NULL
+        AND old.claim_token IS NULL
+        AND old.claimed_at IS NULL
+        AND old.reservation_claim_token IS NULL
+        AND old.reservation_claim_seq IS NULL
+        AND NOT EXISTS {{
+          MATCH (owner:StandardNameSource)
+          WHERE owner.produced_sn_id = old.id
+        }}
+    """
+
+
+def _projection_stub_source_bindings(
+    gc: Any, old_name: str, new_name: str, source_ids: Sequence[str]
+) -> dict[str, str]:
+    """Read successor bindings that can replace an unowned pending projection."""
+    rows = gc.query(
+        f"""
+        MATCH (old:StandardName {{id: $old_name}}),
+              (new:StandardName {{id: $new_name}})
+        UNWIND $source_ids AS source_id
+        MATCH (source:StandardNameSource {{id: source_id}})
+        WHERE source.status = 'composed'
+          AND source.claim_token IS NULL
+          AND source.claimed_at IS NULL
+          AND source.produced_sn_id = new.id
+          AND EXISTS {{ (source)-[:PRODUCED_NAME]->(new) }}
+          AND {_projection_migration_predicate()}
+        RETURN DISTINCT source.id AS source_id, new.id AS current_binding
+        """,
+        old_name=old_name,
+        new_name=new_name,
+        source_ids=list(source_ids),
+    )
+    return {row["source_id"]: row["current_binding"] for row in rows}
+
+
 def retarget_standard_name_sources(
     gc: Any,
     old_name: str,
@@ -526,6 +572,10 @@ def retarget_standard_name_sources(
     its expected current target are mandatory; implicit predecessor-wide
     migration is forbidden. The same completed manifest is idempotent, while a
     different manifest encountering its postcondition fails compare-and-set.
+    Regeneration may instead declare the successor as the expected binding
+    only for an unowned pending projection stub: the compose transaction has
+    already finalized that source, and this operation removes its old projection.
+    Both preflight and mutation require the stub to remain unowned and pending.
 
     A source already bound to a different live identity is reported as an
     adjudicable :class:`SourceBindingConflictError` naming the holding identity
@@ -555,7 +605,12 @@ def retarget_standard_name_sources(
         for source_id, target in expected.items()
         if target != old_name
     }
-    if unexpected_predecessors:
+    projection_stub = (
+        operation == "regenerate"
+        and bool(expected)
+        and set(expected.values()) == {new_name}
+    )
+    if unexpected_predecessors and not projection_stub:
         raise ValueError(
             "source migration manifest is heterogeneous for predecessor "
             f"{old_name!r}: {unexpected_predecessors}"
@@ -689,19 +744,19 @@ def retarget_standard_name_sources(
         scalar = row.get("scalar_binding")
         if (
             row.get("source_exists")
-            and row.get("source_status") != "stale"
-            and not row.get("actively_claimed")
-            and bindings == [old_name]
-            and scalar == old_name
-        ):
-            pending.append(source_id)
-        elif (
-            row.get("source_exists")
             and bindings == [new_name]
             and scalar == new_name
             and row.get("manifest_recorded")
         ):
             completed.append(source_id)
+        elif (
+            row.get("source_exists")
+            and row.get("source_status") != "stale"
+            and not row.get("actively_claimed")
+            and bindings == [expected[source_id]]
+            and scalar == expected[source_id]
+        ):
+            pending.append(source_id)
         elif (
             row.get("source_exists")
             and row.get("source_status") != "stale"
@@ -811,6 +866,17 @@ def retarget_standard_name_sources(
     if completed:
         return 0
 
+    if (
+        projection_stub
+        and _projection_stub_source_bindings(
+            gc, old_name, new_name, admitted_source_ids
+        )
+        != expected
+    ):
+        raise RuntimeError(
+            "source migration requires an unowned pending projection-only predecessor"
+        )
+
     if enforce_consistency and not empty_noop:
         from imas_codex.standard_names.attachment_audit import guard_source_pairings
 
@@ -825,6 +891,23 @@ def retarget_standard_name_sources(
                 or "pairing guard did not admit the exact source cohort"
             )
             raise ValueError(f"source migration attachment rejected: {rejected}")
+    current_binding_guard = """
+          source.produced_sn_id = $old_name
+          AND EXISTS { (source)-[:PRODUCED_NAME]->(old) }
+    """
+    prior_binding_delete = """
+        MATCH (source)-[prior:PRODUCED_NAME]->(old)
+        DELETE prior
+    """
+    if projection_stub:
+        current_binding_guard = f"""
+          source.produced_sn_id = $new_name
+          AND source.status = 'composed'
+          AND EXISTS {{ (source)-[:PRODUCED_NAME]->(new) }}
+          AND {_projection_migration_predicate()}
+        """
+        prior_binding_delete = ""
+
     migration_query = """
         // EXPLICIT_SOURCE_MIGRATION_APPLY
         MATCH (old:StandardName {id: $old_name}),
@@ -837,14 +920,12 @@ def retarget_standard_name_sources(
         WHERE coalesce(source.status, '') <> 'stale'
           AND source.claimed_at IS NULL
           AND source.claim_token IS NULL
-          AND source.produced_sn_id = $old_name
+          AND (__CURRENT_BINDING_GUARD__)
           AND COUNT {
             (source)-[:PRODUCED_NAME]->(source_binding:StandardName)
             WHERE __SOURCE_BINDING_GUARD__
           } = 1
-          AND EXISTS { (source)-[:PRODUCED_NAME]->(old) }
-        MATCH (source)-[prior:PRODUCED_NAME]->(old)
-        DELETE prior
+        __PRIOR_BINDING_DELETE__
         MERGE (source)-[:PRODUCED_NAME]->(new)
         SET source.produced_sn_id = new.id
         WITH DISTINCT new, old, source
@@ -929,7 +1010,9 @@ def retarget_standard_name_sources(
     )
 
     migration_query = (
-        migration_query.replace(
+        migration_query.replace("__CURRENT_BINDING_GUARD__", current_binding_guard)
+        .replace("__PRIOR_BINDING_DELETE__", prior_binding_delete)
+        .replace(
             "__LAST_SOURCE_SUPERSEDE__",
             supersede_drained_name_cypher(
                 name="drained", successor="holder", embedded=True
