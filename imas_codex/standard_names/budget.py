@@ -877,6 +877,24 @@ class BudgetManager:
         # All retries exhausted — propagate to caller
         raise last_exc  # type: ignore[misc]
 
+    def record_llm_cost_event(self, cost: float, event: LLMCostEvent) -> None:
+        """Record one provider call that needs no reservation.
+
+        A zero-cost call is a real call the provider answered and carries the
+        model build it answered with, so it belongs in the graph; but
+        :meth:`reserve` refuses an amount of zero or less, and pricing a
+        reservation for something already known to be free is meaningless. The
+        record is therefore written straight to the writer queue with no
+        reservation and no overspend.
+
+        A negative cost is still a caller defect and raises.
+        """
+        if cost < 0:
+            raise ValueError("recorded cost must be non-negative")
+        if not math.isfinite(cost):
+            raise ValueError("recorded cost must be finite")
+        self._enqueue_write(cost, event, 0.0)
+
     # ------------------------------------------------------------------
     # Internal: enqueue a graph write
     # ------------------------------------------------------------------

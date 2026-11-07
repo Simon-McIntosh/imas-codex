@@ -545,19 +545,25 @@ def _judge_cost_sink(state: StandardNameReviewState) -> Any:
         return None
 
     def charge(step: str, spent: float, model: str | None, release: str | None) -> None:
+        event = LLMCostEvent(
+            model=model or step,
+            model_release=release,
+            tokens_in=0,
+            tokens_out=0,
+            phase="sn_judge",
+        )
+        if spent < 0:
+            raise ValueError(f"judge call reported a negative cost: {spent!r}")
+        # A provider that reports a zero cost still answered, and its build is
+        # the fact this record exists for; reserving against a spend already
+        # known to be zero is meaningless and the pool refuses it outright.
+        if spent == 0:
+            manager.record_llm_cost_event(0.0, event)
+            return
         lease = manager.reserve(spent, phase="sn_judge")
         if lease is None:
             return
-        lease.charge_event(
-            spent,
-            LLMCostEvent(
-                model=model or step,
-                model_release=release,
-                tokens_in=0,
-                tokens_out=0,
-                phase="sn_judge",
-            ),
-        )
+        lease.charge_event(spent, event)
 
     return charge
 

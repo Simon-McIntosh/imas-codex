@@ -12,8 +12,10 @@ transport, so no test here spends anything.
 
 from __future__ import annotations
 
+import ast
 import asyncio
 import json
+import pathlib
 
 import pytest
 
@@ -249,3 +251,146 @@ def test_each_call_charges_its_own_record_with_its_own_release(monkeypatch):
     assert [record[2] for record in charged] == [MODEL_RELEASE, LATER_RELEASE]
     assert {record[0] for record in charged} == {"sn_judge"}
     assert {record[1] for record in charged} == {PINNED_MODEL}
+
+
+def _payload_with_cost(release: str, cost: float) -> dict:
+    payload = _payload(release)
+    payload["usage"] = {"cost": cost}
+    return payload
+
+
+def test_a_zero_cost_decision_still_records_its_release(monkeypatch):
+    """A free answer is still an answer, and its build is still the record.
+
+    The provider admits a zero ``usage.cost``. Pricing the reservation for
+    that spend is meaningless and the pool refuses an amount of zero, so the
+    record has to be written without one rather than the call being dropped or
+    the stage crashing.
+    """
+    charged: list[tuple[float, str | None]] = []
+    monkeypatch.setattr(
+        llm,
+        "_post_decisions",
+        lambda h, b, t: _FakeResponse(_payload_with_cost(MODEL_RELEASE, 0.0)),
+    )
+    tracker = PipelineCost(
+        charge=lambda step, spent, model, release: charged.append((spent, release))
+    )
+    judgment.decide_one(
+        PINNED_MODEL, {}, QUESTIONS, service=SERVICE, cost=tracker, step="sn_judge"
+    )
+    assert tracker.steps["sn_judge"] == 0.0
+    assert tracker.releases["sn_judge"] == MODEL_RELEASE
+    assert charged == [(0.0, MODEL_RELEASE)]
+
+
+class _RecordingLease:
+    def __init__(self) -> None:
+        self.events: list[tuple[float, object]] = []
+
+    def charge_event(self, cost, event):
+        self.events.append((cost, event))
+        return None
+
+
+class _RecordingManager:
+    """A budget manager that refuses nothing and records what it was asked
+    for, so a zero-cost call can be shown to reserve nothing at all."""
+
+    def __init__(self) -> None:
+        self.reserved: list[float] = []
+        self.written: list[tuple[float, object]] = []
+        self.lease = _RecordingLease()
+
+    def reserve(self, amount, phase=""):
+        self.reserved.append(amount)
+        return self.lease
+
+    def record_llm_cost_event(self, cost, event) -> None:
+        self.written.append((cost, event))
+
+
+class _SinkState:
+    def __init__(self, manager) -> None:
+        self.budget_manager = manager
+
+
+def _sink(manager):
+    from imas_codex.standard_names.review.pipeline import _judge_cost_sink
+
+    return _judge_cost_sink(_SinkState(manager))
+
+
+def test_the_judge_sink_writes_a_zero_cost_row_without_reserving():
+    manager = _RecordingManager()
+    _sink(manager)("sn_judge", 0.0, PINNED_MODEL, MODEL_RELEASE)
+    assert manager.reserved == []
+    assert len(manager.written) == 1
+    cost, event = manager.written[0]
+    assert cost == 0.0
+    assert event.model_release == MODEL_RELEASE
+    assert event.model == PINNED_MODEL
+
+
+def test_the_judge_sink_reserves_and_charges_a_paid_call():
+    manager = _RecordingManager()
+    _sink(manager)("sn_judge", COST, PINNED_MODEL, MODEL_RELEASE)
+    assert manager.reserved == [COST]
+    assert manager.lease.events[0][0] == COST
+    assert manager.lease.events[0][1].model_release == MODEL_RELEASE
+
+
+def test_the_judge_sink_rejects_a_negative_cost():
+    manager = _RecordingManager()
+    with pytest.raises(ValueError):
+        _sink(manager)("sn_judge", -COST, PINNED_MODEL, MODEL_RELEASE)
+
+
+def _function(tree, name):
+    for node in ast.walk(tree):
+        if (
+            isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+            and node.name == name
+        ):
+            return node
+    raise AssertionError(f"{name} is missing from the module")
+
+
+def test_the_review_enrich_worker_binds_the_judge_cost_sink():
+    """Reverting the wiring to a bare tracker must turn this red.
+
+    A behavioural test of the enrich worker needs a full review state; the
+    wiring itself is what can silently regress, so it is read off the module's
+    own syntax tree: the judge's tracker must be constructed with a ``charge``
+    sink.
+    """
+    from imas_codex.standard_names.review import pipeline
+
+    tree = ast.parse(pathlib.Path(pipeline.__file__).read_text())
+    worker = _function(tree, "enrich_review_worker")
+    charges = [
+        keyword
+        for node in ast.walk(worker)
+        if isinstance(node, ast.Call)
+        and getattr(node.func, "id", getattr(node.func, "attr", "")) == "PipelineCost"
+        for keyword in node.keywords
+        if keyword.arg == "charge"
+    ]
+    assert charges, "enrich_review_worker no longer binds a charge sink to judge_cost"
+
+
+def test_the_docs_contradiction_call_stamps_the_release_it_was_served():
+    """Reverting the stamp leaves the Jev charge without its build."""
+    from imas_codex.standard_names.worker_tasks import worker_review_docs
+
+    tree = ast.parse(pathlib.Path(worker_review_docs.__file__).read_text())
+    note = _function(tree, "_documentation_contradiction_note")
+    events = [
+        node
+        for node in ast.walk(note)
+        if isinstance(node, ast.Call)
+        and getattr(node.func, "id", getattr(node.func, "attr", "")) == "LLMCostEvent"
+        for keyword in node.keywords
+        if keyword.arg == "model_release"
+    ]
+    assert events, "the review_docs Jev charge no longer stamps model_release"
