@@ -1,0 +1,19 @@
+<section id="sib-reclaim-superseded-spelling">
+  <p><code>sn edit --rename</code> refused every superseded id, so a name could not move back to a spelling an earlier rename had taken from it. The refusal at <code>imas_codex/standard_names/edit.py</code> (collision check, <code>// EDIT_CHECK_COLLISION</code>) now asks whether the tombstone is reclaimable before refusing. Exactly two cases are admitted, both read from the graph rather than from a name's text:</p>
+  <table id="sib-reclaim-superseded-spelling-cases">
+    <thead><tr><th>Case</th><th>How it is read</th><th>Admitted because</th></tr></thead>
+    <tbody>
+      <tr><td><code>closing_lineage</code></td><td>walk <code>REFINED_FROM</code> forward from the tombstone through superseded intermediates; a single live tip that is the renaming name</td><td>the identity itself was renamed off this spelling, so moving it back reverses that hop</td></tr>
+      <tr><td><code>different_locus</code></td><td>the tombstone's own <code>source_paths</code> parent container differs from the live tip's parent container</td><td>the holder names a different DD locus, so the spelling still means what the tombstone recorded (a value spelling vacated onto an average holder). The <code>electron_temperature_at_separatrix</code> family — same locus, different concept — stays refused.</td></tr>
+    </tbody>
+  </table>
+  <p>A reclaim is signed and receipted. In one transaction the tombstone is revived at the stage its own reviews earned (<code>superseded_from_stage</code>, capped so acceptance is a review outcome, never a side effect), its documentation, docs stage and ledger are untouched, and the renaming name is retired onto it with a <code>REFINED_FROM</code> edge. The receipt is a <code>StandardNameChange</code> with <code>operation='reclaim_spelling'</code> whose <code>reason</code> names the case, the two ids and the source cohort. The producing sources then move through <code>retarget_standard_name_sources</code>, the one sanctioned source-move mechanism, and a shortfall raises. A postflight read asserts the tombstone is no longer superseded and carries this reclaim's <code>run_id</code>. Every other tombstone target keeps the existing refusal, which now also names why the reclaim route did not apply.</p>
+  <table id="sib-reclaim-superseded-spelling-measure">
+    <thead><tr><th>Arm</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><th>Both cases on the disposable graph (head f2d466185)</th><td>3 passed; EXIT=0 — case 1 (closing lineage) and case 2 (different locus) reclaim, case 3 (unrelated lineage) is refused.</td></tr>
+      <tr><th>Base writer, same tests (negative control)</th><td>2 failed, 1 passed; EXIT=1 — <code>test_closing_lineage_reclaims_the_tombstone_with_its_history</code> and <code>test_different_locus_holder_reclaims_the_tombstone</code> both fail with <code>a StandardName 'electron_temperature_at_plasma_boundary' already exists</code>; the refusal case passes at base, as it should.</td></tr>
+    </tbody>
+  </table>
+  <p>The <code>sn-edit</code> skill now documents both cases, the signed receipt and the refusal that remains.</p>
+</section>
