@@ -15,6 +15,9 @@ claim cap keeps the collision reason it was refused with.
 
 from __future__ import annotations
 
+import logging
+from types import SimpleNamespace
+
 import pytest
 
 from imas_codex.graph.client import GraphClient
@@ -206,6 +209,62 @@ def _persist_candidate(**overrides):
         compose_model="test-adopt-projection-model",
         return_winner_ids=True,
     )
+
+
+@pytest.mark.parametrize("owned", [False, True])
+def test_worker_attachment_uses_the_graph_source_type(graph, services, owned):
+    """Worker outcomes carry a fence, while the graph owns the source type."""
+    from imas_codex.standard_names.worker_tasks.worker_common import (
+        _claimed_source_outcome,
+    )
+    from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+        _process_attachments_core,
+    )
+
+    _seed_stub(graph, owner_token="another-claim" if owned else None)
+    claims = [{"path": PROBE_PATH, "claim_token": TOKEN, "claim_seq": SEQ}]
+    outcome = _claimed_source_outcome(
+        claims, PROBE_PATH, source_type="dd", status="attached"
+    )
+    assert "source_type" not in outcome
+    assert graph.query(
+        "MATCH (src:StandardNameSource {id: $source}) "
+        "RETURN src.source_type AS source_type",
+        source=PROBE_SOURCE,
+    ) == [{"source_type": "dd"}]
+    counts = _process_attachments_core(
+        [
+            SimpleNamespace(
+                source_id=PROBE_PATH, standard_name=PROBE_STUB, reason="own projection"
+            )
+        ],
+        logging.getLogger(__name__),
+        source_claims=claims,
+        return_winner_ids=True,
+    )
+    source = graph.query(
+        "MATCH (src:StandardNameSource {id: $source}) "
+        "RETURN src.status AS status, src.last_error AS error",
+        source=PROBE_SOURCE,
+    )[0]
+    print(f"worker_attachment: outcome={outcome}; result={counts}; source={source}")
+    if owned:
+        assert counts == {"accepted": 0, "rejected": 1, "winner_ids": []}
+        assert 'has non-bindable name_stage "pending"' in source["error"]
+        assert _producers(graph) == [OWNER_SOURCE]
+        assert _adoption_receipts(graph) == []
+    else:
+        assert counts == {"accepted": 1, "rejected": 0, "winner_ids": [PROBE_SOURCE]}
+        assert source == {"status": "attached", "error": None}
+        assert _producers(graph) == [PROBE_SOURCE]
+        assert _stub(graph)["name_stage"] == "drafted"
+        assert _adoption_receipts(graph) == [
+            {
+                "from_name": "pending",
+                "to_name": "drafted",
+                "adopted_source_id": PROBE_SOURCE,
+            }
+        ]
 
 
 @pytest.mark.timeout(60)
