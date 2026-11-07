@@ -3295,8 +3295,11 @@ MATCH (old:StandardName {id: $old_id}),
       (tomb:StandardName {id: $new_id})
 WHERE old.name_stage = $old_stage
   AND tomb.name_stage = 'superseded'
+WITH old, tomb, old.name_stage AS prior_stage
 SET old.name_stage = 'superseded',
-    old.superseded_from_stage = coalesce(old.superseded_from_stage, old.name_stage),
+    // The prior stage is bound before the SET, so the tombstone records the
+    // stage the name held rather than 'superseded' written by this same SET.
+    old.superseded_from_stage = coalesce(old.superseded_from_stage, prior_stage),
     old.claim_token = null,
     old.claimed_at = null,
     old.source_paths = [],
@@ -3387,6 +3390,10 @@ def _apply_reclaim_rename(
 
     run_id = _new_run_id()
     change_id = f"sn-change:reclaim-spelling:{uuid.uuid4().hex}"
+    # The stage the renaming name held, observed on the pre-write fetch. The
+    # mutation binds the same value before its SET, so the retired name records
+    # where it came from rather than the 'superseded' that SET writes.
+    prior_stage = target_row.get("name_stage")
     receipt = json.dumps(
         {
             "case": reclaim.case,
@@ -3394,6 +3401,7 @@ def _apply_reclaim_rename(
             "from_name": target,
             "to_name": new_name,
             "revived_stage": revived_stage,
+            "prior_stage": prior_stage,
             "sources": producing_source_ids,
         },
         sort_keys=False,

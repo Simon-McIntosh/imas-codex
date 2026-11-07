@@ -12,6 +12,7 @@
     <thead><tr><th>Arm</th><th>Result</th></tr></thead>
     <tbody>
       <tr><th>Both cases on the disposable graph (head f2d466185)</th><td>3 passed; EXIT=0 — case 1 (closing lineage) and case 2 (different locus) reclaim, case 3 (unrelated lineage) is refused.</td></tr>
+      <tr><th>Receipt deleted, same tests (negative control)</th><td>2 failed, 1 passed; EXIT=1 — with the <code>CREATE (change:StandardNameChange …)</code> block removed from the reclaim mutation and nothing else changed, both reclaim cases fail on <code>expected one change receipt, found 0.</code> The receipt is load-bearing, not incidental. Log: <code>logs/negative-control-receipt.log</code>.</td></tr>
       <tr><th>Base writer, same tests (negative control)</th><td>2 failed, 1 passed; EXIT=1 — <code>test_closing_lineage_reclaims_the_tombstone_with_its_history</code> and <code>test_different_locus_holder_reclaims_the_tombstone</code> both fail with <code>a StandardName 'electron_temperature_at_plasma_boundary' already exists</code>; the refusal case passes at base, as it should.</td></tr>
     </tbody>
   </table>

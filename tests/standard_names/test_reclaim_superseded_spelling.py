@@ -9,6 +9,8 @@ two cases the ruling admits — fails here instead of in the catalog.
 
 from __future__ import annotations
 
+import json
+
 import pytest
 
 from imas_codex.graph.client import GraphClient
@@ -96,6 +98,7 @@ def _read(name_id: str) -> dict:
             RETURN sn.name_stage AS name_stage, sn.status AS status,
                    sn.documentation AS documentation,
                    sn.docs_stage AS docs_stage,
+                   sn.superseded_from_stage AS superseded_from_stage,
                    sn.run_id AS run_id,
                    [(succ:StandardName)-[:REFINED_FROM]->(sn) | succ.id]
                      AS successors,
@@ -106,6 +109,26 @@ def _read(name_id: str) -> dict:
         )
     assert rows, f"{name_id} is missing from the graph"
     return dict(rows[0])
+
+
+def _change(old_id: str, new_id: str) -> dict:
+    """The one reclaim receipt the ledger holds for this retired/revived pair."""
+    with GraphClient() as gc:
+        rows = gc.query(
+            """
+            MATCH (change:StandardNameChange {
+              from_name: $old, to_name: $new, operation: 'reclaim_spelling'
+            })
+            RETURN change.operation AS operation, change.reason AS reason,
+                   change.run_id AS run_id
+            """,
+            old=old_id,
+            new=new_id,
+        )
+    assert len(rows) == 1, f"expected one change receipt, found {len(rows)}"
+    receipt = dict(rows[0])
+    receipt["reason"] = json.loads(receipt["reason"])
+    return receipt
 
 
 def test_closing_lineage_reclaims_the_tombstone_with_its_history():
@@ -149,6 +172,17 @@ def test_closing_lineage_reclaims_the_tombstone_with_its_history():
     assert TOMBSTONE in retired["successors"]
     assert retired["sources"] == []
 
+    receipt = _change(TARGET, TOMBSTONE)
+    assert receipt["operation"] == "reclaim_spelling"
+    assert receipt["run_id"] == plan.run_id
+    assert receipt["reason"]["case"] == "closing_lineage"
+    assert receipt["reason"]["from_name"] == TARGET
+    assert receipt["reason"]["to_name"] == TOMBSTONE
+    assert receipt["reason"]["prior_stage"] == "accepted"
+    # The retired name records the stage it held, not the 'superseded' the
+    # retire wrote
+    assert retired["superseded_from_stage"] == "accepted"
+
 
 def test_different_locus_holder_reclaims_the_tombstone():
     """The holder names another DD locus, so the spelling still names this one."""
@@ -178,6 +212,13 @@ def test_different_locus_holder_reclaims_the_tombstone():
     assert holder["name_stage"] == "accepted"
     assert holder["sources"] == [f"dd:{AVERAGE_PATH}"]
 
+    receipt = _change(TARGET, TOMBSTONE)
+    assert receipt["operation"] == "reclaim_spelling"
+    assert receipt["run_id"] == plan.run_id
+    assert receipt["reason"]["case"] == "different_locus"
+    assert receipt["reason"]["prior_stage"] == "accepted"
+    assert _read(TARGET)["superseded_from_stage"] == "accepted"
+
 
 def test_unrelated_tombstone_lineage_is_still_refused():
     """A tombstone whose lineage ends on another live name stays protected."""
@@ -203,3 +244,8 @@ def test_unrelated_tombstone_lineage_is_still_refused():
     tomb = _read(TOMBSTONE)
     assert tomb["name_stage"] == "superseded"
     assert tomb["run_id"] is None
+    with GraphClient() as gc:
+        receipts = gc.query(
+            "MATCH (change:StandardNameChange) RETURN count(change) AS n"
+        )
+    assert receipts[0]["n"] == 0, "a refused reclaim must write no receipt"
