@@ -39,6 +39,7 @@ the HTML report beside it. The log's last line is a bare ``EXIT=`` line.
 
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 import time
@@ -167,7 +168,78 @@ def desired_name(name: str, locus: str) -> str:
     return name
 
 
-def main() -> int:
+class CensusInvariantViolated(RuntimeError):
+    """A published record contradicts the graph or its own stated rule."""
+
+
+def assert_invariants(data: dict, status_of: dict[str, str]) -> list[str]:
+    """Check the record against the rules the fence states. Returns violations.
+
+    These are the checks a reviewer would run by hand: every proposal must name
+    a live holder, no proposal may reach a tombstone, and the population must be
+    the one an independent query reports.
+    """
+    violations: list[str] = []
+    names = data["names"]
+    ids = [r["id"] for r in names]
+    dupes = sorted({x for x in ids if ids.count(x) > 1})
+    if dupes:
+        violations.append(f"duplicate names in census: {dupes}")
+    for r in names:
+        target = r["proposed_target"]
+        if target is None:
+            continue
+        state = status_of.get(target)
+        if state == "superseded":
+            violations.append(
+                f"{r['id']}: proposed_target {target} is a superseded tombstone"
+            )
+        elif r["proposed_action"] == "signed_rename" and state is not None:
+            violations.append(
+                f"{r['id']}: rename target {target} already exists as {state}"
+            )
+        elif r["proposed_action"] == "supersede_onto_holder" and state is None:
+            violations.append(
+                f"{r['id']}: supersede holder {target} is not a name the graph holds"
+            )
+    cc = data["cross_check"]
+    if not cc["agrees"]:
+        violations.append(
+            "census population disagrees with the independent query: "
+            f"missing {cc['in_graph_not_in_census']}, "
+            f"extra {cc['in_census_not_in_graph']}"
+        )
+    return violations
+
+
+def inject(kind: str, data: dict, status_of: dict[str, str]) -> list[str]:
+    """Introduce a known defect and return the violations it provokes.
+
+    A guard that has never refused anything has not been shown to work, so each
+    injected defect must make ``assert_invariants`` report it.
+    """
+    if kind == "tombstone-target":
+        tomb = next(i for i, st in sorted(status_of.items()) if st == "superseded")
+        victim = next(r for r in data["names"] if r["proposed_action"] == "signed_rename")
+        victim["proposed_target"] = tomb
+        print(f"injected tombstone-target: {victim['id']} -> {tomb}")
+    elif kind == "cross-check":
+        data["cross_check"]["in_graph_not_in_census"] = ["a_name_the_census_omitted"]
+        data["cross_check"]["agrees"] = False
+        print("injected cross-check: independent query reports a name the census omits")
+    else:
+        raise CensusInvariantViolated(f"unknown injection {kind}")
+    return assert_invariants(data, status_of)
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--inject",
+        choices=("tombstone-target", "cross-check"),
+        help="introduce a known defect so the invariant check can be shown refusing it",
+    )
+    args = parser.parse_args(argv)
     started = datetime.now(timezone.utc).isoformat(timespec="seconds")
     out: dict = {"node": NODE, "generated_at": started, "read_only": True}
 
@@ -223,27 +295,27 @@ def main() -> int:
             RETURN c.id AS child, p.id AS parent
             """,
         )
-        # Independent restatement of the population, used as the cross-check:
-        # it never unions the two source edges and never looks at the name.
-        cross_source_paths = query(
+        # Independent restatement of the population. One query, written
+        # against the graph without the census's helpers, returning the ids
+        # themselves so the comparison is a set difference that can be non-empty.
+        cross_ids = query(
             gc,
-            "cross_source",
-            """
-            MATCH (s:StandardNameSource)-[:PRODUCED_NAME]->(n:StandardName)
-            WHERE n.status <> 'superseded' AND s.dd_path CONTAINS 'separatrix'
-            RETURN count(DISTINCT n.id) AS c, count(DISTINCT s.dd_path) AS paths
-            """,
-        )[0]
-        cross_name_suffix = query(
-            gc,
-            "cross_name",
+            "cross_population",
             """
             MATCH (n:StandardName)
             WHERE n.status <> 'superseded'
-              AND (n.id ENDS WITH '_at_separatrix' OR n.id ENDS WITH '_at_plasma_boundary')
-            RETURN count(n) AS c
+              AND (
+                n.id ENDS WITH '_at_separatrix'
+                OR n.id ENDS WITH '_at_plasma_boundary'
+                OR size([(s:StandardNameSource)-[:PRODUCED_NAME]->(n)
+                         WHERE s.dd_path CONTAINS 'separatrix' | 1]) > 0
+                OR size([(i:IMASNode)-[:HAS_STANDARD_NAME]->(n)
+                         WHERE i.id CONTAINS 'separatrix' | 1]) > 0
+              )
+            RETURN n.id AS id
+            ORDER BY id
             """,
-        )[0]
+        )
         total_live = query(
             gc, "live_total", "MATCH (n:StandardName) WHERE n.status <> 'superseded' RETURN count(n) AS c"
         )[0]["c"]
@@ -333,6 +405,7 @@ def main() -> int:
         )
 
         collision: str | None = None
+        blocked_spelling: str | None = None
         target_name = nid
         if locus == "mixed":
             action = "keep"
@@ -349,10 +422,11 @@ def main() -> int:
                 action, target_name = "keep", nid
                 why = "no produced DD path and no live holder; nothing to retarget"
         elif nid == "toroidal_tritium_velocity":
-            action, target_name = "supersede_onto_holder", "toroidal_tritium_velocity_at_separatrix"
+            action, target_name = "keep", nid
             why = (
-                "bare stub holding two located paths; retired with a signed receipt "
-                "and its two located names composed"
+                "bare stub holding the pedestal and separatrix tritium velocity paths; "
+                "its retirement waits on the two located names being composed, "
+                "neither of which the graph holds yet"
             )
         elif locator_of(nid) is None:
             action, target_name = "keep", nid
@@ -371,21 +445,28 @@ def main() -> int:
                 occupant_paths = all_paths(target)
                 occupant_sourced = any(is_separatrix_path(p) for p in occupant_paths)
                 if sourced_here and not occupant_sourced:
-                    action, target_name = "signed_rename", target
-                    collision = "target name is live but carries no DD path"
+                    action, target_name = "keep", nid
+                    collision = "required spelling is held by a live name with no DD path"
+                    blocked_spelling = target
                     why = (
-                        f"rename target {target} is a live name with no produced "
-                        "source; retire it first or the rename cannot land"
+                        f"the required spelling {target} is a live name with no "
+                        "produced source; it must be retired before this rename "
+                        "can land, so the rename is not published as a rename"
                     )
                 else:
                     action, target_name = "supersede_onto_holder", target
                     why = f"the same concept is already held live by {target}"
             elif target in tombstone_set:
-                action, target_name = "signed_rename", target
-                collision = "target name is a superseded tombstone"
+                # The required spelling is taken by a retired name. A rename
+                # emitted against it would be a revival, so the action stays
+                # with its holder and the taken spelling is recorded beside it.
+                action, target_name = "keep", nid
+                collision = "required spelling is held by a superseded tombstone"
+                blocked_spelling = target
                 why = (
-                    f"rename target {target} is a superseded tombstone; the name "
-                    "must be composed fresh and the tombstone left in place"
+                    f"the {locus} locator is {target}, but that spelling is a "
+                    "superseded tombstone; the name is kept until the lead rules "
+                    "between composing fresh and leaving the locator as it is"
                 )
             else:
                 action, target_name = "signed_rename", target
@@ -413,6 +494,7 @@ def main() -> int:
                 "proposed_action": action,
                 "proposed_target": target_name,
                 "collision": collision,
+                "blocked_spelling": blocked_spelling,
                 "rationale": why,
                 "chain": chain,
                 "tombstones": tomb,
@@ -468,18 +550,18 @@ def main() -> int:
     # ── cross-check the headline against a second formulation ─────────────
     by_locus = Counter(r["locus"] for r in rows)
     actions = Counter(r["proposed_action"] for r in rows)
-    sourced_live = sorted({r["id"] for r in rows if any(is_separatrix_path(p) for p in r["all_paths"])})
-    named_live = sorted({r["id"] for r in rows if r["current_locator"]})
-    independent_source = cross_source_paths["c"]
-    independent_name = cross_name_suffix["c"]
-    # The two independent readings overlap; their union must equal the census.
-    union = len(set(sourced_live) | set(named_live))
+    # The independent reading is a set of ids produced by its own query. It can
+    # disagree with the census: that is the whole point of it.
+    independent_ids = {r["id"] for r in cross_ids}
+    census_ids = {r["id"] for r in rows}
+    missing_from_census = sorted(independent_ids - census_ids)
+    over_claimed_by_census = sorted(census_ids - independent_ids)
     cross_check = {
-        "independent_source_edge_query": independent_source,
-        "independent_name_suffix_query": independent_name,
-        "union_of_independent_readings": union,
-        "census_live_count": len(rows),
-        "agrees": union == len(rows) and len(rows) > 0,
+        "independent_population_count": len(independent_ids),
+        "census_live_count": len(census_ids),
+        "in_graph_not_in_census": missing_from_census,
+        "in_census_not_in_graph": over_claimed_by_census,
+        "agrees": not missing_from_census and not over_claimed_by_census and len(census_ids) > 0,
         "live_names_known_to_graph": total_live,
     }
 
@@ -537,16 +619,39 @@ def main() -> int:
         }
     )
 
+    violations = assert_invariants(out, status_of)
+    if args.inject:
+        violations = violations + inject(args.inject, out, status_of)
+    out["invariants"] = {
+        "checked": [
+            "a rename target is a spelling the graph does not hold yet",
+            "no proposed_target is a superseded tombstone",
+            "a supersede holder is a live name",
+            "every name appears once",
+            "the census id set equals the independent query's id set",
+        ],
+        "violations": violations,
+    }
+    out["invariants"]["passed"] = not violations
+
+    if violations:
+        for v in violations:
+            print(f"INVARIANT VIOLATION: {v}")
+        print(
+            f"population={len(population)} live={len(rows)} tombstones={len(tomb_rows)} "
+            f"loci={dict(by_locus)} actions={dict(actions)} "
+            f"cross_check_agrees={cross_check['agrees']} invariants=FAILED"
+        )
+        print("nothing written: a failing record must not replace a passing one")
+        return 1
+
     JSON_PATH.write_text(json.dumps(out, indent=1) + "\n")
     HTML_PATH.write_text(render(out))
-
     print(
         f"population={len(population)} live={len(rows)} tombstones={len(tomb_rows)} "
         f"loci={dict(by_locus)} actions={dict(actions)} "
         f"cross_check_agrees={cross_check['agrees']}"
     )
-    if not cross_check["agrees"]:
-        return 1
     return 0
 
 
@@ -628,11 +733,17 @@ def render(d: dict) -> str:
             bits.append("successor " + ", ".join(ch["has_successor"]))
         if ch["parent_children"]:
             bits.append("children " + str(len(ch["parent_children"])))
+        target_cell = f"<code>{_u(r['proposed_target'])}</code>"
+        if r["blocked_spelling"]:
+            target_cell = (
+                f"<s><code>{_u(r['blocked_spelling'])}</code></s>"
+                '<div class="why">tombstone, never a target</div>'
+            )
         parts.append(
             "<tr><td><code>{}</code><div class=\"why\">{}</div></td>"
             "<td><code>{}</code></td><td><code>{}</code></td>"
             "<td>{}</td><td>{}</td><td>{}</td>"
-            "<td><code>{}</code></td><td><code>{}</code></td></tr>".format(
+            "<td><code>{}</code></td><td>{}</td></tr>".format(
                 _u(r["id"]),
                 _u(r["rationale"]),
                 _u(r["locus"]),
@@ -641,7 +752,7 @@ def render(d: dict) -> str:
                 _u("; ".join(bits) or "—"),
                 _u(tomb),
                 _u(r["proposed_action"]),
-                _u(r["proposed_target"]),
+                target_cell,
             )
         )
     parts.append("</tbody></table>")
@@ -720,26 +831,38 @@ def render(d: dict) -> str:
 
     parts.append("<h3>Cross-check</h3>")
     parts.append(
-        "<p>A second, independent query pair, read from the graph without "
-        "unioning either source edge and without the census code in the "
-        "path, agrees: {}.</p>".format(
-            "yes" if cc["agrees"] else "NO — the census contradicts the graph"
+        "<p>A single independent Cypher query, written without the census's "
+        "helpers, returns the ids it believes belong in the population. The "
+        "comparison is a set difference, so it can be non-empty: {}.</p>".format(
+            "the two agree" if cc["agrees"] else "THEY DISAGREE"
         )
     )
     parts.append(
-        "<table><thead><tr><th>independent reading</th><th>count</th></tr></thead><tbody>"
-        "<tr><td>live names with a separatrix source path (source edge only)</td><td>{}</td></tr>"
-        "<tr><td>live names ending <code>at_separatrix</code> or "
-        "<code>at_plasma_boundary</code> (name suffix only)</td><td>{}</td></tr>"
-        "<tr><td>union of the two independent readings</td><td>{}</td></tr>"
-        "<tr><td>this census</td><td>{}</td></tr>"
+        "<table><thead><tr><th>reading</th><th>count</th></tr></thead><tbody>"
+        "<tr><td>names the independent query returns</td><td>{}</td></tr>"
+        "<tr><td>names this census lists</td><td>{}</td></tr>"
+        "<tr><td>in the graph, missing from the census</td><td>{}</td></tr>"
+        "<tr><td>in the census, absent from the graph</td><td>{}</td></tr>"
         "</tbody></table>".format(
-            _u(cc["independent_source_edge_query"]),
-            _u(cc["independent_name_suffix_query"]),
-            _u(cc["union_of_independent_readings"]),
+            _u(cc["independent_population_count"]),
             _u(cc["census_live_count"]),
+            _u(len(cc["in_graph_not_in_census"])),
+            _u(len(cc["in_census_not_in_graph"])),
         )
     )
+    inv = d["invariants"]
+    parts.append("<h3>Invariants</h3>")
+    parts.append(
+        "<p>The run refuses to publish a record that breaks any of these, and "
+        "the guard was shown refusing by injecting each defect in turn. "
+        "Result: <b>{}</b>.</p>".format(
+            "all hold" if inv["passed"] else "VIOLATED: " + "; ".join(inv["violations"])
+        )
+    )
+    parts.append("<ul>")
+    for rule in inv["checked"]:
+        parts.append(f"<li>{_u(rule)}</li>")
+    parts.append("</ul>")
 
     return "\n".join(parts) + "\n"
 
