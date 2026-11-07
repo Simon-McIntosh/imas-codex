@@ -94,12 +94,12 @@ def _seed_removed_source(
     return f"dd:{removed_path}"
 
 
-def _reconcile() -> dict:
+def _reconcile(source_type: str = "dd") -> dict:
     from imas_codex.standard_names.graph_store.graph_audits import (
         reconcile_standard_name_sources,
     )
 
-    return reconcile_standard_name_sources("dd")
+    return reconcile_standard_name_sources(source_type)
 
 
 def _name_row(gc, name: str) -> dict:
@@ -285,6 +285,41 @@ def test_unit_mismatch_supersedes_instead_of_moving(_gc, _clean):
         successor=successor,
     )
     assert bound[0]["n"] == 0
+
+
+@pytest.mark.graph
+def test_a_signal_source_draining_a_name_leaves_it_live(_gc, _clean):
+    """A signals source names no IMASNode, so no successor rule applies to it."""
+    name = _path("signal_backed_name")
+    signal_id = _path("coil_current")
+    _gc.query(
+        """
+        MERGE (sn:StandardName {id: $name})
+        SET sn.name_stage = 'draft', sn.status = 'draft', sn.unit = 'A'
+        MERGE (sns:StandardNameSource {id: 'signals:' + $signal_id})
+        SET sns.source_type = 'signals', sns.source_id = $signal_id,
+            sns.status = 'extracted'
+        MERGE (sns)-[:PRODUCED_NAME]->(sn)
+        """,
+        name=name,
+        signal_id=signal_id,
+    )
+
+    _reconcile("signals")
+
+    source = _gc.query(
+        "MATCH (sns:StandardNameSource {id: 'signals:' + $signal_id}) "
+        "RETURN sns.status AS status",
+        signal_id=signal_id,
+    )
+    assert [row["status"] for row in source] == ["stale"]
+    assert _name_row(_gc, name) == {"name_stage": "draft", "status": "draft"}
+    receipts = _gc.query(
+        "MATCH (:StandardName {id: $name})-[:HAS_INTERNAL_CHANGE]->"
+        "(c:StandardNameChange) RETURN count(c) AS n",
+        name=name,
+    )
+    assert receipts[0]["n"] == 0
 
 
 def test_dead_end_revival_reads_the_source_nodes_type():

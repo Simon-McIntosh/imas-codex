@@ -2515,7 +2515,11 @@ def mark_sources_stale(source_ids: list[str], *, services: Any) -> int:
 
     Every branch fires only when the source was the name's last non-stale
     producer, so one removed path never retires a name another source still
-    produces. Returns the number of sources marked stale.
+    produces. The resolution is scoped to DD sources: a removed DD path has a
+    ``RENAMED_TO`` successor to follow, while a signals source names a facility
+    signal that is not an ``IMASNode`` at all, so it is marked stale and its
+    name is left to the signal-side lifecycle. Returns the number of sources
+    marked stale.
     """
     if not source_ids:
         return 0
@@ -2534,6 +2538,7 @@ def mark_sources_stale(source_ids: list[str], *, services: Any) -> int:
               OPTIONAL MATCH (sns)-[own:PRODUCED_NAME]->(sn:StandardName)
               WITH sns, own, sn
               WHERE sn IS NOT NULL
+                AND sns.source_type = 'dd'
                 AND NOT (coalesce(sn.name_stage, '') IN $terminal_stages)
                 AND NOT (coalesce(sn.status, '') IN
                          ['superseded', 'deprecated'])
@@ -2622,7 +2627,6 @@ def mark_sources_stale(source_ids: list[str], *, services: Any) -> int:
         from imas_codex.standard_names.provenance_lifecycle import (
             record_standard_name_change,
         )
-
         superseded = [
             (row["name_id"], row["holder_id"])
             for row in outcomes
