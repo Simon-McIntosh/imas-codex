@@ -502,6 +502,29 @@ async def compose_held_sources():
     assert result["spend_usd"] <= 2.0, result
 
 
+def located_tritium_preview():
+    name = BARE + "_at_separatrix"
+    target = BARE + "_at_plasma_boundary"
+    with GraphClient() as gc:
+        result = {
+            "before": snapshot(gc, [name, target]),
+            "lineage": lineage(gc, target),
+            "preview": asdict(
+                edit.apply_edit(
+                    target=name,
+                    rename=target,
+                    reason=REASON,
+                    origin="agent",
+                    scope="only_self",
+                    dry_run=True,
+                    gc=gc,
+                )
+            ),
+        }
+    write(RUN / "located-tritium-preview.json", result)
+    print(json.dumps(result, default=str), flush=True)
+
+
 def readback():
     authority = json.loads(AUTHORITY.read_text())
     census = authority["census"]
@@ -531,6 +554,12 @@ def readback():
         )
         source_by_path = {r["path"]: r for r in sources}
         assert source_by_path["summary/local/separatrix/zeff/value"]["id"]
+        produced_tritium_ids = sorted(
+            {n["id"] for p in TRITIUM_PATHS for n in source_by_path[p]["names"]}
+        )
+        changed.extend(produced_tritium_ids)
+        ids = sorted(set(ids) | set(produced_tritium_ids))
+        state.update(snapshot(gc, produced_tritium_ids))
         cycle_rows = gc.query(
             """
           UNWIND $ids AS id MATCH (n:StandardName {id:id})
@@ -544,6 +573,21 @@ def readback():
         )
         cycles = sorted(r["id"] for r in cycle_rows if r["cycle"])
         changed_cycles = sorted(set(cycles) & set(changed))
+        recorded_census = json.loads(
+            (HERE / "sib-separatrix-locus-census.json").read_text()
+        )
+        recorded_rows = {
+            r["id"]: r for r in recorded_census["names"] + recorded_census["tombstones"]
+        }
+        prior_cycle_edges = {}
+        for name in cycles:
+            recorded = recorded_rows.get(name, {})
+            chain = recorded.get("chain", recorded)
+            partners = sorted(
+                set(chain.get("refined_from", [])) & set(chain.get("refined_into", []))
+            )
+            if partners:
+                prior_cycle_edges[name] = partners
         costs = gc.query(
             """
           MATCH (r:SNRun {id:$id})
@@ -613,6 +657,12 @@ def readback():
         "costs": costs,
         "cycle_names_in_cohort": cycles,
         "cycles_through_reclaimed_names": changed_cycles,
+        "cycle_checked_changed_names": changed,
+        "cycles_already_recorded_in_census": prior_cycle_edges,
+        "cycle_names_not_in_recorded_cycles": sorted(
+            set(cycles) - set(prior_cycle_edges)
+        ),
+        "produced_tritium_names": {n: state[n] for n in produced_tritium_ids},
         "reclaim_receipts": len(receipts),
     }
     result["complete"] = bool(
@@ -645,6 +695,9 @@ def readback():
         flush=True,
     )
     assert not changed_cycles, changed_cycles
+    assert set(cycles) == set(prior_cycle_edges), (
+        "cycle has no pre-apply census witness"
+    )
     assert (
         costs
         and costs[0]["events"] == costs[0]["priced_events"]
@@ -667,6 +720,7 @@ def main():
             "tritium",
             "readback",
             "compose-held",
+            "located-preview",
         ],
     )
     p.add_argument("--name")
@@ -691,6 +745,8 @@ def main():
         readback()
     elif args.mode == "compose-held":
         asyncio.run(compose_held_sources())
+    elif args.mode == "located-preview":
+        located_tritium_preview()
     else:
         authority = json.loads(AUTHORITY.read_text())
         for row in authority["operations"]:
