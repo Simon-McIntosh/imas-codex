@@ -8,6 +8,7 @@ a receipt read keyed to the writer's returned run id.
 from __future__ import annotations
 
 import argparse
+import asyncio
 import hashlib
 import json
 import shlex
@@ -33,6 +34,10 @@ REASON = (
     "Reclaim only when superseded intermediates lead to this identity, "
     "or the holder has a different DD locus from the tombstone and this identity."
 )
+TRITIUM_PATHS = [
+    "summary/local/pedestal/velocity_phi/tritium/value",
+    "summary/local/separatrix/velocity_phi/tritium/value",
+]
 
 
 def write(path, data):
@@ -227,9 +232,229 @@ def apply_one(name):
         )
 
 
+def tritium_authority():
+    from imas_codex.standard_names.repair_authority import build_repair_authority
+
+    guards = [
+        {
+            "id": name,
+            "kind": "collateral_immutability"
+            if name == "out-of-allowlist-immutability"
+            else "semantic_authority",
+            "implementation": name,
+            "participant_ids": [BARE],
+        }
+        for name in (
+            "signed-lifecycle-and-claim",
+            "no-live-producing-source",
+            "no-live-structural-child",
+            "out-of-allowlist-immutability",
+        )
+    ]
+    built = build_repair_authority(
+        {
+            "operation_id": "retire-unlocated-tritium-stub",
+            "authority_mode": "external_reviewed",
+            "orphan_policy": "refuse",
+            "receipt_policy": {
+                "id": "one-per-retired-identity",
+                "operation": "retire_unlocated_tritium_stub",
+                "cardinality": "per_target",
+                "link_participant_kind": "standard_name",
+                "replay_projection": ["manifest_sha256", "row_id"],
+            },
+            "rows": [
+                {
+                    "id": BARE,
+                    "identity": {
+                        "id": BARE,
+                        "kind": "standard_name",
+                        "target_id": BARE,
+                    },
+                    "participants": [
+                        {
+                            "id": BARE,
+                            "kind": "node",
+                            "graph_label": "StandardName",
+                            "expected_name_stage": "pending",
+                        }
+                    ],
+                    "mutations": [
+                        {
+                            "id": "retire-stub",
+                            "order": 0,
+                            "kind": "supersede",
+                            "participant_id": BARE,
+                            "preserve_source_paths": True,
+                        }
+                    ],
+                    "guards": guards,
+                    "orphan_policy": "refuse",
+                }
+            ],
+        }
+    )
+    authority = json.loads(AUTHORITY.read_text())
+    authority["tritium"]["retirement_authority"] = json.loads(built.content)
+    authority["tritium"]["retirement_file_sha256"] = built.file_sha256
+    authority["tritium"]["source_paths"] = TRITIUM_PATHS
+    authority["tritium"]["composition"] = (
+        "Retry exactly these two failed sources and compose each location through the existing claimed-source pipeline, with run-attributed cost bounded by USD 2. Preserve any tombstone refusal."
+    )
+    authority["applied_reclaims"] = []
+    for receipt_path in sorted(RUN.glob("reclaim-*.json")):
+        receipt = json.loads(receipt_path.read_text())
+        authority["applied_reclaims"].append(
+            {
+                "apply": receipt["apply"],
+                "receipts": receipt["receipts"],
+                "after": receipt["after"],
+            }
+        )
+    write(AUTHORITY, authority)
+    print(
+        json.dumps(
+            {
+                "retirement_authority_sha256": built.file_sha256,
+                "applied_reclaims": len(authority["applied_reclaims"]),
+            }
+        ),
+        flush=True,
+    )
+
+
+async def tritium():
+    from imas_codex.standard_names.budget import BudgetManager
+    from imas_codex.standard_names.graph_store.graph_audits import (
+        create_sn_run_open,
+        finalize_sn_run,
+    )
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
+        retry_failed_sources,
+        set_source_compose_hint,
+    )
+    from imas_codex.standard_names.pool_adapter import _seed_explicit_paths
+    from imas_codex.standard_names.signed_manifest import (
+        apply_signed_manifest,
+        signed_payload_sha256,
+    )
+    from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+        compose_batch,
+    )
+
+    authority = json.loads(AUTHORITY.read_text())
+    retire = authority["tritium"]["retirement_authority"]
+    retire_path = RUN / "tritium-retirement-authority.json"
+    retire_path.write_text(json.dumps(retire, sort_keys=True, indent=2) + "\n")
+    assert (
+        hashlib.sha256(retire_path.read_bytes()).hexdigest()
+        == authority["tritium"]["retirement_file_sha256"]
+    )
+    kwargs = {
+        "authority_file_sha256": hashlib.sha256(retire_path.read_bytes()).hexdigest(),
+        "authority_payload_sha256": signed_payload_sha256(retire),
+        "reason": "The unlocated stub mixes pedestal-top and separatrix values. Retire it and compose the two independently located quantities.",
+        "run_id": RUN.name,
+    }
+    preview = apply_signed_manifest(retire_path, **kwargs)
+    write(RUN / "tritium-retirement-preview.json", preview)
+    print(
+        "retirement_preview="
+        + json.dumps(
+            {
+                k: v
+                for k, v in preview.items()
+                if k not in ("manifest", "admitted_actions")
+            },
+            default=str,
+        ),
+        flush=True,
+    )
+    assert not preview.get("refusals"), preview
+    receipt = apply_signed_manifest(
+        retire_path, apply=True, manifest_sha256=preview["manifest_sha256"], **kwargs
+    )
+    write(RUN / "tritium-retirement-receipt.json", receipt)
+    print(
+        "retirement_receipt="
+        + json.dumps(
+            {
+                k: v
+                for k, v in receipt.items()
+                if k not in ("manifest", "admitted_actions")
+            },
+            default=str,
+        ),
+        flush=True,
+    )
+    with GraphClient() as gc:
+        state = snapshot(gc, [BARE])
+        assert state[BARE]["stage"] == "superseded", state
+        retry_preview = retry_failed_sources(
+            TRITIUM_PATHS, reason=kwargs["reason"], dry_run=True, gc=gc
+        )
+        write(RUN / "tritium-retry-preview.json", retry_preview)
+        assert retry_preview["eligible"] == 2, retry_preview
+        retry = retry_failed_sources(TRITIUM_PATHS, reason=kwargs["reason"], gc=gc)
+        write(RUN / "tritium-retry-receipt.json", retry)
+        assert retry["retried"] == 2, retry
+        for path, target in zip(
+            TRITIUM_PATHS, authority["tritium"]["compose"], strict=True
+        ):
+            hint = f"Compose {target}: the local toroidal component of tritium ion fluid velocity at this path's own location. Keep the pedestal-top value separate from the plasma-boundary value. This is a local value, not a flux-surface average."
+            preview = set_source_compose_hint(
+                path, hint=hint, reason=kwargs["reason"], dry_run=True, gc=gc
+            )
+            write(RUN / ("hint-preview-" + target + ".json"), preview)
+            assert preview["eligible"], preview
+            applied = set_source_compose_hint(
+                path, hint=hint, reason=kwargs["reason"], gc=gc
+            )
+            write(RUN / ("hint-receipt-" + target + ".json"), applied)
+            assert applied["applied"], applied
+    create_sn_run_open(
+        RUN.name,
+        started_at=datetime.now(UTC),
+        cost_limit=2.0,
+        invocation="scoped tritium composition",
+        invocation_scope=json.dumps(TRITIUM_PATHS),
+    )
+    mgr = BudgetManager(total_budget=2.0, run_id=RUN.name)
+    await mgr.start()
+    outcome = {"run_id": RUN.name, "sources": TRITIUM_PATHS}
+    try:
+        items = await _seed_explicit_paths(TRITIUM_PATHS)
+        write(RUN / "tritium-claimed-items.json", items)
+        assert len(items) == 2, items
+        for item, target in zip(
+            sorted(items, key=lambda r: r["path"]),
+            authority["tritium"]["compose"],
+            strict=True,
+        ):
+            item["name_hint"] = target
+            item["edit_reason"] = kwargs["reason"]
+            item["edit_origin"] = "human"
+        outcome["composed"] = await compose_batch(items, mgr, asyncio.Event())
+    finally:
+        outcome["ledger_drained"] = await mgr.drain_pending(raise_on_failure=True)
+        outcome["spend_usd"] = await mgr.get_total_spent(force_refresh=True)
+        write(RUN / "tritium-compose-result.json", outcome)
+        finalize_sn_run(
+            RUN.name,
+            status="completed" if "composed" in outcome else "failed",
+            cost_spent=outcome["spend_usd"],
+            stopped_at=datetime.now(UTC),
+        )
+    print("composition=" + json.dumps(outcome), flush=True)
+    assert outcome["spend_usd"] <= 2.0, outcome
+
+
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("mode", choices=["prepare", "apply", "apply-all"])
+    p.add_argument(
+        "mode",
+        choices=["prepare", "apply", "apply-all", "tritium-authority", "tritium"],
+    )
     p.add_argument("--name")
     args = p.parse_args()
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
@@ -244,6 +469,10 @@ def main():
         prepare()
     elif args.mode == "apply":
         apply_one(args.name)
+    elif args.mode == "tritium-authority":
+        tritium_authority()
+    elif args.mode == "tritium":
+        asyncio.run(tritium())
     else:
         authority = json.loads(AUTHORITY.read_text())
         for row in authority["operations"]:

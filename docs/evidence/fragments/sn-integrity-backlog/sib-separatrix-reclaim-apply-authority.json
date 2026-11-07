@@ -3691,12 +3691,763 @@
       "toroidal_tritium_velocity_at_plasma_boundary"
     ],
     "source_read_needed": true,
-    "current_target_locus": "The boundary tombstone and its live averaged holder both record the average path. A different-locus reclaim is currently refused."
+    "current_target_locus": "The boundary tombstone and its live averaged holder both record the average path. A different-locus reclaim is currently refused.",
+    "retirement_authority": {
+      "authority_mode": "external_reviewed",
+      "operation_id": "retire-unlocated-tritium-stub",
+      "orphan_policy": "refuse",
+      "receipt_policy": {
+        "cardinality": "per_target",
+        "expected_count": "admitted_rows",
+        "id": "one-per-retired-identity",
+        "link_participant_kind": "standard_name",
+        "operation": "retire_unlocated_tritium_stub",
+        "replay_projection": [
+          "manifest_sha256",
+          "row_id"
+        ]
+      },
+      "repair_rows": [
+        "toroidal_tritium_velocity"
+      ],
+      "rows": [
+        {
+          "guards": [
+            {
+              "id": "signed-lifecycle-and-claim",
+              "implementation": "signed-lifecycle-and-claim",
+              "kind": "semantic_authority",
+              "participant_ids": [
+                "toroidal_tritium_velocity"
+              ]
+            },
+            {
+              "id": "no-live-producing-source",
+              "implementation": "no-live-producing-source",
+              "kind": "semantic_authority",
+              "participant_ids": [
+                "toroidal_tritium_velocity"
+              ]
+            },
+            {
+              "id": "no-live-structural-child",
+              "implementation": "no-live-structural-child",
+              "kind": "semantic_authority",
+              "participant_ids": [
+                "toroidal_tritium_velocity"
+              ]
+            },
+            {
+              "id": "out-of-allowlist-immutability",
+              "implementation": "out-of-allowlist-immutability",
+              "kind": "collateral_immutability",
+              "participant_ids": [
+                "toroidal_tritium_velocity"
+              ]
+            }
+          ],
+          "id": "toroidal_tritium_velocity",
+          "identity": {
+            "id": "toroidal_tritium_velocity",
+            "kind": "standard_name",
+            "target_id": "toroidal_tritium_velocity"
+          },
+          "mutations": [
+            {
+              "id": "retire-stub",
+              "kind": "supersede",
+              "order": 0,
+              "participant_id": "toroidal_tritium_velocity",
+              "preserve_source_paths": true
+            }
+          ],
+          "orphan_policy": "refuse",
+          "participants": [
+            {
+              "expected_name_stage": "pending",
+              "graph_label": "StandardName",
+              "id": "toroidal_tritium_velocity",
+              "kind": "node"
+            }
+          ],
+          "selection": {
+            "id": "artifact-rows",
+            "mode": "exact_complete_signed_cohort",
+            "predicate": "artifact-rows"
+          }
+        }
+      ],
+      "schema": "imas-codex.repair-authority.v1",
+      "selection": {
+        "id": "artifact-rows",
+        "mode": "exact_complete_signed_cohort",
+        "predicate": "artifact-rows"
+      },
+      "signature": {
+        "canonicalization": "json-sort-keys-v1",
+        "sha256": "61e23b7cb110e16e116f2f9b674e297f6c1d21e7919a8cc5f6ea284818edfa8f"
+      }
+    },
+    "retirement_file_sha256": "35145d1b27f548f63442150d7789bab1f4f936f1657a52ee7cdd5564c5809fbf",
+    "source_paths": [
+      "summary/local/pedestal/velocity_phi/tritium/value",
+      "summary/local/separatrix/velocity_phi/tritium/value"
+    ],
+    "composition": "Retry exactly these two failed sources and compose each location through the existing claimed-source pipeline, with run-attributed cost bounded by USD 2. Preserve any tombstone refusal."
   },
   "spend_ceiling_usd": 2.0,
   "full_snapshot": {
     "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T185046746594-sib-separatrix-reclaim-apply/authority-full-preview.json",
     "sha256": "1763dad88e417cfc52ec415f60279c568ed095f2d7981a0d18d2ebf825043318"
   },
-  "preexisting_lineage_cycle": "Recorded deuterium-tritium lineage revisits flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary through flux_surface_averaged_deuterium_tritium_density; no mutation authorized to repair that cycle."
+  "preexisting_lineage_cycle": "Recorded deuterium-tritium lineage revisits flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary through flux_surface_averaged_deuterium_tritium_density; no mutation authorized to repair that cycle.",
+  "applied_reclaims": [
+    {
+      "apply": {
+        "target": "electron_temperature_at_separatrix",
+        "mode": "rename",
+        "axis": "name",
+        "scope": "only_self",
+        "entry": "review_name",
+        "successor": "electron_temperature_at_plasma_boundary",
+        "cascade_deferred": [],
+        "blocked": null,
+        "actions": [
+          "reclaim case closing_lineage: successor lineage closes on 'electron_temperature_at_separatrix'",
+          "carried 1 producing source(s) to 'electron_temperature_at_plasma_boundary' (1 by explicit migration)",
+          "revived 'electron_temperature_at_plasma_boundary' at name_stage='refining' with the tombstone's documentation and ledger kept, and retired 'electron_temperature_at_separatrix' onto it (receipt sn-change:reclaim-spelling:cf1e89853e91400e80b0b0a6f0de5d44)"
+        ],
+        "applied": true,
+        "run_id": "sn-edit-20261107T191734Z"
+      },
+      "receipts": [
+        {
+          "receipt": {
+            "reason": "{\"case\": \"closing_lineage\", \"detail\": \"successor lineage closes on 'electron_temperature_at_separatrix'\", \"from_name\": \"electron_temperature_at_separatrix\", \"to_name\": \"electron_temperature_at_plasma_boundary\", \"revived_stage\": \"refining\", \"prior_stage\": \"accepted\", \"sources\": [\"dd:summary/local/separatrix/t_e/value\"]}",
+            "internal": true,
+            "run_id": "sn-edit-20261107T191734Z",
+            "to_name": "electron_temperature_at_plasma_boundary",
+            "origin": "agent",
+            "changed_at": "2026-11-07T19:17:34.195917000+00:00",
+            "id": "sn-change:reclaim-spelling:cf1e89853e91400e80b0b0a6f0de5d44",
+            "from_name": "electron_temperature_at_separatrix",
+            "operation": "reclaim_spelling"
+          }
+        },
+        {
+          "receipt": {
+            "reason": "098a602d2619d07f63e085de4383568d2e1e50e93f1a5aebc5d9f007a850cff2",
+            "internal": true,
+            "run_id": "sn-edit-20261107T191734Z",
+            "to_name": "electron_temperature_at_plasma_boundary",
+            "origin": "human_edit",
+            "changed_at": "2026-11-07T19:17:34.241000000+00:00",
+            "id": "sn-change:source-migration:098a602d2619d07f63e085de4383568d2e1e50e93f1a5aebc5d9f007a850cff2",
+            "from_name": "electron_temperature_at_separatrix",
+            "operation": "source_migration_manifest"
+          }
+        }
+      ],
+      "after": {
+        "electron_temperature_at_plasma_boundary": {
+          "id": "electron_temperature_at_plasma_boundary",
+          "stage": "refining",
+          "status": "draft",
+          "paths": [
+            "dd:summary/local/separatrix/t_e/value"
+          ],
+          "description": "Thermal energy of the bulk electron population at the plasma boundary expressed as a kinetic temperature, equal to two-thirds of the mean random electron kinetic energy per particle. The boundary value is evaluated on the last closed magnetic flux surface or separatrix.",
+          "score": 0.6875,
+          "unit": "eV",
+          "run_id": "sn-edit-20261107T191734Z",
+          "sources": [
+            "dd:summary/local/separatrix/t_e/value"
+          ],
+          "reviews": [
+            "electron_temperature_at_plasma_boundary:names:a82f88bd-8f23-4852-ab5f-10d8294ddea1:1",
+            "electron_temperature_at_plasma_boundary:names:a82f88bd-8f23-4852-ab5f-10d8294ddea1:0",
+            "electron_temperature_at_plasma_boundary:names:a82f88bd-8f23-4852-ab5f-10d8294ddea1:2",
+            "electron_temperature_at_plasma_boundary:docs:c799862d-0f3b-488d-99e0-cd4542978b41:1",
+            "electron_temperature_at_plasma_boundary:docs:d5025c0e-5715-441c-a25e-6e86407a1727:1",
+            "electron_temperature_at_plasma_boundary:docs:6019c90d-311a-4a8a-8a61-580a24a01a92:0"
+          ]
+        },
+        "electron_temperature_at_separatrix": {
+          "id": "electron_temperature_at_separatrix",
+          "stage": "superseded",
+          "status": "draft",
+          "paths": [],
+          "description": "Temperature of electrons at the separatrix measures their mean random kinetic energy relative to the local mean electron flow.",
+          "score": 1.0,
+          "unit": "eV",
+          "run_id": null,
+          "sources": [],
+          "reviews": [
+            "electron_temperature_at_separatrix:typesafe-jev-1-13:2026-10-22T18:40:31.880282+00:00",
+            "electron_temperature_at_separatrix:docs:918e0750-ca8e-4819-82eb-07580743ec05:1",
+            "electron_temperature_at_separatrix:docs:918e0750-ca8e-4819-82eb-07580743ec05:2",
+            "electron_temperature_at_separatrix:docs:918e0750-ca8e-4819-82eb-07580743ec05:0",
+            "electron_temperature_at_separatrix:docs:b591a890-2d5f-428b-a185-e19c794e2ed0:1",
+            "electron_temperature_at_separatrix:docs:b591a890-2d5f-428b-a185-e19c794e2ed0:0",
+            "electron_temperature_at_separatrix:name:670414d4-cc6b-46c2-91ed-c34e0f545bd4:1",
+            "electron_temperature_at_separatrix:name:670414d4-cc6b-46c2-91ed-c34e0f545bd4:0",
+            "electron_temperature_at_separatrix:names:6478b8d0-9df8-4629-b6d8-1a3e1bd486ea:0",
+            "electron_temperature_at_separatrix:names:6478b8d0-9df8-4629-b6d8-1a3e1bd486ea:2",
+            "electron_temperature_at_separatrix:names:6478b8d0-9df8-4629-b6d8-1a3e1bd486ea:1"
+          ]
+        }
+      }
+    },
+    {
+      "apply": {
+        "target": "tungsten_density_flux_surface_averaged_at_plasma_boundary",
+        "mode": "rename",
+        "axis": "name",
+        "scope": "only_self",
+        "entry": "review_name",
+        "successor": "flux_surface_averaged_tungsten_density_at_plasma_boundary",
+        "cascade_deferred": [],
+        "blocked": null,
+        "actions": [
+          "reclaim case closing_lineage: successor lineage closes on 'tungsten_density_flux_surface_averaged_at_plasma_boundary'",
+          "carried 1 producing source(s) to 'flux_surface_averaged_tungsten_density_at_plasma_boundary' (1 by explicit migration)",
+          "revived 'flux_surface_averaged_tungsten_density_at_plasma_boundary' at name_stage='reviewed' with the tombstone's documentation and ledger kept, and retired 'tungsten_density_flux_surface_averaged_at_plasma_boundary' onto it (receipt sn-change:reclaim-spelling:8dcb549fc34046988364cfda0e42d3d0)"
+        ],
+        "applied": true,
+        "run_id": "sn-edit-20261107T191742Z"
+      },
+      "receipts": [
+        {
+          "receipt": {
+            "reason": "{\"case\": \"closing_lineage\", \"detail\": \"successor lineage closes on 'tungsten_density_flux_surface_averaged_at_plasma_boundary'\", \"from_name\": \"tungsten_density_flux_surface_averaged_at_plasma_boundary\", \"to_name\": \"flux_surface_averaged_tungsten_density_at_plasma_boundary\", \"revived_stage\": \"reviewed\", \"prior_stage\": \"accepted\", \"sources\": [\"dd:summary/local/separatrix_average/n_i/tungsten/value\"]}",
+            "internal": true,
+            "run_id": "sn-edit-20261107T191742Z",
+            "to_name": "flux_surface_averaged_tungsten_density_at_plasma_boundary",
+            "origin": "agent",
+            "changed_at": "2026-11-07T19:17:42.324005000+00:00",
+            "id": "sn-change:reclaim-spelling:8dcb549fc34046988364cfda0e42d3d0",
+            "from_name": "tungsten_density_flux_surface_averaged_at_plasma_boundary",
+            "operation": "reclaim_spelling"
+          }
+        },
+        {
+          "receipt": {
+            "reason": "6097d38e2a2498d660fded3d3def81013fee3fd6c3db8b77d0544432185d70b2",
+            "internal": true,
+            "run_id": "sn-edit-20261107T191742Z",
+            "to_name": "flux_surface_averaged_tungsten_density_at_plasma_boundary",
+            "origin": "human_edit",
+            "changed_at": "2026-11-07T19:17:42.362000000+00:00",
+            "id": "sn-change:source-migration:6097d38e2a2498d660fded3d3def81013fee3fd6c3db8b77d0544432185d70b2",
+            "from_name": "tungsten_density_flux_surface_averaged_at_plasma_boundary",
+            "operation": "source_migration_manifest"
+          }
+        }
+      ],
+      "after": {
+        "flux_surface_averaged_tungsten_density_at_plasma_boundary": {
+          "id": "flux_surface_averaged_tungsten_density_at_plasma_boundary",
+          "stage": "reviewed",
+          "status": "draft",
+          "paths": [
+            "dd:summary/local/separatrix_average/n_i/tungsten/value"
+          ],
+          "description": "Flux-surface-averaged number density of positively charged tungsten ions on the last closed magnetic flux surface, summed over all ionization states.",
+          "score": 1.0,
+          "unit": "m^-3",
+          "run_id": "sn-edit-20261107T191742Z",
+          "sources": [
+            "dd:summary/local/separatrix_average/n_i/tungsten/value"
+          ],
+          "reviews": [
+            "flux_surface_averaged_tungsten_density_at_plasma_boundary:names:f2c4704b-bc08-4f0e-b61f-844ae7b36925:0",
+            "flux_surface_averaged_tungsten_density_at_plasma_boundary:names:f2c4704b-bc08-4f0e-b61f-844ae7b36925:1",
+            "flux_surface_averaged_tungsten_density_at_plasma_boundary:docs:ab30792f-a988-47d3-81ae-b5f50fcb4920:0",
+            "flux_surface_averaged_tungsten_density_at_plasma_boundary:docs:393bd90d-ed56-40ae-94a9-d38f0025a92a:1",
+            "flux_surface_averaged_tungsten_density_at_plasma_boundary:docs:393bd90d-ed56-40ae-94a9-d38f0025a92a:0",
+            "flux_surface_averaged_tungsten_density_at_plasma_boundary:docs:0099f046-86e8-45a8-8b31-2d9942b5cb59:0",
+            "flux_surface_averaged_tungsten_density_at_plasma_boundary:docs:0099f046-86e8-45a8-8b31-2d9942b5cb59:1",
+            "flux_surface_averaged_tungsten_density_at_plasma_boundary:docs:36bb9485-c502-4b7a-99cd-3151b1829244:1",
+            "flux_surface_averaged_tungsten_density_at_plasma_boundary:docs:36bb9485-c502-4b7a-99cd-3151b1829244:0",
+            "flux_surface_averaged_tungsten_density_at_plasma_boundary:docs:36bb9485-c502-4b7a-99cd-3151b1829244:2",
+            "flux_surface_averaged_tungsten_density_at_plasma_boundary:docs:e13e7db0-1ed1-41f0-90d9-652820a06ff2:1",
+            "flux_surface_averaged_tungsten_density_at_plasma_boundary:docs:e13e7db0-1ed1-41f0-90d9-652820a06ff2:0",
+            "flux_surface_averaged_tungsten_density_at_plasma_boundary:docs:517e4f86-2b45-4207-971c-0b7f0db5ab2f:0",
+            "flux_surface_averaged_tungsten_density_at_plasma_boundary:docs:517e4f86-2b45-4207-971c-0b7f0db5ab2f:1"
+          ]
+        },
+        "tungsten_density_flux_surface_averaged_at_plasma_boundary": {
+          "id": "tungsten_density_flux_surface_averaged_at_plasma_boundary",
+          "stage": "superseded",
+          "status": "draft",
+          "paths": [],
+          "description": "Flux-surface-averaged number density of positively charged tungsten ions on the last closed magnetic flux surface, summed over all ionization states.",
+          "score": 0.9875,
+          "unit": "m^-3",
+          "run_id": null,
+          "sources": [],
+          "reviews": [
+            "tungsten_density_flux_surface_averaged_at_plasma_boundary:name:6bd8825c-bada-4b5f-a62b-79a69fe21b43:1",
+            "tungsten_density_flux_surface_averaged_at_plasma_boundary:name:6bd8825c-bada-4b5f-a62b-79a69fe21b43:0"
+          ]
+        }
+      }
+    },
+    {
+      "apply": {
+        "target": "effective_charge_flux_surface_averaged_at_plasma_boundary",
+        "mode": "rename",
+        "axis": "name",
+        "scope": "only_self",
+        "entry": "review_name",
+        "successor": "flux_surface_averaged_effective_charge_at_plasma_boundary",
+        "cascade_deferred": [],
+        "blocked": null,
+        "actions": [
+          "reclaim case closing_lineage: successor lineage closes on 'effective_charge_flux_surface_averaged_at_plasma_boundary'",
+          "carried 1 producing source(s) to 'flux_surface_averaged_effective_charge_at_plasma_boundary' (1 by explicit migration)",
+          "revived 'flux_surface_averaged_effective_charge_at_plasma_boundary' at name_stage='reviewed' with the tombstone's documentation and ledger kept, and retired 'effective_charge_flux_surface_averaged_at_plasma_boundary' onto it (receipt sn-change:reclaim-spelling:8dcc6307e2064c1ba8c51b985b8a8693)"
+        ],
+        "applied": true,
+        "run_id": "sn-edit-20261107T191718Z"
+      },
+      "receipts": [
+        {
+          "receipt": {
+            "reason": "{\"case\": \"closing_lineage\", \"detail\": \"successor lineage closes on 'effective_charge_flux_surface_averaged_at_plasma_boundary'\", \"from_name\": \"effective_charge_flux_surface_averaged_at_plasma_boundary\", \"to_name\": \"flux_surface_averaged_effective_charge_at_plasma_boundary\", \"revived_stage\": \"reviewed\", \"prior_stage\": \"reviewed\", \"sources\": [\"dd:summary/local/separatrix_average/zeff/value\"]}",
+            "internal": true,
+            "run_id": "sn-edit-20261107T191718Z",
+            "to_name": "flux_surface_averaged_effective_charge_at_plasma_boundary",
+            "origin": "agent",
+            "changed_at": "2026-11-07T19:17:18.342711000+00:00",
+            "id": "sn-change:reclaim-spelling:8dcc6307e2064c1ba8c51b985b8a8693",
+            "from_name": "effective_charge_flux_surface_averaged_at_plasma_boundary",
+            "operation": "reclaim_spelling"
+          }
+        },
+        {
+          "receipt": {
+            "reason": "4039e3bfd159b7e620aa32c4f62f0fd69c1522bbf84a67c700685261a82a4189",
+            "internal": true,
+            "run_id": "sn-edit-20261107T191718Z",
+            "to_name": "flux_surface_averaged_effective_charge_at_plasma_boundary",
+            "origin": "human_edit",
+            "changed_at": "2026-11-07T19:17:18.393000000+00:00",
+            "id": "sn-change:source-migration:4039e3bfd159b7e620aa32c4f62f0fd69c1522bbf84a67c700685261a82a4189",
+            "from_name": "effective_charge_flux_surface_averaged_at_plasma_boundary",
+            "operation": "source_migration_manifest"
+          }
+        }
+      ],
+      "after": {
+        "effective_charge_flux_surface_averaged_at_plasma_boundary": {
+          "id": "effective_charge_flux_surface_averaged_at_plasma_boundary",
+          "stage": "superseded",
+          "status": "draft",
+          "paths": [],
+          "description": "Flux-surface average of the ion-mixture effective charge over the entire plasma-boundary surface, distinct from the local boundary value.",
+          "score": 0.88125,
+          "unit": "1",
+          "run_id": null,
+          "sources": [],
+          "reviews": [
+            "effective_charge_flux_surface_averaged_at_plasma_boundary:name:e4334f79-c779-44c7-b3ea-563e8b584a74:0",
+            "effective_charge_flux_surface_averaged_at_plasma_boundary:name:e4334f79-c779-44c7-b3ea-563e8b584a74:1"
+          ]
+        },
+        "flux_surface_averaged_effective_charge_at_plasma_boundary": {
+          "id": "flux_surface_averaged_effective_charge_at_plasma_boundary",
+          "stage": "reviewed",
+          "status": "draft",
+          "paths": [
+            "dd:summary/local/separatrix_average/zeff/value"
+          ],
+          "description": "Flux-surface average of the ion-mixture effective charge over the entire plasma-boundary surface, distinct from the local boundary value.",
+          "score": 0.975,
+          "unit": "1",
+          "run_id": "sn-edit-20261107T191718Z",
+          "sources": [
+            "dd:summary/local/separatrix_average/zeff/value"
+          ],
+          "reviews": [
+            "flux_surface_averaged_effective_charge_at_plasma_boundary:docs:f5443d6f-4370-453d-a6bc-8169f9278a16:0",
+            "flux_surface_averaged_effective_charge_at_plasma_boundary:docs:f5443d6f-4370-453d-a6bc-8169f9278a16:1",
+            "flux_surface_averaged_effective_charge_at_plasma_boundary:names:8cc38d3b-18f7-4215-aadc-eebc96fa0fed:2",
+            "flux_surface_averaged_effective_charge_at_plasma_boundary:names:8cc38d3b-18f7-4215-aadc-eebc96fa0fed:1",
+            "flux_surface_averaged_effective_charge_at_plasma_boundary:names:8cc38d3b-18f7-4215-aadc-eebc96fa0fed:0"
+          ]
+        }
+      }
+    },
+    {
+      "apply": {
+        "target": "electron_pressure_at_separatrix",
+        "mode": "rename",
+        "axis": "name",
+        "scope": "only_self",
+        "entry": "review_name",
+        "successor": "electron_pressure_at_plasma_boundary",
+        "cascade_deferred": [],
+        "blocked": null,
+        "actions": [
+          "reclaim case closing_lineage: successor lineage closes on 'electron_pressure_at_separatrix'",
+          "carried 2 producing source(s) to 'electron_pressure_at_plasma_boundary' (2 by explicit migration)",
+          "revived 'electron_pressure_at_plasma_boundary' at name_stage='refining' with the tombstone's documentation and ledger kept, and retired 'electron_pressure_at_separatrix' onto it (receipt sn-change:reclaim-spelling:ca8ac75a96024a5cb123b3656598b08b)"
+        ],
+        "applied": true,
+        "run_id": "sn-edit-20261107T191722Z"
+      },
+      "receipts": [
+        {
+          "receipt": {
+            "reason": "{\"case\": \"closing_lineage\", \"detail\": \"successor lineage closes on 'electron_pressure_at_separatrix'\", \"from_name\": \"electron_pressure_at_separatrix\", \"to_name\": \"electron_pressure_at_plasma_boundary\", \"revived_stage\": \"refining\", \"prior_stage\": \"accepted\", \"sources\": [\"dd:summary/pedestal_fits/linear/pressure_electron/separatrix/value\", \"dd:summary/pedestal_fits/mtanh/pressure_electron/separatrix/value\"]}",
+            "internal": true,
+            "run_id": "sn-edit-20261107T191722Z",
+            "to_name": "electron_pressure_at_plasma_boundary",
+            "origin": "agent",
+            "changed_at": "2026-11-07T19:17:22.231938000+00:00",
+            "id": "sn-change:reclaim-spelling:ca8ac75a96024a5cb123b3656598b08b",
+            "from_name": "electron_pressure_at_separatrix",
+            "operation": "reclaim_spelling"
+          }
+        },
+        {
+          "receipt": {
+            "reason": "4069bd74883903ad00a3b9aa9240bc6ed3e459b1b2e1c4279591798292aa686e",
+            "internal": true,
+            "run_id": "sn-edit-20261107T191722Z",
+            "to_name": "electron_pressure_at_plasma_boundary",
+            "origin": "human_edit",
+            "changed_at": "2026-11-07T19:17:22.426000000+00:00",
+            "id": "sn-change:source-migration:4069bd74883903ad00a3b9aa9240bc6ed3e459b1b2e1c4279591798292aa686e",
+            "from_name": "electron_pressure_at_separatrix",
+            "operation": "source_migration_manifest"
+          }
+        }
+      ],
+      "after": {
+        "electron_pressure_at_plasma_boundary": {
+          "id": "electron_pressure_at_plasma_boundary",
+          "stage": "refining",
+          "status": "draft",
+          "paths": [
+            "dd:summary/pedestal_fits/linear/pressure_electron/separatrix/value",
+            "dd:summary/pedestal_fits/mtanh/pressure_electron/separatrix/value"
+          ],
+          "description": "Isotropic momentum-flux density of random electron motion evaluated on the last closed flux surface separating confined plasma from the scrape-off layer.",
+          "score": 0.78125,
+          "unit": "Pa",
+          "run_id": "sn-edit-20261107T191722Z",
+          "sources": [
+            "dd:summary/pedestal_fits/mtanh/pressure_electron/separatrix/value",
+            "dd:summary/pedestal_fits/linear/pressure_electron/separatrix/value"
+          ],
+          "reviews": [
+            "electron_pressure_at_plasma_boundary:names:d72de50a-b655-4644-8abd-b7a2084f886c:1",
+            "electron_pressure_at_plasma_boundary:names:d72de50a-b655-4644-8abd-b7a2084f886c:0",
+            "electron_pressure_at_plasma_boundary:docs:091576d4-2d90-417c-a847-ab5b15d588e9:1",
+            "electron_pressure_at_plasma_boundary:docs:091576d4-2d90-417c-a847-ab5b15d588e9:0"
+          ]
+        },
+        "electron_pressure_at_separatrix": {
+          "id": "electron_pressure_at_separatrix",
+          "stage": "superseded",
+          "status": "draft",
+          "paths": [],
+          "description": "Local kinetic pressure carried by the electron population at the magnetic separatrix, marking the boundary between confined plasma and open-field-line scrape-off-layer plasma.",
+          "score": 1.0,
+          "unit": "Pa",
+          "run_id": null,
+          "sources": [],
+          "reviews": [
+            "electron_pressure_at_separatrix:docs:e2eab98f-e6c7-4a55-a380-de2ef24c4689:0",
+            "electron_pressure_at_separatrix:docs:e2eab98f-e6c7-4a55-a380-de2ef24c4689:1",
+            "electron_pressure_at_separatrix:names:95b5023a-a9d6-48fd-8499-077c98373b06:1",
+            "electron_pressure_at_separatrix:names:95b5023a-a9d6-48fd-8499-077c98373b06:0"
+          ]
+        }
+      }
+    },
+    {
+      "apply": {
+        "target": "krypton_density_flux_surface_averaged_at_plasma_boundary",
+        "mode": "rename",
+        "axis": "name",
+        "scope": "only_self",
+        "entry": "review_name",
+        "successor": "flux_surface_averaged_krypton_density_at_plasma_boundary",
+        "cascade_deferred": [],
+        "blocked": null,
+        "actions": [
+          "reclaim case closing_lineage: successor lineage closes on 'krypton_density_flux_surface_averaged_at_plasma_boundary'",
+          "carried 1 producing source(s) to 'flux_surface_averaged_krypton_density_at_plasma_boundary' (1 by explicit migration)",
+          "revived 'flux_surface_averaged_krypton_density_at_plasma_boundary' at name_stage='reviewed' with the tombstone's documentation and ledger kept, and retired 'krypton_density_flux_surface_averaged_at_plasma_boundary' onto it (receipt sn-change:reclaim-spelling:facac908c9d0486096a9f46da03d055e)"
+        ],
+        "applied": true,
+        "run_id": "sn-edit-20261107T191738Z"
+      },
+      "receipts": [
+        {
+          "receipt": {
+            "reason": "{\"case\": \"closing_lineage\", \"detail\": \"successor lineage closes on 'krypton_density_flux_surface_averaged_at_plasma_boundary'\", \"from_name\": \"krypton_density_flux_surface_averaged_at_plasma_boundary\", \"to_name\": \"flux_surface_averaged_krypton_density_at_plasma_boundary\", \"revived_stage\": \"reviewed\", \"prior_stage\": \"accepted\", \"sources\": [\"dd:summary/local/separatrix_average/n_i/krypton/value\"]}",
+            "internal": true,
+            "run_id": "sn-edit-20261107T191738Z",
+            "to_name": "flux_surface_averaged_krypton_density_at_plasma_boundary",
+            "origin": "agent",
+            "changed_at": "2026-11-07T19:17:38.126722000+00:00",
+            "id": "sn-change:reclaim-spelling:facac908c9d0486096a9f46da03d055e",
+            "from_name": "krypton_density_flux_surface_averaged_at_plasma_boundary",
+            "operation": "reclaim_spelling"
+          }
+        },
+        {
+          "receipt": {
+            "reason": "8ccc4b7b83fe4c372163b4b68418f80d01b97af674cfc61e31721412f1555fff",
+            "internal": true,
+            "run_id": "sn-edit-20261107T191738Z",
+            "to_name": "flux_surface_averaged_krypton_density_at_plasma_boundary",
+            "origin": "human_edit",
+            "changed_at": "2026-11-07T19:17:38.174000000+00:00",
+            "id": "sn-change:source-migration:8ccc4b7b83fe4c372163b4b68418f80d01b97af674cfc61e31721412f1555fff",
+            "from_name": "krypton_density_flux_surface_averaged_at_plasma_boundary",
+            "operation": "source_migration_manifest"
+          }
+        }
+      ],
+      "after": {
+        "flux_surface_averaged_krypton_density_at_plasma_boundary": {
+          "id": "flux_surface_averaged_krypton_density_at_plasma_boundary",
+          "stage": "reviewed",
+          "status": "draft",
+          "paths": [
+            "dd:summary/local/separatrix_average/n_i/krypton/value"
+          ],
+          "description": "Charge-state-summed krypton ion number density averaged over the complete separatrix, distinguishing a flux-surface value from the local boundary value.",
+          "score": 1.0,
+          "unit": "m^-3",
+          "run_id": "sn-edit-20261107T191738Z",
+          "sources": [
+            "dd:summary/local/separatrix_average/n_i/krypton/value"
+          ],
+          "reviews": [
+            "flux_surface_averaged_krypton_density_at_plasma_boundary:docs:113d4704-48cf-4b5f-b5d0-8310df8e0d33:1",
+            "flux_surface_averaged_krypton_density_at_plasma_boundary:docs:113d4704-48cf-4b5f-b5d0-8310df8e0d33:0",
+            "flux_surface_averaged_krypton_density_at_plasma_boundary:docs:113d4704-48cf-4b5f-b5d0-8310df8e0d33:2",
+            "flux_surface_averaged_krypton_density_at_plasma_boundary:names:87a58821-221a-4557-8c5c-07883831b611:1",
+            "flux_surface_averaged_krypton_density_at_plasma_boundary:names:87a58821-221a-4557-8c5c-07883831b611:0"
+          ]
+        },
+        "krypton_density_flux_surface_averaged_at_plasma_boundary": {
+          "id": "krypton_density_flux_surface_averaged_at_plasma_boundary",
+          "stage": "superseded",
+          "status": "draft",
+          "paths": [],
+          "description": "Charge-state-summed krypton ion number density averaged over the complete separatrix, distinguishing a flux-surface value from the local boundary value.",
+          "score": 1.0,
+          "unit": "m^-3",
+          "run_id": null,
+          "sources": [],
+          "reviews": [
+            "krypton_density_flux_surface_averaged_at_plasma_boundary:name:e037a7af-5941-4186-a1a6-f2979d1458f2:0",
+            "krypton_density_flux_surface_averaged_at_plasma_boundary:name:e037a7af-5941-4186-a1a6-f2979d1458f2:1"
+          ]
+        }
+      }
+    },
+    {
+      "apply": {
+        "target": "effective_charge_at_separatrix",
+        "mode": "rename",
+        "axis": "name",
+        "scope": "only_self",
+        "entry": "review_name",
+        "successor": "effective_charge_at_plasma_boundary",
+        "cascade_deferred": [],
+        "blocked": null,
+        "actions": [
+          "reclaim case closing_lineage: successor lineage closes on 'effective_charge_at_separatrix'",
+          "carried 1 producing source(s) to 'effective_charge_at_plasma_boundary' (1 by explicit migration)",
+          "revived 'effective_charge_at_plasma_boundary' at name_stage='refining' with the tombstone's documentation and ledger kept, and retired 'effective_charge_at_separatrix' onto it (receipt sn-change:reclaim-spelling:029cd359fe8d4d7e947dc4a72fa77883)"
+        ],
+        "applied": true,
+        "run_id": "sn-edit-20261107T191714Z"
+      },
+      "receipts": [
+        {
+          "receipt": {
+            "reason": "{\"case\": \"closing_lineage\", \"detail\": \"successor lineage closes on 'effective_charge_at_separatrix'\", \"from_name\": \"effective_charge_at_separatrix\", \"to_name\": \"effective_charge_at_plasma_boundary\", \"revived_stage\": \"refining\", \"prior_stage\": \"accepted\", \"sources\": [\"dd:summary/local/separatrix/zeff/value\"]}",
+            "internal": true,
+            "run_id": "sn-edit-20261107T191714Z",
+            "to_name": "effective_charge_at_plasma_boundary",
+            "origin": "agent",
+            "changed_at": "2026-11-07T19:17:14.208348000+00:00",
+            "id": "sn-change:reclaim-spelling:029cd359fe8d4d7e947dc4a72fa77883",
+            "from_name": "effective_charge_at_separatrix",
+            "operation": "reclaim_spelling"
+          }
+        },
+        {
+          "receipt": {
+            "reason": "044dc101fbf8671256f53cc6712283d02d0b3d7e3d905b19c464194912e10ebe",
+            "internal": true,
+            "run_id": "sn-edit-20261107T191714Z",
+            "to_name": "effective_charge_at_plasma_boundary",
+            "origin": "human_edit",
+            "changed_at": "2026-11-07T19:17:14.324000000+00:00",
+            "id": "sn-change:source-migration:044dc101fbf8671256f53cc6712283d02d0b3d7e3d905b19c464194912e10ebe",
+            "from_name": "effective_charge_at_separatrix",
+            "operation": "source_migration_manifest"
+          }
+        }
+      ],
+      "after": {
+        "effective_charge_at_plasma_boundary": {
+          "id": "effective_charge_at_plasma_boundary",
+          "stage": "refining",
+          "status": "draft",
+          "paths": [
+            "dd:summary/local/separatrix/zeff/value"
+          ],
+          "description": "Effective charge number of the ion mixture at the plasma boundary is the charge-squared-weighted sum of ionic number densities divided by the electron number density at that boundary. It equals one for a purely singly charged hydrogenic ion mixture and increases with impurity charge content.",
+          "score": 0.675,
+          "unit": "1",
+          "run_id": "sn-edit-20261107T191714Z",
+          "sources": [
+            "dd:summary/local/separatrix/zeff/value"
+          ],
+          "reviews": [
+            "effective_charge_at_plasma_boundary:names:426e54bf-f978-49b9-a281-ae13de308d37:0",
+            "effective_charge_at_plasma_boundary:names:426e54bf-f978-49b9-a281-ae13de308d37:1",
+            "effective_charge_at_plasma_boundary:names:426e54bf-f978-49b9-a281-ae13de308d37:2",
+            "effective_charge_at_plasma_boundary:docs:434a6f9e-c15b-4d06-8cbe-30d07dd8013c:1",
+            "effective_charge_at_plasma_boundary:docs:434a6f9e-c15b-4d06-8cbe-30d07dd8013c:0",
+            "effective_charge_at_plasma_boundary:docs:434a6f9e-c15b-4d06-8cbe-30d07dd8013c:2",
+            "effective_charge_at_plasma_boundary:docs:e12f4903-a082-4b97-af3e-4b055aebc626:0",
+            "effective_charge_at_plasma_boundary:docs:e12f4903-a082-4b97-af3e-4b055aebc626:1",
+            "effective_charge_at_plasma_boundary:docs:55a62ef9-d01c-4488-93da-a42fed6cf98d:0",
+            "effective_charge_at_plasma_boundary:docs:55a62ef9-d01c-4488-93da-a42fed6cf98d:1",
+            "effective_charge_at_plasma_boundary:docs:4441a9c5-e179-4b3e-aefa-1c0ba8a4544a:1",
+            "effective_charge_at_plasma_boundary:docs:4441a9c5-e179-4b3e-aefa-1c0ba8a4544a:0"
+          ]
+        },
+        "effective_charge_at_separatrix": {
+          "id": "effective_charge_at_separatrix",
+          "stage": "superseded",
+          "status": "draft",
+          "paths": [],
+          "description": "Local effective ionic charge of the plasma mixture at the separatrix, reflecting charge-squared weighting across all contributing ion species and charge states.",
+          "score": 1.0,
+          "unit": "1",
+          "run_id": null,
+          "sources": [],
+          "reviews": [
+            "effective_charge_at_separatrix:docs:aa28e5d1-f3ea-4fef-ae40-405ee1cdbd3b:1",
+            "effective_charge_at_separatrix:docs:aa28e5d1-f3ea-4fef-ae40-405ee1cdbd3b:0",
+            "effective_charge_at_separatrix:names:5ecdc040-5360-44f6-92da-9e555f4d86d8:1",
+            "effective_charge_at_separatrix:names:5ecdc040-5360-44f6-92da-9e555f4d86d8:0"
+          ]
+        }
+      }
+    },
+    {
+      "apply": {
+        "target": "boron_density_flux_surface_averaged_at_plasma_boundary",
+        "mode": "rename",
+        "axis": "name",
+        "scope": "only_self",
+        "entry": "review_name",
+        "successor": "flux_surface_averaged_boron_density_at_plasma_boundary",
+        "cascade_deferred": [],
+        "blocked": null,
+        "actions": [
+          "reclaim case closing_lineage: successor lineage closes on 'boron_density_flux_surface_averaged_at_plasma_boundary'",
+          "carried 1 producing source(s) to 'flux_surface_averaged_boron_density_at_plasma_boundary' (1 by explicit migration)",
+          "revived 'flux_surface_averaged_boron_density_at_plasma_boundary' at name_stage='reviewed' with the tombstone's documentation and ledger kept, and retired 'boron_density_flux_surface_averaged_at_plasma_boundary' onto it (receipt sn-change:reclaim-spelling:00f8dc691da54667b77692d048d8ee0b)"
+        ],
+        "applied": true,
+        "run_id": "sn-edit-20261107T191704Z"
+      },
+      "receipts": [
+        {
+          "receipt": {
+            "reason": "{\"case\": \"closing_lineage\", \"detail\": \"successor lineage closes on 'boron_density_flux_surface_averaged_at_plasma_boundary'\", \"from_name\": \"boron_density_flux_surface_averaged_at_plasma_boundary\", \"to_name\": \"flux_surface_averaged_boron_density_at_plasma_boundary\", \"revived_stage\": \"reviewed\", \"prior_stage\": \"accepted\", \"sources\": [\"dd:summary/local/separatrix_average/n_i/boron/value\"]}",
+            "internal": true,
+            "run_id": "sn-edit-20261107T191704Z",
+            "to_name": "flux_surface_averaged_boron_density_at_plasma_boundary",
+            "origin": "agent",
+            "changed_at": "2026-11-07T19:17:04.148299000+00:00",
+            "id": "sn-change:reclaim-spelling:00f8dc691da54667b77692d048d8ee0b",
+            "from_name": "boron_density_flux_surface_averaged_at_plasma_boundary",
+            "operation": "reclaim_spelling"
+          }
+        },
+        {
+          "receipt": {
+            "reason": "85c55f838ca1ef253d37f294aacd8aeb86c892b37023b85485406668dc749dc5",
+            "internal": true,
+            "run_id": "sn-edit-20261107T191704Z",
+            "to_name": "flux_surface_averaged_boron_density_at_plasma_boundary",
+            "origin": "human_edit",
+            "changed_at": "2026-11-07T19:17:06.078000000+00:00",
+            "id": "sn-change:source-migration:85c55f838ca1ef253d37f294aacd8aeb86c892b37023b85485406668dc749dc5",
+            "from_name": "boron_density_flux_surface_averaged_at_plasma_boundary",
+            "operation": "source_migration_manifest"
+          }
+        }
+      ],
+      "after": {
+        "boron_density_flux_surface_averaged_at_plasma_boundary": {
+          "id": "boron_density_flux_surface_averaged_at_plasma_boundary",
+          "stage": "superseded",
+          "status": "draft",
+          "paths": [],
+          "description": "Flux-surface-averaged number density of boron, including neutral atoms and all ionization states, evaluated on the plasma boundary.",
+          "score": 1.0,
+          "unit": "m^-3",
+          "run_id": null,
+          "sources": [],
+          "reviews": [
+            "boron_density_flux_surface_averaged_at_plasma_boundary:name:d14259c3-b839-4ede-94fb-2ca69e35acae:1",
+            "boron_density_flux_surface_averaged_at_plasma_boundary:name:d14259c3-b839-4ede-94fb-2ca69e35acae:0"
+          ]
+        },
+        "flux_surface_averaged_boron_density_at_plasma_boundary": {
+          "id": "flux_surface_averaged_boron_density_at_plasma_boundary",
+          "stage": "reviewed",
+          "status": "draft",
+          "paths": [
+            "dd:summary/local/separatrix_average/n_i/boron/value"
+          ],
+          "description": "Flux-surface-averaged number density of boron, including neutral atoms and all ionization states, evaluated on the plasma boundary.",
+          "score": 0.90625,
+          "unit": "m^-3",
+          "run_id": "sn-edit-20261107T191704Z",
+          "sources": [
+            "dd:summary/local/separatrix_average/n_i/boron/value"
+          ],
+          "reviews": [
+            "flux_surface_averaged_boron_density_at_plasma_boundary:docs:ce09c34b-a81e-4d2f-ab87-035a5c914dbb:0",
+            "flux_surface_averaged_boron_density_at_plasma_boundary:docs:ce09c34b-a81e-4d2f-ab87-035a5c914dbb:1",
+            "flux_surface_averaged_boron_density_at_plasma_boundary:docs:eb0775e1-1f07-4a68-ba22-e5ae984845f4:0",
+            "flux_surface_averaged_boron_density_at_plasma_boundary:docs:eb0775e1-1f07-4a68-ba22-e5ae984845f4:1",
+            "flux_surface_averaged_boron_density_at_plasma_boundary:docs:3e425d27-d80f-40b1-85f2-c077364a1027:1",
+            "flux_surface_averaged_boron_density_at_plasma_boundary:docs:3e425d27-d80f-40b1-85f2-c077364a1027:0",
+            "flux_surface_averaged_boron_density:docs:8a04452d-b49a-4c35-8656-d0d95731ac9e:1",
+            "flux_surface_averaged_boron_density:docs:8a04452d-b49a-4c35-8656-d0d95731ac9e:0",
+            "flux_surface_averaged_boron_density:docs:65a45a3a-66ef-4274-951d-1f43bcf4238e:0",
+            "flux_surface_averaged_boron_density:docs:65a45a3a-66ef-4274-951d-1f43bcf4238e:1",
+            "flux_surface_averaged_boron_density:names:75233088-1d60-46a6-9e83-afbf1f34f9ea:0",
+            "flux_surface_averaged_boron_density:names:75233088-1d60-46a6-9e83-afbf1f34f9ea:1",
+            "flux_surface_averaged_boron_density:docs:72254480-48ca-485c-81fd-997599a59a10:1",
+            "flux_surface_averaged_boron_density:docs:72254480-48ca-485c-81fd-997599a59a10:0",
+            "flux_surface_averaged_boron_density:docs:74dd9b76-55ac-4b9d-9dcd-0d3f7f3b8bac:2",
+            "flux_surface_averaged_boron_density:docs:74dd9b76-55ac-4b9d-9dcd-0d3f7f3b8bac:1",
+            "flux_surface_averaged_boron_density:docs:74dd9b76-55ac-4b9d-9dcd-0d3f7f3b8bac:0",
+            "flux_surface_averaged_boron_density:names:bb5b1adb-cf08-42bf-a2f6-210ac8ae084e:1",
+            "flux_surface_averaged_boron_density:names:bb5b1adb-cf08-42bf-a2f6-210ac8ae084e:0"
+          ]
+        }
+      }
+    }
+  ]
 }
