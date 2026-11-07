@@ -1,0 +1,74 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no baseline_suite or after_suite gate log, so no suite delta exists for this docs-and-live-graph node",
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/standard_names/export.py:2871 (_fetch_waived_source_chain_identities, HAS_SUCCESSOR chain)",
+    "imas_codex/standard_names/search.py:669 (one-hop successor fetch)",
+    "imas_codex/standard_names/graph_store/graph_audits.py:731 (terminal successor resolution)",
+    "imas_codex/standard_names/signed_manifest.py:2430 (_signed_successor_clause, the writer that stamps the edge)"
+  ],
+  "completed_at": "2026-11-07T00:03:35.443Z",
+  "dispatched_at": "2026-11-06T23:58:29Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-magnetic-successor-edge-run.py",
+      "id": "f280950d294",
+      "line": 259,
+      "severity": "non-blocking",
+      "text": "the `gate` mode named in the manifest's tests line cannot fail on this node's change - it selects live_ids from stage in {accepted,approved} (line 267) and find_sourceless_live_names exempts superseded names, so the predecessor is outside the population and the successor has a composed producer; with the successor edge deleted the gate would still report blocking_count 0 and EXIT=0."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-magnetic-successor-edge.html",
+      "id": "16f6a4e9a7d",
+      "line": 55,
+      "severity": "non-blocking",
+      "text": "the fragment states a second apply returns already_applied with persistent_writes 0, but no committed log carries that result - the committed 04-apply.log records `outcome: applied`, `changed: 1`, `persistent_writes: 2`, and the already_applied result exists only in the session stream (stream.jsonl:5050), so a committed-evidence claim has no committed artefact behind it."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-magnetic-successor-edge-run.py",
+      "id": "6007a1da26d",
+      "line": 294,
+      "severity": "non-blocking",
+      "text": "`sourceless_live_ids` duplicates the adjacent `sourceless_ids` key with a `# noqa: F821 - see next line` that suppresses nothing (the name is defined), so 06-gate.log emits both keys and a future reader cannot tell which is authoritative."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "four production consumers of the HAS_SUCCESSOR edge named on CALL_SITES.",
+    "diff": "read against base fb854ea1c; one commit, 512 insertions across three new files.",
+    "done_when": "read the prompt's FENCE-EVIDENCE against 06-gate.log and 05b-readback.log; the edge is evidenced but the gate named as the test measures only the export blocking set and is invariant to the edge.",
+    "goal": "read the goal against sib-magnetic-successor-edge-run.py:36-37 and 05b-readback.log; exactly one receipt-stamped successor edge recorded.",
+    "manifest": "read; status complete, tests and test_logs filled, landing and outside_scope recorded.",
+    "write_paths": "read the manifest's declared paths against the diff of 0956b225f; three files, all inside."
+  },
+  "justifications": {
+    "durability": "sib-magnetic-successor-edge-run.py:302-330 prints JSON and returns 0 unconditionally, so no assertion fails on a regressed edge.",
+    "evidence": "sib-magnetic-successor-edge-run.py:267 excludes the superseded predecessor from the gate population, so 06-gate.log cannot redden on the edge.",
+    "fit": "sib-magnetic-successor-edge-run.py:294 emits a duplicate key with a noqa that suppresses nothing.",
+    "goal_fidelity": "05b-readback.log records successor_edges=1 with receipt sn-change:signed-manifest:8f25a71f...:43f44939 on the retired name.",
+    "reuse": "the runner imports apply_signed_manifest, build_repair_authority and find_sourceless_live_names rather than re-deriving them.",
+    "scope_discipline": "every path in the diff sits under docs/evidence/fragments/sn-integrity-backlog/, inside the declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to give the retired flux_surface_average_magnetic_field_magnitude one signed successor edge (prompt GOAL); docs/evidence/fragments/sn-integrity-backlog/sib-magnetic-successor-edge-run.py:36-37 names the pair and 05b-readback.log records exactly one receipt-stamped HAS_SUCCESSOR edge to flux_surface_averaged_magnetic_field_magnitude.\nVERDICT done_when: the done_when asks for a committed authority/preview/receipt, one successor edge on the superseded name, and an export blocking set that excludes the three accepted names (/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T233746846226-sib-magnetic-successor-edge/prompt.txt FENCE-EVIDENCE). The gate named in the manifest's tests line runs `gate` only (06-gate.log) and measures the blocking set (0) but not the edge; the dispatch wording said REFINED_FROM while the write is HAS_SUCCESSOR, justified at sib-magnetic-successor-edge.html:62-73 by the scalar REFINED_FROM cardinality the live read at 01-read.log confirms.\nVERDICT write_paths: read the manifest's declared paths; the diff of 0956b225f touches exactly three files, all inside the four declared paths.\nVERDICT manifest: read; status complete, commits 0956b225f, tests names the gate command, test_logs names 06-gate.log/05b-readback.log/04-apply.log, landing and outside_scope filled.\nVERDICT diff: read commit by commit against base fb854ea1c; one commit, 512 insertions, three new files (run.py 331, authority.json 87, fragment 94 lines), all inside scope.\nVERDICT call_sites: production code that consumes the HAS_SUCCESSOR edge the node wrote is imas_codex/standard_names/export.py:2871, imas_codex/standard_names/search.py:669, imas_codex/standard_names/graph_store/graph_audits.py:731 and the writer imas_codex/standard_names/signed_manifest.py:2430; the edge adds the predecessor to their successor resolution, which is the intended effect and the only reachable change.\nCALL_SITES: imas_codex/standard_names/export.py:2871 (_fetch_waived_source_chain_identities, HAS_SUCCESSOR chain), imas_codex/standard_names/search.py:669 (one-hop successor fetch), imas_codex/standard_names/graph_store/graph_audits.py:731 (terminal successor resolution), imas_codex/standard_names/signed_manifest.py:2430 (_signed_successor_clause, the writer that stamps the edge)\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: flux_surface_average_magnetic_field_magnitude now carries exactly one receipt-stamped HAS_SUCCESSOR edge to the accepted name, read back live at 05b-readback.log successior_edges=1 with receipt sn-change:signed-manifest:8f25a71f...:43f44939.\nSCORE evidence: 11\nJUSTIFICATION evidence: 06-gate.log proves the export blocking set is 0 with a 3-name positive control, but the gate's population (sib-magnetic-successor-edge-run.py:267 restricts live_ids to accepted/approved) excludes the superseded predecessor and the successor has a composed producer, so that gate reads identically with the edge absent.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: all three changed files under docs/evidence/fragments/sn-integrity-backlog/ are inside the declared write paths, with no plan edit and no other file touched.\nSCORE durability: 5\nJUSTIFICATION durability: no assertion in the landed change fails on a regression; sib-magnetic-successor-edge-run.py:302-330 prints JSON and returns 0 unconditionally, and the edge-half of the done_when has no failing check.\nSCORE fit: 16\nJUSTIFICATION fit: the fragment/runner pair follows the established docs/evidence fragment pattern, but sib-magnetic-successor-edge-run.py:294 repeats the sourceless list under a second key with a `# noqa: F821` that does not apply, emitting a duplicate key in 06-gate.log.\nSCORE reuse: 19\nJUSTIFICATION reuse: the runner imports the owners rather than re-deriving them - signed_manifest.apply_signed_manifest (:8676), repair_authority.build_repair_authority (:135) and source_invariant.find_sourceless_live_names (:145) with export.py's _SHIPPING_NAME_STAGES (:226) and _RELEASE_IDENTITY_HOLDS (:228).\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-magnetic-successor-edge-run.py:259 non-blocking: the `gate` mode named in the manifest's tests line cannot fail on this node's change - it selects live_ids from stage in {accepted,approved} (line 267) and find_sourceless_live_names exempts superseded names, so the predecessor is outside the population and the successor has a composed producer; with the successor edge deleted the gate would still report blocking_count 0 and EXIT=0.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-magnetic-successor-edge.html:55 non-blocking: the fragment states a second apply returns already_applied with persistent_writes 0, but no committed log carries that result - the committed 04-apply.log records `outcome: applied`, `changed: 1`, `persistent_writes: 2`, and the already_applied result exists only in the session stream (stream.jsonl:5050), so a committed-evidence claim has no committed artefact behind it.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-magnetic-successor-edge-run.py:294 non-blocking: `sourceless_live_ids` duplicates the adjacent `sourceless_ids` key with a `# noqa: F821 - see next line` that suppresses nothing (the name is defined), so 06-gate.log emits both keys and a future reader cannot tell which is authoritative.\n",
+  "review_run_id": "r-20261106T235653061434-review-of-sib-magnetic-successor-edge-0956b225f5ba",
+  "reviewed_base_sha": "fb854ea1c9b160825815056cdd757292ebd6acd2",
+  "reviewed_head_sha": "0956b225f5babe33f5358e96a198eaa2f9ce5c02",
+  "reviewed_run_id": "r-20261106T233746846226-sib-magnetic-successor-edge",
+  "scores": {
+    "durability": 5,
+    "evidence": 11,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T00:02:09.270642+00:00",
+  "total": 89
+}
