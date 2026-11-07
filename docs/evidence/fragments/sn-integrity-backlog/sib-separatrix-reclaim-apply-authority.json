@@ -3714,8 +3714,8 @@
         {
           "guards": [
             {
-              "id": "signed-lifecycle-and-claim",
-              "implementation": "signed-lifecycle-and-claim",
+              "id": "structural-legitimacy",
+              "implementation": "structural-legitimacy",
               "kind": "semantic_authority",
               "participant_ids": [
                 "toroidal_tritium_velocity"
@@ -3757,14 +3757,12 @@
               "id": "retire-stub",
               "kind": "supersede",
               "order": 0,
-              "participant_id": "toroidal_tritium_velocity",
-              "preserve_source_paths": true
+              "participant_id": "toroidal_tritium_velocity"
             }
           ],
           "orphan_policy": "refuse",
           "participants": [
             {
-              "expected_name_stage": "pending",
               "graph_label": "StandardName",
               "id": "toroidal_tritium_velocity",
               "kind": "node"
@@ -3785,10 +3783,10 @@
       },
       "signature": {
         "canonicalization": "json-sort-keys-v1",
-        "sha256": "61e23b7cb110e16e116f2f9b674e297f6c1d21e7919a8cc5f6ea284818edfa8f"
+        "sha256": "de2df371ffc5a15f35b3be6fd37d9b890405bf1fb62d9f1b9b6bf68b3ccb660f"
       }
     },
-    "retirement_file_sha256": "35145d1b27f548f63442150d7789bab1f4f936f1657a52ee7cdd5564c5809fbf",
+    "retirement_file_sha256": "351f763d0a7139ce353f8a9b3b9af6e044da164626d646ce1289ceb15e64b5e2",
     "source_paths": [
       "summary/local/pedestal/velocity_phi/tritium/value",
       "summary/local/separatrix/velocity_phi/tritium/value"

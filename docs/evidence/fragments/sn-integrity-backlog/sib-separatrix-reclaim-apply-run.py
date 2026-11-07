@@ -245,7 +245,7 @@ def tritium_authority():
             "participant_ids": [BARE],
         }
         for name in (
-            "signed-lifecycle-and-claim",
+            "structural-legitimacy",
             "no-live-producing-source",
             "no-live-structural-child",
             "out-of-allowlist-immutability",
@@ -276,7 +276,6 @@ def tritium_authority():
                             "id": BARE,
                             "kind": "node",
                             "graph_label": "StandardName",
-                            "expected_name_stage": "pending",
                         }
                     ],
                     "mutations": [
@@ -285,7 +284,6 @@ def tritium_authority():
                             "order": 0,
                             "kind": "supersede",
                             "participant_id": BARE,
-                            "preserve_source_paths": True,
                         }
                     ],
                     "guards": guards,
@@ -294,6 +292,16 @@ def tritium_authority():
             ],
         }
     )
+    from imas_codex.graph.models import RepairGuard, RepairMutation, RepairParticipant
+
+    for row in json.loads(built.content)["rows"]:
+        for key, model in (
+            ("participants", RepairParticipant),
+            ("mutations", RepairMutation),
+            ("guards", RepairGuard),
+        ):
+            for item in row[key]:
+                model.model_validate(item)
     authority = json.loads(AUTHORITY.read_text())
     authority["tritium"]["retirement_authority"] = json.loads(built.content)
     authority["tritium"]["retirement_file_sha256"] = built.file_sha256
