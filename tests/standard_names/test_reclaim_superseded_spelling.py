@@ -272,6 +272,44 @@ def test_name_from_a_third_locus_cannot_take_the_spelling():
     assert tomb["run_id"] is None
 
 
+def test_a_reclaim_that_would_close_a_cycle_refuses_with_nothing_written():
+    """The cycle check runs inside the write transaction, before any write."""
+    _reset()
+    with GraphClient() as gc:
+        _name(gc, TARGET, stage="accepted", source_paths=[VALUE_PATH])
+        _name(gc, TOMBSTONE, stage="superseded", source_paths=[VALUE_PATH])
+        _name(gc, UNRELATED, stage="accepted", source_paths=[AVERAGE_PATH])
+        # The holder makes this a different-locus case, which links the
+        # retired name onto the revived id; the second edge already runs from
+        # the renaming name back to the tombstone, so that link would close a
+        # directed cycle.
+        _lineage(gc, UNRELATED, TOMBSTONE)
+        _lineage(gc, TARGET, TOMBSTONE)
+        _source(gc, TARGET, VALUE_PATH)
+        _source(gc, UNRELATED, AVERAGE_PATH)
+
+    plan = apply_edit(
+        target=TARGET,
+        rename=TOMBSTONE,
+        reason="this link would close the lineage on itself",
+        gc=GraphClient(),
+    )
+    assert plan.applied is False
+    assert plan.blocked is not None
+    assert "cycle" in (plan.blocked or "")
+
+    # Nothing was written: the tombstone is untouched and no receipt exists.
+    tomb = _read(TOMBSTONE)
+    assert tomb["name_stage"] == "superseded"
+    assert tomb["run_id"] is None
+    assert _read(TARGET)["name_stage"] == "accepted"
+    with GraphClient() as gc:
+        receipts = gc.query(
+            "MATCH (change:StandardNameChange) RETURN count(change) AS n"
+        )
+    assert receipts[0]["n"] == 0, "a refused reclaim must write no receipt"
+
+
 def test_unrelated_tombstone_lineage_is_still_refused():
     """A tombstone whose lineage ends on another live name stays protected."""
     _reset()

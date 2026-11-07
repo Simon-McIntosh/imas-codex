@@ -3154,28 +3154,26 @@ def supersede_into(
 # Reclaiming a superseded spelling
 # ---------------------------------------------------------------------------
 
-#: Bound on the forward walk through a tombstone's successor lineage.
-_RECLAIM_MAX_DEPTH = 12
-
 _RECLAIM_TOMBSTONE_QUERY = """
 // EDIT_RECLAIM_TOMBSTONE
 MATCH (tomb:StandardName {id: $id})
 WHERE tomb.name_stage = 'superseded'
-RETURN properties(tomb) AS properties,
-       [(succ:StandardName)-[:REFINED_FROM]->(tomb) | succ.id] AS successors
+RETURN properties(tomb) AS properties
 """
 
-_RECLAIM_SUCCESSORS_QUERY = """
-// EDIT_RECLAIM_SUCCESSORS
-MATCH (succ:StandardName)-[:REFINED_FROM]->(n:StandardName {id: $id})
-RETURN succ.id AS id, succ.name_stage AS name_stage,
-       succ.source_paths AS source_paths
-"""
-
-_RECLAIM_TARGET_PATHS_QUERY = """
-// EDIT_RECLAIM_TARGET_PATHS
+_RECLAIM_NAME_PATHS_QUERY = """
+// EDIT_RECLAIM_NAME_PATHS
 MATCH (sn:StandardName {id: $id})
 RETURN sn.source_paths AS source_paths
+"""
+
+# The reclaim adds (tomb)-[:REFINED_FROM]->(old), so a cycle appears when a
+# path from the retired name already reaches the tombstone. Read inside the
+# write transaction, before anything is written.
+_RECLAIM_CYCLE_QUERY = """
+// EDIT_RECLAIM_WOULD_CYCLE
+MATCH (old:StandardName {id: $old_id}), (tomb:StandardName {id: $new_id})
+RETURN EXISTS { MATCH (old)-[:REFINED_FROM*1..]->(tomb) } AS would_cycle
 """
 
 
@@ -3206,38 +3204,6 @@ def _dd_locus(source_paths: Iterable[Any]) -> str | None:
     return containers.pop() if len(containers) == 1 else None
 
 
-def _reclaim_successor_tips(
-    gc: GraphClient, start: str
-) -> tuple[list[dict[str, Any]], bool]:
-    """Follow a tombstone's successor lineage forward to its live tips.
-
-    Each hop descends only through a descendant confirmed superseded, so the
-    names returned are the live tip of every branch: an intermediate that is
-    still live stops the walk exactly as a direct live successor would. The
-    second element reports a walk that ran past its bound or hit a cycle,
-    which leaves the lineage unreadable rather than absent.
-    """
-    frontier = [start]
-    seen = {start}
-    tips: list[dict[str, Any]] = []
-    for _ in range(_RECLAIM_MAX_DEPTH):
-        nxt: list[str] = []
-        for name in frontier:
-            for row in gc.query(_RECLAIM_SUCCESSORS_QUERY, id=name):
-                successor_id = row.get("id")
-                if not successor_id or successor_id in seen:
-                    return [], True
-                seen.add(successor_id)
-                if row.get("name_stage") == "superseded":
-                    nxt.append(successor_id)
-                else:
-                    tips.append(dict(row))
-        if not nxt:
-            return tips, False
-        frontier = nxt
-    return [], True
-
-
 def _reclaim_spelling_case(
     gc: GraphClient, *, target: str, new_name: str
 ) -> _ReclaimCase:
@@ -3257,29 +3223,54 @@ def _reclaim_spelling_case(
       third locus would move an unrelated quantity onto the spelling. A
       holder at the same locus also keeps the spelling load-bearing, and both
       of those shapes are refused.
+
+    The lineage is read by :func:`_fold_lineage_walk`, the walk the fold
+    writer uses, so a spelling is reclaimable on exactly the terms a
+    tombstone is foldable: the edges decide, not a scalar summary.
     """
     rows = gc.query(_RECLAIM_TOMBSTONE_QUERY, id=new_name)
     if not rows:
         return _ReclaimCase(case=None, detail="no superseded tombstone")
     tombstone = dict(rows[0].get("properties") or {})
-    tips, unreadable = _reclaim_successor_tips(gc, new_name)
-    if unreadable:
+    with gc.session() as session:
+        transaction = session.begin_transaction()
+        try:
+            snapshot = _fold_snapshot(transaction, target, new_name)
+            lineage = (
+                _fold_lineage_walk(transaction, snapshot, target, new_name)
+                if snapshot is not None
+                else None
+            )
+        finally:
+            transaction.rollback()
+    if lineage is None:
         return _ReclaimCase(
             case=None,
             tombstone=tombstone,
-            detail="successor lineage is unreadable",
+            detail="the tombstone and the renaming name cannot be read together",
         )
-    if len(tips) == 1 and tips[0].get("id") == target:
+    if lineage.over_depth:
+        return _ReclaimCase(
+            case=None,
+            tombstone=tombstone,
+            detail="successor lineage is unreadable: the walk ran past its bound",
+        )
+    if lineage.closes_on_old:
         return _ReclaimCase(
             case="closing_lineage",
             tombstone=tombstone,
             revived_stage=_fold_revival_stage(tombstone),
             detail=f"successor lineage closes on {target!r}",
         )
+    tips = lineage.successors
     tomb_locus = _dd_locus(tombstone.get("source_paths") or ())
     if len(tips) == 1 and tomb_locus is not None:
-        holder_locus = _dd_locus(tips[0].get("source_paths") or ())
-        target_rows = gc.query(_RECLAIM_TARGET_PATHS_QUERY, id=target)
+        holder = tips[0]
+        holder_rows = gc.query(_RECLAIM_NAME_PATHS_QUERY, id=holder)
+        holder_locus = (
+            _dd_locus(holder_rows[0].get("source_paths") or ()) if holder_rows else None
+        )
+        target_rows = gc.query(_RECLAIM_NAME_PATHS_QUERY, id=target)
         target_locus = (
             _dd_locus(target_rows[0].get("source_paths") or ()) if target_rows else None
         )
@@ -3293,9 +3284,9 @@ def _reclaim_spelling_case(
                 tombstone=tombstone,
                 revived_stage=_fold_revival_stage(tombstone),
                 detail=(
-                    f"holder {tips[0].get('id')!r} sits at locus "
-                    f"{holder_locus!r}, the tombstone's own path at "
-                    f"{tomb_locus!r} and {target!r} at the same locus"
+                    f"holder {holder!r} sits at locus {holder_locus!r}, the "
+                    f"tombstone's own path at {tomb_locus!r} and {target!r} at "
+                    "the same locus"
                 ),
             )
     return _ReclaimCase(
@@ -3424,9 +3415,33 @@ def _apply_reclaim_rename(
         sort_keys=False,
     )
     changed_at = _now_iso()
+    link_lineage = reclaim.case != "closing_lineage"
     with gc.session() as session:
         transaction = session.begin_transaction()
         try:
+            if link_lineage:
+                # The edge this reclaim adds runs tombstone -> retired name, so
+                # it closes a directed cycle whenever a lineage path already
+                # runs from the retired name back to the tombstone. Read that
+                # inside the transaction: a would-be cycle refuses the edit
+                # with nothing written.
+                guard = [
+                    dict(row)
+                    for row in transaction.run(
+                        _RECLAIM_CYCLE_QUERY, old_id=target, new_id=new_name
+                    )
+                ]
+                if guard and guard[0].get("would_cycle"):
+                    transaction.rollback()
+                    return _blocked(
+                        target,
+                        "rename",
+                        "name",
+                        scope,
+                        f"reclaim of {new_name!r} would close a directed "
+                        f"REFINED_FROM cycle: {target!r} already descends from "
+                        "the tombstone, so its lineage would stop resolving",
+                    )
             rows = [
                 dict(row)
                 for row in transaction.run(
@@ -3448,7 +3463,7 @@ def _apply_reclaim_rename(
                     # an edge back to the renaming name would close a directed
                     # cycle. That case moves the identity and records it on the
                     # existing chain and the receipt, and writes no new edge.
-                    link_lineage=reclaim.case != "closing_lineage",
+                    link_lineage=link_lineage,
                 )
             ]
             if not rows:
