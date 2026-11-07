@@ -586,12 +586,16 @@ def test_no_gpt5_name_survives_in_the_fallback_slate_or_proxy_routes():
 
     import yaml
 
-    slate = (
-        settings.get_sn_benchmark_compose_models()
-        + settings.get_sn_benchmark_candidate_models()
-        + [settings.get_sn_benchmark_reviewer_model()]
-        + settings.get_sn_benchmark_reviewer_models()
-    )
+    # The module constants, not the accessors: an accessor can be steered by
+    # an environment override, and this assertion is about the fallback the
+    # code ships with. The route table is read from the packaged YAML.
+    defaults = settings._SN_BENCHMARK_DEFAULTS
+    slate = [
+        *defaults["compose-models"],
+        *defaults["candidate-models"],
+        defaults["reviewer-model"],
+        *defaults["reviewer-models"],
+    ]
     routes_path = Path(settings.__file__).parent / "config" / "litellm_config.yaml"
     routes_config = yaml.safe_load(routes_path.read_text())
     routes = [
