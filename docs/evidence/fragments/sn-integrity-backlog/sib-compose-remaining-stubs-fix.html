@@ -1,11 +1,91 @@
-<h2 id="sib-compose-remaining-stubs-fix">Projection migration uses the binding owner's unit guard</h2>
+<h2 id="sib-compose-remaining-stubs-fix">Worker attachments can adopt their own pending DD projections</h2>
 
-<p><strong>The requested review repair is complete.</strong> Source/test head
-<code>26b90b96f8411c9b899bb3be56ee18e7a512e471</code> shares pending-projection eligibility
-with the source-binding owner, including unit agreement. The graph file passes all 19 cases.
-Restoring the copied predicate makes the new mismatched-unit case fail. Both fresh default
-suite arms have the same 10 failure IDs, 8523 passes and 15 skips: zero added failure IDs
-against <code>c59ac227a60e23702eaf865b987b3027fbb0f590</code>.</p>
+<p><strong>The original adoption collision is reproduced and fixed.</strong>
+<code>ceaba7b13d33e469f58a20d3381a53a0422f08d3</code> answers both
+<code>f686170a1ca</code> and <code>dimension-goal_fidelity</code>. The attachment worker
+does not put <code>source_type</code> in its fenced outcome, but adoption read that absent
+batch field. The shared predicate now reads the type from the fenced source node. All
+seven DD source paths behind the five pending names pass that predicate in a read-only
+live check; the real attachment guard accepts those seven and the two reflector controls.
+The head graph gate passes all 21 cases. Reversing the entire answering commit restores
+the newly reproduced collision.</p>
+
+<h3 id="sib-compose-remaining-stubs-fix-attachment-cause">The failing clause and the actual worker input</h3>
+
+<p>At <code>c59ac227a</code>, <code>graph_source_bindings.py:1011</code> requires
+<code>b.source_type = 'dd'</code>. The extraction of that predicate into a shared helper
+kept the same caller expression at line 1177 in <code>118e18d180</code>.
+<code>worker_common.py:719</code>, <code>_claimed_source_outcome</code>, returns source
+identity, claim token, sequence and outcome fields, but no <code>source_type</code>.
+<code>worker_extraction_and_enrichment.py:1457</code> passes that outcome through to
+<code>persist_claimed_attachments</code>. Thus the clause evaluates to null even though
+the claimed graph node records <code>source_type='dd'</code>. The generated-name writer
+supplies the field explicitly at <code>graph_catalog.py:2287</code>, so the same predicate
+can work on that branch.</p>
+
+<p>The archived scoped-run log identifies the affected attachment branch directly:</p>
+<pre>Released source dd:summary/line_average/n_i/neon/value after lifecycle_collision for candidate line_averaged_neon_density at name stage pending (attempt 1 retained)
+Released source dd:soft_x_rays/channel/detector/radius after lifecycle_collision for candidate radius_of_soft_xray_detector at name stage pending (attempt 1 retained)
+Pool generate_name: attached 0 (rejected 1)</pre>
+<p>These are lines 616–621 of the sibling run's <code>logs/gate-scoped-run-2.log</code>.
+The disposable regression drives the real worker helper, with no hand-added type field.
+Before changing product code it reproduces, at <code>118e18d180</code>:</p>
+<pre>result={'accepted': 0, 'rejected': 1, 'winner_ids': []}
+standard-name binding collision: candidate "electron_temperature" has non-bindable name_stage "pending" at composition attempt 3</pre>
+
+<p>The earlier direct-call tests supplied <code>source_type='dd'</code>, hiding this input
+shape. Their successful two-path and structural-parent cases correctly ruled out those
+graph structures as causes. The rich-write-before-adoption probe also did not reproduce
+the collision: that sequence creates an owner, and correctly refuses unowned adoption.</p>
+
+<p>The fix is at <code>graph_source_bindings.py:904</code>: the owner always reads
+<code>{source}.source_type</code>. Its caller at line 1173 no longer substitutes the batch
+field. Ownership, reservation, own-path projection, attachment verdict and unit agreement
+are retained. The test at <code>test_compose_adopts_pending_stub.py:215</code> checks the
+worker result, producer, drafted state and adoption receipt, then exercises the same
+worker path against another claim's stub and observes the pending collision.</p>
+
+<h3 id="sib-compose-remaining-stubs-fix-attachment-control">Reversing the answering commit restores the failure</h3>
+
+<p>The regression was committed first as <code>976b8eebbc70846b5f30c8b1992bbb04250282cd</code>.
+The mutation archive reverses the entire subsequent answering commit <code>ceaba7b13</code>
+with <code>git apply --reverse</code>, retaining that already-committed test. The resulting
+owner module is verified byte-for-byte against the answering commit's parent. The same
+test file is used in the head, main overlay and reversal arms.</p>
+
+<p><code>attachment-negative.log</code> records <strong>1 failed, 1 passed, 19 deselected</strong>
+and <code>EXIT=1</code>. The failure is
+<code>test_worker_attachment_uses_the_graph_source_type[False]</code>, with the exact
+pending collision above. At head the worker accepts one source with no error; the owned
+case still rejects one source. Since the same product commit answers both findings,
+this complete reversal is the negative control for each.</p>
+
+<h3 id="sib-compose-remaining-stubs-fix-current-gates">Completed repair gates</h3>
+
+<table>
+<thead><tr><th>Arm and durable log</th><th>Revision</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>Prior-head reproduction; <code>attachment-reproduction.log</code></td><td><code>118e18d180</code></td><td>1 failed, 1 passed, 19 deselected, 1 warning in 53.34s; <code>EXIT=1</code></td></tr>
+<tr><td>Main graph with delivered tests; <code>attachment-base-graph.log</code></td><td><code>c59ac227a6</code></td><td>2 failed, 19 passed, 1 warning in 122.36s (0:02:02); <code>EXIT=1</code></td></tr>
+<tr><td>Head graph; <code>attachment-head-graph.log</code></td><td><code>ceaba7b13d</code></td><td>21 passed, 1 warning in 107.58s (0:01:47); <code>EXIT=0</code></td></tr>
+<tr><td>Full answering-commit reversal; <code>attachment-negative.log</code></td><td><code>ceaba7b13d</code></td><td>1 failed, 1 passed, 19 deselected, 1 warning in 87.09s (0:01:27); <code>EXIT=1</code></td></tr>
+<tr><td>Main default, eight workers; <code>attachment-base-default.log</code></td><td><code>c59ac227a6</code></td><td>10 failed, 8523 passed, 15 skipped, 274 warnings in 299.10s (0:04:59); <code>EXIT=1</code></td></tr>
+<tr><td>Head default, eight workers; <code>attachment-head-default.log</code></td><td><code>ceaba7b13d</code></td><td>10 failed, 8523 passed, 15 skipped, 274 warnings in 286.25s (0:04:46); <code>EXIT=1</code></td></tr>
+</tbody>
+</table>
+
+<p>Both graph and default comparisons add <strong>zero failure IDs</strong> against
+<code>c59ac227a</code>. The main-only graph failures are the worker attachment regression
+and <code>test_second_claim_after_unpark_finalizes</code>. The head graph run also makes
+all eight non-stub migration guards refuse and retains the unit-mismatch refusal and
+stolen-claim rollback. Each arm uses an archive tree, its own basetemp, all five generated
+files and <code>SOURCE_DATE_EPOCH</code>. Logs name the revision, exact command, tree,
+imported module and resolved working directory, reach their summary, and end with a bare
+<code>EXIT=</code> receipt.</p>
+
+<p><code>goal-completed-comparison.json</code> records the exact failure IDs, complete arm
+receipts, shared test hashes and full-commit reversal digest. The product source is
+unchanged after the tested <code>ceaba7b13</code> head; the later commit records evidence.</p>
 
 <h3 id="sib-compose-remaining-stubs-fix-unit-eligibility">One eligibility predicate, including units</h3>
 
@@ -38,7 +118,7 @@ The migration preflight at line 541 and mutation at line 907 both use that compo
 The caller may still disable the broader consistency audit; it cannot bypass this unit
 check.</p>
 
-<p>The new test at <code>test_compose_adopts_pending_stub.py:349</code> now observes:</p>
+<p>The unit test at <code>test_compose_adopts_pending_stub.py:408</code> observes:</p>
 <pre>stub unit V versus DD unit eV refused: source migration requires an unowned pending projection-only predecessor</pre>
 <p>It also verifies that the stub stays pending, no receipt is created, no producer is
 attached to the stub, and both pre-existing DD projections remain. The existing eight
@@ -60,7 +140,7 @@ arm. <code>unit-negative-proof.json</code> records the restored file digest;
 <code>unit-completed-comparison.json</code> records identical test hashes and the unchanged
 owner module between the head and mutation archives.</p>
 
-<h3 id="sib-compose-remaining-stubs-fix-gates">Completed archive-tree gates</h3>
+<h3 id="sib-compose-remaining-stubs-fix-gates">Earlier unit-guard archive-tree gates</h3>
 
 <table>
   <thead><tr><th>Arm and log</th><th>Revision</th><th>Completed result</th></tr></thead>
@@ -74,8 +154,8 @@ owner module between the head and mutation archives.</p>
   </tbody>
 </table>
 
-<p>Both graph and default comparisons add zero failure IDs. The sole main graph failure is
-still <code>test_second_claim_after_unpark_finalizes</code>; it passes at head.
+<p>Those graph and default comparisons added zero failure IDs. Their sole main graph failure
+was <code>test_second_claim_after_unpark_finalizes</code>; it passed at that head.
 All arms use archive trees, separate basetemps, the five generated files and
 <code>SOURCE_DATE_EPOCH</code>. The head, graph-baseline overlay and mutation use the same
 test file (SHA-256
@@ -97,15 +177,19 @@ projection, retired predecessor, migration receipt and idempotent replay.</p>
 <p>The four apparent direct-retarget guard bypasses were previously isolated to retained
 fixture receipts: the unchanged code refused all four cases on a fresh graph. The fixture
 now resets its disposable receipt ledger and asserts empty boundaries. It sees three
-receipts after unpark composition and zero after cleanup. The current 19-case graph gate
+receipts after unpark composition and zero after cleanup. The current 21-case graph gate
 preserves those checks.</p>
 
-<h3 id="sib-compose-remaining-stubs-fix-live-state">Earlier live evidence, with no new adoption investigation</h3>
+<h3 id="sib-compose-remaining-stubs-fix-live-state">Live evidence for every pending name and source path</h3>
 
-<p>The earlier bounded read found seven identities and nine DD source-path bindings. Five
-were pending with zero producers and no reservation or name claim; their DD, snapshot and
-stub units agreed. The two accepted reflectors each had a producer, providing a positive
-control. These rows are historical observations, not a refreshed production census.</p>
+<p>The refreshed bounded read finds the same seven identities and nine DD source-path
+bindings. All seven paths of the five pending names have graph source type <code>dd</code>,
+zero producers, no reservation and matching DD/stub units. The actual worker outcome has
+no type field for any of them. The predicate using the batch field evaluates to null on
+all seven; using the graph field evaluates to true on all seven. The two accepted
+reflectors each have a producer, providing a positive control for the ownership read.
+The separate attachment guard returns all nine requested source IDs as accepted, so an
+empty rejection list is supported by a positive, complete result.</p>
 
 <table>
   <thead><tr><th>Name</th><th>DD source path</th><th>Unit</th><th>Observed state</th></tr></thead>
@@ -120,10 +204,13 @@ control. These rows are historical observations, not a refreshed production cens
   </tbody>
 </table>
 
-<p>The rich-write-then-adoption probe did not reproduce a main-only adoption defect:
-both revisions created a producer and then refused unowned-stub adoption. The two-path and
-structural-parent cases also passed on main. No further search for the five historical
-collisions was performed. No production composition result is claimed.</p>
+<p><code>goal-live-state.json</code> preserves the exact inputs, query and nine result rows;
+<code>goal-pairing-state.json</code> records the nine accepted source IDs. This measures
+eligibility against actual production state without changing it. The disposable worker
+test verifies the corresponding write and receipt. The source rows remain parked; after
+landing, the coordinator must use the scoped sanctioned unpark before composition.
+That production operation remains with the coordinator under this node's
+no-production-write constraint.</p>
 
 <p>All raw logs, comparisons, prior manifests and the original live read remain under
 <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261106T064233498406-sib-compose-remaining-stubs-fix</code>.
