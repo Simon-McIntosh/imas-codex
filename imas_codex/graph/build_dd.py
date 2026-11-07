@@ -1640,9 +1640,9 @@ def collect_renamed_to_mappings(
         if new_path:
             merged[old_path] = {"new_path": new_path}
     for old_path, new_path in version_renames.items():
-        merged.setdefault(old_path, {"new_path": new_path})
+        merged[old_path] = {"new_path": new_path}
     for old_path, new_path in dd_renames.items():
-        merged.setdefault(old_path, {"new_path": new_path})
+        merged[old_path] = {"new_path": new_path}
     return merged
 
 

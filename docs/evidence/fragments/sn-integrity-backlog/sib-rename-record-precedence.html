@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-filename-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-rename-record-precedence">
+<title>The DD's own rename annotation outranks the packaged path map</title>
+</head>
+<body>
+<main>
+<h1 id="sib-rename-record-precedence-title">The DD's own rename annotation outranks the packaged path map</h1>
+
+<p id="sib-rename-record-precedence-summary">
+<code>collect_renamed_to_mappings</code> assembles the RENAMED_TO record from
+three sources, and the packaged path map was inserted first and then never
+overwritten, because the two later sources used <code>dict.setdefault</code>.
+The docstring states the opposite order (packaged map lowest, the current DD's
+<code>change_nbc_previous_name</code> annotation highest), so a stale target in
+the packaged snapshot shadowed the DD's own annotation and a container rename.
+The record was assembled with the wrong successor, and a removed path's name
+would be rebound onto the stale path instead of the annotated one.
+</p>
+
+<h2 id="sib-rename-record-precedence-repro">Reproduction at base</h2>
+<p>
+A probe at <code>2c9ea5cb</code> passed a packaged entry mapping one path to a
+stale target, and a DD annotation mapping the same path to the current target:
+</p>
+<pre><code>UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH="$PWD" \
+  uv run --no-sync python -c "&lt;probe: packaged=stale, dd=annotated&gt;"</code></pre>
+<p>
+<code>AssertionError: DD annotation shadowed by packaged/container map:
+packaged/stale</code> — the packaged target won. A second probe with only a
+container rename and a DD annotation on the same path returned
+<code>container/a</code>, so the DD annotation lost at both levels.
+</p>
+
+<h2 id="sib-rename-record-precedence-change">What changed</h2>
+<ul>
+<li><code>imas_codex/graph/build_dd.py</code>: the container-rename and DD
+annotation loops now assign over the packaged map instead of
+<code>setdefault</code>-ing into it, so precedence runs
+packaged &lt; container &lt; DD annotation, as the docstring already stated.</li>
+<li><code>tests/graph/test_dd_rename_precedence.py</code>: five tests — a stale
+packaged entry no longer shadows the DD annotation; the DD annotation outranks a
+container rename; a container rename outranks the packaged map; a packaged entry
+still survives where no other source names that path; and all three sources
+contribute their own paths.</li>
+</ul>
+
+<h2 id="sib-rename-record-precedence-evidence">Evidence</h2>
+<table>
+<thead><tr><th>Arm</th><th>Command target</th><th>Result</th><th>Source</th></tr></thead>
+<tbody>
+<tr>
+<td>head, new file</td>
+<td><code>tests/graph/test_dd_rename_precedence.py</code></td>
+<td><strong>5 passed</strong>, <code>EXIT=0</code></td>
+<td><code>gate-head.log</code></td>
+</tr>
+<tr>
+<td>declared mutation (setdefault-first precedence restored)</td>
+<td>same file</td>
+<td><strong>3 failed</strong> (the two shadowing tests and the container-vs-packaged test), <code>EXIT=1</code></td>
+<td><code>gate-negative-control.log</code></td>
+</tr>
+<tr>
+<td>base, <code>tests/graph</code></td>
+<td>whole directory at base content, new test absent</td>
+<td>3 failed / 650 passed, <code>EXIT=1</code></td>
+<td><code>gate-base-tests-graph.log</code></td>
+</tr>
+<tr>
+<td>after, <code>tests/graph</code></td>
+<td>whole directory with the fix</td>
+<td>3 failed / 655 passed, <code>EXIT=1</code> — the same three ids, plus the five new tests</td>
+<td><code>gate-after-tests-graph.log</code></td>
+</tr>
+</tbody>
+</table>
+<p>
+The three pre-existing failures, identical in both arms, are
+<code>test_cypher_property_check.py::test_repository_cypher_literals_have_declared_properties</code>,
+<code>test_dd_path_domain_upsert.py::test_path_upsert_keeps_classified_domain_and_defaults_unclassified_path</code>
+and
+<code>test_updated_at_coverage.py::test_standard_name_package_matches_updated_at_debt_baseline</code>.
+No failure id is added.
+</p>
+
+<h2 id="sib-rename-record-precedence-limits">Limits</h2>
+<p>
+The gate is the pure mapping function and the directory it lives in. Proving
+the merged head is another node's measure.
+</p>
+</main>
+</body>
+</html>
