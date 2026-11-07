@@ -25,6 +25,7 @@ UNRELATED = "ion_temperature_at_plasma_boundary"
 
 VALUE_PATH = "summary/local/separatrix/electron_temperature"
 AVERAGE_PATH = "summary/local/separatrix_average/electron_temperature"
+CORE_PATH = "summary/local/core_profiles/electron_temperature"
 
 
 def _reset() -> None:
@@ -111,6 +112,23 @@ def _read(name_id: str) -> dict:
     return dict(rows[0])
 
 
+def _cycle_reached(name_id: str) -> bool:
+    """Whether a directed REFINED_FROM cycle runs out of and back to ``name_id``."""
+    with GraphClient() as gc:
+        rows = gc.query(
+            """
+            MATCH (sn:StandardName {id: $id})
+            RETURN EXISTS {
+              MATCH path = (sn)-[:REFINED_FROM*2..]->(sn)
+              RETURN path LIMIT 1
+            } AS closes_cycle
+            """,
+            id=name_id,
+        )
+    assert rows, f"{name_id} is missing from the graph"
+    return bool(rows[0]["closes_cycle"])
+
+
 def _change(old_id: str, new_id: str) -> dict:
     """The one reclaim receipt the ledger holds for this retired/revived pair."""
     with GraphClient() as gc:
@@ -169,8 +187,12 @@ def test_closing_lineage_reclaims_the_tombstone_with_its_history():
 
     retired = _read(TARGET)
     assert retired["name_stage"] == "superseded"
-    assert TOMBSTONE in retired["successors"]
     assert retired["sources"] == []
+    # The chain already runs tombstone -> intermediate -> target, so the
+    # reclaim writes no edge back and closes no cycle.
+    assert retired["successors"] == []
+    assert _cycle_reached(TOMBSTONE) is False
+    assert _cycle_reached(TARGET) is False
 
     receipt = _change(TARGET, TOMBSTONE)
     assert receipt["operation"] == "reclaim_spelling"
@@ -216,8 +238,38 @@ def test_different_locus_holder_reclaims_the_tombstone():
     assert receipt["operation"] == "reclaim_spelling"
     assert receipt["run_id"] == plan.run_id
     assert receipt["reason"]["case"] == "different_locus"
+    # This holder is not on the tombstone's lineage, so the retired name is
+    # linked onto the revived id and no cycle is closed.
+    assert TOMBSTONE in _read(TARGET)["successors"]
+    assert _cycle_reached(TOMBSTONE) is False
     assert receipt["reason"]["prior_stage"] == "accepted"
     assert _read(TARGET)["superseded_from_stage"] == "accepted"
+
+
+def test_name_from_a_third_locus_cannot_take_the_spelling():
+    """Only the tombstone's own quantity may move onto its spelling."""
+    _reset()
+    with GraphClient() as gc:
+        _name(gc, TARGET, stage="accepted", source_paths=[CORE_PATH])
+        _name(gc, TOMBSTONE, stage="superseded", source_paths=[VALUE_PATH])
+        _name(gc, UNRELATED, stage="accepted", source_paths=[AVERAGE_PATH])
+        _lineage(gc, UNRELATED, TOMBSTONE)
+        _source(gc, TARGET, CORE_PATH)
+        _source(gc, UNRELATED, AVERAGE_PATH)
+
+    plan = apply_edit(
+        target=TARGET,
+        rename=TOMBSTONE,
+        reason="this name is a different quantity from a third locus",
+        gc=GraphClient(),
+    )
+    assert plan.applied is False
+    assert plan.blocked is not None
+    assert TOMBSTONE in (plan.blocked or "")
+
+    tomb = _read(TOMBSTONE)
+    assert tomb["name_stage"] == "superseded"
+    assert tomb["run_id"] is None
 
 
 def test_unrelated_tombstone_lineage_is_still_refused():

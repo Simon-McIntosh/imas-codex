@@ -3172,6 +3172,12 @@ RETURN succ.id AS id, succ.name_stage AS name_stage,
        succ.source_paths AS source_paths
 """
 
+_RECLAIM_TARGET_PATHS_QUERY = """
+// EDIT_RECLAIM_TARGET_PATHS
+MATCH (sn:StandardName {id: $id})
+RETURN sn.source_paths AS source_paths
+"""
+
 
 @dataclass
 class _ReclaimCase:
@@ -3246,9 +3252,11 @@ def _reclaim_spelling_case(
       stranger's id.
     * ``different_locus`` — the tombstone's current holder is a name for a
       different data-dictionary locus than the tombstone's own source path,
-      so the spelling still names the quantity the tombstone recorded. A
-      holder at the same locus keeps the spelling load-bearing and the case
-      is refused.
+      so the spelling still names the quantity the tombstone recorded. The
+      renaming name must itself sit at the tombstone's locus: a name from a
+      third locus would move an unrelated quantity onto the spelling. A
+      holder at the same locus also keeps the spelling load-bearing, and both
+      of those shapes are refused.
     """
     rows = gc.query(_RECLAIM_TOMBSTONE_QUERY, id=new_name)
     if not rows:
@@ -3271,7 +3279,15 @@ def _reclaim_spelling_case(
     tomb_locus = _dd_locus(tombstone.get("source_paths") or ())
     if len(tips) == 1 and tomb_locus is not None:
         holder_locus = _dd_locus(tips[0].get("source_paths") or ())
-        if holder_locus is not None and holder_locus != tomb_locus:
+        target_rows = gc.query(_RECLAIM_TARGET_PATHS_QUERY, id=target)
+        target_locus = (
+            _dd_locus(target_rows[0].get("source_paths") or ()) if target_rows else None
+        )
+        if (
+            holder_locus is not None
+            and holder_locus != tomb_locus
+            and target_locus == tomb_locus
+        ):
             return _ReclaimCase(
                 case="different_locus",
                 tombstone=tombstone,
@@ -3279,7 +3295,7 @@ def _reclaim_spelling_case(
                 detail=(
                     f"holder {tips[0].get('id')!r} sits at locus "
                     f"{holder_locus!r}, the tombstone's own path at "
-                    f"{tomb_locus!r}"
+                    f"{tomb_locus!r} and {target!r} at the same locus"
                 ),
             )
     return _ReclaimCase(
@@ -3322,7 +3338,8 @@ SET old.name_stage = 'superseded',
     tomb.edit_requested_at = datetime($changed_at),
     tomb.run_id = $run_id,
     tomb.updated_at = datetime($changed_at)
-MERGE (tomb)-[:REFINED_FROM]->(old)
+FOREACH (_ IN CASE WHEN $link_lineage THEN [1] ELSE [] END |
+  MERGE (tomb)-[:REFINED_FROM]->(old))
 CREATE (change:StandardNameChange {
   id: $change_id,
   from_name: $old_id,
@@ -3427,6 +3444,11 @@ def _apply_reclaim_rename(
                     change_id=change_id,
                     receipt=receipt,
                     changed_at=changed_at,
+                    # A closing lineage already descends from the tombstone, so
+                    # an edge back to the renaming name would close a directed
+                    # cycle. That case moves the identity and records it on the
+                    # existing chain and the receipt, and writes no new edge.
+                    link_lineage=reclaim.case != "closing_lineage",
                 )
             ]
             if not rows:
@@ -3457,7 +3479,11 @@ def _apply_reclaim_rename(
         // EDIT_RECLAIM_POSTFLIGHT
         MATCH (tomb:StandardName {id: $id})
         RETURN tomb.name_stage AS name_stage, tomb.status AS status,
-               tomb.run_id AS run_id
+               tomb.run_id AS run_id,
+               EXISTS {
+                 MATCH path = (tomb)-[:REFINED_FROM*2..]->(tomb)
+                 RETURN path LIMIT 1
+               } AS closes_cycle
         """,
         id=new_name,
     )
@@ -3465,6 +3491,11 @@ def _apply_reclaim_rename(
         raise RuntimeError(
             f"reclaim postflight: {new_name!r} did not revive — it is missing "
             "or still a superseded tombstone"
+        )
+    if readback[0].get("closes_cycle"):
+        raise RuntimeError(
+            f"reclaim postflight: {new_name!r} now sits on a directed "
+            "REFINED_FROM cycle, so its lineage no longer reads"
         )
     if readback[0].get("run_id") != run_id:
         raise RuntimeError(
