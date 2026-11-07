@@ -179,7 +179,7 @@ def readback(since: str) -> dict:
             for row in gc.query(
                 """
                 MATCH (r:SNRun)
-                WHERE r.started_at >= datetime($since)
+                WHERE datetime(r.started_at) >= datetime($since)
                 RETURN r.id AS id, r.status AS status,
                        toString(r.started_at) AS started_at,
                        toString(r.finished_at) AS finished_at,
