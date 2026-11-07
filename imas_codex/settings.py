@@ -186,15 +186,15 @@ _MODEL_DEFAULTS: dict[str, str] = {
     # Code-relevance judgements through the OpenRouter decisions endpoint,
     # which takes its own request/response shape and is called directly by
     # the decisions call layer rather than through the chat-routing path.
-    "discovery-relevance": "typesafe/jev-1.13",
+    "discovery-relevance": "typesafe/jev-1.14",
     # Pair judgment and IDS routing over a retrieved DD shortlist, through the
     # same decisions endpoint. Its own seat so the candidate stage's model
     # changes independently of the code-relevance seat.
-    "mapping-candidates": "typesafe/jev-1.13",
+    "mapping-candidates": "typesafe/jev-1.14",
     # Standard-name judgements through the same decisions endpoint. Its own
     # seat so the standard-names stage's model changes independently of the
     # discovery and mapping seats.
-    "sn-judge": "typesafe/jev-1.13",
+    "sn-judge": "typesafe/jev-1.14",
     "cluster-labels": "openrouter/openai/gpt-6.1-sol",
     "ids-mapping": "openrouter/openai/gpt-6.1-sol",
     "agent": "openrouter/anthropic/claude-sonnet-4.6",
@@ -226,7 +226,7 @@ _MODEL_DEFAULTS: dict[str, str] = {
     # its own seat: the tree and the chat classifier below it change models
     # independently of one another. Active model in
     # [tool.imas-codex.sn-domain-tree].
-    "sn-domain-tree": "typesafe/jev-1.13",
+    "sn-domain-tree": "typesafe/jev-1.14",
     # Adjudicates banned-prose grep flags on refined docs at the campaign
     # convergence gate; quorum-independent. Active model in
     # [tool.imas-codex.sn-prose-adjudicator].
@@ -1973,13 +1973,8 @@ _SN_BENCHMARK_DEFAULTS = {
         "anthropic/claude-sonnet-4.6",
         "anthropic/claude-haiku-4.5",
         "openai/gpt-6.1-sol",
+        "openai/gpt-6.1-terra",
         "openai/gpt-6-luna",
-        "openai/gpt-5.6-sol",
-        "openai/gpt-5.6-terra",
-        "openai/gpt-5.6-luna",
-        "openai/gpt-5.5",
-        "openai/gpt-5.4",
-        "openai/gpt-5.4-mini",
         "google/gemini-3.1-pro-preview",
         "google/gemini-3-flash-preview",
         "google/gemini-3.1-flash-lite-preview",
@@ -1993,7 +1988,7 @@ _SN_BENCHMARK_DEFAULTS = {
     "reviewer-models": [
         "anthropic/claude-opus-4.6",
         "anthropic/claude-sonnet-4.6",
-        "openai/gpt-5.4",
+        "openai/gpt-6.1-sol",
     ],
     "candidate-models": [
         "openrouter/x-ai/grok-4.5",
@@ -2001,7 +1996,7 @@ _SN_BENCHMARK_DEFAULTS = {
         "openrouter/google/gemini-3.1-pro-preview",
         "openrouter/openai/gpt-6.1-sol",
         "openrouter/openai/gpt-6-luna",
-        "openrouter/openai/gpt-5.6-terra",
+        "openrouter/openai/gpt-6.1-terra",
         "openrouter/anthropic/claude-sonnet-5",
         "openrouter/deepseek/deepseek-v4-pro",
     ],

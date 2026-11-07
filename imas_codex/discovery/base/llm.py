@@ -3490,13 +3490,19 @@ def _validate_decisions_answers(
 
 def _parse_decisions_response(
     response: Any, questions: Mapping[str, Any]
-) -> tuple[dict[str, Any], float]:
-    """Validate one decisions HTTP response; return ``(answers, cost)``.
+) -> tuple[dict[str, Any], float, str | None]:
+    """Validate one decisions HTTP response; return ``(answers, cost, release)``.
 
     A non-2xx status or an unreadable body raises :class:`DecisionsError` for
     the caller's retry loop. A contract violation raises
     :class:`DecisionsValidationError` directly. A missing or non-numeric
     ``usage.cost`` is refused rather than reported as a silent zero.
+
+    ``release`` is the dated build the endpoint says answered, taken from the
+    response's own ``model`` field (e.g. ``typesafe/jev-1.14-20261014``). A
+    pinned model id does not imply a fixed build, so this is the only value
+    that shows a silent re-point under the same id; it is ``None`` when the
+    response carries no model field.
     """
     status = getattr(response, "status_code", None)
     if isinstance(status, int) and status >= 400:
@@ -3526,7 +3532,9 @@ def _parse_decisions_response(
         raise DecisionsValidationError(
             f"decisions usage cost {raw_cost!r} is not a finite non-negative number"
         )
-    return dict(answers), float(raw_cost)
+    raw_model = payload.get("model")
+    release = raw_model if isinstance(raw_model, str) and raw_model else None
+    return dict(answers), float(raw_cost), release
 
 
 def _post_decisions(
@@ -3560,6 +3568,7 @@ def call_decisions(
     service: str,
     max_retries: int = DEFAULT_MAX_RETRIES,
     retry_base_delay: float = DEFAULT_RETRY_BASE_DELAY,
+    record_release: Callable[[str], None] | None = None,
 ) -> tuple[dict[str, Any], float]:
     """Ask a decisions model for typed judgements; return ``(answers, cost)``.
 
@@ -3572,14 +3581,18 @@ def call_decisions(
     value reported in ``usage.cost``.
 
     Args:
-        model: Decisions model id (e.g. ``typesafe/jev-1.13``).
+        model: Decisions model id (e.g. ``typesafe/jev-1.14``).
         state: The judgement context (facility, file, optional content).
         questions: Question definitions keyed by question name.
         service: Service tag for the API key and the ``X-Title`` header.
+        record_release: Optional sink for the dated build the endpoint reports
+            answering this call, so a cost record can carry it.
 
     Returns:
         ``(answers, cost)`` — the validated answers keyed by question name,
-        and the USD cost reported in ``usage.cost``.
+        and the USD cost reported in ``usage.cost``. The served build reaches
+        the caller through ``record_release`` rather than the return value, so
+        every existing two-value unpack keeps working.
 
     Raises:
         DecisionsValidationError: An answer violated its question contract.
@@ -3595,7 +3608,10 @@ def call_decisions(
     for attempt in range(max_retries):
         try:
             response = _post_decisions(request_headers, body, DECISIONS_TIMEOUT)
-            return _parse_decisions_response(response, questions)
+            answers, cost, release = _parse_decisions_response(response, questions)
+            if record_release is not None and release is not None:
+                record_release(release)
+            return answers, cost
         except DecisionsValidationError:
             raise
         except Exception as exc:  # noqa: BLE001 - the retry policy decides
@@ -3624,6 +3640,7 @@ async def acall_decisions(
     service: str,
     max_retries: int = DEFAULT_MAX_RETRIES,
     retry_base_delay: float = DEFAULT_RETRY_BASE_DELAY,
+    record_release: Callable[[str], None] | None = None,
 ) -> tuple[dict[str, Any], float]:
     """Async counterpart of :func:`call_decisions`.
 
@@ -3640,7 +3657,10 @@ async def acall_decisions(
     for attempt in range(max_retries):
         try:
             response = await _apost_decisions(request_headers, body, DECISIONS_TIMEOUT)
-            return _parse_decisions_response(response, questions)
+            answers, cost, release = _parse_decisions_response(response, questions)
+            if record_release is not None and release is not None:
+                record_release(release)
+            return answers, cost
         except DecisionsValidationError:
             raise
         except Exception as exc:  # noqa: BLE001 - the retry policy decides

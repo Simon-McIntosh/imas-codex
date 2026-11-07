@@ -174,6 +174,14 @@ class LLMCostEvent:
     The field is intentionally unstructured — callers pick the
     encoding that suits their analytics query.
     """
+    model_release: str | None = None
+    """The dated build the provider reported answering this call.
+
+    A pinned model id does not fix the build behind it, so this is the only
+    field that shows a re-point of the same id: two calls under one id with two
+    releases are two different builds. Written to the ``LLMCost`` row beside
+    ``llm_model``.
+    """
     cycle: str | None = None  # e.g. "c0", "c1", "c2"
     phase: str = ""  # generate|regen|enrich|review_names|review_docs
     service: str = "standard-names"
@@ -840,6 +848,7 @@ class BudgetManager:
                         cycle=item.event.cycle,
                         sn_ids=list(item.event.sn_ids) if item.event.sn_ids else None,
                         model=item.event.model,
+                        model_release=item.event.model_release,
                         cost=item.cost,
                         tokens_in=item.event.tokens_in,
                         tokens_out=item.event.tokens_out,
@@ -867,6 +876,24 @@ class BudgetManager:
                     await asyncio.sleep(delay)
         # All retries exhausted — propagate to caller
         raise last_exc  # type: ignore[misc]
+
+    def record_llm_cost_event(self, cost: float, event: LLMCostEvent) -> None:
+        """Record one provider call that needs no reservation.
+
+        A zero-cost call is a real call the provider answered and carries the
+        model build it answered with, so it belongs in the graph; but
+        :meth:`reserve` refuses an amount of zero or less, and pricing a
+        reservation for something already known to be free is meaningless. The
+        record is therefore written straight to the writer queue with no
+        reservation and no overspend.
+
+        A negative cost is still a caller defect and raises.
+        """
+        if cost < 0:
+            raise ValueError("recorded cost must be non-negative")
+        if not math.isfinite(cost):
+            raise ValueError("recorded cost must be finite")
+        self._enqueue_write(cost, event, 0.0)
 
     # ------------------------------------------------------------------
     # Internal: enqueue a graph write

@@ -1,0 +1,221 @@
+<section id="model-refresh-code">
+  <h3>Jev pinned to release 1.14, because the decisions endpoint resolves no moving alias</h3>
+  <p>The lead asked whether the Jev seats could track the newest release by
+  naming an alias rather than a version. They cannot: the OpenRouter decisions
+  endpoint refuses every alias with an explicit HTTP 400, and answers only a
+  release id. The seats therefore name
+  <code>typesafe/jev-1.14</code>, and this fragment records the probe that
+  settled it.</p>
+
+  <h4>Probe: one minimal decision per candidate id</h4>
+  <p>Each row is one <code>call_decisions</code> call —
+  <code>imas_codex.discovery.base.llm.call_decisions</code>, the same function a
+  seat calls — asking a single two-criterion choice question
+  (<em>which word describes the number two?</em>) with a minimal state, run
+  2026-11-07. The HTTP seam was wrapped so the raw payload and response headers
+  survived: the public function returns only <code>(answers, cost)</code>, and
+  the release that answered is the fact in question. The incumbent
+  <code>typesafe/jev-1.13</code> was probed as a positive control — without it, a
+  row failing for an unrelated reason would be indistinguishable from a
+  non-existent alias.</p>
+  <table><thead><tr><th>Requested id</th><th>HTTP</th><th>Outcome</th><th>Reported model</th><th>usage.cost (USD)</th><th>Request id</th><th>Tokens in / out</th></tr></thead><tbody>
+    <tr><td><code>typesafe/jev-latest</code></td><td>400</td><td><code>Model typesafe/jev-latest does not exist</code></td><td>&mdash;</td><td>&mdash;</td><td><code>gen-dec-1794066447-wY8zIIHcBgwEOI5zGNv7</code></td><td>&mdash;</td></tr>
+    <tr><td><code>typesafe/jev</code></td><td>400</td><td><code>Model typesafe/jev does not exist</code></td><td>&mdash;</td><td>&mdash;</td><td><code>gen-dec-1794066447-zK0QFdZRUeUnTk1GbYVX</code></td><td>&mdash;</td></tr>
+    <tr><td><code>typesafe/jev-router</code></td><td>400</td><td><code>Model typesafe/jev-router does not exist</code></td><td>&mdash;</td><td>&mdash;</td><td><code>gen-dec-1794066447-0DgY1Z3Fl8GyuoFoGc3e</code></td><td>&mdash;</td></tr>
+    <tr><td><code>typesafe/jev-1.14</code></td><td>200</td><td><code>choice: even</code>, probabilities <code>even 1.0 / odd 0.0</code></td><td><code>typesafe/jev-1.14-20261014</code></td><td>0.000014658</td><td><code>gen-dec-1794066447-b9luh6OB5nT3Xk8IUK15</code></td><td>349 / 32</td></tr>
+    <tr><td><code>typesafe/jev-1.13</code> (control)</td><td>200</td><td><code>choice: even</code>, probabilities <code>even 1.0 / odd 0.0</code></td><td><code>typesafe/jev-1.13-20260917</code></td><td>0.000014658</td><td><code>gen-dec-1794066448-F2NH1RKhc0jlvQbwS75H</code></td><td>349 / 32</td></tr>
+  </tbody></table>
+  <p>Total spend <strong>USD 0.0000293</strong> (two answered calls at
+  0.000014658 each; the three refusals are not charged), against this node's
+  ceiling of USD 0.05. Per-call records, including each raw payload, are in
+  <code>probe_jev.json</code> in the run directory; the probe script is
+  <code>probe_jev.py</code>.</p>
+
+  <h4>The decision, and why</h4>
+  <p>The brief's rule is: use an alias only if it succeeds <em>and</em> reports
+  the release that served it; otherwise pin the release. No alias resolves —
+  three independent alias spellings were refused by name in the endpoint's own
+  error body — so the seats pin <code>typesafe/jev-1.14</code>. The pinned id
+  answers and reports its build as <code>typesafe/jev-1.14-20261014</code>, so
+  the endpoint does carry the release field an alias scheme would need; what is
+  missing is alias resolution, not release reporting.</p>
+
+  <h4>Before and after</h4>
+  <table><thead><tr><th>Surface</th><th>Before</th><th>After</th></tr></thead><tbody>
+    <tr><td><code>pyproject.toml</code> decisions seats: <code>sn-domain-tree</code>, <code>discovery-relevance</code>, <code>mapping-candidates</code>, <code>sn-judge</code></td><td><code>model = "typesafe/jev-1.13"</code> (four)</td><td><code>model = "typesafe/jev-1.14"</code> (four)</td></tr>
+    <tr><td><code>imas_codex/settings.py</code> defaults: <code>discovery-relevance</code>, <code>mapping-candidates</code>, <code>sn-judge</code>, <code>sn-domain-tree</code></td><td><code>"typesafe/jev-1.13"</code> (four)</td><td><code>"typesafe/jev-1.14"</code> (four)</td></tr>
+    <tr><td><code>imas_codex/discovery/base/llm.py</code> <code>call_decisions</code> docstring</td><td><code>typesafe/jev-1.13</code></td><td><code>typesafe/jev-1.14</code></td></tr>
+    <tr><td><code>tests/core/test_settings.py</code> pinned-seat assertion</td><td><code>typesafe/jev-1.13</code></td><td><code>typesafe/jev-1.14</code></td></tr>
+  </tbody></table>
+  <p><code>grep -rn 'typesafe/jev-1.13' imas_codex/ pyproject.toml</code> returns
+  zero lines afterwards. Test fixtures that use <code>jev-1.13</code> as a plain
+  string in other suites are left alone, as the brief directs.</p>
+
+  <h4>Release tracking: the dated build is recorded beside the spend</h4>
+  <p>The pinned id fixes what a seat <em>asks for</em>, not what answers. The
+  probe above shows the endpoint reporting its build in the response's own
+  <code>model</code> field (<code>typesafe/jev-1.14-20261014</code>), and that
+  field was being discarded by
+  <code>_parse_decisions_response</code>. A re-point of the same id at a newer
+  build would then have left every cost record unchanged.</p>
+  <p>It now reaches the cost record. <code>call_decisions</code> and
+  <code>acall_decisions</code> hand the reported build to an optional
+  <code>record_release</code> sink, and
+  <code>judgment._book_cost</code> — the single place a decisions call's cost
+  becomes a tracker entry — books it under the same step as the spend. The
+  return value stays a two-tuple, so no caller had to change, and a tracker
+  that keeps no releases still books the spend. <code>PipelineCost</code>
+  carries the pair in <code>steps</code> and <code>releases</code>.</p>
+  <p>The decisive property is the one a test can state: the same pinned id
+  served by two different builds leaves <code>steps</code> bit-identical and
+  shows only in <code>releases</code>.</p>
+  <table><thead><tr><th>Surface</th><th>Before</th><th>After</th></tr></thead><tbody>
+    <tr><td><code>_parse_decisions_response</code></td><td><code>(answers, cost)</code>, <code>model</code> dropped</td><td><code>(answers, cost, release)</code></td></tr>
+    <tr><td><code>call_decisions</code> / <code>acall_decisions</code></td><td>no release channel</td><td><code>record_release=</code> sink; return unchanged</td></tr>
+    <tr><td><code>_book_cost</code> / <code>PipelineCost</code></td><td>dollars and tokens only</td><td><code>releases[step]</code> beside <code>steps[step]</code></td></tr>
+    <tr><td><code>tests/discovery/test_decisions_release_tracking.py</code></td><td>&mdash;</td><td>9 tests: both seams, sync and batch, the stored row, per-call charging, plus a spend-only tracker</td></tr>
+  </tbody></table>
+  <p>This also closes the conditional item the earlier round reported as
+  outside its scope: the release is tracked even though the seats pin a
+  release id, which is exactly when a silent build change is otherwise
+  invisible.</p>
+
+
+  <h4>The build reaches the graph row, one record per call</h4>
+  <p>A tracker that only accumulates totals cannot answer the question the
+  record exists for: <em>which build answered, on what day, for what spend</em>.
+  The release therefore travels to the <code>:LLMCost</code> node itself.</p>
+  <table><thead><tr><th>Surface</th><th>Before</th><th>After</th></tr></thead><tbody>
+    <tr><td><code>LLMCostEvent</code></td><td><code>model</code> only</td><td><code>model_release</code>, the dated build the provider reported</td></tr>
+    <tr><td><code>record_llm_cost</code> (the only writer of a <code>:LLMCost</code>)</td><td>no such column</td><td><code>llm_model_release</code> written beside <code>llm_model</code></td></tr>
+    <tr><td><code>PipelineCost</code></td><td>in-memory totals</td><td>optional <code>charge</code> sink, called once per decisions call with that call's model and release</td></tr>
+    <tr><td>SN review judge stage</td><td>total added to the run's spend figure, no row</td><td>each judge call reserves and charges its own lease, so each writes a row</td></tr>
+    <tr><td>SN review <code>review_docs</code> Jev call</td><td>charged without a release</td><td>charges with the release that answered</td></tr>
+    <tr><td>Discovery judgment (<code>decide_one</code>, <code>decide_batch</code>)</td><td>release kept in memory</td><td>release and model handed to the tracker's charge hook per call</td></tr>
+  </tbody></table>
+  <p><strong>One record per call</strong> is the property that matters. A batch is
+  many calls: <code>decide_batch</code> fans a step's states out under one
+  concurrency bound, and two states in one step may be served by two builds. The
+  charge hook fires per call and carries that call's own model and release, so
+  nothing collapses into a step total. The suite asserts it directly — two calls
+  under one step through a bound tracker produce two charges with two different
+  releases.</p>
+  <p>A free answer is still an answer. The endpoint admits a zero
+  <code>usage.cost</code>, and pricing a reservation from a spend already
+  reported as zero is meaningless — the pool refuses an amount of zero
+  outright, so a successful free response would have crashed the stage after
+  the provider had replied. <code>BudgetManager.record_llm_cost_event</code>
+  writes such a call straight to the writer queue: no reservation, no
+  overspend, and the row still carries the build. A negative cost remains an
+  error. Two tests guard the wiring rather than the intent — the enrich
+  worker's tracker must be constructed with a <code>charge</code> sink, and
+  the review_docs Jev charge must stamp <code>model_release</code> — and each
+  turns red when its line is reverted.</p>
+  <p>The stored row is asserted where it is built: <code>record_llm_cost</code> is
+  the only writer of a <code>:LLMCost</code> node, and the test reads the Cypher
+  parameter set it computes, requiring both <code>llm_model</code> and
+  <code>llm_model_release</code>.</p>
+  <h4>Reading it: which build served which model, per day</h4>
+  <pre><code>MATCH (c:LLMCost)
+WHERE c.llm_model_release IS NOT NULL
+RETURN date(c.llm_at)          AS day,
+       c.llm_service           AS service,
+       c.llm_model             AS llm_model,
+       c.llm_model_release     AS release,
+       count(*)                AS calls,
+       round(sum(c.llm_cost), 6) AS usd
+ORDER BY day DESC, llm_model, release</code></pre>
+  <p>A pinned id that was silently re-pointed shows as a second
+  <code>release</code> row under the same <code>llm_model</code>, with the day
+  it started appearing; a seat that never moved shows one row per day. Spend is
+  summed per build, so the cost of a re-point is separable after the fact.</p>
+  <h4>Gate</h4>
+  <p><code>tests/core</code>, <code>tests/discovery/test_llm_decisions.py</code>,
+  <code>tests/discovery/test_judgment.py</code> and
+  <code>tests/standard_names</code>, each arm run as
+  <code>UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=&lt;tree&gt;
+  uv run --no-sync pytest -p no:cacheprovider</code>:</p>
+  <table><thead><tr><th>Arm</th><th>Revision / tree</th><th>Result</th></tr></thead><tbody>
+    <tr><td>base</td><td><code>6f5564b9</code> HEAD snapshot extracted with <code>git archive</code></td><td>23 failed, 9581 passed, 17 skipped, exit 1</td></tr>
+    <tr><td>after</td><td><code>7c0bfd26</code>, this node's Jev commit</td><td>4 failed, 9604 passed, 13 skipped, exit 1</td></tr>
+  </tbody></table>
+  <p><strong>Zero added failures:</strong> every one of the four after-arm failures
+  also fails at the base, and the base carries 19 failures the after arm does
+  not — the base snapshot is a <code>git archive</code> with no <code>.env</code>,
+  so its graph-touching and credential-reading tests fail for a reason this node
+  did not introduce. The comparison is by failure id, not by count. Logs:
+  <code>gate-jev-base.log</code> and <code>gate-jev-after.log</code> in the run
+  directory, each with its revision, tree, command and <code>EXIT=</code> line.
+  The suite ran with <code>-n 8</code> after an unparallelised attempt exceeded
+  its wall-clock bound partway through; both arms used the same selection.</p>
+  <p>The four after-arm failures are in
+  <code>tests/core/test_catalog_input_limits.py</code>,
+  <code>tests/standard_names/test_house_style_checks.py</code>,
+  <code>tests/standard_names/test_pool_batch_processors.py</code> and
+  <code>tests/standard_names/test_pool_registry_imports.py</code> &mdash; reported rather than
+  triaged, since each also fails at the base.</p>
+
+  <h4>Gate, release-tracking round</h4>
+  <p>The same selection was run again on both arms after the release-tracking
+  change, in parallel, with the base arm taken from a <code>git archive</code>
+  of the parent revision and given the main checkout's <code>.env</code> link,
+  so a missing credential cannot masquerade as a regression:</p>
+  <table><thead><tr><th>Arm</th><th>Revision / tree</th><th>Result</th></tr></thead><tbody>
+    <tr><td>base</td><td><code>844d598f</code> source, snapshot tree</td><td>66 failed, 9501 passed, 13 skipped, <code>EXIT=1</code></td></tr>
+    <tr><td>after</td><td><code>33331ed6</code>, this worktree</td><td>66 failed, 9501 passed, 13 skipped, <code>EXIT=1</code></td></tr>
+  </tbody></table>
+  <p><strong>Zero added failures and zero base-only failures:</strong> the two
+  failing-id sets are identical, 66 apiece, so no test changed state between
+  the arms. The count is larger than the earlier round's because both arms now
+  carry the same graph-backed state and run at the same concurrency; the
+  comparison that matters is by id, and it is empty in both directions. Logs:
+  <code>gate-release-base.log</code> and <code>gate-release-after.log</code> in
+  the run directory, each with its revision, tree, command and
+  <code>EXIT=</code> line.</p>
+  <h4>Gate, final round</h4>
+  <p>The base arm is now a <code>git archive</code> of <code>566ee7678</code>
+  unpacked outside the worktree, with the five generated model files copied in
+  from the main checkout and <code>--rootdir</code> pointing at that tree, so
+  the two arms can only be the two revisions and not two views of one
+  directory. The selection collects 9622 items on head; on
+  <code>tests/discovery</code> alone the archived tree collects 1590 against
+  head's 1605, which is the fifteen tests this node added and the check that
+  the two arms really are different trees.</p>
+  <table><thead><tr><th>Arm</th><th>Revision / tree</th><th>Result</th></tr></thead><tbody>
+    <tr><td>base</td><td><code>566ee7678</code>, archived into <code>/dev/shm/crew-base-566ee7678</code></td><td>6 failed, 9601 passed, 14 skipped, <code>EXIT=1</code></td></tr>
+    <tr><td>after</td><td><code>73acefa34</code>, this worktree</td><td>2 failed, 9607 passed, 13 skipped, <code>EXIT=1</code></td></tr>
+  </tbody></table>
+  <p>Both after-arm failures pass in isolation at the same revision
+  (<code>gate-fix-single.log</code>: 5 passed, <code>EXIT=0</code>), so both are
+  parallel-load flakes rather than state changes. The six base-only failures
+  are path-dependent (<code>test_offsite_push</code>,
+  <code>test_manifest_generability</code>,
+  <code>test_catalog_layout_hierarchy</code>) and follow from running the
+  archived tree outside the repository; they fail there and not on head, so
+  the delta is stated by id and each direction is named. Logs:
+  <code>gate-fix-base.log</code> and <code>gate-fix-after.log</code>, each with
+  revision, tree, command and <code>EXIT=</code> line.</p>
+  <h4>Gate, durable-release round</h4>
+  <p>Re-measured after the release was written to the graph, with the base arm
+  taken at <code>566ee7678</code> — the commit before the feature — so the two
+  arms span everything this node changed rather than one round of it:</p>
+  <table><thead><tr><th>Arm</th><th>Revision / tree</th><th>Result</th></tr></thead><tbody>
+    <tr><td>base</td><td><code>566ee7678</code>, <code>git archive</code> snapshot with the main checkout's <code>.env</code></td><td>4 failed, 9605 passed, 13 skipped, <code>EXIT=1</code></td></tr>
+    <tr><td>after</td><td><code>f69d08072</code>, this worktree</td><td>2 failed, 9607 passed, 13 skipped, <code>EXIT=1</code></td></tr>
+  </tbody></table>
+  <p>One failure is after-only:
+  <code>tests/core/test_catalog_input_limits.py::test_docs_review_escalator_accepts_rotated_breaker</code>
+  &mdash; a concurrency-sensitive review-escalator test that <strong>passes alone
+  at the same revision</strong> (<code>gate-single-after.log</code>, 1 passed,
+  <code>EXIT=0</code>), so it is a parallel-load flake rather than a state
+  change. Three failures are base-only
+  (<code>test_pool_batch_processors</code>, <code>test_pool_registry_imports</code>,
+  <code>test_review_pipeline</code>), and one fails on both arms. Logs:
+  <code>gate-durable-base.log</code> and <code>gate-durable-after.log</code>, each
+  opening with its revision, tree and command and closing with its
+  <code>EXIT=</code> line.</p>
+  <p>The new tests sit outside that selection, so they were also run on their
+  own &mdash; <code>tests/discovery/test_decisions_release_tracking.py</code>
+  plus the gpt-5.x guard &mdash; <strong>8 passed</strong>,
+  <code>EXIT=0</code> (<code>gate-release-tracking.log</code>).</p>
+</section>

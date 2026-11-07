@@ -531,6 +531,43 @@ async def extract_review_worker(state: StandardNameReviewState, **_kwargs: Any) 
 # =============================================================================
 
 
+def _judge_cost_sink(state: StandardNameReviewState) -> Any:
+    """Persist each judge call against the run's pool, with its build.
+
+    The judge stage books into an in-memory tracker that only reached the
+    run's total, so a re-pointed decisions model left no record at all. Each
+    call now charges its own lease, which is what writes the ``LLMCost`` row
+    and carries the dated build beside the model id. A run with no budget
+    manager keeps the in-memory total only.
+    """
+    manager = getattr(state, "budget_manager", None)
+    if manager is None:
+        return None
+
+    def charge(step: str, spent: float, model: str | None, release: str | None) -> None:
+        event = LLMCostEvent(
+            model=model or step,
+            model_release=release,
+            tokens_in=0,
+            tokens_out=0,
+            phase="sn_judge",
+        )
+        if spent < 0:
+            raise ValueError(f"judge call reported a negative cost: {spent!r}")
+        # A provider that reports a zero cost still answered, and its build is
+        # the fact this record exists for; reserving against a spend already
+        # known to be zero is meaningless and the pool refuses it outright.
+        if spent == 0:
+            manager.record_llm_cost_event(0.0, event)
+            return
+        lease = manager.reserve(spent, phase="sn_judge")
+        if lease is None:
+            return
+        lease.charge_event(spent, event)
+
+    return charge
+
+
 async def enrich_review_worker(state: StandardNameReviewState, **_kwargs: Any) -> None:
     """Enrich each batch with neighborhood context and audit findings.
 
@@ -603,7 +640,7 @@ async def enrich_review_worker(state: StandardNameReviewState, **_kwargs: Any) -
         # report-only, and are never booked as error-lint findings, so they
         # never cap a score. A batch whose names carry no judged entry makes no
         # call.
-        judge_cost = PipelineCost()
+        judge_cost = PipelineCost(charge=_judge_cost_sink(state))
         judge_findings = await judge_review_stage(
             batch.get("names", []), cost=judge_cost
         )
