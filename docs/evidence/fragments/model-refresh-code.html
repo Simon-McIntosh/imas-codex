@@ -73,13 +73,51 @@
     <tr><td><code>_parse_decisions_response</code></td><td><code>(answers, cost)</code>, <code>model</code> dropped</td><td><code>(answers, cost, release)</code></td></tr>
     <tr><td><code>call_decisions</code> / <code>acall_decisions</code></td><td>no release channel</td><td><code>record_release=</code> sink; return unchanged</td></tr>
     <tr><td><code>_book_cost</code> / <code>PipelineCost</code></td><td>dollars and tokens only</td><td><code>releases[step]</code> beside <code>steps[step]</code></td></tr>
-    <tr><td><code>tests/discovery/test_decisions_release_tracking.py</code></td><td>&mdash;</td><td>7 tests, both seams, sync and batch, plus a spend-only tracker</td></tr>
+    <tr><td><code>tests/discovery/test_decisions_release_tracking.py</code></td><td>&mdash;</td><td>9 tests: both seams, sync and batch, the stored row, per-call charging, plus a spend-only tracker</td></tr>
   </tbody></table>
   <p>This also closes the conditional item the earlier round reported as
   outside its scope: the release is tracked even though the seats pin a
   release id, which is exactly when a silent build change is otherwise
   invisible.</p>
 
+
+  <h4>The build reaches the graph row, one record per call</h4>
+  <p>A tracker that only accumulates totals cannot answer the question the
+  record exists for: <em>which build answered, on what day, for what spend</em>.
+  The release therefore travels to the <code>:LLMCost</code> node itself.</p>
+  <table><thead><tr><th>Surface</th><th>Before</th><th>After</th></tr></thead><tbody>
+    <tr><td><code>LLMCostEvent</code></td><td><code>model</code> only</td><td><code>model_release</code>, the dated build the provider reported</td></tr>
+    <tr><td><code>record_llm_cost</code> (the only writer of a <code>:LLMCost</code>)</td><td>no such column</td><td><code>llm_model_release</code> written beside <code>llm_model</code></td></tr>
+    <tr><td><code>PipelineCost</code></td><td>in-memory totals</td><td>optional <code>charge</code> sink, called once per decisions call with that call's model and release</td></tr>
+    <tr><td>SN review judge stage</td><td>total added to the run's spend figure, no row</td><td>each judge call reserves and charges its own lease, so each writes a row</td></tr>
+    <tr><td>SN review <code>review_docs</code> Jev call</td><td>charged without a release</td><td>charges with the release that answered</td></tr>
+    <tr><td>Discovery judgment (<code>decide_one</code>, <code>decide_batch</code>)</td><td>release kept in memory</td><td>release and model handed to the tracker's charge hook per call</td></tr>
+  </tbody></table>
+  <p><strong>One record per call</strong> is the property that matters. A batch is
+  many calls: <code>decide_batch</code> fans a step's states out under one
+  concurrency bound, and two states in one step may be served by two builds. The
+  charge hook fires per call and carries that call's own model and release, so
+  nothing collapses into a step total. The suite asserts it directly — two calls
+  under one step through a bound tracker produce two charges with two different
+  releases.</p>
+  <p>The stored row is asserted where it is built: <code>record_llm_cost</code> is
+  the only writer of a <code>:LLMCost</code> node, and the test reads the Cypher
+  parameter set it computes, requiring both <code>llm_model</code> and
+  <code>llm_model_release</code>.</p>
+  <h4>Reading it: which build served which model, per day</h4>
+  <pre><code>MATCH (c:LLMCost)
+WHERE c.llm_model_release IS NOT NULL
+RETURN date(c.llm_at)          AS day,
+       c.llm_service           AS service,
+       c.llm_model             AS llm_model,
+       c.llm_model_release     AS release,
+       count(*)                AS calls,
+       round(sum(c.llm_cost), 6) AS usd
+ORDER BY day DESC, llm_model, release</code></pre>
+  <p>A pinned id that was silently re-pointed shows as a second
+  <code>release</code> row under the same <code>llm_model</code>, with the day
+  it started appearing; a seat that never moved shows one row per day. Spend is
+  summed per build, so the cost of a re-point is separable after the fact.</p>
   <h4>Gate</h4>
   <p><code>tests/core</code>, <code>tests/discovery/test_llm_decisions.py</code>,
   <code>tests/discovery/test_judgment.py</code> and
