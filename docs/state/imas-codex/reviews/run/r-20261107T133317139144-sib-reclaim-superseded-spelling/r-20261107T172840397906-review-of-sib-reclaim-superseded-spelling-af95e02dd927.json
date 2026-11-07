@@ -1,0 +1,60 @@
+{
+  "added_failure_count": 1,
+  "added_failure_ids": [
+    "tests/standard_names/test_review_name_stages.py::TestWorkerUsesCanonicalModel::test_worker_uses_canonical_model"
+  ],
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/cli/sn.py:7179",
+    "imas_codex/llm/sn_tools.py:918",
+    "imas_codex/standard_names/promote.py:1241",
+    "imas_codex/standard_names/review_triage.py:337",
+    "imas_codex/standard_names/edit.py:990"
+  ],
+  "completed_at": "2026-11-07T17:46:55.648Z",
+  "dispatched_at": "2026-11-07T17:30:35Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/edit.py",
+      "line": "3451",
+      "severity": "blocking",
+      "text": "The different-locus reclaim links the retired name onto the revived id (MERGE (tomb)-[:REFINED_FROM]->(old), _RECLAIM_MUTATION_QUERY at edit.py:3341, enabled by link_lineage at edit.py:3451) inside the transaction that commits at edit.py:3460, and the only cycle detection is the readback at edit.py:3495, which raises AFTER that commit. When the renaming name already descends from the tombstone through a live intermediate, the walk returns tips=[M] with M live, M != target, M at the different locus and target at the tombstone's own locus, so the different_locus case is admitted and the write closes tomb -> target -> ... -> M -> tomb. The postflight then raises and leaves the directed cycle plus the revival and retirement committed, so a refused reclaim corrupts the lineage it exists to protect. Repair: refuse before the write when target already descends from the tombstone (the same EXISTS { (target)-[:REFINED_FROM*1..]->(tomb) } shape used at edit.py:3484), or assert the cycle inside the transaction so the rollback undoes it."
+    },
+    {
+      "file": "imas_codex/standard_names/edit.py",
+      "line": "3209",
+      "severity": "non-blocking",
+      "text": "_reclaim_successor_tips duplicates the successor-lineage walk the module already owns at edit.py:2041 (_fold_lineage_walk): both descend only through a descendant confirmed superseded, return the live tips, treat a live intermediate as a stopping point, detect a cycle and report an over-depth walk, and even carry near-identical docstring prose. The addition duplicates rather than extends or wraps the owner; it introduces a second bound (_RECLAIM_MAX_DEPTH = 12 at edit.py:3158 against _FOLD_CHAIN_MAX_DEPTH = 64 at edit.py:2028) and a second query path instead of generalising the existing walk. The clone detector at promotion is likely to flag the copied prose."
+    },
+    {
+      "file": "imas_codex/standard_names/edit.py",
+      "line": "3165",
+      "severity": "non-blocking",
+      "text": "_RECLAIM_TOMBSTONE_QUERY projects [(succ:StandardName)-[:REFINED_FROM]->(tomb) | succ.id] AS successors, but _reclaim_spelling_case at edit.py:3260 reads only rows[0]['properties'], so every rename attempt against a superseded occupant pays a redundant pattern-comprehension traversal for a field nothing consumes."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-reclaim-superseded-spelling.html",
+      "line": "20",
+      "severity": "non-blocking",
+      "text": "The 'Added failures' row states zero and says 'All three ids triaged in one serial run at head pass (6 passed, EXIT=0)', but logs/triage-head.log records 2 tests and '2 passed', and the base arm's 2-failure run that puts test_worker_uses_canonical_model in the base union has no log on disk. Subtracting the reviewed run's own recorded arms (baseline_suite 6 ids from logs/base-default-sn.log against after_suite 4 ids from logs/after-suite-a62c2fc8c.log) leaves one head-only id; the serial triage at both revisions shows it is load-sensitive rather than caused by this change, so the conclusion holds but the figure does not follow from the artefacts the fragment cites."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source goal (prompt.txt:33) is to let `sn edit --rename` reclaim a superseded tombstone's id in the two ruled cases through a signed, receipted route; edit.py:3575-3590 now asks `_reclaim_spelling_case` on a superseded occupant and dispatches to `_apply_reclaim_rename` (edit.py:3361), while every other tombstone target keeps the pre-existing refusal at edit.py:3591-3612.\nVERDICT done_when: The done_when in prompt.txt names the disposable-graph test file, both reclaim cases, the third refusal, the sn-edit skill and no added failure id; logs/gate-reclaim.log ends '4 passed' EXIT=0 at a62c2fc8c (the reviewed head af95e02dd changes only the skill and the evidence fragment), the three negative-control logs each end EXIT=1 with the named tests red, and logs/after-edit-engine.log and logs/base-edit-engine.log both end '72 passed' EXIT=0.\nVERDICT write_paths: The node declared five paths; the diff touches exactly four of them (imas_codex/standard_names/edit.py, tests/standard_names/test_reclaim_superseded_spelling.py, .claude/skills/sn-edit/SKILL.md, docs/evidence/fragments/sn-integrity-backlog/sib-reclaim-superseded-spelling.html) and nothing outside them.\nVERDICT manifest: Read; it sets status complete, lists the seven commits, the gate command with its log paths, the three negative controls and the suite arms with their failure ids; it reports zero added failures, which a strict subtraction of its own two recorded arms does not support (see finding at the fragment line 20).\nVERDICT diff: Read all seven commits against 2c9ea5cbdb; edit.py carries exactly two hunks (the reclaim block at edit.py:3158-3522 and the collision-branch dispatch at edit.py:3575-3612), the test file adds 303 lines in four cases, and the skill and fragment are documentation, with no change the goal does not imply.\nCALL_SITES: imas_codex/cli/sn.py:7179, imas_codex/llm/sn_tools.py:918, imas_codex/standard_names/promote.py:1241, imas_codex/standard_names/review_triage.py:337, imas_codex/standard_names/edit.py:990\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: edit.py:3575-3590 dispatches exactly the two ruled cases and edit.py:3591-3612 keeps the prior refusal for every other tombstone, including the third-locus name.\nSCORE evidence: 15\nJUSTIFICATION evidence: logs/gate-reclaim.log ends '4 passed' EXIT=0 at the revision carrying the code and three negative controls end EXIT=1 with the named tests red, but the zero-added figure relies on a base arm with no log on disk.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: Every changed path in the diff is one of the five declared write paths and no experiment or scratch artefact was landed.\nSCORE durability: 14\nJUSTIFICATION durability: The three negative controls prove the closing-lineage, receipt and refusal checks redden, but the cycle check for the different-locus case is the post-commit readback at edit.py:3495 and no test exercises the pre-state where the target already descends from the tombstone.\nSCORE fit: 17\nJUSTIFICATION fit: The node reuses _fold_revival_stage (edit.py:2214), _carry_rename_sources (edit.py:1882) and the surrounding dataclass/_blocked idiom, though _RECLAIM_TOMBSTONE_QUERY at edit.py:3165 projects a field nothing reads.\nSCORE reuse: 5\nJUSTIFICATION reuse: _reclaim_successor_tips at edit.py:3209 re-implements the successor walk _fold_lineage_walk already owns at edit.py:2041, with near-identical docstring prose and a second depth bound, instead of extending that owner.\nFINDING imas_codex/standard_names/edit.py:3451 blocking: the different-locus reclaim writes MERGE (tomb)-[:REFINED_FROM]->(old) inside the transaction committed at edit.py:3460 and detects a cycle only in the readback at edit.py:3495, so when the renaming name already descends from the tombstone through a live intermediate (tips=[M], M live and at the different locus, target at the tombstone's own locus) the write closes tomb -> target -> ... -> M -> tomb and the refusal leaves that directed cycle plus the revival and retirement committed in the live graph.\nFINDING imas_codex/standard_names/edit.py:3209 non-blocking: _reclaim_successor_tips duplicates the capability of _fold_lineage_walk at edit.py:2041 (descend only through superseded intermediates, return live tips, stop at a live intermediate, detect cycles and an over-depth walk) with near-identical prose and a second bound, rather than extending or wrapping the owner.\nFINDING imas_codex/standard_names/edit.py:3165 non-blocking: _RECLAIM_TOMBSTONE_QUERY projects a successors list that _reclaim_spelling_case at edit.py:3260 never reads, so every rename against a superseded occupant pays a redundant traversal.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-reclaim-superseded-spelling.html:20 non-blocking: the zero-added row cites 'three ids ... 6 passed' where logs/triage-head.log records 2 tests and 2 passed, and the base 2-failure run is not logged on disk; subtracting the recorded arms leaves one head-only id, which the serial triage at both revisions shows is load-sensitive rather than caused by this change.",
+  "review_run_id": "r-20261107T172840397906-review-of-sib-reclaim-superseded-spelling-af95e02dd927",
+  "reviewed_base_sha": "2c9ea5cbdb33687b268a19c204fe1aa55465bff5",
+  "reviewed_head_sha": "af95e02dd9278f373487666d6b38d153fd91004c",
+  "reviewed_run_id": "r-20261107T133317139144-sib-reclaim-superseded-spelling",
+  "scores": {
+    "durability": 14,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T17:42:45+00:00",
+  "total": 88
+}
