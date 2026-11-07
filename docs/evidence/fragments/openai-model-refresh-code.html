@@ -1,0 +1,90 @@
+<section id="openai-model-refresh-code">
+  <h3>The proxy routes, the benchmark fallback slate and the bench examples name the newest model of each tier</h3>
+  <p>The <code>pyproject.toml</code> pass moved the configured seats and slates,
+  but three code-side surfaces still named GPT-5 generation models: the
+  LiteLLM proxy's <code>model_list</code>, the <code>_SN_BENCHMARK_DEFAULTS</code>
+  fallback slate in <code>imas_codex/settings.py</code> (used whenever
+  <code>pyproject.toml</code> overrides nothing), and the <code>sn bench</code>
+  docstring examples. Each stale reference now names the newest model of its
+  own tier, but only after one real, minimal call per target model through the
+  repository's own LLM call layer.</p>
+
+  <h4>Probe: one live call per target route</h4>
+  <p>Prompt <code>Reply with the single word: ready</code>,
+  <code>max_tokens=32</code>, <code>max_retries=1</code>, run 2026-11-07 through
+  <code>imas_codex.discovery.base.llm.call_llm</code> resolved from this
+  worktree, which is the path a seat takes. All three returned
+  <code>ready</code>; none failed. The LiteLLM proxy is not running on this
+  host, so each call took the call layer's direct OpenRouter branch — the same
+  <code>openrouter/&lt;provider&gt;/&lt;model&gt;</code> identifier the proxy
+  route serves.</p>
+  <table><thead><tr><th>Route</th><th>Completion</th><th>Prompt / completion / total tokens</th><th>Cost (USD)</th><th>Hand computation from that route's checked-in rates</th></tr></thead><tbody>
+    <tr><td><code>openrouter/openai/gpt-6.1-sol</code></td><td><code>ready</code></td><td>13 / 5 / 18</td><td>0.0000760</td><td>13&nbsp;x&nbsp;2.0 + 5&nbsp;x&nbsp;10.0 per Mtok</td></tr>
+    <tr><td><code>openrouter/openai/gpt-6.1-terra</code></td><td><code>ready</code></td><td>13 / 5 / 18</td><td>0.0000380</td><td>13&nbsp;x&nbsp;1.0 + 5&nbsp;x&nbsp;5.0 per Mtok</td></tr>
+    <tr><td><code>openrouter/openai/gpt-6-luna</code></td><td><code>ready</code></td><td>13 / 5 / 18</td><td>0.0000038</td><td>13&nbsp;x&nbsp;0.1 + 5&nbsp;x&nbsp;0.5 per Mtok</td></tr>
+  </tbody></table>
+  <p>Total spend <strong>USD 0.0001178</strong>, against this node's ceiling of
+  USD 0.05. The reported cost is the control that the checked-in pricing was
+  applied to each route: every figure equals the hand computation from that
+  route's own table at the token counts the provider returned, and the three
+  rates differ by two orders of magnitude, so a single fallback rate could not
+  reproduce them. Per-call records, including the verbatim error for any
+  failure, are in <code>probe.json</code> in the run directory.</p>
+
+  <h4>Before and after</h4>
+  <table><thead><tr><th>Surface</th><th>Before</th><th>After</th></tr></thead><tbody>
+    <tr><td><code>litellm_config.model_list</code></td><td>six GPT routes: <code>gpt-5.4</code>, <code>gpt-5.5</code>, <code>gpt-5.4-mini</code>, <code>gpt-5.6-sol</code>, <code>gpt-5.6-terra</code>, <code>gpt-5.6-luna</code></td><td>three routes: <code>gpt-6.1-sol</code>, <code>gpt-6.1-terra</code>, <code>gpt-6-luna</code></td></tr>
+    <tr><td><code>_SN_BENCHMARK_DEFAULTS["compose-models"]</code></td><td><code>gpt-5.6-sol</code>, <code>gpt-5.6-terra</code>, <code>gpt-5.6-luna</code>, <code>gpt-5.5</code>, <code>gpt-5.4</code>, <code>gpt-5.4-mini</code></td><td><code>gpt-6.1-terra</code> added; the other five map onto <code>gpt-6.1-sol</code> or <code>gpt-6-luna</code>, which the slate already carried, so they are dropped as duplicates rather than listed twice</td></tr>
+    <tr><td><code>_SN_BENCHMARK_DEFAULTS["reviewer-models"]</code></td><td><code>openai/gpt-5.4</code></td><td><code>openai/gpt-6.1-sol</code></td></tr>
+    <tr><td><code>_SN_BENCHMARK_DEFAULTS["candidate-models"]</code></td><td><code>openrouter/openai/gpt-5.6-terra</code></td><td><code>openrouter/openai/gpt-6.1-terra</code></td></tr>
+    <tr><td><code>sn bench</code> docstring examples</td><td><code>openai/gpt-5.4</code> (two examples)</td><td><code>openai/gpt-6.1-sol</code></td></tr>
+  </tbody></table>
+  <p>One judgement the brief left open: <code>gpt-5.4-mini</code> has no direct
+  6.x successor, because the current generation publishes only sol, terra and
+  luna. It was the cheap small-tier route, so it maps to the cheap tier,
+  <code>gpt-6-luna</code> — which both the proxy list and the benchmark slate
+  already carried, so no separate route survives for it.</p>
+  <p>Production seats are unchanged: every <code>model=</code>-style entry in
+  the seat mapping (<code>cluster-labels</code>, <code>ids-mapping</code>,
+  <code>sn-docs</code>, <code>sn-classifier</code>,
+  <code>sn-prose-adjudicator</code>) already named <code>gpt-6.1-sol</code> or
+  <code>gpt-6-luna</code> before this change and was not touched. After it,
+  <code>grep -n 'gpt-5\.[0-9]'</code> over the three files returns
+  <strong>zero</strong> lines. Test fixtures that use a model name as a plain
+  string (for example <code>tests/core/test_settings.py</code>'s
+  <code>gpt-5.6-luna</code> priced-route fixture) were left alone, as the
+  contract directs.</p>
+
+  <h4>Every route kept is priced</h4>
+  <p>The three routes left in the proxy list all resolve a checked-in
+  <code>openrouter-pricing</code> entry: <code>gpt-6.1-sol</code>,
+  <code>gpt-6.1-terra</code> (added on the earlier <code>pyproject.toml</code>
+  pass) and <code>gpt-6-luna</code>. A configured route with no price fails
+  closed, so this is what keeps the fail-closed behaviour reached by a price
+  rather than by its absence. No pricing entry was removed: the three the brief
+  named remain referenced outside this node's write scope, in
+  <code>pyproject.toml</code>'s own route fixtures and in
+  <code>tests/</code> — the full scan is in the sibling fragment's
+  <code>pricing-reference-grep.txt</code>. Those edits were outside this node's
+  write scope and are reported rather than made here.</p>
+
+  <h4>Gate</h4>
+  <p><code>tests/core/test_settings.py</code>,
+  <code>tests/core/test_gpt6_model_support.py</code>,
+  <code>tests/standard_names/test_budget_lease.py</code> and
+  <code>tests/standard_names/test_seat_exposure_calibration.py</code>, each arm
+  run as
+  <code>UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=&lt;tree&gt;
+  uv run --no-sync pytest -p no:cacheprovider</code>:</p>
+  <table><thead><tr><th>Arm</th><th>Revision / tree</th><th>Result</th></tr></thead><tbody>
+    <tr><td>base</td><td><code>6c73f174</code> HEAD snapshot extracted with <code>git archive</code></td><td>114 passed, exit 0</td></tr>
+    <tr><td>after</td><td><code>8471b89e</code>, this node's commit</td><td>114 passed, exit 0</td></tr>
+  </tbody></table>
+  <p>Zero added failures, and identical totals, so the change moved no test
+  outcome in either direction. Logs: <code>gate-base.log</code> and
+  <code>gate-after.log</code> in the run directory. The gate that already
+  guards the fail-closed behaviour was left as it was:
+  <code>test_unpriced_model_is_refused_by_call_layer</code> in
+  <code>test_gpt6_model_support.py</code> still refuses a route whose pricing
+  resolves to nothing.</p>
+</section>
