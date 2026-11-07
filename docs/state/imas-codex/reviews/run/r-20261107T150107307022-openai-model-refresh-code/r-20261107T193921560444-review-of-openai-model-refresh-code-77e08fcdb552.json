@@ -1,0 +1,108 @@
+{
+  "added_failure_count": 2,
+  "added_failure_ids": [
+    "tests/core/test_catalog_input_limits.py::test_docs_review_escalator_accepts_rotated_breaker",
+    "tests/standard_names/test_dd_gap_automated_writers.py::test_review_writer_requires_successful_owned_transition[None-name]"
+  ],
+  "blocking_findings_count": 0,
+  "call_sites": [
+    "imas_codex/ids/candidates.py:373 decide_one(cost=...)",
+    "imas_codex/ids/candidates.py:458 decide_one(cost=...)",
+    "imas_codex/standard_names/review/judge_stage.py:272 decide_batch(cost=cost, step=COST_STEP)",
+    "imas_codex/standard_names/review/pipeline.py:643 PipelineCost(charge=_judge_cost_sink(state))",
+    "imas_codex/standard_names/worker_tasks/worker_review_docs.py:735 decide_batch(reported=releases)",
+    "imas_codex/standard_names/review/jev_review.py:1365 decide_batch",
+    "imas_codex/standard_names/review/cascade.py:601 decide_batch",
+    "imas_codex/standard_names/families.py:884 decide_batch",
+    "imas_codex/standard_names/segment_selection.py:591 decide_batch",
+    "imas_codex/standard_names/domain_decision.py:272 decide_batch",
+    "imas_codex/standard_names/near_duplicates.py:217 decide_batch",
+    "imas_codex/graph/dd_domain_classifier.py:1080 decide_batch",
+    "imas_codex/standard_names/budget.py:829 record_llm_cost(model_release=item.event.model_release)",
+    "imas_codex/settings.py:87 get_openrouter_pricing"
+  ],
+  "completed_at": "2026-11-07T19:53:00.388Z",
+  "dispatched_at": "2026-11-07T19:41:44Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/review/pipeline.py",
+      "line": "564",
+      "severity": "non-blocking",
+      "text": "The zero-cost half of the previous round's blocking finding is repaired (line 560 routes a zero spend through BudgetManager.record_llm_cost_event without reserving), but the other half survives: when manager.reserve returns None the sink returns at line 565 and the call the provider already billed leaves no LLMCost row and no release, which is the silent loss the change exists to end. Recording with overspend, as BudgetLease.charge_event's short-pool path already does at imas_codex/standard_names/budget.py:596, would keep the row."
+    },
+    {
+      "file": "manifest.md",
+      "line": "12",
+      "severity": "non-blocking",
+      "text": "The tests: line and both baseline_suite/after_suite commands select tests/core, tests/discovery/test_llm_decisions.py, tests/discovery/test_judgment.py and tests/standard_names, which collect zero items from tests/discovery/test_decisions_release_tracking.py \u2014 the node's own fifteen tests \u2014 so the recorded gate cannot redden on a regression in the change it measures; gate-release-zero.log runs them separately at 15 passed EXIT=0 but carries no revision header, and the after_suite revision is 73acefa34, three commits behind the reviewed head."
+    },
+    {
+      "file": "docs/evidence/fragments/openai-model-refresh-code.html",
+      "line": "68",
+      "severity": "non-blocking",
+      "text": "The fragment points a reader at 'the sibling fragment's pricing-reference-grep.txt' for the pricing scan, and no such file exists in the repository at 77e08fcdb or in the run directory, so the evidence for leaving the three pricing rows in place cannot be opened by the reader who needs it."
+    },
+    {
+      "file": "manifest.md",
+      "line": "8",
+      "severity": "non-blocking",
+      "text": "The commits: field lists ten shas while git log 6c73f1747..77e08fcdb returns fifteen, omitting 6f5564b9d, 7c0bfd269, 566ee7678, 737edff17 and 393caa869, so a coordinator reconciling the landed change against the record sees two thirds of it."
+    },
+    {
+      "file": "pyproject.toml",
+      "line": "904",
+      "severity": "non-blocking",
+      "text": "openrouter-pricing rows for openrouter/openai/gpt-5.6-luna (:904), gpt-5.5 (:952) and gpt-5.4 (:963) remain, so the done-when's literal 'pyproject.toml references no OpenAI model older than the newest of its tier' is unmet; leaving them is the right call because tests/ still name those ids and an unpriced model fails closed, but the guard added at tests/core/test_settings.py:607 asserts the slate and the route table and never the pricing section, so a stale row would not redden it."
+    }
+  ],
+  "findings_count": 5,
+  "justifications": {
+    "durability": "tests/discovery/test_decisions_release_tracking.py:216-230 fails if PipelineCost.note_release stops being called, :268 fails if record_llm_cost drops llm_model_release, :336 fails if the zero-cost branch reserves, and :359-383 fail if either production wiring is reverted.",
+    "evidence": "gate-fix-base.log:8 reports '6 workers [9621 items]' from an archived 566ee7678 tree that lacks tests/discovery/test_decisions_release_tracking.py and review/pipeline.py's _judge_cost_sink, against 9622 items on the after arm, so the arms now really are two revisions and the 6-failed/2-failed delta is a measured one, but the declared selection never runs the node's own fifteen new tests.",
+    "fit": "The optional record_release sink at imas_codex/discovery/base/llm.py:3611 keeps the two-value return, _book_cost at imas_codex/discovery/base/judgment.py:50 keeps the module's duck-typed cost: Any | None idiom, and the added prose states mechanism rather than provenance.",
+    "goal_fidelity": "imas_codex/settings.py:1973-1998 and imas_codex/config/litellm_config.yaml:86-104 now name only the newest model of each OpenAI tier, which is exactly the goal line, and no code default or proxy route retains a gpt-5.x name.",
+    "reuse": "PipelineCost.record_llm_call at imas_codex/ids/mapping.py:113 hands persistence to record_llm_cost at imas_codex/standard_names/graph_store/graph_cost_and_claims.py:30, the repository's only LLMCost writer, and BudgetManager.record_llm_cost_event at imas_codex/standard_names/budget.py:880 reuses _enqueue_write rather than forking a writer, though the reserve-then-charge_event idiom is restated at imas_codex/standard_names/review/pipeline.py:563 rather than shared.",
+    "scope_discipline": "Every one of the fifteen changed paths is named in the manifest's orientation_write_paths and each beyond the original four-path fence traces to a resume instruction, and no path or symbol carries a plan, sprint or ticket identifier."
+  },
+  "outside_scope": "The previous round's blocking finding on the base arm is repaired and verified: /dev/shm/crew-base-566ee7678 is a real 566ee7678 archive holding the five generated model files, lacks tests/discovery/test_decisions_release_tracking.py and review/pipeline.py's _judge_cost_sink, and gate-fix-base.log carries no ModuleNotFoundError and reports 9621 items against the after arm's 9622, the one-test difference being the new settings guard. The sibling rerank spend at imas_codex/standard_names/review/jev_review.py:1377 is added through cost.add rather than the charge hook, so it writes no LLMCost row and no release; that file is outside this node's diff and is reported rather than reviewed.",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to point the GPT-5 model names in code defaults and proxy routes at the newest model of their tier; imas_codex/config/litellm_config.yaml:86-104 carries exactly the three 6.1/6-tier OpenAI routes and imas_codex/settings.py:1973-1998 the same three in every slate, with no gpt-5.x name left in either.\nVERDICT done_when: docs/evidence/fragments/openai-model-refresh-code.html records the three probe calls with completion, tokens and cost, the before/after table and a two-arm gate, but pyproject.toml:904, :952 and :963 still hold openrouter-pricing rows for gpt-5.6-luna, gpt-5.5 and gpt-5.4.\nVERDICT write_paths: the dispatch fenced four paths and the diff touches fifteen, but every additional path is named by a coordinator resume instruction and repeated in the manifest's orientation_write_paths.\nVERDICT manifest: read; status complete, its gate claims reconcile with the logs they cite, but its commit list names ten of fifteen commits (manifest.md:8) and its after_suite revision is 73acefa34, three commits behind head.\nVERDICT diff: read commit by commit from 6c73f1747 to 77e08fcdb across fifteen files; the tier move, the Jev seat pins after a recorded alias probe, the record_release sink, the LLMCost release column, the zero-cost branch and two evidence fragments are each accounted for.\nCALL_SITES: imas_codex/ids/candidates.py:373, imas_codex/ids/candidates.py:458, imas_codex/standard_names/review/judge_stage.py:272, imas_codex/standard_names/review/pipeline.py:643, imas_codex/standard_names/worker_tasks/worker_review_docs.py:735, imas_codex/standard_names/review/jev_review.py:1365, imas_codex/standard_names/review/cascade.py:601, imas_codex/standard_names/families.py:884, imas_codex/standard_names/segment_selection.py:591, imas_codex/standard_names/domain_decision.py:272, imas_codex/standard_names/near_duplicates.py:217, imas_codex/graph/dd_domain_classifier.py:1080, imas_codex/standard_names/budget.py:829, imas_codex/settings.py:87\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/config/litellm_config.yaml:86-104 and imas_codex/settings.py:1973-1998 now name only gpt-6.1-sol, gpt-6.1-terra and gpt-6-luna, which is the goal line exactly.\nSCORE evidence: 14\nJUSTIFICATION evidence: gate-fix-base.log:8 reports 9621 items from an archived 566ee7678 tree that verifiably lacks the new test file and the new sink, against 9622 on the after arm, so the delta is measured, but the declared selection never runs the node's own fifteen tests.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every one of the fifteen changed paths is listed in the manifest's orientation_write_paths and each beyond the original four-path fence traces to a resume instruction.\nSCORE durability: 17\nJUSTIFICATION durability: tests/discovery/test_decisions_release_tracking.py:336 fails if the zero-cost branch reserves again and :359-383 fail if either production wiring is reverted.\nSCORE fit: 18\nJUSTIFICATION fit: the optional record_release sink at imas_codex/discovery/base/llm.py:3611 keeps the two-value return and the module's docstring-per-argument idiom, and no added name carries a plan or ticket identifier.\nSCORE reuse: 17\nJUSTIFICATION reuse: imas_codex/ids/mapping.py:113 hands persistence to record_llm_cost at imas_codex/standard_names/graph_store/graph_cost_and_claims.py:30, the repository's only LLMCost writer, though the reserve-then-charge idiom is restated at imas_codex/standard_names/review/pipeline.py:563.\nFINDING imas_codex/standard_names/review/pipeline.py:564 non-blocking: the short-pool branch returns without writing a row, so a call the provider already billed leaves no LLMCost record and no release.\nFINDING manifest.md:12 non-blocking: the declared gate selection collects zero items from tests/discovery/test_decisions_release_tracking.py, so the recorded gate cannot redden on a regression in the change it measures.\nFINDING docs/evidence/fragments/openai-model-refresh-code.html:68 non-blocking: the cited pricing-reference-grep.txt exists neither in the repository nor in the run directory.\nFINDING manifest.md:8 non-blocking: the commits field names ten of the fifteen commits between base and head.\nFINDING pyproject.toml:904 non-blocking: the three older-tier pricing rows remain, correctly by the brief's keep-if-referenced rule, but the new guard never reads the pricing section.\n",
+  "review_evidence": {
+    "added_failure_derivation": "FAILED ids read from the two suite logs the manifest declares. baseline_suite (gate-fix-base.log, revision 566ee7678, EXIT=1, 6 failed / 9601 passed) names test_offsite_push.py::test_a_copy_under_a_week_old_is_not_due_and_leaves_the_graph_running, test_offsite_push.py::test_a_due_push_defers_while_other_clients_work_on_the_graph, test_manifest_generability.py::test_every_manifest_source_is_carried_or_names_its_blocking_mechanism, test_manifest_generability.py::test_a_cut_refuses_a_manifest_it_cannot_generate_rather_than_counting, test_manifest_generability.py::test_a_manifest_whose_sources_all_reach_a_name_is_not_refused and test_catalog_layout_hierarchy.py::TestOrderingCycleDetection::test_export_ledgers_cycle_and_writes_packet. after_suite (gate-fix-after.log, revision 73acefa34, EXIT=1, 2 failed / 9607 passed) names test_catalog_input_limits.py::test_docs_review_escalator_accepts_rotated_breaker and test_dd_gap_automated_writers.py::test_review_writer_requires_successful_owned_transition[None-name]. The set difference after-minus-base is those two ids; both pass alone at the same revision (gate-fix-single.log, 5 passed, EXIT=0), which the manifest records as parallel-load flakes.",
+    "base_sha": "6c73f1747b4d64f1943a82ef6bfaaebd91f6c6a5",
+    "gate_logs": [
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T150107307022-openai-model-refresh-code/gate-fix-base.log",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T150107307022-openai-model-refresh-code/gate-fix-after.log",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T150107307022-openai-model-refresh-code/gate-fix-single.log",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T150107307022-openai-model-refresh-code/gate-release-zero.log",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T150107307022-openai-model-refresh-code/gate-base.log",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T150107307022-openai-model-refresh-code/gate-after.log"
+    ],
+    "head_sha": "77e08fcdb55217dfa97694422a1a305bd42c8e8f",
+    "independent_measurements": "The archived base tree at /dev/shm/crew-base-566ee7678 was opened directly: tests/discovery/test_decisions_release_tracking.py is absent and grep for _judge_cost_sink in its review/pipeline.py returns 0, while imas_codex/graph/models.py is present, so the base arm is a genuinely different, importable revision. gate-fix-base.log holds 0 ModuleNotFoundError lines and 0 collection errors.",
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/review-of-openai-model-refresh-code-77e08fcdb552"
+  },
+  "review_run_id": "r-20261107T193921560444-review-of-openai-model-refresh-code-77e08fcdb552",
+  "reviewed_base_sha": "6c73f1747b4d64f1943a82ef6bfaaebd91f6c6a5",
+  "reviewed_head_sha": "77e08fcdb55217dfa97694422a1a305bd42c8e8f",
+  "reviewed_run_id": "r-20261107T150107307022-openai-model-refresh-code",
+  "scores": {
+    "durability": 17,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 17,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T20:55:00+00:00",
+  "total": 103,
+  "verdicts": {
+    "diff": "Read commit by commit from 6c73f1747 to 77e08fcdb across fifteen files: 8471b89e2/6f5564b9d move the proxy routes, the fallback slate and the bench examples and add the OpenAI fragment; 7c0bfd269/566ee7678 pin the four Jev seats to 1.14 after the alias probe; 737edff17 adds the record_release sink and PipelineCost.releases; 393caa869/844d598fb/33331ed6f reshape the settings guard and add the pricing test; 0097269ac adds the second fragment; f69d08072/c23f73856 persist model_release on the LLMCost row and bind the judge stage's sink; 73acefa34 handles zero cost; 539cdb57a/77e08fcdb record the corrected gate.",
+    "done_when": "The done-when asks for a fragment recording the three probe calls with completion, tokens and cost, the before/after reference list and the gate, plus pyproject.toml referencing no OpenAI model older than the newest of its tier; docs/evidence/fragments/openai-model-refresh-code.html records all three probes (completion 'ready', 13/5/18 tokens, 0.0000760 / 0.0000380 / 0.0000038 USD), the before/after table and a two-arm gate, but pyproject.toml:904, :952 and :963 still hold openrouter-pricing rows for gpt-5.6-luna, gpt-5.5 and gpt-5.4, so the second half of the measure is met only under the brief's own keep-if-referenced rule for step 3.",
+    "goal": "The goal is to point the GPT-5 model names in code defaults and proxy routes at the newest model of their tier; at head 77e08fcdb imas_codex/config/litellm_config.yaml:86-104 carries exactly three OpenAI routes (openrouter/openai/gpt-6.1-sol, gpt-6.1-terra, gpt-6-luna) where six GPT-5 routes stood, imas_codex/settings.py:1973-1998 carries the same three in compose-models, reviewer-models and candidate-models, and imas_codex/cli/sn.py:3572-3573 carries the bench examples, with no gpt-5.x name surviving in any of the three.",
+    "manifest": "Read; status complete, and every one of its gate claims reconciles with the log it cites except its commit list, which names ten of the fifteen commits between base and head, omitting 6f5564b9d, 7c0bfd269, 566ee7678, 737edff17 and 393caa869 (manifest.md:8), and its after_suite revision is 73acefa34, three commits behind the reviewed head.",
+    "write_paths": "The dispatch fenced four paths (imas_codex/settings.py, imas_codex/config/litellm_config.yaml, imas_codex/cli/sn.py, docs/evidence/fragments/openai-model-refresh-code.html) and the diff from 6c73f1747 touches fifteen; every additional path is named by a coordinator resume instruction (resume-1-advice.txt for pyproject.toml and tests/core/test_settings.py, resume-2/3/4 for imas_codex/discovery/base/{llm,judgment}.py, imas_codex/ids/mapping.py, imas_codex/standard_names/{budget.py,graph_store/graph_cost_and_claims.py,review/pipeline.py,worker_tasks/worker_review_docs.py} and tests/discovery/test_decisions_release_tracking.py) and is repeated in the manifest's orientation_write_paths, so the extension is authorised even though the governing fence line was narrower."
+  }
+}
