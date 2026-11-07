@@ -1,0 +1,40 @@
+<section data-reckon="fragment" id="sib-removal-follows-renames">
+<h2 id="sib-removal-follows-renames-title">A removed DD path moves its name to the successor, or supersedes it</h2>
+
+<p id="sib-removal-follows-renames-rule">A DD rebuild stamps every path it dropped
+<code>lifecycle_status='removed'</code>. <code>reconcile_standard_name_sources</code>
+marks the sources on such a path <code>stale</code>; before this change it never read
+the name those sources produced, so the last-producing-source invariant — which runs
+only inside a writer's transaction — never fired and a live name was left with no
+producer.</p>
+
+<p id="sib-removal-follows-renames-change">The name is now resolved in the same
+statement that marks the source stale, by the removed path's unheld successor:</p>
+
+<table>
+<thead><tr><th>Branch</th><th>Condition</th><th>Effect</th></tr></thead>
+<tbody>
+<tr><td>move</td><td>a <code>RENAMED_TO</code> successor no live name holds, units agree</td><td>the successor's source becomes the name's sole producer; the name stays live</td></tr>
+<tr><td>supersede_holder</td><td>another live name holds the successor</td><td>the name is superseded, <code>(holder)-[:REFINED_FROM]-&gt;(name)</code>, receipt <code>removed_path_successor_holder</code></td></tr>
+<tr><td>retire</td><td>no successor, or the successor's unit disagrees</td><td>superseded with a <code>removed_path_retirement</code> receipt and no successor edge</td></tr>
+</tbody>
+</table>
+
+<p id="sib-removal-follows-renames-guard">Every branch fires only when the source was
+the name's last non-stale producer, so one removed path never retires a name another
+source still produces. The resolution is also scoped to DD sources: a removed DD path
+has a <code>RENAMED_TO</code> successor to follow, while a signals source names a
+facility signal that is not an <code>IMASNode</code> at all, so a signals source is
+marked stale and its name is left to the signal-side lifecycle. The dead-end revival
+guard also read the batch's <code>source_type</code>, which worker outcomes omit; it
+now reads the source node's own type.</p>
+
+<p id="sib-removal-follows-renames-evidence">Evidence, on the disposable graph:
+<code>tests/standard_names/test_removal_follows_renames.py</code> has four tests that
+drive the real <code>reconcile_standard_name_sources('dd')</code> — one per branch plus
+the unit-mismatch case — one that drives
+<code>reconcile_standard_name_sources('signals')</code> and proves the drained name
+stays live with no receipt, and one that checks the revival guard. Negative controls:
+restoring the stale-mark-only body fails all four reconciliation tests (EXIT=1), and
+removing the DD scoping supersedes the signal-backed name (EXIT=1).</p>
+</section>

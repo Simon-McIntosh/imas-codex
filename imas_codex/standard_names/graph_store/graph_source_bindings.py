@@ -1021,7 +1021,7 @@ def _lock_claimed_name_bindings(
         WITH b, sns, target, owned,
              CASE
                WHEN $allow_dead_end_revival
-                    AND b.source_type = 'dd'
+                    AND sns.source_type = 'dd'
                     AND target.name_stage IN $revivable_stages
                     AND b.attachment_error IS NULL
                     AND (b.unit IS NULL OR target.unit IS NULL
@@ -2487,11 +2487,39 @@ def mark_source_skipped(
     return result[0]["affected"] if result else 0
 
 
+#: The branch a removed path resolves to, keyed by what it does to the name.
+_REMOVAL_MOVE = "move"
+_REMOVAL_SUPERSEDE_HOLDER = "supersede_holder"
+_REMOVAL_RETIRE = "retire"
+
+
 def mark_sources_stale(source_ids: list[str], *, services: Any) -> int:
-    """Mark sources as stale (source entity no longer exists).
+    """Mark sources as stale and resolve the name each losing path produced.
 
     Not token-verified — can be called from reconciliation outside claim context.
-    Returns count of updated sources.
+
+    A DD rebuild stamps a removed path ``lifecycle_status='removed'``, and this
+    is where every source pointing at it is retired. Marking the source alone
+    strands the name it produced: no writer's transaction runs, so the
+    last-producing-source invariant never fires and a live name is left with
+    nothing producing it. The name is therefore resolved in the same statement
+    that marks the source stale, by the path's successor:
+
+    * ``move`` — the removed path has a ``RENAMED_TO`` successor no live name
+      holds and the units agree, so the successor's source takes over the
+      binding and the name stays live;
+    * ``supersede_holder`` — another live name already holds that successor, so
+      this name is superseded onto it with a successor edge and a receipt;
+    * ``retire`` — there is no successor, or the successor's unit disagrees, so
+      the name is superseded with a retirement receipt and no successor edge.
+
+    Every branch fires only when the source was the name's last non-stale
+    producer, so one removed path never retires a name another source still
+    produces. The resolution is scoped to DD sources: a removed DD path has a
+    ``RENAMED_TO`` successor to follow, while a signals source names a facility
+    signal that is not an ``IMASNode`` at all, so it is marked stale and its
+    name is left to the signal-side lifecycle. Returns the number of sources
+    marked stale.
     """
     if not source_ids:
         return 0
@@ -2503,11 +2531,129 @@ def mark_sources_stale(source_ids: list[str], *, services: Any) -> int:
             SET sns.status = 'stale',
                 sns.claimed_at = null,
                 sns.claim_token = null
-            RETURN count(sns) AS affected
+            WITH DISTINCT sns
+            WITH collect(sns) AS stale_sources
+            CALL (stale_sources) {
+              UNWIND stale_sources AS sns
+              OPTIONAL MATCH (sns)-[own:PRODUCED_NAME]->(sn:StandardName)
+              WITH sns, own, sn
+              WHERE sn IS NOT NULL
+                AND sns.source_type = 'dd'
+                AND NOT (coalesce(sn.name_stage, '') IN $terminal_stages)
+                AND NOT (coalesce(sn.status, '') IN
+                         ['superseded', 'deprecated'])
+                AND NOT EXISTS {
+                  MATCH (other:StandardNameSource)-[:PRODUCED_NAME]->(sn)
+                  WHERE coalesce(other.status, '') <> 'stale'
+                }
+              OPTIONAL MATCH (old:IMASNode {id: sns.source_id})-[:RENAMED_TO]->
+                              (succ:IMASNode)
+              WHERE coalesce(succ.lifecycle_status, '') <> 'removed'
+              WITH sns, own, sn, succ,
+                   coalesce(
+                     succ.unit,
+                     head([(succ)-[:HAS_UNIT]->(unit:Unit) | unit.id])
+                   ) AS successor_unit
+              OPTIONAL MATCH (held:StandardNameSource)-[:PRODUCED_NAME]->
+                               (holder:StandardName)
+              WHERE succ IS NOT NULL
+                AND held.source_type = 'dd'
+                AND held.source_id = succ.id
+                AND NOT (coalesce(holder.name_stage, '') IN $terminal_stages)
+                AND NOT (coalesce(holder.status, '') IN
+                         ['superseded', 'deprecated'])
+                AND holder.id <> sn.id
+              WITH sns, own, sn, succ, successor_unit,
+                   head(collect(DISTINCT holder)) AS holder
+              WITH sns, own, sn, succ, successor_unit, holder,
+                   CASE
+                     WHEN succ IS NULL THEN $retire
+                     WHEN sn.unit IS NOT NULL
+                       AND successor_unit IS NOT NULL
+                       AND sn.unit <> successor_unit THEN $retire
+                     WHEN holder IS NOT NULL THEN $supersede_holder
+                     ELSE $move
+                   END AS branch
+              FOREACH (_ IN CASE WHEN branch = $move THEN [1] ELSE [] END |
+                MERGE (moved:StandardNameSource {id: 'dd:' + succ.id})
+                ON CREATE SET moved.source_type = 'dd',
+                              moved.source_id = succ.id,
+                              moved.attempt_count = 0,
+                              moved.created_at = datetime()
+                SET moved.status = CASE
+                      WHEN coalesce(moved.status, '') IN ['', 'stale']
+                        THEN 'extracted'
+                      ELSE moved.status
+                    END,
+                    moved.claimed_at = null,
+                    moved.claim_token = null
+                MERGE (moved)-[:FROM_DD_PATH]->(succ)
+                MERGE (moved)-[:PRODUCED_NAME]->(sn)
+                SET sn.updated_at = datetime()
+              )
+              FOREACH (_ IN CASE WHEN branch = $move THEN [1] ELSE [] END |
+                DELETE own
+              )
+              FOREACH (_ IN CASE WHEN branch IN [$retire, $supersede_holder]
+                              THEN [1] ELSE [] END |
+                SET sn.name_stage = 'superseded',
+                    sn.status = 'superseded',
+                    sn.updated_at = datetime(),
+                    sn.claimed_at = null,
+                    sn.claim_token = null
+              )
+              FOREACH (_ IN CASE WHEN branch = $supersede_holder
+                              THEN [1] ELSE [] END |
+                MERGE (holder)-[:REFINED_FROM]->(sn)
+              )
+              RETURN collect(
+                CASE WHEN sn IS NULL THEN null ELSE
+                  {name_id: sn.id, successor_path: succ.id,
+                   holder_id: holder.id, branch: branch}
+                END
+              ) AS outcomes
+            }
+            RETURN size(stale_sources) AS affected, outcomes
             """,
             source_ids=source_ids,
+            terminal_stages=sorted(foundation._TERMINAL_BINDING_NAME_STAGES),
+            move=_REMOVAL_MOVE,
+            supersede_holder=_REMOVAL_SUPERSEDE_HOLDER,
+            retire=_REMOVAL_RETIRE,
         )
-        return result[0]["affected"] if result else 0
+        if not result:
+            return 0
+        outcomes = [row for row in (result[0].get("outcomes") or []) if row]
+        from imas_codex.standard_names.provenance_lifecycle import (
+            record_standard_name_change,
+        )
+        from imas_codex.standard_names.source_invariant import (
+            record_supersede_receipts,
+        )
+
+        record_supersede_receipts(
+            gc,
+            (
+                (row["name_id"], row["holder_id"])
+                for row in outcomes
+                if row["branch"] == _REMOVAL_SUPERSEDE_HOLDER
+            ),
+            operation="removed_path_successor_holder",
+            reason="the removed path's successor is held by a live name",
+        )
+        # A retirement names no successor, so its receipt is the name's own
+        # event; the wrapper above drops self-pairs.
+        for row in outcomes:
+            if row["branch"] != _REMOVAL_RETIRE:
+                continue
+            record_standard_name_change(
+                gc,
+                row["name_id"],
+                row["name_id"],
+                operation="removed_path_retirement",
+                reason="the source path was removed and has no successor",
+            )
+        return result[0]["affected"]
 
 
 def write_skipped_sources(records: list[dict], *, services: Any) -> int:
