@@ -1,0 +1,62 @@
+{
+  "added_failure_count": 2,
+  "added_failure_ids": [
+    "tests/standard_names/test_review_pipeline.py::test_audit_embedding_preflight",
+    "tests/standard_names/test_review_name_stages.py::TestWorkerUsesCanonicalModel::test_worker_uses_canonical_model"
+  ],
+  "call_site_count": 6,
+  "call_sites": [
+    "imas_codex/cli/sn.py:7179",
+    "imas_codex/llm/sn_tools.py:918",
+    "imas_codex/standard_names/promote.py:1241",
+    "imas_codex/standard_names/review_triage.py:337",
+    "imas_codex/standard_names/source_refresh.py:476",
+    "imas_codex/standard_names/edit.py:990"
+  ],
+  "completed_at": "2026-11-07T16:54:33.764Z",
+  "dispatched_at": "2026-11-07T16:37:44Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/edit.py",
+      "line": "3325",
+      "severity": "blocking",
+      "text": "the reclaim's MERGE (tomb)-[:REFINED_FROM]->(old) closes a directed cycle in the closing_lineage case, because that case is defined at edit.py:3264-3269 as the target already descending from the tombstone (the successor walk returns the target as the tombstone's live tip), so adding tomb->target on top of the target->...->tomb chain yields tomb->target->...->tomb. The repository treats such a cycle as invalid: graph_store/graph_supersession.py:355 excludes a target the name already descends from and :569 refuses with \"REFINED_FROM cycle\", edit.py:2325 raises the same refusal for a fold, and chain_history.py:35 walks REFINED_FROM*1.. unbounded, so it would report the revived name as its own ancestor. The node's own test codifies the cycle rather than catching it: tests/standard_names/test_reclaim_superseded_spelling.py:172 asserts TOMBSTONE in retired[\"successors\"], which is exactly the cycle-closing edge."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-reclaim-superseded-spelling.html",
+      "line": "18",
+      "severity": "non-blocking",
+      "text": "the fragment asserts zero added failures, but the run's own recorded arms do not support it: baseline_suite names six failing ids and after_suite names eight, and two head ids (tests/standard_names/test_review_pipeline.py::test_audit_embedding_preflight, tests/standard_names/test_review_name_stages.py::TestWorkerUsesCanonicalModel::test_worker_uses_canonical_model) have no counterpart in the recorded base log; the second base run the manifest's baseline_suite note cites as covering them is not on disk, so derived from the two recorded arms the added-failure count is 2. The serial triage at head (logs/triage-head.log, 6 passed, EXIT=0) makes a regression unlikely, but the record's zero rests on an unrecorded arm."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-reclaim-superseded-spelling.html",
+      "line": "14",
+      "severity": "non-blocking",
+      "text": "the fragment attributes the recorded 3-passed gate to head f2d466185, but logs/gate-reclaim.log carries no revision or tree header (its first line is a bare '# command:'), and its mtime follows the fix commit ddb434957 which added the receipt assertions the negative control exercises, so the gate log cannot be tied to the revision this review read."
+    },
+    {
+      "file": "imas_codex/standard_names/edit.py",
+      "line": "3271",
+      "severity": "non-blocking",
+      "text": "the different_locus case compares the tombstone's locus with the current holder's locus only, and never compares the renaming name's own locus, so a live name from any third locus may take the tombstoned spelling whenever its holder differs; the ruling's stated purpose (the spelling still means what the tombstone recorded) is preserved only if the target also sits at the tombstone's locus, which no test covers."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source goal in prompt.txt:33 is to let `sn edit --rename` reclaim a superseded tombstone's id in the two ruled cases through a signed, receipted route; imas_codex/standard_names/edit.py:3540-3556 now asks `_reclaim_spelling_case` before refusing and dispatches to `_apply_reclaim_rename` at edit.py:3344, while every other tombstone target keeps the existing refusal.\nVERDICT done_when: The done_when in prompt.txt names three disposable-graph cases, a red base arm, the sn-edit skill, and no added failure id for test_edit_engine.py and the default tests/standard_names suite; logs/gate-reclaim.log ends '3 passed' EXIT=0, logs/negative-control-receipt.log ends '2 failed, 1 passed' EXIT=1 with both reclaim cases red, both edit-engine arms end '72 passed' EXIT=0, and the default pair shows 6 base ids against 8 head ids with two head ids absent from the recorded base log, so the zero-added clause is not derivable from the stored arms alone.\nVERDICT write_paths: The source prompt grants imas_codex/standard_names/edit.py, tests/standard_names/test_reclaim_superseded_spelling.py, .claude/skills/sn-edit/SKILL.md, docs/evidence/fragments/sn-integrity-backlog/sib-reclaim-superseded-spelling.html and the docs/figures directory of the same name; git diff --stat 2c9ea5cbdb..7538a4d85 changes exactly four of those, leaving the figures directory unused and touching no other path.\nVERDICT manifest: Read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T133317139144-sib-reclaim-superseded-spelling/manifest.md; it records commits f2d466185, 99567b9a0, ddb434957 and 7538a4d85, the three-passing gate, both negative controls, both edit-engine arms at 72 passed, and suite arms at base 6 / head 8 whose union it asserts is the same, with the assertion resting on a second base run not stored on disk.\nVERDICT diff: Read commit by commit from 2c9ea5cbdb to 7538a4d85: f2d466185 adds the case reader, the atomic revive-and-retire mutation with its StandardNameChange receipt, the postflight run_id assertion and the collision-branch dispatch; 99567b9a0 adds the evidence fragment and the skill route; ddb434957 binds the prior stage in a WITH before the SET and adds the receipt assertions; 7538a4d85 extends the fragment's measurement table. 667 insertions, 21 deletions, no unrelated change.\nVERDICT call_sites: The rename path is reached from the `sn edit` CLI at imas_codex/cli/sn.py:7179 and from four other apply_edit callers; no production caller passes a rename onto a superseded spelling today, so the new branch is reachable but unused until the separatrix apply node runs.\nCALL_SITES: imas_codex/cli/sn.py:7179, imas_codex/llm/sn_tools.py:918, imas_codex/standard_names/promote.py:1249, imas_codex/standard_names/review_triage.py:337, imas_codex/standard_names/source_refresh.py:476, imas_codex/standard_names/edit.py:990\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: edit.py:3540-3562 admits exactly the two ruled cases and routes them to _apply_reclaim_rename at edit.py:3344, whose postflight at edit.py:3464 refuses a revival that did not take, but the admitted closing_lineage case writes a REFINED_FROM cycle at edit.py:3325.\nSCORE evidence: 14\nJUSTIFICATION evidence: logs/gate-reclaim.log records '3 passed' EXIT=0 and logs/negative-control-receipt.log records '2 failed, 1 passed' EXIT=1, but the gate log names no revision and the zero-added suite claim rests on a base arm not stored on disk (after_suite 8 ids vs baseline_suite 6).\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat 2c9ea5cbdb..7538a4d85 changes only four of the five declared paths (docs/evidence/fragments/sn-integrity-backlog/sib-reclaim-superseded-spelling.html, imas_codex/standard_names/edit.py, tests/standard_names/test_reclaim_superseded_spelling.py, .claude/skills/sn-edit/SKILL.md) and no plan file.\nSCORE durability: 15\nJUSTIFICATION durability: tests/standard_names/test_reclaim_superseded_spelling.py:174-184 and :213-220 redden when the receipt CREATE is deleted (logs/negative-control-receipt.log) and both reclaim cases redden at the base writer, but :172 asserts the cycle-closing edge rather than catching it and no case covers a target at a third locus.\nSCORE fit: 16\nJUSTIFICATION fit: edit.py:3186-3290 names the mechanism with docstrings in the file's existing idiom and carries no plan, ticket or author identifier, though the comment at edit.py:3300 says the tombstone records the stage held when it is the renaming name that does, and _RECLAIM_TOMBSTONE_QUERY returns a successors column at edit.py:3165 that no caller reads.\nSCORE reuse: 16\nJUSTIFICATION reuse: edit.py:3421 reuses _fold_revival_stage and edit.py:3444 reuses _carry_rename_sources (which moves sources through retarget_standard_name_sources), but the new mutation at edit.py:3292-3342 bypasses the repository's REFINED_FROM cycle guard owned by imas_codex/standard_names/graph_store/graph_supersession.py:549 rather than extending it.\nFINDING imas_codex/standard_names/edit.py:3325 blocking: the reclaim's MERGE (tomb)-[:REFINED_FROM]->(old) closes a directed cycle in the closing_lineage case, because that case is defined at edit.py:3264-3269 as the target already descending from the tombstone, so adding tomb->target on the target->...->tomb chain yields tomb->target->...->tomb; graph_store/graph_supersession.py:355 and :569 refuse exactly this cycle, edit.py:2325 raises it for a fold, and chain_history.py:35 walks REFINED_FROM*1.. unbounded, so it would report the revived name as its own ancestor; tests/standard_names/test_reclaim_superseded_spelling.py:172 asserts the cycle-closing edge rather than catching it.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-reclaim-superseded-spelling.html:18 non-blocking: the fragment asserts zero added failures, but baseline_suite records six failing ids against after_suite's eight, and two head ids (test_review_pipeline.py::test_audit_embedding_preflight, test_review_name_stages.py::TestWorkerUsesCanonicalModel::test_worker_uses_canonical_model) have no counterpart in the recorded base log; the second base run the manifest's note cites is not on disk, so the count derived from the two recorded arms is 2, and only the serial triage at head (logs/triage-head.log, 6 passed) makes a regression unlikely.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-reclaim-superseded-spelling.html:14 non-blocking: the fragment attributes the recorded 3-passed gate to head f2d466185, but logs/gate-reclaim.log carries no revision or tree header and its mtime follows ddb434957, which added the receipt assertions the negative control exercises, so the gate log cannot be tied to the manifest's claimed head.\nFINDING imas_codex/standard_names/edit.py:3271 non-blocking: the different_locus case compares the tombstone's locus with the holder's only and never compares the renaming name's own locus, so a live name from any third locus may take the tombstoned spelling when its holder differs, and no test spans that shape.\n",
+  "review_run_id": "r-20261107T163606154286-review-of-sib-reclaim-superseded-spelling-7538a4d85413",
+  "reviewed_base_sha": "2c9ea5cbdb33687b268a19c204fe1aa55465bff5",
+  "reviewed_head_sha": "7538a4d8541307da32f30a627bfc6ea67ffd30f6",
+  "reviewed_run_id": "r-20261107T133317139144-sib-reclaim-superseded-spelling",
+  "scores": {
+    "durability": 15,
+    "evidence": 14,
+    "fit": 16,
+    "goal_fidelity": 14,
+    "reuse": 16,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T16:49:47+00:00",
+  "total": 94
+}
