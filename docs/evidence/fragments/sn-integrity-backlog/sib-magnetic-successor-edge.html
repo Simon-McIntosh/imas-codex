@@ -53,8 +53,8 @@ transaction, and nothing else:</p>
 </tbody>
 </table>
 <p>A second apply of the same manifest returns <code>already_applied</code>
-with <code>persistent_writes: 0</code>, so the write is idempotent on the
-receipt.</p>
+with <code>persistent_writes: 0</code> (<code>07-reapply.log</code>), so the
+write is idempotent on the receipt.</p>
 
 <h2 id="sib-magnetic-successor-edge-deviation">The edge type, stated plainly</h2>
 <p>The dispatch note names this measure as a <code>REFINED_FROM</code> edge.
@@ -88,6 +88,29 @@ filter and release holds from <code>export.py</code>), not by re-deriving it:</p
 <p>The empty blocking set is the measured result, and the three held rows are
 the control that the predicate saw a non-empty population rather than
 nothing.</p>
+
+<h2 id="sib-magnetic-successor-edge-asserts">Both modes assert, and the assertion is shown firing</h2>
+<p><code>readback</code> and <code>gate</code> both run
+<code>require_successor</code> before printing. It requires exactly one
+successor edge, reaching the named successor, carrying a
+<code>receipt_id</code>; exactly one supersession receipt whose id is that same
+<code>receipt_id</code> and whose operation is
+<code>link_signed_successor</code>; and the predecessor <code>superseded</code>
+with the successor <code>accepted</code>. A violated clause exits 1 naming
+itself, so the log's status is the measurement rather than a property of the
+process having run.</p>
+<table id="sib-magnetic-successor-edge-asserts-table">
+<thead><tr><th>Arm</th><th>Command</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>pre-repair runner at <code>0956b225f</code></td><td><code>readback</code></td><td><code>EXIT=0</code> &mdash; it cannot fail; this is the defect</td></tr>
+<tr><td>repaired runner, live graph</td><td><code>readback</code>, <code>gate</code></td><td><code>EXIT=0</code>, one edge, one receipt</td></tr>
+<tr><td>repaired runner, expectation negated to the sibling name</td><td><code>gate</code></td><td><code>EXIT=1</code>, four named refusals</td></tr>
+</tbody>
+</table>
+<p>The negation is the guarded thing made to happen: the same code, asked for
+an edge that is not there, refuses instead of reporting. The first arm is the
+revert the repair answers &mdash; with it restored the check passes silently
+whatever the graph holds.</p>
 
 </main>
 </body>

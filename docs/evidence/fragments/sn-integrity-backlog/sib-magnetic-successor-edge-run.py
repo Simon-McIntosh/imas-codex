@@ -256,6 +256,54 @@ def successor_state() -> dict[str, Any]:
     }
 
 
+def require_successor(state: dict[str, Any]) -> None:
+    """Refuse to report success unless the live graph carries this node's edge.
+
+    The measure is one receipt-stamped successor edge on the retired name. A
+    readback that printed the state and returned zero would certify a missing
+    edge exactly as loudly as a present one, so every clause is asserted and a
+    violated clause exits non-zero naming itself.
+    """
+    count = (state.get("successor_count") or [{}])[0]
+    failures: list[str] = []
+    if count.get("successor_edges") != 1:
+        failures.append(
+            f"successor edge count is {count.get('successor_edges')}, want 1"
+        )
+    if count.get("successors") != [SUCCESSOR]:
+        failures.append(
+            f"successors are {count.get('successors')}, want [{SUCCESSOR!r}]"
+        )
+    edges = state.get("successor_edges") or []
+    if not edges or edges[0].get("successor_id") != SUCCESSOR:
+        failures.append(f"successor edge does not reach {SUCCESSOR!r}")
+    if edges and not edges[0].get("receipt_id"):
+        failures.append("successor edge carries no receipt_id")
+    receipts = state.get("receipts") or []
+    if len(receipts) != 1:
+        failures.append(f"supersession receipt count is {len(receipts)}, want 1")
+    elif receipts[0].get("operation") != SUPERSEDE_OPERATION:
+        failures.append(
+            f"receipt operation is {receipts[0].get('operation')!r}, "
+            f"want {SUPERSEDE_OPERATION!r}"
+        )
+    elif edges and receipts[0].get("id") != edges[0].get("receipt_id"):
+        failures.append("the edge's receipt_id names a different receipt")
+    snapshot = {row["id"]: row for row in state.get("name_snapshots") or []}
+    predecessor = snapshot.get(PREDECESSOR) or {}
+    successor = snapshot.get(SUCCESSOR) or {}
+    if predecessor.get("stage") != "superseded":
+        failures.append(
+            f"predecessor stage is {predecessor.get('stage')!r}, want 'superseded'"
+        )
+    if successor.get("stage") != "accepted":
+        failures.append(
+            f"successor stage is {successor.get('stage')!r}, want 'accepted'"
+        )
+    if failures:
+        raise SystemExit("FAIL: " + "; ".join(failures))
+
+
 def gate() -> dict[str, Any]:
     """Compute the export gate's blocking set through the gate's own predicate."""
     with GraphClient() as gc:
@@ -291,8 +339,7 @@ def gate() -> dict[str, Any]:
             name for name in shipping if name in _RELEASE_IDENTITY_HOLDS
         ),
         "sourceless_live_count": len(sourceless),
-        "sourceless_live_ids": sourceless,  # noqa: F821 - see next line
-        "sourceless_ids": sourceless,
+        "sourceless_live_ids": sourceless,
         "stages": stages,
         "blocking": blocking,
         "blocking_count": len(blocking),
@@ -300,6 +347,18 @@ def gate() -> dict[str, Any]:
         "successor_sourceless": SUCCESSOR in sourceless,
         "release_hold_count": len(_RELEASE_IDENTITY_HOLDS),
     }
+
+
+def checked_readback() -> dict[str, Any]:
+    state = successor_state()
+    require_successor(state)
+    return state
+
+
+def checked_gate() -> dict[str, Any]:
+    """The export blocking set, gated on this node's own edge being present."""
+    require_successor(successor_state())
+    return gate()
 
 
 def main() -> int:
@@ -320,10 +379,11 @@ def main() -> int:
         "authority": build_authority,
         "preview": lambda: signed(False, None),
         "apply": lambda: signed(True, args.digest),
-        "readback": successor_state,
-        "gate": gate,
+        "readback": checked_readback,
+        "gate": checked_gate,
     }[args.mode]
-    print(json.dumps(fn(), indent=2, sort_keys=True, default=str))
+    payload = fn()
+    print(json.dumps(payload, indent=2, sort_keys=True, default=str))
     return 0
 
 
