@@ -118,7 +118,8 @@ def locus_of(paths: list[str], name: str) -> tuple[list[str], list[str]]:
         averaged = [
             p
             for p in telling
-            if p.startswith("summary/local/separatrix_average/") and "/position/" not in p
+            if p.startswith("summary/local/separatrix_average/")
+            and "/position/" not in p
         ]
         if averaged:
             loci.append("separatrix_average")
@@ -150,7 +151,9 @@ def desired_name(name: str, locus: str) -> str:
     if locus in ("separatrix", "pedestal_fit_separatrix"):
         return f"{stem}_at_separatrix"
     if locus == "separatrix_average":
-        stem = stem.replace("_flux_surface_averaged", "").removeprefix("flux_surface_averaged_")
+        stem = stem.replace("_flux_surface_averaged", "").removeprefix(
+            "flux_surface_averaged_"
+        )
         return f"{stem}_flux_surface_averaged_at_separatrix"
     return name
 
@@ -214,7 +217,9 @@ def inject(kind: str, data: dict, status_of: dict[str, str]) -> list[str]:
     """
     if kind == "tombstone-target":
         tomb = next(i for i, st in sorted(status_of.items()) if st == "superseded")
-        victim = next(r for r in data["names"] if r["proposed_action"] == "signed_rename")
+        victim = next(
+            r for r in data["names"] if r["proposed_action"] == "signed_rename"
+        )
         victim["proposed_target"] = tomb
         print(f"injected tombstone-target: {victim['id']} -> {tomb}")
     elif kind == "cross-check":
@@ -311,7 +316,9 @@ def main(argv: list[str] | None = None) -> int:
             """,
         )
         total_live = query(
-            gc, "live_total", "MATCH (n:StandardName) WHERE n.status <> 'superseded' RETURN count(n) AS c"
+            gc,
+            "live_total",
+            "MATCH (n:StandardName) WHERE n.status <> 'superseded' RETURN count(n) AS c",
         )[0]["c"]
 
         status_of = {r["id"]: r["status"] for r in names}
@@ -376,7 +383,9 @@ def main(argv: list[str] | None = None) -> int:
     for nid in sorted(live):
         paths = all_paths(nid)
         loci, telling = locus_of(paths, nid)
-        required = sorted({LOCUS_SUFFIX[locus_id] for locus_id in loci if LOCUS_SUFFIX[locus_id]})
+        required = sorted(
+            {LOCUS_SUFFIX[locus_id] for locus_id in loci if LOCUS_SUFFIX[locus_id]}
+        )
         locus = loci[0] if len(set(required)) <= 1 else "mixed"
         chain = {
             "refined_from": sorted(refined_by.get(nid, set())),
@@ -406,7 +415,9 @@ def main(argv: list[str] | None = None) -> int:
                 "locators; the concept must be split into two names, not renamed"
             )
         elif locus == "unresolved":
-            holders = [h for h in holder_by_stem.get(strip_locator(nid), []) if h != nid]
+            holders = [
+                h for h in holder_by_stem.get(strip_locator(nid), []) if h != nid
+            ]
             if holders:
                 action, target_name = "supersede_onto_holder", sorted(holders)[0]
                 why = "no produced DD path; a live name carries the concept"
@@ -437,7 +448,9 @@ def main(argv: list[str] | None = None) -> int:
                 occupant_sourced = any(is_separatrix_path(p) for p in occupant_paths)
                 if sourced_here and not occupant_sourced:
                     action, target_name = "keep", nid
-                    collision = "required spelling is held by a live name with no DD path"
+                    collision = (
+                        "required spelling is held by a live name with no DD path"
+                    )
                     blocked_spelling = target
                     why = (
                         f"the required spelling {target} is a live name with no "
@@ -461,10 +474,19 @@ def main(argv: list[str] | None = None) -> int:
                 )
             else:
                 action, target_name = "signed_rename", target
-                why = f"ends in {locator_of(nid)}, {locus} requires {LOCUS_SUFFIX[locus]}"
+                why = (
+                    f"ends in {locator_of(nid)}, {locus} requires {LOCUS_SUFFIX[locus]}"
+                )
 
-        if action == "supersede_onto_holder" and status_of.get(target_name) == "superseded":
-            action, target_name, collision = "keep", nid, "refused: holder is a tombstone"
+        if (
+            action == "supersede_onto_holder"
+            and status_of.get(target_name) == "superseded"
+        ):
+            action, target_name, collision = (
+                "keep",
+                nid,
+                "refused: holder is a tombstone",
+            )
             why = "refused: the only candidate holder is a superseded tombstone"
 
         rows.append(
@@ -475,12 +497,16 @@ def main(argv: list[str] | None = None) -> int:
                 "physics_domain": domain_of.get(nid),
                 "locus": locus,
                 "loci_present": loci,
-                "locus_meaning": "; ".join(LOCUS_MEANING[locus_id] for locus_id in loci),
+                "locus_meaning": "; ".join(
+                    LOCUS_MEANING[locus_id] for locus_id in loci
+                ),
                 "locus_paths": telling,
                 "all_paths": paths,
                 "current_locator": locator_of(nid),
                 "required_locator": (
-                    LOCUS_SUFFIX[locus] if locus in LOCUS_SUFFIX else ", ".join(required)
+                    LOCUS_SUFFIX[locus]
+                    if locus in LOCUS_SUFFIX
+                    else ", ".join(required)
                 ),
                 "proposed_action": action,
                 "proposed_target": target_name,
@@ -496,14 +522,18 @@ def main(argv: list[str] | None = None) -> int:
     for nid in sorted(tombstones):
         paths = all_paths(nid)
         loci, telling = locus_of(paths, nid)
-        required = sorted({LOCUS_SUFFIX[locus_id] for locus_id in loci if LOCUS_SUFFIX[locus_id]})
+        required = sorted(
+            {LOCUS_SUFFIX[locus_id] for locus_id in loci if LOCUS_SUFFIX[locus_id]}
+        )
         locus = loci[0] if len(set(required)) <= 1 else "mixed"
         tomb_rows.append(
             {
                 "id": nid,
                 "status": status_of[nid],
                 "locus": locus,
-                "locus_meaning": "; ".join(LOCUS_MEANING[locus_id] for locus_id in loci),
+                "locus_meaning": "; ".join(
+                    LOCUS_MEANING[locus_id] for locus_id in loci
+                ),
                 "locus_paths": telling,
                 "refined_from": sorted(refined_by.get(nid, set())),
                 "refined_into": sorted(refined_of.get(nid, set())),
@@ -528,14 +558,17 @@ def main(argv: list[str] | None = None) -> int:
             {
                 "dd_path": "summary/local/separatrix/velocity_phi/tritium/value",
                 "locus": "separatrix",
-                "proposed_name": desired_name("toroidal_tritium_velocity_at_separatrix", "separatrix"),
+                "proposed_name": desired_name(
+                    "toroidal_tritium_velocity_at_separatrix", "separatrix"
+                ),
                 "existing": status_of.get("toroidal_tritium_velocity_at_separatrix"),
             },
         ],
         "tombstones_on_the_located_names": sorted(
             x
             for x in status_of
-            if x.startswith("toroidal_tritium_velocity") and status_of[x] == "superseded"
+            if x.startswith("toroidal_tritium_velocity")
+            and status_of[x] == "superseded"
         ),
     }
 
@@ -553,7 +586,9 @@ def main(argv: list[str] | None = None) -> int:
         "census_live_count": len(census_ids),
         "in_graph_not_in_census": missing_from_census,
         "in_census_not_in_graph": over_claimed_by_census,
-        "agrees": not missing_from_census and not over_claimed_by_census and len(census_ids) > 0,
+        "agrees": not missing_from_census
+        and not over_claimed_by_census
+        and len(census_ids) > 0,
         "live_names_known_to_graph": total_live,
     }
 
@@ -659,7 +694,7 @@ def render(d: dict) -> str:
     t = d["totals"]
     cc = d["cross_check"]
     parts = [
-        "<h2 id=\"sib-separatrix-locus-census\">Separatrix locus census</h2>",
+        '<h2 id="sib-separatrix-locus-census">Separatrix locus census</h2>',
         "<p>Read-only census of every live standard name tied to the separatrix "
         "loci, produced from the live graph by "
         "<code>sib-separatrix-locus-census-run.py</code>. No write is made; this "
@@ -716,7 +751,9 @@ def render(d: dict) -> str:
         "<th>action</th><th>target</th></tr></thead><tbody>"
     )
     for r in d["names"]:
-        rowsrc = "<br>".join(f"<code>{_u(p)}</code>" for p in r["locus_paths"][:6]) or "—"
+        rowsrc = (
+            "<br>".join(f"<code>{_u(p)}</code>" for p in r["locus_paths"][:6]) or "—"
+        )
         tomb = ", ".join(r["tombstones"]) or "—"
         ch = r["chain"]
         bits = []
@@ -735,7 +772,7 @@ def render(d: dict) -> str:
                 '<div class="why">tombstone, never a target</div>'
             )
         parts.append(
-            "<tr><td><code>{}</code><div class=\"why\">{}</div></td>"
+            '<tr><td><code>{}</code><div class="why">{}</div></td>'
             "<td><code>{}</code></td><td><code>{}</code></td>"
             "<td>{}</td><td>{}</td><td>{}</td>"
             "<td><code>{}</code></td><td>{}</td></tr>".format(
@@ -820,7 +857,10 @@ def render(d: dict) -> str:
             "<p>Sibling tombstones on that stem: {}. The separatrix located name "
             "must be composed as a new name and its tombstone left in place, "
             "never revived.</p>".format(
-                ", ".join(f"<code>{_u(x)}</code>" for x in tri["tombstones_on_the_located_names"])
+                ", ".join(
+                    f"<code>{_u(x)}</code>"
+                    for x in tri["tombstones_on_the_located_names"]
+                )
             )
         )
 
