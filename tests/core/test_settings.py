@@ -571,3 +571,42 @@ class TestIdsMappingReasoningEffortForwarding:
 
         assert result == "ok"
         assert captured["reasoning_effort"] == "high"
+
+
+def test_no_gpt5_name_survives_in_the_fallback_slate_or_proxy_routes():
+    """The newest model of each OpenAI tier is the only one a fallback names.
+
+    A stale ``gpt-5.x`` entry in a bench slate or a proxy route is invisible
+    until a benchmark or a proxied call silently runs an older tier, so the
+    slates and the route table are asserted together here. ``gpt-6.1-terra``
+    is asserted priced as well: a slate entry with no checked-in rate bills
+    zero and would read as free.
+    """
+    from pathlib import Path
+
+    import yaml
+
+    slate = (
+        settings.get_sn_benchmark_compose_models()
+        + settings.get_sn_benchmark_candidate_models()
+        + [settings.get_sn_benchmark_reviewer_model()]
+        + settings.get_sn_benchmark_reviewer_models()
+    )
+    routes_path = Path(settings.__file__).parent / "config" / "litellm_config.yaml"
+    routes_config = yaml.safe_load(routes_path.read_text())
+    routes = [
+        entry["model_name"]
+        for entry in routes_config.get("model_list", [])
+        if str(entry.get("model_name", "")).startswith("openrouter/openai/")
+    ]
+
+    stale = [
+        name for name in slate + routes if name.split("/")[-1].startswith("gpt-5.")
+    ]
+    assert stale == [], f"a gpt-5.x name survives: {stale}"
+    assert any("gpt-6.1-terra" in name for name in slate)
+    assert any("gpt-6.1-terra" in name for name in routes)
+
+    terra = settings.get_openrouter_pricing("openrouter/openai/gpt-6.1-terra")
+    assert terra["input"] > 0
+    assert terra["output"] > 0

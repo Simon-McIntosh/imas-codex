@@ -80,6 +80,7 @@ class PipelineCost:
 
     steps: dict[str, float] = field(default_factory=dict)
     total_tokens: int = 0
+    releases: dict[str, str | None] = field(default_factory=dict)
 
     @property
     def total_usd(self) -> float:
@@ -88,6 +89,15 @@ class PipelineCost:
     def add(self, step: str, cost: float, tokens: int) -> None:
         self.steps[step] = self.steps.get(step, 0) + cost
         self.total_tokens += tokens
+
+    def note_release(self, step: str, release: str) -> None:
+        """Record the dated model build that served ``step``.
+
+        The pinned model id is what a seat asks for; this is what answered. A
+        re-point of the same id under a new build shows here as a new value
+        while the spend line is unchanged.
+        """
+        self.releases[step] = release
 
 
 # ---------------------------------------------------------------------------

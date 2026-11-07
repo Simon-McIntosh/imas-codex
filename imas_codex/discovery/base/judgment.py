@@ -47,16 +47,27 @@ _DEFAULT_CONCURRENCY = 8
 DEFAULT_COST_STEP = "decision"
 
 
-def _book_cost(cost: Any | None, step: str, spent: float) -> None:
-    """Add one call's reported USD cost to a caller's tracker.
+def _book_cost(
+    cost: Any | None, step: str, spent: float, release: str | None = None
+) -> None:
+    """Book one call's reported USD cost, and the build that served it.
 
     Every decisions call this module makes reports its own cost; this is the
     single place that turns one into a tracker entry, so a caller cannot
     silently drop the spend and the two entry points below cannot drift in how
     they book it. A ``None`` tracker is a caller that does not accumulate cost.
+
+    ``release`` is the dated build the endpoint reported answering with. It is
+    recorded beside the spend under the same step, so a tracker holds the
+    model id it asked for and the build it actually got: a re-point of the
+    same id then shows as a new release rather than as unchanged spend. A
+    tracker that does not keep releases still books the spend.
     """
     if cost is not None:
         cost.add(step, spent, 0)
+        note_release = getattr(cost, "note_release", None)
+        if note_release is not None and release is not None:
+            note_release(step, release)
 
 
 class CallStatus(Enum):
@@ -94,6 +105,7 @@ def _settle_call(
     *,
     cost: Any | None,
     step: str,
+    reported: list[str] | None = None,
 ) -> CallOutcome:
     """Make one decisions call, classify its fault, and book its cost.
 
@@ -117,7 +129,7 @@ def _settle_call(
         return CallOutcome(CallStatus.MALFORMED, None, 0.0, exc, fault_text(exc))
     except Exception as exc:  # noqa: BLE001 - a failed judgement is data
         return CallOutcome(CallStatus.TRANSPORT, None, 0.0, exc, fault_text(exc))
-    _book_cost(cost, step, spent)
+    _book_cost(cost, step, spent, reported[0] if reported else None)
     return CallOutcome(CallStatus.OK, answers, spent, None, "")
 
 
@@ -156,10 +168,14 @@ def decide_one(
         The validated answers keyed by question name, or ``None`` when the
         transport failed.
     """
+    reported: list[str] = []
     outcome = _settle_call(
-        lambda: call_decisions(model, state, questions, service=service),
+        lambda: call_decisions(
+            model, state, questions, service=service, record_release=reported.append
+        ),
         cost=cost,
         step=step,
+        reported=reported,
     )
     if outcome.status is CallStatus.MALFORMED:
         assert outcome.fault is not None
@@ -279,11 +295,21 @@ async def decide_batch(
 
     async def _judge(state: Mapping[str, Any]) -> CallOutcome:
         async with semaphore:
+            reported: list[str] = []
             answers, spent, fault = await _await_call(
-                acall_decisions(model, state, questions, service=service)
+                acall_decisions(
+                    model,
+                    state,
+                    questions,
+                    service=service,
+                    record_release=reported.append,
+                )
             )
             return _settle_call(
-                lambda: _resume(answers, spent, fault), cost=cost, step=step
+                lambda: _resume(answers, spent, fault),
+                cost=cost,
+                step=step,
+                reported=reported,
             )
 
     tasks = [asyncio.ensure_future(_judge(state)) for state in states]
