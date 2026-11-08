@@ -96,6 +96,34 @@ failure id also fails on the baseline, so the added-failure count is <strong>0</
 six are in <code>tests/discovery/test_signal_role.py</code> and
 <code>tests/discovery/test_signal_role_store.py</code>, which a concurrent node owns.</p>
 
+<h3 id="sib-test-guards-bite-reuse">The guards run through one shared scaffold</h3>
+
+<p>Review scored reuse below its floor: the added guards each rebuilt a
+collaborator scaffold the suite already owns. Three duplications were removed,
+with no assertion changed. The compose tests now share one <code>_run_batch</code>
+helper that patches the structured call and drives the batch, instead of five
+tests each writing that block. The pending-count double and the equality
+assertion answer through one <code>_restrictions</code> helper, so a count and a
+selection cannot disagree about what a clause restricts. The successor-binding
+guard reads the shared <code>TransactionDouble</code>'s own <code>calls</code>
+log — the double records every statement <em>(cypher, params)</em> it is sent —
+rather than wrapping the side effect a second time.</p>
+
+<p>Measured at the repair commit: patch sites for the structured call 5 → 1,
+claimability computations 3 → 2 (the helper and its one caller),
+statement-log implementations unchanged at 1 with the local wrapper deleted.</p>
+
+<p>The refactored guards were re-probed against their plants in a
+<code>$TMPDIR</code> copy of the tree, because each plant's subject file belongs
+to a concurrent node: a three-attempt retry wrapper in <code>compose_batch</code>,
+an inlined claim predicate in the claim seed, and <code>sn.name_stage =
+'pending'</code> / an <code>attempt_count</code> increment in the stable
+finalize. Each reddens its guard at <code>EXIT=1</code>, as recorded in
+<code>logs/negative-control-repair.log</code>. That log also records the two
+mis-aimed placements — the reserved finalize block rather than the stable one,
+and a failed restore between plants — because a plant that never reaches the
+statement under test is indistinguishable from a guard that does not bite.</p>
+
 <p>Two serial attempts were abandoned — one killed at its background time limit at 45%, one
 killed at 100% before writing its summary line — so the arm of record is the parallel run; each
 log's header line names the command that produced it. The only product change in the commit is
