@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="384">
+<meta name="plan-version" content="385">
 <meta name="plan-modified" content="2026-11-08">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -1245,7 +1245,10 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
     <div class="r-comment-body"><p>Review of [sib-drained-queue-exit](/imas-codex/evidence/fragments/sn-integrity-backlog/sib-drained-queue-exit.html#sib-drained-queue-exit-title) at c3852b403 scores goal 18, evidence 15, scope 19, durability 17, fit 17, reuse 13, with added failures 0 of 0 — one blocking finding (the reviewed worktree carries a staged revert of both product files, so any commit made there lands it) and four non-blocking (predicate now stated in three places with no shared owner fragment; baseline_suite cites a truncated log while declaring completed:true; the modified Cypher was never run or EXPLAINed against a live engine; a test docstring cites a transient job id).</p></div>
 </div>
 <div class="r-comment" data-section="s50" data-id="c-run-r-20261108T052509387434-sib-compose-refusal-narrowing" data-who="reckon-build" data-when="2026-11-08T06:41:59.263Z">
-    <div class="r-comment-body"><p>narrowed the per-candidate compose catch to (ValueError, ValidationError) and deleted the duplicate transport retry wrapper so acall_llm_structured retries the LLM layer&#x27;s transient fault types inside its own bounded loop; base arm 3 failed, head 6 passed, head adds 0 failure ids to tests/standard_names + tests/discovery (13 failed at base, 10 at head, all 10 pre-existing), negative control 1 failed (EXIT=1)</p></div>
+    <div class="r-comment-body"><p>narrowed the per-candidate compose catch to (ValueError, ValidationError) and deleted the duplicate transport retry wrapper so acall_llm_structured retries the LLM layer's transient fault types inside its own bounded loop; base arm 3 failed, head 6 passed, head adds 0 failure ids to tests/standard_names + tests/discovery (13 failed at base, 10 at head, all 10 pre-existing), negative control 1 failed (EXIT=1)</p></div>
+</div>
+<div class="r-comment" data-section="s50" data-id="c-run-r-20261108T064458349577-review-of-sib-compose-refusal-narrowing-9b0e196b7f4f" data-who="reckon-build" data-when="2026-11-08T06:57:24.337Z">
+    <div class="r-comment-body"><p>reviewed a0a53603059a6dacf0ff77d447719fc5b83579c0..9b0e196b7f4f6f34994ad8eed51153ba1ddcb80f (1a2238e4b narrows the compose refusal and moves the transport retry into the single LLM loop, 9b0e196b7 adds the evidence fragment); scores goal_fidelity 19, evidence 19, scope_discipline 20, durability 16, fit 18, reuse 19; added_failure_count 0 (13 failures at base, 10 at head, all 10 pre-existing), two non-blocking findings on unguarded durability claims.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261012T162346807302-review-of-sib-row-census" data-who="reckon-build" data-when="2026-10-12T16:39:58.712Z">
     <div class="r-comment-body"><p>reviewed r-20261012T145528571333-sib-row-census at a7a70db00 against c7b4c626e; total 93/120 (goal_fidelity 15, evidence 13, scope_discipline 19, durability 11, fit 15, reuse 20); two blocking findings — the landing record's verdict tallies and the manifest's row-count both disagree with the 38 rows the census file holds.</p></div>

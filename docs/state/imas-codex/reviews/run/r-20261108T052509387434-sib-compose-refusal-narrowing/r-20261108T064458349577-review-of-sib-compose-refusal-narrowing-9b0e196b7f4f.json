@@ -1,0 +1,76 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T052509387434-sib-compose-refusal-narrowing/after-suite.log",
+  "assertion_analysis": [
+    {
+      "failure_condition": "Removing the isinstance(_transient_transport_errors()) test at imas_codex/discovery/base/llm.py:2629 gives each parametrised fault one attempt, so fake.call_count reads 1 instead of 3; base-arm.log records exactly that failure for both httpx.ConnectError and httpx.ReadError.",
+      "file": "tests/discovery/test_llm_transport_retry.py",
+      "lines": "52-64"
+    },
+    {
+      "failure_condition": "Widening the type test at llm.py:2629 to Exception makes call_count 3 instead of 1 for the deterministic ValueError, so this assertion reddens; it passes at base as well, so it guards against a future widening rather than evidencing this change.",
+      "file": "tests/discovery/test_llm_transport_retry.py",
+      "lines": "67-80"
+    },
+    {
+      "failure_condition": "Removing the per-candidate catch entirely at worker_compose_batches.py:612 propagates the ValidationError and no refusal is recorded, so refusals is empty and the source_id/reason assertions redden.",
+      "file": "tests/standard_names/test_compose_batch_isolation.py",
+      "lines": "278-309"
+    },
+    {
+      "failure_condition": "Restoring the bare Exception catch at worker_compose_batches.py:612 absorbs the AttributeError, so pytest.raises does not fire and refusals/persisted are both non-empty; negative-control.log records exactly this single failure.",
+      "file": "tests/standard_names/test_compose_batch_isolation.py",
+      "lines": "311-343"
+    }
+  ],
+  "base_log_revision": "a0a53603059a6dacf0ff77d447719fc5b83579c0",
+  "baseline_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T052509387434-sib-compose-refusal-narrowing/baseline-suite.log",
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/standard_names/pool_adapter.py:86",
+    "imas_codex/standard_names/worker_tasks/worker_compose_and_validate.py:347",
+    "imas_codex/standard_names/worker_tasks/worker_generate_docs.py:849",
+    "imas_codex/ids/mapping.py:811"
+  ],
+  "completed_at": "2026-11-08T06:57:24.337Z",
+  "dispatched_at": "2026-11-08T06:47:34Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/worker_tasks/worker_compose_batches.py",
+      "line": "340",
+      "severity": "non-blocking",
+      "text": "non-blocking: the done-when's second half \u2014 that one transport fault costs at most the LLM loop's max_retries attempts at the compose seam \u2014 is guarded only at the LLM layer. No test in tests/standard_names/test_compose_batch_isolation.py asserts how many times compose_batch calls acall_llm_structured for one attempt, and the test that did pin this seam (the old calls == 2 assertion) was deleted with the wrapper. Re-adding a retry wrapper around this call would redden no test, so the regression the node exists to remove could return unnoticed."
+    },
+    {
+      "file": "imas_codex/discovery/base/llm.py",
+      "line": "2629",
+      "severity": "non-blocking",
+      "text": "non-blocking: the comment and the evidence fragment claim the fault set is read from its owner rather than restated, but nothing pins that property. Replacing _transient_transport_errors() at line 2630 with a hardcoded (httpx.ConnectError, httpx.ReadError) leaves tests/discovery/test_llm_transport_retry.py green, because both parametrised faults are exactly those two types. The deleted test_the_retry_set_is_read_from_the_llm_layer was the only guard on it, and its replacement tests the loop's count rather than where the set comes from."
+    }
+  ],
+  "head_log_revision": "1a2238e4b53c19cdf316fbbdb9fb0e67dbb3c891",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source node's goal is 'Remove the two over-broad error paths the batch-isolation reviews flagged in compose batches'; imas_codex/standard_names/worker_tasks/worker_compose_batches.py:612 now catches only (ValueError, ValidationError) and the duplicate transport wrapper is gone, with the retry moved to imas_codex/discovery/base/llm.py:2629-2632.\nVERDICT done_when: the done_when names both source files, the two new test files and a no-added-failure measure; the manifest records gate-new-tests.log (6 passed, EXIT=0), base-arm.log (3 failed, EXIT=1), negative-control.log (1 failed, EXIT=1) and both full-suite arms, and I re-derived 13 baseline failures to 10 at head with zero added from baseline-suite.log and after-suite.log.\nVERDICT write_paths: the manifest declares five paths and git diff --name-only a0a53603059a6dacf0ff77d447719fc5b83579c0 9b0e196b7f4f6f34994ad8eed51153ba1ddcb80f lists exactly those five, with nothing outside them.\nVERDICT manifest: read; it states commits 1a2238e4b and 9b0e196b7, both suite arms completed with their failure ids, the negative-control log path, and the 10 remaining failures attributed outside scope, and every figure I re-derived from the logs it names matched its record.\nVERDICT diff: read commit by commit against a0a53603059a6dacf0ff77d447719fc5b83579c0; 1a2238e4b narrows the per-candidate catch, adds the type-first retry classification at llm.py:2629 and deletes _acall_retrying_transport_faults with its two call-site imports, and 9b0e196b7 adds only the evidence fragment, all inside the declared scope.\nCALL_SITES: imas_codex/standard_names/pool_adapter.py:86, imas_codex/standard_names/worker_tasks/worker_compose_and_validate.py:347, imas_codex/standard_names/worker_tasks/worker_generate_docs.py:849, imas_codex/ids/mapping.py:811\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/worker_tasks/worker_compose_batches.py:612 takes only ValueError and ValidationError, and imas_codex/discovery/base/llm.py:2629-2632 decides a transport fault by type so the one loop at 2632 bounds it, which is exactly the two removals the goal names.\nSCORE evidence: 19\nJUSTIFICATION evidence: base-arm.log shows the three new-behaviour tests failing at a0a536030 and negative-control.log shows exactly one failure under the restored bare catch, so the gate measures the done-when's claims rather than asserting them.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only a0a53603059a6dacf0ff77d447719fc5b83579c0 9b0e196b7f4f6f34994ad8eed51153ba1ddcb80f returns only the four source/test paths and the permitted evidence fragment.\nSCORE durability: 16\nJUSTIFICATION durability: the catch narrowing is pinned by tests/standard_names/test_compose_batch_isolation.py:341 and the type-first retry by tests/discovery/test_llm_transport_retry.py:63, but the owner-set read at imas_codex/discovery/base/llm.py:2630 and the compose-seam attempt bound at worker_compose_batches.py:340 are unguarded by any test.\nSCORE fit: 18\nJUSTIFICATION fit: the new comment at imas_codex/discovery/base/llm.py:2629 and the catch at worker_compose_batches.py:612 follow the surrounding comment-and-narrow-catch style, and the module docstring's import sentence was corrected rather than left stale.\nSCORE reuse: 19\nJUSTIFICATION reuse: the change reads _transient_transport_errors() from its owner at imas_codex/discovery/base/llm.py:2630 and deletes the duplicate wrapper outright, with only the type-then-text shape echoing _decisions_retryable at llm.py:3342 without a shared predicate.\nFINDING imas_codex/standard_names/worker_tasks/worker_compose_batches.py:340 non-blocking: no test asserts how many times compose_batch calls acall_llm_structured per attempt, so re-adding a retry wrapper at this call would redden nothing and the attempt multiplication this node removes could return unseen.\nFINDING imas_codex/discovery/base/llm.py:2629 non-blocking: the claim that the fault set is read from its owner rather than restated is unpinned, since hardcoding the two httpx types at line 2630 leaves tests/discovery/test_llm_transport_retry.py green.",
+  "review_run_id": "r-20261108T064458349577-review-of-sib-compose-refusal-narrowing-9b0e196b7f4f",
+  "reviewed_base_sha": "a0a53603059a6dacf0ff77d447719fc5b83579c0",
+  "reviewed_commits": [
+    "1a2238e4b53c19cdf316fbbdb9fb0e67dbb3c891",
+    "9b0e196b7f4f6f34994ad8eed51153ba1ddcb80f"
+  ],
+  "reviewed_head_sha": "9b0e196b7f4f6f34994ad8eed51153ba1ddcb80f",
+  "reviewed_run_id": "r-20261108T052509387434-sib-compose-refusal-narrowing",
+  "scores": {
+    "durability": 16,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T06:54:32.670167+00:00",
+  "total": 111
+}
