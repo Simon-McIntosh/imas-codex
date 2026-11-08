@@ -86,8 +86,18 @@ the statement had run at all.</p>
 
 <h3 id="sib-test-guards-bite-head">The guards at head</h3>
 
-<p>All four files pass at the commit that carries them, and the two suites they live in are
-measured in <code>logs/gate-after.log</code> against the baseline arm in
-<code>logs/gate-baseline.log</code>. The only product change in the commit is the removal of
-<code>dd_path_bound</code> from <code>source_claim_predicate</code>, which no caller passed and
-which therefore selected no branch.</p>
+<p>All four files pass at the commit that carries them. The two suites they live in were measured
+with <code>pytest -n 4 tests/standard_names tests/discovery</code>: the head arm
+(<code>logs/gate-after.log</code>, revision <code>a767ebcda</code>) reports
+<strong>6 failed, 10178 passed</strong> and the baseline arm
+(<code>logs/gate-baseline.log</code>, revision <code>96d64ea46</code> extracted by
+<code>git archive</code>) reports <strong>24 failed, 10105 passed</strong>. Every head-arm
+failure id also fails on the baseline, so the added-failure count is <strong>0</strong>. All
+six are in <code>tests/discovery/test_signal_role.py</code> and
+<code>tests/discovery/test_signal_role_store.py</code>, which a concurrent node owns.</p>
+
+<p>Two serial attempts were abandoned — one killed at its background time limit at 45%, one
+killed at 100% before writing its summary line — so the arm of record is the parallel run; each
+log's header line names the command that produced it. The only product change in the commit is
+the removal of <code>dd_path_bound</code> from <code>source_claim_predicate</code>, which no
+caller passed and which therefore selected no branch.</p>
