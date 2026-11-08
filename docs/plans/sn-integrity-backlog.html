@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="416">
+<meta name="plan-version" content="418">
 <meta name="plan-modified" content="2026-11-08">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -1326,7 +1326,13 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
     <div class="r-comment-body"><p>Reviewed r-20261108T141648847743-sib-second-pass-tail at base 0efd4cf50 head 560053acb; one parsed record with all six dimensions scored (goal_fidelity 17, evidence 16, scope_discipline 20, durability 14, fit 18, reuse 18; total 103), added_failure_count 0 with the reviewed manifest's empty baseline_suite/after_suite as the stated reason, and one non-blocking finding (fragment line 49 states the apply ran at 0efd4cf50 while run.log's header records 24178c995).</p></div>
 </div>
 <div class="r-comment" data-section="s51" data-id="c-run-r-20261108T153500418408-sib-canonical-order-adoption" data-who="reckon-build" data-when="2026-11-08T16:23:25.101Z">
-    <div class="r-comment-body"><p>sib-canonical-order-adoption landed e6845f383 and 7bc7803d8: a compose candidate refused only for segment order is adopted under the strict parser&#x27;s canonical spelling when that spelling parses to the same semantic IR, and refused otherwise; measured 8 of the 9 recorded refusals adopted, focused gate 6 passed at head against a base collection error, negative control red with 1 failed, tests/standard_names 8609 passed with no failing id</p></div>
+    <div class="r-comment-body"><p>sib-canonical-order-adoption landed e6845f383 and 7bc7803d8: a compose candidate refused only for segment order is adopted under the strict parser's canonical spelling when that spelling parses to the same semantic IR, and refused otherwise; measured 8 of the 9 recorded refusals adopted, focused gate 6 passed at head against a base collection error, negative control red with 1 failed, tests/standard_names 8609 passed with no failing id</p></div>
+</div>
+<div class="r-comment" data-section="s51" data-id="c-run-r-20261108T163347746637-review-of-sib-canonical-order-adoption-7bc7803d8b1b" data-who="reckon-build" data-when="2026-11-08T16:45:28.332Z">
+    <div class="r-comment-body"><p>Reviewed r-20261108T153500418408-sib-canonical-order-adoption at base f534f44fb3a3fac03ad0663b75b9f68cbcc21dc3 and head 7bc7803d8b1b7f0157f6cf3aa501b9bb35296bc1 — parsed record, scores goal_fidelity 17, evidence 14, scope_discipline 20, durability 14, fit 19, reuse 20, added_failure_count 0, four non-blocking findings and no blocking finding.</p></div>
+</div>
+<div class="r-comment" data-section="s51" data-id="c-run-r-20261108T141648847743-sib-second-pass-tail" data-who="reckon-build" data-when="2026-11-08T15:31:40Z">
+    <div class="r-comment-body"><p>Reset exactly 41 sources with 41 prior-state receipts and 102 unchanged controls; scoped SLURM job 1308520 produced 5 more sources for cumulative 88/143 (12 below floor), spending USD 0.379417 of 48.51 and USD 1.864962 across both runs. Job/readback EXIT=1; export blockers stay 0, sourceless drafts rise 3 to 5, four failed sources lack new claim receipts, all 19 exclusions unchanged.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261012T162346807302-review-of-sib-row-census" data-who="reckon-build" data-when="2026-10-12T16:39:58.712Z">
     <div class="r-comment-body"><p>reviewed r-20261012T145528571333-sib-row-census at a7a70db00 against c7b4c626e; total 93/120 (goal_fidelity 15, evidence 13, scope_discipline 19, durability 11, fit 15, reuse 20); two blocking findings — the landing record's verdict tallies and the manifest's row-count both disagree with the 38 rows the census file holds.</p></div>

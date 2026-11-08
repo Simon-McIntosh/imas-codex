@@ -1,0 +1,58 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-08T16:45:28.332Z",
+  "dispatched_at": "2026-11-08T16:36:54Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_canonical_order_adoption.py",
+      "line": 29,
+      "severity": "non-blocking",
+      "text": "the assertion compares adopted.name against parse_canonical_name(adopted.name).name, which echoes its own argument, so the value comparison cannot fail and adds no guard beyond not raising."
+    },
+    {
+      "file": "tests/standard_names/test_canonical_order_adoption.py",
+      "line": 50,
+      "severity": "non-blocking",
+      "text": "the assertion compares refusal.value.name against SAME_IR_FLAT_SPELLING, the identical constant the test passed into parse_canonical_name, so it reddens only when the attribute is absent, never when it carries the wrong spelling."
+    },
+    {
+      "file": "imas_codex/standard_names/worker_tasks/worker_compose_batches.py",
+      "line": 687,
+      "severity": "non-blocking",
+      "text": "the adoption branch has no test; restoring the unconditional refusal path there leaves every test in the diff green, so the production wiring the goal rests on is unguarded."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-canonical-order-adoption.html",
+      "line": 36,
+      "severity": "non-blocking",
+      "text": "the recorded measure covers 9 refusal pairs rather than the 18 refusals the done_when names; the substitution is disclosed in the same paragraph and in the manifest, but the figure and the gate are not the same population."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "pass \u2014 compose_batch is reached from worker_compose_batches.py:1309 and pool_adapter.py:86; both paths traverse the pre-validation gate the change edits.",
+    "diff": "pass \u2014 read commit by commit, e6845f383 then 7bc7803d8, against f534f44fb; 223 added and 41 deleted lines across four files.",
+    "done_when": "fail \u2014 the done_when asks for a count of 18 recorded refusals read from sib-second-pass-tail.html, which is absent at both the base and the head; the node measured the 9 recorded refusal pairs that carry both spellings instead and recorded the deviation.",
+    "goal": "pass \u2014 the goal is to adopt the strict parser's canonical spelling when a composed candidate fails only on segment order; grammar_adapter.py:144 adds adopt_canonical_segment_order and worker_compose_batches.py:687 wires it into the pre-validation gate, but only for candidates carrying no operator chain.",
+    "manifest": "pass \u2014 it records the focused gate 6 passed EXIT=0, the base arm EXIT=2 on a collection ImportError, the declared negative control 1 failed EXIT=1, the offline measure 9 pairs with 8 adopted, and the suite 8609 passed with 0 failed at EXIT=0.",
+    "write_paths": "pass \u2014 the declared scope is four files plus a figures directory; the diff touches grammar_adapter.py, worker_compose_batches.py, test_canonical_order_adoption.py and the evidence fragment, every one inside the declared set."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to adopt the strict parser's canonical spelling when a composed candidate fails only on segment order; imas_codex/standard_names/grammar_adapter.py:144 adds adopt_canonical_segment_order and imas_codex/standard_names/worker_tasks/worker_compose_batches.py:687 wires it into the pre-validation gate, but only for candidates carrying no operator chain.\nVERDICT done_when: the done_when asks for a count of 18 recorded refusals read from docs/evidence/fragments/sn-integrity-backlog/sib-second-pass-tail.html and for four test behaviours; that fragment is absent at both the base and the head, so the node measured the 9 recorded refusal pairs that carry both spellings instead (8 adopt, 1 refuses) and recorded the deviation, while all four named test behaviours are present and pass.\nVERDICT write_paths: the declared scope is four files plus a figures directory; the diff touches grammar_adapter.py, worker_compose_batches.py, test_canonical_order_adoption.py and the evidence fragment, every one inside the declared set, and the figures directory is unused.\nVERDICT manifest: read; it records the focused gate 6 passed EXIT=0, the base arm EXIT=2 on a collection ImportError, the declared negative control 1 failed EXIT=1, the offline measure 9 pairs with 8 adopted, and the suite 8609 passed with 0 failed at EXIT=0.\nVERDICT diff: read commit by commit, e6845f383 (helper, seam and tests) then 7bc7803d8 (evidence prose only), against f534f44fb; 223 added and 41 deleted lines across four files.\nCALL_SITES: imas_codex/standard_names/worker_tasks/worker_compose_batches.py:1309, imas_codex/standard_names/pool_adapter.py:86\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/grammar_adapter.py:144 adopts only a same-IR reorder, but imas_codex/standard_names/worker_tasks/worker_compose_batches.py:687 skips every candidate carrying operators so that population still retires its source.\nSCORE evidence: 14\nJUSTIFICATION evidence: the offline count at docs/evidence/fragments/sn-integrity-backlog/sib-canonical-order-adoption.html:36 is real and reproducible over 9 recorded pairs, but the done_when's 18-refusal population names a fragment that does not exist at either revision.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff of 7bc7803d8 against f534f44fb lies inside the four declared file paths.\nSCORE durability: 14\nJUSTIFICATION durability: tests/standard_names/test_canonical_order_adoption.py:28 fails if adoption returns the input, and the declared control reddens line 33, but no test exercises the adoption branch at worker_compose_batches.py:687.\nSCORE fit: 19\nJUSTIFICATION fit: imas_codex/standard_names/grammar_adapter.py:144 follows the module's docstring and dataclass-return idiom, and its deferred import matches the pattern already used at worker_compose_batches.py:118.\nSCORE reuse: 20\nJUSTIFICATION reuse: grammar_adapter.py:153 reuses normalize_canonical_name, parse and _require_semantic_ir rather than restating an ordering policy, extending the module that owns canonical-spelling recovery.\nFINDING tests/standard_names/test_canonical_order_adoption.py:29 non-blocking: the assertion compares adopted.name against parse_canonical_name(adopted.name).name, which echoes its own argument, so the value comparison cannot fail and adds no guard beyond not raising.\nFINDING tests/standard_names/test_canonical_order_adoption.py:50 non-blocking: the assertion compares refusal.value.name against SAME_IR_FLAT_SPELLING, the identical constant the test passed into parse_canonical_name, so it reddens only when the attribute is absent, never when it carries the wrong spelling.\nFINDING imas_codex/standard_names/worker_tasks/worker_compose_batches.py:687 non-blocking: the adoption branch has no test; restoring the unconditional refusal path there leaves every test in the diff green, so the production wiring the goal rests on is unguarded.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-canonical-order-adoption.html:36 non-blocking: the recorded measure covers 9 refusal pairs rather than the 18 refusals the done_when names; the substitution is disclosed in the same paragraph and in the manifest, but the figure and the gate are not the same population.\n",
+  "review_run_id": "r-20261108T163347746637-review-of-sib-canonical-order-adoption-7bc7803d8b1b",
+  "reviewed_base_sha": "f534f44fb3a3fac03ad0663b75b9f68cbcc21dc3",
+  "reviewed_head_sha": "7bc7803d8b1b7f0157f6cf3aa501b9bb35296bc1",
+  "reviewed_run_id": "r-20261108T153500418408-sib-canonical-order-adoption",
+  "scores": {
+    "durability": 14,
+    "evidence": 14,
+    "fit": 19,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T16:54:17.949602+00:00",
+  "total": 104
+}
