@@ -7,6 +7,13 @@
   ],
   "completed_at": "2026-11-08T01:10:53.590Z",
   "dispatched_at": "2026-11-08T00:55:18Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "sib-compose-refusal-narrowing",
+      "recorded_at": "2026-11-08T05:32:03.015284+00:00"
+    }
+  },
   "findings": [
     {
       "detail": "The helper imports DEFAULT_MAX_RETRIES (5) and DEFAULT_RETRY_BASE_DELAY (5.0) and each of its five attempts calls acall_llm_structured, whose own loops in imas_codex/discovery/base/llm.py:2543 and :2339 retry a message-retryable fault five times with the same backoff. For a fault the owner already retries (its RETRYABLE_PATTERNS at llm.py:730 include 'timeout') the composed retry is 5 x 5 provider attempts under about 375 s of sleeping per batch; for the message-less ReadError this node was built for, and for ConnectError, the owner breaks out on its first attempt and the helper's loop is the only one, so the intended fix is sound. The deduplication is partial: the fault set is now the owner's, the loop is still a third copy of the backoff at llm.py:2339/:2543 and worker_compose_batches.py:347. Non-blocking because the worst case is bounded per batch and the batch still succeeds.",
