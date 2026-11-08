@@ -1,0 +1,222 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-08T11:17:14.275Z",
+  "dispatched_at": "2026-11-08T11:08:50Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-integrity-backlog.html:301",
+      "id": "done_when-1",
+      "reason": "the section exists to carry \u00a750's unmet yield bar and no clause in it can detect that the bar is still unmet, so a node can close \u00a751 with 143 reasoned failures and the yield clause is then carried by nothing.",
+      "text": "bullet 1 reads \"every source in the rerun cohort reads back as produced, or failed with a reason written by this rerun\", so a rerun producing zero new names passes, while \u00a750 records that \"Its unmet yield clause is carried by \u00a751\"",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-integrity-backlog.html:301",
+      "id": "done_when-2",
+      "reason": "a tail run holding `-c 50` of its own satisfies the bullet as written at USD 51.49 total, so the per-run reading and the cumulative reading of the cap disagree and a worker cannot tell which one it must satisfy.",
+      "text": "the USD 50 ceiling is stated per run (\"spend is at most USD 50 by the run's own id\") while the cohort now takes two runs and the first has already spent USD 1.4855 of it, and `sib-second-pass-tail` says only \"under the remaining cap\"",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-integrity-backlog.html:301",
+      "id": "done_when-3",
+      "reason": "a zero with no before-run count and no demonstrated positive cannot be told from a predicate that saw no exports, so the section's only name-independent measure is unfalsifiable.",
+      "text": "bullet 3 reads \"the export gate's blocking set is 0 after the rerun, read with the gate's own predicate\" and drops the control \u00a750 carried for the same clause (\"This is controlled by the before-run count of sourceless live drafts, which must not rise\")",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-integrity-backlog.html:301",
+      "id": "done_when-4",
+      "reason": "that node has already landed with its own gate and recorded control, so the wording is loose without changing what a worker would be dispatched to do.",
+      "text": "bullet 2 applies \"each defect node's regression test fails on main and passes at its head\" to the three test-only repairs, and for `sib-test-guards-bite` the defect is that five assertions stayed green through the regression they name, so there is no test that fails on main for that node to turn green",
+      "type": "done_when",
+      "would_change": false
+    },
+    {
+      "anchor": "docs/plans/sn-integrity-backlog.html:301",
+      "id": "wiring-1",
+      "reason": "a coordinator dispatching from \u00a751 can reset and rerun the 143 sources a second time, re-spending and re-disturbing the states the tail node's 41/19 split is defined against.",
+      "text": "\u00a751 lists `sib-second-pass` as work to do (\"a signed reset of the 143 sources \u2026 then a scoped `sn run -c 50`\") in the same list that records that pass's outcome (job 1308283, 83 name-bound, 41 failed, 19 unreached) and creates `sib-second-pass-tail` precisely because it is spent, and the same node ids are declared again in \u00a750",
+      "type": "wiring",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "9651c6bf3a302a7790559db1a6063c607948feb3",
+  "plan_fingerprint": "6025e3f88458acc6be7c586732b10f1a425cb4b331f6291551f5a75958918a9b",
+  "plan_slug": "sn-integrity-backlog",
+  "plan_version": 403,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "b491158a200994a3db0c3ff355107fa5878acca5",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "404 (pushed with this commit) makes the USD 50 cap cumulative over both cohort runs, adds a 100-of-143 produced floor, restores the sourceless-draft control on the export-gate reading, marks sib-second-pass landed, and exempts test-only repairs from the fails-on-main clause.",
+      "reason": "",
+      "when": "2026-11-08T11:32:24.522157+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "b491158a200994a3db0c3ff355107fa5878acca5",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "404 (pushed with this commit) makes the USD 50 cap cumulative over both cohort runs, adds a 100-of-143 produced floor, restores the sourceless-draft control on the export-gate reading, marks sib-second-pass landed, and exempts test-only repairs from the fails-on-main clause.",
+      "reason": "",
+      "when": "2026-11-08T11:32:31.011296+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "b491158a200994a3db0c3ff355107fa5878acca5",
+      "commit_basis": "edit",
+      "finding": "done_when-3",
+      "note": "404 (pushed with this commit) makes the USD 50 cap cumulative over both cohort runs, adds a 100-of-143 produced floor, restores the sourceless-draft control on the export-gate reading, marks sib-second-pass landed, and exempts test-only repairs from the fails-on-main clause.",
+      "reason": "",
+      "when": "2026-11-08T11:32:37.571951+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "b491158a200994a3db0c3ff355107fa5878acca5",
+      "commit_basis": "edit",
+      "finding": "done_when-4",
+      "note": "404 (pushed with this commit) makes the USD 50 cap cumulative over both cohort runs, adds a 100-of-143 produced floor, restores the sourceless-draft control on the export-gate reading, marks sib-second-pass landed, and exempts test-only repairs from the fails-on-main clause.",
+      "reason": "",
+      "when": "2026-11-08T11:32:44.276907+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "b491158a200994a3db0c3ff355107fa5878acca5",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "404 (pushed with this commit) makes the USD 50 cap cumulative over both cohort runs, adds a 100-of-143 produced floor, restores the sourceless-draft control on the export-gate reading, marks sib-second-pass landed, and exempts test-only repairs from the fails-on-main clause.",
+      "reason": "",
+      "when": "2026-11-08T11:32:52.007177+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "b491158a200994a3db0c3ff355107fa5878acca5",
+      "commit_basis": "edit",
+      "note": "404 (pushed with this commit) makes the USD 50 cap cumulative over both cohort runs, adds a 100-of-143 produced floor, restores the sourceless-draft control on the export-gate reading, marks sib-second-pass landed, and exempts test-only repairs from the fails-on-main clause.",
+      "reason": "",
+      "when": "2026-11-08T11:32:24.522157+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "b491158a200994a3db0c3ff355107fa5878acca5",
+      "commit_basis": "edit",
+      "note": "404 (pushed with this commit) makes the USD 50 cap cumulative over both cohort runs, adds a 100-of-143 produced floor, restores the sourceless-draft control on the export-gate reading, marks sib-second-pass landed, and exempts test-only repairs from the fails-on-main clause.",
+      "reason": "",
+      "when": "2026-11-08T11:32:31.011296+00:00"
+    },
+    "done_when-3": {
+      "action": "acted",
+      "by": "",
+      "commit": "b491158a200994a3db0c3ff355107fa5878acca5",
+      "commit_basis": "edit",
+      "note": "404 (pushed with this commit) makes the USD 50 cap cumulative over both cohort runs, adds a 100-of-143 produced floor, restores the sourceless-draft control on the export-gate reading, marks sib-second-pass landed, and exempts test-only repairs from the fails-on-main clause.",
+      "reason": "",
+      "when": "2026-11-08T11:32:37.571951+00:00"
+    },
+    "done_when-4": {
+      "action": "acted",
+      "by": "",
+      "commit": "b491158a200994a3db0c3ff355107fa5878acca5",
+      "commit_basis": "edit",
+      "note": "404 (pushed with this commit) makes the USD 50 cap cumulative over both cohort runs, adds a 100-of-143 produced floor, restores the sourceless-draft control on the export-gate reading, marks sib-second-pass landed, and exempts test-only repairs from the fails-on-main clause.",
+      "reason": "",
+      "when": "2026-11-08T11:32:44.276907+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "b491158a200994a3db0c3ff355107fa5878acca5",
+      "commit_basis": "edit",
+      "note": "404 (pushed with this commit) makes the USD 50 cap cumulative over both cohort runs, adds a 100-of-143 produced floor, restores the sourceless-draft control on the export-gate reading, marks sib-second-pass landed, and exempts test-only repairs from the fails-on-main clause.",
+      "reason": "",
+      "when": "2026-11-08T11:32:52.007177+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-sn-integrity-backlog.v403.json",
+  "review_run_id": "r-20261108T110624600512-plan-review-of-sn-integrity-backlog",
+  "reviewed_blob_sha": "2aae8faaf295e946db3851665b3e26c35071a0c0",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `yield.new_identity_ceiling_in_plausible_unproduced_cohort` resolves to 114 in `sib-full-run-failure-diagnosis.json`, all four cohort class names (`isolated_retry` 121, `registered_token_retry` 9, `binding_now_admissible` 12, `attachment_now_admissible` 1) exist in that fragment's `recovery_counts`, and `#s50` resolves.",
+    "done_when": "a finding \u2014 bullet 1 admits a rerun in which every cohort source fails with a reason, so nothing in \u00a751 measures whether the yield clause it carries is met.",
+    "evidence_paths": "pass \u2014 the rerun read-back and spend are named to `docs/evidence/fragments/sn-integrity-backlog/`, a durable repository path, and the export-gate read writes no log.",
+    "naming": "pass \u2014 the added node ids and prose name mechanisms (`sib-persist-refusal-per-source`, `persist_generated_name_winners`) with no plan labels, ticket numbers or changelog prose.",
+    "reasoning": "pass on the root cause \u2014 the diagnosis fragment's `yield.reason` (\"Every cohort source is failed or vocab_gap \u2026 Fixed code alone does not reset terminal source state\") supports \"the pipeline, not the DD\" and the reset the section performs; the measure defect the third check finds is emitted under done_when.",
+    "single_goal": "pass \u2014 each of the eight listed nodes names one mechanism and one outcome; the three test-only repairs are separate node ids even where they share a bullet.",
+    "wiring": "a finding \u2014 \u00a751 re-declares `sib-second-pass` and the three repair nodes that \u00a750 already declares, and lists the spent first pass beside the tail node it motivated."
+  },
+  "section_digests": {
+    "_document": "4a452782f7c0f2f26f9bb1006f74f8131dd8b9c89d78fa89d46df37a0bfcb133",
+    "s1": "c5d818234e097cc66d461db952acf180dd9364d0ece43082d00f7b2bfdda19e2",
+    "s10": "84c8bdeb15133e22cd2f08ee96d429ac3f92f85d28d6720d5e2fd0a87a97cbf2",
+    "s11": "499a319e38a73614c326b3607a7d1cae481dac12714fad0562ffe74a78694c89",
+    "s12": "62e459e2a7b4232b44e54b32969fb970620d613ef8797e09b993d36d4b44d757",
+    "s13": "80e90ea7c45053ae6c5de9d69ac1ef80a87289bb80c7afb2f796f3c31b3235d7",
+    "s14": "4981171151a50aafb83f844e0ad63c7df82749d58b56d7fb8590f5ee8cccfb9b",
+    "s15": "0e2bcb71a7aac4d1ddeae8e3a5959c43e1f3e90ae3ea89c3ca3b16303b3f87b2",
+    "s16": "0ea017c6ac78ad295a75878f5d17514576fb4cc4c0b96f3acbde1adf6dbce703",
+    "s17": "32359142ba3b6f1263abefa9f37711fbc5fdefe9548620b20287985e5858d673",
+    "s18": "c6a5bf0492c322e4f1c9ebe6e0e4b880f6312ab30ec62992d8c786d321fa2d82",
+    "s19": "f735f604bc9a9d5ff1664a38976a03f6a4ede1a90baa42b16f38af66702d3c4b",
+    "s2": "af2703cbe346dcd322398505bfee69c50a6bcd1238937227f17cdb6c5fc75c58",
+    "s20": "805e801ca7a749b7317a6427d250b1a67bead66a292735383165c6e4e1877825",
+    "s21": "47e390d3695f9b02e65881501ddd52ecd87022d600dc4e915c6d282fa6da35bd",
+    "s22": "ba8506427fb29722b2940dcd76473585cc4f09fe8f4baa48ecff9fa7a723597a",
+    "s23": "44670189f5cafaaefa0ad448ffffd16b3b33a1cc017a2be6b72d08a2a911b48a",
+    "s24": "9c7844d14a2768bfd77971a05dac1d799cff7466e3e9f6802dd0336fadc6fee1",
+    "s25": "40eced7f771252fb9ab48c78df7b98f91a7c1d3300462bc4ecae8c5d4ccc9908",
+    "s26": "6a0bd41e4ff1e25988259389e8245175eb581650bebc0cddbc945a9929aa9a17",
+    "s27": "585251740b9450d952a7e031af167fe71be5f24dd03ecec62395c2344bdceea4",
+    "s28": "10bfd618b26981d0069214a9c611c9fef9bdb5b3da4e6058d2e7378683d2b3fa",
+    "s29": "82321ad1506f8fcde238b5afa9c7b5261e6260db85f5f99889639095ee424b7a",
+    "s3": "300c4331f0fe1af8d898818b2f5b5a441aba08a7471954d088e13d6f8b499de5",
+    "s30": "3f04c2991d18b10a9540db81a31f0b4858b5aff2a5173128826ea0f5e9c65bbf",
+    "s31": "e0680800ed07ea9e6f992f07ba811c8024e82f21ca23c3feb00fdc9a770e2820",
+    "s32": "e57a48b0bd16b5676288a9c2f25d6f6757557cd00e8f0fa3609406df32db55fb",
+    "s33": "4cb7f0c6143d01741bee63e0d19e3b3c28414d8a93c5173e5146d84cca68ed5f",
+    "s34": "09b1730cdf7460d28d27e9a7e774b653e48b93c65363e42967315e5fcc5ad3b1",
+    "s35": "1b0823c332d9635cbced7249ae633900d0b2dc3bf48115bfbe7f4f3c8409e150",
+    "s36": "37252b47ae5685152ecfeedeac6cb23286fff432a25850ed6c4b3a90868794e1",
+    "s37": "d0a7ffabc4967ddf6fea0e673f2ab371cd81ca7a62f646754c9c54fa76507f3b",
+    "s38": "bd84527b717e3c9bd89cbfb4d127c83e2a1507e92a79a9360e7a8753ad4d7731",
+    "s39": "36435d98523924c764cd759ba4387ef2db43f3ba076c56333160112405c22f23",
+    "s4": "9307d261fa4d9e060cd79e2c7b1e6f93c38744adf9aed1dedefa687ebbfa8e73",
+    "s40": "03fe27d87618703c544206edb62e72058a9f7098f0177a4199241ab7f69c808d",
+    "s41": "62049348ccb6d2bb029946d32ab7098803989262e95eb7a25a9f1de01921bf26",
+    "s42": "699c0059fd7fec1dcdbe36dad64191a8a775a22cafb48803633a85d6b40b8c6f",
+    "s43": "7e0432331fac79fcc40e4a4dbe4d8cc6671c02f3dcedd7c6564f68bcad5fb55f",
+    "s44": "785e68a4eb6793368d78cad831c822d2ddfb500005b1f5ffb1ecb55e80f35b55",
+    "s45": "0ebe71c91ae75df28e89e446fab4b1145e085d84aa5b804cbe29f65e0426f584",
+    "s46": "467d058e77470b74eb8c6b1a590d11790ac8aa02b4e1730aed2cbdbf36c64027",
+    "s47": "f92934f49e1f471e7328491e93daba7a387ff595730d8307f8ec9c2f2a2a4fc3",
+    "s48": "10dc8c63aab626e9113e9b0fd594986a0dd09a693f13a03397df3ccd611071f8",
+    "s49": "f9fe4b296803d040493faa2cddc3222d5c4b1e8a65c317be8866652d8d467725",
+    "s5": "d461f7815409b858add81013dfb1604c76f2d4a79f2d45ddce0880e90a64c8fd",
+    "s50": "3d7312fcd7fd291dd700a3b74438e39528e0d30d66d01782b91c01486fde2ddd",
+    "s51": "38cb684861e1f570ac3dbce538e6d5e8e432b2605b8d85998f30e0538090d526",
+    "s6": "e6bf01013b7bd341cf2f86ebf24dc60084ea8cabeb4cf4cd2664c1109ac5ca62",
+    "s7": "1930b98dfc66a2e1f9a1ce5149fbb73fe208b66c3e0c35664330a12e7e945933",
+    "s8": "6b362f87f941f8c95d562c95cdf93e578892ff32c85156fd5565c76548c58eab",
+    "s9": "20748220a6f94f6c422b1b677587d4456ccf3be5fbe204daac414373443327bd"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T11:32:20.092372+00:00",
+  "total": null
+}
