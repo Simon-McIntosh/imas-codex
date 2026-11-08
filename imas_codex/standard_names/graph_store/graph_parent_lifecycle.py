@@ -11,7 +11,11 @@ from typing import Any
 from imas_codex.discovery.base.claims import retry_on_deadlock
 
 from . import graph_foundation as foundation
-from .graph_foundation import _CLAIM_TIMEOUT_SECONDS, DEFAULT_POOL_BATCH_SIZE
+from .graph_foundation import (
+    _CLAIM_TIMEOUT_SECONDS,
+    DEFAULT_POOL_BATCH_SIZE,
+    source_claim_predicate,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -107,17 +111,11 @@ def pool_pending_counts(
         "max_compose_attempts": services._MAX_COMPOSE_CLAIM_ATTEMPTS,
         "parent_desc_placeholder": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
     }
-    # The generate_name claim seeds from a source reached through FROM_DD_PATH
-    # and skips sources already bound to a frozen produced name.  A source
-    # without a DD path is never selectable, so counting it reports pending
-    # work no pool can act on: the exit watchdog then holds the run open until
-    # the stall timer fires and a fully drained run reports a deadlock.
+    # Count only the sources the generate_name claim can select: a source with
+    # no DD path, or already bound to a frozen produced name, is never claimed,
+    # and counting it keeps the exit watchdog open until the stall timer fires.
     params["frozen_name_stages"] = list(services._PIPELINE_FROZEN_NAME_STAGES)
-    source_claim_where = (
-        "AND EXISTS { MATCH (s)-[:FROM_DD_PATH]->(:IMASNode) }"
-        " AND NOT EXISTS { MATCH (s)-[:PRODUCED_NAME]->(frozen:StandardName)"
-        " WHERE frozen.name_stage IN $frozen_name_stages }"
-    )
+    source_claim_where = "AND " + source_claim_predicate(alias="s")
     if domain:
         source_scope += " AND s.physics_domain = $domain"
         name_scope += " AND sn.physics_domain = $domain"

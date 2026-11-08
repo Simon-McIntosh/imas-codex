@@ -26,7 +26,7 @@ proves the query sees links it can see), <b>104</b> pending (extracted,
 <code>attempt_count &lt; 5</code>), and <b>104</b> of those pending sources with no
 <code>FROM_DD_PATH</code> — broken down as <b>101</b> <code>source_type='derived'</code>
 and <b>3</b> <code>'manual'</code>. This is the residual the full-run diagnosis
-measured as <code>seed_candidates: 0</code> for job 1308077.</p>
+measured as <code>seed_candidates: 0</code>.</p>
 
 <p id="sib-drained-queue-exit-effect">With that residue counted, the run never met
 the idle condition. After the stall window it set <code>stalled_event</code>,
@@ -39,14 +39,26 @@ accepts as the drained outcome and exits <b>0</b>. A genuinely claimable source
 with nothing in flight still reports <code>stalled</code> and exit 1.</p>
 
 <p id="sib-drained-queue-exit-paths">Changed:
+<code>imas_codex/standard_names/graph_store/graph_foundation.py</code> now defines
+<code>source_claim_predicate()</code> and the frozen produced-name stage list
+once. <code>claim_generate_name_batch</code> (five statements),
 <code>imas_codex/cli/sn.py</code> (<code>_compute_pool_progress</code>, the live
 watchdog and display query) and
 <code>imas_codex/standard_names/graph_store/graph_parent_lifecycle.py</code>
-(<code>pool_pending_counts</code>, the exported copy). Both add the
-<code>FROM_DD_PATH</code> existence test and the frozen produced-name exclusion;
-the frozen stage list is read from the wired services namespace because
-<code>graph_store</code> modules may import only <code>graph_foundation</code> from
-their siblings.</p>
+(<code>pool_pending_counts</code>, the exported copy) all read that one
+definition, so the count and the claim cannot drift apart. The definition lives
+in <code>graph_foundation</code> rather than beside the claim because
+<code>graph_store</code> modules may import only that shared module from their
+siblings; <code>graph_cost_and_claims</code> re-exports it for callers outside
+the package.</p>
+
+<p id="sib-drained-queue-exit-explain">Each modified statement was planned
+against the live graph with <code>EXPLAIN</code> — the seven distinct statements
+(five in <code>claim_generate_name_batch</code>, two pending-count queries) all
+returned a plan without error, so the shared predicate composes correctly inside
+every surrounding clause. Output:
+<code>explain.log</code> in the run directory; it records 7 statements, all
+<code>ok</code>.</p>
 
 <p id="sib-drained-queue-exit-negative-control">The declared mutation restores
 both product files to base <code>d5da568f9</code> — the unclaimable sources are

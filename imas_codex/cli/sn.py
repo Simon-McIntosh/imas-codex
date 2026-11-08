@@ -593,6 +593,11 @@ def _compute_pool_progress(
         docs_review_eligibility_params,
         docs_review_eligibility_where,
     )
+    from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        _MAX_COMPOSE_CLAIM_ATTEMPTS,
+        _PIPELINE_FROZEN_NAME_STAGES,
+        source_claim_predicate,
+    )
     from imas_codex.standard_names.graph_store.graph_refinement import (
         REFINE_NAME_ATTEMPTS_SPENT,
     )
@@ -608,16 +613,10 @@ def _compute_pool_progress(
     )
     docs_review_eligible = docs_review_eligibility_where()
 
-    # The generate_name claim seeds from a source reached through FROM_DD_PATH
-    # and skips sources already bound to a frozen produced name.  A source
-    # without a DD path is never selectable, so counting it reports pending
-    # work no pool can act on: the exit watchdog then holds the run open until
-    # the stall timer fires and a fully drained run reports a deadlock.
-    source_claim_where = (
-        "AND EXISTS { MATCH (s)-[:FROM_DD_PATH]->(:IMASNode) }"
-        " AND NOT EXISTS { MATCH (s)-[:PRODUCED_NAME]->(frozen:StandardName)"
-        " WHERE frozen.name_stage IN $frozen_name_stages }"
-    )
+    # Count only the sources the generate_name claim can select: a source with
+    # no DD path, or already bound to a frozen produced name, is never claimed,
+    # and counting it keeps the exit watchdog open until the stall timer fires.
+    source_claim_where = "AND " + source_claim_predicate(alias="s")
 
     query = f"""
     CALL {{
@@ -767,10 +766,6 @@ def _compute_pool_progress(
         "drain_scope_id": drain_scope_id,
         **docs_review_eligibility_params(),
     }
-    from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
-        _MAX_COMPOSE_CLAIM_ATTEMPTS,
-        _PIPELINE_FROZEN_NAME_STAGES,
-    )
 
     params["max_compose_attempts"] = _MAX_COMPOSE_CLAIM_ATTEMPTS
     params["frozen_name_stages"] = list(_PIPELINE_FROZEN_NAME_STAGES)

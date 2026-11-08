@@ -126,6 +126,13 @@ _CLAIM_TIMEOUT_SECONDS = 300
 DEFAULT_POOL_BATCH_SIZE = 25
 _CLAIM_VERIFY_SETTLE_SECONDS = 0.5
 
+# Produced-name stages the name pipeline may no longer rewrite; a source bound
+# to one of them has no work left and is not a claim candidate.
+_PIPELINE_FROZEN_NAME_STAGES: tuple[str, ...] = (
+    NameStage.approved.value,
+    NameStage.contested.value,
+)
+
 _PHASE_TO_POOL: dict[str, str] = {
     "generate": "compose",
     "generate_name": "compose",
@@ -189,6 +196,29 @@ def docs_review_winner_query_body() -> str:
         })[0] AS winner
         RETURN winner
     """
+
+
+def source_claim_predicate(*, alias: str, dd_path_bound: bool = False) -> str:
+    """Return the WHERE clauses restricting *alias* to a claimable source.
+
+    ``claim_generate_name_batch`` selects a source only when it is reached
+    through a ``FROM_DD_PATH`` edge and is not already bound to a produced name
+    in a frozen stage.  Every query that reports or acts on the queue must use
+    this same predicate: a count that omits either restriction reports work no
+    pool can select, so a drained run never goes idle and the exit watchdog
+    reports a deadlock instead of a drain.
+
+    ``dd_path_bound`` is for a statement that already matches the DD path with
+    the same variable, where the existence test would repeat that match.
+    """
+    clauses: list[str] = []
+    if not dd_path_bound:
+        clauses.append(f"EXISTS {{ MATCH ({alias})-[:FROM_DD_PATH]->(:IMASNode) }}")
+    clauses.append(
+        f"NOT EXISTS {{ MATCH ({alias})-[:PRODUCED_NAME]->(frozen:StandardName)"
+        " WHERE frozen.name_stage IN $frozen_name_stages }"
+    )
+    return " AND ".join(clauses)
 
 
 DERIVED_PARENT_CLEANUP_DELETION_LIMIT = 80
@@ -736,6 +766,7 @@ __all__ = [
     "_DD_LINK_RE",
     "_LINK_RE",
     "_PHYSICS_ABBREVIATIONS",
+    "_PIPELINE_FROZEN_NAME_STAGES",
     "_SETTLED_SOURCE_BINDING_STAGES",
     "_STABLE_BINDING_NAME_STAGES",
     "_TERMINAL_BINDING_NAME_STAGES",
@@ -783,6 +814,7 @@ __all__ = [
     "reclassify_standard_name_domain",
     "refuse_protected_automatic_deletion",
     "retry_on_deadlock",
+    "source_claim_predicate",
     "strict_review_grammar_context",
     "suppress",
     "time",

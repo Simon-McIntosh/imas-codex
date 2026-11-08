@@ -17,6 +17,7 @@ narrower or wider than the claim changes and the verdict changes with it.
 from __future__ import annotations
 
 import asyncio
+import uuid
 from dataclasses import dataclass
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -85,11 +86,11 @@ class _FixtureGraph:
 
 
 def _unclaimable_sources() -> list[_Source]:
-    """The 101 derived and 3 manual sources job 1308077 left pending.
+    """The 101 derived and 3 manual sources a drained queue left pending.
 
     Measured on the live graph: 104 sources at ``status='extracted'`` with
-    ``attempt_count < 5`` and no ``FROM_DD_PATH`` edge, out of 10,141 sources
-    (9,078 carrying that edge, which proves the query sees links it can see).
+    ``attempt_count < 5`` out of 10,141 (9,078 of which carry a
+    ``FROM_DD_PATH`` edge), and all 104 pending sources without that edge.
     """
     return [_Source(has_dd_path=False) for _ in range(104)]
 
@@ -185,15 +186,13 @@ def test_a_stuck_claim_still_reports_stalled_and_exits_one() -> None:
     assert exit_info.value.code == 1
 
 
-def test_the_generate_count_mirrors_the_claim_seed_predicate() -> None:
+def test_every_pending_count_names_the_claim_restrictions() -> None:
     """Both pending-count queries must name the claim's own restrictions."""
     from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
         pool_pending_counts,
     )
 
-    graph = _FixtureGraph([])
-    _compute_pool_progress(graph, domains=None, rotation_cap=3, min_score=0.75)
-    cli_query = graph.queries[-1]
+    cli_query = _generate_name_clause(_count_cypher([]))
 
     lifecycle_graph = _FixtureGraph([])
     with patch("imas_codex.graph.client.GraphClient", return_value=lifecycle_graph):
@@ -203,12 +202,97 @@ def test_the_generate_count_mirrors_the_claim_seed_predicate() -> None:
                 _PIPELINE_FROZEN_NAME_STAGES=("approved", "contested"),
             ),
         )
-    lifecycle_query = lifecycle_graph.queries[-1]
+    lifecycle_query = _generate_name_clause(lifecycle_graph.queries[-1])
 
     for label, cypher in (("cli", cli_query), ("lifecycle", lifecycle_query)):
-        generate_clause = _generate_name_clause(cypher)
-        assert "FROM_DD_PATH" in generate_clause, label
-        assert "PRODUCED_NAME" in generate_clause, label
+        assert "FROM_DD_PATH" in cypher, label
+        assert "PRODUCED_NAME" in cypher, label
+
+
+def test_the_count_and_the_claim_select_the_same_sources() -> None:
+    """The pending count and the claim select the same sources on a fake."""
+    sources = [
+        _Source(has_dd_path=True),
+        _Source(has_dd_path=True),
+        _Source(has_dd_path=False),
+        _Source(has_dd_path=True, frozen_produced=True),
+    ]
+    count_clause = _generate_name_clause(_count_cypher(sources))
+
+    assert _selects(count_clause, sources) == 2
+    assert _selects(_claim_seed_cypher(), sources) == _selects(count_clause, sources)
+
+
+def test_both_count_sites_and_the_claim_read_one_predicate() -> None:
+    """The claimability predicate is defined once and read by every site."""
+    from imas_codex.standard_names.graph_store.graph_foundation import (
+        source_claim_predicate,
+    )
+
+    count_clause = _generate_name_clause(_count_cypher([]))
+    count_predicate = source_claim_predicate(alias="s")
+
+    assert count_predicate in count_clause
+    assert count_predicate.replace("(s)-", "(sns)-") in _claim_seed_cypher()
+
+
+def _count_cypher(sources: list[_Source]) -> str:
+    graph = _FixtureGraph(sources)
+    _compute_pool_progress(graph, domains=None, rotation_cap=3, min_score=0.75)
+    return graph.queries[-1]
+
+
+def _selects(cypher: str, sources: list[_Source]) -> int:
+    """Apply to a source list the restrictions the query names."""
+    requires_dd_path = "FROM_DD_PATH" in cypher
+    skips_frozen_produced = "PRODUCED_NAME" in cypher
+    return sum(
+        1
+        for source in sources
+        if (not requires_dd_path or source.has_dd_path)
+        and (not skips_frozen_produced or not source.frozen_produced)
+    )
+
+
+def _claim_seed_cypher() -> str:
+    """Return the Cypher the generate_name claim seeds with.
+
+    The graph double answers with no rows, so the claim reports an empty batch
+    after its first statement and nothing is written.
+    """
+    from imas_codex.standard_names.graph_store import graph_cost_and_claims
+
+    graph = _RecordingGraph()
+    graph_cost_and_claims.claim_generate_name_batch(
+        services=SimpleNamespace(uuid=uuid, GraphClient=lambda: graph)
+    )
+    return graph.queries[0]
+
+
+class _RecordingGraph:
+    """Graph double that records the Cypher a claim runs."""
+
+    def __init__(self) -> None:
+        self.queries: list[str] = []
+
+    def __enter__(self) -> _RecordingGraph:
+        return self
+
+    def __exit__(self, *_exc: object) -> None:
+        return None
+
+    def session(self) -> _RecordingGraph:
+        return self
+
+    def begin_transaction(self) -> _RecordingGraph:
+        return self
+
+    def run(self, cypher: str, **_params: object) -> list[dict[str, object]]:
+        self.queries.append(cypher)
+        return []
+
+    def close(self) -> None:
+        return None
 
 
 def _generate_name_clause(cypher: str) -> str:
