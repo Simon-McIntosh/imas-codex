@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="420">
+<meta name="plan-version" content="421">
 <meta name="plan-modified" content="2026-11-08">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -1339,6 +1339,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s51" data-id="c-run-r-20261108T180752870871-review-of-sib-receipt-gaps-expectation-9d198273af1d" data-who="reckon-build" data-when="2026-11-08T18:20:46Z">
     <div class="r-comment-body"><p>Reviewed full requested range; scores 19/18/20/16/19/20, added_failure_count=0, two non-blocking findings and no blocking finding; both record checks pass; coordinator disposition remains for two non-blocking findings.</p></div>
+</div>
+<div class="r-comment" data-section="s51" data-id="c-run-r-20261108T171139362143-sib-receipt-gaps-expectation" data-who="reckon-build" data-when="2026-11-08T17:33:06Z">
+    <div class="r-comment-body"><p>Updated the exact-dict expectation with nullable run_id and batch_key receipt fields; the declared removal reproduces the test failure, and full tests/standard_names at a93e57d9a passed 8623, skipped 11, failed 0 with -n 8.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261012T162346807302-review-of-sib-row-census" data-who="reckon-build" data-when="2026-10-12T16:39:58.712Z">
     <div class="r-comment-body"><p>reviewed r-20261012T145528571333-sib-row-census at a7a70db00 against c7b4c626e; total 93/120 (goal_fidelity 15, evidence 13, scope_discipline 19, durability 11, fit 15, reuse 20); two blocking findings — the landing record's verdict tallies and the manifest's row-count both disagree with the 38 rows the census file holds.</p></div>
