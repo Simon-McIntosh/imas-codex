@@ -11,7 +11,9 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 from collections.abc import Mapping, Sequence
+from contextlib import nullcontext
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -182,6 +184,57 @@ def clear_context_cache() -> None:
     """Clear cached context (for testing)."""
     global _CONTEXT_CACHE
     _CONTEXT_CACHE = None
+
+
+def build_retired_spelling_retry_reason(
+    items: Sequence[Mapping[str, Any]], *, gc: Any = None
+) -> str:
+    """Render persisted retired-spelling refusals for exact verified claims.
+
+    This context is source-specific and never enters the grammar cache. The
+    claim is checked again at the read so a stale batch cannot inherit another
+    owner's refusal. The returned text belongs in the compose ``retry_reason``.
+    """
+    claims = [
+        {key: item[key] for key in ("id", "claim_token", "claim_seq")}
+        for item in items
+        if item.get("id")
+        and item.get("claim_token")
+        and item.get("claim_seq") is not None
+    ]
+    if not claims:
+        return ""
+
+    from imas_codex.graph.client import GraphClient
+
+    with nullcontext(gc) if gc is not None else GraphClient() as graph:
+        rows = graph.query(
+            """
+            UNWIND $claims AS claim
+            MATCH (sns:StandardNameSource {id: claim.id})
+            WHERE sns.claim_token = claim.claim_token
+              AND sns.claim_seq = claim.claim_seq
+              AND sns.status = 'extracted'
+            RETURN sns.id AS id, sns.last_error AS last_error
+            ORDER BY sns.id
+            """,
+            claims=claims,
+        )
+    reasons = []
+    for row in rows:
+        error = row.get("last_error") or ""
+        retired = re.search(
+            r'candidate "([^"]+)" has non-bindable name_stage "(superseded|exhausted)"',
+            error,
+        )
+        if retired:
+            reasons.append(
+                f"Source `{row['id']}`: {error}\n"
+                f"Do not propose the retired spelling `{retired[1]}` again for "
+                "this source. Compose a different identity consistent with its "
+                "quantity, unit and locus."
+            )
+    return "\n\n".join(reasons)
 
 
 # ---------------------------------------------------------------------------
