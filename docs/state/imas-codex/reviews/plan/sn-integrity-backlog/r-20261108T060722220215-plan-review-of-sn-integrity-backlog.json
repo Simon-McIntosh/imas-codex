@@ -82,6 +82,16 @@
       "note": "\u00a751 (843562e66) now declares the rerun cohort and all five repair nodes, links \u00a750, and measures per-source outcome, at least 3 accepted per USD under USD 50, and failing-then-passing regression tests; \u00a750 is declared done on its run verdict.",
       "reason": "",
       "when": "2026-11-08T06:45:06.405873+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "843562e666780df849e0a2218e07311834826f3a",
+      "commit_basis": "edit",
+      "finding": "single_goal-1",
+      "note": "\u00a751 (843562e66) now declares the rerun cohort and all five repair nodes, links \u00a750, and measures per-source outcome, at least 3 accepted per USD under USD 50, and failing-then-passing regression tests; \u00a750 is declared done on its run verdict.",
+      "reason": "",
+      "when": "2026-11-08T06:45:43.634989+00:00"
     }
   ],
   "responses": {
@@ -101,10 +111,13 @@
       "when": "2026-11-08T06:37:08.954045+00:00"
     },
     "single_goal-1": {
-      "action": "declined",
+      "action": "acted",
       "by": "",
-      "reason": "the consistency pass is scheduled as its own node once the second pass and the retired-spelling fix land, because the families are still changing; \u00a750 closes on the run verdict alone",
-      "when": "2026-11-08T06:37:20.943220+00:00"
+      "commit": "843562e666780df849e0a2218e07311834826f3a",
+      "commit_basis": "edit",
+      "note": "\u00a751 (843562e66) now declares the rerun cohort and all five repair nodes, links \u00a750, and measures per-source outcome, at least 3 accepted per USD under USD 50, and failing-then-passing regression tests; \u00a750 is declared done on its run verdict.",
+      "reason": "",
+      "when": "2026-11-08T06:45:43.634989+00:00"
     },
     "wiring-1": {
       "action": "acted",
