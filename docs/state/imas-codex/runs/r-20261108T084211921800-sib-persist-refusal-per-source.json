@@ -1,0 +1,419 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "96d64ea46391e6eb82d4d2676b96cad62f34c287",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 13973826,
+      "input_tokens_cumulative": 13973826,
+      "output_tokens": 51905,
+      "output_tokens_cumulative": 51905,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 496,
+    "files": 4,
+    "removed": 2
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "a51f5e8aae5e02b332550c6cc94a0929e47e35fb",
+    "dcf4dc3fcfab9ed9ef6698b8792d2dbf48c72982",
+    "dc515086a52d3a283a204df5dc8811616a4b0836",
+    "cb00d7729e64e4cc240e09f7d4cf72d6eb827869"
+  ],
+  "completed_at": "2026-11-08T09:45:26.689Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-11-08T08:46:44Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": "infrastructure-failure",
+  "gate": "failed",
+  "gate_check": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-persist-refusal-per-source uv run --no-sync pytest -p no:cacheprovider -n 8 tests/standard_names",
+    "exit_status": 1,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T084211921800-sib-persist-refusal-per-source/logs/after-suite.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.9263157894736842,
+    "plan": "sn-integrity-backlog",
+    "reason": "gate-not-passing",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-11-08T09:42:13.562941+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-11-08T08:42:13Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 27,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 0,
+    "headroom": 12,
+    "mean_context": 100000,
+    "observed_at": "2026-11-08T08:42:01Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 27,
+      "aggregate_tokens_per_second": 76.09,
+      "detail": "",
+      "mean_tokens_per_second": 190.224,
+      "observed_at": "2026-11-08T08:42:01Z",
+      "runs": 0.4,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-08T09:45:26.689Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T084211921800-sib-persist-refusal-per-source/manifest.md",
+  "member": "disposable-r-20261108T084211921800-sib-persist-refusal-per-source",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "gate-not-passing",
+    "test_paths": [
+      "tests/standard_names/test_persist_refusal_per_source.py"
+    ],
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "sib-persist-refusal-per-source",
+  "node_definition": {
+    "after": [],
+    "anchor_paths": [],
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "elevated",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1196,
+          "cached_input_tokens": 319334,
+          "input_tokens": 320532,
+          "output_tokens": 1002,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 321534,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+      "session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea"
+    },
+    "done_when": "persist_generated_name_winners (imas_codex/standard_names/graph_store/graph_catalog.py:2179, the two RuntimeError raises near 2370 and 2384 reading 'rich standard-name write rejected an exact-claim winner') no longer raises when write_standard_names writes fewer names than its rich-write candidates or a finalize entry is lost: each refused winner's source is released through the existing claim-fenced failure writer with a last_error naming the candidate and the refusal, every other winner in the batch persists, and a refusal the writer cannot attribute to a source still raises; the log of SLURM job 1308283 at ~/.cache/imas-codex-sib-second-pass/sn-run-1308283.log, which aborted generate_name three times on this refusal, is read to name which candidates were refused and why the rich write dropped them, recorded in docs/evidence/fragments/sn-integrity-backlog/sib-persist-refusal-per-source.html; tests/standard_names/test_persist_refusal_per_source.py proves one refused winner among three leaves two persisted and one source failed with the reason, and fails on main; tests/standard_names adds no failure id against main beyond the known load timeouts in test_anchor_ab_aggregate.py and test_dd_gap_automated_writers.py; USD 0",
+    "estimated_hours": null,
+    "goal": "Record a rich-write refusal of one exact-claim winner against its source instead of aborting the compose pool",
+    "id": "sib-persist-refusal-per-source",
+    "images": [],
+    "inputs": [
+      "docs/evidence/fragments/sn-integrity-backlog/sib-second-pass.html"
+    ],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-11-08T08:42:13Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 27,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 0,
+      "headroom": 12,
+      "mean_context": 100000,
+      "observed_at": "2026-11-08T08:42:01Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 27,
+        "aggregate_tokens_per_second": 76.09,
+        "detail": "",
+        "mean_tokens_per_second": 190.224,
+        "observed_at": "2026-11-08T08:42:01Z",
+        "runs": 0.4,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T084211921800-sib-persist-refusal-per-source/manifest.md",
+    "negative_control": "restore the raise; the three-winner test must fail with the RuntimeError",
+    "over_fence_reason": "",
+    "plan": "sn-integrity-backlog",
+    "regenerate_paths": [],
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§51",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "imas_codex/standard_names/graph_store/graph_catalog.py",
+      "tests/standard_names/test_persist_refusal_per_source.py",
+      "docs/evidence/fragments/sn-integrity-backlog/sib-persist-refusal-per-source.html",
+      "docs/figures/sn-integrity-backlog/sib-persist-refusal-per-source",
+      "imas_codex/standard_names/graph_ops.py"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 2972414.0,
+  "outcome": "",
+  "outside_scope_paths": [
+    "graph_ops.py"
+  ],
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "sib-persist-refusal-per-source",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-11-08T08:46:13.682949+00:00",
+    "score": 0.6625,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "defect found by sib-second-pass: job 1308283 aborted on this refusal leaving 19 sources unreached",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:capability",
+    "family": null,
+    "jev_model": "~typesafe/jev-latest",
+    "latency_ms": 5001.864,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 1567.28,
+      "context-estimate": 127.513,
+      "records": 1440.601,
+      "verdict-inputs": 2576.705
+    }
+  },
+  "plan": "sn-integrity-backlog",
+  "plan_impl_at_dispatch": 0.9263157894736842,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "cb00d7729e64e4cc240e09f7d4cf72d6eb827869",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "96d64ea46391e6eb82d4d2676b96cad62f34c287",
+    "reviewed_head_sha": "cb00d7729e64e4cc240e09f7d4cf72d6eb827869",
+    "scores": {
+      "durability": 16,
+      "evidence": 16,
+      "fit": 19,
+      "goal_fidelity": 18,
+      "reuse": 14,
+      "scope_discipline": 17
+    },
+    "status": "parsed",
+    "total": 5
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261108T084211921800-sib-persist-refusal-per-source",
+  "scope_acceptances": [
+    {
+      "path": "imas_codex/standard_names/graph_ops.py",
+      "reason": "one-line _WIRED_SERVICE_NAMES entry for the failure writer the persist path now calls; no peer claims the file"
+    }
+  ],
+  "scope_changed": false,
+  "section": "§51",
+  "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+  "session_harness": "claude",
+  "session_id": "668c289d-7eaa-4a2d-95ae-fd09ae9590c1",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 3,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 13973826,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 3493.489,
+    "generated_tokens": 51905,
+    "generation_seconds": 699.377,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 75.9,
+    "machine_seconds": 2794.112,
+    "peak_input_tokens": 174723,
+    "tokens_per_second": 74.22,
+    "wall_tokens_per_second": 14.86
+  },
+  "time_budget": "60m",
+  "tool_steps": 123.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 3522,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-08T09:45:36Z",
+    "last_record_type": "result",
+    "launched_at": "2026-11-08T08:46:59Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [],
+    "run_id": "r-20261108T084211921800-sib-persist-refusal-per-source",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 8899,
+    "worker_pid": 926510
+  },
+  "worker_seconds": 3448,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": {
+    "classification": "retained-for-resume",
+    "retained_at": "2026-11-08T09:45:26.689Z",
+    "session_id": "668c289d-7eaa-4a2d-95ae-fd09ae9590c1",
+    "session_source": "stream",
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-persist-refusal-per-source"
+  }
+}
