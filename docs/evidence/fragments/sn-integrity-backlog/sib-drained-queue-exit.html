@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-drained-queue-exit">
+<title>Landing record — a drained source queue exits cleanly</title>
+</head>
+<body>
+<main>
+
+<h1 id="sib-drained-queue-exit-title">A drained source queue exits cleanly</h1>
+
+<p id="sib-drained-queue-exit-defect">The <code>generate_name</code> pool claims a
+source only when it is reached through a <code>FROM_DD_PATH</code> edge and is not
+already bound to a frozen produced name (<code>claim_generate_name_batch</code>).
+The aggregate pending-count query both pending-count copies run counted every
+source at <code>status='extracted'</code> under the attempt cap, so unclaimable
+sources stayed in the figure the exit watchdog reads.</p>
+
+<p id="sib-drained-queue-exit-reproduction">Reproduced read-only on the live graph
+before the repair, with a positive control in the same statement: <b>10,141</b>
+sources in total, <b>9,078</b> carrying a <code>FROM_DD_PATH</code> edge (which
+proves the query sees links it can see), <b>104</b> pending (extracted,
+<code>attempt_count &lt; 5</code>), and <b>104</b> of those pending sources with no
+<code>FROM_DD_PATH</code> — broken down as <b>101</b> <code>source_type='derived'</code>
+and <b>3</b> <code>'manual'</code>. This is the residual the full-run diagnosis
+measured as <code>seed_candidates: 0</code> for job 1308077.</p>
+
+<p id="sib-drained-queue-exit-effect">With that residue counted, the run never met
+the idle condition. After the stall window it set <code>stalled_event</code>,
+wrote <code>stop_reason='stalled'</code> and exited <b>1</b> — reporting a deadlock
+for a queue whose claimable work was exhausted. Both count sites now name the
+claim's own restrictions, so the watchdog's pending figure is work a pool can
+actually select; the idle branch fires and the run reports
+<code>stop_reason='no_eligible_work'</code>, which <code>_require_terminal_drain</code>
+accepts as the drained outcome and exits <b>0</b>. A genuinely claimable source
+with nothing in flight still reports <code>stalled</code> and exit 1.</p>
+
+<p id="sib-drained-queue-exit-paths">Changed:
+<code>imas_codex/cli/sn.py</code> (<code>_compute_pool_progress</code>, the live
+watchdog and display query) and
+<code>imas_codex/standard_names/graph_store/graph_parent_lifecycle.py</code>
+(<code>pool_pending_counts</code>, the exported copy). Both add the
+<code>FROM_DD_PATH</code> existence test and the frozen produced-name exclusion;
+the frozen stage list is read from the wired services namespace because
+<code>graph_store</code> modules may import only <code>graph_foundation</code> from
+their siblings.</p>
+
+<p id="sib-drained-queue-exit-negative-control">The declared mutation restores
+both product files to base <code>d5da568f9</code> — the unclaimable sources are
+counted again — and the drained case then reports
+<code>assert 'stalled' == 'no_eligible_work'</code> with
+<code>pending={'generate_name: 104'}</code>, 5 failed against 0 failures at head.
+Log: <code>negative-control-base.log</code> in the run directory.</p>
+
+</main>
+</body>
+</html>
