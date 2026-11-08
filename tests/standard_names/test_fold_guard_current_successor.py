@@ -1,4 +1,4 @@
-"""The fold ambiguity guard reads the change ledger, not the edge alone.
+"""Current-successor ambiguity and cyclic tombstone folds have distinct refusals.
 
 A ``REFINED_FROM`` edge records every succession a rename ever made, including
 the ones a later rename revoked. The guard's ambiguity decision -- does some
@@ -9,17 +9,16 @@ most recent rename or supersede event brought the meaning to, provided that
 event was not itself reverted; an event back onto the source means the rename
 was reverted and the edge is history, not a live claim.
 
-The canonical case is the normalized beta family. A ``regenerate`` renamed the
-normalized identity to ``beta`` at 2026-07-22T13:07:04 and a ``human_edit``
-renamed it back three minutes later at 13:10:05, leaving both edges but only
-one live meaning. Under the ledger rule ``normalized_toroidal_plasma_beta``
-has no current successor other than the fold target, so folding it onto its
-canonical spelling is unambiguous -- where the edge-existence reading refused
-forever. Every own test here would fail under that older rule, pinning the
-decision to the ledger.
+The normalized beta family has a reverted rename in its ledger, so ``beta`` is
+not another current successor. Folding back onto the tombstoned ancestor would
+still create a reciprocal edge, and is refused. The sanctioned reversal uses
+the closing-lineage reclaim through ``sn edit``; the disposable-graph test
+``test_closing_lineage_reclaims_same_spelling_without_cycle`` exercises it.
 """
 
 from __future__ import annotations
+
+import copy
 
 from tests.standard_names.test_tombstone_supersede import (
     _Graph,
@@ -44,14 +43,13 @@ def _reverted_beta_state() -> _State:
     the source -- a reverted rename that the ledger records with ``regenerate``
     (source -> beta, 13:07:04) then ``human_edit`` (beta -> source, 13:10:05).
     The canonical target is a tombstone whose only lineage closes back onto the
-    source (the straight refinement chain the tombstone path admits), and it
-    carries no sources, parent, child or successor of its own.
+    source. It carries no sources or parent/child edge, but a fold would write
+    the reciprocal lineage edge. The spelling is reclaimed through ``sn edit``.
     """
     state = _State(
         nodes={
             _OLD: _node(_OLD, stage="accepted", validation="valid"),
-            # The canonical target is a free tombstone: no sources, parent,
-            # child or successor of its own, revived by the fold itself.
+            # The canonical target holds the source's earlier spelling.
             _TARGET: _node(
                 _TARGET,
                 stage="superseded",
@@ -91,23 +89,20 @@ def _reverted_beta_state() -> _State:
     return state
 
 
-def test_reverted_beta_rename_clears_the_tombstone_fold_dry_run() -> None:
-    """The canonical case: a reverted rename is not a current successor.
-
-    Folding the source onto the free tombstone is unambiguous under the ledger
-    rule, because ``beta``'s succession was revoked three minutes after it was
-    written. The edge-existence reading of the same state refuses with "another
-    successor lineage", so this test fails if the guard is reverted to it.
-    """
+def test_reverted_beta_rename_refuses_a_cyclic_tombstone_fold() -> None:
+    """A reverted other successor cannot make a reciprocal edge safe."""
     graph = _Graph(_reverted_beta_state())
+    before = copy.deepcopy(graph.state)
     result = _run(graph, old=_OLD, target=_TARGET, dry_run=True)
 
-    assert result["ok"] is True
-    assert result["old_id"] == _OLD
-    assert result["into_id"] == _TARGET
-    assert result["dry_run"] is True
+    assert result["ok"] is False
+    assert "REFINED_FROM cycle" in result["reason"]
+    assert "closing-lineage reclaim" in result["reason"]
+    assert f"sn edit '{_OLD}' --rename '{_TARGET}'" in result["reason"]
+    assert graph.state == before
     assert graph.commits == 0
     assert graph.rollbacks == 1
+    assert graph.transactions[-1].write_markers == []
 
 
 def test_reverted_rename_clears_an_accepted_target_fold() -> None:
