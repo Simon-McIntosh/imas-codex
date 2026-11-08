@@ -107,16 +107,12 @@ def pool_pending_counts(
         "max_compose_attempts": services._MAX_COMPOSE_CLAIM_ATTEMPTS,
         "parent_desc_placeholder": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
     }
-    from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
-        _PIPELINE_FROZEN_NAME_STAGES,
-    )
-
     # The generate_name claim seeds from a source reached through FROM_DD_PATH
     # and skips sources already bound to a frozen produced name.  A source
     # without a DD path is never selectable, so counting it reports pending
     # work no pool can act on: the exit watchdog then holds the run open until
     # the stall timer fires and a fully drained run reports a deadlock.
-    params["frozen_name_stages"] = list(_PIPELINE_FROZEN_NAME_STAGES)
+    params["frozen_name_stages"] = list(services._PIPELINE_FROZEN_NAME_STAGES)
     source_claim_where = (
         "AND EXISTS { MATCH (s)-[:FROM_DD_PATH]->(:IMASNode) }"
         " AND NOT EXISTS { MATCH (s)-[:PRODUCED_NAME]->(frozen:StandardName)"

@@ -198,7 +198,10 @@ def test_the_generate_count_mirrors_the_claim_seed_predicate() -> None:
     lifecycle_graph = _FixtureGraph([])
     with patch("imas_codex.graph.client.GraphClient", return_value=lifecycle_graph):
         pool_pending_counts(
-            services=SimpleNamespace(_MAX_COMPOSE_CLAIM_ATTEMPTS=5),
+            services=SimpleNamespace(
+                _MAX_COMPOSE_CLAIM_ATTEMPTS=5,
+                _PIPELINE_FROZEN_NAME_STAGES=("approved", "contested"),
+            ),
         )
     lifecycle_query = lifecycle_graph.queries[-1]
 
