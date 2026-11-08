@@ -1,0 +1,454 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "a0a53603059a6dacf0ff77d447719fc5b83579c0",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 4970513,
+      "input_tokens_cumulative": 4970513,
+      "output_tokens": 18268,
+      "output_tokens_cumulative": 18268,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 544,
+    "files": 2,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 820,
+        "name": "mutate_then_lock",
+        "path": "tests/graph/test_manifest_drain.py"
+      },
+      "run_function": {
+        "line": 280,
+        "name": "phase_manifest",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-second-pass-run.py"
+      },
+      "window_line": 294
+    },
+    {
+      "existing_function": {
+        "line": 419,
+        "name": "test_clean_candidate_passes",
+        "path": "tests/standard_names/test_audits.py"
+      },
+      "run_function": {
+        "line": 280,
+        "name": "phase_manifest",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-second-pass-run.py"
+      },
+      "window_line": 294
+    },
+    {
+      "existing_function": {
+        "line": 455,
+        "name": "_two_flagged",
+        "path": "tests/standard_names/test_campaign.py"
+      },
+      "run_function": {
+        "line": 280,
+        "name": "phase_manifest",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-second-pass-run.py"
+      },
+      "window_line": 294
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_review_pydantic_accepts_populated_suggestion",
+        "path": "tests/standard_names/test_review_names_context.py"
+      },
+      "run_function": {
+        "line": 280,
+        "name": "phase_manifest",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-second-pass-run.py"
+      },
+      "window_line": 294
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "43ac0186f050cb382b796539a25e2a8c6f5700c0",
+    "fdf2aedf27fa98f560bb6f8f92c28f9252f79b46",
+    "fdfb1e620bea07148cd2da5e8d0f0b8340fe6cff",
+    "7b7592676ca781cf96bfae05f1e365c9ae79a6b7"
+  ],
+  "completed_at": "2026-11-08T06:46:12Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-11-08T05:21:57Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.9231621092086209,
+    "plan": "sn-integrity-backlog",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-11-08T06:17:39.264272+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-11-08T05:17:39Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 23,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 3,
+    "headroom": 7,
+    "mean_context": 140000,
+    "observed_at": "2026-11-08T05:17:23Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 23,
+      "aggregate_tokens_per_second": 159.868,
+      "detail": "",
+      "mean_tokens_per_second": 61.488,
+      "observed_at": "2026-11-08T05:17:23Z",
+      "runs": 2.6,
+      "state": "measured"
+    },
+    "waiting": 1
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-08T06:46:12Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T051738232687-sib-second-pass/manifest.md",
+  "member": "disposable-r-20261108T051738232687-sib-second-pass",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "sib-second-pass",
+  "node_definition": {
+    "after": [],
+    "anchor_paths": [],
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "elevated",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 469,
+          "cached_input_tokens": 151733,
+          "input_tokens": 152204,
+          "output_tokens": 854,
+          "reasoning_output_tokens": 26,
+          "total_tokens": 153058,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+      "session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea"
+    },
+    "done_when": "docs/evidence/fragments/sn-integrity-backlog/sib-second-pass.html and docs/evidence/fragments/sn-integrity-backlog/sib-second-pass-run.py record: the cohort taken from docs/evidence/fragments/sn-integrity-backlog/sib-full-run-failure-diagnosis.json 'sources' with recovery class isolated_retry (121), registered_token_retry (9), binding_now_admissible (12) or attachment_now_admissible (1); a reset of exactly those sources to extracted through the repository's sanctioned reset path with one receipt per source that keeps its prior status, last_error and attempt history; a scoped sn run over that cohort (dry run first, then apply) with -c 50 from the main checkout at a0a536030 or later, foreground passes or its own SLURM job as the run length requires, with the job id or log path recorded; the read-back by source: produced or still failed with the new reason, new names by stage, spend selected by the run's own id; no source outside the cohort reset; runner log ends in EXIT=",
+    "estimated_hours": null,
+    "goal": "Reset the 143 recoverable failed sources through a signed receipted reset and rerun them under the remaining cap",
+    "id": "sib-second-pass",
+    "images": [],
+    "inputs": [
+      "docs/evidence/fragments/sn-integrity-backlog/sib-full-run-failure-diagnosis.json"
+    ],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-11-08T05:17:39Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 23,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 3,
+      "headroom": 7,
+      "mean_context": 140000,
+      "observed_at": "2026-11-08T05:17:23Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 23,
+        "aggregate_tokens_per_second": 159.868,
+        "detail": "",
+        "mean_tokens_per_second": 61.488,
+        "observed_at": "2026-11-08T05:17:23Z",
+        "runs": 2.6,
+        "state": "measured"
+      },
+      "waiting": 1
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T051738232687-sib-second-pass/manifest.md",
+    "negative_control": "none: one-time signed operation; the before-reset census in docs/evidence/fragments/sn-integrity-backlog/sib-full-run-failure-diagnosis.json and the dry run are the control",
+    "over_fence_reason": "",
+    "plan": "sn-integrity-backlog",
+    "regenerate_paths": [],
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§50",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/evidence/fragments/sn-integrity-backlog/sib-second-pass.html",
+      "docs/evidence/fragments/sn-integrity-backlog/sib-second-pass-run.py",
+      "docs/figures/sn-integrity-backlog/sib-second-pass"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 2180476.0,
+  "outcome": "",
+  "outside_scope_paths": [
+    "dd:ic_antennas/antenna/module/strap/geometry/oblique",
+    "dd:ntms/time_slice/mode",
+    "dd:plasma_transport/model",
+    "dd:plasma_transport/model/ggd"
+  ],
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "sib-second-pass",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-11-08T05:21:21.649905+00:00",
+    "score": 0.8125,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "lead ruling 2026-11-08: reset 143 and rerun",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:snapshot",
+    "family": null,
+    "jev_model": "~typesafe/jev-latest",
+    "latency_ms": 5000.525,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 903.435,
+      "context-estimate": 132.356,
+      "records": 803.084,
+      "verdict-inputs": 1561.307
+    }
+  },
+  "plan": "sn-integrity-backlog",
+  "plan_impl_at_dispatch": 0.9231621092086209,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "7b7592676ca781cf96bfae05f1e365c9ae79a6b7",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "a0a53603059a6dacf0ff77d447719fc5b83579c0",
+    "reviewed_head_sha": "7b7592676ca781cf96bfae05f1e365c9ae79a6b7",
+    "scores": {
+      "durability": 9,
+      "evidence": 14,
+      "fit": 17,
+      "goal_fidelity": 16,
+      "reuse": 17,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 92
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261108T051738232687-sib-second-pass",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§50",
+  "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+  "session_harness": "claude",
+  "session_id": "7944ac72-ccaa-43f6-9625-772e2952a43e",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 14179699,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 605.144,
+    "generated_tokens": 56535,
+    "generation_seconds": 335.41,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 75.9,
+    "machine_seconds": 269.734,
+    "peak_input_tokens": 174572,
+    "tokens_per_second": 168.55,
+    "wall_tokens_per_second": 93.42
+  },
+  "time_budget": "60m",
+  "tool_steps": 95.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 5055,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-08T06:46:18Z",
+    "last_record_type": "result",
+    "launched_at": "2026-11-08T06:36:00Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [],
+    "run_id": "r-20261108T051738232687-sib-second-pass",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 7530,
+    "worker_pid": 138139
+  },
+  "worker_seconds": 1784,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
