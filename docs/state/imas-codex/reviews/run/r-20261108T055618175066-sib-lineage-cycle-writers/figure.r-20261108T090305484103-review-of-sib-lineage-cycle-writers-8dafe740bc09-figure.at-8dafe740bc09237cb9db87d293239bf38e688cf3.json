@@ -1,0 +1,153 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "A figure review runs no suite, so the count is the neutral value the record shape requires and not a measurement; no suite-delta is claimed.",
+  "attachment_map": {
+    "image-0.png (1399x720, the attachment rendered for this review)": "docs/figures/sn-integrity-backlog/sib-lineage-cycle-writers/lineage-refusals.svg"
+  },
+  "attachment_note": "One raster is attached to this review: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T090305484103-review-of-sib-lineage-cycle-writers-8dafe740bc09-figure/image-0.png (md5 9dfcfd6bb1c02dd8c0c5aa858e177e71, 13,538 bytes, mtime 2026-11-08T09:05:09Z, unchanged between the read and the measurements below). Every verdict is read from that PNG alone; no SVG and no other image was opened, read, listed, searched, rendered or shown. The mapping to the repository path comes from the reviewed head's evidence fragment, whose figure element points at that path.",
+  "completed_at": "2026-11-08T09:20:47.817Z",
+  "dispatched_at": "2026-11-08T09:05:13Z",
+  "figure_checks": {
+    "caption_independence": "Read the figure element and figcaption of docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-writers.html at the reviewed head (lines 5-8): the caption does not repeat a title - the figure carries none - and instead states the stored-edge direction (successor to predecessor), what the red dashed arrows mean, and names the branch case, electron_density_at_plasma_boundary as the live tip against the proposed electron_density_at_pedestal_top. It is substantive and no caption finding is raised. It is, however, doing work the figure cannot: every identifier the reader needs is in the caption because none is in the image.",
+    "clipping": "Zero non-white pixels in each of the four 3 px outer frame strips of the 1399x720 render; content bbox (165,281)-(1281,476) leaves 116 px left, 117 px right, 281 px above and 243 px below. Positive control as recorded in render_check.frame_probe_positive_control.",
+    "collision": "Only 33 ink components exist and all lie on three arrow axes; no text is drawn, so no label can be clipped, overlapping another label, or overlapping the data.",
+    "contrast": "Dominant ink colours sampled from the render: arrows #929292 (3.11:1 on white) and #B42318 (6.57:1 on white), computed with the sRGB relative-luminance formula. No text colour is present to assess.",
+    "renderer_disagreement": "The reviewed run's own figure-review.log records a different render of the same repository path at revision 0a9b315ca712172d1ee66f10c72064323f7d3809 - ImageMagick convert -density 140 into a 1714x882 PNG - whose note states 'labels remain inside the canvas, labels do not overlap arrows or one another'. The attachment supplied to this review is 1399x720, produced by the review harness, and shows no text at all. Both cannot describe the same pixels, so what a reader sees depends on which renderer draws the file. This review reports the attachment it was given and does not read the SVG source, so it cannot say which render is faithful."
+  },
+  "figure_verdicts": [
+    {
+      "attachment": "image-0.png (1399x720)",
+      "figure": "docs/figures/sn-integrity-backlog/sib-lineage-cycle-writers/lineage-refusals.svg",
+      "render_check": {
+        "arrow_grey_rgb": [
+          146,
+          146,
+          146
+        ],
+        "arrow_red_rgb": [
+          180,
+          35,
+          24
+        ],
+        "blank_interior_probe": "y=520-600, x=200-1300 returns 0 non-white pixels; row y=531 returns 0",
+        "canvas": [
+          1399,
+          720
+        ],
+        "component_reading": "six large components are the three grey shafts with heads (165-203, 640-678, 1083-1165) and the two red dashed shafts and arrowheads (245-283, 720-758, and the diagonal 1194-1281); the 27 small 4-13 px components are dashes and arrowheads on those same three red lines. No component is glyph-like and none lies off the arrow axes.",
+        "component_sizes_px": [
+          1483,
+          1349,
+          1348,
+          766,
+          738,
+          737,
+          51,
+          50,
+          49,
+          49,
+          49,
+          49,
+          49,
+          49,
+          48,
+          44,
+          44,
+          44,
+          44,
+          44,
+          44,
+          44,
+          44,
+          44,
+          44,
+          44,
+          44,
+          44,
+          44,
+          44,
+          44,
+          44,
+          44
+        ],
+        "content_bbox": [
+          165,
+          281,
+          1281,
+          476
+        ],
+        "frame_probe_positive_control": "the same predicate on the first content rows y=281-283, last content rows y=474-476, first content columns x=165-167 and last content columns x=1279-1281 returns 14, 11, 8 and 11 non-white pixels, so the zero on the frame strips is a measurement and not a dead probe",
+        "ink_components": 33,
+        "ink_components_inside_y_281_476": true,
+        "non_white_px": 7639,
+        "nonwhite_fraction_of_canvas": 0.00758,
+        "outer_frame_non_white_px": {
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "top": 0
+        },
+        "text_colours_present": "none - the render contains no dark text colour (no #303030, no #666666) and no other hue family; the 31 non-grey non-red colours sampled are antialias steps of #B42318 toward white"
+      },
+      "rubric": {
+        "contrast": "fail by absence: no text exists to clear a contrast. The arrows measure grey 3.11:1 and red 6.57:1 on white.",
+        "data_ink": "fail. 99.24% blank canvas; the label ink that carries node identity is missing, so the 7,639 non-white pixels carry direction only.",
+        "decoration": "pass. Plain transparent/white ground, no fill, gradient, frame or shadow.",
+        "label_collision": "pass narrowly. Content bbox (165,281)-(1281,476) leaves 117 px to the right edge and 244 px below; no frame ink, no overlapping content - and no labels to collide.",
+        "legibility": "fail. No text is drawn anywhere on the 1399x720 render. Three groups of arrows appear at x 165-283, 640-758 and 1083-1281, all inside y 281-476: each group is one solid grey downward arrow (#929292) and one dashed red arrow (#B42318), with the third group's red arrow diagonal. Nothing names the nodes, the panels or the convention, so the figure cannot be read.",
+        "table_form": "pass. An edge diagram, not tabular data."
+      },
+      "semantic_check": "The three arrow groups are geometrically consistent with the caption's convention where they can be seen: the first two groups each pair one downward grey edge with one upward dashed red edge (a reversal that would close a cycle), and the third group has two edges leaving one upper node toward two lower points (the second live tip). Which names sit at those nodes, and which group is the fold, the refinement or the three history-apart cases, cannot be recovered from the render because no label is drawn."
+    }
+  ],
+  "findings": [
+    {
+      "file": "docs/figures/sn-integrity-backlog/sib-lineage-cycle-writers/lineage-refusals.svg",
+      "id": "f6ee281e99e",
+      "line": null,
+      "severity": "blocking",
+      "summary": "The rendered image carries no text at all: 7,639 non-white pixels form 33 components, all of them grey arrow shafts and red dashes lying inside y 281-476, with rows 480-719 blank and no glyph-shaped component anywhere. Nothing names a node, a panel or an edge, so a reader sees three unexplained arrow groups and cannot tell the fold from the refinement or the branch case. Per the rubric this is a blocking defect - data the figure does not let a reader see - because the figcaption keys every identity (electron_density_at_plasma_boundary as the live tip, electron_density_at_pedestal_top as the proposed one) to names the picture never shows."
+    },
+    {
+      "file": "docs/figures/sn-integrity-backlog/sib-lineage-cycle-writers/lineage-refusals.svg",
+      "id": "f6ee281e99e",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Two renders of the same repository path disagree. The reviewed run's figure-review.log records ImageMagick convert -density 140 to a 1714x882 PNG and reports that labels stay inside the canvas and do not overlap; the review attachment is a 1399x720 render of that path and contains no text whatsoever. Whatever a reader ends up seeing therefore depends on an unrecorded renderer choice, so the deliverable cannot be reproduced or checked by the next reader; the fragment embeds the SVG directly and should be checked in a browser before the figure is relied on."
+    }
+  ],
+  "item_verdicts": {
+    "caption_independence": "The caption is substantive and accurate against the recorded convention; it is not a restatement of a title, and no caption finding is raised.",
+    "finding_materiality": "One blocking finding: the render shows no text, so a reader cannot identify any node or panel and the figure carries no information on its own. One non-blocking finding: the run's own logged render and the attached render disagree about whether the labels are drawn.",
+    "rendered_artifact": "The image-0.png attachment was opened and inspected at native resolution and measured pixel by pixel; no verdict is read from SVG source or its markup. Method note: the first visual pass over the attachment reported node labels that the pixel measurement does not find. The file is byte-stable across that pass and the measurement (same inode, mtime 2026-11-08T09:05:09Z, md5 9dfcfd6bb1c02dd8c0c5aa858e177e71), so every verdict here rests on the measurement - alpha-0 counts, component segmentation, trim geometry and ink-colour sampling from two independent decoders (Pillow and ImageMagick) - not on the visual impression.",
+    "scope": "Read-only. No file was edited, created, moved, deleted, redrawn, relabelled or reformatted; the only writes are this record at its two declared paths and the run manifest."
+  },
+  "justifications": {
+    "durability": "The record is written at both declared paths and checked with `crew check --review --record` before the manifest is closed.",
+    "evidence": "Every verdict rests on the named PNG: frame-ink counts with a positive control, blank-interior probes, ink-component segmentation, colour sampling, contrast ratios and trim geometry were all measured on image-0.png; the source-path mapping and the caption were read from the reviewed head's evidence fragment.",
+    "legibility_note": "legibility rests on the measurement that the render contains 33 ink components, all on three arrow axes, and no glyph-shaped component anywhere; the fragment's caption names the identities that the image does not.",
+    "scope_discipline": "This review is read-only; no figure, caption or source file was changed and no SVG was opened."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261108T090305484103-review-of-sib-lineage-cycle-writers-8dafe740bc09-figure",
+  "reviewed_base_sha": "f18b75c0b70d490ce4dd109d1a6b0ac33eec28cf",
+  "reviewed_figures": [
+    "docs/figures/sn-integrity-backlog/sib-lineage-cycle-writers/lineage-refusals.svg"
+  ],
+  "reviewed_head_sha": "8dafe740bc09237cb9db87d293239bf38e688cf3",
+  "reviewed_run_id": "r-20261108T055618175066-sib-lineage-cycle-writers",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: fail. The render carries no text of any kind. The whole non-white content is 7,639 pixels inside a 1117x196 band at +165+281, and the 33 ink components are exactly three grey arrow shafts with heads, two red dashed arrow lines with heads, and one red dashed diagonal - no glyph, no node label, no panel heading, no title and no axis. Rows 480-719 are entirely blank (interior probe y=520-600, x=200-1300 returns 0 non-white pixels; row 531 returns 0). The figcaption keys the figure to node names ('electron_density_at_plasma_boundary is already live', 'the proposed electron_density_at_pedestal_top'), so with no labels a reader cannot tell the three arrow groups apart or follow which pair is the fold, which the refinement and which the second-live-tip case.",
+    "RUBRIC data_ink: fail. No decorative ink is present, but 99.24% of the canvas is blank (7,639 of 1,007,280 pixels) and the ink that would carry the data - the node names the arrows connect - is absent, so the marks convey only direction and carry no identity. The arrows themselves are thin (2 px shafts, 4-8 px dashes) and read cleanly at native size.",
+    "RUBRIC decoration: pass. Transparent ground with no gradient, background fill, frame, gridline, drop shadow or styled theme; the only ink is grey #929292 and red #B42318 strokes.",
+    "RUBRIC contrast: fail, by absence rather than by level. No text is rendered, so 'text clears the contrast of its background' cannot be satisfied. The two colour families present are grey #929292 on white at 3.11:1 and red #B42318 on white at 6.57:1; both are antialiased to near-white only at their edges.",
+    "RUBRIC table_form: pass. A three-panel edge diagram with one stored and one refused edge per case is an adjacency a reader must see as a shape; the reviewed fragment carries the case disposition as a separate table, so the figure is not depicting tabular information.",
+    "RUBRIC label_collision: pass narrowly. Nothing is clipped - zero non-white pixels in each 3 px outer frame strip, with the same predicate returning 14, 11, 8 and 11 pixels on the first content rows, last content rows, first content columns and last content columns, so the zero is a measurement and not a dead probe - and no label overlaps another label or the data because the renderer drew no labels at all."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T09:20:50.605271+00:00",
+  "total": null
+}
