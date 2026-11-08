@@ -1,0 +1,222 @@
+{
+ "total_nodes": 1782687,
+ "total_links": 4680845,
+ "nodes": {
+  "tcv": 653458,
+  "jt-60sa": 159199,
+  "jet": 584853,
+  "other": 62224,
+  "dd": 159858,
+  "sn": 156076,
+  "iter": 7019
+ },
+ "internal_links": {
+  "jet": 1391253,
+  "tcv": 1903414,
+  "iter": 16459,
+  "jt-60sa": 427496,
+  "dd": 517898,
+  "sn": 162532,
+  "other": 1
+ },
+ "cross_links": {
+  "other|sn": 89938,
+  "dd|jt-60sa": 118221,
+  "dd|sn": 28509,
+  "jet|other": 5326,
+  "dd|tcv": 15446,
+  "jt-60sa|other": 382,
+  "other|tcv": 3052,
+  "iter|other": 7,
+  "jet|tcv": 911
+ },
+ "cross_link_types": {
+  "other|sn": {
+   "FOR_RUN": 45763,
+   "FOR_STANDARD_NAME": 39523,
+   "GUARDS": 1359,
+   "PARTICIPANTS": 1348,
+   "MUTATIONS": 586,
+   "IDENTITY": 453,
+   "SIGNATURES": 453,
+   "SELECTION": 453
+  },
+  "dd|jt-60sa": {
+   "MAPPING_CANDIDATE": 117612,
+   "REFERENCES_IDS": 360,
+   "MAPS_TO_IMAS": 159,
+   "REFERENCES_IMAS": 53,
+   "POPULATES": 19,
+   "MENTIONS_IMAS": 18
+  },
+  "dd|sn": {
+   "FROM_DD_PATH": 9086,
+   "HAS_STANDARD_NAME": 6124,
+   "HAS_UNIT": 5464,
+   "HAS_PHYSICS_DOMAIN": 5337,
+   "HAS_COCOS": 1227,
+   "HAS_STANDARD_NAME_VOCAB_GAP": 1064,
+   "IN_CLUSTER": 207
+  },
+  "jet|other": {
+   "IS_PERSON": 2847,
+   "INSTANCE_OF": 2163,
+   "IN_DATA_SOURCE": 291,
+   "AT_FACILITY": 25
+  },
+  "dd|tcv": {
+   "HAS_UNIT": 15446
+  },
+  "jt-60sa|other": {
+   "IS_PERSON": 256,
+   "HAS_EVIDENCE": 80,
+   "INSTANCE_OF": 46
+  },
+  "other|tcv": {
+   "INSTANCE_OF": 2002,
+   "IS_PERSON": 1050
+  },
+  "iter|other": {
+   "IS_PERSON": 5,
+   "INSTANCE_OF": 2
+  },
+  "jet|tcv": {
+   "RESOLVES_TO_NODE": 802,
+   "IN_DIRECTORY": 64,
+   "DOCUMENTS": 45
+  }
+ },
+ "nodes_by_label": {
+  "tcv": {
+   "CodeFile": 170642,
+   "CodeChunk": 149120,
+   "SignalNode": 82717,
+   "WikiChunk": 72816,
+   "FacilityPath": 55375,
+   "CodeExample": 52694,
+   "Image": 33358,
+   "Document": 20159,
+   "WikiPage": 7782,
+   "DataReference": 7472,
+   "FacilityUser": 1050,
+   "TDIFunction": 189,
+   "Diagnostic": 51,
+   "SignalEpoch": 18,
+   "DataSource": 12,
+   "DocSource": 1,
+   "Facility": 1,
+   "DataAccess": 1
+  },
+  "jt-60sa": {
+   "CodeFile": 68268,
+   "CodeChunk": 34917,
+   "FacilitySignal": 15111,
+   "FacilityPath": 9916,
+   "CodeExample": 9087,
+   "WikiChunk": 8554,
+   "SignalSource": 6865,
+   "WikiPage": 4484,
+   "Document": 1057,
+   "Image": 625,
+   "FacilityUser": 256,
+   "DataReference": 27,
+   "Diagnostic": 13,
+   "IMASMapping": 7,
+   "DocSource": 6,
+   "DataAccess": 5,
+   "Facility": 1
+  },
+  "jet": {
+   "FacilityPath": 211529,
+   "CodeChunk": 116840,
+   "CodeFile": 91665,
+   "FacilitySignal": 46872,
+   "WikiChunk": 46045,
+   "Document": 19159,
+   "CodeExample": 15853,
+   "WikiPage": 15030,
+   "Image": 9480,
+   "SignalNode": 6627,
+   "FacilityUser": 2847,
+   "SignalSource": 2335,
+   "DataReference": 345,
+   "Diagnostic": 58,
+   "IMASMapping": 53,
+   "CalibrationEpoch": 47,
+   "SignalEpoch": 30,
+   "DocSource": 16,
+   "DataSource": 11,
+   "DataAccess": 10,
+   "Facility": 1
+  },
+  "other": {
+   "LLMCost": 45763,
+   "Fanout": 6013,
+   "Person": 3916,
+   "SoftwareRepo": 1751,
+   "RepairGuard": 1359,
+   "RepairParticipant": 1348,
+   "RepairMutation": 586,
+   "RepairAuthorityDigest": 453,
+   "RepairRowIdentity": 453,
+   "RepairSelection": 453,
+   "MappingEvidence": 81,
+   "AgentRun": 44,
+   "SignalSource": 2,
+   "GraphMeta": 1,
+   "DataAccess": 1
+  },
+  "dd": {
+   "IMASNodeChange": 94962,
+   "IMASNode": 61366,
+   "IMASSemanticCluster": 2201,
+   "DDGapObservation": 521,
+   "Unit": 414,
+   "DDGap": 100,
+   "IDS": 87,
+   "IdentifierSchema": 62,
+   "DDResolution": 51,
+   "DDVersion": 35,
+   "PhysicsDomain": 34,
+   "COCOS": 16,
+   "IMASCoordinateSpec": 8,
+   "DDGapIdentityChange": 1
+  },
+  "sn": {
+   "GrammarToken": 82085,
+   "StandardNameReview": 30836,
+   "StandardNameChange": 16361,
+   "StandardNameSource": 10151,
+   "StandardName": 5471,
+   "DocsRevision": 4484,
+   "GrammarSegment": 1908,
+   "SNRun": 809,
+   "GrammarTemplate": 738,
+   "StandardNameDeletedEdge": 666,
+   "VocabGap": 600,
+   "StructuralNameAuthority": 453,
+   "StandardNameSourceRetry": 441,
+   "ReviewHold": 270,
+   "StandardNameSourceSnapshotChange": 205,
+   "Locus": 199,
+   "VocabGapEvidence": 138,
+   "ISNGrammarVersion": 124,
+   "StandardNameDeletionSnapshot": 121,
+   "PromotionCandidate": 9,
+   "StandardNameSourceIdentityRepair": 3,
+   "StandardNameSourceUnitCacheCorrection": 2,
+   "StandardNameSourceSnapshotAdoption": 1,
+   "StandardNameSourceSnapshotAdmission": 1
+  },
+  "iter": {
+   "WikiChunk": 2901,
+   "Image": 2264,
+   "WikiPage": 951,
+   "Document": 808,
+   "FacilityPath": 87,
+   "FacilityUser": 5,
+   "DocSource": 2,
+   "Facility": 1
+  }
+ }
+}
