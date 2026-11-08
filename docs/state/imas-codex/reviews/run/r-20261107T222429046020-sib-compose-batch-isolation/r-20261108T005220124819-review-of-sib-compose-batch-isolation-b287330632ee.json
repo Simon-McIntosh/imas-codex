@@ -1,0 +1,54 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "imas_codex/standard_names/pool_adapter.py:86",
+    "imas_codex/standard_names/worker_tasks/__init__.py:138"
+  ],
+  "completed_at": "2026-11-08T01:10:53.590Z",
+  "dispatched_at": "2026-11-08T00:55:18Z",
+  "findings": [
+    {
+      "detail": "The helper imports DEFAULT_MAX_RETRIES (5) and DEFAULT_RETRY_BASE_DELAY (5.0) and each of its five attempts calls acall_llm_structured, whose own loops in imas_codex/discovery/base/llm.py:2543 and :2339 retry a message-retryable fault five times with the same backoff. For a fault the owner already retries (its RETRYABLE_PATTERNS at llm.py:730 include 'timeout') the composed retry is 5 x 5 provider attempts under about 375 s of sleeping per batch; for the message-less ReadError this node was built for, and for ConnectError, the owner breaks out on its first attempt and the helper's loop is the only one, so the intended fix is sound. The deduplication is partial: the fault set is now the owner's, the loop is still a third copy of the backoff at llm.py:2339/:2543 and worker_compose_batches.py:347. Non-blocking because the worst case is bounded per batch and the batch still succeeds.",
+      "file": "imas_codex/standard_names/worker_tasks/worker_compose_batches.py",
+      "line": 47,
+      "severity": "non-blocking",
+      "summary": "_acall_retrying_transport_faults retries the whole structured call, which already owns a retry loop, so a fault classified both by type and by message is attempted up to 25 times with roughly 375 s of sleeps.",
+      "text": "non-blocking: worker_compose_batches.py:47 retries the whole acall_llm_structured call, which already retries message-retryable faults five times at llm.py:2543, so such a fault costs up to 25 attempts and about 375 s of sleeps per batch."
+    },
+    {
+      "detail": "The except clause spans two calls, and _mark_source_prevalidation_failed sets status 'failed' on the source, which removes it from future claims. A TypeError or AttributeError in either call is therefore written to last_error as 'grammar validation: <unrelated error>' and consumes the DD source silently; only the recording failure itself is logged, at debug. The broad clause is not gratuitous: the grammar refusal classes the evidence fragment lists span pydantic ValidationError, ValueError, the ISN semantic-IR error, _NonCanonicalParseError and the parser's ParseError, which are not one family, so narrowing needs the parser's exception types imported here. Recorded because the earlier review named the same clause and the repair did not change it.",
+      "file": "imas_codex/standard_names/worker_tasks/worker_compose_batches.py",
+      "line": 659,
+      "severity": "non-blocking",
+      "summary": "The guard catches every Exception from compose_name() and normalize_spelling(), so a programming error is persisted as a source's terminal grammar refusal.",
+      "text": "non-blocking: worker_compose_batches.py:659 catches Exception around compose_name() and normalize_spelling, so an unrelated programming error is persisted as a terminal grammar refusal on the source."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "the only production invocation of compose_batch is imas_codex/standard_names/pool_adapter.py:86; the function is also exposed through the worker_tasks registry at imas_codex/standard_names/worker_tasks/__init__.py:138, whose _bind_task wrapper supplies the _worker_dependency resolver for pool-mode dispatch; _acall_retrying_transport_faults is reached only from worker_compose_batches.py:384.",
+    "diff": "read commit by commit against base a8b6be7c8: 23cc661f3 adds the per-candidate grammar guard, the transport retry wrapper and the test file; ecf4a7142 and 6046a6896 add the evidence fragment and its gate paragraphs; 4e4ad7f87 replaces the local httpx.TransportError clause with the LLM layer's _transient_transport_errors() and extends the test to six cases including a coupling assertion; b28733063 records the repair in the fragment. No plan edit and no generated file.",
+    "done_when": "the done_when names tests/standard_names/test_compose_batch_isolation.py proving both behaviours on fakes and failing on base, tests/standard_names adding no failure id, and USD 0; the manifest records base-focused.log (3 failed at a8b6be7c8), gate-head.log (8541 passed, 0 failed, EXIT=0 at 23cc661f3), repair-focused.log (6 passed at 4e4ad7f87) and repair-negative-control.log (2 failed, EXIT=1).",
+    "goal": "the goal is to keep a compose batch alive when one candidate fails grammar validation or the compose call hits a transient connection error; worker_compose_batches.py:658-682 records the refused candidate on its own source through _mark_source_prevalidation_failed and continues, and worker_compose_batches.py:384 routes the compose call through _acall_retrying_transport_faults, so neither fault leaves the batch processor.",
+    "manifest": "read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T222429046020-sib-compose-batch-isolation/manifest.md; it records commits 23cc661f3, ecf4a7142, 6046a6896, 4e4ad7f87 and b28733063, baseline_suite with 7 failure ids at a8b6be7c8, after_suite with 0 at 23cc661f3, four base-arm failures attributed to the git-archive extraction's missing provenance stamp, and the post-repair wide arm of 239 passed in repair-gate-wide.log.",
+    "write_paths": "the declared scope is worker_compose_batches.py, tests/standard_names/test_compose_batch_isolation.py, docs/evidence/fragments/sn-integrity-backlog/sib-compose-batch-isolation(.html) and its figures dir; git diff --name-status a8b6be7c8..b28733063 lists exactly those three files and nothing else."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is 'Keep a compose batch alive when one candidate fails grammar validation or the model call hits a transient connection error'; worker_compose_batches.py:658-682 records the refused candidate on its own source and continues, and worker_compose_batches.py:384 routes the compose call through _acall_retrying_transport_faults.\nVERDICT done_when: the done_when names tests/standard_names/test_compose_batch_isolation.py proving both behaviours on fakes and failing on base, tests/standard_names adding no failure id, and USD 0; the manifest records base-focused.log (3 failed at a8b6be7c8), gate-head.log (8541 passed, 0 failed, EXIT=0), repair-focused.log (6 passed, EXIT=0) and repair-negative-control.log (2 failed, EXIT=1).\nVERDICT write_paths: the declared scope is the module, the test file and the evidence fragment; git diff --name-status a8b6be7c8..b28733063 lists exactly imas_codex/standard_names/worker_tasks/worker_compose_batches.py, tests/standard_names/test_compose_batch_isolation.py and docs/evidence/fragments/sn-integrity-backlog/sib-compose-batch-isolation.html.\nVERDICT manifest: read; it records commits 23cc661f3, ecf4a7142, 6046a6896, 4e4ad7f87 and b28733063, baseline_suite with 7 failure ids, after_suite with 0, four base-arm failures attributed to the git-archive extraction's missing provenance stamp, and the post-repair wide arm of 239 passed in repair-gate-wide.log.\nVERDICT diff: read commit by commit against base a8b6be7c8; 23cc661f3 carries the grammar guard, the transport retry wrapper and the test file, ecf4a7142 and 6046a6896 the evidence fragment, 4e4ad7f87 the reuse repair that reads imas_codex/discovery/base/llm.py:3323 _transient_transport_errors() and adds the coupling test, and b28733063 its recording; no plan edit and no generated file.\nCALL_SITES: imas_codex/standard_names/pool_adapter.py:86, imas_codex/standard_names/worker_tasks/__init__.py:138\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: worker_compose_batches.py:659 drops one refused candidate while its siblings still reach _persist_description_checked_candidates, and worker_compose_batches.py:47 retries the fault types owned by imas_codex/discovery/base/llm.py:3323.\nSCORE evidence: 17\nJUSTIFICATION evidence: gate-head.log ends EXIT=0 with 8541 passed and base-focused.log ends EXIT=1 with the three new cases red, but the suite-wide arm was measured at 23cc661f3 and after the 4e4ad7f87 product repair only the 13-file selection in repair-gate-wide.log (239 passed) was run.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-status a8b6be7c8..b28733063 lists only the module, the test file and the landing fragment the node is permitted to write.\nSCORE durability: 18\nJUSTIFICATION durability: negative_control.log shows TestGrammarRefusalIsolation red with the guard removed and repair-negative-control.log shows the coupling case and the builtin TimeoutError case red against the pre-repair module, so each new assertion names the regression it catches.\nSCORE fit: 18\nJUSTIFICATION fit: the guard reuses the surrounding _mark_source_prevalidation_failed plus disposition_winner_ids idiom at worker_compose_batches.py:700 and the helper imports the owner's policy constants rather than restating them, with no plan label in any name.\nSCORE reuse: 16\nJUSTIFICATION reuse: the retry now reads imas_codex/discovery/base/llm.py:3323 _transient_transport_errors(), repairing the duplicated classification the earlier review scored 5, while the backoff loop itself remains a third copy of the loops at llm.py:2339 and llm.py:2543.\nFINDING imas_codex/standard_names/worker_tasks/worker_compose_batches.py:47 non-blocking: _acall_retrying_transport_faults retries the whole acall_llm_structured call, which already retries message-retryable faults five times at imas_codex/discovery/base/llm.py:2543, so such a fault costs up to 25 attempts and about 375 s of sleeps per batch.\nFINDING imas_codex/standard_names/worker_tasks/worker_compose_batches.py:659 non-blocking: the guard catches every Exception from compose_name() and normalize_spelling(), so a programming error is persisted as the source's terminal grammar refusal and consumes the DD source.\n",
+  "review_run_id": "r-20261108T005220124819-review-of-sib-compose-batch-isolation-b287330632ee",
+  "reviewed_base_sha": "a8b6be7c8256c08bdb78cb08bd10dededd95430c",
+  "reviewed_head_sha": "b287330632ee4510b83fc362a55f9e39781bec0c",
+  "reviewed_run_id": "r-20261107T222429046020-sib-compose-batch-isolation",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 16,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T01:26:42.522525+00:00",
+  "total": 108
+}
