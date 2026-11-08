@@ -9,47 +9,104 @@
 <h2 id="sib-second-pass-second-pass">Second composition pass over the recoverable failed cohort</h2>
 
 <p id="sib-second-pass-cohort">The cohort is the 143 sources the full-DD run left
-<code>failed</code> whose recovery class is one of <code>isolated_retry</code>
-(121), <code>registered_token_retry</code> (9), <code>binding_now_admissible</code>
+<code>failed</code> whose recovery class is <code>isolated_retry</code> (121),
+<code>registered_token_retry</code> (9), <code>binding_now_admissible</code>
 (12) or <code>attachment_now_admissible</code> (1), read from
-<code>sib-full-run-failure-diagnosis.json</code>. A live census before the reset
-confirmed all 143 were still <code>failed</code>, none claimed, with attempt
-counts of 5 for 136, 4 for 2 and 3 for 5. The control is every non-cohort failed
-source: 229 of them.</p>
+<code>sib-full-run-failure-diagnosis.json</code>. A live census immediately
+before the reset confirmed all 143 were still <code>failed</code> and none was
+claimed, with attempt counts of 5 for 136, 4 for 2 and 3 for 5. The control is
+every non-cohort failed source: 229 of them.</p>
 
-<p id="sib-second-pass-reset">The reset went through
-<code>retry_failed_sources</code>, the operation the <code>sn retry --failed</code>
-CLI exposes. The dry run reported 143 requested, 143 eligible, 0 refused. The
-apply reported 143 retried and wrote 143 <code>StandardNameSourceRetry</code>
-events, one per source, each carrying the source's prior status, attempt count
-and <code>last_error</code> before the counters were cleared.</p>
+<h3 id="sib-second-pass-reset">The reset</h3>
+
+<p id="sib-second-pass-reset-path">The reset goes through
+<code>retry_failed_sources</code>, the operation the
+<code>sn retry --failed</code> CLI exposes. It is exact by construction: each
+source is named, and the write uses its read status and attempt count as a
+compare-and-set guard. The dry run reported 143 requested, 143 eligible, 0
+refused. The apply reported 143 retried and wrote 143
+<code>StandardNameSourceRetry</code> events — one receipt per source, each
+carrying the prior status, the prior attempt count and the prior
+<code>last_error</code> before the counters were cleared.</p>
 
 <table id="sib-second-pass-verify">
 <caption>Post-reset read-back of the cohort and of the non-cohort control</caption>
-<thead><tr><th>Reading | Value</th></tr></thead>
+<thead>
+<tr><th>Reading</th><th>Value</th></tr>
+</thead>
 <tbody>
-<tr><td>Cohort status after reset | 143 <code>extracted</code>, 0 <code>failed</code></td></tr>
-<tr><td>Cohort sources still claimed | 0</td></tr>
-<tr><td>Cohort attempt counters not cleared | 0</td></tr>
-<tr><td>Cohort sources with a receipt | 143</td></tr>
-<tr><td>Receipts that keep prior status, attempts and error | 143 of 143</td></tr>
-<tr><td>Non-cohort failed sources, before then after | 229 then 229</td></tr>
-<tr><td>Sources outside the cohort that moved | 0 lost, 0 gained</td></tr>
+<tr><td>Cohort status after reset</td><td>143 <code>extracted</code></td></tr>
+<tr><td>Cohort sources still claimed</td><td>0</td></tr>
+<tr><td>Attempt counters not cleared</td><td>0</td></tr>
+<tr><td>Cohort sources carrying a receipt</td><td>143</td></tr>
+<tr><td>Receipts matching prior status, attempts and error</td><td>143 of 143</td></tr>
+<tr><td>Non-cohort failed sources, before then after the reset</td><td>229 then 229</td></tr>
+<tr><td>Non-cohort sources the reset moved</td><td>0 lost, 0 gained</td></tr>
 </tbody>
 </table>
 
-<p id="sib-second-pass-rerun">The scoped rerun runs
-<code>sn run --focus cohort-sources-runnable.json -c 50</code> from the main
-checkout. It covers 139 of the 143: four structural sources created on
-2026-07-31 carry neither <code>dd_path</code> nor <code>dd_version</code>, so
-<code>_pin_dd_source_snapshots</code> refuses the whole batch on them. Those four
-are reported outside this node's scope, where a DD provenance backfill is
-<span>needed</span> before they can be claimed at all.</p>
+<h3 id="sib-second-pass-rerun">The scoped rerun</h3>
 
-<p id="sib-second-pass-state">The reset is applied and verified. The rerun is
-submitted as its own SLURM job on partition <code>all</code> with a six-hour wall
-time; its per-source outcome, names by stage and spend by phase are read back
-after that job ends.</p>
+<p id="sib-second-pass-rerun-scope">The rerun is
+<code>sn run --focus cohort-sources-runnable.json -c 50</code>, from the main
+checkout at revision <code>2f0a49c10</code>. Its dry run reported 143
+extraction candidates; the apply seeded 138 focus sources, skipping one path
+that already holds a live accepted name. It ran as its own SLURM job,
+<code>1308283</code>, on partition <code>all</code> for 49m08s and recorded run
+<code>9192044a-3fa0-4592-95a8-cb3cf0977823</code> with the seeded focus scope
+<code>2585b8d1-b9ae-*</code>.</p>
+
+<p id="sib-second-pass-rerun-stop">The run ended <code>EXIT=1</code> with
+<code>stop_reason: failed</code> after spending <strong>USD 1.4855 of the 50
+cap</strong>. It did not stall: the generate pool raised
+<code>RuntimeError: rich standard-name write rejected an exact-claim
+winner</code> from
+<code>persist_generated_name_winners</code>, which aborts the batch when
+<code>write_standard_names</code> writes fewer names than the rich-write
+candidates it was given or when the finalize batch loses an entry. That is a
+persist-layer refusal, not a source-level one: the rejected candidate is never
+recorded against its own source, the batch cannot continue, and 23 of the
+pool's errors are this same guard.</p>
+
+<table id="sib-second-pass-readback">
+<caption>Per-source outcome over all 143 cohort sources, read back after the job</caption>
+<thead>
+<tr><th>Reading</th><th>Value</th></tr>
+</thead>
+<tbody>
+<tr><td>Produced — carries a bound name</td><td>83</td></tr>
+<tr><td>… of those, <code>attached</code></td><td>39</td></tr>
+<tr><td>… of those, <code>composed</code></td><td>33</td></tr>
+<tr><td>… of those, <code>failed</code> but still name-bound from an earlier pass</td><td>11</td></tr>
+<tr><td>Still failed with no name</td><td>41</td></tr>
+<tr><td>Untouched (<code>extracted</code> 4, <code>vocab_gap</code> 15)</td><td>19</td></tr>
+<tr><td>Names created by the run, by stage</td><td>accepted 20, drafted 4, exhausted 11 (35)</td></tr>
+<tr><td>Spend by phase</td><td>generate_docs USD 1.1427 (20 calls), generate_name USD 0.0000 (203), review_docs USD 0.3403 (44), review_name USD 0.0026 (20)</td></tr>
+</tbody>
+</table>
+
+<p id="sib-second-pass-reasons">The 41 still-failed sources split into 23 that
+reached the claim-attempt cap and 18 that failed pre-validation on the first
+or second attempt. Grouped by reason: attempt cap reached (8), a pre-validation
+grammar error (19 across four messages, including 6 with an ISN-rejected
+operator chain and 2 non-canonical names), attempt cap with a binding collision
+as the last refusal (4), attempt cap with an attachment rejection as the last
+refusal (4), and one non-actionable vocabulary gap. Every one of them carries a
+new <code>last_error</code> from this pass.</p>
+
+<p id="sib-second-pass-control-drift">One non-cohort source left the failed set
+during the rerun window: <code>dd:summary/pedestal_fits/linear/t_e/offset/value</code>,
+now <code>attached</code> to a name composed on 2026-11-07. Neither the reset (an explicit id list) nor the rerun's log
+mentions it, so it moved outside this node's action, most likely through
+another session's pool pass. It is recorded rather than explained.</p>
+
+<p id="sib-second-pass-state">Summary of the result: <strong>the reset is
+complete and exact</strong> — 143 sources returned to <code>extracted</code>
+with 143 receipts and no drift in the control — and <strong>the rerun is
+partial</strong>: 83 of the 143 now carry a name, 35 names were created and 20
+of them reached <code>accepted</code> for USD 1.4855, and 41 sources remain
+failed, 23 of them at the claim cap. The rerun itself aborted on the persist
+guard above rather than finishing its queue.</p>
 </section>
 </body>
 </html>

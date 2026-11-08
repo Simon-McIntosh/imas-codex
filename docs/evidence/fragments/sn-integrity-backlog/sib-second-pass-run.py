@@ -315,6 +315,7 @@ def phase_readback(args: argparse.Namespace) -> dict:
     rows = cohort()
     ids = [r["id"] for r in rows]
     run_id = args.run_id
+    scope_run_id = args.scope_run_id
     state = source_state(ids)
     produced: list[str] = []
     still_failed: list[dict] = []
@@ -340,11 +341,11 @@ def phase_readback(args: argparse.Namespace) -> dict:
             gc.query(
                 """
                 MATCH (s:StandardName)
-                WHERE s.run_id = $run_id OR s.created_run_id = $run_id
+                WHERE s.run_id = $scope_run_id
                 RETURN coalesce(s.name_stage, '(null)') AS stage, count(s) AS n
                 ORDER BY stage
                 """,
-                run_id=run_id,
+                scope_run_id=scope_run_id,
             )
         )
         run_rows = list(
@@ -379,6 +380,7 @@ def phase_readback(args: argparse.Namespace) -> dict:
         "run_id": run_id,
         "run": run_rows,
         "names_by_stage": names_by_stage,
+        "scope_run_id": scope_run_id,
         "cost_by_phase": cost_by_phase,
         "cohort_size": len(ids),
         "produced_count": len(produced),
@@ -389,6 +391,13 @@ def phase_readback(args: argparse.Namespace) -> dict:
         "untouched": untouched,
         "status_counts": dict(
             sorted(collections.Counter(s["status"] for s in state.values()).items())
+        ),
+        "produced_by_status": dict(
+            sorted(
+                collections.Counter(
+                    s["status"] for s in state.values() if s.get("bindings")
+                ).items()
+            )
         ),
     }
 
@@ -408,10 +417,11 @@ def main() -> int:
     parser.add_argument("--out", default=None)
     parser.add_argument("--manifest-name", default=None)
     parser.add_argument("--run-id", default=None)
+    parser.add_argument("--scope-run-id", default=None)
     parser.add_argument("--exclude", action="append", default=[])
     args = parser.parse_args()
     payload = phases[args.phase](args)
-    text = json.dumps(payload, indent=2, sort_keys=True)
+    text = json.dumps(payload, indent=2, sort_keys=True, default=str)
     if args.out:
         Path(args.out).write_text(text + "\n")
     print(text)
