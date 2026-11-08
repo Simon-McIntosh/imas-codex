@@ -15,7 +15,7 @@ from imas_codex.discovery.base.claims import retry_on_deadlock
 from imas_codex.graph.client import GraphClient
 
 from . import graph_foundation as foundation
-from .graph_cost_and_claims import (
+from .graph_foundation import (
     append_claim_attempts,
     claim_attempt_entry,
     claim_outcome_for_status,

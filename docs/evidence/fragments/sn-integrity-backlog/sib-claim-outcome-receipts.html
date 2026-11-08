@@ -104,4 +104,8 @@ through a graph double that implements the append's fence and its create-once
 identity, and one <code>-m graph</code> test runs the real statement against a
 disposable Neo4j: it creates and links a receipt, proves a stale sequence writes
 nothing, and removes its probe nodes.</p>
+<p>A third guard covers the sweep's own call. Replacing
+<code>_orphan_sweep_tick</code>'s append with a no-op fails
+<code>test_the_sweep_tick_issues_the_capped_append</code> and nothing else, so
+the tick cannot park a source without leaving its receipt.</p>
 </section>

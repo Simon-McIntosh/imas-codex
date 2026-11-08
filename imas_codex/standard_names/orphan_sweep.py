@@ -135,7 +135,7 @@ _SWEEP_QUERIES: Final[list[tuple[str, str]]] = [
 
 def _capped_claim_entries(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """One capped entry for each source the parking statement just parked."""
-    from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+    from imas_codex.standard_names.graph_store.graph_foundation import (
         claim_attempt_entry,
     )
 
@@ -177,6 +177,8 @@ def _orphan_sweep_tick(*, timeout_s: int) -> dict[str, int]:
     """
     from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
         _MAX_COMPOSE_CLAIM_ATTEMPTS,
+    )
+    from imas_codex.standard_names.graph_store.graph_foundation import (
         append_claim_attempts,
     )
     from imas_codex.standard_names.graph_store.graph_source_bindings import (

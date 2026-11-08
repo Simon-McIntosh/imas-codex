@@ -21,7 +21,7 @@ from typing import Any
 import pytest
 
 from imas_codex.standard_names.graph_store import (
-    graph_cost_and_claims as gcc,
+    graph_foundation as claims,
     graph_source_bindings as gsb,
 )
 
@@ -123,17 +123,17 @@ def _claim(claim_token: str = "tok", claim_seq: int = 1) -> dict[str, Any]:
 def test_claim_attempt_entry_names_each_outcome() -> None:
     """Every outcome the census knows produces a distinct, keyed entry."""
     entries = [
-        gcc.claim_attempt_entry(
+        claims.claim_attempt_entry(
             "dd:equilibrium/time_slice/profiles_1d/psi",
             attempt=1,
             outcome=outcome,
             reason=f"{outcome} reason",
             claim_seq=4,
         )
-        for outcome in sorted(gcc.CLAIM_ATTEMPT_OUTCOMES)
+        for outcome in sorted(claims.CLAIM_ATTEMPT_OUTCOMES)
     ]
 
-    assert {entry["outcome"] for entry in entries} == set(gcc.CLAIM_ATTEMPT_OUTCOMES)
+    assert {entry["outcome"] for entry in entries} == set(claims.CLAIM_ATTEMPT_OUTCOMES)
     assert len({entry["id"] for entry in entries}) == len(entries)
     for entry in entries:
         assert entry["source_id"] == "dd:equilibrium/time_slice/profiles_1d/psi"
@@ -145,12 +145,14 @@ def test_claim_attempt_entry_names_each_outcome() -> None:
 def test_claim_attempt_entry_requires_a_claim_sequence() -> None:
     """A fenced writer must state the sequence it is closing."""
     with pytest.raises(TypeError, match="claim_seq"):
-        gcc.claim_attempt_entry("dd:x", attempt=1, outcome="refused")
+        claims.claim_attempt_entry("dd:x", attempt=1, outcome="refused")
 
 
 def test_an_unclaimed_source_keys_its_receipt_on_the_attempt() -> None:
     """The sweep that parks a source at the cap holds no sequence to key on."""
-    entry = gcc.claim_attempt_entry("dd:x", attempt=5, outcome="capped", claim_seq=None)
+    entry = claims.claim_attempt_entry(
+        "dd:x", attempt=5, outcome="capped", claim_seq=None
+    )
 
     assert entry["claim_seq"] is None
     assert entry["id"] == "claim-attempt:dd:x:attempt-5:capped"
@@ -159,7 +161,7 @@ def test_an_unclaimed_source_keys_its_receipt_on_the_attempt() -> None:
 def test_claim_attempt_entry_rejects_unknown_outcome() -> None:
     """A writer cannot invent an outcome the census does not know."""
     with pytest.raises(ValueError, match="unknown compose claim outcome"):
-        gcc.claim_attempt_entry(
+        claims.claim_attempt_entry(
             "dd:x", attempt=1, outcome="produced_later", claim_seq=1
         )
 
@@ -180,7 +182,7 @@ def test_claim_attempt_entry_rejects_unknown_outcome() -> None:
 )
 def test_status_maps_to_its_own_outcome(status: str, outcome: str) -> None:
     """A skipped source and a requeued batch are never recorded as refusals."""
-    assert gcc.claim_outcome_for_status(status) == outcome
+    assert claims.claim_outcome_for_status(status) == outcome
 
 
 # ---------------------------------------------------------------------------
@@ -202,7 +204,7 @@ def test_produced_writer_stores_a_produced_receipt() -> None:
         }
     ]
 
-    gcc.append_claim_attempts(gc, gsb._produced_claim_entries(batch))
+    claims.append_claim_attempts(gc, gsb._produced_claim_entries(batch))
 
     held = gc.held_by("dd:a")
     assert len(held) == 1
@@ -227,7 +229,7 @@ def test_released_writer_stores_a_released_receipt_with_its_reason() -> None:
         }
     ]
 
-    gcc.append_claim_attempts(gc, gsb._released_claim_entries(batch))
+    claims.append_claim_attempts(gc, gsb._released_claim_entries(batch))
 
     held = gc.held_by("dd:a")
     assert len(held) == 1
@@ -248,7 +250,7 @@ def test_attachment_refusal_reason_names_the_attachment_error() -> None:
         }
     ]
 
-    gcc.append_claim_attempts(gc, gsb._released_claim_entries(batch))
+    claims.append_claim_attempts(gc, gsb._released_claim_entries(batch))
 
     assert "already attached" in gc.held_by("dd:a")[0]["reason"]
 
@@ -279,7 +281,7 @@ def test_batch_failure_writer_stores_a_receipt_per_claimed_source() -> None:
         "generate_name",
     )
 
-    gcc.append_claim_attempts(gc, entries)
+    claims.append_claim_attempts(gc, entries)
 
     assert len(gc.held_by("dd:a")) == 1
     assert len(gc.held_by("dd:b")) == 1
@@ -302,7 +304,7 @@ def test_stored_status_writer_records_refused_for_a_failed_source() -> None:
         }
     ]
 
-    gcc.append_claim_attempts(gc, gsb._stored_outcome_claim_entries(batch))
+    claims.append_claim_attempts(gc, gsb._stored_outcome_claim_entries(batch))
 
     held = gc.held_by("dd:a")
     assert len(held) == 1
@@ -328,7 +330,7 @@ def test_stored_status_writer_never_records_a_refusal_for_a_parked_or_requeued_s
         }
     ]
 
-    gcc.append_claim_attempts(gc, gsb._stored_outcome_claim_entries(batch))
+    claims.append_claim_attempts(gc, gsb._stored_outcome_claim_entries(batch))
 
     held = gc.held_by("dd:a")
     assert len(held) == 1
@@ -352,7 +354,7 @@ def test_capped_writer_stores_a_capped_receipt() -> None:
         ]
     )
 
-    gcc.append_claim_attempts(gc, entries)
+    claims.append_claim_attempts(gc, entries)
 
     held = gc.held_by("dd:a")
     assert len(held) == 1
@@ -400,7 +402,7 @@ def test_the_sweep_tick_issues_the_capped_append(monkeypatch) -> None:
 def test_a_stale_claim_writes_no_receipt() -> None:
     """A delayed duplicate cannot append to a claim it no longer holds."""
     gc = _FakeGraphClient({"dd:a": _claim("live-token", 7)})
-    entry = gcc.claim_attempt_entry(
+    entry = claims.claim_attempt_entry(
         "dd:a",
         attempt=2,
         outcome="batch_failed",
@@ -408,7 +410,7 @@ def test_a_stale_claim_writes_no_receipt() -> None:
         claim_token="stale-token",
     )
 
-    assert gcc.append_claim_attempts(gc, [entry]) == 0
+    assert claims.append_claim_attempts(gc, [entry]) == 0
     assert gc.receipts == {}
 
 
@@ -420,10 +422,10 @@ def test_a_source_at_the_attempt_cap_holds_one_receipt_per_attempt() -> None:
         # Each re-claim bumps the sequence, so the source's live sequence is
         # the one the attempt it is recording was made under.
         gc.claims["dd:a"] = _claim("tok", attempt)
-        written += gcc.append_claim_attempts(
+        written += claims.append_claim_attempts(
             gc,
             [
-                gcc.claim_attempt_entry(
+                claims.claim_attempt_entry(
                     "dd:a",
                     attempt=attempt,
                     outcome="refused",
@@ -443,7 +445,7 @@ def test_a_source_at_the_attempt_cap_holds_one_receipt_per_attempt() -> None:
 def test_the_written_count_is_receipts_created_not_claims_matched() -> None:
     """A retried write of an existing receipt reports nothing new."""
     gc = _FakeGraphClient({"dd:a": _claim("tok", 1)})
-    entry = gcc.claim_attempt_entry(
+    entry = claims.claim_attempt_entry(
         "dd:a",
         attempt=1,
         outcome="released",
@@ -451,8 +453,8 @@ def test_the_written_count_is_receipts_created_not_claims_matched() -> None:
         claim_token="tok",
     )
 
-    assert gcc.append_claim_attempts(gc, [entry]) == 1
-    assert gcc.append_claim_attempts(gc, [entry]) == 0
+    assert claims.append_claim_attempts(gc, [entry]) == 1
+    assert claims.append_claim_attempts(gc, [entry]) == 0
     assert len(gc.receipts) == 1
     assert gc.links == [("dd:a", entry["id"]), ("dd:a", entry["id"])]
 
@@ -460,7 +462,7 @@ def test_the_written_count_is_receipts_created_not_claims_matched() -> None:
 def test_every_receipt_names_its_source() -> None:
     """The schema requires source_id on the receipt, so no writer may omit it."""
     gc = _FakeGraphClient({"dd:a": _claim("tok", 1)})
-    gcc.append_claim_attempts(
+    claims.append_claim_attempts(
         gc,
         gsb._produced_claim_entries(
             [{"sns_id": "dd:a", "claim_token": "tok", "claim_seq": 1}]
@@ -499,7 +501,7 @@ def test_batch_failure_never_masks_the_batch_error(monkeypatch) -> None:
     def _explode(entries, *, services):
         raise RuntimeError("graph unavailable")
 
-    monkeypatch.setattr(gcc, "record_claim_attempts", _explode)
+    monkeypatch.setattr(claims, "record_claim_attempts", _explode)
     monkeypatch.setattr(
         "imas_codex.standard_names.graph_store.graph_foundation.get_services",
         lambda: object(),
@@ -539,7 +541,7 @@ def test_the_append_statement_creates_and_links_a_receipt_in_the_live_graph() ->
             id=source_id,
         )
         try:
-            entry = gcc.claim_attempt_entry(
+            entry = claims.claim_attempt_entry(
                 source_id,
                 attempt=3,
                 outcome="batch_failed",
@@ -549,8 +551,8 @@ def test_the_append_statement_creates_and_links_a_receipt_in_the_live_graph() ->
                 batch_key="probe-batch",
                 run_id="probe-run",
             )
-            assert gcc.append_claim_attempts(gc, [entry]) == 1
-            assert gcc.append_claim_attempts(gc, [entry]) == 0
+            assert claims.append_claim_attempts(gc, [entry]) == 1
+            assert claims.append_claim_attempts(gc, [entry]) == 0
 
             stored = gc.query(
                 """
@@ -574,14 +576,14 @@ def test_the_append_statement_creates_and_links_a_receipt_in_the_live_graph() ->
             assert row["run_id"] == "probe-run"
             assert row["recorded"]
 
-            stale = gcc.claim_attempt_entry(
+            stale = claims.claim_attempt_entry(
                 source_id,
                 attempt=4,
                 outcome="released",
                 claim_seq=2,
                 claim_token="probe-token",
             )
-            assert gcc.append_claim_attempts(gc, [stale]) == 0
+            assert claims.append_claim_attempts(gc, [stale]) == 0
         finally:
             gc.query(
                 """

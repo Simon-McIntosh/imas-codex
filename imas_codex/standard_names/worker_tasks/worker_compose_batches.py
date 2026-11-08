@@ -24,7 +24,7 @@ def _batch_failure_claim_entries(
     batch: list[dict[str, Any]], batch_key: str | None, phase: str
 ) -> list[dict[str, Any]]:
     """One batch_failed entry for every claimed source a failed batch carried."""
-    from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+    from imas_codex.standard_names.graph_store.graph_foundation import (
         claim_attempt_entry,
     )
 
@@ -58,11 +58,9 @@ def _record_batch_failure(
     failure to write it must not replace the exception that ended the batch,
     which is the error the caller and the run's stop reason need.
     """
-    from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
-        record_claim_attempts,
-    )
     from imas_codex.standard_names.graph_store.graph_foundation import (
         get_services,
+        record_claim_attempts,
     )
 
     entries = _batch_failure_claim_entries(batch, batch_key, phase)
