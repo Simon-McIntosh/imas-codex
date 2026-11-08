@@ -1,0 +1,61 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-08T13:54:55.637Z",
+  "dispatched_at": "2026-11-08T13:38:08Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_foundation.py",
+      "line": 891,
+      "severity": "non-blocking",
+      "text": "the claim_attempt_entry docstring states that an entry omitting claim_token or claim_seq 'is compared against a null and writes nothing at all', but the append's WHERE clause at graph_foundation.py:936 opens with `entry.claim_token IS NULL OR ...`, so omitting the token does not fail closed \u2014 it removes the fence and the receipt is written unconditionally. Only a missing claim_seq fails closed. A future claim-ending writer that follows this docstring and passes no token would write an unfenced receipt onto a claim it no longer holds, which is the exact stale-duplicate the fence exists to stop. Omitting the token is legitimate for the sweep (orphan_sweep.py:203 says so explicitly), so the defect is the docstring promising a refusal the statement does not give."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_source_bindings.py",
+      "line": 54,
+      "severity": "non-blocking",
+      "text": "_stored_outcome_claim_entries reads run_id and batch_key from the caller's item, and the only production producer of the rows this writer consumes, worker_common.py::_claimed_source_outcome, sets neither key (it builds sns_id, source_id, claim_token, claim_seq, status, last_error, skip_reason, skip_reason_detail only). Every refused, skipped and requeued receipt therefore stores run_id=null and batch_key=null \u2014 the outcomes a failure census most needs to attribute to a run and a batch. The manifest's landing line nonetheless states 'every entry carries claim_seq, source_id and run_id', which is false on this path; per-source attribution still works through source_id and claim_seq, so the census is not blocked."
+    },
+    {
+      "file": "manifest.md",
+      "line": 17,
+      "severity": "non-blocking",
+      "text": "changed_paths omits imas_codex/standard_names/graph_store/graph_foundation.py, which carries the whole receipt writer (186 added lines: the outcome enum, the entry builder, the append Cypher, append_claim_attempts and record_claim_attempts), and lists imas_codex/standard_names/graph_store/graph_cost_and_claims.py, which the diff does not touch at all (git diff --stat over the reviewed range returns nothing for it). The grant was widened to cover graph_foundation.py and the three test files, and crew check --manifest now reports ok:true, so the fence is satisfied \u2014 but a coordinator reading changed_paths to audit the diff would look for the core of the change in the wrong file and find nothing where the writer lives."
+    },
+    {
+      "file": "nc-combined.log",
+      "line": 2,
+      "severity": "non-blocking",
+      "text": "section A of the recorded negative-control run reports '12 failed, 10 passed, 1 deselected' over 23 tests and names failing ids that do not exist at the reviewed head \u2014 test_produced_writer_stores_a_produced_receipt and test_released_writer_stores_a_released_receipt_with_its_reason were replaced in this round by test_persist_claimed_attachments_stores_a_produced_receipt and test_the_binding_lock_stores_a_released_receipt_with_its_collision; the head test file collects 26 items. So the claim_seq mutation arm was not re-run against the delivered test file, and the fragment's '12 tests fail' figure describes the previous round's file. Sections B, C and the released/stored/produced mutations do name head tests and are current."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_source_bindings.py",
+      "line": 1495,
+      "severity": "non-blocking",
+      "text": "in the new transaction block of persist_claimed_source_outcomes the Cypher literal and its 'batch=batch,' argument sit at column 12 inside a call opened at column 16, and 'tx.commit()' is indented to column 16 while the call it terminates began at column 16 inside the same try \u2014 the block parses and behaves correctly, but the misleading indentation makes the statement look as though it escapes the try, and the same shape recurs at graph_source_bindings.py:1557, 1684 and 1793. A reader auditing that the receipt and the status write commit as a pair has to count spaces to see it."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_foundation.py",
+      "line": 943,
+      "severity": "non-blocking",
+      "text": "the append writes a second per-source append-only audit event family (StandardNameSourceClaimAttempt + HAS_CLAIM_ATTEMPT) beside the existing StandardNameSourceRetry + HAS_RETRY_EVENT owner at graph_source_bindings.py:2351, which already records why a source was parked and is written from four places (attachment_audit.py:483 and :652, graph_source_bindings.py:2442 and :2588, provenance_lifecycle.py:1331). The new type is not a textual copy and carries outcomes the retry event cannot express (produced, released, requeued, batch_failed), so it is an adjacent capability rather than a fork; but the repository now owns two event trails on the same node with overlapping audit intent, and nothing in the fragment says which one a future census should prefer."
+    }
+  ],
+  "project": "imas-codex",
+  "review_run_id": "r-20261108T133728025424-review-of-sib-claim-outcome-receipts-4e3261143a36",
+  "reviewed_base_sha": "96d64ea46391e6eb82d4d2676b96cad62f34c287",
+  "reviewed_head_sha": "4e3261143a361a6838066e14dc5bbd3a04cc0667",
+  "reviewed_run_id": "r-20261108T084737359779-sib-claim-outcome-receipts",
+  "scores": {
+    "durability": 18,
+    "evidence": 15,
+    "fit": 15,
+    "goal_fidelity": 17,
+    "reuse": 12,
+    "scope_discipline": 15
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T14:15:13.769073+00:00",
+  "total": 92
+}
