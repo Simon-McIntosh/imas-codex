@@ -532,8 +532,9 @@ class TestClaimedAttachmentPersistence:
             winners = persist_claimed_attachments([self._attachment()])
 
         assert winners == []
-        # Pairing guard, binding lock, stale-reservation cleanup, release.
-        assert tx.run.call_count == 4
+        # Pairing guard, binding lock, stale-reservation cleanup, receipt,
+        # release.
+        assert tx.run.call_count == 5
         cypher = _transaction_call(tx, "AS outcome").args[0]
         assert "sns.claim_token = b.claim_token" in cypher
         assert "sns.claim_seq = b.claim_seq" in cypher
@@ -1001,8 +1002,8 @@ class TestPersistGeneratedNameBatch:
         counter.assert_not_called()
         self.atomic_tx.commit.assert_called_once()
         # Target existence probe, binding lock, stale-reservation cleanup,
-        # release.
-        assert self.atomic_tx.run.call_count == 4
+        # receipt, release.
+        assert self.atomic_tx.run.call_count == 5
         cypher = _transaction_call(self.atomic_tx, "AS outcome").args[0]
         cleanup_cypher = _transaction_call(
             self.atomic_tx, "b.preserve_current = true"

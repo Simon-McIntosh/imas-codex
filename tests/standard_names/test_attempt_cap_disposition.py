@@ -122,8 +122,10 @@ class ParkingStub:
         if "SET sns.parked_disposition" in cypher:
             self.writes.append(list(params["rows"]))
             return [{"written": len(params["rows"])}]
+        if "StandardNameSourceClaimAttempt" in cypher:
+            return [{"written": len(params.get("entries") or [])}]
         if _owning_graph_source_bindings._COMPOSE_CAP_REASON in cypher:
-            return [{"n": self.park_count}]
+            return [dict(r) for r in self.parked_rows]
         return [{"n": 0}]
 
     def __enter__(self):

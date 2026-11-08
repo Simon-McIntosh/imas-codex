@@ -422,6 +422,15 @@ enums:
         description: >-
           The source reached its claim-attempt budget and was parked at the
           attempt cap.
+      skipped:
+        description: >-
+          The claim ended by parking the source as skipped, for example a
+          non-nameable coordinate. This is a triage decision, not a refusal of
+          a candidate.
+      requeued:
+        description: >-
+          The claim ended with the source returned to the queue for another
+          attempt, so no verdict about the source was reached.
 
   ComposeHintStatus:
     description: >-

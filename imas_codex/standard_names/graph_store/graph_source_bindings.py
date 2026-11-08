@@ -15,8 +15,81 @@ from imas_codex.discovery.base.claims import retry_on_deadlock
 from imas_codex.graph.client import GraphClient
 
 from . import graph_foundation as foundation
+from .graph_cost_and_claims import (
+    append_claim_attempts,
+    claim_attempt_entry,
+    claim_outcome_for_status,
+)
 
 logger = logging.getLogger(__name__)
+
+
+def _collision_release_reason(item: dict[str, Any]) -> str:
+    """Explain the release in the receipt, in the same terms as last_error."""
+    if item.get("attachment_error"):
+        return (
+            f'standard-name attachment rejected: candidate "{item.get("sn_id")}" '
+            f"{item['attachment_error']}"
+        )
+    return (
+        f'standard-name binding collision: candidate "{item.get("sn_id")}" '
+        f'unit "{item.get("unit") or "<unset>"}" is not bindable'
+    )
+
+
+def _stored_outcome_claim_entries(batch: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Entries for the status a claim-ending caller is storing.
+
+    The outcome follows the stored status rather than defaulting to a refusal:
+    a skipped source and a source returned to the queue were not refused.
+    """
+    return [
+        claim_attempt_entry(
+            item["sns_id"],
+            attempt=item.get("attempt_count"),
+            outcome=item.get("claim_outcome")
+            or claim_outcome_for_status(item.get("status")),
+            reason=item.get("last_error") or item.get("skip_reason_detail"),
+            claim_seq=item.get("claim_seq"),
+            claim_token=item.get("claim_token"),
+            batch_key=item.get("batch_key"),
+            run_id=item.get("run_id"),
+        )
+        for item in batch
+    ]
+
+
+def _produced_claim_entries(batch: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Entries for claims that bound their candidate and attached the source."""
+    return [
+        claim_attempt_entry(
+            item["sns_id"],
+            attempt=item.get("attempt_count"),
+            outcome="produced",
+            claim_seq=item.get("claim_seq"),
+            claim_token=item.get("claim_token"),
+            batch_key=item.get("batch_key"),
+            run_id=item.get("run_id"),
+        )
+        for item in batch
+    ]
+
+
+def _released_claim_entries(batch: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Entries for claims returned to the queue by a binding refusal."""
+    return [
+        claim_attempt_entry(
+            item["sns_id"],
+            attempt=item.get("attempt_count"),
+            outcome="released",
+            reason=_collision_release_reason(item),
+            claim_seq=item.get("claim_seq"),
+            claim_token=item.get("claim_token"),
+            batch_key=item.get("batch_key"),
+            run_id=item.get("run_id"),
+        )
+        for item in batch
+    ]
 
 
 def write_enrichment_results(
@@ -1351,6 +1424,9 @@ def _lock_claimed_name_bindings(
     }
     collision_batch = [item for item in batch if item["sns_id"] in collision_ids]
     if collision_batch and not _retrying_retired:
+        # Written before the release clears the claim, because the receipt is
+        # fenced on the live token and sequence.
+        append_claim_attempts(gc, _released_claim_entries(collision_batch))
         gc.query(
             """
             UNWIND $batch AS b
@@ -1382,16 +1458,6 @@ def _lock_claimed_name_bindings(
                        '" at composition attempt ' +
                        toString(coalesce(sns.attempt_count, 0))
                 END
-            WITH sns, b
-            MERGE (attempt_row:StandardNameSourceClaimAttempt {id:
-              'claim-attempt:' + sns.id + ':' + toString(b.claim_seq)
-              + ':released'})
-            ON CREATE SET attempt_row.attempt = coalesce(sns.attempt_count, 1),
-                          attempt_row.outcome = 'released',
-                          attempt_row.reason = sns.last_error,
-                          attempt_row.batch_key = sns.batch_key,
-                          attempt_row.recorded_at = datetime()
-            MERGE (sns)-[:HAS_CLAIM_ATTEMPT]->(attempt_row)
             """,
             batch=collision_batch,
             stable_stages=sorted(foundation._STABLE_BINDING_NAME_STAGES),
@@ -1428,6 +1494,12 @@ def persist_claimed_source_outcomes(
         return []
     services._guard_failed_source_reasons(batch)
     with services.GraphClient() as gc:
+        # The claim is still live here, so the receipt is written fenced on it
+        # before the status write consumes the claim. The outcome follows the
+        # status the caller is storing: a skipped source and a source returned
+        # to the queue were not refused, and recording them as refusals would
+        # misattribute them in the next failure census.
+        append_claim_attempts(gc, _stored_outcome_claim_entries(batch))
         rows = gc.query(
             """
             UNWIND $batch AS b
@@ -1446,17 +1518,6 @@ def persist_claimed_source_outcomes(
                     b.skip_reason_detail, sns.skip_reason_detail),
                 sns.skipped_at = CASE WHEN b.status = 'skipped'
                                       THEN datetime() ELSE sns.skipped_at END
-            WITH sns, b
-            MERGE (attempt_row:StandardNameSourceClaimAttempt {id:
-              'claim-attempt:' + sns.id + ':' + toString(b.claim_seq) + ':'
-              + coalesce(b.claim_outcome, 'refused')})
-            ON CREATE SET attempt_row.attempt = coalesce(sns.attempt_count, 1),
-                          attempt_row.outcome =
-                            coalesce(b.claim_outcome, 'refused'),
-                          attempt_row.reason = sns.last_error,
-                          attempt_row.batch_key = sns.batch_key,
-                          attempt_row.recorded_at = datetime()
-            MERGE (sns)-[:HAS_CLAIM_ATTEMPT]->(attempt_row)
             RETURN sns.id AS id
             """,
             batch=batch,
@@ -1642,6 +1703,9 @@ def persist_claimed_attachments(
                     if item["sns_id"] in locked_ids
                 ]
                 if winner_batch:
+                    # The claim is consumed by the statement below, so the
+                    # produced receipt is appended while the fence still holds.
+                    append_claim_attempts(tx_gc, _produced_claim_entries(winner_batch))
                     rows = tx_gc.query(
                         """
                         UNWIND $batch AS b
@@ -1675,16 +1739,6 @@ def persist_claimed_attachments(
                             THEN sn.source_paths
                             ELSE coalesce(sn.source_paths, []) + uri END,
                             sn.updated_at = datetime()
-                        MERGE (attempt_row:StandardNameSourceClaimAttempt {id:
-                          'claim-attempt:' + sns.id + ':' + toString(b.claim_seq)
-                          + ':produced'})
-                        ON CREATE SET attempt_row.attempt =
-                                        coalesce(sns.attempt_count, 1),
-                                      attempt_row.outcome = 'produced',
-                                      attempt_row.reason = null,
-                                      attempt_row.batch_key = sns.batch_key,
-                                      attempt_row.recorded_at = datetime()
-                        MERGE (sns)-[:HAS_CLAIM_ATTEMPT]->(attempt_row)
                         RETURN sns.id AS id
                         """,
                         batch=winner_batch,

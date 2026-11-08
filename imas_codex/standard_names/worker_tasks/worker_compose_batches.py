@@ -20,6 +20,34 @@ if TYPE_CHECKING:
     from imas_codex.standard_names.budget import BudgetManager
 
 
+def _batch_failure_claim_entries(
+    batch: list[dict[str, Any]], batch_key: str | None, phase: str
+) -> list[dict[str, Any]]:
+    """One batch_failed entry for every claimed source a failed batch carried."""
+    from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        claim_attempt_entry,
+    )
+
+    entries: list[dict[str, Any]] = []
+    for item in batch:
+        source_id = item.get("id")
+        if not source_id:
+            continue
+        entries.append(
+            claim_attempt_entry(
+                source_id,
+                attempt=item.get("attempt_count"),
+                outcome="batch_failed",
+                reason=f"compose batch raised in phase {phase}",
+                claim_seq=item.get("claim_seq"),
+                claim_token=item.get("claim_token"),
+                batch_key=batch_key or item.get("batch_key"),
+                run_id=item.get("run_id"),
+            )
+        )
+    return entries
+
+
 def _record_batch_failure(
     batch: list[dict[str, Any]], batch_key: str | None, phase: str
 ) -> None:
@@ -31,28 +59,13 @@ def _record_batch_failure(
     which is the error the caller and the run's stop reason need.
     """
     from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
-        claim_attempt_entry,
         record_claim_attempts,
     )
     from imas_codex.standard_names.graph_store.graph_foundation import (
         get_services,
     )
 
-    entries: list[dict[str, Any]] = []
-    for item in batch:
-        source_id = item.get("id")
-        if not source_id:
-            continue
-        entry = claim_attempt_entry(
-            source_id,
-            attempt=item.get("attempt_count"),
-            outcome="batch_failed",
-            reason=f"compose batch raised in phase {phase}",
-            claim_seq=item.get("claim_seq"),
-            batch_key=batch_key,
-        )
-        entry["claim_token"] = item.get("claim_token")
-        entries.append(entry)
+    entries = _batch_failure_claim_entries(batch, batch_key, phase)
     if not entries:
         return
     try:

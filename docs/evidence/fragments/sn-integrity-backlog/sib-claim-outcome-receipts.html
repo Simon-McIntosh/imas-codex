@@ -35,12 +35,29 @@ claim-ending statement.</p>
       <td><code>worker_compose_batches.py</code>, <code>compose_batch</code>'s except path</td>
     </tr>
     <tr>
+      <td>Skipped source (the batch reports it as not a quantity)</td>
+      <td><code>skipped</code></td>
+      <td><code>graph_source_bindings.py</code>, <code>persist_claimed_source_outcomes</code></td>
+    </tr>
+    <tr>
+      <td>Batch requeued (the source goes back to <code>extracted</code>)</td>
+      <td><code>requeued</code></td>
+      <td><code>graph_source_bindings.py</code>, <code>persist_claimed_source_outcomes</code></td>
+    </tr>
+    <tr>
       <td>Attempt-cap parking sweep</td>
       <td><code>capped</code></td>
       <td><code>orphan_sweep.py</code>, the <code>compose_attempt_cap</code> statement</td>
     </tr>
   </tbody>
 </table>
+
+<p>The stored-status writer maps the batch <code>status</code> to an outcome in
+one place (<code>claim_outcome_for_status</code>), so <code>failed</code> and
+<code>vocab_gap</code> record <code>refused</code>, a <code>skipped</code>
+source records <code>skipped</code>, and a source a batch hands back as
+<code>extracted</code> records <code>requeued</code>. None of them is reported
+as a refusal, so a census cannot count a skip as a failure.</p>
 
 <h3>Writers left out, and why</h3>
 <ul>
@@ -63,15 +80,28 @@ claim-ending statement.</p>
 A source holds one claim per sequence number, so the MERGE is idempotent under
 a deadlock-retried write, and the record is bounded by the claim-attempt cap: a
 source that fails five times holds five entries and is then parked
-<code>capped</code>. The standalone writer fenced on
-<code>claim_token</code>/<code>claim_seq</code>, so a delayed duplicate worker
-cannot append a receipt to a claim it no longer holds.</p>
+<code>capped</code>. Every entry carries <code>claim_seq</code>, which the
+append's <code>WHERE</code> clause compares against the source's live
+sequence, so a delayed duplicate worker cannot append a receipt to a claim it no
+longer holds. The append runs on the same client or transaction as the statement
+that ends the claim, so the receipt and the ending are one unit of work.</p>
+<p>A source the sweep parks carries no live sequence to key on, so its entry is
+keyed on the attempt number (<code>claim-attempt:{source}:attempt-{n}:capped</code>).
+The append reports the number of receipts it created rather than the number of
+MERGE matches, so a retried write reads zero.</p>
 
-<h3>Negative control</h3>
-<p>The declared mutation removes the append from the batch-failure release. Run
-against it, <code>test_compose_batch_records_the_receipt_before_it_reraises</code>
-fails and the run exits non-zero. The first version of the tests survived that
-mutation — they exercised the helper directly — which is why the guard now
-asserts the call sits inside <code>compose_batch</code>'s except block ahead of
-its re-raise.</p>
+<h3>Negative controls</h3>
+<p>Two mutations, both run against the node's own test file. Removing the
+<code>claim_seq</code> from the entry — the defect this round fixed — leaves the
+append fenced on a null and every token-carrying receipt unwritten: 12 tests
+fail and the run exits non-zero. The declared mutation removes the append from
+the batch-failure release; run against it,
+<code>test_compose_batch_records_the_receipt_before_it_reraises</code> fails and
+the run exits non-zero.</p>
+<p>Both would have passed a suite that asserted the entry a writer built rather
+than the receipt the graph stored. Every outcome test now drives the real writer
+through a graph double that implements the append's fence and its create-once
+identity, and one <code>-m graph</code> test runs the real statement against a
+disposable Neo4j: it creates and links a receipt, proves a stale sequence writes
+nothing, and removes its probe nodes.</p>
 </section>

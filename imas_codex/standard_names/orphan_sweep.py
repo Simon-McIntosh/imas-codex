@@ -122,19 +122,35 @@ _SWEEP_QUERIES: Final[list[tuple[str, str]]] = [
             END,
             s.claim_token = null,
             s.claimed_at  = null
-        WITH s
-        MERGE (attempt_row:StandardNameSourceClaimAttempt {id:
-          'claim-attempt:' + s.id + ':' + toString(s.claim_seq) + ':capped'})
-        ON CREATE SET attempt_row.attempt = coalesce(s.attempt_count, 1),
-                      attempt_row.outcome = 'capped',
-                      attempt_row.reason = s.last_error,
-                      attempt_row.batch_key = s.batch_key,
-                      attempt_row.recorded_at = datetime()
-        MERGE (s)-[:HAS_CLAIM_ATTEMPT]->(attempt_row)
-        RETURN count(*) AS n
+        RETURN s.id AS id,
+               s.attempt_count AS attempt_count,
+               s.claim_seq AS claim_seq,
+               s.last_error AS last_error,
+               s.batch_key AS batch_key,
+               s.run_id AS run_id
         """,
     ),
 ]
+
+
+def _capped_claim_entries(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """One capped entry for each source the parking statement just parked."""
+    from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        claim_attempt_entry,
+    )
+
+    return [
+        claim_attempt_entry(
+            row["id"],
+            attempt=row.get("attempt_count"),
+            outcome="capped",
+            reason=row.get("last_error"),
+            claim_seq=row.get("claim_seq"),
+            batch_key=row.get("batch_key"),
+            run_id=row.get("run_id"),
+        )
+        for row in rows
+    ]
 
 
 # ---------------------------------------------------------------------------
@@ -161,6 +177,7 @@ def _orphan_sweep_tick(*, timeout_s: int) -> dict[str, int]:
     """
     from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
         _MAX_COMPOSE_CLAIM_ATTEMPTS,
+        append_claim_attempts,
     )
     from imas_codex.standard_names.graph_store.graph_source_bindings import (
         record_dispositions_for_undisposed_parks,
@@ -174,7 +191,17 @@ def _orphan_sweep_tick(*, timeout_s: int) -> dict[str, int]:
                 timeout_s=timeout_s,
                 max_compose_attempts=_MAX_COMPOSE_CLAIM_ATTEMPTS,
             )
-            counts[label] = rows[0]["n"] if rows else 0
+            if label == _PARKING_LABEL:
+                # The parking statement returns the rows it just parked so the
+                # capped receipt can name each one. The sweep holds no claim
+                # token, so these entries are appended unfenced on the sequence
+                # the statement itself carried out of the claimable pool.
+                parked = [row for row in rows or [] if row.get("id")]
+                if parked:
+                    append_claim_attempts(gc, _capped_claim_entries(parked))
+                counts[label] = len(parked)
+            else:
+                counts[label] = rows[0]["n"] if rows else 0
 
         if counts.get(_PARKING_LABEL):
             from imas_codex.standard_names.graph_store.graph_foundation import (

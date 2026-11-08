@@ -137,7 +137,9 @@ def test_a_non_terminal_outcome_still_needs_no_reason() -> None:
     with patch.object(_owning_graph_foundation, "GraphClient", return_value=client):
         _owning_graph_source_bindings.persist_claimed_source_outcomes([outcome])
 
-    client.query.assert_called_once()
+    # The claim-attempt receipt, then the status write: a non-terminal outcome
+    # is recorded but still needs no failure reason.
+    assert client.query.call_count == 2
 
 
 @pytest.mark.parametrize("reason", REASONLESS)
