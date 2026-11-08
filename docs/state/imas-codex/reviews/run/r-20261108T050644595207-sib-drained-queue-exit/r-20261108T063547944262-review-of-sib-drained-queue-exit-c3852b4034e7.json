@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate logs: the after arm (logs/suite-head.log, revision c3852b403, completed to its summary line, 8550 passed 0 failed 11 skipped, EXIT=0) carries no failing id at all, so no failure can have been added; the baseline arm (logs/suite-base.log) is truncated at 58% with no summary line and no EXIT= line, so it contributes no ids and cannot be read as the source of the five ids the manifest attributes to it.",
+  "completed_at": "2026-11-08T06:49:11.438Z",
+  "dispatched_at": "2026-11-08T06:37:30Z",
+  "findings": [
+    {
+      "file": "imas_codex/cli/sn.py",
+      "line": 616,
+      "severity": "blocking",
+      "text": "The reviewed worktree .../sib-drained-queue-exit is left with this change reverted in the working tree AND in the index: `git -C <worktree> diff --cached HEAD` shows the 14-line sn.py block and the 12-line graph_parent_lifecycle.py block deleted (`grep -c source_claim_where` is 2 at HEAD, 0 in the tree). HEAD c3852b403 is correct, but an interrupted base-arm suite run (stream record at line 7336, killed with exit 137 before its restore line) left the tree on the base product files. Any commit made in that worktree -- including a merge concluded there, which takes the whole index -- lands the revert, so the change is intact only until someone commits from that tree. Repair by `git -C <worktree> checkout HEAD -- imas_codex/cli/sn.py imas_codex/standard_names/graph_store/graph_parent_lifecycle.py` (the fix lives in HEAD), or reclaim the worktree before any commit."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_parent_lifecycle.py",
+      "line": 116,
+      "severity": "non-blocking",
+      "text": "The claimability predicate is now written out as literal Cypher in three places -- the owner `claim_generate_name_batch` at imas_codex/standard_names/graph_store/graph_cost_and_claims.py:486/506 and both pending counts (imas_codex/cli/sn.py:616 and here) -- with no shared constant. The count drifting from the claim is exactly the defect this node repaired, and the fix re-states the predicate rather than extracting it, so the next change to the claim predicate can reintroduce the same divergence silently. A module-level fragment exported beside `_PIPELINE_FROZEN_NAME_STAGES` and interpolated by all three sites would close it; the graph_store sibling-import rule that forced commit 07e795a68 is satisfied by exporting it from graph_foundation or the wired services namespace."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T050644595207-sib-drained-queue-exit/manifest.md",
+      "line": 21,
+      "severity": "non-blocking",
+      "text": "`baseline_suite` declares `completed: true`, but the log it cites (logs/suite-base.log) is truncated at 58% of the progress bar: 80 lines, no pytest summary line, no `EXIT=` line, and only the single `F` already printed at 48%. The run it describes is the third base-arm attempt, which the worker's own stream shows was killed with exit code 137 before the shell appended its exit line; the completed base-arm measurement (5 failed, 8545 passed) was a previous attempt whose log was overwritten. The declared failure_ids are consistent with that earlier run, and the added-failure answer is unaffected because the after arm names zero failures, but the receipt as written cannot be re-read to confirm it."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_parent_lifecycle.py",
+      "line": 150,
+      "severity": "non-blocking",
+      "text": "The two modified Cypher statements were never executed or explained against a live engine: `-m graph` is never passed and no `EXPLAIN` appears anywhere in the run's stream. The repo's graph guidance requires one of them for edited Cypher, because the default markers exclude the graph marker and a syntax error therefore surfaces only when a live run's watchdog calls the count. The risk is low in fact -- every construct used (`EXISTS { MATCH ... }`, `NOT EXISTS { MATCH ... WHERE ... }`, `$frozen_name_stages` list parameter) already parses in live statements in the same files -- but the statement itself is unproven."
+    },
+    {
+      "file": "tests/standard_names/test_drained_queue_exit.py",
+      "line": 88,
+      "severity": "non-blocking",
+      "text": "The docstring cites `job 1308077`, a transient scheduler job id that no longer resolves and means nothing to a reader without access to that job's record. The user-global naming rule bans tracker/job/RCA references in source comments and docstrings; the numbers that matter here (101 derived plus 3 manual, 104 pending, none carrying a DD path) are already stated in the same docstring and stand on their own."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit from d5da568f9: 22156bbb9 adds the predicate to both count sites plus a 219-line test, 07e795a68 replaces a refused sibling import with the wired services namespace, c3852b403 adds the 60-line evidence fragment; 305 insertions, no deletions, nothing outside the five declared product/test/docs paths.",
+    "done_when": "The done_when names imas_codex/standard_names/test_drained_queue_exit.py and the manifest records that file's run; the head gate log records 6 passed EXIT=0, the after arm records 8550 passed 0 failed EXIT=0, and the negative-control log records 5 failed 1 passed EXIT=1 against the base product files, which is the 'proves both on fakes and fails on main' half of the measure.",
+    "goal": "The goal is to make a drained SN run exit cleanly instead of reporting a deadlock when only unclaimable sources remain pending; imas_codex/cli/sn.py:616 and imas_codex/standard_names/graph_store/graph_parent_lifecycle.py:116 add the FROM_DD_PATH existence test and the frozen produced-name exclusion to the generate_name pending count, which is the figure pools.py:1069 reads, so a queue with only unclaimable work now goes idle and reports no_eligible_work.",
+    "manifest": "Read; it states 6 passed at head, 8550 passed at the after arm, 5 failed 1 passed at the negative control, and a live read-only reproduction of 10,141 sources / 9,078 with a DD path / 104 pending, all without one, split 101 derived and 3 manual; the baseline_suite block is the one entry that does not hold up (see finding at manifest.md:21).",
+    "write_paths": "The declared paths are graph_parent_lifecycle.py, pools.py, cli/sn.py, test_drained_queue_exit.py and the two docs/evidence+figures paths for this node; the diff touches four of them and nothing else -- pools.py and docs/figures/ are declared but unused, which is not a violation."
+  },
+  "justifications": {
+    "durability": "The negative-control run reinstates the regression on the base product files and four of the six tests redden against it (assert 104 == 0 at tests/standard_names/test_drained_queue_exit.py:157, assert 2 == 1 at :163, assert 1 == 0 at :169, 'stalled' == 'no_eligible_work' at :175), so the assertions do fail when the change is removed.",
+    "evidence": "The gate log logs/gate-head.log records 6 passed EXIT=0, the after arm records 8550 passed 0 failed and the negative control records 5 failed EXIT=1, but the baseline log it cites is truncated with no summary, and the new Cypher is never run against a live engine.",
+    "fit": "The added block follows the surrounding query-assembly idiom (an interpolated `{source_claim_where}` beside the existing `{source_scope}` at graph_parent_lifecycle.py:149) and takes `_PIPELINE_FROZEN_NAME_STAGES` from the same owner the claim seed uses, matching `services._MAX_COMPOSE_CLAIM_ATTEMPTS` two lines above.",
+    "goal_fidelity": "imas_codex/cli/sn.py:616 and graph_parent_lifecycle.py:116 carry both restrictions the claim seed at graph_cost_and_claims.py:486 imposes, so the watchdog's pending figure is claimable work and the drained branch at pools.py:1069 can fire.",
+    "reuse": "The claimability predicate the change restates is owned by claim_generate_name_batch at imas_codex/standard_names/graph_store/graph_cost_and_claims.py:486; the change aligns the counts with it but writes a third literal copy instead of extending the owner with a shared fragment.",
+    "scope_discipline": "Every path in the diff -- imas_codex/cli/sn.py, imas_codex/standard_names/graph_store/graph_parent_lifecycle.py, tests/standard_names/test_drained_queue_exit.py and the evidence fragment -- is inside the six declared write paths and no other file is touched."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261108T063547944262-review-of-sib-drained-queue-exit-c3852b4034e7",
+  "reviewed_base_sha": "d5da568f900ad87ef23df65eba413492786824f2",
+  "reviewed_head_sha": "c3852b4034e7842b30a4075aca788a9e33b8c490",
+  "reviewed_run_id": "r-20261108T050644595207-sib-drained-queue-exit",
+  "scores": {
+    "durability": 17,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 13,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T06:58:53.896417+00:00",
+  "total": 99
+}
