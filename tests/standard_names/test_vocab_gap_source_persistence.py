@@ -75,6 +75,8 @@ def test_actionable_gap_retires_source_no_string():
             "source_id": "equilibrium/constraints/n_e_line/measured",
             "claim_token": "winner",
             "claim_seq": 8,
+            "run_id": None,
+            "batch_key": None,
             "status": "vocab_gap",
             "last_error": None,
             "skip_reason": None,
