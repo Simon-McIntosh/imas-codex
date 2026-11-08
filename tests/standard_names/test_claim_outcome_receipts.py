@@ -239,3 +239,22 @@ def test_ending_writer_carries_its_outcome(
         assert "coalesce(b.claim_outcome, 'refused')" in source
     else:
         assert "attempt_row.outcome = 'capped'" in source
+
+
+def test_compose_batch_records_the_receipt_before_it_reraises() -> None:
+    """The batch failure path itself writes the receipt, not a caller.
+
+    The helper is only half the requirement: what makes the receipt reach a
+    real source is the compose batch's own failure path invoking it before it
+    re-raises. This asserts the call is present in that path, so removing the
+    append is a test failure rather than a silent gap in the record.
+    """
+    from imas_codex.standard_names.worker_tasks import worker_compose_batches as wcb
+
+    source = inspect.getsource(wcb.compose_batch)
+    except_index = source.rindex("except Exception:")
+    failure_path = source[except_index:]
+    assert "_record_batch_failure(batch, group_key, phase_tag)" in failure_path
+    assert failure_path.index("_record_batch_failure") < failure_path.index(
+        "\n        raise\n"
+    )
