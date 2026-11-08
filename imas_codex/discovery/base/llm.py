@@ -2619,7 +2619,17 @@ async def acall_llm_structured(
                 # the per-call retry/backoff, which still retries this attempt).
                 if governor is not None and _is_rate_limited(error_msg):
                     governor.record_rate_limited()
-                if _is_retryable(error_msg) and attempt < max_retries - 1:
+                # A transport fault is decided by its type before its text is
+                # read: a dropped connection carries an empty message
+                # (``httpx.ReadError``) and a bare connect refusal carries no
+                # phrase the patterns match (``httpx.ConnectError``), so
+                # substring classification alone gives each of them one
+                # attempt. The type set is this module's own, read here rather
+                # than restated, so the two seams cannot drift.
+                _retryable_fault = isinstance(
+                    e, _transient_transport_errors()
+                ) or _is_retryable(error_msg)
+                if _retryable_fault and attempt < max_retries - 1:
                     # Budget-exhaustion empty (reasoning model spent its whole
                     # completion budget on thinking): grow the token budget so
                     # the retry can finish reasoning AND emit the answer.
@@ -3327,6 +3337,8 @@ def _transient_transport_errors() -> tuple[type[BaseException], ...]:
     the installed client's rather than a second list of names typed here. The
     builtin timeout and connection errors are included because the same seam
     is exercised through both the synchronous and the asynchronous client.
+    The async structured call reads this same set, so a connection fault
+    reaches one classification rather than two.
     """
     import httpx
 
