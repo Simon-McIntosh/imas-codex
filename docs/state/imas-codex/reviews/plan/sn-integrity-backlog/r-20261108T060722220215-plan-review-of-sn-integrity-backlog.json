@@ -72,14 +72,27 @@
       "note": "\u00a751 (843562e66) now declares the rerun cohort and all five repair nodes, links \u00a750, and measures per-source outcome, at least 3 accepted per USD under USD 50, and failing-then-passing regression tests; \u00a750 is declared done on its run verdict.",
       "reason": "",
       "when": "2026-11-08T06:44:50.004781+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "843562e666780df849e0a2218e07311834826f3a",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a751 (843562e66) now declares the rerun cohort and all five repair nodes, links \u00a750, and measures per-source outcome, at least 3 accepted per USD under USD 50, and failing-then-passing regression tests; \u00a750 is declared done on its run verdict.",
+      "reason": "",
+      "when": "2026-11-08T06:45:06.405873+00:00"
     }
   ],
   "responses": {
     "done_when-1": {
-      "action": "declined",
+      "action": "acted",
       "by": "",
-      "reason": "moot: the launch has happened; its suite precondition was read as a delta against be4c7ee6c in the sib-full-dd-run fragment",
-      "when": "2026-11-08T06:37:15.001220+00:00"
+      "commit": "843562e666780df849e0a2218e07311834826f3a",
+      "commit_basis": "edit",
+      "note": "\u00a751 (843562e66) now declares the rerun cohort and all five repair nodes, links \u00a750, and measures per-source outcome, at least 3 accepted per USD under USD 50, and failing-then-passing regression tests; \u00a750 is declared done on its run verdict.",
+      "reason": "",
+      "when": "2026-11-08T06:45:06.405873+00:00"
     },
     "reasoning-1": {
       "action": "declined",
