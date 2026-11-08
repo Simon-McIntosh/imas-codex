@@ -107,9 +107,28 @@
       "note": "2b70738ba declares the persist-refusal, tail-rerun and test-repair nodes in \u00a751, cites the 114 ceiling to the diagnosis fragment, drops the unreachable per-USD floor, names the fragment directory as the read-back path, and states \u00a751 carries \u00a750's unmet yield.",
       "reason": "",
       "when": "2026-11-08T09:59:28.324334+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "2b70738ba5bc76dc39b3e8b9bcc87ab66ec09b7b",
+      "commit_basis": "edit",
+      "finding": "anchors_resolve-1",
+      "note": "2b70738ba declares the persist-refusal, tail-rerun and test-repair nodes in \u00a751, cites the 114 ceiling to the diagnosis fragment, drops the unreachable per-USD floor, names the fragment directory as the read-back path, and states \u00a751 carries \u00a750's unmet yield.",
+      "reason": "",
+      "when": "2026-11-08T09:59:40.208693+00:00"
     }
   ],
   "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "2b70738ba5bc76dc39b3e8b9bcc87ab66ec09b7b",
+      "commit_basis": "edit",
+      "note": "2b70738ba declares the persist-refusal, tail-rerun and test-repair nodes in \u00a751, cites the 114 ceiling to the diagnosis fragment, drops the unreachable per-USD floor, names the fragment directory as the read-back path, and states \u00a751 carries \u00a750's unmet yield.",
+      "reason": "",
+      "when": "2026-11-08T09:59:40.208693+00:00"
+    },
     "done_when-1": {
       "action": "acted",
       "by": "",
