@@ -71,4 +71,12 @@ the two existing canonical-order tests pass:
 <code>6 passed, EXIT=0</code>. The declared negative control — bypassing the
 same-IR check — turns the IR-changing reorder test red while the other three
 pass: <code>1 failed, 3 passed, EXIT=1</code>.</p>
+
+<p id="sib-canonical-order-adoption-suite"><code>tests/standard_names</code> at
+the change reads <code>8609 passed, 11 skipped, 470 deselected</code>,
+<code>EXIT=0</code>, with no failing id, so it adds no failure id against the
+base revision. The base arm did not reach its summary line: the run was stopped
+at 78% by the harness's background time limit, so no base failure list was
+recorded and none is needed — a head arm with zero failures cannot have added
+one.</p>
 </section>
