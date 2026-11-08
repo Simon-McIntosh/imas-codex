@@ -1,0 +1,92 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "the reviewed run recorded no baseline arm (its manifest carries baseline_suite: null and after_suite: null); its only suite log, the focused gate at after-suite.log, ends 157 passed, 2 skipped, EXIT=0 with zero FAILED ids, so no failure is added on either arm.",
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/standard_names/graph_store/graph_source_bindings.py:1417 persist_claimed_source_outcomes: reached from imas_codex/standard_names/worker_tasks/worker_common.py:1084 and worker_extraction_and_enrichment.py:741,1598",
+    "imas_codex/standard_names/graph_store/graph_source_bindings.py:1385 _lock_claimed_name_bindings",
+    "imas_codex/standard_names/graph_store/graph_source_bindings.py:1675 persist_claimed_attachments",
+    "imas_codex/standard_names/orphan_sweep.py:126 _orphan_sweep_tick",
+    "imas_codex/standard_names/worker_tasks/worker_compose_batches.py:1240 compose_batch"
+  ],
+  "completed_at": "2026-11-08T10:24:52.178Z",
+  "dispatched_at": "2026-11-08T10:14:09Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_cost_and_claims.py",
+      "line": "804",
+      "severity": "blocking",
+      "text": "the fence compares sns.claim_seq with entry.claim_seq, but claim_attempt_entry at :744-752 never puts claim_seq in the entry, so for every entry carrying a claim_token the comparison is null and the WHERE is false, and worker_compose_batches.py:54 always sets a token -- verified by constructing an entry, which has keys attempt, batch_key, id, outcome, reason, run_id, source_id and no claim_seq, so the batch_failed outcome reaches the graph zero times."
+    },
+    {
+      "file": "tests/standard_names/test_claim_outcome_receipts.py",
+      "line": "155",
+      "severity": "blocking",
+      "text": "test_batch_failure_records_every_claimed_source monkeypatches record_claim_attempts with a capture, so it proves only that the helper built entries and not that any receipt is written; driving the same entries through _FakeGraphClient would have exposed the missing claim_seq, so this assertion survives the defect it was added to guard."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_source_bindings.py",
+      "line": "1452",
+      "severity": "non-blocking",
+      "text": "persist_claimed_source_outcomes is also called with status skipped (worker_extraction_and_enrichment.py:724 and :1592) and status extracted for a retried batch, so a skipped or requeued claim is recorded as refused, which misattributes it in exactly the failure census the node exists to serve."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_cost_and_claims.py",
+      "line": "805",
+      "severity": "non-blocking",
+      "text": "the schema declares source_id required true at imas_codex/schemas/standard_name.yaml:3608 and run_id as a field, but no writer in any of the five stanzas sets attempt_row.source_id and only the standalone path sets run_id, so the stored node carries a null on a property the schema requires."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_cost_and_claims.py",
+      "line": "793",
+      "severity": "non-blocking",
+      "text": "the docstring says the return is the number of sources that received an entry, but the query returns count(*) over rows that passed the WHERE, which counts MERGE-matched retries too, so the figure overstates new receipts under a deadlock retry."
+    },
+    {
+      "file": "tests/standard_names/test_claim_outcome_receipts.py",
+      "line": "229",
+      "severity": "non-blocking",
+      "text": "test_ending_writer_carries_its_outcome asserts HAS_CLAIM_ATTEMPT appears somewhere in the module source, so the produced and released appends in graph_source_bindings.py are guarded by the presence of whichever stanza remains rather than by their own text."
+    }
+  ],
+  "gate_sources": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T084737359779-sib-claim-outcome-receipts/after-suite.log",
+    "baseline_suite": null
+  },
+  "item_verdicts": {
+    "diff": "Read commit by commit against the base; 3882c8f7e adds the schema class and four inline stanzas, 915d3778a adds the batch-failure helper plus its text assertion, cd39d8612 adds the fragment, and every hunk sits inside the declared scope.",
+    "done_when": "The done_when asks each outcome be proved on fakes and a five-failure source hold five entries; tests/standard_names/test_claim_outcome_receipts.py:155 monkeypatches record_claim_attempts out, so the one graph-writing path that carries batch_failed is never exercised and its fence defect stays green, and the after_suite log records 157 passed, 2 skipped, EXIT=0 for the focused gate only.",
+    "goal": "The node goal is to record every compose claim's outcome on its StandardNameSource; imas_codex/standard_names/graph_store/graph_cost_and_claims.py:711-775 adds the receipt contract, but the batch_failed outcome is never written to the graph because the entry builder omits claim_seq while graph_cost_and_claims.py:802-804 fences on it.",
+    "manifest": "Read; it names commits 3882c8f7e, 915d3778a and cd39d8612, the focused gate command and its 157 passed 2 skipped EXIT=0, the negative control ending 1 failed, EXIT=1, and states under evidence_inputs that the full tests/standard_names arm did not complete.",
+    "write_paths": "The source manifest declares eight write paths; git diff 96d64ea46391e6eb82d4d2676b96cad62f34c287..cd39d86124f2d81a8ec76606606653bb39454e0d changes seven files and every one of them is inside that declared set, with docs/figures/ granted and unused."
+  },
+  "justifications": {
+    "durability": "removing the produced append at graph_source_bindings.py:1675 or the released append at :1385 leaves every assertion green, because tests/standard_names/test_claim_outcome_receipts.py:229 only requires the module to contain HAS_CLAIM_ATTEMPT once.",
+    "evidence": "the focused gate at after-suite.log ends 157 passed, 2 skipped, EXIT=0 and negative-control.log ends 1 failed, EXIT=1, but the gate's proof for batch_failed is a monkeypatched capture at tests/standard_names/test_claim_outcome_receipts.py:155 that never reaches the query it claims to prove.",
+    "fit": "the new class follows the neighbouring schema shape at imas_codex/schemas/standard_name.yaml:3083 and introduces no forbidden name, but graph_source_bindings.py:1452 coalesces b.claim_outcome, a key no writer in the repository sets, so the branch is dead and the outcome is unconditionally refused.",
+    "goal_fidelity": "four of the five claim-ending writers append their outcome inside the ending statement at graph_source_bindings.py:1385,1417,1675 and orphan_sweep.py:126, but worker_compose_batches.py:54 hands the batch_failed entry a claim_token without a claim_seq so graph_cost_and_claims.py:802-804 drops it.",
+    "reuse": "no prior owner exists for a per-claim attempt receipt (StandardNameSourceRetry at imas_codex/schemas/standard_name.yaml:3083 records operator releases only), yet the node builds a shared append stanza at graph_cost_and_claims.py:759 and four of its five writers hand-roll the same MERGE instead of calling it.",
+    "scope_discipline": "git diff 96d64ea..cd39d861 changes seven files and all seven are inside the write paths declared in the source manifest, with nothing touched outside them."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The node goal is to record every compose claim's outcome on its StandardNameSource; imas_codex/standard_names/graph_store/graph_cost_and_claims.py:711-775 adds the receipt contract, but the batch_failed outcome is never written to the graph because the entry builder omits claim_seq while graph_cost_and_claims.py:802-804 fences on it.\nVERDICT done_when: The done_when asks each outcome be proved on fakes and a five-failure source hold five entries; tests/standard_names/test_claim_outcome_receipts.py:155 monkeypatches record_claim_attempts out, so the one graph-writing path that carries batch_failed is never exercised and its fence defect stays green, and the after_suite log records 157 passed, 2 skipped, EXIT=0 for the focused gate only.\nVERDICT write_paths: The source manifest declares eight write paths; git diff 96d64ea46391e6eb82d4d2676b96cad62f34c287..cd39d86124f2d81a8ec76606606653bb39454e0d changes seven files and every one of them is inside that declared set, with docs/figures/ granted and unused.\nVERDICT manifest: Read; it names commits 3882c8f7e, 915d3778a and cd39d8612, the focused gate command and its 157 passed 2 skipped EXIT=0, the negative control ending 1 failed, EXIT=1, and states under evidence_inputs that the full tests/standard_names arm did not complete.\nVERDICT diff: Read commit by commit against the base; 3882c8f7e adds the schema class and four inline stanzas, 915d3778a adds the batch-failure helper plus its text assertion, cd39d8612 adds the fragment, and every hunk sits inside the declared scope.\nCALL_SITES: imas_codex/standard_names/graph_store/graph_source_bindings.py:1417 persist_claimed_source_outcomes: reached from imas_codex/standard_names/worker_tasks/worker_common.py:1084 and worker_extraction_and_enrichment.py:741,1598; imas_codex/standard_names/graph_store/graph_source_bindings.py:1385 _lock_claimed_name_bindings; imas_codex/standard_names/graph_store/graph_source_bindings.py:1675 persist_claimed_attachments; imas_codex/standard_names/orphan_sweep.py:126 _orphan_sweep_tick; imas_codex/standard_names/worker_tasks/worker_compose_batches.py:1240 compose_batch\nSCORE goal_fidelity: 12\nJUSTIFICATION goal_fidelity: four of the five claim-ending writers append their outcome inside the ending statement at graph_source_bindings.py:1385,1417,1675 and orphan_sweep.py:126, but worker_compose_batches.py:54 hands the batch_failed entry a claim_token without a claim_seq so graph_cost_and_claims.py:802-804 drops it.\nSCORE evidence: 10\nJUSTIFICATION evidence: the focused gate at after-suite.log ends 157 passed, 2 skipped, EXIT=0 and negative-control.log ends 1 failed, EXIT=1, but the gate's proof for batch_failed is a monkeypatched capture at tests/standard_names/test_claim_outcome_receipts.py:155 that never reaches the query it claims to prove.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff 96d64ea..cd39d861 changes seven files and all seven are inside the write paths declared in the source manifest, with nothing touched outside them.\nSCORE durability: 8\nJUSTIFICATION durability: removing the produced append at graph_source_bindings.py:1675 or the released append at :1385 leaves every assertion green, because tests/standard_names/test_claim_outcome_receipts.py:229 only requires the module to contain HAS_CLAIM_ATTEMPT once.\nSCORE fit: 16\nJUSTIFICATION fit: the new class follows the neighbouring schema shape at imas_codex/schemas/standard_name.yaml:3083 and introduces no forbidden name, but graph_source_bindings.py:1452 coalesces b.claim_outcome, a key no writer in the repository sets, so the branch is dead and the outcome is unconditionally refused.\nSCORE reuse: 13\nJUSTIFICATION reuse: no prior owner exists for a per-claim attempt receipt (StandardNameSourceRetry at imas_codex/schemas/standard_name.yaml:3083 records operator releases only), yet the node builds a shared append stanza at graph_cost_and_claims.py:759 and four of its five writers hand-roll the same MERGE instead of calling it.\nFINDING imas_codex/standard_names/graph_store/graph_cost_and_claims.py:804 blocking: the fence compares sns.claim_seq with entry.claim_seq, but claim_attempt_entry at :744-752 never puts claim_seq in the entry, so for every entry carrying a claim_token the comparison is null and the WHERE is false, and worker_compose_batches.py:54 always sets a token -- verified by constructing an entry, which has keys attempt, batch_key, id, outcome, reason, run_id, source_id and no claim_seq, so the batch_failed outcome reaches the graph zero times.\nFINDING tests/standard_names/test_claim_outcome_receipts.py:155 blocking: test_batch_failure_records_every_claimed_source monkeypatches record_claim_attempts with a capture, so it proves only that the helper built entries and not that any receipt is written; driving the same entries through _FakeGraphClient would have exposed the missing claim_seq, so this assertion survives the defect it was added to guard.\nFINDING imas_codex/standard_names/graph_store/graph_source_bindings.py:1452 non-blocking: persist_claimed_source_outcomes is also called with status skipped (worker_extraction_and_enrichment.py:724 and :1592) and status extracted for a retried batch, so a skipped or requeued claim is recorded as refused, which misattributes it in exactly the failure census the node exists to serve.\nFINDING imas_codex/standard_names/graph_store/graph_cost_and_claims.py:805 non-blocking: the schema declares source_id required true at imas_codex/schemas/standard_name.yaml:3608 and run_id as a field, but no writer in any of the five stanzas sets attempt_row.source_id and only the standalone path sets run_id, so the stored node carries a null on a property the schema requires.\nFINDING imas_codex/standard_names/graph_store/graph_cost_and_claims.py:793 non-blocking: the docstring says the return is the number of sources that received an entry, but the query returns count(*) over rows that passed the WHERE, which counts MERGE-matched retries too, so the figure overstates new receipts under a deadlock retry.\nFINDING tests/standard_names/test_claim_outcome_receipts.py:229 non-blocking: test_ending_writer_carries_its_outcome asserts HAS_CLAIM_ATTEMPT appears somewhere in the module source, so the produced and released appends in graph_source_bindings.py are guarded by the presence of whichever stanza remains rather than by their own text.\n",
+  "review_run_id": "r-20261108T101210079167-review-of-sib-claim-outcome-receipts-cd39d86124f2",
+  "reviewed_base_sha": "96d64ea46391e6eb82d4d2676b96cad62f34c287",
+  "reviewed_head_sha": "cd39d86124f2d81a8ec76606606653bb39454e0d",
+  "reviewed_run_id": "r-20261108T084737359779-sib-claim-outcome-receipts",
+  "scores": {
+    "durability": 8,
+    "evidence": 10,
+    "fit": 16,
+    "goal_fidelity": 12,
+    "reuse": 13,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T10:22:28.825361+00:00",
+  "total": 78
+}
