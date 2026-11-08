@@ -70,15 +70,7 @@ class _FixtureGraph:
 
     def query(self, cypher: str, **_params: object) -> list[dict[str, int]]:
         self.queries.append(cypher)
-        generate_clause = _generate_name_clause(cypher)
-        requires_dd_path = "FROM_DD_PATH" in generate_clause
-        skips_frozen_produced = "PRODUCED_NAME" in generate_clause
-        claimable = sum(
-            1
-            for source in self._sources
-            if (not requires_dd_path or source.has_dd_path)
-            and (not skips_frozen_produced or not source.frozen_produced)
-        )
+        claimable = _selects(_generate_name_clause(cypher), self._sources)
         row = dict.fromkeys(_POOLS, 0)
         row["generate_name"] = claimable
         row.update({f"{name}_done": 0 for name in _POOLS})
@@ -284,10 +276,19 @@ def _count_cypher(sources: list[_Source]) -> str:
     return graph.queries[-1]
 
 
-def _selects(cypher: str, sources: list[_Source]) -> int:
-    """Apply to a source list the restrictions the query names."""
-    requires_dd_path = "FROM_DD_PATH" in cypher
-    skips_frozen_produced = "PRODUCED_NAME" in cypher
+def _restrictions(clause: str) -> tuple[bool, bool]:
+    """The claim restrictions a generate_name subquery names: DD path, frozen."""
+    return "FROM_DD_PATH" in clause, "PRODUCED_NAME" in clause
+
+
+def _selects(clause: str, sources: list[_Source]) -> int:
+    """Apply to a source list the restrictions the clause names.
+
+    The graph double and the equality assertion both answer through this one
+    function, so a count and a selection cannot disagree about what a clause
+    restricts.
+    """
+    requires_dd_path, skips_frozen_produced = _restrictions(clause)
     return sum(
         1
         for source in sources

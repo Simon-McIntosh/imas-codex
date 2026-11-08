@@ -52,6 +52,9 @@ class BindingGraph(TransactionDouble):
         self.query.side_effect = self.answer
 
     def answer(self, cypher, **params):
+        # The shared double's own statement log; the base side effect is
+        # replaced here, so appending to ``calls`` keeps it the one record.
+        self.calls.append((cypher, params))
         if "AS outcome" in cypher:
             assert "[:HAS_SUCCESSOR]" in cypher
             rows = []
@@ -231,19 +234,6 @@ def test_finalizer_binds_successor_without_rewriting_its_metadata():
     graph.transaction.commit.assert_called_once()
 
 
-def _record_statements(graph):
-    """Capture every statement the production path sends, in order."""
-    statements: list[tuple[str, dict]] = []
-    original = graph.query.side_effect
-
-    def record(cypher, **params):
-        statements.append((cypher, params))
-        return original(cypher, **params)
-
-    graph.query.side_effect = record
-    return statements
-
-
 def _assignments(cypher: str, field: str) -> list[str]:
     import re
 
@@ -259,10 +249,10 @@ def test_binding_a_successor_leaves_its_stage_and_attempt_untouched():
     source's attempt count (which spends a retry the source did not make).
     """
     graph = BindingGraph([_successor()])
-    statements = _record_statements(graph)
 
     result, _services = _persist(graph)
 
+    statements = graph.calls
     assert result == [SOURCE]
     finalize = [
         (cypher, params)
