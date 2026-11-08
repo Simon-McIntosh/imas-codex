@@ -1,0 +1,748 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Source retry: five produced, yield and draft checks fail</title></head>
+<body>
+<section id="sib-second-pass-tail-record">
+<h2 id="sib-second-pass-tail-result">Five sources produced; cumulative yield and draft checks fail</h2>
+<p>The authorized run processed the 41 eligible sources. Five gained a name binding (two attached, three composed), 35 ended failed with reasons, and one moved to <code>vocab_gap</code>. Cumulative production is <strong>88 of 143</strong>, twelve below the 100-source floor. The four excluded structure sources remain unproduced; the denominator stays 143.</p>
+<table id="sib-second-pass-tail-results"><caption>Terminal measures</caption><thead><tr><th>Measure</th><th>Result</th></tr></thead><tbody>
+<tr><td>Before → after produced sources</td><td>83 → 88 / 143; 5 gained, 0 lost</td></tr>
+<tr><td>Selected source outcomes</td><td>2 attached, 3 composed, 35 failed, 1 vocab_gap</td></tr>
+<tr><td>Authorized exclusions</td><td>4 unpinned structure sources and 15 pre-existing vocab_gap sources; all 19 unchanged</td></tr>
+<tr><td>Export source-audit blocking set</td><td>0 before and 0 after</td></tr>
+<tr><td>Sourceless live drafts</td><td>3 → 5; invariant failed</td></tr>
+<tr><td>Failed sources with new claim receipts</td><td>31 / 35; four missing</td></tr>
+<tr><td>All selected sources with new claim receipts</td><td>34 / 41; seven missing</td></tr>
+<tr><td>New claim receipts</td><td>54: 2 produced, 18 refused, 20 released, 13 capped, 1 batch_failed</td></tr>
+<tr><td>Receipt run attribution</td><td>41 have null run_id; 13 capped receipts carry the focus scope id</td></tr>
+<tr><td>This run spend / authorized cap</td><td>USD 0.379417 / USD 48.51</td></tr>
+<tr><td>First pass + this run</td><td>USD 1.485545 + USD 0.379417 = USD 1.864962 / USD 50</td></tr>
+<tr><td>Runtime</td><td>1771.284 seconds in the pipeline; SLURM elapsed 00:29:43</td></tr>
+<tr><td>Terminal result</td><td>stop_reason=failed; runner EXIT=1; read-back measure EXIT=1</td></tr>
+</tbody></table>
+<p>The run did not reach its spend or time cap. It emptied the queues and finished outstanding calls, then refused successful completion after one counted <code>generate_name</code> pool error: <code>Connection error.</code> The log also records 18 exhausted <code>GrammarRetryResponse</code> validation sequences. The run therefore leaves USD 48.130583 of this node’s cap unused; more budget alone did not resolve these failures.</p>
+<h3 id="sib-second-pass-tail-identities">Produced source bindings</h3>
+<p>All five bound names read back at <code>name_stage=accepted</code>. Scores below are the stored name-review scores, including existing scores on reused identities.</p>
+<table id="sib-second-pass-tail-names"><thead><tr><th>Source</th><th>Name and description</th><th>Outcome</th><th>Score</th></tr></thead><tbody>
+<tr><td><code>dd:camera_ir/fibre_bundle/geometry/outline/x1</code></td><td><code>first_local_tangential_coordinate_of_fibre_bundle</code><br>Signed position of an individual optical fiber center along the first tangential axis of the fiber bundle&#x27;s local (X1, X2) frame.</td><td>attached</td><td>0.993750</td></tr>
+<tr><td><code>dd:edge_transport/model/flux_multiplier</code></td><td><code>heat_coefficient_due_to_convection</code><br>Dimensionless coefficient selecting the thermal energy carried by particle flux in the heat-flux convention of a plasma transport energy equation.</td><td>composed</td><td>0.883280</td></tr>
+<tr><td><code>dd:gyrokinetics_local/linear/wavevector/eigenmode/fields/a_field_parallel_perturbed_norm</code></td><td><code>normalized_perturbed_parallel_vector_potential_amplitude</code><br>Relative weight of the magnetic-vector-potential perturbation parallel to the equilibrium magnetic field in a linear gyrokinetic eigenmode, with normalization unspecified.</td><td>attached</td><td>0.946158</td></tr>
+<tr><td><code>dd:gyrokinetics_local/linear/wavevector/eigenmode/fields/b_field_parallel_perturbed_parity</code></td><td><code>parity_of_gyrokinetic_eigenmode_due_to_perturbed_parallel_magnetic_field</code><br>Even or odd reflection symmetry of the parallel magnetic-field perturbation about zero poloidal angle for a linear gyrokinetic eigenmode.</td><td>composed</td><td>0.942150</td></tr>
+<tr><td><code>dd:gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_gyrocenter/v_perpendicular_square_energy</code></td><td><code>normalized_perturbed_perpendicular_gyrocenter_energy_moment</code><br>Normalized fourth-order velocity moment of a perturbed gyrocenter distribution, weighted by perpendicular speed squared times total kinetic energy in a linear gyrokinetic eigenmode.</td><td>composed</td><td>0.899056</td></tr>
+</tbody></table>
+<h3 id="sib-second-pass-tail-guards">Writer refusals and source coverage</h3>
+<p>The rich-write refusal now stays per source: the log records <code>persist_generated_name_winners: released dd:camera_ir/fibre_bundle/geometry/x1_width after a rich-write refusal</code> for <code>first_local_tangential_width_of_fiber_bundle</code>, and the corresponding release for the spectrometer’s <code>x2_width</code> source and <code>second_local_tangential_width_of_fiber_bundle</code>. Other batches continued. However, the post-run source audit finds those two rejected spellings as new, never-bound live drafts:</p><ul>
+<li><code>first_local_tangential_width_of_fiber_bundle</code> — status <code>draft</code>, name stage <code>pending</code>, population <code>never_bound</code>, no recorded source ids.</li>
+<li><code>second_local_tangential_width_of_fiber_bundle</code> — status <code>draft</code>, name stage <code>pending</code>, population <code>never_bound</code>, no recorded source ids.</li>
+</ul>
+<p>The accepted <code>first_local_tangential_coordinate_of_fibre_bundle</code> describes a position along the first local axis. It is not an alternative spelling for the rejected width quantity: changing width to coordinate would change the meaning. Separately, the beamlet tangency-radius refusal explicitly contrasts <code>major_radius</code> with the intended <code>radial_coordinate_of_beamlet_group</code>: the source is a point’s radial coordinate, while the guard reserves major radius for its reference-radius and compound uses.</p>
+<p>The 35 failed sources divide into 18 pre-validation refusals, 13 attempt-cap outcomes, two rich-write refusals and two non-actionable vocabulary reports. Every one has a nonempty final reason. Four have no new claim-attempt receipt:</p><ul>
+<li><code>dd:camera_ir/fibre_bundle/fibre_radius</code> — non-actionable vocabulary gap: &#x27;radius&#x27; is already a registered physical_base token — it is not a vocabulary gap; use it directly.</li>
+<li><code>dd:camera_ir/fibre_bundle/geometry/x1_width</code> — rich standard-name write refused candidate &#x27;first_local_tangential_width_of_fiber_bundle&#x27;: the writer refused to mint this identity, so the source produced no name</li>
+<li><code>dd:gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_particle/v_parallel_energy_perpendicular</code> — non-actionable vocabulary gap: The quantity is a mixed velocity-space moment, the velocity-space integral of v_parallel * v_perpendicular^2 of the perturbed particle distribution, so it simultaneously needs a parallel projection axis and a perpendicular energy weighting. The grammar admits only one</li>
+<li><code>dd:spectrometer_visible/channel/fibre_bundle/geometry/x2_width</code> — rich standard-name write refused candidate &#x27;second_local_tangential_width_of_fiber_bundle&#x27;: the writer refused to mint this identity, so the source produced no name</li>
+</ul>
+<p>Two produced sources and the new vocabulary-gap source also have no new claim receipt. “New” here means receipt ids present after the run and absent in the saved before-reset census. The 41 null-run-id receipts cannot be joined directly to this SNRun; their source ids, timestamps and before/after membership are retained rather than silently assigning them a run id. The 13 capped receipts name focus scope <code>1da71ae9-33c3-4cca-8104-9f2f545b27c1</code>, distinct from the billing run.</p>
+<h3 id="sib-second-pass-tail-reset">Prerequisite, exact reset and run identity</h3>
+<p>The initial worker build attempt failed on the read-only main-checkout model file. The coordinator then ran <code>uv run --no-sync build-models --force</code> at <code>0efd4cf50</code> with exit 0, recorded in <a href="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T141648847743-sib-second-pass-tail/resume-1-advice.txt">the resume instruction</a>. The census independently imported main-checkout models and verified <code>StandardNameSourceClaimAttempt</code>. The original refusal remains in <a href="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T141648847743-sib-second-pass-tail/build-models.log">build-models.log</a>.</p>
+<p>The original runner’s selector found all 143 diagnosed cohort ids. The raw failed count was 52: 41 unbound plus 11 already name-bound and counted produced. The 41 eligible unbound sources passed the existing snapshot guard. After the explicit narrowing authorization, the sanctioned <code>retry_failed_sources</code> dry run reported 41 requested, 41 eligible and zero refused. Apply reset all 41 to extracted with 41 receipts. Verification matched each receipt’s prior status, attempt count and error, confirmed zero attempts and no claims, and found all 102 other cohort sources unchanged.</p>
+<p>The CLI dry run reported 41 focused DD paths and no graph writes. Apply ran from main <code>0efd4cf508efc8b9a738435fbf79acc3b0ef6d2d</code> as separate SLURM job <code>1308520</code> on <code>all_debug</code>, node <code>98dci4-clu-3141</code>. The command used <code>--focus cohort-sources.json --skip-global-maintenance -c 48.51 -t 55</code>; the job had a 59-minute bound. The log confirms 41 seeded sources and 31 bypassed global-maintenance actions, including vocabulary-gap retries.</p>
+<p>Billing run: <code>1d32882b-5417-47aa-972a-cfc9fa89a44f</code>. Focus scope: <code>1da71ae9-33c3-4cca-8104-9f2f545b27c1</code>. Exact <code>LLMCost.for_run</code> receipts agree with <code>SNRun.cost_spent</code>; the first pass is selected separately by <code>9192044a-3fa0-4592-95a8-cb3cf0977823</code>. The first-pass cost query finds 287 calls, providing a positive control for the accounting instrument.</p>
+<table id="sib-second-pass-tail-costs"><caption>Current-run cost receipts</caption><thead><tr><th>Phase</th><th>Calls</th><th>USD</th></tr></thead><tbody>
+<tr><td><code>generate_docs</code></td><td>3</td><td>0.246716</td></tr>
+<tr><td><code>generate_name</code></td><td>133</td><td>0.000000</td></tr>
+<tr><td><code>review_docs</code></td><td>8</td><td>0.132303</td></tr>
+<tr><td><code>review_name</code></td><td>3</td><td>0.000398</td></tr>
+</tbody></table>
+<p>The final read-back ran at main <code>f534f44fb3a3fac03ad0663b75b9f68cbcc21dc3</code>; there was no Standard Names product-source difference from the launch revision. The export check reuses <code>classify_sourceless_standard_names</code>, <code>find_sourceless_live_names</code>, <code>_SHIPPING_NAME_STAGES</code> and <code>_RELEASE_IDENTITY_HOLDS</code> with the export gate’s predicate. The before census saw 10 audit rows and three real sourceless drafts, so the zero shipping-blocker result is accompanied by a positive population control.</p>
+<h3 id="sib-second-pass-tail-exclusions">Authorized exclusions remain unchanged</h3>
+<p>The four structure sources are counted as not produced and were neither reset nor altered. The existing seed guard refused each with the exact reason below:</p><ul>
+<li><code>dd:ic_antennas/antenna/module/strap/geometry/oblique</code> — existing DD source &#x27;dd:ic_antennas/antenna/module/strap/geometry/oblique&#x27; has no provable immutable snapshot; run the provenance backfill report</li>
+<li><code>dd:ntms/time_slice/mode</code> — existing DD source &#x27;dd:ntms/time_slice/mode&#x27; has no provable immutable snapshot; run the provenance backfill report</li>
+<li><code>dd:plasma_transport/model</code> — existing DD source &#x27;dd:plasma_transport/model&#x27; has no provable immutable snapshot; run the provenance backfill report</li>
+<li><code>dd:plasma_transport/model/ggd</code> — existing DD source &#x27;dd:plasma_transport/model/ggd&#x27; has no provable immutable snapshot; run the provenance backfill report</li>
+</ul>
+<p>The 15 pre-existing vocabulary-gap sources also remained unchanged. One selected source newly entered <code>vocab_gap</code>: <code>dd:cryostat/description_2d/thermal_shield/unit/annular/outline_outer/r</code>, whose recorded reason identifies missing thermal-shield vocabulary. The preliminary census field <code>missing_pins</code> flagged six missing path/version fields; two sources were already snapshot-pinned at version 4.1.1 and passed the actual guard, leaving exactly the four exclusions above.</p>
+<h3 id="sib-second-pass-tail-per-source">Every selected source and its new receipts</h3>
+<p>Each entry preserves the final reason and all new <code>StandardNameSourceClaimAttempt</code> receipts found by before/after id difference. Empty receipt lists remain explicit.</p>
+<details id="sib-second-pass-tail-source-0"><summary><code>dd:camera_ir/fibre_bundle/fibre_radius</code> — failed, 0 new receipts</summary>
+<p>Attempt count: 3. Bindings: none.</p>
+<pre>non-actionable vocabulary gap: &#x27;radius&#x27; is already a registered physical_base token — it is not a vocabulary gap; use it directly.</pre>
+<pre>[]</pre></details>
+<details id="sib-second-pass-tail-source-1"><summary><code>dd:camera_ir/fibre_bundle/geometry/outline/x1</code> — attached, 1 new receipts</summary>
+<p>Attempt count: 1. Bindings: <code>first_local_tangential_coordinate_of_fibre_bundle</code>.</p>
+<pre>[
+  {
+    &quot;attempt&quot;: 1,
+    &quot;id&quot;: &quot;claim-attempt:dd:camera_ir/fibre_bundle/geometry/outline/x1:9:produced&quot;,
+    &quot;outcome&quot;: &quot;produced&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T14:52:06.941000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:camera_ir/fibre_bundle/geometry/outline/x1&quot;
+  }
+]</pre></details>
+<details id="sib-second-pass-tail-source-2"><summary><code>dd:camera_ir/fibre_bundle/geometry/x1_width</code> — failed, 0 new receipts</summary>
+<p>Attempt count: 5. Bindings: none.</p>
+<pre>rich standard-name write refused candidate &#x27;first_local_tangential_width_of_fiber_bundle&#x27;: the writer refused to mint this identity, so the source produced no name</pre>
+<pre>[]</pre></details>
+<details id="sib-second-pass-tail-source-3"><summary><code>dd:camera_visible/channel/fibre_bundle/geometry/surface</code> — failed, 1 new receipts</summary>
+<p>Attempt count: 5. Bindings: none.</p>
+<pre>compose claim-attempt cap reached</pre>
+<pre>[
+  {
+    &quot;attempt&quot;: 5,
+    &quot;batch_key&quot;: &quot;focus&quot;,
+    &quot;id&quot;: &quot;claim-attempt:dd:camera_visible/channel/fibre_bundle/geometry/surface:15:capped&quot;,
+    &quot;outcome&quot;: &quot;capped&quot;,
+    &quot;reason&quot;: &quot;compose claim-attempt cap reached&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T15:10:48.012000000+00:00&quot;,
+    &quot;run_id&quot;: &quot;1da71ae9-33c3-4cca-8104-9f2f545b27c1&quot;,
+    &quot;source_id&quot;: &quot;dd:camera_visible/channel/fibre_bundle/geometry/surface&quot;
+  }
+]</pre></details>
+<details id="sib-second-pass-tail-source-4"><summary><code>dd:camera_visible/channel/fibre_bundle/geometry/x2_width</code> — failed, 1 new receipts</summary>
+<p>Attempt count: 5. Bindings: none.</p>
+<pre>compose claim-attempt cap reached</pre>
+<pre>[
+  {
+    &quot;attempt&quot;: 5,
+    &quot;batch_key&quot;: &quot;focus&quot;,
+    &quot;id&quot;: &quot;claim-attempt:dd:camera_visible/channel/fibre_bundle/geometry/x2_width:15:capped&quot;,
+    &quot;outcome&quot;: &quot;capped&quot;,
+    &quot;reason&quot;: &quot;compose claim-attempt cap reached&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T15:13:18.777000000+00:00&quot;,
+    &quot;run_id&quot;: &quot;1da71ae9-33c3-4cca-8104-9f2f545b27c1&quot;,
+    &quot;source_id&quot;: &quot;dd:camera_visible/channel/fibre_bundle/geometry/x2_width&quot;
+  }
+]</pre></details>
+<details id="sib-second-pass-tail-source-5"><summary><code>dd:core_transport/model/flux_multiplier</code> — failed, 2 new receipts</summary>
+<p>Attempt count: 2. Bindings: none.</p>
+<pre>candidate pre-validation failed (grammar validation: name is not canonical: flat segment order renders as &#x27;heat_convected_coefficient&#x27;): coefficient</pre>
+<pre>[
+  {
+    &quot;attempt&quot;: 2,
+    &quot;id&quot;: &quot;claim-attempt:dd:core_transport/model/flux_multiplier:12:refused&quot;,
+    &quot;outcome&quot;: &quot;refused&quot;,
+    &quot;reason&quot;: &quot;candidate pre-validation failed (grammar validation: name is not canonical: flat segment order renders as &#x27;heat_convected_coefficient&#x27;): coefficient&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T14:58:11.769000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:core_transport/model/flux_multiplier&quot;
+  },
+  {
+    &quot;attempt&quot;: 1,
+    &quot;id&quot;: &quot;claim-attempt:dd:core_transport/model/flux_multiplier:11:released&quot;,
+    &quot;outcome&quot;: &quot;released&quot;,
+    &quot;reason&quot;: &quot;standard-name binding collision: candidate \&quot;convected_heat_flux_coefficient\&quot; unit \&quot;&lt;unset&gt;\&quot; is not bindable&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T14:50:54.568000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:core_transport/model/flux_multiplier&quot;
+  }
+]</pre></details>
+<details id="sib-second-pass-tail-source-6"><summary><code>dd:cryostat/description_2d/thermal_shield/unit/annular/outline_outer/r</code> — vocab_gap, 0 new receipts</summary>
+<p>Attempt count: 1. Bindings: none.</p>
+<pre>missing geometry vocabulary token &#x27;thermal_shield&#x27;: The quantity is the radial (R) outline coordinate of the OUTER contour of the cryostat THERMAL SHIELD annular unit. The outline carrier (`outline`, projection `radial`) and the `outer` variant are expressible, but the owning structure — the cryostat thermal shield — has no registered device/geometry locus token (only `cryostat`, `vacuum_vessel`, `breeder_blanket_*`, etc. exist). Substituting `cryostat` would collapse the thermal-shield contour onto the cryostat&#x27;s own outline, erasing the carrier, which is the silent semantic-error case; no combination of registered qualifiers expresses `thermal_shield`.</pre>
+<pre>[]</pre></details>
+<details id="sib-second-pass-tail-source-7"><summary><code>dd:ece/channel/delta_position_suprathermal/r</code> — failed, 1 new receipts</summary>
+<p>Attempt count: 2. Bindings: none.</p>
+<pre>candidate pre-validation failed (grammar validation: 1 validation error for StandardName
+geometric_base
+  Input should be &#x27;centroid&#x27;, &#x27;normalized_minor_radius&#x27;, &#x27;normalized_toroidal_flux_coordinate&#x27;, &#x27;offset&#x27;, &#x27;position&#x27;, &#x27;radial_coordinate&#x27;, &#x27;toroidal_flux_coordinate&#x27;, &#x27;contour&#x27;, &#x27;cross_section&#x27;, &#x27;coordinate&#x27;, &#x27;displacement&#x27;, &#x27;extent&#x27;, &#x27;normalized_poloidal_flux_coordinate&#x27;, &#x27;poloidal_magnetic_flux_coordinate&#x27;, &#x27;outline&#x27;, &#x27;sensor_normal&#x27;, &#x27;surface_normal&#x27;, &#x27;tangent_vector&#x27;, &#x27;trajectory&#x27;, &#x27;unit_vector&#x27;, &#x27;vertex&#x27;, &#x27;first_local_tangential_coordinate&#x27;, &#x27;second_local_tangential_coordinate&#x27;, &#x27;first_local_tangential_unit_vector&#x27;, &#x27;second_local_tangential_unit_vector&#x27;, &#x27;poloidal_angle&#x27;, &#x27;toroidal_angle&#x27;, &#x27;normal_coordinate&#x27;, &#x27;binormal_coordinate&#x27;, &#x27;direction_unit_vector&#x27;, &#x27;image_up_unit_vector&#x27;, &#x27;major_axis_unit_vector&#x27;, &#x27;minor_axis_unit_vector&#x27;, &#x27;first_measurement_direction_unit_vector&#x27; or &#x27;second_measurement_direction_unit_vector&#x27; [type=enum, input_value=&#x27;suprathermal_electron_displacement&#x27;, input_type=str]
+    For further information visit <a href="https://errors.pydantic.dev/2.12/v/enum">Pydantic validation detail</a>): displacement</pre>
+<pre>[
+  {
+    &quot;attempt&quot;: 2,
+    &quot;id&quot;: &quot;claim-attempt:dd:ece/channel/delta_position_suprathermal/r:8:refused&quot;,
+    &quot;outcome&quot;: &quot;refused&quot;,
+    &quot;reason&quot;: &quot;candidate pre-validation failed (grammar validation: 1 validation error for StandardName\ngeometric_base\n  Input should be &#x27;centroid&#x27;, &#x27;normalized_minor_radius&#x27;, &#x27;normalized_toroidal_flux_coordinate&#x27;, &#x27;offset&#x27;, &#x27;position&#x27;, &#x27;radial_coordinate&#x27;, &#x27;toroidal_flux_coordinate&#x27;, &#x27;contour&#x27;, &#x27;cross_section&#x27;, &#x27;coordinate&#x27;, &#x27;displacement&#x27;, &#x27;extent&#x27;, &#x27;normalized_poloidal_flux_coordinate&#x27;, &#x27;poloidal_magnetic_flux_coordinate&#x27;, &#x27;outline&#x27;, &#x27;sensor_normal&#x27;, &#x27;surface_normal&#x27;, &#x27;tangent_vector&#x27;, &#x27;trajectory&#x27;, &#x27;unit_vector&#x27;, &#x27;vertex&#x27;, &#x27;first_local_tangential_coordinate&#x27;, &#x27;second_local_tangential_coordinate&#x27;, &#x27;first_local_tangential_unit_vector&#x27;, &#x27;second_local_tangential_unit_vector&#x27;, &#x27;poloidal_angle&#x27;, &#x27;toroidal_angle&#x27;, &#x27;normal_coordinate&#x27;, &#x27;binormal_coordinate&#x27;, &#x27;direction_unit_vector&#x27;, &#x27;image_up_unit_vector&#x27;, &#x27;major_axis_unit_vector&#x27;, &#x27;minor_axis_unit_vector&#x27;, &#x27;first_measurement_direction_unit_vector&#x27; or &#x27;second_measurement_direction_unit_vector&#x27; [type=enum, input_value=&#x27;suprathermal_electron_displacement&#x27;, input_type=str]\n    For further information visit <a href="https://errors.pydantic.dev/2.12/v/enum">Pydantic validation detail</a>): displacement&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T15:00:11.688000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:ece/channel/delta_position_suprathermal/r&quot;
+  }
+]</pre></details>
+<details id="sib-second-pass-tail-source-8"><summary><code>dd:edge_profiles/ggd/neutral/velocity/toroidal</code> — failed, 1 new receipts</summary>
+<p>Attempt count: 5. Bindings: none.</p>
+<pre>compose claim-attempt cap reached</pre>
+<pre>[
+  {
+    &quot;attempt&quot;: 5,
+    &quot;batch_key&quot;: &quot;focus&quot;,
+    &quot;id&quot;: &quot;claim-attempt:dd:edge_profiles/ggd/neutral/velocity/toroidal:15:capped&quot;,
+    &quot;outcome&quot;: &quot;capped&quot;,
+    &quot;reason&quot;: &quot;compose claim-attempt cap reached&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T15:10:48.012000000+00:00&quot;,
+    &quot;run_id&quot;: &quot;1da71ae9-33c3-4cca-8104-9f2f545b27c1&quot;,
+    &quot;source_id&quot;: &quot;dd:edge_profiles/ggd/neutral/velocity/toroidal&quot;
+  }
+]</pre></details>
+<details id="sib-second-pass-tail-source-9"><summary><code>dd:edge_transport/model/flux_multiplier</code> — composed, 1 new receipts</summary>
+<p>Attempt count: 3. Bindings: <code>heat_coefficient_due_to_convection</code>.</p>
+<pre>[
+  {
+    &quot;attempt&quot;: 1,
+    &quot;id&quot;: &quot;claim-attempt:dd:edge_transport/model/flux_multiplier:11:released&quot;,
+    &quot;outcome&quot;: &quot;released&quot;,
+    &quot;reason&quot;: &quot;standard-name binding collision: candidate \&quot;convected_heat_flux_coefficient\&quot; unit \&quot;&lt;unset&gt;\&quot; is not bindable&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T14:51:22.255000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:edge_transport/model/flux_multiplier&quot;
+  }
+]</pre></details>
+<details id="sib-second-pass-tail-source-10"><summary><code>dd:equilibrium/time_slice/constraints/strike_point/position_reconstructed/r</code> — failed, 5 new receipts</summary>
+<p>Attempt count: 5. Bindings: none.</p>
+<pre>compose claim-attempt cap reached; last refusal: standard-name attachment rejected: candidate &quot;radial_coordinate_of_strike_point&quot; distinct-vector conflict: path &#x27;equilibrium/time_slice/constraints/strike_point/position_reconstructed/r&#x27; and already-sourced &#x27;equilibrium/time_slice/constraints/strike_point/position_measured/r&#x27; are the same axis leaf of DIFFERENT vector fields of one device node — SN &#x27;radial_coordinate_of_strike_point&#x27; must not carry both at composition attempt 4</pre>
+<pre>[
+  {
+    &quot;attempt&quot;: 5,
+    &quot;batch_key&quot;: &quot;focus&quot;,
+    &quot;id&quot;: &quot;claim-attempt:dd:equilibrium/time_slice/constraints/strike_point/position_reconstructed/r:15:capped&quot;,
+    &quot;outcome&quot;: &quot;capped&quot;,
+    &quot;reason&quot;: &quot;compose claim-attempt cap reached; last refusal: standard-name attachment rejected: candidate \&quot;radial_coordinate_of_strike_point\&quot; distinct-vector conflict: path &#x27;equilibrium/time_slice/constraints/strike_point/position_reconstructed/r&#x27; and already-sourced &#x27;equilibrium/time_slice/constraints/strike_point/position_measured/r&#x27; are the same axis leaf of DIFFERENT vector fields of one device node \u2014 SN &#x27;radial_coordinate_of_strike_point&#x27; must not carry both at composition attempt 4&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T14:57:44.724000000+00:00&quot;,
+    &quot;run_id&quot;: &quot;1da71ae9-33c3-4cca-8104-9f2f545b27c1&quot;,
+    &quot;source_id&quot;: &quot;dd:equilibrium/time_slice/constraints/strike_point/position_reconstructed/r&quot;
+  },
+  {
+    &quot;attempt&quot;: 4,
+    &quot;id&quot;: &quot;claim-attempt:dd:equilibrium/time_slice/constraints/strike_point/position_reconstructed/r:14:released&quot;,
+    &quot;outcome&quot;: &quot;released&quot;,
+    &quot;reason&quot;: &quot;standard-name attachment rejected: candidate \&quot;radial_coordinate_of_strike_point\&quot; distinct-vector conflict: path &#x27;equilibrium/time_slice/constraints/strike_point/position_reconstructed/r&#x27; and already-sourced &#x27;equilibrium/time_slice/constraints/strike_point/position_measured/r&#x27; are the same axis leaf of DIFFERENT vector fields of one device node \u2014 SN &#x27;radial_coordinate_of_strike_point&#x27; must not carry both&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T14:57:24.287000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:equilibrium/time_slice/constraints/strike_point/position_reconstructed/r&quot;
+  },
+  {
+    &quot;attempt&quot;: 3,
+    &quot;id&quot;: &quot;claim-attempt:dd:equilibrium/time_slice/constraints/strike_point/position_reconstructed/r:13:released&quot;,
+    &quot;outcome&quot;: &quot;released&quot;,
+    &quot;reason&quot;: &quot;standard-name attachment rejected: candidate \&quot;radial_coordinate_of_strike_point\&quot; distinct-vector conflict: path &#x27;equilibrium/time_slice/constraints/strike_point/position_reconstructed/r&#x27; and already-sourced &#x27;equilibrium/time_slice/constraints/strike_point/position_measured/r&#x27; are the same axis leaf of DIFFERENT vector fields of one device node \u2014 SN &#x27;radial_coordinate_of_strike_point&#x27; must not carry both&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T14:55:41.883000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:equilibrium/time_slice/constraints/strike_point/position_reconstructed/r&quot;
+  },
+  {
+    &quot;attempt&quot;: 2,
+    &quot;id&quot;: &quot;claim-attempt:dd:equilibrium/time_slice/constraints/strike_point/position_reconstructed/r:12:released&quot;,
+    &quot;outcome&quot;: &quot;released&quot;,
+    &quot;reason&quot;: &quot;standard-name attachment rejected: candidate \&quot;radial_coordinate_of_strike_point\&quot; distinct-vector conflict: path &#x27;equilibrium/time_slice/constraints/strike_point/position_reconstructed/r&#x27; and already-sourced &#x27;equilibrium/time_slice/constraints/strike_point/position_measured/r&#x27; are the same axis leaf of DIFFERENT vector fields of one device node \u2014 SN &#x27;radial_coordinate_of_strike_point&#x27; must not carry both&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T14:54:56.214000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:equilibrium/time_slice/constraints/strike_point/position_reconstructed/r&quot;
+  },
+  {
+    &quot;attempt&quot;: 1,
+    &quot;id&quot;: &quot;claim-attempt:dd:equilibrium/time_slice/constraints/strike_point/position_reconstructed/r:11:released&quot;,
+    &quot;outcome&quot;: &quot;released&quot;,
+    &quot;reason&quot;: &quot;standard-name attachment rejected: candidate \&quot;radial_coordinate_of_strike_point\&quot; distinct-vector conflict: path &#x27;equilibrium/time_slice/constraints/strike_point/position_reconstructed/r&#x27; and already-sourced &#x27;equilibrium/time_slice/constraints/strike_point/position_measured/r&#x27; are the same axis leaf of DIFFERENT vector fields of one device node \u2014 SN &#x27;radial_coordinate_of_strike_point&#x27; must not carry both&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T14:52:00.533000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:equilibrium/time_slice/constraints/strike_point/position_reconstructed/r&quot;
+  }
+]</pre></details>
+<details id="sib-second-pass-tail-source-11"><summary><code>dd:equilibrium/time_slice/constraints/x_point/position_reconstructed/r</code> — failed, 5 new receipts</summary>
+<p>Attempt count: 5. Bindings: none.</p>
+<pre>compose claim-attempt cap reached; last refusal: standard-name attachment rejected: candidate &quot;radial_coordinate_of_x_point&quot; distinct-vector conflict: path &#x27;equilibrium/time_slice/constraints/x_point/position_reconstructed/r&#x27; and already-sourced &#x27;equilibrium/time_slice/constraints/x_point/position_measured/r&#x27; are the same axis leaf of DIFFERENT vector fields of one device node — SN &#x27;radial_coordinate_of_x_point&#x27; must not carry both at composition attempt 4</pre>
+<pre>[
+  {
+    &quot;attempt&quot;: 5,
+    &quot;batch_key&quot;: &quot;focus&quot;,
+    &quot;id&quot;: &quot;claim-attempt:dd:equilibrium/time_slice/constraints/x_point/position_reconstructed/r:15:capped&quot;,
+    &quot;outcome&quot;: &quot;capped&quot;,
+    &quot;reason&quot;: &quot;compose claim-attempt cap reached; last refusal: standard-name attachment rejected: candidate \&quot;radial_coordinate_of_x_point\&quot; distinct-vector conflict: path &#x27;equilibrium/time_slice/constraints/x_point/position_reconstructed/r&#x27; and already-sourced &#x27;equilibrium/time_slice/constraints/x_point/position_measured/r&#x27; are the same axis leaf of DIFFERENT vector fields of one device node \u2014 SN &#x27;radial_coordinate_of_x_point&#x27; must not carry both at composition attempt 4&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T14:57:44.724000000+00:00&quot;,
+    &quot;run_id&quot;: &quot;1da71ae9-33c3-4cca-8104-9f2f545b27c1&quot;,
+    &quot;source_id&quot;: &quot;dd:equilibrium/time_slice/constraints/x_point/position_reconstructed/r&quot;
+  },
+  {
+    &quot;attempt&quot;: 4,
+    &quot;id&quot;: &quot;claim-attempt:dd:equilibrium/time_slice/constraints/x_point/position_reconstructed/r:14:released&quot;,
+    &quot;outcome&quot;: &quot;released&quot;,
+    &quot;reason&quot;: &quot;standard-name attachment rejected: candidate \&quot;radial_coordinate_of_x_point\&quot; distinct-vector conflict: path &#x27;equilibrium/time_slice/constraints/x_point/position_reconstructed/r&#x27; and already-sourced &#x27;equilibrium/time_slice/constraints/x_point/position_measured/r&#x27; are the same axis leaf of DIFFERENT vector fields of one device node \u2014 SN &#x27;radial_coordinate_of_x_point&#x27; must not carry both&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T14:57:24.287000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:equilibrium/time_slice/constraints/x_point/position_reconstructed/r&quot;
+  },
+  {
+    &quot;attempt&quot;: 3,
+    &quot;id&quot;: &quot;claim-attempt:dd:equilibrium/time_slice/constraints/x_point/position_reconstructed/r:13:released&quot;,
+    &quot;outcome&quot;: &quot;released&quot;,
+    &quot;reason&quot;: &quot;standard-name attachment rejected: candidate \&quot;radial_coordinate_of_x_point\&quot; distinct-vector conflict: path &#x27;equilibrium/time_slice/constraints/x_point/position_reconstructed/r&#x27; and already-sourced &#x27;equilibrium/time_slice/constraints/x_point/position_measured/r&#x27; are the same axis leaf of DIFFERENT vector fields of one device node \u2014 SN &#x27;radial_coordinate_of_x_point&#x27; must not carry both&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T14:55:41.883000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:equilibrium/time_slice/constraints/x_point/position_reconstructed/r&quot;
+  },
+  {
+    &quot;attempt&quot;: 2,
+    &quot;id&quot;: &quot;claim-attempt:dd:equilibrium/time_slice/constraints/x_point/position_reconstructed/r:12:released&quot;,
+    &quot;outcome&quot;: &quot;released&quot;,
+    &quot;reason&quot;: &quot;standard-name attachment rejected: candidate \&quot;radial_coordinate_of_x_point\&quot; distinct-vector conflict: path &#x27;equilibrium/time_slice/constraints/x_point/position_reconstructed/r&#x27; and already-sourced &#x27;equilibrium/time_slice/constraints/x_point/position_measured/r&#x27; are the same axis leaf of DIFFERENT vector fields of one device node \u2014 SN &#x27;radial_coordinate_of_x_point&#x27; must not carry both&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T14:54:56.214000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:equilibrium/time_slice/constraints/x_point/position_reconstructed/r&quot;
+  },
+  {
+    &quot;attempt&quot;: 1,
+    &quot;id&quot;: &quot;claim-attempt:dd:equilibrium/time_slice/constraints/x_point/position_reconstructed/r:11:released&quot;,
+    &quot;outcome&quot;: &quot;released&quot;,
+    &quot;reason&quot;: &quot;standard-name attachment rejected: candidate \&quot;radial_coordinate_of_x_point\&quot; distinct-vector conflict: path &#x27;equilibrium/time_slice/constraints/x_point/position_reconstructed/r&#x27; and already-sourced &#x27;equilibrium/time_slice/constraints/x_point/position_measured/r&#x27; are the same axis leaf of DIFFERENT vector fields of one device node \u2014 SN &#x27;radial_coordinate_of_x_point&#x27; must not carry both&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T14:52:00.533000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:equilibrium/time_slice/constraints/x_point/position_reconstructed/r&quot;
+  }
+]</pre></details>
+<details id="sib-second-pass-tail-source-12"><summary><code>dd:equilibrium/time_slice/constraints/x_point/position_reconstructed/z</code> — failed, 5 new receipts</summary>
+<p>Attempt count: 5. Bindings: none.</p>
+<pre>compose claim-attempt cap reached; last refusal: standard-name attachment rejected: candidate &quot;vertical_coordinate_of_x_point&quot; distinct-vector conflict: path &#x27;equilibrium/time_slice/constraints/x_point/position_reconstructed/z&#x27; and already-sourced &#x27;equilibrium/time_slice/constraints/x_point/position_measured/z&#x27; are the same axis leaf of DIFFERENT vector fields of one device node — SN &#x27;vertical_coordinate_of_x_point&#x27; must not carry both at composition attempt 4</pre>
+<pre>[
+  {
+    &quot;attempt&quot;: 5,
+    &quot;batch_key&quot;: &quot;focus&quot;,
+    &quot;id&quot;: &quot;claim-attempt:dd:equilibrium/time_slice/constraints/x_point/position_reconstructed/z:15:capped&quot;,
+    &quot;outcome&quot;: &quot;capped&quot;,
+    &quot;reason&quot;: &quot;compose claim-attempt cap reached; last refusal: standard-name attachment rejected: candidate \&quot;vertical_coordinate_of_x_point\&quot; distinct-vector conflict: path &#x27;equilibrium/time_slice/constraints/x_point/position_reconstructed/z&#x27; and already-sourced &#x27;equilibrium/time_slice/constraints/x_point/position_measured/z&#x27; are the same axis leaf of DIFFERENT vector fields of one device node \u2014 SN &#x27;vertical_coordinate_of_x_point&#x27; must not carry both at composition attempt 4&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T14:57:44.724000000+00:00&quot;,
+    &quot;run_id&quot;: &quot;1da71ae9-33c3-4cca-8104-9f2f545b27c1&quot;,
+    &quot;source_id&quot;: &quot;dd:equilibrium/time_slice/constraints/x_point/position_reconstructed/z&quot;
+  },
+  {
+    &quot;attempt&quot;: 4,
+    &quot;id&quot;: &quot;claim-attempt:dd:equilibrium/time_slice/constraints/x_point/position_reconstructed/z:14:released&quot;,
+    &quot;outcome&quot;: &quot;released&quot;,
+    &quot;reason&quot;: &quot;standard-name attachment rejected: candidate \&quot;vertical_coordinate_of_x_point\&quot; distinct-vector conflict: path &#x27;equilibrium/time_slice/constraints/x_point/position_reconstructed/z&#x27; and already-sourced &#x27;equilibrium/time_slice/constraints/x_point/position_measured/z&#x27; are the same axis leaf of DIFFERENT vector fields of one device node \u2014 SN &#x27;vertical_coordinate_of_x_point&#x27; must not carry both&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T14:57:24.287000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:equilibrium/time_slice/constraints/x_point/position_reconstructed/z&quot;
+  },
+  {
+    &quot;attempt&quot;: 3,
+    &quot;id&quot;: &quot;claim-attempt:dd:equilibrium/time_slice/constraints/x_point/position_reconstructed/z:13:released&quot;,
+    &quot;outcome&quot;: &quot;released&quot;,
+    &quot;reason&quot;: &quot;standard-name attachment rejected: candidate \&quot;vertical_coordinate_of_x_point\&quot; distinct-vector conflict: path &#x27;equilibrium/time_slice/constraints/x_point/position_reconstructed/z&#x27; and already-sourced &#x27;equilibrium/time_slice/constraints/x_point/position_measured/z&#x27; are the same axis leaf of DIFFERENT vector fields of one device node \u2014 SN &#x27;vertical_coordinate_of_x_point&#x27; must not carry both&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T14:55:41.883000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:equilibrium/time_slice/constraints/x_point/position_reconstructed/z&quot;
+  },
+  {
+    &quot;attempt&quot;: 2,
+    &quot;id&quot;: &quot;claim-attempt:dd:equilibrium/time_slice/constraints/x_point/position_reconstructed/z:12:released&quot;,
+    &quot;outcome&quot;: &quot;released&quot;,
+    &quot;reason&quot;: &quot;standard-name attachment rejected: candidate \&quot;vertical_coordinate_of_x_point\&quot; distinct-vector conflict: path &#x27;equilibrium/time_slice/constraints/x_point/position_reconstructed/z&#x27; and already-sourced &#x27;equilibrium/time_slice/constraints/x_point/position_measured/z&#x27; are the same axis leaf of DIFFERENT vector fields of one device node \u2014 SN &#x27;vertical_coordinate_of_x_point&#x27; must not carry both&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T14:54:56.214000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:equilibrium/time_slice/constraints/x_point/position_reconstructed/z&quot;
+  },
+  {
+    &quot;attempt&quot;: 1,
+    &quot;id&quot;: &quot;claim-attempt:dd:equilibrium/time_slice/constraints/x_point/position_reconstructed/z:11:released&quot;,
+    &quot;outcome&quot;: &quot;released&quot;,
+    &quot;reason&quot;: &quot;standard-name attachment rejected: candidate \&quot;vertical_coordinate_of_x_point\&quot; distinct-vector conflict: path &#x27;equilibrium/time_slice/constraints/x_point/position_reconstructed/z&#x27; and already-sourced &#x27;equilibrium/time_slice/constraints/x_point/position_measured/z&#x27; are the same axis leaf of DIFFERENT vector fields of one device node \u2014 SN &#x27;vertical_coordinate_of_x_point&#x27; must not carry both&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T14:52:00.533000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:equilibrium/time_slice/constraints/x_point/position_reconstructed/z&quot;
+  }
+]</pre></details>
+<details id="sib-second-pass-tail-source-13"><summary><code>dd:gyrokinetics_local/flux_surface/dgeometric_axis_r_dr_minor</code> — failed, 1 new receipts</summary>
+<p>Attempt count: 5. Bindings: none.</p>
+<pre>compose claim-attempt cap reached; last refusal: non-actionable vocabulary gap: The source quantity is dR_geo/dr_minor: the radial (major-radius) coordinate of the flux-surface geometric axis differentiated with respect to the minor radius. The coordinate cannot be named `major_radius_of_geometric_axis` because a positional locus is rejected on th</pre>
+<pre>[
+  {
+    &quot;attempt&quot;: 5,
+    &quot;batch_key&quot;: &quot;focus&quot;,
+    &quot;id&quot;: &quot;claim-attempt:dd:gyrokinetics_local/flux_surface/dgeometric_axis_r_dr_minor:11:capped&quot;,
+    &quot;outcome&quot;: &quot;capped&quot;,
+    &quot;reason&quot;: &quot;compose claim-attempt cap reached; last refusal: non-actionable vocabulary gap: The source quantity is dR_geo/dr_minor: the radial (major-radius) coordinate of the flux-surface geometric axis differentiated with respect to the minor radius. The coordinate cannot be named `major_radius_of_geometric_axis` because a positional locus is rejected on th&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T15:09:17.797000000+00:00&quot;,
+    &quot;run_id&quot;: &quot;1da71ae9-33c3-4cca-8104-9f2f545b27c1&quot;,
+    &quot;source_id&quot;: &quot;dd:gyrokinetics_local/flux_surface/dgeometric_axis_r_dr_minor&quot;
+  }
+]</pre></details>
+<details id="sib-second-pass-tail-source-14"><summary><code>dd:gyrokinetics_local/flux_surface/pressure_gradient_norm</code> — failed, 1 new receipts</summary>
+<p>Attempt count: 4. Bindings: none.</p>
+<pre>candidate pre-validation failed (grammar validation: 1 validation error for StandardName
+  Value error, Generic physical_base &#x27;pressure&#x27; requires qualification. Generic terms like &#x27;pressure&#x27; are ambiguous without context. Add a qualifying segment: subject (e.g., electron_), device (e.g., flux_loop_), object (e.g., of_flux_loop), position (e.g., at_magnetic_axis), geometry (e.g., of_plasma_boundary), region (e.g., over_halo_region), or path (e.g., along_line_of_sight). [type=value_error, input_value={&#x27;physical_base&#x27;: &#x27;pressure&#x27;}, input_type=dict]
+    For further information visit <a href="https://errors.pydantic.dev/2.12/v/value_error">Pydantic validation detail</a>): pressure</pre>
+<pre>[
+  {
+    &quot;attempt&quot;: 4,
+    &quot;id&quot;: &quot;claim-attempt:dd:gyrokinetics_local/flux_surface/pressure_gradient_norm:10:refused&quot;,
+    &quot;outcome&quot;: &quot;refused&quot;,
+    &quot;reason&quot;: &quot;candidate pre-validation failed (grammar validation: 1 validation error for StandardName\n  Value error, Generic physical_base &#x27;pressure&#x27; requires qualification. Generic terms like &#x27;pressure&#x27; are ambiguous without context. Add a qualifying segment: subject (e.g., electron_), device (e.g., flux_loop_), object (e.g., of_flux_loop), position (e.g., at_magnetic_axis), geometry (e.g., of_plasma_boundary), region (e.g., over_halo_region), or path (e.g., along_line_of_sight). [type=value_error, input_value={&#x27;physical_base&#x27;: &#x27;pressure&#x27;}, input_type=dict]\n    For further information visit <a href="https://errors.pydantic.dev/2.12/v/value_error">Pydantic validation detail</a>): pressure&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T15:09:01.096000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:gyrokinetics_local/flux_surface/pressure_gradient_norm&quot;
+  }
+]</pre></details>
+<details id="sib-second-pass-tail-source-15"><summary><code>dd:gyrokinetics_local/linear/wavevector/eigenmode/fields/a_field_parallel_perturbed_norm</code> — attached, 1 new receipts</summary>
+<p>Attempt count: 2. Bindings: <code>normalized_perturbed_parallel_vector_potential_amplitude</code>.</p>
+<pre>[
+  {
+    &quot;attempt&quot;: 2,
+    &quot;id&quot;: &quot;claim-attempt:dd:gyrokinetics_local/linear/wavevector/eigenmode/fields/a_field_parallel_perturbed_norm:9:produced&quot;,
+    &quot;outcome&quot;: &quot;produced&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T15:00:11.880000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:gyrokinetics_local/linear/wavevector/eigenmode/fields/a_field_parallel_perturbed_norm&quot;
+  }
+]</pre></details>
+<details id="sib-second-pass-tail-source-16"><summary><code>dd:gyrokinetics_local/linear/wavevector/eigenmode/fields/b_field_parallel_perturbed_parity</code> — composed, 0 new receipts</summary>
+<p>Attempt count: 1. Bindings: <code>parity_of_gyrokinetic_eigenmode_due_to_perturbed_parallel_magnetic_field</code>.</p>
+<pre>[]</pre></details>
+<details id="sib-second-pass-tail-source-17"><summary><code>dd:gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_gyrocenter/heat_flux_parallel</code> — failed, 1 new receipts</summary>
+<p>Attempt count: 2. Bindings: none.</p>
+<pre>candidate pre-validation failed (grammar validation: ISN rejected operator chain normalized -&gt; perturbed: name &#x27;parallel_normalized_gyrocenter_heat_perturbed_flux&#x27; round-trips textually but changes the semantic IR. Reorder the outer-to-inner operators or correct their operands.): flux</pre>
+<pre>[
+  {
+    &quot;attempt&quot;: 2,
+    &quot;id&quot;: &quot;claim-attempt:dd:gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_gyrocenter/heat_flux_parallel:9:refused&quot;,
+    &quot;outcome&quot;: &quot;refused&quot;,
+    &quot;reason&quot;: &quot;candidate pre-validation failed (grammar validation: ISN rejected operator chain normalized -&gt; perturbed: name &#x27;parallel_normalized_gyrocenter_heat_perturbed_flux&#x27; round-trips textually but changes the semantic IR. Reorder the outer-to-inner operators or correct their operands.): flux&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T15:04:42.549000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_gyrocenter/heat_flux_parallel&quot;
+  }
+]</pre></details>
+<details id="sib-second-pass-tail-source-18"><summary><code>dd:gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_gyrocenter/pressure</code> — failed, 1 new receipts</summary>
+<p>Attempt count: 2. Bindings: none.</p>
+<pre>candidate pre-validation failed (grammar validation: 1 validation error for StandardName
+  Value error, Generic physical_base &#x27;pressure&#x27; requires qualification. Generic terms like &#x27;pressure&#x27; are ambiguous without context. Add a qualifying segment: subject (e.g., electron_), device (e.g., flux_loop_), object (e.g., of_flux_loop), position (e.g., at_magnetic_axis), geometry (e.g., of_plasma_boundary), region (e.g., over_halo_region), or path (e.g., along_line_of_sight). [type=value_error, input_value={&#x27;physical_base&#x27;: &#x27;pressure&#x27;}, input_type=dict]
+    For further information visit <a href="https://errors.pydantic.dev/2.12/v/value_error">Pydantic validation detail</a>): pressure</pre>
+<pre>[
+  {
+    &quot;attempt&quot;: 2,
+    &quot;id&quot;: &quot;claim-attempt:dd:gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_gyrocenter/pressure:8:refused&quot;,
+    &quot;outcome&quot;: &quot;refused&quot;,
+    &quot;reason&quot;: &quot;candidate pre-validation failed (grammar validation: 1 validation error for StandardName\n  Value error, Generic physical_base &#x27;pressure&#x27; requires qualification. Generic terms like &#x27;pressure&#x27; are ambiguous without context. Add a qualifying segment: subject (e.g., electron_), device (e.g., flux_loop_), object (e.g., of_flux_loop), position (e.g., at_magnetic_axis), geometry (e.g., of_plasma_boundary), region (e.g., over_halo_region), or path (e.g., along_line_of_sight). [type=value_error, input_value={&#x27;physical_base&#x27;: &#x27;pressure&#x27;}, input_type=dict]\n    For further information visit <a href="https://errors.pydantic.dev/2.12/v/value_error">Pydantic validation detail</a>): pressure&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T15:03:46.548000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_gyrocenter/pressure&quot;
+  }
+]</pre></details>
+<details id="sib-second-pass-tail-source-19"><summary><code>dd:gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_gyrocenter/v_perpendicular_square_energy</code> — composed, 0 new receipts</summary>
+<p>Attempt count: 3. Bindings: <code>normalized_perturbed_perpendicular_gyrocenter_energy_moment</code>.</p>
+<pre>[]</pre></details>
+<details id="sib-second-pass-tail-source-20"><summary><code>dd:gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_particle/heat_flux_parallel</code> — failed, 1 new receipts</summary>
+<p>Attempt count: 2. Bindings: none.</p>
+<pre>candidate pre-validation failed (grammar validation: Two &#x27;channel&#x27; tokens (&#x27;particle&#x27; and &#x27;heat&#x27;) cannot stack in a single name; the channel segment admits at most one transport channel token.): flux</pre>
+<pre>[
+  {
+    &quot;attempt&quot;: 2,
+    &quot;id&quot;: &quot;claim-attempt:dd:gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_particle/heat_flux_parallel:8:refused&quot;,
+    &quot;outcome&quot;: &quot;refused&quot;,
+    &quot;reason&quot;: &quot;candidate pre-validation failed (grammar validation: Two &#x27;channel&#x27; tokens (&#x27;particle&#x27; and &#x27;heat&#x27;) cannot stack in a single name; the channel segment admits at most one transport channel token.): flux&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T15:00:17.279000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_particle/heat_flux_parallel&quot;
+  }
+]</pre></details>
+<details id="sib-second-pass-tail-source-21"><summary><code>dd:gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_particle/v_parallel_energy_perpendicular</code> — failed, 0 new receipts</summary>
+<p>Attempt count: 3. Bindings: none.</p>
+<pre>non-actionable vocabulary gap: The quantity is a mixed velocity-space moment, the velocity-space integral of v_parallel * v_perpendicular^2 of the perturbed particle distribution, so it simultaneously needs a parallel projection axis and a perpendicular energy weighting. The grammar admits only one</pre>
+<pre>[]</pre></details>
+<details id="sib-second-pass-tail-source-22"><summary><code>dd:gyrokinetics_local/non_linear/fields_intensity_3d/phi_potential_perturbed_norm</code> — failed, 1 new receipts</summary>
+<p>Attempt count: 2. Bindings: none.</p>
+<pre>candidate pre-validation failed (grammar validation: ISN rejected operator chain time_averaged -&gt; normalized -&gt; perturbed -&gt; magnitude: operator &#x27;magnitude&#x27; requires one of [&#x27;vector&#x27;, &#x27;complex&#x27;], got &#x27;scalar&#x27;. Reorder the outer-to-inner operators or correct their operands.): electrostatic_potential</pre>
+<pre>[
+  {
+    &quot;attempt&quot;: 2,
+    &quot;id&quot;: &quot;claim-attempt:dd:gyrokinetics_local/non_linear/fields_intensity_3d/phi_potential_perturbed_norm:9:refused&quot;,
+    &quot;outcome&quot;: &quot;refused&quot;,
+    &quot;reason&quot;: &quot;candidate pre-validation failed (grammar validation: ISN rejected operator chain time_averaged -&gt; normalized -&gt; perturbed -&gt; magnitude: operator &#x27;magnitude&#x27; requires one of [&#x27;vector&#x27;, &#x27;complex&#x27;], got &#x27;scalar&#x27;. Reorder the outer-to-inner operators or correct their operands.): electrostatic_potential&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T15:03:56.938000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:gyrokinetics_local/non_linear/fields_intensity_3d/phi_potential_perturbed_norm&quot;
+  }
+]</pre></details>
+<details id="sib-second-pass-tail-source-23"><summary><code>dd:gyrokinetics_local/species/velocity_phi_gradient_norm</code> — failed, 1 new receipts</summary>
+<p>Attempt count: 2. Bindings: none.</p>
+<pre>candidate pre-validation failed (grammar validation: 1 validation error for StandardName
+  Value error, Generic physical_base &#x27;velocity&#x27; requires qualification. Generic terms like &#x27;velocity&#x27; are ambiguous without context. Add a qualifying segment: subject (e.g., electron_), device (e.g., flux_loop_), object (e.g., of_flux_loop), position (e.g., at_magnetic_axis), geometry (e.g., of_plasma_boundary), region (e.g., over_halo_region), or path (e.g., along_line_of_sight). [type=value_error, input_value={&#x27;physical_base&#x27;: &#x27;veloci...&#x27;component&#x27;: &#x27;toroidal&#x27;}, input_type=dict]
+    For further information visit <a href="https://errors.pydantic.dev/2.12/v/value_error">Pydantic validation detail</a>): velocity</pre>
+<pre>[
+  {
+    &quot;attempt&quot;: 2,
+    &quot;id&quot;: &quot;claim-attempt:dd:gyrokinetics_local/species/velocity_phi_gradient_norm:8:refused&quot;,
+    &quot;outcome&quot;: &quot;refused&quot;,
+    &quot;reason&quot;: &quot;candidate pre-validation failed (grammar validation: 1 validation error for StandardName\n  Value error, Generic physical_base &#x27;velocity&#x27; requires qualification. Generic terms like &#x27;velocity&#x27; are ambiguous without context. Add a qualifying segment: subject (e.g., electron_), device (e.g., flux_loop_), object (e.g., of_flux_loop), position (e.g., at_magnetic_axis), geometry (e.g., of_plasma_boundary), region (e.g., over_halo_region), or path (e.g., along_line_of_sight). [type=value_error, input_value={&#x27;physical_base&#x27;: &#x27;veloci...&#x27;component&#x27;: &#x27;toroidal&#x27;}, input_type=dict]\n    For further information visit <a href="https://errors.pydantic.dev/2.12/v/value_error">Pydantic validation detail</a>): velocity&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T14:59:57.817000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:gyrokinetics_local/species/velocity_phi_gradient_norm&quot;
+  }
+]</pre></details>
+<details id="sib-second-pass-tail-source-24"><summary><code>dd:ic_antennas/antenna/module/strap/geometry/oblique/z</code> — failed, 5 new receipts</summary>
+<p>Attempt count: 5. Bindings: none.</p>
+<pre>compose claim-attempt cap reached; last refusal: standard-name attachment rejected: candidate &quot;vertical_coordinate_of_antenna_strap&quot; distinct-vector conflict: path &#x27;ic_antennas/antenna/module/strap/geometry/oblique/z&#x27; and already-sourced &#x27;ic_antennas/antenna/module/strap/geometry/annulus/z&#x27; are the same axis leaf of DIFFERENT vector fields of one device node — SN &#x27;vertical_coordinate_of_antenna_strap&#x27; must not carry both at composition attempt 4</pre>
+<pre>[
+  {
+    &quot;attempt&quot;: 5,
+    &quot;batch_key&quot;: &quot;focus&quot;,
+    &quot;id&quot;: &quot;claim-attempt:dd:ic_antennas/antenna/module/strap/geometry/oblique/z:16:capped&quot;,
+    &quot;outcome&quot;: &quot;capped&quot;,
+    &quot;reason&quot;: &quot;compose claim-attempt cap reached; last refusal: standard-name attachment rejected: candidate \&quot;vertical_coordinate_of_antenna_strap\&quot; distinct-vector conflict: path &#x27;ic_antennas/antenna/module/strap/geometry/oblique/z&#x27; and already-sourced &#x27;ic_antennas/antenna/module/strap/geometry/annulus/z&#x27; are the same axis leaf of DIFFERENT vector fields of one device node \u2014 SN &#x27;vertical_coordinate_of_antenna_strap&#x27; must not carry both at composition attempt 4&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T14:56:14.511000000+00:00&quot;,
+    &quot;run_id&quot;: &quot;1da71ae9-33c3-4cca-8104-9f2f545b27c1&quot;,
+    &quot;source_id&quot;: &quot;dd:ic_antennas/antenna/module/strap/geometry/oblique/z&quot;
+  },
+  {
+    &quot;attempt&quot;: 4,
+    &quot;id&quot;: &quot;claim-attempt:dd:ic_antennas/antenna/module/strap/geometry/oblique/z:15:released&quot;,
+    &quot;outcome&quot;: &quot;released&quot;,
+    &quot;reason&quot;: &quot;standard-name attachment rejected: candidate \&quot;vertical_coordinate_of_antenna_strap\&quot; distinct-vector conflict: path &#x27;ic_antennas/antenna/module/strap/geometry/oblique/z&#x27; and already-sourced &#x27;ic_antennas/antenna/module/strap/geometry/annulus/z&#x27; are the same axis leaf of DIFFERENT vector fields of one device node \u2014 SN &#x27;vertical_coordinate_of_antenna_strap&#x27; must not carry both&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T14:56:07.114000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:ic_antennas/antenna/module/strap/geometry/oblique/z&quot;
+  },
+  {
+    &quot;attempt&quot;: 3,
+    &quot;id&quot;: &quot;claim-attempt:dd:ic_antennas/antenna/module/strap/geometry/oblique/z:14:released&quot;,
+    &quot;outcome&quot;: &quot;released&quot;,
+    &quot;reason&quot;: &quot;standard-name attachment rejected: candidate \&quot;vertical_coordinate_of_antenna_strap\&quot; distinct-vector conflict: path &#x27;ic_antennas/antenna/module/strap/geometry/oblique/z&#x27; and already-sourced &#x27;ic_antennas/antenna/module/strap/geometry/annulus/z&#x27; are the same axis leaf of DIFFERENT vector fields of one device node \u2014 SN &#x27;vertical_coordinate_of_antenna_strap&#x27; must not carry both&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T14:55:07.394000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:ic_antennas/antenna/module/strap/geometry/oblique/z&quot;
+  },
+  {
+    &quot;attempt&quot;: 2,
+    &quot;id&quot;: &quot;claim-attempt:dd:ic_antennas/antenna/module/strap/geometry/oblique/z:13:released&quot;,
+    &quot;outcome&quot;: &quot;released&quot;,
+    &quot;reason&quot;: &quot;standard-name attachment rejected: candidate \&quot;vertical_coordinate_of_antenna_strap\&quot; distinct-vector conflict: path &#x27;ic_antennas/antenna/module/strap/geometry/oblique/z&#x27; and already-sourced &#x27;ic_antennas/antenna/module/strap/geometry/annulus/z&#x27; are the same axis leaf of DIFFERENT vector fields of one device node \u2014 SN &#x27;vertical_coordinate_of_antenna_strap&#x27; must not carry both&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T14:52:44.585000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:ic_antennas/antenna/module/strap/geometry/oblique/z&quot;
+  },
+  {
+    &quot;attempt&quot;: 1,
+    &quot;id&quot;: &quot;claim-attempt:dd:ic_antennas/antenna/module/strap/geometry/oblique/z:12:released&quot;,
+    &quot;outcome&quot;: &quot;released&quot;,
+    &quot;reason&quot;: &quot;standard-name attachment rejected: candidate \&quot;vertical_coordinate_of_antenna_strap\&quot; distinct-vector conflict: path &#x27;ic_antennas/antenna/module/strap/geometry/oblique/z&#x27; and already-sourced &#x27;ic_antennas/antenna/module/strap/geometry/annulus/z&#x27; are the same axis leaf of DIFFERENT vector fields of one device node \u2014 SN &#x27;vertical_coordinate_of_antenna_strap&#x27; must not carry both&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T14:51:19.774000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:ic_antennas/antenna/module/strap/geometry/oblique/z&quot;
+  }
+]</pre></details>
+<details id="sib-second-pass-tail-source-25"><summary><code>dd:magnetics/bpol_probe/non_linear_response/b_field_non_linear</code> — failed, 1 new receipts</summary>
+<p>Attempt count: 5. Bindings: none.</p>
+<pre>compose claim-attempt cap reached</pre>
+<pre>[
+  {
+    &quot;attempt&quot;: 5,
+    &quot;batch_key&quot;: &quot;focus&quot;,
+    &quot;id&quot;: &quot;claim-attempt:dd:magnetics/bpol_probe/non_linear_response/b_field_non_linear:15:capped&quot;,
+    &quot;outcome&quot;: &quot;capped&quot;,
+    &quot;reason&quot;: &quot;compose claim-attempt cap reached&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T15:12:48.677000000+00:00&quot;,
+    &quot;run_id&quot;: &quot;1da71ae9-33c3-4cca-8104-9f2f545b27c1&quot;,
+    &quot;source_id&quot;: &quot;dd:magnetics/bpol_probe/non_linear_response/b_field_non_linear&quot;
+  }
+]</pre></details>
+<details id="sib-second-pass-tail-source-26"><summary><code>dd:magnetics/flux_loop/gm9</code> — failed, 2 new receipts</summary>
+<p>Attempt count: 2. Bindings: none.</p>
+<pre>candidate pre-validation failed (grammar validation: 1 validation error for StandardName
+  Value error, &#x27;major_radius&#x27; cannot take a positional/geometry locus; a point&#x27;s radial coordinate is &#x27;radial_coordinate_of_flux_loop&#x27; (geometric_base=radial_coordinate, symmetric with vertical_coordinate). Reserve major_radius for the bare R0 reference and length/operator compounds. [type=value_error, input_value={&#x27;physical_base&#x27;: &#x27;major_..., &#x27;object&#x27;: &#x27;flux_loop&#x27;}, input_type=dict]
+    For further information visit <a href="https://errors.pydantic.dev/2.12/v/value_error">Pydantic validation detail</a>): radius</pre>
+<pre>[
+  {
+    &quot;attempt&quot;: 2,
+    &quot;id&quot;: &quot;claim-attempt:dd:magnetics/flux_loop/gm9:8:refused&quot;,
+    &quot;outcome&quot;: &quot;refused&quot;,
+    &quot;reason&quot;: &quot;candidate pre-validation failed (grammar validation: 1 validation error for StandardName\n  Value error, &#x27;major_radius&#x27; cannot take a positional/geometry locus; a point&#x27;s radial coordinate is &#x27;radial_coordinate_of_flux_loop&#x27; (geometric_base=radial_coordinate, symmetric with vertical_coordinate). Reserve major_radius for the bare R0 reference and length/operator compounds. [type=value_error, input_value={&#x27;physical_base&#x27;: &#x27;major_..., &#x27;object&#x27;: &#x27;flux_loop&#x27;}, input_type=dict]\n    For further information visit <a href="https://errors.pydantic.dev/2.12/v/value_error">Pydantic validation detail</a>): radius&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T14:55:21.438000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:magnetics/flux_loop/gm9&quot;
+  },
+  {
+    &quot;attempt&quot;: 1,
+    &quot;batch_key&quot;: &quot;magnetics&quot;,
+    &quot;id&quot;: &quot;claim-attempt:dd:magnetics/flux_loop/gm9:7:batch_failed&quot;,
+    &quot;outcome&quot;: &quot;batch_failed&quot;,
+    &quot;reason&quot;: &quot;compose batch raised in phase generate_name&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T14:52:12.009000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:magnetics/flux_loop/gm9&quot;
+  }
+]</pre></details>
+<details id="sib-second-pass-tail-source-27"><summary><code>dd:mhd_linear/time_slice/toroidal_mode/plasma/displacement_parallel/imaginary</code> — failed, 1 new receipts</summary>
+<p>Attempt count: 1. Bindings: none.</p>
+<pre>candidate pre-validation failed (grammar validation: 1 validation error for StandardName
+geometric_base
+  Input should be &#x27;centroid&#x27;, &#x27;normalized_minor_radius&#x27;, &#x27;normalized_toroidal_flux_coordinate&#x27;, &#x27;offset&#x27;, &#x27;position&#x27;, &#x27;radial_coordinate&#x27;, &#x27;toroidal_flux_coordinate&#x27;, &#x27;contour&#x27;, &#x27;cross_section&#x27;, &#x27;coordinate&#x27;, &#x27;displacement&#x27;, &#x27;extent&#x27;, &#x27;normalized_poloidal_flux_coordinate&#x27;, &#x27;poloidal_magnetic_flux_coordinate&#x27;, &#x27;outline&#x27;, &#x27;sensor_normal&#x27;, &#x27;surface_normal&#x27;, &#x27;tangent_vector&#x27;, &#x27;trajectory&#x27;, &#x27;unit_vector&#x27;, &#x27;vertex&#x27;, &#x27;first_local_tangential_coordinate&#x27;, &#x27;second_local_tangential_coordinate&#x27;, &#x27;first_local_tangential_unit_vector&#x27;, &#x27;second_local_tangential_unit_vector&#x27;, &#x27;poloidal_angle&#x27;, &#x27;toroidal_angle&#x27;, &#x27;normal_coordinate&#x27;, &#x27;binormal_coordinate&#x27;, &#x27;direction_unit_vector&#x27;, &#x27;image_up_unit_vector&#x27;, &#x27;major_axis_unit_vector&#x27;, &#x27;minor_axis_unit_vector&#x27;, &#x27;first_measurement_direction_unit_vector&#x27; or &#x27;second_measurement_direction_unit_vector&#x27; [type=enum, input_value=&#x27;plasma_displacement&#x27;, input_type=str]
+    For further information visit <a href="https://errors.pydantic.dev/2.12/v/enum">Pydantic validation detail</a>): displacement</pre>
+<pre>[
+  {
+    &quot;attempt&quot;: 1,
+    &quot;id&quot;: &quot;claim-attempt:dd:mhd_linear/time_slice/toroidal_mode/plasma/displacement_parallel/imaginary:5:refused&quot;,
+    &quot;outcome&quot;: &quot;refused&quot;,
+    &quot;reason&quot;: &quot;candidate pre-validation failed (grammar validation: 1 validation error for StandardName\ngeometric_base\n  Input should be &#x27;centroid&#x27;, &#x27;normalized_minor_radius&#x27;, &#x27;normalized_toroidal_flux_coordinate&#x27;, &#x27;offset&#x27;, &#x27;position&#x27;, &#x27;radial_coordinate&#x27;, &#x27;toroidal_flux_coordinate&#x27;, &#x27;contour&#x27;, &#x27;cross_section&#x27;, &#x27;coordinate&#x27;, &#x27;displacement&#x27;, &#x27;extent&#x27;, &#x27;normalized_poloidal_flux_coordinate&#x27;, &#x27;poloidal_magnetic_flux_coordinate&#x27;, &#x27;outline&#x27;, &#x27;sensor_normal&#x27;, &#x27;surface_normal&#x27;, &#x27;tangent_vector&#x27;, &#x27;trajectory&#x27;, &#x27;unit_vector&#x27;, &#x27;vertex&#x27;, &#x27;first_local_tangential_coordinate&#x27;, &#x27;second_local_tangential_coordinate&#x27;, &#x27;first_local_tangential_unit_vector&#x27;, &#x27;second_local_tangential_unit_vector&#x27;, &#x27;poloidal_angle&#x27;, &#x27;toroidal_angle&#x27;, &#x27;normal_coordinate&#x27;, &#x27;binormal_coordinate&#x27;, &#x27;direction_unit_vector&#x27;, &#x27;image_up_unit_vector&#x27;, &#x27;major_axis_unit_vector&#x27;, &#x27;minor_axis_unit_vector&#x27;, &#x27;first_measurement_direction_unit_vector&#x27; or &#x27;second_measurement_direction_unit_vector&#x27; [type=enum, input_value=&#x27;plasma_displacement&#x27;, input_type=str]\n    For further information visit <a href="https://errors.pydantic.dev/2.12/v/enum">Pydantic validation detail</a>): displacement&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T14:54:44.663000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:mhd_linear/time_slice/toroidal_mode/plasma/displacement_parallel/imaginary&quot;
+  }
+]</pre></details>
+<details id="sib-second-pass-tail-source-28"><summary><code>dd:mhd_linear/time_slice/toroidal_mode/plasma/displacement_perpendicular/imaginary</code> — failed, 1 new receipts</summary>
+<p>Attempt count: 1. Bindings: none.</p>
+<pre>candidate pre-validation failed (grammar validation: 1 validation error for StandardName
+geometric_base
+  Input should be &#x27;centroid&#x27;, &#x27;normalized_minor_radius&#x27;, &#x27;normalized_toroidal_flux_coordinate&#x27;, &#x27;offset&#x27;, &#x27;position&#x27;, &#x27;radial_coordinate&#x27;, &#x27;toroidal_flux_coordinate&#x27;, &#x27;contour&#x27;, &#x27;cross_section&#x27;, &#x27;coordinate&#x27;, &#x27;displacement&#x27;, &#x27;extent&#x27;, &#x27;normalized_poloidal_flux_coordinate&#x27;, &#x27;poloidal_magnetic_flux_coordinate&#x27;, &#x27;outline&#x27;, &#x27;sensor_normal&#x27;, &#x27;surface_normal&#x27;, &#x27;tangent_vector&#x27;, &#x27;trajectory&#x27;, &#x27;unit_vector&#x27;, &#x27;vertex&#x27;, &#x27;first_local_tangential_coordinate&#x27;, &#x27;second_local_tangential_coordinate&#x27;, &#x27;first_local_tangential_unit_vector&#x27;, &#x27;second_local_tangential_unit_vector&#x27;, &#x27;poloidal_angle&#x27;, &#x27;toroidal_angle&#x27;, &#x27;normal_coordinate&#x27;, &#x27;binormal_coordinate&#x27;, &#x27;direction_unit_vector&#x27;, &#x27;image_up_unit_vector&#x27;, &#x27;major_axis_unit_vector&#x27;, &#x27;minor_axis_unit_vector&#x27;, &#x27;first_measurement_direction_unit_vector&#x27; or &#x27;second_measurement_direction_unit_vector&#x27; [type=enum, input_value=&#x27;plasma_displacement&#x27;, input_type=str]
+    For further information visit <a href="https://errors.pydantic.dev/2.12/v/enum">Pydantic validation detail</a>): displacement</pre>
+<pre>[
+  {
+    &quot;attempt&quot;: 1,
+    &quot;id&quot;: &quot;claim-attempt:dd:mhd_linear/time_slice/toroidal_mode/plasma/displacement_perpendicular/imaginary:6:refused&quot;,
+    &quot;outcome&quot;: &quot;refused&quot;,
+    &quot;reason&quot;: &quot;candidate pre-validation failed (grammar validation: 1 validation error for StandardName\ngeometric_base\n  Input should be &#x27;centroid&#x27;, &#x27;normalized_minor_radius&#x27;, &#x27;normalized_toroidal_flux_coordinate&#x27;, &#x27;offset&#x27;, &#x27;position&#x27;, &#x27;radial_coordinate&#x27;, &#x27;toroidal_flux_coordinate&#x27;, &#x27;contour&#x27;, &#x27;cross_section&#x27;, &#x27;coordinate&#x27;, &#x27;displacement&#x27;, &#x27;extent&#x27;, &#x27;normalized_poloidal_flux_coordinate&#x27;, &#x27;poloidal_magnetic_flux_coordinate&#x27;, &#x27;outline&#x27;, &#x27;sensor_normal&#x27;, &#x27;surface_normal&#x27;, &#x27;tangent_vector&#x27;, &#x27;trajectory&#x27;, &#x27;unit_vector&#x27;, &#x27;vertex&#x27;, &#x27;first_local_tangential_coordinate&#x27;, &#x27;second_local_tangential_coordinate&#x27;, &#x27;first_local_tangential_unit_vector&#x27;, &#x27;second_local_tangential_unit_vector&#x27;, &#x27;poloidal_angle&#x27;, &#x27;toroidal_angle&#x27;, &#x27;normal_coordinate&#x27;, &#x27;binormal_coordinate&#x27;, &#x27;direction_unit_vector&#x27;, &#x27;image_up_unit_vector&#x27;, &#x27;major_axis_unit_vector&#x27;, &#x27;minor_axis_unit_vector&#x27;, &#x27;first_measurement_direction_unit_vector&#x27; or &#x27;second_measurement_direction_unit_vector&#x27; [type=enum, input_value=&#x27;plasma_displacement&#x27;, input_type=str]\n    For further information visit <a href="https://errors.pydantic.dev/2.12/v/enum">Pydantic validation detail</a>): displacement&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T14:54:44.650000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:mhd_linear/time_slice/toroidal_mode/plasma/displacement_perpendicular/imaginary&quot;
+  }
+]</pre></details>
+<details id="sib-second-pass-tail-source-29"><summary><code>dd:mhd_linear/time_slice/toroidal_mode/plasma/displacement_perpendicular/real</code> — failed, 1 new receipts</summary>
+<p>Attempt count: 1. Bindings: none.</p>
+<pre>candidate pre-validation failed (grammar validation: 1 validation error for StandardName
+geometric_base
+  Input should be &#x27;centroid&#x27;, &#x27;normalized_minor_radius&#x27;, &#x27;normalized_toroidal_flux_coordinate&#x27;, &#x27;offset&#x27;, &#x27;position&#x27;, &#x27;radial_coordinate&#x27;, &#x27;toroidal_flux_coordinate&#x27;, &#x27;contour&#x27;, &#x27;cross_section&#x27;, &#x27;coordinate&#x27;, &#x27;displacement&#x27;, &#x27;extent&#x27;, &#x27;normalized_poloidal_flux_coordinate&#x27;, &#x27;poloidal_magnetic_flux_coordinate&#x27;, &#x27;outline&#x27;, &#x27;sensor_normal&#x27;, &#x27;surface_normal&#x27;, &#x27;tangent_vector&#x27;, &#x27;trajectory&#x27;, &#x27;unit_vector&#x27;, &#x27;vertex&#x27;, &#x27;first_local_tangential_coordinate&#x27;, &#x27;second_local_tangential_coordinate&#x27;, &#x27;first_local_tangential_unit_vector&#x27;, &#x27;second_local_tangential_unit_vector&#x27;, &#x27;poloidal_angle&#x27;, &#x27;toroidal_angle&#x27;, &#x27;normal_coordinate&#x27;, &#x27;binormal_coordinate&#x27;, &#x27;direction_unit_vector&#x27;, &#x27;image_up_unit_vector&#x27;, &#x27;major_axis_unit_vector&#x27;, &#x27;minor_axis_unit_vector&#x27;, &#x27;first_measurement_direction_unit_vector&#x27; or &#x27;second_measurement_direction_unit_vector&#x27; [type=enum, input_value=&#x27;plasma_displacement&#x27;, input_type=str]
+    For further information visit <a href="https://errors.pydantic.dev/2.12/v/enum">Pydantic validation detail</a>): displacement</pre>
+<pre>[
+  {
+    &quot;attempt&quot;: 1,
+    &quot;id&quot;: &quot;claim-attempt:dd:mhd_linear/time_slice/toroidal_mode/plasma/displacement_perpendicular/real:5:refused&quot;,
+    &quot;outcome&quot;: &quot;refused&quot;,
+    &quot;reason&quot;: &quot;candidate pre-validation failed (grammar validation: 1 validation error for StandardName\ngeometric_base\n  Input should be &#x27;centroid&#x27;, &#x27;normalized_minor_radius&#x27;, &#x27;normalized_toroidal_flux_coordinate&#x27;, &#x27;offset&#x27;, &#x27;position&#x27;, &#x27;radial_coordinate&#x27;, &#x27;toroidal_flux_coordinate&#x27;, &#x27;contour&#x27;, &#x27;cross_section&#x27;, &#x27;coordinate&#x27;, &#x27;displacement&#x27;, &#x27;extent&#x27;, &#x27;normalized_poloidal_flux_coordinate&#x27;, &#x27;poloidal_magnetic_flux_coordinate&#x27;, &#x27;outline&#x27;, &#x27;sensor_normal&#x27;, &#x27;surface_normal&#x27;, &#x27;tangent_vector&#x27;, &#x27;trajectory&#x27;, &#x27;unit_vector&#x27;, &#x27;vertex&#x27;, &#x27;first_local_tangential_coordinate&#x27;, &#x27;second_local_tangential_coordinate&#x27;, &#x27;first_local_tangential_unit_vector&#x27;, &#x27;second_local_tangential_unit_vector&#x27;, &#x27;poloidal_angle&#x27;, &#x27;toroidal_angle&#x27;, &#x27;normal_coordinate&#x27;, &#x27;binormal_coordinate&#x27;, &#x27;direction_unit_vector&#x27;, &#x27;image_up_unit_vector&#x27;, &#x27;major_axis_unit_vector&#x27;, &#x27;minor_axis_unit_vector&#x27;, &#x27;first_measurement_direction_unit_vector&#x27; or &#x27;second_measurement_direction_unit_vector&#x27; [type=enum, input_value=&#x27;plasma_displacement&#x27;, input_type=str]\n    For further information visit <a href="https://errors.pydantic.dev/2.12/v/enum">Pydantic validation detail</a>): displacement&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T14:54:44.658000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:mhd_linear/time_slice/toroidal_mode/plasma/displacement_perpendicular/real&quot;
+  }
+]</pre></details>
+<details id="sib-second-pass-tail-source-30"><summary><code>dd:nbi/unit/beamlets_group/tangency_radius</code> — failed, 1 new receipts</summary>
+<p>Attempt count: 1. Bindings: none.</p>
+<pre>candidate pre-validation failed (grammar validation: 1 validation error for StandardName
+  Value error, &#x27;major_radius&#x27; cannot take a positional/geometry locus; a point&#x27;s radial coordinate is &#x27;radial_coordinate_of_beamlet_group&#x27; (geometric_base=radial_coordinate, symmetric with vertical_coordinate). Reserve major_radius for the bare R0 reference and length/operator compounds. [type=value_error, input_value={&#x27;physical_base&#x27;: &#x27;major_...bject&#x27;: &#x27;beamlet_group&#x27;}, input_type=dict]
+    For further information visit <a href="https://errors.pydantic.dev/2.12/v/value_error">Pydantic validation detail</a>): radius</pre>
+<pre>[
+  {
+    &quot;attempt&quot;: 1,
+    &quot;id&quot;: &quot;claim-attempt:dd:nbi/unit/beamlets_group/tangency_radius:7:refused&quot;,
+    &quot;outcome&quot;: &quot;refused&quot;,
+    &quot;reason&quot;: &quot;candidate pre-validation failed (grammar validation: 1 validation error for StandardName\n  Value error, &#x27;major_radius&#x27; cannot take a positional/geometry locus; a point&#x27;s radial coordinate is &#x27;radial_coordinate_of_beamlet_group&#x27; (geometric_base=radial_coordinate, symmetric with vertical_coordinate). Reserve major_radius for the bare R0 reference and length/operator compounds. [type=value_error, input_value={&#x27;physical_base&#x27;: &#x27;major_...bject&#x27;: &#x27;beamlet_group&#x27;}, input_type=dict]\n    For further information visit <a href="https://errors.pydantic.dev/2.12/v/value_error">Pydantic validation detail</a>): radius&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T14:53:42.271000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:nbi/unit/beamlets_group/tangency_radius&quot;
+  }
+]</pre></details>
+<details id="sib-second-pass-tail-source-31"><summary><code>dd:plasma_transport/model/flux_multiplier</code> — failed, 2 new receipts</summary>
+<p>Attempt count: 2. Bindings: none.</p>
+<pre>candidate pre-validation failed (grammar validation: name is not canonical: flat segment order renders as &#x27;energy_convected_coefficient&#x27;): coefficient</pre>
+<pre>[
+  {
+    &quot;attempt&quot;: 2,
+    &quot;id&quot;: &quot;claim-attempt:dd:plasma_transport/model/flux_multiplier:12:refused&quot;,
+    &quot;outcome&quot;: &quot;refused&quot;,
+    &quot;reason&quot;: &quot;candidate pre-validation failed (grammar validation: name is not canonical: flat segment order renders as &#x27;energy_convected_coefficient&#x27;): coefficient&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T14:59:09.638000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:plasma_transport/model/flux_multiplier&quot;
+  },
+  {
+    &quot;attempt&quot;: 1,
+    &quot;id&quot;: &quot;claim-attempt:dd:plasma_transport/model/flux_multiplier:11:released&quot;,
+    &quot;outcome&quot;: &quot;released&quot;,
+    &quot;reason&quot;: &quot;standard-name binding collision: candidate \&quot;convected_heat_flux_coefficient\&quot; unit \&quot;&lt;unset&gt;\&quot; is not bindable&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T14:51:22.255000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:plasma_transport/model/flux_multiplier&quot;
+  }
+]</pre></details>
+<details id="sib-second-pass-tail-source-32"><summary><code>dd:plasma_transport/model/ggd/neutral/state/momentum/v_radial/values</code> — failed, 1 new receipts</summary>
+<p>Attempt count: 5. Bindings: none.</p>
+<pre>compose claim-attempt cap reached</pre>
+<pre>[
+  {
+    &quot;attempt&quot;: 5,
+    &quot;batch_key&quot;: &quot;focus&quot;,
+    &quot;id&quot;: &quot;claim-attempt:dd:plasma_transport/model/ggd/neutral/state/momentum/v_radial/values:15:capped&quot;,
+    &quot;outcome&quot;: &quot;capped&quot;,
+    &quot;reason&quot;: &quot;compose claim-attempt cap reached&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T15:12:18.560000000+00:00&quot;,
+    &quot;run_id&quot;: &quot;1da71ae9-33c3-4cca-8104-9f2f545b27c1&quot;,
+    &quot;source_id&quot;: &quot;dd:plasma_transport/model/ggd/neutral/state/momentum/v_radial/values&quot;
+  }
+]</pre></details>
+<details id="sib-second-pass-tail-source-33"><summary><code>dd:spectrometer_visible/channel/fibre_bundle/geometry/surface</code> — failed, 1 new receipts</summary>
+<p>Attempt count: 5. Bindings: none.</p>
+<pre>compose claim-attempt cap reached</pre>
+<pre>[
+  {
+    &quot;attempt&quot;: 5,
+    &quot;batch_key&quot;: &quot;focus&quot;,
+    &quot;id&quot;: &quot;claim-attempt:dd:spectrometer_visible/channel/fibre_bundle/geometry/surface:15:capped&quot;,
+    &quot;outcome&quot;: &quot;capped&quot;,
+    &quot;reason&quot;: &quot;compose claim-attempt cap reached&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T15:10:48.012000000+00:00&quot;,
+    &quot;run_id&quot;: &quot;1da71ae9-33c3-4cca-8104-9f2f545b27c1&quot;,
+    &quot;source_id&quot;: &quot;dd:spectrometer_visible/channel/fibre_bundle/geometry/surface&quot;
+  }
+]</pre></details>
+<details id="sib-second-pass-tail-source-34"><summary><code>dd:spectrometer_visible/channel/fibre_bundle/geometry/x1_width</code> — failed, 2 new receipts</summary>
+<p>Attempt count: 5. Bindings: none.</p>
+<pre>compose claim-attempt cap reached; last refusal: standard-name binding collision: candidate &quot;first_local_tangential_width_of_fiber_bundle&quot; has non-bindable name_stage &quot;pending&quot; at composition attempt 4</pre>
+<pre>[
+  {
+    &quot;attempt&quot;: 5,
+    &quot;batch_key&quot;: &quot;focus&quot;,
+    &quot;id&quot;: &quot;claim-attempt:dd:spectrometer_visible/channel/fibre_bundle/geometry/x1_width:15:capped&quot;,
+    &quot;outcome&quot;: &quot;capped&quot;,
+    &quot;reason&quot;: &quot;compose claim-attempt cap reached; last refusal: standard-name binding collision: candidate \&quot;first_local_tangential_width_of_fiber_bundle\&quot; has non-bindable name_stage \&quot;pending\&quot; at composition attempt 4&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T15:12:18.560000000+00:00&quot;,
+    &quot;run_id&quot;: &quot;1da71ae9-33c3-4cca-8104-9f2f545b27c1&quot;,
+    &quot;source_id&quot;: &quot;dd:spectrometer_visible/channel/fibre_bundle/geometry/x1_width&quot;
+  },
+  {
+    &quot;attempt&quot;: 4,
+    &quot;id&quot;: &quot;claim-attempt:dd:spectrometer_visible/channel/fibre_bundle/geometry/x1_width:14:released&quot;,
+    &quot;outcome&quot;: &quot;released&quot;,
+    &quot;reason&quot;: &quot;standard-name binding collision: candidate \&quot;first_local_tangential_width_of_fiber_bundle\&quot; unit \&quot;m\&quot; is not bindable&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T15:12:13.864000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:spectrometer_visible/channel/fibre_bundle/geometry/x1_width&quot;
+  }
+]</pre></details>
+<details id="sib-second-pass-tail-source-35"><summary><code>dd:spectrometer_visible/channel/fibre_bundle/geometry/x2_width</code> — failed, 0 new receipts</summary>
+<p>Attempt count: 5. Bindings: none.</p>
+<pre>rich standard-name write refused candidate &#x27;second_local_tangential_width_of_fiber_bundle&#x27;: the writer refused to mint this identity, so the source produced no name</pre>
+<pre>[]</pre></details>
+<details id="sib-second-pass-tail-source-36"><summary><code>dd:summary/pedestal_fits/mtanh/stability/bootstrap_current_hager/alpha_critical/value</code> — failed, 1 new receipts</summary>
+<p>Attempt count: 4. Bindings: none.</p>
+<pre>candidate pre-validation failed (grammar validation: ISN rejected operator chain normalized -&gt; gradient: operator &#x27;normalized&#x27; with precedence 15 cannot wrap &#x27;gradient&#x27; with precedence 20. Reorder the outer-to-inner operators or correct their operands.): pressure</pre>
+<pre>[
+  {
+    &quot;attempt&quot;: 4,
+    &quot;id&quot;: &quot;claim-attempt:dd:summary/pedestal_fits/mtanh/stability/bootstrap_current_hager/alpha_critical/value:11:refused&quot;,
+    &quot;outcome&quot;: &quot;refused&quot;,
+    &quot;reason&quot;: &quot;candidate pre-validation failed (grammar validation: ISN rejected operator chain normalized -&gt; gradient: operator &#x27;normalized&#x27; with precedence 15 cannot wrap &#x27;gradient&#x27; with precedence 20. Reorder the outer-to-inner operators or correct their operands.): pressure&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T15:09:09.412000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:summary/pedestal_fits/mtanh/stability/bootstrap_current_hager/alpha_critical/value&quot;
+  }
+]</pre></details>
+<details id="sib-second-pass-tail-source-37"><summary><code>dd:summary/pedestal_fits/mtanh/stability/bootstrap_current_sauter/alpha_critical/value</code> — failed, 1 new receipts</summary>
+<p>Attempt count: 5. Bindings: none.</p>
+<pre>compose claim-attempt cap reached</pre>
+<pre>[
+  {
+    &quot;attempt&quot;: 5,
+    &quot;batch_key&quot;: &quot;focus&quot;,
+    &quot;id&quot;: &quot;claim-attempt:dd:summary/pedestal_fits/mtanh/stability/bootstrap_current_sauter/alpha_critical/value:11:capped&quot;,
+    &quot;outcome&quot;: &quot;capped&quot;,
+    &quot;reason&quot;: &quot;compose claim-attempt cap reached&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T15:12:18.560000000+00:00&quot;,
+    &quot;run_id&quot;: &quot;1da71ae9-33c3-4cca-8104-9f2f545b27c1&quot;,
+    &quot;source_id&quot;: &quot;dd:summary/pedestal_fits/mtanh/stability/bootstrap_current_sauter/alpha_critical/value&quot;
+  }
+]</pre></details>
+<details id="sib-second-pass-tail-source-38"><summary><code>dd:wall/description_2d/vessel/unit/annular/outline_outer/r</code> — failed, 1 new receipts</summary>
+<p>Attempt count: 1. Bindings: none.</p>
+<pre>candidate pre-validation failed (grammar validation: 1 validation error for StandardName
+geometric_base
+  Input should be &#x27;centroid&#x27;, &#x27;normalized_minor_radius&#x27;, &#x27;normalized_toroidal_flux_coordinate&#x27;, &#x27;offset&#x27;, &#x27;position&#x27;, &#x27;radial_coordinate&#x27;, &#x27;toroidal_flux_coordinate&#x27;, &#x27;contour&#x27;, &#x27;cross_section&#x27;, &#x27;coordinate&#x27;, &#x27;displacement&#x27;, &#x27;extent&#x27;, &#x27;normalized_poloidal_flux_coordinate&#x27;, &#x27;poloidal_magnetic_flux_coordinate&#x27;, &#x27;outline&#x27;, &#x27;sensor_normal&#x27;, &#x27;surface_normal&#x27;, &#x27;tangent_vector&#x27;, &#x27;trajectory&#x27;, &#x27;unit_vector&#x27;, &#x27;vertex&#x27;, &#x27;first_local_tangential_coordinate&#x27;, &#x27;second_local_tangential_coordinate&#x27;, &#x27;first_local_tangential_unit_vector&#x27;, &#x27;second_local_tangential_unit_vector&#x27;, &#x27;poloidal_angle&#x27;, &#x27;toroidal_angle&#x27;, &#x27;normal_coordinate&#x27;, &#x27;binormal_coordinate&#x27;, &#x27;direction_unit_vector&#x27;, &#x27;image_up_unit_vector&#x27;, &#x27;major_axis_unit_vector&#x27;, &#x27;minor_axis_unit_vector&#x27;, &#x27;first_measurement_direction_unit_vector&#x27; or &#x27;second_measurement_direction_unit_vector&#x27; [type=enum, input_value=&#x27;outer_outline&#x27;, input_type=str]
+    For further information visit <a href="https://errors.pydantic.dev/2.12/v/enum">Pydantic validation detail</a>): outline</pre>
+<pre>[
+  {
+    &quot;attempt&quot;: 1,
+    &quot;id&quot;: &quot;claim-attempt:dd:wall/description_2d/vessel/unit/annular/outline_outer/r:9:refused&quot;,
+    &quot;outcome&quot;: &quot;refused&quot;,
+    &quot;reason&quot;: &quot;candidate pre-validation failed (grammar validation: 1 validation error for StandardName\ngeometric_base\n  Input should be &#x27;centroid&#x27;, &#x27;normalized_minor_radius&#x27;, &#x27;normalized_toroidal_flux_coordinate&#x27;, &#x27;offset&#x27;, &#x27;position&#x27;, &#x27;radial_coordinate&#x27;, &#x27;toroidal_flux_coordinate&#x27;, &#x27;contour&#x27;, &#x27;cross_section&#x27;, &#x27;coordinate&#x27;, &#x27;displacement&#x27;, &#x27;extent&#x27;, &#x27;normalized_poloidal_flux_coordinate&#x27;, &#x27;poloidal_magnetic_flux_coordinate&#x27;, &#x27;outline&#x27;, &#x27;sensor_normal&#x27;, &#x27;surface_normal&#x27;, &#x27;tangent_vector&#x27;, &#x27;trajectory&#x27;, &#x27;unit_vector&#x27;, &#x27;vertex&#x27;, &#x27;first_local_tangential_coordinate&#x27;, &#x27;second_local_tangential_coordinate&#x27;, &#x27;first_local_tangential_unit_vector&#x27;, &#x27;second_local_tangential_unit_vector&#x27;, &#x27;poloidal_angle&#x27;, &#x27;toroidal_angle&#x27;, &#x27;normal_coordinate&#x27;, &#x27;binormal_coordinate&#x27;, &#x27;direction_unit_vector&#x27;, &#x27;image_up_unit_vector&#x27;, &#x27;major_axis_unit_vector&#x27;, &#x27;minor_axis_unit_vector&#x27;, &#x27;first_measurement_direction_unit_vector&#x27; or &#x27;second_measurement_direction_unit_vector&#x27; [type=enum, input_value=&#x27;outer_outline&#x27;, input_type=str]\n    For further information visit <a href="https://errors.pydantic.dev/2.12/v/enum">Pydantic validation detail</a>): outline&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T14:52:53.127000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:wall/description_2d/vessel/unit/annular/outline_outer/r&quot;
+  }
+]</pre></details>
+<details id="sib-second-pass-tail-source-39"><summary><code>dd:wall/description_ggd/ggd/energy_fluxes/radiation/incident/values</code> — failed, 1 new receipts</summary>
+<p>Attempt count: 1. Bindings: none.</p>
+<pre>candidate pre-validation failed (grammar validation: name is not canonical: flat segment order renders as &#x27;incident_energy_radiative_flux_at_wall&#x27;): flux</pre>
+<pre>[
+  {
+    &quot;attempt&quot;: 1,
+    &quot;id&quot;: &quot;claim-attempt:dd:wall/description_ggd/ggd/energy_fluxes/radiation/incident/values:7:refused&quot;,
+    &quot;outcome&quot;: &quot;refused&quot;,
+    &quot;reason&quot;: &quot;candidate pre-validation failed (grammar validation: name is not canonical: flat segment order renders as &#x27;incident_energy_radiative_flux_at_wall&#x27;): flux&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T14:53:28.559000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:wall/description_ggd/ggd/energy_fluxes/radiation/incident/values&quot;
+  }
+]</pre></details>
+<details id="sib-second-pass-tail-source-40"><summary><code>dd:waves/coherent_wave/profiles_2d/e_field_n_phi/parallel/amplitude</code> — failed, 1 new receipts</summary>
+<p>Attempt count: 1. Bindings: none.</p>
+<pre>candidate pre-validation failed (grammar validation: ISN rejected operator chain per_toroidal_mode -&gt; amplitude: name &#x27;parallel_per_toroidal_mode_wave_cross_sectional_electric_field_amplitude&#x27; round-trips textually but changes the semantic IR. Reorder the outer-to-inner operators or correct their operands.): electric_field</pre>
+<pre>[
+  {
+    &quot;attempt&quot;: 1,
+    &quot;id&quot;: &quot;claim-attempt:dd:waves/coherent_wave/profiles_2d/e_field_n_phi/parallel/amplitude:7:refused&quot;,
+    &quot;outcome&quot;: &quot;refused&quot;,
+    &quot;reason&quot;: &quot;candidate pre-validation failed (grammar validation: ISN rejected operator chain per_toroidal_mode -&gt; amplitude: name &#x27;parallel_per_toroidal_mode_wave_cross_sectional_electric_field_amplitude&#x27; round-trips textually but changes the semantic IR. Reorder the outer-to-inner operators or correct their operands.): electric_field&quot;,
+    &quot;recorded_at&quot;: &quot;2026-11-08T14:52:44.233000000+00:00&quot;,
+    &quot;source_id&quot;: &quot;dd:waves/coherent_wave/profiles_2d/e_field_n_phi/parallel/amplitude&quot;
+  }
+]</pre></details>
+<h3 id="sib-second-pass-tail-artifacts">Durable evidence</h3>
+<p><a href="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T141648847743-sib-second-pass-tail/census.json">census.json</a>, <a href="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T141648847743-sib-second-pass-tail/before-reset.json">before-reset.json</a>, <a href="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T141648847743-sib-second-pass-tail/retry-dry.json">retry-dry.json</a>, <a href="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T141648847743-sib-second-pass-tail/retry-apply.json">retry-apply.json</a>, <a href="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T141648847743-sib-second-pass-tail/verify-reset.json">verify-reset.json</a>, <a href="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T141648847743-sib-second-pass-tail/run-dry.log">run-dry.log</a>, <a href="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T141648847743-sib-second-pass-tail/job.json">job.json</a>, <a href="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T141648847743-sib-second-pass-tail/scheduler-receipt.log">scheduler-receipt.log</a>, <a href="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T141648847743-sib-second-pass-tail/run.log">run.log</a>, <a href="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T141648847743-sib-second-pass-tail/readback.log">readback.log</a>, <a href="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T141648847743-sib-second-pass-tail/readback.json">readback.json</a>.</p>
+<p>The 466,547-byte full read-back remains in the run directory. No plan status was changed. This node’s measure is red: yield is below 100, sourceless drafts increased, and four failed sources lack claim receipts. Independent merged-result verification belongs to the separately dispatched test node.</p>
+</section>
+</body>
+</html>
