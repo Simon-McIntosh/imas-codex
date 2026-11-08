@@ -10,9 +10,9 @@
   "completed_at": "2026-11-07T23:59:57.335Z",
   "dimension_dispositions": {
     "reuse": {
-      "kind": "exempted",
-      "reason": "read-only census instrument kept as evidence; the repair node after the full run reuses catalog_ordering._find_cyclic_components for its cycle check",
-      "recorded_at": "2026-11-08T00:26:50.966223+00:00"
+      "kind": "folded",
+      "node": "repair-of-sib-lineage-cycle-census-4215ded8de35",
+      "recorded_at": "2026-11-08T00:40:16.832435+00:00"
     }
   },
   "dispatched_at": "2026-11-07T23:46:33Z",
