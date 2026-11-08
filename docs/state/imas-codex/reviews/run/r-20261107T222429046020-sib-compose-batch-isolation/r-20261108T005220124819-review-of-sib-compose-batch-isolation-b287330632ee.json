@@ -12,6 +12,11 @@
       "kind": "folded",
       "node": "sib-compose-refusal-narrowing",
       "recorded_at": "2026-11-08T05:32:03.015284+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "sib-compose-refusal-narrowing",
+      "recorded_at": "2026-11-08T05:32:15.388103+00:00"
     }
   },
   "findings": [
