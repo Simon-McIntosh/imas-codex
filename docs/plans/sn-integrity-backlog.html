@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="394">
+<meta name="plan-version" content="395">
 <meta name="plan-modified" content="2026-11-08">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -1220,6 +1220,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 <div class="r-comment" data-section="s49" data-id="c-run-r-20261108T090157109941-review-of-sib-lineage-cycle-writers-8dafe740bc09" data-who="reckon-build" data-when="2026-11-08T09:12:26Z">
     <div class="r-comment-body"><p>Independent read-only review of base f18b75c0b70d490ce4dd109d1a6b0ac33eec28cf to head 8dafe740bc09237cb9db87d293239bf38e688cf3: all six dimensions 20/20, no blocking or non-blocking findings, added_failure_count 0, 55 assertion failure conditions recorded; both parsed records pass crew check.</p></div>
 </div>
+<div class="r-comment" data-section="s49" data-id="c-run-r-20261108T055618175066-sib-lineage-cycle-writers" data-who="reckon-build" data-when="2026-11-08T08:59:55Z">
+    <div class="r-comment-body"><p>Three writer openings now refuse before mutation while the two refusing controls remain intact. Final live graph gate 14/14; three-file base 6 failed/20 passed versus head 26 passed; package base 9 failed/8534 passed versus serial head 8544 passed with zero added failure IDs. Removing the tombstoned-ancestor guard made a fold commit reciprocal edges and fail its refusal test. Spend USD 0 of USD 0. Evidence: [lineage writer guards](/imas-codex/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-writers.html#sib-lineage-cycle-writers)</p></div>
+</div>
 <div class="r-comment" data-section="s50" data-id="c-run-r-20261107T204942022312-review-of-sib-full-dd-run-5f5026ac94f3" data-who="reckon-build" data-when="2026-11-07T20:59:25Z">
     <div class="r-comment-body"><p>Parsed independent review of source commits b9de20a8a6e23ecd2d7f664cfe7e5e22772934dd and 5f5026ac94f307a22c918d466f928e46a8b0cbf7 against base 50bcd5a7542237f72d71e4797f94dfb8dfc316b4; six scores total 74/120, one blocking provenance finding and one non-blocking reuse finding, with unmeasured suite delta explicitly noted.</p></div>
 </div>
@@ -1270,6 +1273,12 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s50" data-id="c-run-r-20261108T053726614886-sib-retired-spelling-retry" data-who="reckon-build" data-when="2026-11-08T07:51:59Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/sn-integrity-backlog/sib-retired-spelling-retry.html#sib-retired-spelling-retry-record: single live same-unit HAS_SUCCESSOR reuse and safe finalizer propagation; otherwise initial and internal retry prompts retain the retired spelling and exact refusal. Focused 126 passed; full 8562 passed / 3 timeout failures / 11 skipped versus base 8544 passed / 11 skipped; zero-added-failure threshold not met, ids recorded under outside_scope; 21 new cases; two-target negative control 2 failed; 7 live EXPLAIN statements parsed. Census 58 sources / 37 candidates: 1 catalog-compatible holder, 57 without direct edges; recorded source units prove 0 follows / 58 historical-context routes. USD 0 / 0.</p></div>
+</div>
+<div class="r-comment" data-section="s51" data-id="c-run-r-20261108T090255727777-review-of-sib-signal-role-fakes-11a6c58cf2b1" data-who="reckon-build" data-when="2026-11-08T09:21:33.871Z">
+    <div class="r-comment-body"><p>Reviewed r-20261108T082756356464-sib-signal-role-fakes at base cedb8cad58 head 11a6c58: all four signal-role decision fakes now name `record_release`, the defect reproduces independently on the unpatched tree (6 failed, 5 passed in 43.39s, the same six FAILED ids as the base log) and the head tree passes independently (11 passed in 16.99s); scores goal 20, evidence 17, scope 20, durability 18, fit 20, reuse 20, added failures 0; two non-blocking findings on the landing fragment's inaccurate evidence prose.</p></div>
+</div>
+<div class="r-comment" data-section="s51" data-id="c-run-r-20261108T082756356464-sib-signal-role-fakes" data-who="reckon-build" data-when="2026-11-08T08:47:24.441Z">
+    <div class="r-comment-body"><p>Made the four signal-role decision fakes accept `record_release` explicitly (two also assert it is callable); the six TypeError failures move from 6 failed / 5 passed at cedb8cad58 to 11 passed, tests/discovery is 1608 passed, and the declared negative control fails with the same TypeError.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261012T162346807302-review-of-sib-row-census" data-who="reckon-build" data-when="2026-10-12T16:39:58.712Z">
     <div class="r-comment-body"><p>reviewed r-20261012T145528571333-sib-row-census at a7a70db00 against c7b4c626e; total 93/120 (goal_fidelity 15, evidence 13, scope_discipline 19, durability 11, fit 15, reuse 20); two blocking findings — the landing record's verdict tallies and the manifest's row-count both disagree with the 38 rows the census file holds.</p></div>
@@ -1363,12 +1372,6 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s9" data-id="c-run-r-20261012T195012490344-review-of-sib-restore-archived-origin" data-who="reckon-build" data-when="2026-10-12T20:01:10.018Z">
     <div class="r-comment-body"><p>reviewed run r-20261012T194341934507-sib-restore-archived-origin at f4dffef72 (base c51cf292f): the added case at tests/standard_names/test_archive_reconstruction_entry_point.py:203 correctly pins the composer's refusal of an archive's own origin and closes the coverage gap the prior review named; scores goal_fidelity 20, evidence 19, scope_discipline 20, durability 19, fit 19, reuse 20 (total 117); no blocking findings, one follow-on on the gate-log revision header.</p></div>
-</div>
-<div class="r-comment" data-section="s51" data-id="c-run-r-20261108T090255727777-review-of-sib-signal-role-fakes-11a6c58cf2b1" data-who="reckon-build" data-when="2026-11-08T09:21:33.871Z">
-    <div class="r-comment-body"><p>Reviewed r-20261108T082756356464-sib-signal-role-fakes at base cedb8cad58 head 11a6c58: all four signal-role decision fakes now name `record_release`, the defect reproduces independently on the unpatched tree (6 failed, 5 passed in 43.39s, the same six FAILED ids as the base log) and the head tree passes independently (11 passed in 16.99s); scores goal 20, evidence 17, scope 20, durability 18, fit 20, reuse 20, added failures 0; two non-blocking findings on the landing fragment's inaccurate evidence prose.</p></div>
-</div>
-<div class="r-comment" data-section="s51" data-id="c-run-r-20261108T082756356464-sib-signal-role-fakes" data-who="reckon-build" data-when="2026-11-08T08:47:24.441Z">
-    <div class="r-comment-body"><p>Made the four signal-role decision fakes accept `record_release` explicitly (two also assert it is callable); the six TypeError failures move from 6 failed / 5 passed at cedb8cad58 to 11 passed, tests/discovery is 1608 passed, and the declared negative control fails with the same TypeError.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
