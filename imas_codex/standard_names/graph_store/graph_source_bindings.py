@@ -46,9 +46,7 @@ def _stored_outcome_claim_entries(batch: list[dict[str, Any]]) -> list[dict[str,
     return [
         claim_attempt_entry(
             item["sns_id"],
-            attempt=item.get("attempt_count"),
-            outcome=item.get("claim_outcome")
-            or claim_outcome_for_status(item.get("status")),
+            outcome=claim_outcome_for_status(item.get("status")),
             reason=item.get("last_error") or item.get("skip_reason_detail"),
             claim_seq=item.get("claim_seq"),
             claim_token=item.get("claim_token"),
@@ -64,7 +62,6 @@ def _produced_claim_entries(batch: list[dict[str, Any]]) -> list[dict[str, Any]]
     return [
         claim_attempt_entry(
             item["sns_id"],
-            attempt=item.get("attempt_count"),
             outcome="produced",
             claim_seq=item.get("claim_seq"),
             claim_token=item.get("claim_token"),
@@ -80,7 +77,6 @@ def _released_claim_entries(batch: list[dict[str, Any]]) -> list[dict[str, Any]]
     return [
         claim_attempt_entry(
             item["sns_id"],
-            attempt=item.get("attempt_count"),
             outcome="released",
             reason=_collision_release_reason(item),
             claim_seq=item.get("claim_seq"),
@@ -1493,14 +1489,19 @@ def persist_claimed_source_outcomes(
     if not batch:
         return []
     services._guard_failed_source_reasons(batch)
-    with services.GraphClient() as gc:
-        # The claim is still live here, so the receipt is written fenced on it
-        # before the status write consumes the claim. The outcome follows the
-        # status the caller is storing: a skipped source and a source returned
-        # to the queue were not refused, and recording them as refusals would
-        # misattribute them in the next failure census.
-        append_claim_attempts(gc, _stored_outcome_claim_entries(batch))
-        rows = gc.query(
+    with services.GraphClient() as graph:
+        with graph.session() as session:
+            tx = session.begin_transaction()
+            tx_gc = services._TransactionQuery(tx)
+            try:
+                # The receipt and the status write that consumes the claim are
+                # one transaction, so a status cannot land without its receipt.
+                # The outcome follows the status the caller stores: a skipped
+                # source and a source returned to the queue were not refused,
+                # and recording them as refusals would misattribute them in
+                # the next failure census.
+                append_claim_attempts(tx_gc, _stored_outcome_claim_entries(batch))
+                rows = tx_gc.query(
             """
             UNWIND $batch AS b
             MATCH (sns:StandardNameSource {id: b.sns_id})
@@ -1520,8 +1521,13 @@ def persist_claimed_source_outcomes(
                                       THEN datetime() ELSE sns.skipped_at END
             RETURN sns.id AS id
             """,
-            batch=batch,
-        )
+                    batch=batch,
+                )
+                tx.commit()
+            except BaseException:
+                if tx.closed is False:
+                    tx.close()
+                raise
     return [row["id"] for row in rows]
 
 

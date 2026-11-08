@@ -142,7 +142,7 @@ def _capped_claim_entries(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [
         claim_attempt_entry(
             row["id"],
-            attempt=row.get("attempt_count"),
+            attempt_key=row.get("attempt_count"),
             outcome="capped",
             reason=row.get("last_error"),
             claim_seq=row.get("claim_seq"),

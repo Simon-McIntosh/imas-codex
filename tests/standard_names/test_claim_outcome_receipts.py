@@ -5,11 +5,12 @@ A claim ends in exactly one of seven ways. Each ending writer appends a
 census can read one entry per attempt instead of a single overwritten
 ``last_error``.
 
-These tests drive the real writer for each outcome through a graph double that
-implements the append statement's fence and its create-once identity. A stored
-receipt is what is asserted, never the entry a writer built, so an entry that
-omits the claim sequence -- and is therefore fenced out of the graph -- fails
-here rather than passing on the strength of its own shape.
+These tests drive the ending writers themselves through a graph double that
+implements the append statement's fence and its create-once identity, so
+deleting an append from a writer leaves no receipt and fails here. A stored
+receipt is what is asserted, never the entry a writer built, and the receipt's
+attempt number is taken from the source node at write time rather than from
+anything the caller carried.
 """
 
 from __future__ import annotations
@@ -26,23 +27,69 @@ from imas_codex.standard_names.graph_store import (
 )
 
 
+class _FakeTransaction:
+    """A transaction whose queries land in the client that opened it."""
+
+    def __init__(self, client: _FakeGraphClient) -> None:
+        self._client = client
+        self.closed = False
+        self.committed = False
+        self.statements: list[str] = []
+
+    def run(self, cypher: str, **params: Any) -> list[dict[str, Any]]:
+        self.statements.append(cypher)
+        return self._client.dispatch(cypher, params)
+
+    def commit(self) -> None:
+        self.committed = True
+        self.closed = True
+
+    def close(self) -> None:
+        self.closed = True
+
+
+class _FakeSession:
+    def __init__(self, client: _FakeGraphClient) -> None:
+        self._client = client
+
+    def __enter__(self) -> _FakeSession:
+        return self
+
+    def __exit__(self, *exc: object) -> bool:
+        return False
+
+    def begin_transaction(self) -> _FakeTransaction:
+        transaction = _FakeTransaction(self._client)
+        self._client.transactions.append(transaction)
+        return transaction
+
+
 class _FakeGraphClient:
     """Graph double that executes the append statement's fence and identity.
 
-    Sources are seeded with their live claim. An entry is written only when the
-    statement would write it: the source must match, and when the entry carries
-    a token the source's live token and sequence must equal it. A missing
-    ``claim_seq`` therefore compares against a null and writes nothing, exactly
-    as Cypher does.
+    Sources are seeded with their live claim and their own ``attempt_count``. An
+    entry is written only when the statement would write it: the source must
+    match, and when the entry carries a token the source's live token and
+    sequence must equal it. A missing ``claim_seq`` therefore compares against a
+    null and writes nothing, exactly as Cypher does. The stored attempt number
+    is the entry's if it carries one and otherwise the source's, so a writer that
+    goes back to taking the count from its caller's row fails here.
     """
 
-    def __init__(self, claims: dict[str, dict[str, Any]]) -> None:
+    def __init__(
+        self,
+        claims: dict[str, dict[str, Any]],
+        *,
+        bind_rows: list[dict[str, Any]] | None = None,
+    ) -> None:
         self.claims = claims
+        self.bind_rows = bind_rows or []
         self.receipts: dict[str, dict[str, Any]] = {}
         self.links: list[tuple[str, str]] = []
         self.queries: list[tuple[str, dict[str, Any]]] = []
         self.status_writes: list[dict[str, Any]] = []
         self.parking_rows: list[dict[str, Any]] = []
+        self.transactions: list[_FakeTransaction] = []
 
     def __enter__(self) -> _FakeGraphClient:
         return self
@@ -50,12 +97,33 @@ class _FakeGraphClient:
     def __exit__(self, *exc: object) -> bool:
         return False
 
+    def session(self) -> _FakeSession:
+        return _FakeSession(self)
+
     def query(self, cypher: str, **params: Any) -> list[dict[str, Any]]:
+        return self.dispatch(cypher, params)
+
+    def dispatch(self, cypher: str, params: dict[str, Any]) -> list[dict[str, Any]]:
         self.queries.append((cypher, params))
-        if "$max_compose_attempts" in cypher:
-            return [dict(row) for row in self.parking_rows]
         if "StandardNameSourceClaimAttempt" in cypher:
             return [{"written": self._append(params.get("entries") or [])}]
+        if "$max_compose_attempts" in cypher:
+            return [dict(row) for row in self.parking_rows]
+        if "AS binding_kind" in cypher:
+            return [dict(row) for row in self.bind_rows]
+        if "RETURN old.id AS old_id" in cypher:
+            return []
+        if "sns.composed_at = null" in cypher:
+            return []
+        if "sns.status = 'attached'" in cypher:
+            matched = []
+            for item in params.get("batch") or []:
+                claim = self.claims.get(item["sns_id"])
+                if claim is None or claim["claim_token"] != item["claim_token"]:
+                    continue
+                claim["status"] = "attached"
+                matched.append({"id": item["sns_id"]})
+            return matched
         if "SET sns.status = b.status" in cypher:
             matched = []
             for item in params.get("batch") or []:
@@ -67,10 +135,11 @@ class _FakeGraphClient:
                     or claim["claim_seq"] != item["claim_seq"]
                 ):
                     continue
+                claim["status"] = item["status"]
                 self.status_writes.append(item)
                 matched.append({"id": item["sns_id"]})
             return matched
-        return [{"n": 0}]
+        return []
 
     def _append(self, entries: list[dict[str, Any]]) -> int:
         written = 0
@@ -89,7 +158,7 @@ class _FakeGraphClient:
             self.receipts[entry["id"]] = {
                 "id": entry["id"],
                 "source_id": entry["source_id"],
-                "attempt": entry["attempt"],
+                "attempt": entry.get("attempt", claim.get("attempt_count", 1)),
                 "outcome": entry["outcome"],
                 "reason": entry["reason"],
                 "batch_key": entry["batch_key"],
@@ -108,11 +177,27 @@ class _FakeGraphClient:
 
 
 def _services(gc: _FakeGraphClient, **extra: Any) -> SimpleNamespace:
-    return SimpleNamespace(GraphClient=lambda: gc, **extra)
+    wiring: dict[str, Any] = {
+        "GraphClient": lambda: gc,
+        "NameStage": claims.NameStage,
+        "_TransactionQuery": claims._TransactionQuery,
+        "_complete_source_fences": lambda items: [dict(item) for item in items],
+        "_guard_failed_source_reasons": lambda batch: None,
+        "_lock_claimed_name_bindings": gsb._lock_claimed_name_bindings,
+        "_guard_existing_target_pairings": gsb._guard_existing_target_pairings,
+    }
+    wiring.update(extra)
+    return SimpleNamespace(**wiring)
 
 
-def _claim(claim_token: str = "tok", claim_seq: int = 1) -> dict[str, Any]:
-    return {"claim_token": claim_token, "claim_seq": claim_seq}
+def _claim(
+    claim_token: str = "tok", claim_seq: int = 1, attempt: int = 1
+) -> dict[str, Any]:
+    return {
+        "claim_token": claim_token,
+        "claim_seq": claim_seq,
+        "attempt_count": attempt,
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -125,7 +210,6 @@ def test_claim_attempt_entry_names_each_outcome() -> None:
     entries = [
         claims.claim_attempt_entry(
             "dd:equilibrium/time_slice/profiles_1d/psi",
-            attempt=1,
             outcome=outcome,
             reason=f"{outcome} reason",
             claim_seq=4,
@@ -138,20 +222,19 @@ def test_claim_attempt_entry_names_each_outcome() -> None:
     for entry in entries:
         assert entry["source_id"] == "dd:equilibrium/time_slice/profiles_1d/psi"
         assert entry["claim_seq"] == 4
-        assert entry["attempt"] == 1
         assert entry["reason"] == f"{entry['outcome']} reason"
 
 
 def test_claim_attempt_entry_requires_a_claim_sequence() -> None:
     """A fenced writer must state the sequence it is closing."""
     with pytest.raises(TypeError, match="claim_seq"):
-        claims.claim_attempt_entry("dd:x", attempt=1, outcome="refused")
+        claims.claim_attempt_entry("dd:x", outcome="refused")
 
 
 def test_an_unclaimed_source_keys_its_receipt_on_the_attempt() -> None:
     """The sweep that parks a source at the cap holds no sequence to key on."""
     entry = claims.claim_attempt_entry(
-        "dd:x", attempt=5, outcome="capped", claim_seq=None
+        "dd:x", attempt_key=5, outcome="capped", claim_seq=None
     )
 
     assert entry["claim_seq"] is None
@@ -160,10 +243,8 @@ def test_an_unclaimed_source_keys_its_receipt_on_the_attempt() -> None:
 
 def test_claim_attempt_entry_rejects_unknown_outcome() -> None:
     """A writer cannot invent an outcome the census does not know."""
-    with pytest.raises(ValueError, match="unknown compose claim outcome"):
-        claims.claim_attempt_entry(
-            "dd:x", attempt=1, outcome="produced_later", claim_seq=1
-        )
+    with pytest.raises(ValueError, match="unknown compose claim"):
+        claims.claim_attempt_entry("dd:x", outcome="produced_later", claim_seq=1)
 
 
 # ---------------------------------------------------------------------------
@@ -190,22 +271,33 @@ def test_status_maps_to_its_own_outcome(status: str, outcome: str) -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_produced_writer_stores_a_produced_receipt() -> None:
-    """A bound candidate leaves a produced receipt carrying the claim's run."""
-    gc = _FakeGraphClient({"dd:a": _claim("tok-a", 3)})
-    batch = [
-        {
-            "sns_id": "dd:a",
-            "claim_token": "tok-a",
-            "claim_seq": 3,
-            "attempt_count": 3,
-            "batch_key": "bk",
-            "run_id": "run-1",
-        }
-    ]
+def test_persist_claimed_attachments_stores_a_produced_receipt() -> None:
+    """The attachment writer leaves a produced receipt carrying the claim's run."""
+    gc = _FakeGraphClient(
+        {"dd:a": _claim("tok-a", 3, attempt=3)},
+        bind_rows=[
+            {"id": "dd:a", "outcome": "winner", "resolved_id": "name_psi"},
+        ],
+    )
+    services = _services(gc)
 
-    claims.append_claim_attempts(gc, gsb._produced_claim_entries(batch))
+    ids = gsb.persist_claimed_attachments(
+        [
+            {
+                "sns_id": "dd:a",
+                "standard_name": "name_psi",
+                "source_id": "equilibrium/time_slice/profiles_1d/psi",
+                "unit": "eV",
+                "claim_token": "tok-a",
+                "claim_seq": 3,
+                "batch_key": "bk",
+                "run_id": "run-1",
+            }
+        ],
+        services=services,
+    )
 
+    assert ids == ["dd:a"]
     held = gc.held_by("dd:a")
     assert len(held) == 1
     assert held[0]["outcome"] == "produced"
@@ -215,44 +307,168 @@ def test_produced_writer_stores_a_produced_receipt() -> None:
     assert held[0]["reason"] is None
 
 
-def test_released_writer_stores_a_released_receipt_with_its_reason() -> None:
-    """A binding refusal returns the claim with the collision it hit."""
-    gc = _FakeGraphClient({"dd:a": _claim("tok-a", 2)})
-    batch = [
-        {
-            "sns_id": "dd:a",
-            "sn_id": "name_candidate",
-            "unit": "m",
-            "claim_token": "tok-a",
-            "claim_seq": 2,
-            "attempt_count": 2,
-        }
-    ]
+def test_the_receipt_records_the_sources_own_attempt_count() -> None:
+    """The attempt is read off the source when the receipt is written.
 
-    claims.append_claim_attempts(gc, gsb._released_claim_entries(batch))
+    The caller's row carries a count that is wrong on purpose: a receipt that
+    records it would report the attempt the caller believed it was making
+    rather than the one the source was on.
+    """
+    gc = _FakeGraphClient(
+        {"dd:a": _claim("tok-a", 4, attempt=4)},
+        bind_rows=[{"id": "dd:a", "outcome": "winner", "resolved_id": "name_psi"}],
+    )
+
+    gsb.persist_claimed_attachments(
+        [
+            {
+                "sns_id": "dd:a",
+                "standard_name": "name_psi",
+                "source_id": "equilibrium/time_slice/profiles_1d/psi",
+                "claim_token": "tok-a",
+                "claim_seq": 4,
+                "attempt_count": 99,
+            }
+        ],
+        services=_services(gc),
+    )
 
     held = gc.held_by("dd:a")
     assert len(held) == 1
+    assert held[0]["attempt"] == 4
+
+
+def test_the_binding_lock_stores_a_released_receipt_with_its_collision() -> None:
+    """A binding refusal returns the claim and records the collision it hit."""
+    gc = _FakeGraphClient(
+        {"dd:a": _claim("tok-a", 2, attempt=2)},
+        bind_rows=[
+            {
+                "id": "dd:a",
+                "outcome": "unit_collision",
+                "candidate_id": "name_cand",
+                "target_stage": "drafted",
+                "successors": [],
+            }
+        ],
+    )
+
+    rows = gsb._lock_claimed_name_bindings(
+        gc,
+        [
+            {
+                "sns_id": "dd:a",
+                "sn_id": "name_cand",
+                "unit": "m",
+                "source_id": "equilibrium/time_slice/profiles_1d/psi",
+                "claim_token": "tok-a",
+                "claim_seq": 2,
+            }
+        ],
+        services=_services(gc),
+        allow_missing=False,
+        allow_own_pending_reservation=False,
+    )
+
+    assert rows[0]["outcome"] == "unit_collision"
+    held = gc.held_by("dd:a")
+    assert len(held) == 1
     assert held[0]["outcome"] == "released"
-    assert "name_candidate" in held[0]["reason"]
+    assert "name_cand" in held[0]["reason"]
 
 
-def test_attachment_refusal_reason_names_the_attachment_error() -> None:
+def test_an_attachment_refusal_records_the_rejection_reason() -> None:
     """An attachment refusal records the rejection, not a generic collision."""
-    gc = _FakeGraphClient({"dd:a": _claim("t", 1)})
-    batch = [
-        {
-            "sns_id": "dd:a",
-            "sn_id": "cand",
-            "attachment_error": "is already attached to another source",
-            "claim_token": "t",
-            "claim_seq": 1,
-        }
-    ]
+    gc = _FakeGraphClient(
+        {"dd:a": _claim("t", 1)},
+        bind_rows=[
+            {
+                "id": "dd:a",
+                "outcome": "attachment_collision",
+                "candidate_id": "cand",
+                "target_stage": "drafted",
+                "successors": [],
+            }
+        ],
+    )
 
-    claims.append_claim_attempts(gc, gsb._released_claim_entries(batch))
+    gsb._lock_claimed_name_bindings(
+        gc,
+        [
+            {
+                "sns_id": "dd:a",
+                "sn_id": "cand",
+                "source_id": "equilibrium/time_slice/profiles_1d/psi",
+                "attachment_error": "is already attached to another source",
+                "claim_token": "t",
+                "claim_seq": 1,
+            }
+        ],
+        services=_services(gc),
+        allow_missing=False,
+        allow_own_pending_reservation=False,
+    )
 
-    assert "already attached" in gc.held_by("dd:a")[0]["reason"]
+    reason = gc.held_by("dd:a")[0]["reason"]
+    assert "attachment rejected" in reason
+    assert '"cand"' in reason
+    assert "binding collision" not in reason
+
+
+@pytest.mark.parametrize(
+    ("status", "outcome"),
+    [("failed", "refused"), ("skipped", "skipped"), ("extracted", "requeued")],
+)
+def test_persist_claimed_source_outcomes_stores_the_stored_outcome(
+    status: str, outcome: str
+) -> None:
+    """The stored status decides the outcome, and a skip is never a refusal."""
+    gc = _FakeGraphClient({"dd:a": _claim("tok-a", 2, attempt=2)})
+
+    ids = gsb.persist_claimed_source_outcomes(
+        [
+            {
+                "sns_id": "dd:a",
+                "status": status,
+                "last_error": "candidate pre-validation failed (grammar): bad_name",
+                "skip_reason_detail": "bare timestamp",
+                "claim_token": "tok-a",
+                "claim_seq": 2,
+            }
+        ],
+        services=_services(gc),
+    )
+
+    assert ids == ["dd:a"]
+    held = gc.held_by("dd:a")
+    assert len(held) == 1
+    assert held[0]["outcome"] == outcome
+
+
+def test_the_stored_outcome_receipt_is_committed_with_its_status_write() -> None:
+    """The receipt and the status write it accompanies are one transaction."""
+    gc = _FakeGraphClient({"dd:a": _claim("tok-a", 2)})
+
+    gsb.persist_claimed_source_outcomes(
+        [
+            {
+                "sns_id": "dd:a",
+                "status": "failed",
+                "last_error": "pre-validation failed",
+                "claim_token": "tok-a",
+                "claim_seq": 2,
+            }
+        ],
+        services=_services(gc),
+    )
+
+    assert len(gc.transactions) == 1
+    transaction = gc.transactions[0]
+    assert transaction.committed
+    assert len(transaction.statements) == 2
+    assert "StandardNameSourceClaimAttempt" in transaction.statements[0]
+    assert "SET sns.status = b.status" in transaction.statements[1]
+    assert gc.held_by("dd:a")[0]["outcome"] == "refused"
 
 
 def test_batch_failure_writer_stores_a_receipt_per_claimed_source() -> None:
@@ -266,15 +482,9 @@ def test_batch_failure_writer_stores_a_receipt_per_claimed_source() -> None:
                 "id": "dd:a",
                 "claim_token": "tok-a",
                 "claim_seq": 3,
-                "attempt_count": 3,
                 "run_id": "run-9",
             },
-            {
-                "id": "dd:b",
-                "claim_token": "tok-b",
-                "claim_seq": 3,
-                "attempt_count": 3,
-            },
+            {"id": "dd:b", "claim_token": "tok-b", "claim_seq": 3},
             {"id": None},
         ],
         "batch-key",
@@ -290,58 +500,11 @@ def test_batch_failure_writer_stores_a_receipt_per_claimed_source() -> None:
     assert "generate_name" in gc.held_by("dd:a")[0]["reason"]
 
 
-def test_stored_status_writer_records_refused_for_a_failed_source() -> None:
-    """A source parked failed by pre-validation or a persist refusal is refused."""
-    gc = _FakeGraphClient({"dd:a": _claim("tok-a", 2)})
-    batch = [
-        {
-            "sns_id": "dd:a",
-            "status": "failed",
-            "last_error": "candidate pre-validation failed (grammar): bad_name",
-            "claim_token": "tok-a",
-            "claim_seq": 2,
-            "attempt_count": 2,
-        }
-    ]
-
-    claims.append_claim_attempts(gc, gsb._stored_outcome_claim_entries(batch))
-
-    held = gc.held_by("dd:a")
-    assert len(held) == 1
-    assert held[0]["outcome"] == "refused"
-    assert "grammar" in held[0]["reason"]
-
-
-@pytest.mark.parametrize(
-    ("status", "outcome"), [("skipped", "skipped"), ("extracted", "requeued")]
-)
-def test_stored_status_writer_never_records_a_refusal_for_a_parked_or_requeued_source(
-    status: str, outcome: str
-) -> None:
-    """Skipped and requeued ends are their own outcomes, not refusals."""
-    gc = _FakeGraphClient({"dd:a": _claim("tok", 1)})
-    batch = [
-        {
-            "sns_id": "dd:a",
-            "status": status,
-            "skip_reason_detail": "bare timestamp",
-            "claim_token": "tok",
-            "claim_seq": 1,
-        }
-    ]
-
-    claims.append_claim_attempts(gc, gsb._stored_outcome_claim_entries(batch))
-
-    held = gc.held_by("dd:a")
-    assert len(held) == 1
-    assert held[0]["outcome"] == outcome
-
-
 def test_capped_writer_stores_a_capped_receipt() -> None:
     """The attempt-cap sweep leaves a capped receipt on each row it parks."""
     from imas_codex.standard_names import orphan_sweep
 
-    gc = _FakeGraphClient({"dd:a": _claim("tok", 5)})
+    gc = _FakeGraphClient({"dd:a": _claim("tok", 5, attempt=5)})
     entries = orphan_sweep._capped_claim_entries(
         [
             {
@@ -369,7 +532,7 @@ def test_the_sweep_tick_issues_the_capped_append(monkeypatch) -> None:
     from imas_codex.standard_names import orphan_sweep
     from imas_codex.standard_names.graph_store import graph_source_bindings
 
-    gc = _FakeGraphClient({"dd:a": _claim("tok", 5)})
+    gc = _FakeGraphClient({"dd:a": _claim("tok", 5, attempt=5)})
     gc.parking_rows = [
         {
             "id": "dd:a",
@@ -404,7 +567,6 @@ def test_a_stale_claim_writes_no_receipt() -> None:
     gc = _FakeGraphClient({"dd:a": _claim("live-token", 7)})
     entry = claims.claim_attempt_entry(
         "dd:a",
-        attempt=2,
         outcome="batch_failed",
         claim_seq=6,
         claim_token="stale-token",
@@ -416,18 +578,17 @@ def test_a_stale_claim_writes_no_receipt() -> None:
 
 def test_a_source_at_the_attempt_cap_holds_one_receipt_per_attempt() -> None:
     """A source that fails five times carries five receipts, not one."""
-    gc = _FakeGraphClient({"dd:a": _claim("tok", 1)})
+    gc = _FakeGraphClient({"dd:a": _claim("tok", 1, attempt=1)})
     written = 0
     for attempt in range(1, 6):
         # Each re-claim bumps the sequence, so the source's live sequence is
         # the one the attempt it is recording was made under.
-        gc.claims["dd:a"] = _claim("tok", attempt)
+        gc.claims["dd:a"] = _claim("tok", attempt, attempt=attempt)
         written += claims.append_claim_attempts(
             gc,
             [
                 claims.claim_attempt_entry(
                     "dd:a",
-                    attempt=attempt,
                     outcome="refused",
                     reason=f"refusal {attempt}",
                     claim_seq=attempt,
@@ -447,7 +608,6 @@ def test_the_written_count_is_receipts_created_not_claims_matched() -> None:
     gc = _FakeGraphClient({"dd:a": _claim("tok", 1)})
     entry = claims.claim_attempt_entry(
         "dd:a",
-        attempt=1,
         outcome="released",
         claim_seq=1,
         claim_token="tok",
@@ -464,9 +624,7 @@ def test_every_receipt_names_its_source() -> None:
     gc = _FakeGraphClient({"dd:a": _claim("tok", 1)})
     claims.append_claim_attempts(
         gc,
-        gsb._produced_claim_entries(
-            [{"sns_id": "dd:a", "claim_token": "tok", "claim_seq": 1}]
-        ),
+        [claims.claim_attempt_entry("dd:a", outcome="produced", claim_seq=1)],
     )
 
     assert gc.receipts[next(iter(gc.receipts))]["source_id"] == "dd:a"
@@ -508,7 +666,7 @@ def test_batch_failure_never_masks_the_batch_error(monkeypatch) -> None:
     )
 
     wcb._record_batch_failure(
-        [{"id": "dd:a", "claim_token": "t", "claim_seq": 1, "attempt_count": 1}],
+        [{"id": "dd:a", "claim_token": "t", "claim_seq": 1}],
         "batch-key",
         "generate_name",
     )
@@ -524,9 +682,9 @@ def test_the_append_statement_creates_and_links_a_receipt_in_the_live_graph() ->
     """The statement the double models behaves the same way in Neo4j.
 
     A double proves the writers build entries the fence accepts; only the real
-    statement proves the fence, the create-once identity and the relationship
-    are what the double claims. The probe source is created and removed here,
-    so it leaves nothing behind.
+    statement proves the fence, the create-once identity, the attempt number it
+    reads off the source and the relationship are what the double claims. The
+    probe source is created and removed here, so it leaves nothing behind.
     """
     from imas_codex.graph.client import GraphClient
 
@@ -536,14 +694,13 @@ def test_the_append_statement_creates_and_links_a_receipt_in_the_live_graph() ->
             """
             MERGE (s:StandardNameSource {id: $id})
             SET s.claim_token = 'probe-token', s.claim_seq = 3,
-                s.status = 'extracting'
+                s.attempt_count = 4, s.status = 'extracting'
             """,
             id=source_id,
         )
         try:
             entry = claims.claim_attempt_entry(
                 source_id,
-                attempt=3,
                 outcome="batch_failed",
                 reason="probe batch failure",
                 claim_seq=3,
@@ -569,7 +726,7 @@ def test_the_append_statement_creates_and_links_a_receipt_in_the_live_graph() ->
             row = stored[0]
             assert row["id"] == entry["id"]
             assert row["source_id"] == source_id
-            assert row["attempt"] == 3
+            assert row["attempt"] == 4
             assert row["outcome"] == "batch_failed"
             assert row["reason"] == "probe batch failure"
             assert row["batch_key"] == "probe-batch"
@@ -578,7 +735,6 @@ def test_the_append_statement_creates_and_links_a_receipt_in_the_live_graph() ->
 
             stale = claims.claim_attempt_entry(
                 source_id,
-                attempt=4,
                 outcome="released",
                 claim_seq=2,
                 claim_token="probe-token",

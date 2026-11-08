@@ -36,7 +36,6 @@ def _batch_failure_claim_entries(
         entries.append(
             claim_attempt_entry(
                 source_id,
-                attempt=item.get("attempt_count"),
                 outcome="batch_failed",
                 reason=f"compose batch raised in phase {phase}",
                 claim_seq=item.get("claim_seq"),

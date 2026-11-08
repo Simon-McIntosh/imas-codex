@@ -87,8 +87,24 @@ longer holds. The append runs on the same client or transaction as the statement
 that ends the claim, so the receipt and the ending are one unit of work.</p>
 <p>A source the sweep parks carries no live sequence to key on, so its entry is
 keyed on the attempt number (<code>claim-attempt:{source}:attempt-{n}:capped</code>).
-The append reports the number of receipts it created rather than the number of
-MERGE matches, so a retried write reads zero.</p>
+The attempt number the receipt <em>stores</em> is never taken from the caller's
+row: the append reads <code>sns.attempt_count</code> off the source inside the
+same statement, so a writer holding a stale count cannot record it. The append
+reports the number of receipts it created rather than the number of MERGE
+matches, so a retried write reads zero.</p>
+
+<h3>One transaction per ending</h3>
+<p>Each receipt is written inside the unit of work that ends the claim, so a
+claim cannot end without its outcome. In
+<code>persist_claimed_attachments</code> and in the binding lock
+(<code>_lock_claimed_name_bindings</code>, shared with the catalog writers) the
+append runs on the caller's own transaction, before the statement that clears
+the claim token. <code>persist_claimed_source_outcomes</code> opens one
+transaction and writes the receipt and the status write in it together, so the
+receipt and the status it describes commit or roll back as a pair. The
+batch-failure path is the one deliberate exception: it runs after the batch has
+already raised, holds no client, and records best-effort so a graph fault
+cannot replace the exception that ended the batch.</p>
 
 <h3>Negative controls</h3>
 <p>Two mutations, both run against the node's own test file. Removing the
@@ -102,8 +118,14 @@ the run exits non-zero.</p>
 than the receipt the graph stored. Every outcome test now drives the real writer
 through a graph double that implements the append's fence and its create-once
 identity, and one <code>-m graph</code> test runs the real statement against a
-disposable Neo4j: it creates and links a receipt, proves a stale sequence writes
-nothing, and removes its probe nodes.</p>
+disposable Neo4j: it creates and links a receipt, stores the source's own
+attempt count, proves a stale sequence writes nothing, and removes its probe
+nodes.</p>
+<p>Three further mutations remove the append from one writer at a time —
+<code>persist_claimed_attachments</code> (produced), the binding lock
+(released) and <code>persist_claimed_source_outcomes</code> (stored outcome).
+Each leaves one test failing and no receipt, so no writer can lose its append
+without a test noticing.</p>
 <p>A third guard covers the sweep's own call. Replacing
 <code>_orphan_sweep_tick</code>'s append with a no-op fails
 <code>test_the_sweep_tick_issues_the_capped_append</code> and nothing else, so

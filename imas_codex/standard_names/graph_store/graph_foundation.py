@@ -867,21 +867,25 @@ def claim_outcome_for_status(status: str | None) -> str:
 def claim_attempt_entry(
     sns_id: str,
     *,
-    attempt: Any,
     outcome: str,
-    reason: str | None = None,
     claim_seq: Any,
+    reason: str | None = None,
     claim_token: str | None = None,
     batch_key: str | None = None,
     run_id: str | None = None,
+    attempt_key: Any = None,
 ) -> dict[str, Any]:
     """Build one claim-attempt entry for the append stanza.
 
     The identity is ``claim-attempt:{source}:{claim_seq}:{outcome}``. A source
     holds one claim per sequence number, so the triple is unique and the MERGE
     is idempotent under a deadlock retry. A source that carries no sequence is
-    keyed on its attempt number instead, which is what the sweep that parks it
-    at the attempt cap holds.
+    keyed on the attempt number the writer read off that source, which is what
+    the sweep that parks it at the cap holds.
+
+    The attempt number the receipt *stores* never comes from here: the append
+    reads ``sns.attempt_count`` at write time, so a caller cannot record a
+    stale count by carrying one in its own row.
 
     ``claim_token`` and ``claim_seq`` ride on the entry because the append is
     fenced on the source's live claim. An entry that omits either one is
@@ -890,13 +894,14 @@ def claim_attempt_entry(
 
     Args:
         sns_id: StandardNameSource id the claim belongs to.
-        attempt: Composition-attempt number held at claim time.
         outcome: One of :data:`CLAIM_ATTEMPT_OUTCOMES`.
-        reason: Refusal or failure text that ended the claim.
         claim_seq: Monotonic per-source claim counter that keys the receipt.
+        reason: Refusal or failure text that ended the claim.
         claim_token: Token of the live claim this entry closes.
         batch_key: Compose batch or unit group that carried the claim.
         run_id: Standard-name run that owned the claim.
+        attempt_key: The source's own attempt count, used only to key a receipt
+            on a source that holds no claim sequence.
 
     Returns:
         The entry map consumed by :data:`CLAIM_ATTEMPT_APPEND_CYPHER`.
@@ -909,13 +914,12 @@ def claim_attempt_entry(
             f"unknown compose claim outcome {outcome!r}; expected one of "
             f"{sorted(CLAIM_ATTEMPT_OUTCOMES)}"
         )
-    key = claim_seq if claim_seq is not None else f"attempt-{int(attempt or 0)}"
+    key = claim_seq if claim_seq is not None else f"attempt-{int(attempt_key or 0)}"
     return {
         "id": f"claim-attempt:{sns_id}:{key}:{outcome}",
         "source_id": sns_id,
         "claim_seq": claim_seq,
         "claim_token": claim_token,
-        "attempt": int(attempt or 1),
         "outcome": outcome,
         "reason": reason,
         "batch_key": batch_key,
@@ -936,7 +940,7 @@ OPTIONAL MATCH (existing:StandardNameSourceClaimAttempt {{id: entry.id}})
 WITH {sns_var} AS sns, entry, existing
 MERGE (attempt_row:StandardNameSourceClaimAttempt {{id: entry.id}})
 ON CREATE SET attempt_row.source_id = entry.source_id,
-              attempt_row.attempt = entry.attempt,
+              attempt_row.attempt = coalesce(sns.attempt_count, 1),
               attempt_row.outcome = entry.outcome,
               attempt_row.reason = entry.reason,
               attempt_row.batch_key = entry.batch_key,

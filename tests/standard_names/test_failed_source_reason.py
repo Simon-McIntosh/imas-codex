@@ -25,13 +25,25 @@ REASONLESS = [None, "", "   ", "\n\t "]
 
 
 def _outcome_client() -> MagicMock:
-    """A GraphClient whose single query reports the outcome batch as a winner."""
-    gc = MagicMock()
-    gc.query.return_value = [{"id": "dd:wall/outline/r"}]
+    """A GraphClient whose one transaction writes a receipt and reports a winner."""
+    transaction = MagicMock()
+    transaction.closed = False
+    transaction.run.side_effect = [
+        [{"written": 1}],
+        [{"id": "dd:wall/outline/r"}],
+    ]
+
+    @contextmanager
+    def _session():
+        session = MagicMock()
+        session.begin_transaction.return_value = transaction
+        yield session
+
     client = MagicMock()
-    client.__enter__.return_value = gc
+    client.__enter__.return_value = client
     client.__exit__.return_value = False
-    client.query = gc.query
+    client.session = _session
+    client.transaction = transaction
     return client
 
 
@@ -109,7 +121,7 @@ def test_claimed_outcome_carries_a_stated_failure_reason_to_the_write() -> None:
             [_failed_outcome(reason)]
         ) == ["dd:wall/outline/r"]
 
-    persisted = client.query.call_args.kwargs["batch"][0]
+    persisted = client.transaction.run.call_args.kwargs["batch"][0]
     assert persisted["status"] == "failed"
     assert persisted["last_error"] == reason
 
@@ -122,7 +134,7 @@ def test_claimed_outcome_trims_the_stated_failure_reason() -> None:
             [_failed_outcome("  compose returned no candidate  ")]
         )
 
-    persisted = client.query.call_args.kwargs["batch"][0]
+    persisted = client.transaction.run.call_args.kwargs["batch"][0]
     assert persisted["last_error"] == "compose returned no candidate"
 
 
@@ -139,7 +151,7 @@ def test_a_non_terminal_outcome_still_needs_no_reason() -> None:
 
     # The claim-attempt receipt, then the status write: a non-terminal outcome
     # is recorded but still needs no failure reason.
-    assert client.query.call_count == 2
+    assert client.transaction.run.call_count == 2
 
 
 @pytest.mark.parametrize("reason", REASONLESS)
