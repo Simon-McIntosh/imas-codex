@@ -8,6 +8,13 @@
   "call_sites": [],
   "call_sites_note": "No production runtime code imports the evidence runner; its __main__ block at docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py:1121-1145 is the standalone entry.",
   "completed_at": "2026-11-07T23:59:57.335Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "exempted",
+      "reason": "read-only census instrument kept as evidence; the repair node after the full run reuses catalog_ordering._find_cyclic_components for its cycle check",
+      "recorded_at": "2026-11-08T00:26:50.966223+00:00"
+    }
+  },
   "dispatched_at": "2026-11-07T23:46:33Z",
   "durability_note": "The planted controls at :107-108 and the independent Cypher cycle and live-tip cross-checks at :178 and :187 would redden if classify regressed, and the two refusal scenarios at :365-405 would redden if the writers stopped refusing; none is wired into the pytest suite and :31 makes the instrument unrunnable outside this host.",
   "findings": [
