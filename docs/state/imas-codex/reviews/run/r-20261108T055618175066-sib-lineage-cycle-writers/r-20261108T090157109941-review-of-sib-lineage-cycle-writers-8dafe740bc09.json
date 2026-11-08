@@ -1,0 +1,481 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived directly from completed source-run package logs: nine distinct baseline FAILED IDs, zero head FAILED IDs, empty head-minus-base set; known-present baseline failures validate the extraction.",
+  "after_suite": {
+    "command": "TMPDIR=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T055618175066-sib-lineage-cycle-writers/scratch UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-lineage-cycle-writers uv run --no-sync pytest -p no:cacheprovider -o timeout=60 --basetemp /home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T055618175066-sib-lineage-cycle-writers/scratch/head-full-serial-temp /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-lineage-cycle-writers/tests/standard_names/",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T055618175066-sib-lineage-cycle-writers/resume-head-standard-names-serial.log",
+    "revision": "404b86a19d595eeb716913b0c7bada997da72ab7"
+  },
+  "assertion_audit": [
+    {
+      "assertion": "result['ok'] is False",
+      "fails_if": "Restore the ancestor-fold exemption: the writer returns ok=True and this independent refusal assertion fails (demonstrated by the mutation receipt).",
+      "file": "tests/standard_names/test_lineage_cycle_writers.py",
+      "independent": true,
+      "line": 111
+    },
+    {
+      "assertion": "'REFINED_FROM cycle' in result['reason']",
+      "fails_if": "Remove or misclassify the cycle guard: the returned refusal lacks the required cycle reason (or refinement fails to raise earlier).",
+      "file": "tests/standard_names/test_lineage_cycle_writers.py",
+      "independent": true,
+      "line": 112
+    },
+    {
+      "assertion": "_state() == before",
+      "fails_if": "Permit a name-stage change, lineage edge, source reassignment or change receipt despite refusal: an independent before/after graph read or deep-copied fake state differs.",
+      "file": "tests/standard_names/test_lineage_cycle_writers.py",
+      "independent": true,
+      "line": 113
+    },
+    {
+      "assertion": "result['ok'] is False",
+      "fails_if": "Restore the ancestor-fold exemption: the writer returns ok=True and this independent refusal assertion fails (demonstrated by the mutation receipt).",
+      "file": "tests/standard_names/test_lineage_cycle_writers.py",
+      "independent": true,
+      "line": 125
+    },
+    {
+      "assertion": "'REFINED_FROM cycle' in result['reason']",
+      "fails_if": "Remove or misclassify the cycle guard: the returned refusal lacks the required cycle reason (or refinement fails to raise earlier).",
+      "file": "tests/standard_names/test_lineage_cycle_writers.py",
+      "independent": true,
+      "line": 126
+    },
+    {
+      "assertion": "f\"sn edit '{OLD}' --rename '{ANCESTOR}'\" in result['reason']",
+      "fails_if": "Remove the sanctioned reclaim guidance or name the wrong old/target in the refusal: the required command/reclaim phrase is absent.",
+      "file": "tests/standard_names/test_lineage_cycle_writers.py",
+      "independent": true,
+      "line": 127
+    },
+    {
+      "assertion": "_state() == before",
+      "fails_if": "Permit a name-stage change, lineage edge, source reassignment or change receipt despite refusal: an independent before/after graph read or deep-copied fake state differs.",
+      "file": "tests/standard_names/test_lineage_cycle_writers.py",
+      "independent": true,
+      "line": 128
+    },
+    {
+      "assertion": "plan.blocked is None",
+      "fails_if": "Refuse the sanctioned closing-lineage reclaim: the returned plan carries a blocking reason.",
+      "file": "tests/standard_names/test_lineage_cycle_writers.py",
+      "independent": true,
+      "line": 145
+    },
+    {
+      "assertion": "plan.applied is True",
+      "fails_if": "Return a dry-run/unapplied plan for the actual reclaim: applied is not True.",
+      "file": "tests/standard_names/test_lineage_cycle_writers.py",
+      "independent": true,
+      "line": 146
+    },
+    {
+      "assertion": "plan.successor == ANCESTOR",
+      "fails_if": "Return a different successor identity for the reclaim: the result disagrees with the requested ancestor; separate graph-edge/source assertions independently check the actual write.",
+      "file": "tests/standard_names/test_lineage_cycle_writers.py",
+      "independent": true,
+      "line": 147
+    },
+    {
+      "assertion": "{row['id']: row['stage'] for row in state['names']} == {OLD: 'superseded', ANCESTOR: 'reviewed'}",
+      "fails_if": "Leave the old name live, fail to revive the ancestor, or create an extra name: the database-derived identity-to-stage map differs.",
+      "file": "tests/standard_names/test_lineage_cycle_writers.py",
+      "independent": true,
+      "line": 149
+    },
+    {
+      "assertion": "state['edges'] == [{'successor': OLD, 'predecessor': ANCESTOR}]",
+      "fails_if": "Reinstate the reverse-edge MERGE in closing-lineage reclaim or delete its original edge: the independently queried exact edge set differs.",
+      "file": "tests/standard_names/test_lineage_cycle_writers.py",
+      "independent": true,
+      "line": 153
+    },
+    {
+      "assertion": "state['sources'] == [{'id': f'dd:{SOURCE_PATH}', 'produced': ANCESTOR}]",
+      "fails_if": "Fail to move the DD source onto the reclaimed spelling, move it elsewhere, or add another source: the graph-derived source binding differs.",
+      "file": "tests/standard_names/test_lineage_cycle_writers.py",
+      "independent": true,
+      "line": 154
+    },
+    {
+      "assertion": "len(receipts) == 1",
+      "fails_if": "Omit or duplicate the reclaim_spelling receipt: the database query returns a count other than one.",
+      "file": "tests/standard_names/test_lineage_cycle_writers.py",
+      "independent": true,
+      "line": 160
+    },
+    {
+      "assertion": "json.loads(receipts[0]['reason'])['case'] == 'closing_lineage'",
+      "fails_if": "Write the wrong reclaim case into the signed receipt: the parsed graph receipt is not closing_lineage.",
+      "file": "tests/standard_names/test_lineage_cycle_writers.py",
+      "independent": true,
+      "line": 161
+    },
+    {
+      "assertion": "'successor_lifecycle_collision' in str(refusal.value)",
+      "fails_if": "Misclassify the superseded-ancestor control: its raised refusal lacks the existing lifecycle-collision reason.",
+      "file": "tests/standard_names/test_lineage_cycle_writers.py",
+      "independent": true,
+      "line": 174
+    },
+    {
+      "assertion": "_state() == before",
+      "fails_if": "Permit a name-stage change, lineage edge, source reassignment or change receipt despite refusal: an independent before/after graph read or deep-copied fake state differs.",
+      "file": "tests/standard_names/test_lineage_cycle_writers.py",
+      "independent": true,
+      "line": 175
+    },
+    {
+      "assertion": "'REFINED_FROM cycle' in str(refusal.value)",
+      "fails_if": "Remove or misclassify the cycle guard: the returned refusal lacks the required cycle reason (or refinement fails to raise earlier).",
+      "file": "tests/standard_names/test_lineage_cycle_writers.py",
+      "independent": true,
+      "line": 188
+    },
+    {
+      "assertion": "_state() == before",
+      "fails_if": "Permit a name-stage change, lineage edge, source reassignment or change receipt despite refusal: an independent before/after graph read or deep-copied fake state differs.",
+      "file": "tests/standard_names/test_lineage_cycle_writers.py",
+      "independent": true,
+      "line": 189
+    },
+    {
+      "assertion": "'live descendant' in str(refusal.value)",
+      "fails_if": "Remove or misclassify the live-descendant guard: the required reason is absent (or pytest.raises fails earlier when a second tip is persisted).",
+      "file": "tests/standard_names/test_lineage_cycle_writers.py",
+      "independent": true,
+      "line": 202
+    },
+    {
+      "assertion": "BRANCH in str(refusal.value)",
+      "fails_if": "Report a different or missing existing live descendant: the independently seeded branch identity is absent from the diagnostic.",
+      "file": "tests/standard_names/test_lineage_cycle_writers.py",
+      "independent": true,
+      "line": 203
+    },
+    {
+      "assertion": "_state() == before",
+      "fails_if": "Permit a name-stage change, lineage edge, source reassignment or change receipt despite refusal: an independent before/after graph read or deep-copied fake state differs.",
+      "file": "tests/standard_names/test_lineage_cycle_writers.py",
+      "independent": true,
+      "line": 204
+    },
+    {
+      "assertion": "archive['holder'] == HOLDER",
+      "fails_if": "Archive history without linking it to the existing averaged holder: the independent archive query disagrees before the planted exception.",
+      "file": "tests/standard_names/test_reclaim_history_apart.py",
+      "independent": true,
+      "line": 298
+    },
+    {
+      "assertion": "tombstone['name_stage'] == 'superseded'",
+      "fails_if": "Omit compensating restore after the planted rename failure: the tombstone remains absent or has the wrong stage.",
+      "file": "tests/standard_names/test_reclaim_history_apart.py",
+      "independent": true,
+      "line": 311
+    },
+    {
+      "assertion": "tombstone['documentation'] == TOMBSTONE_PROSE",
+      "fails_if": "Restore the wrong prose or omit the archived documentation: the database value differs from the independently seeded averaged-quantity prose.",
+      "file": "tests/standard_names/test_reclaim_history_apart.py",
+      "independent": true,
+      "line": 312
+    },
+    {
+      "assertion": "tombstone['reviews'] == ['review:average:1']",
+      "fails_if": "Fail to move the archived paid review back onto the tombstone: the database-derived review-id list differs.",
+      "file": "tests/standard_names/test_reclaim_history_apart.py",
+      "independent": true,
+      "line": 313
+    },
+    {
+      "assertion": "_read(TARGET)['sources'] == [f'dd:{VALUE_PATH}']",
+      "fails_if": "Move or lose the local-value source during compensation: the target source query no longer returns its original DD path.",
+      "file": "tests/standard_names/test_reclaim_history_apart.py",
+      "independent": true,
+      "line": 314
+    },
+    {
+      "assertion": "_read(HOLDER)['sources'] == [f'dd:{AVERAGE_PATH}']",
+      "fails_if": "Move or lose the averaged source during compensation: the holder source query no longer returns its original DD path.",
+      "file": "tests/standard_names/test_reclaim_history_apart.py",
+      "independent": true,
+      "line": 315
+    },
+    {
+      "assertion": "HOLDER in _successors(TOMBSTONE)",
+      "fails_if": "Fail to restore the averaged holder lineage edge: the independently queried successors omit HOLDER.",
+      "file": "tests/standard_names/test_reclaim_history_apart.py",
+      "independent": true,
+      "line": 316
+    },
+    {
+      "assertion": "gc.query('MATCH (n:ArchivedStandardName) RETURN count(n) AS n')[0]['n'] == 0",
+      "fails_if": "Leave the compensating archive behind: the independent archive-node count is positive.",
+      "file": "tests/standard_names/test_reclaim_history_apart.py",
+      "independent": true,
+      "line": 318
+    },
+    {
+      "assertion": "gc.query('MATCH (n:StandardNameChange) RETURN count(n) AS n')[0]['n'] == 0",
+      "fails_if": "Leave the archive receipt behind after compensation: the independent change-node count is positive.",
+      "file": "tests/standard_names/test_reclaim_history_apart.py",
+      "independent": true,
+      "line": 321
+    },
+    {
+      "assertion": "result['ok'] is False",
+      "fails_if": "Restore the ancestor-fold exemption: the writer returns ok=True and this independent refusal assertion fails (demonstrated by the mutation receipt).",
+      "file": "tests/standard_names/test_fold_guard_current_successor.py",
+      "independent": true,
+      "line": 98
+    },
+    {
+      "assertion": "'REFINED_FROM cycle' in result['reason']",
+      "fails_if": "Remove or misclassify the cycle guard: the returned refusal lacks the required cycle reason (or refinement fails to raise earlier).",
+      "file": "tests/standard_names/test_fold_guard_current_successor.py",
+      "independent": true,
+      "line": 99
+    },
+    {
+      "assertion": "'closing-lineage reclaim' in result['reason']",
+      "fails_if": "Remove the sanctioned reclaim guidance or name the wrong old/target in the refusal: the required command/reclaim phrase is absent.",
+      "file": "tests/standard_names/test_fold_guard_current_successor.py",
+      "independent": true,
+      "line": 100
+    },
+    {
+      "assertion": "f\"sn edit '{_OLD}' --rename '{_TARGET}'\" in result['reason']",
+      "fails_if": "Remove the sanctioned reclaim guidance or name the wrong old/target in the refusal: the required command/reclaim phrase is absent.",
+      "file": "tests/standard_names/test_fold_guard_current_successor.py",
+      "independent": true,
+      "line": 101
+    },
+    {
+      "assertion": "graph.state == before",
+      "fails_if": "Permit a name-stage change, lineage edge, source reassignment or change receipt despite refusal: an independent before/after graph read or deep-copied fake state differs.",
+      "file": "tests/standard_names/test_fold_guard_current_successor.py",
+      "independent": true,
+      "line": 102
+    },
+    {
+      "assertion": "graph.commits == 0",
+      "fails_if": "Commit the refused fold transaction: the independently recorded commit counter becomes nonzero.",
+      "file": "tests/standard_names/test_fold_guard_current_successor.py",
+      "independent": true,
+      "line": 103
+    },
+    {
+      "assertion": "graph.rollbacks == 1",
+      "fails_if": "Skip the refusal rollback or execute it twice: the independently recorded rollback count differs from one.",
+      "file": "tests/standard_names/test_fold_guard_current_successor.py",
+      "independent": true,
+      "line": 104
+    },
+    {
+      "assertion": "graph.transactions[-1].write_markers == []",
+      "fails_if": "Execute a fold write before refusing: the transaction recorder contains a write marker.",
+      "file": "tests/standard_names/test_fold_guard_current_successor.py",
+      "independent": true,
+      "line": 105
+    },
+    {
+      "assertion": "result['ok'] is False",
+      "fails_if": "Restore the ancestor-fold exemption: the writer returns ok=True and this independent refusal assertion fails (demonstrated by the mutation receipt).",
+      "file": "tests/standard_names/test_supersede_into_tombstone.py",
+      "independent": true,
+      "line": 161
+    },
+    {
+      "assertion": "'REFINED_FROM cycle' in result['reason']",
+      "fails_if": "Remove or misclassify the cycle guard: the returned refusal lacks the required cycle reason (or refinement fails to raise earlier).",
+      "file": "tests/standard_names/test_supersede_into_tombstone.py",
+      "independent": true,
+      "line": 162
+    },
+    {
+      "assertion": "'closing-lineage reclaim' in result['reason']",
+      "fails_if": "Remove the sanctioned reclaim guidance or name the wrong old/target in the refusal: the required command/reclaim phrase is absent.",
+      "file": "tests/standard_names/test_supersede_into_tombstone.py",
+      "independent": true,
+      "line": 163
+    },
+    {
+      "assertion": "f\"sn edit '{_OLD}' --rename '{_TARGET}'\" in result['reason']",
+      "fails_if": "Remove the sanctioned reclaim guidance or name the wrong old/target in the refusal: the required command/reclaim phrase is absent.",
+      "file": "tests/standard_names/test_supersede_into_tombstone.py",
+      "independent": true,
+      "line": 164
+    },
+    {
+      "assertion": "graph.state == before",
+      "fails_if": "Permit a name-stage change, lineage edge, source reassignment or change receipt despite refusal: an independent before/after graph read or deep-copied fake state differs.",
+      "file": "tests/standard_names/test_supersede_into_tombstone.py",
+      "independent": true,
+      "line": 165
+    },
+    {
+      "assertion": "graph.commits == 0",
+      "fails_if": "Commit the refused fold transaction: the independently recorded commit counter becomes nonzero.",
+      "file": "tests/standard_names/test_supersede_into_tombstone.py",
+      "independent": true,
+      "line": 166
+    },
+    {
+      "assertion": "graph.rollbacks == 1",
+      "fails_if": "Skip the refusal rollback or execute it twice: the independently recorded rollback count differs from one.",
+      "file": "tests/standard_names/test_supersede_into_tombstone.py",
+      "independent": true,
+      "line": 167
+    },
+    {
+      "assertion": "graph.transactions[-1].write_markers == []",
+      "fails_if": "Execute a fold write before refusing: the transaction recorder contains a write marker.",
+      "file": "tests/standard_names/test_supersede_into_tombstone.py",
+      "independent": true,
+      "line": 168
+    },
+    {
+      "assertion": "result['ok'] is False",
+      "fails_if": "Restore the ancestor-fold exemption: the writer returns ok=True and this independent refusal assertion fails (demonstrated by the mutation receipt).",
+      "file": "tests/standard_names/test_supersede_into_tombstone.py",
+      "independent": true,
+      "line": 189
+    },
+    {
+      "assertion": "'REFINED_FROM cycle' in result['reason']",
+      "fails_if": "Remove or misclassify the cycle guard: the returned refusal lacks the required cycle reason (or refinement fails to raise earlier).",
+      "file": "tests/standard_names/test_supersede_into_tombstone.py",
+      "independent": true,
+      "line": 190
+    },
+    {
+      "assertion": "'closing-lineage reclaim' in result['reason']",
+      "fails_if": "Remove the sanctioned reclaim guidance or name the wrong old/target in the refusal: the required command/reclaim phrase is absent.",
+      "file": "tests/standard_names/test_supersede_into_tombstone.py",
+      "independent": true,
+      "line": 191
+    },
+    {
+      "assertion": "f\"sn edit '{_OLD}' --rename '{_TARGET}'\" in result['reason']",
+      "fails_if": "Remove the sanctioned reclaim guidance or name the wrong old/target in the refusal: the required command/reclaim phrase is absent.",
+      "file": "tests/standard_names/test_supersede_into_tombstone.py",
+      "independent": true,
+      "line": 192
+    },
+    {
+      "assertion": "graph.state == before",
+      "fails_if": "Permit a name-stage change, lineage edge, source reassignment or change receipt despite refusal: an independent before/after graph read or deep-copied fake state differs.",
+      "file": "tests/standard_names/test_supersede_into_tombstone.py",
+      "independent": true,
+      "line": 193
+    },
+    {
+      "assertion": "graph.commits == 0",
+      "fails_if": "Commit the refused fold transaction: the independently recorded commit counter becomes nonzero.",
+      "file": "tests/standard_names/test_supersede_into_tombstone.py",
+      "independent": true,
+      "line": 194
+    },
+    {
+      "assertion": "graph.rollbacks == 1",
+      "fails_if": "Skip the refusal rollback or execute it twice: the independently recorded rollback count differs from one.",
+      "file": "tests/standard_names/test_supersede_into_tombstone.py",
+      "independent": true,
+      "line": 195
+    },
+    {
+      "assertion": "graph.transactions[-1].write_markers == []",
+      "fails_if": "Execute a fold write before refusing: the transaction recorder contains a write marker.",
+      "file": "tests/standard_names/test_supersede_into_tombstone.py",
+      "independent": true,
+      "line": 196
+    }
+  ],
+  "assertion_audit_note": "All 55 added/replacement assert statements have explicit failure conditions; fixture constants compared with database reads are independent expectations, not an output echoed from the same call; pytest.raises additionally fails if either refinement proceeds or the planted rename exception is swallowed.",
+  "assertion_count": 55,
+  "baseline_suite": {
+    "command": "TMPDIR=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T055618175066-sib-lineage-cycle-writers/scratch UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T055618175066-sib-lineage-cycle-writers/scratch/base uv run --project /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-lineage-cycle-writers --no-sync python -m pytest -p no:cacheprovider --basetemp /home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T055618175066-sib-lineage-cycle-writers/scratch/base-full-temp /home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T055618175066-sib-lineage-cycle-writers/scratch/base/tests/standard_names/",
+    "completed": true,
+    "exit_status": 1,
+    "failure_count": 9,
+    "failure_ids": [
+      "tests/standard_names/test_catalog_layout_hierarchy.py::TestOrderingCycleDetection::test_export_ledgers_cycle_and_writes_packet",
+      "tests/standard_names/test_defaulted_attributes_exist.py::test_configured_module_roots_have_coverage",
+      "tests/standard_names/test_fold_guard_current_successor.py::test_reverted_beta_rename_refuses_a_cyclic_tombstone_fold",
+      "tests/standard_names/test_manifest_generability.py::test_every_manifest_source_is_carried_or_names_its_blocking_mechanism",
+      "tests/standard_names/test_manifest_generability.py::test_a_cut_refuses_a_manifest_it_cannot_generate_rather_than_counting",
+      "tests/standard_names/test_manifest_generability.py::test_a_manifest_whose_sources_all_reach_a_name_is_not_refused",
+      "tests/standard_names/test_pool_registry_imports.py::test_pool_phase_import_orders_succeed_in_fresh_process[import imas_codex.cli.sn; import imas_codex.standard_names.turn as t; print(t.TURN_PHASES)]",
+      "tests/standard_names/test_supersede_into_tombstone.py::test_tombstone_target_whose_only_successor_is_the_folded_name_refuses_cycle",
+      "tests/standard_names/test_supersede_into_tombstone.py::test_tombstone_target_whose_two_hop_chain_closes_onto_its_root_refuses_cycle"
+    ],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T055618175066-sib-lineage-cycle-writers/resume-base-standard-names-final.log",
+    "revision": "f18b75c0b70d490ce4dd109d1a6b0ac33eec28cf"
+  },
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/cli/sn.py:sn_supersede",
+    "imas_codex/standard_names/edit.py:supersede_into",
+    "imas_codex/standard_names/edit.py:_apply_rename",
+    "imas_codex/standard_names/worker_tasks/worker_refine_names.py:717"
+  ],
+  "completed_at": "2026-11-08T09:12:26Z",
+  "dispatched_at": "2026-11-08T09:02:50Z",
+  "figure_review": {
+    "rendered": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T090157109941-review-of-sib-lineage-cycle-writers-8dafe740bc09/lineage-refusals.png",
+    "source": "docs/figures/sn-integrity-backlog/sib-lineage-cycle-writers/lineage-refusals.svg",
+    "verdict": "Inspected the head SVG rendered at 1400 by 720: readable labels, no clipping or label collision, identified grey stored arrows and red dashed refused arrows, direction agrees with the caption."
+  },
+  "findings": [],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "Read all seven commits from f18b75c0b70d490ce4dd109d1a6b0ac33eec28cf to 8dafe740bc09237cb9db87d293239bf38e688cf3; the eight-file diff contains writer guards, regression tests, reclaim documentation and its evidence figure, with only evidence HTML changing after the tested source revision 404b86a19d595eeb716913b0c7bada997da72ab7.",
+    "done_when": "Read prompt.txt:121 and the gate receipts; base-writers-final.log records 3 failed/5 passed, resume-head-graph-serial.log records 14 passed, and the completed package logs yield zero added failure IDs.",
+    "goal": "Read prompt.txt:42 and the live sn-integrity-backlog section 49; edit.py:2342 and graph_refinement.py:850 close the three named openings while preserving the two control refusals and the sanctioned spelling reclaim.",
+    "manifest": "Read manifest.md and its actual logs; the 8544-pass package result, 14-pass graph result, refusal mutation and nine base failure IDs reconcile with their stored receipts.",
+    "write_paths": "Read prompt.txt:90 and resume-1-advice.txt:1; all eight changed paths are granted, including the two legacy test files explicitly added on resume."
+  },
+  "justifications": {
+    "durability": "test_lineage_cycle_writers.py:125,188,202 fails when the corresponding guard is removed, graph snapshots detect committed mutations, and test_reclaim_history_apart.py:311-321 fails when compensating restore is omitted, with every added assertion audited independently in this record.",
+    "evidence": "base-writers-final.log:19-33 reproduces the three openings, negative-control-readback.log:12-13 observes the forbidden receipt/source move/reciprocal edges, and resume-head-standard-names-serial.log:1103-1104 records a completed zero-failure head arm whose source/tests equal the reviewed head.",
+    "fit": "edit.py:2342 extends the existing transactional fold guard, graph_refinement.py:495,850 extends the existing typed refusal/preflight owner, and the new tests reuse the disposable graph and DD-resolution fixtures without forbidden names.",
+    "goal_fidelity": "edit.py:2342 refuses the cyclic tombstone fold, graph_refinement.py:850 refuses pending ancestry and live descendants before mutation, and test_reclaim_history_apart.py:286 exercises compensation while the reclaim comments describe all three cases.",
+    "reuse": "capability searches over standard_names and its test fixtures found the existing fold/rename/refinement owners in edit.py and graph_refinement.py, which this diff extends, while conftest.py:49,767 supplies the reused graph infrastructure and no shared owner supplies this scenario-specific seed/snapshot/refine harness.",
+    "scope_discipline": "the eight paths in the base-to-head diff match the original six grants in prompt.txt plus the two test-file grants in resume-1-advice.txt:1, with no unrelated production changes."
+  },
+  "negative_control_evidence": {
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T055618175066-sib-lineage-cycle-writers/negative-control-readback.log",
+    "result": "ok=True; one fold receipt; one source carried; both reciprocal REFINED_FROM edges; refusal assertion failed; EXIT=1"
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: Read prompt.txt:42 and the live sn-integrity-backlog section 49; edit.py:2342 and graph_refinement.py:850 close the three named openings while preserving the two control refusals and the sanctioned spelling reclaim.\nVERDICT done_when: Read prompt.txt:121 and the gate receipts; base-writers-final.log records 3 failed/5 passed, resume-head-graph-serial.log records 14 passed, and the completed package logs yield zero added failure IDs.\nVERDICT write_paths: Read prompt.txt:90 and resume-1-advice.txt:1; all eight changed paths are granted, including the two legacy test files explicitly added on resume.\nVERDICT manifest: Read manifest.md and its actual logs; the 8544-pass package result, 14-pass graph result, refusal mutation and nine base failure IDs reconcile with their stored receipts.\nVERDICT diff: Read all seven commits from f18b75c0b70d490ce4dd109d1a6b0ac33eec28cf to 8dafe740bc09237cb9db87d293239bf38e688cf3; the eight-file diff contains writer guards, regression tests, reclaim documentation and its evidence figure, with only evidence HTML changing after the tested source revision 404b86a19d595eeb716913b0c7bada997da72ab7.\nCALL_SITES: imas_codex/cli/sn.py:sn_supersede, imas_codex/standard_names/edit.py:supersede_into, imas_codex/standard_names/edit.py:_apply_rename, imas_codex/standard_names/worker_tasks/worker_refine_names.py:717\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: edit.py:2342 refuses the cyclic tombstone fold, graph_refinement.py:850 refuses pending ancestry and live descendants before mutation, and test_reclaim_history_apart.py:286 exercises compensation while the reclaim comments describe all three cases.\nSCORE evidence: 20\nJUSTIFICATION evidence: base-writers-final.log:19-33 reproduces the three openings, negative-control-readback.log:12-13 observes the forbidden receipt/source move/reciprocal edges, and resume-head-standard-names-serial.log:1103-1104 records a completed zero-failure head arm whose source/tests equal the reviewed head.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the eight paths in the base-to-head diff match the original six grants in prompt.txt plus the two test-file grants in resume-1-advice.txt:1, with no unrelated production changes.\nSCORE durability: 20\nJUSTIFICATION durability: test_lineage_cycle_writers.py:125,188,202 fails when the corresponding guard is removed, graph snapshots detect committed mutations, and test_reclaim_history_apart.py:311-321 fails when compensating restore is omitted, with every added assertion audited independently in this record.\nSCORE fit: 20\nJUSTIFICATION fit: edit.py:2342 extends the existing transactional fold guard, graph_refinement.py:495,850 extends the existing typed refusal/preflight owner, and the new tests reuse the disposable graph and DD-resolution fixtures without forbidden names.\nSCORE reuse: 20\nJUSTIFICATION reuse: capability searches over standard_names and its test fixtures found the existing fold/rename/refinement owners in edit.py and graph_refinement.py, which this diff extends, while conftest.py:49,767 supplies the reused graph infrastructure and no shared owner supplies this scenario-specific seed/snapshot/refine harness.\n",
+  "review_limitations": "Read-only bounded review; no suite rerun, mutation, merge, live catalog write or product modification performed; evidence is the source run receipts and the committed code read at the named revision.",
+  "review_run_id": "r-20261108T090157109941-review-of-sib-lineage-cycle-writers-8dafe740bc09",
+  "reviewed_base_sha": "f18b75c0b70d490ce4dd109d1a6b0ac33eec28cf",
+  "reviewed_head_sha": "8dafe740bc09237cb9db87d293239bf38e688cf3",
+  "reviewed_run_id": "r-20261108T055618175066-sib-lineage-cycle-writers",
+  "scores": {
+    "durability": 20,
+    "evidence": 20,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "tested_revision_equivalence": "docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-writers.html",
+  "tested_source_revision": "404b86a19d595eeb716913b0c7bada997da72ab7",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T09:17:19.975613+00:00",
+  "total": 120
+}
