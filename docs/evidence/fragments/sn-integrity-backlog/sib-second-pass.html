@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The recoverable failed sources are reset and rerun under the remaining cap</title>
+</head>
+<body>
+<section id="sib-second-pass-record">
+<h2 id="sib-second-pass-second-pass">Second composition pass over the recoverable failed cohort</h2>
+
+<p id="sib-second-pass-cohort">The cohort is the 143 sources the full-DD run left
+<code>failed</code> whose recovery class is one of <code>isolated_retry</code>
+(121), <code>registered_token_retry</code> (9), <code>binding_now_admissible</code>
+(12) or <code>attachment_now_admissible</code> (1), read from
+<code>sib-full-run-failure-diagnosis.json</code>. A live census before the reset
+confirmed all 143 were still <code>failed</code>, none claimed, with attempt
+counts of 5 for 136, 4 for 2 and 3 for 5. The control is every non-cohort failed
+source: 229 of them.</p>
+
+<p id="sib-second-pass-reset">The reset went through
+<code>retry_failed_sources</code>, the operation the <code>sn retry --failed</code>
+CLI exposes. The dry run reported 143 requested, 143 eligible, 0 refused. The
+apply reported 143 retried and wrote 143 <code>StandardNameSourceRetry</code>
+events, one per source, each carrying the source's prior status, attempt count
+and <code>last_error</code> before the counters were cleared.</p>
+
+<table id="sib-second-pass-verify">
+<caption>Post-reset read-back of the cohort and of the non-cohort control</caption>
+<thead><tr><th>Reading | Value</th></tr></thead>
+<tbody>
+<tr><td>Cohort status after reset | 143 <code>extracted</code>, 0 <code>failed</code></td></tr>
+<tr><td>Cohort sources still claimed | 0</td></tr>
+<tr><td>Cohort attempt counters not cleared | 0</td></tr>
+<tr><td>Cohort sources with a receipt | 143</td></tr>
+<tr><td>Receipts that keep prior status, attempts and error | 143 of 143</td></tr>
+<tr><td>Non-cohort failed sources, before then after | 229 then 229</td></tr>
+<tr><td>Sources outside the cohort that moved | 0 lost, 0 gained</td></tr>
+</tbody>
+</table>
+
+<p id="sib-second-pass-rerun">The scoped rerun runs
+<code>sn run --focus cohort-sources-runnable.json -c 50</code> from the main
+checkout. It covers 139 of the 143: four structural sources created on
+2026-07-31 carry neither <code>dd_path</code> nor <code>dd_version</code>, so
+<code>_pin_dd_source_snapshots</code> refuses the whole batch on them. Those four
+are reported outside this node's scope, where a DD provenance backfill is
+<span>needed</span> before they can be claimed at all.</p>
+
+<p id="sib-second-pass-state">The reset is applied and verified. The rerun is
+submitted as its own SLURM job on partition <code>all</code> with a six-hour wall
+time; its per-source outcome, names by stage and spend by phase are read back
+after that job ends.</p>
+</section>
+</body>
+</html>
