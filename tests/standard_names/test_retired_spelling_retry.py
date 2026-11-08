@@ -52,6 +52,9 @@ class BindingGraph(TransactionDouble):
         self.query.side_effect = self.answer
 
     def answer(self, cypher, **params):
+        # The shared double's own statement log; the base side effect is
+        # replaced here, so appending to ``calls`` keeps it the one record.
+        self.calls.append((cypher, params))
         if "AS outcome" in cypher:
             assert "[:HAS_SUCCESSOR]" in cypher
             rows = []
@@ -229,6 +232,44 @@ def test_finalizer_binds_successor_without_rewriting_its_metadata():
     assert graph.names[RETIRED]["name_stage"] == "superseded"
     services.write_standard_names.assert_not_called()
     graph.transaction.commit.assert_called_once()
+
+
+def _assignments(cypher: str, field: str) -> list[str]:
+    import re
+
+    return re.findall(rf"\b[\w.]*{field}\s*=(?!=)", cypher)
+
+
+def test_binding_a_successor_leaves_its_stage_and_attempt_untouched():
+    """Production Cypher must not rewrite the lifecycle it is binding to.
+
+    Following a retired spelling resolves the source onto an existing live
+    name. That write consumes the claim; it must not reset the target's stage
+    (which would drag a reviewed name back into composition) nor increment the
+    source's attempt count (which spends a retry the source did not make).
+    """
+    graph = BindingGraph([_successor()])
+
+    result, _services = _persist(graph)
+
+    statements = graph.calls
+    assert result == [SOURCE]
+    finalize = [
+        (cypher, params)
+        for cypher, params in statements
+        if "sns.produced_sn_id = sn.id" in cypher
+        and "MERGE (sns)-[produced:PRODUCED_NAME]->(sn)" in cypher
+    ]
+    assert finalize, "the successor bind statement must run"
+
+    for cypher, params in finalize:
+        assert _assignments(cypher, "name_stage") == []
+        assert _assignments(cypher, "attempt_count") == []
+        # Positive control: this is the statement that binds the successor.
+        assert SUCCESSOR in {item["sn_id"] for item in params["batch"]}
+
+    for cypher, _params in statements:
+        assert not _assignments(cypher, "attempt_count")
 
 
 def test_two_live_successors_never_bind():

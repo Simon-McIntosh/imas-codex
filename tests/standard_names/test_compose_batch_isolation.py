@@ -22,6 +22,7 @@ from types import SimpleNamespace
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import httpx
 import pytest
 from pydantic import BaseModel, ValidationError
 
@@ -128,6 +129,16 @@ class _FakeBudgetManager:
         return _FakeLease()
 
 
+async def _run_batch(items: list[dict[str, Any]], llm):
+    """Run one compose batch with *llm* answering its structured call."""
+    from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+        compose_batch,
+    )
+
+    with patch("imas_codex.discovery.base.llm.acall_llm_structured", llm):
+        return await compose_batch(items, _FakeBudgetManager(), asyncio.Event())
+
+
 @pytest.fixture
 def compose_deps():
     """Patch every collaborator compose_batch reaches outside the batch logic."""
@@ -226,27 +237,19 @@ class TestGrammarRefusalIsolation:
     async def test_refused_candidate_is_recorded_and_siblings_still_persist(
         self, compose_deps
     ) -> None:
-        from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
-            compose_batch,
-        )
-
         result = _FakeBatchResult(
             [
                 _FakeCandidate("", _REFUSED_PATH, error=ValueError(_GRAMMAR_MESSAGE)),
                 _FakeCandidate(_GOOD_NAME, _GOOD_PATH),
             ]
         )
-        llm_out = _FakeLLMOut(result)
 
         async def mock_llm(*_args, **_kwargs):
-            return llm_out
+            return _FakeLLMOut(result)
 
-        with patch("imas_codex.discovery.base.llm.acall_llm_structured", mock_llm):
-            count = await compose_batch(
-                [_make_batch_item(_REFUSED_PATH), _make_batch_item(_GOOD_PATH)],
-                _FakeBudgetManager(),
-                asyncio.Event(),
-            )
+        count = await _run_batch(
+            [_make_batch_item(_REFUSED_PATH), _make_batch_item(_GOOD_PATH)], mock_llm
+        )
 
         assert count == 1
         assert [candidate["id"] for candidate in compose_deps.persisted] == [_GOOD_NAME]
@@ -278,27 +281,19 @@ class TestPerCandidateCatchNarrowing:
     async def test_validation_error_is_recorded_for_its_own_source(
         self, compose_deps
     ) -> None:
-        from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
-            compose_batch,
-        )
-
         result = _FakeBatchResult(
             [
                 _FakeCandidate("", _REFUSED_PATH, error=_validation_error()),
                 _FakeCandidate(_GOOD_NAME, _GOOD_PATH),
             ]
         )
-        llm_out = _FakeLLMOut(result)
 
         async def mock_llm(*_args, **_kwargs):
-            return llm_out
+            return _FakeLLMOut(result)
 
-        with patch("imas_codex.discovery.base.llm.acall_llm_structured", mock_llm):
-            count = await compose_batch(
-                [_make_batch_item(_REFUSED_PATH), _make_batch_item(_GOOD_PATH)],
-                _FakeBudgetManager(),
-                asyncio.Event(),
-            )
+        count = await _run_batch(
+            [_make_batch_item(_REFUSED_PATH), _make_batch_item(_GOOD_PATH)], mock_llm
+        )
 
         assert count == 1
         assert [candidate["id"] for candidate in compose_deps.persisted] == [_GOOD_NAME]
@@ -312,10 +307,6 @@ class TestPerCandidateCatchNarrowing:
         self, compose_deps
     ) -> None:
         """An AttributeError is this code's defect, not a source's refusal."""
-        from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
-            compose_batch,
-        )
-
         defect = AttributeError("segments has no base_token")
         result = _FakeBatchResult(
             [
@@ -323,21 +314,55 @@ class TestPerCandidateCatchNarrowing:
                 _FakeCandidate(_GOOD_NAME, _GOOD_PATH),
             ]
         )
-        llm_out = _FakeLLMOut(result)
 
         async def mock_llm(*_args, **_kwargs):
-            return llm_out
+            return _FakeLLMOut(result)
 
-        with (
-            patch("imas_codex.discovery.base.llm.acall_llm_structured", mock_llm),
-            pytest.raises(AttributeError) as raised,
-        ):
-            await compose_batch(
+        with pytest.raises(AttributeError) as raised:
+            await _run_batch(
                 [_make_batch_item(_REFUSED_PATH), _make_batch_item(_GOOD_PATH)],
-                _FakeBudgetManager(),
-                asyncio.Event(),
+                mock_llm,
             )
 
         assert raised.value is defect
         assert compose_deps.refusals == []
         assert compose_deps.persisted == []
+
+
+class TestOneStructuredCallPerAttempt:
+    """The structured call is made once per compose attempt, never in a loop.
+
+    Transport retries belong to the LLM layer's own loop
+    (``tests/discovery/test_llm_transport_retry.py``). A retry wrapper added
+    here would re-spend an attempt on a fault the layer below already retried,
+    and would multiply the paid calls one compose attempt makes.
+    """
+
+    @pytest.mark.asyncio
+    async def test_a_successful_attempt_makes_exactly_one_call(
+        self, compose_deps
+    ) -> None:
+        calls: list[int] = []
+
+        async def answering(*_args, **_kwargs):
+            calls.append(1)
+            return _FakeLLMOut(_FakeBatchResult([]))
+
+        await _run_batch([_make_batch_item(_GOOD_PATH)], answering)
+
+        assert len(calls) == 1
+
+    @pytest.mark.asyncio
+    async def test_a_transport_fault_is_not_retried_inside_compose_batch(
+        self, compose_deps
+    ) -> None:
+        calls: list[int] = []
+
+        async def raising(*_args, **_kwargs):
+            calls.append(1)
+            raise httpx.ReadError("")
+
+        with pytest.raises(httpx.ReadError):
+            await _run_batch([_make_batch_item(_GOOD_PATH)], raising)
+
+        assert len(calls) == 1

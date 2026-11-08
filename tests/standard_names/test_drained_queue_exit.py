@@ -70,15 +70,7 @@ class _FixtureGraph:
 
     def query(self, cypher: str, **_params: object) -> list[dict[str, int]]:
         self.queries.append(cypher)
-        generate_clause = _generate_name_clause(cypher)
-        requires_dd_path = "FROM_DD_PATH" in generate_clause
-        skips_frozen_produced = "PRODUCED_NAME" in generate_clause
-        claimable = sum(
-            1
-            for source in self._sources
-            if (not requires_dd_path or source.has_dd_path)
-            and (not skips_frozen_produced or not source.frozen_produced)
-        )
+        claimable = _selects(_generate_name_clause(cypher), self._sources)
         row = dict.fromkeys(_POOLS, 0)
         row["generate_name"] = claimable
         row.update({f"{name}_done": 0 for name in _POOLS})
@@ -236,16 +228,67 @@ def test_both_count_sites_and_the_claim_read_one_predicate() -> None:
     assert count_predicate.replace("(s)-", "(sns)-") in _claim_seed_cypher()
 
 
+def test_the_claim_predicate_has_one_input() -> None:
+    """The predicate takes an alias and nothing else.
+
+    A second keyword no caller passes is a branch no query exercises: it reads
+    as configuration while every site takes the default path.
+    """
+    import inspect
+
+    from imas_codex.standard_names.graph_store.graph_foundation import (
+        source_claim_predicate,
+    )
+
+    assert set(inspect.signature(source_claim_predicate).parameters) == {"alias"}
+
+
+def test_every_site_calls_the_shared_claim_predicate(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Each count site and the claim seed must CALL the shared predicate.
+
+    A copy of the predicate's text inlined at a site would satisfy a text
+    comparison against the shared function's output. Replacing the function
+    itself makes only a site that reads it carry the marker, so a site that
+    stops applying the shared predicate fails here.
+    """
+    from imas_codex.standard_names.graph_store import (
+        graph_cost_and_claims,
+        graph_parent_lifecycle,
+    )
+
+    marker = "SHARED_CLAIM_PREDICATE"
+
+    def marked(*, alias: str, **_kwargs) -> str:
+        return f"{marker}_{alias}"
+
+    monkeypatch.setattr(graph_cost_and_claims, "source_claim_predicate", marked)
+    monkeypatch.setattr(graph_parent_lifecycle, "source_claim_predicate", marked)
+
+    assert f"{marker}_s" in _generate_name_clause(_count_cypher([]))
+    assert f"{marker}_sns" in _claim_seed_cypher()
+
+
 def _count_cypher(sources: list[_Source]) -> str:
     graph = _FixtureGraph(sources)
     _compute_pool_progress(graph, domains=None, rotation_cap=3, min_score=0.75)
     return graph.queries[-1]
 
 
-def _selects(cypher: str, sources: list[_Source]) -> int:
-    """Apply to a source list the restrictions the query names."""
-    requires_dd_path = "FROM_DD_PATH" in cypher
-    skips_frozen_produced = "PRODUCED_NAME" in cypher
+def _restrictions(clause: str) -> tuple[bool, bool]:
+    """The claim restrictions a generate_name subquery names: DD path, frozen."""
+    return "FROM_DD_PATH" in clause, "PRODUCED_NAME" in clause
+
+
+def _selects(clause: str, sources: list[_Source]) -> int:
+    """Apply to a source list the restrictions the clause names.
+
+    The graph double and the equality assertion both answer through this one
+    function, so a count and a selection cannot disagree about what a clause
+    restricts.
+    """
+    requires_dd_path, skips_frozen_produced = _restrictions(clause)
     return sum(
         1
         for source in sources
