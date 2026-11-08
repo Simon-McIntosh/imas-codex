@@ -1,0 +1,60 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/standard_names/worker_tasks/worker_compose_batches.py:23",
+    "imas_codex/standard_names/graph_store/graph_cost_and_claims.py:404",
+    "imas_codex/standard_names/graph_store/graph_parent_lifecycle.py:72",
+    "imas_codex/standard_names/graph_store/graph_foundation.py:source_claim_predicate",
+    "imas_codex/standard_names/graph_store/graph_catalog.py:persist_generated_name_winners"
+  ],
+  "completed_at": "2026-11-08T11:27:37.403Z",
+  "dispatched_at": "2026-11-08T11:19:47Z",
+  "findings": [
+    {
+      "file": "logs/gate-repair.log",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "the log the manifest cites as the refactor's gate carries no revision/tree/command header and no bare EXIT= line (it ends at '41 passed, 1 warning in 42.87s'), while the manifest's artifacts line asserts 'EXIT=0' for it, so the exit status of the only arm covering ddb380720 is claimed rather than recorded."
+    },
+    {
+      "file": "tests/standard_names/test_drained_queue_exit.py",
+      "line": "223",
+      "severity": "non-blocking",
+      "text": "_selects is renamed and documented to take a generate_name subquery clause, but this call passes _claim_seed_cypher(), which returns a full claim statement; the substring restriction check happens to work either way, so the narrowed docstring now misdescribes one of its two callers."
+    },
+    {
+      "file": "logs/negative-control-repair.log",
+      "line": "31",
+      "severity": "non-blocking",
+      "text": "the claim plant's red was produced on a tree still carrying the compose plant because the restore step failed, and one run exited 4 rather than reddening a test, so the re-probe establishes the three guards bite but does not establish each red in isolation; the log discloses both, and the compose and claim plants touch disjoint files so the attribution holds."
+    }
+  ],
+  "justifications": {
+    "durability": "logs/negative-control-repair.log:3,8,27 shows each refactor-sensitive guard red under its own plant, but the claim plant ran on a tree still carrying the compose plant (the log's own corrections block, :31-34) and the finalize plant only reddened once re-aimed at the stable SET block (:22-27), so two of the three reds are attributed by reasoning about file disjointness rather than by an isolated run.",
+    "evidence": "logs/gate-after.log and logs/gate-baseline.log both carry a revision header and a bare EXIT line and yield 6 failed against 24 failed, so added is 0, but the after arm ran at a767ebcda and predates both delta commits, and the only arm covering the refactor, logs/gate-repair.log, carries no header and no EXIT line.",
+    "fit": "the helpers follow their files' idiom and introduce no plan, version or ticket identifier, but tests/standard_names/test_drained_queue_exit.py:245 documents _selects as taking a generate_name clause while :223 passes it the full claim statement _claim_seed_cypher().",
+    "goal_fidelity": "tests/standard_names/test_compose_batch_isolation.py:132 adds one _run_batch helper that all five callers use, tests/standard_names/test_drained_queue_exit.py:279 routes both the double and the equality assertion through one _restrictions, and tests/standard_names/test_retired_spelling_retry.py:55 reads TransactionDouble's inherited calls log, so the reuse finding the prior review scored 5 is answered without changing an assertion.",
+    "reuse": "the prior review's finding at tests/standard_names/test_retired_spelling_retry.py:234 is retired \u2014 the local _record_statements is deleted and the guard reads the owner at tests/recording_graph_client.py:32 \u2014 and the new tests/standard_names/test_compose_batch_isolation.py:132 _run_batch serves arbitrary raising and counting callables, which the scripted-response fixture at tests/standard_names/conftest.py:1020 cannot.",
+    "scope_discipline": "git diff 853dfee0cf63..4d260f69d6b7 touches exactly the four granted paths and nothing else."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The delta answers the prior review's reuse finding \u2014 tests/standard_names/test_compose_batch_isolation.py:132 adds one _run_batch helper replacing five patch blocks, tests/standard_names/test_drained_queue_exit.py:279 funnels the double and the equality assertion through _restrictions, and tests/standard_names/test_retired_spelling_retry.py:55 appends to the double's inherited calls log, leaving every assertion unchanged.\nVERDICT done_when: The source done_when asks that tests/standard_names and tests/discovery add no failure id; logs/gate-baseline.log (24 failed) and logs/gate-after.log (6 failed, all present in the baseline set) give added 0, and logs/gate-repair.log shows 41 passed over the four guard files, though that log carries no header or EXIT line and the after arm is at a767ebcda rather than the head.\nVERDICT write_paths: git diff 853dfee..4d260f69d touches exactly docs/evidence/fragments/sn-integrity-backlog/sib-test-guards-bite.html, tests/standard_names/test_compose_batch_isolation.py, tests/standard_names/test_drained_queue_exit.py and tests/standard_names/test_retired_spelling_retry.py, all inside the seven-path grant.\nVERDICT manifest: Read at commit 4d260f69d; it records status complete, the five commits, both suite arms with revision and command, and an added-failure count of 0 that matches the two logs on disk, but its EXIT=0 claim for gate-repair.log is not carried by that log.\nVERDICT diff: Read both commits since the prior review \u2014 ddb380720 refactors the three guard files (81/27/18 changed lines, 71 insertions and 83 deletions total, no assertion altered) and 4d260f69d adds the fragment's shared-scaffold section.\nCALL_SITES: imas_codex/standard_names/worker_tasks/worker_compose_batches.py:23, imas_codex/standard_names/graph_store/graph_cost_and_claims.py:404, imas_codex/standard_names/graph_store/graph_parent_lifecycle.py:72, imas_codex/standard_names/graph_store/graph_foundation.py:source_claim_predicate, imas_codex/standard_names/graph_store/graph_catalog.py:persist_generated_name_winners\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: tests/standard_names/test_compose_batch_isolation.py:132, tests/standard_names/test_drained_queue_exit.py:279 and tests/standard_names/test_retired_spelling_retry.py:55 retire exactly the three duplications the prior review named, with no assertion changed.\nSCORE evidence: 14\nJUSTIFICATION evidence: logs/gate-after.log (6 failed) against logs/gate-baseline.log (24 failed) gives added 0, but the after arm is at a767ebcda and the only arm covering the refactor, logs/gate-repair.log, has no header and no EXIT line.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff 853dfee0cf63..4d260f69d6b7 touches only the four granted paths.\nSCORE durability: 17\nJUSTIFICATION durability: logs/negative-control-repair.log:3,8,27 reddens each refactor-sensitive guard under a plant, but the claim red ran over a tree still carrying the compose plant and one run exited 4.\nSCORE fit: 16\nJUSTIFICATION fit: tests/standard_names/test_drained_queue_exit.py:245 documents a clause parameter that :223 feeds a full statement.\nSCORE reuse: 17\nJUSTIFICATION reuse: the local statement recorder is deleted in favour of the owner at tests/recording_graph_client.py:32, and _run_batch at tests/standard_names/test_compose_batch_isolation.py:132 covers arbitrary callables the scripted fixture at tests/standard_names/conftest.py:1020 does not.\nFINDING logs/gate-repair.log:1 non-blocking: the only arm covering the refactor commit carries no revision/command header and no bare EXIT line, yet the manifest asserts EXIT=0 for it, so that exit status is claimed rather than recorded.\nFINDING tests/standard_names/test_drained_queue_exit.py:223 non-blocking: _selects is documented as taking a generate_name clause but is passed the full claim statement, so the narrowed docstring misdescribes one caller.\nFINDING logs/negative-control-repair.log:31 non-blocking: the claim plant's red was produced on a tree still carrying the compose plant and one re-probe run exited 4, so the three guards are shown to bite but not each in isolation.\n",
+  "review_run_id": "r-20261108T111632863294-review-of-sib-test-guards-bite-4d260f69d6b7",
+  "reviewed_base_sha": "853dfee0cf631529031b466fb0066d17a6e0700d",
+  "reviewed_head_sha": "4d260f69d6b73b83dd4aadb13559faf0f446efe1",
+  "reviewed_run_id": "r-20261108T085257838027-sib-test-guards-bite",
+  "scores": {
+    "durability": 17,
+    "evidence": 14,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 17,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T11:45:12.983629+00:00",
+  "total": 101
+}
