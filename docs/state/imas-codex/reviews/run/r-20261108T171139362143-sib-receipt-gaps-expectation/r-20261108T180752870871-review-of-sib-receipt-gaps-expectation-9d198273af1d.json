@@ -1,0 +1,161 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Coordinator explicitly authorized predecessor head-suite.log as the substitute baseline; derive head failures minus that baseline, without treating null baseline_suite as a blocker.",
+  "assertion_analysis": [
+    {
+      "assertions": "release count; receipt singleton; outcome; attempt; run/batch; unrelated-source receipt absence and token; selected token cleared; append-before-clear order",
+      "fails_when": "Removing the release append loses the singleton receipt and the recorded mutation reddens both variants; changing outcome, count, attempt, metadata, release ownership filtering or statement order contradicts the independent seeded source state or stored receipt.",
+      "file": "tests/standard_names/test_receipt_gaps.py",
+      "lines": "111-129"
+    },
+    {
+      "assertions": "missing-token zero write and empty receipt set, then matching-token one write and one stored receipt",
+      "fails_when": "Restoring the original WHERE entry.claim_token IS NULL OR shortcut stores the tokenless entry and fails the first assertion; the matching-owner arm proves the instrument can see a receipt.",
+      "file": "tests/standard_names/test_receipt_gaps.py",
+      "lines": "134-142"
+    },
+    {
+      "assertions": "wrong-token, wrong-sequence and absent-sequence zero writes and no receipts",
+      "fails_when": "A writer that admits these entries through the modeled shortcut fails, but deleting only the emitted token/sequence comparisons does not fail because the double independently enforces them; this limitation is a non-blocking finding.",
+      "file": "tests/standard_names/test_receipt_gaps.py",
+      "lines": "143-159"
+    },
+    {
+      "assertions": "tokenless released denied, capped extracted denied, capped failed admitted and stored outcome capped",
+      "fails_when": "Restoring the old tokenless shortcut or removing the failed-status predicate contradicts the zero-write assertions; removing the capped or unclaimed branches blocks the positive control; wrong capped sequences are not modeled or tested.",
+      "file": "tests/standard_names/test_receipt_gaps.py",
+      "lines": "162-174"
+    },
+    {
+      "assertions": "persisted source ID; receipt singleton; mapped outcome; explicit metadata precedence and source metadata fallback; reason",
+      "fails_when": "Removing the worker metadata fields changes explicit run/batch to distinct source-run/source-batch and fails; removing the Cypher coalesce expressions loses fallback values and fails; changing outcome/reason or consuming no source contradicts the stored receipt or returned source.",
+      "file": "tests/standard_names/test_receipt_gaps.py",
+      "lines": "206-214"
+    },
+    {
+      "assertions": "no persisted winners; candidate named in stored error; grammar and fiber_bundle detail or unit conflict and both units; claim released",
+      "fails_when": "Restoring the generic refusal string loses grammar/unit text; dropping the writer diagnostic map or forwarding loses details; persisting the refused winner or retaining its claim fails the independent graph-state assertions.",
+      "file": "tests/standard_names/test_receipt_gaps.py",
+      "lines": "241-257"
+    },
+    {
+      "assertions": "exact captured outcome dictionary includes run_id=None and batch_key=None",
+      "fails_when": "Removing either metadata key from the production outcome or giving an absent-input field a non-null default fails equality; input contains neither key, so the literal None expectations are independent of the captured output.",
+      "file": "tests/standard_names/test_vocab_gap_source_persistence.py",
+      "lines": "72-85"
+    }
+  ],
+  "assertion_independence": "No added assertion compares a supplied object to the same object returned as expected output; run/batch constants intentionally test propagation into independently stored receipts, with distinct source fallback values. The fence-model limitation is separately identified rather than counted as proof of query semantics.",
+  "baseline_authority": "Current review dispatch brief: Baseline, supplied by the coordinator.",
+  "call_site_count": 7,
+  "call_sites": [
+    "imas_codex/standard_names/loop.py:875",
+    "imas_codex/standard_names/worker_tasks/worker_common.py:1017",
+    "imas_codex/standard_names/graph_store/graph_source_bindings.py:1503",
+    "imas_codex/standard_names/graph_store/graph_catalog.py:2720",
+    "imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py:1643",
+    "imas_codex/standard_names/worker_tasks/worker_compose_batches.py:1094",
+    "imas_codex/standard_names/orphan_sweep.py:203"
+  ],
+  "completed_at": "2026-11-08T18:20:46Z",
+  "coordinator_action": "Dispose each non-blocking finding as folded into an assigned node or exempted with a reason; then attach this parsed review to the reviewed run.",
+  "dispatched_at": "2026-11-08T18:10:46Z",
+  "evidence_caveats": [
+    "Assigned review worktree HEAD is 4ca9b0b926a45a56713d3d2f338668048a2bc2aa; source, call-site and diff inspections explicitly read reviewed_head_sha.",
+    "Authorized baseline is described as 5ce4a26e3 by the coordinator; its own header says 4be454496bfa7c8ad80e3aa9bce6aac0fd2b81a4, and the intervening commits change only evidence HTML.",
+    "Focused and release-mutation logs name 545cb8d6d although the passing arm includes uncommitted source repair; the committed full-suite arm at 4be454496 and final head suite corroborate behavior.",
+    "Final suite ran at a93e57d9a; the reviewed head adds evidence HTML only.",
+    "No full suite, live graph query or source mutation was run by this reviewer; recorded red controls were read, and graph behavior remains bounded by double-based tests plus live syntax EXPLAIN.",
+    "The brief lists seven union paths; the continuation actual fence also authorizes its new evidence fragment, so all eight changed paths are authorized."
+  ],
+  "findings": [
+    {
+      "file": "tests/standard_names/test_receipt_gaps.py",
+      "line": "40",
+      "severity": "non-blocking",
+      "text": "non-blocking: ReceiptGraph enforces token and sequence equality regardless of whether those clauses occur in the emitted query, so the wrong-fence assertions at :143 remain green if graph_foundation.py loses its token or sequence equality; the capped branch also omits sequence comparison, leaving those predicate regressions unguarded even though the original null-token defect is demonstrably caught."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_claim_release.py",
+      "line": "50",
+      "severity": "non-blocking",
+      "text": "non-blocking: the comment says a failed append preserves ownership, but the helper ignores the append result and clears ownership at :72 after a non-exception zero-result refusal or missing-count response; qualify the comment or verify receipt existence, remembering that an idempotent retry legitimately creates zero new receipts."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 7 production call site(s)",
+    "diff": "read all seven commits in 0efd4cf508efc8b9a738435fbf79acc3b0ef6d2d..9d198273af1d01f7e51ae5524e06cd3ddd023f3a; four production files, two test files and two evidence fragments change, with no unrelated implementation.",
+    "done_when": "predecessor prompt.txt:107 is measured by baseline-final-regression.log (15 failed, 3 passed), head-final-focused.log (78 passed), the release-removal control (2 failed) and the authorized suite comparison (1 baseline failure, 0 head failures).",
+    "goal": "predecessor prompt.txt:38 and :107 require release receipts, ownership fencing, run/batch attribution and actual writer refusals; graph_claim_release.py:52, graph_foundation.py:932, worker_common.py:751 and graph_catalog.py:2427 implement these, and the continuation corrects the nullable expectation.",
+    "manifest": "both source manifests name commits, paths and retained logs; the continuation's baseline_suite is null, and this review uses the coordinator-authorized predecessor head-suite.log substitute rather than treating the missing arm as a blocker.",
+    "write_paths": "all eight diff paths belong to the two source dispatches' actual fences at predecessor prompt.txt:81 and continuation prompt.txt:80, including the continuation-specific evidence fragment omitted from the brief's abbreviated union."
+  },
+  "justifications": {
+    "durability": "test_receipt_gaps.py:111 catches removal of release appending, :134 detects the original tokenless bypass, :211 checks stored metadata and :250 checks actual refusal diagnostics, but :40 hardcodes part of the fence independently of the emitted query.",
+    "evidence": "baseline-final-regression.log records 15 failures against the original source, negative-control.log records both release failures, explain-final.log records marker 731 and three parsed statements, and the authorized head-suite.log to standard_names_head.log comparison adds zero failure IDs despite imperfect focused-log revision headers.",
+    "fit": "graph_catalog.py:83 adds an optional caller-owned refusal map to the existing services-based writer and graph_claim_release.py:52 reuses the canonical receipt appender, although its :50 comment overstates the zero-result guarantee.",
+    "goal_fidelity": "graph_claim_release.py:52 appends before release, graph_foundation.py:932 closes the tokenless bypass, worker_common.py:751 carries metadata and graph_catalog.py:2427 retains the writer's refusal, with the release zero-result caveat recorded separately.",
+    "reuse": "capability searches for receipt appending, claim-ending writers, refusal diagnostics and stateful graph doubles found graph_foundation.py:961, graph_catalog.py:79, test_claim_outcome_receipts.py:67 and test_persist_refusal_per_source.py:46; production extends those owners and both added graph subclasses extend and reuse the existing stateful doubles.",
+    "scope_discipline": "the eight paths in the requested range are all authorized by the two dispatch fences, including docs/evidence/fragments/sn-integrity-backlog/sib-receipt-gaps-expectation.html at continuation prompt.txt:83."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: predecessor prompt.txt:38 and :107 require release receipts, ownership fencing, run/batch attribution and actual writer refusals; graph_claim_release.py:52, graph_foundation.py:932, worker_common.py:751 and graph_catalog.py:2427 implement these, and the continuation corrects the nullable expectation.\nVERDICT done_when: predecessor prompt.txt:107 is measured by baseline-final-regression.log (15 failed, 3 passed), head-final-focused.log (78 passed), the release-removal control (2 failed) and the authorized suite comparison (1 baseline failure, 0 head failures).\nVERDICT write_paths: all eight diff paths belong to the two source dispatches' actual fences at predecessor prompt.txt:81 and continuation prompt.txt:80, including the continuation-specific evidence fragment omitted from the brief's abbreviated union.\nVERDICT manifest: both source manifests name commits, paths and retained logs; the continuation's baseline_suite is null, and this review uses the coordinator-authorized predecessor head-suite.log substitute rather than treating the missing arm as a blocker.\nVERDICT diff: read all seven commits in 0efd4cf508efc8b9a738435fbf79acc3b0ef6d2d..9d198273af1d01f7e51ae5524e06cd3ddd023f3a; four production files, two test files and two evidence fragments change, with no unrelated implementation.\nCALL_SITES: imas_codex/standard_names/loop.py:875, imas_codex/standard_names/worker_tasks/worker_common.py:1017, imas_codex/standard_names/graph_store/graph_source_bindings.py:1503, imas_codex/standard_names/graph_store/graph_catalog.py:2720, imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py:1643, imas_codex/standard_names/worker_tasks/worker_compose_batches.py:1094, imas_codex/standard_names/orphan_sweep.py:203\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: graph_claim_release.py:52 appends before release, graph_foundation.py:932 closes the tokenless bypass, worker_common.py:751 carries metadata and graph_catalog.py:2427 retains the writer's refusal, with the release zero-result caveat recorded separately.\nSCORE evidence: 18\nJUSTIFICATION evidence: baseline-final-regression.log records 15 failures against the original source, negative-control.log records both release failures, explain-final.log records marker 731 and three parsed statements, and the authorized head-suite.log to standard_names_head.log comparison adds zero failure IDs despite imperfect focused-log revision headers.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the eight paths in the requested range are all authorized by the two dispatch fences, including docs/evidence/fragments/sn-integrity-backlog/sib-receipt-gaps-expectation.html at continuation prompt.txt:83.\nSCORE durability: 16\nJUSTIFICATION durability: test_receipt_gaps.py:111 catches removal of release appending, :134 detects the original tokenless bypass, :211 checks stored metadata and :250 checks actual refusal diagnostics, but :40 hardcodes part of the fence independently of the emitted query.\nSCORE fit: 19\nJUSTIFICATION fit: graph_catalog.py:83 adds an optional caller-owned refusal map to the existing services-based writer and graph_claim_release.py:52 reuses the canonical receipt appender, although its :50 comment overstates the zero-result guarantee.\nSCORE reuse: 20\nJUSTIFICATION reuse: capability searches for receipt appending, claim-ending writers, refusal diagnostics and stateful graph doubles found graph_foundation.py:961, graph_catalog.py:79, test_claim_outcome_receipts.py:67 and test_persist_refusal_per_source.py:46; production extends those owners and both added graph subclasses extend and reuse the existing stateful doubles.\nFINDING tests/standard_names/test_receipt_gaps.py:40 non-blocking: ReceiptGraph enforces token and sequence equality regardless of whether those clauses occur in the emitted query, so the wrong-fence assertions at :143 remain green if graph_foundation.py loses its token or sequence equality; the capped branch also omits sequence comparison, leaving those predicate regressions unguarded even though the original null-token defect is demonstrably caught.\nFINDING imas_codex/standard_names/graph_store/graph_claim_release.py:50 non-blocking: the comment says a failed append preserves ownership, but the helper ignores the append result and clears ownership at :72 after a non-exception zero-result refusal or missing-count response; qualify the comment or verify receipt existence, remembering that an idempotent retry legitimately creates zero new receipts.\n",
+  "review_run_id": "r-20261108T180752870871-review-of-sib-receipt-gaps-expectation-9d198273af1d",
+  "reviewed_base_sha": "0efd4cf508efc8b9a738435fbf79acc3b0ef6d2d",
+  "reviewed_commits": [
+    "d715ec6c7c8cdba2acf90870791b3769f8aa5647",
+    "545cb8d6d851b4df63c2651d3aa69fa500fd28dc",
+    "4be454496bfa7c8ad80e3aa9bce6aac0fd2b81a4",
+    "1dc2aa1404f5930c38e7a003a7f984c96fae83b9",
+    "5ce4a26e35cf0fd2cddfcdcd314883129023bd6c",
+    "a93e57d9a4799675dbbe8e0208a99ea815e8c3f8",
+    "9d198273af1d01f7e51ae5524e06cd3ddd023f3a"
+  ],
+  "reviewed_head_sha": "9d198273af1d01f7e51ae5524e06cd3ddd023f3a",
+  "reviewed_run_id": "r-20261108T171139362143-sib-receipt-gaps-expectation",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "suite_comparison": {
+    "after": {
+      "command": "timeout 850s env UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-receipt-gaps-expectation uv run --no-sync pytest -n 8 -p no:cacheprovider /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-receipt-gaps-expectation/tests/standard_names/",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T171139362143-sib-receipt-gaps-expectation/standard_names_head.log",
+      "revision_header": "# revision: a93e57d9a",
+      "summary": "========== 8623 passed, 11 skipped, 274 warnings in 304.26s (0:05:04) =========="
+    },
+    "baseline": {
+      "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-receipt-gaps TMPDIR=/tmp/reckon-crew-scratch/r-20261108T141838375901-sib-receipt-gaps uv run --no-sync pytest -p no:cacheprovider --basetemp=/tmp/reckon-crew-scratch/r-20261108T141838375901-sib-receipt-gaps/receipt-gate-rGbd9v/pytest /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-receipt-gaps/tests/standard_names -n 4 ",
+      "completed": true,
+      "exit_status": 1,
+      "failure_count": 1,
+      "failure_ids": [
+        "tests/standard_names/test_vocab_gap_source_persistence.py::test_actionable_gap_retires_source_no_string"
+      ],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T141838375901-sib-receipt-gaps/head-suite.log",
+      "revision_header": "# revision: 4be454496bfa7c8ad80e3aa9bce6aac0fd2b81a4 tree: /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-receipt-gaps",
+      "summary": "===== 1 failed, 8622 passed, 11 skipped, 142 warnings in 442.00s (0:07:22) ====="
+    }
+  },
+  "supersedes": {
+    "reason": "Prior review covered only the continuation and lacked an authorized baseline; this review covers the full requested range and uses the explicitly supplied substitute.",
+    "review_run_id": "r-20261108T173448791464-review-of-sib-receipt-gaps-expectation-9d198273af1d",
+    "status": "incomplete"
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T18:26:23.473870+00:00",
+  "total": 112
+}
