@@ -57,7 +57,30 @@
   "plan_slug": "sn-integrity-backlog",
   "plan_version": 391,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "2b70738ba5bc76dc39b3e8b9bcc87ab66ec09b7b",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "2b70738ba declares the persist-refusal, tail-rerun and test-repair nodes in \u00a751, cites the 114 ceiling to the diagnosis fragment, drops the unreachable per-USD floor, names the fragment directory as the read-back path, and states \u00a751 carries \u00a750's unmet yield.",
+      "reason": "",
+      "when": "2026-11-08T09:57:00.572239+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "2b70738ba5bc76dc39b3e8b9bcc87ab66ec09b7b",
+      "commit_basis": "edit",
+      "note": "2b70738ba declares the persist-refusal, tail-rerun and test-repair nodes in \u00a751, cites the 114 ceiling to the diagnosis fragment, drops the unreachable per-USD floor, names the fragment directory as the read-back path, and states \u00a751 carries \u00a750's unmet yield.",
+      "reason": "",
+      "when": "2026-11-08T09:57:00.572239+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-integrity-backlog/r-20261108T090651132072-plan-review-of-sn-integrity-backlog.json",
   "review_run_id": "r-20261108T090651132072-plan-review-of-sn-integrity-backlog",
   "reviewed_blob_sha": "347b9c24c609f48864cd218f43217ab67f31196f",
   "rubric": "content",
