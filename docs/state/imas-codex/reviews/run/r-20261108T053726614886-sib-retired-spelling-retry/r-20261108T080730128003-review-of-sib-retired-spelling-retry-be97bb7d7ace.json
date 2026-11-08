@@ -1,0 +1,73 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 3,
+  "added_failure_ids": [
+    "tests/standard_names/test_anchor_ab_aggregate.py::test_population_derived_from_selection",
+    "tests/standard_names/test_anchor_ab_aggregate.py::test_verdict_computed_from_conditions",
+    "tests/standard_names/test_dd_gap_automated_writers.py::test_review_writer_requires_successful_owned_transition[None-name]"
+  ],
+  "assertion_audit_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T080730128003-review-of-sib-retired-spelling-retry-be97bb7d7ace/assertion-audit.md",
+  "call_site_count": 6,
+  "call_sites": [
+    "imas_codex/standard_names/worker_tasks/worker_compose_batches.py:compose_batch",
+    "imas_codex/standard_names/graph_store/graph_catalog.py:persist_generated_name_winners",
+    "imas_codex/standard_names/graph_store/graph_catalog.py:persist_generated_name_batch",
+    "imas_codex/standard_names/graph_store/graph_source_bindings.py:persist_claimed_attachments",
+    "imas_codex/standard_names/graph_store/graph_source_bindings.py:stage_claimed_generated_candidates",
+    "imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py:1467"
+  ],
+  "completed_at": "2026-11-08T08:20:58Z",
+  "dispatched_at": "2026-11-08T08:08:36Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_retired_spelling_retry.py",
+      "line": "134",
+      "severity": "non-blocking",
+      "text": "non-blocking: the stage assertion compares the stage passed into BindingGraph with the same stored fixture field, and the attempt assertions at 135, 175 and 240 read a counter initialized to 5 that BindingGraph.answer never mutates; adding a production Cypher stage reset or attempt increment would leave these assertions green, so they do not establish the claimed stage/attempt preservation."
+    }
+  ],
+  "gate_evidence": {
+    "after_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T053726614886-sib-retired-spelling-retry/caller-suite-retry.log",
+    "after_revision": "ef3ef5dd47e5e8e66fa91352f37d67c085e51b93",
+    "baseline_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T053726614886-sib-retired-spelling-retry/baseline-suite.log",
+    "baseline_revision": "2f0a49c10c39735458e7d12c897352a09651edeb",
+    "note": "The reviewed final commit changes evidence only; the head suite ran at the last product-code commit. Three added timeout IDs remain measured; no external test source was investigated."
+  },
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 6 production call site(s)",
+    "diff": "read de1d4669414a055c1035cbe54b632a7ac87ecf19, cdcb744fb035bceda526fddec7466a29e7567ee0, ef3ef5dd47e5e8e66fa91352f37d67c085e51b93 and be97bb7d7ace202e9873bb3e5032a33d7d10e2b8 against 2f0a49c10c39735458e7d12c897352a09651edeb; the cumulative diff adds guarded successor resolution, finalizer propagation, context wiring, 21 regression cases and the evidence fragment, with no unrelated changes.",
+    "done_when": "prompt.txt and resume-1-advice.txt require safe HAS_SUCCESSOR reuse, refusal context, a 58-source census and no added suite failures; the focused receipt records 126 passes and the census is controlled, but caller-suite-retry.log records three added timeout failure IDs against baseline-suite.log's zero.",
+    "goal": "prompt.txt names stopping attempts on retired catalog spellings; graph_source_bindings.py:1233-1285 follows one direct compatible holder and worker_compose_batches.py:334-337 and 541-543 carry the persisted refusal into initial and internal retry prompts.",
+    "manifest": "manifest.md names all four commits and six changed paths, records completed baseline and head arms, and explicitly leaves the zero-added-failure threshold unmet rather than reporting the three timeouts as green.",
+    "write_paths": "prompt.txt's five grants plus resume-1-advice.txt's graph_catalog.py extension and resume-2-advice.txt's worker_compose_batches.py extension cover all six paths changed by the four reviewed commits."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_retired_spelling_retry.py:132-133, 171-176, 227-231 and 392-399 fail on lost successor selection, unsafe following, wrong finalization or missing prompt refusal, but its immutable fake stage and attempt assertions at 134-135 cannot detect mutations made by the production Cypher.",
+    "evidence": "baseline-suite.log ends with 8544 passed and EXIT=0, caller-suite-retry.log ends with 3 failed, 8562 passed and EXIT=1, and docs/evidence/fragments/sn-integrity-backlog/sib-retired-spelling-retry.html:11 explicitly states the no-added-failure bar is unmet while its census distinguishes observed source units from unavailable historical proposal units.",
+    "fit": "context.py:189-237 uses the surrounding context-builder conventions, graph_source_bindings.py:1268 re-enters the existing transaction guard, and the added function and test names describe their mechanisms without transient plan labels.",
+    "goal_fidelity": "graph_source_bindings.py:921-934 and 1233-1285 enforce a unique direct same-unit live successor through the existing binding guards, while worker_compose_batches.py:334-337 and 541-543 preserve refusal guidance when selection fails.",
+    "reuse": "capability searches at the reviewed head found graph_source_bindings.py's binding owner, graph_claim_release.py:1012's diagnostic successor lookup, mark_sources_stale at graph_source_bindings.py:2600's distinct removed-DD-path reconciliation, worker_common.py:1443-1475's grammar/token guidance and tests/standard_names/graph_transaction_doubles.py:30's transaction double; the additions extend the binding/context owners and subclass that double rather than duplicating those capabilities.",
+    "scope_discipline": "all six cumulative diff paths are authorized by prompt.txt and the explicit scope extensions in resume-1-advice.txt and resume-2-advice.txt, and the caller edit touches exactly the three replacements that the latter authorizes."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: prompt.txt names stopping attempts on retired catalog spellings; graph_source_bindings.py:1233-1285 follows one direct compatible holder and worker_compose_batches.py:334-337 and 541-543 carry the persisted refusal into initial and internal retry prompts.\nVERDICT done_when: prompt.txt and resume-1-advice.txt require safe HAS_SUCCESSOR reuse, refusal context, a 58-source census and no added suite failures; the focused receipt records 126 passes and the census is controlled, but caller-suite-retry.log records three added timeout failure IDs against baseline-suite.log's zero.\nVERDICT write_paths: prompt.txt's five grants plus resume-1-advice.txt's graph_catalog.py extension and resume-2-advice.txt's worker_compose_batches.py extension cover all six paths changed by the four reviewed commits.\nVERDICT manifest: manifest.md names all four commits and six changed paths, records completed baseline and head arms, and explicitly leaves the zero-added-failure threshold unmet rather than reporting the three timeouts as green.\nVERDICT diff: read de1d4669414a055c1035cbe54b632a7ac87ecf19, cdcb744fb035bceda526fddec7466a29e7567ee0, ef3ef5dd47e5e8e66fa91352f37d67c085e51b93 and be97bb7d7ace202e9873bb3e5032a33d7d10e2b8 against 2f0a49c10c39735458e7d12c897352a09651edeb; the cumulative diff adds guarded successor resolution, finalizer propagation, context wiring, 21 regression cases and the evidence fragment, with no unrelated changes.\nCALL_SITES: imas_codex/standard_names/worker_tasks/worker_compose_batches.py:compose_batch, imas_codex/standard_names/graph_store/graph_catalog.py:persist_generated_name_winners, imas_codex/standard_names/graph_store/graph_catalog.py:persist_generated_name_batch, imas_codex/standard_names/graph_store/graph_source_bindings.py:persist_claimed_attachments, imas_codex/standard_names/graph_store/graph_source_bindings.py:stage_claimed_generated_candidates, imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py:1467\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: graph_source_bindings.py:921-934 and 1233-1285 enforce a unique direct same-unit live successor through the existing binding guards, while worker_compose_batches.py:334-337 and 541-543 preserve refusal guidance when selection fails.\nSCORE evidence: 16\nJUSTIFICATION evidence: baseline-suite.log ends with 8544 passed and EXIT=0, caller-suite-retry.log ends with 3 failed, 8562 passed and EXIT=1, and docs/evidence/fragments/sn-integrity-backlog/sib-retired-spelling-retry.html:11 explicitly states the no-added-failure bar is unmet while its census distinguishes observed source units from unavailable historical proposal units.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: all six cumulative diff paths are authorized by prompt.txt and the explicit scope extensions in resume-1-advice.txt and resume-2-advice.txt, and the caller edit touches exactly the three replacements that the latter authorizes.\nSCORE durability: 16\nJUSTIFICATION durability: tests/standard_names/test_retired_spelling_retry.py:132-133, 171-176, 227-231 and 392-399 fail on lost successor selection, unsafe following, wrong finalization or missing prompt refusal, but its immutable fake stage and attempt assertions at 134-135 cannot detect mutations made by the production Cypher.\nSCORE fit: 19\nJUSTIFICATION fit: context.py:189-237 uses the surrounding context-builder conventions, graph_source_bindings.py:1268 re-enters the existing transaction guard, and the added function and test names describe their mechanisms without transient plan labels.\nSCORE reuse: 20\nJUSTIFICATION reuse: capability searches at the reviewed head found graph_source_bindings.py's binding owner, graph_claim_release.py:1012's diagnostic successor lookup, mark_sources_stale at graph_source_bindings.py:2600's distinct removed-DD-path reconciliation, worker_common.py:1443-1475's grammar/token guidance and tests/standard_names/graph_transaction_doubles.py:30's transaction double; the additions extend the binding/context owners and subclass that double rather than duplicating those capabilities.\nFINDING tests/standard_names/test_retired_spelling_retry.py:134 non-blocking: the stage assertion compares the stage passed into BindingGraph with the same stored fixture field, and the attempt assertions at 135, 175 and 240 read a counter initialized to 5 that BindingGraph.answer never mutates; adding a production Cypher stage reset or attempt increment would leave these assertions green, so they do not establish the claimed stage/attempt preservation.\n",
+  "review_method": "Source files and call sites read from git objects at reviewed_head_sha; assigned review worktree HEAD is separately recorded in the manifest. No source mutation and no suite rerun.",
+  "review_run_id": "r-20261108T080730128003-review-of-sib-retired-spelling-retry-be97bb7d7ace",
+  "reviewed_base_sha": "2f0a49c10c39735458e7d12c897352a09651edeb",
+  "reviewed_head_sha": "be97bb7d7ace202e9873bb3e5032a33d7d10e2b8",
+  "reviewed_run_id": "r-20261108T053726614886-sib-retired-spelling-retry",
+  "scores": {
+    "durability": 16,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T08:30:34.032439+00:00",
+  "total": 110
+}
