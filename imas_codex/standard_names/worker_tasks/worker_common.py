@@ -748,6 +748,8 @@ def _claimed_source_outcome(
         "source_id": source_id,
         "claim_token": token,
         "claim_seq": seq,
+        "run_id": item.get("run_id"),
+        "batch_key": item.get("batch_key"),
         "status": status,
         "last_error": last_error,
         "skip_reason": skip_reason,

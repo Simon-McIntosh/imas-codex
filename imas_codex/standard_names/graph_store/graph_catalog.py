@@ -80,6 +80,7 @@ def write_standard_names(
     override: bool = False,
     gc: Any | None = None,
     return_written_ids: bool = False,
+    refusal_reasons: dict[str, str] | None = None,
     services: Any,
 ) -> int | list[str]:
     """MERGE StandardName nodes with HAS_STANDARD_NAME relationships.
@@ -113,6 +114,9 @@ def write_standard_names(
         allowing an explicit transaction to own the complete rich write.
     return_written_ids:
         Return the identities that survived validation and conflict checks.
+    refusal_reasons:
+        Optional caller-owned map receiving grammar and unit refusal text by
+        name identity, including candidates filtered before any graph write.
 
     Performs conflict detection on ``unit``: if a StandardName already exists
     with a different unit value, that entry is skipped (not written)
@@ -122,6 +126,8 @@ def write_standard_names(
     """
     if not names:
         return [] if return_written_ids else 0
+    if refusal_reasons is None:
+        refusal_reasons = {}
 
     # Pipeline protection — strip catalog-owned fields from catalog_edit items
     from imas_codex.standard_names.protection import filter_protected
@@ -158,6 +164,7 @@ def write_standard_names(
                     raise ValueError("strict grammar round-trip changed the name")
                 valid_names.append(n)
             except Exception as exc:
+                refusal_reasons[n["id"]] = f"grammar parse failed: {exc}"
                 logger.warning(
                     "write_standard_names: rejecting '%s' — grammar parse failed: %s",
                     n["id"],
@@ -213,6 +220,7 @@ def write_standard_names(
                 override=override,
                 gc=client,
                 return_written_ids=return_written_ids,
+                refusal_reasons=refusal_reasons,
             )
     if gc is not None and type(gc) is services.GraphClient:
         with gc.session() as session:
@@ -223,6 +231,7 @@ def write_standard_names(
                     override=override,
                     gc=services._TransactionQuery(transaction),
                     return_written_ids=return_written_ids,
+                    refusal_reasons=refusal_reasons,
                 )
                 transaction.commit()
                 return result
@@ -254,6 +263,11 @@ def write_standard_names(
                 or []
             )
             if unit_conflicts:
+                for conflict in unit_conflicts:
+                    refusal_reasons[conflict["name"]] = (
+                        f"unit conflict: existing unit {conflict['existing_unit']!r} "
+                        f"differs from incoming unit {conflict['incoming_unit']!r}"
+                    )
                 conflict_details = "; ".join(
                     f"{c['name']}: {c['existing_unit']} vs {c['incoming_unit']}"
                     for c in unit_conflicts
@@ -2366,11 +2380,13 @@ def persist_generated_name_winners(
                     if item["sns_id"] in locked_ids
                     and binding_kinds[item["sns_id"]] not in _RICH_WRITE_BINDING_KINDS
                 }
+                refusal_reasons: dict[str, str] = {}
                 if rich_write_candidates:
                     written_names = services.write_standard_names(
                         rich_write_candidates,
                         gc=tx_gc,
                         return_written_ids=True,
+                        refusal_reasons=refusal_reasons,
                     )
                     if isinstance(written_names, int):
                         if written_names != len(rich_write_candidates):
@@ -2407,9 +2423,12 @@ def persist_generated_name_winners(
                                 "claim_seq": item["claim_seq"],
                                 "reason": (
                                     "rich standard-name write refused candidate "
-                                    f"{candidate.get('id')!r}: the writer refused "
-                                    "to mint this identity, so the source "
-                                    "produced no name"
+                                    f"{candidate.get('id')!r}: "
+                                    + refusal_reasons.get(
+                                        str(candidate.get("id")),
+                                        "the writer refused to mint this identity, "
+                                        "so the source produced no name",
+                                    )
                                 ),
                             }
                         )

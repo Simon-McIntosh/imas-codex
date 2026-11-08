@@ -886,6 +886,7 @@ def claim_attempt_entry(
     fenced on the source's live claim. An entry that omits either one is
     compared against a null and writes nothing at all, so ``claim_seq`` is a
     required argument: a fenced writer must state the sequence it is closing.
+    Only the cap sweep may omit a token, for an unclaimed failed source.
 
     Args:
         sns_id: StandardNameSource id the claim belongs to.
@@ -928,9 +929,15 @@ def claim_attempt_entry(
 CLAIM_ATTEMPT_APPEND_CYPHER: Final[str] = """
 UNWIND $entries AS entry
 MATCH ({sns_var}:StandardNameSource {{id: entry.source_id}})
-WHERE entry.claim_token IS NULL
-   OR ({sns_var}.claim_token = entry.claim_token
+WHERE (entry.claim_token IS NOT NULL
+       AND {sns_var}.claim_token = entry.claim_token
        AND {sns_var}.claim_seq = entry.claim_seq)
+   OR (entry.claim_token IS NULL
+       AND entry.outcome = 'capped'
+       AND {sns_var}.claim_token IS NULL
+       AND {sns_var}.status = 'failed'
+       AND ({sns_var}.claim_seq = entry.claim_seq
+            OR ({sns_var}.claim_seq IS NULL AND entry.claim_seq IS NULL)))
 OPTIONAL MATCH (existing:StandardNameSourceClaimAttempt {{id: entry.id}})
 WITH {sns_var} AS sns, entry, existing
 MERGE (attempt_row:StandardNameSourceClaimAttempt {{id: entry.id}})
@@ -938,8 +945,8 @@ ON CREATE SET attempt_row.source_id = entry.source_id,
               attempt_row.attempt = coalesce(sns.attempt_count, 1),
               attempt_row.outcome = entry.outcome,
               attempt_row.reason = entry.reason,
-              attempt_row.batch_key = entry.batch_key,
-              attempt_row.run_id = entry.run_id,
+              attempt_row.batch_key = coalesce(entry.batch_key, sns.batch_key),
+              attempt_row.run_id = coalesce(entry.run_id, sns.run_id),
               attempt_row.recorded_at = datetime()
 MERGE (sns)-[:HAS_CLAIM_ATTEMPT]->(attempt_row)
 RETURN sum(CASE WHEN existing IS NULL THEN 1 ELSE 0 END) AS written
