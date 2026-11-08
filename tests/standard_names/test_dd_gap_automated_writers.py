@@ -462,8 +462,6 @@ def _review_item(axis: str) -> dict:
 async def test_review_writer_requires_successful_owned_transition(
     axis: str, transition: str | None
 ) -> None:
-    from imas_codex.standard_names import workers
-
     dims = (
         {"grammar": 18, "semantic": 18, "convention": 18, "completeness": 18}
         if axis == "name"
@@ -492,10 +490,17 @@ async def test_review_writer_requires_successful_owned_transition(
     )
 
     with ExitStack() as stack:
-        stack.enter_context(
+        llm = stack.enter_context(
             patch(
                 "imas_codex.discovery.base.llm.acall_llm_structured",
                 new=AsyncMock(return_value=(llm_result, 0.01, 100)),
+            )
+        )
+        # Evidence authorization depends on the owned transition, not embeddings.
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.audits.semantic_similarity_check",
+                return_value=(None, []),
             )
         )
         stack.enter_context(
@@ -540,7 +545,7 @@ async def test_review_writer_requires_successful_owned_transition(
                 return_value=[],
             )
         )
-        stack.enter_context(
+        persist = stack.enter_context(
             patch(
                 f"imas_codex.standard_names.graph_store.graph_review_persistence.{persist_name}",
                 return_value=transition,
@@ -562,6 +567,9 @@ async def test_review_writer_requires_successful_owned_transition(
         )
         await process([_review_item(axis)], mgr, asyncio.Event())
 
+    llm.assert_awaited_once()
+    persist.assert_called_once()
+    assert persist.call_args.kwargs["claim_token"] == "claim-token"
     if transition is None:
         write.assert_not_called()
     else:

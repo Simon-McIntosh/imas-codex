@@ -19,6 +19,7 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+from time import perf_counter
 
 import pytest
 
@@ -44,6 +45,12 @@ def _load(path: Path):
 
 
 agg = _load(MODULE_PATH)
+
+
+@pytest.fixture(autouse=True)
+def _stub_record_provenance(monkeypatch) -> None:
+    """Aggregation assertions need record contents, independent of git history."""
+    monkeypatch.setattr(agg, "git_commit", lambda path: "record-commit")
 
 
 def _record(drop: tuple[str, ...] = (), git_head: str | None = None) -> dict:
@@ -120,7 +127,10 @@ def test_population_derived_from_selection() -> None:
         for row in selection["selected"]
         if row["heuristic_anchor"] != row["jev_anchor"]
     ]
+    started = perf_counter()
     payload = agg.build(RECORDS_DIR, SELECTION)
+    elapsed = perf_counter() - started
+    assert elapsed < 10, f"Aggregation exceeded its 10 s budget: {elapsed:.2f} s"
     assert payload["population"]["agreements"] == expected_agreements
     assert payload["population"]["compared"] == expected_compared
     assert len(payload["population"]["compared"]) == 3
