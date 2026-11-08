@@ -1,16 +1,16 @@
 """Illustrate ITER's engineering data as a road map of France, built in stages.
 
 An illustration, not a census. Each town is one body of data ITER owns
-(documents, CAD models, drawings, non-conformance reports, ...). The motorways
-are the links between them: infrastructure ITER builds, pays for and keeps,
-which is the organisation's memory. Each named relationship runs along the real
-motorways between its two towns and carries a plain ontological verb
-(``Documents references CAD Models``). Vehicles are agents' requests: they only
-ever travel the relationships, the way a traversal runs on a live graph
+(documents, CAD models, drawings, interface sheets, non-conformance reports,
+...). The motorways are the links between them: infrastructure ITER builds, pays
+for and keeps, which is the organisation's memory. Each named relationship runs
+along the real motorways between its two towns and carries a plain ontological
+verb (``Documents references CAD Models``). Vehicles are agents' requests: they
+only ever travel the relationships, the way a traversal runs on a live graph
 database, and shuttle what they read back the way they came. They drive beneath
-every label. Whatever the vehicle, the roads stay ours. ITER sits east of
-the map, joined to it by one on-ramp: each burst of vehicles is a question
-leaving ITER, and each vehicle's return is an answer coming back.
+every label. Whatever the vehicle, the roads stay ours. ITER sits east of the
+map, joined to it by one on-ramp: each burst of vehicles is a question leaving
+ITER, and each vehicle's return is an answer coming back.
 
 The sequence opens on a full-width grid of the repositories as cards (``--grid``;
 with ``--thumbnails`` it carries example IDM pages and is written to a gitignored
@@ -60,6 +60,7 @@ from matplotlib.animation import FuncAnimation, PillowWriter
 from matplotlib.patches import Circle, Ellipse, PathPatch, Polygon, Rectangle
 from matplotlib.path import Path as MplPath
 from matplotlib.text import Text
+from matplotlib.transforms import Bbox
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "scripts/figure_data"
@@ -115,7 +116,8 @@ TOWNS = [
     ),
     Town("con", "Contracts", "procurement · SAP", -1.68, 48.11, (-4, -14, "center")),
     Town("req", "Requirements", "RQM", 7.75, 48.57, (12, 2, "left")),
-    Town("pbs", "Plant Breakdown", "PBS", 5.04, 47.32, (8, 6, "left")),
+    Town("pbs", "Plant Breakdown", "PBS", 5.04, 47.32, (-12, -10, "right")),
+    Town("ifc", "Interfaces", "interface sheets", 6.18, 48.69, (-18, -1, "right")),
 ]
 
 # Whoever asks, at ITER or at a Domestic Agency: east of France, off the data map,
@@ -132,10 +134,12 @@ RELATIONS = [
     ("ncr", "cites", "doc", (0.5, 0, 0)),
     ("drw", "depicts", "cmp", (0.5, 0, 0)),
     ("con", "delivers", "doc", (0.28, 0, 0)),
-    ("doc", "specifies", "req", (0.5, 0, 0)),
-    ("cmp", "is part of", "pbs", (0.55, 0, 0)),
+    ("doc", "specifies", "req", (0.3, 0, 0)),
+    ("cmp", "is part of", "pbs", (0.4, 0, 0)),
     ("ana", "assesses", "cmp", (0.5, 0, 0)),
-    ("doc", "is filed under", "pbs", (0.5, 0, 0)),
+    ("doc", "is filed under", "pbs", (0.5, 0, -4)),
+    ("ifc", "joins", "pbs", (0.58, 0, 0)),
+    ("ifc", "states", "req", (0.6, 0, 0)),
 ]
 
 
@@ -420,6 +424,13 @@ def draw_icon(ax, kind: str, x: float, y: float, s: float = 0.2) -> None:
                 zorder=8,
             )
         )
+    elif kind == "ifc":
+        # a token split in two: each system keeps one half, and the interface
+        # is the join between them
+        zig = [(0.08, 0.9), (-0.12, 0.45), (0.12, 0.0), (-0.12, -0.45), (0.08, -0.9)]
+        gap = 0.1
+        poly([(-1, -0.9), *[(u - gap, v) for u, v in reversed(zig)], (-1, 0.9)])
+        poly([(1, 0.9), *[(u + gap, v) for u, v in zig], (1, -0.9)], face="#c9c7c2")
     elif kind == "ana":
         ax.add_patch(
             Rectangle((x - s, y - 0.8 * s), 2 * s, 1.6 * s, facecolor="white", **style)
@@ -575,13 +586,18 @@ def draw_relation_labels(ax, routes, others: list[Text]) -> list[Text]:
         )
         labels.append(label)
     boxes = [t.get_window_extent(renderer).padded(3) for t in [*others, *labels]]
+    for town in TOWNS:  # and keep clear of the town dots the roads arrive at
+        x, y = ax.transData.transform(place(town.key))
+        boxes.append(Bbox.from_extents(x - 11, y - 11, x + 11, y + 11))
     arrows = []
     for (_, _, _, (f, _, _)), points in zip(RELATIONS, routes, strict=True):
         total, start = length(points), f * length(points)
-        for step in range(120):  # 0.03 map units at a time, alternating sides
-            s = start + 0.03 * (step // 2 + 1) * (1 if step % 2 == 0 else -1)
-            if not 0.2 < s < total - 0.2:
-                continue
+        candidates = [  # 0.03 map units at a time, alternating sides
+            start + 0.03 * (step // 2 + 1) * (1 if step % 2 == 0 else -1)
+            for step in range(120)
+        ]
+        candidates = [s for s in candidates if 0.2 < s < total - 0.2] or [start]
+        for s in candidates:
             xa, ya, _ = along(points, s / total)
             arrow = Polygon(
                 place_shape(CHEVRON, xa, ya, heading_at(points, s), 0.17),
@@ -594,13 +610,11 @@ def draw_relation_labels(ax, routes, others: list[Text]) -> list[Text]:
             ax.add_patch(arrow)
             extent = arrow.get_window_extent(renderer)
             if not any(extent.overlaps(b) for b in boxes):
-                arrows.append(arrow)
                 break
-            arrow.remove()
-        else:
-            raise SystemExit(
-                f"no clear place on its road for the arrowhead of {points[0]}"
-            )
+            if s != candidates[-1]:
+                arrow.remove()
+        # with no clear place the last try stays, and the layout check names it
+        arrows.append(arrow)
     ax.figure.relation_arrows = arrows
     return labels
 
@@ -986,8 +1000,8 @@ def save_traffic(stage: str, draft: Path | None) -> Path:
 GRID_NAMES = {"ncr": "Non-Conformance\nReports"}
 GRID_SYSTEMS = {"cad": "CATIA\nDassault Systèmes"}
 
-# Repositories in reading order for the full-width grid: five above, four below.
-GRID_ORDER = ["doc", "cad", "ncr", "drw", "ana", "cmp", "pbs", "req", "con"]
+# Repositories in reading order for the full-width grid: five above, five below.
+GRID_ORDER = ["doc", "cad", "ncr", "drw", "ana", "cmp", "pbs", "ifc", "req", "con"]
 
 # Example pages for the grid, rendered from IDM into a private directory outside
 # git (they are internal documents): town -> (page image stem, source, crop box as
@@ -1002,6 +1016,7 @@ THUMBNAILS = {
     "req": ("req-X3Y95E-p13", "X3Y95E v2.2 p13", (0.08, 0.03, 0.92, 0.36), "fill"),
     "cmp": ("cmp-7VLKY2-p12", "7VLKY2 v1.0 p12", (0.05, 0.22, 0.42, 0.955), "fit"),
     "con": ("con-4F6AQ8-p1", "4F6AQ8 v1.0 p1", (0.04, 0.02, 0.96, 0.42), "fit"),
+    "ifc": ("ifc-F7TX5Y-p9", "F7TX5Y v1.10 p9", (0.14, 0.145, 0.86, 0.44), "fit"),
 }
 PRIVATE = FIGURES / "private"  # gitignored: served by the docs SPA, never pushed
 
@@ -1071,7 +1086,7 @@ def grid_figure(thumbnails: Path | None) -> Path:
     texts = []
     for i, key in enumerate(GRID_ORDER):
         row, col = (0, i) if i < 5 else (1, i - 5)
-        per_row = 5 if row == 0 else 4
+        per_row = 5 if row == 0 else len(GRID_ORDER) - 5
         left = (SLIDE_WIDTH - per_row * card_w - (per_row - 1) * gap) / 2
         x0, top = left + col * (card_w + gap), row_top[row]
         box = (
