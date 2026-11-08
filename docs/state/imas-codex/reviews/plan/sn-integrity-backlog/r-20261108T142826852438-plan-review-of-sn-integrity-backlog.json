@@ -17,7 +17,30 @@
   "plan_slug": "sn-integrity-backlog",
   "plan_version": 412,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "090dc8b3cc921d91a020d9cb62faa72011e0bc10",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "v413 counts the vocabulary-gap set as 85 in \u00a750 as well as \u00a751.",
+      "reason": "",
+      "when": "2026-11-08T14:49:27.058858+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "090dc8b3cc921d91a020d9cb62faa72011e0bc10",
+      "commit_basis": "edit",
+      "note": "v413 counts the vocabulary-gap set as 85 in \u00a750 as well as \u00a751.",
+      "reason": "",
+      "when": "2026-11-08T14:49:27.058858+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-integrity-backlog/r-20261108T142826852438-plan-review-of-sn-integrity-backlog.json",
   "review_run_id": "r-20261108T142826852438-plan-review-of-sn-integrity-backlog",
   "reviewed_blob_sha": "9a58ca8bc934b894e84bb44a0664b84760717969",
   "rubric": "content",
