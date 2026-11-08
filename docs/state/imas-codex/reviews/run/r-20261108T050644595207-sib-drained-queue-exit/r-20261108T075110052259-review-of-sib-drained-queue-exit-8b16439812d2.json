@@ -1,0 +1,80 @@
+{
+  "absent": [],
+  "added_failure_count": 1,
+  "added_failure_ids": [
+    "tests/standard_names/test_anchor_ab_aggregate.py::test_population_derived_from_selection"
+  ],
+  "added_failures_note": "Derived from the reviewed run's own two suite logs. logs/suite-base.log (d5da568f, base product files, completed to '13 failed, 8539 passed, 11 skipped' at 08:46) and logs/suite-head.log (8b1643981, completed to '3 failed, 8549 passed, 11 skipped' at 08:46) are compared id by id: head fails test_anchor_ab_aggregate.py::test_population_derived_from_selection, test_anchor_ab_aggregate.py::test_verdict_computed_from_conditions and test_dd_gap_automated_writers.py::test_review_writer_requires_successful_owned_transition[None-name]; the base arm carries the latter two plus eleven more. So exactly one head id is absent from the base arm. That id is load-sensitive under -n 8: the same file is 13 passed in isolation at head (logs/gate-head.log second run), so it is not a regression this change causes, but it is an added id against the stated base and the manifest's 'adds no failure id' claim is therefore not literally met.",
+  "completed_at": "2026-11-08T08:09:11.863Z",
+  "dispatched_at": "2026-11-08T07:57:19Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_drained_queue_exit.py",
+      "line": 223,
+      "severity": "non-blocking",
+      "text": "`assert _selects(_claim_seed_cypher(), sources) == _selects(count_clause, sources)` is close to tautological. `_selects` decides only from the substrings 'FROM_DD_PATH' and 'PRODUCED_NAME', and the claim seed statement contains both regardless of the shared predicate -- 'MATCH (sns)-[:FROM_DD_PATH]->(imas0:IMASNode)' is its own pre-existing match and the predicate supplies PRODUCED_NAME -- so this line would stay true if the predicate stopped being applied to the seed. The independent guard for the claim side is tests/standard_names/test_drained_queue_exit.py:236, which compares the predicate text itself; this line adds no condition under which it would redden that line 236 does not already cover."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_foundation.py",
+      "line": 201,
+      "severity": "non-blocking",
+      "text": "The `dd_path_bound` keyword on the new predicate has no caller. Every interpolated site -- graph_cost_and_claims.py:486, 506, 518, 530, cli/sn.py:619 and graph_parent_lifecycle.py:118 -- passes the default False, including the three claim statements that already carry `MATCH (sns)-[:FROM_DD_PATH]->...` a few lines below and so now test the same edge twice. The parameter is dead as shipped; either it should be used at the sites whose docstring rationale describes it, or it should not exist."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T050644595207-sib-drained-queue-exit/logs/gate-head.log",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "The head gate log carries no revision header, no command line and no trailing `EXIT=` line, and it concatenates two separate pytest runs (19 passed for test_frozen_stage_pool_guard.py + test_drained_queue_exit.py, then 13 passed for test_anchor_ab_aggregate.py) with no separator naming either. The manifest's `tests:` line names only test_drained_queue_exit.py, so the log cannot be tied to the command it claims and its exit status cannot be read from the file the way the manifest contract requires."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T050644595207-sib-drained-queue-exit/logs/negative-control-base.log",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "The declared negative control ran the six-test revision of the test file (07:23) and its failure list names `test_the_generate_count_mirrors_the_claim_seed_predicate`, a test that does not exist at the reviewed head; the delivered file has eight tests and two of them use `source_claim_predicate`, which does not exist at the base revision. A later and complete red-on-base receipt does exist -- logs/suite-base.log runs the head test files against the base product files and reddens 7 of the 8, all except the deliberately-passing `test_a_stuck_claim_still_reports_stalled_and_exits_one` -- but the field the manifest points at cannot be re-read against the delivered tests."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T050644595207-sib-drained-queue-exit/manifest.md",
+      "line": 10,
+      "severity": "non-blocking",
+      "text": "The checkpoint states `tests/standard_names adds no failure id against the base`, but the two suite logs it cites differ by one id: tests/standard_names/test_anchor_ab_aggregate.py::test_population_derived_from_selection fails at head and does not fail at base. The manifest's own failure_attribution explains it as a load flake that passes 13/13 in isolation at head, which is credible against logs/gate-head.log, but the stated comparison is contradicted by the receipts and the added-failure figure for this node is 1, not 0."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-drained-queue-exit.html",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "The landed evidence fragment is text-only although docs/figures/sn-integrity-backlog/sib-drained-queue-exit was a granted write path. The comparison the fragment rests on -- 104 pending sources, all 104 without a FROM_DD_PATH, beside 9,078 of 10,141 that carry one -- is exactly the shape a small bar or a two-state queue diagram carries better than a paragraph, and the user-global graphics mandate makes the figure the default for an evidence record of this kind."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit from d5da568f9. 22156bbb9 adds the predicate to both count sites and a 219-line test; 07e795a68 reads the frozen stages from the wired services namespace after a sibling import was refused; c3852b403 adds the 72-line evidence fragment; 36fb20289 moves the predicate into graph_foundation and has the claim's six guard sites interpolate it (13 deletions from the inline text, 32 added); 8b1643981 re-anchors the frozen-stage guard test on the predicate's call sites instead of its Cypher text. 448 insertions, 13 deletions, all inside scope, with clamp guarantees preserved (the predicate is text inserted into the existing WHERE clauses and no statement's parameters changed except the two count sites gaining $frozen_name_stages).",
+    "done_when": "The done_when names tests/standard_names/test_drained_queue_exit.py and requires both branches on fakes plus no added failures. The gate log records 19 passed over that file and test_frozen_stage_pool_guard.py; the tests do drive the real _compute_pool_progress count and the real _idle_exhaustion_watchdog and assert 'no_eligible_work' + exit 0 for the drained case (line 173) and 'stalled' + SystemExit(1) for a claimable source (line 180); the seven modified Cypher statements were EXPLAINed against the live graph, 7 of 7 ok (logs/explain.log). The 'adds no failure id' clause is not literally met: the suite arms differ by one id (see the added-failure note).",
+    "goal": "The goal is to make a drained SN run exit cleanly instead of reporting a deadlock when only unclaimable sources remain pending. The diff defines that claimability once at imas_codex/standard_names/graph_store/graph_foundation.py:201 and reads it from all six claim guard sites (graph_cost_and_claims.py:486/506/518/530), the CLI count the run watchdog reads (imas_codex/cli/sn.py:619, fed by _pool_pending_fn at sn.py:1012 and :1142) and the exported count (graph_parent_lifecycle.py:118), so pending work is now work a pool can select.",
+    "manifest": "Read. It states the head gate at 19 passed (8 in test_drained_queue_exit.py), the base arm at 13 failed / 8539 passed and the after arm at 3 failed / 8549 passed, the negative control at 5 failed 1 passed EXIT=1, seven of seven EXPLAINs ok, and a live reproduction of 10,141 sources / 9,078 with a DD path / 104 pending all without one (101 derived, 3 manual). Two statements do not survive their own receipts: the 'adds no failure id' checkpoint (one id is added) and the declared negative_control_log, which predates the delivered test file.",
+    "write_paths": "The declared nine paths are graph_parent_lifecycle.py, pools.py, cli/sn.py, graph_cost_and_claims.py, graph_foundation.py, tests/test_drained_queue_exit.py, tests/test_frozen_stage_pool_guard.py, the evidence fragment and the figures directory. Every path in the diff -- imas_codex/cli/sn.py, graph_foundation.py, graph_cost_and_claims.py, graph_parent_lifecycle.py, the two test files and the evidence fragment -- is inside that set; pools.py and the figures directory are declared and unused, which is not a violation."
+  },
+  "justifications": {
+    "durability": "logs/suite-base.log runs the delivered test file against the base product files and reddens 7 of its 8 tests (test_drained_queue_exit.py:156, 161, 167, 173, 189, 212, 226), so the guards do fail when the change is reverted; the one weak line is the claim-side comparison at test_drained_queue_exit.py:223, which is satisfied by the seed statement's pre-existing FROM_DD_PATH match and would survive a predicate regression.",
+    "evidence": "logs/suite-head.log and logs/suite-base.log are complete with headers and summary lines and logs/explain.log records 7 of 7 EXPLAIN ok, but the head gate log has no revision header or EXIT line, the declared negative control predates the delivered test file, and one added failure id contradicts the manifest's 'adds no failure id' claim.",
+    "fit": "The new helper follows the module's existing query-fragment idiom -- a function returning a WHERE body, beside docs_review_winner_query_body at imas_codex/standard_names/graph_store/graph_foundation.py:162 and the interpolated _SKELETON_PLACEHOLDER_PREDICATE at graph_lineage.py:2332 used from graph_catalog.py:701 -- and is named for the mechanism, carries a mechanism-only docstring with no plan or ticket identifier, and the commit messages carry bodies.",
+    "goal_fidelity": "imas_codex/standard_names/graph_store/graph_foundation.py:201 defines the restriction once and graph_cost_and_claims.py:486 plus imas_codex/cli/sn.py:619 and graph_parent_lifecycle.py:118 all read it, so the count and the claim select the same sources and a drained queue reaches the no_eligible_work branch.",
+    "reuse": "graph_foundation.py:201 is the single owner of a predicate that the diff removes from six inline copies in graph_cost_and_claims.py (a git grep for the inline frozen-name guard at 8b1643981 returns only the owner), so the change consolidates rather than forks, and the two count sites extend that owner.",
+    "scope_discipline": "Every path changed in d5da568f9..8b1643981 -- imas_codex/cli/sn.py, graph_store/graph_foundation.py, graph_store/graph_cost_and_claims.py, graph_store/graph_parent_lifecycle.py, the two tests under tests/standard_names and the evidence fragment -- is inside the nine declared write paths, and the two later additions (graph_foundation, test_frozen_stage_pool_guard) are recorded in outside_scope with the constraint that forced each."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261108T075110052259-review-of-sib-drained-queue-exit-8b16439812d2",
+  "reviewed_base_sha": "d5da568f900ad87ef23df65eba413492786824f2",
+  "reviewed_head_sha": "8b16439812d29ef5185ec523f5632fe78743b29b",
+  "reviewed_run_id": "r-20261108T050644595207-sib-drained-queue-exit",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T08:21:06.212623+00:00",
+  "total": 109
+}
