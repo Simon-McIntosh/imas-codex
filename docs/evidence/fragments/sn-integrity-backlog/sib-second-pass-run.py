@@ -278,13 +278,16 @@ def phase_verify(args: argparse.Namespace) -> dict:
 
 
 def phase_manifest(args: argparse.Namespace) -> dict:
-    """Emit the sn-sources manifest that scopes the rerun to the cohort."""
     rows = cohort()
     grouped: dict[str, list[str]] = collections.defaultdict(list)
+    excluded = set(args.exclude or ())
+    rows = [r for r in rows if r["id"] not in excluded]
     for row in rows:
         ids_relative = row["id"].partition(":")[2]
-        ids_name = ids_relative.partition("/")[0]
-        grouped[ids_name].append(ids_relative)
+        # The loader flattens sources.<ids>[] to '<ids>/<path>', so the value
+        # carries the path within the IDS, never the IDS name again.
+        ids_name, _, path_within_ids = ids_relative.partition("/")
+        grouped[ids_name].append(path_within_ids)
     manifest = {
         "kind": "sn_sources",
         "schema_version": 1,
@@ -296,7 +299,7 @@ def phase_manifest(args: argparse.Namespace) -> dict:
         ),
         "sources": {k: sorted(v) for k, v in sorted(grouped.items())},
     }
-    out = RUN_DIR / "cohort-sources.json"
+    out = RUN_DIR / (args.manifest_name or "cohort-sources.json")
     out.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
     return {
         "manifest_path": str(out),
@@ -403,7 +406,9 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("phase", choices=sorted(phases))
     parser.add_argument("--out", default=None)
+    parser.add_argument("--manifest-name", default=None)
     parser.add_argument("--run-id", default=None)
+    parser.add_argument("--exclude", action="append", default=[])
     args = parser.parse_args()
     payload = phases[args.phase](args)
     text = json.dumps(payload, indent=2, sort_keys=True)
