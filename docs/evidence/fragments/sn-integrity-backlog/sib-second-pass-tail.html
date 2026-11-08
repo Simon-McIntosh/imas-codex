@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Source retry stopped at its model-build prerequisite</title></head>
+<body>
+<section id="sib-second-pass-tail-record">
+<h2 id="sib-second-pass-tail-outcome">Model-build prerequisite refused; no sources reset</h2>
+<p>The live plan was read at version 412. The required first operation,
+<code>uv run --no-sync build-models --force</code>, ran from the main checkout
+at <code>0efd4cf508efc8b9a738435fbf79acc3b0ef6d2d</code>, which contains
+<code>b7bf0f5f4</code>. It ended <code>EXIT=1</code> while generating the
+facility models:</p>
+<pre>Error: [Errno 30] Read-only file system: '/home/ITER/mcintos/Code/imas-codex/imas_codex/graph/models.py'</pre>
+<p>The full receipt is
+<a href="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T141648847743-sib-second-pass-tail/build-models.log">the model-build log</a>.
+Its first line records the revision, tree and command; its last line is
+<code>EXIT=1</code>. The accompanying Python recorder reproduces only this
+prerequisite and preserves existing logs. It has not been used to retry the
+refused write.</p>
+<table id="sib-second-pass-tail-measurements">
+<caption>What this attempt measured</caption>
+<thead><tr><th>Measure</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>Model rebuild</td><td>Failed on the worker filesystem fence</td></tr>
+<tr><td>Live cohort census and sourceless-draft baseline</td><td>Not reached</td></tr>
+<tr><td>Sources reset; reset receipts written</td><td>0; 0</td></tr>
+<tr><td>Scoped pipeline jobs submitted</td><td>0</td></tr>
+<tr><td>This attempt's pipeline spend / authorized ceiling</td><td>USD 0 / USD 48.51</td></tr>
+<tr><td>New run id, claim receipts, export blocking set</td><td>Not measured; no pipeline run started</td></tr>
+</tbody>
+</table>
+<p>The earlier evidence records 83 produced out of 143, 41 failed without a
+name, 4 extracted and 15 vocabulary gaps. These are historical figures, not
+a live census from this attempt. The cumulative floor of 100 and the export
+and draft invariants remain unverified. No vocabulary-gap source was touched.</p>
+<p>Resume after the coordinator rebuilds the main-checkout generated models.
+Then verify the generated claim-attempt model, capture the live cohort and
+sourceless-draft baseline, perform the sanctioned reset with receipts and dry
+run, and run the scoped pipeline under the remaining cap. No further paid
+work was attempted because the required prerequisite failed.</p>
+</section>
+</body>
+</html>
