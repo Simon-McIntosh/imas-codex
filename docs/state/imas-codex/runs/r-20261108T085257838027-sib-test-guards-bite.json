@@ -1,0 +1,2458 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "96d64ea46391e6eb82d4d2676b96cad62f34c287",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 7268161,
+      "input_tokens_cumulative": 7268161,
+      "output_tokens": 30332,
+      "output_tokens_cumulative": 30332,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 321,
+    "files": 6,
+    "removed": 57
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_list_uses_exact_read_filters_and_does_not_call_writers",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 49
+    },
+    {
+      "existing_function": {
+        "line": 186,
+        "name": "test_show_reports_exact_paths_and_is_read_only",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 47
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "test_document_image_persistence_keeps_judgment_and_drops_image_bytes",
+        "path": "tests/discovery/test_document_workers.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 49
+    },
+    {
+      "existing_function": {
+        "line": 420,
+        "name": "test_every_database_signal_has_a_persisted_access_method",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 49
+    },
+    {
+      "existing_function": {
+        "line": 592,
+        "name": "test_mbdb_signal_keeps_case_and_field",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 49
+    },
+    {
+      "existing_function": {
+        "line": 705,
+        "name": "test_lcdb_signal_keeps_owner_category_and_shot",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 49
+    },
+    {
+      "existing_function": {
+        "line": 19,
+        "name": "_fixture_row",
+        "path": "tests/discovery/test_evaluation.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 47
+    },
+    {
+      "existing_function": {
+        "line": 114,
+        "name": "test_create_only_leaves_existing_node_unchanged",
+        "path": "tests/graph/test_create_nodes_create_only.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 50
+    },
+    {
+      "existing_function": {
+        "line": 284,
+        "name": "test_returns_field_details",
+        "path": "tests/ids/test_mapping_e2e.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 49
+    },
+    {
+      "existing_function": {
+        "line": 1267,
+        "name": "query",
+        "path": "tests/standard_names/test_attachment_audit.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 50
+    },
+    {
+      "existing_function": {
+        "line": 27,
+        "name": "_full_item",
+        "path": "tests/standard_names/test_compose_names_context.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 49
+    },
+    {
+      "existing_function": {
+        "line": 175,
+        "name": "test_review_cost_accumulated_on_standard_name",
+        "path": "tests/standard_names/test_cost_attribution.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 48
+    },
+    {
+      "existing_function": {
+        "line": 222,
+        "name": "test_review_cached_tokens_written",
+        "path": "tests/standard_names/test_cost_attribution.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 48
+    },
+    {
+      "existing_function": {
+        "line": 618,
+        "name": "test_compose_evidence_follows_each_committed_disposition",
+        "path": "tests/standard_names/test_dd_gap_automated_writers.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 47
+    },
+    {
+      "existing_function": {
+        "line": 804,
+        "name": "test_registry_migration_cas_compares_complete_graph_snapshots",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 47
+    },
+    {
+      "existing_function": {
+        "line": 333,
+        "name": "test_generate_docs_user_template_renders_source_paths",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 49
+    },
+    {
+      "existing_function": {
+        "line": 307,
+        "name": "test_claim_then_persist_race_does_not_loop",
+        "path": "tests/standard_names/test_docs_supersede_safety.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 47
+    },
+    {
+      "existing_function": {
+        "line": 153,
+        "name": "_persist_gc",
+        "path": "tests/standard_names/test_enrich_parents.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 50
+    },
+    {
+      "existing_function": {
+        "line": 59,
+        "name": "_failed_outcome",
+        "path": "tests/standard_names/test_failed_source_reason.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 50
+    },
+    {
+      "existing_function": {
+        "line": 28,
+        "name": "test_returns_feedback_mapping",
+        "path": "tests/standard_names/test_fetch_review_feedback_for_sources.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 49
+    },
+    {
+      "existing_function": {
+        "line": 369,
+        "name": "test_filters_by_min_size",
+        "path": "tests/standard_names/test_harmonize.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 49
+    },
+    {
+      "existing_function": {
+        "line": 397,
+        "name": "test_filters_by_min_drift",
+        "path": "tests/standard_names/test_harmonize.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 50
+    },
+    {
+      "existing_function": {
+        "line": 417,
+        "name": "test_signature_match_excludes_family",
+        "path": "tests/standard_names/test_harmonize.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 49
+    },
+    {
+      "existing_function": {
+        "line": 454,
+        "name": "test_missing_signature_treated_as_never_harmonized",
+        "path": "tests/standard_names/test_harmonize.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 49
+    },
+    {
+      "existing_function": {
+        "line": 498,
+        "name": "test_ranked_by_drift_desc_then_n_desc",
+        "path": "tests/standard_names/test_harmonize.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 49
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_independent_source_guard_rejects_review_derived_label",
+        "path": "tests/standard_names/test_judgment_goldens.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 47
+    },
+    {
+      "existing_function": {
+        "line": 774,
+        "name": "_run_audit_row_contract",
+        "path": "tests/standard_names/test_panel_audit_sample.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 47
+    },
+    {
+      "existing_function": {
+        "line": 803,
+        "name": "test_review_docs_comment_not_clipped",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 49
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_pool_compose_retry.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 45
+    },
+    {
+      "existing_function": {
+        "line": 55,
+        "name": "test_accepted_catalog_edit_persists_actor_from_pull_request_evidence",
+        "path": "tests/standard_names/test_promote_reviewer_actor.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 47
+    },
+    {
+      "existing_function": {
+        "line": 29,
+        "name": "_review_entry",
+        "path": "tests/standard_names/test_review_axis_scoped_writes.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 47
+    },
+    {
+      "existing_function": {
+        "line": 275,
+        "name": "test_write_reviews_default_does_accumulate_cost",
+        "path": "tests/standard_names/test_review_axis_scoped_writes.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 48
+    },
+    {
+      "existing_function": {
+        "line": 42,
+        "name": "test_write_reviews_forwards_cost_and_tokens",
+        "path": "tests/standard_names/test_review_cost.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 48
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_write_reviews_coalesces_none_cost_to_zero",
+        "path": "tests/standard_names/test_review_cost_persistence.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 49
+    },
+    {
+      "existing_function": {
+        "line": 73,
+        "name": "test_write_reviews_preserves_zero_cost",
+        "path": "tests/standard_names/test_review_cost_persistence.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 49
+    },
+    {
+      "existing_function": {
+        "line": 221,
+        "name": "test_escalation_review_carries_cost",
+        "path": "tests/standard_names/test_review_cost_persistence.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 49
+    },
+    {
+      "existing_function": {
+        "line": 10,
+        "name": "test_fetch_review_feedback_includes_suggested_name",
+        "path": "tests/standard_names/test_review_feedback_suggested_name.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 47
+    },
+    {
+      "existing_function": {
+        "line": 324,
+        "name": "test_prior_reviews_iteration_uses_dict_index",
+        "path": "tests/standard_names/test_review_names_context.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 47
+    },
+    {
+      "existing_function": {
+        "line": 129,
+        "name": "test_write_name_review_results_batch_uses_original_id",
+        "path": "tests/standard_names/test_revised_name_fix.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 47
+    },
+    {
+      "existing_function": {
+        "line": 243,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_self_refine.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 45
+    },
+    {
+      "existing_function": {
+        "line": 11,
+        "name": "__init__",
+        "path": "tests/standard_names/test_sn_approve_undo_fallback.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 47
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_pooled_compose_delivers_source_and_name_steering_to_prompt",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 47
+    },
+    {
+      "existing_function": {
+        "line": 15,
+        "name": "_review_record",
+        "path": "tests/standard_names/test_suggestion_persist_gate.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 47
+    },
+    {
+      "existing_function": {
+        "line": 111,
+        "name": "test_gap_writer_failure_rolls_back_source_outcome",
+        "path": "tests/standard_names/test_vocab_gap_source_persistence.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 50
+    },
+    {
+      "existing_function": {
+        "line": 668,
+        "name": "test_text_only_match_uses_text_score",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 49
+    },
+    {
+      "existing_function": {
+        "line": 706,
+        "name": "test_dual_match_boosted",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 49
+    },
+    {
+      "existing_function": {
+        "line": 746,
+        "name": "test_enrichment_includes_lifecycle",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 43,
+        "name": "_make_batch_item",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 49
+    },
+    {
+      "existing_function": {
+        "line": 78,
+        "name": "__init__",
+        "path": "tests/standard_names/test_pool_compose_retry.py"
+      },
+      "run_function": {
+        "line": 103,
+        "name": "__init__",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 104
+    },
+    {
+      "existing_function": {
+        "line": 287,
+        "name": "__init__",
+        "path": "tests/standard_names/test_self_refine.py"
+      },
+      "run_function": {
+        "line": 103,
+        "name": "__init__",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 104
+    },
+    {
+      "existing_function": {
+        "line": 69,
+        "name": "_patched_submit",
+        "path": "tests/cli/test_services_remote.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 182
+    },
+    {
+      "existing_function": {
+        "line": 266,
+        "name": "test_h200_location_preserves_partition_reservation",
+        "path": "tests/cli/test_services_remote.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 183
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "_capture_reset",
+        "path": "tests/discovery/test_paths_pipeline.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 178
+    },
+    {
+      "existing_function": {
+        "line": 16,
+        "name": "_approve",
+        "path": "tests/standard_names/test_approve_withholds_on_comments.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 179
+    },
+    {
+      "existing_function": {
+        "line": 50,
+        "name": "_export_report",
+        "path": "tests/standard_names/test_audit_reports_sourceless_drafts.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 588,
+        "name": "test_run_benchmark_mocked",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 182
+    },
+    {
+      "existing_function": {
+        "line": 684,
+        "name": "test_run_benchmark_multiple_models",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 182
+    },
+    {
+      "existing_function": {
+        "line": 752,
+        "name": "test_run_benchmark_llm_failure",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 182
+    },
+    {
+      "existing_function": {
+        "line": 1364,
+        "name": "test_run_benchmark_compose_elapsed_populated",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 182
+    },
+    {
+      "existing_function": {
+        "line": 1499,
+        "name": "test_score_with_reviewer_docs_target",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 138,
+        "name": "test_generate_docs_releases_lease_on_happy_path",
+        "path": "tests/standard_names/test_budget_lease_release.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 183
+    },
+    {
+      "existing_function": {
+        "line": 195,
+        "name": "test_review_name_releases_lease_on_happy_path",
+        "path": "tests/standard_names/test_budget_lease_release.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 183
+    },
+    {
+      "existing_function": {
+        "line": 232,
+        "name": "test_review_docs_releases_lease_on_happy_path",
+        "path": "tests/standard_names/test_budget_lease_release.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 183
+    },
+    {
+      "existing_function": {
+        "line": 273,
+        "name": "test_refine_docs_releases_lease_on_happy_path",
+        "path": "tests/standard_names/test_budget_lease_release.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 183
+    },
+    {
+      "existing_function": {
+        "line": 51,
+        "name": "_run_review",
+        "path": "tests/standard_names/test_budget_reservation_invariant.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 183
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_precomputed_embedding_skips_embed",
+        "path": "tests/standard_names/test_compose_batch_embed.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 224,
+        "name": "test_none_embedding_calls_embed",
+        "path": "tests/standard_names/test_compose_batch_embed.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 500,
+        "name": "test_identity_rejection_reaps_only_the_invalid_pending_parent",
+        "path": "tests/standard_names/test_derived_parent_lifecycle_repair.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 744,
+        "name": "test_inadmissible_accepted_derived_parent_is_deleted",
+        "path": "tests/standard_names/test_derived_parent_lifecycle_repair.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 787,
+        "name": "test_childless_derived_placeholder_is_retired",
+        "path": "tests/standard_names/test_derived_parent_lifecycle_repair.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 843,
+        "name": "test_reaped_snapshot_candidate_is_not_rematerialized",
+        "path": "tests/standard_names/test_derived_parent_lifecycle_repair.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 921,
+        "name": "test_childless_parent_chain_is_reaped_to_fixpoint",
+        "path": "tests/standard_names/test_derived_parent_lifecycle_repair.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 1068,
+        "name": "test_accepted_docs_complete_parent_with_missing_unit_is_repaired",
+        "path": "tests/standard_names/test_derived_parent_lifecycle_repair.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_enrich_populates_source_paths",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 110,
+        "name": "test_enrich_populates_dd_source_docs_and_aliases",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 218,
+        "name": "test_a_claim_is_held_only_when_no_bound_source_supports_it",
+        "path": "tests/standard_names/test_docs_contradiction_veto.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 28,
+        "name": "_persisted_documentation",
+        "path": "tests/standard_names/test_docs_opening_insertion.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 59,
+        "name": "_run_fixture_export",
+        "path": "tests/standard_names/test_export_bound_adjacent.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 89,
+        "name": "_run_fixture_export",
+        "path": "tests/standard_names/test_export_release_holds.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 169,
+        "name": "_run_fixture_export",
+        "path": "tests/standard_names/test_export_waiver_intermediates.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 524,
+        "name": "test_worker_streams_per_item",
+        "path": "tests/standard_names/test_generate_docs.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 183
+    },
+    {
+      "existing_function": {
+        "line": 301,
+        "name": "test_finalize_batch_carries_exact_source_fence",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 212
+    },
+    {
+      "existing_function": {
+        "line": 677,
+        "name": "test_persist_calls_finalize_stage",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 212
+    },
+    {
+      "existing_function": {
+        "line": 713,
+        "name": "test_persist_sets_name_stage_drafted",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 212
+    },
+    {
+      "existing_function": {
+        "line": 741,
+        "name": "test_persist_sets_chain_length_zero",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 212
+    },
+    {
+      "existing_function": {
+        "line": 769,
+        "name": "test_persist_sets_docs_stage_pending",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 212
+    },
+    {
+      "existing_function": {
+        "line": 797,
+        "name": "test_persist_clears_claim_on_source",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 212
+    },
+    {
+      "existing_function": {
+        "line": 826,
+        "name": "test_persist_creates_produced_name_edge",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 212
+    },
+    {
+      "existing_function": {
+        "line": 854,
+        "name": "test_persist_idempotent_merge_semantics",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 212
+    },
+    {
+      "existing_function": {
+        "line": 1790,
+        "name": "test_persist_error_sibling_excluded_from_finalize",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 212
+    },
+    {
+      "existing_function": {
+        "line": 2131,
+        "name": "test_persist_regen_supersedes_one_live_name",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 212
+    },
+    {
+      "existing_function": {
+        "line": 733,
+        "name": "test_validate_processes_claimed_names",
+        "path": "tests/standard_names/test_graph_state_machine.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 183
+    },
+    {
+      "existing_function": {
+        "line": 843,
+        "name": "test_drain_validation_backlog_marks_until_empty",
+        "path": "tests/standard_names/test_graph_state_machine.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 183
+    },
+    {
+      "existing_function": {
+        "line": 81,
+        "name": "test_pipeline_does_not_spin_when_all_work_complete",
+        "path": "tests/standard_names/test_no_stuck_idle.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 520,
+        "name": "_run_sn_pools_patches",
+        "path": "tests/standard_names/test_only_phase_skip_generate.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 211
+    },
+    {
+      "existing_function": {
+        "line": 11,
+        "name": "test_explicit_paths_return_only_claim_winners_with_fences",
+        "path": "tests/standard_names/test_pool_adapter_claims.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 212
+    },
+    {
+      "existing_function": {
+        "line": 65,
+        "name": "test_explicit_paths_without_claim_winner_skip_graph_reads",
+        "path": "tests/standard_names/test_pool_adapter_claims.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 212
+    },
+    {
+      "existing_function": {
+        "line": 240,
+        "name": "test_compose_domain_context_from_batch",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 327,
+        "name": "test_compose_stop_event_short_circuits",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 407,
+        "name": "test_review_names_processes_batch",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 502,
+        "name": "test_review_docs_independent_from_names",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 601,
+        "name": "test_batch_processor_releases_claims_on_exception",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 743,
+        "name": "test_review_name_comment_not_clipped",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 182
+    },
+    {
+      "existing_function": {
+        "line": 803,
+        "name": "test_review_docs_comment_not_clipped",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 182
+    },
+    {
+      "existing_function": {
+        "line": 919,
+        "name": "test_refine_name_grammar_failure_exhausts_not_reloops",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 122,
+        "name": "_patch_compose_deps",
+        "path": "tests/standard_names/test_pool_compose_retry.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 245,
+        "name": "test_partial_winner_emits_and_counts_only_finalized_source",
+        "path": "tests/standard_names/test_pool_compose_retry.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 212
+    },
+    {
+      "existing_function": {
+        "line": 367,
+        "name": "test_retry_exhausted_falls_through",
+        "path": "tests/standard_names/test_pool_compose_retry.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 212
+    },
+    {
+      "existing_function": {
+        "line": 441,
+        "name": "test_retry_disabled_when_zero",
+        "path": "tests/standard_names/test_pool_compose_retry.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 212
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_stub_parent_lifecycle_startup",
+        "path": "tests/standard_names/test_pool_endpoint_failure_scope.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 211
+    },
+    {
+      "existing_function": {
+        "line": 194,
+        "name": "_run_scaffold_patches",
+        "path": "tests/standard_names/test_pool_endpoint_failure_scope.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 66,
+        "name": "_stub_parent_lifecycle_startup",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 211
+    },
+    {
+      "existing_function": {
+        "line": 1245,
+        "name": "test_finalize_populates_counter_fields",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 211
+    },
+    {
+      "existing_function": {
+        "line": 44,
+        "name": "_stub_parent_lifecycle_startup",
+        "path": "tests/standard_names/test_pool_orchestrator_integration.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 211
+    },
+    {
+      "existing_function": {
+        "line": 482,
+        "name": "test_finalize_interrupted_on_stop_event",
+        "path": "tests/standard_names/test_pool_orchestrator_integration.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 211
+    },
+    {
+      "existing_function": {
+        "line": 601,
+        "name": "test_finalize_completed_on_natural_drain",
+        "path": "tests/standard_names/test_pool_orchestrator_integration.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 211
+    },
+    {
+      "existing_function": {
+        "line": 723,
+        "name": "test_create_sn_run_open_receives_invocation",
+        "path": "tests/standard_names/test_pool_orchestrator_integration.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 211
+    },
+    {
+      "existing_function": {
+        "line": 385,
+        "name": "test_deferred_quorum_releases_and_skips_persist",
+        "path": "tests/standard_names/test_rd_quorum_integrity.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 182
+    },
+    {
+      "existing_function": {
+        "line": 468,
+        "name": "test_cycle2_reservation_refused_defers",
+        "path": "tests/standard_names/test_rd_quorum_integrity.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 212
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_attachment_rejection_counts_the_attempt_and_stays_retryable",
+        "path": "tests/standard_names/test_refine_attempt_budget.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 178
+    },
+    {
+      "existing_function": {
+        "line": 714,
+        "name": "test_worker_calls_persist",
+        "path": "tests/standard_names/test_refine_docs_chain.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 182
+    },
+    {
+      "existing_function": {
+        "line": 761,
+        "name": "test_worker_releases_on_failure",
+        "path": "tests/standard_names/test_refine_docs_chain.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 182
+    },
+    {
+      "existing_function": {
+        "line": 713,
+        "name": "test_process_calls_escalation_model",
+        "path": "tests/standard_names/test_refine_name_chain.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 772,
+        "name": "test_process_uses_default_model_below_cap",
+        "path": "tests/standard_names/test_refine_name_chain.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 887,
+        "name": "test_releases_claim_on_llm_failure",
+        "path": "tests/standard_names/test_refine_name_chain.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 935,
+        "name": "test_exact_id_collision_emits_both_ids_and_releases_claim",
+        "path": "tests/standard_names/test_refine_name_chain.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 182
+    },
+    {
+      "existing_function": {
+        "line": 1014,
+        "name": "test_proven_claim_loss_is_distinct_from_successor_refusal",
+        "path": "tests/standard_names/test_refine_name_chain.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 178
+    },
+    {
+      "existing_function": {
+        "line": 1089,
+        "name": "test_parse_failure_charges_once_then_terminates",
+        "path": "tests/standard_names/test_refine_name_chain.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 182
+    },
+    {
+      "existing_function": {
+        "line": 1171,
+        "name": "test_billed_structured_failure_charges_telemetry_once",
+        "path": "tests/standard_names/test_refine_name_chain.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 182
+    },
+    {
+      "existing_function": {
+        "line": 1225,
+        "name": "test_provider_budget_error_charges_prior_responses_then_propagates",
+        "path": "tests/standard_names/test_refine_name_chain.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 182
+    },
+    {
+      "existing_function": {
+        "line": 1278,
+        "name": "test_pre_response_provider_budget_error_does_not_charge",
+        "path": "tests/standard_names/test_refine_name_chain.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 182
+    },
+    {
+      "existing_function": {
+        "line": 1415,
+        "name": "test_prompt_context_keys",
+        "path": "tests/standard_names/test_refine_name_chain.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 85,
+        "name": "_worker_dependencies",
+        "path": "tests/standard_names/test_refine_scope_continuity.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 803,
+        "name": "test_failed_release_keeps_drafted",
+        "path": "tests/standard_names/test_review_docs_stages.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 182
+    },
+    {
+      "existing_function": {
+        "line": 845,
+        "name": "test_worker_streams_per_item",
+        "path": "tests/standard_names/test_review_docs_stages.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 182
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "_make_build_kwargs",
+        "path": "tests/standard_names/test_review_model_compat.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 182
+    },
+    {
+      "existing_function": {
+        "line": 903,
+        "name": "test_worker_uses_canonical_model",
+        "path": "tests/standard_names/test_review_name_stages.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 182
+    },
+    {
+      "existing_function": {
+        "line": 953,
+        "name": "test_worker_streams_per_item",
+        "path": "tests/standard_names/test_review_name_stages.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 182
+    },
+    {
+      "existing_function": {
+        "line": 1009,
+        "name": "test_failed_release_reverts_drafted",
+        "path": "tests/standard_names/test_review_name_stages.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 182
+    },
+    {
+      "existing_function": {
+        "line": 1101,
+        "name": "test_valid_status_still_calls_llm",
+        "path": "tests/standard_names/test_review_name_stages.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 182
+    },
+    {
+      "existing_function": {
+        "line": 698,
+        "name": "test_review_single_batch_retries_unmatched",
+        "path": "tests/standard_names/test_review_pipeline.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 183
+    },
+    {
+      "existing_function": {
+        "line": 797,
+        "name": "test_review_single_batch_no_retry_when_all_matched",
+        "path": "tests/standard_names/test_review_pipeline.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 183
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "_patch_common",
+        "path": "tests/standard_names/test_review_quorum_pool.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 182
+    },
+    {
+      "existing_function": {
+        "line": 372,
+        "name": "test_refine_name_excludes_unreviewed_names",
+        "path": "tests/standard_names/test_seed_expand_claims.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 196
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "_patch_compose_deps",
+        "path": "tests/standard_names/test_self_refine.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 77,
+        "name": "test_write_sweeps_only_its_unowned_placeholder_endpoints",
+        "path": "tests/standard_names/test_skeleton_placeholder_cleanup_graph.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 334,
+        "name": "_run_export_with_audit",
+        "path": "tests/standard_names/test_source_audit_gate.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_pooled_compose_delivers_source_and_name_steering_to_prompt",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 860,
+        "name": "_startup_patches",
+        "path": "tests/standard_names/test_source_revival.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 211
+    },
+    {
+      "existing_function": {
+        "line": 646,
+        "name": "test_fallback_version_passed_to_cypher",
+        "path": "tests/standard_names/test_vocab_gaps.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 183
+    },
+    {
+      "existing_function": {
+        "line": 528,
+        "name": "test_ssh_url_reads_file_and_converts",
+        "path": "tests/wiki/test_scoring_functions.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 183
+    },
+    {
+      "existing_function": {
+        "line": 325,
+        "name": "test_images_persisted_to_graph",
+        "path": "tests/wiki/test_workers.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 182
+    },
+    {
+      "existing_function": {
+        "line": 371,
+        "name": "test_unfetchable_images_become_failed_nodes",
+        "path": "tests/wiki/test_workers.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 181
+    },
+    {
+      "existing_function": {
+        "line": 424,
+        "name": "test_successful_ingestion",
+        "path": "tests/wiki/test_workers.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "compose_deps",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 182
+    },
+    {
+      "existing_function": {
+        "line": 281,
+        "name": "test_validation_error_is_recorded_for_its_own_source",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "run_function": {
+        "line": 237,
+        "name": "test_refused_candidate_is_recorded_and_siblings_still_persist",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 243
+    },
+    {
+      "existing_function": {
+        "line": 237,
+        "name": "test_refused_candidate_is_recorded_and_siblings_still_persist",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "run_function": {
+        "line": 281,
+        "name": "test_validation_error_is_recorded_for_its_own_source",
+        "path": "tests/standard_names/test_compose_batch_isolation.py"
+      },
+      "window_line": 287
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "_make_gc_tx",
+        "path": "tests/standard_names/test_generate_docs.py"
+      },
+      "run_function": {
+        "line": 363,
+        "name": "test_compose_prompts_keep_retired_refusal_through_internal_retry",
+        "path": "tests/standard_names/test_retired_spelling_retry.py"
+      },
+      "window_line": 382
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_write_reviews_coalesces_none_cost_to_zero",
+        "path": "tests/standard_names/test_review_cost_persistence.py"
+      },
+      "run_function": {
+        "line": 363,
+        "name": "test_compose_prompts_keep_retired_refusal_through_internal_retry",
+        "path": "tests/standard_names/test_retired_spelling_retry.py"
+      },
+      "window_line": 382
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "a4d4c69e387be818db1ea61ea21ea95a0798a13b",
+    "a767ebcdad3768f2981ee710d31f238c6157a623",
+    "853dfee0cf631529031b466fb0066d17a6e0700d",
+    "ddb380720996d898bf67471e84937e7749ab8595",
+    "4d260f69d6b73b83dd4aadb13559faf0f446efe1"
+  ],
+  "completed_at": "2026-11-08T11:09:40Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-11-08T08:57:01Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": "infrastructure-failure",
+  "gate": "failed",
+  "gate_check": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-test-guards-bite uv run --no-sync pytest -p no:cacheprovider -n 4 tests/standard_names tests/discovery",
+    "exit_status": 1,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T085257838027-sib-test-guards-bite/logs/gate-after.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.9263157894736842,
+    "plan": "sn-integrity-backlog",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-11-08T09:53:00.884753+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-11-08T08:53:00Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 15,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 0,
+    "headroom": 12,
+    "mean_context": 146667,
+    "observed_at": "2026-11-08T08:53:04Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 15,
+      "aggregate_tokens_per_second": 204.404,
+      "detail": "",
+      "mean_tokens_per_second": 146.003,
+      "observed_at": "2026-11-08T08:53:04Z",
+      "runs": 1.4,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-08T11:09:40Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T085257838027-sib-test-guards-bite/manifest.md",
+  "member": "disposable-r-20261108T085257838027-sib-test-guards-bite",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "gate-not-passing",
+    "test_paths": [
+      "tests/discovery/test_llm_transport_retry.py",
+      "tests/standard_names/test_compose_batch_isolation.py",
+      "tests/standard_names/test_drained_queue_exit.py",
+      "tests/standard_names/test_retired_spelling_retry.py"
+    ],
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "sib-test-guards-bite",
+  "node_definition": {
+    "after": [],
+    "anchor_paths": [],
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "elevated",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1975,
+          "cached_input_tokens": 322554,
+          "input_tokens": 324531,
+          "output_tokens": 2147,
+          "reasoning_output_tokens": 448,
+          "total_tokens": 326678,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+      "session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea"
+    },
+    "done_when": "each of these reddens under a planted regression that it does not catch on main, with the plant and its red result recorded in docs/evidence/fragments/sn-integrity-backlog/sib-test-guards-bite.html: (1) tests/standard_names/test_compose_batch_isolation.py asserts compose_batch calls acall_llm_structured once per compose attempt, so re-adding a retry wrapper fails it; (2) tests/discovery/test_llm_transport_retry.py fails if acall_llm_structured's retry set is hardcoded instead of read from _transient_transport_errors(); (3) tests/standard_names/test_drained_queue_exit.py's count-versus-claim assertion fails if the shared predicate stops being applied to the claim seed; (4) the dd_path_bound keyword of source_claim_predicate in imas_codex/standard_names/graph_store/graph_foundation.py, which no caller passes, is deleted; (5) tests/standard_names/test_retired_spelling_retry.py's stage and attempt preservation assertions fail if production Cypher resets the stage or increments the attempt; no product behaviour changes; tests/standard_names and tests/discovery add no failure id against main; USD 0",
+    "estimated_hours": null,
+    "goal": "Make five test guards from today's reviews fail when the behaviour they name regresses",
+    "id": "sib-test-guards-bite",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-11-08T08:53:00Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 15,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 0,
+      "headroom": 12,
+      "mean_context": 146667,
+      "observed_at": "2026-11-08T08:53:04Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 15,
+        "aggregate_tokens_per_second": 204.404,
+        "detail": "",
+        "mean_tokens_per_second": 146.003,
+        "observed_at": "2026-11-08T08:53:04Z",
+        "runs": 1.4,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T085257838027-sib-test-guards-bite/manifest.md",
+    "negative_control": "the five plants are the negative controls; each must redden its test",
+    "over_fence_reason": "",
+    "plan": "sn-integrity-backlog",
+    "regenerate_paths": [],
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§51",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "tests/standard_names/test_compose_batch_isolation.py",
+      "tests/discovery/test_llm_transport_retry.py",
+      "tests/standard_names/test_drained_queue_exit.py",
+      "tests/standard_names/test_retired_spelling_retry.py",
+      "imas_codex/standard_names/graph_store/graph_foundation.py",
+      "docs/evidence/fragments/sn-integrity-backlog/sib-test-guards-bite.html",
+      "docs/figures/sn-integrity-backlog/sib-test-guards-bite"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 2110097.0,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "sib-test-guards-bite",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-11-08T08:56:32.948850+00:00",
+    "score": 0.7375,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "folds review findings f8ddbecb093, fc703b3308e, f94d5f6aa44, f3658f81ead, f79a53b360f",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:snapshot",
+    "family": null,
+    "jev_model": "~typesafe/jev-latest",
+    "latency_ms": 5000.433,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 1787.275,
+      "context-estimate": 190.556,
+      "records": 1383.483,
+      "verdict-inputs": 905.301
+    }
+  },
+  "plan": "sn-integrity-backlog",
+  "plan_impl_at_dispatch": 0.9263157894736842,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "4d260f69d6b73b83dd4aadb13559faf0f446efe1",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "853dfee0cf631529031b466fb0066d17a6e0700d",
+    "reviewed_head_sha": "4d260f69d6b73b83dd4aadb13559faf0f446efe1",
+    "scores": {
+      "durability": 17,
+      "evidence": 14,
+      "fit": 16,
+      "goal_fidelity": 18,
+      "reuse": 17,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 101
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261108T085257838027-sib-test-guards-bite",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§51",
+  "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+  "session_harness": "claude",
+  "session_id": "147f7069-9c1d-45e1-9bef-506814979a1a",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 24518778,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 1187.534,
+    "generated_tokens": 98601,
+    "generation_seconds": 484.796,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 57.1,
+    "machine_seconds": 702.738,
+    "peak_input_tokens": 131497,
+    "tokens_per_second": 203.39,
+    "wall_tokens_per_second": 83.03
+  },
+  "time_budget": "60m",
+  "tool_steps": 136.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 7959,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-08T11:09:49Z",
+    "last_record_type": "result",
+    "launched_at": "2026-11-08T10:49:47Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [],
+    "run_id": "r-20261108T085257838027-sib-test-guards-bite",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 13820,
+    "worker_pid": 1985169
+  },
+  "worker_seconds": 5722,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": {
+    "classification": "retained-for-resume",
+    "retained_at": "2026-11-08T11:09:40Z",
+    "session_id": "147f7069-9c1d-45e1-9bef-506814979a1a",
+    "session_source": "stream",
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-test-guards-bite"
+  }
+}
