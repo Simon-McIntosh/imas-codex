@@ -50,6 +50,13 @@
       "finding": "done_when-2",
       "reason": "sib-load-sensitive-tests landed with its restored-cost control (21.08 s isolated) as its planted regression; the bullet's wording covers it",
       "when": "2026-11-08T12:54:07.910137+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "wiring-1",
+      "reason": "the other nodes are landed and their landing comments record the merge; only sib-second-pass needed a do-not-redispatch note because \u00a751 also declares its tail",
+      "when": "2026-11-08T12:55:01.951066+00:00"
     }
   ],
   "responses": {
@@ -67,6 +74,12 @@
       "by": "",
       "reason": "sib-load-sensitive-tests landed with its restored-cost control (21.08 s isolated) as its planted regression; the bullet's wording covers it",
       "when": "2026-11-08T12:54:07.910137+00:00"
+    },
+    "wiring-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "the other nodes are landed and their landing comments record the merge; only sib-second-pass needed a do-not-redispatch note because \u00a751 also declares its tail",
+      "when": "2026-11-08T12:55:01.951066+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-integrity-backlog/r-20261108T120109867192-plan-review-of-sn-integrity-backlog.json",
