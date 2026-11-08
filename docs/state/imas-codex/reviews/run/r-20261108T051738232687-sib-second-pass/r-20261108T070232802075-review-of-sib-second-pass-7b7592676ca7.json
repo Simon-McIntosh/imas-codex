@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-08T07:14:00.515Z",
+  "dispatched_at": "2026-11-08T07:04:35Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-second-pass.html",
+      "line": "43",
+      "severity": "non-blocking",
+      "text": "non-blocking: the control table reads 229 then 229 with 0 lost and 0 gained, but the verify.log the manifest cites in test_logs at revision fdfb1e620 records control_failed_after 228 and one lost id, so the table's figures come from the earlier 06:33 verify.json rather than from the log a reader is sent to and cannot be re-derived from it."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-second-pass.html",
+      "line": "53",
+      "severity": "non-blocking",
+      "text": "non-blocking: the rerun sentence says 143 dry-run candidates became 138 seeded sources by skipping one path with a live accepted name, but the arithmetic requires four further exclusions, and the four unpinnable sources the manifest reports under outside_scope are dropped from cohort-sources-runnable.json without being named in the fragment."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-second-pass-run.py",
+      "line": "203",
+      "severity": "non-blocking",
+      "text": "non-blocking: phase_verify reports every failure as a boolean in its payload and never raises, so the gate log exits 0 on a failed verification; the control loss it detected produced EXIT=0 and survives only as a value a reader must notice."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read commit by commit; 43ac0186f adds the 417-line phase script, fdf2aedf2 corrects the sn-sources path flattening (9 added, 4 removed), fdfb1e620 adds 55 lines of fragment, and 7b7592676 splits the names-by-stage scope id from the spend run id and adds 103 lines, for 544 insertions and 0 deletions over two files with no product source and no test file.",
+    "done_when": "the done_when requires the cohort, a reset with one receipt per source keeping prior status, attempts and last_error, a dry-then-apply scoped run with its job recorded, a per-source read-back with names by stage and spend by the run's own id, and a runner log ending EXIT=; verify.json reads 143 extracted, 143 receipted, 0 claimed, control 229 before and after, readback.json reads 83 produced, 41 still failed, 19 untouched with 20 accepted, 4 drafted, 11 exhausted and USD 1.4855 against run 9192044a, and sn-run-1308283.log carries EXIT=1 at line 8991, so every item is measured, though 19 cohort sources read back as neither produced nor failed with a new reason.",
+    "goal": "the goal is a signed receipted reset of the 143 recoverable failed sources followed by a scoped rerun under the remaining cap; retry-apply.json records requested 143, eligible 143, retried 143, refused 0 with 143 events, and job 1308283 ran the cohort under -c 50 for USD 1.4855 of the cap, so the reset is exact and the rerun ran but stopped part-way.",
+    "manifest": "read in full; it states status complete, names commits 43ac0186f fdf2aedf2 fdfb1e620 7b7592676 and the two changed paths, records the 143/143/0 reset, the 83 produced / 41 failed / 19 untouched read-back, USD 1.4855 of 50, the persist-guard abort as the negative control, three retry failures with scaffolding and pipeline attributions, and six rubric lines.",
+    "write_paths": "the declared scope is the fragment HTML, the run script and a figures directory; git show --stat over a0a536030..7b7592676 touches only docs/evidence/fragments/sn-integrity-backlog/sib-second-pass-run.py and sib-second-pass.html, both inside it, and the figures directory is unused."
+  },
+  "justifications": {
+    "durability": "sib-second-pass-run.py:203 phase_verify returns a dict of booleans instead of raising, so verify.log ends EXIT=0 while its own payload reports control_failed_after 228 against a before of 229, and no test or guard reddens if the reset regresses.",
+    "evidence": "verify.log and readback.log both end EXIT=0 at revisions fdfb1e620 and 7b7592676 and readback.json reconciles with the fragment's table, but the control row at sib-second-pass.html:43 quotes 229 then 229 while the verify.log the manifest cites reads control_failed_after 228 with one lost id.",
+    "fit": "the phases at sib-second-pass-run.py:96-395 follow the repository's phase-artifact idiom, the module docstring names each phase by what it does, and no plan label, deliverable id, ticket reference or author attribution appears in the script or the fragment.",
+    "goal_fidelity": "retry-apply.json records requested 143, eligible 143, retried 143, refused 0 and readback.json reads 83 produced against 60 not produced, so the reset met the goal exactly and the rerun delivered part of it.",
+    "reuse": "the mutation path calls retry_failed_sources at imas_codex/standard_names/graph_store/graph_source_bindings.py:2137 rather than reimplementing the reset, and the only hand-rolled writer is the sn_sources manifest at sib-second-pass-run.py:283, for which sources_manifest.py offers only a loader and no builder.",
+    "scope_discipline": "the diff over a0a536030..7b7592676 is 544 insertions confined to docs/evidence/fragments/sn-integrity-backlog/sib-second-pass-run.py and sib-second-pass.html, both declared, with no product or test file touched and the worktree clean at 7b7592676."
+  },
+  "model": "deepseek-v4.1-flash",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is a signed receipted reset of the 143 recoverable failed sources followed by a scoped rerun under the remaining cap; retry-apply.json records requested 143, eligible 143, retried 143, refused 0 with 143 events, and job 1308283 ran the cohort under -c 50 for USD 1.4855 of the cap, so the reset is exact and the rerun ran but stopped part-way.\nVERDICT done_when: the done_when requires the cohort, a reset with one receipt per source keeping prior status, attempts and last_error, a dry-then-apply scoped run with its job recorded, a per-source read-back with names by stage and spend by the run's own id, and a runner log ending EXIT=; verify.json reads 143 extracted, 143 receipted, 0 claimed, control 229 before and after, readback.json reads 83 produced, 41 still failed, 19 untouched with 20 accepted, 4 drafted, 11 exhausted and USD 1.4855 against run 9192044a, and sn-run-1308283.log carries EXIT=1 at line 8991, so every item is measured, though 19 cohort sources read back as neither produced nor failed with a new reason.\nVERDICT write_paths: the declared scope is the fragment HTML, the run script and a figures directory; git show --stat over a0a536030..7b7592676 touches only docs/evidence/fragments/sn-integrity-backlog/sib-second-pass-run.py and sib-second-pass.html, both inside it, and the figures directory is unused.\nVERDICT manifest: read in full; it states status complete, names commits 43ac0186f fdf2aedf2 fdfb1e620 7b7592676 and the two changed paths, records the 143/143/0 reset, the 83 produced / 41 failed / 19 untouched read-back, USD 1.4855 of 50, the persist-guard abort as the negative control, three retry failures with scaffolding and pipeline attributions, and six rubric lines.\nVERDICT diff: read commit by commit; 43ac0186f adds the 417-line phase script, fdf2aedf2 corrects the sn-sources path flattening (9 added, 4 removed), fdfb1e620 adds 55 lines of fragment, and 7b7592676 splits the names-by-stage scope id from the spend run id and adds 103 lines, for 544 insertions and 0 deletions over two files with no product source and no test file.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: retry-apply.json records requested 143, eligible 143, retried 143, refused 0 and readback.json reads 83 produced against 60 not produced, so the reset met the goal exactly and the rerun delivered part of it.\nSCORE evidence: 14\nJUSTIFICATION evidence: verify.log and readback.log both end EXIT=0 at revisions fdfb1e620 and 7b7592676 and readback.json reconciles with the fragment's table, but the control row at sib-second-pass.html:43 quotes 229 then 229 while the verify.log the manifest cites reads control_failed_after 228 with one lost id.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the diff over a0a536030..7b7592676 is 544 insertions confined to docs/evidence/fragments/sn-integrity-backlog/sib-second-pass-run.py and sib-second-pass.html, both declared, with no product or test file touched and the worktree clean at 7b7592676.\nSCORE durability: 9\nJUSTIFICATION durability: sib-second-pass-run.py:203 phase_verify returns a dict of booleans instead of raising, so verify.log ends EXIT=0 while its own payload reports control_failed_after 228 against a before of 229, and no test or guard reddens if the reset regresses.\nSCORE fit: 17\nJUSTIFICATION fit: the phases at sib-second-pass-run.py:96-395 follow the repository's phase-artifact idiom, the module docstring names each phase by what it does, and no plan label, deliverable id, ticket reference or author attribution appears in the script or the fragment.\nSCORE reuse: 17\nJUSTIFICATION reuse: the mutation path calls retry_failed_sources at imas_codex/standard_names/graph_store/graph_source_bindings.py:2137 rather than reimplementing the reset, and the only hand-rolled writer is the sn_sources manifest at sib-second-pass-run.py:283, for which sources_manifest.py offers only a loader and no builder.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-second-pass.html:43 non-blocking: the control table reads 229 then 229 with 0 lost and 0 gained, but the verify.log the manifest cites in test_logs at revision fdfb1e620 records control_failed_after 228 and one lost id, so the table's figures come from the earlier 06:33 verify.json rather than from the log a reader is sent to and cannot be re-derived from it.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-second-pass.html:53 non-blocking: the rerun sentence says 143 dry-run candidates became 138 seeded sources by skipping one path with a live accepted name, but the arithmetic requires four further exclusions, and the four unpinnable sources the manifest reports under outside_scope are dropped from cohort-sources-runnable.json without being named in the fragment.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-second-pass-run.py:203 non-blocking: phase_verify reports every failure as a boolean in its payload and never raises, so the gate log exits 0 on a failed verification; the control loss it detected produced EXIT=0 and survives only as a value a reader must notice.\n",
+  "review_run_id": "r-20261108T070232802075-review-of-sib-second-pass-7b7592676ca7",
+  "reviewed_base_sha": "a0a53603059a6dacf0ff77d447719fc5b83579c0",
+  "reviewed_head_sha": "7b7592676ca781cf96bfae05f1e365c9ae79a6b7",
+  "reviewed_run_id": "r-20261108T051738232687-sib-second-pass",
+  "scores": {
+    "durability": 9,
+    "evidence": 14,
+    "fit": 17,
+    "goal_fidelity": 16,
+    "reuse": 17,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T07:23:17.458487+00:00",
+  "total": 92
+}

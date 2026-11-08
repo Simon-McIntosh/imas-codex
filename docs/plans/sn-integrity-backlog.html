@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="385">
+<meta name="plan-version" content="386">
 <meta name="plan-modified" content="2026-11-08">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -1249,6 +1249,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s50" data-id="c-run-r-20261108T064458349577-review-of-sib-compose-refusal-narrowing-9b0e196b7f4f" data-who="reckon-build" data-when="2026-11-08T06:57:24.337Z">
     <div class="r-comment-body"><p>reviewed a0a53603059a6dacf0ff77d447719fc5b83579c0..9b0e196b7f4f6f34994ad8eed51153ba1ddcb80f (1a2238e4b narrows the compose refusal and moves the transport retry into the single LLM loop, 9b0e196b7 adds the evidence fragment); scores goal_fidelity 19, evidence 19, scope_discipline 20, durability 16, fit 18, reuse 19; added_failure_count 0 (13 failures at base, 10 at head, all 10 pre-existing), two non-blocking findings on unguarded durability claims.</p></div>
+</div>
+<div class="r-comment" data-section="s50" data-id="c-run-r-20261108T070232802075-review-of-sib-second-pass-7b7592676ca7" data-who="reckon-build" data-when="2026-11-08T07:14:00.515Z">
+    <div class="r-comment-body"><p>Independent review of r-20261108T051738232687-sib-second-pass at a0a536030..7b7592676 is parsed with all six scores (goal_fidelity 16, evidence 14, scope_discipline 19, durability 9, fit 17, reuse 17), zero added failures and three non-blocking findings: the control table quotes 229 then 229 from an earlier verify than the log it cites, the 143-to-138 rerun arithmetic omits the four unpinnable sources, and phase_verify exits 0 on a failed verification.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261012T162346807302-review-of-sib-row-census" data-who="reckon-build" data-when="2026-10-12T16:39:58.712Z">
     <div class="r-comment-body"><p>reviewed r-20261012T145528571333-sib-row-census at a7a70db00 against c7b4c626e; total 93/120 (goal_fidelity 15, evidence 13, scope_discipline 19, durability 11, fit 15, reuse 20); two blocking findings — the landing record's verdict tallies and the manifest's row-count both disagree with the 38 rows the census file holds.</p></div>
