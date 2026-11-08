@@ -161,3 +161,43 @@ def test_placeholder_retirement_rolls_back_with_batch(graph, monkeypatch):
     assert graph.query("MATCH (c:StandardNameChange) RETURN count(c) AS count") == [
         {"count": 0}
     ]
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "first_local_tangential_width_of_fiber_bundle",
+        "second_local_tangential_width_of_fiber_bundle",
+    ],
+)
+def test_grammar_refusal_records_writer_reason_without_leaving_placeholder(graph, name):
+    from imas_codex.standard_names.graph_store import graph_catalog, graph_foundation
+
+    services = _services(graph, [])
+    services.GraphClient = GraphClient
+    services.write_standard_names = lambda *args, **kwargs: (
+        graph_catalog.write_standard_names(
+            *args, **kwargs, services=graph_foundation.get_services()
+        )
+    )
+    candidate = {**_candidate(name, REFUSED_PATH), "unit": "m"}
+
+    assert (
+        persist_generated_name_winners(
+            [candidate], compose_model="test", services=services
+        )
+        == []
+    )
+    assert (
+        graph.query("MATCH (sn:StandardName {id: $name}) RETURN sn.id AS id", name=name)
+        == []
+    )
+    source = graph.query(
+        """MATCH (source:StandardNameSource {id: $id})
+        RETURN source.last_error AS reason, source.claim_token AS token""",
+        id=f"dd:{REFUSED_PATH}",
+    )[0]
+    assert source["token"] is None
+    assert f"rich standard-name write refused candidate {name!r}" in source["reason"]
+    assert "grammar parse failed" in source["reason"]
+    assert "does not match any physical_base or geometry_carrier" in source["reason"]
