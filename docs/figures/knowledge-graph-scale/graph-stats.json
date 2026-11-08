@@ -86,6 +86,20 @@
    "DOCUMENTS": 45
   }
  },
+ "ids_mappings": {
+  "jet": {
+   "facility": "jet",
+   "ids": 42,
+   "sources": 175,
+   "signals": 2960
+  },
+  "jt-60sa": {
+   "facility": "jt-60sa",
+   "ids": 7,
+   "sources": 113,
+   "signals": 64
+  }
+ },
  "nodes_by_label": {
   "tcv": {
    "CodeFile": 170642,
