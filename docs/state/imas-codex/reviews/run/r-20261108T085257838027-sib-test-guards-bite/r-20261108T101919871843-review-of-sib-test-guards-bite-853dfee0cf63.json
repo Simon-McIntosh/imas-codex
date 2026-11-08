@@ -11,6 +11,13 @@
     "imas_codex/cli/sn.py:619"
   ],
   "completed_at": "2026-11-08T10:37:57.437Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "repair-of-sib-test-guards-bite-853dfee0cf63",
+      "recorded_at": "2026-11-08T11:20:19.238491+00:00"
+    }
+  },
   "dispatched_at": "2026-11-08T10:22:20Z",
   "findings": [
     {
