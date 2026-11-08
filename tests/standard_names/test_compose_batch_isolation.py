@@ -256,8 +256,15 @@ class TestTransportFaultIsolation:
     @pytest.mark.parametrize(
         "transport_error",
         [
+            # The three faults the full-DD run recorded or that reach the
+            # compose call as a bare httpx transport error.
             httpx.ConnectError("Cannot connect to host openrouter.ai:443"),
             httpx.ConnectTimeout("timed out"),
+            httpx.ReadError(""),
+            # A builtin transport fault, which is not an httpx.TransportError:
+            # the LLM layer's seam sees these too and classifies them as
+            # transient, so the compose retry must read the same set.
+            TimeoutError("the read operation timed out"),
         ],
     )
     async def test_transient_connect_error_is_retried(
@@ -294,3 +301,35 @@ class TestTransportFaultIsolation:
         assert sleep.await_count == 1
         assert count == 1
         assert [candidate["id"] for candidate in compose_deps.persisted] == [_GOOD_NAME]
+
+    @pytest.mark.asyncio
+    async def test_the_retry_set_is_read_from_the_llm_layer(self, compose_deps) -> None:
+        """A narrowed owner set narrows the compose retry: one set, not two."""
+        from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+            compose_batch,
+        )
+
+        calls = [0]
+
+        async def mock_llm(*_args, **_kwargs):
+            calls[0] += 1
+            raise httpx.ConnectError("Cannot connect to host openrouter.ai:443")
+
+        sleep = AsyncMock(return_value=None)
+        with (
+            patch("imas_codex.discovery.base.llm.acall_llm_structured", mock_llm),
+            patch(
+                "imas_codex.discovery.base.llm._transient_transport_errors",
+                return_value=(ValueError,),
+            ),
+            patch("asyncio.sleep", sleep),
+            pytest.raises(httpx.ConnectError),
+        ):
+            await compose_batch(
+                [_make_batch_item(_GOOD_PATH)],
+                _FakeBudgetManager(),
+                asyncio.Event(),
+            )
+
+        assert calls[0] == 1
+        assert sleep.await_count == 0

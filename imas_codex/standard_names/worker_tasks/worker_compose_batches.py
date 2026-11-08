@@ -36,13 +36,18 @@ async def _acall_retrying_transport_faults(
     leaves that loop on its first occurrence. Retrying here keeps one network
     blip from failing the whole batch — the response it already paid for holds
     every candidate, and none of them is at fault.
-    """
-    import httpx
 
+    The fault *types* are the LLM layer's own: ``_transient_transport_errors``
+    is read from the owner rather than restated, so the set this loop retries
+    cannot drift from the one that seam already classifies as transient.
+    """
+    from imas_codex.discovery.base.llm import _transient_transport_errors
+
+    transient_faults = _transient_transport_errors()
     for attempt in range(attempts):
         try:
             return await acall(**kwargs)
-        except httpx.TransportError as transport_exc:
+        except transient_faults as transport_exc:
             if attempt == attempts - 1:
                 raise
             delay = base_delay * (2**attempt)

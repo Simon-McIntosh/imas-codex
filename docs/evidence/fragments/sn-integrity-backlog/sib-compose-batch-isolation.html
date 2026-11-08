@@ -51,14 +51,18 @@ was already leaving the function, so the sibling candidates from the same respon
 persist step.</p>
 
 <p><b>Transport fault.</b> The compose call now runs through
-<code>_acall_retrying_transport_faults</code>, which retries <code>httpx.TransportError</code>
-(covering <code>ConnectError</code>, <code>ConnectTimeout</code> and <code>ReadError</code>) under
-the LLM retry policy already in use elsewhere — <code>DEFAULT_MAX_RETRIES</code> attempts at
-<code>DEFAULT_RETRY_BASE_DELAY</code> doubling each retry, both imported rather than restated. The
-fault needed its own retry because <code>acall_llm_structured</code> decides retryability from the
-error <em>message</em>: <code>ReadError</code> carries an empty string and <code>ConnectError</code>
-a host phrase its patterns do not match, so the exception left that loop on its first occurrence
-rather than being retried inside it.</p>
+<code>_acall_retrying_transport_faults</code>, which retries the LLM layer's own transient-fault
+set — <code>_transient_transport_errors()</code>, read from
+<code>imas_codex/discovery/base/llm.py</code> rather than restated, so the retried types cannot
+drift from the ones that seam already classifies as transient. That set covers
+<code>ConnectError</code>, <code>ConnectTimeout</code> and a message-less <code>ReadError</code>,
+and the builtin <code>TimeoutError</code> and <code>ConnectionError</code> the same seam sees
+through both clients. The policy is likewise imported:
+<code>DEFAULT_MAX_RETRIES</code> attempts at <code>DEFAULT_RETRY_BASE_DELAY</code> doubling each
+retry, and the fault needed its own loop because <code>acall_llm_structured</code> decides retryability
+from the error <em>message</em>: <code>ReadError</code> carries an empty string and
+<code>ConnectError</code> a host phrase its patterns do not match, so the exception left that loop
+on its first occurrence rather than being retried inside it.</p>
 
 <h3 id="sib-compose-batch-isolation-evidence">Evidence</h3>
 
