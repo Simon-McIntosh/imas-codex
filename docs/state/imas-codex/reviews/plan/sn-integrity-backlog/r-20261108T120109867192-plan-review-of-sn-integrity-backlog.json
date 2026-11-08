@@ -33,7 +33,30 @@
   "plan_slug": "sn-integrity-backlog",
   "plan_version": 407,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "237e12276ee502784fa685f3e00f992677ab5f36",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "v408 routes the 15 vocab_gap sources to the vocabulary ruling and narrows the tail to 41 failed and 4 extracted.",
+      "reason": "",
+      "when": "2026-11-08T12:53:39.448793+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "237e12276ee502784fa685f3e00f992677ab5f36",
+      "commit_basis": "edit",
+      "note": "v408 routes the 15 vocab_gap sources to the vocabulary ruling and narrows the tail to 41 failed and 4 extracted.",
+      "reason": "",
+      "when": "2026-11-08T12:53:39.448793+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-integrity-backlog/r-20261108T120109867192-plan-review-of-sn-integrity-backlog.json",
   "review_run_id": "r-20261108T120109867192-plan-review-of-sn-integrity-backlog",
   "reviewed_blob_sha": "caa9ef776c863432f552c134e838f4f0654cb702",
   "rubric": "content",
