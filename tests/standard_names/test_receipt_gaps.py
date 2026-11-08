@@ -213,6 +213,7 @@ def test_persist_refusal_retains_actual_writer_reason(cause, monkeypatch):
 
     graph = WriterRefusalGraph()
     services = persistence_services(graph, [])
+    services.logger = catalog.logger
     services.write_standard_names = lambda names, **kwargs: (
         catalog.write_standard_names(names, services=services, **kwargs)
     )
