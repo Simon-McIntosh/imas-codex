@@ -2,6 +2,25 @@
 <html lang="en">
 <head><meta charset="utf-8"><title>Source retry census and immutable snapshot refusals</title></head>
 <body>
+<section id="sib-second-pass-tail-reset">
+<h2 id="sib-second-pass-tail-reset-result">Exact reset verified; scoped dry run passes</h2>
+<p>The sanctioned <code>retry_failed_sources</code> operation reported
+41 requested, 41 eligible and 0 refused in dry-run mode. Apply reset all 41
+to <code>extracted</code> and wrote 41 <code>StandardNameSourceRetry</code>
+receipts. The post-reset read verified one receipt per source, with the prior
+status, attempt count and error preserved; every attempt count is now zero,
+no selected source is claimed and all 102 non-selected cohort sources are
+unchanged.</p>
+<p>The scoped CLI dry run reports <code>would run normal worker pools for 41
+focused DD path(s); no graph writes performed</code> and ends
+<code>EXIT=0</code>. The run carries <code>--skip-global-maintenance</code>
+to preserve the excluded sources, <code>-c 48.51</code>, and a 55-minute
+runtime bound inside a separate 59-minute SLURM job.</p>
+<p>Receipts and controls are in
+<a href="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T141648847743-sib-second-pass-tail/verify-reset.json">the reset verification</a>;
+the CLI preview is in
+<a href="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T141648847743-sib-second-pass-tail/run-dry.log">the dry-run log</a>.</p>
+</section>
 <p id="sib-second-pass-tail-authorized-scope">The coordinator subsequently
 authorized the 41 eligible sources to run under USD 48.51. The four structure
 sources listed below are excluded for lack of an immutable DD snapshot, kept
