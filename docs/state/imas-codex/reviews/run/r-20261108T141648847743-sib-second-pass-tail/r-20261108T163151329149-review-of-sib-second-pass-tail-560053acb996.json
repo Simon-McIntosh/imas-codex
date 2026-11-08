@@ -1,0 +1,47 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed manifest declares baseline_suite and after_suite empty (this is an evidence node whose write paths include no test file and no product source), so no test-suite arm exists to derive added failures from and the derivation is 0 with no ids. Its gate is the runner's readback, which ended EXIT=1 by design on the measures it was written to assert.",
+  "completed_at": "2026-11-08T16:44:40.204Z",
+  "dispatched_at": "2026-11-08T16:35:25Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-second-pass-tail.html",
+      "line": "49",
+      "severity": "non-blocking",
+      "text": "the fragment states 'Apply ran from main 0efd4cf508efc8b9a738435fbf79acc3b0ef6d2d', but run.log's own header records '# revision: 24178c99547a5e4a3cf348aee32d60ff8abed82f' for the same 'run' action, and the job started at 15:50:09 (job.json 15:50:41, run.log mtime 16:19:40, elapsed 1771s) after 24178c995 was committed at 15:49:29, so the pipeline ran at 24178c995 and not at 0efd4cf50; the manifest's evidence_inputs repeats the same claim; `git diff --stat 0efd4cf50 24178c995 -- imas_codex` is empty, so the measures are unaffected, but a reader reconciling the stated revision against the log is misled."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to rerun the second pass's 41 failed and 4 still-extracted cohort sources under the remaining USD 48.51; prepare() at sib-second-pass-tail-run.py:217 pins the run to the 41 census-failed sources and the coordinator's resume-2-advice.txt explicitly authorizes excluding the 4 extracted structure sources with the seed guard's refusal text, which sib-second-pass-tail.html:60-66 records, so the shape of the rerun the goal names was delivered as authorized even though its yield measure failed.\nVERDICT done_when: the done_when's measures are cumulative produced against the 100-of-143 floor, a per-source outcome with its receipts, the export gate's blocking set, and the sourceless-draft count before and after; readback() at sib-second-pass-tail-run.py:363-470 computes exactly those and returns 1 unless produced>=100, missing_outcomes is empty, control_changes is empty, spend<=48.51, cumulative_spend<=50, export_blocking==0 and drafts_after<=drafts_before, and readback.log ends EXIT=1 with readback.json summary recording produced 88, produced 83 before, drafts 3 before and 5 after, and four missing_outcomes.\nVERDICT write_paths: the manifest declares docs/evidence/fragments/sn-integrity-backlog/sib-second-pass-tail.html, .../sib-second-pass-tail-run.py and docs/figures/sn-integrity-backlog/sib-second-pass-tail; git diff --stat 0efd4cf50..560053acb changes exactly the two fragment files (526 and 748 inserted lines), the figures path is untouched, and no product source or test file appears in the diff.\nVERDICT manifest: read; status failed, five commits 331d0d053 to 560053acb recorded, changed_paths lists the two fragment files, retry_failures and failure_attribution are populated, tests: names the readback command and test_logs lists readback.log (EXIT=1), run.log (EXIT=1) and verify-reset.log/run-dry.log/prepare.log (EXIT=0), while baseline_suite and after_suite are both empty because this evidence node declares no test-suite arm.\nVERDICT diff: read commit by commit against 0efd4cf50 - 331d0d053 records the blocked build prerequisite, ea6aefd8a the 143-source census and the four seed refusals with the four structures excluded, 4cca37af5 adds the retry/reset/run/readback runner and the fragment's result tables, ea268831b preserves the forty-one verified receipts, and 560053acb records the capped outcomes and the four integrity failures; every hunk stays inside the two declared evidence files.\nCALL_SITES: imas_codex/standard_names/graph_store/graph_source_bindings.py:retry_failed_sources, imas_codex/standard_names/graph_store/graph_source_bindings.py:_pin_dd_source_snapshots, imas_codex/standard_names/graph_store/graph_supersession.py:classify_sourceless_standard_names, imas_codex/standard_names/source_invariant.py:find_sourceless_live_names, imas_codex/standard_names/export.py:_SHIPPING_NAME_STAGES, imas_codex/standard_names/export.py:_RELEASE_IDENTITY_HOLDS\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: sib-second-pass-tail-run.py:217-222 narrows the run to the 41 unbound failed sources and sib-second-pass-tail.html:60-66 records the four authorized structure exclusions, so the rerun the goal names was executed as authorized, while its own yield floor measure is honestly reported as unmet at 88 of 143 (readback.json summary.produced).\nSCORE evidence: 16\nJUSTIFICATION evidence: readback() at sib-second-pass-tail-run.py:469-477 returns 1 on the done_when measures and readback.log's final line is EXIT=1 with readback.json carrying produced 88, drafts 3 to 5 and four missing_outcomes, but sib-second-pass-tail.html:49 states the apply ran at 0efd4cf508 while run.log's header records 24178c99547a, so one recorded provenance fact is wrong even though the measures reconcile.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 0efd4cf50..560053acb touches only docs/evidence/fragments/sn-integrity-backlog/sib-second-pass-tail-run.py and .html, both declared write paths, with docs/figures/sn-integrity-backlog/sib-second-pass-tail untouched and no product source, test, plan or state file changed.\nSCORE durability: 14\nJUSTIFICATION durability: the run's guards are shown firing rather than merely green - seed-preflight.log ends EXIT=1 refusing the four unpinned structures and readback.log ends EXIT=1 on produced 88 and drafts 5 - and sib-second-pass-tail-run.py:265,301 compare each reset receipt against an independently snapshotted before-state, but no test ties the fragment's prose numbers to readback.json, which is how the line-49 revision claim survived.\nSCORE fit: 18\nJUSTIFICATION fit: the fragment and runner follow the sibling evidence-fragment idiom, every element id in sib-second-pass-tail.html begins with the node id (sib-second-pass-tail-record, -source-N), and neither file introduces a plan, sprint, ticket or version label in a symbol, filename or comment.\nSCORE reuse: 18\nJUSTIFICATION reuse: the runner imports previous() from docs/evidence/fragments/sn-integrity-backlog/sib-second-pass-run.py:52-113 instead of re-deriving cohort(), source_state() and retry_receipts(), and export_state() at sib-second-pass-tail-run.py:44-79 calls the owned imas_codex/standard_names/graph_store/graph_supersession.py:3033 classify_sourceless_standard_names and imas_codex/standard_names/source_invariant.py:145 find_sourceless_live_names with export.py's own _SHIPPING_NAME_STAGES and _RELEASE_IDENTITY_HOLDS rather than defining its own, the only reproduced fragment being the six-line blocking filter that export.py:3084 keeps inline in run_export with no callable owner.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-second-pass-tail.html:49 non-blocking: the fragment states 'Apply ran from main 0efd4cf508efc8b9a738435fbf79acc3b0ef6d2d', but run.log's own header records revision 24178c99547a5e4a3cf348aee32d60ff8abed82f for the same run action and the job started at 15:50:09 after 24178c995 was committed at 15:49:29, so the pipeline ran at 24178c995; git diff --stat 0efd4cf50 24178c995 -- imas_codex is empty so the measures are unaffected, but the manifest's evidence_inputs repeats the claim and a reader reconciling the revision against the log is misled.\n",
+  "review_run_id": "r-20261108T163151329149-review-of-sib-second-pass-tail-560053acb996",
+  "reviewed_base_sha": "0efd4cf508efc8b9a738435fbf79acc3b0ef6d2d",
+  "reviewed_head_sha": "560053acb996d04ed6cc214b61893a0457a9efb9",
+  "reviewed_run_id": "r-20261108T141648847743-sib-second-pass-tail",
+  "scores": {
+    "durability": 14,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "sources": {
+    "authorization": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T141648847743-sib-second-pass-tail/resume-2-advice.txt",
+    "brief": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T163151329149-review-of-sib-second-pass-tail-560053acb996/brief.md",
+    "census_json": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T141648847743-sib-second-pass-tail/census.json",
+    "diff_base": "0efd4cf508efc8b9a738435fbf79acc3b0ef6d2d",
+    "diff_head": "560053acb996d04ed6cc214b61893a0457a9efb9",
+    "gate_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T141648847743-sib-second-pass-tail/readback.log",
+    "manifest": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T141648847743-sib-second-pass-tail/manifest.md",
+    "negative_control_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T141648847743-sib-second-pass-tail/seed-preflight.log",
+    "plan": "imas-codex:sn-integrity-backlog \u00a751",
+    "prompt": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T141648847743-sib-second-pass-tail/prompt.txt",
+    "readback_json": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T141648847743-sib-second-pass-tail/readback.json",
+    "run_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T141648847743-sib-second-pass-tail/run.log"
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T16:50:49.294375+00:00",
+  "total": 103
+}
