@@ -6,7 +6,7 @@
     "topology-preview.png (1400x720, written by the reviewed run's own render step and recorded in its manifest artifacts.figure_review)": "docs/figures/sn-integrity-backlog/sib-lineage-cycle-census/topology.svg"
   },
   "attachment_note": "One raster is attached to the reviewed run: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T201632402746-sib-lineage-cycle-census/topology-preview.png (1400x720). The reviewed run's manifest records it as the render of the committed SVG (artifacts.figure = docs/figures/sn-integrity-backlog/sib-lineage-cycle-census/topology.svg). Per the review brief no SVG was opened, read, listed, searched, rendered or shown; every verdict below is read from this PNG, and provenance to the committed blob rests on the reviewed run's own record rather than on any comparison I made against source markup.",
-  "completed_at": "",
+  "completed_at": "2026-11-08T00:03:00.326Z",
   "dispatched_at": "2026-11-07T23:50:39Z",
   "figure_checks": {
     "caption_independence": "Read the figure element at docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census.html line 7 at the reviewed head. The caption does not merely repeat the title: it states the stored edge direction (successor to predecessor), names the left and right cases, distinguishes local from averaged holders, explains the reviewed-then-superseded spelling, and notes that identifiers live in the tables. No caption finding is raised.",
@@ -124,6 +124,6 @@
   ],
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-08T00:03:11.180500+00:00",
+  "timestamp": "2026-11-08T00:16:59.702648+00:00",
   "total": null
 }
