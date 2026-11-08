@@ -2330,6 +2330,15 @@ def persist_generated_name_winners(
                     for row in locked_rows
                     if row.get("outcome", "winner") == "winner"
                 }
+                resolved_ids = {
+                    row["id"]: row["resolved_id"]
+                    for row in locked_rows
+                    if row.get("resolved_id")
+                }
+                write_batch = [
+                    {**item, "sn_id": resolved_ids.get(item["sns_id"], item["sn_id"])}
+                    for item in write_batch
+                ]
                 locked_candidates = [
                     candidate_by_sns[sns_id]
                     for sns_id in candidate_by_sns
@@ -2344,12 +2353,12 @@ def persist_generated_name_winners(
                     for sns_id, kind in binding_kinds.items()
                     if kind in _RICH_WRITE_BINDING_KINDS
                 ]
-                stable_candidates = [
-                    candidate_by_sns[sns_id]
-                    for sns_id, kind in binding_kinds.items()
-                    if kind not in _RICH_WRITE_BINDING_KINDS
-                ]
-                written_name_ids = {entry["id"] for entry in stable_candidates}
+                written_name_ids = {
+                    item["sn_id"]
+                    for item in write_batch
+                    if item["sns_id"] in locked_ids
+                    and binding_kinds[item["sns_id"]] not in _RICH_WRITE_BINDING_KINDS
+                }
                 if rich_write_candidates:
                     written_names = services.write_standard_names(
                         rich_write_candidates,

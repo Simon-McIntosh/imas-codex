@@ -918,6 +918,22 @@ def _pending_projection_stub_predicate(
     """
 
 
+def _single_live_binding_successor(
+    successors: list[dict[str, Any]], unit: str | None
+) -> str | None:
+    """Resolve one direct holder, without filtering away competing targets."""
+    if len(successors) != 1 or unit is None:
+        return None
+    successor = successors[0]
+    if (
+        not successor.get("name_stage")
+        or successor["name_stage"] in foundation._SETTLED_SOURCE_BINDING_STAGES
+        or successor.get("unit") != unit
+    ):
+        return None
+    return successor.get("id")
+
+
 def _lock_claimed_name_bindings(
     gc: Any,
     batch: list[dict[str, Any]],
@@ -928,6 +944,7 @@ def _lock_claimed_name_bindings(
     allow_dead_end_revival: bool = False,
     allow_adopt_pending_stub: bool = False,
     released_out: list[dict[str, str]] | None = None,
+    _retrying_retired: bool = False,
 ) -> list[dict[str, Any]]:
     """Lock source claims and classify their proposed name bindings.
 
@@ -964,6 +981,12 @@ def _lock_claimed_name_bindings(
     the candidate identity, lifecycle state, and attempt number. Because this
     query runs through the caller's transaction, a later rich-write failure
     rolls the release back with every other graph effect.
+
+    A retired collision may reuse its sole direct ``HAS_SUCCESSOR`` target
+    when that target is live and its unit equals the proposed unit. The target
+    passes the same lifecycle and attachment guards as any other binding.
+    ``resolved_id`` identifies a successful replacement for finalization;
+    no rich candidate metadata is transferred to the existing holder.
     """
     attachment_refusals = services._guard_existing_target_pairings(
         gc, batch, targets_may_be_missing=allow_missing
@@ -1149,6 +1172,14 @@ def _lock_claimed_name_bindings(
           THEN [1] ELSE [] END |
           REMOVE target.binding_lock_token, target.binding_lock_seq
         )
+        WITH b, sns, target, owned, target_stage, bindable,
+             lifecycle_bindable, unit_bindable, attachment_bindable,
+             adopt_projection
+        CALL (target) {
+          OPTIONAL MATCH (target)-[:HAS_SUCCESSOR]->(successor:StandardName)
+          WHERE target.name_stage IN $revivable_stages
+          RETURN collect(DISTINCT successor {.id, .name_stage, .unit}) AS successors
+        }
         RETURN sns.id AS id,
                CASE
                  WHEN bindable THEN 'winner'
@@ -1167,6 +1198,7 @@ def _lock_claimed_name_bindings(
                END AS binding_kind,
                b.sn_id AS candidate_id,
                target_stage,
+               successors,
                coalesce(sns.attempt_count, 0) AS attempt_count
         """.replace("__TARGET_CLAUSE__", target_clause).replace(
         "__PENDING_PROJECTION_PREDICATE__",
@@ -1197,6 +1229,60 @@ def _lock_claimed_name_bindings(
         pending_stage=services.NameStage.pending.value,
         reviewable_stage=services.NameStage.drafted.value,
     )
+
+    if not _retrying_retired:
+        retired_ids = {
+            row["id"]
+            for row in rows
+            if row.get("outcome") == "lifecycle_collision"
+            and row.get("target_stage") in foundation._SETTLED_SOURCE_BINDING_STAGES
+        }
+        retired_batch = [item for item in batch if item["sns_id"] in retired_ids]
+        if retired_batch:
+            units = {item["sns_id"]: item.get("unit") for item in retired_batch}
+            successor_ids = {
+                row["id"]: successor_id
+                for row in rows
+                if row["id"] in units
+                and (
+                    successor_id := _single_live_binding_successor(
+                        row.get("successors") or [], units[row["id"]]
+                    )
+                )
+            }
+            successor_batch = [
+                {
+                    **item,
+                    "sn_id": successor_ids[item["sns_id"]],
+                    "attachment_error": None,
+                }
+                for item in retired_batch
+                if item["sns_id"] in successor_ids
+            ]
+            if successor_batch:
+                # The first query holds the retired identity and source locks.
+                # Reuse the binding guards in that transaction, but leave any
+                # refusal to the outer call so it retains the retired spelling.
+                followed = {
+                    row["id"]: {**row, "resolved_id": successor_ids[row["id"]]}
+                    for row in _lock_claimed_name_bindings(
+                        gc,
+                        successor_batch,
+                        services=services,
+                        allow_missing=False,
+                        allow_own_pending_reservation=False,
+                        released_out=released_out,
+                        _retrying_retired=True,
+                    )
+                    if row.get("outcome") == "winner"
+                }
+                rows = [followed.get(row["id"], row) for row in rows]
+                batch = [
+                    {**item, "sn_id": followed[item["sns_id"]]["resolved_id"]}
+                    if item["sns_id"] in followed
+                    else item
+                    for item in batch
+                ]
 
     outcomes_by_source = {row["id"]: row.get("outcome", "winner") for row in rows}
     fenced_batch = [
@@ -1264,7 +1350,7 @@ def _lock_claimed_name_bindings(
         row["id"] for row in rows if row.get("outcome", "winner") != "winner"
     }
     collision_batch = [item for item in batch if item["sns_id"] in collision_ids]
-    if collision_batch:
+    if collision_batch and not _retrying_retired:
         gc.query(
             """
             UNWIND $batch AS b
@@ -1301,7 +1387,7 @@ def _lock_claimed_name_bindings(
             stable_stages=sorted(foundation._STABLE_BINDING_NAME_STAGES),
         )
     for row in rows:
-        if row.get("outcome", "winner") == "winner":
+        if row.get("outcome", "winner") == "winner" or _retrying_retired:
             continue
         reason = attachment_refusals.get(row.get("id") or "")
         logger.warning(
@@ -1524,7 +1610,16 @@ def persist_claimed_attachments(
                     for row in locked_rows
                     if row.get("outcome", "winner") == "winner"
                 }
-                winner_batch = [item for item in batch if item["sns_id"] in locked_ids]
+                resolved_ids = {
+                    row["id"]: row["resolved_id"]
+                    for row in locked_rows
+                    if row.get("resolved_id")
+                }
+                winner_batch = [
+                    {**item, "sn_id": resolved_ids.get(item["sns_id"], item["sn_id"])}
+                    for item in batch
+                    if item["sns_id"] in locked_ids
+                ]
                 if winner_batch:
                     rows = tx_gc.query(
                         """
@@ -1622,7 +1717,16 @@ def stage_claimed_generated_candidates(
                     if row.get("outcome", "winner") == "winner"
                 }
                 winner_ids = list(locked_ids)
-                winner_batch = [item for item in batch if item["sns_id"] in locked_ids]
+                resolved_ids = {
+                    row["id"]: row["resolved_id"]
+                    for row in locked_rows
+                    if row.get("resolved_id")
+                }
+                winner_batch = [
+                    {**item, "sn_id": resolved_ids.get(item["sns_id"], item["sn_id"])}
+                    for item in batch
+                    if item["sns_id"] in locked_ids
+                ]
                 _supersede_released_bindings(
                     tx_gc,
                     released,
