@@ -1,0 +1,122 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Canonical baseline_suite versus after_suite delta is zero, derived from both completed logs; the separate three-run stability union adds two IDs and remains unadjudicated.",
+  "assertion_analysis": [
+    {
+      "assertion": "elapsed < 10",
+      "fails_if": "Restore real git provenance cost in the population test; the recorded mutation measured 21.08 s and failed this assertion.",
+      "file": "tests/standard_names/test_anchor_ab_aggregate.py",
+      "independence": "Measured wall time versus fixed budget, not an input echo.",
+      "line": 133
+    },
+    {
+      "assertion": "llm.assert_awaited_once()",
+      "fails_if": "Review returns before the quorum LLM call, fails to await it, or invokes it twice.",
+      "file": "tests/standard_names/test_dd_gap_automated_writers.py",
+      "independence": "Observed call count, not supplied mock return value.",
+      "line": 570
+    },
+    {
+      "assertion": "persist.assert_called_once()",
+      "fails_if": "Review returns before the owned transition or attempts the transition twice.",
+      "file": "tests/standard_names/test_dd_gap_automated_writers.py",
+      "independence": "Observed call count, independent of transition return value.",
+      "line": 571
+    },
+    {
+      "assertion": "persist.call_args.kwargs[claim_token] == claim-token",
+      "fails_if": "The worker omits, changes or substitutes the claim token forwarded from the claimed item.",
+      "file": "tests/standard_names/test_dd_gap_automated_writers.py",
+      "independence": "Checks argument propagation against a fixed expected token; it does not compare the mock return value to its configured return value.",
+      "line": 572
+    }
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "call_sites_note": "No production code calls the edited test fixture or assertions; the runtime mechanisms exercised by those tests were read at the reviewed head and are listed separately.",
+  "completed_at": "2026-11-08T10:08:23Z",
+  "dispatched_at": "2026-11-08T10:00:10Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-load-sensitive-tests.html",
+      "line": "18",
+      "severity": "blocking",
+      "text": "blocking: The declared zero-added-failure acceptance condition remains unproven across the three-run stability measurement; the fragment itself records two new failure identities in head run 2, so the coordinator must adjudicate that evidence before accepting the node even though the final canonical after_suite arm is green."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Read bb430b6052d95c9d4fb4baad727f7c17c546b338 and 535e6ad16b106eadb1ea0497875f9488775b4a4a individually against base 96d64ea46391e6eb82d4d2676b96cad62f34c287; the first isolates costs and strengthens assertions, and the second adds the 20-line evidence fragment.",
+    "done_when": "The source prompt.txt evidence clause requires three target-clean eight-worker suites and no added failure IDs; head-suite-1.log through head-suite-3.log establish the target result, but head-suite-2.log adds two IDs absent from baseline-suite.log, so unconditional gate acceptance is not established.",
+    "goal": "The source prompt.txt goal requires removing three 30 s timeouts under -n 8; tests/standard_names/test_anchor_ab_aggregate.py:51 and tests/standard_names/test_dd_gap_automated_writers.py:499 remove the measured git and embedding costs without raising the timeout, and all three targets pass in three recorded head runs.",
+    "manifest": "The source manifest.md names both commits and readable suite and negative-control receipts, accurately discloses the second-run failures, and records the final-arm failure delta separately from the unresolved stability-run union.",
+    "write_paths": "The four declared paths in source prompt.txt include both changed test modules and the evidence fragment; the exact base-to-head diff changes only those three permitted files."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_anchor_ab_aggregate.py:133 fails with restored git cost as negative-control.log demonstrates, and tests/standard_names/test_dd_gap_automated_writers.py:570-572 fail on skipped or duplicated review/persistence or a lost claim token, although only population aggregation receives the added ten-second budget.",
+    "evidence": "docs/evidence/fragments/sn-integrity-backlog/sib-load-sensitive-tests.html:10 records that the original targets passed at base, while lines 15 and 18 disclose the unresolved two-ID stability delta despite the final suite being green.",
+    "fit": "tests/standard_names/test_anchor_ab_aggregate.py:50 uses pytest monkeypatch at the existing git_commit boundary, and tests/standard_names/test_dd_gap_automated_writers.py:499 extends its existing ExitStack/patch idiom with mechanism-based names and comments.",
+    "goal_fidelity": "tests/standard_names/test_anchor_ab_aggregate.py:51 and tests/standard_names/test_dd_gap_automated_writers.py:499 remove the identified costs while retaining the real aggregation and review authorization paths, with all three target tests passing in each head-suite log.",
+    "reuse": "The added fixture at tests/standard_names/test_anchor_ab_aggregate.py:51 extends the test owner by patching its existing git_commit boundary; capability searches of tests/standard_names and tests/conftest.py found no shared provenance-stubbing owner, while docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py:101 owns the real lookup.",
+    "scope_discipline": "The 46-line base-to-head delta touches only tests/standard_names/test_anchor_ab_aggregate.py, tests/standard_names/test_dd_gap_automated_writers.py and the declared docs/evidence/fragments/sn-integrity-backlog/sib-load-sensitive-tests.html path."
+  },
+  "production_context_examined": [
+    "docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py:classify_record:159",
+    "imas_codex/standard_names/worker_tasks/worker_review_names.py:process_review_name_batch:1135,1360,1383",
+    "imas_codex/standard_names/worker_tasks/worker_review_docs.py:process_review_docs_batch:951,976"
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source prompt.txt goal requires removing three 30 s timeouts under -n 8; tests/standard_names/test_anchor_ab_aggregate.py:51 and tests/standard_names/test_dd_gap_automated_writers.py:499 remove the measured git and embedding costs without raising the timeout, and all three targets pass in three recorded head runs.\nVERDICT done_when: The source prompt.txt evidence clause requires three target-clean eight-worker suites and no added failure IDs; head-suite-1.log through head-suite-3.log establish the target result, but head-suite-2.log adds two IDs absent from baseline-suite.log, so unconditional gate acceptance is not established.\nVERDICT write_paths: The four declared paths in source prompt.txt include both changed test modules and the evidence fragment; the exact base-to-head diff changes only those three permitted files.\nVERDICT manifest: The source manifest.md names both commits and readable suite and negative-control receipts, accurately discloses the second-run failures, and records the final-arm failure delta separately from the unresolved stability-run union.\nVERDICT diff: Read bb430b6052d95c9d4fb4baad727f7c17c546b338 and 535e6ad16b106eadb1ea0497875f9488775b4a4a individually against base 96d64ea46391e6eb82d4d2676b96cad62f34c287; the first isolates costs and strengthens assertions, and the second adds the 20-line evidence fragment.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: tests/standard_names/test_anchor_ab_aggregate.py:51 and tests/standard_names/test_dd_gap_automated_writers.py:499 remove the identified costs while retaining the real aggregation and review authorization paths, with all three target tests passing in each head-suite log.\nSCORE evidence: 15\nJUSTIFICATION evidence: docs/evidence/fragments/sn-integrity-backlog/sib-load-sensitive-tests.html:10 records that the original targets passed at base, while lines 15 and 18 disclose the unresolved two-ID stability delta despite the final suite being green.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The 46-line base-to-head delta touches only tests/standard_names/test_anchor_ab_aggregate.py, tests/standard_names/test_dd_gap_automated_writers.py and the declared docs/evidence/fragments/sn-integrity-backlog/sib-load-sensitive-tests.html path.\nSCORE durability: 18\nJUSTIFICATION durability: tests/standard_names/test_anchor_ab_aggregate.py:133 fails with restored git cost as negative-control.log demonstrates, and tests/standard_names/test_dd_gap_automated_writers.py:570-572 fail on skipped or duplicated review/persistence or a lost claim token, although only population aggregation receives the added ten-second budget.\nSCORE fit: 20\nJUSTIFICATION fit: tests/standard_names/test_anchor_ab_aggregate.py:50 uses pytest monkeypatch at the existing git_commit boundary, and tests/standard_names/test_dd_gap_automated_writers.py:499 extends its existing ExitStack/patch idiom with mechanism-based names and comments.\nSCORE reuse: 20\nJUSTIFICATION reuse: The added fixture at tests/standard_names/test_anchor_ab_aggregate.py:51 extends the test owner by patching its existing git_commit boundary; capability searches of tests/standard_names and tests/conftest.py found no shared provenance-stubbing owner, while docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py:101 owns the real lookup.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-load-sensitive-tests.html:18 blocking: The declared zero-added-failure acceptance condition remains unproven across the three-run stability measurement; the fragment itself records two new failure identities in head run 2, so the coordinator must adjudicate that evidence before accepting the node even though the final canonical after_suite arm is green.\n",
+  "reuse_search": "Searched git provenance stubbing capability across tests/standard_names and tests/conftest.py, then checked the reviewed-head aggregate test and conftest owners; only the newly added local fixture supplies it. Opened the real git_commit owner at aggregate-run.py:101.",
+  "review_run_id": "r-20261108T095905600064-review-of-sib-load-sensitive-tests-535e6ad16b10",
+  "reviewed_base_sha": "96d64ea46391e6eb82d4d2676b96cad62f34c287",
+  "reviewed_head_sha": "535e6ad16b106eadb1ea0497875f9488775b4a4a",
+  "reviewed_run_id": "r-20261108T085722857932-sib-load-sensitive-tests",
+  "scores": {
+    "durability": 18,
+    "evidence": 15,
+    "fit": 20,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "stability_added_failure_count": 2,
+  "stability_added_failure_ids": [
+    "tests/standard_names/test_pool_registry_imports.py::test_pool_phase_import_orders_succeed_in_fresh_process[import imas_codex.cli.sn; import imas_codex.standard_names.turn as t; print(t.TURN_PHASES)]",
+    "tests/standard_names/test_review_pipeline.py::test_audit_embedding_preflight"
+  ],
+  "status": "parsed",
+  "suite_evidence": {
+    "after_suite": {
+      "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-load-sensitive-tests:/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T085722857932-sib-load-sensitive-tests PYTHONUNBUFFERED=1 TMPDIR=/tmp/reckon-crew-scratch/r-20261108T085722857932-sib-load-sensitive-tests/head-suite-3-t6r5m691 uv run --no-sync pytest -p no:cacheprovider --basetemp=/tmp/reckon-crew-scratch/r-20261108T085722857932-sib-load-sensitive-tests/head-suite-3-t6r5m691/pytest /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-load-sensitive-tests/tests/standard_names -n 8 --durations=0 --durations-min=0",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T085722857932-sib-load-sensitive-tests/head-suite-3.log",
+      "revision": "bb430b6052d95c9d4fb4baad727f7c17c546b338",
+      "verified_failure_ids": []
+    },
+    "baseline_suite": {
+      "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-load-sensitive-tests:/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T085722857932-sib-load-sensitive-tests PYTHONUNBUFFERED=1 TMPDIR=/tmp/reckon-crew-scratch/r-20261108T085722857932-sib-load-sensitive-tests/baseline-suite-bjw2dgvx uv run --no-sync pytest -p no:cacheprovider --basetemp=/tmp/reckon-crew-scratch/r-20261108T085722857932-sib-load-sensitive-tests/baseline-suite-bjw2dgvx/pytest /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-load-sensitive-tests/tests/standard_names -n 8 --durations=0 --durations-min=0 -p timing_probe",
+      "completed": true,
+      "exit_status": 1,
+      "failure_count": 1,
+      "failure_ids": [
+        "tests/standard_names/test_house_style_checks.py::test_audit_report_carries_the_conformance_findings"
+      ],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T085722857932-sib-load-sensitive-tests/baseline-suite.log",
+      "revision": "96d64ea46391e6eb82d4d2676b96cad62f34c287",
+      "verified_failure_ids": [
+        "tests/standard_names/test_house_style_checks.py::test_audit_report_carries_the_conformance_findings"
+      ]
+    }
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T10:20:33.166659+00:00",
+  "total": 112
+}
