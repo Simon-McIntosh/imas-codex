@@ -1,0 +1,109 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed manifest has blank baseline_suite and after_suite fields; no paired suite completed, so this is an empty recorded delta rather than evidence that all tests pass.",
+  "assertion_audit": [
+    {
+      "fails_if": "a query starts outside MATCH/UNWIND or contains a listed write verb; the refusal can be bypassed under optimized Python, but the recorded command did not use optimization",
+      "lines": "133-134,171"
+    },
+    {
+      "fails_if": "source IDs or last-error/attempt fields disappear, the status aggregate changes during capture, its counts disagree with source rows, the 1000-row bound is reached, or run identity is ambiguous",
+      "lines": "176-188"
+    },
+    {
+      "fails_if": "a batch exception has no terminal error, counted failure markers disagree, no source path is found in the log, or the single 600-second stall with 104 pending records disappears",
+      "lines": "283-313"
+    },
+    {
+      "fails_if": "a named product mechanism marker cannot be located",
+      "lines": "385"
+    },
+    {
+      "fails_if": "the bare network error loses its two-call retry or the wrapped API connection error ceases to fail after one call",
+      "lines": "472-475"
+    },
+    {
+      "fails_if": "the job log hash changes, source IDs duplicate, cohort count differs from 371, aggregate drifts, or source authority coverage is incomplete",
+      "lines": "483-495"
+    },
+    {
+      "fails_if": "class totals or expected class distribution changes, expanded rows cease to be 373, pending count ceases to be 104, the DD-link positive control disappears, or a claimable seed appears",
+      "lines": "549-560"
+    },
+    {
+      "fails_if": "the production terminal-drain function does not refuse stalled with exit 1 or the read-only wrapper admits a mutating query",
+      "lines": "567-576"
+    },
+    {
+      "fails_if": "the known registered temperature token is not recognized or the recorded gap set becomes automatically revivable",
+      "lines": "584-595"
+    },
+    {
+      "fails_if": "the scheduler receipt no longer reports job 1308077 failed with exit 1:0",
+      "lines": "605-607"
+    },
+    {
+      "fails_if": "an imported product module differs byte-for-byte from the assigned tree",
+      "lines": "649"
+    },
+    {
+      "fails_if": "an artifact exceeds the size bound, persisted JSON omits a source ID, HTML omits or reorders a source row, element IDs collide, the known toroidal-flux refusal disappears, or HTML exceeds its size bound",
+      "lines": "741,749-755,895"
+    },
+    {
+      "fails_if": "report mode lacks a supplement",
+      "lines": "915"
+    }
+  ],
+  "assertion_limit": "The JSON and HTML ID checks at lines 749-755 compare generated output with input rows; they guard persistence and rendering omissions, not independent correctness of each recovery classification. No durability credit for per-source recovery labels is taken from them.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-08T02:43:50Z",
+  "dispatched_at": "2026-11-08T02:30:38Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-full-run-failure-diagnosis-run.py",
+      "line": "535",
+      "severity": "blocking",
+      "text": "blocking: 253 sources carry only a terminal reason and 58 carry no stored reason, so the required per-source run-log account of what consumed their attempts is absent; the 73 batch exceptions cannot be assigned to sources and the 149 cap cases remain symptoms rather than diagnosed causes."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "commits a22d1770ce361b06e346c348ac8e90b54547c167, b4387ec8dc8c7be6cc362d8bc6d84e9f829787c5 and db3afa0c04182c3b82956f8885204346f788b7cc add the capture runner, 371-row fragment and JSON, then bind generated evidence to product bytes.",
+    "done_when": "prompt.txt:100 requires per-source attempt evidence and a quantified second-pass diagnosis; diagnosis-record.log:6-7 records 371 sources, 373 expanded rows and EXIT=0, while docs/evidence/fragments/sn-integrity-backlog/sib-full-run-failure-diagnosis-run.py:714 states failed-batch membership is unavailable.",
+    "goal": "prompt.txt:38 requires every failed or vocabulary-gap DD source to be classified; docs/evidence/fragments/sn-integrity-backlog/sib-full-run-failure-diagnosis-run.py:480-550 emits 371 source rows with classes and recovery dispositions, but the 149 cap rows do not identify their consumed-attempt cause.",
+    "manifest": "manifest.md:6-18 reports three commits, the generated artifacts and diagnosis-record.log with its EXIT=0 receipt; baseline_suite and after_suite are blank, so no suite delta was measured.",
+    "write_paths": "prompt.txt:77-81 grants the evidence runner, fragment, JSON and figure directory; git diff from 0198b31b3af666a05078bd1c8f55712366f0ff95 to db3afa0c04182c3b82956f8885204346f788b7cc changes only the first three granted paths."
+  },
+  "justifications": {
+    "durability": "docs/evidence/fragments/sn-integrity-backlog/sib-full-run-failure-diagnosis-run.py:483-595 has falsifiable count, hash, refusal and positive-control assertions, while its per-source recovery labels have no independent expected outcome and the manifest records no baseline/after suite.",
+    "evidence": "diagnosis-record.log:6-7 records count, class and exit checks, but docs/evidence/fragments/sn-integrity-backlog/sib-full-run-failure-diagnosis-run.py:714 concedes the job log has no source-to-failed-batch attribution.",
+    "fit": "docs/evidence/fragments/sn-integrity-backlog/sib-full-run-failure-diagnosis-run.py:146-188 follows the adjacent read-only evidence-runner pattern and records independent aggregates, though the long artifact-specific script is difficult to rerun as a narrow regression gate.",
+    "goal_fidelity": "docs/evidence/fragments/sn-integrity-backlog/sib-full-run-failure-diagnosis-run.py:535 classifies every source but marks many rows terminal_reason_only or legacy_error_not_recorded, leaving their attempt cause unresolved.",
+    "reuse": "the capability search over imas_codex and docs/evidence found only the distinct shc-locus-remeasure-rerun-run.py evidence producer, whose family measurement at lines 1-120 does not classify terminal DD source attempts.",
+    "scope_discipline": "the three paths in git diff --stat from 0198b31b3af666a05078bd1c8f55712366f0ff95 to db3afa0c04182c3b82956f8885204346f788b7cc are exactly among prompt.txt:77-81's granted paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: prompt.txt:38 requires every failed or vocabulary-gap DD source to be classified; docs/evidence/fragments/sn-integrity-backlog/sib-full-run-failure-diagnosis-run.py:480-550 emits 371 source rows with classes and recovery dispositions, but the 149 cap rows do not identify their consumed-attempt cause.\nVERDICT done_when: prompt.txt:100 requires per-source attempt evidence and a quantified second-pass diagnosis; diagnosis-record.log:6-7 records 371 sources, 373 expanded rows and EXIT=0, while docs/evidence/fragments/sn-integrity-backlog/sib-full-run-failure-diagnosis-run.py:714 states failed-batch membership is unavailable.\nVERDICT write_paths: prompt.txt:77-81 grants the evidence runner, fragment, JSON and figure directory; git diff from 0198b31b3af666a05078bd1c8f55712366f0ff95 to db3afa0c04182c3b82956f8885204346f788b7cc changes only the first three granted paths.\nVERDICT manifest: manifest.md:6-18 reports three commits, the generated artifacts and diagnosis-record.log with its EXIT=0 receipt; baseline_suite and after_suite are blank, so no suite delta was measured.\nVERDICT diff: commits a22d1770ce361b06e346c348ac8e90b54547c167, b4387ec8dc8c7be6cc362d8bc6d84e9f829787c5 and db3afa0c04182c3b82956f8885204346f788b7cc add the capture runner, 371-row fragment and JSON, then bind generated evidence to product bytes.\nCALL_SITES: none\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-integrity-backlog/sib-full-run-failure-diagnosis-run.py:535 classifies every source but marks many rows terminal_reason_only or legacy_error_not_recorded, leaving their attempt cause unresolved.\nSCORE evidence: 14\nJUSTIFICATION evidence: diagnosis-record.log:6-7 records count, class and exit checks, but docs/evidence/fragments/sn-integrity-backlog/sib-full-run-failure-diagnosis-run.py:714 concedes the job log has no source-to-failed-batch attribution.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the three paths in git diff --stat from 0198b31b3af666a05078bd1c8f55712366f0ff95 to db3afa0c04182c3b82956f8885204346f788b7cc are exactly among prompt.txt:77-81's granted paths.\nSCORE durability: 12\nJUSTIFICATION durability: docs/evidence/fragments/sn-integrity-backlog/sib-full-run-failure-diagnosis-run.py:483-595 has falsifiable count, hash, refusal and positive-control assertions, while its per-source recovery labels have no independent expected outcome and the manifest records no baseline/after suite.\nSCORE fit: 18\nJUSTIFICATION fit: docs/evidence/fragments/sn-integrity-backlog/sib-full-run-failure-diagnosis-run.py:146-188 follows the adjacent read-only evidence-runner pattern and records independent aggregates, though the long artifact-specific script is difficult to rerun as a narrow regression gate.\nSCORE reuse: 20\nJUSTIFICATION reuse: the capability search over imas_codex and docs/evidence found only the distinct shc-locus-remeasure-rerun-run.py evidence producer, whose family measurement at lines 1-120 does not classify terminal DD source attempts.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-full-run-failure-diagnosis-run.py:535 blocking: 253 sources carry only a terminal reason and 58 carry no stored reason, so the required per-source run-log account of what consumed their attempts is absent; the 73 batch exceptions cannot be assigned to sources and the 149 cap cases remain symptoms rather than diagnosed causes.",
+  "review_run_id": "r-20261108T022736934708-review-of-sib-full-run-failure-diagnosis-db3afa0c0418",
+  "reviewed_base_sha": "0198b31b3af666a05078bd1c8f55712366f0ff95",
+  "reviewed_head_sha": "db3afa0c04182c3b82956f8885204346f788b7cc",
+  "reviewed_run_id": "r-20261108T014126437508-sib-full-run-failure-diagnosis",
+  "scores": {
+    "durability": 12,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 15,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T02:55:49.853380+00:00",
+  "total": 99
+}
