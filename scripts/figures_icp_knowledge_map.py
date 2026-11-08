@@ -26,8 +26,8 @@ e. the same traffic driven by several models, one colour each;
 f. the whole fleet: several models and kinds of vehicle, under heavier load.
 
 Geography: the metropolitan outline is the simplified ``france-geojson``
-(Licence Ouverte / Etalab); the roads are Natural Earth 10m major highways
-(public domain), clipped to that outline.
+(Licence Ouverte / Etalab); the roads are Natural Earth 10m major and secondary
+highways (public domain), clipped to that outline.
 
 Usage::
 
@@ -117,7 +117,7 @@ TOWNS = [
     Town("con", "Contracts", "procurement · SAP", -1.68, 48.11, (-4, -14, "center")),
     Town("req", "Requirements", "RQM", 7.75, 48.57, (12, 2, "left")),
     Town("pbs", "Plant Breakdown", "PBS", 5.04, 47.32, (-12, -10, "right")),
-    Town("ifc", "Interfaces", "interface sheets", 6.18, 48.69, (-18, -1, "right")),
+    Town("ifc", "Interfaces", "interface sheets", 6.18, 48.69, (-14, -20, "left")),
 ]
 
 # Whoever asks, at ITER or at a Domestic Agency: east of France, off the data map,
@@ -137,9 +137,10 @@ RELATIONS = [
     ("doc", "specifies", "req", (0.3, 0, 0)),
     ("cmp", "is part of", "pbs", (0.4, 0, 0)),
     ("ana", "assesses", "cmp", (0.5, 0, 0)),
-    ("doc", "is filed under", "pbs", (0.5, 0, -4)),
-    ("ifc", "joins", "pbs", (0.58, 0, 0)),
+    ("doc", "is filed under", "pbs", (0.5, -26, -4)),
+    ("ifc", "joins", "pbs", (0.58, -18, 0)),
     ("ifc", "states", "req", (0.6, 0, 0)),
+    ("ifc", "constrains", "cad", (0.70, 0, 0)),
 ]
 
 
@@ -157,19 +158,39 @@ def place(key: str) -> tuple[float, float]:
 # --------------------------------------------------------------------------- roads
 
 
-def load_roads() -> list[list[tuple[float, float]]]:
+SECONDARY_COST = 1.5  # a secondary highway is taken only when it saves real distance
+TAKEN_COST = 4.0  # a road another relationship already runs along is avoided
+SHARED_LIMIT = 2.0  # map units of taken road beyond which a relationship finds its own
+
+
+def load_roads() -> list[tuple[list[tuple[float, float]], bool]]:
+    """Every highway polyline, flagged True when it is a secondary highway."""
     features = json.loads(ROADS.read_text())["features"]
     return [
-        [project(lon, lat) for lon, lat in f["geometry"]["coordinates"]]
+        (
+            [project(lon, lat) for lon, lat in f["geometry"]["coordinates"]],
+            f["properties"]["type"] != "Major Highway",
+        )
         for f in features
-        if f["properties"]["type"] == "Major Highway"
     ]
 
 
-class RoadGraph:
-    """The motorway polylines as a graph, so a relation can follow the roads."""
+Segment = frozenset[tuple[float, float]]
 
-    def __init__(self, roads: list[list[tuple[float, float]]], snap: float = 0.1):
+
+def segments(points) -> set[Segment]:
+    return {
+        frozenset(((round(p[0], 4), round(p[1], 4)), (round(q[0], 4), round(q[1], 4))))
+        for p, q in zip(points, points[1:], strict=False)
+    }
+
+
+class RoadGraph:
+    """The highway polylines as a graph, so a relation can follow the roads."""
+
+    def __init__(
+        self, roads: list[tuple[list[tuple[float, float]], bool]], snap: float = 0.1
+    ):
         self.nodes: list[tuple[float, float]] = []
         self.edges: dict[int, list[tuple[int, float]]] = {}
         index: dict[tuple[float, float], int] = {}
@@ -182,10 +203,10 @@ class RoadGraph:
             return index[key]
 
         ends = []
-        for line in roads:
+        for line, secondary in roads:
             ids = [node(p) for p in line]
             for a, b in zip(ids, ids[1:], strict=False):
-                self.link(a, b)
+                self.link(a, b, SECONDARY_COST if secondary else 1.0)
             ends += [ids[0], ids[-1]]
         # polylines that meet at a junction rarely share a vertex: join them
         for e in ends:
@@ -193,8 +214,8 @@ class RoadGraph:
                 if n != e and math.dist(p, self.nodes[e]) < snap:
                     self.link(e, n)
 
-    def link(self, a: int, b: int) -> None:
-        d = math.dist(self.nodes[a], self.nodes[b])
+    def link(self, a: int, b: int, cost: float = 1.0) -> None:
+        d = cost * math.dist(self.nodes[a], self.nodes[b])
         self.edges.setdefault(a, []).append((b, d))
         self.edges.setdefault(b, []).append((a, d))
 
@@ -202,8 +223,12 @@ class RoadGraph:
         return min(range(len(self.nodes)), key=lambda n: math.dist(self.nodes[n], p))
 
     def path(
-        self, a: tuple[float, float], b: tuple[float, float]
+        self,
+        a: tuple[float, float],
+        b: tuple[float, float],
+        taken: set[Segment] = frozenset(),
     ) -> list[tuple[float, float]]:
+        """Cheapest route from a to b, paying TAKEN_COST on every taken segment."""
         start, goal = self.nearest(a), self.nearest(b)
         queue, best, prev = [(0.0, start)], {start: 0.0}, {}
         while queue:
@@ -211,11 +236,13 @@ class RoadGraph:
             if n == goal:
                 break
             for m, d in self.edges.get(n, []):
+                if taken and segments([self.nodes[n], self.nodes[m]]) <= taken:
+                    d *= TAKEN_COST
                 if dist + d < best.get(m, math.inf):
                     best[m], prev[m] = dist + d, n
                     heapq.heappush(queue, (dist + d, m))
         if goal not in best:
-            raise SystemExit(f"no motorway route between {a} and {b}")
+            raise SystemExit(f"no highway route between {a} and {b}")
         points, n = [], goal
         while n != start:
             points.append(self.nodes[n])
@@ -224,11 +251,34 @@ class RoadGraph:
         return [a, *reversed(points), b]
 
 
+def shared_length(points, taken: set[Segment]) -> float:
+    return sum(
+        math.dist(p, q)
+        for p, q in zip(points, points[1:], strict=False)
+        if segments([p, q]) <= taken
+    )
+
+
 def relation_routes(roads) -> list[list[tuple[float, float]]]:
-    """The road each relationship runs along, then ITER's on-ramp last."""
-    graph = RoadGraph(roads)
-    routes = [graph.path(place(s), place(o)) for s, _, o, _ in RELATIONS]
-    return [*routes, graph.path(place("iter"), place(ON_RAMP))]
+    """The road each relationship runs along, then ITER's on-ramp last.
+
+    A relationship takes its shortest motorway route, unless a long stretch of it
+    is road earlier relationships already run along: two relationships on one
+    road read as one. It then takes its own way over every highway, secondary
+    ones included, paying extra for any road already taken."""
+    motorways = RoadGraph([(line, False) for line, secondary in roads if not secondary])
+    highways = RoadGraph(roads)
+    routes, taken = [], set()
+    for s, _, o, _ in RELATIONS:
+        try:
+            route = motorways.path(place(s), place(o))
+        except SystemExit:  # no motorway joins them
+            route = None
+        if route is None or shared_length(route, taken) > SHARED_LIMIT:
+            route = highways.path(place(s), place(o), taken)
+        routes.append(route)
+        taken |= segments(route)
+    return [*routes, motorways.path(place("iter"), place(ON_RAMP))]
 
 
 def length(points) -> float:
@@ -588,7 +638,7 @@ def draw_relation_labels(ax, routes, others: list[Text]) -> list[Text]:
     boxes = [t.get_window_extent(renderer).padded(3) for t in [*others, *labels]]
     for town in TOWNS:  # and keep clear of the town dots the roads arrive at
         x, y = ax.transData.transform(place(town.key))
-        boxes.append(Bbox.from_extents(x - 11, y - 11, x + 11, y + 11))
+        boxes.append(Bbox.from_extents(x - 9, y - 9, x + 9, y + 9))
     arrows = []
     for (_, _, _, (f, _, _)), points in zip(RELATIONS, routes, strict=True):
         total, start = length(points), f * length(points)
