@@ -1,0 +1,47 @@
+<section id="sib-compose-refusal-narrowing" class="r-evidence">
+<h2>sib-compose-refusal-narrowing — two over-broad error paths in the compose batch</h2>
+
+<p>The batch-isolation repair stopped one bad candidate from discarding a paid
+response, but it caught more than the failure it was written for. Two error
+paths were broad enough to swallow outcomes they did not own: the per-candidate
+grammar catch took every <code>Exception</code>, and the compose call wrapped
+<code>acall_llm_structured</code> in a second retry loop of its own. The first
+retired a source for a defect in this code; the second multiplied the LLM
+layer's attempt bound by its own, so one transport fault could cost twenty-five
+attempts and about six minutes of backoff per batch.</p>
+
+<table>
+<thead><tr><th>path</th><th>before</th><th>after</th></tr></thead>
+<tbody>
+<tr><td>per-candidate name</td><td><code>except Exception</code>: any defect persisted as that source's terminal grammar refusal</td><td><code>except (ValueError, ValidationError)</code>: only the errors a bad proposal raises; anything else propagates</td></tr>
+<tr><td>transport fault</td><td>five-attempt wrapper around a five-attempt loop, classified by message only</td><td>one loop in <code>acall_llm_structured</code>, classified by type first, bounded by <code>max_retries</code></td></tr>
+</tbody>
+</table>
+
+<p>The compose catch now names the two failures a malformed proposal actually
+produces: the <code>ValueError</code> from the ISN round-trip and pydantic's
+<code>ValidationError</code> from the candidate model. A <code>ValueError</code>
+is still recorded on its own source and the batch's valid siblings still
+persist. An <code>AttributeError</code> from the composer is this code's
+defect and now leaves <code>compose_batch</code>, so the batch is recorded as
+failed instead of retiring a source for a reason that is not about the source.</p>
+
+<p>The duplicate transport loop is gone. <code>acall_llm_structured</code>
+decides a fault by type before reading its message, using the module's own
+<code>_transient_transport_errors()</code> set, so a
+<code>httpx.ReadError</code> with an empty message and a bare
+<code>httpx.ConnectError</code> are retried inside the loop that already bounds
+the attempt count. The fault set is read from its owner rather than restated,
+so the two seams cannot drift.</p>
+
+<p><strong>Evidence.</strong> The new tests fail on the base revision and pass
+at the change. At base <code>a0a536030</code>, with the two test files placed
+over it, three tests fail: the <code>AttributeError</code> propagation test and
+both parametrised transport-retry tests; the <code>ValidationError</code>
+recording test and the deterministic-error test pass at base, since they pin
+behaviour the repair must not lose. At head <code>1a2238e4b</code> all six
+pass. The declared negative control restores the bare <code>Exception</code>
+catch on the head tree: exactly one test fails, the
+<code>AttributeError</code> propagation test, which is the guard this node
+adds.</p>
+</section>
