@@ -1,9 +1,70 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><title>Source retry stopped at its model-build prerequisite</title></head>
+<head><meta charset="utf-8"><title>Source retry census and immutable snapshot refusals</title></head>
 <body>
+<section id="sib-second-pass-tail-resumed">
+<h2 id="sib-second-pass-tail-current">Census complete; four sources still fail the seed guard</h2>
+<p>The coordinator completed <code>uv run --no-sync build-models --force</code>
+at <code>0efd4cf50</code> with exit 0, recorded in
+<a href="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T141648847743-sib-second-pass-tail/resume-1-advice.txt">the resume instruction</a>.
+The resumed census independently imported the main-checkout models and confirmed
+<code>StandardNameSourceClaimAttempt</code> exists. The initial filesystem refusal
+below is resolved; no second worker rebuild was attempted.</p>
+<p>The census reuses the original runner's cohort selector and source-state reader.
+All 143 source ids were found. The source-audit reader found 10 entries, including
+7 dropped-edge and 2 never-bound names, so the zero export-blocker result is
+accompanied by a positive sourceless-population control.</p>
+<table id="sib-second-pass-tail-live-counts">
+<caption>Live read-back before any reset</caption>
+<thead><tr><th>Measure</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>Produced sources, measured by a PRODUCED_NAME binding</td><td>83 / 143</td></tr>
+<tr><td>Failed without a binding, selected for retry</td><td>41</td></tr>
+<tr><td>Extracted, selected for retry</td><td>4</td></tr>
+<tr><td>Vocabulary gaps, excluded</td><td>15</td></tr>
+<tr><td>Raw failed count</td><td>52: the 41 unbound plus 11 already name-bound</td></tr>
+<tr><td>Export source-audit blocking set</td><td>0</td></tr>
+<tr><td>Sourceless live-draft baseline</td><td>3</td></tr>
+<tr><td>Snapshot preflight</td><td>41 eligible, 4 refused; EXIT=1</td></tr>
+<tr><td>Resets, new receipts, pipeline jobs, pipeline spend</td><td>0, 0, 0, USD 0 / USD 48.51</td></tr>
+</tbody>
+</table>
+<p>The export read uses <code>classify_sourceless_standard_names</code>,
+<code>find_sourceless_live_names</code>, <code>_SHIPPING_NAME_STAGES</code>
+and <code>_RELEASE_IDENTITY_HOLDS</code> with the predicate from the export gate.
+The three drafts are <code>line_averaged_neon_density</code> (recorded path
+<code>summary/line_average/n_i/neon/value</code>),
+<code>radius_of_soft_xray_detector</code> (<code>soft_x_rays/channel/detector/radius</code>),
+and <code>ratio_of_diamagnetic_vorticity_to_major_radius</code>
+(<code>edge_profiles/ggd/vorticity_over_r/diamagnetic</code> and
+<code>plasma_profiles/ggd/vorticity_over_r/diamagnetic</code>). These are recorded
+provenance paths, not surviving source-to-name bindings.</p>
+<p>The existing <code>_pin_dd_source_snapshots</code> guard was called read-only
+for each selected id. It accepted all 41 failed sources and refused each of the
+four extracted sources, with <code>has no provable immutable snapshot; run the
+provenance backfill report</code>. The exact refused ids are:</p>
+<ul>
+<li><code>dd:ic_antennas/antenna/module/strap/geometry/oblique</code></li>
+<li><code>dd:ntms/time_slice/mode</code></li>
+<li><code>dd:plasma_transport/model</code></li>
+<li><code>dd:plasma_transport/model/ggd</code></li>
+</ul>
+<p>The census's preliminary <code>missing_pins</code> field flags six sources
+missing a path or version. Two of those, the cryostat thermal-shield and wall
+vessel <code>annular/outline_outer/r</code> sources, carry
+<code>dd_snapshot_pinned=true</code> and version <code>4.1.1</code>; the actual
+seed guard accepts them. Only the four ids above lack a provable snapshot.</p>
+<p>No reset or paid run began after the refusal. The cumulative 100-source floor
+is not met: the live census still reads 83. The after-run export and draft checks
+remain unperformed because no run started. The full per-source census, prior
+claim receipts and exact refusal messages are retained in
+<a href="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T141648847743-sib-second-pass-tail/census.json">the census</a>,
+<a href="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T141648847743-sib-second-pass-tail/census.log">its successful log</a>, and
+<a href="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T141648847743-sib-second-pass-tail/seed-preflight.log">the seed-refusal log</a>.
+The logs end <code>EXIT=0</code> and <code>EXIT=1</code>, respectively.</p>
+</section>
 <section id="sib-second-pass-tail-record">
-<h2 id="sib-second-pass-tail-outcome">Model-build prerequisite refused; no sources reset</h2>
+<h2 id="sib-second-pass-tail-outcome">Initial attempt: model-build prerequisite refused</h2>
 <p>The live plan was read at version 412. The required first operation,
 <code>uv run --no-sync build-models --force</code>, ran from the main checkout
 at <code>0efd4cf508efc8b9a738435fbf79acc3b0ef6d2d</code>, which contains
@@ -14,8 +75,8 @@ facility models:</p>
 <a href="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T141648847743-sib-second-pass-tail/build-models.log">the model-build log</a>.
 Its first line records the revision, tree and command; its last line is
 <code>EXIT=1</code>. The accompanying Python recorder reproduces only this
-prerequisite and preserves existing logs. It has not been used to retry the
-refused write.</p>
+prerequisite in the initial commit. On resume it was extended to record the
+census and read-only seed preflight; the refused build was not retried.</p>
 <table id="sib-second-pass-tail-measurements">
 <caption>What this attempt measured</caption>
 <thead><tr><th>Measure</th><th>Result</th></tr></thead>
@@ -32,11 +93,8 @@ refused write.</p>
 name, 4 extracted and 15 vocabulary gaps. These are historical figures, not
 a live census from this attempt. The cumulative floor of 100 and the export
 and draft invariants remain unverified. No vocabulary-gap source was touched.</p>
-<p>Resume after the coordinator rebuilds the main-checkout generated models.
-Then verify the generated claim-attempt model, capture the live cohort and
-sourceless-draft baseline, perform the sanctioned reset with receipts and dry
-run, and run the scoped pipeline under the remaining cap. No further paid
-work was attempted because the required prerequisite failed.</p>
+<p>This initial attempt ended before any live graph read. The successful
+coordinator rebuild and resumed measurements are recorded above.</p>
 </section>
 </body>
 </html>
