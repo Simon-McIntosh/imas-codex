@@ -13,6 +13,13 @@
     "imas_codex/standard_names/worker_tasks/worker_compose_batches.py:1240 compose_batch"
   ],
   "completed_at": "2026-11-08T10:24:52.178Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "sib-claim-outcome-receipts",
+      "recorded_at": "2026-11-08T10:35:53.196416+00:00"
+    }
+  },
   "dispatched_at": "2026-11-08T10:14:09Z",
   "findings": [
     {
