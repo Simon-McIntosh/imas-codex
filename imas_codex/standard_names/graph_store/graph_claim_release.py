@@ -11,7 +11,11 @@ from imas_codex.discovery.base.claims import retry_on_deadlock
 from imas_codex.graph.models import RefineStopReason
 from imas_codex.standard_names.defaults import DEFAULT_REFINE_ROTATIONS
 
-from .graph_foundation import _CLAIM_VERIFY_SETTLE_SECONDS
+from .graph_foundation import (
+    _CLAIM_VERIFY_SETTLE_SECONDS,
+    append_claim_attempts,
+    claim_attempt_entry,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +36,34 @@ def release_generate_name_claims(
     if not source_ids:
         return 0
     with services.GraphClient() as gc:
+        rows = gc.query(
+            """
+            UNWIND $ids AS sid
+            MATCH (n:StandardNameSource {id: sid})
+            WHERE n.claim_token = $token
+            RETURN n.id AS id, n.claim_seq AS claim_seq,
+                   n.run_id AS run_id, n.batch_key AS batch_key
+            """,
+            ids=source_ids,
+            token=claim_token,
+        )
+        # Append while the claim is live. A failed append leaves ownership
+        # intact, and a retried append is idempotent on the claim sequence.
+        append_claim_attempts(
+            gc,
+            [
+                claim_attempt_entry(
+                    row["id"],
+                    outcome="released",
+                    claim_seq=row.get("claim_seq"),
+                    claim_token=claim_token,
+                    run_id=row.get("run_id"),
+                    batch_key=row.get("batch_key"),
+                )
+                for row in rows
+                if row.get("id")
+            ],
+        )
         result = gc.query(
             """
             UNWIND $ids AS sid

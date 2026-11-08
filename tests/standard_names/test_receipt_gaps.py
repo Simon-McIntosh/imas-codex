@@ -58,7 +58,14 @@ class ReceiptGraph(_FakeGraphClient):
                     and source["claim_token"] is None
                     and token is None
                 )
+                if "sns.status = 'failed'" in compact:
+                    unfenced = unfenced and source.get("status") == "failed"
                 if fenced or (token is None and shortcut) or unfenced:
+                    entry = dict(entry)
+                    for field in ("run_id", "batch_key"):
+                        if f"coalesce(entry.{field}, sns.{field})" in compact:
+                            if entry.get(field) is None:
+                                entry[field] = source.get(field)
                     entries.append(entry)
             return [{"written": self._append(entries)}]
         if "$ids" in cypher and "StandardNameSource" in cypher:
@@ -158,6 +165,9 @@ def test_only_capped_sweep_can_append_to_unclaimed_source():
     entries = _capped_claim_entries(
         [{"id": "dd:parked", "claim_seq": 7, "attempt_count": 5}]
     )
+    graph.claims["dd:parked"]["status"] = "extracted"
+    assert foundation.append_claim_attempts(graph, entries) == 0
+    graph.claims["dd:parked"]["status"] = "failed"
     assert foundation.append_claim_attempts(graph, entries) == 1
     assert graph.held_by("dd:parked")[0]["outcome"] == "capped"
 
@@ -166,8 +176,17 @@ def test_only_capped_sweep_can_append_to_unclaimed_source():
     "status,outcome",
     [("failed", "refused"), ("skipped", "skipped"), ("extracted", "requeued")],
 )
-def test_claimed_outcome_stores_run_and_batch_metadata(status, outcome):
-    graph = ReceiptGraph({"dd:path": _claim("owner", 7, attempt=4)})
+@pytest.mark.parametrize("carry_metadata", [True, False])
+def test_claimed_outcome_stores_run_and_batch_metadata(status, outcome, carry_metadata):
+    graph = ReceiptGraph(
+        {
+            "dd:path": {
+                **_claim("owner", 7, attempt=4),
+                "run_id": "source-run",
+                "batch_key": "source-batch",
+            }
+        }
+    )
     item = {
         "path": "path",
         "claim_token": "owner",
@@ -175,6 +194,9 @@ def test_claimed_outcome_stores_run_and_batch_metadata(status, outcome):
         "run_id": "run",
         "batch_key": "batch",
     }
+    if not carry_metadata:
+        item.pop("run_id")
+        item.pop("batch_key")
     result = worker_common._claimed_source_outcome(
         [item],
         "path",
@@ -187,8 +209,8 @@ def test_claimed_outcome_stores_run_and_batch_metadata(status, outcome):
     ) == ["dd:path"]
     (receipt,) = graph.held_by("dd:path")
     assert receipt["outcome"] == outcome
-    assert receipt["run_id"] == "run"
-    assert receipt["batch_key"] == "batch"
+    assert receipt["run_id"] == ("run" if carry_metadata else "source-run")
+    assert receipt["batch_key"] == ("batch" if carry_metadata else "source-batch")
     assert receipt["reason"] == "source-specific reason"
 
 
