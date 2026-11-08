@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
@@ -314,3 +315,94 @@ def test_retry_helper_skips_items_without_a_complete_claim():
     graph = MagicMock()
     assert build_retired_spelling_retry_reason([{"id": SOURCE}], gc=graph) == ""
     graph.query.assert_not_called()
+
+
+@pytest.mark.asyncio
+@pytest.mark.timeout(180)
+async def test_compose_prompts_keep_retired_refusal_through_internal_retry(monkeypatch):
+    from imas_codex.llm.prompt_loader import render_prompt
+    from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+        compose_batch,
+    )
+
+    refused = BindingGraph([])
+    _lock(refused)
+    graph = MagicMock()
+    graph.__enter__.return_value = graph
+    graph.query.side_effect = lambda cypher, **kwargs: (
+        [{"id": SOURCE, "last_error": refused.error}]
+        if "sns.last_error AS last_error" in cypher
+        else []
+    )
+    batch = [
+        {
+            "id": SOURCE,
+            "path": PATH,
+            "claim_token": "next-owner",
+            "claim_seq": 7,
+            "description": "Energy confinement time.",
+            "unit": "s",
+        }
+    ]
+    prompts = []
+    editorial_reason = "Use the reviewed quantity token."
+
+    async def compose(**kwargs):
+        prompts.append(kwargs["messages"][-1]["content"])
+        if len(prompts) == 2:
+            raise RuntimeError("captured both compose prompts")
+        return (
+            SimpleNamespace(
+                candidates=[], vocab_gaps=[], attachments=[], skipped=[], dd_gaps=[]
+            ),
+            0.0,
+            0,
+        )
+
+    monkeypatch.setattr(
+        "imas_codex.standard_names.graph_store.graph_claim_release._verify_source_claim_winners",
+        lambda items, **kwargs: items,
+    )
+    monkeypatch.setattr("imas_codex.graph.client.GraphClient", lambda: graph)
+    monkeypatch.setattr("imas_codex.discovery.base.llm.acall_llm_structured", compose)
+    monkeypatch.setattr(
+        "imas_codex.llm.prompt_loader.render_prompt",
+        lambda name, context: (
+            render_prompt(name, context) if name == "sn/generate_name_dd" else "system"
+        ),
+    )
+    for target, value in {
+        "imas_codex.settings.get_model": "test-model",
+        "imas_codex.standard_names.context.build_compose_context": {},
+        "imas_codex.standard_names.example_loader.load_compose_examples": [],
+        "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_batch_items": None,
+        "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._search_nearby_names": [],
+        "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._enrich_ids_context": None,
+        "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._retry_attempts": 1,
+        "imas_codex.standard_names.worker_tasks.worker_common._active_editorial_gap_guidance": (
+            editorial_reason,
+            True,
+        ),
+    }.items():
+        monkeypatch.setattr(target, MagicMock(return_value=value))
+
+    with pytest.raises(RuntimeError, match="captured both compose prompts"):
+        await compose_batch(batch, MagicMock(run_id="run"), asyncio.Event())
+
+    assert len(prompts) == 2
+    for prompt in prompts:
+        assert PATH in prompt
+        assert "Energy confinement time." in prompt
+        assert RETIRED in prompt
+        assert refused.error in prompt
+        assert "Do not propose" in prompt
+    assert editorial_reason in prompts[1]
+    refusal_reads = [
+        call
+        for call in graph.query.call_args_list
+        if "sns.last_error AS last_error" in call.args[0]
+    ]
+    assert len(refusal_reads) == 1
+    assert refusal_reads[0].kwargs["claims"] == [
+        {"id": SOURCE, "claim_token": "next-owner", "claim_seq": 7}
+    ]

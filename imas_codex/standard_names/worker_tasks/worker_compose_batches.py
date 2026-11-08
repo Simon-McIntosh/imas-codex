@@ -111,7 +111,10 @@ async def compose_batch(
         get_reasoning_effort,
     )
     from imas_codex.standard_names.budget import LLMCostEvent
-    from imas_codex.standard_names.context import build_compose_context
+    from imas_codex.standard_names.context import (
+        build_compose_context,
+        build_retired_spelling_retry_reason,
+    )
     from imas_codex.standard_names.models import StandardNameComposeBatch
 
     if not batch:
@@ -328,6 +331,9 @@ async def compose_batch(
         "cocos_version": batch[0].get("cocos_version") if batch else None,
         "dd_version": batch[0].get("dd_version") if batch else None,
     }
+    user_context["retry_reason"] = await asyncio.to_thread(
+        build_retired_spelling_retry_reason, batch
+    )
     user_prompt = render_prompt("sn/generate_name_dd", {**context, **user_context})
 
     messages = [
@@ -532,7 +538,9 @@ async def compose_batch(
             if _grammar_failures:
                 await asyncio.to_thread(_re_enrich_expanded)
 
-            _reason_parts = []
+            _reason_parts = (
+                [user_context["retry_reason"]] if user_context["retry_reason"] else []
+            )
             if _grammar_failures:
                 _reason_parts.append(
                     _worker_dependency("_build_grammar_retry_reason")(
