@@ -2317,11 +2317,6 @@ def _fold_guard_reason(
             f"target {into!r} is validation_status="
             f"{target_properties.get('validation_status')!r}, not 'valid'"
         )
-    if snapshot.get("cycle"):
-        return (
-            f"{old!r} already descends from {into!r} (REFINED_FROM cycle) — cannot fold"
-        )
-
     successors = [
         relationship
         for relationship in snapshot.get("relationships") or []
@@ -2341,6 +2336,12 @@ def _fold_guard_reason(
         successor_name = relationship.get("start_id")
         if _fold_successor_is_current(transaction, old, successor_name):
             return f"name {old!r} has another successor lineage; fold is ambiguous"
+    # A separate current successor is the more specific refusal; without one,
+    # adding the reverse edge to an ancestor would close a lineage cycle.
+    if snapshot.get("cycle"):
+        return (
+            f"{old!r} already descends from {into!r} (REFINED_FROM cycle) — cannot fold"
+        )
 
     for label, properties in (("old", old_properties), ("target", target_properties)):
         if (
