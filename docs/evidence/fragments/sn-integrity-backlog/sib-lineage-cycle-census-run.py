@@ -8,6 +8,8 @@ descendant; all live members are also reported to expose reclaimed ancestors.
 from __future__ import annotations
 
 import argparse
+import hashlib
+import importlib.util
 import json
 import os
 import shlex
@@ -27,10 +29,8 @@ ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(ROOT))
 
 from imas_codex.graph.client import GraphClient  # noqa: E402
+from imas_codex.standard_names import catalog_ordering  # noqa: E402
 
-RUN = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T201632402746-sib-lineage-cycle-census"
-)
 HERE = Path(__file__).resolve().parent
 STEM = Path(__file__).stem.removesuffix("-run")
 SPECIAL = {
@@ -56,20 +56,19 @@ def reachable(start, adjacency):
 
 
 def classify(nodes, edges):
-    parents, children, neighbours = (defaultdict(set) for _ in range(3))
+    children, neighbours = (defaultdict(set) for _ in range(2))
     for edge in edges:
         a, b = edge["successor"], edge["predecessor"]
-        parents[a].add(b)
         children[b].add(a)
         neighbours[a].add(b)
         neighbours[b].add(a)
-    cycle_names = {node for node in nodes if node in reachable(node, parents)}
-    cycles, pending_cycles = [], set(cycle_names)
-    while pending_cycles:
-        start = min(pending_cycles)
-        component = (reachable(start, parents) & reachable(start, children)) | {start}
-        cycles.append(sorted(component))
-        pending_cycles -= component
+    # Reversing every edge preserves strongly connected components. Pass the
+    # predecessor-to-successor adjacency to the catalog's shared cycle owner.
+    cycle_sets = catalog_ordering._find_cyclic_components(
+        set(nodes), {node: sorted(children[node]) for node in nodes}
+    )
+    cycles = [sorted(component) for component in cycle_sets]
+    cycle_names = set().union(*cycle_sets)
     components, remaining = [], set(nodes)
     while remaining:
         start = min(remaining)
@@ -88,7 +87,7 @@ def classify(nodes, edges):
     return cycles, components
 
 
-def controls():
+def controls(classifier=classify):
     nodes = {
         x: {"stage": "accepted" if x in {"left", "right", "solo"} else "superseded"}
         for x in ["ancestor", "left", "right", "loop_a", "loop_b", "self", "solo"]
@@ -103,7 +102,7 @@ def controls():
             ("self", "self"),
         ]
     ]
-    cycles, components = classify(nodes, edges)
+    cycles, components = classifier(nodes, edges)
     assert cycles == [["loop_a", "loop_b"], ["self"]]
     assert [c["live_tips"] for c in components if len(c["live_tips"]) > 1] == [
         ["left", "right"]
@@ -113,7 +112,94 @@ def controls():
     )
 
 
-def capture():
+def verify(run_dir, candidate_path=None):
+    """Check shared cycle ownership and topology against the retained snapshot."""
+    classifier = classify
+    if candidate_path is not None:
+        spec = importlib.util.spec_from_file_location(
+            "census_candidate", candidate_path
+        )
+        candidate = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(candidate)
+        classifier = candidate.classify
+    source = Path(classifier.__code__.co_filename).resolve()
+    print(
+        f"# candidate_module: {source}; sha256: {hashlib.sha256(source.read_bytes()).hexdigest()}"
+    )
+    nodes = {name: {"stage": "accepted"} for name in ["alpha", "beta", "child"]}
+    edges = [
+        {"successor": a, "predecessor": b}
+        for a, b in [("alpha", "beta"), ("beta", "alpha"), ("child", "beta")]
+    ]
+
+    def owner_delegation():
+        with patch.object(
+            catalog_ordering,
+            "_find_cyclic_components",
+            wraps=catalog_ordering._find_cyclic_components,
+        ) as owner:
+            cycles, _ = classifier(nodes, edges)
+        assert cycles == [["alpha", "beta"]], "acyclic descendant entered cycle"
+        owner.assert_called_once_with(
+            set(nodes), {"alpha": ["beta"], "beta": ["alpha", "child"], "child": []}
+        )
+
+    def owner_refusal():
+        class OwnerRefusal(RuntimeError):
+            pass
+
+        with patch.object(
+            catalog_ordering,
+            "_find_cyclic_components",
+            side_effect=OwnerRefusal("cycle owner refused the planted input"),
+        ):
+            try:
+                classifier(nodes, edges)
+            except OwnerRefusal as exc:
+                print(f"REFUSAL propagated: {exc}")
+                return
+        raise AssertionError("census bypassed the cycle owner's refusal")
+
+    def snapshot_equivalence():
+        data = json.loads((run_dir / "graph-snapshot.json").read_text())
+        cycles, components = classifier(
+            {n["id"]: n for n in data["nodes"]}, data["edges"]
+        )
+        assert cycles == data["cycles"], "cycle groups changed"
+        assert components == data["components"], "lineages or live tips changed"
+        assert {n for cycle in cycles for n in cycle} == {
+            row["id"] for row in data["cycle_cross_check"]
+        }, "cycle membership differs from independent Cypher"
+        assert {n for component in components for n in component["live_tips"]} == {
+            row["id"] for row in data["tip_cross_check"]
+        }, "live tips differ from independent Cypher"
+        print(
+            f"REPLAY names={len(data['nodes'])} edges={len(data['edges'])} "
+            f"cycle_components={len(cycles)} cycle_names={sum(map(len, cycles))} "
+            f"live_tips={len(data['tip_cross_check'])} "
+            f"multi_tip_components={sum(len(c['live_tips']) > 1 for c in components)}"
+        )
+
+    checks = {
+        "cycle_owner_delegation": owner_delegation,
+        "cycle_owner_refusal": owner_refusal,
+        "planted_topology": lambda: controls(classifier),
+        "snapshot_equivalence": snapshot_equivalence,
+    }
+    failures = []
+    for name, check in checks.items():
+        try:
+            check()
+        except AssertionError as exc:
+            failures.append(name)
+            print(f"FAILED {name}: {exc}")
+        else:
+            print(f"PASSED {name}")
+    print(f"VERIFY passed={len(checks) - len(failures)} failed={len(failures)}")
+    return int(bool(failures))
+
+
+def capture(run_dir):
     observations = []
     with GraphClient() as gc:
         print(
@@ -258,7 +344,7 @@ def capture():
         "tip_cross_check": independent_tips,
         "spend_usd": 0,
     }
-    (RUN / "graph-snapshot.json").write_text(
+    (run_dir / "graph-snapshot.json").write_text(
         json.dumps(result, default=str, indent=2) + "\n"
     )
     print(
@@ -267,7 +353,7 @@ def capture():
     )
 
 
-def reproduce():
+def reproduce(run_dir):
     """Exercise the actual writers against an empty, isolated local database."""
     from imas_codex.graph import temp_neo4j
     from imas_codex.standard_names import edit
@@ -451,7 +537,7 @@ def reproduce():
                 )
                 print("REPRODUCTION", json.dumps(results[-1]), flush=True)
                 assert any(len(c["live_tips"]) == 2 for c in after["components"])
-            (RUN / "writer-reproductions.json").write_text(
+            (run_dir / "writer-reproductions.json").write_text(
                 json.dumps(results, indent=2) + "\n"
             )
         finally:
@@ -462,11 +548,11 @@ def reproduce():
             )
             subprocess.run(
                 ["ps", "-eo", "pid,ppid,pgid,etime,args"],
-                stdout=(RUN / "disposable-processes.txt").open("w"),
+                stdout=(run_dir / "disposable-processes.txt").open("w"),
                 check=True,
             )
             temp_neo4j.stop_temp_neo4j(process)
-            shutil.copyfile(server_log, RUN / "disposable-server.log")
+            shutil.copyfile(server_log, run_dir / "disposable-server.log")
             print(f"DISPOSABLE removed scratch {root}", flush=True)
     print(f"WRITERS scenarios={len(results)} confirmed_open=3 refused_controls=2")
 
@@ -546,7 +632,7 @@ BRANCH_REPAIRS = {
 }
 
 
-def draw_topology():
+def draw_topology(run_dir):
     """Show two measured components, with arrow direction matching the graph."""
     import re
     import textwrap
@@ -558,7 +644,7 @@ def draw_topology():
     from matplotlib.patches import FancyArrowPatch
 
     plt.style.use(Path.home() / ".config/matplotlib/stylelib/data-ink.mplstyle")
-    observed = json.loads((RUN / "graph-snapshot.json").read_text())
+    observed = json.loads((run_dir / "graph-snapshot.json").read_text())
     observed_names = {n["id"]: n["stage"] for n in observed["nodes"]}
     fig = plt.figure(figsize=(14, 7.2), dpi=100)
     ax = fig.add_axes((0, 0, 1, 1))
@@ -649,29 +735,33 @@ def draw_topology():
         count=1,
     )
     target.write_text(svg)
-    fig.savefig(RUN / "topology-preview.png", dpi=100)
+    fig.savefig(run_dir / "topology-preview.png", dpi=100)
     plt.close(fig)
     print(
         "FIGURE labels=6 clipping=0 overlap=0 arrows=5 preview="
-        + str(RUN / "topology-preview.png")
+        + str(run_dir / "topology-preview.png")
     )
 
 
-def report():
+def report(run_dir, out_dir=HERE):
     """Write a normalized, lossless case index and a readable landing fragment."""
-    import hashlib
     from collections import Counter
     from html import escape
 
-    raw_path = RUN / "graph-snapshot.json"
+    raw_path = run_dir / "graph-snapshot.json"
     raw_bytes = raw_path.read_bytes()
     data = json.loads(raw_bytes)
-    reproductions = json.loads((RUN / "writer-reproductions.json").read_text())
+    reproductions = json.loads((run_dir / "writer-reproductions.json").read_text())
     assert len(reproductions) == 5
-    assert (RUN / "reproduce-scratch.log").read_text().rstrip().endswith("EXIT=0")
-    reclaim_log = (RUN / "reclaim-controls.log").read_text()
+    assert (run_dir / "reproduce-scratch.log").read_text().rstrip().endswith("EXIT=0")
+    reclaim_log = (run_dir / "reclaim-controls.log").read_text()
     assert "2 passed" in reclaim_log and reclaim_log.rstrip().endswith("EXIT=0")
     nodes = {n["id"]: n for n in data["nodes"]}
+    cycles, components = classify(nodes, data["edges"])
+    assert cycles == data["cycles"], "cycle membership differs from retained snapshot"
+    assert components == data["components"], (
+        "lineage membership differs from retained snapshot"
+    )
     cases = data["cases"]
     selected = sorted({n for c in cases for n in c["members"]})
     name_index = {n: i for i, n in enumerate(selected)}
@@ -881,6 +971,13 @@ def report():
         "raw_snapshot": str(raw_path),
         "raw_snapshot_sha256": hashlib.sha256(raw_bytes).hexdigest(),
         "summary": summary,
+        "cycle_detector": {
+            "owner": "imas_codex.standard_names.catalog_ordering._find_cyclic_components",
+            "source_sha256": hashlib.sha256(
+                Path(catalog_ordering.__file__).read_bytes()
+            ).hexdigest(),
+            "snapshot_replay_agrees": True,
+        },
         "definitions": {
             "direction": "successor -> predecessor",
             "lineage": "weakly connected component of StandardName REFINED_FROM edges",
@@ -941,9 +1038,9 @@ def report():
             "count": len(data["tip_cross_check"]),
             "agrees": True,
         },
-        "reproduction_file": str(RUN / "writer-reproductions.json"),
+        "reproduction_file": str(run_dir / "writer-reproductions.json"),
         "limitations": [
-            "Every live REFINED_FROM edge has an empty property map; no writer id, receipt id or creation timestamp is stamped on any of the 1859 edges.",
+            f"{sum(not e['properties'] for e in data['edges'])} of {summary['edges']} REFINED_FROM edges have empty property maps with no writer id, receipt id or creation timestamp.",
             "Unresolved creators are explicit missing evidence, never inferred from a name, later maintenance event or backfill timestamp.",
             "This snapshot is time-bounded; graph writers may change the corpus after observed_at. Inventory before/after and independent traversals agreed during capture.",
             "Proposed repairs require lead adjudication. No live identity, source, edge, review or documentation was changed.",
@@ -954,8 +1051,8 @@ def report():
     assert len(encoded.encode()) <= 300000, (
         f"report JSON too large: {len(encoded.encode())}"
     )
-    (HERE / f"{STEM}.json").write_text(encoded)
-    (RUN / "census-expanded.json").write_text(
+    (out_dir / f"{STEM}.json").write_text(encoded)
+    (run_dir / "census-expanded.json").write_text(
         json.dumps(report_data, indent=2, ensure_ascii=False) + "\n"
     )
 
@@ -968,11 +1065,12 @@ def report():
     html = [
         f'<section id="{STEM}">',
         "<h2>Refinement cycles and live-tip lineage census</h2>",
-        f"<p>Read-only graph snapshot at {escape(data['observed_at'])}: <strong>{summary['cycle_names']} names in {summary['cycle_components']} cyclic components</strong> ({summary['reciprocal_pairs']} reciprocal pairs), and <strong>{summary['multi_tip_components']} lineages with more than one live tip</strong>, across {summary['names']} StandardNames and {summary['edges']} REFINED_FROM edges. The plan recorded 17 reciprocal cases; this graph-wide instrument finds the larger population reported here. Independent Cypher finds the same 144 cycle members and 2748 live tips. Spend USD 0 of USD 0; live writes 0.</p>",
+        f"<p>Read-only graph snapshot at {escape(data['observed_at'])}: <strong>{summary['cycle_names']} names in {summary['cycle_components']} cyclic components</strong> ({summary['reciprocal_pairs']} reciprocal pairs), and <strong>{summary['multi_tip_components']} lineages with more than one live tip</strong>, across {summary['names']} StandardNames and {summary['edges']} REFINED_FROM edges. The plan recorded 17 reciprocal cases; this graph-wide instrument finds the larger population reported here. Independent Cypher finds the same {len(data['cycle_cross_check'])} cycle members and {len(data['tip_cross_check'])} live tips. Spend USD 0 of USD 0; live writes 0.</p>",
         f'<p>This record lists {len(cases)} components and {len(names)} names, including all cycle and multiple-tip cases plus the four specifically requested families. The <a href="/imas-codex/evidence/fragments/sn-integrity-backlog/{STEM}.json">machine-readable census</a> holds every name, chain edge, producing source, recorded source path, review score, receipt reference, writer location and proposed action. Numeric name and receipt indices refer to its declared column tables.</p>',
-        f"<p><strong>Attribution limit:</strong> {summary['unresolved_creator_edges']} of the {len(edges)} reported edges have no original creation receipt that identifies their writer. All 1859 graph edges have empty property maps. Backfilled refinement records establish a historical direction but do not identify who originally wrote an edge. Every such edge is marked unresolved below. A matching receipt maps an operation to today's writer; it does not prove which deployed source revision ran then.</p>",
+        f"<p><strong>Attribution limit:</strong> {summary['unresolved_creator_edges']} of the {len(edges)} reported edges have no original creation receipt that identifies their writer. {sum(not e['properties'] for e in data['edges'])} of {summary['edges']} graph edges have empty property maps. Backfilled refinement records establish a historical direction but do not identify who originally wrote an edge. Every such edge is marked unresolved below. A matching receipt maps an operation to today's writer; it does not prove which deployed source revision ran then.</p>",
         "<p>Arrows below follow the stored direction, successor → predecessor. A lineage is a weakly connected component. “Live” means name_stage is not superseded, so exhausted names are included. A live tip has no other live descendant; all live members are listed as well, because reclaimed ancestors and intermediate live identities need not be terminal tips. Cycles are strongly connected groups rather than an exponentially large listing of equivalent closed walks.</p>",
         f'<figure><img src="/imas-codex/figures/sn-integrity-backlog/{STEM}/topology.svg" alt="Reciprocal carbon spelling edges and the branched tungsten lineage"/><figcaption>Arrows are stored REFINED_FROM edges, from successor to predecessor. Left: the carbon spelling reversal retains both directions. Right: tungsten has separate local and averaged live holders; the average is currently reviewed after reclaim while its infix spelling is superseded. A graph leaf and a live tip differ here: the infix node is a superseded leaf. Names are spaced for readability; exact identifiers are in the tables.</figcaption></figure>',
+        "<p>Cycle membership is computed by <code>catalog_ordering._find_cyclic_components</code>, the same owner used by catalog ordering. Replaying the retained snapshot through this owner reproduces every cycle and lineage. The census keeps its own live-tip predicate because it includes exhausted names. The replay gate also requires delegation and propagation of a planted owner refusal. The parent implementation passes topology and snapshot checks but fails both ownership checks (<code>reuse-negative.log</code>, <code>EXIT=1</code>); the delivered runner passes all four (<code>reuse-head.log</code>, <code>EXIT=0</code>).</p>",
         "<h3>Writers and the history they retain</h3>",
         '<p>The September fold design deliberately retained reversed rename edges as complete history, as documented in <a href="/imas-codex/evidence/sn-grammar-refinement/fold-guard-divergence.md">the fold guard evidence</a>. The current reclaim requires acyclic ancestry. Repair therefore needs to distinguish a current successor from historical succession: retain immutable change records and paid reviews, then archive only the obsolete lineage edges under a signed disposition. A blanket deletion of every newest edge would sometimes discard the current identity.</p>',
         "<table><thead><tr><th>Writer</th><th>Current code</th><th>Measured state</th></tr></thead><tbody>",
@@ -1096,7 +1194,7 @@ def report():
         "<pre>" + escape(report_data["cycle_cross_check"]["query"]) + "</pre>",
         "<pre>" + escape(report_data["tip_cross_check"]["query"]) + "</pre>",
         "<p>Run record: "
-        + code(RUN)
+        + code(run_dir)
         + ". Logs: "
         + code("capture-complete.log")
         + ", "
@@ -1104,13 +1202,13 @@ def report():
         + ", "
         + code("reclaim-controls.log")
         + " and "
-        + code("report-final.log")
+        + code("reuse-head.log")
         + ". The invocation revision and imported source paths are recorded in the logs. Large snapshots and raw receipts are retained in the run directory, not duplicated into the repository.</p>",
         "</section>",
     ]
     html_text = "\n".join(html) + "\n"
     assert len(html_text.encode()) <= 300000, "fragment exceeds artifact size ceiling"
-    (HERE / f"{STEM}.html").write_text(html_text)
+    (out_dir / f"{STEM}.html").write_text(html_text)
     assert all(c["anchor"].startswith(STEM) for c in repair_cases)
     assert {names[n][0] for c in repair_cases for g in c["cycles"] for n in g} == {
         r["id"] for r in data["cycle_cross_check"]
@@ -1127,18 +1225,53 @@ def report():
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--run-dir",
+        type=Path,
+        required=True,
+        help="Directory containing the snapshot, receipts and run logs",
+    )
+    parser.add_argument(
+        "--out",
+        type=Path,
+        default=HERE,
+        help="Destination directory for the HTML and JSON reports",
+    )
     parser.add_argument("--capture", action="store_true")
     parser.add_argument("--reproduce", action="store_true")
     parser.add_argument("--report", action="store_true")
+    parser.add_argument(
+        "--figure",
+        action="store_true",
+        help="Regenerate the topology SVG and its run-directory preview",
+    )
+    parser.add_argument(
+        "--verify",
+        action="store_true",
+        help="Check shared owner use and replay the saved snapshot; no graph access",
+    )
+    parser.add_argument(
+        "--verify-runner",
+        type=Path,
+        help="Verify another runner's classifier as a negative control",
+    )
     args = parser.parse_args()
+    if args.verify_runner and not args.verify:
+        parser.error("--verify-runner requires --verify")
+    if args.verify:
+        result = verify(args.run_dir, args.verify_runner)
+        if result:
+            return result
     controls()
     if args.capture:
-        capture()
+        capture(args.run_dir)
     if args.reproduce:
-        reproduce()
+        reproduce(args.run_dir)
+    if args.figure:
+        draw_topology(args.run_dir)
     if args.report:
-        draw_topology()
-        report()
+        args.out.mkdir(parents=True, exist_ok=True)
+        report(args.run_dir, args.out)
     return 0
 
 
@@ -1148,6 +1281,15 @@ if __name__ == "__main__":
         flush=True,
     )
     print(f"# module: {__file__}; cwd: {Path.cwd().resolve()}", flush=True)
+    print(
+        f"# runner_sha256: {hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}",
+        flush=True,
+    )
+    print(
+        f"# cycle_owner_module: {catalog_ordering.__file__}; sha256: "
+        f"{hashlib.sha256(Path(catalog_ordering.__file__).read_bytes()).hexdigest()}",
+        flush=True,
+    )
     try:
         code = main()
     except Exception:
