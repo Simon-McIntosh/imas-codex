@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-persist-refusal-per-source">
+<title>A refused compose winner now costs its own source, not the compose pool</title>
+</head>
+<body>
+<main>
+
+<h1 id="sib-persist-refusal-per-source-title">A refused compose winner now costs its own source, not the compose pool</h1>
+
+<p id="sib-persist-refusal-per-source-summary">
+The rerun run (SLURM 1308283) ended <code>EXIT=1</code> with 23
+<code>generate_name</code> pool processes failed, every one of them on
+<code>RuntimeError: rich standard-name write rejected an exact-claim winner</code>.
+The refusal behind every one of them is the standard-name writer's grammar gate
+dropping the batch's only candidate. The persistence path treated the resulting
+count mismatch as a batch-level fault, so a candidate the writer would not mint
+took the whole compose batch with it. It now attributes that refusal to the
+source the candidate came from: the other winners in the batch finalize, the
+refused source is released through the claim-fenced failure writer carrying a
+<code>last_error</code> that names the candidate and the refusal, and a refusal
+the writer cannot attribute still fails the batch.
+</p>
+
+<h2 id="sib-persist-refusal-per-source-header">Header</h2>
+<table id="sib-persist-refusal-per-source-header-table">
+<tbody>
+<tr><th>Node</th><td>sib-persist-refusal-per-source</td></tr>
+<tr><th>Measure</th><td>one refused winner among several persists the rest and fails its own source with a reason</td></tr>
+<tr><th>Run log</th><td><code>~/.cache/imas-codex-sib-second-pass/sn-run-1308283.log</code></td></tr>
+<tr><th>Run</th><td>SLURM job 1308283, revision <code>2f0a49c1</code>, 2948&#8201;s, <code>EXIT=1</code>, 33 names composed, 40 reviewed</td></tr>
+<tr><th>Module</th><td><code>imas_codex/standard_names/graph_store/graph_catalog.py</code>, <code>persist_generated_name_winners</code></td></tr>
+<tr><th>Base revision</th><td><code>96d64ea46</code></td></tr>
+</tbody>
+</table>
+
+<h2 id="sib-persist-refusal-per-source-repro">The refusal, as the run recorded it</h2>
+
+<p id="sib-persist-refusal-per-source-repro-text">
+The first abort, verbatim from the run log (timestamped <code>06:54:01</code>):
+</p>
+
+<pre id="sib-persist-refusal-per-source-quote"><code>06:54:01 - WARNING - write_standard_names: rejecting 'surface_area_of_fiber_bundle' — grammar parse failed: residue 'surface_area_of_fiber_bundle' does not match any physical_base or geometry_carrier; nearest candidates: (none)
+06:54:01 - INFO - Grammar gate: 0/1 names passed parse validation
+...
+  File ".../imas_codex/standard_names/graph_store/graph_catalog.py", line 2374, in persist_generated_name_winners
+    raise RuntimeError(
+RuntimeError: rich standard-name write rejected an exact-claim winner
+06:54:01 - ERROR - pool[generate_name#3] process failed: rich standard-name write rejected an exact-claim winner</code></pre>
+
+<p>
+The writer did exactly what its contract says: it refused one candidate it could
+not parse and returned an empty written-id list. The count comparison
+<code>written_names != len(rich_write_candidates)</code> then raised, so the
+refusal of one candidate became a failure of the batch, and the pool restarted
+the process rather than releasing one source.
+</p>
+
+<h2 id="sib-persist-refusal-per-source-candidates">Which candidates were refused, and why</h2>
+
+<p>
+Each of the 23 aborts is preceded by exactly one writer rejection, and each of
+those rejections is the grammar gate (<code>Grammar gate: 0/1 names passed</code>).
+No unit-conflict refusal appears anywhere in the log
+(<code>grep -c "Unit conflicts detected"</code> is 0). The 23 aborts distribute
+across five spellings:
+</p>
+
+<table id="sib-persist-refusal-per-source-candidates-table">
+<thead><tr><th>Refused candidate</th><th>Aborts</th><th>Writer's reason</th></tr></thead>
+<tbody>
+<tr><td><code>first_local_tangential_width_of_fiber_bundle</code></td><td>9</td><td>grammar parse: residue does not match any physical_base or geometry_carrier</td></tr>
+<tr><td><code>surface_area_of_fiber_bundle</code></td><td>6</td><td>grammar parse: residue does not match any physical_base or geometry_carrier</td></tr>
+<tr><td><code>second_local_tangential_width_of_fiber_bundle</code></td><td>4</td><td>grammar parse: residue does not match any physical_base or geometry_carrier</td></tr>
+<tr><td><code>first_local_tangential_coordinate_of_fiber_bundle</code></td><td>3</td><td>grammar parse: residue does not match any physical_base or geometry_carrier</td></tr>
+<tr><td><code>radius_of_fiber_bundle</code></td><td>1</td><td>grammar parse: residue does not match any physical_base or geometry_carrier</td></tr>
+</tbody>
+</table>
+
+<p id="sib-persist-refusal-per-source-scope">
+Every one of the five is a <code>fiber_bundle</code> composition the ISN grammar
+has no base for, so the refusal is permanent for that spelling rather than
+transient — which is exactly why aborting the batch was the wrong response, and
+why the released source must carry the refusal as its reason rather than being
+silently dropped.
+</p>
+
+<h2 id="sib-persist-refusal-per-source-change">What the persistence path does now</h2>
+
+<ul id="sib-persist-refusal-per-source-change-list">
+<li>A winner missing from the finalize batch is attributed by candidate identity.
+If the writer did not return that candidate's id, the suppression is the writer's
+per-candidate refusal: the source is recorded for release and the rest of the
+batch finalizes.</li>
+<li>The refused source's provisional <code>PRODUCED_NAME</code> reservation on its
+pending identity is deleted inside the same transaction, so the pending stub
+reads as unowned and the next attempt may adopt it. The stub node itself is not
+deleted.</li>
+<li>After the batch's effects commit, each refused source is released through
+<code>mark_sources_failed</code> — the existing claim-token-fenced failure writer —
+with <code>last_error</code> reading
+<code>rich standard-name write refused candidate '&lt;name&gt;': the writer refused
+to mint this identity, so the source produced no name</code>. The writer
+increments the attempt count and parks the source at <code>failed</code> at the
+claim cap.</li>
+<li>A candidate the writer <em>accepted</em> and that nonetheless produced no
+finalize entry has no attributable source state, so it still raises
+<code>rich standard-name write rejected an exact-claim winner</code> and rolls the
+batch back.</li>
+</ul>
+
+<h2 id="sib-persist-refusal-per-source-arms">Regression arms</h2>
+
+<table id="sib-persist-refusal-per-source-arms-table">
+<thead><tr><th>Arm</th><th>Command target</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>head</td><td><code>tests/standard_names/test_persist_refusal_per_source.py</code></td><td>5 passed, <code>EXIT=0</code></td></tr>
+<tr><td>base (raise restored)</td><td>same file, module restored from <code>96d64ea46</code></td><td>4 failed, 1 passed, <code>EXIT=1</code>, four <code>RuntimeError: rich standard-name write rejected an exact-claim winner</code> lines</td></tr>
+</tbody>
+</table>
+
+<h2 id="sib-persist-refusal-per-source-suite">Suite delta</h2>
+
+<p id="sib-persist-refusal-per-source-suite-text">
+Both arms ran <code>tests/standard_names</code> under <code>-n 8</code> with the
+shared environment unsynced, head at <code>dc515086a</code> and the base arm with
+the module restored from <code>96d64ea46</code> and the new test file ignored
+(it does not exist there).
+</p>
+
+<table id="sib-persist-refusal-per-source-suite-table">
+<thead><tr><th>Arm</th><th>Totals</th><th>Failing ids</th></tr></thead>
+<tbody>
+<tr>
+<td>head</td>
+<td>3 failed, 8572 passed, <code>EXIT=1</code></td>
+<td><code>test_anchor_ab_aggregate.py::test_verdict_computed_from_conditions</code>,
+<code>test_review_quorum_pool.py::test_names_batch_response_is_unwrapped</code>,
+<code>test_house_style_checks.py::test_audit_report_carries_the_conformance_findings</code></td>
+</tr>
+<tr>
+<td>base</td>
+<td>5 failed, 8565 passed, <code>EXIT=1</code></td>
+<td><code>test_anchor_ab_aggregate.py::test_population_derived_from_selection</code>,
+<code>test_anchor_ab_aggregate.py::test_verdict_computed_from_conditions</code>,
+<code>test_facade_closure.py::test_service_bridge_resolves_only_wired_names</code>,
+<code>test_review_name_stages.py::TestWorkerUsesCanonicalModel::test_worker_uses_canonical_model</code>,
+<code>test_house_style_checks.py::test_audit_report_carries_the_conformance_findings</code></td>
+</tr>
+</tbody>
+</table>
+
+<p id="sib-persist-refusal-per-source-suite-reading">
+Read as a delta, this node adds no surviving failure id. The two
+<code>test_anchor_ab_aggregate.py</code> timeouts and
+<code>test_house_style_checks.py</code> fail in both arms. The base arm's
+<code>test_facade_closure</code> failure is an artefact of how that arm was built —
+it kept this node's <code>graph_ops.py</code> wiring while restoring only the
+module — and that test passes at head, which is the state that ships. The two ids
+that fail at head and not at base were re-run serially and both pass
+(<code>tests/standard_names/test_review_quorum_pool.py::test_names_batch_response_is_unwrapped</code>
+and
+<code>tests/standard_names/test_house_style_checks.py::test_audit_report_carries_the_conformance_findings</code>,
+2 passed, <code>EXIT=0</code>), so they are parallel-run flakes rather than this
+change. The remaining base-only id,
+<code>test_review_name_stages.py::TestWorkerUsesCanonicalModel::test_worker_uses_canonical_model</code>,
+passes at head.
+</p>
+
+</main>
+</body>
+</html>
