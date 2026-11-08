@@ -251,7 +251,9 @@ def test_the_claim_predicate_has_one_input() -> None:
     assert set(inspect.signature(source_claim_predicate).parameters) == {"alias"}
 
 
-def test_every_site_calls_the_shared_claim_predicate(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_every_site_calls_the_shared_claim_predicate(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """Each count site and the claim seed must CALL the shared predicate.
 
     A copy of the predicate's text inlined at a site would satisfy a text

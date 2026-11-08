@@ -1,0 +1,93 @@
+<h2 id="sib-test-guards-bite">sib-test-guards-bite — five guards now fail when the behaviour they name regresses</h2>
+
+<p class="sib-test-guards-bite-status"><strong>Outcome: landed.</strong>
+Five assertions taken from today's reviews passed for reasons other than the behaviour they
+named: three compared a fixture's own state, and two matched a string that a copy would also
+match. Each guard is now shown to redden under a plant, and each plant is reverted in the same
+commit's tree. No product behaviour changed.</p>
+
+<h3 id="sib-test-guards-bite-guards">The guard and the plant that reddens it</h3>
+
+<p>A plant is applied to production code, the guard is run, and the plant is reverted. The run
+of every plant is appended to
+<code>logs/negative-control.log</code> in the run directory, one section per plant with its own
+<code>EXIT=</code> line.</p>
+
+<table>
+  <tr><th>guard</th><th>what it now asserts</th><th>plant</th><th>red result</th></tr>
+  <tr>
+    <td><code>test_compose_batch_isolation.py</code><br><code>TestOneStructuredCallPerAttempt</code></td>
+    <td><code>compose_batch</code> makes one <code>acall_llm_structured</code> call per compose
+        attempt, and a transport fault carries it out of the function instead of being retried
+        there</td>
+    <td>a three-attempt retry wrapper around the structured call inside
+        <code>compose_batch</code></td>
+    <td><code>FAILED …::test_a_transport_fault_is_not_retried_inside_compose_batch</code> —
+        1 failed, 1 passed, <code>EXIT=1</code>. The sibling success-path assertion still
+        passed, which is why the count is asserted on the failing path.</td>
+  </tr>
+  <tr>
+    <td><code>test_llm_transport_retry.py</code><br><code>test_the_retry_set_is_read_from_the_transient_helper</code></td>
+    <td>the retry set is read from <code>_transient_transport_errors()</code>: a fault class
+        injected only into that helper is retried <code>max_retries</code> times</td>
+    <td>the loop hardcodes <code>(httpx.TimeoutException, httpx.NetworkError)</code> in place of
+        the helper call</td>
+    <td><code>FAILED …::test_the_retry_set_is_read_from_the_transient_helper</code> —
+        1 failed, 3 passed, <code>EXIT=1</code>. The two pre-existing transport tests pass
+        under the plant, so this is the coverage that was missing.</td>
+  </tr>
+  <tr>
+    <td><code>test_drained_queue_exit.py</code><br><code>test_every_site_calls_the_shared_claim_predicate</code></td>
+    <td>each pending-count site and the claim seed <em>call</em>
+        <code>source_claim_predicate</code>; the function is replaced by a marker-returning one,
+        so an inlined copy of the text cannot satisfy it</td>
+    <td>the claims module defines a local copy of the predicate and points its own call sites at
+        it</td>
+    <td><code>FAILED …::test_every_site_calls_the_shared_claim_predicate</code> —
+        1 failed, 9 passed, <code>EXIT=1</code>. The text-equality guard still passed under the
+        plant, which is exactly the weakness the marker check closes.</td>
+  </tr>
+  <tr>
+    <td><code>test_drained_queue_exit.py</code><br><code>test_the_claim_predicate_has_one_input</code></td>
+    <td><code>source_claim_predicate</code> takes <code>alias</code> and nothing else</td>
+    <td>the unused <code>dd_path_bound</code> keyword re-added</td>
+    <td><code>FAILED …::test_the_claim_predicate_has_one_input</code> —
+        1 failed, 9 deselected, <code>EXIT=1</code>.</td>
+  </tr>
+  <tr>
+    <td><code>test_retired_spelling_retry.py</code><br><code>test_binding_a_successor_leaves_its_stage_and_attempt_untouched</code></td>
+    <td>the Cypher that binds a retired spelling onto a live successor assigns neither
+        <code>name_stage</code> nor <code>attempt_count</code>, asserted on the statement the
+        path actually sends</td>
+    <td>(a) <code>sn.name_stage = 'pending',</code> added to the stable finalize
+        <code>SET</code>; (b) <code>sns.attempt_count = coalesce(sns.attempt_count, 0) + 1,</code>
+        in its place</td>
+    <td>(a) <code>FAILED …::test_binding_a_successor_leaves_its_stage_and_attempt_untouched</code>,
+        <code>EXIT=1</code>. (b) the same id, <code>EXIT=1</code>.</td>
+  </tr>
+</table>
+
+<h3 id="sib-test-guards-bite-method">How each plant was applied</h3>
+
+<p>The four plants whose subject is in this node's write paths were applied in the worktree and
+reverted with <code>git diff --stat</code> confirming an empty diff afterwards. The fifth subject
+is the finalize statement in <code>graph_catalog.py</code>, which a concurrent node owns, so that
+plant was applied to a copy of the tree under <code>$TMPDIR</code> and run there with
+<code>PYTHONPATH</code> pointing at the copy; the copy was removed afterwards. Its two runs are
+the <code>plant 5</code> and <code>plant 5b</code> sections of the log, whose header lines record
+the scratch tree's path.</p>
+
+<p>The first attempt at plant 5 inserted into the reserved-name finalize block and the guard
+passed: that block is not the one a stable successor binds through. The plant was moved to the
+stable block, where the guard reddened. That failed attempt is recorded because a plant that
+never reaches the statement under test is indistinguishable from a guard that does not bite —
+the guard's own positive control (the bound <code>sn_id</code> is the successor) is what showed
+the statement had run at all.</p>
+
+<h3 id="sib-test-guards-bite-head">The guards at head</h3>
+
+<p>All four files pass at the commit that carries them, and the two suites they live in are
+measured in <code>logs/gate-after.log</code> against the baseline arm in
+<code>logs/gate-baseline.log</code>. The only product change in the commit is the removal of
+<code>dd_path_bound</code> from <code>source_claim_predicate</code>, which no caller passed and
+which therefore selected no branch.</p>

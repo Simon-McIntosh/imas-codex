@@ -208,9 +208,7 @@ def source_claim_predicate(*, alias: str) -> str:
     pool can select, so a drained run never goes idle and the exit watchdog
     reports a deadlock instead of a drain.
     """
-    clauses: list[str] = [
-        f"EXISTS {{ MATCH ({alias})-[:FROM_DD_PATH]->(:IMASNode) }}"
-    ]
+    clauses: list[str] = [f"EXISTS {{ MATCH ({alias})-[:FROM_DD_PATH]->(:IMASNode) }}"]
     clauses.append(
         f"NOT EXISTS {{ MATCH ({alias})-[:PRODUCED_NAME]->(frozen:StandardName)"
         " WHERE frozen.name_stage IN $frozen_name_stages }"
