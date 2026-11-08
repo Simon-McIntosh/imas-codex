@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="390">
+<meta name="plan-version" content="391">
 <meta name="plan-modified" content="2026-11-08">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -1264,6 +1264,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s50" data-id="c-run-r-20261108T080730128003-review-of-sib-retired-spelling-retry-be97bb7d7ace" data-who="reckon-build" data-when="2026-11-08T08:20:58Z">
     <div class="r-comment-body"><p>Independent review of 2f0a49c10c39735458e7d12c897352a09651edeb..be97bb7d7ace202e9873bb3e5032a33d7d10e2b8: scores 19/16/20/16/19/20; one non-blocking durability finding, no blocking code finding, added failure count 3 from the source gate logs.</p></div>
+</div>
+<div class="r-comment" data-section="s50" data-id="c-run-r-20261108T053726614886-sib-retired-spelling-retry" data-who="reckon-build" data-when="2026-11-08T07:51:59Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/sn-integrity-backlog/sib-retired-spelling-retry.html#sib-retired-spelling-retry-record: single live same-unit HAS_SUCCESSOR reuse and safe finalizer propagation; otherwise initial and internal retry prompts retain the retired spelling and exact refusal. Focused 126 passed; full 8562 passed / 3 timeout failures / 11 skipped versus base 8544 passed / 11 skipped; zero-added-failure threshold not met, ids recorded under outside_scope; 21 new cases; two-target negative control 2 failed; 7 live EXPLAIN statements parsed. Census 58 sources / 37 candidates: 1 catalog-compatible holder, 57 without direct edges; recorded source units prove 0 follows / 58 historical-context routes. USD 0 / 0.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261012T162346807302-review-of-sib-row-census" data-who="reckon-build" data-when="2026-10-12T16:39:58.712Z">
     <div class="r-comment-body"><p>reviewed r-20261012T145528571333-sib-row-census at a7a70db00 against c7b4c626e; total 93/120 (goal_fidelity 15, evidence 13, scope_discipline 19, durability 11, fit 15, reuse 20); two blocking findings — the landing record's verdict tallies and the manifest's row-count both disagree with the 38 rows the census file holds.</p></div>
