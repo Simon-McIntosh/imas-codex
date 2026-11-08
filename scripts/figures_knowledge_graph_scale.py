@@ -513,7 +513,7 @@ RADIUS_PER_ROOT_NODE = 1.55 / math.sqrt(653_458)  # in: area reads as node count
 # Crossing name, and the groups its lines join.
 CROSSING_LABELS = {
     "jt-60sa|dd": ("mapping\ncandidates", "jt-60sa/signals", "dd"),
-    "jet|dd": ("signals mapped\nto {ids} IDSs", "jet/signals", "dd"),
+    "jet|dd": ("signals in {ids} IDS\nmappings, no field edges", "jet/signals", "dd"),
     "tcv|dd": ("\nunit links", "tcv/signals", "dd"),
     "sn|dd": ("\nDD sources", "sn", "dd"),
 }

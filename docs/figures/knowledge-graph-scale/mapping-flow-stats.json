@@ -1,0 +1,38 @@
+{
+ "jet": {
+  "wiki": 46045,
+  "code": 116840,
+  "signals": 46872,
+  "sources": 2335,
+  "validated": 146,
+  "dispositions": 76,
+  "member_of": 30284,
+  "candidate": 0,
+  "binding": 0,
+  "binding_ids": 0,
+  "mappings": 53,
+  "uses": 207,
+  "populates": 0,
+  "evidence": 0
+ },
+ "jt-60sa": {
+  "wiki": 8554,
+  "code": 34917,
+  "signals": 15111,
+  "sources": 6865,
+  "validated": 78,
+  "dispositions": 121,
+  "member_of": 15113,
+  "candidate": 117612,
+  "binding": 159,
+  "binding_ids": 7,
+  "mappings": 7,
+  "uses": 113,
+  "populates": 19,
+  "evidence": 80
+ },
+ "dd": {
+  "paths": 61366,
+  "clusters": 2201
+ }
+}
