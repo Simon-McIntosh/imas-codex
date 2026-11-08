@@ -8,6 +8,7 @@ import asyncio
 import contextlib
 import hashlib
 import html
+import importlib
 import json
 import os
 import re
@@ -633,9 +634,30 @@ def report(snapshot_path: Path, context_path: Path, log_path: Path) -> None:
         for s in sources
         for g in s["gaps"]
     }
+    imported_modules = {}
+    for module_name in (
+        "imas_codex.graph.client",
+        "imas_codex.standard_names.attachment_audit",
+        "imas_codex.standard_names.worker_tasks.worker_compose_batches",
+        "imas_codex.standard_names.segments",
+        "imas_codex.cli.sn",
+    ):
+        module = importlib.import_module(module_name)
+        module_path = Path(module.__file__).resolve()
+        relative = Path(*module_name.split(".")).with_suffix(".py")
+        digest = hashlib.sha256(module_path.read_bytes()).hexdigest()
+        assert digest == hashlib.sha256((TREE / relative).read_bytes()).hexdigest()
+        imported_modules[module_name] = {
+            "path": str(module_path),
+            "sha256": digest,
+            "matches_assigned_tree": True,
+        }
     result = {
         "observed_at": snapshot["observed_at"],
-        "code_revision": revision(TREE),
+        "product_revision": snapshot["client_revision"],
+        "analysis_base_revision": revision(TREE),
+        "runner_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        "measurement_modules": imported_modules,
         "source_log": {
             "path": str(log_path),
             "sha256": snapshot["log_sha256"],
@@ -762,7 +784,7 @@ def write_html(result: dict, destination: Path) -> None:
         "<p><strong>371 distinct sources are classified: 319 failed and 52 vocabulary gaps.</strong> The supplied 373 is an edge-expanded count: two failed sources each link to two names, yielding 30 produced rows for 28 sources. The independent before/after source counts agree. This diagnosis made no graph writes or paid calls (USD 0).</p>"
     )
     parts.append(
-        f'<p>Observed {esc(result["observed_at"])}; code {esc(result["code_revision"])}. The JSON contains every source, complete last_error, attempt count, source-specific log lines, current binding evidence, recovery classification and mechanism references. <a href="/imas-codex/evidence/fragments/sn-integrity-backlog/{RECORD_ID}.json">Machine-readable classification</a>.</p>'
+        f'<p>Observed {esc(result["observed_at"])}; product revision <code>{result["product_revision"]}</code>; evidence base <code>{result["analysis_base_revision"]}</code>; runner SHA-256 <code>{result["runner_sha256"]}</code>. Imported product modules match the assigned tree byte-for-byte; the JSON records their absolute paths and hashes. The JSON contains every source, complete last_error, attempt count, source-specific log lines, current binding evidence, recovery classification and mechanism references. <a href="/imas-codex/evidence/fragments/sn-integrity-backlog/{RECORD_ID}.json">Machine-readable classification</a>.</p>'
     )
     parts.append(
         f'<h4 id="{RECORD_ID}-counts">Cause and recoverability</h4><table><thead><tr><th>Last-error class</th><th>Sources</th><th>Unproduced</th><th>Produced</th></tr></thead><tbody>'
@@ -813,6 +835,9 @@ def write_html(result: dict, destination: Path) -> None:
     )
     parts.append(
         "<p>Binding collisions preserve the terminal identity guard. Feed the prior refused candidate, its reason and any semantically matching current holder back into composition; use signed identity repair where required rather than reopening tombstones indiscriminately. Twelve candidates now have drafted targets, so the last-error stage is historical, not a current refusal. Their pairing checks were rerun.</p>"
+    )
+    parts.append(
+        "<p>For example, <code>turbulence/profiles_2d/neutral/element/a</code> means “Mass of atom” [u]. Its refused <code>neutral_atomic_mass</code> is superseded (last name score 0.825); the refinement lineage reaches accepted <code>neutral_species_atomic_mass</code> (score 0.875), which explicitly names the species. Confirm that species meaning before routing the source to this current identity. Likewise <code>poloidal_ion_state_momentum_diffusion_coefficient</code> has a recorded successor, accepted <code>poloidal_ion_charge_state_momentum_diffusion_coefficient</code>: charge_state makes the ion-state axis explicit. These alternatives are evidence-backed review targets, not authority to move bindings.</p>"
     )
     parts.append(
         "<table><thead><tr><th>Attachment case</th><th>Recheck and proposed correction</th></tr></thead><tbody>"
