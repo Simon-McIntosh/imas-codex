@@ -109,12 +109,12 @@ TOWNS = [
         (-14, -10, "right"),
     ),
     Town("drw", "2D Drawings", "SMDD", -0.58, 44.84, (-14, 2, "right")),
-    Town("ncr", "Non-Conformance Reports", "NCR", 3.06, 50.63, (-14, 2, "right")),
+    Town("ncr", "Non-Conformance Reports", "NCR", -1.55, 47.22, (-14, -6, "right")),
     Town("cmp", "Components", "functional references", 4.84, 45.76, (14, 2, "left")),
     Town(
         "ana", "Analysis Results", "simulation archive", 3.88, 43.61, (-4, -14, "left")
     ),
-    Town("con", "Contracts", "procurement · SAP", -1.68, 48.11, (-4, -14, "center")),
+    Town("con", "Contracts", "procurement · SAP", -1.68, 48.11, (-14, -6, "right")),
     Town("req", "Requirements", "RQM", 7.75, 48.57, (12, 2, "left")),
     Town("pbs", "Plant Breakdown", "PBS", 5.04, 47.32, (-12, -10, "right")),
     Town("ifc", "Interfaces", "interface sheets", 6.18, 48.69, (-14, -20, "left")),
@@ -131,11 +131,11 @@ RELATIONS = [
     ("doc", "references", "cad", (0.5, 0, 0)),
     ("cad", "has", "ana", (0.5, 0, 0)),
     ("cad", "is drawn as", "drw", (0.5, 0, 0)),
-    ("ncr", "cites", "doc", (0.5, 0, 0)),
+    ("ncr", "cites", "doc", (0.35, 0, 0)),
     ("drw", "depicts", "cmp", (0.5, 0, 0)),
     ("con", "delivers", "doc", (0.28, 0, 0)),
     ("doc", "specifies", "req", (0.3, 0, 0)),
-    ("cmp", "is part of", "pbs", (0.4, 0, 0)),
+    ("cmp", "is part of", "pbs", (0.4, 0, 4)),
     ("ana", "assesses", "cmp", (0.5, 0, 0)),
     ("doc", "is filed under", "pbs", (0.5, -26, -4)),
     ("ifc", "joins", "pbs", (0.58, -18, 0)),
@@ -161,6 +161,7 @@ def place(key: str) -> tuple[float, float]:
 SECONDARY_COST = 1.5  # a secondary highway is taken only when it saves real distance
 TAKEN_COST = 4.0  # a road another relationship already runs along is avoided
 SHARED_LIMIT = 2.0  # map units of taken road beyond which a relationship finds its own
+TOWN_RADIUS = 0.1  # map units: a road ending this close to a town enters it
 
 
 def load_roads() -> list[tuple[list[tuple[float, float]], bool]]:
@@ -222,6 +223,15 @@ class RoadGraph:
     def nearest(self, p: tuple[float, float]) -> int:
         return min(range(len(self.nodes)), key=lambda n: math.dist(self.nodes[n], p))
 
+    def near(self, p: tuple[float, float]) -> dict[int, float]:
+        """Every road node within TOWN_RADIUS of p, with the distance to reach it.
+
+        A town is where its roads meet, but the data carries no ring roads: a
+        motorway can end short of the one nearest the town and never join it."""
+        reach = {n: math.dist(q, p) for n, q in enumerate(self.nodes)}
+        close = {n: d for n, d in reach.items() if d < TOWN_RADIUS}
+        return close or {self.nearest(p): reach[self.nearest(p)]}
+
     def path(
         self,
         a: tuple[float, float],
@@ -229,11 +239,19 @@ class RoadGraph:
         taken: set[Segment] = frozenset(),
     ) -> list[tuple[float, float]]:
         """Cheapest route from a to b, paying TAKEN_COST on every taken segment."""
-        start, goal = self.nearest(a), self.nearest(b)
-        queue, best, prev = [(0.0, start)], {start: 0.0}, {}
+        starts, goals = self.near(a), self.near(b)
+        queue = [(d, n) for n, d in starts.items()]
+        heapq.heapify(queue)
+        best, prev, goal = dict(starts), {}, None
         while queue:
             dist, n = heapq.heappop(queue)
-            if n == goal:
+            if dist > best.get(n, math.inf):
+                continue
+            if n in goals and (
+                goal is None or dist + goals[n] < best[goal] + goals[goal]
+            ):
+                goal = n
+            if goal is not None and dist >= best[goal] + goals[goal]:
                 break
             for m, d in self.edges.get(n, []):
                 if taken and segments([self.nodes[n], self.nodes[m]]) <= taken:
@@ -241,13 +259,12 @@ class RoadGraph:
                 if dist + d < best.get(m, math.inf):
                     best[m], prev[m] = dist + d, n
                     heapq.heappush(queue, (dist + d, m))
-        if goal not in best:
+        if goal is None:
             raise SystemExit(f"no highway route between {a} and {b}")
-        points, n = [], goal
-        while n != start:
-            points.append(self.nodes[n])
+        points, n = [self.nodes[goal]], goal
+        while n in prev:
             n = prev[n]
-        points.append(self.nodes[start])
+            points.append(self.nodes[n])
         return [a, *reversed(points), b]
 
 
