@@ -107,7 +107,7 @@ already raised, holds no client, and records best-effort so a graph fault
 cannot replace the exception that ended the batch.</p>
 
 <h3>Negative controls</h3>
-<p>Two mutations, both run against the node's own test file. Removing the
+<p>Mutations, all run against the node's own test file. Removing the
 <code>claim_seq</code> from the entry — the defect this round fixed — leaves the
 append fenced on a null and every token-carrying receipt unwritten: 12 tests
 fail and the run exits non-zero. The declared mutation removes the append from
