@@ -198,7 +198,7 @@ def docs_review_winner_query_body() -> str:
     """
 
 
-def source_claim_predicate(*, alias: str, dd_path_bound: bool = False) -> str:
+def source_claim_predicate(*, alias: str) -> str:
     """Return the WHERE clauses restricting *alias* to a claimable source.
 
     ``claim_generate_name_batch`` selects a source only when it is reached
@@ -207,13 +207,10 @@ def source_claim_predicate(*, alias: str, dd_path_bound: bool = False) -> str:
     this same predicate: a count that omits either restriction reports work no
     pool can select, so a drained run never goes idle and the exit watchdog
     reports a deadlock instead of a drain.
-
-    ``dd_path_bound`` is for a statement that already matches the DD path with
-    the same variable, where the existence test would repeat that match.
     """
-    clauses: list[str] = []
-    if not dd_path_bound:
-        clauses.append(f"EXISTS {{ MATCH ({alias})-[:FROM_DD_PATH]->(:IMASNode) }}")
+    clauses: list[str] = [
+        f"EXISTS {{ MATCH ({alias})-[:FROM_DD_PATH]->(:IMASNode) }}"
+    ]
     clauses.append(
         f"NOT EXISTS {{ MATCH ({alias})-[:PRODUCED_NAME]->(frozen:StandardName)"
         " WHERE frozen.name_stage IN $frozen_name_stages }"

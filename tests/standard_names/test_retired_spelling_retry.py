@@ -231,6 +231,57 @@ def test_finalizer_binds_successor_without_rewriting_its_metadata():
     graph.transaction.commit.assert_called_once()
 
 
+def _record_statements(graph):
+    """Capture every statement the production path sends, in order."""
+    statements: list[tuple[str, dict]] = []
+    original = graph.query.side_effect
+
+    def record(cypher, **params):
+        statements.append((cypher, params))
+        return original(cypher, **params)
+
+    graph.query.side_effect = record
+    return statements
+
+
+def _assignments(cypher: str, field: str) -> list[str]:
+    import re
+
+    return re.findall(rf"\b[\w.]*{field}\s*=(?!=)", cypher)
+
+
+def test_binding_a_successor_leaves_its_stage_and_attempt_untouched():
+    """Production Cypher must not rewrite the lifecycle it is binding to.
+
+    Following a retired spelling resolves the source onto an existing live
+    name. That write consumes the claim; it must not reset the target's stage
+    (which would drag a reviewed name back into composition) nor increment the
+    source's attempt count (which spends a retry the source did not make).
+    """
+    graph = BindingGraph([_successor()])
+    statements = _record_statements(graph)
+
+    result, _services = _persist(graph)
+
+    assert result == [SOURCE]
+    finalize = [
+        (cypher, params)
+        for cypher, params in statements
+        if "sns.produced_sn_id = sn.id" in cypher
+        and "MERGE (sns)-[produced:PRODUCED_NAME]->(sn)" in cypher
+    ]
+    assert finalize, "the successor bind statement must run"
+
+    for cypher, params in finalize:
+        assert _assignments(cypher, "name_stage") == []
+        assert _assignments(cypher, "attempt_count") == []
+        # Positive control: this is the statement that binds the successor.
+        assert SUCCESSOR in {item["sn_id"] for item in params["batch"]}
+
+    for cypher, _params in statements:
+        assert not _assignments(cypher, "attempt_count")
+
+
 def test_two_live_successors_never_bind():
     graph = BindingGraph([_successor(), _successor("local_energy_confinement_time")])
     result, services = _persist(graph)

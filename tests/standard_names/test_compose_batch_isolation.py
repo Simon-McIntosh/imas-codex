@@ -22,6 +22,7 @@ from types import SimpleNamespace
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import httpx
 import pytest
 from pydantic import BaseModel, ValidationError
 
@@ -341,3 +342,58 @@ class TestPerCandidateCatchNarrowing:
         assert raised.value is defect
         assert compose_deps.refusals == []
         assert compose_deps.persisted == []
+
+
+class TestOneStructuredCallPerAttempt:
+    """The structured call is made once per compose attempt, never in a loop.
+
+    Transport retries belong to the LLM layer's own loop
+    (``tests/discovery/test_llm_transport_retry.py``). A retry wrapper added
+    here would re-spend an attempt on a fault the layer below already retried,
+    and would multiply the paid calls one compose attempt makes.
+    """
+
+    @pytest.mark.asyncio
+    async def test_a_successful_attempt_makes_exactly_one_call(
+        self, compose_deps
+    ) -> None:
+        from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+            compose_batch,
+        )
+
+        calls: list[int] = []
+
+        async def answering(*_args, **_kwargs):
+            calls.append(1)
+            return _FakeLLMOut(_FakeBatchResult([]))
+
+        with patch("imas_codex.discovery.base.llm.acall_llm_structured", answering):
+            await compose_batch(
+                [_make_batch_item(_GOOD_PATH)], _FakeBudgetManager(), asyncio.Event()
+            )
+
+        assert len(calls) == 1
+
+    @pytest.mark.asyncio
+    async def test_a_transport_fault_is_not_retried_inside_compose_batch(
+        self, compose_deps
+    ) -> None:
+        from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
+            compose_batch,
+        )
+
+        calls: list[int] = []
+
+        async def raising(*_args, **_kwargs):
+            calls.append(1)
+            raise httpx.ReadError("")
+
+        with (
+            patch("imas_codex.discovery.base.llm.acall_llm_structured", raising),
+            pytest.raises(httpx.ReadError),
+        ):
+            await compose_batch(
+                [_make_batch_item(_GOOD_PATH)], _FakeBudgetManager(), asyncio.Event()
+            )
+
+        assert len(calls) == 1

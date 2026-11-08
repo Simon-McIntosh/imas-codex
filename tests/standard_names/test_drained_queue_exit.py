@@ -236,6 +236,46 @@ def test_both_count_sites_and_the_claim_read_one_predicate() -> None:
     assert count_predicate.replace("(s)-", "(sns)-") in _claim_seed_cypher()
 
 
+def test_the_claim_predicate_has_one_input() -> None:
+    """The predicate takes an alias and nothing else.
+
+    A second keyword no caller passes is a branch no query exercises: it reads
+    as configuration while every site takes the default path.
+    """
+    import inspect
+
+    from imas_codex.standard_names.graph_store.graph_foundation import (
+        source_claim_predicate,
+    )
+
+    assert set(inspect.signature(source_claim_predicate).parameters) == {"alias"}
+
+
+def test_every_site_calls_the_shared_claim_predicate(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Each count site and the claim seed must CALL the shared predicate.
+
+    A copy of the predicate's text inlined at a site would satisfy a text
+    comparison against the shared function's output. Replacing the function
+    itself makes only a site that reads it carry the marker, so a site that
+    stops applying the shared predicate fails here.
+    """
+    from imas_codex.standard_names.graph_store import (
+        graph_cost_and_claims,
+        graph_parent_lifecycle,
+    )
+
+    marker = "SHARED_CLAIM_PREDICATE"
+
+    def marked(*, alias: str, **_kwargs) -> str:
+        return f"{marker}_{alias}"
+
+    monkeypatch.setattr(graph_cost_and_claims, "source_claim_predicate", marked)
+    monkeypatch.setattr(graph_parent_lifecycle, "source_claim_predicate", marked)
+
+    assert f"{marker}_s" in _generate_name_clause(_count_cypher([]))
+    assert f"{marker}_sns" in _claim_seed_cypher()
+
+
 def _count_cypher(sources: list[_Source]) -> str:
     graph = _FixtureGraph(sources)
     _compute_pool_progress(graph, domains=None, rotation_cap=3, min_score=0.75)

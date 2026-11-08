@@ -78,3 +78,32 @@ async def test_a_deterministic_error_is_still_given_one_attempt() -> None:
 
     assert fake.call_count == 1
     assert sleep.await_count == 0
+
+
+class _SeamTransportError(Exception):
+    """A transport class carrying no phrase the message patterns match."""
+
+
+async def test_the_retry_set_is_read_from_the_transient_helper() -> None:
+    """The loop must ask ``_transient_transport_errors`` rather than restate it.
+
+    The type set is the seam's own, so a fault class it adds is retried without
+    a second copy of the list here. A hardcoded tuple in the retry loop gives
+    this class one attempt and fails the test.
+    """
+    fake = AsyncMock(side_effect=_SeamTransportError("seam dropped"))
+    sleep = AsyncMock(return_value=None)
+
+    with (
+        patch("litellm.acompletion", fake),
+        patch("asyncio.sleep", sleep),
+        patch(
+            "imas_codex.discovery.base.llm._transient_transport_errors",
+            return_value=(_SeamTransportError,),
+        ),
+        pytest.raises(ValueError, match=f"failed after {_MAX_RETRIES} attempts"),
+    ):
+        await _call()
+
+    assert fake.call_count == _MAX_RETRIES
+    assert sleep.await_count == _MAX_RETRIES - 1
