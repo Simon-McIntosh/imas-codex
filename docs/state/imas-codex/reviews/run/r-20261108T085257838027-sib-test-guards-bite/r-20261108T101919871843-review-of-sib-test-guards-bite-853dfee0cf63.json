@@ -1,0 +1,55 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 6,
+  "call_sites": [
+    "imas_codex/standard_names/graph_store/graph_cost_and_claims.py:486",
+    "imas_codex/standard_names/graph_store/graph_cost_and_claims.py:506",
+    "imas_codex/standard_names/graph_store/graph_cost_and_claims.py:518",
+    "imas_codex/standard_names/graph_store/graph_cost_and_claims.py:530",
+    "imas_codex/standard_names/graph_store/graph_parent_lifecycle.py:118",
+    "imas_codex/cli/sn.py:619"
+  ],
+  "completed_at": "2026-11-08T10:37:57.437Z",
+  "dispatched_at": "2026-11-08T10:22:20Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-test-guards-bite.html",
+      "line": "94",
+      "severity": "non-blocking",
+      "text": "the base arm is presented as a clean measurement of 96d64ea46, but logs/gate-baseline.log ran in a /tmp scratch tree with no .env link (nine failure lines read OPENROUTER_API_KEY_IMAS_CODEX not set) and several subprocess tests hit the 30 s pytest-timeout, so at least eight of its 24 failures are provisioning and load artifacts; the added-failure figure of 0 survives because the six head ids are all present in that superset, but the record should state that the base arm over-fails."
+    },
+    {
+      "file": "tests/standard_names/test_retired_spelling_retry.py",
+      "line": "234",
+      "severity": "non-blocking",
+      "text": "_record_statements re-implements the statement capture the repository already owns in tests/recording_graph_client.py:32 (RecordingGraphClient.calls); it wraps an existing side_effect rather than extending that owner, which the node could not do because tests/standard_names/graph_transaction_doubles.py:49 is outside its write fence and replaces query with a MagicMock so the shared capture never fills; a follow-on that routes the double through the shared capture would retire this copy."
+    }
+  ],
+  "justifications": {
+    "durability": "logs/negative-control.log:41,75,105,136,190,222 reddens each guard under a plant applied to production code, e.g. the marker check at tests/standard_names/test_drained_queue_exit.py:277-278 fails a local-copy plant that the text comparison at :235 passes.",
+    "evidence": "logs/gate-after.log ends 6 failed, 10178 passed at a767ebcda and logs/gate-baseline.log ends 24 failed, 10105 passed, so added is 0, but the base arm ran without the .env link and nine of its failure lines name OPENROUTER_API_KEY_IMAS_CODEX not set.",
+    "fit": "the added tests follow the file-local idiom they sit in (tests/standard_names/test_drained_queue_exit.py:245 imports inspect inline as its neighbour does) and add no plan or version identifier.",
+    "goal_fidelity": "tests/standard_names/test_compose_batch_isolation.py:378, tests/discovery/test_llm_transport_retry.py:108, tests/standard_names/test_drained_queue_exit.py:254 and tests/standard_names/test_retired_spelling_retry.py:253 are the guards the goal names, and logs/negative-control.log:41,75,105,136,190,222 shows each one red.",
+    "reuse": "tests/standard_names/test_retired_spelling_retry.py:234 adds _record_statements, a second statement capture, where tests/recording_graph_client.py:32 already owns RecordingGraphClient.calls.",
+    "scope_discipline": "git diff 96d64ea46391..853dfee0cf63 touches only the four granted test files, imas_codex/standard_names/graph_store/graph_foundation.py and docs/evidence/fragments/sn-integrity-backlog/sib-test-guards-bite.html."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The goal asks that five test guards fail when the behaviour they name regresses; tests/standard_names/test_compose_batch_isolation.py:375-399, tests/discovery/test_llm_transport_retry.py:86-108, tests/standard_names/test_drained_queue_exit.py:239-278 and tests/standard_names/test_retired_spelling_retry.py:253-290 carry the five guards, and each reddens under its own plant in logs/negative-control.log.\nVERDICT done_when: The done_when names five behaviours plus \"tests/standard_names and tests/discovery add no failure id against main\"; docs/evidence/fragments/sn-integrity-backlog/sib-test-guards-bite.html:20-63 records every plant with its red test id, and logs/gate-after.log (6 failed, 10178 passed) against logs/gate-baseline.log (24 failed, 10105 passed) yields added 0, though the base arm over-fails on environment scaffolding.\nVERDICT write_paths: The source brief grants seven paths; git diff 96d64ea46391..853dfee0cf63 changes six files, all inside that grant, and leaves docs/figures/sn-integrity-backlog/sib-test-guards-bite untouched.\nVERDICT manifest: The source manifest reports status complete at commits a4d4c69e3, a767ebcda and 853dfee0c and its suite arms agree with the two logs on disk, but failure_attribution is {} while at least eight baseline failure blocks are environment or load scaffolding.\nVERDICT diff: Read all three commits against 96d64ea46: a4d4c69e3 adds the five guards and deletes source_claim_predicate's unused dd_path_bound keyword at imas_codex/standard_names/graph_store/graph_foundation.py:201, a767ebcda adds the fragment and formats, and 853dfee0c records the suite arms in the fragment, so only the keyword deletion changes product code.\nCALL_SITES: imas_codex/standard_names/graph_store/graph_cost_and_claims.py:486, imas_codex/standard_names/graph_store/graph_cost_and_claims.py:506, imas_codex/standard_names/graph_store/graph_cost_and_claims.py:518, imas_codex/standard_names/graph_store/graph_cost_and_claims.py:530, imas_codex/standard_names/graph_store/graph_parent_lifecycle.py:118, imas_codex/cli/sn.py:619\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: tests/standard_names/test_compose_batch_isolation.py:378, tests/discovery/test_llm_transport_retry.py:108, tests/standard_names/test_drained_queue_exit.py:254 and tests/standard_names/test_retired_spelling_retry.py:253 are the guards the goal names, and logs/negative-control.log:41,75,105,136,190,222 shows each one red.\nSCORE evidence: 15\nJUSTIFICATION evidence: logs/gate-after.log ends 6 failed, 10178 passed at a767ebcda and logs/gate-baseline.log ends 24 failed, 10105 passed, so added is 0, but the base arm ran without the .env link and nine of its failure lines name OPENROUTER_API_KEY_IMAS_CODEX not set.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff 96d64ea46391..853dfee0cf63 touches only the four granted test files, imas_codex/standard_names/graph_store/graph_foundation.py and docs/evidence/fragments/sn-integrity-backlog/sib-test-guards-bite.html.\nSCORE durability: 18\nJUSTIFICATION durability: logs/negative-control.log:41,75,105,136,190,222 reddens each guard under a plant applied to production code, e.g. the marker check at tests/standard_names/test_drained_queue_exit.py:277-278 fails a local-copy plant that the text comparison at :235 passes.\nSCORE fit: 18\nJUSTIFICATION fit: the added tests follow the file-local idiom they sit in (tests/standard_names/test_drained_queue_exit.py:245 imports inspect inline as its neighbour does) and add no plan or version identifier.\nSCORE reuse: 5\nJUSTIFICATION reuse: tests/standard_names/test_retired_spelling_retry.py:234 adds _record_statements, a second statement capture, where tests/recording_graph_client.py:32 already owns RecordingGraphClient.calls.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-test-guards-bite.html:94 non-blocking: the base arm is presented as a clean measurement of 96d64ea46, but logs/gate-baseline.log ran in a /tmp scratch tree with no .env link and several subprocess tests hit the 30 s pytest-timeout, so at least eight of its 24 failures are provisioning and load artifacts that the record does not distinguish from the revision's own failures.\nFINDING tests/standard_names/test_retired_spelling_retry.py:234 non-blocking: _record_statements re-implements the statement capture owned by tests/recording_graph_client.py:32 rather than extending it, because tests/standard_names/graph_transaction_doubles.py:49 replaces query with a MagicMock and the shared capture never fills.\n",
+  "review_run_id": "r-20261108T101919871843-review-of-sib-test-guards-bite-853dfee0cf63",
+  "reviewed_base_sha": "96d64ea46391e6eb82d4d2676b96cad62f34c287",
+  "reviewed_head_sha": "853dfee0cf631529031b466fb0066d17a6e0700d",
+  "reviewed_run_id": "r-20261108T085257838027-sib-test-guards-bite",
+  "scores": {
+    "durability": 18,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T10:42:40.567271+00:00",
+  "total": 94
+}
