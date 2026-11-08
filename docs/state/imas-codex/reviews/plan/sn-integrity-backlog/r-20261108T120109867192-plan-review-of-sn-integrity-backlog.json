@@ -43,6 +43,13 @@
       "note": "v408 routes the 15 vocab_gap sources to the vocabulary ruling and narrows the tail to 41 failed and 4 extracted.",
       "reason": "",
       "when": "2026-11-08T12:53:39.448793+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-2",
+      "reason": "sib-load-sensitive-tests landed with its restored-cost control (21.08 s isolated) as its planted regression; the bullet's wording covers it",
+      "when": "2026-11-08T12:54:07.910137+00:00"
     }
   ],
   "responses": {
@@ -54,6 +61,12 @@
       "note": "v408 routes the 15 vocab_gap sources to the vocabulary ruling and narrows the tail to 41 failed and 4 extracted.",
       "reason": "",
       "when": "2026-11-08T12:53:39.448793+00:00"
+    },
+    "done_when-2": {
+      "action": "declined",
+      "by": "",
+      "reason": "sib-load-sensitive-tests landed with its restored-cost control (21.08 s isolated) as its planted regression; the bullet's wording covers it",
+      "when": "2026-11-08T12:54:07.910137+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-integrity-backlog/r-20261108T120109867192-plan-review-of-sn-integrity-backlog.json",
