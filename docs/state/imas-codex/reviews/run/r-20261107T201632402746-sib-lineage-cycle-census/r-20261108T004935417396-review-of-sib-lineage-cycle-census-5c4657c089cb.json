@@ -1,0 +1,53 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run's own completed baseline_suite is the byte-identical parent classifier under the new verifier (cycle_owner_delegation and cycle_owner_refusal fail, EXIT=1); its completed after_suite is the delivered classifier (no failing ids, EXIT=0). The after-minus-baseline set is empty.",
+  "call_sites": [
+    "docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py:capture:257",
+    "docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py:reproduce:436",
+    "docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py:report:760",
+    "docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py:main:1262"
+  ],
+  "call_sites_note": "These are runtime calls inside the standalone evidence runner; repository search found no application import of this runner.",
+  "completed_at": "2026-11-08T00:59:41Z",
+  "dispatched_at": "2026-11-08T00:51:20Z",
+  "durability_note": "The owner delegation assertion fails if classify bypasses or miscalls the owner; the refusal check fails if it bypasses or swallows the owner error; planted topology fails on wrong cycle or tip output; snapshot replay fails on changed groups or Cypher membership. The parent-source negative arm proves the two new owner checks redden on the prior implementation.",
+  "findings": [],
+  "item_verdicts": {
+    "diff": "I read commit 5c4657c089cb against its actual parent 4215ded8de35; docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py:58 delegates cycle detection to catalog_ordering, docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py:115 adds replay/refusal checks, and the HTML/JSON update provenance without changing case tables.",
+    "done_when": "The source done_when in prompt.txt:103 requires the HTML and JSON census from the runner with an EXIT= log; reuse-head.log ends EXIT=0 with 4/4 replay checks, and reuse-delivery-check.log matches all three committed artifacts, while the original live capture remains the earlier measured input.",
+    "goal": "The source goal in prompt.txt:38 requires a graph-wide cycle and multi-tip census with writers and repairs; docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census.json retains 68 cyclic components, 18 multi-tip lineages and per-case proposals, while 138 creator edges remain explicitly unresolved.",
+    "manifest": "The source manifest.md:21-22 records a completed parent-candidate arm with 2 failing ownership ids and a completed delivered-head arm with 0 failures; reuse-negative.log and reuse-head.log contain those receipts.",
+    "write_paths": "The source prompt.txt:78-82 grants the census runner, fragment, JSON and figure directory; commit 5c4657c089cb changes only docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py, docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census.html and docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census.json."
+  },
+  "justifications": {
+    "durability": "docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py:142-160 uses fixed expected adjacency and a planted owner refusal; the byte-identical parent classifier fails cycle_owner_delegation and cycle_owner_refusal in reuse-negative.log while the head passes.",
+    "evidence": "docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py:168-176 checks retained groups and independent Cypher memberships, and reuse-head.log records VERIFY passed=4 failed=0 at the reviewed head.",
+    "fit": "docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py:1226-1274 follows the runner's existing argparse entry point and replaces the fixed RUN constant with explicit run-dir and output paths.",
+    "goal_fidelity": "docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census.json:cycle_detector records the shared owner and replay agreement; the unchanged census still has 138 creator edges without surviving creation receipts.",
+    "reuse": "docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py:66 calls catalog_ordering._find_cyclic_components, whose existing owner is imas_codex/standard_names/catalog_ordering.py:186; no second cycle detector remains in the changed runner.",
+    "scope_discipline": "git show --name-only 5c4657c089cb lists only docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py, docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census.html and docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census.json, all granted by prompt.txt:78-82."
+  },
+  "node": "sib-lineage-cycle-census",
+  "plan": "sn-integrity-backlog",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source goal in prompt.txt:38 requires a graph-wide cycle and multi-tip census with writers and repairs; docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census.json retains 68 cyclic components, 18 multi-tip lineages and per-case proposals, while 138 creator edges remain explicitly unresolved.\nVERDICT done_when: The source done_when in prompt.txt:103 requires the HTML and JSON census from the runner with an EXIT= log; reuse-head.log ends EXIT=0 with 4/4 replay checks, and reuse-delivery-check.log matches all three committed artifacts, while the original live capture remains the earlier measured input.\nVERDICT write_paths: The source prompt.txt:78-82 grants the census runner, fragment, JSON and figure directory; commit 5c4657c089cb changes only docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py, docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census.html and docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census.json.\nVERDICT manifest: The source manifest.md:21-22 records a completed parent-candidate arm with 2 failing ownership ids and a completed delivered-head arm with 0 failures; reuse-negative.log and reuse-head.log contain those receipts.\nVERDICT diff: I read commit 5c4657c089cb against its actual parent 4215ded8de35; docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py:58 delegates cycle detection to catalog_ordering, docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py:115 adds replay/refusal checks, and the HTML/JSON update provenance without changing case tables.\nCALL_SITES: docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py:capture:257, docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py:reproduce:436, docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py:report:760, docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py:main:1262\nSCORE goal_fidelity: 18\nSCORE evidence: 18\nSCORE scope_discipline: 20\nSCORE durability: 19\nSCORE fit: 18\nSCORE reuse: 20\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census.json:cycle_detector records the shared owner and replay agreement; the unchanged census still has 138 creator edges without surviving creation receipts.\nJUSTIFICATION evidence: docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py:168-176 checks retained groups and independent Cypher memberships, and reuse-head.log records VERIFY passed=4 failed=0 at the reviewed head.\nJUSTIFICATION scope_discipline: git show --name-only 5c4657c089cb lists only docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py, docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census.html and docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census.json, all granted by prompt.txt:78-82.\nJUSTIFICATION durability: docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py:142-160 uses fixed expected adjacency and a planted owner refusal; the byte-identical parent classifier fails cycle_owner_delegation and cycle_owner_refusal in reuse-negative.log while the head passes.\nJUSTIFICATION fit: docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py:1226-1274 follows the runner's existing argparse entry point and replaces the fixed RUN constant with explicit run-dir and output paths.\nJUSTIFICATION reuse: docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py:66 calls catalog_ordering._find_cyclic_components, whose existing owner is imas_codex/standard_names/catalog_ordering.py:186; no second cycle detector remains in the changed runner.\n",
+  "reuse_note": "Capability search found imas_codex/standard_names/catalog_ordering.py:186 as the shared strongly connected component owner and the changed classifier calls it; no independent cycle search remains in the changed runner.",
+  "review_run_id": "r-20261108T004935417396-review-of-sib-lineage-cycle-census-5c4657c089cb",
+  "reviewed_base_sha": "4215ded8de35b06a2f81bd2842a4f825460b8363",
+  "reviewed_commit": "5c4657c089cb060b9ffdc283fad0df07d9f866b3",
+  "reviewed_head_sha": "5c4657c089cb060b9ffdc283fad0df07d9f866b3",
+  "reviewed_run_id": "r-20261107T201632402746-sib-lineage-cycle-census",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T01:04:44.004481+00:00",
+  "total": 113
+}
