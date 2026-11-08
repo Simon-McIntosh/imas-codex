@@ -1,0 +1,69 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed manifest carries no baseline_suite or after_suite JSON blocks; the figure is read from the logs it names. baseline: logs/base-two-files.log, '6 failed, 5 passed, 1 warning in 20.14s', EXIT=1, ids the six signal-role tests. after: logs/head-two-files.log '11 passed', EXIT=0 and logs/head-discovery-suite.log '1608 passed, 8 deselected', EXIT=0. No failure present after is absent before, so added_failure_count is 0.",
+  "completed_at": "2026-11-08T09:21:33.871Z",
+  "dispatched_at": "2026-11-08T09:05:11Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-signal-role-fakes.html",
+      "line": "38",
+      "severity": "non-blocking",
+      "text": "The fragment says 'the two fakes that return an answer assert callable(record_release)', but three fakes return an answer (test_judge_accepts_choice_and_reports_response_cost, test_judge_refuses_choice_outside_six_roles and _answer) and only two assert, so the landed evidence prose describes coverage the diff does not have."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-signal-role-fakes.html",
+      "line": "25",
+      "severity": "non-blocking",
+      "text": "The base-arm reproduction is quoted as '6 failed, 5 passed in 41.76s' while the retained logs/base-two-files.log ends '6 failed, 5 passed, 1 warning in 20.14s', so the artifact's figure reconciles with no log it names."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "Verified imas_codex/discovery/base/judgment.py:322 (_judge passes record_release=served.append), judgment.py:189 and imas_codex/discovery/signals/role.py:67, which reach the fakes under test_judge_accepts_choice_and_reports_response_cost.",
+    "diff": "The diff against cedb8cad58 is one commit, 11a6c58, changing three files: two fakes per file gain record_release=None, two gain assert callable(record_release), and the landing fragment is new.",
+    "done_when": "The done_when names the six TypeError failures and no added failure id; logs/base-two-files.log records exactly those six FAILED ids and logs/head-discovery-suite.log records 1608 passed, so the gate asserts the measure.",
+    "goal": "The goal is that the signal-role decision fakes accept record_release; all four fakes in the two test files do, and the six previously failing tests pass in an independent rerun at 11a6c58.",
+    "manifest": "The manifest reports status complete with base 6 failed, head 11 passed and directory 1608 passed arms plus a negative-control log; its baseline_suite and after_suite JSON blocks are absent, so the added-failure figure is derived from the named logs.",
+    "write_paths": "The manifest declares the two test files, the evidence fragment and a figures directory; the diff at 11a6c58 changes the two test files and the fragment and nothing else."
+  },
+  "justifications": {
+    "durability": "assert callable(record_release) at tests/discovery/test_signal_role.py:60 and tests/discovery/test_signal_role_store.py:156 reddens if judgment.py:322 stops passing the sink, but the other two fakes accept a missing sink silently.",
+    "evidence": "The base arm log records six FAILED ids carrying the exact TypeError at judgment.py:317 and the head arms are EXIT=0, but docs/evidence/fragments/sn-integrity-backlog/sib-signal-role-fakes.html:25 and :38 state figures and a fake count the diff contradicts.",
+    "fit": "The keyword is spelled as imas_codex/discovery/base/judgment.py:322 declares it, and the added comment at tests/discovery/test_signal_role.py:58 states the mechanism without a ticket or plan label.",
+    "goal_fidelity": "All four decision fakes in tests/discovery/test_signal_role.py:58,100 and tests/discovery/test_signal_role_store.py:155,210 name record_release explicitly and none takes **kwargs, so the keyword acall_decisions passes at imas_codex/discovery/base/judgment.py:322 is accepted and the six TypeError tests pass.",
+    "reuse": "The node adds no helper; a capability search over tests/discovery, tests/standard_names, tests/graph and tests/llm for acall_decisions fakes found no shared fake factory, and sibling fakes keep their own **_kwargs stubs.",
+    "scope_discipline": "The diff at 11a6c58 touches only tests/discovery/test_signal_role.py, tests/discovery/test_signal_role_store.py and the permitted landing fragment, all inside the declared write paths, and no product source changed."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261108T090255727777-review-of-sib-signal-role-fakes-11a6c58cf2b1",
+  "review_sources": {
+    "gate_logs": [
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T082756356464-sib-signal-role-fakes/logs/base-two-files.log",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T082756356464-sib-signal-role-fakes/logs/head-two-files.log",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T082756356464-sib-signal-role-fakes/logs/head-discovery-suite.log",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T082756356464-sib-signal-role-fakes/logs/negative-control.log"
+    ],
+    "independent_checks": {
+      "head_tree": "source worktree at 11a6c58: 11 passed in 20.73s, EXIT=0 (log logs/head-arm-at-11a6c58.log in this review's run directory)",
+      "unpatched_tree_base": "review worktree at 96d64ea where 11a6c58 is not an ancestor: 6 failed, 5 passed in 37.23s, EXIT=1, the same six FAILED ids as the reviewed base log (log logs/base-arm-unpatched.log in this review's run directory)"
+    },
+    "reviewed_manifest": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T082756356464-sib-signal-role-fakes/manifest.md"
+  },
+  "reviewed_base_sha": "cedb8cad587438ccc1ca24aad2cd1a54c55ebe71",
+  "reviewed_head_sha": "11a6c58cf2b14cd5f3e5d0d9e5e796a5ce3d99e2",
+  "reviewed_run_id": "r-20261108T082756356464-sib-signal-role-fakes",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T09:37:31.940190+00:00",
+  "total": 115
+}
