@@ -2419,6 +2419,7 @@ def persist_generated_name_winners(
                         refusals.append(
                             {
                                 "sns_id": item["sns_id"],
+                                "sn_id": item["sn_id"],
                                 "claim_token": item["claim_token"],
                                 "claim_seq": item["claim_seq"],
                                 "reason": (
@@ -2437,33 +2438,59 @@ def persist_generated_name_winners(
                         "rich standard-name write rejected an exact-claim winner"
                     )
                 if refusals:
-                    # Drop the provisional reservation this claim took on the
-                    # refused source's target, so the pending identity reads as
-                    # an unowned stub the next attempt may adopt. The stub
-                    # itself is not ours to delete.
-                    tx_gc.query(
+                    from imas_codex.standard_names.protection import (
+                        automatic_deletion_protections,
+                    )
+                    from imas_codex.standard_names.provenance_lifecycle import (
+                        retire_unrecoverable_provenance_orphans,
+                    )
+
+                    # Unwind only this candidate's reservation. A protected
+                    # target keeps its last producer; an unprotected pending
+                    # orphan is retired with a receipt in this transaction.
+                    protected = automatic_deletion_protections(
+                        tx_gc, [refusal["sn_id"] for refusal in refusals]
+                    )
+                    released = tx_gc.query(
                         """
                         UNWIND $batch AS b
                         MATCH (sns:StandardNameSource {id: b.sns_id})
                         WHERE sns.claim_token = b.claim_token
                           AND sns.claim_seq = b.claim_seq
-                        OPTIONAL MATCH (sns)-[reservation:PRODUCED_NAME]->
-                            (:StandardName)
+                        MATCH (sns)-[reservation:PRODUCED_NAME]->
+                            (sn:StandardName {id: b.sn_id})
                         WHERE reservation.provisional = true
                           AND reservation.claim_token = b.claim_token
                           AND reservation.claim_seq = b.claim_seq
+                          AND (EXISTS {
+                            MATCH (other:StandardNameSource)-[:PRODUCED_NAME]->(sn)
+                            WHERE other <> sns
+                          } OR (sn.name_stage = $pending_stage
+                                AND NOT sn.id IN $protected_ids))
                         DELETE reservation
-                        RETURN sns.id AS id
+                        WITH sns, sn
+                        RETURN sns.id AS id, CASE
+                          WHEN sn.name_stage = $pending_stage AND NOT EXISTS {
+                            MATCH (:StandardNameSource)-[:PRODUCED_NAME]->(sn)
+                          } THEN sn.id END AS orphan_id
                         """,
                         batch=[
                             {
                                 "sns_id": refusal["sns_id"],
+                                "sn_id": refusal["sn_id"],
                                 "claim_token": refusal["claim_token"],
                                 "claim_seq": refusal["claim_seq"],
                             }
                             for refusal in refusals
                         ],
+                        pending_stage=services.NameStage.pending.value,
+                        protected_ids=list(protected),
                     )
+                    orphan_ids = sorted(
+                        {row["orphan_id"] for row in released if row.get("orphan_id")}
+                    )
+                    if orphan_ids:
+                        retire_unrecoverable_provenance_orphans(tx_gc, orphan_ids)
 
                 reserved_finalize_batch = [
                     item
