@@ -1,0 +1,86 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Unmeasured as a base/head delta: the reviewed run leaves baseline_suite and after_suite null, so no suite arms exist. Zero records that no newly established failure id exists; reclaim-controls.log shows only its two focused head tests passing (2 passed).",
+  "call_site_count": 0,
+  "call_sites": [],
+  "call_sites_note": "No production runtime code imports the evidence runner; its __main__ block at docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py:1121-1145 is the standalone entry.",
+  "completed_at": "2026-11-07T23:59:57.335Z",
+  "dispatched_at": "2026-11-07T23:46:33Z",
+  "durability_note": "The planted controls at :107-108 and the independent Cypher cycle and live-tip cross-checks at :178 and :187 would redden if classify regressed, and the two refusal scenarios at :365-405 would redden if the writers stopped refusing; none is wired into the pytest suite and :31 makes the instrument unrunnable outside this host.",
+  "findings": [
+    {
+      "disposition": null,
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py",
+      "id": "f1",
+      "line": "58",
+      "severity": "non-blocking",
+      "text": "classify() duplicates the SCC and cycle detection owned by imas_codex/standard_names/catalog_ordering.py:186 (_find_cyclic_components), which takes the same nodes/children inputs, so the census adds a second cycle detector instead of extending the owner."
+    },
+    {
+      "disposition": null,
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py",
+      "id": "f2",
+      "line": "971",
+      "severity": "non-blocking",
+      "text": "the prose hardcodes \"144 cycle members and 2748 live tips\" while the same sentence interpolates the summary, so a re-run on a changed graph would publish two disagreeing counts."
+    },
+    {
+      "disposition": null,
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py",
+      "id": "f3",
+      "line": "31",
+      "severity": "non-blocking",
+      "text": "RUN is an absolute per-user run directory, so the committed instrument and its report step cannot run from another checkout or user, unlike sibling evidence runners that take an --out path."
+    },
+    {
+      "disposition": null,
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T201632402746-sib-lineage-cycle-census/report-final.log",
+      "id": "f4",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "the gate header names revision 6ec3df6b9, which does not contain report() (added in 4215ded8d), so the log alone cannot prove the gate executed the delivered revision; the matching artefact byte counts are the only tie to what was committed."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production runtime code imports or invokes the evidence runner; the landed change is documentation plus a standalone __main__ script at docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py:1121-1145.",
+    "diff": "read c4024120a, 6ec3df6b9 and 4215ded8d against base be4c7ee6c commit by commit: 3035 added lines across the census script, fragment, JSON and SVG, with no product source or test changed.",
+    "done_when": "the done_when names the html and json written by the run script with a log ending in EXIT=; report-final.log ends EXIT=0 and its REPORT and ARTIFACT lines give json_bytes=284456 and html_bytes=297804, exactly the sizes of the two committed artefacts.",
+    "goal": "the node goal is to census every REFINED_FROM cycle and multi-tip lineage with the writer that created each and a proposed repair; docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census.json reports 144 cycle names in 68 cyclic components and 18 multi-tip lineages with per-component proposals, but 138 of its 313 reported edges carry writer \"unresolved\".",
+    "manifest": "read; the source manifest.md records commits c4024120a, 6ec3df6b9 and 4215ded8d, the report command, four gate logs, 144 cycle names, 68 components, 62 reciprocal pairs, 18 multi-tip components and 138 unresolved creators, with baseline_suite and after_suite null.",
+    "write_paths": "read the source prompt; the three commits touch exactly the four declared evidence and figure paths and nothing else."
+  },
+  "item_verdicts_extra": {},
+  "justifications": {
+    "durability": "the planted controls at docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py:107-108 and the independent Cypher cross-checks at :178 and :187 fail if classify regresses, but no suite target invokes them and :31 hardcodes a per-user run directory.",
+    "evidence": "report-final.log ends EXIT=0 and its byte counts (json 284456, html 297804) match the committed artefacts exactly, though its header names revision 6ec3df6b, which predates the report() code landed in 4215ded8.",
+    "fit": "the fragment, JSON and SVG follow the sibling evidence layout and node-prefixed anchors, but :971 hardcodes \"144 cycle members and 2748 live tips\" beside an interpolated summary that would drift from it.",
+    "goal_fidelity": "docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census.json reports 68 cyclic components and 18 multi-tip lineages with per-case proposals, but 138 of its 313 reported edges resolve to writer \"unresolved\" because no creation receipt survives.",
+    "reuse": "docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py:58 classify re-implements strongly-connected-component cycle detection already owned by imas_codex/standard_names/catalog_ordering.py:186 (_find_cyclic_components), while GraphClient, temp_neo4j and the production writers are reused.",
+    "scope_discipline": "git diff --stat be4c7ee6c..4215ded8d shows only the four declared evidence and figure paths, with no product source, test, plan or state change."
+  },
+  "node": "sib-lineage-cycle-census",
+  "plan": "sn-integrity-backlog",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to census every REFINED_FROM cycle and multi-tip lineage with the writer that created each and a proposed repair; docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census.json reports 144 cycle names in 68 cyclic components and 18 multi-tip lineages with per-component proposals, but 138 of its 313 reported edges carry writer \"unresolved\".\nVERDICT done_when: the done_when names the html and json written by the run script with a log ending in EXIT=; report-final.log ends EXIT=0 and its REPORT and ARTIFACT lines give json_bytes=284456 and html_bytes=297804, exactly the sizes of the two committed artefacts.\nVERDICT write_paths: read the source prompt; the three commits touch exactly the four declared evidence and figure paths and nothing else.\nVERDICT manifest: read; the source manifest.md records commits c4024120a, 6ec3df6b9 and 4215ded8d, the report command, four gate logs, 144 cycle names, 68 components, 62 reciprocal pairs, 18 multi-tip components and 138 unresolved creators, with baseline_suite and after_suite null.\nVERDICT diff: read c4024120a, 6ec3df6b9 and 4215ded8d against base be4c7ee6c commit by commit: 3035 added lines across the census script, fragment, JSON and SVG, with no product source or test changed.\nCALL_SITES: none\nSCORE goal_fidelity: 15\nSCORE evidence: 14\nSCORE scope_discipline: 20\nSCORE durability: 13\nSCORE fit: 16\nSCORE reuse: 5\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census.json reports 68 cyclic components and 18 multi-tip lineages with per-case proposals, but 138 of its 313 reported edges resolve to writer \"unresolved\" because no creation receipt survives.\nJUSTIFICATION evidence: report-final.log ends EXIT=0 and its byte counts (json 284456, html 297804) match the committed artefacts exactly, though its header names revision 6ec3df6b, which predates the report() code landed in 4215ded8.\nJUSTIFICATION scope_discipline: git diff --stat be4c7ee6c..4215ded8d shows only the four declared evidence and figure paths, with no product source, test, plan or state change.\nJUSTIFICATION durability: the planted controls at docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py:107-108 and the independent Cypher cross-checks at :178 and :187 fail if classify regresses, but no suite target invokes them and :31 hardcodes a per-user run directory.\nJUSTIFICATION fit: the fragment, JSON and SVG follow the sibling evidence layout and node-prefixed anchors, but :971 hardcodes \"144 cycle members and 2748 live tips\" beside an interpolated summary that would drift from it.\nJUSTIFICATION reuse: docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py:58 classify re-implements strongly-connected-component cycle detection already owned by imas_codex/standard_names/catalog_ordering.py:186 (_find_cyclic_components), while GraphClient, temp_neo4j and the production writers are reused.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py:58 non-blocking: classify() duplicates the SCC and cycle detection owned by imas_codex/standard_names/catalog_ordering.py:186 (_find_cyclic_components), which takes the same nodes/children inputs, so the census adds a second cycle detector instead of extending the owner.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py:971 non-blocking: the prose hardcodes \"144 cycle members and 2748 live tips\" while the same sentence interpolates the summary, so a re-run on a changed graph would publish two disagreeing counts.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py:31 non-blocking: RUN is an absolute per-user run directory, so the committed instrument and its report step cannot run from another checkout or user, unlike sibling evidence runners that take an --out path.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T201632402746-sib-lineage-cycle-census/report-final.log:1 non-blocking: the gate header names revision 6ec3df6b9, which does not contain report() (added in 4215ded8d), so the log alone cannot prove the gate executed the delivered revision; the matching artefact byte counts are the only tie to what was committed.\n",
+  "reuse_note": "Owner search: imas_codex/standard_names/catalog_ordering.py:186 owns SCC cycle detection; imas_codex/standard_names/provenance_lifecycle.py:2278 owns a live-tip Cypher query with a different definition (it excludes exhausted names). The census re-implements the cycle detection and reuses GraphClient, temp_neo4j, edit.supersede_into and graph_refinement.persist_refined_name.",
+  "review_run_id": "r-20261107T222811255340-review-of-sib-lineage-cycle-census-4215ded8de35",
+  "reviewed_base_sha": "be4c7ee6c9cd7a42c313fd79d68dadabffc2a9e7",
+  "reviewed_head_sha": "4215ded8de35b06a2f81bd2842a4f825460b8363",
+  "reviewed_run_id": "r-20261107T201632402746-sib-lineage-cycle-census",
+  "scores": {
+    "durability": 13,
+    "evidence": 14,
+    "fit": 16,
+    "goal_fidelity": 15,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-07T23:55:49.395066+00:00",
+  "total": 83
+}

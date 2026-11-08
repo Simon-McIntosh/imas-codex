@@ -1,0 +1,129 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "A figure review runs no suite, so the count is the neutral value the record shape requires and not a measurement; no suite-delta is claimed.",
+  "attachment_map": {
+    "topology-preview.png (1400x720, written by the reviewed run's own render step and recorded in its manifest artifacts.figure_review)": "docs/figures/sn-integrity-backlog/sib-lineage-cycle-census/topology.svg"
+  },
+  "attachment_note": "One raster is attached to the reviewed run: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T201632402746-sib-lineage-cycle-census/topology-preview.png (1400x720). The reviewed run's manifest records it as the render of the committed SVG (artifacts.figure = docs/figures/sn-integrity-backlog/sib-lineage-cycle-census/topology.svg). Per the review brief no SVG was opened, read, listed, searched, rendered or shown; every verdict below is read from this PNG, and provenance to the committed blob rests on the reviewed run's own record rather than on any comparison I made against source markup.",
+  "completed_at": "",
+  "dispatched_at": "2026-11-07T23:50:39Z",
+  "figure_checks": {
+    "caption_independence": "Read the figure element at docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census.html line 7 at the reviewed head. The caption does not merely repeat the title: it states the stored edge direction (successor to predecessor), names the left and right cases, distinguishes local from averaged holders, explains the reviewed-then-superseded spelling, and notes that identifiers live in the tables. No caption finding is raised.",
+    "clipping": "Zero non-white pixels in each of the four 2 px frame strips of the 1400x720 render (PIL), so no text or arrow is clipped at the canvas edge.",
+    "collision": "Row-band and per-region ink-extent measurement on the render shows six disjoint label boxes and no arrow stroke entering a text box.",
+    "contrast": "Sampled the dominant ink colours of the render: text (48,48,48) and arrows (146,146,146) against white."
+  },
+  "figure_verdicts": [
+    {
+      "attachment": "topology-preview.png",
+      "figure": "docs/figures/sn-integrity-backlog/sib-lineage-cycle-census/topology.svg",
+      "render_check": {
+        "arrow_grey_rgb": [
+          146,
+          146,
+          146
+        ],
+        "canvas": "1400x720",
+        "content_bbox": [
+          140,
+          78,
+          1332,
+          646
+        ],
+        "label_bboxes": {
+          "left_bottom": [
+            140,
+            458,
+            513,
+            577
+          ],
+          "left_top": [
+            140,
+            458,
+            127,
+            192
+          ],
+          "right_bottom": [
+            1047,
+            1333,
+            500,
+            647
+          ],
+          "right_left": [
+            703,
+            886,
+            250,
+            387
+          ],
+          "right_mid": [
+            1060,
+            1317,
+            250,
+            397
+          ],
+          "right_top": [
+            880,
+            1137,
+            78,
+            219
+          ]
+        },
+        "outer_frame_non_white_px": {
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "top": 0
+        },
+        "text_grey_rgb": [
+          48,
+          48,
+          48
+        ]
+      },
+      "rubric": {
+        "contrast": "pass. Text #303030 on white about 13.3:1; arrows #929292 on white about 3.2:1. Both clear the 3:1 graphics floor and the text clears any body-text floor.",
+        "data_ink": "pass. Text plus thin arrows only; no filled area, no marker fill, no shading. The data are the whole of the ink.",
+        "decoration": "pass. Plain white ground with no grid, no frame, no background tint, no gradient and no shadow.",
+        "label_collision": "pass. Six disjoint label boxes (measured above), no arrow crossing a text box, and zero ink on the outer 2 px frame, so no label is clipped or overlapped.",
+        "legibility": "pass. Read from the 1400x720 render at native size. Left cluster: 'accumulated carbon count due to gas injection [accepted]' above 'carbon count accumulated due to gas injection [superseded]', joined by two bowed arrows (one arrowhead down, one up), so the reciprocal edge is visible. Right cluster: 'tungsten density at plasma boundary [superseded]' at the top, with two arrows converging on it from 'tungsten density at separatrix [accepted]' (lower left) and 'flux surface averaged tungsten density at plasma boundary [reviewed]' (right); a further upward arrow runs from 'tungsten density flux surface averaged at plasma boundary [superseded]' (bottom right) into the reviewed name. Every label is legible and every edge traceable.",
+        "table_form": "pass. A directed graph of six names with a two-node cycle and a converged predecessor is an adjacency the reader must see as a shape, not a table."
+      },
+      "semantic_check": "The drawn edges agree with the HTML caption's stated convention (successor to predecessor): the accepted 'tungsten density at separatrix' and the reviewed 'flux surface averaged tungsten density at plasma boundary' both point into the superseded 'tungsten density at plasma boundary', and the superseded infix 'tungsten density flux surface averaged at plasma boundary' points into the reviewed prefixed name. The carbon pair carries one arrow each way, matching 'retains both directions'. The alt text, 'Reciprocal carbon spelling edges and the branched tungsten lineage', matches what the render shows."
+    }
+  ],
+  "findings": [],
+  "item_verdicts": {
+    "caption_independence": "The caption is substantive and accurate against the rendered image and the recorded convention; it is not a restatement of a title (the figure carries no title element), and no caption finding is raised.",
+    "finding_materiality": "No finding of either declared severity is raised: nothing is clipped, no label overlaps another label or the data, no text is unreadable, the image is not tabular, and the data are fully visible.",
+    "rendered_artifact": "The reviewed run's own 1400x720 PNG attachment was opened and inspected at native resolution; no verdict is read from SVG source or its markup.",
+    "scope": "Read-only. No file was edited, created, moved, deleted, redrawn, relabelled or reformatted; the only writes are this record at its two declared paths and the run manifest."
+  },
+  "justifications": {
+    "durability": "The record is written at both declared paths and checked with `crew check --review --record` before the manifest is closed.",
+    "evidence": "Every verdict rests on the named PNG: frame-ink counts, ink-colour sampling and label bounding boxes were measured on topology-preview.png, and the reviewed head and base were read from git (git rev-parse on the reviewed commits).",
+    "legibility": "The six labels are near-black #303030 at 14 pt-equivalent on a 1400x720 canvas, with measured 18 px text bands and 5 px inter-line gaps, and all five edges carry arrowheads.",
+    "scope_discipline": "This review is read-only; no figure, caption or source file was changed and no SVG was opened."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261107T223402274124-review-of-sib-lineage-cycle-census-4215ded8de35-figure",
+  "reviewed_base_sha": "be4c7ee6c9cd7a42c313fd79d68dadabffc2a9e7",
+  "reviewed_figures": [
+    "docs/figures/sn-integrity-backlog/sib-lineage-cycle-census/topology.svg"
+  ],
+  "reviewed_head_sha": "4215ded8de35b06a2f81bd2842a4f825460b8363",
+  "reviewed_run_id": "r-20261107T201632402746-sib-lineage-cycle-census",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: pass. Six node names on one 1400x720 canvas, each set as two or three centred lines of near-black text: left a two-name carbon pair, right a four-name tungsten group. All ten edges are visible as grey arrows and every arrowhead is drawn, so both the reciprocal carbon pair and the three successor-to-predecessor tungsten edges can be followed at a glance; text bands measure 18 px with 5 px gaps between lines, so no glyph line crowds the next.",
+    "RUBRIC data_ink: pass. The only ink is the node text and the edge arrows; there is no fill, band, marker fill or shaded region of any kind, and the white page carries everything else.",
+    "RUBRIC decoration: pass. No gridlines, spines, ticks, background fill, gradient, drop shadow or border is drawn; the canvas has no frame and no title furniture.",
+    "RUBRIC contrast: pass. Text is #303030 (48,48,48) on white, about 13.3:1, and the arrows are #929292 (146,146,146) on white, about 3.2:1, so every text mark and every data mark clears the 3:1 floor.",
+    "RUBRIC table_form: pass. The image shows a topology of directed REFINED_FROM edges among six names, including a two-node cycle and a converged pair; the shape a reader must see is the adjacency, which a table of name/stage rows would not carry, so the graphic is the natural form here.",
+    "RUBRIC label_collision: pass. Each of the six labels occupies a disjoint bounding box; measured ink extents are left-top (140-458, 127-192), left-bottom (140-458, 513-577), right-top (880-1137, 78-219 including its incoming arrowheads), right-left (703-886, 250-387 including its outgoing arrow), right-mid (1060-1317, 250-397) and right-bottom (1047-1333, 500-647), so no two labels overlap horizontally and vertically at once, and no arrow stroke crosses a text box. Zero non-white pixels lie in the outer 2 px frame of the render, so nothing is clipped at the canvas edge."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T00:03:11.180500+00:00",
+  "total": null
+}
