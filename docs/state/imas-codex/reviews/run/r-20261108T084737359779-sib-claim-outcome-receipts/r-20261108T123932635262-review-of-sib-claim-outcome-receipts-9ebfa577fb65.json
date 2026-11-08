@@ -1,0 +1,73 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-08T12:57:32.144Z",
+  "dispatched_at": "2026-11-08T12:41:57Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_source_bindings.py",
+      "line": "49",
+      "severity": "blocking",
+      "text": "every receipt these three builders write takes its attempt number from item.get(\"attempt_count\") (lines 49, 67 and 83), but no production producer of those batches sets that key: worker_common.py:719 _claimed_source_outcome builds the outcome dict for persist_claimed_source_outcomes and persist_claimed_attachments with sns_id, claim_token, claim_seq, status and the reasons only. claim_attempt_entry therefore falls back to int(attempt or 1) at graph_foundation.py:918, and produced, refused, skipped, requeued and released receipts all store attempt=1 whatever the real attempt was; only capped (orphan_sweep, which returns s.attempt_count from its parking query) records it. The schema marks attempt required and the done-when requires an attempt number per entry, so a census reading this field attributes every refusal to attempt 1. Repair in scope: have the append coalesce entry.attempt with the source's snapshotted attempt_count in CLAIM_ATTEMPT_APPEND_CYPHER."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_foundation.py",
+      "line": "824",
+      "severity": "blocking",
+      "text": "the final commit adds 182 lines to graph_foundation.py (the whole claim-attempt writer block, lines 824-1002), and that file is not among the node's eight declared write paths; the manifest's changed_paths omits it and rubric.scope states \"every production change is inside the granted write set\", so the undeclared file is invisible to a coordinator auditing the diff against the fence. The move itself is sound layering (orphan_sweep and worker_compose_batches reach the writer without importing the claims module), so the repair is to extend the grant or disclose the path, not to revert it."
+    },
+    {
+      "file": "manifest.md",
+      "line": "17",
+      "severity": "blocking",
+      "text": "reckon crew check --manifest --run r-20261108T084737359779-sib-claim-outcome-receipts returns ok:false with \"changed paths outside the write scope: tests/standard_names/test_attempt_cap_disposition.py, tests/standard_names/test_failed_source_reason.py, tests/standard_names/test_generate_name_persist.py\". The three edits are small stub and statement-count updates forced by the new append and are disclosed under outside_scope, but the manifest audit refuses them, so the node cannot be promoted as it stands until the grant is extended or the audit is answered."
+    },
+    {
+      "file": "tests/standard_names/test_claim_outcome_receipts.py",
+      "line": "212",
+      "severity": "non-blocking",
+      "text": "test_produced_writer_stores_a_produced_receipt asserts held[0][\"attempt\"] == 3 from a fixture that itself supplies \"attempt_count\": 3, a key no production caller sets (worker_common.py:719 omits it); the assertion therefore tests a shape the code under test never receives in production and cannot fail on the defect at graph_source_bindings.py:49, which is why that defect shipped. The refusal test at line 307 has the same fabricated key and does not assert attempt at all."
+    },
+    {
+      "file": "tests/standard_names/test_claim_outcome_receipts.py",
+      "line": "207",
+      "severity": "non-blocking",
+      "text": "the produced (207), released (232, 253) and stored-outcome (307, 333) tests call the entry builders directly rather than driving persist_claimed_attachments, _lock_claimed_name_bindings or persist_claimed_source_outcomes, so deleting the append_claim_attempts call at graph_source_bindings.py:1708, 1429 or 1502 leaves every test in this file green. Only the compose-batch failure path and the sweep tick have wiring guards, so three of the five claim-ending writers can lose their receipt silently."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-claim-outcome-receipts.html",
+      "line": "92",
+      "severity": "non-blocking",
+      "text": "the fragment states the append \"runs on the same client or transaction as the statement that ends the claim, so the receipt and the ending are one unit of work\", which is true only of the produced append inside the transaction at graph_source_bindings.py:1708; the stored-status append at 1502 and the released append at 1429 are separate autocommit gc.query calls issued before an ending statement that can still match no row, so a reader auditing atomicity is misled. This was raised in the previous round and the sentence is unchanged."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_source_bindings.py",
+      "line": "50",
+      "severity": "non-blocking",
+      "text": "item.get(\"claim_outcome\") is read as an outcome override but no writer in imas_codex/ sets that key, so the branch is dead and the outcome is decided solely by claim_outcome_for_status(status). Dead, not wrong, but it advertises a caller-supplied outcome the code cannot honour; carried forward unresolved from the previous review round."
+    },
+    {
+      "file": "manifest.md",
+      "line": "14",
+      "severity": "non-blocking",
+      "text": "the tests: line carries the literal placeholder \"PYTHONPATH=<arm tree>\" in the full-suite command, so the gate command cannot be re-run from the manifest as written; the after-suite.log header does carry the resolved path, which is the fallback promotion reads."
+    }
+  ],
+  "project": "imas-codex",
+  "review_run_id": "r-20261108T123932635262-review-of-sib-claim-outcome-receipts-9ebfa577fb65",
+  "reviewed_base_sha": "96d64ea46391e6eb82d4d2676b96cad62f34c287",
+  "reviewed_head_sha": "9ebfa577fb65e58886adbeae8ef861b2b2f19513",
+  "reviewed_run_id": "r-20261108T084737359779-sib-claim-outcome-receipts",
+  "scores": {
+    "durability": 11,
+    "evidence": 16,
+    "fit": 16,
+    "goal_fidelity": 15,
+    "reuse": 17,
+    "scope_discipline": 9
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T13:17:14.766236+00:00",
+  "total": 84
+}
