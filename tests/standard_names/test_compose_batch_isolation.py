@@ -1,4 +1,4 @@
-"""A compose batch survives one unusable candidate and one dropped connection.
+"""A compose batch survives one unusable candidate and nothing else.
 
 Production evidence: a full-DD run lost 35 batches. Sixteen carried a grammar
 refusal from ``compose_name`` for a single candidate, and fifteen carried a
@@ -6,10 +6,13 @@ transport fault from the compose call. Each failure discarded every candidate
 in the paid response, because the exception left ``compose_batch`` and the
 pool recorded the batch as failed.
 
-Both defects are per-source or per-call outcomes, not batch outcomes. These
-tests drive the batch processor over fakes and assert that the valid sibling
-still persists, and that a dropped connection is retried under the LLM retry
-policy rather than raised.
+The grammar refusal is a per-source outcome: the model proposed a name the
+grammar or the candidate model rejects for THIS source, and the valid siblings
+in the same paid response must still persist. The catch that isolates it is
+narrowed to the two errors a bad proposal raises, so a defect in the composer
+propagates instead of being persisted as the source's terminal refusal.
+Transport faults are retried inside the LLM layer's own loop
+(``tests/discovery/test_llm_transport_retry.py``).
 """
 
 from __future__ import annotations
@@ -19,8 +22,8 @@ from types import SimpleNamespace
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
-import httpx
 import pytest
+from pydantic import BaseModel, ValidationError
 
 _GOOD_PATH = "equilibrium/time_slice/profiles_1d/psi"
 _REFUSED_PATH = "equilibrium/time_slice/profiles_1d/psi_ratio"
@@ -64,19 +67,25 @@ class _FakeSegments:
 
 
 class _FakeCandidate:
-    def __init__(self, name: str, source_id: str, *, raises: bool = False):
+    def __init__(
+        self,
+        name: str,
+        source_id: str,
+        *,
+        error: BaseException | None = None,
+    ):
         self.source_id = source_id
         self.description = "Poloidal flux at the plasma boundary"
         self.kind = "scalar"
         self.dd_paths = [source_id]
         self.reason = ""
-        self.segments = _FakeSegments("ratio_of" if raises else name)
+        self.segments = _FakeSegments("ratio_of" if error is not None else name)
         self._name = name
-        self._raises = raises
+        self._error = error
 
     def compose_name(self) -> str:
-        if self._raises:
-            raise ValueError(_GRAMMAR_MESSAGE)
+        if self._error is not None:
+            raise self._error
         return self._name
 
 
@@ -223,7 +232,7 @@ class TestGrammarRefusalIsolation:
 
         result = _FakeBatchResult(
             [
-                _FakeCandidate("", _REFUSED_PATH, raises=True),
+                _FakeCandidate("", _REFUSED_PATH, error=ValueError(_GRAMMAR_MESSAGE)),
                 _FakeCandidate(_GOOD_NAME, _GOOD_PATH),
             ]
         )
@@ -249,87 +258,86 @@ class TestGrammarRefusalIsolation:
         assert refusal["claim_seq"] == 3
 
 
-class TestTransportFaultIsolation:
-    """A dropped connection retries under the LLM policy; it does not fail."""
+class _ComposedName(BaseModel):
+    name: str
+
+
+def _validation_error() -> ValidationError:
+    """A pydantic ValidationError of the shape a bad proposal raises."""
+    try:
+        _ComposedName()
+    except ValidationError as exc:
+        return exc
+    raise AssertionError("a missing field must raise ValidationError")
+
+
+class TestPerCandidateCatchNarrowing:
+    """Only a bad proposal is recorded; a defect in the composer propagates."""
 
     @pytest.mark.asyncio
-    @pytest.mark.parametrize(
-        "transport_error",
-        [
-            # The three faults the full-DD run recorded or that reach the
-            # compose call as a bare httpx transport error.
-            httpx.ConnectError("Cannot connect to host openrouter.ai:443"),
-            httpx.ConnectTimeout("timed out"),
-            httpx.ReadError(""),
-            # A builtin transport fault, which is not an httpx.TransportError:
-            # the LLM layer's seam sees these too and classifies them as
-            # transient, so the compose retry must read the same set.
-            TimeoutError("the read operation timed out"),
-        ],
-    )
-    async def test_transient_connect_error_is_retried(
-        self, compose_deps, transport_error
+    async def test_validation_error_is_recorded_for_its_own_source(
+        self, compose_deps
     ) -> None:
         from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
             compose_batch,
         )
 
-        llm_out = _FakeLLMOut(
-            _FakeBatchResult([_FakeCandidate(_GOOD_NAME, _GOOD_PATH)])
+        result = _FakeBatchResult(
+            [
+                _FakeCandidate("", _REFUSED_PATH, error=_validation_error()),
+                _FakeCandidate(_GOOD_NAME, _GOOD_PATH),
+            ]
         )
-        calls = 0
+        llm_out = _FakeLLMOut(result)
 
         async def mock_llm(*_args, **_kwargs):
-            nonlocal calls
-            calls += 1
-            if calls == 1:
-                raise transport_error
             return llm_out
 
-        sleep = AsyncMock(return_value=None)
-        with (
-            patch("imas_codex.discovery.base.llm.acall_llm_structured", mock_llm),
-            patch("asyncio.sleep", sleep),
-        ):
+        with patch("imas_codex.discovery.base.llm.acall_llm_structured", mock_llm):
             count = await compose_batch(
-                [_make_batch_item(_GOOD_PATH)],
+                [_make_batch_item(_REFUSED_PATH), _make_batch_item(_GOOD_PATH)],
                 _FakeBudgetManager(),
                 asyncio.Event(),
             )
 
-        assert calls == 2
-        assert sleep.await_count == 1
         assert count == 1
         assert [candidate["id"] for candidate in compose_deps.persisted] == [_GOOD_NAME]
+        assert len(compose_deps.refusals) == 1
+        refusal = compose_deps.refusals[0]
+        assert refusal["source_id"] == _REFUSED_PATH
+        assert refusal["reason"].startswith("grammar validation: ")
 
     @pytest.mark.asyncio
-    async def test_the_retry_set_is_read_from_the_llm_layer(self, compose_deps) -> None:
-        """A narrowed owner set narrows the compose retry: one set, not two."""
+    async def test_programming_error_propagates_and_is_not_recorded(
+        self, compose_deps
+    ) -> None:
+        """An AttributeError is this code's defect, not a source's refusal."""
         from imas_codex.standard_names.worker_tasks.worker_compose_batches import (
             compose_batch,
         )
 
-        calls = [0]
+        defect = AttributeError("segments has no base_token")
+        result = _FakeBatchResult(
+            [
+                _FakeCandidate("", _REFUSED_PATH, error=defect),
+                _FakeCandidate(_GOOD_NAME, _GOOD_PATH),
+            ]
+        )
+        llm_out = _FakeLLMOut(result)
 
         async def mock_llm(*_args, **_kwargs):
-            calls[0] += 1
-            raise httpx.ConnectError("Cannot connect to host openrouter.ai:443")
+            return llm_out
 
-        sleep = AsyncMock(return_value=None)
         with (
             patch("imas_codex.discovery.base.llm.acall_llm_structured", mock_llm),
-            patch(
-                "imas_codex.discovery.base.llm._transient_transport_errors",
-                return_value=(ValueError,),
-            ),
-            patch("asyncio.sleep", sleep),
-            pytest.raises(httpx.ConnectError),
+            pytest.raises(AttributeError) as raised,
         ):
             await compose_batch(
-                [_make_batch_item(_GOOD_PATH)],
+                [_make_batch_item(_REFUSED_PATH), _make_batch_item(_GOOD_PATH)],
                 _FakeBudgetManager(),
                 asyncio.Event(),
             )
 
-        assert calls[0] == 1
-        assert sleep.await_count == 0
+        assert raised.value is defect
+        assert compose_deps.refusals == []
+        assert compose_deps.persisted == []

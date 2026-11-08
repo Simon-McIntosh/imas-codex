@@ -3,7 +3,7 @@
 Every collaborator that lives on the entrypoint module — including the budget
 and provenance helpers — is reached through the two functions' positional-only
 ``_worker_dependency`` resolver, so a patch on ``workers.<name>`` stays visible
-inside the moved code.  Only standard-library modules are imported directly;
+inside the moved code.  Library modules are imported directly;
 ``BudgetManager`` is imported for typing alone.
 """
 
@@ -18,48 +18,6 @@ logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from imas_codex.standard_names.budget import BudgetManager
-
-
-async def _acall_retrying_transport_faults(
-    acall: Callable[..., Any],
-    /,
-    *,
-    attempts: int,
-    base_delay: float,
-    **kwargs: Any,
-) -> Any:
-    """Call the compose seat, retrying a transport fault under the LLM policy.
-
-    ``acall_llm_structured`` decides retryability from the error *message*: a
-    dropped connection carries an empty one (``httpx.ReadError``) or a host
-    phrase its patterns do not match (``httpx.ConnectError``), so the fault
-    leaves that loop on its first occurrence. Retrying here keeps one network
-    blip from failing the whole batch — the response it already paid for holds
-    every candidate, and none of them is at fault.
-
-    The fault *types* are the LLM layer's own: ``_transient_transport_errors``
-    is read from the owner rather than restated, so the set this loop retries
-    cannot drift from the one that seam already classifies as transient.
-    """
-    from imas_codex.discovery.base.llm import _transient_transport_errors
-
-    transient_faults = _transient_transport_errors()
-    for attempt in range(attempts):
-        try:
-            return await acall(**kwargs)
-        except transient_faults as transport_exc:
-            if attempt == attempts - 1:
-                raise
-            delay = base_delay * (2**attempt)
-            logger.warning(
-                "compose transport error (attempt %d/%d): %s — retrying in %.1fs",
-                attempt + 1,
-                attempts,
-                str(transport_exc) or type(transport_exc).__name__,
-                delay,
-            )
-            await asyncio.sleep(delay)
-    raise AssertionError("unreachable: attempts must be at least 1")
 
 
 async def compose_batch(
@@ -99,11 +57,9 @@ async def compose_batch(
     Returns:
         Count of successfully composed/regenerated candidates.
     """
-    from imas_codex.discovery.base.llm import (
-        DEFAULT_MAX_RETRIES as _transport_attempts,
-        DEFAULT_RETRY_BASE_DELAY as _transport_delay,
-        acall_llm_structured,
-    )
+    from pydantic import ValidationError
+
+    from imas_codex.discovery.base.llm import acall_llm_structured
     from imas_codex.llm.prompt_loader import render_prompt
     from imas_codex.settings import (
         get_compose_self_refine,
@@ -381,10 +337,7 @@ async def compose_batch(
 
         for _compose_attempt in range(_max_retries + 1):
             try:
-                llm_out = await _acall_retrying_transport_faults(
-                    acall_llm_structured,
-                    attempts=_transport_attempts,
-                    base_delay=_transport_delay,
+                llm_out = await acall_llm_structured(
                     model=model,
                     messages=messages,
                     response_model=StandardNameComposeBatch,
@@ -656,12 +609,19 @@ async def compose_batch(
             # re-claimed forever.
             try:
                 name_id = _worker_dependency("normalize_spelling")(c.compose_name())
-            except Exception as compose_exc:
+            except (ValueError, ValidationError) as compose_exc:
                 # One candidate whose name cannot be composed is a per-source
                 # outcome, not a batch failure: the grammar rejects what the
                 # model proposed for THIS source, while every other candidate
                 # in the same paid response is composable. Record the refusal
                 # on the source and drop the candidate.
+                #
+                # Only the two errors a bad proposal produces are caught: a
+                # ``ValueError`` from the ISN round-trip and a pydantic
+                # ``ValidationError`` from the composer's own model. Anything
+                # else is a defect in this code, and persisting it as the
+                # source's terminal grammar refusal would retire the source
+                # for a reason that is not about the source.
                 _base_token = (
                     getattr(getattr(c, "segments", None), "base_token", "") or ""
                 )
