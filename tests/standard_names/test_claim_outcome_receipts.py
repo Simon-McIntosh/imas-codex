@@ -42,6 +42,7 @@ class _FakeGraphClient:
         self.links: list[tuple[str, str]] = []
         self.queries: list[tuple[str, dict[str, Any]]] = []
         self.status_writes: list[dict[str, Any]] = []
+        self.parking_rows: list[dict[str, Any]] = []
 
     def __enter__(self) -> _FakeGraphClient:
         return self
@@ -51,6 +52,8 @@ class _FakeGraphClient:
 
     def query(self, cypher: str, **params: Any) -> list[dict[str, Any]]:
         self.queries.append((cypher, params))
+        if "$max_compose_attempts" in cypher:
+            return [dict(row) for row in self.parking_rows]
         if "StandardNameSourceClaimAttempt" in cypher:
             return [{"written": self._append(params.get("entries") or [])}]
         if "SET sns.status = b.status" in cypher:
@@ -357,6 +360,36 @@ def test_capped_writer_stores_a_capped_receipt() -> None:
     assert held[0]["attempt"] == 5
     assert held[0]["batch_key"] == "bk"
     assert "cap reached" in held[0]["reason"]
+
+
+def test_the_sweep_tick_issues_the_capped_append(monkeypatch) -> None:
+    """The tick itself appends: deleting the call leaves no capped receipt."""
+    from imas_codex.standard_names import orphan_sweep
+    from imas_codex.standard_names.graph_store import graph_source_bindings
+
+    gc = _FakeGraphClient({"dd:a": _claim("tok", 5)})
+    gc.parking_rows = [
+        {
+            "id": "dd:a",
+            "attempt_count": 5,
+            "claim_seq": 5,
+            "last_error": "compose claim-attempt cap reached",
+            "batch_key": "bk",
+        }
+    ]
+    monkeypatch.setattr(orphan_sweep, "GraphClient", lambda: gc)
+    monkeypatch.setattr(
+        graph_source_bindings,
+        "record_dispositions_for_undisposed_parks",
+        lambda **_: {"written": 1, "counts": {}},
+    )
+
+    counts = orphan_sweep._orphan_sweep_tick(timeout_s=300)
+
+    assert counts["compose_attempt_cap"] == 1
+    held = gc.held_by("dd:a")
+    assert len(held) == 1
+    assert held[0]["outcome"] == "capped"
 
 
 # ---------------------------------------------------------------------------
