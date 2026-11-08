@@ -124,10 +124,19 @@ def test_standard_name_pool_claims_share_the_frozen_stage_guard(claim: Any) -> N
 
 def test_generate_name_excludes_sources_bound_to_frozen_names() -> None:
     """The source pool applies the same guard before and after its write lock."""
+    from imas_codex.standard_names.graph_store.graph_foundation import (
+        source_claim_predicate,
+    )
+
     source = inspect.getsource(_owning_graph_cost_and_claims.claim_generate_name_batch)
-    assert source.count("MATCH (sns)-[:PRODUCED_NAME]->(frozen:StandardName)") >= 4
-    assert source.count("MATCH (sns2)-[:PRODUCED_NAME]->(frozen:StandardName)") >= 2
-    assert source.count("frozen.name_stage IN $frozen_name_stages") >= 6
+    guard_sites = source.count("source_claim_predicate(alias=")
+    assert guard_sites >= 6
+    # every guard site names one of the two source variables, so each of the
+    # seed, the three expansions and the post-lock re-check carries the guard
+    assert source.count("alias='sns'") + source.count("alias='sns2'") == guard_sites
+    guard = inspect.getsource(source_claim_predicate)
+    assert "MATCH ({alias})-[:PRODUCED_NAME]->(frozen:StandardName)" in guard
+    assert "frozen.name_stage IN $frozen_name_stages" in guard
 
 
 class _ReviewGraph:
