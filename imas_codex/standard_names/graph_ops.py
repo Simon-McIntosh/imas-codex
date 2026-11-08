@@ -188,6 +188,7 @@ _WIRED_SERVICE_NAMES: frozenset[str] = frozenset(
         "isn_vocabulary_signature",
         "json",
         "logger",
+        "mark_sources_failed",
         "mark_sources_stale",
         "normalize_name_id",
         "nullcontext",
