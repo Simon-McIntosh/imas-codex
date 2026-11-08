@@ -2052,10 +2052,8 @@ def _fold_lineage_walk(
     a branch leading to a different name anywhere along the way keeps the
     target spelling load-bearing.
 
-    A chain of any depth whose every live descendant is ``old`` closes onto
-    ``into`` as its own root identity and resolves no successor, leaving the
-    caller's other free-identity checks (sources, parent, child) to decide —
-    as does a target with no successor lineage at all.
+    A chain whose only live descendant is ``old`` resolves no other holder.
+    Reclaim can inspect that shape, while fold separately refuses its cycle.
     """
     element_id = snapshot["target_element_id"]
     relationships = snapshot.get("relationships") or []
@@ -2092,8 +2090,8 @@ def _fold_tombstone_target_reason(
     it, and neither a parent nor a child. A target whose only live
     descendant, at the end of that chain, is the name being folded is a
     straight-line refinement chain closing on itself, not a third-party
-    identity being taken, so that case alone is admitted — provided every
-    intermediate on the way is itself superseded, with no other lineage of
+    identity being taken; fold's cycle guard still refuses the reverse edge.
+    Every intermediate must itself be superseded, with no other lineage of
     its own. Any other live descendant, or a chain that passes through a
     still-live intermediate, makes the spelling load-bearing, so the fold
     refuses and names the tip of the lineage as the identity holding the
@@ -2306,9 +2304,8 @@ def _fold_guard_reason(
     if old_stage != "superseded" and old_stage not in _FOLD_PREDECESSOR_STAGES:
         return f"name {old!r} has unsupported predecessor stage {old_stage!r}"
     target_stage = target_properties.get("name_stage")
-    closing_straight_chain = False
     if target_stage == "superseded":
-        tombstone_reason, closing_straight_chain = _fold_tombstone_target_reason(
+        tombstone_reason, _ = _fold_tombstone_target_reason(
             transaction, snapshot, old, into
         )
         if tombstone_reason:
@@ -2320,7 +2317,7 @@ def _fold_guard_reason(
             f"target {into!r} is validation_status="
             f"{target_properties.get('validation_status')!r}, not 'valid'"
         )
-    if snapshot.get("cycle") and not closing_straight_chain:
+    if snapshot.get("cycle"):
         return (
             f"{old!r} already descends from {into!r} (REFINED_FROM cycle) — cannot fold"
         )
@@ -3211,8 +3208,8 @@ def _reclaim_spelling_case(
 ) -> _ReclaimCase:
     """Decide whether ``target`` may rename onto the tombstone ``new_name``.
 
-    Exactly two cases are admitted, and both keep the tombstone's recorded
-    history and paid reviews rather than minting a fresh identity:
+    Three cases are admitted. The first two retain the tombstone's recorded
+    history and paid reviews; the third archives them beside their live holder:
 
     * ``closing_lineage`` — the tombstone's successor lineage ends on the
       renaming name itself. An earlier rename moved this identity off the
@@ -3770,9 +3767,9 @@ def _apply_rename(
     )
     if coll and coll[0].get("n"):
         if coll[0].get("occupant_stage") == "superseded":
-            # A tombstoned spelling is reclaimable in exactly two ruled cases,
-            # both of which move this identity's own spelling back onto the id
-            # rather than reviving history nobody holds.
+            # A tombstoned spelling has three reclaimable shapes: two retain
+            # its history, while the other archives that history beside the
+            # holder before the freed spelling is claimed.
             reclaim = _reclaim_spelling_case(gc, target=target, new_name=new_name)
             if reclaim.case == "history_apart":
                 # The tombstone's history moves beside its holder before the

@@ -493,6 +493,8 @@ class RefinedNamePersistenceRefusalReason(StrEnum):
     SUCCESSOR_LIFECYCLE = "successor_lifecycle_collision"
     SUCCESSOR_SCOPE = "successor_scope_collision"
     SUCCESSOR_NOT_PERSISTED = "successor_not_persisted"
+    LINEAGE_CYCLE = "REFINED_FROM cycle"
+    LIVE_DESCENDANT = "predecessor has a live descendant"
 
 
 class RefinedNamePersistenceRefusal(RuntimeError):
@@ -632,6 +634,12 @@ def _classify_refined_name_persistence_refusal(
                    existing.drain_scope_id AS existing_drain_scope_id,
                    existing.drain_scope_claimed_at
                        AS existing_drain_scope_claimed_at,
+                   EXISTS {
+                     MATCH (old)-[:REFINED_FROM*1..]->(existing)
+                   } AS lineage_cycle,
+                   [(other:StandardName)-[:REFINED_FROM*1..]->(old)
+                     WHERE other.name_stage <> 'superseded' | other.id]
+                       AS live_descendant_ids,
                    (old.drain_scope_id IS NULL
                     OR existing.drain_scope_id IS NULL
                     OR existing.drain_scope_id = old.drain_scope_id
@@ -665,12 +673,20 @@ def _classify_refined_name_persistence_refusal(
             )
             if not reusable:
                 reason = RefinedNamePersistenceRefusalReason.SUCCESSOR_LIFECYCLE
+            elif state.get("lineage_cycle"):
+                reason = RefinedNamePersistenceRefusalReason.LINEAGE_CYCLE
+            elif state.get("live_descendant_ids"):
+                reason = RefinedNamePersistenceRefusalReason.LIVE_DESCENDANT
+                existing_name = sorted(state["live_descendant_ids"])[0]
             else:
                 reason = (
                     RefinedNamePersistenceRefusalReason.SUCCESSOR_NOT_PERSISTED
                     if state.get("successor_scope_compatible")
                     else RefinedNamePersistenceRefusalReason.SUCCESSOR_SCOPE
                 )
+        elif state.get("live_descendant_ids"):
+            reason = RefinedNamePersistenceRefusalReason.LIVE_DESCENDANT
+            existing_name = sorted(state["live_descendant_ids"])[0]
         else:
             reason = RefinedNamePersistenceRefusalReason.SUCCESSOR_NOT_PERSISTED
     return RefinedNamePersistenceRefusal(
@@ -821,7 +837,7 @@ def persist_refined_name(
                           )
                         OPTIONAL MATCH (existing:StandardName {{id: $new_name}})
                         WITH old, existing
-                        WHERE existing IS NULL
+                        WHERE (existing IS NULL
                            OR ($edit_mode IS NULL
                                AND coalesce(existing.name_stage, '') IN ['', 'pending']
                                AND coalesce(existing.origin, '') <> 'derived'
@@ -830,7 +846,14 @@ def persist_refined_name(
                                     OR existing.drain_scope_id = old.drain_scope_id
                                     OR existing.drain_scope_claimed_at IS NULL
                                     OR existing.drain_scope_claimed_at < datetime()
-                                         - duration('PT600S')))
+                                         - duration('PT600S'))))
+                          AND NOT EXISTS {{
+                            MATCH (old)-[:REFINED_FROM*1..]->(existing)
+                          }}
+                          AND NOT EXISTS {{
+                            MATCH (other:StandardName)-[:REFINED_FROM*1..]->(old)
+                            WHERE other.name_stage <> 'superseded'
+                          }}
                         WITH old, existing,
                              CASE WHEN $inherit_open_edit
                                         AND old.edit_status = 'open'

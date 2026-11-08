@@ -1,0 +1,18 @@
+<section id="sib-lineage-cycle-writers">
+  <h2>Lineage writers refuse cycles and second live tips</h2>
+  <p>The five disposable-graph cases use <code>electron_number_density</code> (description: “Electron number density”) produced by <code>dd:core_profiles/profiles_1d/electrons/density</code>. The ancestor spelling is <code>electron_density</code>; neither fixture carries a paid review score. Each refused write leaves the names, lineage edges, source binding and change receipts unchanged.</p>
+  <p>The base arm imported the base writer modules from its scratch tree and recorded <strong>3 failed, 5 passed</strong>: the fold succeeded, and both refinements returned instead of refusing. With the writer guards, the same five scenarios and three history-apart tests recorded <strong>8 passed</strong>. Both control refusals remained green. The tests ran against an empty disposable Neo4j instance; spend was USD 0.</p>
+  <figure id="sib-lineage-cycle-writers-figure">
+    <img src="/imas-codex/figures/sn-integrity-backlog/sib-lineage-cycle-writers/lineage-refusals.svg" alt="Two proposed reverse lineage edges would make cycles; a proposed second descendant would make two live tips" />
+    <figcaption>Stored <code>REFINED_FROM</code> arrows point from successor to predecessor. Red dashed arrows are the edges the fold or refinement writer refuses before mutation. In the branch case, <code>electron_density_at_plasma_boundary</code> is already live; the proposed <code>electron_density_at_pedestal_top</code> would be another live tip.</figcaption>
+  </figure>
+  <table id="sib-lineage-cycle-writers-cases"><thead><tr><th>Case</th><th>Disposition</th><th>Reason</th></tr></thead><tbody>
+    <tr><td>Fold into accepted ancestor</td><td>refused control</td><td><code>REFINED_FROM cycle</code></td></tr>
+    <tr><td>Fold into superseded ancestor</td><td>refused</td><td><code>REFINED_FROM cycle</code></td></tr>
+    <tr><td>Refine onto superseded ancestor</td><td>refused control</td><td><code>successor_lifecycle_collision</code></td></tr>
+    <tr><td>Refine onto pending ancestor</td><td>refused</td><td><code>REFINED_FROM cycle</code></td></tr>
+    <tr><td>Refine with an existing live descendant</td><td>refused</td><td><code>predecessor has a live descendant</code>, naming <code>electron_density_at_plasma_boundary</code></td></tr>
+  </tbody></table>
+  <p>The history-apart rename retains three distinct reclaim cases in its docstring and collision comment. A planted failure after archiving but before rename exercises the compensating restore: the averaged quantity’s tombstone, documentation and review return, its holder and the value name keep their own sources, and no archive or change receipt remains.</p>
+  <p>Three earlier tests still assert that an ancestor fold should succeed. They fail under the acyclic rule and sit outside this writer node’s granted paths: two in <code>test_supersede_into_tombstone.py</code> and one in <code>test_fold_guard_current_successor.py</code>. The coordinator must reconcile those expectations before the package test gate can have zero added failures.</p>
+</section>

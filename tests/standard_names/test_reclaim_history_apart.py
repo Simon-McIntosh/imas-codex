@@ -17,6 +17,7 @@ import json
 import pytest
 
 from imas_codex.graph.client import GraphClient
+from imas_codex.standard_names import edit
 from imas_codex.standard_names.edit import apply_edit
 
 pytestmark = pytest.mark.graph
@@ -281,3 +282,42 @@ def test_a_tombstone_with_no_live_holder_at_its_locus_is_refused():
         )
     assert archives[0]["n"] == 0, "a refused reclaim must archive nothing"
     assert receipts[0]["n"] == 0, "a refused reclaim must write no receipt"
+
+
+def test_failed_rename_restores_archived_history(
+    seed_dd_resolutions, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A rename refusal compensates its preceding archive transaction."""
+    _reset()
+    seed_dd_resolutions([{"path": VALUE_PATH, "effective": "m/s"}])
+    with GraphClient() as gc:
+        _seed_average_case(gc)
+
+    def refuse_after_archive(**_kwargs):
+        archive = _archive_for(TOMBSTONE)
+        assert archive["holder"] == HOLDER
+        raise RuntimeError("planted rename refusal")
+
+    monkeypatch.setattr(edit, "persist_refined_name", refuse_after_archive)
+    with pytest.raises(RuntimeError, match="planted rename refusal"):
+        apply_edit(
+            target=TARGET,
+            rename=TOMBSTONE,
+            reason="the local value needs the spelling",
+            gc=GraphClient(),
+        )
+
+    tombstone = _read(TOMBSTONE)
+    assert tombstone["name_stage"] == "superseded"
+    assert tombstone["documentation"] == TOMBSTONE_PROSE
+    assert tombstone["reviews"] == ["review:average:1"]
+    assert _read(TARGET)["sources"] == [f"dd:{VALUE_PATH}"]
+    assert _read(HOLDER)["sources"] == [f"dd:{AVERAGE_PATH}"]
+    assert HOLDER in _successors(TOMBSTONE)
+    with GraphClient() as gc:
+        assert (
+            gc.query("MATCH (n:ArchivedStandardName) RETURN count(n) AS n")[0]["n"] == 0
+        )
+        assert (
+            gc.query("MATCH (n:StandardNameChange) RETURN count(n) AS n")[0]["n"] == 0
+        )
