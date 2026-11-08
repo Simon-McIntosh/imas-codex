@@ -1,0 +1,171 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "A figure review runs no suite, so the count is the neutral value the record shape requires and not a measurement; no suite-delta is claimed.",
+  "attachment_map": {
+    "image-0.png (1399x720, the attachment rendered for this review)": "docs/figures/sn-integrity-backlog/sib-lineage-cycle-census/topology.svg"
+  },
+  "attachment_note": "One raster is attached to this review: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T005153415827-review-of-sib-lineage-cycle-census-5c4657c089cb-figure/image-0.png. Every verdict below is read from that PNG alone; no SVG and no other image was opened, read, listed, searched, rendered or shown. The mapping to the repository path is from the reviewed head's evidence fragment, whose figure element points at that path.",
+  "completed_at": "2026-11-08T01:12:31.622Z",
+  "dispatched_at": "2026-11-08T00:54:27Z",
+  "figure_checks": {
+    "caption_independence": "Read the figure element and figcaption of docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census.html at the reviewed head (line 7): the caption does not repeat a title \u2014 the figure carries none \u2014 and instead states the stored edge direction (successor to predecessor), distinguishes the left carbon reversal from the right tungsten case, separates the local and averaged live holders, explains the reviewed-then-superseded infix spelling, and notes that identifiers live in the tables. No caption finding is raised.",
+    "clipping": "Zero non-white pixels in each of the four 3 px frame strips of the 1399x720 render; content bbox (136,77)-(1335,646) leaves 63 px minimum edge clearance. Positive control: the same predicate detects 40, 24, 44 and 13 ink pixels on the first content row, last content row, first content column and last content column; a true-negative probe on the interior blank band y=200-430, x=500-690 returns 0.",
+    "collision": "Value-chain segmentation of the render into text ink (greys 48 and 102 and their antialias steps) and arrow ink (146 and its antialias steps) yields six disjoint label boxes and five arrow components, none intersecting a label box.",
+    "contrast": "Dominant ink colours sampled from the render: live labels (48,48,48), superseded labels (102,102,102), arrows (146,146,146) against (255,255,255). Contrast ratios computed with the sRGB relative-luminance formula: 13.2:1, 5.74:1 and 3.11:1.",
+    "unchanged_between_heads": "The reviewed head adds one commit over the head of the prior figure review of this run; that commit touches the evidence fragment's script, HTML and JSON only, and the figure path is byte-identical across both heads (git ls-tree name match at both). The render reviewed here is therefore the same artifact, re-attached."
+  },
+  "figure_verdicts": [
+    {
+      "attachment": "image-0.png (1399x720)",
+      "figure": "docs/figures/sn-integrity-backlog/sib-lineage-cycle-census/topology.svg",
+      "render_check": {
+        "arrow_components": [
+          [
+            801,
+            950,
+            168,
+            293
+          ],
+          [
+            1058,
+            1163,
+            168,
+            278
+          ],
+          [
+            222,
+            245,
+            232,
+            466
+          ],
+          [
+            354,
+            377,
+            234,
+            469
+          ],
+          [
+            1184,
+            1195,
+            442,
+            533
+          ]
+        ],
+        "arrow_grey_rgb": [
+          146,
+          146,
+          146
+        ],
+        "canvas": [
+          1399,
+          720
+        ],
+        "content_bbox": [
+          136,
+          77,
+          1335,
+          646
+        ],
+        "frame_probe_positive_control": "the same predicate on content rows y=77-79 and y=644-646 and content columns x=136-138 and x=1333-1335 returns 40, 24, 44 and 13 non-white pixels, so a zero on the frame strips is a measurement and not a dead probe",
+        "label_bboxes": {
+          "left_bottom": [
+            136,
+            463,
+            511,
+            576
+          ],
+          "left_top": [
+            136,
+            463,
+            127,
+            192
+          ],
+          "right_bottom": [
+            1044,
+            1335,
+            581,
+            646
+          ],
+          "right_left": [
+            700,
+            889,
+            321,
+            387
+          ],
+          "right_mid": [
+            1056,
+            1320,
+            310,
+            397
+          ],
+          "right_top": [
+            877,
+            1141,
+            77,
+            142
+          ]
+        },
+        "outer_frame_non_white_px": {
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "top": 0
+        },
+        "text_grey_rgb_live": [
+          48,
+          48,
+          48
+        ],
+        "text_grey_rgb_superseded": [
+          102,
+          102,
+          102
+        ]
+      },
+      "rubric": {
+        "contrast": "pass. Text #303030 (13.2:1) and #666666 (5.74:1) on white; arrows #929292 (3.11:1) on white. Both classes of mark clear their floor.",
+        "data_ink": "pass. Text plus thin arrows only; no filled area, no marker fill, no shading. Measured 20,634 non-white pixels inside the six label boxes against 3,417 inside the five arrow components, so the data carry the ink and the arrows stay subordinate without disappearing.",
+        "decoration": "pass. Plain white ground; no grid, frame, background tint, gradient or shadow.",
+        "label_collision": "pass. Six pairwise-disjoint label boxes, five arrow components outside every box, zero ink on the outer frame strips and at least 63 px clearance to each canvas edge, so no label is clipped or overlapped and no arrow crosses text.",
+        "legibility": "pass. Read from the 1399x720 render at native size. Left: 'accumulated carbon count due to gas injection [accepted]' above 'carbon count accumulated due to gas injection [superseded]', joined by two bowed arrows, one arrowed down and one up, so the reciprocal edge is visible. Right: 'tungsten density at plasma boundary [superseded]' at the top, with one arrow arriving from 'tungsten density at separatrix [accepted]' at lower left and one from 'flux surface averaged tungsten density at plasma boundary [reviewed]' at right; a fifth vertical arrow runs from 'tungsten density flux surface averaged at plasma boundary [superseded]' at bottom right up into the reviewed name. Every label is fully legible and every edge traceable.",
+        "table_form": "pass. A directed graph of six names with one reciprocal pair and a converged predecessor is an adjacency the reader must see as a shape rather than as rows."
+      },
+      "semantic_check": "The arrows agree with the caption's stated convention (successor to predecessor): the accepted 'tungsten density at separatrix' and the reviewed 'flux surface averaged tungsten density at plasma boundary' both point into the superseded 'tungsten density at plasma boundary', and the superseded infix-spelling 'tungsten density flux surface averaged at plasma boundary' points into the reviewed prefixed name. The carbon pair carries one arrow in each direction. The alt text, 'Reciprocal carbon spelling edges and the branched tungsten lineage', matches what the render shows."
+    }
+  ],
+  "findings": [],
+  "item_verdicts": {
+    "caption_independence": "The caption is substantive and accurate against the rendered image and the recorded convention; it is not a restatement of a title, and no caption finding is raised.",
+    "finding_materiality": "No finding of either declared severity is raised: nothing is clipped, no label overlaps another label or the data, no text is unreadable, the image is not naturally a table, and the drawn data are fully visible.",
+    "rendered_artifact": "The image-0.png attachment was opened and inspected at native resolution; no verdict is read from SVG source or its markup.",
+    "scope": "Read-only. No file was edited, created, moved, deleted, redrawn, relabelled or reformatted; the only writes are this record at its two declared paths and the run manifest."
+  },
+  "justifications": {
+    "durability": "The record is written at both declared paths and checked with `crew check --review --record` before the manifest is closed.",
+    "evidence": "Every verdict rests on the named PNG: frame-ink counts with a positive control, ink-colour sampling, label and arrow bounding boxes, and contrast ratios were all measured on image-0.png; the source-path mapping and the caption were read from the reviewed head's evidence fragment.",
+    "legibility_note": "legibility rests on the native-size render: the six labels are readable without zoom and all five arrowheads are drawn.",
+    "scope_discipline": "This review is read-only; no figure, caption or source file was changed and no SVG was opened."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261108T005153415827-review-of-sib-lineage-cycle-census-5c4657c089cb-figure",
+  "reviewed_base_sha": "be4c7ee6c9cd7a42c313fd79d68dadabffc2a9e7",
+  "reviewed_figures": [
+    "docs/figures/sn-integrity-backlog/sib-lineage-cycle-census/topology.svg"
+  ],
+  "reviewed_head_sha": "5c4657c089cb060b9ffdc283fad0df07d9f866b3",
+  "reviewed_run_id": "r-20261107T201632402746-sib-lineage-cycle-census",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: pass. Six node names, each set as three or four centred lines of sans text on one 1399x720 canvas: a two-name carbon pair on the left and a four-name tungsten group on the right. Text bands measure 17-21 px with 6-9 px gaps, so no line crowds the next, and the smallest glyph height seen is 17 px at native scale, which reads without zooming. All five edges are drawn as thin grey arrows with arrowheads rendered, so the reciprocal carbon pair and the three tungsten edges can be followed at a glance.",
+    "RUBRIC data_ink: pass. The ink is text and thin arrow strokes on a white ground: of 24,103 non-white pixels, 20,634 (85.6%) fall inside the six tight label boxes and 3,417 (14.2%) inside the five tight arrow boxes, so about 86:14 node text to edge strokes. Labels are node identity, which is the data, so the ink is data and there is no fill, band, marker fill or shaded region anywhere.",
+    "RUBRIC decoration: pass. No gridlines, spines, ticks, frame, background tint, gradient, drop shadow or border is drawn; the canvas is blank white apart from the six labels and five arrows, and no title furniture is present.",
+    "RUBRIC contrast: pass. Live-status labels are #303030 on white, 13.2:1; superseded-status labels are #666666 on white, 5.74:1; arrows are #929292 on white, 3.11:1. Every text mark clears body-text contrast and every arrow clears the 3:1 graphics floor; the superseded labels are the only mid-grey text and they remain plainly readable at native size.",
+    "RUBRIC table_form: pass. The image shows a directed adjacency: a two-node reciprocal pair on the left and, on the right, two live names converging on one superseded boundary name plus an infix-spelling leaf feeding the reviewed averaged name. The adjacency is the point of the figure, and a name/status table would not carry which node points at which, so the graphic is the natural form here.",
+    "RUBRIC label_collision: pass. Ink segmentation of the render gives six label boxes that are pairwise disjoint in both axes: (136-463, 127-192), (136-463, 511-576), (877-1141, 77-142), (700-889, 321-387), (1056-1320, 310-397) and (1044-1335, 581-646). Five arrow components lie wholly outside those boxes: (801-950, 168-293), (1058-1163, 168-278), (222-245, 232-466), (354-377, 234-469) and (1184-1195, 442-533), so no stroke crosses a text box. Zero non-white pixels sit in any of the four 3 px frame strips of the render and the content bbox is (136, 77)-(1335, 646), leaving at least 63 px of margin on every side, so nothing is clipped."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T01:28:24.240223+00:00",
+  "total": null
+}
