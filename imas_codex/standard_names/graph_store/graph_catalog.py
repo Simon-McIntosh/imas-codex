@@ -2199,7 +2199,13 @@ def persist_generated_name_winners(
     An exact token-and-sequence source CAS acquires the source write lock. The
     rich name writer, lifecycle transition, cluster backfill, and predecessor
     retirement then run through that transaction before the source claim is
-    consumed. Any failure rolls every graph effect back together.
+    consumed. An unexpected failure rolls every graph effect back together.
+
+    A candidate the rich writer refuses by name is not such a failure: the other
+    winners in the batch finalize, and the refused source is released through
+    the claim-fenced failure writer with a ``last_error`` naming the candidate
+    and the refusal. A winner the writer accepted but did not finalize has no
+    attributable source state and still fails the whole batch.
 
     Returns the finalized ``StandardNameSource`` identities.
     """
@@ -2299,6 +2305,7 @@ def persist_generated_name_winners(
         return []
 
     finalized_ids: list[str] = []
+    refusals: list[dict[str, Any]] = []
     with services.GraphClient() as graph:
         with graph.session() as session:
             tx = session.begin_transaction()
@@ -2379,9 +2386,64 @@ def persist_generated_name_winners(
                     if item["sns_id"] in locked_ids
                     and item["sn_id"] in written_name_ids
                 ]
-                if len(finalize_batch) != len(locked_candidates):
+                # A winner left out of the finalize batch is refused by name,
+                # which is a per-source outcome the compose pool can survive.
+                # The rich writer drops a candidate before it mints anything, so
+                # the source is still unbound and its claim is still ours. One
+                # it accepted and then failed to finalize has no attributable
+                # source state and remains a batch-level fault.
+                finalized_batch_sns = {item["sns_id"] for item in finalize_batch}
+                for item in write_batch:
+                    if item["sns_id"] not in locked_ids:
+                        continue
+                    if item["sns_id"] in finalized_batch_sns:
+                        continue
+                    candidate = candidate_by_sns[item["sns_id"]]
+                    if str(candidate.get("id")) not in written_name_ids:
+                        refusals.append(
+                            {
+                                "sns_id": item["sns_id"],
+                                "claim_token": item["claim_token"],
+                                "claim_seq": item["claim_seq"],
+                                "reason": (
+                                    "rich standard-name write refused candidate "
+                                    f"{candidate.get('id')!r}: the writer refused "
+                                    "to mint this identity, so the source "
+                                    "produced no name"
+                                ),
+                            }
+                        )
+                        continue
                     raise RuntimeError(
                         "rich standard-name write rejected an exact-claim winner"
+                    )
+                if refusals:
+                    # Drop the provisional reservation this claim took on the
+                    # refused source's target, so the pending identity reads as
+                    # an unowned stub the next attempt may adopt. The stub
+                    # itself is not ours to delete.
+                    tx_gc.query(
+                        """
+                        UNWIND $batch AS b
+                        MATCH (sns:StandardNameSource {id: b.sns_id})
+                        WHERE sns.claim_token = b.claim_token
+                          AND sns.claim_seq = b.claim_seq
+                        OPTIONAL MATCH (sns)-[reservation:PRODUCED_NAME]->
+                            (:StandardName)
+                        WHERE reservation.provisional = true
+                          AND reservation.claim_token = b.claim_token
+                          AND reservation.claim_seq = b.claim_seq
+                        DELETE reservation
+                        RETURN sns.id AS id
+                        """,
+                        batch=[
+                            {
+                                "sns_id": refusal["sns_id"],
+                                "claim_token": refusal["claim_token"],
+                                "claim_seq": refusal["claim_seq"],
+                            }
+                            for refusal in refusals
+                        ],
                     )
 
                 reserved_finalize_batch = [
@@ -2602,6 +2664,23 @@ def persist_generated_name_winners(
                 if tx.closed is False:
                     tx.close()
                 raise
+
+    # Release each refused source through the claim-fenced failure writer, after
+    # the batch's own effects are durable. The writer increments the attempt
+    # count and records the reason, so the refusal is attributable per source
+    # and the next failure census can read it rather than guess.
+    for refusal in refusals:
+        services.mark_sources_failed(
+            refusal["claim_token"],
+            [refusal["sns_id"]],
+            refusal["reason"],
+        )
+        logger.warning(
+            "persist_generated_name_winners: released %s after a rich-write "
+            "refusal: %s",
+            refusal["sns_id"],
+            refusal["reason"],
+        )
 
     if finalized_ids:
         services.bump_sn_run_counter(run_id, "names_composed", delta=len(finalized_ids))
