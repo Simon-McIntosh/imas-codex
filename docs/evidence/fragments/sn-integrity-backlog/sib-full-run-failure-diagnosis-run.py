@@ -9,12 +9,15 @@ import contextlib
 import hashlib
 import html
 import importlib
+import importlib.util
 import json
 import os
 import re
 import shlex
+import shutil
 import subprocess
 import sys
+import tempfile
 import traceback
 from collections import Counter
 from datetime import UTC, datetime
@@ -477,6 +480,112 @@ async def transport_controls() -> dict:
     return outcomes
 
 
+def attempt_history(rows: list[dict], log: dict) -> dict:
+    """Count numbered outcomes separately from unnumbered grammar observations."""
+    original_evidence = Counter(row["attempt_evidence"] for row in rows)
+    for row in rows:
+        expected = set(range(1, row["attempts"] + 1))
+        accounted = set(row["refusal_attempts"])
+        assert accounted <= expected, f"Claim number outside stored count: {row['id']}"
+        row["unexplained_attempts"] = sorted(expected - accounted)
+        grammar_lines = []
+        for number in row["log_lines"]:
+            match = re.search(
+                r"composition retry \d+/\d+: \d+ grammar failures \((.*?)\)",
+                log["quotes"][str(number)],
+            )
+            if match and row["id"].removeprefix("dd:") in match[1].split(", "):
+                grammar_lines.append(number)
+        if grammar_lines:
+            row["grammar_lines"] = grammar_lines
+        del row["attempt_evidence"]
+    incomplete = [row for row in rows if row["unexplained_attempts"]]
+    return {
+        "complete": not incomplete,
+        "source_count": len(rows),
+        "complete_numbered_histories": len(rows) - len(incomplete),
+        "incomplete_numbered_histories": len(incomplete),
+        "stored_claims": sum(row["attempts"] for row in rows),
+        "numbered_refusal_outcomes": sum(len(set(r["refusal_attempts"])) for r in rows),
+        "unexplained_claims": sum(len(r["unexplained_attempts"]) for r in rows),
+        "grammar_observed_sources": sum(bool(r.get("grammar_lines")) for r in rows),
+        "sources_without_direct_attempt_event": sum(
+            not r["refusal_lines"] and not r.get("grammar_lines") for r in rows
+        ),
+        "cap_sources_with_grammar_observation": sum(
+            r["class"] == "attempt_cap" and bool(r.get("grammar_lines")) for r in rows
+        ),
+        "original_evidence_counts": dict(original_evidence),
+        "grammar_limit": "The sanitized response names these claimed sources, but the retry message has no claim number. It proves at least one grammar failure, not the cause of every claim or the final batch outcome.",
+        "numbered_limit": "Numbered refusal coverage is an upper bound on reconstructed history: the source stores no run/claim ledger with which to exclude counter resets. Unnumbered messages never fill numbered holes.",
+    }
+
+
+def retained_history_inputs(directory: Path, log: dict) -> dict:
+    """Read the bounded receipt audit, requiring positive controls for absences."""
+    receipt_path = directory / "attribution-receipts.json"
+    application_path = directory / "application-log-attribution.json"
+    receipts = json.loads(receipt_path.read_text())["queries"]
+    application = json.loads(application_path.read_text())
+    costs = receipts["compose_costs"]["rows"]
+    cost_control = next(
+        row
+        for row in receipts["cost_presence"]["rows"]
+        if row["phase"] == "generate_name"
+    )
+    assert 0 < len(costs) == cost_control["rows"] < 2000
+    retries = receipts["cohort_retries"]["rows"]
+    assert receipts["retry_presence"]["rows"][0]["with_error"] > 0
+    assert 0 < len(retries) == len(receipts["retry_scalar_match"]["rows"]) < 1500
+    assert {r["retry"]["id"] for r in retries} == {
+        r["retry"]["id"] for r in receipts["retry_scalar_match"]["rows"]
+    }
+    messages = [
+        event for item in application["logs"] for event in item["source_events"]
+    ]
+    assert messages
+    payloads = {text.split(" - ", 2)[-1] for text in log["quotes"].values()}
+    assert all(event["text"].split(": ", 1)[-1] in payloads for event in messages)
+    return {
+        "inputs": [
+            {"path": str(p), "sha256": hashlib.sha256(p.read_bytes()).hexdigest()}
+            for p in (receipt_path, application_path)
+        ],
+        "compose_cost_rows": len(costs),
+        "distinct_reused_group_labels": len({row["batch_id"] for row in costs}),
+        "cost_property_sets": cost_control["property_sets"],
+        "cohort_retry_receipts": len(retries),
+        "latest_cohort_retry": max(row["retry"]["retried_at"] for row in retries),
+        "application_source_messages": len(messages),
+        "application_source_messages_absent_from_job_log": 0,
+        "application_logs": [
+            {
+                k: v
+                for k, v in item.items()
+                if k not in {"source_events", "unique_events"}
+            }
+            for item in application["logs"]
+        ],
+        "limitation": "Application rotations can contain concurrent processes; timestamps and reused group labels are not a source-to-claim join. Cost receipts have candidate names, not source IDs or claim tokens. Retry receipts all predate the full run.",
+    }
+
+
+def require_complete_attempt_history(result: dict) -> None:
+    """Refuse completion when any source lacks a numbered attempt outcome."""
+    missing = [
+        set(range(1, row["attempts"] + 1)) - set(row["refusal_attempts"])
+        for row in result["sources"]
+    ]
+    missing = [numbers for numbers in missing if numbers]
+    if missing:
+        count = sum(map(len, missing))
+        raise RuntimeError(
+            f"Attempt history incomplete: {len(missing)}/{len(result['sources'])} "
+            f"sources have {count} unexplained claims; terminal reasons and "
+            "unassigned batch exceptions do not satisfy per-source attribution"
+        )
+
+
 def report(snapshot_path: Path, context_path: Path, log_path: Path) -> None:
     snapshot = json.loads(snapshot_path.read_text())
     context = json.loads(context_path.read_text())
@@ -544,6 +653,8 @@ def report(snapshot_path: Path, context_path: Path, log_path: Path) -> None:
                 "binding_writer" if kind == "binding_collision" else "attachment_writer"
             )
         rows.append(row)
+    history = attempt_history(rows, log)
+    history_inputs = retained_history_inputs(snapshot_path.parent, log)
     class_counts = dict(sorted(Counter(r["class"] for r in rows).items()))
     recovery_counts = dict(sorted(Counter(r["recovery"] for r in rows).items()))
     assert sum(class_counts.values()) == 371
@@ -711,6 +822,8 @@ def report(snapshot_path: Path, context_path: Path, log_path: Path) -> None:
         },
         "gaps": gaps,
         "sources": rows,
+        "attempt_history": history,
+        "retained_history_inputs": history_inputs,
         "batch_attribution_for_every_source": "No failed-batch record contains source membership or claim token; source-to-batch attribution cannot be recovered. Source-specific refusal lines, where present, are independent evidence.",
         "spend_usd": 0,
     }
@@ -761,6 +874,7 @@ def report(snapshot_path: Path, context_path: Path, log_path: Path) -> None:
         + json.dumps(
             {
                 "sources": len(rows),
+                "attempt_history": history,
                 "edge_expanded_rows": 373,
                 "classes": class_counts,
                 "recoveries": recovery_counts,
@@ -770,6 +884,7 @@ def report(snapshot_path: Path, context_path: Path, log_path: Path) -> None:
             }
         )
     )
+    require_complete_attempt_history(persisted)
 
 
 def write_html(result: dict, destination: Path) -> None:
@@ -778,10 +893,10 @@ def write_html(result: dict, destination: Path) -> None:
 
     parts = [
         f'<section id="{RECORD_ID}-record">',
-        f'<h3 id="{RECORD_ID}-title">Full DD run: failed-source diagnosis</h3>',
+        f'<h3 id="{RECORD_ID}-title">Full DD run: incomplete attempt diagnosis</h3>',
     ]
     parts.append(
-        "<p><strong>371 distinct sources are classified: 319 failed and 52 vocabulary gaps.</strong> The supplied 373 is an edge-expanded count: two failed sources each link to two names, yielding 30 produced rows for 28 sources. The independent before/after source counts agree. This diagnosis made no graph writes or paid calls (USD 0).</p>"
+        "<p><strong>Incomplete: the last-error census covers all 371 distinct sources, but their consumed-attempt causes are not fully recoverable from the retained inputs.</strong> There are 319 failed sources and 52 vocabulary gaps. The supplied 373 is an edge-expanded count: two failed sources each link to two names, yielding 30 produced rows for 28 sources. The independent before/after source counts agree. This diagnosis made no graph writes or paid calls (USD 0).</p>"
     )
     parts.append(
         f'<p>Observed {esc(result["observed_at"])}; product revision <code>{result["product_revision"]}</code>; evidence base <code>{result["analysis_base_revision"]}</code>; runner SHA-256 <code>{result["runner_sha256"]}</code>. Imported product modules match the assigned tree byte-for-byte; the JSON records their absolute paths and hashes. The JSON contains every source, complete last_error, attempt count, source-specific log lines, current binding evidence, recovery classification and mechanism references. <a href="/imas-codex/evidence/fragments/sn-integrity-backlog/{RECORD_ID}.json">Machine-readable classification</a>.</p>'
@@ -800,8 +915,12 @@ def write_html(result: dict, destination: Path) -> None:
         "</tbody></table><p>The vocabulary class includes 52 sources in vocab_gap and 31 failed sources whose last error reports a vocabulary problem. Blank errors belong to 57 terminal records dated 28 July and one dated 27 July; they are not evidence of failures caused by this run. Of 149 bare attempt-cap errors, 121 were stamped during this run and 28 predate it.</p>"
     )
     parts.append(f'<h4 id="{RECORD_ID}-attempts">What consumed attempts</h4>')
+    history = result["attempt_history"]
     parts.append(
-        "<p>Sixty sources have exact logged collision/attachment refusals; 253 retain a graph reason without such a log entry, and 58 have no stored reason. Even a direct refusal explains only its recorded attempt number, not every claim. The same parser finds the known toroidal-flux refusal at log line 4821 before it reports missing source-specific evidence elsewhere.</p>"
+        f"<p><strong>The completion gate refuses: {history['incomplete_numbered_histories']} of 371 sources have {history['unexplained_claims']} unexplained claims.</strong> The stored counters total {history['stored_claims']} claims; exact collision/attachment refusals account for {history['numbered_refusal_outcomes']} distinct source/attempt pairs across 60 sources. Only {history['complete_numbered_histories']} sources have every stored attempt number represented, and even these lack a durable run/claim ledger to exclude counter resets. The same parser finds the known toroidal-flux refusal at log line 4821 before reporting missing evidence elsewhere.</p>"
+    )
+    parts.append(
+        f"<p>Source-specific grammar-retry messages add partial evidence for {history['grammar_observed_sources']} sources, including {history['cap_sources_with_grammar_observation']} of the 149 bare caps. These messages follow claimed-source sanitization, so they show a grammar failure for the named source; they contain no claim number and cannot fill numbered holes. The other 121 capped sources have no such grammar observation. In total, {history['sources_without_direct_attempt_event']} sources have neither a numbered refusal nor a source-specific grammar retry. The 58 blank historical errors remain unexplained.</p>"
     )
     parts.append(
         "<p>Each claim increments attempt_count before composition; the sweep parks the source at five claims. The final job log has 73 whole-batch exceptions. Their categories below are taken from complete exception blocks, not keyword matches elsewhere in the log. The earlier 58-entry note described an incomplete log.</p><ul>"
@@ -810,6 +929,10 @@ def write_html(result: dict, destination: Path) -> None:
         parts.append(f"<li>{value}: {esc(key)}</li>")
     parts.append(
         "</ul><p>Candidate isolation in merge <code>0198b31b3</code> catches compose_name failures per source. It cannot prove that every capped source was a valid sibling: batch exceptions do not carry source IDs or claim tokens. The source table therefore distinguishes direct logged refusals from retained terminal reasons and explicitly leaves batch membership unresolved. Source mentions such as out-of-batch proposals are not counted as consumed attempts.</p>"
+    )
+    retained = result["retained_history_inputs"]
+    parts.append(
+        f"<p>The bounded retained-input audit found {retained['compose_cost_rows']} compose-cost receipts using {retained['distinct_reused_group_labels']} reused group labels, with candidate names but no source IDs or claim tokens. The {retained['cohort_retry_receipts']} retry receipts matched by both relationship and scalar source ID all predate this run (latest {esc(retained['latest_cohort_retry'])}). Three application-log rotations contain {retained['application_source_messages']} exact cohort source messages; all already occur in the job log. These nonempty controls establish that the readers see real records. Their hashes, queries and matched messages are retained beside the manifest. Reused group labels or adjacent timestamps cannot assign concurrent batch failures to sources.</p>"
     )
     parts.append(
         "<p>A deterministic, network-free replay confirms bare httpx.ReadError is retried (two calls then success), while an OpenAI APIConnectionError wrapping that error escapes after one call. The final log has 29 APIConnectionError terminal exceptions and one structured-call wrapper with a connection error. The transport recovery assumption is therefore incomplete; the report does not treat those batches as guaranteed recoveries.</p>"
@@ -869,7 +992,7 @@ def write_html(result: dict, destination: Path) -> None:
         )
     parts.append("</dl>")
     parts.append(
-        f'<h4 id="{RECORD_ID}-sources">Every affected source</h4><p>Log references point to the numbered full job log. Refusal attempts are only the explicitly logged claim numbers, not an invented reconstruction of all claims. Empty references are an evidence limit; each source retains its graph error independently.</p><table><thead><tr><th>Source / binding</th><th>Class, attempts, last error</th><th>Evidence and retry</th></tr></thead><tbody>'
+        f'<h4 id="{RECORD_ID}-sources">Every affected source</h4><p>Log references point to the numbered full job log. Each row lists claim numbers without a recorded outcome, plus any source-specific grammar-retry lines. Grammar observations are partial evidence and do not identify the numbered claim. A terminal cap is a symptom, not a recovered cause.</p><table><thead><tr><th>Source / binding</th><th>Class, attempts, last error</th><th>Evidence and retry</th></tr></thead><tbody>'
     )
     for r in result["sources"]:
         bindings = (
@@ -884,16 +1007,82 @@ def write_html(result: dict, destination: Path) -> None:
             or "no exact source-path mention"
         )
         parts.append(
-            f'<tr data-source="{esc(r["id"])}"><td><code>{esc(r["id"])}</code><br>{esc(bindings)}</td><td>{r["class"]}; {r["attempts"]} claims<br>{esc(r["last_error"] or "(blank)")}</td><td>{esc(r["recovery"])}<br>Log: {esc(refs)}<br>{esc(r["attempt_evidence"])}</td></tr>'
+            f'<tr data-source="{esc(r["id"])}"><td><code>{esc(r["id"])}</code><br>{esc(bindings)}</td><td>{r["class"]}; {r["attempts"]} claims<br>{esc(r["last_error"] or "(blank)")}</td><td>{esc(r["recovery"])}<br>Log: {esc(refs)}<br>Unexplained claim numbers: {esc(r["unexplained_attempts"])}<br>Grammar-retry lines: {esc(r.get("grammar_lines", []))}</td></tr>'
         )
     parts.append("</tbody></table>")
     parts.append(
-        f'<h4 id="{RECORD_ID}-reproducibility">Reproduction and limits</h4><p>Job log: <code>{esc(result["source_log"]["path"])}</code>; SHA-256 <code>{result["source_log"]["sha256"]}</code>. Raw source/context snapshots and complete matched log quotes live beside this run’s manifest. The JSON embeds the independent source and edge-expanded count queries, positive controls, 73 exception references and current writer locations. The runner writes both this fragment and the JSON; its gate log ends with EXIT=0 only after all checks and both artifacts are written.</p>'
+        f'<h4 id="{RECORD_ID}-reproducibility">Reproduction and limits</h4><p>Job log: <code>{esc(result["source_log"]["path"])}</code>; SHA-256 <code>{result["source_log"]["sha256"]}</code>. Raw source/context snapshots and complete matched log quotes live beside this run’s manifest. The JSON embeds the independent source and edge-expanded count queries, positive controls, 73 exception references and current writer locations. The runner persists both artifacts before enforcing attempt-history completeness. This cohort must end with EXIT=1: the census and current guard checks do not satisfy the missing historical attribution. A new authorized run could record fresh source/claim outcomes but could not recreate these missing historical events.</p>'
     )
     parts.append("</section>\n")
     content = "\n".join(parts)
     assert len(content.encode()) <= 300000, "Repository HTML exceeds size limit"
     destination.write_text(content)
+
+
+def verify_report_refusal(
+    candidate_revision: str, snapshot_path: Path, context_path: Path, log_path: Path
+) -> None:
+    """Run a revision's producer in disposable output paths and demand refusal."""
+    relative = Path(__file__).resolve().relative_to(TREE)
+    source = subprocess.check_output(
+        ["git", "-C", str(TREE), "show", f"{candidate_revision}:{relative}"],
+    )
+    with tempfile.TemporaryDirectory(
+        prefix="attempt-history-", dir=os.environ["TMPDIR"]
+    ) as temporary:
+        scratch = Path(temporary)
+        candidate = scratch / relative
+        candidate.parent.mkdir(parents=True)
+        candidate.write_bytes(source)
+        spec = importlib.util.spec_from_file_location("history_candidate", candidate)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        module.TREE = TREE
+        inputs = scratch / "inputs"
+        inputs.mkdir()
+        for path in (
+            snapshot_path,
+            context_path,
+            snapshot_path.parent / "attribution-receipts.json",
+            snapshot_path.parent / "application-log-attribution.json",
+        ):
+            shutil.copy2(path, inputs / path.name)
+        print(f"# candidate_revision={candidate_revision} module={module.__file__}")
+        print(f"# measurement_cwd={Path.cwd().resolve()}")
+        failure_id = "test_incomplete_attempt_history_blocks_completion"
+        try:
+            module.report(
+                inputs / snapshot_path.name, inputs / context_path.name, log_path
+            )
+        except RuntimeError as error:
+            assert str(error).startswith("Attempt history incomplete:"), str(error)
+            print(f"REFUSAL {error}")
+        else:
+            print(
+                f"FAILED {failure_id}: producer returned successfully for missing history"
+            )
+            raise AssertionError(failure_id)
+        result = json.loads(candidate.with_name(f"{RECORD_ID}.json").read_text())
+        complete_rows = [
+            row
+            for row in result["sources"]
+            if row["attempts"] > 0 and not row["unexplained_attempts"]
+        ]
+        assert complete_rows
+        module.require_complete_attempt_history({"sources": complete_rows})
+        corrupted = {**complete_rows[0], "refusal_attempts": []}
+        try:
+            module.require_complete_attempt_history({"sources": [corrupted]})
+        except RuntimeError as error:
+            assert "Attempt history incomplete:" in str(error)
+            print(f"CONTROL refused removed numbered outcomes: {error}")
+        else:
+            raise AssertionError(
+                "Completeness trusted a stale unexplained_attempts field"
+            )
+        print(
+            f"PASSED {failure_id}; complete-history positive control={len(complete_rows)}"
+        )
 
 
 def main() -> None:
@@ -904,9 +1093,19 @@ def main() -> None:
     parser.add_argument("--report", action="store_true")
     parser.add_argument("--refresh", action="store_true")
     parser.add_argument("--gate-log", type=Path)
+    parser.add_argument("--verify-report-refusal-at", metavar="REVISION")
     args = parser.parse_args()
 
     def execute():
+        if args.verify_report_refusal_at:
+            assert args.supplement
+            verify_report_refusal(
+                args.verify_report_refusal_at,
+                args.snapshot,
+                args.supplement,
+                args.run_log,
+            )
+            return
         if args.refresh or not args.supplement:
             capture(args.snapshot, args.run_log)
         if args.supplement and (args.refresh or not args.report):
@@ -940,6 +1139,7 @@ def main() -> None:
             + " ".join(
                 f"{key}={shlex.quote(os.environ[key])}"
                 for key in (
+                    "TMPDIR",
                     "PYTHONDONTWRITEBYTECODE",
                     "PYTHONPATH",
                     "UV_PROJECT_ENVIRONMENT",
