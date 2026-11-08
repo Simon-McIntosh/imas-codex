@@ -62,6 +62,16 @@
       "finding": "single_goal-1",
       "reason": "the consistency pass is scheduled as its own node once the second pass and the retired-spelling fix land, because the families are still changing; \u00a750 closes on the run verdict alone",
       "when": "2026-11-08T06:37:20.943220+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "843562e666780df849e0a2218e07311834826f3a",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "\u00a751 (843562e66) now declares the rerun cohort and all five repair nodes, links \u00a750, and measures per-source outcome, at least 3 accepted per USD under USD 50, and failing-then-passing regression tests; \u00a750 is declared done on its run verdict.",
+      "reason": "",
+      "when": "2026-11-08T06:44:50.004781+00:00"
     }
   ],
   "responses": {
@@ -82,9 +92,18 @@
       "by": "",
       "reason": "the consistency pass is scheduled as its own node once the second pass and the retired-spelling fix land, because the families are still changing; \u00a750 closes on the run verdict alone",
       "when": "2026-11-08T06:37:20.943220+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "843562e666780df849e0a2218e07311834826f3a",
+      "commit_basis": "edit",
+      "note": "\u00a751 (843562e66) now declares the rerun cohort and all five repair nodes, links \u00a750, and measures per-source outcome, at least 3 accepted per USD under USD 50, and failing-then-passing regression tests; \u00a750 is declared done on its run verdict.",
+      "reason": "",
+      "when": "2026-11-08T06:44:50.004781+00:00"
     }
   },
-  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-sn-integrity-backlog.v381.json",
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-integrity-backlog/r-20261108T060722220215-plan-review-of-sn-integrity-backlog.json",
   "review_run_id": "r-20261108T060722220215-plan-review-of-sn-integrity-backlog",
   "reviewed_blob_sha": "4cf9323340658789fd0420bf47b9f61bde7b5a00",
   "rubric": "content",
