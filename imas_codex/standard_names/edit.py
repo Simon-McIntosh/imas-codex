@@ -2339,9 +2339,15 @@ def _fold_guard_reason(
     # A separate current successor is the more specific refusal; without one,
     # adding the reverse edge to an ancestor would close a lineage cycle.
     if snapshot.get("cycle"):
-        return (
+        reason = (
             f"{old!r} already descends from {into!r} (REFINED_FROM cycle) — cannot fold"
         )
+        if target_stage == "superseded":
+            return (
+                f"{reason}; use sn edit {old!r} --rename {into!r} "
+                "for the closing-lineage reclaim"
+            )
+        return reason
 
     for label, properties in (("old", old_properties), ("target", target_properties)):
         if (

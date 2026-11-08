@@ -1,14 +1,17 @@
-"""Folding an identity onto a tombstoned spelling that nothing else reads.
+"""Folding onto a tombstoned spelling preserves acyclic lineage.
 
 A superseded name with no successor, no sources and no parent or child edge is
 a free identity: the spelling is dead and the fold may re-occupy it. Anything
 that still reads the spelling — a successor lineage edge,
 a bound source, a parent or a child — keeps the fold refused, and a target in a
-live stage other than ``accepted`` stays refused as before.
+live stage other than ``accepted`` stays refused. A tombstone whose lineage
+already reaches the source is reclaimed through ``sn edit``, since a fold
+would write a reciprocal edge.
 """
 
 from __future__ import annotations
 
+import copy
 from typing import Any
 
 import pytest
@@ -142,23 +145,30 @@ def test_tombstone_target_holding_a_successor_is_refused() -> None:
     assert lineage.commits == 0
 
 
-def test_tombstone_target_whose_only_successor_is_the_folded_name_is_admitted() -> None:
-    """A straight-line refinement chain (target -> old) closes back onto target.
+def test_tombstone_target_whose_only_successor_is_the_folded_name_refuses_cycle() -> (
+    None
+):
+    """A straight-line refinement chain cannot accept its reverse edge.
 
     ``old`` already carries a REFINED_FROM edge onto ``target``, so ``target``'s
-    only live descendant is the very name now being folded into it. That is
-    the chain collapsing on itself, not a third-party identity being seized,
-    so the fold is admitted despite the target being tombstoned.
+    only live descendant is the name now being folded. The sanctioned route is
+    the closing-lineage reclaim through ``sn edit``.
     """
     graph = _RevivingGraph(_tombstone_state())
     graph.state.refined_from.append((_OLD, _TARGET))
+    before = copy.deepcopy(graph.state)
     result = _run(graph)
-    assert result["ok"] is True
-    assert graph.commits == 1
-    assert graph.state.nodes[_OLD]["name_stage"] == "superseded"
+    assert result["ok"] is False
+    assert "REFINED_FROM cycle" in result["reason"]
+    assert "closing-lineage reclaim" in result["reason"]
+    assert f"sn edit '{_OLD}' --rename '{_TARGET}'" in result["reason"]
+    assert graph.state == before
+    assert graph.commits == 0
+    assert graph.rollbacks == 1
+    assert graph.transactions[-1].write_markers == []
 
 
-def test_tombstone_target_whose_two_hop_chain_closes_onto_its_root_is_admitted() -> (
+def test_tombstone_target_whose_two_hop_chain_closes_onto_its_root_refuses_cycle() -> (
     None
 ):
     """target -> intermediate -> old, intermediate itself tombstoned, closes.
@@ -166,8 +176,7 @@ def test_tombstone_target_whose_two_hop_chain_closes_onto_its_root_is_admitted()
     ``target``'s only direct successor is ``electron_number_density``, which
     is itself superseded and whose only successor is ``old``. Every live
     descendant of ``target``, at the end of the chain, is the name now being
-    folded into it, so the fold is admitted despite the walk needing two hops
-    rather than one.
+    folded into it. The two-hop path still makes the reverse fold edge cyclic.
     """
     graph = _RevivingGraph(_tombstone_state())
     graph.state.nodes["electron_number_density"] = _node(
@@ -175,10 +184,16 @@ def test_tombstone_target_whose_two_hop_chain_closes_onto_its_root_is_admitted()
     )
     graph.state.refined_from.append(("electron_number_density", _TARGET))
     graph.state.refined_from.append((_OLD, "electron_number_density"))
+    before = copy.deepcopy(graph.state)
     result = _run(graph)
-    assert result["ok"] is True
-    assert graph.commits == 1
-    assert graph.state.nodes[_OLD]["name_stage"] == "superseded"
+    assert result["ok"] is False
+    assert "REFINED_FROM cycle" in result["reason"]
+    assert "closing-lineage reclaim" in result["reason"]
+    assert f"sn edit '{_OLD}' --rename '{_TARGET}'" in result["reason"]
+    assert graph.state == before
+    assert graph.commits == 0
+    assert graph.rollbacks == 1
+    assert graph.transactions[-1].write_markers == []
 
 
 def test_tombstone_target_whose_two_hop_chain_branches_stays_refused() -> None:

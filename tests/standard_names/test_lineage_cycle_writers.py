@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from types import SimpleNamespace
 
 import pytest
@@ -123,7 +124,41 @@ def test_fold_onto_tombstoned_ancestor_refuses(
 
     assert result["ok"] is False
     assert "REFINED_FROM cycle" in result["reason"]
+    assert f"sn edit '{OLD}' --rename '{ANCESTOR}'" in result["reason"]
     assert _state() == before
+
+
+def test_closing_lineage_reclaims_same_spelling_without_cycle(
+    disposable_neo4j_empty: str, seed_dd_resolutions
+) -> None:
+    """The refused fold's spelling is reclaimed through the rename writer."""
+    _seed(ancestor_stage="superseded")
+    seed_dd_resolutions([{"path": SOURCE_PATH, "effective": "m^-3"}])
+
+    plan = edit.apply_edit(
+        target=OLD,
+        rename=ANCESTOR,
+        reason="restore the earlier spelling without reversing lineage",
+        gc=GraphClient(),
+    )
+
+    assert plan.blocked is None, plan.blocked
+    assert plan.applied is True
+    assert plan.successor == ANCESTOR
+    state = _state()
+    assert {row["id"]: row["stage"] for row in state["names"]} == {
+        OLD: "superseded",
+        ANCESTOR: "reviewed",
+    }
+    assert state["edges"] == [{"successor": OLD, "predecessor": ANCESTOR}]
+    assert state["sources"] == [{"id": f"dd:{SOURCE_PATH}", "produced": ANCESTOR}]
+    with GraphClient() as graph:
+        receipts = graph.query(
+            "MATCH (change:StandardNameChange {operation: 'reclaim_spelling'}) "
+            "RETURN change.reason AS reason"
+        )
+    assert len(receipts) == 1
+    assert json.loads(receipts[0]["reason"])["case"] == "closing_lineage"
 
 
 def test_refine_onto_superseded_ancestor_refuses(
