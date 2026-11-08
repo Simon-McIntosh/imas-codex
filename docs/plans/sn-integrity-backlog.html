@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="380">
+<meta name="plan-version" content="381">
 <meta name="plan-modified" content="2026-11-08">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -1208,7 +1208,10 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
     <div class="r-comment-body"><p>Census now reuses catalog_ordering._find_cyclic_components; committed replay passes 4 checks, parent-source control fails 2 ownership checks while 2 topology checks pass. Explicit input/output directories, data-derived counts and committed source-hash receipts added. Snapshot remains 144 cycle names in 68 groups and 18 multi-tip lineages; 138 original creators unresolved; USD 0 of USD 0. Evidence: [census and proposals](/imas-codex/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census.html#sib-lineage-cycle-census)</p></div>
 </div>
 <div class="r-comment" data-section="s49" data-id="c-run-r-20261108T053338066884-review-of-sib-reclaim-history-apart-856098ace30c" data-who="reckon-build" data-when="2026-11-08T05:47:45.214Z">
-    <div class="r-comment-body"><p>Reviewed r-20261107T201231103918-sib-reclaim-history-apart at base be4c7ee6c to head 856098ace: scores goal_fidelity 19, evidence 16, scope_discipline 20, durability 15, fit 16, reuse 18 (total 104), zero blocking findings and three non-blocking (the _reclaim_spelling_case docstring at edit.py:3214 still says two cases and that both keep the history, which the third case contradicts; the collision-branch comment at edit.py:3773 still says two ruled cases; the compensating restore at edit.py:3693/4044 is exercised by no test), added_failure_count 0 because the reviewed run&#x27;s after arm records no failing id.</p></div>
+    <div class="r-comment-body"><p>Reviewed r-20261107T201231103918-sib-reclaim-history-apart at base be4c7ee6c to head 856098ace: scores goal_fidelity 19, evidence 16, scope_discipline 20, durability 15, fit 16, reuse 18 (total 104), zero blocking findings and three non-blocking (the _reclaim_spelling_case docstring at edit.py:3214 still says two cases and that both keep the history, which the third case contradicts; the collision-branch comment at edit.py:3773 still says two ruled cases; the compensating restore at edit.py:3693/4044 is exercised by no test), added_failure_count 0 because the reviewed run's after arm records no failing id.</p></div>
+</div>
+<div class="r-comment" data-section="s49" data-id="c-run-r-20261107T201231103918-sib-reclaim-history-apart" data-who="reckon-build" data-when="2026-11-07T21:01:25.204Z">
+    <div class="r-comment-body"><p>reclaims a tombstone whose quantity a live successor holds by archiving the tombstone&#x27;s history beside that successor and renaming the live name onto the freed id; 2 of 2 disposable-graph cases pass at head, the same reclaim case fails at base with the existing refusal, and the default standard-names selection runs with no failing test id</p></div>
 </div>
 <div class="r-comment" data-section="s50" data-id="c-run-r-20261107T204942022312-review-of-sib-full-dd-run-5f5026ac94f3" data-who="reckon-build" data-when="2026-11-07T20:59:25Z">
     <div class="r-comment-body"><p>Parsed independent review of source commits b9de20a8a6e23ecd2d7f664cfe7e5e22772934dd and 5f5026ac94f307a22c918d466f928e46a8b0cbf7 against base 50bcd5a7542237f72d71e4797f94dfb8dfc316b4; six scores total 74/120, one blocking provenance finding and one non-blocking reuse finding, with unmeasured suite delta explicitly noted.</p></div>
