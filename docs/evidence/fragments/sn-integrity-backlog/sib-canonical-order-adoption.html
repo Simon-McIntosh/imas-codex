@@ -1,0 +1,74 @@
+<section id="sib-canonical-order-adoption" class="r-evidence">
+<h2>sib-canonical-order-adoption — a segment-order refusal is adopted under the parser's spelling when the expression is unchanged</h2>
+
+<p id="sib-canonical-order-adoption-what-refused">A composition whose segments
+are merely out of the strict grammar's canonical order was retired as a source
+failure. The parser rejects such a flat spelling in
+<code>compose_standard_name</code> — inside the composer, before any
+normalization in codex can run — with
+<code>_NonCanonicalParseError: name is not canonical: flat segment order
+renders as '…'</code>. The pre-validation gate caught that
+<code>ValueError</code> at
+<code>worker_compose_batches.py</code> and marked the source failed, even
+though the parser was reporting a reordering rather than a malformed name.
+The refusal is reproduced offline against the recorded candidates; for
+example <code>parse_canonical_name("radiated_energy_accumulated_due_to_impurity_radiation")</code>
+raises <code>name is not canonical: flat segment order renders as
+'accumulated_radiated_energy_due_to_impurity_radiation'</code>.</p>
+
+<p id="sib-canonical-order-adoption-rule">The repair adds
+<code>adopt_canonical_segment_order</code> to the grammar adapter. It asks the
+strict parser for the canonical spelling through
+<code>normalize_canonical_name</code>, then requires that the spelling denote the
+same expression, comparing the non-strict parse of the refused name with the
+canonical parse through <code>_require_semantic_ir</code>. Only then does the
+candidate proceed, under the canonical name. A reorder that moves a token
+between semantic roles is refused, and any grammar failure that carries no
+canonical spelling is re-raised unchanged. The pre-validation gate adopts the
+refused spelling carried on the parser's error, logs both spellings, and
+otherwise keeps its existing refusal path. The candidate's operator chain is not
+re-composed, so a candidate carrying operators keeps its refusal: only the base
+composition's spelling is recoverable from the parser's error.</p>
+
+<table id="sib-canonical-order-adoption-recorded">
+<caption>The rule run offline over every recorded segment-order refusal that
+carries both spellings — the strict-grammar rejections in the full run's log
+(<code>sn-run-1308077.log</code>). 8 of 9 adopt; the one refusal is a reorder
+that changes the expression, so the same-IR check fires on recorded data.</caption>
+<thead><tr><th>refused spelling</th><th>parser's canonical spelling</th><th>rule</th></tr></thead>
+<tbody>
+<tr><td><code>coolant_absorbed_energy_accumulated_of_plasma_facing_component</code></td><td><code>accumulated_coolant_absorbed_energy_of_plasma_facing_component</code></td><td>adopt</td></tr>
+<tr><td><code>linear_thermal_electron_decay_time_volume_averaged_due_to_disruption</code></td><td><code>volume_averaged_linear_thermal_electron_decay_time_due_to_disruption</code></td><td>adopt</td></tr>
+<tr><td><code>neutral_count_accumulated_at_wall</code></td><td><code>accumulated_neutral_count_at_wall</code></td><td>adopt</td></tr>
+<tr><td><code>oxygen_count_accumulated_due_to_gas_injection</code></td><td><code>accumulated_oxygen_count_due_to_gas_injection</code></td><td>adopt</td></tr>
+<tr><td><code>poloidal_electron_beta_flux_surface_averaged_at_pedestal_top</code></td><td><code>flux_surface_averaged_poloidal_electron_beta_at_pedestal_top</code></td><td>adopt</td></tr>
+<tr><td><code>radiated_energy_accumulated_due_to_impurity_radiation</code></td><td><code>accumulated_radiated_energy_due_to_impurity_radiation</code></td><td>adopt</td></tr>
+<tr><td><code>runaway_electron_critical_momentum_volume_averaged_due_to_avalanche</code></td><td><code>volume_averaged_runaway_electron_critical_momentum_due_to_avalanche</code></td><td>adopt</td></tr>
+<tr><td><code>toroidal_current_density_flux_surface_averaged_at_constraint_position</code></td><td><code>flux_surface_averaged_toroidal_current_density_at_constraint_position</code></td><td>adopt</td></tr>
+<tr><td><code>poloidal_momentum_neutral_internal_state_flux_limiter_coefficient</code></td><td><code>poloidal_neutral_internal_state_momentum_flux_limiter_coefficient</code></td><td>refuse — changes the semantic IR</td></tr>
+</tbody>
+</table>
+
+<p id="sib-canonical-order-adoption-caveat">The refused population was measured
+over the recorded rejections that carry both spellings. The pre-validation
+refusal record itself keeps only the base token
+(<code>candidate pre-validation failed (grammar validation: name is not
+canonical: … 'heat_convected_coefficient'): coefficient</code>), so the refused
+spelling is dropped once the narrowing records a per-source refusal; the
+second-pass tail's own fragment was not present in this tree when the rule was
+measured, so its refusal count could not be read offline. Retaining the refused
+spelling on the per-source refusal would make the next census countable.</p>
+
+<p id="sib-canonical-order-adoption-evidence"><strong>Evidence.</strong> The new
+tests fail on the base revision and pass at the change. At base
+<code>f534f44fb</code> the module under test
+(<code>/home/ITER/mcintos/Code/imas-codex/imas_codex/standard_names/grammar_adapter.py</code>)
+has no adoption helper, so the test module fails collection:
+<code>ImportError: cannot import name 'adopt_canonical_segment_order' from
+'imas_codex.standard_names.grammar_adapter'</code>,
+<code>1 error in 1.59s, EXIT=2</code>. At the change the same four tests plus
+the two existing canonical-order tests pass:
+<code>6 passed, EXIT=0</code>. The declared negative control — bypassing the
+same-IR check — turns the IR-changing reorder test red while the other three
+pass: <code>1 failed, 3 passed, EXIT=1</code>.</p>
+</section>

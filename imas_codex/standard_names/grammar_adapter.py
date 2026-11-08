@@ -141,6 +141,23 @@ def normalize_canonical_name(name: str) -> ParsedCanonicalName:
     return parse_canonical_name(canonical)
 
 
+def adopt_canonical_segment_order(name: str) -> ParsedCanonicalName:
+    """Return the parser's canonical spelling when only the segment order differs.
+
+    The strict parser rejects a flat spelling whose segments are out of its
+    canonical order while still understanding the same expression.  This adopts
+    the parser's spelling only when it parses to the same semantic IR as the
+    input, so a reorder that moves meaning between segments is still refused.
+    Any other grammar failure is re-raised unchanged.
+    """
+    parsed = normalize_canonical_name(name)
+    if parsed.name == name:
+        return parsed
+    original = parse(name, strict=False).ir
+    _require_semantic_ir(original, parsed.ir, name=name)
+    return parsed
+
+
 def compose_canonical_ir(ir: StandardNameIR) -> str:
     """Compose *ir* and prove strict spelling and semantic IR preservation."""
     name = compose(ir)

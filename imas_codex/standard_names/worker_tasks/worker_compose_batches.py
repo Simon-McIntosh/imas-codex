@@ -674,48 +674,80 @@ async def compose_batch(
             try:
                 name_id = _worker_dependency("normalize_spelling")(c.compose_name())
             except (ValueError, ValidationError) as compose_exc:
-                # One candidate whose name cannot be composed is a per-source
-                # outcome, not a batch failure: the grammar rejects what the
-                # model proposed for THIS source, while every other candidate
-                # in the same paid response is composable. Record the refusal
-                # on the source and drop the candidate.
-                #
-                # Only the two errors a bad proposal produces are caught: a
-                # ``ValueError`` from the ISN round-trip and a pydantic
-                # ``ValidationError`` from the composer's own model. Anything
-                # else is a defect in this code, and persisting it as the
-                # source's terminal grammar refusal would retire the source
-                # for a reason that is not about the source.
-                _base_token = (
-                    getattr(getattr(c, "segments", None), "base_token", "") or ""
-                )
-                wlog.warning(
-                    "Pool %s: grammar validation refused source=%s (%s): %s",
-                    phase_tag,
-                    c.source_id,
-                    _base_token or "no base token",
-                    compose_exc,
-                )
-                if c.source_id:
+                # A segment-order refusal is the strict parser rejecting a flat
+                # spelling whose tokens are merely out of its canonical order.
+                # Adopt the parser's own spelling when it denotes the same
+                # expression, so a reorderable composition proceeds under the
+                # canonical name instead of retiring its source.  The refused
+                # name is the base composition's own rendering, so a candidate
+                # carrying operators is left to its own refusal: only the base
+                # spelling is recoverable from the parser's error.
+                _adopted = None
+                _refused = getattr(compose_exc, "name", None)
+                if _refused and not c.operators:
+                    from imas_codex.standard_names.grammar_adapter import (
+                        adopt_canonical_segment_order,
+                    )
+
                     try:
-                        failed = _worker_dependency(
-                            "_mark_source_prevalidation_failed"
-                        )(
-                            c.source_id,
-                            source_type=source_kind,
-                            candidate_name=_base_token or "<uncompisable>",
-                            reason=f"grammar validation: {compose_exc}",
-                            claim_token=(source_item or {}).get("claim_token"),
-                            claim_seq=(source_item or {}).get("claim_seq"),
-                        )
-                        if failed:
-                            disposition_winner_ids.add(f"{source_kind}:{c.source_id}")
-                    except Exception:
-                        wlog.debug(
-                            "Failed to mark grammar-refused source %s",
-                            c.source_id,
-                        )
-                continue
+                        _adopted = adopt_canonical_segment_order(_refused)
+                    except (ValueError, ValidationError):
+                        _adopted = None
+                if _adopted is not None:
+                    name_id = _worker_dependency("normalize_spelling")(_adopted.name)
+                    wlog.warning(
+                        "Pool %s: adopted canonical segment order for source=%s: "
+                        "%r -> %r",
+                        phase_tag,
+                        c.source_id,
+                        _refused,
+                        _adopted.name,
+                    )
+                else:
+                    # One candidate whose name cannot be composed is a per-source
+                    # outcome, not a batch failure: the grammar rejects what the
+                    # model proposed for THIS source, while every other candidate
+                    # in the same paid response is composable. Record the refusal
+                    # on the source and drop the candidate.
+                    #
+                    # Only the two errors a bad proposal produces are caught: a
+                    # ``ValueError`` from the ISN round-trip and a pydantic
+                    # ``ValidationError`` from the composer's own model. Anything
+                    # else is a defect in this code, and persisting it as the
+                    # source's terminal grammar refusal would retire the source
+                    # for a reason that is not about the source.
+                    _base_token = (
+                        getattr(getattr(c, "segments", None), "base_token", "") or ""
+                    )
+                    wlog.warning(
+                        "Pool %s: grammar validation refused source=%s (%s): %s",
+                        phase_tag,
+                        c.source_id,
+                        _base_token or "no base token",
+                        compose_exc,
+                    )
+                    if c.source_id:
+                        try:
+                            failed = _worker_dependency(
+                                "_mark_source_prevalidation_failed"
+                            )(
+                                c.source_id,
+                                source_type=source_kind,
+                                candidate_name=_base_token or "<uncompisable>",
+                                reason=f"grammar validation: {compose_exc}",
+                                claim_token=(source_item or {}).get("claim_token"),
+                                claim_seq=(source_item or {}).get("claim_seq"),
+                            )
+                            if failed:
+                                disposition_winner_ids.add(
+                                    f"{source_kind}:{c.source_id}"
+                                )
+                        except Exception:
+                            wlog.debug(
+                                "Failed to mark grammar-refused source %s",
+                                c.source_id,
+                            )
+                    continue
             # Provenance collapse: estimator facets of one quantity share the
             # canonical name (MERGE identity) regardless of per-facet drift.
             _pterm, _pbase = _worker_dependency("detect_value_provenance")(
