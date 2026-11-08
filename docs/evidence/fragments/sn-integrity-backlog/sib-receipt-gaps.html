@@ -34,6 +34,8 @@ is <strong>USD 0 against a USD 0 ceiling</strong>; these gates make no model cal
 <tr><td>Final regression file against original production code <code>0efd4cf508efc8b9a738435fbf79acc3b0ef6d2d</code></td><td><code>15 failed, 3 passed, 2 warnings in 13.79s</code>; <code>EXIT=1</code>.</td><td><code>baseline-final-regression.log</code></td></tr>
 <tr><td>Focused head: new receipt regressions, release verification, persist refusal and existing claim receipts</td><td><code>78 passed, 1 deselected, 1 warning in 21.82s</code>; <code>EXIT=0</code>.</td><td><code>head-final-focused.log</code></td></tr>
 <tr><td>Declared mutation: remove the release append</td><td><code>2 failed, 16 deselected, 1 warning in 12.45s</code>; <code>EXIT=1</code>. Both release tests fail, while both pass in the head arm.</td><td><code>negative-control.log</code></td></tr>
+<tr><td>Full standard-name baseline, including the initial regression matrix</td><td><code>12 failed, 8608 passed, 11 skipped, 142 warnings in 559.54s</code>; <code>EXIT=1</code>.</td><td><code>baseline-suite.log</code></td></tr>
+<tr><td>Full standard-name head at <code>4be454496bfa7c8ad80e3aa9bce6aac0fd2b81a4</code></td><td><code>1 failed, 8622 passed, 11 skipped, 142 warnings in 442.00s</code>; <code>EXIT=1</code>. The added failure count is <strong>1</strong>; the required zero-added-failure measure is unmet.</td><td><code>head-suite.log</code></td></tr>
 <tr><td>Final Cypher syntax check against Neo4j</td><td><code>parsed_statements=3</code>; <code>EXIT=0</code>. The client first returns the expected positive-control marker <code>731</code>.</td><td><code>explain-final.log</code></td></tr>
 </tbody>
 </table>
@@ -50,6 +52,6 @@ inside an isolated pytest process. It leaves repository source untouched. Graph
 fakes verify the receipt and source effects; live <code>EXPLAIN</code> verifies
 syntax without executing the writes. Release appends and ownership clearing use
 the same client in order; this change does not add a cross-statement transaction.
-The full standard-name head suite is still running and its comparison will be
-recorded here before delivery.</p>
+The full standard-name comparison is complete and records one added failing
+ID. The worker delivery is blocked on the zero-added-failure measure.</p>
 </section>
