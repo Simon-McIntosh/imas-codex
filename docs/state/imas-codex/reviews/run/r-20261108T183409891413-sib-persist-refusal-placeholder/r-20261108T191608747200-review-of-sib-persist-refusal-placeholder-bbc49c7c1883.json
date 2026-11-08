@@ -1,0 +1,113 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": [
+    {
+      "failure_condition": "The persister fails to request written ids or fails to establish the provisional pending target before invoking the writer; the database query is a positive control seeing the very target whose later absence is asserted.",
+      "lines": "54-61"
+    },
+    {
+      "failure_condition": "A refused source is returned as finalized, is not parked failed after its exhausted attempt, retains its token, or loses the concrete writer refusal; restoring batch abort or omitting mark_sources_failed fails these checks.",
+      "lines": "89,96-98"
+    },
+    {
+      "failure_condition": "Restoring the orphan-retirement omission leaves a pending database row and no removal receipt; both absence and receipt assertions fail independently of test input.",
+      "lines": "114,120"
+    },
+    {
+      "failure_condition": "Restoring unconditional deletion or removal of another source producer changes the surviving pending target or its independent producer query.",
+      "lines": "126"
+    },
+    {
+      "failure_condition": "Restoring unconditional reservation deletion strands positive-spend or catalog-authorized targets without the expected producer; base graph logs demonstrate both failures.",
+      "lines": "135-140"
+    },
+    {
+      "failure_condition": "Removing the retirement call prevents the planted post-retirement exception; committing retirement outside the parent transaction leaves a deletion receipt or source/target effects after abort.",
+      "lines": "150,159-165"
+    },
+    {
+      "failure_condition": "Returning a refused name as finalized, retaining its pending placeholder or token, or losing its actual grammar diagnostic fails direct real-writer graph readbacks; restoring retirement omission fails the pending-target assertion.",
+      "lines": "185-203"
+    }
+  ],
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/standard_names/graph_store/graph_catalog.py:2747 persist_generated_name_batch",
+    "imas_codex/standard_names/worker_tasks/worker_common.py:940 _withhold_binding_conflicted_sources",
+    "imas_codex/standard_names/worker_tasks/worker_compose_and_validate.py:939 compose_worker"
+  ],
+  "completed_at": "2026-11-08T19:24:02Z",
+  "dispatched_at": "2026-11-08T19:17:02Z",
+  "findings": [],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "Read cca4b224163a3283844bc1bb36a9adfb0fc7d462, 3fc1f9c87a86e96a846ba0e3e507a6e6db3d562c and bbc49c7c1883d92fab551a6629485b88592d093d against base 970dfd632251c81ca0402ab8a5a566f0d212e305; the changes comprise transactional cleanup, eight graph regression cases and the scoped evidence fragment.",
+    "done_when": "Read prompt.txt:103 and the graph, suite, retirement and census receipts; eight graph cases pass versus seven failures at base, two live targets are retired, drafts return from five to three, and the suite adds zero failure ids.",
+    "goal": "Read prompt.txt:41 and graph_catalog.py:2440; the refused candidate's exact reservation is removed and an unprotected pending orphan is retired transactionally while protected or shared targets keep a producer.",
+    "manifest": "Read manifest.md and its named logs; the eight-pass graph result, three-failure mutation control, complete suite arms, local commits and live retirement receipts are present, with historical generic last_error values explicitly preserved.",
+    "write_paths": "Read prompt.txt:79 and git diff --stat; all three changed paths are within the declared graph_catalog.py, test_persist_refusal_placeholder.py and evidence-fragment scope."
+  },
+  "justifications": {
+    "durability": "test_persist_refusal_placeholder.py:114 reads the actual post-write graph and fails when retirement is removed, while lines 131, 138 and 159 independently guard other producers, protected producers and rollback.",
+    "evidence": "writer-graph.log records 8 passed and negative-control.log records 3 failed, while baseline-suite-pinned.log and after-suite.log provide a zero added-id delta with the documented limitation that the baseline is an archive extraction with SOURCE_DATE_EPOCH rather than an identical worktree environment.",
+    "fit": "graph_catalog.py:2441 uses local imports and the existing transaction query adapter, with capability-based names and no new forbidden source labels.",
+    "goal_fidelity": "graph_catalog.py:2454 fences the release to the exact candidate and provenance_lifecycle.py:2132 records retirement in the supplied transaction, while retirement-marker.json records both historical targets as superseded from pending.",
+    "reuse": "Capability searches located and opened protection.py:85, provenance_lifecycle.py:2132 and test_persist_refusal_per_source.py:116; the change calls those owners and reuses their candidate/services helpers rather than duplicating protection, deletion or persistence setup.",
+    "scope_discipline": "The three paths in the 305-addition/8-deletion diff match prompt.txt's grants and the signed two-target retirement receipt implements the expressly authorized live-data cleanup."
+  },
+  "limitations": [
+    "Read-only review: no graph queries or suite reruns performed.",
+    "Historical source last_error remains generic by explicit evidence choice; newly exercised real-writer cases read concrete grammar reasons.",
+    "Default suite excludes graph tests; separate eight-case graph gate covers the changed Cypher.",
+    "Full suite head predates the later graph-only cases and documentation; committed product and final test hashes independently match the gate-input receipt."
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: Read prompt.txt:41 and graph_catalog.py:2440; the refused candidate's exact reservation is removed and an unprotected pending orphan is retired transactionally while protected or shared targets keep a producer.\nVERDICT done_when: Read prompt.txt:103 and the graph, suite, retirement and census receipts; eight graph cases pass versus seven failures at base, two live targets are retired, drafts return from five to three, and the suite adds zero failure ids.\nVERDICT write_paths: Read prompt.txt:79 and git diff --stat; all three changed paths are within the declared graph_catalog.py, test_persist_refusal_placeholder.py and evidence-fragment scope.\nVERDICT manifest: Read manifest.md and its named logs; the eight-pass graph result, three-failure mutation control, complete suite arms, local commits and live retirement receipts are present, with historical generic last_error values explicitly preserved.\nVERDICT diff: Read cca4b224163a3283844bc1bb36a9adfb0fc7d462, 3fc1f9c87a86e96a846ba0e3e507a6e6db3d562c and bbc49c7c1883d92fab551a6629485b88592d093d against base 970dfd632251c81ca0402ab8a5a566f0d212e305; the changes comprise transactional cleanup, eight graph regression cases and the scoped evidence fragment.\nCALL_SITES: imas_codex/standard_names/graph_store/graph_catalog.py:2747 persist_generated_name_batch, imas_codex/standard_names/worker_tasks/worker_common.py:940 _withhold_binding_conflicted_sources, imas_codex/standard_names/worker_tasks/worker_compose_and_validate.py:939 compose_worker\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: graph_catalog.py:2454 fences the release to the exact candidate and provenance_lifecycle.py:2132 records retirement in the supplied transaction, while retirement-marker.json records both historical targets as superseded from pending.\nSCORE evidence: 18\nJUSTIFICATION evidence: writer-graph.log records 8 passed and negative-control.log records 3 failed, while baseline-suite-pinned.log and after-suite.log provide a zero added-id delta with the documented limitation that the baseline is an archive extraction with SOURCE_DATE_EPOCH rather than an identical worktree environment.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The three paths in the 305-addition/8-deletion diff match prompt.txt's grants and the signed two-target retirement receipt implements the expressly authorized live-data cleanup.\nSCORE durability: 20\nJUSTIFICATION durability: test_persist_refusal_placeholder.py:114 reads the actual post-write graph and fails when retirement is removed, while lines 131, 138 and 159 independently guard other producers, protected producers and rollback.\nSCORE fit: 20\nJUSTIFICATION fit: graph_catalog.py:2441 uses local imports and the existing transaction query adapter, with capability-based names and no new forbidden source labels.\nSCORE reuse: 20\nJUSTIFICATION reuse: Capability searches located and opened protection.py:85, provenance_lifecycle.py:2132 and test_persist_refusal_per_source.py:116; the change calls those owners and reuses their candidate/services helpers rather than duplicating protection, deletion or persistence setup.\n",
+  "reuse_search": "Searched standard_names for pending-orphan retirement, deletion protections and persistence entry points, and opened protection.py, provenance_lifecycle.py and test_persist_refusal_per_source.py; all added test definitions extend the existing fixture and services capability with graph integration scenarios.",
+  "review_run_id": "r-20261108T191608747200-review-of-sib-persist-refusal-placeholder-bbc49c7c1883",
+  "reviewed_base_sha": "970dfd632251c81ca0402ab8a5a566f0d212e305",
+  "reviewed_head_sha": "bbc49c7c1883d92fab551a6629485b88592d093d",
+  "reviewed_run_id": "r-20261108T183409891413-sib-persist-refusal-placeholder",
+  "scores": {
+    "durability": 20,
+    "evidence": 18,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "self_referential_assertions": "none: expected names and claim tokens identify independently queried database state; no assertion compares two values that the implementation merely echoes from a shared supplied expectation.",
+  "status": "parsed",
+  "suite_evidence": {
+    "after_suite": {
+      "command": "uv run --no-sync pytest -p no:cacheprovider --basetemp /tmp/reckon-crew-scratch/r-20261108T183409891413-sib-persist-refusal-placeholder/after-suite-b0f3goz2/pytest -n 8 /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-persist-refusal-placeholder/tests/standard_names",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T183409891413-sib-persist-refusal-placeholder/after-suite.log",
+      "revision": "cca4b224163a3283844bc1bb36a9adfb0fc7d462"
+    },
+    "baseline_suite": {
+      "command": "env SOURCE_DATE_EPOCH=1794162689 uv run --no-sync pytest -p no:cacheprovider --basetemp /tmp/reckon-crew-scratch/r-20261108T183409891413-sib-persist-refusal-placeholder/baseline-suite-pinned-dtizgcvu/pytest -n 8 /tmp/reckon-crew-scratch/r-20261108T183409891413-sib-persist-refusal-placeholder/baseline-suite-pinned-dtizgcvu/tree/tests/standard_names",
+      "completed": true,
+      "exit_status": 1,
+      "failure_count": 2,
+      "failure_ids": [
+        "tests/standard_names/test_export_determinism.py::TestManifestDeterminism::test_no_commit_uses_stable_unversioned_timestamp",
+        "tests/standard_names/test_house_style_checks.py::test_line_form_equation_is_a_forbidden_variant"
+      ],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T183409891413-sib-persist-refusal-placeholder/baseline-suite-pinned.log",
+      "revision": "970dfd632251c81ca0402ab8a5a566f0d212e305"
+    }
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T19:30:39.363828+00:00",
+  "total": 118,
+  "verified_product_sha256": "863982bf0693d14dd31d6dbaab9a6f0a0323cf20421ee51eb805eddb0bdb5ebf",
+  "verified_tests_sha256": "18e0ccacf2fc35951c73327fddf6271e7f23665797727b0aea703fb666063f83"
+}
