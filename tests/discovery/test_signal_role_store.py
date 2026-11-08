@@ -152,7 +152,8 @@ class _RoleGraph:
 
 
 def _answer(role: str):
-    async def fake_decision(model, state, questions, *, service):
+    async def fake_decision(model, state, questions, *, service, record_release=None):
+        assert callable(record_release)
         assert questions["signal_role"]["type"] == "choice"
         return {"signal_role": {"choice": role}}, 0.003
 
@@ -206,7 +207,7 @@ def test_failed_judgement_stores_no_role(monkeypatch):
     sweep's population still names it, ready for the next run.
     """
 
-    async def failing_decision(model, state, questions, *, service):
+    async def failing_decision(model, state, questions, *, service, record_release=None):
         raise RuntimeError("decision endpoint refused")
 
     graph = _RoleGraph(

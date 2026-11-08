@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-signal-role-fakes">
+<title>Landing record — the signal-role decision fakes accept the release sink</title>
+</head>
+<body>
+<main>
+
+<h1 id="sib-signal-role-fakes-title">The signal-role decision fakes accept the release sink</h1>
+
+<p id="sib-signal-role-fakes-defect">The decisions batch passes a
+<code>record_release</code> sink to every call
+(<code>imas_codex/discovery/base/judgment.py:322</code>, added by
+<code>50bcd5a75</code> so the dated build that answered a call reaches its cost
+record). The four decision fakes in the signal-role tests still declared only
+<code>service</code> as a keyword, so each one raised before reaching any
+assertion it already held.</p>
+
+<p id="sib-signal-role-fakes-reproduction">Reproduced on the unmodified tree at
+<code>cedb8cad58</code> before the repair: <code>6 failed, 5 passed</code> in
+41.76s, every failure carrying
+<code>TypeError: _answer.&lt;locals&gt;.fake_decision() got an unexpected keyword
+argument 'record_release'</code> raised at
+<code>judgment.py:317 in _judge</code>. The six were
+<code>test_judge_accepts_choice_and_reports_response_cost</code>,
+<code>test_judge_refuses_choice_outside_six_roles</code>,
+<code>test_enrichment_stores_a_role_for_a_described_signal</code>,
+<code>test_failed_judgement_stores_no_role</code>,
+<code>test_out_of_set_judgement_stores_no_role</code> and
+<code>test_sweep_and_census_share_one_predicate</code>.</p>
+
+<p id="sib-signal-role-fakes-change">Each fake now names the keyword explicitly
+(<code>record_release=None</code>) rather than taking <code>**kwargs</code>, and
+the two fakes that return an answer assert
+<code>callable(record_release)</code>, so a batch that stopped passing the sink
+fails these tests instead of silently agreeing with the fake. Every assertion
+the fakes carried before is unchanged; no product source was touched.</p>
+
+<table id="sib-signal-role-fakes-arms">
+<thead>
+<tr><th>arm</th><th>command</th><th>result</th></tr>
+</thead>
+<tbody>
+<tr>
+<td>base, both files</td>
+<td><code>pytest tests/discovery/test_signal_role.py tests/discovery/test_signal_role_store.py</code></td>
+<td>6 failed, 5 passed (EXIT=1)</td>
+</tr>
+<tr>
+<td>head, both files</td>
+<td>same</td>
+<td>11 passed (EXIT=0)</td>
+</tr>
+<tr>
+<td>head, directory</td>
+<td><code>pytest tests/discovery</code></td>
+<td>1608 passed, 8 deselected (EXIT=0)</td>
+</tr>
+<tr>
+<td>negative control</td>
+<td><code>record_release</code> dropped from one fake's signature</td>
+<td>1 failed with the same <code>TypeError</code> (EXIT=1)</td>
+</tr>
+<tbody>
+</table>
+
+<p id="sib-signal-role-fakes-negative-control">With <code>record_release</code>
+removed from <code>fake_decision</code> in
+<code>tests/discovery/test_signal_role.py</code>,
+<code>test_judge_accepts_choice_and_reports_response_cost</code> fails with
+<code>TypeError: test_judge_accepts_choice_and_reports_response_cost.&lt;locals&gt;.fake_decision()
+got an unexpected keyword argument 'record_release'</code>, the same defect the
+base arm shows. The file was restored byte-for-byte afterwards and the head arm
+re-run.</p>
+
+<p id="sib-signal-role-fakes-cost">No model calls were made: every fake replaces
+<code>acall_decisions</code>, so the spend for this node is USD 0.</p>
+
+</main>
+</body>
+</html>

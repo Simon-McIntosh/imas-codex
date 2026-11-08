@@ -55,7 +55,9 @@ def test_state_uses_only_the_recorded_text() -> None:
 
 @pytest.mark.asyncio
 async def test_judge_accepts_choice_and_reports_response_cost(monkeypatch) -> None:
-    async def fake_decision(model, state, questions, *, service):
+    async def fake_decision(model, state, questions, *, service, record_release=None):
+        # The batch hands every call a sink for the dated build that served it.
+        assert callable(record_release)
         # The judge is handed each row's name, which is what decides the
         # name-keyed choice below; a path that sent the judge a state without
         # it would otherwise agree with whatever choice the branch produced.
@@ -95,7 +97,7 @@ async def test_judge_accepts_choice_and_reports_response_cost(monkeypatch) -> No
 
 @pytest.mark.asyncio
 async def test_judge_refuses_choice_outside_six_roles(monkeypatch) -> None:
-    async def fake_decision(model, state, questions, *, service):
+    async def fake_decision(model, state, questions, *, service, record_release=None):
         return {"signal_role": {"choice": "unknown"}}, 0.002
 
     monkeypatch.setattr(judgment, "acall_decisions", fake_decision)
