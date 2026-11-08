@@ -1,0 +1,105 @@
+<h2 id="sib-compose-batch-isolation">sib-compose-batch-isolation — one bad candidate or one dropped connection no longer fails a compose batch</h2>
+
+<p class="sib-compose-batch-isolation-status"><strong>Outcome: landed.</strong>
+A candidate whose name the grammar refuses, and a transient transport fault on the compose call,
+each failed the entire batch and discarded every candidate in a response that was already paid
+for. Both are per-source outcomes and neither now leaves the batch processor.</p>
+
+<h3 id="sib-compose-batch-isolation-census">The failures the full-DD run recorded</h3>
+
+<p>Read from <code>~/.cache/imas-codex-full-dd-run/sn-run-1308077.log</code>. Each entry is a
+<code>Pool generate_name: compose batch failed</code> line with its traceback; every one of the
+grammar class enters through the same call, <code>c.compose_name()</code> in
+<code>worker_compose_batches.py</code>.</p>
+
+<table>
+  <tr><th>class</th><th>entries</th><th>raised by</th></tr>
+  <tr><td>grammar refusal</td><td>32</td>
+      <td><code>compose_name()</code>: 27 <code>pydantic ValidationError</code>, 3
+          <code>ValueError</code> (ISN semantic-IR round-trip), 1
+          <code>_NonCanonicalParseError</code>, 1 <code>ParseError</code> (residue token)</td></tr>
+  <tr><td>transport fault</td><td>23</td><td><code>httpx.ReadError</code> from the compose call</td></tr>
+  <tr><td>other</td><td>3</td><td>2 <code>ValidationError</code> reaching
+      <code>_persist_dd_gap_evidence</code>, 1 <code>RuntimeError</code> from the rich
+      standard-name write</td></tr>
+</table>
+
+<p>The log was still being appended to when it was read, so the totals grow: the node's scoping
+recorded 35 entries (16 grammar, 15 connection) at the time of measurement, and the read above
+found 58. The proportions hold — the grammar class is the larger one and every member of both
+classes ends the batch. Representative grammar messages:</p>
+
+<ul>
+  <li><code>ValueError: ISN rejected operator chain ratio: name
+      'ratio_of_beam_launched_power_to_launched_power_due_to_neutral_beam_injection'
+      round-trips textually but changes the semantic IR</code></li>
+  <li><code>imas_standard_names.grammar.parser.ParseError: residue 'beta_angle' does not match any
+      physical_base or geometry_carrier; nearest candidates: ['tilt_angle', 'toroidal_angle',
+      'pitch_angle']</code></li>
+  <li><code>httpx.ReadError</code> raised through <code>httpcore</code> while receiving response
+      headers from the compose endpoint</li>
+</ul>
+
+<h3 id="sib-compose-batch-isolation-mechanism">The two mechanisms</h3>
+
+<p><b>Per-candidate grammar refusal.</b> <code>compose_name()</code> is now called behind a guard.
+A refusal is recorded on its own source through the existing pre-validation failure path — status
+<code>failed</code>, <code>last_error</code> carrying <code>candidate pre-validation failed
+(grammar validation: &lt;validator message&gt;): &lt;base token&gt;</code>, and the claim token and
+sequence from the batch item — and the candidate is dropped. The guard sits where the exception
+was already leaving the function, so the sibling candidates from the same response still reach the
+persist step.</p>
+
+<p><b>Transport fault.</b> The compose call now runs through
+<code>_acall_retrying_transport_faults</code>, which retries the LLM layer's own transient-fault
+set — <code>_transient_transport_errors()</code>, read from
+<code>imas_codex/discovery/base/llm.py</code> rather than restated, so the retried types cannot
+drift from the ones that seam already classifies as transient. That set covers
+<code>ConnectError</code>, <code>ConnectTimeout</code> and a message-less <code>ReadError</code>,
+and the builtin <code>TimeoutError</code> and <code>ConnectionError</code> the same seam sees
+through both clients. The policy is likewise imported:
+<code>DEFAULT_MAX_RETRIES</code> attempts at <code>DEFAULT_RETRY_BASE_DELAY</code> doubling each
+retry, and the fault needed its own loop because <code>acall_llm_structured</code> decides retryability
+from the error <em>message</em>: <code>ReadError</code> carries an empty string and
+<code>ConnectError</code> a host phrase its patterns do not match, so the exception left that loop
+on its first occurrence rather than being retried inside it.</p>
+
+<h3 id="sib-compose-batch-isolation-evidence">Evidence</h3>
+
+<p>The focused test is <code>tests/standard_names/test_compose_batch_isolation.py</code>, six
+cases over fakes: a refused candidate beside a valid sibling; the transport retry for
+<code>ConnectError</code>, <code>ConnectTimeout</code>, a message-less <code>ReadError</code> and the
+builtin <code>TimeoutError</code>; and a coupling case that narrows the LLM layer's
+<code>_transient_transport_errors()</code> in a scratch patch and requires the compose call to stop
+retrying a <code>ConnectError</code>, which is what makes the retry set the owner's rather than a
+copy of it.</p>
+
+<table>
+  <tr><th>arm</th><th>tree</th><th>result</th></tr>
+  <tr><td>head</td><td>this node's tree, commit <code>4e4ad7f87</code></td>
+      <td>6 passed</td></tr>
+  <tr><td>base</td><td><code>git archive a8b6be7c8</code> plus the new test file</td>
+      <td>3 failed — the batch raises <code>ValueError</code> / <code>httpx.ConnectError</code>
+          before any assertion</td></tr>
+  <tr><td>negative control</td><td>head module with the grammar guard removed</td>
+      <td>the isolation case fails, <code>EXIT=1</code></td></tr>
+  <tr><td>reuse control</td><td>tree exported from <code>4e4ad7f87</code> with the pre-repair
+      product module restored</td>
+      <td>2 failed, 4 passed: the coupling case and the builtin <code>TimeoutError</code> case,
+          because the local <code>httpx.TransportError</code> clause ignores the owner's set,
+          <code>EXIT=1</code></td></tr>
+</table>
+
+<p>The gate is <code>pytest tests/standard_names</code> on both arms. <b>Head (8541 passed, 11
+skipped, 460 deselected, 0 failed, <code>EXIT=0</code>)</b> against <b>base (8533 passed, 12
+skipped, 460 deselected, 7 failed, <code>EXIT=1</code>)</b>. No failure id is added: the head arm
+has none. Three of the base arm's seven are the three new cases, red as intended. The other four
+are an artefact of the base arm's tree — it was extracted with <code>git archive</code> into a
+scratch directory and is not a Git checkout, so the export's provenance stamp refuses with
+<em>run from an imas-codex Git checkout or set SOURCE_DATE_EPOCH</em>; the head arm runs inside a
+real worktree and passes the same four.</p>
+
+<p>After the reuse repair the narrower gate for this module is every test file that names
+<code>compose_batch</code> — thirteen files, <b>239 passed, 2 skipped, <code>EXIT=0</code></b> at
+<code>4e4ad7f87</code>. That selection is the one a change to the compose call can reach; the
+suite-wide arm above was measured before the repair and is not re-run for it.</p>
