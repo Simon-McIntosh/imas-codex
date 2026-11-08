@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="370">
+<meta name="plan-version" content="371">
 <meta name="plan-modified" content="2026-11-08">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -1206,6 +1206,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s50" data-id="c-run-r-20261107T200959160712-sib-full-dd-run" data-who="reckon-build" data-when="2026-11-07T21:34:38Z">
     <div class="r-comment-body"><p>Baseline provenance now resolves through stream items item_166/item_168/item_173/item_200 to runner blob 86163b3e8970287910772e7a3ee42bb1c3cd92fd; the runner calls the export owner and graph-activity owner, and a planted accepted-name source loss refuses. Positive test 1/1 and provenance EXIT=0; virtual-parent control EXIT=1 for all three findings. Original graph checkpoint and capped job 1308077 remain as recorded; node spend USD 0. Evidence: docs/evidence/fragments/sn-integrity-backlog/sib-full-dd-run.html.</p></div>
+</div>
+<div class="r-comment" data-section="s50" data-id="c-run-r-20261107T235040066718-review-of-sib-compose-batch-isolation-6046a68964b8" data-who="reckon-build" data-when="2026-11-08T00:04:56.053Z">
+    <div class="r-comment-body"><p>Independent review of r-20261107T222429046020-sib-compose-batch-isolation at base a8b6be7c8 / head 6046a6896 scores goal_fidelity 19, evidence 18, scope_discipline 20, durability 18, fit 18, reuse 5; added_failure_count 0 with no added failure ids derived from the run&#x27;s own baseline_suite (7 failed) and after_suite (0 failed) logs; two non-blocking findings (the transport retry duplicates the LLM layer&#x27;s type-first classification at imas_codex/discovery/base/llm.py:3342 and backoff loop instead of extending it; worker_compose_batches.py:654 catches every Exception so an unrelated programming error is persisted as a terminal grammar refusal) and no blocking finding.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261012T162346807302-review-of-sib-row-census" data-who="reckon-build" data-when="2026-10-12T16:39:58.712Z">
     <div class="r-comment-body"><p>reviewed r-20261012T145528571333-sib-row-census at a7a70db00 against c7b4c626e; total 93/120 (goal_fidelity 15, evidence 13, scope_discipline 19, durability 11, fit 15, reuse 20); two blocking findings — the landing record's verdict tallies and the manifest's row-count both disagree with the 38 rows the census file holds.</p></div>

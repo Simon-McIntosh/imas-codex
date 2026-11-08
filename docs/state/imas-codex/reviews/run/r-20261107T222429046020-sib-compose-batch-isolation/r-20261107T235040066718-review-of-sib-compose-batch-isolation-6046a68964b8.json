@@ -1,0 +1,55 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "imas_codex/standard_names/pool_adapter.py:86",
+    "imas_codex/standard_names/worker_tasks/worker_compose_batches.py:1242",
+    "imas_codex/standard_names/worker_tasks/__init__.py:138"
+  ],
+  "completed_at": "2026-11-08T00:04:56.053Z",
+  "dispatched_at": "2026-11-07T23:53:12Z",
+  "findings": [
+    {
+      "detail": "imas_codex/discovery/base/llm.py:3342 _decisions_retryable already decides a transport fault by its type before reading its text (via _transient_transport_errors), and the retry loop in acall_llm_structured owns the backoff. The added wrapper imports only the policy constants and re-implements the loop and its own isinstance(httpx.TransportError) classification in the compose caller, leaving the owner unchanged for every other acall_llm_structured caller. The addition duplicates rather than extends the owner. Non-blocking because the node's write fence excluded llm.py; the fold candidate is to extend _is_retryable/_decisions_retryable's type-first rule into the structured retry loop.",
+      "file": "imas_codex/standard_names/worker_tasks/worker_compose_batches.py",
+      "line": 23,
+      "severity": "non-blocking",
+      "summary": "_acall_retrying_transport_faults duplicates transport classification and exponential backoff that the LLM layer already owns, so other callers still give a message-less ReadError one attempt.",
+      "text": "non-blocking: _acall_retrying_transport_faults re-implements the transport classification already at imas_codex/discovery/base/llm.py:3342 and the backoff loop of acall_llm_structured instead of extending that owner."
+    },
+    {
+      "detail": "The except clause covers two calls, not only the grammar call: an AttributeError, TypeError or NameError raised by compose_name() or by normalize_spelling() is written to the source as status failed with last_error 'grammar validation: <unrelated error>' and the candidate is dropped. _mark_source_prevalidation_failed sets a terminal failed status, so a code defect would silently consume DD sources rather than appear in the batch's failure log. A narrower clause naming the grammar exception types (the ValueError family and the parser errors the evidence fragment lists) would keep the programming-error path loud.",
+      "file": "imas_codex/standard_names/worker_tasks/worker_compose_batches.py",
+      "line": 654,
+      "severity": "non-blocking",
+      "summary": "the new guard catches every Exception from normalize_spelling(compose_name()), so a defect in either records a source as a terminal grammar refusal instead of surfacing.",
+      "text": "non-blocking: worker_compose_batches.py:654 catches Exception around both normalize_spelling and compose_name, so an unrelated programming error is persisted as a source's terminal grammar refusal."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "compose_batch is called from imas_codex/standard_names/pool_adapter.py:86 and from process_compose_batch at worker_compose_batches.py:1242, and registered as a worker dependency at worker_tasks/__init__.py:138; the new retry wrapper is reached only from worker_compose_batches.py:379.",
+    "diff": "read commit by commit against base a8b6be7c8: 23cc661f3 adds the per-candidate grammar guard and the transport retry wrapper plus the test file, ecf4a7142 adds the evidence fragment, 6046a6896 adds the gate paragraphs to that fragment; no plan edit and no generated file.",
+    "done_when": "the done_when names tests/standard_names/test_compose_batch_isolation.py proving both behaviours on fakes and failing on base, tests/standard_names adding no failure id, USD 0; the manifest records base-focused.log 3 failed and gate-head.log 8541 passed 0 failed at EXIT=0.",
+    "goal": "the node goal is to keep a compose batch alive when one candidate fails grammar validation or the model call hits a transient connection error; worker_compose_batches.py:651 guards compose_name per candidate and :379 wraps the compose call in _acall_retrying_transport_faults, so both faults stay inside the batch.",
+    "manifest": "read; it records commits 23cc661f3, ecf4a7142 and 6046a6896, the gate command, its logs, baseline_suite with 7 failure ids and after_suite with 0, and attributes four base-arm failures to the git-archive extraction missing a provenance stamp.",
+    "write_paths": "declared paths are worker_compose_batches.py, tests/standard_names/test_compose_batch_isolation.py and the evidence fragment; git diff --name-status a8b6be7c8..6046a6896 lists exactly those three files and nothing else."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: read the node goal 'Keep a compose batch alive when one candidate fails grammar validation or the model call hits a transient connection error'; worker_compose_batches.py:651 guards compose_name per candidate and worker_compose_batches.py:379 wraps the compose call in a transport retry, and both faults are contained.\nVERDICT done_when: the done_when names tests/standard_names/test_compose_batch_isolation.py proving both behaviours on fakes and failing on base with no added suite failure; the manifest records base-focused.log (3 failed) and gate-head.log (8541 passed, 0 failed, EXIT=0).\nVERDICT write_paths: the manifest declares worker_compose_batches.py, tests/standard_names/test_compose_batch_isolation.py and the evidence fragment; git diff --name-status a8b6be7c8..6046a6896 shows exactly those three paths.\nVERDICT manifest: read; it records commits 23cc661f3, ecf4a7142, 6046a6896, the gate command and logs, baseline_suite with 7 failure ids and after_suite with 0, and attributes the four non-test base-arm failures to the extracted tree's missing git provenance stamp.\nVERDICT diff: read commit by commit against base a8b6be7c8; 23cc661f3 carries the two code mechanisms and the test, ecf4a7142 the evidence fragment, 6046a6896 the gate paragraphs in that fragment, with no plan edit and no generated file.\nCALL_SITES: imas_codex/standard_names/pool_adapter.py:86, imas_codex/standard_names/worker_tasks/worker_compose_batches.py:1242, imas_codex/standard_names/worker_tasks/__init__.py:138\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: worker_compose_batches.py:651 drops one refused candidate while its siblings reach the persist step, and worker_compose_batches.py:379 retries httpx.TransportError under the imported LLM policy constants.\nSCORE evidence: 18\nJUSTIFICATION evidence: gate-head.log ends EXIT=0 with 8541 passed and base-focused.log ends EXIT=1 with the three new cases red, though the suite arms ran at 23cc661f3 rather than the docs-only reviewed head 6046a6896.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-status a8b6be7c8..6046a6896 lists only the three declared paths and the fragment is the landing record the node is permitted to write.\nSCORE durability: 18\nJUSTIFICATION durability: negative_control.log shows TestGrammarRefusalIsolation red with the guard removed, and base-focused.log shows all three cases red on a8b6be7c8, so each assertion names the regression it catches.\nSCORE fit: 18\nJUSTIFICATION fit: the guard at worker_compose_batches.py:654 reuses the surrounding _mark_source_prevalidation_failed plus disposition_winner_ids idiom used at worker_compose_batches.py:700, and no name carries a plan label.\nSCORE reuse: 5\nJUSTIFICATION reuse: _acall_retrying_transport_faults at worker_compose_batches.py:23 duplicates the type-first transport classification already owned by imas_codex/discovery/base/llm.py:3342 and the backoff loop of acall_llm_structured without extending either.\nFINDING imas_codex/standard_names/worker_tasks/worker_compose_batches.py:23 non-blocking: _acall_retrying_transport_faults re-implements the transport classification at imas_codex/discovery/base/llm.py:3342 and the backoff loop of acall_llm_structured instead of extending that owner, so other callers still give a message-less ReadError one attempt.\nFINDING imas_codex/standard_names/worker_tasks/worker_compose_batches.py:654 non-blocking: the guard catches every Exception from normalize_spelling(compose_name()), so an unrelated programming error is persisted as a source's terminal grammar refusal instead of surfacing.\n",
+  "review_run_id": "r-20261107T235040066718-review-of-sib-compose-batch-isolation-6046a68964b8",
+  "reviewed_base_sha": "a8b6be7c8256c08bdb78cb08bd10dededd95430c",
+  "reviewed_head_sha": "6046a68964b85f92209fb40a68a914218b4e0691",
+  "reviewed_run_id": "r-20261107T222429046020-sib-compose-batch-isolation",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T00:25:03.174764+00:00",
+  "total": 98
+}
