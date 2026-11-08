@@ -1,0 +1,93 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "the reviewed run recorded no baseline arm (its manifest carries neither baseline_suite nor after_suite); its only suite log is the focused gate at after-suite.log, which ends 168 passed, 2 skipped, EXIT=0 with zero FAILED ids, so no failure id is added on the evidence that exists and none could be added on an arm that was not run.",
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/standard_names/graph_store/graph_source_bindings.py:1483 persist_claimed_source_outcomes (from worker_common.py:1084, worker_extraction_and_enrichment.py:741,1598)",
+    "imas_codex/standard_names/graph_store/graph_source_bindings.py:1654 persist_claimed_attachments (from worker_extraction_and_enrichment.py:1467)",
+    "imas_codex/standard_names/graph_store/graph_source_bindings.py:1010 _lock_claimed_name_bindings (from graph_catalog.py:2307)",
+    "imas_codex/standard_names/orphan_sweep.py:194 _orphan_sweep_tick",
+    "imas_codex/standard_names/worker_tasks/worker_compose_batches.py:1251 compose_batch (from pool_adapter.py:86)"
+  ],
+  "completed_at": "2026-11-08T11:31:39.886Z",
+  "dispatched_at": "2026-11-08T11:18:37Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_attempt_cap_disposition.py",
+      "line": "125",
+      "severity": "non-blocking",
+      "text": "this file, tests/standard_names/test_failed_source_reason.py:142 and tests/standard_names/test_generate_name_persist.py:537 were edited outside the declared write paths, so the node's declared fence does not describe the change; the edits are small stub and statement-count updates forced by the new append and are disclosed in the manifest's outside_scope field, but the fence was never extended to cover them."
+    },
+    {
+      "file": "imas_codex/standard_names/orphan_sweep.py",
+      "line": "201",
+      "severity": "non-blocking",
+      "text": "nothing asserts that _orphan_sweep_tick issues the capped append: test_attempt_cap_disposition.py:125 answers a StandardNameSourceClaimAttempt query but no test reads stub.queries for it, so deleting this call leaves all 23 node tests green and the capped outcome silently stops being recorded on the sweep path."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-claim-outcome-receipts.html",
+      "line": "87",
+      "severity": "non-blocking",
+      "text": "the fragment states the receipt and the ending are one unit of work, but only the produced append at graph_source_bindings.py:1708 runs inside the ending transaction; the stored-status, released and capped appends are separate autocommit statements issued before an ending statement that can still match no row, so the claim is true of one of five writers and a reader auditing durability is misled."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-claim-outcome-receipts.html",
+      "line": "88",
+      "severity": "non-blocking",
+      "text": "the fragment says a sweep-parked source carries no live sequence and is keyed on attempt-N, but orphan_sweep.py:130-135 returns s.claim_seq and does not clear it, so _capped_claim_entries keys the receipt on the sequence and the attempt-keyed form is reached only when claim_seq is null, which is the case only test_an_unclaimed_source_keys_its_receipt_on_the_attempt exercises."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_source_bindings.py",
+      "line": "50",
+      "severity": "non-blocking",
+      "text": "item.get('claim_outcome') is read as an override but no writer in the repository sets that key, so the branch is dead and the outcome is decided solely by the status map, which hides from a reader that a caller could once have overridden it and is untested by the parametrised status tests."
+    },
+    {
+      "file": "imas_codex/standard_names/AGENTS.md",
+      "line": "86",
+      "severity": "non-blocking",
+      "text": "the relationship table enumerates every StandardNameSource edge including HAS_RETRY_EVENT but not the new HAS_CLAIM_ATTEMPT, so the repository's own graph map omits the relationship this node adds; the file is outside the node's write scope, so the omission could not be repaired here and needs a home in a later node."
+    }
+  ],
+  "gate_sources": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T084737359779-sib-claim-outcome-receipts/after-suite.log",
+    "baseline_suite": null
+  },
+  "item_verdicts": {
+    "diff": "read all four commits against base 96d64ea: 3882c8f7e adds the schema class, enum and append stanza, 915d3778a rewrites the batch-failure proof to drive the graph double, cd39d8612 adds the landing fragment, and c93bff3 carries claim_seq into the entry and repairs the fence the previous review found blocking.",
+    "done_when": "the done_when's proof that each outcome is on fakes and that a source failed five times holds five entries is tests/standard_names/test_claim_outcome_receipts.py, which passes 22/22 at the reviewed head, but its clause that tests/standard_names adds no failure id against main is unmeasured: the manifest records no baseline arm and its only suite log, after-suite.log, is a 12-file focused gate.",
+    "goal": "the node goal is to record every compose claim's outcome on its StandardNameSource; graph_source_bindings.py:1502, :1429 and :1708, orphan_sweep.py:201 and worker_compose_batches.py:1251 each append one StandardNameSourceClaimAttempt before the claim ends, but claims released by graph_claim_release.py:release_generate_name_claims still write no receipt, so 'every' is not yet true.",
+    "manifest": "read; it names commits 3882c8f7e, 915d3778a, cd39d8612 and c93bff3f3, the focused gate at 168 passed 2 skipped EXIT=0, node tests at 22 passed, a -m graph arm at 1 passed, two negative controls at 12 failed and 1 failed, and carries neither baseline_suite nor after_suite.",
+    "write_paths": "the manifest declares eight write paths; git diff 96d64ea..c93bff3 changes ten files, and tests/standard_names/test_attempt_cap_disposition.py, test_failed_source_reason.py and test_generate_name_persist.py are outside that set and are disclosed in the manifest's outside_scope field rather than covered by a granted path."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_claim_outcome_receipts.py drives each writer through _FakeGraphClient, which re-implements the fence so a dropped claim_seq writes nothing (12 tests red, negative-control.log), and the -m graph arm proves the real statement refuses a stale sequence; but no assertion covers orphan_sweep.py:201, so removing the capped append leaves 23 tests green.",
+    "evidence": "after-suite.log ends 168 passed, 2 skipped, EXIT=0 and negative-control.log ends 12 failed then EXIT=1, both recorded, but the done_when's no-added-failure clause over tests/standard_names is measured nowhere because no baseline arm was run.",
+    "fit": "graph_cost_and_claims.py:697-797 follows the module's Final constants and #: comment idiom and worker_compose_batches.py:53's best-effort warning matches the pool's logging style, though graph_source_bindings.py:50 keeps a claim_outcome branch no writer sets.",
+    "goal_fidelity": "graph_source_bindings.py:1708 writes the produced receipt inside the attach transaction and :1429/:1502 write released and stored-status outcomes, but graph_claim_release.py:release_generate_name_claims releases compose claims with no entry, so the goal's 'every compose claim' is not met.",
+    "reuse": "the search over imas_codex/standard_names and imas_codex/graph found no owner of a per-claim outcome census; the nearest, StandardNameSourceRetry at imas_codex/schemas/standard_name.yaml:3530, records operator-granted recovery audits and is neither extended nor duplicated, and all five writers call the one append stanza rather than repeating it.",
+    "scope_discipline": "tests/standard_names/test_generate_name_persist.py:537, test_failed_source_reason.py:142 and test_attempt_cap_disposition.py:125 were edited outside the three-product-file-and-one-test-file fence, and the rest of the diff stays inside it."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to record every compose claim's outcome on its StandardNameSource; graph_source_bindings.py:1502, :1429 and :1708, orphan_sweep.py:201 and worker_compose_batches.py:1251 append one StandardNameSourceClaimAttempt per ended claim, but a claim released by graph_claim_release.py leaves none, so 'every' is not yet true.\nVERDICT done_when: the fakes proof and the five-entries proof are in tests/standard_names/test_claim_outcome_receipts.py and pass 22/22 at the reviewed head, but the clause that tests/standard_names adds no failure id against main is unmeasured because the run recorded no baseline arm and after-suite.log is a 12-file focused gate.\nVERDICT write_paths: the manifest declares eight paths and the diff changes ten files; tests/standard_names/test_attempt_cap_disposition.py, test_failed_source_reason.py and test_generate_name_persist.py sit outside that set and are disclosed under outside_scope instead of a granted path.\nVERDICT manifest: read; it names four commits, the focused gate at 168 passed 2 skipped EXIT=0, node tests at 22 passed, the -m graph arm at 1 passed and two negative controls at 12 failed and 1 failed, and it carries no baseline_suite or after_suite key.\nVERDICT diff: read all four commits against base 96d64ea; 3882c8f7e adds the schema class enum and append stanza, 915d3778a drives the batch-failure proof through the graph double, cd39d8612 adds the fragment, and c93bff3f3 carries claim_seq into the entry and repairs the fence the previous review found blocking.\nCALL_SITES: imas_codex/standard_names/graph_store/graph_source_bindings.py:1483 persist_claimed_source_outcomes (from worker_common.py:1084, worker_extraction_and_enrichment.py:741,1598); imas_codex/standard_names/graph_store/graph_source_bindings.py:1654 persist_claimed_attachments (from worker_extraction_and_enrichment.py:1467); imas_codex/standard_names/graph_store/graph_source_bindings.py:1010 _lock_claimed_name_bindings (from graph_catalog.py:2307); imas_codex/standard_names/orphan_sweep.py:194 _orphan_sweep_tick; imas_codex/standard_names/worker_tasks/worker_compose_batches.py:1251 compose_batch (from pool_adapter.py:86)\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: graph_source_bindings.py:1708 writes the produced receipt inside the attach transaction and :1429/:1502 write released and stored-status outcomes, but graph_claim_release.py:release_generate_name_claims releases compose claims with no entry, so the goal's 'every compose claim' is not met.\nSCORE evidence: 12\nJUSTIFICATION evidence: after-suite.log ends 168 passed, 2 skipped, EXIT=0 and negative-control.log ends 12 failed then EXIT=1, both recorded, but the done_when's no-added-failure clause over tests/standard_names is measured nowhere because no baseline arm was run.\nSCORE scope_discipline: 12\nJUSTIFICATION scope_discipline: tests/standard_names/test_generate_name_persist.py:537, test_failed_source_reason.py:142 and test_attempt_cap_disposition.py:125 were edited outside the three-product-file-and-one-test-file fence, and the rest of the diff stays inside it.\nSCORE durability: 15\nJUSTIFICATION durability: tests/standard_names/test_claim_outcome_receipts.py drives each writer through _FakeGraphClient, which re-implements the fence so a dropped claim_seq writes nothing (12 tests red, negative-control.log), and the -m graph arm proves the real statement refuses a stale sequence; but no assertion covers orphan_sweep.py:201, so removing the capped append leaves 23 tests green.\nSCORE fit: 17\nJUSTIFICATION fit: graph_cost_and_claims.py:697-797 follows the module's Final constants and #: comment idiom and worker_compose_batches.py:53's best-effort warning matches the pool's logging style, though graph_source_bindings.py:50 keeps a claim_outcome branch no writer sets.\nSCORE reuse: 19\nJUSTIFICATION reuse: the search over imas_codex/standard_names and imas_codex/graph found no owner of a per-claim outcome census; the nearest, StandardNameSourceRetry at imas_codex/schemas/standard_name.yaml:3530, records operator-granted recovery audits and is neither extended nor duplicated, and all five writers call the one append stanza rather than repeating it.\nFINDING tests/standard_names/test_attempt_cap_disposition.py:125 non-blocking: this file, tests/standard_names/test_failed_source_reason.py:142 and tests/standard_names/test_generate_name_persist.py:537 were edited outside the declared write paths, so the node's declared fence does not describe the change; the edits are small stub and statement-count updates forced by the new append and are disclosed in the manifest's outside_scope field, but the fence was never extended to cover them.\nFINDING imas_codex/standard_names/orphan_sweep.py:201 non-blocking: nothing asserts that _orphan_sweep_tick issues the capped append: test_attempt_cap_disposition.py:125 answers a StandardNameSourceClaimAttempt query but no test reads stub.queries for it, so deleting this call leaves all 23 node tests green and the capped outcome silently stops being recorded on the sweep path.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-claim-outcome-receipts.html:87 non-blocking: the fragment states the receipt and the ending are one unit of work, but only the produced append at graph_source_bindings.py:1708 runs inside the ending transaction; the stored-status, released and capped appends are separate autocommit statements issued before an ending statement that can still match no row, so the claim is true of one of five writers and a reader auditing durability is misled.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-claim-outcome-receipts.html:88 non-blocking: the fragment says a sweep-parked source carries no live sequence and is keyed on attempt-N, but orphan_sweep.py:130-135 returns s.claim_seq and does not clear it, so _capped_claim_entries keys the receipt on the sequence and the attempt-keyed form is reached only when claim_seq is null, which is the case only test_an_unclaimed_source_keys_its_receipt_on_the_attempt exercises.\nFINDING imas_codex/standard_names/graph_store/graph_source_bindings.py:50 non-blocking: item.get('claim_outcome') is read as an override but no writer in the repository sets that key, so the branch is dead and the outcome is decided solely by the status map, which hides from a reader that a caller could once have overridden it and is untested by the parametrised status tests.\nFINDING imas_codex/standard_names/AGENTS.md:86 non-blocking: the relationship table enumerates every StandardNameSource edge including HAS_RETRY_EVENT but not the new HAS_CLAIM_ATTEMPT, so the repository's own graph map omits the relationship this node adds; the file is outside the node's write scope, so the omission could not be repaired here and needs a home in a later node.\n",
+  "review_run_id": "r-20261108T111615362188-review-of-sib-claim-outcome-receipts-c93bff3f3709",
+  "reviewed_base_sha": "96d64ea46391e6eb82d4d2676b96cad62f34c287",
+  "reviewed_head_gate_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T111615362188-review-of-sib-claim-outcome-receipts-c93bff3f3709/review-node-tests.log",
+  "reviewed_head_sha": "c93bff3f37092f3cda76dd39e90797ca3c3cc549",
+  "reviewed_run_id": "r-20261108T084737359779-sib-claim-outcome-receipts",
+  "scores": {
+    "durability": 15,
+    "evidence": 12,
+    "fit": 17,
+    "goal_fidelity": 16,
+    "reuse": 19,
+    "scope_discipline": 12
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T11:28:04.925369+00:00",
+  "total": 91
+}
