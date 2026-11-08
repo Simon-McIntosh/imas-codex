@@ -36,6 +36,13 @@
     }
   },
   "dispatched_at": "2026-11-08T10:14:09Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "sib-claim-outcome-receipts",
+      "recorded_at": "2026-11-08T11:19:51.066684+00:00"
+    }
+  },
   "findings": [
     {
       "file": "imas_codex/standard_names/graph_store/graph_cost_and_claims.py",
