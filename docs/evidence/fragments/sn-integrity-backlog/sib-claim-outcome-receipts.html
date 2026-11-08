@@ -1,0 +1,77 @@
+<section id="sib-claim-outcome-receipts">
+<h2>sib-claim-outcome-receipts — every ended claim writes its outcome on the source</h2>
+<p>A composition claim could end without leaving any per-attempt record. The
+source carried a single <code>last_error</code>, overwritten by whichever writer
+touched it last, so a failure census could not tell five refusals from one, nor
+a batch that raised from a source that was genuinely refused. This node adds
+<code>StandardNameSourceClaimAttempt</code>, an append-only receipt reached from
+the source by <code>HAS_CLAIM_ATTEMPT</code>, and writes one entry inside each
+claim-ending statement.</p>
+
+<table>
+  <thead>
+    <tr><th>Claim-ending writer</th><th>Outcome written</th><th>Where</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Produced-name attachment (candidate binds and the source attaches)</td>
+      <td><code>produced</code></td>
+      <td><code>graph_source_bindings.py</code>, the winner attach statement</td>
+    </tr>
+    <tr>
+      <td>Pre-validation and persist refusal writer
+        (<code>_mark_source_prevalidation_failed</code> routes here)</td>
+      <td><code>refused</code></td>
+      <td><code>graph_source_bindings.py</code>, <code>persist_claimed_source_outcomes</code></td>
+    </tr>
+    <tr>
+      <td>Binding and attachment refusal release</td>
+      <td><code>released</code></td>
+      <td><code>graph_source_bindings.py</code>, the collision-release statement</td>
+    </tr>
+    <tr>
+      <td>Batch failure (the paid batch raised before any per-source verdict)</td>
+      <td><code>batch_failed</code></td>
+      <td><code>worker_compose_batches.py</code>, <code>compose_batch</code>'s except path</td>
+    </tr>
+    <tr>
+      <td>Attempt-cap parking sweep</td>
+      <td><code>capped</code></td>
+      <td><code>orphan_sweep.py</code>, the <code>compose_attempt_cap</code> statement</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Writers left out, and why</h3>
+<ul>
+  <li><strong><code>release_generate_name_claims</code> /
+    <code>release_generate_name_failed_claims</code></strong>
+    (<code>graph_claim_release.py</code>, called from
+    <code>worker_common.py</code>) releases a claim for retry on the empty-
+    description and worker-failure paths. It is outside this node's write scope,
+    so it appends no receipt; a claim it releases reads as an attempt with no
+    outcome entry until a later node or the sweep accounts for it.</li>
+  <li><strong><code>graph_catalog.py</code>'s <code>PRODUCED_NAME</code> merge</strong>
+    is claimed by the sibling node <code>sib-persist-refusal-per-source</code>,
+    so this node leaves it untouched. The produced outcome is recorded at the
+    attach statement in <code>graph_source_bindings.py</code>, which is the
+    fenced writer that ends the claim.</li>
+</ul>
+
+<h3>Bounded, append-only, and fenced</h3>
+<p>The entry identity is <code>claim-attempt:{source}:{claim_seq}:{outcome}</code>.
+A source holds one claim per sequence number, so the MERGE is idempotent under
+a deadlock-retried write, and the record is bounded by the claim-attempt cap: a
+source that fails five times holds five entries and is then parked
+<code>capped</code>. The standalone writer fenced on
+<code>claim_token</code>/<code>claim_seq</code>, so a delayed duplicate worker
+cannot append a receipt to a claim it no longer holds.</p>
+
+<h3>Negative control</h3>
+<p>The declared mutation removes the append from the batch-failure release. Run
+against it, <code>test_compose_batch_records_the_receipt_before_it_reraises</code>
+fails and the run exits non-zero. The first version of the tests survived that
+mutation — they exercised the helper directly — which is why the guard now
+asserts the call sits inside <code>compose_batch</code>'s except block ahead of
+its re-raise.</p>
+</section>
