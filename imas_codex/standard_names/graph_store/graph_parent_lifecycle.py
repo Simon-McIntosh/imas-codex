@@ -11,7 +11,11 @@ from typing import Any
 from imas_codex.discovery.base.claims import retry_on_deadlock
 
 from . import graph_foundation as foundation
-from .graph_foundation import _CLAIM_TIMEOUT_SECONDS, DEFAULT_POOL_BATCH_SIZE
+from .graph_foundation import (
+    _CLAIM_TIMEOUT_SECONDS,
+    DEFAULT_POOL_BATCH_SIZE,
+    source_claim_predicate,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -107,6 +111,11 @@ def pool_pending_counts(
         "max_compose_attempts": services._MAX_COMPOSE_CLAIM_ATTEMPTS,
         "parent_desc_placeholder": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
     }
+    # Count only the sources the generate_name claim can select: a source with
+    # no DD path, or already bound to a frozen produced name, is never claimed,
+    # and counting it keeps the exit watchdog open until the stall timer fires.
+    params["frozen_name_stages"] = list(services._PIPELINE_FROZEN_NAME_STAGES)
+    source_claim_where = "AND " + source_claim_predicate(alias="s")
     if domain:
         source_scope += " AND s.physics_domain = $domain"
         name_scope += " AND sn.physics_domain = $domain"
@@ -136,6 +145,7 @@ def pool_pending_counts(
     cypher = f"""
     CALL {{ MATCH (s:StandardNameSource {{status: 'extracted'}})
            WHERE coalesce(s.attempt_count, 0) < $max_compose_attempts
+             {source_claim_where}
              {source_scope}
            RETURN count(s) AS generate_name }}
     CALL {{ MATCH (sn:StandardName {{name_stage: 'drafted'}})

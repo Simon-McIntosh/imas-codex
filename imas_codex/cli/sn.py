@@ -593,6 +593,11 @@ def _compute_pool_progress(
         docs_review_eligibility_params,
         docs_review_eligibility_where,
     )
+    from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        _MAX_COMPOSE_CLAIM_ATTEMPTS,
+        _PIPELINE_FROZEN_NAME_STAGES,
+        source_claim_predicate,
+    )
     from imas_codex.standard_names.graph_store.graph_refinement import (
         REFINE_NAME_ATTEMPTS_SPENT,
     )
@@ -608,10 +613,16 @@ def _compute_pool_progress(
     )
     docs_review_eligible = docs_review_eligibility_where()
 
+    # Count only the sources the generate_name claim can select: a source with
+    # no DD path, or already bound to a frozen produced name, is never claimed,
+    # and counting it keeps the exit watchdog open until the stall timer fires.
+    source_claim_where = "AND " + source_claim_predicate(alias="s")
+
     query = f"""
     CALL {{
       MATCH (s:StandardNameSource {{status: 'extracted'}})
       WHERE coalesce(s.attempt_count, 0) < $max_compose_attempts
+        {source_claim_where}
         {domain_filter_src}
         {pending_filter_src}
       RETURN count(s) AS generate_name
@@ -755,11 +766,9 @@ def _compute_pool_progress(
         "drain_scope_id": drain_scope_id,
         **docs_review_eligibility_params(),
     }
-    from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
-        _MAX_COMPOSE_CLAIM_ATTEMPTS,
-    )
 
     params["max_compose_attempts"] = _MAX_COMPOSE_CLAIM_ATTEMPTS
+    params["frozen_name_stages"] = list(_PIPELINE_FROZEN_NAME_STAGES)
     if domains:
         params["domains"] = list(domains)
     if scope_run_id:
