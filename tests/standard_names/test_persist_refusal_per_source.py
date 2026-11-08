@@ -134,6 +134,9 @@ def _services(graph: RefusalGraph, written: list[str]) -> SimpleNamespace:
     services._lock_claimed_name_bindings = lambda *args, **kwargs: (
         bindings._lock_claimed_name_bindings(*args, services=services, **kwargs)
     )
+    services.mark_sources_failed = lambda *args, **kwargs: bindings.mark_sources_failed(
+        *args, services=services, **kwargs
+    )
     return services
 
 

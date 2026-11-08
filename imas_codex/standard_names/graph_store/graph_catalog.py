@@ -2670,13 +2670,10 @@ def persist_generated_name_winners(
     # count and records the reason, so the refusal is attributable per source
     # and the next failure census can read it rather than guess.
     for refusal in refusals:
-        from . import graph_source_bindings as bindings
-
-        bindings.mark_sources_failed(
+        services.mark_sources_failed(
             refusal["claim_token"],
             [refusal["sns_id"]],
             refusal["reason"],
-            services=services,
         )
         logger.warning(
             "persist_generated_name_winners: released %s after a rich-write "
