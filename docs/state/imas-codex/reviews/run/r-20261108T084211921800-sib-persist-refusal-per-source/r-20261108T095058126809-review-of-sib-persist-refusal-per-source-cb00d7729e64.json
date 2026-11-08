@@ -1,0 +1,88 @@
+{
+  "added_failure_count": 1,
+  "added_failure_ids": [
+    "test_review_quorum_pool.py::test_names_batch_response_is_unwrapped"
+  ],
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/standard_names/graph_store/graph_catalog.py:2622 persist_generated_name_batch calls persist_generated_name_winners",
+    "imas_codex/standard_names/worker_tasks/worker_common.py:938 persist path calls persist_generated_name_batch",
+    "imas_codex/standard_names/worker_tasks/worker_common.py:1041 persist path calls persist_generated_name_batch",
+    "imas_codex/standard_names/worker_tasks/worker_compose_and_validate.py:901 compose worker calls persist_generated_name_batch",
+    "imas_codex/standard_names/worker_tasks/worker_compose_and_validate.py:939 compose worker calls persist_generated_name_batch"
+  ],
+  "completed_at": "2026-11-08T10:03:36.451Z",
+  "dispatched_at": "2026-11-08T09:53:02Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-persist-refusal-per-source.html",
+      "line": "57",
+      "severity": "non-blocking",
+      "text": "non-blocking: the prose says the abort came from the count comparison `written_names != len(rich_write_candidates)`, but that branch is unreachable here (the call passes return_written_ids=True and write_standard_names then returns a list); the run's own traceback at revision 2f0a49c1 lands on line 2374, the `len(finalize_batch) != len(locked_candidates)` raise, so the fragment names a dead branch as the cause."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-persist-refusal-per-source.html",
+      "line": "164",
+      "severity": "non-blocking",
+      "text": "non-blocking: the delta prose says the two ids that fail at head and not at base were re-run and both pass, but test_house_style_checks.py::test_audit_report_carries_the_conformance_findings fails in both arms (baseline-suite.log and after-suite.log), so only test_review_quorum_pool.py::test_names_batch_response_is_unwrapped is head-only and the sentence overstates the re-run set."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_catalog.py",
+      "line": "2436",
+      "severity": "non-blocking",
+      "text": "non-blocking: the new inline Cypher deletes the refused source's provisional PRODUCED_NAME edge, duplicating the stale-reservation cleanup _lock_claimed_name_bindings already performs at graph_source_bindings.py:1303 for a reclaiming source; the next attempt's lock would drop the same edge, so this is a second implementation of an owned capability rather than an extension of it."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_catalog.py",
+      "line": "2409",
+      "severity": "non-blocking",
+      "text": "non-blocking: the last_error it writes names the candidate but not the writer's actual refusal (grammar-parse rejection versus unit conflict), which reaches the log only as a writer WARNING, so a per-source census reading last_error cannot tell a permanent grammar refusal from a unit mismatch."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_ops.py",
+      "line": "191",
+      "severity": "non-blocking",
+      "text": "non-blocking: one line landed outside the node's exclusive write paths, adding mark_sources_failed to _WIRED_SERVICE_NAMES; the store's facade-closure test requires it for the new collaborator read and the manifest declares it under outside_scope, so it needs the coordinator's confirmation that no peer owns this file."
+    }
+  ],
+  "gate_sources": {
+    "after_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T084211921800-sib-persist-refusal-per-source/logs/after-suite.log",
+    "baseline_suite": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T084211921800-sib-persist-refusal-per-source/logs/baseline-suite.log",
+    "head": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T084211921800-sib-persist-refusal-per-source/logs/head.log",
+    "negative_control": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T084211921800-sib-persist-refusal-per-source/logs/negative-control.log"
+  },
+  "item_verdicts": {
+    "call_sites": "pass \u2014 five production call sites read: graph_catalog.py:2622 (persist_generated_name_batch) and its four worker callers in worker_common.py and worker_compose_and_validate.py.",
+    "diff": "pass \u2014 read commit by commit from 96d64ea46 to cb00d7729; a51f5e8aa replaces the batch-level raise with per-source attribution and an in-transaction reservation drop, dcf4dc3fc then dc515086a settle how the failure writer is reached and add the one-line wiring, and cb00d7729 adds the evidence fragment.",
+    "done_when": "pass \u2014 the done_when names tests/standard_names/test_persist_refusal_per_source.py plus a reading of the SLURM 1308283 log; the file is red at the restored base module (negative-control.log: 4 failed, 1 passed, EXIT=1, four RuntimeError lines) and green at head (head.log: 5 passed inside a 40-passed run, EXIT=0), and I independently re-counted the run log: 23 aborts, 23 'rejecting' lines, 23 'Grammar gate: 0/1', 0 'Unit conflicts detected', across the five spellings the fragment lists (9/6/4/3/1).",
+    "goal": "pass \u2014 the node goal asks that a rich-write refusal of one exact-claim winner be recorded against its source instead of aborting the compose pool; imas_codex/standard_names/graph_store/graph_catalog.py:2396-2417 now identifies each locked winner the writer did not return, records it as a per-source refusal and continues, and the remaining winners finalize.",
+    "manifest": "pass \u2014 the manifest is status complete and records commits a51f5e8aa, dcf4dc3fc, dc515086a, cb00d7729, the literal gate command, five log paths, both suite arms with ids, and a negative-control log that carries EXIT=1.",
+    "write_paths": "pass \u2014 the reviewed manifest grants graph_catalog.py, the new test file, the evidence fragment and a figures directory; git diff 96d64ea46..cb00d7729 touches those three real files plus one line in imas_codex/standard_names/graph_ops.py, which the manifest declares under outside_scope."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_persist_refusal_per_source.py:150-165 fails when the batch-level raise is restored and each assertion compares production output (finalized ids, the double's recorded drafted writes, released rows) against an independently stated expectation, though no assertion guards that the release happens after the commit.",
+    "evidence": "head.log and negative-control.log record 40 passed EXIT=0 and 4 failed EXIT=1 with four RuntimeError lines, but docs/evidence/fragments/sn-integrity-backlog/sib-persist-refusal-per-source.html:57 attributes the run's abort to a count comparison that is unreachable at this call site.",
+    "fit": "imas_codex/standard_names/graph_store/graph_catalog.py:2386-2417 follows the module's existing idiom of an inline tx_gc.query plus a services-namespace collaborator, and the new names carry no plan, stage or ticket identifiers.",
+    "goal_fidelity": "imas_codex/standard_names/graph_store/graph_catalog.py:2396-2448 attributes the refusal by candidate identity and continues the batch, and :2673-2680 releases the source through mark_sources_failed so the pool is not aborted.",
+    "reuse": "the release reuses the existing claim-fenced writer graph_source_bindings.py:2014 mark_sources_failed, but graph_catalog.py:2436 re-implements the stale-provisional-reservation cleanup that _lock_claimed_name_bindings already owns at graph_source_bindings.py:1303.",
+    "scope_discipline": "git diff 96d64ea46..cb00d7729 changes only the three granted paths plus imas_codex/standard_names/graph_ops.py:191, a one-line wiring addition the facade-closure test requires and the manifest declares."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: pass \u2014 the node goal asks that a rich-write refusal of one exact-claim winner be recorded against its source instead of aborting the compose pool; imas_codex/standard_names/graph_store/graph_catalog.py:2396-2417 now identifies each locked winner the writer did not return, records it as a per-source refusal and continues, and the remaining winners finalize.\nVERDICT done_when: pass \u2014 the done_when names tests/standard_names/test_persist_refusal_per_source.py plus a reading of the SLURM 1308283 log; the file is red at the restored base module (negative-control.log: 4 failed, 1 passed, EXIT=1, four RuntimeError lines) and green at head (head.log: 5 passed inside a 40-passed run, EXIT=0), and I independently re-counted the run log: 23 aborts, 23 'rejecting' lines, 23 'Grammar gate: 0/1', 0 'Unit conflicts detected', across the five spellings the fragment lists (9/6/4/3/1).\nVERDICT write_paths: pass \u2014 the reviewed manifest grants graph_catalog.py, the new test file, the evidence fragment and a figures directory; git diff 96d64ea46..cb00d7729 touches those three real files plus one line in imas_codex/standard_names/graph_ops.py, which the manifest declares under outside_scope.\nVERDICT manifest: pass \u2014 the manifest is status complete and records commits a51f5e8aa, dcf4dc3fc, dc515086a, cb00d7729, the literal gate command, five log paths, both suite arms with ids, and a negative-control log that carries EXIT=1.\nVERDICT diff: pass \u2014 read commit by commit from 96d64ea46 to cb00d7729; a51f5e8aa replaces the batch-level raise with per-source attribution and an in-transaction reservation drop, dcf4dc3fc then dc515086a settle how the failure writer is reached and add the one-line wiring, and cb00d7729 adds the evidence fragment.\nCALL_SITES: imas_codex/standard_names/graph_store/graph_catalog.py:2622 persist_generated_name_batch, imas_codex/standard_names/worker_tasks/worker_common.py:938, imas_codex/standard_names/worker_tasks/worker_common.py:1041, imas_codex/standard_names/worker_tasks/worker_compose_and_validate.py:901, imas_codex/standard_names/worker_tasks/worker_compose_and_validate.py:939\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/graph_store/graph_catalog.py:2396-2448 attributes the refusal by candidate identity and continues the batch, and :2673-2680 releases the source through mark_sources_failed so the pool is not aborted.\nSCORE evidence: 16\nJUSTIFICATION evidence: head.log and negative-control.log record 40 passed EXIT=0 and 4 failed EXIT=1 with four RuntimeError lines, but docs/evidence/fragments/sn-integrity-backlog/sib-persist-refusal-per-source.html:57 attributes the run's abort to a count comparison that is unreachable at this call site.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: git diff 96d64ea46..cb00d7729 changes only the three granted paths plus imas_codex/standard_names/graph_ops.py:191, a one-line wiring addition the facade-closure test requires and the manifest declares.\nSCORE durability: 16\nJUSTIFICATION durability: tests/standard_names/test_persist_refusal_per_source.py:150-165 fails when the batch-level raise is restored and each assertion compares production output against an independently stated expectation, though no assertion guards that the release happens after the commit.\nSCORE fit: 19\nJUSTIFICATION fit: imas_codex/standard_names/graph_store/graph_catalog.py:2386-2417 follows the module's existing idiom of an inline tx_gc.query plus a services-namespace collaborator, and the new names carry no plan, stage or ticket identifiers.\nSCORE reuse: 14\nJUSTIFICATION reuse: the release reuses the existing claim-fenced writer graph_source_bindings.py:2014 mark_sources_failed, but graph_catalog.py:2436 re-implements the stale-provisional-reservation cleanup that _lock_claimed_name_bindings already owns at graph_source_bindings.py:1303.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-persist-refusal-per-source.html:57 non-blocking: the prose says the abort came from the count comparison written_names != len(rich_write_candidates), but that branch is unreachable here (the call passes return_written_ids=True and write_standard_names then returns a list); the run's own traceback at revision 2f0a49c1 lands on line 2374, the len(finalize_batch) != len(locked_candidates) raise, so the fragment names a dead branch as the cause.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-persist-refusal-per-source.html:164 non-blocking: the delta prose says the two ids that fail at head and not at base were re-run and both pass, but test_house_style_checks.py::test_audit_report_carries_the_conformance_findings fails in both arms (baseline-suite.log and after-suite.log), so only test_review_quorum_pool.py::test_names_batch_response_is_unwrapped is head-only and the sentence overstates the re-run set.\nFINDING imas_codex/standard_names/graph_store/graph_catalog.py:2436 non-blocking: the new inline Cypher deletes the refused source's provisional PRODUCED_NAME edge, duplicating the stale-reservation cleanup _lock_claimed_name_bindings already performs at graph_source_bindings.py:1303 for a reclaiming source; the next attempt's lock would drop the same edge, so this is a second implementation of an owned capability rather than an extension of it.\nFINDING imas_codex/standard_names/graph_store/graph_catalog.py:2409 non-blocking: the last_error it writes names the candidate but not the writer's actual refusal (grammar-parse rejection versus unit conflict), which reaches the log only as a writer WARNING, so a per-source census reading last_error cannot tell a permanent grammar refusal from a unit mismatch.\nFINDING imas_codex/standard_names/graph_ops.py:191 non-blocking: one line landed outside the node's exclusive write paths, adding mark_sources_failed to _WIRED_SERVICE_NAMES; the store's facade-closure test requires it for the new collaborator read and the manifest declares it under outside_scope, so it needs the coordinator's confirmation that no peer owns this file.",
+  "review_run_id": "r-20261108T095058126809-review-of-sib-persist-refusal-per-source-cb00d7729e64",
+  "reviewed_base_sha": "96d64ea46391e6eb82d4d2676b96cad62f34c287",
+  "reviewed_head_sha": "cb00d7729e64e4cc240e09f7d4cf72d6eb827869",
+  "reviewed_run_id": "r-20261108T084211921800-sib-persist-refusal-per-source",
+  "scores": {
+    "durability": 16,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 14,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-08T10:20:00Z",
+  "total": 100
+}
