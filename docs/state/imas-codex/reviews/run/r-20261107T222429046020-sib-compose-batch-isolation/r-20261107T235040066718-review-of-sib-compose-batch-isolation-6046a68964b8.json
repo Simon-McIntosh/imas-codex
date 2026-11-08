@@ -7,6 +7,13 @@
     "imas_codex/standard_names/worker_tasks/__init__.py:138"
   ],
   "completed_at": "2026-11-08T00:04:56.053Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "sib-compose-refusal-narrowing",
+      "recorded_at": "2026-11-08T00:27:00.495268+00:00"
+    }
+  },
   "dispatched_at": "2026-11-07T23:53:12Z",
   "findings": [
     {
