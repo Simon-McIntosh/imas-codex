@@ -63,6 +63,13 @@
   "call_sites": [],
   "completed_at": "2026-11-08T02:43:50Z",
   "dispatched_at": "2026-11-08T02:30:38Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-sib-full-run-failure-diagnosis-db3afa0c0418",
+      "recorded_at": "2026-11-08T03:37:39.633102+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-integrity-backlog/sib-full-run-failure-diagnosis-run.py",
