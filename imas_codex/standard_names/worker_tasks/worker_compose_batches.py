@@ -20,6 +20,52 @@ if TYPE_CHECKING:
     from imas_codex.standard_names.budget import BudgetManager
 
 
+def _record_batch_failure(
+    batch: list[dict[str, Any]], batch_key: str | None, phase: str
+) -> None:
+    """Append one batch_failed receipt per claimed source in a failed batch.
+
+    The batch raised before any per-source verdict, so the claim ended about
+    the batch rather than about the source. The receipt is best-effort: a
+    failure to write it must not replace the exception that ended the batch,
+    which is the error the caller and the run's stop reason need.
+    """
+    from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        claim_attempt_entry,
+        record_claim_attempts,
+    )
+    from imas_codex.standard_names.graph_store.graph_foundation import (
+        get_services,
+    )
+
+    entries: list[dict[str, Any]] = []
+    for item in batch:
+        source_id = item.get("id")
+        if not source_id:
+            continue
+        entry = claim_attempt_entry(
+            source_id,
+            attempt=item.get("attempt_count"),
+            outcome="batch_failed",
+            reason=f"compose batch raised in phase {phase}",
+            claim_seq=item.get("claim_seq"),
+            batch_key=batch_key,
+        )
+        entry["claim_token"] = item.get("claim_token")
+        entries.append(entry)
+    if not entries:
+        return
+    try:
+        record_claim_attempts(entries, services=get_services())
+    except Exception:
+        logger.warning(
+            "Pool %s: could not record %d batch_failed claim receipts",
+            phase,
+            len(entries),
+            exc_info=True,
+        )
+
+
 async def compose_batch(
     _worker_dependency,
     /,
@@ -1189,6 +1235,12 @@ async def compose_batch(
 
     except Exception:
         logger.exception("Pool %s: compose batch failed", phase_tag)
+        # The paid batch raised, so none of its claimed sources ended with a
+        # verdict about themselves. Record that on every one of them before the
+        # pool's release hook returns the claims to the queue, so a failure
+        # census can attribute the attempt to the batch rather than to a
+        # missing reason.
+        _record_batch_failure(batch, group_key, phase_tag)
         raise
     finally:
         if lease:

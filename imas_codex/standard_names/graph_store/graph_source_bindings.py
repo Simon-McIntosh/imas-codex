@@ -1382,6 +1382,16 @@ def _lock_claimed_name_bindings(
                        '" at composition attempt ' +
                        toString(coalesce(sns.attempt_count, 0))
                 END
+            WITH sns, b
+            MERGE (attempt_row:StandardNameSourceClaimAttempt {id:
+              'claim-attempt:' + sns.id + ':' + toString(b.claim_seq)
+              + ':released'})
+            ON CREATE SET attempt_row.attempt = coalesce(sns.attempt_count, 1),
+                          attempt_row.outcome = 'released',
+                          attempt_row.reason = sns.last_error,
+                          attempt_row.batch_key = sns.batch_key,
+                          attempt_row.recorded_at = datetime()
+            MERGE (sns)-[:HAS_CLAIM_ATTEMPT]->(attempt_row)
             """,
             batch=collision_batch,
             stable_stages=sorted(foundation._STABLE_BINDING_NAME_STAGES),
@@ -1436,6 +1446,17 @@ def persist_claimed_source_outcomes(
                     b.skip_reason_detail, sns.skip_reason_detail),
                 sns.skipped_at = CASE WHEN b.status = 'skipped'
                                       THEN datetime() ELSE sns.skipped_at END
+            WITH sns, b
+            MERGE (attempt_row:StandardNameSourceClaimAttempt {id:
+              'claim-attempt:' + sns.id + ':' + toString(b.claim_seq) + ':'
+              + coalesce(b.claim_outcome, 'refused')})
+            ON CREATE SET attempt_row.attempt = coalesce(sns.attempt_count, 1),
+                          attempt_row.outcome =
+                            coalesce(b.claim_outcome, 'refused'),
+                          attempt_row.reason = sns.last_error,
+                          attempt_row.batch_key = sns.batch_key,
+                          attempt_row.recorded_at = datetime()
+            MERGE (sns)-[:HAS_CLAIM_ATTEMPT]->(attempt_row)
             RETURN sns.id AS id
             """,
             batch=batch,
@@ -1654,6 +1675,16 @@ def persist_claimed_attachments(
                             THEN sn.source_paths
                             ELSE coalesce(sn.source_paths, []) + uri END,
                             sn.updated_at = datetime()
+                        MERGE (attempt_row:StandardNameSourceClaimAttempt {id:
+                          'claim-attempt:' + sns.id + ':' + toString(b.claim_seq)
+                          + ':produced'})
+                        ON CREATE SET attempt_row.attempt =
+                                        coalesce(sns.attempt_count, 1),
+                                      attempt_row.outcome = 'produced',
+                                      attempt_row.reason = null,
+                                      attempt_row.batch_key = sns.batch_key,
+                                      attempt_row.recorded_at = datetime()
+                        MERGE (sns)-[:HAS_CLAIM_ATTEMPT]->(attempt_row)
                         RETURN sns.id AS id
                         """,
                         batch=winner_batch,

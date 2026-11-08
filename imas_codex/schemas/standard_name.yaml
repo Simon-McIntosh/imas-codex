@@ -397,6 +397,32 @@ enums:
       cause_not_recorded:
         description: The parked source carries no cause that permits narrower triage.
 
+  ComposeClaimOutcome:
+    description: >-
+      How one composition claim on a StandardNameSource ended. Every claim
+      taken from the queue is closed by exactly one of these outcomes, so a
+      failure census can attribute attempts per source instead of reading a
+      single overwritable last_error.
+    permissible_values:
+      produced:
+        description: The claim bound its candidate name and attached the source.
+      refused:
+        description: >-
+          The candidate was rejected for this source by pre-validation,
+          grammar or well-formedness checks; the source is parked failed.
+      batch_failed:
+        description: >-
+          The paid batch that carried this claim raised, so the claim ended
+          without a verdict about the source.
+      released:
+        description: >-
+          A binding or attachment refusal returned the claim to the queue for
+          another attempt.
+      capped:
+        description: >-
+          The source reached its claim-attempt budget and was parked at the
+          attempt cap.
+
   ComposeHintStatus:
     description: >-
       Lifecycle of exact-source operator steering for DD name composition.
@@ -3066,6 +3092,18 @@ classes:
         inlined: false
         annotations:
           relationship_type: HAS_RETRY_EVENT
+      claim_attempts:
+        description: >-
+          Bounded append-only record of every composition claim that ended on
+          this source, one entry per ended claim. The entry is written by the
+          same claim-fenced statement that ends the claim, so a census can
+          attribute attempts per source rather than reading one overwritable
+          last_error. Bounded by the claim-attempt cap.
+        multivalued: true
+        range: StandardNameSourceClaimAttempt
+        inlined: false
+        annotations:
+          relationship_type: HAS_CLAIM_ATTEMPT
       snapshot_changes:
         description: >-
           Immutable governed migrations of this source's pinned DD snapshot.
@@ -3539,6 +3577,42 @@ classes:
         required: true
         range: datetime
         description: Timestamp when the source was returned to extracted.
+
+  StandardNameSourceClaimAttempt:
+    description: >-
+      One ended composition claim on a StandardNameSource. The source keeps a
+      HAS_CLAIM_ATTEMPT relationship to every entry, so a source that fails
+      repeatedly carries one entry per attempt rather than a single
+      overwritten reason.
+    class_uri: sn:StandardNameSourceClaimAttempt
+    attributes:
+      id:
+        identifier: true
+        required: true
+        description: "Composite key: claim-attempt:{source_id}:{claim_seq}:{outcome}"
+      source_id:
+        required: true
+        description: The StandardNameSource whose claim this entry closes.
+      attempt:
+        required: true
+        range: integer
+        description: Composition-attempt number the source held at this claim.
+      outcome:
+        required: true
+        range: ComposeClaimOutcome
+        description: How the claim ended.
+      reason:
+        description: >-
+          The refusal or failure text that ended the claim. Null only when the
+          outcome itself carries the whole verdict.
+      batch_key:
+        description: The compose batch or unit group the claim was processed in.
+      run_id:
+        description: The standard-name run that owned the claim.
+      recorded_at:
+        required: true
+        range: datetime
+        description: Transaction timestamp at which the entry was written.
 
   SNRun:
     description: >-

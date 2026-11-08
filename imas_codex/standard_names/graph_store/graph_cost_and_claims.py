@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 from datetime import UTC
-from typing import Any
+from typing import Any, Final
 
 from imas_codex.discovery.base.claims import retry_on_deadlock
 from imas_codex.standard_names.defaults import (
@@ -688,3 +688,130 @@ QUORATE_RESOLUTION_METHODS: frozenset[str] = frozenset(
 )
 
 _ESCALATOR_CHAIN_SIZE = 3
+
+
+# ---------------------------------------------------------------------------
+# Compose claim outcome receipts
+# ---------------------------------------------------------------------------
+
+#: The outcomes a composition claim can end in. Exactly one entry is written
+#: per ended claim, so a source that fails repeatedly carries one entry per
+#: attempt and a census can attribute attempts per source.
+CLAIM_ATTEMPT_OUTCOMES: Final[frozenset[str]] = frozenset(
+    {
+        "produced",
+        "refused",
+        "batch_failed",
+        "released",
+        "capped",
+    }
+)
+
+
+def claim_attempt_entry(
+    sns_id: str,
+    *,
+    attempt: Any,
+    outcome: str,
+    reason: str | None = None,
+    claim_seq: Any = None,
+    batch_key: str | None = None,
+    run_id: str | None = None,
+) -> dict[str, Any]:
+    """Build one claim-attempt entry for the append stanza.
+
+    The identity is ``claim-attempt:{source}:{claim_seq}:{outcome}``. A source
+    holds one claim per sequence number, so the triple is unique and the MERGE
+    is idempotent under a retried deadlock.
+
+    Args:
+        sns_id: StandardNameSource id the claim belongs to.
+        attempt: Composition-attempt number held at claim time.
+        outcome: One of :data:`CLAIM_ATTEMPT_OUTCOMES`.
+        reason: Refusal or failure text that ended the claim.
+        claim_seq: Monotonic per-source claim counter.
+        batch_key: Compose batch or unit group that carried the claim.
+        run_id: Standard-name run that owned the claim.
+
+    Returns:
+        The entry map consumed by :data:`CLAIM_ATTEMPT_APPEND_CYPHER`.
+    """
+    if outcome not in CLAIM_ATTEMPT_OUTCOMES:
+        raise ValueError(
+            f"unknown compose claim outcome {outcome!r}; expected one of "
+            f"{sorted(CLAIM_ATTEMPT_OUTCOMES)}"
+        )
+    return {
+        "id": f"claim-attempt:{sns_id}:{claim_seq}:{outcome}",
+        "source_id": sns_id,
+        "attempt": int(attempt or 1),
+        "outcome": outcome,
+        "reason": reason,
+        "batch_key": batch_key,
+        "run_id": run_id,
+    }
+
+
+#: Appends one entry per row of ``$entries`` to the source named by
+#: ``sns_var``. Callers interpolate only the local Cypher variable name, so the
+#: write lives inside the same statement that ends the claim and inherits its
+#: fence rather than opening a second transaction.
+CLAIM_ATTEMPT_APPEND_CYPHER: Final[str] = """
+UNWIND $entries AS entry
+MATCH ({sns_var}:StandardNameSource {{id: entry.source_id}})
+MERGE (attempt_row:StandardNameSourceClaimAttempt {{id: entry.id}})
+ON CREATE SET attempt_row.attempt = entry.attempt,
+              attempt_row.outcome = entry.outcome,
+              attempt_row.reason = entry.reason,
+              attempt_row.batch_key = entry.batch_key,
+              attempt_row.run_id = entry.run_id,
+              attempt_row.recorded_at = datetime()
+MERGE ({sns_var})-[:HAS_CLAIM_ATTEMPT]->(attempt_row)
+"""
+
+
+def claim_attempt_append_cypher(*, sns_var: str = "sns") -> str:
+    """Return the append stanza bound to one Cypher variable name."""
+    return CLAIM_ATTEMPT_APPEND_CYPHER.format(sns_var=sns_var)
+
+
+@retry_on_deadlock()
+def record_claim_attempts(entries: list[dict[str, Any]], *, services: Any) -> int:
+    """Append claim-attempt entries for callers whose ending write is elsewhere.
+
+    Entries are fenced on the source's live claim when they carry
+    ``claim_token`` and ``claim_seq``; an entry whose claim has already been
+    cleared or re-taken is not written, so a delayed duplicate worker cannot
+    append a receipt to somebody else's claim.
+
+    Args:
+        entries: Entry maps from :func:`claim_attempt_entry`, optionally
+            carrying ``claim_token``/``claim_seq`` for fencing.
+        services: Graph service namespace.
+
+    Returns:
+        The number of sources that received an entry.
+    """
+    if not entries:
+        return 0
+    with services.GraphClient() as gc:
+        rows = gc.query(
+            """
+            UNWIND $entries AS entry
+            MATCH (sns:StandardNameSource {id: entry.source_id})
+            WHERE entry.claim_token IS NULL
+               OR (sns.claim_token = entry.claim_token
+                   AND sns.claim_seq = entry.claim_seq)
+            MERGE (attempt_row:StandardNameSourceClaimAttempt {id: entry.id})
+            ON CREATE SET attempt_row.attempt = entry.attempt,
+                          attempt_row.outcome = entry.outcome,
+                          attempt_row.reason = entry.reason,
+                          attempt_row.batch_key = entry.batch_key,
+                          attempt_row.run_id = entry.run_id,
+                          attempt_row.recorded_at = datetime()
+            MERGE (sns)-[:HAS_CLAIM_ATTEMPT]->(attempt_row)
+            RETURN count(*) AS written
+            """,
+            entries=entries,
+        )
+    return int(rows[0]["written"]) if rows else 0

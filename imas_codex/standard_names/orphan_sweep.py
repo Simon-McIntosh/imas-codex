@@ -122,6 +122,15 @@ _SWEEP_QUERIES: Final[list[tuple[str, str]]] = [
             END,
             s.claim_token = null,
             s.claimed_at  = null
+        WITH s
+        MERGE (attempt_row:StandardNameSourceClaimAttempt {id:
+          'claim-attempt:' + s.id + ':' + toString(s.claim_seq) + ':capped'})
+        ON CREATE SET attempt_row.attempt = coalesce(s.attempt_count, 1),
+                      attempt_row.outcome = 'capped',
+                      attempt_row.reason = s.last_error,
+                      attempt_row.batch_key = s.batch_key,
+                      attempt_row.recorded_at = datetime()
+        MERGE (s)-[:HAS_CLAIM_ATTEMPT]->(attempt_row)
         RETURN count(*) AS n
         """,
     ),
