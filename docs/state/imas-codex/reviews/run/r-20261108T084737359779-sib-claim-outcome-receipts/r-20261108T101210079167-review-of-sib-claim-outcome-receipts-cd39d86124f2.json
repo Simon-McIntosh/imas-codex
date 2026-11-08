@@ -46,6 +46,11 @@
       "kind": "folded",
       "node": "sib-claim-outcome-receipts",
       "recorded_at": "2026-11-08T11:20:01.389940+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "sib-claim-outcome-receipts",
+      "recorded_at": "2026-11-08T11:20:13.213506+00:00"
     }
   },
   "findings": [
