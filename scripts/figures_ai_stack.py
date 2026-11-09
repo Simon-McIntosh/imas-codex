@@ -572,7 +572,7 @@ def draw_legend(c: Canvas) -> None:
         [
             ("deterministic", "deterministic"),
             ("frontier", "frontier"),
-            ("on-premise workers", "onprem"),
+            ("open-weight workers", "onprem"),
         ]
     ):
         yy = y - i * 3.0
