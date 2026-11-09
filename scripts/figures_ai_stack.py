@@ -40,7 +40,7 @@ ROOT = Path(__file__).resolve().parents[1]
 FIGURES = ROOT / "docs/figures/ai-stack"
 STEM = "ai-stack"
 
-WIDTH, HEIGHT = 14.0, 7.2  # in: the slide canvas
+WIDTH, HEIGHT = 14.0, 6.4  # in: wider than the slide canvas, leaving room for a title
 U = 10  # drawing units per inch, so the axes run 0..140 by 0..72
 
 # Deterministic: the infrastructure ITER owns, in the ICP knowledge map's relation colour.
@@ -54,7 +54,9 @@ INK = "#2b2b2b"
 MUTED = "#6b6b6b"
 NEUTRAL_EDGE = "#b4b1aa"
 
-TITLE, BODY, SMALL = 14, 12, 11  # pt
+TITLE, BODY, SMALL = 14, 12, 11  # pt, inside the stack
+OUTER = 18  # pt, the layer names
+OUTER_SMALL = 14  # pt, the legend and the annotations outside the boxes
 
 
 @dataclass
@@ -68,6 +70,11 @@ class Placed:
 class Canvas:
     def __init__(self):
         plt.style.use("data-ink")
+        # Arial where it is installed; Nimbus Sans shares its metrics, so the layout
+        # check measures the same widths, and the SVG keeps its text as text in Arial.
+        plt.rcParams["font.family"] = "sans-serif"
+        plt.rcParams["font.sans-serif"] = ["Arial", "Nimbus Sans"]
+        plt.rcParams["svg.fonttype"] = "none"
         self.fig = plt.figure(figsize=(WIDTH, HEIGHT), dpi=100)
         self.ax = self.fig.add_axes((0, 0, 1, 1))
         self.ax.axis("off")
@@ -160,8 +167,8 @@ class Canvas:
                 continue
             (x0, y0), (x1, y1) = to_data.transform([(b.x0, b.y0), (b.x1, b.y1)])
             bx0, by0, bx1, by1 = p.inside
-            pad = 0.4
-            if x0 < bx0 + pad or x1 > bx1 - pad or y0 < by0 + pad or y1 > by1 - pad:
+            px, py = 0.4, 0.15  # clear margin to the box edge, in drawing units
+            if x0 < bx0 + px or x1 > bx1 - px or y0 < by0 + py or y1 > by1 - py:
                 faults.append(f"escapes its box: {p.text.get_text()!r}")
         if faults:
             message = "layout check refused the figure:\n  " + "\n  ".join(faults)
@@ -181,11 +188,11 @@ LAYER_X = 124.0
 BAND_FILL = "#f4f3f0"
 
 LAYERS = {  # (y0, y1) of each band
-    "icp4": (1.5, 9.5),
-    "graph": (13.5, 23.0),
-    "functions": (25.0, 43.0),
-    "interfaces": (45.0, 56.5),
-    "users": (58.5, 71.5),
+    "icp4": (1.0, 8.6),
+    "graph": (11.8, 20.6),
+    "functions": (22.0, 37.8),
+    "interfaces": (39.2, 50.2),
+    "users": (51.6, 63.4),
 }
 
 
@@ -233,8 +240,8 @@ def draw_layer_names(c: Canvas) -> None:
         y0, y1 = LAYERS[key]
         mid = (y0 + y1) / 2
         for i, line in enumerate(lines):
-            dy = (len(lines) - 1) / 2 * 2.6 - i * 2.6
-            c.text(LAYER_X, mid + dy, line, size=TITLE, ha="left", weight="bold")
+            dy = (len(lines) - 1) / 2 * 3.0 - i * 3.0
+            c.text(LAYER_X, mid + dy, line, size=OUTER, ha="left", weight="bold")
 
 
 # Each role reaches from Claude Desktop to the interface named. No one stops at
@@ -348,8 +355,8 @@ def draw_interfaces(c: Canvas) -> None:
 
 def draw_users(c: Canvas) -> None:
     y0, y1 = LAYERS["users"]
-    pitch, height = 2.5, 1.9
-    top = y1 - 0.9
+    pitch, height = 2.3, 1.8
+    top = y1 - 0.7
     for i, (role, reach) in enumerate(USERS):
         y = top - i * pitch
         left = span(y)[0]
@@ -374,7 +381,7 @@ def draw_functions(c: Canvas) -> None:
 
     # third-party connectors, to the left and a little higher
     cx0, cx1 = cx
-    cy0, cy1 = y0 + 3.5, y1
+    cy0, cy1 = y0 + 1.6, y1
     c.box(cx0, cy0, cx1, cy1, edge=NEUTRAL_EDGE, fill="white", lw=1.2, dashed=True)
     c.text(
         (cx0 + cx1) / 2,
@@ -388,7 +395,7 @@ def draw_functions(c: Canvas) -> None:
         top = cy1 - 3.4 - i * 3.2
         c.chip(cx0 + 0.6, top - 2.4, cx1 - 0.6, top, name, kind="deterministic")
 
-    # Lucy tools: what Lucy chat calls, and where future Lucies plug into the graph
+    # Lucy tools: what Lucy chat calls, and where other assistants plug into the graph
     lx0, lx1 = lx
     c.box(lx0, y0, lx1, y1, edge=NEUTRAL_EDGE, fill="white", lw=1.2, dashed=True)
     c.text(
@@ -400,21 +407,12 @@ def draw_functions(c: Canvas) -> None:
         ha="left",
         inside=(lx0, y0, lx1, y1),
     )
-    c.text(
-        lx1 - 1.0,
-        y1 - 1.6,
-        "future Lucies plug in",
-        size=SMALL,
-        color=MUTED,
-        ha="right",
-        inside=(lx0, y0, lx1, y1),
-    )
     cols = 3
     w = (lx1 - lx0 - 2 * 0.8 - (cols - 1) * gap) / cols
     for i, (name, kind) in enumerate(LUCY_TOOLS):
         r, col = divmod(i, cols)
         x = lx0 + 0.8 + col * (w + gap)
-        top = y1 - 3.6 - r * 3.4
+        top = y1 - 3.4 - r * 3.2
         c.chip(x, top - 2.5, x + w, top, name, kind=kind)
 
     # imas-codex tools over the fusion data dictionary, signals and facility docs
@@ -434,7 +432,7 @@ def draw_functions(c: Canvas) -> None:
     for i, name in enumerate(CODEX_TOOLS):
         r, col = divmod(i, cols)
         x = ix0 + 0.8 + col * (w + gap)
-        top = y1 - 3.6 - r * 3.4
+        top = y1 - 3.4 - r * 3.2
         c.chip(x, top - 2.5, x + w, top, name, kind="deterministic")
 
     # the REPL: generated code, run against the graph, for whatever no tool covers
@@ -518,7 +516,7 @@ def draw_graph(c: Canvas) -> None:
         xa + 1.0,
         (y1 + LAYERS["functions"][0]) / 2 + 0.5,
         "read-only",
-        size=SMALL,
+        size=OUTER_SMALL,
         color=MUTED,
         ha="left",
     )
@@ -562,7 +560,7 @@ def draw_foundation(c: Canvas) -> None:
         CENTRE,
         (y1 + g0) / 2,
         "ETL",
-        size=BODY,
+        size=OUTER_SMALL,
         weight="bold",
         color=DETERMINISTIC,
         backgroundcolor="white",
@@ -578,10 +576,10 @@ def draw_foundation(c: Canvas) -> None:
         zorder=3,
     )
     c.text(
-        xb - 1.3,
+        xb - 1.4,
         (LAYERS["icp4"][0] + top) / 2,
         "ITER infrastructure",
-        size=BODY,
+        size=OUTER_SMALL,
         rotation=90,
         color=DETERMINISTIC,
         weight="bold",
@@ -589,16 +587,16 @@ def draw_foundation(c: Canvas) -> None:
 
 
 def draw_legend(c: Canvas) -> None:
-    x, y = 2.0, 70.0
+    x, y = 1.5, 62.2
     for i, (label, edge, fill) in enumerate(
         [
             ("deterministic", DETERMINISTIC, DETERMINISTIC_FILL),
             ("agentic · LLM", AGENTIC, AGENTIC_FILL),
         ]
     ):
-        yy = y - i * 3.0
-        c.box(x, yy - 1.0, x + 2.6, yy + 1.0, edge=edge, fill=fill, lw=1.6)
-        c.text(x + 3.6, yy, label, size=SMALL, ha="left")
+        yy = y - i * 3.2
+        c.box(x, yy - 1.1, x + 2.8, yy + 1.1, edge=edge, fill=fill, lw=1.6)
+        c.text(x + 3.8, yy, label, size=OUTER_SMALL, ha="left")
 
 
 def draw(draft: Path | None) -> Path:
@@ -621,9 +619,11 @@ def draw(draft: Path | None) -> Path:
     svg = FIGURES / f"{STEM}.svg"
     c.fig.savefig(svg, format="svg", metadata={"Date": None}, facecolor="white")
     text = svg.read_text()
-    # declared at slide height (16 cm) so it drops onto a slide at that size
+    # declared at slide width (31.1 cm), so it drops onto a slide under its title
     text = text.replace(f'width="{WIDTH * 72:g}pt"', 'width="31.1cm"', 1)
-    text = text.replace(f'height="{HEIGHT * 72:g}pt"', 'height="16cm"', 1)
+    text = text.replace(
+        f'height="{HEIGHT * 72:g}pt"', f'height="{31.1 * HEIGHT / WIDTH:.2f}cm"', 1
+    )
     svg.write_text("\n".join(line.rstrip() for line in text.splitlines()) + "\n")
     plt.close(c.fig)
     print(svg.relative_to(ROOT))
