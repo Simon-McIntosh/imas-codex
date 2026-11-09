@@ -46,6 +46,11 @@
       "kind": "exempted",
       "reason": "adjudicated environmental by sib-two-flake-adjudication (cf825881): test_audit_embedding_preflight passes 3/3 at head and times out once at base at the 30 s cutoff; test_total_timeout_with_sync_helpers passes 3/3 at both revisions; neither is reachable from the test-only change",
       "recorded_at": "2026-11-09T23:56:53.579122+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "non-blocking: the canonical-spelling assertion and the recorded mutation already guard adoption, as the finding itself states",
+      "recorded_at": "2026-11-09T23:57:04.853327+00:00"
     }
   },
   "findings": [
