@@ -639,7 +639,7 @@ def main() -> int:
 
     per_name_cost = costs["per_accepted_name_usd"]
     low_rate, high_rate = costs["per_source_band_usd"]
-    cohort = costs["cohort_rerun_measured"]
+    cohort = costs.get("cohort_rerun_measured") or {}
 
     def class_record(
         cls: str, counts: Counter, samples: dict, *, population: str
@@ -659,9 +659,11 @@ def main() -> int:
         if population == "source":
             record["expected_cost_usd_measured_cohort"] = {
                 "per_source_attempted": round(
-                    count * cohort["per_cohort_source_usd"], 2
+                    count * cohort.get("per_cohort_source_usd", 0.0), 2
                 ),
-                "per_named_source": round(count * cohort["per_named_source_usd"], 2),
+                "per_named_source": round(
+                    count * cohort.get("per_named_source_usd", 0.0), 2
+                ),
                 "basis": (
                     f"{COHORT_RERUN_NAMED} of {COHORT_RERUN_SOURCES} cohort sources "
                     f"named for USD {COHORT_RERUN_SPEND_USD:.2f}"
@@ -675,6 +677,8 @@ def main() -> int:
             )
         return record
 
+    assignments = {cls: per_class_sources.get(cls, []) for cls in CLASSES}
+    name_assignments = {cls: per_class_names.get(cls, []) for cls in CLASSES}
     document = {
         "observed_at": datetime.now(UTC).isoformat(),
         "acceptance_floor": DEFAULT_MIN_SCORE,
@@ -702,21 +706,19 @@ def main() -> int:
         },
         # Every item's class, not a sample: the continuation run scopes its
         # cohorts by these source paths, so a truncated list cannot serve it.
-        "source_assignments": {cls: per_class_sources.get(cls, []) for cls in CLASSES},
-        "name_assignments": {cls: per_class_names.get(cls, []) for cls in CLASSES},
+        "source_assignments": assignments,
+        "name_assignments": name_assignments,
         "duplicate_source_paths": duplicated,
     }
     document["assignment_coverage"] = {
-        "source_assignments": sum(
-            len(v) for v in document["source_assignments"].values()
-        ),
+        "source_assignments": sum(len(v) for v in assignments.values()),
         "source_assignments_distinct": len(
-            {a["source"] for v in document["source_assignments"].values() for a in v}
+            {a["source"] for v in assignments.values() for a in v}
         ),
         "duplicated_source_paths": len(duplicated),
-        "name_assignments": sum(len(v) for v in document["name_assignments"].values()),
+        "name_assignments": sum(len(v) for v in name_assignments.values()),
         "name_assignments_distinct": len(
-            {a["id"] for v in document["name_assignments"].values() for a in v}
+            {a["id"] for v in name_assignments.values() for a in v}
         ),
     }
     check_document_assignments(

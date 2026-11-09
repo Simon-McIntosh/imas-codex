@@ -1026,7 +1026,7 @@
       "step": "vocabulary release, then compose"
     }
   },
-  "observed_at": "2026-11-09T23:30:26.941451+00:00",
+  "observed_at": "2026-11-09T23:35:11.353080+00:00",
   "reconciliation": {
     "name_class_sum": 116,
     "names": "sum(name_classes) == exhausted_names",
