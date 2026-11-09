@@ -362,6 +362,72 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "8d310cc8d7d025125ab44c304a8eb09a1f4e6283",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "manifest is blocked; process kept for resume",
+    "scratch_bytes": 0,
+    "scratch_host": "98dci4-clu-2068.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261109T061552328370-review-of-sib-vocab-worklist-e8bfa681356f",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 0,
+        "path": "/tmp/reckon-crew-scratch/r-20261109T061552328370-review-of-sib-vocab-worklist-e8bfa681356f"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "integrated",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [],
+          "head": "8d310cc8d7d025125ab44c304a8eb09a1f4e6283",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/review-of-sib-vocab-worklist-e8bfa681356f",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-11-09T06:24:43Z",
+            "session_id": "01a1bef4-fe50-7e42-ac50-7a216d4f7474",
+            "session_source": "stream",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/review-of-sib-vocab-worklist-e8bfa681356f"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "this worktree is the working directory of recoverable session 01a1bef4-fe50-7e42-ac50-7a216d4f7474"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_retention": {
+      "classification": "retained-for-resume",
+      "retained_at": "2026-11-09T06:24:43Z",
+      "session_id": "01a1bef4-fe50-7e42-ac50-7a216d4f7474",
+      "session_source": "stream",
+      "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/review-of-sib-vocab-worklist-e8bfa681356f"
+    },
+    "worktree_withheld": "retained as the working directory of recoverable session 01a1bef4-fe50-7e42-ac50-7a216d4f7474"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],
