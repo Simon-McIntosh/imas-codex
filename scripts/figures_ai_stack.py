@@ -484,7 +484,7 @@ def draw_functions(c: Canvas) -> None:
 def draw_interfaces(c: Canvas) -> None:
     y0, y1 = LAYERS["interfaces"]
     y0, y1 = y0 + 0.6, y1 - 0.9
-    cols = spread(*span(y1), [19.5, 12.5, 20, 18.5, 20.5])
+    cols = spread(*span(y1), [19, 12.5, 18.5, 22.5, 19.5])
     for key, xs in zip(
         ["desktop", "lucy", "dash", "sandbox", "clive"], cols, strict=True
     ):
@@ -526,7 +526,13 @@ def draw_interfaces(c: Canvas) -> None:
         )
     x0, x1 = INTERFACES["sandbox"]
     c.card(
-        x0, y0, x1, y1, "Sandbox", ("full development", "H200 GPUs"), kind="frontier"
+        x0,
+        y0,
+        x1,
+        y1,
+        "Claude Code",
+        ("sandbox · full development", "H200 GPUs"),
+        kind="frontier",
     )
     x0, x1 = INTERFACES["clive"]
     c.card(
