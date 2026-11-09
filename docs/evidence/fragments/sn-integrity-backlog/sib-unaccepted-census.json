@@ -1,0 +1,800 @@
+{
+  "acceptance_floor": 0.85,
+  "compose_claim_cap": 5,
+  "cost_basis": {
+    "accepted_per_usd": 4.091331189514206,
+    "cohort_rerun_measured": null,
+    "cohort_rerun_note": "No cohort rerun has run, so no measured cohort figure exists; the estimate uses the full run's measured cost per accepted name.",
+    "corrected_estimate_band_usd": [
+      80.0,
+      160.0
+    ],
+    "full_run_accepted_in_window": 284,
+    "full_run_spend_usd": 69.41506,
+    "per_accepted_name_usd": 0.2444,
+    "per_source_band_usd": [
+      0.0612,
+      0.1223
+    ]
+  },
+  "exhausted_names": 116,
+  "live_sources": 6123,
+  "live_sources_accepted": 5203,
+  "live_sources_unaccepted": 920,
+  "name_classes": {
+    "attempt-capped": {
+      "count": 0,
+      "expected_cost_usd_at_full_run_rate": 0.0,
+      "expected_cost_usd_band": [
+        0.0,
+        0.0
+      ],
+      "representative": [],
+      "scope": "the parked cohort, scoped by source_id",
+      "step": "one signed reset with receipts (sn reset), then compose"
+    },
+    "awaiting review": {
+      "count": 4,
+      "expected_cost_usd_at_full_run_rate": 0.98,
+      "expected_cost_usd_band": [
+        0.24,
+        0.49
+      ],
+      "representative": [
+        {
+          "docs_stage": "pending",
+          "id": "grating_line_density",
+          "score": null,
+          "validation_status": "valid"
+        },
+        {
+          "docs_stage": "pending",
+          "id": "ion_charge_state_torque_density_due_to_collisions",
+          "score": null,
+          "validation_status": "quarantined"
+        },
+        {
+          "docs_stage": "pending",
+          "id": "poloidal_total_momentum_convection_velocity",
+          "score": null,
+          "validation_status": "quarantined"
+        },
+        {
+          "docs_stage": "pending",
+          "id": "radial_derivative_of_pedestal_electron_density",
+          "score": null,
+          "validation_status": "quarantined"
+        }
+      ],
+      "scope": "the drafted cohort, scoped by source_id",
+      "step": "review_name"
+    },
+    "documentation missing": {
+      "count": 1,
+      "expected_cost_usd_at_full_run_rate": 0.24,
+      "expected_cost_usd_band": [
+        0.06,
+        0.12
+      ],
+      "representative": [
+        {
+          "docs_stage": "pending",
+          "id": "radial_coordinate_of_pellet_path",
+          "score": 0.885,
+          "validation_status": "quarantined"
+        }
+      ],
+      "scope": "the name cohort whose name passed review without accepted docs",
+      "step": "generate_docs then review_docs"
+    },
+    "never claimed": {
+      "count": 0,
+      "expected_cost_usd_at_full_run_rate": 0.0,
+      "expected_cost_usd_band": [
+        0.0,
+        0.0
+      ],
+      "representative": [],
+      "scope": "the extracted cohort with no claim, scoped by source_id",
+      "step": "compose"
+    },
+    "refused by a writer": {
+      "count": 10,
+      "expected_cost_usd_at_full_run_rate": 2.44,
+      "expected_cost_usd_band": [
+        0.61,
+        1.22
+      ],
+      "representative": [
+        {
+          "docs_stage": "accepted",
+          "id": "fast_electron_energy",
+          "score": 0.8732142857142858,
+          "validation_status": "quarantined"
+        },
+        {
+          "docs_stage": "accepted",
+          "id": "gas_flow",
+          "score": 0.8579545454545454,
+          "validation_status": "valid"
+        },
+        {
+          "docs_stage": "accepted",
+          "id": "lower_bound_energy_of_neutron_detector",
+          "score": 0.8833333333333333,
+          "validation_status": "quarantined"
+        },
+        {
+          "docs_stage": "accepted",
+          "id": "parallel_neutral_species_energy_convection_velocity",
+          "score": 0.8674999999999999,
+          "validation_status": "quarantined"
+        },
+        {
+          "docs_stage": "accepted",
+          "id": "parallel_normalized_particle_perturbed_pressure",
+          "score": 0.8637500000000001,
+          "validation_status": "quarantined"
+        },
+        {
+          "docs_stage": "accepted",
+          "id": "parallel_wave_electric_field_amplitude",
+          "score": 0.8888888888888888,
+          "validation_status": "quarantined"
+        },
+        {
+          "docs_stage": "accepted",
+          "id": "perpendicular_normalized_gyrocenter_perturbed_pressure",
+          "score": 0.8624999999999999,
+          "validation_status": "quarantined"
+        },
+        {
+          "docs_stage": "accepted",
+          "id": "poloidal_ion_charge_state_momentum_diffusivity",
+          "score": 0.8910714285714286,
+          "validation_status": "quarantined"
+        },
+        {
+          "docs_stage": "accepted",
+          "id": "toroidal_trapped_thermal_electron_torque_density_due_to_coulomb_collisions_with_electrons",
+          "score": 0.8787500000000001,
+          "validation_status": "quarantined"
+        },
+        {
+          "docs_stage": "accepted",
+          "id": "vertical_centroid_of_coil_conductor_element",
+          "score": 0.8825000000000001,
+          "validation_status": "quarantined"
+        }
+      ],
+      "scope": "the refused cohort, scoped by source_id",
+      "step": "compose (the candidate was refused at write time)"
+    },
+    "scored below the acceptance floor": {
+      "count": 101,
+      "expected_cost_usd_at_full_run_rate": 24.68,
+      "expected_cost_usd_band": [
+        6.18,
+        12.35
+      ],
+      "representative": [
+        {
+          "docs_stage": "accepted",
+          "id": "alpha_parameter",
+          "score": 0.675,
+          "validation_status": "quarantined"
+        },
+        {
+          "docs_stage": "accepted",
+          "id": "angle_of_antenna_strap",
+          "score": 0.6,
+          "validation_status": "quarantined"
+        },
+        {
+          "docs_stage": "accepted",
+          "id": "core_density_of_pellet",
+          "score": 0.805,
+          "validation_status": "quarantined"
+        },
+        {
+          "docs_stage": "accepted",
+          "id": "critical_momentum_due_to_avalanche",
+          "score": 0.7714285714285714,
+          "validation_status": "quarantined"
+        },
+        {
+          "docs_stage": "pending",
+          "id": "deposited_power_at_divertor_target",
+          "score": 0.5541666666666667,
+          "validation_status": "quarantined"
+        },
+        {
+          "docs_stage": "accepted",
+          "id": "derivative_of_electron_density_at_pedestal_maximum_with_respect_to_normalized_poloidal_flux_coordinate",
+          "score": 0.5347222222222222,
+          "validation_status": "valid"
+        },
+        {
+          "docs_stage": "accepted",
+          "id": "derivative_of_normalized_effective_particle_energy_with_respect_to_poloidal_angle",
+          "score": 0.7708333333333334,
+          "validation_status": "valid"
+        },
+        {
+          "docs_stage": "accepted",
+          "id": "deuterium_tritium_density_flux_surface_averaged_at_plasma_boundary",
+          "score": 0.6541666666666667,
+          "validation_status": "quarantined"
+        },
+        {
+          "docs_stage": "pending",
+          "id": "difference_of_poloidal_magnetic_flux_and_toroidal_magnetic_flux",
+          "score": 0.7583333333333333,
+          "validation_status": "valid"
+        },
+        {
+          "docs_stage": "pending",
+          "id": "electron_convection_velocity",
+          "score": 0.71875,
+          "validation_status": "quarantined"
+        },
+        {
+          "docs_stage": "accepted",
+          "id": "electron_temperature_at_plasma_boundary",
+          "score": 0.7833333333333332,
+          "validation_status": "valid"
+        },
+        {
+          "docs_stage": "pending",
+          "id": "energy_flux_due_to_eddy_current",
+          "score": 0.64375,
+          "validation_status": "quarantined"
+        }
+      ],
+      "scope": "the below-floor cohort, scoped by source_id",
+      "step": "refine_name (or sn rescore where the chain never reached a verdict)"
+    },
+    "vocabulary gap": {
+      "count": 0,
+      "expected_cost_usd_at_full_run_rate": 0.0,
+      "expected_cost_usd_band": [
+        0.0,
+        0.0
+      ],
+      "representative": [],
+      "scope": "the vocabulary-blocked cohort, scoped by source_id",
+      "step": "vocabulary release, then compose"
+    }
+  },
+  "observed_at": "2026-11-09T22:52:23.410676+00:00",
+  "reconciliation": {
+    "name_class_sum": 116,
+    "names": "sum(name_classes) == exhausted_names",
+    "source_class_sum": 920,
+    "sources": "accepted + unaccepted == live_sources"
+  },
+  "source_classes": {
+    "attempt-capped": {
+      "count": 90,
+      "expected_cost_usd_at_full_run_rate": 22.0,
+      "expected_cost_usd_band": [
+        5.51,
+        11.01
+      ],
+      "representative": [
+        {
+          "attempts": 5,
+          "last_error": "compose claim-attempt cap reached",
+          "source": "edge_profiles/ggd/neutral/velocity/phi",
+          "status": "failed"
+        },
+        {
+          "attempts": 4,
+          "last_error": "",
+          "source": "bolometer/camera/channel/subcollimators_separation",
+          "status": "failed"
+        },
+        {
+          "attempts": 4,
+          "last_error": "",
+          "source": "camera_visible/channel/fibre_bundle/fibre_positions/x1",
+          "status": "failed"
+        },
+        {
+          "attempts": 5,
+          "last_error": "compose claim-attempt cap reached",
+          "source": "camera_visible/channel/fibre_bundle/geometry/centre/phi",
+          "status": "failed"
+        },
+        {
+          "attempts": 5,
+          "last_error": "compose claim-attempt cap reached",
+          "source": "camera_visible/channel/fibre_bundle/geometry/centre/z",
+          "status": "failed"
+        },
+        {
+          "attempts": 5,
+          "last_error": "",
+          "source": "camera_visible/channel/fibre_bundle/geometry/radius",
+          "status": "failed"
+        },
+        {
+          "attempts": 5,
+          "last_error": "compose claim-attempt cap reached",
+          "source": "camera_visible/channel/fibre_bundle/geometry/surface",
+          "status": "failed"
+        },
+        {
+          "attempts": 5,
+          "last_error": "compose claim-attempt cap reached",
+          "source": "camera_visible/channel/fibre_bundle/geometry/x2_width",
+          "status": "failed"
+        },
+        {
+          "attempts": 5,
+          "last_error": "compose claim-attempt cap reached",
+          "source": "mhd_linear/time_slice/toroidal_mode/plasma/displacement_parallel/real",
+          "status": "failed"
+        },
+        {
+          "attempts": 5,
+          "last_error": "compose claim-attempt cap reached",
+          "source": "summary/pedestal_fits/mtanh/stability/bootstrap_current_sauter/alpha_critical/value",
+          "status": "failed"
+        },
+        {
+          "attempts": 3,
+          "last_error": "",
+          "source": "mhd_linear/time_slice/toroidal_mode/plasma/stress_reynolds/imaginary",
+          "status": "failed"
+        },
+        {
+          "attempts": 3,
+          "last_error": "",
+          "source": "mhd_linear/time_slice/toroidal_mode/plasma/stress_reynolds/real",
+          "status": "failed"
+        }
+      ],
+      "scope": "the parked cohort, scoped by source_id",
+      "step": "one signed reset with receipts (sn reset), then compose"
+    },
+    "awaiting review": {
+      "count": 239,
+      "expected_cost_usd_at_full_run_rate": 58.41,
+      "expected_cost_usd_band": [
+        14.63,
+        29.23
+      ],
+      "representative": [
+        {
+          "attempts": 1,
+          "last_error": "",
+          "source": "edge_profiles/ggd/a_field/phi",
+          "status": "attached"
+        },
+        {
+          "attempts": 2,
+          "last_error": "",
+          "source": "edge_profiles/ggd/ion/velocity/parallel",
+          "status": "attached"
+        },
+        {
+          "attempts": 1,
+          "last_error": "",
+          "source": "edge_profiles/ggd/ion/velocity/r",
+          "status": "attached"
+        },
+        {
+          "attempts": 0,
+          "last_error": "",
+          "source": "edge_profiles/ggd/ion/velocity/radial",
+          "status": "attached"
+        },
+        {
+          "attempts": 0,
+          "last_error": "",
+          "source": "edge_profiles/ggd/ion/velocity_over_b_field/radial",
+          "status": "attached"
+        },
+        {
+          "attempts": 0,
+          "last_error": "",
+          "source": "edge_profiles/ggd/neutral/density_fast/values",
+          "status": "attached"
+        },
+        {
+          "attempts": 1,
+          "last_error": "",
+          "source": "bolometer/camera/channel/aperture/radius",
+          "status": "attached"
+        },
+        {
+          "attempts": 2,
+          "last_error": "",
+          "source": "camera_x_rays/aperture/radius",
+          "status": "attached"
+        },
+        {
+          "attempts": 4,
+          "last_error": "",
+          "source": "hard_x_rays/channel/aperture/radius",
+          "status": "attached"
+        },
+        {
+          "attempts": 4,
+          "last_error": "",
+          "source": "hard_x_rays/channel/detector/radius",
+          "status": "attached"
+        },
+        {
+          "attempts": 0,
+          "last_error": "",
+          "source": "mhd/ggd/t_i_average/values",
+          "status": "attached"
+        },
+        {
+          "attempts": 0,
+          "last_error": "",
+          "source": "ntms/time_slice/mode/dfrequency_dt",
+          "status": "attached"
+        }
+      ],
+      "scope": "the drafted cohort, scoped by source_id",
+      "step": "review_name"
+    },
+    "documentation missing": {
+      "count": 5,
+      "expected_cost_usd_at_full_run_rate": 1.22,
+      "expected_cost_usd_band": [
+        0.31,
+        0.61
+      ],
+      "representative": [
+        {
+          "attempts": 0,
+          "last_error": "",
+          "source": "ntms/time_slice/mode",
+          "status": "extracted"
+        },
+        {
+          "attempts": 0,
+          "last_error": "",
+          "source": "plasma_transport/model",
+          "status": "extracted"
+        },
+        {
+          "attempts": 0,
+          "last_error": "",
+          "source": "ic_antennas/antenna/module/strap/geometry/oblique",
+          "status": "extracted"
+        },
+        {
+          "attempts": 0,
+          "last_error": "",
+          "source": "plasma_transport/model/ggd",
+          "status": "extracted"
+        },
+        {
+          "attempts": 5,
+          "last_error": "compose claim-attempt cap reached; last refusal: standard-name binding collision: candidate \"poloidal_ion_state_momentum_diffusion_coefficient\" has non-bindable name_stage \"superseded\" at composition ",
+          "source": "plasma_transport/model/ggd/ion/state/momentum/d_pol",
+          "status": "failed"
+        }
+      ],
+      "scope": "the name cohort whose name passed review without accepted docs",
+      "step": "generate_docs then review_docs"
+    },
+    "never claimed": {
+      "count": 8,
+      "expected_cost_usd_at_full_run_rate": 1.96,
+      "expected_cost_usd_band": [
+        0.49,
+        0.98
+      ],
+      "representative": [
+        {
+          "attempts": 0,
+          "last_error": "",
+          "source": "edge_profiles/ggd/vorticity_over_r/diamagnetic",
+          "status": "extracted"
+        },
+        {
+          "attempts": 0,
+          "last_error": "",
+          "source": "soft_x_rays/channel/detector/radius",
+          "status": "extracted"
+        },
+        {
+          "attempts": 0,
+          "last_error": "",
+          "source": "spectrometer_visible/channel/grating_spectrometer/grating",
+          "status": "extracted"
+        },
+        {
+          "attempts": 0,
+          "last_error": "",
+          "source": "summary/pedestal_fits/linear/n_e/d_dpsi_norm/value",
+          "status": "extracted"
+        },
+        {
+          "attempts": 0,
+          "last_error": "",
+          "source": "summary/local/separatrix/t_e/value",
+          "status": "extracted"
+        },
+        {
+          "attempts": 0,
+          "last_error": "",
+          "source": "edge_transport/model/ggd/momentum/v/poloidal",
+          "status": "extracted"
+        },
+        {
+          "attempts": 0,
+          "last_error": "",
+          "source": "summary/line_average/n_i/neon/value",
+          "status": "extracted"
+        },
+        {
+          "attempts": 0,
+          "last_error": "",
+          "source": "plasma_profiles/ggd/vorticity_over_r/diamagnetic",
+          "status": "extracted"
+        }
+      ],
+      "scope": "the extracted cohort with no claim, scoped by source_id",
+      "step": "compose"
+    },
+    "refused by a writer": {
+      "count": 91,
+      "expected_cost_usd_at_full_run_rate": 22.24,
+      "expected_cost_usd_band": [
+        5.57,
+        11.13
+      ],
+      "representative": [
+        {
+          "attempts": 5,
+          "last_error": "compose claim-attempt cap reached; last refusal: standard-name binding collision: candidate \"ion_state_charge_number\" has non-bindable name_stage \"superseded\" at composition attempt 4",
+          "source": "edge_profiles/ggd/ion/state/z_average/values",
+          "status": "failed"
+        },
+        {
+          "attempts": 5,
+          "last_error": "compose claim-attempt cap reached; last refusal: standard-name binding collision: candidate \"ratio_of_vertical_ion_velocity_to_magnetic_field_magnitude\" has non-bindable name_stage \"superseded\" at com",
+          "source": "edge_profiles/ggd/ion/velocity_over_b_field/z",
+          "status": "failed"
+        },
+        {
+          "attempts": 5,
+          "last_error": "compose claim-attempt cap reached; last refusal: standard-name binding collision: candidate \"total_anomalous_current_density_due_to_diamagnetic_drift\" has non-bindable name_stage \"superseded\" at compo",
+          "source": "edge_profiles/ggd/j_anomalous/diamagnetic",
+          "status": "failed"
+        },
+        {
+          "attempts": 5,
+          "last_error": "compose claim-attempt cap reached; last refusal: standard-name binding collision: candidate \"total_size_of_camera\" has non-bindable name_stage \"exhausted\" at composition attempt 4",
+          "source": "camera_x_rays/camera/camera_dimensions",
+          "status": "failed"
+        },
+        {
+          "attempts": 1,
+          "last_error": "candidate pre-validation failed (grammar validation: 1 validation error for StandardName\ngeometric_base\n  Input should be 'centroid', 'normalized_minor_radius', 'normalized_toroidal_flux_coordinate', ",
+          "source": "mhd_linear/time_slice/toroidal_mode/plasma/displacement_parallel/imaginary",
+          "status": "failed"
+        },
+        {
+          "attempts": 1,
+          "last_error": "candidate pre-validation failed (grammar validation: 1 validation error for StandardName\ngeometric_base\n  Input should be 'centroid', 'normalized_minor_radius', 'normalized_toroidal_flux_coordinate', ",
+          "source": "mhd_linear/time_slice/toroidal_mode/plasma/displacement_perpendicular/imaginary",
+          "status": "failed"
+        },
+        {
+          "attempts": 1,
+          "last_error": "candidate pre-validation failed (grammar validation: 1 validation error for StandardName\ngeometric_base\n  Input should be 'centroid', 'normalized_minor_radius', 'normalized_toroidal_flux_coordinate', ",
+          "source": "mhd_linear/time_slice/toroidal_mode/plasma/displacement_perpendicular/real",
+          "status": "failed"
+        },
+        {
+          "attempts": 4,
+          "last_error": "candidate pre-validation failed (grammar validation: ISN rejected operator chain normalized -> gradient: operator 'normalized' with precedence 15 cannot wrap 'gradient' with precedence 20. Reorder the",
+          "source": "summary/pedestal_fits/mtanh/stability/bootstrap_current_hager/alpha_critical/value",
+          "status": "failed"
+        },
+        {
+          "attempts": 5,
+          "last_error": "compose claim-attempt cap reached; last refusal: standard-name binding collision: candidate \"vertical_coordinate_of_coordinate_system\" has non-bindable name_stage \"superseded\" at composition attempt 1",
+          "source": "mhd_linear/time_slice/toroidal_mode/plasma/coordinate_system/z",
+          "status": "failed"
+        },
+        {
+          "attempts": 5,
+          "last_error": "compose claim-attempt cap reached; last refusal: standard-name binding collision: candidate \"first_local_tangential_width_of_fiber_bundle\" has non-bindable name_stage \"pending\" at composition attempt ",
+          "source": "spectrometer_visible/channel/fibre_bundle/geometry/x1_width",
+          "status": "failed"
+        },
+        {
+          "attempts": 5,
+          "last_error": "rich standard-name write refused candidate 'second_local_tangential_width_of_fiber_bundle': the writer refused to mint this identity, so the source produced no name",
+          "source": "spectrometer_visible/channel/fibre_bundle/geometry/x2_width",
+          "status": "failed"
+        },
+        {
+          "attempts": 5,
+          "last_error": "compose claim-attempt cap reached; last refusal: standard-name binding collision: candidate \"vertical_coordinate_of_bragg_crystal\" has non-bindable name_stage \"superseded\" at composition attempt 4",
+          "source": "spectrometer_x_ray_crystal/channel/crystal/centre/z",
+          "status": "failed"
+        }
+      ],
+      "scope": "the refused cohort, scoped by source_id",
+      "step": "compose (the candidate was refused at write time)"
+    },
+    "scored below the acceptance floor": {
+      "count": 395,
+      "expected_cost_usd_at_full_run_rate": 96.54,
+      "expected_cost_usd_band": [
+        24.17,
+        48.31
+      ],
+      "representative": [
+        {
+          "attempts": 2,
+          "last_error": "",
+          "source": "camera_x_rays/camera/pixel_dimensions",
+          "status": "attached"
+        },
+        {
+          "attempts": 1,
+          "last_error": "",
+          "source": "camera_x_rays/photon_energy",
+          "status": "attached"
+        },
+        {
+          "attempts": 2,
+          "last_error": "",
+          "source": "hard_x_rays/channel/energy_band/energies",
+          "status": "attached"
+        },
+        {
+          "attempts": 1,
+          "last_error": "",
+          "source": "summary/disruption/decay_times/ip/linear_20_80/value",
+          "status": "attached"
+        },
+        {
+          "attempts": 2,
+          "last_error": "",
+          "source": "mhd_linear/time_slice/toroidal_mode/plasma/coordinate_system/r",
+          "status": "attached"
+        },
+        {
+          "attempts": 2,
+          "last_error": "",
+          "source": "mhd_linear/time_slice/toroidal_mode/vacuum/coordinate_system/r",
+          "status": "attached"
+        },
+        {
+          "attempts": 3,
+          "last_error": "",
+          "source": "mhd_linear/time_slice/toroidal_mode/vacuum/coordinate_system/z",
+          "status": "attached"
+        },
+        {
+          "attempts": 1,
+          "last_error": "",
+          "source": "spectrometer_visible/channel/filter_spectrometer/output_voltage",
+          "status": "attached"
+        },
+        {
+          "attempts": 1,
+          "last_error": "",
+          "source": "spectrometer_x_ray_crystal/channel/bin/instrument_function/intensity",
+          "status": "attached"
+        },
+        {
+          "attempts": 1,
+          "last_error": "",
+          "source": "spectrometer_uv/channel/wavelength_calibration/gain",
+          "status": "attached"
+        },
+        {
+          "attempts": 2,
+          "last_error": "",
+          "source": "spectrometer_visible/channel/grating_spectrometer/wavelength_calibration/gain",
+          "status": "attached"
+        },
+        {
+          "attempts": 1,
+          "last_error": "",
+          "source": "soft_x_rays/channel/energy_band/energies",
+          "status": "attached"
+        }
+      ],
+      "scope": "the below-floor cohort, scoped by source_id",
+      "step": "refine_name (or sn rescore where the chain never reached a verdict)"
+    },
+    "vocabulary gap": {
+      "count": 92,
+      "expected_cost_usd_at_full_run_rate": 22.48,
+      "expected_cost_usd_band": [
+        5.63,
+        11.25
+      ],
+      "representative": [
+        {
+          "attempts": 0,
+          "last_error": "missing device vocabulary token 'optical_fibre': Radius of one optical fibre inside a bundle; the registered fibre_bundle token would denote the bundle itself, and optical_element would erase the fibr",
+          "source": "camera_visible/channel/fibre_bundle/fibre_radius",
+          "status": "extracted"
+        },
+        {
+          "attempts": 0,
+          "last_error": "missing device vocabulary token 'gas_injection_pipe': Length of a gas injection pipe requires the pipe as the owning structural locus, but no registered device token denotes a gas injection pipe, so t",
+          "source": "gas_injection/pipe/length",
+          "status": "extracted"
+        },
+        {
+          "attempts": 0,
+          "last_error": "missing position vocabulary token 'pre_sawtooth_crash': Psi-star is evaluated just before the sawtooth crash, distinct from the registered post_sawtooth_crash; the pre-crash state is a genuinely diffe",
+          "source": "sawteeth/profiles_1d/psi_star_pre_crash",
+          "status": "extracted"
+        },
+        {
+          "attempts": 0,
+          "last_error": "missing physical_base vocabulary token 'stress': The DD leaf is the imaginary part of the Maxwell stress tensor component (unit N.m^-2) for a linear MHD toroidal mode; the closed physical_base registr",
+          "source": "mhd_linear/time_slice/toroidal_mode/plasma/stress_maxwell/imaginary",
+          "status": "extracted"
+        },
+        {
+          "attempts": 0,
+          "last_error": "missing physical_base vocabulary token 'stress': The real part of the neoclassical toroidal viscosity stress tensor component (N.m^-2) cannot be decomposed: the irreducible base is 'stress' (absent fr",
+          "source": "mhd_linear/time_slice/toroidal_mode/plasma/ntv/real",
+          "status": "extracted"
+        },
+        {
+          "attempts": 0,
+          "last_error": "missing physical_base vocabulary token 'stress': The real part of the Maxwell stress tensor component (N.m^-2) has no registered 'stress' base; 'strain' is a different dimensionless tensor and 'magnet",
+          "source": "mhd_linear/time_slice/toroidal_mode/plasma/stress_maxwell/real",
+          "status": "extracted"
+        },
+        {
+          "attempts": 0,
+          "last_error": "missing qualifier vocabulary token 'custom': Linear decay time of Ip between user-defined fractional thresholds is a distinct observable from the fixed 20-80% plasma decay time; no registered qualifie",
+          "source": "summary/disruption/decay_times/ip/linear_custom/decay_time/value",
+          "status": "extracted"
+        },
+        {
+          "attempts": 0,
+          "last_error": "missing qualifier vocabulary token 'half': 'half' is in no grammar class and does not decompose into registered tokens; naming this needs a new qualifier token in imas-standard-names.",
+          "source": "summary/disruption/time_half_ip/value",
+          "status": "extracted"
+        },
+        {
+          "attempts": 0,
+          "last_error": "missing physical_base vocabulary token 'delta_prime': The quantity is a contribution to the modified Rutherford equation for NTM island-width evolution, a tearing-mode stability-index term with unit m",
+          "source": "ntms/time_slice/mode/deltaw/value",
+          "status": "extracted"
+        },
+        {
+          "attempts": 0,
+          "last_error": "missing physical_base vocabulary token 'delta_prime': Same observable as ntms/time_slice/mode/deltaw/value, sampled on the finer NTM evolution timebase: a delta-prime contribution to the Rutherford eq",
+          "source": "ntms/time_slice/mode/detailed_evolution/deltaw/value",
+          "status": "extracted"
+        },
+        {
+          "attempts": 0,
+          "last_error": "missing physical_base vocabulary token 'stress': The imaginary part of the neoclassical toroidal viscosity stress tensor component (N.m^-2) needs an unregistered 'stress' base, plus no qualifier/carri",
+          "source": "mhd_linear/time_slice/toroidal_mode/plasma/ntv/imaginary",
+          "status": "extracted"
+        },
+        {
+          "attempts": 0,
+          "last_error": "missing physical_base vocabulary token 'magnetic_safety_factor_placeholder': 'magnetic_safety_factor_placeholder' is in no grammar class and does not decompose into registered tokens; naming this need",
+          "source": "sawteeth/diagnostics/magnetic_shear_q1",
+          "status": "extracted"
+        }
+      ],
+      "scope": "the vocabulary-blocked cohort, scoped by source_id",
+      "step": "vocabulary release, then compose"
+    }
+  }
+}
