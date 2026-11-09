@@ -1,0 +1,130 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 2,
+  "added_failure_ids": [
+    "tests/standard_names/fanout/test_dispatcher.py::TestSyncTimeouts::test_total_timeout_with_sync_helpers",
+    "tests/standard_names/test_review_pipeline.py::test_audit_embedding_preflight"
+  ],
+  "assertion_analysis": [
+    {
+      "failure_condition": "A parser that accepts the refused spelling or no longer produces a segment-order diagnostic fails the raises expectation before the fake response is constructed.",
+      "file": "tests/standard_names/test_canonical_order_adoption.py",
+      "lines": "66-67"
+    },
+    {
+      "failure_condition": "Removing the batch adoption call skips the sole candidate and returns zero rather than the independent expected one; the recorded negative control fails here.",
+      "file": "tests/standard_names/test_canonical_order_adoption.py",
+      "lines": "82"
+    },
+    {
+      "failure_condition": "Removing adoption empties the captured persistence list; persisting the refused spelling or another spelling also differs from the fixed canonical constant, which is never supplied as candidate input.",
+      "file": "tests/standard_names/test_canonical_order_adoption.py",
+      "lines": "83"
+    },
+    {
+      "failure_condition": "Dropping or corrupting the supplied source mapping fails the identity assertion, but the expected value is the same source_path supplied to the fake candidate and item, so changing that input changes both sides; it is supplemental mapping coverage, not an independent adoption oracle.",
+      "file": "tests/standard_names/test_canonical_order_adoption.py",
+      "lines": "84"
+    },
+    {
+      "failure_condition": "Recording a prevalidation refusal on the source fails the empty-refusal assertion; removing adoption takes this path, though the earlier count assertion stops execution first.",
+      "file": "tests/standard_names/test_canonical_order_adoption.py",
+      "lines": "85"
+    }
+  ],
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/standard_names/worker_tasks/worker_compose_batches.py:693 compose_batch adoption branch",
+    "imas_codex/standard_names/worker_tasks/worker_compose_batches.py:1183 compose_batch persistence call",
+    "imas_codex/standard_names/worker_tasks/worker_compose_batches.py:1309 process_generate_name_batch"
+  ],
+  "completed_at": "2026-11-09T23:19:37Z",
+  "dispatched_at": "2026-11-09T23:09:16Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-canonical-adoption-wiring-test.html",
+      "line": "5",
+      "severity": "blocking",
+      "text": "blocking: The recorded standard-names suite adds two failure IDs over the stated base, so the node's explicit zero-added-failure measure remains unmet and requires coordinator adjudication or separate gate repair before landing; the focused green result cannot discharge that requirement."
+    },
+    {
+      "file": "tests/standard_names/test_canonical_order_adoption.py",
+      "line": "84",
+      "severity": "non-blocking",
+      "text": "non-blocking: The source identity assertion compares the persisted value with source_path supplied to both the fake candidate and batch item, so changing that input moves both sides together and this assertion alone does not guard canonical adoption; the independent canonical-spelling assertion at line 83 and the recorded mutation provide that protection, so this supplemental identity check does not hold landing."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "Read a09b04998e99e7a084dfa7f14b7f8cd56c15992f and 892692d8e45a7312af06955f3afca97d963afb2f individually against 197de19cd11eb9b247fd9cb9f16ded0d231c775f; they add 34 test lines and seven fragment lines, reusing the compose isolation fixture and documenting the remaining gate failure.",
+    "done_when": "Read source prompt.txt:102 and baseline-suite.log:845-847, head-suite.log:840-844 and negative-control.log:37-39; the targeted mutation fails only the new test, but the complete suite arms add two failure IDs and therefore do not meet the zero-added-failure requirement.",
+    "goal": "Read source prompt.txt:38 and tests/standard_names/test_canonical_order_adoption.py:65-85; the added asynchronous test drives compose_batch with a real parser refusal and checks the independent canonical spelling passed to persistence.",
+    "manifest": "Read source manifest.md and manifest.md.asdelivered with their gate receipts; the focused five-pass result, one-failure mutation, two commits and unmet suite delta are accurately reported, and the delivered blocked status was subsequently normalized to complete without resolving the stated suite blocker.",
+    "write_paths": "Read source prompt.txt's FENCE scope and both commit diffs; the only changed paths are the granted test_canonical_order_adoption.py and sib-canonical-adoption-wiring-test.html fragment, with no product changes."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_canonical_order_adoption.py:82-83 uses a literal count and independently fixed canonical spelling that fail when adoption is removed, as negative-control.log:12-16 confirms, although line 84 only checks the supplied source identity and supplies no independent adoption oracle.",
+    "evidence": "negative-control.log:37-39 records the new test failing when the adoption call is removed, while baseline-suite.log:845-847 and head-suite.log:840-844 demonstrate two added failure IDs rather than the required zero.",
+    "fit": "tests/standard_names/test_canonical_order_adoption.py:10-20 follows test_compose_batch_isolation.py:35 and :132-243 by reusing its asynchronous runner, fixture and bounded cold-import timeout with capability-based names.",
+    "goal_fidelity": "tests/standard_names/test_canonical_order_adoption.py:65-85 exercises the production batch branch with radiated_energy_accumulated_due_to_impurity_radiation and expects accumulated_radiated_energy_due_to_impurity_radiation at the persistence seam for the synthetic energy source.",
+    "reuse": "Capability searches for batch execution, fake structured responses and canonical adoption located and opened test_compose_batch_isolation.py:43-243 and grammar_adapter.py:144-158; the additions reuse those owners and add only the scenario-specific answering coroutine at test_canonical_order_adoption.py:77.",
+    "scope_discipline": "The complete base-to-head diff contains only tests/standard_names/test_canonical_order_adoption.py and the explicitly granted docs/evidence/fragments/sn-integrity-backlog/sib-canonical-adoption-wiring-test.html, with no product edits."
+  },
+  "limitations": [
+    "Persistence is observed at the patched _persist_description_checked_candidates seam, not through a real database write, matching the test-only goal.",
+    "No suite or mutation rerun during this read-only review; recorded complete receipts were inspected.",
+    "The focused-head receipt names the base revision while testing then-uncommitted test edits; the committed after_suite at a09b04998e99e7a084dfa7f14b7f8cd56c15992f contains the same final test and supplies the revision-bound head receipt.",
+    "The final reviewed commit changes only the seven-line evidence fragment after the suite-tested test commit.",
+    "Coordinator disposition remains required for the blocking unmet suite measure and non-blocking supplemental input-echo assertion."
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: Read source prompt.txt:38 and tests/standard_names/test_canonical_order_adoption.py:65-85; the added asynchronous test drives compose_batch with a real parser refusal and checks the independent canonical spelling passed to persistence.\nVERDICT done_when: Read source prompt.txt:102 and baseline-suite.log:845-847, head-suite.log:840-844 and negative-control.log:37-39; the targeted mutation fails only the new test, but the complete suite arms add two failure IDs and therefore do not meet the zero-added-failure requirement.\nVERDICT write_paths: Read source prompt.txt's FENCE scope and both commit diffs; the only changed paths are the granted test_canonical_order_adoption.py and sib-canonical-adoption-wiring-test.html fragment, with no product changes.\nVERDICT manifest: Read source manifest.md and manifest.md.asdelivered with their gate receipts; the focused five-pass result, one-failure mutation, two commits and unmet suite delta are accurately reported, and the delivered blocked status was subsequently normalized to complete without resolving the stated suite blocker.\nVERDICT diff: Read a09b04998e99e7a084dfa7f14b7f8cd56c15992f and 892692d8e45a7312af06955f3afca97d963afb2f individually against 197de19cd11eb9b247fd9cb9f16ded0d231c775f; they add 34 test lines and seven fragment lines, reusing the compose isolation fixture and documenting the remaining gate failure.\nCALL_SITES: imas_codex/standard_names/worker_tasks/worker_compose_batches.py:693 compose_batch adoption branch, imas_codex/standard_names/worker_tasks/worker_compose_batches.py:1183 compose_batch persistence call, imas_codex/standard_names/worker_tasks/worker_compose_batches.py:1309 process_generate_name_batch\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: tests/standard_names/test_canonical_order_adoption.py:65-85 exercises the production batch branch with radiated_energy_accumulated_due_to_impurity_radiation and expects accumulated_radiated_energy_due_to_impurity_radiation at the persistence seam for the synthetic energy source.\nSCORE evidence: 15\nJUSTIFICATION evidence: negative-control.log:37-39 records the new test failing when the adoption call is removed, while baseline-suite.log:845-847 and head-suite.log:840-844 demonstrate two added failure IDs rather than the required zero.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The complete base-to-head diff contains only tests/standard_names/test_canonical_order_adoption.py and the explicitly granted docs/evidence/fragments/sn-integrity-backlog/sib-canonical-adoption-wiring-test.html, with no product edits.\nSCORE durability: 18\nJUSTIFICATION durability: tests/standard_names/test_canonical_order_adoption.py:82-83 uses a literal count and independently fixed canonical spelling that fail when adoption is removed, as negative-control.log:12-16 confirms, although line 84 only checks the supplied source identity and supplies no independent adoption oracle.\nSCORE fit: 20\nJUSTIFICATION fit: tests/standard_names/test_canonical_order_adoption.py:10-20 follows test_compose_batch_isolation.py:35 and :132-243 by reusing its asynchronous runner, fixture and bounded cold-import timeout with capability-based names.\nSCORE reuse: 20\nJUSTIFICATION reuse: Capability searches for batch execution, fake structured responses and canonical adoption located and opened test_compose_batch_isolation.py:43-243 and grammar_adapter.py:144-158; the additions reuse those owners and add only the scenario-specific answering coroutine at test_canonical_order_adoption.py:77.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-canonical-adoption-wiring-test.html:5 blocking: The recorded standard-names suite adds two failure IDs over the stated base, so the node's explicit zero-added-failure measure remains unmet and requires coordinator adjudication or separate gate repair before landing; the focused green result cannot discharge that requirement.\nFINDING tests/standard_names/test_canonical_order_adoption.py:84 non-blocking: The source identity assertion compares the persisted value with source_path supplied to both the fake candidate and batch item, so changing that input moves both sides together and this assertion alone does not guard canonical adoption; the independent canonical-spelling assertion at line 83 and the recorded mutation provide that protection, so this supplemental identity check does not hold landing.\n",
+  "reuse_search": "Searched compose batch execution, structured-response fakes and adoption capabilities; opened test_compose_batch_isolation.py (_run_batch, compose_deps, fake candidate/result/output and local answering scenarios) and grammar_adapter.py:144-158. The new test extends the existing fixture owner with one scenario-specific response closure; no production capability is duplicated.",
+  "review_run_id": "r-20261109T230753271766-review-of-sib-canonical-adoption-wiring-test-892692d8e45a",
+  "reviewed_base_sha": "197de19cd11eb9b247fd9cb9f16ded0d231c775f",
+  "reviewed_head_sha": "892692d8e45a7312af06955f3afca97d963afb2f",
+  "reviewed_run_id": "r-20261109T222257030325-sib-canonical-adoption-wiring-test",
+  "scores": {
+    "durability": 18,
+    "evidence": 15,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "self_referential_assertions": [
+    "tests/standard_names/test_canonical_order_adoption.py:84 compares against the same source_path supplied to the fake candidate and batch item; it does not independently prove adoption and is not counted as its oracle."
+  ],
+  "status": "parsed",
+  "suite_evidence": {
+    "after_suite": {
+      "command": "uv run --no-sync --directory /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-canonical-adoption-wiring-test pytest -p no:cacheprovider --basetemp /tmp/reckon-crew-scratch/r-20261109T222257030325-sib-canonical-adoption-wiring-test/canonical-adoption-gate-GF3kfP/pytest /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-canonical-adoption-wiring-test/tests/standard_names -n 8",
+      "completed": true,
+      "exit_status": 1,
+      "failure_count": 3,
+      "failure_ids": [
+        "tests/standard_names/fanout/test_dispatcher.py::TestSyncTimeouts::test_total_timeout_with_sync_helpers",
+        "tests/standard_names/test_review_pipeline.py::test_audit_embedding_preflight",
+        "tests/standard_names/test_pool_registry_imports.py::test_pool_phase_import_orders_succeed_in_fresh_process[import imas_codex.cli.sn; import imas_codex.standard_names.turn as t; print(t.TURN_PHASES)]"
+      ],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T222257030325-sib-canonical-adoption-wiring-test/head-suite.log",
+      "revision": "a09b04998e99e7a084dfa7f14b7f8cd56c15992f"
+    },
+    "baseline_suite": {
+      "command": "uv run --no-sync --directory /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-canonical-adoption-wiring-test pytest -p no:cacheprovider --basetemp /tmp/reckon-crew-scratch/r-20261109T222257030325-sib-canonical-adoption-wiring-test/canonical-adoption-gate-joL4kH/pytest /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-canonical-adoption-wiring-test/tests/standard_names -n 8",
+      "completed": true,
+      "exit_status": 1,
+      "failure_count": 1,
+      "failure_ids": [
+        "tests/standard_names/test_pool_registry_imports.py::test_pool_phase_import_orders_succeed_in_fresh_process[import imas_codex.cli.sn; import imas_codex.standard_names.turn as t; print(t.TURN_PHASES)]"
+      ],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T222257030325-sib-canonical-adoption-wiring-test/baseline-suite.log",
+      "revision": "197de19cd11eb9b247fd9cb9f16ded0d231c775f"
+    }
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-11-09T23:22:54.813849+00:00",
+  "total": 113
+}
