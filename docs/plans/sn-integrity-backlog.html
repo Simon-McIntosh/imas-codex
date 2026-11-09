@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="424">
+<meta name="plan-version" content="425">
 <meta name="plan-modified" content="2026-11-09">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -315,6 +315,9 @@
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="_top" data-id="c-s51-lead-rulings-2026-11-09" data-who="Simon McIntosh" data-when="2026-11-09T08:00:00Z">
+    <div class="r-comment-body"><p>Lead rulings, 2026-11-09:</p><ul><li><strong>Vocabulary:</strong> add the physics words and reject the composer's artefacts, but rework the proposed list first. Several proposals look like composites and must be split into their parts. The equipment is the poloidal field <em>coil</em> (not "circuit"), and ITER speaks of power <em>convertors</em>, not power supplies. A worklist node classifies every gap token (add / reject with the existing spelling / decompose) before anything goes into the grammar.</li><li><strong>Rerun:</strong> one run, after the vocabulary lands: the 35 failed cohort sources plus the 16 vocabulary-blocked ones.</li><li><strong>Attempt-capped sources (13):</strong> one signed reset with receipts; a source that hits the cap again gets a diagnosis, not another retry.</li><li><strong>After the cohort clears 100 of 143:</strong> the signed lineage-cycle repair (after a fresh count), then the catalog-consistency pass, before any scale-up.</li></ul></div>
+</div>
 <div class="r-comment" data-section="s10" data-id="c-run-r-20261013T002058592682-review-of-sib-name-gate-confirm-0ba9048f5965" data-who="reckon-build" data-when="2026-10-13T00:31:36.701Z">
     <div class="r-comment-body"><p>review of r-20261013T000726279739-sib-name-gate-confirm stored at /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20261013T000726279739-sib-name-gate-confirm.at-0ba9048f5965f077dbfb956ababf60098f6daece.json (base 0ba9048f5965f077dbfb956ababf60098f6daece, head 0ba9048f5965f077dbfb956ababf60098f6daece) — status parsed, six dimensions scored (goal_fidelity 18, evidence 18, scope_discipline 15, durability 17, fit 18, reuse 20; total 106), added_failure_count 0, three follow-on findings</p></div>
 </div>
@@ -1349,6 +1352,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 <div class="r-comment" data-section="s51" data-id="c-run-r-20261108T183409891413-sib-persist-refusal-placeholder" data-who="reckon-build" data-when="2026-11-08T19:12:24Z">
     <div class="r-comment-body"><p>Refused pending targets are retired with their reservation in one transaction unless protected or produced elsewhere; graph regressions 8 passed versus 7 failed / 1 passed at base, cleanup-removal control 3 failed / 3 passed, signed live retirement 2 targets / 2 receipts restores drafts 5 to 3 and preserves USD 0.003509; spend USD 0 / 0.</p></div>
 </div>
+<div class="r-comment" data-section="s51" data-id="c-run-r-20261109T053105567654-sib-vocab-worklist" data-who="reckon-build" data-when="2026-11-09T06:09:40Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/sn-integrity-backlog/sib-vocab-worklist.html#sib-vocab-worklist-record classifies 68 segment-token rows (26 add, 31 decompose, 11 reject), with 90 bindings covering all 86 DD sources (70+15+1), 42 distinct proposed token additions, seven strict parser reuse controls and three mutation refusals; tagged vocabulary v0.10.1; graph reads only; spend USD 0/0.</p></div>
+</div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261012T162346807302-review-of-sib-row-census" data-who="reckon-build" data-when="2026-10-12T16:39:58.712Z">
     <div class="r-comment-body"><p>reviewed r-20261012T145528571333-sib-row-census at a7a70db00 against c7b4c626e; total 93/120 (goal_fidelity 15, evidence 13, scope_discipline 19, durability 11, fit 15, reuse 20); two blocking findings — the landing record's verdict tallies and the manifest's row-count both disagree with the 38 rows the census file holds.</p></div>
 </div>
@@ -1441,9 +1447,6 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s9" data-id="c-run-r-20261012T195012490344-review-of-sib-restore-archived-origin" data-who="reckon-build" data-when="2026-10-12T20:01:10.018Z">
     <div class="r-comment-body"><p>reviewed run r-20261012T194341934507-sib-restore-archived-origin at f4dffef72 (base c51cf292f): the added case at tests/standard_names/test_archive_reconstruction_entry_point.py:203 correctly pins the composer's refusal of an archive's own origin and closes the coverage gap the prior review named; scores goal_fidelity 20, evidence 19, scope_discipline 20, durability 19, fit 19, reuse 20 (total 117); no blocking findings, one follow-on on the gate-log revision header.</p></div>
-</div>
-<div class="r-comment" data-section="_top" data-id="c-s51-lead-rulings-2026-11-09" data-who="Simon McIntosh" data-when="2026-11-09T08:00:00Z">
-    <div class="r-comment-body"><p>Lead rulings, 2026-11-09:</p><ul><li><strong>Vocabulary:</strong> add the physics words and reject the composer's artefacts, but rework the proposed list first. Several proposals look like composites and must be split into their parts. The equipment is the poloidal field <em>coil</em> (not "circuit"), and ITER speaks of power <em>convertors</em>, not power supplies. A worklist node classifies every gap token (add / reject with the existing spelling / decompose) before anything goes into the grammar.</li><li><strong>Rerun:</strong> one run, after the vocabulary lands: the 35 failed cohort sources plus the 16 vocabulary-blocked ones.</li><li><strong>Attempt-capped sources (13):</strong> one signed reset with receipts; a source that hits the cap again gets a diagnosis, not another retry.</li><li><strong>After the cohort clears 100 of 143:</strong> the signed lineage-cycle repair (after a fresh count), then the catalog-consistency pass, before any scale-up.</li></ul></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
