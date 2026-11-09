@@ -7,8 +7,10 @@ stay whole. Every cluster's area is in proportion to its real node count and
 every cluster is drawn at one dot density, so a dot stands for about the same
 number of nodes everywhere. Graphviz sfdp lays each cluster out from its own
 topology, so its hubs, trees and dense cores are the graph's. Grey lines are
-sampled relationships that cross systems, each crossing labelled with its full
-count. The top of the canvas is left clear for the slide title.
+sampled relationships that cross systems. Each system is named with its node
+count, and text is set in Arial, written into the SVG as text so a slide renders
+it in the slide's own font. The top of the canvas is left clear for the slide
+title.
 
     uv run python scripts/figures_knowledge_graph_scale.py --query    # counts + sample
     uv run python scripts/figures_knowledge_graph_scale.py            # draw from cache
@@ -97,13 +99,6 @@ RETURN labels(n)[0] AS l,
        coalesce(n.facility_id, CASE WHEN n:Facility THEN n.id END) AS f,
        count(*) AS c
 """
-# A facility's IMAS mappings name their IDS by property, not by an edge.
-IDS_MAPPINGS = """
-MATCH (m:IMASMapping)-[:USES_SIGNAL_SOURCE]->(s:SignalSource)
-OPTIONAL MATCH (f:FacilitySignal)-[:MEMBER_OF]->(s)
-RETURN m.facility_id AS facility, count(DISTINCT m.ids_name) AS ids,
-       count(DISTINCT s) AS sources, count(DISTINCT f) AS signals
-"""
 
 
 def system_of(label: str, facility: str | None) -> str:
@@ -141,7 +136,6 @@ def query_stats(gc) -> dict:
         "internal_links": dict(internal),
         "cross_links": dict(cross),
         "cross_link_types": {k: dict(v.most_common()) for k, v in cross_types.items()},
-        "ids_mappings": {r["facility"]: r for r in gc.query(IDS_MAPPINGS)},
         "nodes_by_label": {k: dict(v.most_common()) for k, v in by_label.items()},
     }
 
@@ -510,13 +504,19 @@ CATEGORY_LABEL_ANGLE = {
 }
 RADIUS_PER_ROOT_NODE = 1.55 / math.sqrt(653_458)  # in: area reads as node count
 
-# Crossing name, and the groups its lines join.
-CROSSING_LABELS = {
-    "jt-60sa|dd": ("mapping\ncandidates", "jt-60sa/signals", "dd"),
-    "jet|dd": ("signals in {ids} IDS\nmappings, no field edges", "jet/signals", "dd"),
-    "tcv|dd": ("\nunit links", "tcv/signals", "dd"),
-    "sn|dd": ("\nDD sources", "sn", "dd"),
+# Arial, falling back to its metric twins Liberation Sans or Nimbus Sans where
+# Arial is not installed, so the layout check measures the widths a slide will
+# draw. SVG text stays text, so the slide sets it in its own Arial.
+FONT = {
+    "font.family": "sans-serif",
+    "font.sans-serif": ["Arial", "Liberation Sans", "Nimbus Sans"],
+    "svg.fonttype": "none",
 }
+
+
+def use_style() -> None:
+    plt.style.use("data-ink")
+    plt.rcParams.update(FONT)
 
 
 def human(n: float) -> str:
@@ -556,15 +556,6 @@ def geometry(stats: dict) -> dict[str, tuple[float, float, float]]:
     return out
 
 
-def crossing_count(stats: dict, key: str) -> tuple[int, str]:
-    a, b = key.split("|")
-    name = CROSSING_LABELS[key][0]
-    if a == "jet":
-        m = stats["ids_mappings"]["jet"]
-        return m["signals"], name.format(ids=m["ids"])
-    return stats["cross_links"]["|".join(sorted((a, b)))], name
-
-
 def directional_text(ax, x, y, angle, text, **kw):
     """Text anchored on the side of (x, y) that faces away along angle."""
     c, s = math.cos(angle), math.sin(angle)
@@ -579,7 +570,7 @@ def directional_text(ax, x, y, angle, text, **kw):
 
 
 def draw(stats: dict, sample: dict, pos: dict, out: Path, draft: Path | None) -> None:
-    plt.style.use("data-ink")
+    use_style()
     fig = plt.figure(figsize=(SLIDE_WIDTH, HEIGHT), dpi=100)
     ax = fig.add_axes((0, 0, 1, 1))
     ax.axis("off")
@@ -640,26 +631,6 @@ def draw(stats: dict, sample: dict, pos: dict, out: Path, draft: Path | None) ->
                 )
             )
 
-    for key, (_, ga, gb) in CROSSING_LABELS.items():
-        count, name = crossing_count(stats, key)
-        (ax_, ay, ra), (bx, by, rb) = geo[ga], geo[gb]
-        d = math.hypot(bx - ax_, by - ay)
-        f = (ra + 0.5 * (d - ra - rb)) / d
-        labels.append(
-            ax.text(
-                ax_ + f * (bx - ax_),
-                ay + f * (by - ay),
-                f"{human(count)} {name}",
-                ha="center",
-                va="center",
-                fontsize=14,
-                color=INK,
-                linespacing=1.1,
-                zorder=6,
-                bbox={"boxstyle": "square,pad=0.15", "fc": "white", "ec": "none"},
-            )
-        )
-
     for key, (name, colour, _, _, side) in SYSTEMS.items():
         circles = [g for k, g in geo.items() if k.split("/")[0] == key]
         x0 = min(x - r for x, _, r in circles)
@@ -671,10 +642,7 @@ def draw(stats: dict, sample: dict, pos: dict, out: Path, draft: Path | None) ->
             "above": (y1 + 0.75, (x0 + x1) / 2, "center"),
             "right": ((y0 + y1) / 2 + 0.38, x1 + 0.15, "left"),
         }[side]
-        detail = (
-            f"{human(stats['nodes'][key])} nodes · "
-            f"{human(stats['internal_links'][key])} links"
-        )
+        detail = f"{human(stats['nodes'][key])} nodes"
         for text, y, size, weight, c in (
             (name, name_y, 22, "bold", colour),
             (detail, name_y - 0.45, 16, "normal", INK),

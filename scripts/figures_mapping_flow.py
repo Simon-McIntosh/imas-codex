@@ -36,6 +36,7 @@ from figures_knowledge_graph_scale import (  # noqa: E402
     check_layout,
     human,
     save,
+    use_style,
 )
 
 DATA = FIGURES / "mapping-flow-graph.json"
@@ -128,7 +129,7 @@ def draw(data: dict, out, draft) -> None:
     columns = {f: sum(totals[f, s] for s in STAGES) for f in FACILITIES}
     unit = (TOP - BOTTOM - GAP * len(order)) / max(*columns.values(), whole)
 
-    plt.style.use("data-ink")
+    use_style()
     fig = plt.figure(figsize=(SLIDE_WIDTH, HEIGHT))
     ax = fig.add_axes((0, 0, 1, 1))
     ax.set_xlim(0, SLIDE_WIDTH)
