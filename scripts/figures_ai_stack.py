@@ -43,8 +43,8 @@ ROOT = Path(__file__).resolve().parents[1]
 FIGURES = ROOT / "docs/figures/ai-stack"
 STEM = "ai-stack"
 
-WIDTH, HEIGHT = 14.0, 6.3  # in: wider than the slide canvas, leaving room for a title
-U = 10  # drawing units per inch, so the axes run 0..140 by 0..63
+WIDTH, HEIGHT = 14.0, 6.45  # in: wider than the slide canvas, leaving room for a title
+U = 10  # drawing units per inch, so the axes run 0..140 by 0..64.5
 
 # Deterministic in the ICP knowledge map's relation plum; agentic work in coral where a
 # frontier model drives it, teal where it can also run on-premises.
@@ -238,7 +238,7 @@ LAYERS = {  # (y0, y1) of each band
     "graph": (11.6, 17.6),
     "functions": (18.6, 33.4),
     "interfaces": (34.4, 46.6),
-    "users": (47.6, 61.8),
+    "users": (47.6, 63.2),
 }
 
 LAYER_NAMES = {
@@ -556,7 +556,7 @@ def draw_interfaces(c: Canvas) -> None:
 
 def draw_users(c: Canvas) -> None:
     _, y1 = LAYERS["users"]
-    pitch, height = 2.7, 2.4
+    pitch, height = 3.0, 2.75
     top = y1 - 0.4
     for i, (role, reach) in enumerate(USERS):
         y = top - i * pitch
