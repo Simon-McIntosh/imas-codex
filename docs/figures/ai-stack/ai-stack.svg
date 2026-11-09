@@ -909,28 +909,28 @@ z
     </g>
    </g>
    <g id="text_1">
-    <text style="font-weight: 700; font-size: 18px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="885.6" y="63.882" transform="rotate(-0 885.6 63.882)">users</text>
+    <text style="font-weight: 700; font-size: 18px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="810.432" y="63.882" transform="rotate(-0 810.432 63.882)">users</text>
    </g>
    <g id="text_2">
-    <text style="font-weight: 700; font-size: 18px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="885.6" y="166.122563" transform="rotate(-0 885.6 166.122563)">interfaces</text>
+    <text style="font-weight: 700; font-size: 18px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="830.88" y="166.122563" transform="rotate(-0 830.88 166.122563)">interfaces</text>
    </g>
    <g id="text_3">
-    <text style="font-weight: 700; font-size: 18px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="885.6" y="270.522562" transform="rotate(-0 885.6 270.522562)">functions</text>
+    <text style="font-weight: 700; font-size: 18px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="851.76" y="270.522562" transform="rotate(-0 851.76 270.522562)">functions</text>
    </g>
    <g id="text_4">
-    <text style="font-weight: 700; font-size: 18px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="885.6" y="342.162562" transform="rotate(-0 885.6 342.162562)">knowledge</text>
+    <text style="font-weight: 700; font-size: 18px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="866.088" y="342.162562" transform="rotate(-0 866.088 342.162562)">knowledge</text>
    </g>
    <g id="text_5">
-    <text style="font-weight: 700; font-size: 18px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="885.6" y="363.042562" transform="rotate(-0 885.6 363.042562)">graph</text>
+    <text style="font-weight: 700; font-size: 18px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="870.264" y="363.042562" transform="rotate(-0 870.264 363.042562)">graph</text>
    </g>
    <g id="text_6">
-    <text style="font-weight: 700; font-size: 18px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="885.6" y="399.402562" transform="rotate(-0 885.6 399.402562)">ITER</text>
+    <text style="font-weight: 700; font-size: 18px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="877.536" y="399.402562" transform="rotate(-0 877.536 399.402562)">ITER</text>
    </g>
    <g id="text_7">
-    <text style="font-weight: 700; font-size: 18px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="885.6" y="420.389437" transform="rotate(-0 885.6 420.389437)">Collaborative</text>
+    <text style="font-weight: 700; font-size: 18px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="881.712" y="420.389437" transform="rotate(-0 881.712 420.389437)">Collaborative</text>
    </g>
    <g id="text_8">
-    <text style="font-weight: 700; font-size: 18px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="885.6" y="441.162562" transform="rotate(-0 885.6 441.162562)">Platform</text>
+    <text style="font-weight: 700; font-size: 18px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="885.888" y="441.162562" transform="rotate(-0 885.888 441.162562)">Platform</text>
    </g>
    <g id="text_9">
     <text style="font-weight: 700; font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: middle; fill: #2b2b2b" x="93.1536" y="419.366437" transform="rotate(-0 93.1536 419.366437)">IDM</text>
@@ -1052,51 +1052,54 @@ z
     <text style="font-size: 13px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: middle; fill: #2b2b2b" x="419.43287" y="184.777406" transform="rotate(-0 419.43287 184.777406)">overnight digest</text>
    </g>
    <g id="text_46">
-    <text style="font-weight: 700; font-size: 16px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: middle; fill: #2b2b2b" x="574.104522" y="148.295" transform="rotate(-0 574.104522 148.295)">Claude Code</text>
+    <text style="font-weight: 700; font-size: 16px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: middle; fill: #2b2b2b" x="574.104522" y="140.495" transform="rotate(-0 574.104522 140.495)">Claude Code</text>
    </g>
    <g id="text_47">
-    <text style="font-size: 13px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: middle; fill: #5f5f5f" x="574.104522" y="168.036406" transform="rotate(-0 574.104522 168.036406)">sandbox · full development</text>
+    <text style="font-size: 13px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: middle; fill: #5f5f5f" x="574.104522" y="160.236406" transform="rotate(-0 574.104522 160.236406)">sandbox · full development</text>
    </g>
    <g id="text_48">
-    <text style="font-size: 13px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: middle; fill: #5f5f5f" x="574.104522" y="183.752187" transform="rotate(-0 574.104522 183.752187)">H200 GPUs</text>
+    <text style="font-size: 13px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: middle; fill: #5f5f5f" x="574.104522" y="175.952187" transform="rotate(-0 574.104522 175.952187)">H200 GPUs</text>
    </g>
    <g id="text_49">
-    <text style="font-weight: 700; font-size: 16px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: middle; fill: #2b2b2b" x="732.373043" y="140.495" transform="rotate(-0 732.373043 140.495)">Clive</text>
+    <text style="font-size: 13px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: middle; fill: #5f5f5f" x="574.104522" y="191.552187" transform="rotate(-0 574.104522 191.552187)">DeepSeek v4.1 Flash</text>
    </g>
    <g id="text_50">
-    <text style="font-size: 13px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: middle; fill: #5f5f5f" x="732.373043" y="160.352187" transform="rotate(-0 732.373043 160.352187)">Claude orchestrator</text>
+    <text style="font-weight: 700; font-size: 16px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: middle; fill: #2b2b2b" x="732.373043" y="140.495" transform="rotate(-0 732.373043 140.495)">Clive</text>
    </g>
    <g id="text_51">
-    <text style="font-size: 13px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: middle; fill: #5f5f5f" x="732.373043" y="175.952187" transform="rotate(-0 732.373043 175.952187)">B300 GPUs</text>
+    <text style="font-size: 13px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: middle; fill: #5f5f5f" x="732.373043" y="160.352187" transform="rotate(-0 732.373043 160.352187)">Claude orchestrator</text>
    </g>
    <g id="text_52">
-    <text style="font-size: 13px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: middle; fill: #5f5f5f" x="732.373043" y="191.552187" transform="rotate(-0 732.373043 191.552187)">DeepSeek v4.1 Flash</text>
+    <text style="font-size: 13px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: middle; fill: #5f5f5f" x="732.373043" y="175.952187" transform="rotate(-0 732.373043 175.952187)">B300 GPUs</text>
    </g>
    <g id="text_53">
-    <text style="font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="135.936" y="23.387219" transform="rotate(-0 135.936 23.387219)">assembly and commissioning · ITER infrastructure</text>
+    <text style="font-size: 13px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: middle; fill: #5f5f5f" x="732.373043" y="191.552187" transform="rotate(-0 732.373043 191.552187)">DeepSeek v4.1 Flash</text>
    </g>
    <g id="text_54">
-    <text style="font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="132.048" y="42.806438" transform="rotate(-0 132.048 42.806438)">prototyping with domain experts · science · code developer</text>
+    <text style="font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="135.936" y="23.387219" transform="rotate(-0 135.936 23.387219)">assembly and commissioning · ITER infrastructure</text>
    </g>
    <g id="text_55">
-    <text style="font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="128.16" y="62.246438" transform="rotate(-0 128.16 62.246438)">commissioning engineer · planning</text>
+    <text style="font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="132.048" y="42.806438" transform="rotate(-0 132.048 42.806438)">prototyping with domain experts · science · code developer</text>
    </g>
    <g id="text_56">
-    <text style="font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="124.272" y="81.707219" transform="rotate(-0 124.272 81.707219)">configuration control</text>
+    <text style="font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="128.16" y="62.246438" transform="rotate(-0 128.16 62.246438)">commissioning engineer · planning</text>
    </g>
    <g id="text_57">
-    <text style="font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="120.384" y="101.126438" transform="rotate(-0 120.384 101.126438)">administrative support</text>
+    <text style="font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="124.272" y="81.707219" transform="rotate(-0 124.272 81.707219)">configuration control</text>
    </g>
    <g id="text_58">
-    <text style="font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="34.56" y="19.046438" transform="rotate(-0 34.56 19.046438)">deterministic</text>
+    <text style="font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="120.384" y="101.126438" transform="rotate(-0 120.384 101.126438)">administrative support</text>
    </g>
    <g id="text_59">
-    <text style="font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="34.56" y="40.667219" transform="rotate(-0 34.56 40.667219)">frontier</text>
+    <text style="font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="34.56" y="19.046438" transform="rotate(-0 34.56 19.046438)">deterministic</text>
    </g>
    <g id="text_60">
-    <text style="font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="34.56" y="62.246438" transform="rotate(-0 34.56 62.246438)">open-weight</text>
+    <text style="font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="34.56" y="40.667219" transform="rotate(-0 34.56 40.667219)">frontier</text>
    </g>
    <g id="text_61">
+    <text style="font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="34.56" y="62.246438" transform="rotate(-0 34.56 62.246438)">open-weight</text>
+   </g>
+   <g id="text_62">
     <text style="font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="34.56" y="79.526437" transform="rotate(-0 34.56 79.526437)">workers</text>
    </g>
   </g>

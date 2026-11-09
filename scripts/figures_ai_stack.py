@@ -228,10 +228,10 @@ class Canvas:
 #
 # The stack is a pyramid: each layer is a band whose sides slope inward as it rises,
 # so the infrastructure is the widest base and the users sit at the narrow top. The
-# layer names sit in the right margin, beside their band.
+# layer names lean against its right-hand slope, beside their band.
 
 CENTRE, BASE_HALF, SLOPE = 63.5, 58.5, 0.2  # half-width = BASE_HALF - SLOPE * y
-LAYER_X = 123.0
+LAYER_GAP = 1.5  # between a band's sloped right edge and its name
 
 LAYERS = {  # (y0, y1) of each band
     "icp": (2.6, 7.8),
@@ -321,8 +321,10 @@ def draw_layer_names(c: Canvas) -> None:
         pitch = 2.9
         mid = (y0 + y1) / 2
         for i, line in enumerate(lines):
-            dy = (len(lines) - 1) / 2 * pitch - i * pitch
-            c.text(LAYER_X, mid + dy, line, size=OUTER, ha="left", weight="bold")
+            y = mid + (len(lines) - 1) / 2 * pitch - i * pitch
+            # each line leans on the pyramid's slope at its own height
+            x = span(y, 0)[1] + LAYER_GAP
+            c.text(x, y, line, size=OUTER, ha="left", weight="bold")
 
 
 def draw_foundation(c: Canvas) -> None:
@@ -531,7 +533,7 @@ def draw_interfaces(c: Canvas) -> None:
         x1,
         y1,
         "Claude Code",
-        ("sandbox · full development", "H200 GPUs"),
+        ("sandbox · full development", "H200 GPUs", "DeepSeek v4.1 Flash"),
         kind="frontier",
     )
     x0, x1 = INTERFACES["clive"]
