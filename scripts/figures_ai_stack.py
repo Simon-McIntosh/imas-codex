@@ -252,7 +252,7 @@ LAYER_NAMES = {
 # Top to bottom: each bar's roles reach from Claude Desktop to the interface named, and
 # no one stops at Claude Desktop, because every role needs ITER's data through Lucy.
 USERS = [
-    ("assembly and commissioning project support", "clive"),
+    ("assembly and commissioning project support · ITER infrastructure", "clive"),
     ("prototyping with domain experts · science · code developer", "sandbox"),
     ("commissioning engineer · planning", "dash"),
     ("configuration control", "lucy"),
