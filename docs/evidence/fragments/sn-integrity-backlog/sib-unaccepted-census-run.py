@@ -34,6 +34,10 @@ from imas_codex.standard_names.defaults import DEFAULT_MIN_SCORE
 from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
     _MAX_COMPOSE_CLAIM_ATTEMPTS as COMPOSE_CLAIM_CAP,
 )
+from imas_codex.standard_names.graph_store.graph_source_bindings import (
+    CAP_PARKED_DISPOSITIONS,
+    classify_parked_source,
+)
 
 HERE = Path(__file__).resolve().parent
 
@@ -103,6 +107,7 @@ def source_rows(gc: GraphClient) -> dict[str, dict]:
         WHERE s.status IN $live
         OPTIONAL MATCH (s)-[:PRODUCED_NAME]->(sn:StandardName)
         OPTIONAL MATCH (ns:StandardName {id: s.produced_sn_id})
+        OPTIONAL MATCH (n:IMASNode {id: s.source_id})
         RETURN s.id AS sid, s.source_id AS path, s.status AS status,
                coalesce(s.attempt_count, 0) AS attempts,
                s.last_error AS last_error,
@@ -111,7 +116,9 @@ def source_rows(gc: GraphClient) -> dict[str, dict]:
                sn.id AS bound_id, sn.name_stage AS bound_stage,
                sn.review_mean_score AS bound_score,
                ns.id AS produced_stage_id, ns.name_stage AS produced_stage,
-               ns.review_mean_score AS produced_score
+               ns.review_mean_score AS produced_score,
+               n.lifecycle_status AS node_lifecycle,
+               n.node_category AS node_category
         """,
         cap=20000,
         live=list(LIVE_STATUSES),
@@ -162,83 +169,130 @@ def reason_family(error: str | None) -> str:
     return "other"
 
 
-def classify_source(record: dict) -> str:
-    """Assign one class to a source with no accepted name.
+#: The recorded causes that mean a writer refused the candidate rather than
+#: the compose budget ran out.
+REFUSAL_FAMILIES = frozenset(
+    {"binding_collision", "attachment_rejected", "pre_validation", "refused"}
+)
 
-    A binding at drafted or reviewed decides first, because the name exists
-    and only needs its remaining step. An exhausted binding decides next by
-    what its score records. A source with no binding is decided by its own
-    recorded state, and a recorded vocabulary cause outranks an empty DD
-    description because the vocabulary gap is the step that can be taken.
+
+def source_rules(record: dict) -> dict[str, bool]:
+    """Every class's defining predicate for one source, from its own state.
+
+    One table decides both the assignment and whether the classes stay total
+    and exclusive for the whole population. A drafted or reviewed binding is
+    awaiting review unless its score is below the floor; an exhausted binding
+    is decided by its score, except that a recorded vocabulary cause outranks
+    it because the vocabulary gap is the step that can be taken.
     """
     binding = pick_binding(record["bindings"])
     family = reason_family(record["last_error"])
+    stage = binding["bound_stage"] if binding else None
+    score = binding["bound_score"] if binding else None
     vocabulary = record["status"] == "vocab_gap" or family == "vocabulary"
+    status = record["status"]
+    unbound = binding is None
+    plain = not vocabulary and not record["no_source_description"]
+    refused_reason = unbound and family in REFUSAL_FAMILIES
+    below_floor = score is not None and score < DEFAULT_MIN_SCORE
+    cleared_floor = score is not None and score >= DEFAULT_MIN_SCORE
+    return {
+        "awaiting review": (
+            stage in ("drafted", "reviewed") and (score is None or cleared_floor)
+        )
+        # Rotations were spent without a review verdict recorded, so the
+        # outstanding operation is the review that never ran.
+        or (stage == "exhausted" and not vocabulary and score is None),
+        "scored below the acceptance floor": below_floor
+        and not (stage == "exhausted" and vocabulary),
+        "documentation missing": unbound
+        and not vocabulary
+        and record["no_source_description"],
+        "refused by a writer": stage == "superseded"
+        or (stage == "exhausted" and not vocabulary and cleared_floor)
+        or (refused_reason and plain),
+        "attempt-capped": unbound
+        and plain
+        and (
+            (status == "failed" and not refused_reason)
+            or (
+                status not in ("failed", "extracted")
+                and record["attempts"] >= COMPOSE_CLAIM_CAP
+            )
+        ),
+        "never claimed": unbound
+        and plain
+        and (
+            status == "extracted"
+            or (
+                status not in ("failed", "extracted")
+                and record["attempts"] < COMPOSE_CLAIM_CAP
+                and not refused_reason
+            )
+        ),
+        "vocabulary gap": vocabulary,
+    }
 
-    if binding is not None:
-        stage = binding["bound_stage"]
-        score = binding["bound_score"]
-        if stage in ("drafted", "reviewed"):
-            if score is None or score >= DEFAULT_MIN_SCORE:
-                return "awaiting review"
-            return "scored below the acceptance floor"
-        if stage == "superseded":
-            return "refused by a writer"
-        if stage == "exhausted":
-            if vocabulary:
-                return "vocabulary gap"
-            if score is None:
-                # Rotations were spent without a review verdict being
-                # recorded, so the outstanding operation is the review.
-                return "awaiting review"
-            if score >= DEFAULT_MIN_SCORE:
-                return "refused by a writer"
-            return "scored below the acceptance floor"
-        raise RuntimeError(f"unclassified binding stage {stage!r} for {record['sid']}")
 
-    if vocabulary:
-        return "vocabulary gap"
-    if record["no_source_description"]:
-        return "documentation missing"
-    if record["status"] == "extracted":
-        return "never claimed"
-    if record["status"] == "failed":
-        if family in (
-            "binding_collision",
-            "attachment_rejected",
-            "pre_validation",
-            "refused",
-        ):
-            return "refused by a writer"
-        # A terminal failed row with a spent compose budget: the step is the
-        # signed reset, whether or not the recorded count reached the cap.
-        return "attempt-capped"
-    if record["attempts"] >= COMPOSE_CLAIM_CAP:
-        return "attempt-capped"
-    if family in (
-        "binding_collision",
-        "attachment_rejected",
-        "pre_validation",
-        "refused",
-    ):
-        return "refused by a writer"
-    return "never claimed"
+def name_rules(name: dict) -> dict[str, bool]:
+    """Every class's defining predicate for one exhausted catalog name."""
+    score = name["score"]
+    cleared = score is not None and score >= DEFAULT_MIN_SCORE
+    return {
+        # Rotations were spent without any review verdict recorded.
+        "awaiting review": score is None,
+        "scored below the acceptance floor": score is not None and not cleared,
+        "documentation missing": cleared and name["docs_stage"] != "accepted",
+        # The name cleared the floor, so a guard ended it rather than the
+        # score: either the validation quarantine or the rotation counter.
+        "refused by a writer": cleared and name["docs_stage"] == "accepted",
+    }
+
+
+def assign_class(rules: dict[str, bool], item: str) -> str:
+    """The single class whose predicate holds, refusing any other answer.
+
+    Totality and exclusivity are what make the class sums reconcile, so a rule
+    change that leaves an item in no class or in two is a defect the census
+    refuses rather than a distribution it reports.
+    """
+    hits = [cls for cls in CLASSES if rules.get(cls)]
+    if len(hits) != 1:
+        raise RuntimeError(
+            f"{item}: {len(hits)} classes satisfied ({', '.join(hits) or 'none'})"
+        )
+    return hits[0]
+
+
+def classify_source(record: dict) -> str:
+    return assign_class(source_rules(record), f"source {record['path']}")
 
 
 def classify_exhausted(name: dict) -> str:
-    """Assign one class to an exhausted catalog name."""
-    score = name["score"]
-    if score is None:
-        # Rotations were spent without any review verdict recorded. The
-        # outstanding operation is the review that never ran.
-        return "awaiting review"
-    if score >= DEFAULT_MIN_SCORE:
-        if name["docs_stage"] != "accepted":
-            return "documentation missing"
-        # The name cleared the floor, so a guard ended it rather than the
-        # score: either the validation quarantine or the rotation counter.
-        return "refused by a writer"
-    return "scored below the acceptance floor"
+    return assign_class(name_rules(name), f"exhausted name {name['id']}")
+
+
+def parked_disposition(record: dict) -> str | None:
+    """The product's own triage of a source that carries no binding.
+
+    Reused from ``graph_source_bindings`` rather than re-derived, because that
+    is the vocabulary the continuation run reads: it separates a spent compose
+    budget from a structural blocker such as a coordinate path.
+    """
+    if pick_binding(record["bindings"]) is not None:
+        return None
+    disposition = classify_parked_source(
+        {
+            "produced": 1 if record["produced_stage_id"] else 0,
+            "lifecycle_status": record["node_lifecycle"],
+            "node_category": record["node_category"],
+            "last_error": record["last_error"],
+        },
+        services=None,
+    )
+    if disposition not in CAP_PARKED_DISPOSITIONS:
+        raise RuntimeError(f"{record['path']}: unknown disposition {disposition!r}")
+    return disposition
 
 
 #: The full run's own receipt: USD 69.41506 spent to create 284 accepted
@@ -250,10 +304,20 @@ FULL_RUN_ACCEPTED_IN_WINDOW = 284
 REMAINING_SOURCES_ESTIMATED = 1308
 REMAINING_COST_BAND_USD = (80.0, 160.0)
 
+#: The measured cohort rerun (sn-integrity-backlog section 51): a signed reset
+#: of 143 sources then a scoped compose, which named 83 of the 143 for
+#: USD 1.49 before a persist defect ended the batch.
+COHORT_RERUN_SOURCES = 143
+COHORT_RERUN_NAMED = 83
+COHORT_RERUN_SPEND_USD = 1.49
+COHORT_RERUN_JOB = 1308283
+
 
 def cost_basis() -> dict[str, Any]:
     per_accepted = FULL_RUN_SPEND_USD / FULL_RUN_ACCEPTED_IN_WINDOW
     low, high = REMAINING_COST_BAND_USD
+    per_cohort_source = COHORT_RERUN_SPEND_USD / COHORT_RERUN_SOURCES
+    per_named_source = COHORT_RERUN_SPEND_USD / COHORT_RERUN_NAMED
     return {
         "full_run_spend_usd": FULL_RUN_SPEND_USD,
         "full_run_accepted_in_window": FULL_RUN_ACCEPTED_IN_WINDOW,
@@ -264,135 +328,136 @@ def cost_basis() -> dict[str, Any]:
             round(low / REMAINING_SOURCES_ESTIMATED, 4),
             round(high / REMAINING_SOURCES_ESTIMATED, 4),
         ],
-        "cohort_rerun_measured": None,
-        "cohort_rerun_note": (
-            "No cohort rerun has run, so no measured cohort figure exists; "
-            "the estimate uses the full run's measured cost per accepted name."
-        ),
+        "cohort_rerun_measured": {
+            "node": "sib-second-pass",
+            "job": COHORT_RERUN_JOB,
+            "sources_in_cohort": COHORT_RERUN_SOURCES,
+            "sources_named": COHORT_RERUN_NAMED,
+            "named_fraction": round(COHORT_RERUN_NAMED / COHORT_RERUN_SOURCES, 4),
+            "spend_usd": COHORT_RERUN_SPEND_USD,
+            "per_cohort_source_usd": round(per_cohort_source, 5),
+            "per_named_source_usd": round(per_named_source, 5),
+            "recorded_in": "docs/plans/sn-integrity-backlog.html section 51",
+            "note": (
+                "A scoped cohort rerun has run, so the per-source cost is measured "
+                "rather than interpolated from the full run: USD 1.49 bought 83 "
+                "named sources out of 143 attempted, i.e. USD 0.0104 per attempted "
+                "source and USD 0.01795 per named source."
+            ),
+        },
     }
 
 
-def check_class_invariants(
-    unaccepted: dict, source_class_by_id: dict, names: list
-) -> list[str]:
-    """Re-derive each class's defining predicate and refuse a mismatch.
+def check_document_assignments(
+    document: dict,
+    unaccepted: dict,
+    names: list,
+    source_class_by_id: dict,
+    name_class_by_id: dict,
+) -> None:
+    """Refuse a census that does not record every item in exactly one class.
 
-    This is the census's internal check: a class whose members do not satisfy
-    the rule that named it is a classification defect, not a result.
+    Completeness is what the continuation run depends on: it scopes a cohort
+    by the source paths this document records, so a sampled list would
+    silently under-run the work and a double-assigned one would run it twice.
     """
-    failures: list[str] = []
-    for sid, rec in unaccepted.items():
-        cls = source_class_by_id[sid]
-        binding = pick_binding(rec["bindings"])
-        family = reason_family(rec["last_error"])
-        vocabulary = rec["status"] == "vocab_gap" or family == "vocabulary"
-        if cls == "awaiting review":
-            if binding is None:
-                ok = False
-            elif binding["bound_stage"] in ("drafted", "reviewed"):
-                ok = (
-                    binding["bound_score"] is None
-                    or binding["bound_score"] >= DEFAULT_MIN_SCORE
-                )
-            else:
-                ok = (
-                    binding["bound_stage"] == "exhausted"
-                    and binding["bound_score"] is None
-                    and not vocabulary
-                )
-        elif cls == "scored below the acceptance floor":
-            ok = (
-                binding is not None
-                and binding["bound_score"] is not None
-                and binding["bound_score"] < DEFAULT_MIN_SCORE
-            )
-        elif cls == "refused by a writer":
-            if binding is not None:
-                ok = binding["bound_stage"] == "superseded" or (
-                    binding["bound_stage"] == "exhausted"
-                    and binding["bound_score"] is not None
-                    and binding["bound_score"] >= DEFAULT_MIN_SCORE
-                    and not vocabulary
-                )
-            else:
-                ok = family in (
-                    "binding_collision",
-                    "attachment_rejected",
-                    "pre_validation",
-                    "refused",
-                )
-        elif cls == "vocabulary gap":
-            ok = vocabulary
-        elif cls == "documentation missing":
-            ok = binding is None and not vocabulary and rec["no_source_description"]
-        elif cls == "never claimed":
-            ok = (
-                binding is None
-                and not vocabulary
-                and not rec["no_source_description"]
-                and rec["status"] != "failed"
-            )
-        elif cls == "attempt-capped":
-            ok = (
-                binding is None
-                and not vocabulary
-                and not rec["no_source_description"]
-                and rec["status"] == "failed"
-                and family
-                not in (
-                    "binding_collision",
-                    "attachment_rejected",
-                    "pre_validation",
-                    "refused",
-                )
-            )
-        else:
-            ok = False
-        if not ok:
-            failures.append(f"{sid}: {cls} does not satisfy its own rule")
-    if not source_class_by_id:
-        failures.append("no sources classified")
-    if not names:
-        failures.append("no exhausted names read")
-    return failures
-
-
-def write_html(document: dict, path: Path) -> None:
-    node = "sib-unaccepted-census"
-    cost = document["cost_basis"]
-    source_rows: list[str] = []
-    name_rows: list[str] = []
+    groups = document.get("source_assignments")
+    if not isinstance(groups, dict) or set(groups) != set(CLASSES):
+        raise RuntimeError("source_assignments is missing or not keyed by class")
     for cls in CLASSES:
-        rec = document["source_classes"][cls]
-        sample = (
-            "; ".join(
-                f"<code>{escape(item['source'])}</code> ({escape(item['status'])})"
-                for item in rec["representative"][:4]
-            )
-            or "none"
+        expected = Counter(
+            rec["path"]
+            for sid, rec in unaccepted.items()
+            if source_class_by_id[sid] == cls
         )
-        source_rows.append(
-            f'<tr id="{node}-src-{cls.replace(" ", "-")}">'
+        got = Counter(row["source"] for row in groups[cls])
+        if got != expected:
+            raise RuntimeError(
+                f"{cls}: recorded paths do not match the class membership"
+            )
+        if sum(got.values()) != document["source_classes"][cls]["count"]:
+            raise RuntimeError(f"{cls}: recorded paths do not match the class count")
+    duplicated = {
+        path for path, rows in document.get("duplicate_source_paths", {}).items()
+    }
+    seen = Counter(row["source"] for cls in CLASSES for row in groups[cls])
+    if {path for path, count in seen.items() if count > 1} != duplicated:
+        raise RuntimeError("a path carrying more than one live node is not disclosed")
+    name_groups = document.get("name_assignments")
+    if not isinstance(name_groups, dict) or set(name_groups) != set(CLASSES):
+        raise RuntimeError("name_assignments is missing or not keyed by class")
+    for cls in CLASSES:
+        expected = {name["id"] for name in names if name_class_by_id[name["id"]] == cls}
+        got = [row["id"] for row in name_groups[cls]]
+        if len(got) != len(set(got)) or set(got) != expected:
+            raise RuntimeError(f"{cls}: recorded names do not match the class")
+        if len(got) != document["name_classes"][cls]["count"]:
+            raise RuntimeError(f"{cls}: recorded names do not match the class count")
+    if not unaccepted or not names:
+        raise RuntimeError("the live read returned an empty population")
+
+
+def check_cost_basis(document: dict) -> None:
+    """Refuse a cost basis that drops or contradicts the measured cohort run."""
+    measured = document["cost_basis"].get("cohort_rerun_measured")
+    if not isinstance(measured, dict):
+        raise RuntimeError("cost basis records no measured cohort rerun figure")
+    recorded = (
+        measured["spend_usd"],
+        measured["sources_in_cohort"],
+        measured["sources_named"],
+    )
+    if recorded != (COHORT_RERUN_SPEND_USD, COHORT_RERUN_SOURCES, COHORT_RERUN_NAMED):
+        raise RuntimeError(f"measured cohort figures disagree with the run: {recorded}")
+    expected = round(COHORT_RERUN_SPEND_USD / COHORT_RERUN_NAMED, 5)
+    if measured.get("per_named_source_usd") != expected:
+        raise RuntimeError(
+            f"per-named-source cost {measured.get('per_named_source_usd')} != {expected}"
+        )
+    for cls in CLASSES:
+        per_class = document["source_classes"][cls]["expected_cost_usd_measured_cohort"]
+        if not isinstance(per_class, dict):
+            raise RuntimeError(f"{cls}: no measured cohort cost recorded")
+
+
+def class_table_rows(
+    document: dict, key: str, node: str, prefix: str, cell: Any
+) -> list[str]:
+    """The body rows of one class table; both tables share this renderer."""
+    rows: list[str] = []
+    for cls in CLASSES:
+        rec = document[key][cls]
+        sample = "; ".join(cell(item) for item in rec["representative"][:4]) or "none"
+        rows.append(
+            f'<tr id="{node}-{prefix}-{cls.replace(" ", "-")}">'
             f"<td>{escape(cls)}</td><td>{rec['count']}</td>"
             f"<td>{escape(rec['step'])}</td>"
             f"<td>USD {rec['expected_cost_usd_at_full_run_rate']:.2f}</td>"
             f"<td>{sample}</td></tr>"
         )
-        nrec = document["name_classes"][cls]
-        nsample = (
-            "; ".join(
-                f"<code>{escape(item['id'])}</code>"
-                for item in nrec["representative"][:4]
-            )
-            or "none"
-        )
-        name_rows.append(
-            f'<tr id="{node}-name-{cls.replace(" ", "-")}">'
-            f"<td>{escape(cls)}</td><td>{nrec['count']}</td>"
-            f"<td>{escape(nrec['step'])}</td>"
-            f"<td>USD {nrec['expected_cost_usd_at_full_run_rate']:.2f}</td>"
-            f"<td>{nsample}</td></tr>"
-        )
+    return rows
+
+
+def write_html(document: dict, path: Path) -> None:
+    node = "sib-unaccepted-census"
+    cost = document["cost_basis"]
+    cohort = cost["cohort_rerun_measured"]
+    source_rows = class_table_rows(
+        document,
+        "source_classes",
+        node,
+        "src",
+        lambda item: (
+            f"<code>{escape(item['source'])}</code> ({escape(item['status'])})"
+        ),
+    )
+    name_rows = class_table_rows(
+        document,
+        "name_classes",
+        node,
+        "name",
+        lambda item: f"<code>{escape(item['id'])}</code>",
+    )
 
     html = (
         '<!doctype html><html lang="en"><head><meta charset="utf-8">'
@@ -407,7 +472,19 @@ def write_html(document: dict, path: Path) -> None:
         "and each exhausted name is assigned exactly one class, and the class "
         "sums reconcile to those totals. The acceptance floor is "
         f"{document['acceptance_floor']} and the compose claim cap is "
-        f"{document['compose_claim_cap']} attempts.</p>"
+        f"{document['compose_claim_cap']} attempts. The counts are by "
+        f"source node, so {document['live_sources_unaccepted']} rows cover "
+        f"{document['assignment_coverage']['source_assignments_distinct']} distinct "
+        "DD paths: "
+        + (
+            ", ".join(
+                f"<code>{escape(path)}</code> carries "
+                f"{len(rows)} live rows ({', '.join(row['class'] for row in rows)})"
+                for path, rows in document["duplicate_source_paths"].items()
+            )
+            or "no path carries more than one live row"
+        )
+        + ".</p>"
         f'<p id="{node}-cost">Cost basis: the full run spent '
         f"USD {cost['full_run_spend_usd']:.5f} and created "
         f"{cost['full_run_accepted_in_window']} accepted names in its window, "
@@ -418,8 +495,18 @@ def write_html(document: dict, path: Path) -> None:
         f"&ndash;{cost['corrected_estimate_band_usd'][1]:.0f} over "
         f"{REMAINING_SOURCES_ESTIMATED} eligible sources "
         f"(USD {cost['per_source_band_usd'][0]:.4f}&ndash;"
-        f"{cost['per_source_band_usd'][1]:.4f} per source). "
-        f"{escape(cost['cohort_rerun_note'])}</p>"
+        f"{cost['per_source_band_usd'][1]:.4f} per source). The measured cohort "
+        f"rerun ({escape(cohort['node'])}, job {cohort['job']}) named "
+        f"{cohort['sources_named']} of {cohort['sources_in_cohort']} sources for "
+        f"USD {cohort['spend_usd']:.2f}, so USD {cohort['per_cohort_source_usd']:.5f} "
+        "buys one source attempt and USD "
+        f"{cohort['per_named_source_usd']:.5f} one named source. The JSON records "
+        "every assignment, not a sample: each of the "
+        f"{document['assignment_coverage']['source_assignments']} unaccepted sources "
+        "and each of the "
+        f"{document['assignment_coverage']['name_assignments']} exhausted names "
+        "appears once, under its class, with the state the continuation run needs "
+        "to scope that cohort.</p>"
         '<h2 id="{node}-sources">Unaccepted live sources</h2>'.replace("{node}", node)
         + "<table><thead><tr><th>Class</th><th>Count</th><th>Advancing step</th>"
         "<th>At full-run rate</th><th>Representative sources</th></tr></thead><tbody>"
@@ -493,7 +580,7 @@ def main() -> int:
     source_classes = Counter()
     source_class_by_id: dict[str, str] = {}
     per_class_sources: dict[str, list[dict]] = defaultdict(list)
-    for sid, rec in unaccepted.items():
+    for sid, rec in sorted(unaccepted.items(), key=lambda item: item[1]["path"]):
         cls = classify_source(rec)
         source_classes[cls] += 1
         source_class_by_id[sid] = cls
@@ -502,16 +589,42 @@ def main() -> int:
                 "source": rec["path"],
                 "status": rec["status"],
                 "attempts": rec["attempts"],
-                "last_error": (rec["last_error"] or "")[:200],
+                "reason": reason_family(rec["last_error"]),
+                "parked": parked_disposition(rec),
             }
         )
 
+    # Two live nodes can name one DD path; the count is by node, so the
+    # collision is disclosed rather than collapsed, and a cohort scoped by
+    # path must decide whether both rows are one work item.
+    duplicated = {
+        path: [
+            {"class": cls, **row}
+            for cls in CLASSES
+            for row in per_class_sources.get(cls, [])
+            if row["source"] == path
+        ]
+        for path, seen in Counter(
+            row["source"] for cls in CLASSES for row in per_class_sources.get(cls, [])
+        ).items()
+        if seen > 1
+    }
+
     name_classes = Counter()
+    name_class_by_id: dict[str, str] = {}
     per_class_names: dict[str, list[dict]] = defaultdict(list)
     for name in names:
         cls = classify_exhausted(name)
         name_classes[cls] += 1
-        per_class_names[cls].append(name)
+        name_class_by_id[name["id"]] = cls
+        per_class_names[cls].append(
+            {
+                "id": name["id"],
+                "score": name["score"],
+                "docs_stage": name["docs_stage"],
+                "validation_status": name["validation_status"],
+            }
+        )
 
     for cls in source_classes:
         if cls not in CLASSES:
@@ -523,18 +636,16 @@ def main() -> int:
         raise RuntimeError("source class sums do not reconcile to the live read")
     if sum(name_classes.values()) != len(names):
         raise RuntimeError("name class sums do not reconcile to the live read")
-    failures = check_class_invariants(unaccepted, source_class_by_id, names)
-    if failures:
-        raise RuntimeError(
-            f"{len(failures)} classification invariant(s) failed; first: {failures[0]}"
-        )
 
     per_name_cost = costs["per_accepted_name_usd"]
     low_rate, high_rate = costs["per_source_band_usd"]
+    cohort = costs["cohort_rerun_measured"]
 
-    def class_record(cls: str, counts: Counter, samples: dict) -> dict:
+    def class_record(
+        cls: str, counts: Counter, samples: dict, *, population: str
+    ) -> dict:
         count = counts.get(cls, 0)
-        return {
+        record = {
             "count": count,
             "step": CLASS_STEPS[cls][0],
             "scope": CLASS_STEPS[cls][1],
@@ -545,6 +656,24 @@ def main() -> int:
             ],
             "representative": samples.get(cls, [])[:12],
         }
+        if population == "source":
+            record["expected_cost_usd_measured_cohort"] = {
+                "per_source_attempted": round(
+                    count * cohort["per_cohort_source_usd"], 2
+                ),
+                "per_named_source": round(count * cohort["per_named_source_usd"], 2),
+                "basis": (
+                    f"{COHORT_RERUN_NAMED} of {COHORT_RERUN_SOURCES} cohort sources "
+                    f"named for USD {COHORT_RERUN_SPEND_USD:.2f}"
+                ),
+            }
+        else:
+            record["expected_cost_usd_measured_cohort"] = None
+            record["measured_cohort_note"] = (
+                "the measured cohort figure is a compose rate over sources; an "
+                "exhausted name advances by review or refine instead"
+            )
+        return record
 
     document = {
         "observed_at": datetime.now(UTC).isoformat(),
@@ -562,13 +691,45 @@ def main() -> int:
             "name_class_sum": sum(name_classes.values()),
         },
         "source_classes": {
-            cls: class_record(cls, source_classes, per_class_sources) for cls in CLASSES
+            cls: class_record(
+                cls, source_classes, per_class_sources, population="source"
+            )
+            for cls in CLASSES
         },
         "name_classes": {
-            cls: class_record(cls, name_classes, per_class_names) for cls in CLASSES
+            cls: class_record(cls, name_classes, per_class_names, population="name")
+            for cls in CLASSES
         },
+        # Every item's class, not a sample: the continuation run scopes its
+        # cohorts by these source paths, so a truncated list cannot serve it.
+        "source_assignments": {cls: per_class_sources.get(cls, []) for cls in CLASSES},
+        "name_assignments": {cls: per_class_names.get(cls, []) for cls in CLASSES},
+        "duplicate_source_paths": duplicated,
     }
-    args.json.write_text(json.dumps(document, indent=2, sort_keys=True) + "\n")
+    document["assignment_coverage"] = {
+        "source_assignments": sum(
+            len(v) for v in document["source_assignments"].values()
+        ),
+        "source_assignments_distinct": len(
+            {a["source"] for v in document["source_assignments"].values() for a in v}
+        ),
+        "duplicated_source_paths": len(duplicated),
+        "name_assignments": sum(len(v) for v in document["name_assignments"].values()),
+        "name_assignments_distinct": len(
+            {a["id"] for v in document["name_assignments"].values() for a in v}
+        ),
+    }
+    check_document_assignments(
+        document, unaccepted, names, source_class_by_id, name_class_by_id
+    )
+    check_cost_basis(document)
+    payload = json.dumps(document, indent=2, sort_keys=True) + "\n"
+    if len(payload) > 300_000:
+        raise RuntimeError(
+            f"emitted census is {len(payload)} bytes, above the 300000-byte "
+            "single-file bound; the assignments belong in the run directory"
+        )
+    args.json.write_text(payload)
     write_html(document, args.html)
     print(
         json.dumps(
