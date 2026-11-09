@@ -21,7 +21,7 @@ agentic: driven by a frontier model, or by an on-premises one.
 Usage::
 
     uv run python scripts/figures_ai_stack.py
-    uv run python scripts/figures_ai_stack.py --draft /tmp/x.png [--palette NAME]
+    uv run python scripts/figures_ai_stack.py --draft /tmp/x.png
 """
 
 from __future__ import annotations
@@ -46,13 +46,9 @@ STEM = "ai-stack"
 WIDTH, HEIGHT = 14.0, 6.8  # in: wider than the slide canvas, leaving room for a title
 U = 10  # drawing units per inch, so the axes run 0..140 by 0..68
 
-# (deterministic, frontier, on-premises) candidate colour sets.
-PALETTES = {
-    "plum-coral-teal": ("#8e3a8e", "#cf5f36", "#1d8585"),
-    "slate-terracotta-blue": ("#55606e", "#c4553a", "#2f78bd"),
-    "navy-orange-green": ("#2f5d8a", "#e0782a", "#2e8b57"),
-}
-DEFAULT_PALETTE = "plum-coral-teal"
+# Deterministic in the ICP knowledge map's relation plum; agentic work in coral where a
+# frontier model drives it, teal where it can also run on-premises.
+COLOURS = ("#8e3a8e", "#cf5f36", "#1d8585")  # deterministic, frontier, on-premises
 
 INK = "#2b2b2b"
 MUTED = "#5f5f5f"
@@ -98,6 +94,7 @@ class Canvas:
         plt.rcParams["font.family"] = "sans-serif"
         plt.rcParams["font.sans-serif"] = ["Arial", "Nimbus Sans"]
         plt.rcParams["svg.fonttype"] = "none"
+        plt.rcParams["svg.hashsalt"] = STEM  # stable ids, so a re-render diffs clean
         self.roles = roles
         self.fig = plt.figure(figsize=(WIDTH, HEIGHT), dpi=100)
         self.ax = self.fig.add_axes((0, 0, 1, 1))
@@ -604,8 +601,8 @@ def draw_legend(c: Canvas) -> None:
         c.text(x + 3.6, yy, label, size=OUTER_SMALL, ha="left")
 
 
-def draw(draft: Path | None, palette: str) -> Path:
-    c = Canvas(Roles(*PALETTES[palette]))
+def draw(draft: Path | None) -> Path:
+    c = Canvas(Roles(*COLOURS))
     draw_bands(c)
     draw_layer_names(c)
     draw_foundation(c)
@@ -638,9 +635,8 @@ def draw(draft: Path | None, palette: str) -> Path:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--draft", type=Path, help="write a PNG here, unchecked")
-    parser.add_argument("--palette", choices=PALETTES, default=DEFAULT_PALETTE)
     args = parser.parse_args()
-    draw(args.draft, args.palette)
+    draw(args.draft)
 
 
 if __name__ == "__main__":
