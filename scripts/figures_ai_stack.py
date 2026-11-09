@@ -402,7 +402,7 @@ def draw_graph(c: Canvas) -> None:
     c.text(
         x0 + 30.0,
         (y0 + y1) / 2,
-        "schema · data · knowledge",
+        "search & traverse",
         size=SMALL,
         color=MUTED,
         ha="left",
