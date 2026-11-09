@@ -931,7 +931,7 @@ z
    </g>
    <g id="line2d_46">
     <g clip-path="url(#pb3c5608699)">
-     <use xlink:href="#m93257e1731" x="18.72" y="59.04" style="fill: #1d8585; stroke: #ffffff; stroke-width: 2"/>
+     <use xlink:href="#m93257e1731" x="18.72" y="67.68" style="fill: #1d8585; stroke: #ffffff; stroke-width: 2"/>
     </g>
    </g>
    <g id="text_1">
@@ -1123,7 +1123,10 @@ z
     <text style="font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="34.56" y="40.667219" transform="rotate(-0 34.56 40.667219)">frontier</text>
    </g>
    <g id="text_61">
-    <text style="font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="34.56" y="62.246438" transform="rotate(-0 34.56 62.246438)">on-premises</text>
+    <text style="font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="34.56" y="62.246438" transform="rotate(-0 34.56 62.246438)">on-premise</text>
+   </g>
+   <g id="text_62">
+    <text style="font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="34.56" y="79.526437" transform="rotate(-0 34.56 79.526437)">workers</text>
    </g>
   </g>
  </g>

@@ -572,14 +572,15 @@ def draw_legend(c: Canvas) -> None:
         [
             ("deterministic", "deterministic"),
             ("frontier", "frontier"),
-            ("on-premises", "onprem"),
+            ("on-premise workers", "onprem"),
         ]
     ):
         yy = y - i * 3.0
         if kind == "onprem":
+            # two lines, each its own artist, with the dot centred on the pair
             c.ax.plot(
                 x + 1.4,
-                yy,
+                yy - 1.2,
                 "o",
                 markersize=14,
                 markerfacecolor=c.roles.onprem,
@@ -587,7 +588,9 @@ def draw_legend(c: Canvas) -> None:
                 markeredgewidth=2.0,
                 zorder=9,
             )
-            c.text(x + 3.6, yy, label, size=OUTER_SMALL, ha="left")
+            first, second = label.rsplit(" ", 1)
+            c.text(x + 3.6, yy, first, size=OUTER_SMALL, ha="left")
+            c.text(x + 3.6, yy - 2.4, second, size=OUTER_SMALL, ha="left")
             continue
         c.box(
             x,
