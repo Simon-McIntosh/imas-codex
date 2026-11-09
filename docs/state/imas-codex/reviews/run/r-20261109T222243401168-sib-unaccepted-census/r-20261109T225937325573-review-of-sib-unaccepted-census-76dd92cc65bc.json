@@ -31,6 +31,13 @@
     }
   },
   "dispatched_at": "2026-11-09T23:00:49Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-sib-unaccepted-census-76dd92cc65bc",
+      "recorded_at": "2026-11-09T23:40:01.101539+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py",
