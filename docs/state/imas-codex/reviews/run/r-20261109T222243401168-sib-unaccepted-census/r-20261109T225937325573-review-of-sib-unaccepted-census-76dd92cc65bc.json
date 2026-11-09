@@ -1,0 +1,110 @@
+{
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed manifest arms no baseline_suite and no after_suite, and the diff adds no product source and no test file, so no suite delta exists to take. Zero is recorded because the change cannot add a test failure: it edits nothing any test executes. This is an absence of arms, not a measured green suite.",
+  "artifact_verification": {
+    "html_sha256": "8902342018f18e0d8a6905c8fd90236426915f22a2705d1f8fcbb5e52709d660",
+    "json_sha256": "37bb9e7064462287e9249633518793e9ffa6447c4d0a6bb64f1cca2e08f2956a",
+    "script_sha256": "cf6f0f5174902e2f42654aff55050e0fba1d40e8efca633ba73645306db5ef49",
+    "source_summary": "6123 live / 5203 accepted / 920 unaccepted sources, 116 exhausted names; source class sum 920 and name class sum 116 reconcile; 73 of 920 source members and 27 of 116 name members listed; per-accepted-name USD 0.2444 at 4.1 accepted per USD; spend USD 0"
+  },
+  "assertion_review": {
+    "added_executable_assertions": [
+      "sib-unaccepted-census-run.py:93 raises when a graph result exceeds the caller's cap; it can fire only above 20,000 rows, and the live read returns 6,123, so it did not fire.",
+      "sib-unaccepted-census-run.py:518 and :521 raise on a class outside the declared set; classify_source and classify_exhausted return only declared literals, so neither can fire.",
+      "sib-unaccepted-census-run.py:523 and :525 compare each class Counter's sum to len() of the same collection the Counter was built from, so both hold whatever the classifier does.",
+      "sib-unaccepted-census-run.py:526 raises on any source whose class does not satisfy the separately written predicate in check_class_invariants; this one can fail and did, 237 times, on the mutated classifier recorded in negative-control.log.",
+      "sib-unaccepted-census-run.py:354 and :356 raise on an empty read of either population, which guards against reporting an empty census from a failed query."
+    ],
+    "durability_limit": "No test is committed and the node correctly declares that no test path exists; the guards live inside the script, so a change to the script can be made alongside a change to its own checker and the two can agree while both are wrong.",
+    "independent_controls": "negative-control.log records a mutated classifier scoring every drafted/reviewed source below the floor and the invariant check refusing it with exit 1, which is a genuine falsification of the check. The plan's own stated control, a source planted outside every class, is not applicable to this design because classify_source ends in a catch-all return, and the substitute mutation does not exercise the reconciliation guard."
+  },
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-09T23:09:38.152Z",
+  "dispatched_at": "2026-11-09T23:00:49Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py",
+      "line": "546",
+      "severity": "blocking",
+      "text": "blocking: class_record stores only `representative[:12]`, so the committed JSON carries 73 of the 920 source assignments and 27 of the 116 name assignments; the plan's measure requires each item to be recorded in exactly one class, and sib-full-dd-continuation must run the advanceable classes scoped by source, which this artifact cannot supply without re-running the script."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py",
+      "line": "267",
+      "severity": "blocking",
+      "text": "blocking: cost_basis asserts `cohort_rerun_measured: null` with the note that no cohort rerun has run, while docs/plans/sn-integrity-backlog.html \u00a751 records sib-second-pass (job 1308283) naming 83 of 143 sources for USD 1.49; the done-when requires the expected cost to come from the measured per-name cost of the full run and the cohort reruns, and the available measured cohort figure (USD 0.01795 per named source) is omitted on a false premise."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py",
+      "line": "522",
+      "severity": "non-blocking",
+      "text": "non-blocking: the reconciliation guard `sum(source_classes.values()) != len(unaccepted)` compares a Counter incremented once per item in the same loop that builds `unaccepted`, so it is true for every possible classification and cannot fail; the JSON's reconciliation block presents it as the evidence that each item is in exactly one class, which the plan names as this census's negative control."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py",
+      "line": "205",
+      "severity": "non-blocking",
+      "text": "non-blocking: every `status == 'failed'` source whose reason is not a refusal family is classed attempt-capped, whether or not it reached the cap of 5; the artifact's own representatives carry attempts 3 and 4, and a failed row recording no reason at all lands in the same class, so the name asserts a cause the census never established."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py",
+      "line": "165",
+      "severity": "non-blocking",
+      "text": "non-blocking: classify_source re-implements the cause-precedence classifier owned by imas_codex/standard_names/graph_store/graph_source_bindings.py:2076 (classify_parked_source, with CAP_PARKED_DISPOSITIONS at :2050) for the same StandardNameSource population, duplicating it with a different vocabulary rather than wrapping or extending the owner; the owner's documented rule that a row recording nothing is its own class is contradicted here."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call site reaches the change: the added file is a standalone script nothing imports, and it calls into imas_codex.standard_names rather than the reverse.",
+    "diff": "read 9d43b8925 (three files added, 1393 lines, no product source or test) and 76dd92cc6 (observed_at 22:52:23 to 22:53:13, no count or class changed) against 197de19cd; the scope is docs/evidence only.",
+    "done_when": "prompt.txt:104 measures 920+116 each in exactly one class reconciling to the live read, each class naming its step, scope and cost from the full run and the cohort reruns, with an HTML summary; census-gate.log records EXIT=0 at 9d43b8925 with 6123/5203/920/116 reconciling, but the cohort-rerun input the measure names is answered with a false claim that no cohort rerun ran, and the reconciliation the plan designates as the negative control cannot fail.",
+    "goal": "prompt.txt:38 asks for every unaccepted live DD source and every exhausted name classified with the step and cost that advance each class; sib-unaccepted-census.json records counts for all 920 sources and 116 names with step, scope and expected cost per class, but persists the per-item assignment for only 73 sources and 27 names.",
+    "manifest": "manifest.md:5-30 reports complete with both commits, the literal gate command, census-gate.log, negative-control.log and 237 invariant failures; its evidence_inputs line repeats the false no-cohort-rerun claim that also sits in the artifact.",
+    "write_paths": "prompt.txt:81-85 grants sib-unaccepted-census.json, .html, -run.py and docs/figures/sn-integrity-backlog/sib-unaccepted-census; git diff --name-status 197de19cd..76dd92cc6 adds exactly the three fragment files, all inside that scope, and writes no figure."
+  },
+  "justifications": {
+    "durability": "the only added check that can fail is the invariant re-derivation at sib-unaccepted-census-run.py:526, which negative-control.log shows firing 237 times on a mutated classifier; no versioned test exists, and the class-sum guard at :522 is unfalsifiable because both sides are built by the same loop.",
+    "evidence": "census-gate.log records the live read at 9d43b8925 with 6123 live / 5203 accepted / 920 unaccepted / 116 exhausted and the class sums 920 and 116, reproducing prompt.txt:104's denominators, but sib-unaccepted-census-run.py:267 asserts no cohort rerun exists while the plan records sib-second-pass (job 1308283) naming 83 of 143 sources for USD 1.49.",
+    "fit": "sib-unaccepted-census-run.py:33-36 imports DEFAULT_MIN_SCORE and _MAX_COMPOSE_CLAIM_ATTEMPTS from their owners instead of restating them and emits node-prefixed fragment ids, but its classify_source at :205 contradicts graph_source_bindings.py:2071's rule that a row recording nothing is its own class, folding that silence into attempt-capped.",
+    "goal_fidelity": "sib-unaccepted-census-run.py:546 stores only 12 representatives per class, so 847 of the 920 source assignments and 89 of the 116 name assignments are computed and then discarded, which is short of classifying every one.",
+    "reuse": "sib-unaccepted-census-run.py:165 duplicates the cause-precedence classifier the repository already owns at imas_codex/standard_names/graph_store/graph_source_bindings.py:2076 without importing or extending it, giving the same StandardNameSource population a second, incompatible disposition vocabulary.",
+    "scope_discipline": "git diff --name-status 197de19cd..76dd92cc6 lists only the three declared fragment paths, and the granted figure directory stays empty."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: prompt.txt:38 asks for every unaccepted live DD source and every exhausted name classified with the step and cost that advance each class; sib-unaccepted-census.json records counts for all 920 sources and 116 names with step, scope and expected cost per class, but persists the per-item assignment for only 73 sources and 27 names.\nVERDICT done_when: prompt.txt:104 measures 920+116 each in exactly one class reconciling to the live read, each class naming its step, scope and cost from the full run and the cohort reruns, with an HTML summary; census-gate.log records EXIT=0 at 9d43b8925 with 6123/5203/920/116 reconciling, but the cohort-rerun input the measure names is answered with a false claim that no cohort rerun ran, and the reconciliation the plan designates as the negative control cannot fail.\nVERDICT write_paths: prompt.txt:81-85 grants sib-unaccepted-census.json, .html, -run.py and docs/figures/sn-integrity-backlog/sib-unaccepted-census; git diff --name-status 197de19cd..76dd92cc6 adds exactly the three fragment files, all inside that scope, and writes no figure.\nVERDICT manifest: manifest.md:5-30 reports complete with both commits, the literal gate command, census-gate.log, negative-control.log and 237 invariant failures; its evidence_inputs line repeats the false no-cohort-rerun claim that also sits in the artifact.\nVERDICT diff: read 9d43b8925 (three files added, 1393 lines, no product source or test) and 76dd92cc6 (observed_at 22:52:23 to 22:53:13, no count or class changed) against 197de19cd; the scope is docs/evidence only.\nCALL_SITES: none\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: sib-unaccepted-census-run.py:546 stores only 12 representatives per class, so 847 of the 920 source assignments and 89 of the 116 name assignments are computed and then discarded, which is short of classifying every one.\nSCORE evidence: 12\nJUSTIFICATION evidence: census-gate.log records the live read at 9d43b8925 with 6123 live / 5203 accepted / 920 unaccepted / 116 exhausted and the class sums 920 and 116, reproducing prompt.txt:104's denominators, but sib-unaccepted-census-run.py:267 asserts no cohort rerun exists while the plan records sib-second-pass (job 1308283) naming 83 of 143 sources for USD 1.49.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-status 197de19cd..76dd92cc6 lists only the three declared fragment paths, and the granted figure directory stays empty.\nSCORE durability: 11\nJUSTIFICATION durability: the only added check that can fail is the invariant re-derivation at sib-unaccepted-census-run.py:526, which negative-control.log shows firing 237 times on a mutated classifier; no versioned test exists, and the class-sum guard at :522 is unfalsifiable because both sides are built by the same loop.\nSCORE fit: 16\nJUSTIFICATION fit: sib-unaccepted-census-run.py:33-36 imports DEFAULT_MIN_SCORE and _MAX_COMPOSE_CLAIM_ATTEMPTS from their owners instead of restating them and emits node-prefixed fragment ids, but its classify_source at :205 contradicts graph_source_bindings.py:2071's rule that a row recording nothing is its own class, folding that silence into attempt-capped.\nSCORE reuse: 5\nJUSTIFICATION reuse: sib-unaccepted-census-run.py:165 duplicates the cause-precedence classifier the repository already owns at imas_codex/standard_names/graph_store/graph_source_bindings.py:2076 without importing or extending it, giving the same StandardNameSource population a second, incompatible disposition vocabulary.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py:546 blocking: class_record stores only `representative[:12]`, so the committed JSON carries 73 of the 920 source assignments and 27 of the 116 name assignments; the plan's measure requires each item to be recorded in exactly one class, and sib-full-dd-continuation must run the advanceable classes scoped by source, which this artifact cannot supply without re-running the script.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py:267 blocking: cost_basis asserts `cohort_rerun_measured: null` with the note that no cohort rerun has run, while docs/plans/sn-integrity-backlog.html \u00a751 records sib-second-pass (job 1308283) naming 83 of 143 sources for USD 1.49; the done-when requires the expected cost to come from the measured per-name cost of the full run and the cohort reruns, and the available measured cohort figure (USD 0.01795 per named source) is omitted on a false premise.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py:522 non-blocking: the reconciliation guard `sum(source_classes.values()) != len(unaccepted)` compares a Counter incremented once per item in the same loop that builds `unaccepted`, so it is true for every possible classification and cannot fail; the JSON's reconciliation block presents it as the evidence that each item is in exactly one class, which the plan names as this census's negative control.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py:205 non-blocking: every `status == 'failed'` source whose reason is not a refusal family is classed attempt-capped, whether or not it reached the cap of 5; the artifact's own representatives carry attempts 3 and 4, and a failed row recording no reason at all lands in the same class, so the name asserts a cause the census never established.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py:165 non-blocking: classify_source re-implements the cause-precedence classifier owned by imas_codex/standard_names/graph_store/graph_source_bindings.py:2076 (classify_parked_source, with CAP_PARKED_DISPOSITIONS at :2050) for the same StandardNameSource population, duplicating it with a different vocabulary rather than wrapping or extending the owner; the owner's documented rule that a row recording nothing is its own class is contradicted here.\n",
+  "reuse_search": {
+    "added_definitions": [
+      "read",
+      "source_rows",
+      "pick_binding",
+      "reason_family",
+      "classify_source",
+      "classify_exhausted",
+      "cost_basis",
+      "check_class_invariants",
+      "write_html",
+      "main"
+    ],
+    "call_sites_search": "Searched imas_codex/ and tests/ for any importer of the added script; there is none, and the script imports DEFAULT_MIN_SCORE and _MAX_COMPOSE_CLAIM_ATTEMPTS from their owners.",
+    "search": "Searched imas_codex/standard_names/ for the source-status vocabulary and for an existing classifier of unaccepted sources, by capability rather than by name: status fields vocab_gap, attempt caps and cause precedence. Found and opened the owner imas_codex/standard_names/graph_store/graph_source_bindings.py:2044-2102, which owns the closed disposition set, the cause-precedence order and the totality guarantee for the same StandardNameSource population. Also checked imas_codex/standard_names/orphan_sweep.py and the evidence fragments directory for an existing unaccepted-source census; none exists."
+  },
+  "review_run_id": "r-20261109T225937325573-review-of-sib-unaccepted-census-76dd92cc65bc",
+  "reviewed_base_sha": "197de19cd11eb9b247fd9cb9f16ded0d231c775f",
+  "reviewed_head_sha": "76dd92cc65bc1d070596f6bcfd96dee17d778ad9",
+  "reviewed_run_id": "r-20261109T222243401168-sib-unaccepted-census",
+  "scores": {
+    "durability": 11,
+    "evidence": 12,
+    "fit": 16,
+    "goal_fidelity": 13,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-10T00:14:00+00:00",
+  "total": 77
+}
