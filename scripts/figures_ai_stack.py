@@ -252,8 +252,8 @@ LAYER_NAMES = {
 # Top to bottom: each bar's roles reach from Claude Desktop to the interface named, and
 # no one stops at Claude Desktop, because every role needs ITER's data through Lucy.
 USERS = [
-    ("project support", "clive"),
-    ("prototyping with domain experts · code developer", "sandbox"),
+    ("assembly and commissioning project support", "clive"),
+    ("prototyping with domain experts · science · code developer", "sandbox"),
     ("commissioning engineer · planning", "dash"),
     ("configuration control", "lucy"),
     ("administrative support", "lucy"),
@@ -525,7 +525,9 @@ def draw_interfaces(c: Canvas) -> None:
             weight="normal",
         )
     x0, x1 = INTERFACES["sandbox"]
-    c.card(x0, y0, x1, y1, "Sandbox", "full development", kind="frontier")
+    c.card(
+        x0, y0, x1, y1, "Sandbox", ("full development", "H200 GPUs"), kind="frontier"
+    )
     x0, x1 = INTERFACES["clive"]
     c.card(
         x0,
@@ -533,7 +535,7 @@ def draw_interfaces(c: Canvas) -> None:
         x1,
         y1,
         "Clive",
-        ("Claude orchestrator", "H200 + B300 GPUs", "DeepSeek v4.1 Flash"),
+        ("Claude orchestrator", "B300 GPUs", "DeepSeek v4.1 Flash"),
         kind="frontier",
     )
 
