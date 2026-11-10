@@ -1,0 +1,163 @@
+<h2 id="sib-isn-pin-0-11-0">imas-codex pinned to ISN 0.11.0 and the graph grammar snapshot synced to it</h2>
+
+<p>Both <code>imas-standard-names</code> pins in <code>pyproject.toml</code> moved
+from <code>==0.10.1</code> to <code>==0.11.0</code> (lines 18 and 186, the core
+dependency set and the catalog-preview extra). The editable sibling-checkout
+override in <code>[tool.uv.sources]</code> is unchanged, so the lock continues to
+resolve the package from <code>../imas-standard-names</code>. The graph's
+grammar snapshot was then synced to 0.11.0 through the repository's own
+grammar-sync path, <code>sync_isn_grammar_to_graph()</code> in
+<code>imas_codex/standard_names/grammar_sync.py</code> — the same helper that
+<code>sn run</code>'s startup auto-sync, <code>sn clear</code>'s re-seed and the
+hatch build hook call. No Cypher was written by hand.</p>
+
+<h3 id="sib-isn-pin-0-11-0-lock">Lock</h3>
+
+<p><code>uv lock</code> re-resolves the tree at the new pins and exits 0 with
+<strong>no change to <code>uv.lock</code></strong>. That is the correct result and
+not a missed refresh: an editable path source records neither the requirement
+specifier nor a resolved version in the lock, so the lock's only
+<code>imas-standard-names</code> entries are the three references already
+present — the root project's dependency list, the editable source record, and the
+package block whose <code>source = { editable = "../imas-standard-names" }</code>
+stays as it was. The resolution was re-run from a scratch copy of the bumped
+<code>pyproject.toml</code> placed beside a symlink to the sibling checkout,
+because this worktree has no <code>../imas-standard-names</code> of its own; the
+relative source text in the result is identical, which is why the diff is empty.
+</p>
+
+<h3 id="sib-isn-pin-0-11-0-sync">Grammar sync, before and after</h3>
+
+<p>The sync reads the installed <code>imas_standard_names.__version__</code> as
+the version label it writes. The shared environment's editable install still
+carries dist metadata from the 0.10.1 cut, so the sync was driven with the
+released 0.11.0 artifact first on <code>PYTHONPATH</code> and the worktree second;
+the run asserts both module paths before writing. The package inline is the
+released wheel content for 0.11.0, not the sibling checkout's development
+revision, which is one commit past the tag.</p>
+
+<table>
+  <thead><tr><th>state</th><th>active version</th><th>content digest</th><th>GrammarToken</th><th>GrammarSegment</th><th>templates</th></tr></thead>
+  <tbody>
+    <tr><td>before</td><td>0.10.1</td><td><code>sha256:320e8e2b89afa50d803c69ff3832b0feb42ceed19a12987456651c7cf1984e66</code></td><td>983</td><td>22</td><td>7</td></tr>
+    <tr><td>after</td><td>0.11.0</td><td><code>sha256:5eac6bcabd5bb3dd3529e366eb494bbc750b8b987dd43e7ffd7466e49e233ef2</code></td><td>1031</td><td>22</td><td>7</td></tr>
+  </tbody>
+</table>
+
+<p>The 0.11.0 token count is non-zero and exceeds the previous active version's
+count (1031 against 983, +48), which is the barrier this node had to clear.
+Segment and template counts are unchanged, as expected: 0.11.0 adds vocabulary
+and operator machinery, not grammar structure.</p>
+
+<h3 id="sib-isn-pin-0-11-0-readback">Read-backs</h3>
+
+<table>
+  <thead><tr><th>token</th><th>as a token of 0.10.1 before</th><th>as a token of 0.11.0 after</th><th>segment(s) in 0.11.0</th></tr></thead>
+  <tbody>
+    <tr><td><code>power_convertor</code></td><td>absent</td><td>present</td><td><code>device</code>, <code>object</code></td></tr>
+    <tr><td><code>stress</code></td><td>absent</td><td>present</td><td><code>physical_base</code></td></tr>
+    <tr><td><code>delta_prime</code></td><td>absent</td><td>present</td><td><code>physical_base</code></td></tr>
+    <tr><td><code>argmax_with_respect_to</code></td><td>absent</td><td><strong>not a GrammarToken</strong> — see below</td><td>operator registry only</td></tr>
+  </tbody>
+</table>
+
+<p>The three vocabulary tokens are a real before/after discriminator: each
+returns no row at 0.10.1 and one or two rows at 0.11.0, so the reader is
+reported absent at one release and present at the other rather than simply
+present.</p>
+
+<h4 id="sib-isn-pin-0-11-0-argmax">Why <code>argmax_with_respect_to</code> is not a GrammarToken</h4>
+
+<p><code>argmax_with_respect_to</code> is an <em>operator</em>, not a vocabulary
+token. In the 0.11.0 artifact it is declared in
+<code>imas_standard_names/grammar/vocabularies/operators.yml</code> as an
+indexed unary-prefix operator, and it is exposed through
+<code>get_grammar_context()["grammar"]["vocabularies"]["operators"]</code> (52
+operators in 0.11.0, this one present with <code>kind: unary_prefix</code>,
+<code>precedence: 20</code>, <code>indexed: true</code>).</p>
+
+<p>The grammar snapshot's graph spec does not carry the operator registry. Its
+keys are exactly <code>version</code>, <code>segment_order</code>,
+<code>segments</code>, <code>templates</code>;
+<code>_grammar_context_token_rows()</code> flattens only
+<code>vocabulary_sections</code>, and <code>vocabulary_sections</code> has no
+operator section (its 22 segments are the closed-vocabulary segments). The graph
+confirms this is a standing property rather than a 0.11.0 regression: no operator
+token has ever been a <code>GrammarToken</code> in any synced version — queries
+for <code>derivative_with_respect_to</code>, <code>time_derivative</code>,
+<code>maximum</code> and <code>flux_surface_averaged</code> return zero rows
+across every version. Codex reads operators from the in-process grammar context
+(<code>imas_codex/standard_names/audits.py</code>), never from the graph.</p>
+
+<p>Making an operator a graph token therefore needs a channel that does not
+exist: either a <code>GrammarSegment</code> the closed-vocabulary order does not
+define, or a new node label and sync statement in
+<code>grammar_sync.py</code>. Both are product-source changes outside this
+node's write scope, so this read-back is reported here rather than forced. The
+token is a token of 0.11.0 and reads back as such through the package's own
+operator registry; it is not a <code>GrammarToken</code> of any release.</p>
+
+<p><strong>Environment follow-up.</strong> The shared project environment's
+editable install still carries 0.10.1 dist metadata, because it was built at the
+0.10.1 cut and a worktree must not re-sync an environment shared with peer
+sessions. That does not undo this sync — the startup auto-sync compares the
+active <em>content digest</em>, and the installed checkout's grammar files hash
+to the same <code>sha256:5eac6bca…</code> written here, so it no-ops. It does
+mean the next deliberate re-sync from that environment would label the same
+content as 0.10.1. Run <code>uv sync</code> from the main
+checkout once this pin lands, so the runtime package version reads 0.11.0.</p>
+
+<h3 id="sib-isn-pin-0-11-0-controls">Controls</h3>
+
+<ul>
+  <li><strong>Positive control.</strong> The same read-back query that returns
+  the negative-control token empty returns <code>power_convertor</code> with two
+  rows at 0.11.0, so the instrument is shown to see what is present before an
+  absence is reported.</li>
+  <li><strong>Negative control.</strong> <code>sourced</code> — a spelling the
+  lead accepted for a later release — returns no row as a 0.11.0
+  <code>GrammarToken</code>, and no <code>sourced:</code> entry exists in the
+  0.11.0 vocabularies (its only occurrence in the artifact is inside a comment in
+  <code>qualifiers.yml</code>).</li>
+</ul>
+
+<h3 id="sib-isn-pin-0-11-0-tests">Tests</h3>
+
+<p><code>tests/standard_names</code> was run in arms under one instrument
+(<code>-n 4 --timeout=120 --timeout-method=thread</code>). The serial form was
+abandoned: <code>pytest-timeout</code>'s SIGALRM method kills an xdist worker
+and turns a single slow test into <code>INTERNALERROR</code> for the whole run,
+which is what happened to the first attempt at each arm.</p>
+
+<table>
+  <thead><tr><th>arm</th><th>tree</th><th>revision</th><th>result</th><th>exit</th></tr></thead>
+  <tbody>
+    <tr><td>base</td><td>this worktree</td><td><code>da4e6748f</code></td><td>9 failed, 8630 passed, 11 skipped in 704s</td><td>1</td></tr>
+    <tr><td>head</td><td><code>git archive</code> of the head</td><td><code>2c2f0ac43</code></td><td>13 failed, 8625 passed, 12 skipped in 637s</td><td>1</td></tr>
+    <tr><td>head (incomplete)</td><td>this worktree at the head</td><td><code>2c2f0ac43</code></td><td>reached 99% when the background time limit stopped it; no summary line, no exit</td><td>—</td></tr>
+  </tbody>
+</table>
+
+<p>The nine failures are the same ids in both complete arms. Four ids appear
+only at the head, and they are an artefact of the archive tree rather than of
+this change. Re-running just those files gives: base worktree
+<strong>6 passed, exit 0</strong>; head archive <strong>4 failed, 2 passed, exit
+1</strong>; head worktree <strong>6 passed, exit 0</strong>. The archive carries
+only tracked files, while the manifest-generability and ledger tests read
+catalog and manifest data that this checkout generates outside git; a tree
+without those files fails them whatever the pins say. The same three runs are
+logged beside the two full arms, and the manifest attributes the four ids under
+<code>failure_attribution</code>.</p>
+
+<p><strong>What this record does not show.</strong> No complete head arm ran in a
+worktree, so the base-to-head comparison rests on a base arm plus a focused
+disproof of the only four added ids, not on two full arms of the same shape. A
+full worktree head arm was started and ran to 99% of the suite before the
+background time limit stopped it one step short of its summary line. It is
+recorded as incomplete rather than read for a result: a truncated run declares
+no verdict. The re-run is cheap in expectation and should be the follow-on's
+first step.</p>
+
+<p><em>Totals and log paths are recorded in the node manifest's
+<code>baseline_suite</code>, <code>after_suite</code>,
+<code>failure_attribution</code> and <code>test_logs</code> keys.</em></p>
