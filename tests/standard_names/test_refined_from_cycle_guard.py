@@ -468,3 +468,116 @@ def test_batch_source_retirements_cannot_cycle_each_other(
                 ],
             )
         assert _state() == before
+
+
+def _writer_insertion_clause(writer: str) -> tuple[str, str]:
+    """Assemble the writer's real insertion clause without its earlier preflight.
+
+    The inline queries are string additions and calls to the shared guard. Read
+    that expression from the owning module so removing its call also removes it
+    from this execution. Only those two expression forms are accepted; no source
+    is evaluated. The enclosing MATCH/WHERE and lifecycle updates are deliberately
+    excluded so another refusal cannot stand in for the insertion's guard.
+    """
+    import ast
+    from pathlib import Path
+
+    from imas_codex.standard_names.graph_store.graph_foundation import (
+        refined_from_cycle_guard_cypher,
+    )
+
+    module, successor, operation = {
+        "refine": ("graph_store/graph_refinement.py", "new", "persist_refined_name"),
+        "fold": ("edit.py", "target", "supersede_into"),
+        "regeneration": (
+            "graph_store/graph_supersession.py",
+            "new",
+            "supersede_prior_source_names",
+        ),
+        "tombstone": (
+            "graph_store/graph_supersession.py",
+            "into",
+            "tombstone_supersede_into",
+        ),
+    }[writer]
+    path = Path(__file__).parents[2] / "imas_codex/standard_names" / module
+    provenance = f"{path.stem}.{operation}"
+    expressions = [
+        node
+        for node in ast.walk(ast.parse(path.read_text()))
+        if isinstance(node, ast.BinOp)
+        and any(
+            isinstance(child, ast.Constant)
+            and isinstance(child.value, str)
+            and f"lineage_edge.writer = '{provenance}'" in child.value
+            for child in ast.walk(node)
+        )
+    ]
+    expression = max(expressions, key=lambda node: len(list(ast.walk(node))))
+
+    def assemble(node: ast.AST) -> str:
+        if isinstance(node, ast.Constant) and isinstance(node.value, str):
+            return node.value
+        if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
+            return assemble(node.left) + assemble(node.right)
+        assert isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+        assert node.func.id == "refined_from_cycle_guard_cypher"
+        assert not node.keywords and len(node.args) == 2
+        return refined_from_cycle_guard_cypher(*(assemble(arg) for arg in node.args))
+
+    cypher = assemble(expression)
+    start = cypher.index("FOREACH (lineage_write IN [1] |")
+    clock = "$changed_at" if writer == "fold" else ""
+    terminator = f"lineage_edge.created_at = datetime({clock}))"
+    end = cypher.index(terminator, start) + len(terminator)
+    return (
+        f"MATCH ({successor}:StandardName {{id: $successor}}), "
+        "(old:StandardName {id: $predecessor})\n"
+        + cypher[start:end]
+        + f"\nRETURN {successor}.id AS successor",
+        provenance,
+    )
+
+
+@pytest.mark.parametrize("writer", ["refine", "fold", "regeneration", "tombstone"])
+@pytest.mark.parametrize("closes_cycle", [False, True], ids=["acyclic", "cycle"])
+def test_writer_insertion_boundary(
+    disposable_neo4j_empty: str, writer: str, closes_cycle: bool
+) -> None:
+    """Execute each insertion even when a surrounding preflight would refuse."""
+    from datetime import UTC, datetime
+
+    from neo4j.exceptions import ClientError
+
+    cypher, provenance = _writer_insertion_clause(writer)
+    with GraphClient() as gc:
+        gc.query("""
+            CREATE (:StandardName {id: 'electron_number_density'})
+            CREATE (:StandardName {id: 'electron_density'})
+            """)
+        if closes_cycle:
+            gc.query("""
+                MATCH (old:StandardName {id: 'electron_number_density'}),
+                      (successor:StandardName {id: 'electron_density'})
+                CREATE (old)-[:REFINED_FROM]->(:StandardName {id: 'density'})
+                       -[:REFINED_FROM]->(successor)
+                """)
+            assert gc.query("""
+                MATCH (:StandardName {id: 'electron_number_density'})
+                      -[:REFINED_FROM*2]->
+                      (:StandardName {id: 'electron_density'})
+                RETURN count(*) AS reverse_paths
+                """) == [{"reverse_paths": 1}]
+        before = _state()
+        params = {
+            "successor": "electron_density",
+            "predecessor": "electron_number_density",
+            "changed_at": datetime.now(UTC).isoformat(),
+        }
+        if closes_cycle:
+            with pytest.raises(ClientError, match="REFINED_FROM cycle"):
+                gc.query(cypher, **params)
+            assert _state() == before
+        else:
+            assert gc.query(cypher, **params) == [{"successor": "electron_density"}]
+            _assert_lineage_provenance(provenance)
