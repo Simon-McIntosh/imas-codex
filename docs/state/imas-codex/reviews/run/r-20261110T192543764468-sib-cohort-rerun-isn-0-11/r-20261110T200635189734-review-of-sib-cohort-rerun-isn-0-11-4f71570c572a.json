@@ -5,6 +5,13 @@
   "call_sites": "none",
   "completed_at": "2026-11-10T20:23:08.469Z",
   "dispatched_at": "2026-11-10T20:08:27Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "sib-cohort-rerun-isn-0-11",
+      "recorded_at": "2026-11-10T21:02:54.969609+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-integrity-backlog/sib-cohort-rerun-isn-0-11.html",
