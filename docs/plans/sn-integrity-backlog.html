@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="455">
+<meta name="plan-version" content="456">
 <meta name="plan-modified" content="2026-11-11">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -1423,7 +1423,10 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
     <div class="r-comment-body"><p>review of sib-consistency-census at base de46fb885540ab298aa1b41e1c6c7a81169251b9 and head 4eb2a2f7c4d47ab01acff967e658e45c1639cc0e scores 76/120 (goal_fidelity 12, evidence 15, scope_discipline 19, durability 11, fit 15, reuse 4) with one blocking finding: the census writes proposed.definition and definition_from as null for all 127 divergent families because descriptions are popped before the anchor is chosen, so its done_when's proposed definition per family is absent; five non-blocking findings record that the definition axis counts sibling-qualifier variety as definition divergence, that the opening template feature is vacuous, that the HTML top-family table carries no examples, that evidence_inputs quotes stale concept and docs_stage figures, and that _anchor duplicates imas_codex/standard_names/families.py select_anchor.</p></div>
 </div>
 <div class="r-comment" data-section="s52" data-id="c-run-r-20261110T222743094703-sib-guard-added-failure-check" data-who="reckon-build" data-when="2026-11-10T22:53:27.675Z">
-    <div class="r-comment-body"><p>Measured 3 serial runs at base 7f3db88c and 3 at head 88189cd0 of tests/standard_names/test_pool_batch_processors.py::TestComposeDomainContextFromBatch::test_compose_domain_context_from_batch from per-arm git archive copies: 6 of 6 passed (EXIT=0 each; 92.63s, 85.76s, 68.19s at base; 82.22s, 82.37s, 77.76s at head), so the added suite failure is NOT attributable to the guard&#x27;s head — it failed in no head run.</p></div>
+    <div class="r-comment-body"><p>Measured 3 serial runs at base 7f3db88c and 3 at head 88189cd0 of tests/standard_names/test_pool_batch_processors.py::TestComposeDomainContextFromBatch::test_compose_domain_context_from_batch from per-arm git archive copies: 6 of 6 passed (EXIT=0 each; 92.63s, 85.76s, 68.19s at base; 82.22s, 82.37s, 77.76s at head), so the added suite failure is NOT attributable to the guard's head — it failed in no head run.</p></div>
+</div>
+<div class="r-comment" data-section="s52" data-id="c-run-r-20261110T230723855882-review-of-sib-guard-added-failure-check-5382599d9ff1" data-who="reckon-build" data-when="2026-11-10T23:23:23.241Z">
+    <div class="r-comment-body"><p>Independent review of r-20261110T222743094703-sib-guard-added-failure-check at head 5382599d9 against base 0ca35cd15: status parsed, six dimensions scored (goal_fidelity 17, evidence 17, scope_discipline 20, durability 10, fit 18, reuse 20), added_failure_count 0 with no added failure ids, three non-blocking findings on the fragment&#x27;s uncited failure provenance, one over-generalised faulthandler attribution and an unqualified head in the verdict sentence.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261012T162346807302-review-of-sib-row-census" data-who="reckon-build" data-when="2026-10-12T16:39:58.712Z">
     <div class="r-comment-body"><p>reviewed r-20261012T145528571333-sib-row-census at a7a70db00 against c7b4c626e; total 93/120 (goal_fidelity 15, evidence 13, scope_discipline 19, durability 11, fit 15, reuse 20); two blocking findings — the landing record's verdict tallies and the manifest's row-count both disagree with the 38 rows the census file holds.</p></div>
