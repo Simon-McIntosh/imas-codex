@@ -1,0 +1,59 @@
+{
+  "added_failure_count": 1,
+  "added_failure_ids": [
+    "tests/standard_names/test_pool_batch_processors.py::TestComposeDomainContextFromBatch::test_compose_domain_context_from_batch"
+  ],
+  "completed_at": "2026-11-10T23:46:33Z",
+  "dimension_dispositions": {
+    "scope_discipline": {
+      "kind": "exempted",
+      "reason": "the score rests on the scope finding above; every edited path is in the widened grant",
+      "recorded_at": "2026-11-10T23:50:47.610502+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-10T23:13:05Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "all seven test files are in the run's granted write paths: the coordinator widened the scope with crew widen after the provenance stamping broke them; the reviewer read the original prompt.txt scope",
+      "recorded_at": "2026-11-10T23:50:32.740897+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "adjudicated by sib-guard-added-failure-check (landed at 5382599d9): the test passed 6 of 6 serial runs at base 7f3db88c and head 88189cd0, so the added id is load-dependent and not attributable to this run",
+      "recorded_at": "2026-11-10T23:50:39.785083+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/standard_names/test_atomic_refined_name_persistence.py",
+      "line": 70,
+      "severity": "blocking",
+      "text": "This test edit is outside the exclusive paths in prompt.txt:82-92; the same ungranted change set touches test_edit_engine.py:694, test_generate_name_persist.py:1969, test_refine_source_cohort_gate.py:49, test_supersede_into_tombstone.py:72, test_supersession.py:117 and test_tombstone_supersede.py:45, so the scope must be granted or these edits removed before the node can land."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T172313546861-sib-lineage-cycle-guard/manifest.md",
+      "line": 20,
+      "severity": "blocking",
+      "text": "The completed package head adds test_pool_batch_processors.py::TestComposeDomainContextFromBatch::test_compose_domain_context_from_batch against the 16-failure baseline, leaving the required zero-added gate unmet and requiring coordinator adjudication outside this node's scope."
+    }
+  ],
+  "project": "imas-codex",
+  "report": "VERDICT goal: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T172313546861-sib-lineage-cycle-guard/prompt.txt:38 sets the deliverable to prevent cycles at every REFINED_FROM writer and attribute cycles since the writer fix; the landed shared guard and attribution fragment address both.\nVERDICT done_when: prompt.txt:110-111 requires a zero-added test failure delta; the completed base arm at 7f3db88c110bac47a5e470bd08432eab953ef760 has 16 failures, while the package arm at 88189cd030059b8ca6161a35bacc05a05a90c02b, before the docs-only reviewed head a086e975350c9a0441684927ab830b173ebc94fd, has 12 and adds tests/standard_names/test_pool_batch_processors.py::TestComposeDomainContextFromBatch::test_compose_domain_context_from_batch, so the measure is unmet.\nVERDICT write_paths: prompt.txt:81-92 grants eight production files, one graph test, the evidence fragment and figure directory; the diff also changes seven unlisted tests: test_atomic_refined_name_persistence.py, test_edit_engine.py, test_generate_name_persist.py, test_refine_source_cohort_gate.py, test_supersede_into_tombstone.py, test_supersession.py and test_tombstone_supersede.py.\nVERDICT manifest: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T172313546861-sib-lineage-cycle-guard/manifest.md:19-25 records completed base/head suite arms, the one added failure id and the unmet package gate, alongside passing graph and affected-file checks.\nVERDICT diff: I read the 17 commits from base through a086e975350c9a0441684927ab830b173ebc94fd; graph_foundation.py:237 adds the shared guard and seven production insertions call it, while test_refined_from_cycle_guard.py:18,33,104,184,247,299,354,470,580 fail if refusals stop or failed transactions leave state changed, :110,187,249,302,359,583 fail if valid writes or provenance stamps regress, :431,438,443 fail if concurrent reciprocal writes both land or leave a cycle, :462,470 fail if mutually cyclic batch rows are admitted, and :578,580 fail if the direct insertion guard is removed; test_generate_name_persist.py:1969 fails if either provenance assignment disappears; the test controls compare seeded graph state, literal expected writers and readbacks, so none is self-referential, and transaction.svg was clear in the 1400px render.\nCALL_SITES: imas_codex/standard_names/edit.py:_FOLD_NAME_MUTATION_QUERY:1559, imas_codex/standard_names/edit.py:_RECLAIM_MUTATION_QUERY:3380, imas_codex/standard_names/source_invariant.py:_supersede_update:55, imas_codex/standard_names/graph_store/graph_source_bindings.py:mark_sources_stale:2805, imas_codex/standard_names/graph_store/graph_refinement.py:persist_refined_name:1207, imas_codex/standard_names/graph_store/graph_supersession.py:supersede_prior_source_names:433, imas_codex/standard_names/graph_store/graph_supersession.py:tombstone_supersede_into:644\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: graph_foundation.py:237 is called by all seven direct insertion sites, and the evidence fragment at line 8 records no newly observed cyclic edges after the earlier writer fix.\nSCORE evidence: 12\nJUSTIFICATION evidence: the complete receipts at manifest.md:19-20 measure the required base/head delta but report one added id, so the zero-added condition is false.\nSCORE scope_discipline: 4\nJUSTIFICATION scope_discipline: prompt.txt:82-92 grants the production paths, one graph test and evidence assets, while manifest.md:12 and the diff contain seven additional ungranted test files.\nSCORE durability: 19\nJUSTIFICATION durability: test_refined_from_cycle_guard.py:544 assembles each production insertion block without its preflight, test_generate_name_persist.py:1969 guards both provenance assignments, and the four guard-removal controls in the evidence fragment at line 59 each fail only on their intended cycle case while the acyclic control passes.\nSCORE fit: 19\nJUSTIFICATION fit: graph_foundation.py:237 keeps the Cypher builder with shared graph primitives, and the changed production symbols and comments name mechanisms without repository-forbidden labels.\nSCORE reuse: 20\nJUSTIFICATION reuse: the pre-existing reachability check in graph_supersession.py:549 is extended by graph_foundation.py:237 into a locked same-update-block guard rather than duplicated as caller-specific logic.\nFINDING tests/standard_names/test_atomic_refined_name_persistence.py:70 blocking: this test edit is outside the exclusive paths in prompt.txt:82-92; the same ungranted change set touches test_edit_engine.py:694, test_generate_name_persist.py:1969, test_refine_source_cohort_gate.py:49, test_supersede_into_tombstone.py:72, test_supersession.py:117 and test_tombstone_supersede.py:45, so the scope must be granted or these edits removed before the node can land.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T172313546861-sib-lineage-cycle-guard/manifest.md:20 blocking: the completed package head adds test_pool_batch_processors.py::TestComposeDomainContextFromBatch::test_compose_domain_context_from_batch against the 16-failure baseline, leaving the required zero-added gate unmet and requiring coordinator adjudication outside this node's scope.",
+  "review_run_id": "r-20261110T231056331270-review-of-sib-lineage-cycle-guard-a086e975350c",
+  "reviewed_base_sha": "7f3db88c110bac47a5e470bd08432eab953ef760",
+  "reviewed_head_sha": "a086e975350c9a0441684927ab830b173ebc94fd",
+  "reviewed_run_id": "r-20261110T172313546861-sib-lineage-cycle-guard",
+  "scores": {
+    "durability": 19,
+    "evidence": 12,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 4
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-10T23:51:35.824185+00:00",
+  "total": 92
+}
