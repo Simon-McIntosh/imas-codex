@@ -1,0 +1,143 @@
+{
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed manifest arms neither baseline_suite nor after_suite, and the diff adds no product source and no test file, so there is no suite delta to take. Zero records that the change cannot add a failing test id because it edits nothing a test executes; it is an absence of arms, not a measured green suite.",
+  "artifact_verification": {
+    "html_sha256": "70d6353c87d00cfab9055cb0eee921b921e4c29362315a6f3bfdb1f4c5eb948c",
+    "json_sha256": "df847f16b60b49e45780ecda20572952002f6478d7cbb45c3543c6882baf46ae",
+    "script_sha256": "90d5b09474b696b620f626557332ef6786d176e9a8cb33d0248c15b6c4874284",
+    "source_summary": "6123 live / 5203 accepted / 920 unaccepted DD sources, 116 exhausted names; source class sum 920 over 919 distinct paths with one disclosed duplicate; name class sum 116; status split 616 named / 220 failed / 68 extracted / 16 vocab_gap reproduces the plan's 616 + 304; JSON 237472 bytes, under the 300000-byte single-file bound; per-accepted-name USD 0.2444 and measured cohort USD 0.01042 per attempted and USD 0.01795 per named source; spend USD 0"
+  },
+  "assertion_review": {
+    "added_executable_assertions": [
+      "sib-unaccepted-census-run.py:252 assign_class raises unless exactly one class predicate holds; it fires on a rule table change that leaves an item classless or doubly classed, and negative-control.log nc3 shows it firing at '0 classes satisfied (none)' with exit 1.",
+      "sib-unaccepted-census-run.py:364-395 check_document_assignments compares the emitted per-class lists with the class membership recomputed from the live read (independent of the emission), so an emission that truncates to a sample, double-records or drops a class fails; negative-control.log nc1 shows the missing-list branch firing with exit 1.",
+      "sib-unaccepted-census-run.py:396 raises when either population read is empty, which is the guard against a zero-row query reporting a clean census.",
+      "sib-unaccepted-census-run.py:380-385 compares the paths appearing more than once with the disclosed duplicate map, and both sides are built from the same per-class lists, so it can only fail if the disclosure is edited away from the list it summarises.",
+      "sib-unaccepted-census-run.py:402-404 check_cost_basis raises when the measured cohort block is absent; negative-control.log nc2 shows that branch firing with exit 1.",
+      "sib-unaccepted-census-run.py:410-416 compares the emitted cohort figures and their derived per-named cost with the module constants COHORT_RERUN_SPEND_USD/SOURCES/NAMED, which are the same constants cost_basis() at :316 built the block from in the same process, so those branches hold whatever the code does and would survive the regression they claim to catch.",
+      "sib-unaccepted-census-run.py:635-638 compare each class Counter's sum with len() of the population the Counter was incremented once per item over, so they are true for any classification."
+    ],
+    "durability_limit": "No test is committed and the node's write paths carry no test file, which is correct for an evidence fragment; the guards live inside the script that also produces the artefact, so two of the eight assertion families cannot fail, and a classifier change plus a matching checker change would still be internally consistent. The negative-control log is therefore the only falsification evidence, and it covers three of the guards."
+  },
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-09T23:55:08.694Z",
+  "dispatched_at": "2026-11-09T23:42:25Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "sib-full-dd-continuation",
+      "recorded_at": "2026-11-09T23:59:29.331307+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "the live guard is check_document_assignments, which the review confirms; the same-process cost check is a redundant assertion, not a claimed control",
+      "recorded_at": "2026-11-09T23:59:42.325327+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "check_document_assignments at :351 is the real one-class-per-item guard and is what the plan names; the Counter sums are reported alongside it, not instead of it",
+      "recorded_at": "2026-11-09T23:59:57.888081+00:00"
+    },
+    "3": {
+      "kind": "folded",
+      "node": "sib-full-dd-continuation",
+      "recorded_at": "2026-11-10T00:00:06.139270+00:00"
+    },
+    "4": {
+      "kind": "exempted",
+      "reason": "comments in a committed evidence runner under docs/evidence cite the node that produced the figures as data provenance; the figures are restated in prose beside them",
+      "recorded_at": "2026-11-10T00:00:17.057827+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py",
+      "line": "650",
+      "severity": "non-blocking",
+      "text": "non-blocking: the name population's class records take step and scope from the source-oriented CLASS_STEPS table at :60-89, so the JSON's name_classes carry 'scoped by source_id' and, for the ten cleared names, the step 'compose (the candidate was refused at write time)'; an exhausted name is not scoped by source_id and is not advanced by compose (its row records docs_stage accepted with validation quarantined for nine of the ten and valid for the tenth), so for that population the record does not name the step that advances it as the done_when requires."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py",
+      "line": "410",
+      "severity": "non-blocking",
+      "text": "non-blocking: check_cost_basis compares the emitted cohort figures and their derived per-named rate with the same module constants that cost_basis() built them from in the same process, so the branch 'the emission refuses a basis whose figures disagree with the recorded run' claimed by commit 9788064fd cannot fire; only the absent-block branch at :402 is a live guard, which is what negative-control.log nc2 exercises."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py",
+      "line": "635",
+      "severity": "non-blocking",
+      "text": "non-blocking: the class-sum guards at :635 and :637 compare each Counter's sum with len() of the population it was incremented once per item over, so they hold for any classification, yet :691-696 publishes those two sums in the document's reconciliation block as the evidence that every item is in exactly one class; the real guard is check_document_assignments at :351."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py",
+      "line": "217",
+      "severity": "non-blocking",
+      "text": "non-blocking: a source whose status is terminal 'failed' is classed attempt-capped whether or not it reached the five-attempt claim cap, so the class holds 43 rows at 5, 34 at 4, 11 at 3 and 2 at 6 attempts, and 56 of the 90 carry the parked disposition cause_not_recorded; the class name asserts a cause the census never established for the sub-cap rows, though the per-row parked field does disclose it."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py",
+      "line": "307",
+      "severity": "non-blocking",
+      "text": "non-blocking: the comments at :299 and :307-308 cite a plan node id and a plan section number, which the repository naming rules forbid in source comments (the mechanism, not the plan item, belongs there); the same figures are already stated in the prose of the same comment, so the citation adds nothing a reader needs."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "Read commit by commit against base 197de19cd1: 9d43b8925 added the script, JSON and HTML; 76dd92cc6 changed only observed_at (2 lines); 9788064fd replaced the twelve-per-class sample with the full assignment lists, replaced the false 'no cohort rerun has run' basis with the measured sib-second-pass receipt and rewrote the classifier as one rule table per population; b67a1f0e0 (15/13) made the completeness and cost checks report their own refusal instead of raising KeyError.",
+    "done_when": "The done_when (prompt.txt FENCE-EVIDENCE; plan sn-integrity-backlog section 52) asks for 920+116 each in exactly one class with sums reconciling to the live read, each class naming the step and scope that advances it plus a cost from the full run and the cohort reruns, and an HTML summary; census-gate.log records EXIT=0 with 6123 live / 5203 accepted / 920 unaccepted / 116 exhausted, and I recomputed from the committed JSON that the class counts equal the recorded row counts (920 and 116) and that the per-status split is 616 named / 220 failed / 68 extracted / 16 vocab_gap, which is the plan's 304-without-a-name plus 616 exactly.",
+    "goal": "prompt.txt:38 asks for every unaccepted live DD source and every exhausted name classified by what holds it, with the step and cost that advance each class; docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census.json at b67a1f0e0 records all 920 sources and all 116 names exactly once under one of the seven declared classes, each row carrying the state a cohort scopes by, and every class carries a step, scope, full-run-rate cost and (for sources) the measured cohort cost, but the step and scope text stored for the name population is the source table's.",
+    "manifest": "Read in full at r-20261109T222243401168-sib-unaccepted-census/manifest.md: status complete, four commits, the literal gate command with absolute paths, census-gate.log as its log, negative-control.log with three scratch reversions, measurement_module/cwd for the scratch-tree runs, one rubric line per dimension, and outside_scope/blockers none.",
+    "write_paths": "The manifest declares docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census.{json,html,run.py} and docs/figures/sn-integrity-backlog/sib-unaccepted-census; git diff --stat 197de19cd1..b67a1f0e09 shows exactly those three files (8880 insertions) and the figures directory untouched, so every changed path is inside the granted scope."
+  },
+  "justifications": {
+    "durability": "The guards that can fail are real and were shown firing: assign_class refuses an item in zero or two classes (negative-control.log nc3, exit 1), check_document_assignments compares the emitted lists against the class membership derived from the read (nc1, exit 1) and refuses an empty population at :396, while the cost-agreement branch at :410 and the class-sum guard at :635 cannot fail because both sides are produced by the same computation.",
+    "evidence": "census-gate.log records EXIT=0 at the gate revision with totals matching the plan's 6123/5203/920/116, and negative-control.log shows three scratch reversions each exiting 1 at the check they defeat, but part of the asserted evidence is the code checking its own output: sib-unaccepted-census-run.py:410 compares the emitted cost basis with the same module constants that built it, and :635/:637 compare each class Counter's sum with len() of the collection it was incremented from.",
+    "fit": "The script follows the evidence-fragment idiom of its siblings (a node-named <node>-run.py beside <node>.json/.html, node-prefixed ids, import of product constants rather than restated thresholds), but sib-unaccepted-census-run.py:299 and :307 cite a plan node id and a plan section number in comments, which the repository naming rules forbid in source.",
+    "goal_fidelity": "sib-unaccepted-census-run.py:252 (assign_class) plus the rule tables at :179 and :237 assign every one of the 920 sources and 116 names to exactly one class and the emitted JSON carries them (verified: 920/919-distinct and 116/116), but the name population's step and scope at :650-651 come from the source-oriented CLASS_STEPS at :60, so an exhausted name marked 'refused by a writer' is told its advancing step is 'compose (the candidate was refused at write time)' scoped 'by source_id' when its own row shows docs accepted and a validation quarantine.",
+    "reuse": "The census reuses DEFAULT_MIN_SCORE, _MAX_COMPOSE_CLAIM_ATTEMPTS and graph_source_bindings.classify_parked_source/CAP_PARKED_DISPOSITIONS instead of restating the floor, the cap or the parked triage; my search over imas_codex/standard_names for an existing per-item blocking-class owner found only count-level instruments (graph_claim_scope.pipeline_buckets, cost_model, graph_source_bindings.census_parked_dispositions), none of which assigns a blocking class per unaccepted source, so the added table is the first owner of that capability.",
+    "scope_discipline": "git diff --stat 197de19cd1..b67a1f0e09 lists only the three assigned fragment files, with no plan edit, no product source and no generated model touched, and the HTML element ids are prefixed with sib-unaccepted-census per the fragment contract."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: prompt.txt:38 asks for every unaccepted live DD source and every exhausted name classified by what holds it, with the step and cost that advance each class; sib-unaccepted-census.json at b67a1f0e0 records all 920 sources and all 116 names once under one of the seven declared classes with the state a cohort scopes by, and every class carries a step, scope and cost, but the step and scope stored for the name population are the source table's.\nVERDICT done_when: the done_when (prompt.txt FENCE-EVIDENCE; plan sn-integrity-backlog section 52) asks for 920+116 each in exactly one class with sums reconciling to the live read and a cost from the full run and the cohort reruns; census-gate.log records EXIT=0 with 6123/5203/920/116, and recomputing from the committed JSON gives class counts equal to the recorded rows (920, 116) and a status split of 616 named / 220 failed / 68 extracted / 16 vocab_gap, which is the plan's 616 + 304.\nVERDICT write_paths: the manifest declares three fragment files plus a figures directory; git diff --stat 197de19cd1..b67a1f0e09 shows exactly those three files and nothing else.\nVERDICT manifest: read in full; status complete, four commits, the literal gate command with absolute paths, census-gate.log, negative-control.log with three scratch reversions, measurement_module/cwd recorded, one rubric line per dimension, blockers none.\nVERDICT diff: read all four commits against base 197de19cd1; the work lands in 9d43b8925 (script, JSON, HTML), 76dd92cc6 (observed_at only), 9788064fd (full assignment lists, measured cohort basis, one rule table per population) and b67a1f0e0 (checks report their own refusal instead of a KeyError).\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: sib-unaccepted-census-run.py:252 assigns every one of the 920 sources and 116 names to exactly one class and the JSON carries them, but :650-651 give the name population the source-oriented step and scope from CLASS_STEPS at :60.\nSCORE evidence: 15\nJUSTIFICATION evidence: census-gate.log records EXIT=0 with totals matching the plan's 6123/5203/920/116 and negative-control.log shows three checks firing, but sib-unaccepted-census-run.py:410 and :635 assert figures against the same computation that produced them.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 197de19cd1..b67a1f0e09 lists only the three assigned fragment paths, with no plan edit and no product source touched.\nSCORE durability: 14\nJUSTIFICATION durability: assign_class at :252 and check_document_assignments at :351 can fail and negative-control.log nc1/nc3 show them doing so, while the cost-agreement branch at :410 and the class-sum guard at :635 cannot fail.\nSCORE fit: 15\nJUSTIFICATION fit: the script follows the sibling evidence-fragment idiom and imports product constants, but its comments at :299 and :307 cite a plan node id and a section number, which the repository naming rules forbid in source.\nSCORE reuse: 18\nJUSTIFICATION reuse: the census reuses DEFAULT_MIN_SCORE, _MAX_COMPOSE_CLAIM_ATTEMPTS and graph_source_bindings.classify_parked_source/CAP_PARKED_DISPOSITIONS, and my search over imas_codex/standard_names found only count-level instruments (graph_claim_scope.py:30-120 pipeline_buckets, cost_model.py) rather than an owner of per-item blocking classes.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py:650 non-blocking: the name population's class records take step and scope from the source-oriented CLASS_STEPS table at :60-89, so exhausted names are told to be scoped by source_id and the ten cleared names are told to advance by compose, which their own rows contradict.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py:410 non-blocking: check_cost_basis compares the emitted cohort figures with the same module constants that built them, so the disagreement branch claimed by commit 9788064fd cannot fire; only the absent-block branch at :402 guards anything.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py:635 non-blocking: the two class-sum guards compare each Counter with len() of the population it counts and cannot fail, yet :691-696 publishes them as the reconciliation evidence.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py:217 non-blocking: terminal 'failed' sources are classed attempt-capped below the five-attempt cap (34 at 4, 11 at 3), and 56 of the 90 carry cause_not_recorded, so the class name asserts a cause the census did not establish.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py:307 non-blocking: the comments at :299 and :307-308 cite a plan node id and section number, which the repository naming rules forbid in source comments.",
+  "reuse_search": {
+    "added_definitions": [
+      "read",
+      "source_rows",
+      "pick_binding",
+      "reason_family",
+      "source_rules",
+      "name_rules",
+      "assign_class",
+      "classify_source",
+      "classify_exhausted",
+      "parked_disposition",
+      "cost_basis",
+      "check_document_assignments",
+      "check_cost_basis",
+      "class_table_rows",
+      "write_html",
+      "main"
+    ],
+    "call_sites_search": "Searched imas_codex/, tests/ and agents/ for any importer or reader of the added script, the JSON or the HTML; nothing references sib-unaccepted-census, and the script itself imports from imas_codex.standard_names rather than the reverse, so the change has no production call site.",
+    "search": "Searched imas_codex/standard_names/ by capability (per-item classification of unaccepted sources, exhausted-name bucketing, parked-source triage, remaining-work cost) and opened the owners: graph_store/graph_source_bindings.py:2044-2102 (closed disposition set, cause precedence, totality for StandardNameSource - reused through classify_parked_source and CAP_PARKED_DISPOSITIONS), graph_store/graph_source_bindings.py census_parked_dispositions (:2281, a read-back census of parked rows only), graph_store/graph_claim_scope.py pipeline_buckets (:30-120, count-level phase buckets), standard_names/cost_model.py (count-level cost model), and the sibling evidence fragments under docs/evidence/fragments/sn-integrity-backlog/ (sib-full-run-failure-diagnosis-run.py:238 classify_error maps one last_error to a cause family, a narrower capability than a blocking-class assignment over both populations). No product owner assigns a blocking class per unaccepted source and per exhausted name."
+  },
+  "review_run_id": "r-20261109T234131905265-review-of-sib-unaccepted-census-b67a1f0e0915",
+  "reviewed_base_sha": "197de19cd11eb9b247fd9cb9f16ded0d231c775f",
+  "reviewed_head_sha": "b67a1f0e09157d4e60e44855ee8faa87a4595a5e",
+  "reviewed_run_id": "r-20261109T222243401168-sib-unaccepted-census",
+  "scores": {
+    "durability": 14,
+    "evidence": 15,
+    "fit": 15,
+    "goal_fidelity": 17,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-09T23:52:15.904669+00:00",
+  "total": 99
+}
