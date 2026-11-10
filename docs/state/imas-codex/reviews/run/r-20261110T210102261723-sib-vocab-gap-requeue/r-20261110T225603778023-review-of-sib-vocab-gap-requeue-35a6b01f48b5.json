@@ -1,0 +1,79 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-10T23:12:03.614Z",
+  "dispatched_at": "2026-11-10T22:58:43Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "evidence-fragment prose and an unasserted attribution split; the fragment's table, transition.json and the accepted count in \u00a751's next census are the authoritative record, and a repair round would buy only prose",
+      "recorded_at": "2026-11-10T23:18:31.119122+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "evidence-fragment prose and an unasserted attribution split; the fragment's table, transition.json and the accepted count in \u00a751's next census are the authoritative record, and a repair round would buy only prose",
+      "recorded_at": "2026-11-10T23:19:03.265031+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "evidence-fragment prose and an unasserted attribution split; the fragment's table, transition.json and the accepted count in \u00a751's next census are the authoritative record, and a repair round would buy only prose",
+      "recorded_at": "2026-11-10T23:19:34.391346+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-vocab-gap-requeue.html",
+      "line": 205,
+      "severity": "non-blocking",
+      "text": "the outcomes bullet still reports the sibling run's leaving status as this node's starting point, contradicting the table column the same commit changed: line 205-206 states 'All 17 of this node's sources read {\"vocab_gap\": 17} before the rerun' while line 66 heads the before column 'this node's census read, taken before the rerun' and all 17 of its rows read 'extracted', and line 133-136 explains that the vocab_gap status is the sibling run's state and not this run's starting point; the counter is still built at sib-vocab-gap-requeue-run.py:755 from transition receipts at transition.json, whose before_status is the retry pass's before (vocab_gap) rather than this node's observed state, so the record asserts two mutually exclusive pre-states for the same 17 sources and the prior review's folded finding is only half repaired"
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-vocab-gap-requeue.html",
+      "line": 134,
+      "severity": "non-blocking",
+      "text": "the paragraph states the retry pass 'had already moved every source to extracted by the time this node read them', which this node's own transition.json contradicts: its receipts carry after_status_counts {attached: 2, extracted: 15} and record the two tangency sources at attached with before_attempt_count 2 when observed, so 'every source' is wrong for two of the 17 and a reader comparing the two artifacts cannot tell which observed state is authoritative"
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-vocab-gap-requeue-run.py",
+      "line": 982,
+      "severity": "non-blocking",
+      "text": "provenance() computes the record's headline attribution split (2 names under this run's id, 2 peer, 2 pre-existing) with no assertion and no negative control, and the gate the manifest names (check(), line 512) does not recompute it, so a regression in the LLMCost join or the created_at fallback would silently change the number the plan quotes while check.log stays green"
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "no production call sites: the node writes only docs/evidence/fragments/sn-integrity-backlog/sib-vocab-gap-requeue-run.py and .html, and a search over imas_codex/ and tests/ for the node id returns no import, so no runtime code can reach the landed change",
+    "diff": "read commit by commit against 7cc4da3e7; the single new commit 35a6b01f4 adds a provenance phase (sib-vocab-gap-requeue-run.py:982-1080) and a fifth outcome column, a non-production attribution section, a corrected before column and a corrected recomputation-control sentence (sib-vocab-gap-requeue.html), touching no production source, no test file and no plan or meta line",
+    "done_when": "the done_when's figures are present in the fragment and readback.json - per-source gap token and 0.11.0 resolution, per-source before/after status with produced name and score or the stated reason, cohort count 97 of 143 restated as +2/+2/+2/-1 against 92, spend USD 0.057160 of 5.0 selected by run id 6124274e, export blocking 0, 4 sourceless drafts - but the gate the manifest names (its tests: line, the runner's check action) asserts only the composable/parked classification and the eligible set, so the attribution split and every rerun outcome are recorded observations with no assertion behind them",
+    "goal": "the goal is to return the cohort's vocab_gap sources whose missing tokens are now in ISN 0.11.0 to composition and rerun them; the transition was performed by the repository's signature-keyed retry pass in a peer startup at 21:18:38 UTC (sib-vocab-gap-requeue.html:126-131) and this node reran the 16 composable sources through one scoped sn run, so the landed record now states honestly which of the 6 bound names this run produced (2), which a peer produced (2) and which bound a pre-existing name (2)",
+    "manifest": "read; status complete, both changed paths, the literal check command, seven log paths including the new provenance.log, a negative-control log with its note, and one rubric line per dimension, but still no baseline_suite or after_suite block, so the added-failure delta rests on the recorded gate logs' EXIT lines rather than on the suite pair the record contract asks for",
+    "write_paths": "the three declared paths are the fragment html, the runner py and the figure directory; git diff --stat 7cc4da3e7 35a6b01f4 is 2 files and 280 insertions/47 deletions, both inside the fence, and docs/figures/sn-integrity-backlog/sib-vocab-gap-requeue is correctly untouched because the dispatch states the done-when names no artifact"
+  },
+  "justifications": {
+    "durability": "sib-vocab-gap-requeue-run.py:982 provenance() computes the headline 2/2/4 attribution split with no assertion and no negative control, and check() at line 512 does not recompute it",
+    "evidence": "sib-vocab-gap-requeue-run.py:512 check() still asserts only the composable/parked classification and the eligible set, so the attribution counts read from provenance.json have a log (provenance.log EXIT=0) but no assertion behind them",
+    "fit": "the new phase follows the one-artifact-per-action idiom of save/load at sib-vocab-gap-requeue-run.py:77-84 and reuses the prior evidence module through previous() at line 63 rather than inlining a reader, and introduces no plan or stage label in any name",
+    "goal_fidelity": "sib-vocab-gap-requeue.html:87-94 now separates this run's 2 names from 2 peer-run names and 2 pre-existing bindings, and sib-vocab-gap-requeue-run.py:1002 keys attribution on the LLMCost rows that carry the run id",
+    "reuse": "protection.py:66 materialize_llm_cost_name_edges already materializes LLMCost->StandardName from standard_name_ids, but it filters llm_cost>0.0 and keys by name rather than run, so it cannot answer the run-attribution question at sib-vocab-gap-requeue-run.py:1002 - the two names this run produced carry zero-cost rows that the existing edge excludes",
+    "scope_discipline": "git diff --stat 7cc4da3e7 35a6b01f4 names only docs/evidence/fragments/sn-integrity-backlog/sib-vocab-gap-requeue-run.py and docs/evidence/fragments/sn-integrity-backlog/sib-vocab-gap-requeue.html, both declared"
+  },
+  "project": "imas-codex",
+  "raw_text": "project: imas-codex\nreviewed_run_id: r-20261110T210102261723-sib-vocab-gap-requeue\nreview_run_id: r-20261110T225603778023-review-of-sib-vocab-gap-requeue-35a6b01f48b5\nreviewed_base_sha: 7cc4da3e71305b64d7f85ee5635661809e450ee5\nreviewed_head_sha: 35a6b01f48b52c0ed3a85f9a86bb0f9080c0f43c\nadded_failure_count: 0\nadded_failure_ids: []\nstatus: parsed\n\n# Independent review of sib-vocab-gap-requeue at 35a6b01f4\n\nReviewed run: r-20261110T210102261723-sib-vocab-gap-requeue\nReviewed head: 35a6b01f48b52c0ed3a85f9a86bb0f9080c0f43c\nReviewed base: 7cc4da3e71305b64d7f85ee5635661809e450ee5\n\nThis review covers the commits the run gained since it was reviewed at 7cc4da3e7:\ncommit 35a6b01f4 alone, 2 files, 280 insertions and 47 deletions, all inside the\ndeclared write paths.\n\nThe reviewed run's manifest records no baseline_suite and no after_suite block, so\nthe added-failure delta is derived from the gate logs it did record, as the prior\nreview of this run also had to: check.log EXIT=0, negative-control.log EXIT=0,\nreadback.log EXIT=0, run.log EXIT=0, and for this revision provenance.log EXIT=0\nand fragment.log EXIT=0. Nothing failed and nothing new failed, so\nadded_failure_count is 0 over an empty id list.\n\nVERDICT goal: the goal is to return the cohort's vocab_gap sources whose missing tokens are now in ISN 0.11.0 to composition and rerun them; sib-vocab-gap-requeue.html:126-131 records that the transition itself was the peer startup retry pass at 21:18:38 UTC and this node reran the 16 composable sources through one scoped sn run, and the new commit makes the record state honestly which of the 6 bound names this run produced (2 at sib-vocab-gap-requeue.html:87-94) rather than claiming all 6\nVERDICT done_when: the done_when's per-source token and 0.11.0 resolution, per-source before/after status with produced name and score or the stated reason, cohort count 97 of 143 restated as +2/+2/+2/-1 against 92, spend USD 0.057160 of 5.0 by run id, export blocking 0 and 4 sourceless drafts are all present in sib-vocab-gap-requeue.html and provenance.json, but the gate the manifest names (sib-vocab-gap-requeue-run.py:512 check) asserts only the composable/parked classification and the eligible set, so the attribution split and every rerun outcome are recorded observations with no assertion behind them\nVERDICT write_paths: the three declared paths are docs/evidence/fragments/sn-integrity-backlog/sib-vocab-gap-requeue.html, ...-run.py and docs/figures/sn-integrity-backlog/sib-vocab-gap-requeue; git diff --stat 7cc4da3e7 35a6b01f4 is 2 files and 280 insertions/47 deletions, both inside the fence, and the figure directory is correctly unused because the dispatch states the done-when names no artifact\nVERDICT manifest: read; status complete, both changed paths, the literal check command, seven log paths including the new provenance.log, a negative-control log with its note, and one rubric line per dimension, but no baseline_suite or after_suite block, so the failure delta rests on the gate logs' EXIT lines rather than on the suite pair the record contract asks for\nVERDICT diff: read commit by commit against 7cc4da3e7; the single new commit 35a6b01f4 adds a provenance phase (sib-vocab-gap-requeue-run.py:982-1080), a fifth outcome column, a non-production attribution section, a before column read from the node's own census and a corrected recomputation-control sentence (sib-vocab-gap-requeue.html), touching no production source, no test file and no plan or meta line\nCALL_SITES: none\nSCORE goal_fidelity: 15\nSCORE evidence: 11\nSCORE scope_discipline: 19\nSCORE durability: 12\nSCORE fit: 17\nSCORE reuse: 16\nJUSTIFICATION goal_fidelity: sib-vocab-gap-requeue.html:87-94 now separates this run's 2 names from 2 peer-run names and 2 pre-existing bindings, and sib-vocab-gap-requeue-run.py:1002 keys attribution on the LLMCost rows that carry the run id\nJUSTIFICATION evidence: sib-vocab-gap-requeue-run.py:512 check() still asserts only the composable/parked classification and the eligible set, so the attribution counts read from provenance.json have a log (provenance.log EXIT=0) but no assertion behind them\nJUSTIFICATION scope_discipline: git diff --stat 7cc4da3e7 35a6b01f4 names only docs/evidence/fragments/sn-integrity-backlog/sib-vocab-gap-requeue-run.py and docs/evidence/fragments/sn-integrity-backlog/sib-vocab-gap-requeue.html, both declared\nJUSTIFICATION durability: sib-vocab-gap-requeue-run.py:982 provenance() computes the headline 2/2/4 attribution split with no assertion and no negative control, and check() at line 512 does not recompute it\nJUSTIFICATION fit: the new phase follows the one-artifact-per-action idiom of save/load at sib-vocab-gap-requeue-run.py:77-84 and reuses the prior evidence module through previous() at line 63 rather than inlining a reader, and introduces no plan or stage label in any name\nJUSTIFICATION reuse: protection.py:66 materialize_llm_cost_name_edges already materializes LLMCost->StandardName from standard_name_ids, but it filters llm_cost>0.0 and keys by name rather than run, so it cannot answer the run-attribution question at sib-vocab-gap-requeue-run.py:1002 - the two names this run produced carry zero-cost rows that the existing edge excludes\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-vocab-gap-requeue.html:205 non-blocking: the outcomes bullet still reports the sibling run's leaving status as this node's starting point, contradicting the table column the same commit changed - line 205-206 states 'All 17 of this node's sources read {\"vocab_gap\": 17} before the rerun' while line 66 heads the before column 'this node's census read, taken before the rerun' and all 17 of its rows read 'extracted', and line 133-136 explains that the vocab_gap status is the sibling run's state; the counter is still built at sib-vocab-gap-requeue-run.py:755 from transition receipts whose before_status is the retry pass's before, so the record asserts two mutually exclusive pre-states for the same 17 sources and the prior review's folded finding is only half repaired\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-vocab-gap-requeue.html:134 non-blocking: the paragraph states the retry pass 'had already moved every source to extracted by the time this node read them', which this node's own transition.json contradicts - its receipts carry after_status_counts {attached: 2, extracted: 15} and record the two tangency sources at attached with before_attempt_count 2 when observed - so 'every source' is wrong for two of the 17 and a reader cannot tell which observed state is authoritative\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-vocab-gap-requeue-run.py:982 non-blocking: provenance() computes the record's headline attribution split (2 under this run's id, 2 peer, 2 pre-existing) with no assertion and no negative control, and check() at line 512 does not recompute it, so a regression in the LLMCost join or the created_at fallback would silently change the number the plan quotes while check.log stays green\n",
+  "review_run_id": "r-20261110T225603778023-review-of-sib-vocab-gap-requeue-35a6b01f48b5",
+  "reviewed_base_sha": "7cc4da3e71305b64d7f85ee5635661809e450ee5",
+  "reviewed_head_sha": "35a6b01f48b52c0ed3a85f9a86bb0f9080c0f43c",
+  "reviewed_run_id": "r-20261110T210102261723-sib-vocab-gap-requeue",
+  "scores": {
+    "durability": 12,
+    "evidence": 11,
+    "fit": 17,
+    "goal_fidelity": 15,
+    "reuse": 16,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-10T23:24:29.901604+00:00",
+  "total": 90
+}
