@@ -5,25 +5,25 @@
 <meta name="reckon-type" content="evidence-fragment">
 <meta name="plan-slug" content="sn-integrity-backlog">
 <meta name="node-id" content="sib-catalog-rc-snapshot">
-<title>The catalog RC preflight passes, and the pin-before-reconcile census refuses the cut</title>
+<title>The catalog RC preflight and kind census pass, and the export's manifest-generability gate refuses the cut</title>
 </head>
 <body>
 <main>
-<h1 id="sib-catalog-rc-snapshot-title">The catalog RC preflight passes, and the pin-before-reconcile census refuses the cut</h1>
+<h1 id="sib-catalog-rc-snapshot-title">The catalog RC preflight and kind census pass, and the export's manifest-generability gate refuses the cut</h1>
 
 <p id="sib-catalog-rc-snapshot-summary">
-Every operational gate of the release recipe that this node could run passed: the
-four help citations exited 0, <code>sn release status</code> printed the expected
-catalog path, <code>State: rc</code>, <code>Latest tag: v0.4.0rc7+west-task-2e</code>,
-both remotes and an RC continuation offered with no bump flag, and the batch dry
-run exited 0 reporting <code>Review batch v0.4.0rc8+west-task-2e</code> with
-<code>Batch size: 231 name(s)</code>. The census that recipe step 3 places between
-the dry run and the cut does not pass, and the recipe stops the cut on it: the
-installed standard-names metadata reads <code>0.10.1</code> while both
-<code>pyproject.toml</code> pins read <code>0.11.0</code>, and nine live identities
-carry a stored <code>kind</code> their identity contradicts. No candidate tag was
-pushed and no fork review pull request was opened, so no published byte carries
-these contradictions.
+Every preflight gate of the release recipe passed on the resumed run, including the
+two that the first attempt failed: the installed standard-names distribution is
+byte-identical to the pinned release, and the pin-before-reconcile census is clean
+at <code>live 3145 == with_kind 3145</code> with <code>disagreements 0</code>. The
+batch dry run exited 0 with the expected continuation identity
+<code>v0.4.0rc8+west-task-2e</code> and 231 candidates. The cut then ran and was
+refused by the export quality gate <code>manifest_generability</code>: of the 342
+sources in this batch, 104 are carried by a publishable name and 238 are not, and
+an uncarried source without an explicit waiver refuses the cut. None of the 238 is
+waived, and waived sources are enumerated in a lead-authored file that an agent
+may propose to extend but may not extend. No tag was pushed, no branch was created
+and no fork review pull request was opened, so no published byte changed.
 </p>
 
 <h2 id="sib-catalog-rc-snapshot-gates">Gates run, in recipe order</h2>
@@ -38,91 +38,118 @@ the worktree at <code>a839cece46b</code> with
 <table id="sib-catalog-rc-snapshot-gate-table">
 <thead><tr><th>Recipe step</th><th>Result</th><th>Evidence</th></tr></thead>
 <tbody>
-<tr><td>preflight help citations</td><td>pass</td><td><code>sn run</code>, <code>sn release</code>, <code>sn approve</code>, <code>sn resolve</code> all <code>EXIT=0</code> (<code>help-citations.log</code>)</td></tr>
+<tr><td>1 — preflight help citations</td><td>pass</td><td><code>sn run</code>, <code>sn release</code>, <code>sn approve</code>, <code>sn resolve</code> all <code>EXIT=0</code> (<code>help-citations.log</code>)</td></tr>
 <tr><td>2 — release state</td><td>pass (restore point waived)</td><td><code>status.log</code>: Path <code>/home/ITER/mcintos/Code/imas-standard-names-catalog</code>, State <code>rc</code>, Latest tag <code>v0.4.0rc7+west-task-2e</code>, Batch RC <code>+west-task-2e</code>, origin and upstream remotes as expected</td></tr>
 <tr><td>2 — series continuation</td><td>pass</td><td>status offers <code>sn release -m 'Next RC'</code> for the next RC of the printed tag; no bump flag offered or used</td></tr>
-<tr><td>3 — pin census</td><td><strong>fail</strong></td><td><code>pin-census-1.log</code>: <code>isn 0.10.1</code> against pins <code>0.11.0</code>; <code>live 3145</code>, <code>with_kind 3144</code>, <code>disagreements 9</code></td></tr>
+<tr><td>3 — pin equivalence</td><td>pass</td><td><code>pin-equivalence.log</code>: installed <code>0.11.1.dev1+gef1bc401e</code>, <code>git diff v0.11.0..HEAD -- imas_standard_names/</code> prints nothing (0 lines) between <code>9c9443370d</code> (v0.11.0) and <code>ef1bc401e8</code> (HEAD), and both <code>pyproject.toml</code> pins read <code>0.11.0</code></td></tr>
+<tr><td>3 — pin census</td><td>pass</td><td><code>pin-census-2.log</code>: <code>{'isn': '0.11.1.dev1+gef1bc401e', 'live': 3145, 'with_kind': 3145, 'disagreements': 0}</code>, controls <code>momentum</code>/<code>torque</code>/<code>torque_density</code> = vector and <code>electron_temperature</code> = scalar</td></tr>
 <tr><td>4 — batch dry run</td><td>pass</td><td><code>dryrun.log</code>: <code>EXIT=0</code>, <code>Review batch v0.4.0rc8+west-task-2e</code>, <code>Batch size: 231 name(s)</code>, <code>Unmatched sources: 1</code>, no errors section, <code>--skip-gate</code> never used</td></tr>
-<tr><td>5 — cut</td><td>not run</td><td>blocked by step 3</td></tr>
+<tr><td>5 — cut</td><td><strong>refused by the export gate</strong></td><td><code>cut.log</code>: <code>EXIT=1</code>, <code>Export quality gates failed: manifest_generability</code>; 9 of the 10 export gates pass (<code>cut-gate-verdict.log</code>)</td></tr>
+<tr><td>6 — tag gate, PR checks, preview</td><td>not reached</td><td>no tag was pushed and no PR exists to check</td></tr>
 </tbody>
 </table>
 
-<h2 id="sib-catalog-rc-snapshot-kind-census">The nine identities whose stored kind contradicts their identity</h2>
+<h2 id="sib-catalog-rc-snapshot-pin">Pin equivalence, and why the version string is not the pinned literal</h2>
 <p>
-The census used the recipe's own predicate and derivation
-(<code>LIVE_NAME</code>, <code>derive_kind</code>) on 2026-11-10. Vector-base
-controls read <code>vector</code>
-for <code>momentum</code>, <code>torque</code> and <code>torque_density</code>,
-and scalar for <code>electron_temperature</code>, so the derivation itself is
-answering correctly and the nine rows are graph state rather than an instrument
-artifact. One of the nine carries no stored kind at all, which is why
-<code>with_kind</code> is one below <code>live</code>.
+<code>imas-standard-names</code> is an editable dependency: <code>[tool.uv.sources]</code>
+resolves it to the sibling checkout <code>../imas-standard-names</code>, and the
+installed <code>_editable_impl_imas_standard_names.pth</code> points there. That
+checkout's head <code>ef1bc401e8</code> is one commit past the <code>v0.11.0</code>
+tag <code>9c9443370d</code>, so <code>hatch-vcs</code> stamps the distribution
+<code>0.11.1.dev1+gef1bc401e</code> while the code being imported is the pinned
+release plus a documentation commit. The measurable statement is that the
+difference between the pinned tag and the running head is empty for every file the
+package ships: <code>git diff v0.11.0..HEAD -- imas_standard_names/</code> prints
+nothing, zero lines. The version string is a sync artifact; the code is the pin.
 </p>
-<table id="sib-catalog-rc-snapshot-kind-table">
-<thead><tr><th>Identity</th><th>Stored kind</th><th>Derived kind</th><th>Name stage</th></tr></thead>
+
+<h2 id="sib-catalog-rc-snapshot-kind-census">The kind census is clean</h2>
+<p>
+Re-run after the environment re-sync, the recipe's own predicate and derivation
+(<code>LIVE_NAME</code>, <code>derive_kind</code>) return zero disagreements over
+the whole live population:
+</p>
+<pre><code>{'isn': '0.11.1.dev1+gef1bc401e', 'live': 3145, 'with_kind': 3145,
+ 'disagreements': 0,
+ 'controls': {'momentum': 'vector', 'torque': 'vector',
+              'torque_density': 'vector', 'electron_temperature': 'scalar'}}</code></pre>
+<p>
+The nine disagreements recorded on the first attempt were a property of the stale
+install, not of the graph: under the pinned derivation the live state agrees with
+itself on every one of the 3,145 live identities.
+</p>
+
+<h2 id="sib-catalog-rc-snapshot-refusal">What refused the cut, and the population behind it</h2>
+<p>
+The export wrote 104 names, closed its accounting ledger with residue 0, and passed
+nine of its ten gates. <code>manifest_generability</code> then refused: of 342
+manifest sources, 104 are carried and 238 are not, and the gate requires every
+uncarried source either to reach a name or to carry a <code>waived</code>
+disposition. No source in this batch is waived.
+</p>
+<table id="sib-catalog-rc-snapshot-refusal-table">
+<thead><tr><th>Mechanism</th><th>Sources</th><th>What it is</th></tr></thead>
 <tbody>
-<tr><td><code>perturbed_gyrocenter_pressure_bessel_0</code></td><td>vector</td><td>scalar</td><td>accepted</td></tr>
-<tr><td><code>gyrocenter_pressure_bessel_0</code></td><td>vector</td><td>scalar</td><td>accepted</td></tr>
-<tr><td><code>per_toroidal_mode_wave_phase</code></td><td>vector</td><td>scalar</td><td>accepted</td></tr>
-<tr><td><code>parity</code></td><td>vector</td><td>scalar</td><td>accepted</td></tr>
-<tr><td><code>normalized_effective_energy</code></td><td>vector</td><td>scalar</td><td>accepted</td></tr>
-<tr><td><code>effective_energy</code></td><td>vector</td><td>scalar</td><td>accepted</td></tr>
-<tr><td><code>perturbed_gyrocenter_density_bessel_1</code></td><td>vector</td><td>scalar</td><td>accepted</td></tr>
-<tr><td><code>gyrocenter_density_bessel_1</code></td><td>vector</td><td>scalar</td><td>accepted</td></tr>
-<tr><td><code>second_local_tangential_width_of_fiber_bundle</code></td><td>(none stored)</td><td>scalar</td><td>drafted</td></tr>
+<tr><td><code>terminal_identity_unusable</code></td><td>237</td><td>the source reaches a name whose identity cannot be published: 126 names excluded as <code>documentation_not_accepted</code> and 1 as <code>invalid_validation_status</code>, across 127 distinct identities</td></tr>
+<tr><td><code>recorded_refusal</code></td><td>1</td><td><code>camera_x_rays/camera/camera_dimensions</code>: <code>compose claim-attempt cap reached; last refusal: standard-name binding collision: candidate "total_size_of_camera" has non-bindable name_stage "exhausted" at composition attempt 4</code></td></tr>
 </tbody>
 </table>
 <p>
-The full machine-readable list is <code>kind-detail.log</code> in the run
-directory. The pattern is one-directional: every stored value is <code>vector</code>
-where the pinned release derives <code>scalar</code>, which is the shape a base
-registry correction produces when the graph has not been reconciled since the
-pin moved.
+The documentation exclusions are not one state. 124 of the 126 names have
+<code>docs_stage='pending'</code> — documentation never attempted — and 2 have
+<code>docs_stage='drafted'</code>, <code>launched_power_of_lower_hybrid_antenna</code>
+and <code>vertical_coordinate_of_magnetic_axis</code>. The remaining exclusion is
+<code>total_energy_of_calorimetry_component</code> at
+<code>validation_status='pending'</code>. So the batch is not one repair away from
+generable: it needs a documentation drain over 124 identities, completion for 2
+drafted ones, one validation observation, and a decision on one exhausted candidate
+name, or a lead-authored waiver for the sources concerned.
+</p>
+<p>
+For scale, the previous RC of this same batch, <code>v0.4.0rc7+west-task-2e</code>,
+froze a roster of 600 names from 355 source records, against 231 candidates and 104
+published today. The contraction is measured here but not attributed: this node did
+not investigate what moved it, and the refusal above stands on the present state
+regardless.
 </p>
 
-<h2 id="sib-catalog-rc-snapshot-pin">What the pin mismatch is, and what it is not</h2>
+<h2 id="sib-catalog-rc-snapshot-dryrun-gap">The dry run cannot show this refusal</h2>
 <p>
-<code>imas-standard-names</code> is an editable dependency of this repository:
-<code>[tool.uv.sources]</code> resolves it to the sibling checkout
-<code>../imas-standard-names</code>, and the installed
-<code>_editable_impl_imas_standard_names.pth</code> points at
-<code>/home/ITER/mcintos/Code/imas-standard-names</code>. The imported code is
-therefore the live sibling tree, which sits at <code>ef1bc40</code>,
-<code>git describe --tags</code> = <code>v0.11.0-1-gef1bc40</code> — the pinned
-release plus one documentation commit. The <code>0.10.1</code> figure is the
-distribution metadata written at the last environment sync, not the release the
-pipeline is executing, so the kind derivation above already runs on the
-<code>0.11.0</code> bases.
+The recipe places a dry run immediately before the cut, and this dispatch required
+it to exit 0 with no unresolved source finding. It did. The refusal still arrived
+one step later, and that is not an accident of where the gate happens to sit: the
+dry-run path does measure the export leg in a scratch tree, but its summary prints
+only the batch identity, the batch size, the unmatched-source count and the artifact
+path, and it returns 0 whether or not the measured export failed a gate. So a
+rehearsal can be green on a cut that the same command refuses outright, which is
+how this node reached the cut believing its preflight was complete. The gap is in
+<code>imas_codex/cli/sn.py</code>, outside this node's write fence, and is reported
+rather than changed here.
 </p>
 <p>
-That distinction does not clear the gate as the recipe states it, and it cannot be
-cleared from inside this node: a rebuild of the editable distribution at
-<code>ef1bc40</code> yields a <code>0.11.1.dev1</code> development version rather
-than <code>0.11.0</code>, because the tag is one commit behind the checkout head,
-and reaching a literal <code>0.11.0</code> would mean moving the shared grammar
-checkout onto its tag. The substance the gate protects — reconciling against the
-pinned bases — is instead proven by the editable path and shallow history above.
+The rehearsal did name the one unmatched source in its count, and the export report
+names it: <code>camera_x_rays/camera/camera_dimensions</code>, the
+<code>recorded_refusal</code> row above. The first attempt's fragment recorded that
+count as unexplained; it is now explained.
 </p>
 
 <h2 id="sib-catalog-rc-snapshot-next">What unblocks the cut</h2>
 <ol>
-<li>Reconcile the live kinds under the pinned release, which recipe step 3 places
-before the cut and which requires an unscoped drain rather than a scoped one: a
-scoped run or <code>--skip-global-maintenance</code> bypasses the sweep that
-rewrites them, which is the route the recipe forbids by name.</li>
-<li>Re-run the same census and require <code>with_kind == live</code> and
-<code>disagreements == 0</code>.</li>
-<li>Re-run this node's other steps unchanged. They are already recorded as passing,
-and the batch identity they establish — <code>v0.4.0rc8+west-task-2e</code>,
-231 names — is what the next attempt should reproduce.</li>
+<li>Advance the 124 <code>docs_stage='pending'</code> identities and the 2
+<code>drafted</code> ones to accepted documentation, supply a validation observation
+for <code>total_energy_of_calorimetry_component</code>, and resolve
+<code>total_size_of_camera</code> — or have the lead record waivers for the 238
+uncarried sources in <code>waived_sources.yaml</code>. Either route is graph or
+authority work this node may not do.</li>
+<li>Re-run the same cut command unchanged. Every other input is already established
+and reproducible: the batch identity <code>v0.4.0rc8+west-task-2e</code>, the
+231-name candidate roster, the frozen artifact path
+<code>imas_codex/standard_names/manifests/reviews/v0.4.0rc8+west-task-2e.sn_names.yaml</code>,
+and the finalized PR body naming the snapshot, its published count and
+<code>REVIEWING.md</code>.</li>
+<li>Then run recipe step 6's tag gate on the pushed tag, <code>gh pr checks</code>,
+and the Pages preview request, which this node has not been able to reach.</li>
 </ol>
-<p>
-One further pre-cut item is recorded but not resolved here: the dry run reports
-<code>Unmatched sources: 1</code> for the batch manifest. The recipe's step 4 gate
-asks for source accounting with zero unexplained paths, and a single unmatched
-source is explicable only once its reason is read; the dry-run summary does not
-name it.
-</p>
 </main>
 </body>
 </html>
