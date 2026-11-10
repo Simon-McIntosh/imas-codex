@@ -1,0 +1,411 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "da4e6748f24c9e421ddbfbdf894a6834cdae57fa",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "budget_overrun": true,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 1751,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 861530,
+      "input_tokens_cumulative": 861530,
+      "output_tokens": 3022,
+      "output_tokens_cumulative": 3022,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 165,
+    "files": 2,
+    "removed": 2
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "8bfafcf35668a3fdf1917f308f596724c6af6387",
+    "2c2f0ac43bb0e84e2470c6330b146de724216c12",
+    "6046a488e95693484ea73985daf9bdf7f900e109",
+    "89d83c43327c1405e12ed4ea8e77f9fa7296564c"
+  ],
+  "completed_at": "2026-11-10T18:23:31.548Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-11-10T16:54:27Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": "pre-existing-failure",
+  "gate": "failed",
+  "gate_check": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261110T165137050208-sib-isn-pin-0-11-0/head uv run --no-sync pytest tests/standard_names -p no:cacheprovider -n 4 --timeout=120 --timeout-method=thread",
+    "exit_status": null,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T165137050208-sib-isn-pin-0-11-0/logs/head_tests_standard_names.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.8906098017209129,
+    "plan": "sn-integrity-backlog",
+    "reason": "gate-not-passing",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-11-10T17:51:40.946177+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-11-10T16:51:40Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 22,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 3,
+    "headroom": 9,
+    "mean_context": 100000,
+    "observed_at": "2026-11-10T16:51:18Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 22,
+      "aggregate_tokens_per_second": 138.93,
+      "detail": "",
+      "mean_tokens_per_second": 69.465,
+      "observed_at": "2026-11-10T16:51:18Z",
+      "runs": 2.0,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-10T18:23:31.548Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T165137050208-sib-isn-pin-0-11-0/manifest.md",
+  "member": "disposable-r-20261110T165137050208-sib-isn-pin-0-11-0",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "sib-isn-pin-0-11-0",
+  "node_definition": {
+    "admission_findings": [],
+    "after": [],
+    "anchor_paths": [],
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "elevated",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1650,
+          "cached_input_tokens": 583744,
+          "input_tokens": 585396,
+          "output_tokens": 516,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 585912,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+      "session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea"
+    },
+    "done_when": "both imas-standard-names pins in pyproject.toml read ==0.11.0 and uv.lock is refreshed with uv lock (the editable source override stays); the graph's active ISNGrammarVersion is 0.11.0, synced through the repository's grammar-sync path rather than raw Cypher, with a non-zero GrammarToken count for it that is at least the previous active version's count, and power_convertor, stress, argmax_with_respect_to and breakdown-free tokens such as delta_prime read back as tokens of 0.11.0; docs/evidence/fragments/sn-integrity-backlog/sib-isn-pin-0-11-0.html records the before and after version, the token counts and the read-backs; tests/standard_names adds no failure id against the stated base, base and head logs recorded on the compute node",
+    "estimated_hours": null,
+    "goal": "Pin imas-codex to the released ISN grammar and sync the graph's grammar snapshot to it",
+    "id": "sib-isn-pin-0-11-0",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-11-10T16:51:40Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 22,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 3,
+      "headroom": 9,
+      "mean_context": 100000,
+      "observed_at": "2026-11-10T16:51:18Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 22,
+        "aggregate_tokens_per_second": 138.93,
+        "detail": "",
+        "mean_tokens_per_second": 69.465,
+        "observed_at": "2026-11-10T16:51:18Z",
+        "runs": 2.0,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T165137050208-sib-isn-pin-0-11-0/manifest.md",
+    "negative_control": "read back a token absent from 0.11.0 (sourced, which the lead accepted for a later release): it must be reported absent",
+    "over_fence_reason": "",
+    "peer_scopes": {},
+    "plan": "sn-integrity-backlog",
+    "regenerate_paths": [],
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§51",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "pyproject.toml",
+      "uv.lock",
+      "docs/evidence/fragments/sn-integrity-backlog/sib-isn-pin-0-11-0.html",
+      "docs/figures/sn-integrity-backlog/sib-isn-pin-0-11-0"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 6066699.0,
+  "outcome": "",
+  "outside_scope_paths": [
+    "0.11.0",
+    "version/segment_order/segments/templates",
+    "imas_codex/standard_names/grammar_sync.py"
+  ],
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "sib-isn-pin-0-11-0",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-11-10T16:53:40.663627+00:00",
+    "score": 0.7375,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:capability",
+    "family": null,
+    "jev_model": "~typesafe/jev-latest",
+    "latency_ms": 5000.903,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 1475.965,
+      "context-estimate": 379.537,
+      "records": 1656.407,
+      "verdict-inputs": 2336.427
+    }
+  },
+  "plan": "sn-integrity-backlog",
+  "plan_impl_at_dispatch": 0.8906098017209129,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "89d83c43327c1405e12ed4ea8e77f9fa7296564c",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "da4e6748f24c9e421ddbfbdf894a6834cdae57fa",
+    "reviewed_head_sha": "89d83c43327c1405e12ed4ea8e77f9fa7296564c",
+    "scores": {
+      "durability": 8,
+      "evidence": 13,
+      "fit": 16,
+      "goal_fidelity": 18,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 5
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261110T165137050208-sib-isn-pin-0-11-0",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§51",
+  "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+  "session_harness": "claude",
+  "session_id": "edc8f85c-c418-40bd-a8e4-55545ada988b",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 15785255,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 84.93,
+    "generated_tokens": 85604,
+    "generation_seconds": -4190.11,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 76.8,
+    "machine_seconds": 4275.04,
+    "peak_input_tokens": 176818,
+    "wall_tokens_per_second": 1007.94
+  },
+  "time_budget": "60m",
+  "tool_steps": 154.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 5344,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-10T18:23:45Z",
+    "last_record_type": "result",
+    "launched_at": "2026-11-10T16:54:43Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [],
+    "run_id": "r-20261110T165137050208-sib-isn-pin-0-11-0",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 13732,
+    "worker_pid": 4160969
+  },
+  "worker_seconds": 5265,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": {
+    "classification": "retained-for-resume",
+    "retained_at": "2026-11-10T18:23:31.548Z",
+    "session_id": "edc8f85c-c418-40bd-a8e4-55545ada988b",
+    "session_source": "stream",
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-isn-pin-0-11-0"
+  }
+}
