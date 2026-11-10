@@ -134,7 +134,7 @@ which is what happened to the first attempt at each arm.</p>
   <tbody>
     <tr><td>base</td><td>this worktree</td><td><code>da4e6748f</code></td><td>9 failed, 8630 passed, 11 skipped in 704s</td><td>1</td></tr>
     <tr><td>head</td><td><code>git archive</code> of the head</td><td><code>2c2f0ac43</code></td><td>13 failed, 8625 passed, 12 skipped in 637s</td><td>1</td></tr>
-    <tr><td>head (incomplete)</td><td>this worktree at the head</td><td><code>2c2f0ac43</code></td><td>reached 48% at the hard stop, no summary line</td><td>—</td></tr>
+    <tr><td>head (incomplete)</td><td>this worktree at the head</td><td><code>2c2f0ac43</code></td><td>reached 99% when the background time limit stopped it; no summary line, no exit</td><td>—</td></tr>
   </tbody>
 </table>
 
@@ -152,8 +152,11 @@ logged beside the two full arms, and the manifest attributes the four ids under
 <p><strong>What this record does not show.</strong> No complete head arm ran in a
 worktree, so the base-to-head comparison rests on a base arm plus a focused
 disproof of the only four added ids, not on two full arms of the same shape. A
-full worktree head arm was started and reached 48% when the node's hard stop
-arrived; it is recorded as incomplete and should be re-run by a follow-on.</p>
+full worktree head arm was started and ran to 99% of the suite before the
+background time limit stopped it one step short of its summary line. It is
+recorded as incomplete rather than read for a result: a truncated run declares
+no verdict. The re-run is cheap in expectation and should be the follow-on's
+first step.</p>
 
 <p><em>Totals and log paths are recorded in the node manifest's
 <code>baseline_suite</code>, <code>after_suite</code>,
