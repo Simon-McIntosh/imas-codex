@@ -7,6 +7,17 @@ from imas_codex.standard_names.grammar_adapter import (
     is_canonical_name,
     parse_canonical_name,
 )
+from tests.standard_names.test_compose_batch_isolation import (
+    _FakeBatchResult,
+    _FakeCandidate,
+    _FakeLLMOut,
+    _make_batch_item,
+    _run_batch,
+    compose_deps,  # noqa: F401 — imported pytest fixture
+)
+
+# Cold fixture setup imports the grammar and provider modules before assertions.
+pytestmark = pytest.mark.timeout(180)
 
 # A flat spelling the strict parser reorders without moving any token between
 # semantic roles, recorded when the composer emitted it for a DD source.
@@ -49,3 +60,26 @@ def test_refusal_carries_the_refused_spelling_for_the_compose_gate() -> None:
 
     assert refusal.value.name == SAME_IR_FLAT_SPELLING
     assert refusal.value.canonical_form == SAME_IR_CANONICAL
+
+
+@pytest.mark.asyncio
+async def test_compose_batch_persists_the_adopted_canonical_spelling(compose_deps):
+    with pytest.raises(ValueError, match="flat segment order") as refusal:
+        parse_canonical_name(SAME_IR_FLAT_SPELLING)
+
+    source_path = "radiation/time_slice/energy"
+    candidate = _FakeCandidate(SAME_IR_FLAT_SPELLING, source_path, error=refusal.value)
+    candidate.operators = []
+    candidate.description = "Accumulated energy radiated by impurities"
+    item = _make_batch_item(source_path)
+    item.update(unit="J", description=candidate.description)
+
+    async def answering(*_args, **_kwargs):
+        return _FakeLLMOut(_FakeBatchResult([candidate]))
+
+    count = await _run_batch([item], answering)
+
+    assert count == 1
+    assert [c["id"] for c in compose_deps.persisted] == [SAME_IR_CANONICAL]
+    assert compose_deps.persisted[0]["source_id"] == source_path
+    assert compose_deps.refusals == []
