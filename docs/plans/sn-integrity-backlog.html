@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="436">
+<meta name="plan-version" content="437">
 <meta name="plan-modified" content="2026-11-10">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -1370,6 +1370,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s51" data-id="c-run-r-20261109T235557185903-review-of-sib-two-flake-adjudication-cf825881881b" data-who="reckon-build" data-when="2026-11-10T00:06:05.143Z">
     <div class="r-comment-body"><p>Reviewed 7fc74ba07be89696d663f46bc1cd0f0299acb7d4..cf825881881bfded79a29bea77509f085810f0d2, a single 91-line evidence fragment; parsed scores goal_fidelity 18, evidence 16, scope_discipline 20, durability 10, fit 18, reuse 19, added_failure_count 0, and three non-blocking findings (no receipt paths cited, an unevidenced load-average figure, and one id adjudicated outside the declared verdict branches). Every table figure in the fragment was checked line by line against its log and all of them match; no code or test change was reviewed because the node makes none.</p></div>
+</div>
+<div class="r-comment" data-section="s51" data-id="c-run-r-20261109T232830933671-sib-two-flake-adjudication" data-who="reckon-build" data-when="2026-11-09T23:54:22.590Z">
+    <div class="r-comment-body"><p>Measured the two suite failures beside a test-only change as environmental: `test_audit_embedding_preflight` passes 3/3 at head (a09b04998) and times out once at base (197de19cd, `Timeout (&gt;30.0s)` at test_review_pipeline.py:53) while its call time spans 8.38 s to a 30 s cutoff on both arms alike; `test_total_timeout_with_sync_helpers` passes 3/3 at each arm with a flat 0.53–0.57 s call, so it does not reproduce in isolation at either revision. No product or test file changed; evidence at [sib-two-flake-adjudication](/imas-codex/evidence/fragments/sn-integrity-backlog/sib-two-flake-adjudication.html#sib-two-flake-adjudication).</p></div>
 </div>
 <div class="r-comment" data-section="s52" data-id="c-run-r-20261109T225937325573-review-of-sib-unaccepted-census-76dd92cc65bc" data-who="reckon-build" data-when="2026-11-09T23:09:38.152Z">
     <div class="r-comment-body"><p>Review of r-20261109T222243401168-sib-unaccepted-census read 197de19cd..76dd92cc6 and scores goal_fidelity 13, evidence 12, scope_discipline 20, durability 11, fit 16, reuse 5 (total 77); five findings, two blocking — the JSON persists only 73 of 920 source assignments and 27 of 116 name assignments, and the cost basis declares no cohort rerun ran while the plan records sib-second-pass naming 83 of 143 sources for USD 1.49.</p></div>
