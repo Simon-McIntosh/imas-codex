@@ -19,6 +19,7 @@ from .graph_foundation import (
     append_claim_attempts,
     claim_attempt_entry,
     claim_outcome_for_status,
+    refined_from_cycle_guard_cypher,
 )
 
 logger = logging.getLogger(__name__)
@@ -1502,7 +1503,7 @@ def persist_claimed_source_outcomes(
                 # the next failure census.
                 append_claim_attempts(tx_gc, _stored_outcome_claim_entries(batch))
                 rows = tx_gc.query(
-            """
+                    """
             UNWIND $batch AS b
             MATCH (sns:StandardNameSource {id: b.sns_id})
             WHERE sns.claim_token = b.claim_token
@@ -2799,7 +2800,11 @@ def mark_sources_stale(source_ids: list[str], *, services: Any) -> int:
               )
               FOREACH (_ IN CASE WHEN branch = $supersede_holder
                               THEN [1] ELSE [] END |
-                MERGE (holder)-[:REFINED_FROM]->(sn)
+                """
+            + "FOREACH (lineage_write IN [1] | "
+            + refined_from_cycle_guard_cypher("holder", "sn")
+            + """
+                MERGE (holder)-[:REFINED_FROM]->(sn))
               )
               RETURN collect(
                 CASE WHEN sn IS NULL THEN null ELSE

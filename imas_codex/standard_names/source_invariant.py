@@ -24,14 +24,13 @@ def _derived_parent_cypher(parent: str = "sn") -> str:
     return f"coalesce({parent}.origin, '') = 'derived' AND {_live_child_cypher(parent)}"
 
 
-def _drained_test(name: str, successor: str) -> str:
+def _drained_test(name: str) -> str:
     """Return the predicate that says the predecessor has nothing left."""
     return f"""(
             NOT coalesce({name}.name_stage, '') IN
                   ['superseded', 'exhausted', 'contested']
         AND NOT coalesce({name}.status, '') IN ['deprecated', 'superseded']
         AND NOT ({_derived_parent_cypher(name)})
-        AND NOT ({name})-[:REFINED_FROM*1..]->({successor})
         AND COUNT {{
               (source:StandardNameSource)-[:PRODUCED_NAME]->({name})
               WHERE coalesce(source.status, '') <> 'stale'
@@ -47,12 +46,20 @@ def _supersede_update(name: str, successor: str) -> str:
     ``StandardNameChange`` writer, so this clause carries the retirement and the
     successor edge and nothing else.
     """
-    return f"""SET {name}.updated_at = datetime(),
+    from imas_codex.standard_names.graph_store.graph_foundation import (
+        refined_from_cycle_guard_cypher,
+    )
+
+    return (
+        "FOREACH (lineage_write IN [1] | "
+        + refined_from_cycle_guard_cypher(successor, name)
+        + f"""SET {name}.updated_at = datetime(),
             {name}.name_stage = 'superseded',
             {name}.status = 'superseded',
             {name}.claimed_at = null,
             {name}.claim_token = null
-        MERGE ({successor})-[:REFINED_FROM]->({name})"""
+        MERGE ({successor})-[:REFINED_FROM]->({name}))"""
+    )
 
 
 def supersede_drained_name_cypher(
@@ -77,7 +84,7 @@ def supersede_drained_name_cypher(
     sources would then report none moved at all.
     """
     update = _supersede_update(name, successor)
-    test = _drained_test(name, successor)
+    test = _drained_test(name)
     if embedded:
         return (
             f"""WITH {name}, {successor},
@@ -225,11 +232,7 @@ def supersede_names_losing_last_source(
     if not pairs:
         return []
     claimed = sorted(
-        {
-            (str(source), str(name))
-            for source, name in bindings
-            if source and name
-        }
+        {(str(source), str(name)) for source, name in bindings if source and name}
     )
     rows = [
         dict(row)
@@ -252,9 +255,7 @@ def supersede_names_losing_last_source(
             ORDER BY superseded_old_id
             """,
             pairs=[{"old_name": old, "new_name": new} for old, new in pairs],
-            bindings=[
-                {"source_id": source, "sn_id": name} for source, name in claimed
-            ],
+            bindings=[{"source_id": source, "sn_id": name} for source, name in claimed],
         )
         or []
     ]

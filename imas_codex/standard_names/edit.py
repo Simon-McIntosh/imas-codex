@@ -104,6 +104,9 @@ from imas_codex.standard_names.graph_store.graph_docs_persistence import (
     persist_refined_docs,
     reset_standard_name_docs,
 )
+from imas_codex.standard_names.graph_store.graph_foundation import (
+    refined_from_cycle_guard_cypher,
+)
 from imas_codex.standard_names.graph_store.graph_refinement import persist_refined_name
 from imas_codex.standard_names.kind_derivation import derive_kind
 
@@ -1519,7 +1522,8 @@ RETURN sources_moved, projections_moved
 #: an expectation computed before any write, so a stamp the expectation cannot
 #: name would make the proof refuse every fold. One declared instant lets both
 #: sides derive the same value.
-_FOLD_NAME_MUTATION_QUERY = """
+_FOLD_NAME_MUTATION_QUERY = (
+    """
 // ATOMIC_FOLD_MUTATE_NAMES
 MATCH (old:StandardName {id: $old_id}),
       (target:StandardName {id: $into_id})
@@ -1550,11 +1554,16 @@ SET old.superseded_from_stage = $predecessor_stage,
     // tombstone, so a non-revival fold writes back the unchanged value.
     target.status = coalesce($target_revived_status, target.status),
     target.updated_at = datetime($changed_at)
-MERGE (target)-[:REFINED_FROM]->(old)
+"""
+    + "FOREACH (lineage_write IN [1] | "
+    + refined_from_cycle_guard_cypher("target", "old")
+    + """
+MERGE (target)-[:REFINED_FROM]->(old))
 RETURN old.name_stage AS old_stage,
        old.superseded_from_stage AS predecessor_stage,
        target.name_stage AS target_stage
 """
+)
 
 _FOLD_POSTFLIGHT_QUERY = _FOLD_SNAPSHOT_QUERY.replace(
     "// ATOMIC_FOLD_SNAPSHOT", "// ATOMIC_FOLD_POSTFLIGHT", 1
@@ -3326,7 +3335,8 @@ def _reclaim_spelling_case(
     )
 
 
-_RECLAIM_MUTATION_QUERY = """
+_RECLAIM_MUTATION_QUERY = (
+    """
 // ATOMIC_RECLAIM_SPELLING
 MATCH (old:StandardName {id: $old_id}),
       (tomb:StandardName {id: $new_id})
@@ -3360,7 +3370,11 @@ SET old.name_stage = 'superseded',
     tomb.run_id = $run_id,
     tomb.updated_at = datetime($changed_at)
 FOREACH (_ IN CASE WHEN $link_lineage THEN [1] ELSE [] END |
-  MERGE (tomb)-[:REFINED_FROM]->(old))
+  """
+    + "FOREACH (lineage_write IN [1] | "
+    + refined_from_cycle_guard_cypher("tomb", "old")
+    + """
+  MERGE (tomb)-[:REFINED_FROM]->(old)))
 CREATE (change:StandardNameChange {
   id: $change_id,
   from_name: $old_id,
@@ -3377,6 +3391,7 @@ MERGE (tomb)-[:HAS_INTERNAL_CHANGE]->(change)
 RETURN tomb.name_stage AS revived_stage,
        old.name_stage AS retired_stage
 """
+)
 
 
 def _apply_reclaim_rename(

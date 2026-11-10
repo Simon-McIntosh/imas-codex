@@ -23,6 +23,7 @@ from .graph_foundation import (
     _CLAIM_TIMEOUT_SECONDS,
     DEFAULT_POOL_BATCH_SIZE,
     _TransactionQuery,
+    refined_from_cycle_guard_cypher,
 )
 
 logger = logging.getLogger(__name__)
@@ -1201,7 +1202,11 @@ def persist_refined_name(
                                $source_edit_include_accepted OR
                                (old.edit_include_accepted IS NULL AND
                                 $source_edit_include_accepted IS NULL))
-                        MERGE (new)-[:REFINED_FROM]->(old)
+                        """
+                        + "FOREACH (lineage_write IN [1] | "
+                        + refined_from_cycle_guard_cypher("new", "old")
+                        + """
+                        MERGE (new)-[:REFINED_FROM]->(old))
 
                         // 3. Mark old as superseded, clear claim
                         //

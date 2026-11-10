@@ -19,7 +19,7 @@ from imas_codex.discovery.base.claims import retry_on_deadlock
 from imas_codex.standard_names.signed_manifest import apply_signed_manifest
 
 from . import graph_foundation as foundation
-from .graph_foundation import _TransactionQuery
+from .graph_foundation import _TransactionQuery, refined_from_cycle_guard_cypher
 
 logger = logging.getLogger(__name__)
 
@@ -428,7 +428,11 @@ def supersede_prior_source_names(
                     new.edit_status = CASE WHEN carry_edit
                         THEN coalesce(new.edit_status, o_edit_status)
                         ELSE new.edit_status END
-                MERGE (new)-[:REFINED_FROM]->(old)
+                """
+                + "FOREACH (lineage_write IN [1] | "
+                + refined_from_cycle_guard_cypher("new", "old")
+                + """
+                MERGE (new)-[:REFINED_FROM]->(old))
                 RETURN old.id AS old_name, new.id AS new_name
                 """,
                 plans=[
@@ -633,7 +637,11 @@ def tombstone_supersede_into(
                 old.edit_status = CASE
                     WHEN coalesce(old.edit_status, '') = 'open'
                     THEN 'applied' ELSE old.edit_status END
-            MERGE (into)-[:REFINED_FROM]->(old)
+            """
+                    + "FOREACH (lineage_write IN [1] | "
+                    + refined_from_cycle_guard_cypher("into", "old")
+                    + """
+            MERGE (into)-[:REFINED_FROM]->(old))
             RETURN old.id AS old_id, into.id AS into_id
             """,
                     old_id=old_id,
