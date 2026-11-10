@@ -21461,7 +21461,7 @@
    }
   }
  },
- "generated_at": "2026-11-10T22:41:37+00:00",
+ "generated_at": "2026-11-10T22:45:03+00:00",
  "source": "live Neo4j graph, read-only; no writes, no LLM spend",
  "control": {
   "graph": "disposable Neo4j, empty at start, planted rows only",
