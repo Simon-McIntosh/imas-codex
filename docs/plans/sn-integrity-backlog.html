@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="445">
+<meta name="plan-version" content="446">
 <meta name="plan-modified" content="2026-11-10">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -1382,6 +1382,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s51" data-id="c-run-r-20261110T200635189734-review-of-sib-cohort-rerun-isn-0-11-4f71570c572a" data-who="reckon-build" data-when="2026-11-10T20:23:08.469Z">
     <div class="r-comment-body"><p>Reviewed run r-20261110T192543764468-sib-cohort-rerun-isn-0-11 at 4f71570c5 against base a839cece and stored a parsed record scoring goal_fidelity 15, evidence 14, scope_discipline 20, durability 13, fit 18, reuse 12 (total 92); two blocking findings (the fragment states all 35 reset sources had reached the claim cap while the run's own census records 20 at attempt_count 1-4, and the retry reason persisted on every receipt repeats that cap claim), two non-blocking (export_state duplicates a sibling runner's export-gate helper; 4 pin-refused sources of 55 were never rerun).</p></div>
+</div>
+<div class="r-comment" data-section="s51" data-id="c-run-r-20261110T210332283388-review-of-sib-cohort-rerun-isn-0-11-d77fd4da2231" data-who="reckon-build" data-when="2026-11-10T21:18:34.865Z">
+    <div class="r-comment-body"><p>Independent review of the commits r-20261110T192543764468-sib-cohort-rerun-isn-0-11 gained after its first review: scores goal_fidelity 16, evidence 17, scope_discipline 19, durability 15, fit 18, reuse 19 (total 104) over 4f71570c5..d77fd4da2, with four non-blocking findings and no blocking one - the two blocking findings of the first review are repaired with the reset class verified against census.json (15 of 35 at the cap, 20 below at 7-at-1/9-at-2/2-at-3/2-at-4, all 35 terminal failed and unclaimed) and the reason constant corrected.</p></div>
 </div>
 <div class="r-comment" data-section="s52" data-id="c-run-r-20261109T225937325573-review-of-sib-unaccepted-census-76dd92cc65bc" data-who="reckon-build" data-when="2026-11-09T23:09:38.152Z">
     <div class="r-comment-body"><p>Review of r-20261109T222243401168-sib-unaccepted-census read 197de19cd..76dd92cc6 and scores goal_fidelity 13, evidence 12, scope_discipline 20, durability 11, fit 16, reuse 5 (total 77); five findings, two blocking — the JSON persists only 73 of 920 source assignments and 27 of 116 name assignments, and the cost basis declares no cohort rerun ran while the plan records sib-second-pass naming 83 of 143 sources for USD 1.49.</p></div>
