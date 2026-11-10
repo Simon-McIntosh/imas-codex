@@ -1,0 +1,119 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-10T00:06:05.143Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "one-time measurement of two existing tests; nothing durable is meant to be kept beyond the verdict",
+      "recorded_at": "2026-11-10T00:07:53.878721+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-09T23:57:20Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the run's logs are the receipts for a one-time adjudication; the verdict is recorded in the landed wiring-test outcome",
+      "recorded_at": "2026-11-10T00:07:37.831907+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "the load figure is context, not the verdict's basis; the verdict rests on the logged pass/fail counts",
+      "recorded_at": "2026-11-10T00:07:42.631467+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "the coordinator's rule omitted the pass-at-both case; a test passing 3/3 in isolation at both revisions is not attributable to the head, which is the question the rule answered",
+      "recorded_at": "2026-11-10T00:07:47.617007+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-two-flake-adjudication.html",
+      "line": "26",
+      "severity": "non-blocking",
+      "text": "non-blocking: The fragment names no log path, digest or evidence directory anywhere, so the six receipts its table summarizes are not discoverable from the repository; the archive trees and driver script live under /tmp scratch and the run directory is subject to retention cleanup, which leaves the table unverifiable by a later reader. Sibling fragments carry this pointer (sib-load-sensitive-tests.html ends with an 'Evidence directory' sentence and a full receipt list), and the node's write scope permitted the fragment, so the omission is repairable in one line."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-two-flake-adjudication.html",
+      "line": "71",
+      "severity": "non-blocking",
+      "text": "non-blocking: 'load average 40-53 on 8 CPUs during the runs' is a quantitative claim about the instrument with no receipt \u2014 none of the nine gate logs records a load reading, and the driver records only the revision, tree, command, cwd and the two embedding probes \u2014 so the load half of the mechanism explanation rests on the worker's recollection while the citation-free figure reads as measured."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-two-flake-adjudication.html",
+      "line": "50",
+      "severity": "non-blocking",
+      "text": "non-blocking: The source rule at prompt.txt:102 admits exactly two environmental branches (pass at head and fail at base, or fail with the same error at both) and otherwise attributes the failure to the head; the dispatcher id satisfies neither branch, and the fragment folds it into the environmental verdict without recording that this is a third reading the spec does not define, though it discloses the reasoning plainly at :50-54 and the reading itself is sound."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "Read cf825881881bfded79a29bea77509f085810f0d2 against its parent 7fc74ba07be89696d663f46bc1cd0f0299acb7d4 commit by commit; it is one new 91-line evidence fragment with no product, test, or plan change.",
+    "done_when": "Read source prompt.txt:102 and the nine headings of logs/base-1..3.log, head-1..3.log and head-parallel-1..3.log; every element the done-when names is present (three serial runs per arm, archive trees with the five generated files, one log per run, per-run pass/fail, the embedding probe before and after each run, a verdict) and every figure in the fragment's table matches its log exactly, with the single exception that the dispatcher id meets neither branch of the declared verdict rule.",
+    "goal": "Read source prompt.txt:38 and docs/evidence/fragments/sn-integrity-backlog/sib-two-flake-adjudication.html:1-91; the fragment measures both named ids three times at each of base 197de19cd and head a09b04998 and states an environmental verdict for each, which is the goal exactly.",
+    "manifest": "Read source manifest.md; it records the six serial runs, the three -n 8 head runs, all nine log paths, the per-run call times and the environmental verdict, and its baseline_suite (base-3, EXIT=1, one failure) and after_suite (head-1, EXIT=0, no failures) both match the logs they cite.",
+    "write_paths": "Read source prompt.txt:80-82 and the sole commit diff; the only changed path is docs/evidence/fragments/sn-integrity-backlog/sib-two-flake-adjudication.html, inside the granted scope, with the granted figures directory unused."
+  },
+  "justifications": {
+    "durability": "No test guards this record and none can, since no product or test file changed; the receipts it summarizes live only in the run directory and a /tmp scratch tree, and sib-two-flake-adjudication.html:26 names neither, so the table cannot be re-verified once the scratch tree is cleaned.",
+    "evidence": "Every figure in the fragment's table matches its log verbatim (base 12.08/20.47/30.00 s and head 14.01/17.08/8.38 s against logs/base-1.log:35, base-2.log, base-3.log:14-75, head-1.log:35, head-2.log, head-3.log), but the fragment cites no log path at :26 and the load-average figure at :71 has no receipt in any of the nine logs.",
+    "fit": "docs/evidence/fragments/sn-integrity-backlog/sib-two-flake-adjudication.html:1-2 follows the sibling fragment sib-canonical-order-adoption.html:1-2 exactly (section.r-evidence plus an h2 of 'node-id \u2014 sentence'), and every element id carries the node-id prefix.",
+    "goal_fidelity": "docs/evidence/fragments/sn-integrity-backlog/sib-two-flake-adjudication.html:43-55 gives a per-id verdict backed by the six-run table at :34-39, which is the measurement the goal asks for.",
+    "reuse": "A capability search for a flake-measurement or two-revision test-repeat harness over imas_codex/ and scripts/ found none, and the node adds no code, reusing the documented archive-tree plus shared-environment recipe instead.",
+    "scope_discipline": "The complete base-to-head diff is docs/evidence/fragments/sn-integrity-backlog/sib-two-flake-adjudication.html alone, one of the two granted write paths, with no product or test file touched."
+  },
+  "limitations": [
+    "The diff adds no assertion; durability is judged on the record's re-verifiability, not on a guard, because the node changes no code and the done-when forbids product or test changes.",
+    "No test or suite was re-run during this read-only review; the numbers were checked against the recorded logs line by line.",
+    "The head arm's revision a09b04998 is the sibling test node's commit, which is not an ancestor of this node's head cf82588; it was read from the shared object store, and 197de19cd is confirmed an ancestor of a09b04998 with a 34-line single-file test diff between them.",
+    "added_failure_count and added_failure_ids are the after_suite failures minus the baseline_suite failures (0 - 1 preflight timeout = 0 added); the preflight timeout is present at base and absent at head, so nothing was added by the measured change."
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: Read source prompt.txt:38 and docs/evidence/fragments/sn-integrity-backlog/sib-two-flake-adjudication.html:1-91; the fragment measures both named ids three times at each of base 197de19cd and head a09b04998 and states an environmental verdict for each, which is the goal exactly.\nVERDICT done_when: Read source prompt.txt:102 and the nine headings of logs/base-1..3.log, head-1..3.log and head-parallel-1..3.log; every element the done-when names is present and every figure in the fragment's table matches its log exactly, with the single exception that the dispatcher id meets neither branch of the declared verdict rule.\nVERDICT write_paths: Read source prompt.txt:80-82 and the sole commit diff; the only changed path is docs/evidence/fragments/sn-integrity-backlog/sib-two-flake-adjudication.html, inside the granted scope, with the granted figures directory unused.\nVERDICT manifest: Read source manifest.md; its baseline_suite (base-3, EXIT=1, one failure) and after_suite (head-1, EXIT=0, no failures) both match the logs they cite, and all nine log paths are named.\nVERDICT diff: Read cf825881881bfded79a29bea77509f085810f0d2 against its parent 7fc74ba07be89696d663f46bc1cd0f0299acb7d4 commit by commit; it is one new 91-line evidence fragment with no product, test, or plan change.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-integrity-backlog/sib-two-flake-adjudication.html:43-55 gives a per-id verdict backed by the six-run table at :34-39, which is the measurement the goal asks for.\nSCORE evidence: 16\nJUSTIFICATION evidence: Every figure in the fragment's table matches its log verbatim (base 12.08/20.47/30.00 s and head 14.01/17.08/8.38 s), but the fragment cites no log path at :26 and the load-average figure at :71 has no receipt in any of the nine logs.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The complete base-to-head diff is docs/evidence/fragments/sn-integrity-backlog/sib-two-flake-adjudication.html alone, one of the two granted write paths, with no product or test file touched.\nSCORE durability: 10\nJUSTIFICATION durability: No test guards this record and none can, since no product or test file changed, and sib-two-flake-adjudication.html:26 names neither the log paths nor an evidence directory, so the table cannot be re-verified once the /tmp scratch tree is cleaned.\nSCORE fit: 18\nJUSTIFICATION fit: docs/evidence/fragments/sn-integrity-backlog/sib-two-flake-adjudication.html:1-2 follows the sibling fragment sib-canonical-order-adoption.html:1-2 exactly (section.r-evidence plus an h2 of 'node-id \u2014 sentence'), and every element id carries the node-id prefix.\nSCORE reuse: 19\nJUSTIFICATION reuse: A capability search for a flake-measurement or two-revision test-repeat harness over imas_codex/ and scripts/ found none, and the node adds no code, reusing the documented archive-tree plus shared-environment recipe instead.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-two-flake-adjudication.html:26 non-blocking: The fragment names no log path, digest or evidence directory anywhere, so the six receipts its table summarizes are not discoverable from the repository, and the archive trees plus driver script live under /tmp scratch while the run directory is subject to retention cleanup.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-two-flake-adjudication.html:71 non-blocking: the load-average 40-53 claim on 8 CPUs is a quantitative claim about the instrument with no receipt \u2014 none of the nine gate logs records a load reading \u2014 so the load half of the mechanism explanation rests on recollection.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-two-flake-adjudication.html:50 non-blocking: The source verdict rule admits exactly two environmental branches and otherwise attributes the failure to the head; the dispatcher id satisfies neither, and the fragment folds it into the environmental verdict without recording that this is a third reading the spec does not define.\n",
+  "reuse_search": "Searched for an existing capability that repeats a test id at two revisions or adjudicates a suite flake: name and capability greps over imas_codex/ (flake, adjudicat) and scripts/, plus a grep for a git-archive measurement driver, found no owner. The node adds no code at all, so nothing is duplicated; the archive-tree plus shared-environment recipe it follows is the repository's documented worktree measurement path.",
+  "review_run_id": "r-20261109T235557185903-review-of-sib-two-flake-adjudication-cf825881881b",
+  "reviewed_base_sha": "7fc74ba07be89696d663f46bc1cd0f0299acb7d4",
+  "reviewed_head_sha": "cf825881881bfded79a29bea77509f085810f0d2",
+  "reviewed_run_id": "r-20261109T232830933671-sib-two-flake-adjudication",
+  "scores": {
+    "durability": 10,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "self_referential_assertions": [],
+  "status": "parsed",
+  "suite_evidence": {
+    "after_suite": {
+      "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261109T232830933671-sib-two-flake-adjudication/head uv run --no-sync pytest -p no:cacheprovider --no-header -rA -v tests/standard_names/fanout/test_dispatcher.py::TestSyncTimeouts::test_total_timeout_with_sync_helpers tests/standard_names/test_review_pipeline.py::test_audit_embedding_preflight",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T232830933671-sib-two-flake-adjudication/logs/head-1.log",
+      "revision": "a09b04998e99e7a084dfa7f14b7f8cd56c15992f"
+    },
+    "baseline_suite": {
+      "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261109T232830933671-sib-two-flake-adjudication/base uv run --no-sync pytest -p no:cacheprovider --no-header -rA -v tests/standard_names/fanout/test_dispatcher.py::TestSyncTimeouts::test_total_timeout_with_sync_helpers tests/standard_names/test_review_pipeline.py::test_audit_embedding_preflight",
+      "completed": true,
+      "exit_status": 1,
+      "failure_count": 1,
+      "failure_ids": [
+        "tests/standard_names/test_review_pipeline.py::test_audit_embedding_preflight"
+      ],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T232830933671-sib-two-flake-adjudication/logs/base-3.log",
+      "revision": "197de19cd11eb9b247fd9cb9f16ded0d231c775f"
+    }
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-11-10T00:30:00Z",
+  "total": 101
+}
