@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The cohort's unproduced sources are rerun and read back one by one</title>
+</head>
+<body>
+<section id="sib-cohort-rerun-isn-0-11-record">
+<h2 id="sib-cohort-rerun-isn-0-11-heading">Cohort rerun against the 0.11.0 grammar</h2>
+
+<p id="sib-cohort-rerun-isn-0-11-cohort">The cohort is the 143 sources recorded by
+<code>sib-second-pass</code> and <code>sib-second-pass-tail</code>. A live read
+before this run found 88 of them produced and
+55 without a produced name: 35 <code>failed</code>,
+4 <code>extracted</code> and 16 <code>vocab_gap</code>. Status counts across the
+143 were {&quot;attached&quot;: 41, &quot;composed&quot;: 36, &quot;extracted&quot;: 4, &quot;failed&quot;: 46, &quot;vocab_gap&quot;: 16}.</p>
+
+<h3 id="sib-cohort-rerun-isn-0-11-reset">The reset</h3>
+
+<p id="sib-cohort-rerun-isn-0-11-reset-path">Unproduced sources whose attempt
+count had reached the claim cap (5) were reset
+through <code>retry_failed_sources</code>: 35 requested, 35 retried, 35
+<code>StandardNameSourceRetry</code> receipts, 35 verified <code>extracted</code>
+with the counters cleared and no claim. Sources below the cap were not reset;
+none of them is claimable. Four structure sources were refused before the run
+because they carry no provable immutable snapshot and are recorded as such.</p>
+
+<h3 id="sib-cohort-rerun-isn-0-11-rerun">The scoped rerun</h3>
+
+<p id="sib-cohort-rerun-isn-0-11-rerun-scope">The rerun is one
+<code>sn run --focus cohort-sources.json -c 10.0</code> over
+51 sources, run in place on the compute allocation
+(SLURM job <code>1291586</code>). It
+recorded run <code>0ab927bc-907f-4a9e-8c45-0ae77b3bf04f</code> with status
+<code>started</code> and stop reason
+<code>None</code>, spending
+<strong>USD 0.264093</strong> of the USD 10 selected by its own
+run id, which leaves USD 279.735907 of the USD 280 that remained under
+the lead's ruling. The process reached its time limit and was stopped during
+graceful shutdown, so the run record still reads
+<code>started</code> with no end time; the cost is
+the sum of that run's own per-call cost receipts.</p>
+
+<table id="sib-cohort-rerun-isn-0-11-summary">
+<caption>Read-back of the cohort after the rerun</caption>
+<thead><tr><th>Reading</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>Produced before the run</td><td>88 of 143</td></tr>
+<tr><td>Produced after the run</td><td><strong>92 of 143</strong> against the 100-of-143 floor (short by 8)</td></tr>
+<tr><td>Selected sources produced in this run</td><td>4 of 55</td></tr>
+<tr><td>Export gate blocking set</td><td>0</td></tr>
+<tr><td>Sourceless live drafts, before then after</td><td>3 then 3</td></tr>
+<tr><td>Still unproduced</td><td>51</td></tr>
+</tbody>
+</table>
+
+<h3 id="sib-cohort-rerun-isn-0-11-produced">Sources produced</h3>
+
+<table id="sib-cohort-rerun-isn-0-11-produced-table">
+<caption>Every cohort source holding a produced name after the run</caption>
+<thead><tr><th>Source</th><th>Status before</th><th>Status after</th><th>Produced name, stage and review score</th></tr></thead>
+<tbody>
+<tr><td><code>dd:b_field_non_axisymmetric/time_slice/control_surface/normal_vector/r</code></td><td>composed</td><td>composed</td><td><code>radial_surface_normal_of_control_surface</code> (drafted)</td></tr>
+<tr><td><code>dd:b_field_non_axisymmetric/time_slice/field_map/grid/r</code></td><td>attached</td><td>attached</td><td><code>radial_coordinate</code> (accepted, score 1.0)</td></tr>
+<tr><td><code>dd:camera_ir/fibre_bundle/geometry/outline/x1</code></td><td>attached</td><td>attached</td><td><code>first_local_tangential_coordinate_of_fibre_bundle</code> (accepted, score 0.99375)</td></tr>
+<tr><td><code>dd:camera_ir/fibre_bundle/geometry/surface</code></td><td>attached</td><td>attached</td><td><code>surface_area_of_optical_element</code> (drafted)</td></tr>
+<tr><td><code>dd:camera_visible/channel/aperture/outline/x1</code></td><td>attached</td><td>attached</td><td><code>first_local_tangential_coordinate_of_aperture</code> (accepted, score 0.91875)</td></tr>
+<tr><td><code>dd:camera_visible/channel/aperture/x2_width</code></td><td>composed</td><td>composed</td><td><code>second_local_tangential_width_of_diagnostic_aperture</code> (drafted)</td></tr>
+<tr><td><code>dd:camera_visible/channel/fibre_bundle/geometry/x1_width</code></td><td>failed</td><td>failed</td><td><code>width_of_diagnostic_aperture</code> (exhausted, score 0.5375)</td></tr>
+<tr><td><code>dd:camera_visible/channel/optical_element/geometry/outline/x1</code></td><td>attached</td><td>attached</td><td><code>first_local_tangential_coordinate_of_optical_element</code> (accepted, score 0.9875)</td></tr>
+<tr><td><code>dd:camera_visible/channel/optical_element/geometry/x1_width</code></td><td>composed</td><td>composed</td><td><code>first_local_tangential_width_of_optical_element</code> (accepted, score 0.8842081609873913)</td></tr>
+<tr><td><code>dd:camera_x_rays/filter_window/x1_curvature</code></td><td>attached</td><td>attached</td><td><code>first_local_tangential_radius_of_filter_window</code> (accepted, score 1.0)</td></tr>
+<tr><td><code>dd:core_profiles/profiles_1d/ion/pressure</code></td><td>composed</td><td>composed</td><td><code>total_ion_pressure</code> (drafted)</td></tr>
+<tr><td><code>dd:core_profiles/profiles_1d/momentum_tor</code></td><td>failed</td><td>failed</td><td><code>toroidal_total_plasma_angular_momentum</code> (exhausted, score 0.6625000000000001)</td></tr>
+<tr><td><code>dd:core_profiles/profiles_2d/pressure_perpendicular</code></td><td>attached</td><td>attached</td><td><code>perpendicular_plasma_pressure</code> (drafted)</td></tr>
+<tr><td><code>dd:core_sources/source/global_quantities/current_parallel</code></td><td>composed</td><td>composed</td><td><code>parallel_current_due_to_non_inductive_current_drive</code> (accepted, score 0.8946409076102291)</td></tr>
+<tr><td><code>dd:cryostat/description_2d/cryostat/unit/annular/outline_outer/z</code></td><td>composed</td><td>composed</td><td><code>vertical_outline_of_cryostat</code> (drafted)</td></tr>
+<tr><td><code>dd:cryostat/description_2d/thermal_shield/unit/annular/centreline/r</code></td><td>attached</td><td>attached</td><td><code>radial_coordinate_of_cryostat</code> (accepted, score 0.9063908561430464)</td></tr>
+<tr><td><code>dd:cryostat/description_2d/thermal_shield/unit/annular/outline_inner/r</code></td><td>attached</td><td>attached</td><td><code>radial_outline_of_cryostat</code> (reviewed, score 0.84375)</td></tr>
+<tr><td><code>dd:cryostat/description_2d/thermal_shield/unit/annular/thickness</code></td><td>attached</td><td>attached</td><td><code>thickness_of_cryostat</code> (drafted)</td></tr>
+<tr><td><code>dd:distributions/distribution/ggd/amplitude/values</code></td><td>composed</td><td>composed</td><td><code>particle_distribution</code> (accepted, score 0.9073692253543518)</td></tr>
+<tr><td><code>dd:distributions/distribution/profiles_1d/pressure_fast</code></td><td>composed</td><td>composed</td><td><code>fast_particle_pressure</code> (accepted, score 0.9625)</td></tr>
+<tr><td><code>dd:edge_profiles/ggd/ion/state/z_square_average/values</code></td><td>attached</td><td>attached</td><td><code>square_of_ion_state_charge_number</code> (accepted, score 0.9044952955120636)</td></tr>
+<tr><td><code>dd:edge_profiles/profiles_1d/ion/pressure</code></td><td>attached</td><td>attached</td><td><code>total_ion_pressure</code> (drafted)</td></tr>
+<tr><td><code>dd:edge_transport/model/flux_multiplier</code></td><td>composed</td><td>composed</td><td><code>heat_coefficient_due_to_convection</code> (accepted, score 0.8832803609736397)</td></tr>
+<tr><td><code>dd:edge_transport/model/ggd/ion/momentum/flux_limiter/r</code></td><td>attached</td><td>attached</td><td><code>radial_ion_momentum_flux_limiter_coefficient</code> (accepted, score 1.0)</td></tr>
+<tr><td><code>dd:edge_transport/model/ggd/ion/momentum/flux_limiter/z</code></td><td>composed</td><td>composed</td><td><code>vertical_ion_momentum_flux_limiter_coefficient</code> (accepted, score 0.9438543310950087)</td></tr>
+<tr><td><code>dd:edge_transport/model/ggd/ion/state/energy/flux_limiter/values</code></td><td>attached</td><td>attached</td><td><code>ion_state_energy_flux_limiter_coefficient</code> (drafted)</td></tr>
+<tr><td><code>dd:edge_transport/model/ggd/momentum/flux_limiter/poloidal</code></td><td>composed</td><td>composed</td><td><code>poloidal_momentum_flux_limiter_coefficient</code> (accepted, score 0.9234346189391974)</td></tr>
+<tr><td><code>dd:edge_transport/model/ggd/momentum/flux_limiter/r</code></td><td>composed</td><td>composed</td><td><code>radial_momentum_flux_limiter_coefficient</code> (accepted, score 0.8973943037879134)</td></tr>
+<tr><td><code>dd:edge_transport/model/ggd/momentum/flux_limiter/z</code></td><td>composed</td><td>composed</td><td><code>vertical_momentum_flux_limiter_coefficient</code> (accepted, score 0.8882450762386063)</td></tr>
+<tr><td><code>dd:edge_transport/model/ggd/momentum/v/parallel</code></td><td>attached</td><td>attached</td><td><code>total_plasma_momentum_field_aligned_convection_velocity</code> (drafted)</td></tr>
+<tr><td><code>dd:edge_transport/model/ggd/neutral/momentum/flux_limiter/phi</code></td><td>composed</td><td>composed</td><td><code>toroidal_neutral_momentum_flux_limiter_coefficient</code> (accepted, score 0.9181718970577032)</td></tr>
+<tr><td><code>dd:edge_transport/model/ggd/neutral/momentum/flux_limiter/r</code></td><td>attached</td><td>attached</td><td><code>radial_neutral_momentum_flux_limiter_coefficient</code> (reviewed, score 0.91875)</td></tr>
+<tr><td><code>dd:equilibrium/time_slice/boundary/closest_wall_point/distance</code></td><td>attached</td><td>attached</td><td><code>gap_at_closest_wall_point</code> (accepted, score 0.99375)</td></tr>
+<tr><td><code>dd:equilibrium/time_slice/boundary/gap/r</code></td><td>attached</td><td>attached</td><td><code>radial_coordinate_of_plasma_boundary_gap_reference_point</code> (drafted)</td></tr>
+<tr><td><code>dd:equilibrium/time_slice/boundary/gap/value</code></td><td>composed</td><td>composed</td><td><code>gap_at_plasma_boundary</code> (drafted)</td></tr>
+<tr><td><code>dd:equilibrium/time_slice/coordinate_system/z</code></td><td>composed</td><td>composed</td><td><code>vertical_coordinate_of_coordinate_system</code> (drafted)</td></tr>
+<tr><td><code>dd:equilibrium/time_slice/profiles_1d/geometric_axis/z</code></td><td>attached</td><td>attached</td><td><code>vertical_coordinate_of_geometric_axis</code> (accepted, score 0.98125)</td></tr>
+<tr><td><code>dd:gyrokinetics_local/flux_surface/b_field_phi_sign</code></td><td>composed</td><td>composed</td><td><code>toroidal_parity</code> (accepted, score 0.8862090247783165)</td></tr>
+<tr><td><code>dd:gyrokinetics_local/flux_surface/delongation_dr_minor_norm</code></td><td>composed</td><td>composed</td><td><code>derivative_of_elongation_of_flux_surface_with_respect_to_normalized_minor_radius</code> (accepted, score 0.988125761335992)</td></tr>
+<tr><td><code>dd:gyrokinetics_local/linear/wavevector/eigenmode/fields/a_field_parallel_perturbed_norm</code></td><td>attached</td><td>attached</td><td><code>normalized_perturbed_parallel_vector_potential_amplitude</code> (accepted, score 0.9461582055611047)</td></tr>
+<tr><td><code>dd:gyrokinetics_local/linear/wavevector/eigenmode/fields/a_field_parallel_perturbed_parity</code></td><td>composed</td><td>composed</td><td><code>parity_of_gyrokinetic_eigenmode_due_to_perturbed_parallel_vector_potential</code> (accepted, score 0.934139145362423)</td></tr>
+<tr><td><code>dd:gyrokinetics_local/linear/wavevector/eigenmode/fields/b_field_parallel_perturbed_norm</code></td><td>failed</td><td>failed</td><td><code>parallel_normalized_perturbed_magnetic_field_amplitude</code> (exhausted, score 0.625)</td></tr>
+<tr><td><code>dd:gyrokinetics_local/linear/wavevector/eigenmode/fields/b_field_parallel_perturbed_parity</code></td><td>composed</td><td>composed</td><td><code>parity_of_gyrokinetic_eigenmode_due_to_perturbed_parallel_magnetic_field</code> (accepted, score 0.9421502410562973)</td></tr>
+<tr><td><code>dd:gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_gyrocenter/pressure_perpendicular</code></td><td>failed</td><td>failed</td><td><code>perpendicular_normalized_gyrocenter_perturbed_pressure</code> (exhausted, score 0.7875)</td></tr>
+<tr><td><code>dd:gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_gyrocenter/v_parallel_energy_perpendicular</code></td><td>failed</td><td>failed</td><td><code>perpendicular_gyrocenter_heat_perturbed_flux_normalized_of_gyrokinetic_eigenmode</code> (exhausted, score 0.625)</td></tr>
+<tr><td><code>dd:gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_gyrocenter/v_perpendicular_square_energy</code></td><td>composed</td><td>composed</td><td><code>normalized_perturbed_perpendicular_gyrocenter_energy_moment</code> (accepted, score 0.899055500606099)</td></tr>
+<tr><td><code>dd:gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_gyrocenter_bessel_0/heat_flux_parallel</code></td><td>composed</td><td>composed</td><td><code>normalized_perturbed_parallel_gyrocenter_heat_flux_bessel_0</code> (accepted, score 0.935436818881087)</td></tr>
+<tr><td><code>dd:gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_gyrocenter_bessel_0/pressure</code></td><td>composed</td><td>composed</td><td><code>normalized_perturbed_gyrocenter_pressure_bessel_0</code> (accepted, score 0.9362962043863369)</td></tr>
+<tr><td><code>dd:gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_gyrocenter_bessel_0/v_parallel_energy_perpendicular</code></td><td>composed</td><td>composed</td><td><code>normalized_perturbed_parallel_gyrocenter_energy_bessel_0</code> (accepted, score 0.9252731478757781)</td></tr>
+<tr><td><code>dd:gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_gyrocenter_bessel_1/density</code></td><td>composed</td><td>composed</td><td><code>normalized_perturbed_gyrocenter_density_bessel_1</code> (accepted, score 0.9468545484864922)</td></tr>
+<tr><td><code>dd:gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_gyrocenter_bessel_1/v_parallel_energy_perpendicular</code></td><td>composed</td><td>composed</td><td><code>normalized_perturbed_parallel_gyrocenter_energy_bessel_1</code> (accepted, score 0.9070480393205271)</td></tr>
+<tr><td><code>dd:gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_particle/pressure_parallel</code></td><td>failed</td><td>failed</td><td><code>parallel_normalized_particle_perturbed_pressure</code> (exhausted, score 0.8125)</td></tr>
+<tr><td><code>dd:gyrokinetics_local/non_linear/binormal_wavevector_norm</code></td><td>attached</td><td>attached</td><td><code>binormal_wave_vector_normalized_of_gyrokinetic_eigenmode</code> (accepted, score 0.9309650181965152)<br><code>parallel_normalized_wave_vector</code> (exhausted, score 0.3625)</td></tr>
+<tr><td><code>dd:gyrokinetics_local/non_linear/fields_intensity_1d/a_field_parallel_perturbed_norm</code></td><td>attached</td><td>attached</td><td><code>flux_surface_averaged_time_averaged_normalized_perturbed_parallel_vector_potential_magnitude</code> (accepted, score 0.9372019429862994)</td></tr>
+<tr><td><code>dd:gyrokinetics_local/non_linear/fields_intensity_3d/b_field_parallel_perturbed_norm</code></td><td>attached</td><td>attached</td><td><code>time_averaged_normalized_perturbed_parallel_magnetic_field_magnitude</code> (accepted)</td></tr>
+<tr><td><code>dd:gyrokinetics_local/species/potential_energy_gradient_norm</code></td><td>composed</td><td>composed</td><td><code>derivative_of_normalized_effective_particle_energy_with_respect_to_poloidal_angle</code> (exhausted, score 0.8)<br><code>gradient_of_normalized_effective_energy</code> (accepted, score 0.9310914120812583)</td></tr>
+<tr><td><code>dd:gyrokinetics_local/species/potential_energy_norm</code></td><td>composed</td><td>composed</td><td><code>normalized_effective_particle_energy</code> (accepted, score 0.7625)</td></tr>
+<tr><td><code>dd:ic_antennas/antenna/module/strap/geometry/arcs_of_circle/z</code></td><td>composed</td><td>composed</td><td><code>vertical_coordinate_of_coil_conductor</code> (exhausted, score 0.5375)<br><code>vertical_outline_of_antenna_strap</code> (accepted, score 0.95625)</td></tr>
+<tr><td><code>dd:ic_antennas/antenna/module/strap/geometry/rectangle/z</code></td><td>attached</td><td>attached</td><td><code>vertical_coordinate_of_rectangle_center</code> (accepted, score 1.0)</td></tr>
+<tr><td><code>dd:mhd_linear/time_slice/toroidal_mode/plasma/coordinate_system/r</code></td><td>attached</td><td>attached</td><td><code>radial_coordinate_of_coordinate_system</code> (drafted)</td></tr>
+<tr><td><code>dd:mhd_linear/time_slice/toroidal_mode/vacuum/coordinate_system/r</code></td><td>attached</td><td>attached</td><td><code>radial_coordinate_of_coordinate_system</code> (drafted)</td></tr>
+<tr><td><code>dd:mhd_linear/time_slice/toroidal_mode/vacuum/coordinate_system/z</code></td><td>attached</td><td>attached</td><td><code>vertical_coordinate_of_coordinate_system</code> (drafted)</td></tr>
+<tr><td><code>dd:nbi/unit/beamlets_group/tangency_radius</code></td><td>failed</td><td>composed</td><td><code>tangency_radius_of_neutral_beam_injector</code> (accepted, score 0.9487085421104783)</td></tr>
+<tr><td><code>dd:pf_passive/loop/element/geometry/arcs_of_circle/z</code></td><td>composed</td><td>composed</td><td><code>vertical_outline_of_coil_conductor_element</code> (accepted, score 0.8774576675545227)</td></tr>
+<tr><td><code>dd:pf_plasma/element/geometry/arcs_of_circle/curvature_radii</code></td><td>composed</td><td>composed</td><td><code>radius_of_plasma_filament</code> (accepted, score 0.56875)</td></tr>
+<tr><td><code>dd:plasma_profiles/ggd/pressure_perpendicular/values</code></td><td>attached</td><td>attached</td><td><code>perpendicular_plasma_pressure</code> (drafted)</td></tr>
+<tr><td><code>dd:plasma_profiles/profiles_1d/ion/pressure</code></td><td>attached</td><td>attached</td><td><code>total_ion_pressure</code> (drafted)</td></tr>
+<tr><td><code>dd:plasma_profiles/profiles_1d/pressure_perpendicular</code></td><td>attached</td><td>attached</td><td><code>perpendicular_plasma_pressure</code> (drafted)</td></tr>
+<tr><td><code>dd:plasma_profiles/profiles_2d/ion/pressure</code></td><td>attached</td><td>attached</td><td><code>total_ion_pressure</code> (drafted)</td></tr>
+<tr><td><code>dd:plasma_profiles/profiles_2d/pressure_perpendicular</code></td><td>attached</td><td>attached</td><td><code>perpendicular_plasma_pressure</code> (drafted)</td></tr>
+<tr><td><code>dd:plasma_sources/source/global_quantities/current_parallel</code></td><td>attached</td><td>attached</td><td><code>parallel_current_due_to_non_inductive_current_drive</code> (accepted, score 0.8946409076102291)</td></tr>
+<tr><td><code>dd:plasma_sources/source/profiles_1d/current_parallel_inside</code></td><td>attached</td><td>attached</td><td><code>parallel_cumulative_inside_flux_surface_current_due_to_non_inductive_current_drive</code> (accepted, score 0.9087432297217399)</td></tr>
+<tr><td><code>dd:plasma_transport/model/ggd/momentum/flux_limiter/z</code></td><td>failed</td><td>failed</td><td><code>vertical_momentum_flux_limiter_coefficient</code> (accepted, score 0.8882450762386063)</td></tr>
+<tr><td><code>dd:plasma_transport/model/ggd/neutral/state/momentum/v_radial/values</code></td><td>failed</td><td>composed</td><td><code>radial_neutral_state_momentum_velocity_due_to_convection</code> (accepted, score 0.9077590319922567)</td></tr>
+<tr><td><code>dd:plasma_transport/model/profiles_1d/neutral/state/momentum/flux_limiter/phi</code></td><td>attached</td><td>attached</td><td><code>toroidal_neutral_internal_state_momentum_flux_limiter_coefficient</code> (accepted, score 1.0)</td></tr>
+<tr><td><code>dd:pulse_schedule/density_control/valve/species/fraction</code></td><td>attached</td><td>attached</td><td><code>molecular_fraction</code> (drafted)<br><code>neutral_species_fraction</code> (exhausted, score 0.83125)</td></tr>
+<tr><td><code>dd:reflectometer_profile/channel/antenna_detection/centre/phi</code></td><td>attached</td><td>attached</td><td><code>toroidal_coordinate_of_reflectometer_antenna</code> (accepted, score 1.0)</td></tr>
+<tr><td><code>dd:reflectometer_profile/channel/antenna_emission/centre/phi</code></td><td>attached</td><td>attached</td><td><code>toroidal_coordinate_of_reflectometer_antenna</code> (accepted, score 1.0)</td></tr>
+<tr><td><code>dd:spectrometer_visible/channel/detector/outline/x1</code></td><td>composed</td><td>composed</td><td><code>first_local_tangential_coordinate_of_detector</code> (accepted, score 1.0)</td></tr>
+<tr><td><code>dd:spectrometer_visible/channel/detector/x1_width</code></td><td>attached</td><td>attached</td><td><code>first_local_tangential_width_of_detector</code> (accepted, score 1.0)</td></tr>
+<tr><td><code>dd:spectrometer_visible/channel/fibre_bundle/geometry/outline/x1</code></td><td>attached</td><td>attached</td><td><code>first_local_tangential_coordinate_of_fibre_bundle</code> (accepted, score 0.99375)</td></tr>
+<tr><td><code>dd:spectrometer_visible/channel/fibre_bundle/geometry/x2_width</code></td><td>failed</td><td>composed</td><td><code>second_local_tangential_width_of_fiber_bundle</code> (drafted)</td></tr>
+<tr><td><code>dd:spectrometer_visible/channel/optical_element/geometry/surface</code></td><td>composed</td><td>composed</td><td><code>surface_area_of_optical_element</code> (drafted)</td></tr>
+<tr><td><code>dd:spectrometer_visible/channel/polarizer/outline/x1</code></td><td>composed</td><td>composed</td><td><code>first_local_tangential_coordinate_of_polarizer</code> (accepted, score 0.8768761940259513)</td></tr>
+<tr><td><code>dd:summary/local/pedestal/n_i_total/value</code></td><td>composed</td><td>composed</td><td><code>total_ion_density_at_pedestal_top</code> (accepted, score 0.9500972417523423)</td></tr>
+<tr><td><code>dd:summary/pedestal_fits/mtanh/stability/alpha_experimental/value</code></td><td>failed</td><td>failed</td><td><code>alpha_parameter</code> (exhausted, score 0.4375)</td></tr>
+<tr><td><code>dd:summary/pedestal_fits/mtanh/stability/bootstrap_current_hager/alpha_critical/value</code></td><td>failed</td><td>composed</td><td><code>pedestal_critical_ballooning_parameter</code> (accepted, score 0.9107735351105779)</td></tr>
+<tr><td><code>dd:waves/coherent_wave/global_quantities/current_phi_n_phi</code></td><td>attached</td><td>attached</td><td><code>current_per_toroidal_mode_due_to_wave_driven_current_drive</code> (accepted, score 1.0)</td></tr>
+<tr><td><code>dd:waves/coherent_wave/profiles_1d/e_field_n_phi/minus/phase</code></td><td>failed</td><td>failed</td><td><code>per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field</code> (exhausted, score 0.5625)</td></tr>
+<tr><td><code>dd:waves/coherent_wave/profiles_1d/e_field_n_phi/parallel/phase</code></td><td>failed</td><td>failed</td><td><code>parallel_per_toroidal_mode_electric_field</code> (exhausted, score 0.45)</td></tr>
+<tr><td><code>dd:waves/coherent_wave/profiles_2d/e_field_n_phi/parallel/phase</code></td><td>composed</td><td>composed</td><td><code>parallel_per_toroidal_mode_wave_phase</code> (accepted, score 0.9438281381087485)</td></tr>
+<tr><td><code>dd:waves/coherent_wave/profiles_2d/power_density_n_tor</code></td><td>failed</td><td>failed</td><td><code>per_toroidal_mode_flux_surface_average_total_absorbed_power_density</code> (exhausted, score 0.625)</td></tr>
+</tbody>
+</table>
+
+<h3 id="sib-cohort-rerun-isn-0-11-unproduced">Sources still unproduced, with a reason</h3>
+
+<p id="sib-cohort-rerun-isn-0-11-vocabulary">The sources whose vocabulary is
+still pending a later release are <code>pellet_species</code>,
+<code>plateau_factor</code>, <code>current_profile_alignment</code>,
+<code>breakdown_candidate</code> and <code>sourced</code>. None of the five is
+in this cohort, so none of them appears below and none is counted as a failure;
+the 17
+<code>vocab_gap</code> sources that are in the cohort stand under the vocabulary
+ruling, not under the composition defects this rerun exercises.</p>
+
+<table id="sib-cohort-rerun-isn-0-11-unproduced-table">
+<caption>Every cohort source with no produced name after the run</caption>
+<thead><tr><th>Source</th><th>Status before</th><th>Status after</th><th>Reason</th></tr></thead>
+<tbody>
+<tr><td><code>dd:b_field_non_axisymmetric/time_slice/field_map/grid/z</code></td><td>vocab_gap</td><td>vocab_gap</td><td>vocabulary gap; pending the vocabulary ruling</td></tr>
+<tr><td><code>dd:camera_ir/fibre_bundle/fibre_radius</code></td><td>failed</td><td>failed</td><td>compose claim-attempt cap reached; last refusal: non-actionable vocabulary gap: &#x27;radius&#x27; is already a registered physical_base token — it is not a vocabulary gap; use it directly.</td></tr>
+<tr><td><code>dd:camera_ir/fibre_bundle/geometry/x1_width</code></td><td>failed</td><td>extracted</td><td>extracted, nothing produced in this run</td></tr>
+<tr><td><code>dd:camera_visible/channel/fibre_bundle/geometry/surface</code></td><td>failed</td><td>failed</td><td>compose claim-attempt cap reached; last refusal: standard-name binding collision: candidate &quot;surface_area_of_diagnostic_aperture&quot; has non-bindable name_stage &quot;superseded&quot; at composition attempt 4</td></tr>
+<tr><td><code>dd:camera_visible/channel/fibre_bundle/geometry/x2_width</code></td><td>failed</td><td>extracted</td><td>extracted, nothing produced in this run</td></tr>
+<tr><td><code>dd:core_transport/model/flux_multiplier</code></td><td>failed</td><td>failed</td><td>candidate pre-validation failed (grammar validation: Two &#x27;channel&#x27; tokens (&#x27;heat&#x27; and &#x27;particle&#x27;) cannot stack in a single name; the channel segment admits at most one transport channel token.): coefficient</td></tr>
+<tr><td><code>dd:cryostat/description_2d/thermal_shield/unit/annular/outline_outer/r</code></td><td>vocab_gap</td><td>vocab_gap</td><td>vocabulary gap; pending the vocabulary ruling</td></tr>
+<tr><td><code>dd:ece/channel/delta_position_suprathermal/r</code></td><td>failed</td><td>failed</td><td>candidate pre-validation failed (grammar validation: 1 validation error for StandardName
+geometric_base
+  Input should be &#x27;centroid&#x27;, &#x27;normalized_minor_radius&#x27;, &#x27;normalized_toroidal_flux_coordinate&#x27;, &#x27;offset&#x27;, &#x27;position&#x27;, &#x27;radial_coordinate&#x27;, &#x27;toroidal_flux_coordinate&#x27;, &#x27;contour&#x27;, &#x27;cross_section&#x27;, &#x27;coordinate&#x27;, &#x27;displacement&#x27;, &#x27;extent&#x27;, &#x27;normalized_poloidal_flux_coordinate&#x27;, &#x27;poloidal_magnetic_flux_coordinate&#x27;, &#x27;outline&#x27;, &#x27;sensor_normal&#x27;, &#x27;surface_normal&#x27;, &#x27;tangent_vector&#x27;, &#x27;trajectory&#x27;, &#x27;unit_vector&#x27;, &#x27;vertex&#x27;, &#x27;first_local_tangential_coordinate&#x27;, &#x27;second_local_tangential_coordinate&#x27;, &#x27;first_local_tangential_unit_vector&#x27;, &#x27;second_local_tangential_unit_vector&#x27;, &#x27;poloidal_angle&#x27;, &#x27;toroidal_angle&#x27;, &#x27;normal_coordinate&#x27;, &#x27;binormal_coordinate&#x27;, &#x27;direction_unit_vector&#x27;, &#x27;image_up_unit_vector&#x27;, &#x27;major_axis_unit_vector&#x27;, &#x27;minor_axis_unit_vector&#x27;, &#x27;first_measurement_direction_unit_vector&#x27;, &#x27;second_measurement_direction_unit_vector&#x27;, &#x27;image&#x27; or &#x27;grid&#x27; [type=enum, input_value=&#x27;suprathermal_displacement&#x27;, input_type=str]
+    For further information visit https://errors.pydantic.dev/2.12/v/enum): displacement</td></tr>
+<tr><td><code>dd:edge_profiles/ggd/neutral/velocity/toroidal</code></td><td>failed</td><td>extracted</td><td>extracted, nothing produced in this run</td></tr>
+<tr><td><code>dd:equilibrium/time_slice/constraints/strike_point/position_reconstructed/r</code></td><td>failed</td><td>failed</td><td>compose claim-attempt cap reached; last refusal: standard-name attachment rejected: candidate &quot;radial_coordinate_of_strike_point&quot; distinct-vector conflict: path &#x27;equilibrium/time_slice/constraints/strike_point/position_reconstructed/r&#x27; and already-sourced &#x27;equilibrium/time_slice/constraints/strike_point/position_measured/r&#x27; are the same axis leaf of DIFFERENT vector fields of one device node — SN &#x27;radial_coordinate_of_strike_point&#x27; must not carry both at composition attempt 4</td></tr>
+<tr><td><code>dd:equilibrium/time_slice/constraints/strike_point/position_reconstructed/z</code></td><td>vocab_gap</td><td>vocab_gap</td><td>vocabulary gap; pending the vocabulary ruling</td></tr>
+<tr><td><code>dd:equilibrium/time_slice/constraints/x_point/position_reconstructed/r</code></td><td>failed</td><td>failed</td><td>compose claim-attempt cap reached; last refusal: standard-name attachment rejected: candidate &quot;radial_coordinate_of_x_point&quot; distinct-vector conflict: path &#x27;equilibrium/time_slice/constraints/x_point/position_reconstructed/r&#x27; and already-sourced &#x27;equilibrium/time_slice/constraints/x_point/position_measured/r&#x27; are the same axis leaf of DIFFERENT vector fields of one device node — SN &#x27;radial_coordinate_of_x_point&#x27; must not carry both at composition attempt 4</td></tr>
+<tr><td><code>dd:equilibrium/time_slice/constraints/x_point/position_reconstructed/z</code></td><td>failed</td><td>failed</td><td>compose claim-attempt cap reached; last refusal: standard-name attachment rejected: candidate &quot;vertical_coordinate_of_x_point&quot; distinct-vector conflict: path &#x27;equilibrium/time_slice/constraints/x_point/position_reconstructed/z&#x27; and already-sourced &#x27;equilibrium/time_slice/constraints/x_point/position_measured/z&#x27; are the same axis leaf of DIFFERENT vector fields of one device node — SN &#x27;vertical_coordinate_of_x_point&#x27; must not carry both at composition attempt 4</td></tr>
+<tr><td><code>dd:equilibrium/time_slice/ggd/z/values</code></td><td>vocab_gap</td><td>vocab_gap</td><td>vocabulary gap; pending the vocabulary ruling</td></tr>
+<tr><td><code>dd:equilibrium/time_slice/profiles_2d/z</code></td><td>vocab_gap</td><td>vocab_gap</td><td>vocabulary gap; pending the vocabulary ruling</td></tr>
+<tr><td><code>dd:gyrokinetics_local/flux_surface/dgeometric_axis_r_dr_minor</code></td><td>failed</td><td>failed</td><td>non-actionable vocabulary gap: The quantity is the derivative of the flux-surface geometric axis radial position (major radius) with respect to the local minor radius r_minor. Expressing it requires a differential operator applied to a geometric-axis coordinate, but differential/geometric-derivative</td></tr>
+<tr><td><code>dd:gyrokinetics_local/flux_surface/ds_dr_minor_norm</code></td><td>vocab_gap</td><td>vocab_gap</td><td>vocabulary gap; pending the vocabulary ruling</td></tr>
+<tr><td><code>dd:gyrokinetics_local/flux_surface/pressure_gradient_norm</code></td><td>failed</td><td>failed</td><td>candidate pre-validation failed (grammar validation: 1 validation error for StandardName
+  Value error, Generic physical_base &#x27;pressure&#x27; requires qualification. Generic terms like &#x27;pressure&#x27; are ambiguous without context. Add a qualifying segment: subject (e.g., electron_), device (e.g., flux_loop_), object (e.g., of_flux_loop), position (e.g., at_magnetic_axis), geometry (e.g., of_plasma_boundary), region (e.g., over_halo_region), or path (e.g., along_line_of_sight). [type=value_error, input_value={&#x27;physical_base&#x27;: &#x27;pressure&#x27;}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.12/v/value_error): pressure</td></tr>
+<tr><td><code>dd:gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_gyrocenter/heat_flux_parallel</code></td><td>failed</td><td>failed</td><td>candidate pre-validation failed (grammar validation: ISN rejected operator chain normalized -&gt; perturbed: name &#x27;parallel_normalized_gyrocenter_heat_perturbed_flux&#x27; round-trips textually but changes the semantic IR. Reorder the outer-to-inner operators or correct their operands.): flux</td></tr>
+<tr><td><code>dd:gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_gyrocenter/pressure</code></td><td>failed</td><td>failed</td><td>candidate pre-validation failed (grammar validation: ISN rejected operator chain normalized -&gt; perturbed: name &#x27;normalized_gyrocenter_perturbed_pressure&#x27; round-trips textually but changes the semantic IR. Reorder the outer-to-inner operators or correct their operands.): pressure</td></tr>
+<tr><td><code>dd:gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_particle/heat_flux_parallel</code></td><td>failed</td><td>failed</td><td>candidate pre-validation failed (grammar validation: Two &#x27;channel&#x27; tokens (&#x27;particle&#x27; and &#x27;heat&#x27;) cannot stack in a single name; the channel segment admits at most one transport channel token.): flux</td></tr>
+<tr><td><code>dd:gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_particle/v_parallel_energy_perpendicular</code></td><td>failed</td><td>failed</td><td>candidate pre-validation failed (grammar validation: ISN rejected operator chain normalized -&gt; perturbed: name &#x27;parallel_normalized_particle_perturbed_energy&#x27; round-trips textually but changes the semantic IR. Reorder the outer-to-inner operators or correct their operands.): energy</td></tr>
+<tr><td><code>dd:gyrokinetics_local/non_linear/fields_intensity_3d/phi_potential_perturbed_norm</code></td><td>failed</td><td>failed</td><td>candidate pre-validation failed (grammar validation: ISN rejected operator chain time_averaged -&gt; normalized -&gt; perturbed -&gt; magnitude: operator &#x27;magnitude&#x27; requires one of [&#x27;vector&#x27;, &#x27;complex&#x27;], got &#x27;scalar&#x27;. Reorder the outer-to-inner operators or correct their operands.): electrostatic_potential</td></tr>
+<tr><td><code>dd:gyrokinetics_local/species/velocity_phi_gradient_norm</code></td><td>failed</td><td>failed</td><td>candidate pre-validation failed (grammar validation: 1 validation error for StandardName
+  Value error, Generic physical_base &#x27;velocity&#x27; requires qualification. Generic terms like &#x27;velocity&#x27; are ambiguous without context. Add a qualifying segment: subject (e.g., electron_), device (e.g., flux_loop_), object (e.g., of_flux_loop), position (e.g., at_magnetic_axis), geometry (e.g., of_plasma_boundary), region (e.g., over_halo_region), or path (e.g., along_line_of_sight). [type=value_error, input_value={&#x27;physical_base&#x27;: &#x27;veloci...&#x27;component&#x27;: &#x27;toroidal&#x27;}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.12/v/value_error): velocity</td></tr>
+<tr><td><code>dd:gyrokinetics_local/species_all/velocity_phi_norm</code></td><td>vocab_gap</td><td>vocab_gap</td><td>vocabulary gap; pending the vocabulary ruling</td></tr>
+<tr><td><code>dd:ic_antennas/antenna/module/strap/geometry/oblique</code></td><td>extracted</td><td>extracted</td><td>refused before the run: no provable immutable snapshot</td></tr>
+<tr><td><code>dd:ic_antennas/antenna/module/strap/geometry/oblique/z</code></td><td>failed</td><td>vocab_gap</td><td>vocabulary gap; pending the vocabulary ruling</td></tr>
+<tr><td><code>dd:iron_core/segment/geometry/arcs_of_circle/r</code></td><td>vocab_gap</td><td>vocab_gap</td><td>vocabulary gap; pending the vocabulary ruling</td></tr>
+<tr><td><code>dd:magnetics/bpol_probe/non_linear_response/b_field_non_linear</code></td><td>failed</td><td>extracted</td><td>extracted, nothing produced in this run</td></tr>
+<tr><td><code>dd:magnetics/flux_loop/gm9</code></td><td>failed</td><td>failed</td><td>candidate pre-validation failed (grammar validation: 1 validation error for StandardName
+  Value error, &#x27;major_radius&#x27; cannot take a positional/geometry locus; a point&#x27;s radial coordinate is &#x27;radial_coordinate_of_flux_loop&#x27; (geometric_base=radial_coordinate, symmetric with vertical_coordinate). Reserve major_radius for the bare R0 reference and length/operator compounds. [type=value_error, input_value={&#x27;physical_base&#x27;: &#x27;major_..., &#x27;object&#x27;: &#x27;flux_loop&#x27;}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.12/v/value_error): radius</td></tr>
+<tr><td><code>dd:mhd_linear/time_slice/toroidal_mode/plasma/displacement_parallel/imaginary</code></td><td>failed</td><td>failed</td><td>candidate pre-validation failed (grammar validation: ISN rejected operator chain imaginary_part: operator &#x27;imaginary_part&#x27; cannot apply to a geometry carrier. Reorder the outer-to-inner operators or correct their operands.): displacement</td></tr>
+<tr><td><code>dd:mhd_linear/time_slice/toroidal_mode/plasma/displacement_perpendicular/imaginary</code></td><td>failed</td><td>failed</td><td>candidate pre-validation failed (grammar validation: ISN rejected operator chain imaginary_part: operator &#x27;imaginary_part&#x27; cannot apply to a geometry carrier. Reorder the outer-to-inner operators or correct their operands.): displacement</td></tr>
+<tr><td><code>dd:mhd_linear/time_slice/toroidal_mode/plasma/displacement_perpendicular/real</code></td><td>failed</td><td>failed</td><td>candidate pre-validation failed (grammar validation: ISN rejected operator chain real_part: operator &#x27;real_part&#x27; cannot apply to a geometry carrier. Reorder the outer-to-inner operators or correct their operands.): displacement</td></tr>
+<tr><td><code>dd:nbi/unit/beamlets_group/beamlets/tangency_radii</code></td><td>vocab_gap</td><td>vocab_gap</td><td>vocabulary gap; pending the vocabulary ruling</td></tr>
+<tr><td><code>dd:ntms/time_slice/mode</code></td><td>extracted</td><td>extracted</td><td>refused before the run: no provable immutable snapshot</td></tr>
+<tr><td><code>dd:pf_plasma/element/geometry/thick_line/second_point/z</code></td><td>vocab_gap</td><td>vocab_gap</td><td>vocabulary gap; pending the vocabulary ruling</td></tr>
+<tr><td><code>dd:plasma_transport/model</code></td><td>extracted</td><td>extracted</td><td>refused before the run: no provable immutable snapshot</td></tr>
+<tr><td><code>dd:plasma_transport/model/flux_multiplier</code></td><td>failed</td><td>failed</td><td>candidate pre-validation failed (grammar validation: name is not canonical: flat segment order renders as &#x27;energy_convected_coefficient&#x27;): coefficient</td></tr>
+<tr><td><code>dd:plasma_transport/model/ggd</code></td><td>extracted</td><td>extracted</td><td>refused before the run: no provable immutable snapshot</td></tr>
+<tr><td><code>dd:spectrometer_visible/channel/fibre_bundle/geometry/surface</code></td><td>failed</td><td>failed</td><td>compose claim-attempt cap reached; last refusal: rich standard-name write refused candidate &#x27;surface_area_of_fiber_bundle&#x27;: grammar parse failed: residue &#x27;surface_area_of_fiber_bundle&#x27; does not match any physical_base or geometry_carrier; nearest candidates: (none)</td></tr>
+<tr><td><code>dd:spectrometer_visible/channel/fibre_bundle/geometry/x1_width</code></td><td>failed</td><td>extracted</td><td>extracted, nothing produced in this run</td></tr>
+<tr><td><code>dd:summary/global_quantities/current_alignment/value</code></td><td>vocab_gap</td><td>vocab_gap</td><td>vocabulary gap; pending the vocabulary ruling</td></tr>
+<tr><td><code>dd:summary/heating_current_drive/ec/position/value</code></td><td>vocab_gap</td><td>vocab_gap</td><td>vocabulary gap; pending the vocabulary ruling</td></tr>
+<tr><td><code>dd:summary/heating_current_drive/ic/position/value</code></td><td>vocab_gap</td><td>vocab_gap</td><td>vocabulary gap; pending the vocabulary ruling</td></tr>
+<tr><td><code>dd:summary/heating_current_drive/lh/position/value</code></td><td>vocab_gap</td><td>vocab_gap</td><td>vocabulary gap; pending the vocabulary ruling</td></tr>
+<tr><td><code>dd:summary/heating_current_drive/nbi/tangency_radius/value</code></td><td>vocab_gap</td><td>vocab_gap</td><td>vocabulary gap; pending the vocabulary ruling</td></tr>
+<tr><td><code>dd:summary/local/r_eff_norm_2_3/effective_helical_ripple/value</code></td><td>vocab_gap</td><td>vocab_gap</td><td>vocabulary gap; pending the vocabulary ruling</td></tr>
+<tr><td><code>dd:summary/pedestal_fits/mtanh/stability/bootstrap_current_sauter/alpha_critical/value</code></td><td>failed</td><td>failed</td><td>candidate pre-validation failed (grammar validation: ISN rejected operator chain normalized -&gt; gradient: operator &#x27;normalized&#x27; with precedence 15 cannot wrap &#x27;gradient&#x27; with precedence 20. Reorder the outer-to-inner operators or correct their operands.): pressure</td></tr>
+<tr><td><code>dd:wall/description_2d/vessel/unit/annular/outline_outer/r</code></td><td>failed</td><td>failed</td><td>candidate pre-validation failed (grammar validation: 1 validation error for StandardName
+geometric_base
+  Input should be &#x27;centroid&#x27;, &#x27;normalized_minor_radius&#x27;, &#x27;normalized_toroidal_flux_coordinate&#x27;, &#x27;offset&#x27;, &#x27;position&#x27;, &#x27;radial_coordinate&#x27;, &#x27;toroidal_flux_coordinate&#x27;, &#x27;contour&#x27;, &#x27;cross_section&#x27;, &#x27;coordinate&#x27;, &#x27;displacement&#x27;, &#x27;extent&#x27;, &#x27;normalized_poloidal_flux_coordinate&#x27;, &#x27;poloidal_magnetic_flux_coordinate&#x27;, &#x27;outline&#x27;, &#x27;sensor_normal&#x27;, &#x27;surface_normal&#x27;, &#x27;tangent_vector&#x27;, &#x27;trajectory&#x27;, &#x27;unit_vector&#x27;, &#x27;vertex&#x27;, &#x27;first_local_tangential_coordinate&#x27;, &#x27;second_local_tangential_coordinate&#x27;, &#x27;first_local_tangential_unit_vector&#x27;, &#x27;second_local_tangential_unit_vector&#x27;, &#x27;poloidal_angle&#x27;, &#x27;toroidal_angle&#x27;, &#x27;normal_coordinate&#x27;, &#x27;binormal_coordinate&#x27;, &#x27;direction_unit_vector&#x27;, &#x27;image_up_unit_vector&#x27;, &#x27;major_axis_unit_vector&#x27;, &#x27;minor_axis_unit_vector&#x27;, &#x27;first_measurement_direction_unit_vector&#x27;, &#x27;second_measurement_direction_unit_vector&#x27;, &#x27;image&#x27; or &#x27;grid&#x27; [type=enum, input_value=&#x27;outer_outline&#x27;, input_type=str]
+    For further information visit https://errors.pydantic.dev/2.12/v/enum): outline</td></tr>
+<tr><td><code>dd:wall/description_ggd/ggd/energy_fluxes/radiation/incident/values</code></td><td>failed</td><td>failed</td><td>candidate pre-validation failed (grammar validation: name is not canonical: flat segment order renders as &#x27;incident_energy_radiative_flux_at_wall&#x27;): flux</td></tr>
+<tr><td><code>dd:waves/coherent_wave/profiles_2d/e_field_n_phi/parallel/amplitude</code></td><td>failed</td><td>failed</td><td>candidate pre-validation failed (grammar validation: ISN rejected operator chain per_toroidal_mode -&gt; amplitude: name &#x27;parallel_per_toroidal_mode_wave_cross_sectional_electric_field_amplitude&#x27; round-trips textually but changes the semantic IR. Reorder the outer-to-inner operators or correct their operands.): electric_field</td></tr>
+</tbody>
+</table>
+
+<h3 id="sib-cohort-rerun-isn-0-11-cost">Spend by phase</h3>
+
+<table id="sib-cohort-rerun-isn-0-11-cost-table">
+<caption>Calls and cost recorded against run 0ab927bc-907f-4a9e-8c45-0ae77b3bf04f</caption>
+<thead><tr><th>Phase</th><th>Calls</th><th>Cost [USD]</th></tr></thead>
+<tbody>
+<tr><td>generate_docs</td><td>3</td><td>0.262615</td></tr>
+<tr><td>generate_name</td><td>108</td><td>0.000000</td></tr>
+<tr><td>review_docs</td><td>6</td><td>0.001090</td></tr>
+<tr><td>review_name</td><td>3</td><td>0.000388</td></tr>
+<tr><td><strong>Total</strong></td><td>120</td><td><strong>0.264093</strong></td></tr>
+</tbody>
+</table>
+</section>
+</body>
+</html>
