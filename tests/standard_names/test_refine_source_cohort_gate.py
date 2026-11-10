@@ -46,7 +46,7 @@ def test_empty_authoritative_source_cohort_refuses_successor() -> None:
                     "effective_edit_include_accepted": None,
                 }
             ]
-        if "MERGE (new)-[:REFINED_FROM]->(old)" in cypher:
+        if "MERGE (new)-[lineage_edge:REFINED_FROM]->(old)" in cypher:
             return [{"old_name": params["old_name"], "new_name": params["new_name"]}]
         raise AssertionError(f"unexpected transaction query: {cypher}")
 
@@ -150,7 +150,7 @@ def _run_with_empty_cohort(row: dict[str, object]):
         seen.append(cypher)
         if "// REFINE_ATOMIC_PREFLIGHT" in cypher:
             return [row]
-        if "MERGE (new)-[:REFINED_FROM]->(old)" in cypher:
+        if "MERGE (new)-[lineage_edge:REFINED_FROM]->(old)" in cypher:
             return [{"old_name": params["old_name"], "new_name": params["new_name"]}]
         return []
 

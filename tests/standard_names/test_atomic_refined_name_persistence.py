@@ -67,7 +67,7 @@ def _transaction(
                     },
                 }
             ]
-        if "MERGE (new)-[:REFINED_FROM]->(old)" in cypher:
+        if "MERGE (new)-[lineage_edge:REFINED_FROM]->(old)" in cypher:
             return [
                 {
                     "old_name": "electron_density",
@@ -116,7 +116,7 @@ class _RacingEditTransaction:
                     },
                 }
             ]
-        if "MERGE (new)-[:REFINED_FROM]->(old)" in cypher:
+        if "MERGE (new)-[lineage_edge:REFINED_FROM]->(old)" in cypher:
             matches_snapshot = all(
                 self.state.get(field) == params.get(f"source_{field}")
                 for field in _EDIT_FIELDS
@@ -127,7 +127,6 @@ class _RacingEditTransaction:
                 else []
             )
         raise AssertionError(f"unexpected transaction query: {cypher}")
-
 
 
 def _graph(transaction: MagicMock) -> MagicMock:

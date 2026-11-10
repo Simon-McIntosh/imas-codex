@@ -234,6 +234,40 @@ class _TransactionQuery:
         return [dict(record) for record in self._transaction.run(cypher, **params)]
 
 
+def refined_from_cycle_guard_cypher(successor: str, predecessor: str) -> str:
+    """Refuse a cycle inside the statement that inserts a lineage edge.
+
+    The update-only clause also fits inside a conditional FOREACH, so embedded
+    lifecycle writers share exactly the same guard as standalone writers.
+    The caller encloses this clause and its MERGE in one FOREACH update block:
+    each row checks and inserts together instead of prechecking an entire batch.
+    Lock both connected lineage components before checking the reverse path;
+    adjacent insertions then serialize even when their endpoints differ.
+    Reassigning each id to itself takes a write lock without changing its value.
+
+    Cypher has no built-in assertion statement. Parsing an explicitly invalid
+    datetime raises a native client error only on the refusal branch, aborting
+    the entire transaction, including source moves earlier in the statement.
+    This requires no optional database extension or persistent lock property.
+    """
+    if not successor.isidentifier() or not predecessor.isidentifier():
+        raise ValueError("lineage guard requires Cypher variable identifiers")
+    return f"""
+        // REFINED_FROM_CYCLE_GUARD
+        FOREACH (lineage_member IN COLLECT {{
+          UNWIND [{successor}, {predecessor}] AS lineage_endpoint
+          MATCH (lineage_endpoint)-[:REFINED_FROM*0..]-(lineage_member:StandardName)
+          RETURN DISTINCT lineage_member ORDER BY lineage_member.id
+        }} | SET lineage_member.id = lineage_member.id)
+        FOREACH (_ IN CASE WHEN {successor} = {predecessor}
+          OR EXISTS {{ MATCH ({predecessor})-[:REFINED_FROM*1..]->({successor}) }}
+          THEN [1] ELSE [] END |
+          SET {successor}.id = datetime('REFINED_FROM cycle: '
+            + {successor}.id + ' -> ' + {predecessor}.id)
+        )
+    """
+
+
 def _ensure_json(value: Any) -> str | None:
     """Ensure a value is a JSON string, not a raw dict/list (Neo4j rejects Maps)."""
     if value is None:
@@ -696,9 +730,8 @@ def _extract_links_from_docs(
     When ``self_name`` is set, a ``name:<self_name>`` reference is
     dropped: prose may legitimately mention the current entry by name
     in one or more paragraphs, but the structured ``links`` index is a
-    cross-reference list and a self-loop is meaningless. The ISNC
-    SQLite catalog enforces UNIQUE(name, link) and a self-reference
-    that survived deduplication used to crash ``validate_catalog``.
+    cross-reference list and a self-loop is meaningless. The structured index
+    therefore omits self-references before the catalog consumes it.
     """
     if not documentation:
         return None

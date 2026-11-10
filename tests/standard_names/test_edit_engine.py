@@ -691,7 +691,7 @@ class FakeGraph:
                 }
             ]
 
-        if "MERGE (new)-[:REFINED_FROM]->(old)" in cypher:
+        if "MERGE (new)-[lineage_edge:REFINED_FROM]->(old)" in cypher:
             old_name = params["old_name"]
             new_name = params["new_name"]
             old = self.nodes.get(old_name)
