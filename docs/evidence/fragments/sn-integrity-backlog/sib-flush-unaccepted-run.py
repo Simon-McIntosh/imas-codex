@@ -61,6 +61,58 @@ def stage_counts(gc: Any) -> dict[str, int]:
     return {str(row["stage"]): int(row["count"]) for row in rows}
 
 
+def docs_stage_counts(gc: Any) -> dict[str, int]:
+    rows = gc.query(
+        """
+        MATCH (n:StandardName)
+        RETURN coalesce(n.docs_stage, '') AS stage, count(*) AS count
+        ORDER BY stage
+        """
+    )
+    return {str(row["stage"]): int(row["count"]) for row in rows}
+
+
+def excluded_source_state(gc: Any, path: str) -> dict[str, Any]:
+    """Raw graph state of one DD source the census classifier cannot place.
+
+    Reported whole rather than summarised, because a source that satisfies no
+    census class is a state the reader has to judge: its status, attempt count,
+    claim and every produced-name edge with that name's stages.
+    """
+    rows = gc.query(
+        """
+        MATCH (s:StandardNameSource {source_id: $path})
+        OPTIONAL MATCH (s)-[r:PRODUCED_NAME]->(sn:StandardName)
+        RETURN s.id AS sid, properties(s) AS props,
+               collect(DISTINCT {
+                   rel: type(r),
+                   id: sn.id,
+                   name_stage: sn.name_stage,
+                   docs_stage: sn.docs_stage,
+                   lifecycle: coalesce(sn.lifecycle_status, sn.lifecycle, '')
+               }) AS edges
+        """,
+        path=path,
+    )
+    records = []
+    for row in rows:
+        props = {}
+        for key, value in dict(row["props"]).items():
+            if isinstance(value, (str, int, float, bool)) or value is None:
+                props[key] = value if not isinstance(value, str) or len(value) <= 300 else value[:300] + "…"
+            elif isinstance(value, (list, tuple)) and len(value) <= 20:
+                props[key] = [_jsonable(v) for v in value]
+        edges = [
+            {
+                k: (_jsonable(v) if k != "rel" else v)
+                for k, v in dict(edge).items()
+            }
+            for edge in (row["edges"] or [])
+        ]
+        records.append({"source_id": path, "sid": row["sid"], "props": props, "edges": edges})
+    return {"source_id": path, "matched_sources": len(records), "records": records}
+
+
 def guarded_rows_digest(
     gc: Any, stages: tuple[str, ...] = GUARDED_STAGES
 ) -> dict[str, Any]:
@@ -179,10 +231,18 @@ def measure(zero_spend: bool) -> dict[str, Any]:
         unaccepted = {
             sid: rec for sid, rec in sources.items() if sid not in accepted_set
         }
-        source_classes = Counter(
-            census.classify_source(rec) for rec in unaccepted.values()
-        )
+        source_classes: Counter[str] = Counter()
+        excluded: dict[str, dict[str, Any]] = {}
+        for rec in unaccepted.values():
+            try:
+                source_classes[census.classify_source(rec)] += 1
+            except Exception as exc:  # a source in a state no census class covers
+                excluded[str(rec["path"])] = {
+                    "classifier_error": f"{type(exc).__name__}: {exc}",
+                    "raw_state": excluded_source_state(gc, str(rec["path"])),
+                }
         stages = stage_counts(gc)
+        docs_stages = docs_stage_counts(gc)
         guarded = guarded_rows_digest(gc)
         control = sensitivity_control(gc)
 
@@ -195,7 +255,10 @@ def measure(zero_spend: bool) -> dict[str, Any]:
         "source_classes": {
             cls: int(source_classes.get(cls, 0)) for cls in census.CLASSES
         },
+        "sources_classified": int(sum(source_classes.values())),
+        "excluded_sources": excluded,
         "name_stage_counts": stages,
+        "docs_stage_counts": docs_stages,
         "guarded_rows": guarded,
         "digest_sensitivity_control": control,
         "export_gate": export_gate() if not zero_spend else None,
