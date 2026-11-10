@@ -27,6 +27,11 @@
       "kind": "exempted",
       "reason": "the user-global rule says a session on the fleet allocation (SLURM_JOB_ID set) runs heavy gates in place and never submits them to a debug partition; the eight-worker run inside job 1291586 is the prescribed placement",
       "recorded_at": "2026-11-10T21:28:44.314908+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "sib-lineage-cycle-guard",
+      "recorded_at": "2026-11-10T21:29:01.406155+00:00"
     }
   },
   "findings": [
