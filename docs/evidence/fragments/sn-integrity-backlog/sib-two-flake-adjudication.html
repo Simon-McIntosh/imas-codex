@@ -1,0 +1,91 @@
+<section id="sib-two-flake-adjudication" class="r-evidence">
+<h2>sib-two-flake-adjudication — the two suite failures beside a test-only change are environmental</h2>
+
+<p id="sib-two-flake-adjudication-question">The canonical-adoption test node
+(<code>a09b04998</code>, one test file added, 34 lines) was reviewed against a
+base of <code>197de19cd</code>. Its suite arm reported two failures beside an
+otherwise green run:
+<code>tests/standard_names/fanout/test_dispatcher.py::TestSyncTimeouts::test_total_timeout_with_sync_helpers</code>
+and
+<code>tests/standard_names/test_review_pipeline.py::test_audit_embedding_preflight</code>.
+Neither file is touched by the head commit — its diff is
+<code>tests/standard_names/test_canonical_order_adoption.py</code> alone — so the
+question is whether both ids are load-sensitive rather than regressed.</p>
+
+<p id="sib-two-flake-adjudication-method">Each arm is a <code>git archive</code>
+extraction of its own revision plus a copy of the five generated files
+(<code>imas_codex/graph/models.py</code>, <code>imas_codex/graph/dd_models.py</code>,
+<code>imas_codex/config/models.py</code>,
+<code>imas_codex/graph/schema_context_data.py</code>,
+<code>agents/schema-reference.md</code>), never the shared tree. Each run is one
+serial invocation of both ids, one log per run, run from the archive tree with
+the shared project environment read-only
+(<code>UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv
+PYTHONPATH=&lt;tree&gt; uv run --no-sync pytest</code>), so the package code
+imported is the revision's own. The embedding service was probed before and
+after every run with <code>curl -m 5 http://localhost:18765/health</code>.</p>
+
+<table id="sib-two-flake-adjudication-runs">
+<caption>Three serial runs per arm. <code>preflight call</code> is the
+<code>test_audit_embedding_preflight</code> call duration pytest reported;
+the dispatcher id's call stayed between 0.53 s and 0.57 s in all six runs.</caption>
+<thead><tr><th>run</th><th>revision</th><th>dispatcher id</th><th>preflight id</th><th>preflight call</th><th>run total</th><th>embedding <code>/health</code></th><th>EXIT</th></tr></thead>
+<tbody>
+<tr><td>base 1</td><td><code>197de19cd</code></td><td>PASS</td><td>PASS</td><td>12.08 s</td><td>35.29 s</td><td><code>000</code> refused</td><td>0</td></tr>
+<tr><td>base 2</td><td><code>197de19cd</code></td><td>PASS</td><td>PASS</td><td>20.47 s</td><td>43.63 s</td><td><code>000</code> refused</td><td>0</td></tr>
+<tr><td>base 3</td><td><code>197de19cd</code></td><td>PASS</td><td><strong>FAIL</strong> — <code>Timeout (&gt;30.0s)</code></td><td>30.00 s (cut off)</td><td>51.39 s</td><td><code>000</code> refused</td><td>1</td></tr>
+<tr><td>head 1</td><td><code>a09b04998</code></td><td>PASS</td><td>PASS</td><td>14.01 s</td><td>36.08 s</td><td><code>000</code> refused</td><td>0</td></tr>
+<tr><td>head 2</td><td><code>a09b04998</code></td><td>PASS</td><td>PASS</td><td>17.08 s</td><td>33.62 s</td><td><code>000</code> refused</td><td>0</td></tr>
+<tr><td>head 3</td><td><code>a09b04998</code></td><td>PASS</td><td>PASS</td><td>8.38 s</td><td>23.54 s</td><td><code>000</code> refused</td><td>0</td></tr>
+</tbody>
+</table>
+
+<p id="sib-two-flake-adjudication-verdict"><strong>Verdict: environmental.</strong>
+<code>test_audit_embedding_preflight</code> passes at least once at head (3 of 3)
+and fails at least once at base (base 3), which is the declared environmental
+condition, met exactly:
+<code>Failed: Timeout (&gt;30.0s) from pytest-timeout</code> at
+<code>tests/standard_names/test_review_pipeline.py:53</code>
+(<code>report = run_embedding_preflight(names)</code>).
+<code>test_total_timeout_with_sync_helpers</code> passes at both arms (3 of 3
+each), so it satisfies neither the fail-at-base branch nor any
+head-attributable reading: a test that passes at head cannot be a head
+regression, and its call time is flat at 0.53–0.57 s against a 2.5 s assertion,
+so the suite-run failure does not reproduce in isolation at either revision. No
+product or test file changed in this node.</p>
+
+<p id="sib-two-flake-adjudication-mechanism">The same test id spans 8.38 s to
+30.00 s of call time across the six runs, on both arms alike — the distribution
+straddles the repository's 30 s per-test budget rather than shifting between
+revisions. The cost is the preflight's own import path, not its assertions: with
+the embedding server unavailable (connection refused at every probe), the
+preflight's re-embed branch at
+<code>imas_codex/embeddings/description.py:85</code> constructs the local
+encoder, whose <code>_load_model</code> imports <code>torch</code> and
+<code>torch</code> then enumerates every installed distribution's entry points
+(<code>importlib.metadata.entry_points</code>) over the shared
+<code>site-packages</code>. The failing run's chained traceback shows that walk
+inside <code>dist.entry_points</code> for
+<code>mdurl-0.1.2.dist-info</code>, which carries no
+<code>entry_points.txt</code>; the suppression around the read is entered and
+the run is cut off inside it. Under this workstation's load (load average 40–53
+on 8 CPUs during the runs) the walk plus model load exceeds 30 s. The tree's own
+modules are not in that path.</p>
+
+<p id="sib-two-flake-adjudication-parallel">A further arm ran the same two ids
+under <code>pytest -n 8</code> at head, three times; all three exited 0 with both
+ids passing. The failure therefore is not reproduced by parallel pytest
+scheduling either, which points at the shared environment's import cost and the
+node's external load rather than at intra-suite contention.</p>
+
+<p id="sib-two-flake-adjudication-caveat">The measurement runs against the shared
+project environment, as the worktree recipe prescribes, so third-party package
+state (<code>torch</code>, <code>mdurl</code>) is the shared checkout's and not
+the revision's. That is a property of the instrument rather than of either arm,
+and it is the reason the observed failure is read as environmental: the same
+third-party state is present at both revisions and the one failure lands in it.
+The preflight id is load-sensitive by construction wherever this environment is
+used, because its re-embed branch loads a local model whenever the embedding
+service is down — which it was at every probe: before and after each of the six
+serial runs (12 probes), each a connection refusal.</p>
+</section>
