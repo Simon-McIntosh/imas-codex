@@ -1,0 +1,123 @@
+{
+  "added_failure_attribution": "all four are properties of the git-archive head tree, not of the pin: the three-tree focused re-run gives base worktree 6 passed exit 0, head archive 4 failed 2 passed exit 1, head worktree 6 passed exit 0; so no failure is attributable to the change.",
+  "added_failure_count": 4,
+  "added_failure_ids": [
+    "tests/standard_names/test_catalog_layout_hierarchy.py::TestOrderingCycleDetection::test_export_ledgers_cycle_and_writes_packet",
+    "tests/standard_names/test_manifest_generability.py::test_a_cut_refuses_a_manifest_it_cannot_generate_rather_than_counting",
+    "tests/standard_names/test_manifest_generability.py::test_a_manifest_whose_sources_all_reach_a_name_is_not_refused",
+    "tests/standard_names/test_manifest_generability.py::test_every_manifest_source_is_carried_or_names_its_blocking_mechanism"
+  ],
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/standard_names/grammar_sync.py:258",
+    "imas_codex/cli/sn.py:1403",
+    "imas_codex/cli/sn.py:5744",
+    "hatch_build_hooks.py:202"
+  ],
+  "completed_at": "2026-11-10T18:57:17.330Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "a dependency pin and a graph sync; durability lives in the release process, not in this node",
+      "recorded_at": "2026-11-10T19:02:57.515470+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-10T18:44:04Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "log names lack the extension the manifest gives them; the logs exist under the run directory and the verdict does not rest on them",
+      "recorded_at": "2026-11-10T19:01:45.459007+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "coordinator accepts the deviation explicitly: the unmet clause was a brief error, operators are not GrammarTokens by design",
+      "recorded_at": "2026-11-10T19:01:56.830238+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "the four extra head failures are the known archive-only ids (manifest generability x3, ordering-cycle layout) that pass in a git checkout, disproved here by a focused re-run",
+      "recorded_at": "2026-11-10T19:02:13.101960+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "the editable override is the repository's standing local-development choice; the pins govern CI and fresh checkouts",
+      "recorded_at": "2026-11-10T19:02:25.558655+00:00"
+    },
+    "4": {
+      "kind": "exempted",
+      "reason": "a pin-value test belongs to a release check rather than this pin-and-sync node, whose scope excluded tests",
+      "recorded_at": "2026-11-10T19:02:42.200964+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T165137050208-sib-isn-pin-0-11-0/manifest.md",
+      "line": 16,
+      "severity": "non-blocking",
+      "text": "test_logs names base_refocus.log, head_refocus.log and worktree_refocus.log, but the files on disk are base_refocus, head_refocus and worktree_refocus with no extension, so three of the cited logs return ENOENT to any reader or promotion guard that follows the path."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T165137050208-sib-isn-pin-0-11-0/manifest.md",
+      "line": 5,
+      "severity": "non-blocking",
+      "text": "status reads complete while line 28 records a done-when clause as unsatisfiable and logs/grammar_sync_0110.log ends VERDICT=failed EXIT=1; the deviation is disclosed but needs the coordinator to accept it explicitly rather than read as a satisfied measure."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T165137050208-sib-isn-pin-0-11-0/manifest.md",
+      "line": 23,
+      "severity": "non-blocking",
+      "text": "the comparable head arm ran in a git-archive tree, so four of its thirteen failures are tree artefacts; the disproof is a focused six-test re-run and the worktree head arm was truncated one step short of its summary, leaving the base-to-head comparison weaker than a complete status implies."
+    },
+    {
+      "file": "pyproject.toml",
+      "line": 1204,
+      "severity": "non-blocking",
+      "text": "the [tool.uv.sources] editable override redirects imas-standard-names to ../imas-standard-names, so the ==0.11.0 pins at pyproject.toml:18 and :186 are enforced by no sync in this checkout and uv.lock records neither specifier nor version; the shared environment still reports 0.10.1 dist metadata and nothing in the tree fails if the pins drift."
+    },
+    {
+      "file": "tests/core/test_isn_pin_agreement.py",
+      "line": 59,
+      "severity": "non-blocking",
+      "text": "the only test over the landed change asserts the two pins agree on one version and never names 0.11.0, so it passes when both sites are reverted together; the node's write paths excluded tests, so the guard a durability claim needs belongs to a follow-on node with tests in scope."
+    }
+  ],
+  "independent_verification": "queried the live graph for this review: MATCH (v:ISNGrammarVersion {active:true}) returned one row at 0.11.0 with digest sha256:5eac6bca; 1031 GrammarToken at 0.11.0; power_convertor (device, object), stress and delta_prime (physical_base) present and argmax_with_respect_to absent, matching the record.",
+  "item_verdicts": {
+    "call_sites": "imas_codex/standard_names/grammar_sync.py:258, imas_codex/cli/sn.py:1403, imas_codex/cli/sn.py:5744, hatch_build_hooks.py:202",
+    "diff": "read all four commits against da4e6748f; 2 files, 165 insertions and 2 deletions, all in scope; no source or test change and therefore no added assertion.",
+    "done_when": "pins, uv.lock, active version, token count and added-failure clause are evidenced, but the argmax_with_respect_to read-back is unmet and logs/grammar_sync_0110.log ends VERDICT=failed EXIT=1.",
+    "goal": "the goal is to pin imas-codex to the released ISN grammar and sync the graph's grammar snapshot; pyproject.toml:18 and :186 read ==0.11.0 and the graph's active ISNGrammarVersion is 0.11.0 (digest sha256:5eac6bca), so both halves are in place.",
+    "manifest": "read; complete, four commits, both suite arms recorded, but three test_logs paths name no file because the logs carry no .log extension.",
+    "write_paths": "four declared paths; the diff touches pyproject.toml and the fragment only, uv.lock is correctly unchanged and docs/figures is unused."
+  },
+  "justifications": {
+    "durability": "no assertion is added, and the only guard over the landed pin, tests/core/test_isn_pin_agreement.py:59, passes if both sites are reverted to 0.10.1 together, so it catches a one-site regression and not the regression this change is.",
+    "evidence": "logs/baseline_tests_standard_names.log and logs/head_tests_standard_names.log are complete arms at their own revisions, but the head arm ran in a git-archive tree rather than the worktree, three log paths named in manifest.md:16 do not resolve, and logs/grammar_sync_0110.log ends EXIT=1 while the record claims complete.",
+    "fit": "the fragment at docs/evidence/fragments/sn-integrity-backlog/sib-isn-pin-0-11-0.html is balanced, all seven element ids carry the node prefix, and it sits beside its siblings, while the pin edit follows the existing two-site form at pyproject.toml:18 and pyproject.toml:186.",
+    "goal_fidelity": "pyproject.toml:18 and pyproject.toml:186 read ==0.11.0 and the graph's single active ISNGrammarVersion is 0.11.0 with 1031 GrammarToken, so the goal is met in both places it names.",
+    "reuse": "the run adds no definition; it drove the sync through the owner of the capability, imas_codex/standard_names/grammar_sync.py:258, the same helper reached from imas_codex/cli/sn.py:1403, imas_codex/cli/sn.py:5744 and hatch_build_hooks.py:202, and a search of imas_codex/standard_names/ and imas_codex/cli/ found no other grammar-sync path.",
+    "scope_discipline": "every path in the diff -- pyproject.toml and docs/evidence/fragments/sn-integrity-backlog/sib-isn-pin-0-11-0.html -- is inside the four declared write paths, and uv.lock carried no change to make."
+  },
+  "node": "review-of-sib-isn-pin-0-11-0-89d83c43327c",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to pin imas-codex to the released ISN grammar and sync the graph's grammar snapshot to it; pyproject.toml:18 and pyproject.toml:186 both read imas-standard-names==0.11.0, and a live query run for this review returns exactly one active ISNGrammarVersion, version 0.11.0 with digest sha256:5eac6bcabd5bb3dd3529e366eb494bbc750b8b987dd43e7ffd7466e49e233ef2, so both halves of the goal are in place.\nVERDICT done_when: the done_when requires both pins at 0.11.0, uv.lock refreshed, the graph active version at 0.11.0 through the sync path with a non-zero token count at least the previous version's, four token read-backs, the evidence fragment, and no added failure id in tests/standard_names; the first, third and sixth are evidenced (logs/uv_lock.log reads LOCK_EXIT=0 DIFF_EMPTY=yes; baseline 9 against head 13 failures; 1031 GrammarToken against 983) but the argmax_with_respect_to read-back is unmet and the node's own instrument records it, ending logs/grammar_sync_0110.log with VERDICT=failed and EXIT=1.\nVERDICT write_paths: the node declared pyproject.toml, uv.lock, docs/evidence/fragments/sn-integrity-backlog/sib-isn-pin-0-11-0.html and docs/figures/sn-integrity-backlog/sib-isn-pin-0-11-0; the diff touches only the first and the fragment, uv.lock is unchanged because the editable path source records no specifier, and the figures directory is unused.\nVERDICT manifest: read at its own path; it reports status complete, four commits, base and head suite totals with their failure ids, a failure_attribution mapping the four head-only ids to the git-archive tree, and blockers naming the unmet clause, but three of its test_logs entries \u2014 base_refocus.log, head_refocus.log and worktree_refocus.log \u2014 name no file on disk, because those logs exist without the .log extension.\nVERDICT diff: read commit by commit against da4e6748f24c9e421ddbfbdf894a6834cdae57fa; two files change with 165 insertions and 2 deletions, all inside the declared scope; no product source and no test changes, so the run adds no assertion at all, and the pin's only structural guard is the pre-existing tests/core/test_isn_pin_agreement.py:36-59, which asserts the two sites agree but never asserts which version they agree on.\nCALL_SITES: imas_codex/standard_names/grammar_sync.py:258, imas_codex/cli/sn.py:1403, imas_codex/cli/sn.py:5744, hatch_build_hooks.py:202\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: pyproject.toml:18 and pyproject.toml:186 read ==0.11.0 and the graph's single active ISNGrammarVersion is 0.11.0 with 1031 GrammarToken, so the goal is met in both places it names.\nSCORE evidence: 13\nJUSTIFICATION evidence: logs/baseline_tests_standard_names.log and logs/head_tests_standard_names.log are complete arms at their own revisions, but the head arm ran in a git-archive tree rather than the worktree, three log paths named in manifest.md:16 do not resolve, and logs/grammar_sync_0110.log ends EXIT=1 while the record claims complete.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff -- pyproject.toml and docs/evidence/fragments/sn-integrity-backlog/sib-isn-pin-0-11-0.html -- is inside the four declared write paths, and uv.lock carried no change to make.\nSCORE durability: 8\nJUSTIFICATION durability: no assertion is added, and the only guard over the landed pin, tests/core/test_isn_pin_agreement.py:59, passes if both sites are reverted to 0.10.1 together, so it catches a one-site regression and not the regression this change is.\nSCORE fit: 16\nJUSTIFICATION fit: the fragment at docs/evidence/fragments/sn-integrity-backlog/sib-isn-pin-0-11-0.html is balanced, all seven element ids carry the node prefix, and it sits beside its siblings, while the pin edit follows the existing two-site form at pyproject.toml:18 and pyproject.toml:186.\nSCORE reuse: 20\nJUSTIFICATION reuse: the run adds no definition; it drove the sync through the owner, imas_codex/standard_names/grammar_sync.py:258 sync_isn_grammar_to_graph, the same helper reached from imas_codex/cli/sn.py:1403, imas_codex/cli/sn.py:5744 and hatch_build_hooks.py:202, and a search of imas_codex/standard_names/ and imas_codex/cli/ found no other grammar-sync path.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T165137050208-sib-isn-pin-0-11-0/manifest.md:16 non-blocking: the test_logs line names base_refocus.log, head_refocus.log and worktree_refocus.log, but the files on disk are base_refocus, head_refocus and worktree_refocus with no extension, so a reader or a promotion guard following the cited paths gets ENOENT for three of the six logs the record's evidence rests on.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T165137050208-sib-isn-pin-0-11-0/manifest.md:5 non-blocking: status reads complete while manifest.md:28 records one done-when clause as unsatisfiable and logs/grammar_sync_0110.log ends VERDICT=failed with EXIT=1, so the node's own verdict and its own instrument disagree; the deviation is disclosed and needs the coordinator to accept it explicitly rather than being read as a satisfied measure.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T165137050208-sib-isn-pin-0-11-0/manifest.md:23 non-blocking: the comparable head arm ran in a git-archive tree rather than in the worktree, so four of the thirteen head failures are properties of an under-provisioned tree; the three-tree refocus log that disproves them is a focused six-test re-run, not a same-shape arm, and the worktree head arm was truncated one step short of its summary, leaving the base-to-head comparison weaker than the record's complete status implies.\nFINDING pyproject.toml:1204 non-blocking: the [tool.uv.sources] editable override redirects imas-standard-names to ../imas-standard-names, so the ==0.11.0 pins at pyproject.toml:18 and pyproject.toml:186 are not enforced by any sync in this checkout and uv.lock records neither specifier nor version; the shared environment still reports 0.10.1 dist metadata, so nothing in the tree fails if the pins drift.\nFINDING tests/core/test_isn_pin_agreement.py:59 non-blocking: the only test over the landed change asserts the two pins agree on one version and never names 0.11.0, and the node's write paths excluded tests, so the pin has no guard that fails when it regresses; the repair belongs to a follow-on node with tests in scope.\n",
+  "review_run_id": "r-20261110T184153321857-review-of-sib-isn-pin-0-11-0-89d83c43327c",
+  "reviewed_base_sha": "da4e6748f24c9e421ddbfbdf894a6834cdae57fa",
+  "reviewed_diff_summary": "4 commits against da4e6748f24c9e421ddbfbdf894a6834cdae57fa: 8bfafcf35 (deps pin), 2c2f0ac43, 6046a488e, 89d83c433 (evidence fragment and its corrections); pyproject.toml +2/-2 and one new 163-line evidence fragment.",
+  "reviewed_head_sha": "89d83c43327c1405e12ed4ea8e77f9fa7296564c",
+  "reviewed_node": "sib-isn-pin-0-11-0",
+  "reviewed_run_id": "r-20261110T165137050208-sib-isn-pin-0-11-0",
+  "scores": {
+    "durability": 8,
+    "evidence": 13,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-10T19:13:21.812637+00:00",
+  "total": 95
+}
