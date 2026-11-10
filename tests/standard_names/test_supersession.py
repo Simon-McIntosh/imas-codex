@@ -114,7 +114,7 @@ class TestPersistRefinedNameRecording:
             def run(self, cypher, **kwargs):
                 if "new_name" not in kwargs or "old_name" not in kwargs:
                     return []
-                if "MERGE (new)-[:REFINED_FROM]->(old)" in cypher:
+                if "MERGE (new)-[lineage_edge:REFINED_FROM]->(old)" in cypher:
                     captured["cypher"] = cypher
                 return [
                     {"new_name": kwargs["new_name"], "old_name": kwargs["old_name"]}
