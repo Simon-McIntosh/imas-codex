@@ -307,6 +307,44 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "73cf96a30e1fc3571f53706a77d1d215b7c57d0c",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 1849397,
+    "scratch_host": "98dci4-clu-2023.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261110T214511614246-review-of-sib-consistency-census-4eb2a2f7c4d4",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 1849397,
+        "path": "/tmp/reckon-crew-scratch/r-20261110T214511614246-review-of-sib-consistency-census-4eb2a2f7c4d4"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/review-of-sib-consistency-census-4eb2a2f7c4d4",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],
