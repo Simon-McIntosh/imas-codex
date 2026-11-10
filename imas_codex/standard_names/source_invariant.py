@@ -58,7 +58,9 @@ def _supersede_update(name: str, successor: str) -> str:
             {name}.status = 'superseded',
             {name}.claimed_at = null,
             {name}.claim_token = null
-        MERGE ({successor})-[:REFINED_FROM]->({name}))"""
+        MERGE ({successor})-[lineage_edge:REFINED_FROM]->({name})
+        ON CREATE SET lineage_edge.writer = 'source_invariant.supersede_drained_name_cypher',
+                      lineage_edge.created_at = datetime())"""
     )
 
 

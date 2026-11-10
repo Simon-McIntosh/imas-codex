@@ -432,7 +432,9 @@ def supersede_prior_source_names(
                 + "FOREACH (lineage_write IN [1] | "
                 + refined_from_cycle_guard_cypher("new", "old")
                 + """
-                MERGE (new)-[:REFINED_FROM]->(old))
+                MERGE (new)-[lineage_edge:REFINED_FROM]->(old)
+                ON CREATE SET lineage_edge.writer = 'graph_supersession.supersede_prior_source_names',
+                              lineage_edge.created_at = datetime())
                 RETURN old.id AS old_name, new.id AS new_name
                 """,
                 plans=[
@@ -641,7 +643,9 @@ def tombstone_supersede_into(
                     + "FOREACH (lineage_write IN [1] | "
                     + refined_from_cycle_guard_cypher("into", "old")
                     + """
-            MERGE (into)-[:REFINED_FROM]->(old))
+            MERGE (into)-[lineage_edge:REFINED_FROM]->(old)
+            ON CREATE SET lineage_edge.writer = 'graph_supersession.tombstone_supersede_into',
+                          lineage_edge.created_at = datetime())
             RETURN old.id AS old_id, into.id AS into_id
             """,
                     old_id=old_id,

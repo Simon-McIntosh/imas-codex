@@ -1558,7 +1558,9 @@ SET old.superseded_from_stage = $predecessor_stage,
     + "FOREACH (lineage_write IN [1] | "
     + refined_from_cycle_guard_cypher("target", "old")
     + """
-MERGE (target)-[:REFINED_FROM]->(old))
+MERGE (target)-[lineage_edge:REFINED_FROM]->(old)
+ON CREATE SET lineage_edge.writer = 'edit.supersede_into',
+              lineage_edge.created_at = datetime())
 RETURN old.name_stage AS old_stage,
        old.superseded_from_stage AS predecessor_stage,
        target.name_stage AS target_stage
@@ -3374,7 +3376,9 @@ FOREACH (_ IN CASE WHEN $link_lineage THEN [1] ELSE [] END |
     + "FOREACH (lineage_write IN [1] | "
     + refined_from_cycle_guard_cypher("tomb", "old")
     + """
-  MERGE (tomb)-[:REFINED_FROM]->(old)))
+  MERGE (tomb)-[lineage_edge:REFINED_FROM]->(old)
+  ON CREATE SET lineage_edge.writer = 'edit._apply_reclaim_rename',
+                lineage_edge.created_at = datetime()))
 CREATE (change:StandardNameChange {
   id: $change_id,
   from_name: $old_id,

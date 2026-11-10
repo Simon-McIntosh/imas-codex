@@ -2804,7 +2804,9 @@ def mark_sources_stale(source_ids: list[str], *, services: Any) -> int:
             + "FOREACH (lineage_write IN [1] | "
             + refined_from_cycle_guard_cypher("holder", "sn")
             + """
-                MERGE (holder)-[:REFINED_FROM]->(sn))
+                MERGE (holder)-[lineage_edge:REFINED_FROM]->(sn)
+                ON CREATE SET lineage_edge.writer = 'graph_source_bindings.mark_sources_stale',
+                              lineage_edge.created_at = datetime())
               )
               RETURN collect(
                 CASE WHEN sn IS NULL THEN null ELSE

@@ -70,6 +70,18 @@ def _state() -> list[dict]:
             """)
 
 
+def _assert_lineage_provenance(writer: str) -> None:
+    """Read the newly created edge and its database-clock creation time."""
+    with GraphClient() as gc:
+        rows = gc.query("""
+            MATCH ()-[edge:REFINED_FROM]->()
+            RETURN edge.writer AS writer,
+                   edge.created_at >= datetime() - duration('PT5M')
+                   AND edge.created_at <= datetime() AS recent
+            """)
+    assert rows == [{"writer": writer, "recent": True}]
+
+
 def _stale_writer() -> int:
     from types import SimpleNamespace
 
@@ -95,6 +107,7 @@ def test_removed_path_writer_refuses_cycle(disposable_neo4j_empty: str) -> None:
 def test_removed_path_writer_writes_acyclic_edge(disposable_neo4j_empty: str) -> None:
     _seed_removed_path(closes_cycle=False)
     assert _stale_writer() == 1
+    _assert_lineage_provenance("graph_source_bindings.mark_sources_stale")
     with GraphClient() as gc:
         assert gc.query("""
             MATCH (holder:StandardName {id: 'electron_number_density'})
@@ -171,6 +184,7 @@ def test_last_source_writers(
         assert _state() == before
     else:
         apply()
+        _assert_lineage_provenance("source_invariant.supersede_drained_name_cypher")
         with GraphClient() as gc:
             assert gc.query(
                 """
@@ -232,6 +246,13 @@ def test_identity_writers(
     if closes_cycle:
         assert _state() == before
     else:
+        _assert_lineage_provenance(
+            {
+                "refine": "graph_refinement.persist_refined_name",
+                "edit_fold": "edit.supersede_into",
+                "tombstone_fold": "graph_supersession.tombstone_supersede_into",
+            }[writer]
+        )
         with GraphClient() as gc:
             assert gc.query(
                 """
@@ -278,6 +299,7 @@ def test_regeneration_writer(disposable_neo4j_empty: str, closes_cycle: bool) ->
         assert _state() == before
     else:
         assert apply() == 1
+        _assert_lineage_provenance("graph_supersession.supersede_prior_source_names")
         with GraphClient() as gc:
             assert gc.query(
                 """
@@ -334,6 +356,7 @@ def test_reclaim_mutation_boundary(
             assert gc.query(_RECLAIM_MUTATION_QUERY, **params) == [
                 {"revived_stage": "reviewed", "retired_stage": "superseded"}
             ]
+            _assert_lineage_provenance("edit._apply_reclaim_rename")
             assert gc.query(
                 """
                 MATCH (:StandardName {id: $new_id})-[:REFINED_FROM]->

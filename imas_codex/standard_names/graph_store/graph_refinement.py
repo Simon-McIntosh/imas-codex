@@ -1206,7 +1206,9 @@ def persist_refined_name(
                         + "FOREACH (lineage_write IN [1] | "
                         + refined_from_cycle_guard_cypher("new", "old")
                         + """
-                        MERGE (new)-[:REFINED_FROM]->(old))
+                        MERGE (new)-[lineage_edge:REFINED_FROM]->(old)
+                        ON CREATE SET lineage_edge.writer = 'graph_refinement.persist_refined_name',
+                                      lineage_edge.created_at = datetime())
 
                         // 3. Mark old as superseded, clear claim
                         //
