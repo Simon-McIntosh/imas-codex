@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="450">
+<meta name="plan-version" content="451">
 <meta name="plan-modified" content="2026-11-10">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -1390,7 +1390,10 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
     <div class="r-comment-body"><p>Reran the 143-source cohort's 55 live unproduced sources after a signed reset of the 35 terminal-failed ones (35 receipts, 35 verified, of which 15 were at the claim cap and 20 below it, 4 structure sources refused for want of an immutable snapshot), producing 4 more names for 92 of 143 against the 100 floor, spending USD 0.264093 of USD 10 selected by run 0ab927bc and leaving USD 279.735907 of USD 280; export blocking set stayed 0 and sourceless live drafts stayed at 3.</p></div>
 </div>
 <div class="r-comment" data-section="s51" data-id="c-run-r-20261110T215636081353-review-of-sib-vocab-gap-requeue-7cc4da3e7130" data-who="reckon-build" data-when="2026-11-10T22:19:40.192Z">
-    <div class="r-comment-body"><p>independent review of r-20261110T210102261723-sib-vocab-gap-requeue at head 7cc4da3e7 / base de46fb8855 — six dimensions scored (goal_fidelity 15, evidence 10, scope_discipline 19, durability 12, fit 17, reuse 14), one blocking finding (the fragment&#x27;s six-produced-names headline counts two names a peer produced before the rerun; the node&#x27;s own production is 4 names and 2 accepted scores) and two non-blocking findings, added_failure_count 0 over an empty id list because the reviewed run recorded no baseline_suite/after_suite pair</p></div>
+    <div class="r-comment-body"><p>independent review of r-20261110T210102261723-sib-vocab-gap-requeue at head 7cc4da3e7 / base de46fb8855 — six dimensions scored (goal_fidelity 15, evidence 10, scope_discipline 19, durability 12, fit 17, reuse 14), one blocking finding (the fragment's six-produced-names headline counts two names a peer produced before the rerun; the node's own production is 4 names and 2 accepted scores) and two non-blocking findings, added_failure_count 0 over an empty id list because the reviewed run recorded no baseline_suite/after_suite pair</p></div>
+</div>
+<div class="r-comment" data-section="s51" data-id="c-run-r-20261110T215919887569-sib-retry-receipt-correction" data-who="reckon-build" data-when="2026-11-10T22:27:14.275Z">
+    <div class="r-comment-body"><p>Correction records appended for the 20 cohort sources reset below the claim cap: 20 new StandardNameSourceRetry records, each linked by CORRECTS to the receipt it corrects, read back as 20 of 20 with the originals unchanged and a negative control that writes 0 rows for a source reset at the cap (evidence: docs/evidence/fragments/sn-integrity-backlog/sib-retry-receipt-correction.html).</p></div>
 </div>
 <div class="r-comment" data-section="s52" data-id="c-run-r-20261109T225937325573-review-of-sib-unaccepted-census-76dd92cc65bc" data-who="reckon-build" data-when="2026-11-09T23:09:38.152Z">
     <div class="r-comment-body"><p>Review of r-20261109T222243401168-sib-unaccepted-census read 197de19cd..76dd92cc6 and scores goal_fidelity 13, evidence 12, scope_discipline 20, durability 11, fit 16, reuse 5 (total 77); five findings, two blocking — the JSON persists only 73 of 920 source assignments and 27 of 116 name assignments, and the cost basis declares no cohort rerun ran while the plan records sib-second-pass naming 83 of 143 sources for USD 1.49.</p></div>
