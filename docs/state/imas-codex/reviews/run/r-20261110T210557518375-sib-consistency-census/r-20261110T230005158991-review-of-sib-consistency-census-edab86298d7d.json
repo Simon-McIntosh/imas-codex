@@ -1,0 +1,58 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_source": "The source manifest records no baseline_suite or after_suite and its exclusive paths contain no test file; the only declared gate log is census-planted.log, which ends EXIT=0. Zero and an empty id list therefore mean no test failures were recorded, not a measured before/after suite delta.",
+  "assertion_analysis": [
+    "At sib-consistency-census-run.py:703-744 the planted family is independently known to be divergent: suppressing family reports, collapsing the two base-phrase variants, or collapsing template features makes the corresponding detection or count check fail.",
+    "Reporting the known identical planted pair makes identical_family_not_reported false; breaking the concept regex or collapsing the two known formula texts makes planted_concept_detected or planted_concept_definition_variants fail.",
+    "Returning an empty family definition or template makes the planted proposal checks fail; leaving any reported family without one makes proposals_complete false and main exits non-zero.",
+    "These checks compare results with planted facts and fixed expectations, not values passed through as inputs; the internal proposals_complete aggregate is not an independent coverage check for omitted live families. The control does not catch the pronoun lemma defect at line 72."
+  ],
+  "call_sites": [],
+  "completed_at": "2026-11-10T23:29:00Z",
+  "dispatched_at": "2026-11-10T23:02:27Z",
+  "findings": [
+    {
+      "description": "The concept regex captures pronoun-led 'It is defined by' text as the concept lemma 'it'; the committed JSON records 36 divergent definitions for it and the HTML includes it among the largest divergent concepts. The planted control never exercises this false-positive case, so the live census presents a pronoun as a shared catalog concept and can misdirect the consistency pass.",
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-consistency-census-run.py",
+      "line": 72,
+      "severity": "blocking",
+      "text": "The concept regex captures pronoun-led 'It is defined by' text as the concept lemma 'it'; the committed JSON records 36 divergent definitions for it and the HTML includes it among the largest divergent concepts. The planted control never exercises this false-positive case, so the live census presents a pronoun as a shared catalog concept and can misdirect the consistency pass."
+    },
+    {
+      "description": "A family with no accepted-docs member gets template_share=None from census_families, but the largest-family renderer formats that value with :.1%; it raises TypeError if a catalog-modal family enters the top ten. The current JSON has two catalog-modal families and neither is in the top ten, so this run's fragment remains valid.",
+      "disposition": "folded",
+      "disposition_reason": "Guard the before/after census renderer used by the consistency pass so a live family entering the top ten does not prevent its evidence fragment from being written.",
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-consistency-census-run.py",
+      "line": 850,
+      "node": "sib-catalog-consistency",
+      "severity": "non-blocking",
+      "text": "A family with no accepted-docs member gets template_share=None from census_families, but the largest-family renderer formats that value with :.1%; it raises TypeError if a catalog-modal family enters the top ten. The current JSON has two catalog-modal families and neither is in the top ten, so this run's fragment remains valid."
+    }
+  ],
+  "project": "imas-codex",
+  "review_run_id": "r-20261110T230005158991-review-of-sib-consistency-census-edab86298d7d",
+  "review_text": "VERDICT goal: the source prompt at prompt.txt:38 sets the goal to census catalog families with divergent definitions, documentation templates or groupings; the runner groups by physical_base and shared concept and produces proposals at docs/evidence/fragments/sn-integrity-backlog/sib-consistency-census-run.py:278 and :437.\nVERDICT done_when: the source prompt at prompt.txt:107-108 defines the evidence measure, which is exercised by the logged --live --planted command; census-planted.log records 3,034 names, 125 divergent families, 90 divergent concepts, a 25-definition flux-surface-average witness, 125/125 proposals and EXIT=0.\nVERDICT write_paths: the source prompt at prompt.txt:81-85 declares three artifact files and a figure directory; all three paths in the four-commit diff are inside that declaration.\nVERDICT manifest: the source manifest at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T210557518375-sib-consistency-census/manifest.md reports the four commits, three changed paths, metrics and census-planted.log; it records retry_failures:none but has no baseline_suite or after_suite fields.\nVERDICT diff: read de46fb885540ab298aa1b41e1c6c7a81169251b9..edab86298d7d392e57f1fbd4338683dbe579edd9 commit by commit: add the census and artifacts, refresh the planted-control report, repair shared-anchor proposals and render examples, then refresh the final JSON timestamp; only the declared artifact files changed.\nCALL_SITES: none\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: sib-consistency-census-run.py:72 admits pronoun-led 'It is defined by' as a concept lemma, and the committed output reports that false concept with 36 variants.\nSCORE evidence: 16\nJUSTIFICATION evidence: census-planted.log:4 records the live counts and complete proposals, and census-planted.log:7 records EXIT=0; the source manifest has no before/after suite receipts.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the four-commit diff changes only the three artifact files declared in prompt.txt:81-85, inside the write paths.\nSCORE durability: 13\nJUSTIFICATION durability: sib-consistency-census-run.py:703-744 compares planted outcomes to fixed expectations, so suppressing divergent groups, merging their phrase/template variants, reporting the identical family, losing either planted concept definition or leaving its proposal empty changes a check; no assertion compares a pass-through input to the same call's output, and none detects the 'it' false positive at line 72.\nSCORE fit: 18\nJUSTIFICATION fit: sib-consistency-census-run.py:267 delegates anchor choice to standard_names/families.py:517 and the report code follows the repository's Python and HTML escaping idiom.\nSCORE reuse: 20\nJUSTIFICATION reuse: the capability search for definition_variants, template_signature and base_phrase found no existing standard-name consistency census, while sib-consistency-census-run.py:267 reuses the existing anchor owner at standard_names/families.py:517.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-consistency-census-run.py:72 blocking: the concept regex treats 'It is defined by' as a lemma 'it'; the JSON and HTML report 36 spurious divergent definitions, which can misdirect the planned consistency pass.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-consistency-census-run.py:850 non-blocking: template_share is None for a catalog-modal family with no accepted docs, but this renderer formats it as a percentage; the fragment raises TypeError if that family enters the top ten. Disposition: folded into sib-catalog-consistency to protect its before/after census output.\n",
+  "reviewed_base_sha": "de46fb885540ab298aa1b41e1c6c7a81169251b9",
+  "reviewed_head_sha": "edab86298d7d392e57f1fbd4338683dbe579edd9",
+  "reviewed_run_id": "r-20261110T210557518375-sib-consistency-census",
+  "scores": {
+    "durability": 13,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 13,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-10T23:38:10.051983+00:00",
+  "total": 100,
+  "verdicts": {
+    "diff": "read de46fb885540ab298aa1b41e1c6c7a81169251b9..edab86298d7d392e57f1fbd4338683dbe579edd9 commit by commit: add the census and artifacts, refresh the planted-control report, repair shared-anchor proposals and render examples, then refresh the final JSON timestamp; only the declared artifact files changed.",
+    "done_when": "the source prompt at prompt.txt:107-108 defines the evidence measure, which is exercised by the logged --live --planted command; census-planted.log records 3,034 names, 125 divergent families, 90 divergent concepts, a 25-definition flux-surface-average witness, 125/125 proposals and EXIT=0.",
+    "goal": "the source prompt at prompt.txt:38 sets the goal to census catalog families with divergent definitions, documentation templates or groupings; the runner groups by physical_base and shared concept and produces proposals at docs/evidence/fragments/sn-integrity-backlog/sib-consistency-census-run.py:278 and :437.",
+    "manifest": "the source manifest at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T210557518375-sib-consistency-census/manifest.md reports the four commits, three changed paths, metrics and census-planted.log; it records retry_failures:none but has no baseline_suite or after_suite fields.",
+    "write_paths": "the source prompt at prompt.txt:81-85 declares three artifact files and a figure directory; all three paths in the four-commit diff are inside that declaration."
+  }
+}
