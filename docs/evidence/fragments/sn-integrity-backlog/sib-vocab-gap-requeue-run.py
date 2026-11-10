@@ -617,6 +617,8 @@ def fragment():
     from html import escape
 
     census_payload = load("census")
+    prov = load("provenance")
+    attributions = prov["per_source"]
     grid = load("token-grid")
     readback = load("readback")
     transition = load("transition")["receipts"]
@@ -651,7 +653,6 @@ def fragment():
             + _cell(verdict)
             + "</tr>"
         )
-        rec = transition[sid]
         outcome = readback["outcomes"][sid]
         produced = names_by_source.get(sid) or []
         if produced:
@@ -673,12 +674,20 @@ def fragment():
                 f"still unproduced: {escape(str(outcome['after_status']))} - "
                 f"{escape(err)}"
             )
+        att = attributions.get(sid)
+        cred = (
+            f"{att['attribution']} (name created {att['created_at'][:19]} UTC, "
+            f"{att['own_cost_rows']} cost row(s) under this run's id)"
+            if att
+            else "no bound name"
+        )
         rows_outcome.append(
             "<tr>"
             + _cell(sid.split(":", 1)[1])
-            + _cell(rec["before_status"])
+            + _cell(info["live_status"])
             + _cell(outcome["after_status"])
             + f"<td>{shown}</td>"
+            + _cell(cred)
             + "</tr>"
         )
 
@@ -750,6 +759,18 @@ def fragment():
         for sid in row["recorded_source_ids"]
     }
     drafts_from_cohort = sorted(draft_sources & set(census_payload["cohort"]))
+    peer_rows = [
+        "<tr>"
+        + _cell(sid.split(":", 1)[1])
+        + _cell(att["name"])
+        + _cell(att["created_at"][:19] + " UTC")
+        + _cell(str(att["own_cost_rows"]))
+        + _cell(att["attribution"])
+        + "</tr>"
+        for sid, att in sorted(attributions.items())
+        if att["attribution"] != "produced by this run"
+    ]
+    peer_count = len(peer_rows)
     spend = f"{summary['spend']:.6f}"
     html_doc = f"""<h2 id="sib-vocab-gap-requeue">The cohort's vocabulary-gap sources are re-decided against ISN 0.11.0 and rerun</h2>
 
@@ -766,10 +787,13 @@ part, a token of the {escape(GRAMMAR_VERSION)} operator registry, which no relea
 has ever carried as a <code>GrammarToken</code>. {escape(str(len(census_payload["eligible"])))}
 of 17 resolve completely and were rerun through one scoped <code>sn run</code>;
 {escape(str(len(census_payload["parked"])))} still waits on a vocabulary token a later
-release must add. The rerun produced a name for
+release must add. After the rerun,
 {escape(str(summary["after_status_counts"].get("attached", 0) + summary["after_status_counts"].get("composed", 0)))}
-of the {escape(str(len(census_payload["eligible"])))} and left the rest unproduced for
-reasons the composer states per source below.</p>
+of the {escape(str(len(census_payload["eligible"])))} hold a bound name, but only
+{escape(str(prov["attribution_counts"].get("produced by this run", 0)))} of those
+names were produced under this run's id. Every name is attributed by run id in the
+outcome table below, so a name a concurrent run or an earlier release produced is
+not counted as this node's.</p>
 
 <h3 id="sib-vocab-gap-requeue-tokens">Gap token and 0.11.0 resolution, per source</h3>
 
@@ -797,11 +821,40 @@ rerun.</p>
 <h3 id="sib-vocab-gap-requeue-outcomes">Status and outcome, per source</h3>
 
 <table>
-  <thead><tr><th>DD source</th><th>status before</th><th>status after</th><th>produced name and score, or why it is still unproduced</th></tr></thead>
+  <thead><tr><th>DD source</th><th>status before (this node's census read, taken before the rerun)</th><th>status after</th><th>produced name and score, or why it is still unproduced</th><th>who produced the name</th></tr></thead>
   <tbody>
 {chr(10).join(rows_outcome)}
   </tbody>
 </table>
+
+<h3 id="sib-vocab-gap-requeue-attribution">Names in this cohort that this run did not produce</h3>
+
+<p>{escape(str(peer_count))} of the bound names are not this run's work, judged by
+run id: no LLMCost row carrying
+<code>{escape(str(prov["run_id"]))}</code> names them. A name counts as produced
+by this run only when such a row exists, so an attach that binds an older name is
+not counted as production.</p>
+
+<table>
+  <thead><tr><th>DD source</th><th>bound name</th><th>name created</th><th>cost rows under this run's id</th><th>attribution</th></tr></thead>
+  <tbody>
+{chr(10).join(peer_rows)}
+  </tbody>
+</table>
+
+<p>The two tangency sources carry the same name and were bound together. The
+review brief attributes their composition to the concurrent
+<code>sib-flush-unaccepted</code> run, and this node does not claim them. The
+record shows two facts beside that attribution, so a reader can weigh it: that
+name was created at 19:42:12 UTC, before either flush run started (20:36:52 and
+21:16:35 UTC) and before this run launched (21:26:13 UTC); and this run's own
+pipeline logged the bind itself at 21:26:46 UTC -
+<em>"Attached summary/heating_current_drive/nbi/tangency_radius/value</em> and
+<em>Attached nbi/unit/beamlets_group/beamlets/tangency_radii"</em>, both to
+<code>tangency_radius_of_neutral_beam_injector</code>. So the name is neither
+this run's and is older than the flush runs, while the binding event is logged
+here. The two are reported as produced elsewhere and bound here, and are not
+counted toward this run's production.</p>
 
 <h3 id="sib-vocab-gap-requeue-transition">How the sources left <code>vocab_gap</code></h3>
 
@@ -812,11 +865,15 @@ whose recorded vocabulary signature differs from the live one is returned to
 <code>extracted</code> for one compose attempt under the new vocabulary. It ran at
 2026-11-10 21:18:38 UTC in a peer pipeline's startup, and its own log line is the
 transition receipt: <em>"vocabulary-bump retry - 15 of 15 parked source(s)
-returned to 'extracted' under the current ISN vocabulary"</em>. Two of the 17 were
-then claimed and composed by that peer run and read <code>attached</code> with a
-produced name. This node wrote no Cypher: it read the live state, recorded one
-receipt row per source (<code>transition.json</code>) and reran the sources through
-the CLI.</p>
+returned to 'extracted' under the current ISN vocabulary"</em>. This node wrote no
+Cypher: it read the live state, recorded one receipt row per source
+(<code>transition.json</code>) and reran the sources through the CLI.</p>
+
+<p>The before column of the outcome table is this node's own census read of each
+source, taken before the rerun launched; the <code>vocab_gap</code> status the
+sibling run recorded is the prior run's state, not this run's starting point, and
+the two differ because the retry pass above had already moved every source to
+<code>extracted</code> by the time this node read them.</p>
 
 <p><strong>Deviation, stated plainly.</strong> The retry pass is keyed on the
 vocabulary signature, not on per-source resolvability, so it also revived the
@@ -859,8 +916,26 @@ The tokens the lead accepted for a later release remain:</p>
   <li><strong>Cumulative cohort count:</strong> {escape(str(produced_143))} of 143
   cohort sources now hold a produced name
   ({escape("at or above" if produced_143 >= 100 else "short of")} the 100-of-143
-  floor). All 17 of this node's sources stood at <code>vocab_gap</code> before the
-  rerun ({escape(json.dumps(dict(before_17), sort_keys=True))}) and read
+  floor), against {escape(str(prov["cohort_produced_before"]))} when the sibling
+  run finished. Each increment, with its source:
+  <ul>
+    <li><strong>+{escape(str(prov["attribution_counts"].get("produced by this run", 0)))}</strong>
+    names created under this run's id
+    ({escape(", ".join(sorted(s.split(":", 1)[1] for s, a in attributions.items() if a["attribution"] == "produced by this run"))) or "none"});</li>
+    <li><strong>+{escape(str(prov["attribution_counts"].get("produced by a peer run", 0)))}</strong>
+    names a peer run created and this run did not, listed in the next section
+    ({escape(", ".join(sorted(s.split(":", 1)[1] for s, a in attributions.items() if a["attribution"] == "produced by a peer run"))) or "none"});</li>
+    <li><strong>+{escape(str(prov["attribution_counts"].get("pre-existing name", 0)))}</strong>
+    sources this run bound to a name that already existed, created long before
+    either run
+    ({escape(", ".join(sorted(s.split(":", 1)[1] for s, a in attributions.items() if a["attribution"] == "pre-existing name"))) or "none"});</li>
+    <li><strong>-{escape(str(len(prov["lost_since_sibling"])))}</strong> source lost its
+    binding since the sibling run
+    ({escape(", ".join(prov["lost_since_sibling"]) or "none")}), which is the name now
+    sitting in the sourceless draft population rather than on its source.</li>
+  </ul>
+  All 17 of this node's sources read
+  {escape(json.dumps(dict(before_17), sort_keys=True))} before the rerun and
   {escape(json.dumps(summary["after_status_counts"], sort_keys=True))} after it.</li>
   <li><strong>Spend by this run's id:</strong> USD {escape(spend)} of the USD
   {escape(str(summary["cost_limit"]))} cap, selected by run
@@ -886,9 +961,14 @@ The tokens the lead accepted for a later release remain:</p>
   tokens the lead accepted for a later release, returns no row at either release,
   and the parked source's missing token <code>current_alignment</code> returns
   none at 0.11.0 either.</li>
-  <li><strong>Recomputation.</strong> The runner's <code>check</code> action
-  re-derives every composable/parked verdict and the eligible set from the
-  snapshot and fails if either drifts.</li>
+  <li><strong>Recomputation, and what it does not prove.</strong> The runner's
+  <code>check</code> action recomputes every composable/parked verdict and the
+  eligible set and fails if either differs from the stored census. It calls the
+  same <code>classify()</code> the census used, so it guards against the inputs
+  having drifted since the census was written - a changed worklist row, a
+  changed grammar snapshot - and it is not an independent re-derivation of the
+  verdicts. Only the composer's own pre-validation tests those, and it is what
+  the four re-parked sources are reported from.</li>
 </ul>
 """
     out = (
@@ -896,6 +976,96 @@ The tokens the lead accepted for a later release remain:</p>
     )
     out.write_text(html_doc)
     print(json.dumps({"fragment": str(out), "bytes": len(html_doc)}))
+    return 0
+
+
+def provenance():
+    """Attribute each bound name to the run that produced it, by run id.
+
+    A name counts as this run's only when an LLMCost row carrying this run's id
+    names it. Time alone is not enough: a concurrent run composes into the same
+    cohort, and a bound name can predate this run entirely.
+    """
+    from imas_codex.graph.client import GraphClient
+
+    readback_payload = load("readback")
+    run = readback_payload["summary"]
+    run_id = run["run_id"]
+    started = readback_payload["run"]["started_at"]
+    census_payload = load("census")
+    ids = census_payload["cohort"]
+
+    with GraphClient() as gc:
+        rows = gc.query(
+            """UNWIND $ids AS id
+            MATCH (:StandardNameSource {id:id})-[:PRODUCED_NAME]->(n:StandardName)
+            OPTIONAL MATCH (c:LLMCost {for_run:$run_id})
+              WHERE n.id IN coalesce(c.standard_name_ids, [])
+            RETURN id AS source_id, n.id AS name, n.name_stage AS stage,
+                   n.created_at AS created_at, count(c) AS own_rows,
+                   collect(DISTINCT c.phase) AS own_phases
+            ORDER BY id, name""",
+            ids=ids,
+            run_id=run_id,
+        )
+
+    peer_start = json.loads((SIBLING / "readback.json").read_text())["run"][
+        "created_at"
+    ]
+
+    per_source: dict[str, dict] = {}
+    for row in rows:
+        src = str(row["created_at"])
+        if row["own_rows"]:
+            who = "produced by this run"
+        elif src >= peer_start:
+            who = "produced by a peer run"
+        else:
+            who = "pre-existing name"
+        per_source[row["source_id"]] = {
+            "name": row["name"],
+            "stage": row["stage"],
+            "created_at": src,
+            "own_cost_rows": row["own_rows"],
+            "own_phases": row["own_phases"],
+            "attribution": who,
+        }
+
+    counts = collections.Counter(v["attribution"] for v in per_source.values())
+
+    sibling = json.loads((SIBLING / "readback.json").read_text())["sources"]
+    cohort = sorted(json.loads((SIBLING / "census.json").read_text())["sources"])
+    now = previous().source_state(cohort)
+    produced_now = {sid for sid, state in now.items() if state["bindings"]}
+    produced_before = {sid for sid, state in sibling.items() if state["bindings"]}
+    gained = sorted(produced_now - produced_before)
+    lost = sorted(produced_before - produced_now)
+
+    payload = {
+        "run_id": run_id,
+        "run_started_at": started,
+        "attribution_counts": dict(counts),
+        "per_source": per_source,
+        "cohort_produced_now": len(produced_now),
+        "cohort_produced_before": len(produced_before),
+        "gained_since_sibling": gained,
+        "lost_since_sibling": lost,
+    }
+    save("provenance", payload)
+    print(
+        json.dumps(
+            {
+                k: payload[k]
+                for k in (
+                    "attribution_counts",
+                    "cohort_produced_now",
+                    "cohort_produced_before",
+                )
+            },
+            indent=1,
+        )
+    )
+    print(json.dumps(gained, indent=1))
     return 0
 
 
@@ -910,6 +1080,7 @@ def main():
             "pipeline",
             "readback",
             "tokens",
+            "provenance",
             "fragment",
             "negative-control",
             "check",

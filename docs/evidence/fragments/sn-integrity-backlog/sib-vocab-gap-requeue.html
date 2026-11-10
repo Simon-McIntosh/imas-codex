@@ -13,10 +13,13 @@ part, a token of the 0.11.0 operator registry, which no release
 has ever carried as a <code>GrammarToken</code>. 16
 of 17 resolve completely and were rerun through one scoped <code>sn run</code>;
 1 still waits on a vocabulary token a later
-release must add. The rerun produced a name for
+release must add. After the rerun,
 6
-of the 16 and left the rest unproduced for
-reasons the composer states per source below.</p>
+of the 16 hold a bound name, but only
+2 of those
+names were produced under this run's id. Every name is attributed by run id in the
+outcome table below, so a name a concurrent run or an earlier release produced is
+not counted as this node's.</p>
 
 <h3 id="sib-vocab-gap-requeue-tokens">Gap token and 0.11.0 resolution, per source</h3>
 
@@ -60,27 +63,59 @@ rerun.</p>
 <h3 id="sib-vocab-gap-requeue-outcomes">Status and outcome, per source</h3>
 
 <table>
-  <thead><tr><th>DD source</th><th>status before</th><th>status after</th><th>produced name and score, or why it is still unproduced</th></tr></thead>
+  <thead><tr><th>DD source</th><th>status before (this node's census read, taken before the rerun)</th><th>status after</th><th>produced name and score, or why it is still unproduced</th><th>who produced the name</th></tr></thead>
   <tbody>
-<tr><td>b_field_non_axisymmetric/time_slice/field_map/grid/z</td><td>vocab_gap</td><td>attached</td><td><code>vertical_coordinate_of_coordinate_system</code> (drafted, score None)</td></tr>
-<tr><td>cryostat/description_2d/thermal_shield/unit/annular/outline_outer/r</td><td>vocab_gap</td><td>failed</td><td>still unproduced: failed - candidate pre-validation failed (grammar validation: 1 validation error for StandardName geometric_base Input should be &#x27;centroid&#x27;, &#x27;normalized_minor_radius&#x27;, &#x27;normalized_toroidal_flux_coordinate&#x27;, &#x27;offset&#x27;, &#x27;position&#x27;, &#x27;radial_coordinate&#x27;, [...]</td></tr>
-<tr><td>equilibrium/time_slice/constraints/strike_point/position_reconstructed/z</td><td>vocab_gap</td><td>failed</td><td>still unproduced: failed - compose claim-attempt cap reached; last refusal: standard-name attachment rejected: candidate &quot;vertical_coordinate_of_strike_point&quot; distinct-vector conflict: path &#x27;equilibrium/time_slice/constraints/strike_point/position_reconstructed/z&#x27; an [...]</td></tr>
-<tr><td>equilibrium/time_slice/ggd/z/values</td><td>vocab_gap</td><td>attached</td><td><code>vertical_coordinate_of_coordinate_system</code> (drafted, score None)</td></tr>
-<tr><td>equilibrium/time_slice/profiles_2d/z</td><td>vocab_gap</td><td>failed</td><td>still unproduced: failed - compose claim-attempt cap reached; last refusal: standard-name attachment rejected: candidate &quot;vertical_coordinate_of_coordinate_system&quot; distinct-vector conflict: path &#x27;equilibrium/time_slice/profiles_2d/z&#x27; and already-sourced &#x27;equilibrium/ [...]</td></tr>
-<tr><td>gyrokinetics_local/flux_surface/ds_dr_minor_norm</td><td>vocab_gap</td><td>composed</td><td><code>derivative_of_sine_coefficient_of_flux_surface_with_respect_to_normalized_minor_radius</code> (accepted, score 0.9848400496756291)</td></tr>
-<tr><td>gyrokinetics_local/species_all/velocity_phi_norm</td><td>vocab_gap</td><td>failed</td><td>still unproduced: failed - candidate pre-validation failed (grammar validation: 1 validation error for StandardName Value error, Generic physical_base &#x27;velocity&#x27; requires qualification. Generic terms like &#x27;velocity&#x27; are ambiguous without context. Add a qualifying seg [...]</td></tr>
-<tr><td>ic_antennas/antenna/module/strap/geometry/oblique/z</td><td>vocab_gap</td><td>failed</td><td>still unproduced: failed - compose claim-attempt cap reached; last refusal: standard-name attachment rejected: candidate &quot;vertical_coordinate_of_antenna_strap&quot; distinct-vector conflict: path &#x27;ic_antennas/antenna/module/strap/geometry/oblique/z&#x27; and already-sourced &#x27;i [...]</td></tr>
-<tr><td>iron_core/segment/geometry/arcs_of_circle/r</td><td>vocab_gap</td><td>failed</td><td>still unproduced: failed - compose claim-attempt cap reached; last refusal: standard-name attachment rejected: candidate &quot;radial_coordinate_of_arc_of_circle_center&quot; distinct-vector conflict: path &#x27;iron_core/segment/geometry/arcs_of_circle/r&#x27; and already-sourced &#x27;iron [...]</td></tr>
-<tr><td>nbi/unit/beamlets_group/beamlets/tangency_radii</td><td>vocab_gap</td><td>attached</td><td><code>tangency_radius_of_neutral_beam_injector</code> (accepted, score 0.9487085421104783)</td></tr>
-<tr><td>pf_plasma/element/geometry/thick_line/second_point/z</td><td>vocab_gap</td><td>vocab_gap</td><td>still unproduced: vocab_gap - missing position vocabulary token &#x27;plasma_current_element_thick_line&#x27;: The vertical coordinate belongs to a plasma current-filament element thick-line geometry; no registered locus/carrier token denotes a pf_plasma element thick line (coil_ [...]</td></tr>
-<tr><td>summary/global_quantities/current_alignment/value</td><td>vocab_gap</td><td>extracted</td><td>still unproduced: vocabulary pending a later release: current_alignment</td></tr>
-<tr><td>summary/heating_current_drive/ec/position/value</td><td>vocab_gap</td><td>vocab_gap</td><td>still unproduced: vocab_gap - missing geometry vocabulary token &#x27;electron_cyclotron_power_deposition_peak&#x27;: Normalized toroidal flux coordinate of the maximum of the electron cyclotron (ECRH) power deposition profile; no registered locus token denotes an electron cyclot [...]</td></tr>
-<tr><td>summary/heating_current_drive/ic/position/value</td><td>vocab_gap</td><td>vocab_gap</td><td>still unproduced: vocab_gap - missing geometry vocabulary token &#x27;ion_cyclotron_power_deposition_peak&#x27;: Normalized toroidal flux coordinate of the maximum of the ion cyclotron (ICRH) power deposition profile; the required peak-of-power-deposition locus is not in the regi [...]</td></tr>
-<tr><td>summary/heating_current_drive/lh/position/value</td><td>vocab_gap</td><td>vocab_gap</td><td>still unproduced: vocab_gap - missing geometry vocabulary token &#x27;lower_hybrid_power_deposition_peak&#x27;: The quantity is the normalized toroidal flux coordinate of the extremum of the lower hybrid power deposition profile; the grammar mints extrema loca per feature (e.g. e [...]</td></tr>
-<tr><td>summary/heating_current_drive/nbi/tangency_radius/value</td><td>vocab_gap</td><td>attached</td><td><code>tangency_radius_of_neutral_beam_injector</code> (accepted, score 0.9487085421104783)</td></tr>
-<tr><td>summary/local/r_eff_norm_2_3/effective_helical_ripple/value</td><td>vocab_gap</td><td>composed</td><td><code>effective_helical_ripple_coefficient</code> (accepted, score 0.9130274896722252)</td></tr>
+<tr><td>b_field_non_axisymmetric/time_slice/field_map/grid/z</td><td>extracted</td><td>attached</td><td><code>vertical_coordinate_of_coordinate_system</code> (drafted, score None)</td><td>pre-existing name (name created 2026-06-17T17:27:36 UTC, 0 cost row(s) under this run&#x27;s id)</td></tr>
+<tr><td>cryostat/description_2d/thermal_shield/unit/annular/outline_outer/r</td><td>extracted</td><td>failed</td><td>still unproduced: failed - candidate pre-validation failed (grammar validation: 1 validation error for StandardName geometric_base Input should be &#x27;centroid&#x27;, &#x27;normalized_minor_radius&#x27;, &#x27;normalized_toroidal_flux_coordinate&#x27;, &#x27;offset&#x27;, &#x27;position&#x27;, &#x27;radial_coordinate&#x27;, [...]</td><td>no bound name</td></tr>
+<tr><td>equilibrium/time_slice/constraints/strike_point/position_reconstructed/z</td><td>extracted</td><td>failed</td><td>still unproduced: failed - compose claim-attempt cap reached; last refusal: standard-name attachment rejected: candidate &quot;vertical_coordinate_of_strike_point&quot; distinct-vector conflict: path &#x27;equilibrium/time_slice/constraints/strike_point/position_reconstructed/z&#x27; an [...]</td><td>no bound name</td></tr>
+<tr><td>equilibrium/time_slice/ggd/z/values</td><td>extracted</td><td>attached</td><td><code>vertical_coordinate_of_coordinate_system</code> (drafted, score None)</td><td>pre-existing name (name created 2026-06-17T17:27:36 UTC, 0 cost row(s) under this run&#x27;s id)</td></tr>
+<tr><td>equilibrium/time_slice/profiles_2d/z</td><td>extracted</td><td>failed</td><td>still unproduced: failed - compose claim-attempt cap reached; last refusal: standard-name attachment rejected: candidate &quot;vertical_coordinate_of_coordinate_system&quot; distinct-vector conflict: path &#x27;equilibrium/time_slice/profiles_2d/z&#x27; and already-sourced &#x27;equilibrium/ [...]</td><td>no bound name</td></tr>
+<tr><td>gyrokinetics_local/flux_surface/ds_dr_minor_norm</td><td>extracted</td><td>composed</td><td><code>derivative_of_sine_coefficient_of_flux_surface_with_respect_to_normalized_minor_radius</code> (accepted, score 0.9848400496756291)</td><td>produced by this run (name created 2026-11-10T21:28:57 UTC, 5 cost row(s) under this run&#x27;s id)</td></tr>
+<tr><td>gyrokinetics_local/species_all/velocity_phi_norm</td><td>extracted</td><td>failed</td><td>still unproduced: failed - candidate pre-validation failed (grammar validation: 1 validation error for StandardName Value error, Generic physical_base &#x27;velocity&#x27; requires qualification. Generic terms like &#x27;velocity&#x27; are ambiguous without context. Add a qualifying seg [...]</td><td>no bound name</td></tr>
+<tr><td>ic_antennas/antenna/module/strap/geometry/oblique/z</td><td>extracted</td><td>failed</td><td>still unproduced: failed - compose claim-attempt cap reached; last refusal: standard-name attachment rejected: candidate &quot;vertical_coordinate_of_antenna_strap&quot; distinct-vector conflict: path &#x27;ic_antennas/antenna/module/strap/geometry/oblique/z&#x27; and already-sourced &#x27;i [...]</td><td>no bound name</td></tr>
+<tr><td>iron_core/segment/geometry/arcs_of_circle/r</td><td>extracted</td><td>failed</td><td>still unproduced: failed - compose claim-attempt cap reached; last refusal: standard-name attachment rejected: candidate &quot;radial_coordinate_of_arc_of_circle_center&quot; distinct-vector conflict: path &#x27;iron_core/segment/geometry/arcs_of_circle/r&#x27; and already-sourced &#x27;iron [...]</td><td>no bound name</td></tr>
+<tr><td>nbi/unit/beamlets_group/beamlets/tangency_radii</td><td>extracted</td><td>attached</td><td><code>tangency_radius_of_neutral_beam_injector</code> (accepted, score 0.9487085421104783)</td><td>produced by a peer run (name created 2026-11-10T19:42:12 UTC, 0 cost row(s) under this run&#x27;s id)</td></tr>
+<tr><td>pf_plasma/element/geometry/thick_line/second_point/z</td><td>extracted</td><td>vocab_gap</td><td>still unproduced: vocab_gap - missing position vocabulary token &#x27;plasma_current_element_thick_line&#x27;: The vertical coordinate belongs to a plasma current-filament element thick-line geometry; no registered locus/carrier token denotes a pf_plasma element thick line (coil_ [...]</td><td>no bound name</td></tr>
+<tr><td>summary/global_quantities/current_alignment/value</td><td>extracted</td><td>extracted</td><td>still unproduced: vocabulary pending a later release: current_alignment</td><td>no bound name</td></tr>
+<tr><td>summary/heating_current_drive/ec/position/value</td><td>extracted</td><td>vocab_gap</td><td>still unproduced: vocab_gap - missing geometry vocabulary token &#x27;electron_cyclotron_power_deposition_peak&#x27;: Normalized toroidal flux coordinate of the maximum of the electron cyclotron (ECRH) power deposition profile; no registered locus token denotes an electron cyclot [...]</td><td>no bound name</td></tr>
+<tr><td>summary/heating_current_drive/ic/position/value</td><td>extracted</td><td>vocab_gap</td><td>still unproduced: vocab_gap - missing geometry vocabulary token &#x27;ion_cyclotron_power_deposition_peak&#x27;: Normalized toroidal flux coordinate of the maximum of the ion cyclotron (ICRH) power deposition profile; the required peak-of-power-deposition locus is not in the regi [...]</td><td>no bound name</td></tr>
+<tr><td>summary/heating_current_drive/lh/position/value</td><td>extracted</td><td>vocab_gap</td><td>still unproduced: vocab_gap - missing geometry vocabulary token &#x27;lower_hybrid_power_deposition_peak&#x27;: The quantity is the normalized toroidal flux coordinate of the extremum of the lower hybrid power deposition profile; the grammar mints extrema loca per feature (e.g. e [...]</td><td>no bound name</td></tr>
+<tr><td>summary/heating_current_drive/nbi/tangency_radius/value</td><td>extracted</td><td>attached</td><td><code>tangency_radius_of_neutral_beam_injector</code> (accepted, score 0.9487085421104783)</td><td>produced by a peer run (name created 2026-11-10T19:42:12 UTC, 0 cost row(s) under this run&#x27;s id)</td></tr>
+<tr><td>summary/local/r_eff_norm_2_3/effective_helical_ripple/value</td><td>extracted</td><td>composed</td><td><code>effective_helical_ripple_coefficient</code> (accepted, score 0.9130274896722252)</td><td>produced by this run (name created 2026-11-10T21:33:16 UTC, 5 cost row(s) under this run&#x27;s id)</td></tr>
   </tbody>
 </table>
+
+<h3 id="sib-vocab-gap-requeue-attribution">Names in this cohort that this run did not produce</h3>
+
+<p>4 of the bound names are not this run's work, judged by
+run id: no LLMCost row carrying
+<code>6124274e-6f4c-4b78-b38f-92993d2403b8</code> names them. A name counts as produced
+by this run only when such a row exists, so an attach that binds an older name is
+not counted as production.</p>
+
+<table>
+  <thead><tr><th>DD source</th><th>bound name</th><th>name created</th><th>cost rows under this run's id</th><th>attribution</th></tr></thead>
+  <tbody>
+<tr><td>b_field_non_axisymmetric/time_slice/field_map/grid/z</td><td>vertical_coordinate_of_coordinate_system</td><td>2026-06-17T17:27:36 UTC</td><td>0</td><td>pre-existing name</td></tr>
+<tr><td>equilibrium/time_slice/ggd/z/values</td><td>vertical_coordinate_of_coordinate_system</td><td>2026-06-17T17:27:36 UTC</td><td>0</td><td>pre-existing name</td></tr>
+<tr><td>nbi/unit/beamlets_group/beamlets/tangency_radii</td><td>tangency_radius_of_neutral_beam_injector</td><td>2026-11-10T19:42:12 UTC</td><td>0</td><td>produced by a peer run</td></tr>
+<tr><td>summary/heating_current_drive/nbi/tangency_radius/value</td><td>tangency_radius_of_neutral_beam_injector</td><td>2026-11-10T19:42:12 UTC</td><td>0</td><td>produced by a peer run</td></tr>
+  </tbody>
+</table>
+
+<p>The two tangency sources carry the same name and were bound together. The
+review brief attributes their composition to the concurrent
+<code>sib-flush-unaccepted</code> run, and this node does not claim them. The
+record shows two facts beside that attribution, so a reader can weigh it: that
+name was created at 19:42:12 UTC, before either flush run started (20:36:52 and
+21:16:35 UTC) and before this run launched (21:26:13 UTC); and this run's own
+pipeline logged the bind itself at 21:26:46 UTC -
+<em>"Attached summary/heating_current_drive/nbi/tangency_radius/value</em> and
+<em>Attached nbi/unit/beamlets_group/beamlets/tangency_radii"</em>, both to
+<code>tangency_radius_of_neutral_beam_injector</code>. So the name is neither
+this run's and is older than the flush runs, while the binding event is logged
+here. The two are reported as produced elsewhere and bound here, and are not
+counted toward this run's production.</p>
 
 <h3 id="sib-vocab-gap-requeue-transition">How the sources left <code>vocab_gap</code></h3>
 
@@ -91,11 +126,15 @@ whose recorded vocabulary signature differs from the live one is returned to
 <code>extracted</code> for one compose attempt under the new vocabulary. It ran at
 2026-11-10 21:18:38 UTC in a peer pipeline's startup, and its own log line is the
 transition receipt: <em>"vocabulary-bump retry - 15 of 15 parked source(s)
-returned to 'extracted' under the current ISN vocabulary"</em>. Two of the 17 were
-then claimed and composed by that peer run and read <code>attached</code> with a
-produced name. This node wrote no Cypher: it read the live state, recorded one
-receipt row per source (<code>transition.json</code>) and reran the sources through
-the CLI.</p>
+returned to 'extracted' under the current ISN vocabulary"</em>. This node wrote no
+Cypher: it read the live state, recorded one receipt row per source
+(<code>transition.json</code>) and reran the sources through the CLI.</p>
+
+<p>The before column of the outcome table is this node's own census read of each
+source, taken before the rerun launched; the <code>vocab_gap</code> status the
+sibling run recorded is the prior run's state, not this run's starting point, and
+the two differ because the retry pass above had already moved every source to
+<code>extracted</code> by the time this node read them.</p>
 
 <p><strong>Deviation, stated plainly.</strong> The retry pass is keyed on the
 vocabulary signature, not on per-source resolvability, so it also revived the
@@ -145,8 +184,26 @@ The tokens the lead accepted for a later release remain:</p>
   <li><strong>Cumulative cohort count:</strong> 97 of 143
   cohort sources now hold a produced name
   (short of the 100-of-143
-  floor). All 17 of this node's sources stood at <code>vocab_gap</code> before the
-  rerun ({&quot;vocab_gap&quot;: 17}) and read
+  floor), against 92 when the sibling
+  run finished. Each increment, with its source:
+  <ul>
+    <li><strong>+2</strong>
+    names created under this run's id
+    (gyrokinetics_local/flux_surface/ds_dr_minor_norm, summary/local/r_eff_norm_2_3/effective_helical_ripple/value);</li>
+    <li><strong>+2</strong>
+    names a peer run created and this run did not, listed in the next section
+    (nbi/unit/beamlets_group/beamlets/tangency_radii, summary/heating_current_drive/nbi/tangency_radius/value);</li>
+    <li><strong>+2</strong>
+    sources this run bound to a name that already existed, created long before
+    either run
+    (b_field_non_axisymmetric/time_slice/field_map/grid/z, equilibrium/time_slice/ggd/z/values);</li>
+    <li><strong>-1</strong> source lost its
+    binding since the sibling run
+    (dd:spectrometer_visible/channel/fibre_bundle/geometry/x2_width), which is the name now
+    sitting in the sourceless draft population rather than on its source.</li>
+  </ul>
+  All 17 of this node's sources read
+  {&quot;vocab_gap&quot;: 17} before the rerun and
   {&quot;attached&quot;: 4, &quot;composed&quot;: 2, &quot;extracted&quot;: 1, &quot;failed&quot;: 6, &quot;vocab_gap&quot;: 4} after it.</li>
   <li><strong>Spend by this run's id:</strong> USD 0.057160 of the USD
   5.0 cap, selected by run
@@ -172,7 +229,12 @@ The tokens the lead accepted for a later release remain:</p>
   tokens the lead accepted for a later release, returns no row at either release,
   and the parked source's missing token <code>current_alignment</code> returns
   none at 0.11.0 either.</li>
-  <li><strong>Recomputation.</strong> The runner's <code>check</code> action
-  re-derives every composable/parked verdict and the eligible set from the
-  snapshot and fails if either drifts.</li>
+  <li><strong>Recomputation, and what it does not prove.</strong> The runner's
+  <code>check</code> action recomputes every composable/parked verdict and the
+  eligible set and fails if either differs from the stored census. It calls the
+  same <code>classify()</code> the census used, so it guards against the inputs
+  having drifted since the census was written - a changed worklist row, a
+  changed grammar snapshot - and it is not an independent re-derivation of the
+  verdicts. Only the composer's own pre-validation tests those, and it is what
+  the four re-parked sources are reported from.</li>
 </ul>
