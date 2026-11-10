@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="443">
+<meta name="plan-version" content="444">
 <meta name="plan-modified" content="2026-11-10">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -1378,7 +1378,10 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
     <div class="r-comment-body"><p>review of sib-isn-pin-0-11-0 at 89d83c43327c1405e12ed4ea8e77f9fa7296564c against base da4e6748f24c9e421ddbfbdf894a6834cdae57fa; scores goal_fidelity 18, evidence 13, scope_discipline 20, durability 8, fit 16, reuse 20; added_failure_count 4 with all four ids attributed to the git-archive head tree and disproved in the worktree; five non-blocking findings; verdict is that the pin and the graph sync are real and independently confirmed, while the argmax_with_respect_to read-back clause is unmet and needs the coordinator to accept the deviation explicitly.</p></div>
 </div>
 <div class="r-comment" data-section="s51" data-id="c-run-r-20261110T165137050208-sib-isn-pin-0-11-0" data-who="reckon-build" data-when="2026-11-10T18:23:31.548Z">
-    <div class="r-comment-body"><p>imas-codex pins imas-standard-names at 0.11.0 in both pyproject.toml sites (the editable source override and uv.lock are unchanged, uv lock exits 0 with an empty diff), the graph&#x27;s active ISNGrammarVersion is 0.11.0 synced through sync_isn_grammar_to_graph with 1031 GrammarToken against the previous active 0.10.1&#x27;s 983, and the new vocabulary tokens read back at 0.11.0. argmax_with_respect_to reads back as an operator-registry token of 0.11.0 but not as a GrammarToken, because the sync path carries no operator channel.</p></div>
+    <div class="r-comment-body"><p>imas-codex pins imas-standard-names at 0.11.0 in both pyproject.toml sites (the editable source override and uv.lock are unchanged, uv lock exits 0 with an empty diff), the graph's active ISNGrammarVersion is 0.11.0 synced through sync_isn_grammar_to_graph with 1031 GrammarToken against the previous active 0.10.1's 983, and the new vocabulary tokens read back at 0.11.0. argmax_with_respect_to reads back as an operator-registry token of 0.11.0 but not as a GrammarToken, because the sync path carries no operator channel.</p></div>
+</div>
+<div class="r-comment" data-section="s51" data-id="c-run-r-20261110T200635189734-review-of-sib-cohort-rerun-isn-0-11-4f71570c572a" data-who="reckon-build" data-when="2026-11-10T20:23:08.469Z">
+    <div class="r-comment-body"><p>Reviewed run r-20261110T192543764468-sib-cohort-rerun-isn-0-11 at 4f71570c5 against base a839cece and stored a parsed record scoring goal_fidelity 15, evidence 14, scope_discipline 20, durability 13, fit 18, reuse 12 (total 92); two blocking findings (the fragment states all 35 reset sources had reached the claim cap while the run&#x27;s own census records 20 at attempt_count 1-4, and the retry reason persisted on every receipt repeats that cap claim), two non-blocking (export_state duplicates a sibling runner&#x27;s export-gate helper; 4 pin-refused sources of 55 were never rerun).</p></div>
 </div>
 <div class="r-comment" data-section="s52" data-id="c-run-r-20261109T225937325573-review-of-sib-unaccepted-census-76dd92cc65bc" data-who="reckon-build" data-when="2026-11-09T23:09:38.152Z">
     <div class="r-comment-body"><p>Review of r-20261109T222243401168-sib-unaccepted-census read 197de19cd..76dd92cc6 and scores goal_fidelity 13, evidence 12, scope_discipline 20, durability 11, fit 16, reuse 5 (total 77); five findings, two blocking — the JSON persists only 73 of 920 source assignments and 27 of 116 name assignments, and the cost basis declares no cohort rerun ran while the plan records sib-second-pass naming 83 of 143 sources for USD 1.49.</p></div>

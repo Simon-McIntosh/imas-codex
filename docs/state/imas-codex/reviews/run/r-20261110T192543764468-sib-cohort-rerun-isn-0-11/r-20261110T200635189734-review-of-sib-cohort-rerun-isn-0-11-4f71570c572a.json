@@ -1,0 +1,60 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured by the reviewed run's own evidence: its manifest records no baseline_suite or after_suite arms (an operational evidence node declaring `negative_control: none: an operational run with no test path`), so no suite delta could be derived; 0 is not a claim that a suite ran clean.",
+  "call_sites": "none",
+  "completed_at": "2026-11-10T20:23:08.469Z",
+  "dispatched_at": "2026-11-10T20:08:27Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-cohort-rerun-isn-0-11.html",
+      "line": "21",
+      "severity": "blocking",
+      "text": "the reset paragraph states that the 35 reset sources had reached the claim cap (5), but the run's own census.json records 20 of those 35 at attempt_count 1-4, so the deliverable misstates the class of a state mutation it performed and the done_when's \"sources below the cap are not reset\" condition was not honoured"
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-cohort-rerun-isn-0-11-run.py",
+      "line": "250",
+      "severity": "blocking",
+      "text": "the retry reason written into every StandardNameSourceRetry receipt asserts \"the source reached the claim cap\", which is false for the 20 below-cap sources the same call resets, leaving durable graph audit text that misattributes why 20 sources had their attempt counters cleared"
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-cohort-rerun-isn-0-11-run.py",
+      "line": "71",
+      "severity": "non-blocking",
+      "text": "export_state duplicates sib-second-pass-tail-run.py:42 verbatim and recomposes the export gate's inline blocking/draft predicate from imas_codex/standard_names/export.py:3060-3090, so a change to the gate's predicate would leave this copy reporting a different blocking set from the one the gate enforces"
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-cohort-rerun-isn-0-11.html",
+      "line": "25",
+      "severity": "non-blocking",
+      "text": "4 of the 55 unproduced cohort sources were pin-refused and never rerun, so the done_when's \"every source not yet produced ... is rerun\" is met for 51 of 55; the exclusion and its reason are recorded and the pipeline offers no path around an unpinned DD source"
+    }
+  ],
+  "item_verdicts": {
+    "diff": "pass one commit of 941 insertions over the fragment and its runner, nothing outside the fence",
+    "done_when": "fail the reset clause is not honoured and is misstated, though every quantitative reading in the done_when is recorded and reconciles with the logs",
+    "goal": "pass the goal's read-back covers all 143 sources and 51 of the 55 unproduced ones were rerun in one scoped sn run on the compute allocation",
+    "manifest": "pass the reviewed manifest names its commit, paths, logs and every headline figure, and declares its negative control with a reason",
+    "write_paths": "pass the single commit touches only the two declared evidence files"
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to rerun the June cohort's unproduced sources against the 0.11.0 grammar and read back each outcome; the fragment's produced table holds 92 rows and its unproduced table 51, all 143 sources carrying before and after status, while census.json selected 55 and pin.json made 51 eligible.\nVERDICT done_when: readback.log (EXIT=0) states produced 92 of 143 short by 8, spend 0.264093 beside the USD 280 cap, export blocking 0 and sourceless drafts 3 then 3, and every unproduced row carries a reason; the reset clause \"sources below the cap are not reset\" is contradicted by the run's own census (20 of the 35 reset sources held attempt_count 1-4).\nVERDICT write_paths: read the manifest's declared paths and the commit; git show --stat lists only docs/evidence/fragments/sn-integrity-backlog/sib-cohort-rerun-isn-0-11.html (+254) and ...-run.py (+687), both inside the fence, and no figure directory was written.\nVERDICT manifest: read; it names commit 4f71570c5, both changed paths, seven run-directory logs, and records produced 92 with the 8-short floor, spend 0.264093 of USD 10, blocking 0 and drafts 3 then 3; it names no baseline_suite or after_suite arms and declares the negative control none with a reason.\nVERDICT diff: read commit by commit against a839cece; one commit of 941 insertions over the two declared evidence files, no product source, test or plan file changed.\nCALL_SITES: none\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: the fragment's produced table reconciles exactly with readback.json (92 produced, 51 unproduced, 96 name cells), but 4 of the 55 unproduced sources named in pin.json refused were never rerun.\nSCORE evidence: 14\nJUSTIFICATION evidence: readback.log EXIT=0 carries produced 92, spend 0.264093, export_blocking 0 and drafts 3 then 3, all reconciling with readback.json and census.json, while the reset clause at sib-cohort-rerun-isn-0-11.html:21 is stated as a claim cap that census.json contradicts.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the single commit 4f71570c5 changes only sib-cohort-rerun-isn-0-11.html and sib-cohort-rerun-isn-0-11-run.py, both declared write paths.\nSCORE durability: 13\nJUSTIFICATION durability: sib-cohort-rerun-isn-0-11-run.py:110 fails if the live cohort read misses a source and :399 fails unless exactly one SNRun receipt names the invocation, but no test path exists and nothing fails if the fragment's prose drifts from its data.\nSCORE fit: 18\nJUSTIFICATION fit: the runner follows the sibling revision/command/EXIT header convention of sib-second-pass-tail-run.py:1 and every element id in the fragment begins with the node id.\nSCORE reuse: 12\nJUSTIFICATION reuse: export_state at sib-cohort-rerun-isn-0-11-run.py:71 is a verbatim copy of sib-second-pass-tail-run.py:42 while it consumes export.py's own _SHIPPING_NAME_STAGES, _RELEASE_IDENTITY_HOLDS and sourceless classifiers, so the gate predicate has no single owner.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-cohort-rerun-isn-0-11.html:21 blocking: the reset paragraph states that the 35 reset sources had reached the claim cap (5), but the run's own census.json records 20 of those 35 at attempt_count 1-4, so the deliverable misstates the class of a state mutation it performed and the done_when's \"sources below the cap are not reset\" condition was not honoured.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-cohort-rerun-isn-0-11-run.py:250 blocking: the retry reason written into every StandardNameSourceRetry receipt asserts \"the source reached the claim cap\", which is false for the 20 below-cap sources the same call resets, leaving durable graph audit text that misattributes why 20 sources had their attempt counters cleared.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-cohort-rerun-isn-0-11-run.py:71 non-blocking: export_state duplicates sib-second-pass-tail-run.py:42 verbatim and recomposes the export gate's inline blocking/draft predicate from imas_codex/standard_names/export.py:3060-3090, so a change to the gate's predicate would leave this copy reporting a different blocking set from the one the gate enforces.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-cohort-rerun-isn-0-11.html:25 non-blocking: 4 of the 55 unproduced cohort sources were pin-refused and never rerun, so the done_when's \"every source not yet produced ... is rerun\" is met for 51 of 55; the exclusion and its reason are recorded and the pipeline offers no path around an unpinned DD source.\n",
+  "review_run_id": "r-20261110T200635189734-review-of-sib-cohort-rerun-isn-0-11-4f71570c572a",
+  "reviewed_base_sha": "a839cece46b71a4d196628e28dda4bd8e586ad75",
+  "reviewed_head_sha": "4f71570c572a7b79a2c2b8f35fbe9528de7a65f4",
+  "reviewed_run_id": "r-20261110T192543764468-sib-cohort-rerun-isn-0-11",
+  "rubric": "text",
+  "scores": {
+    "durability": 13,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 15,
+    "reuse": 12,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-10T20:41:01.386210+00:00",
+  "total": 92
+}
