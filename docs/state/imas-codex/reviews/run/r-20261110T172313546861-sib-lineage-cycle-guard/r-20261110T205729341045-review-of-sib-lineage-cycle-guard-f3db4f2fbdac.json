@@ -22,6 +22,13 @@
     "source": "docs/figures/sn-integrity-backlog/sib-lineage-cycle-guard/transaction.svg",
     "verdict": "Labels and arrows are legible and unclipped; visually inspected exact-head SVG rendered with ImageMagick."
   },
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the user-global rule says a session on the fleet allocation (SLURM_JOB_ID set) runs heavy gates in place and never submits them to a debug partition; the eight-worker run inside job 1291586 is the prescribed placement",
+      "recorded_at": "2026-11-10T21:28:44.314908+00:00"
+    }
+  },
   "findings": [
     {
       "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T172313546861-sib-lineage-cycle-guard/run_provenance_gate.py",
