@@ -250,7 +250,7 @@ def test_identity_writers(
             {
                 "refine": "graph_refinement.persist_refined_name",
                 "edit_fold": "edit.supersede_into",
-                "tombstone_fold": "graph_supersession.tombstone_supersede_into",
+                "tombstone_fold": "source_invariant.supersede_drained_name_cypher",
             }[writer]
         )
         with GraphClient() as gc:
@@ -299,7 +299,7 @@ def test_regeneration_writer(disposable_neo4j_empty: str, closes_cycle: bool) ->
         assert _state() == before
     else:
         assert apply() == 1
-        _assert_lineage_provenance("graph_supersession.supersede_prior_source_names")
+        _assert_lineage_provenance("source_invariant.supersede_drained_name_cypher")
         with GraphClient() as gc:
             assert gc.query(
                 """

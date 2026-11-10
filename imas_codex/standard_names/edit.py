@@ -1560,7 +1560,7 @@ SET old.superseded_from_stage = $predecessor_stage,
     + """
 MERGE (target)-[lineage_edge:REFINED_FROM]->(old)
 ON CREATE SET lineage_edge.writer = 'edit.supersede_into',
-              lineage_edge.created_at = datetime())
+              lineage_edge.created_at = datetime($changed_at))
 RETURN old.name_stage AS old_stage,
        old.superseded_from_stage AS predecessor_stage,
        target.name_stage AS target_stage
@@ -2711,7 +2711,10 @@ def _fold_expected_state(
                     "end_id": old,
                     "start_labels": snapshot["target_labels"],
                     "end_labels": snapshot["old_labels"],
-                    "properties": {},
+                    "properties": {
+                        "writer": "edit.supersede_into",
+                        "created_at": stamped_at,
+                    },
                 }
             )
     event = {
