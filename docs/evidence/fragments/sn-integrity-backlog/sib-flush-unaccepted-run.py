@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Capture the flush drain's before/after state for §52.
+"""Capture a flush drain's before/after state.
 
 Read-only: graph reads only, no LLM call, no graph write.
 
