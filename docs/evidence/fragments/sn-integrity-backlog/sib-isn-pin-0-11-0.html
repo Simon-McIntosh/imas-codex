@@ -123,11 +123,38 @@ checkout once this pin lands, so the runtime package version reads 0.11.0.</p>
 
 <h3 id="sib-isn-pin-0-11-0-tests">Tests</h3>
 
-<p><code>tests/standard_names</code> was run at the base revision and at the head
-in two arms. The base arm ran from this worktree at
-<code>da4e6748f</code>; the head arm ran from a <code>git archive</code> of the
-head commit with the worktree's gitignored generated models copied in, so each
-arm ran its own tree and the comparison is by failure id.</p>
+<p><code>tests/standard_names</code> was run in arms under one instrument
+(<code>-n 4 --timeout=120 --timeout-method=thread</code>). The serial form was
+abandoned: <code>pytest-timeout</code>'s SIGALRM method kills an xdist worker
+and turns a single slow test into <code>INTERNALERROR</code> for the whole run,
+which is what happened to the first attempt at each arm.</p>
 
-<p><em>Totals are recorded in the node manifest's <code>baseline_suite</code>,
-<code>after_suite</code> and <code>test_logs</code> keys.</em></p>
+<table>
+  <thead><tr><th>arm</th><th>tree</th><th>revision</th><th>result</th><th>exit</th></tr></thead>
+  <tbody>
+    <tr><td>base</td><td>this worktree</td><td><code>da4e6748f</code></td><td>9 failed, 8630 passed, 11 skipped in 704s</td><td>1</td></tr>
+    <tr><td>head</td><td><code>git archive</code> of the head</td><td><code>2c2f0ac43</code></td><td>13 failed, 8625 passed, 12 skipped in 637s</td><td>1</td></tr>
+    <tr><td>head (incomplete)</td><td>this worktree at the head</td><td><code>2c2f0ac43</code></td><td>reached 48% at the hard stop, no summary line</td><td>—</td></tr>
+  </tbody>
+</table>
+
+<p>The nine failures are the same ids in both complete arms. Four ids appear
+only at the head, and they are an artefact of the archive tree rather than of
+this change. Re-running just those files gives: base worktree
+<strong>6 passed, exit 0</strong>; head archive <strong>4 failed, 2 passed, exit
+1</strong>; head worktree <strong>6 passed, exit 0</strong>. The archive carries
+only tracked files, while the manifest-generability and ledger tests read
+catalog and manifest data that this checkout generates outside git; a tree
+without those files fails them whatever the pins say. The same three runs are
+logged beside the two full arms, and the manifest attributes the four ids under
+<code>failure_attribution</code>.</p>
+
+<p><strong>What this record does not show.</strong> No complete head arm ran in a
+worktree, so the base-to-head comparison rests on a base arm plus a focused
+disproof of the only four added ids, not on two full arms of the same shape. A
+full worktree head arm was started and reached 48% when the node's hard stop
+arrived; it is recorded as incomplete and should be re-run by a follow-on.</p>
+
+<p><em>Totals and log paths are recorded in the node manifest's
+<code>baseline_suite</code>, <code>after_suite</code>,
+<code>failure_attribution</code> and <code>test_logs</code> keys.</em></p>
