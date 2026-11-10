@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-guard-added-failure-check">
+<title>The suite failure seen beside the lineage cycle guard does not reproduce at its head</title>
+</head>
+<body>
+<main>
+<h1 id="sib-guard-added-failure-check-title">The added suite failure does not reproduce at the guard's head, so it is not attributable to it</h1>
+
+<p id="sib-guard-added-failure-check-summary">Three serial runs of
+<code>tests/standard_names/test_pool_batch_processors.py::TestComposeDomainContextFromBatch::test_compose_domain_context_from_batch</code>
+at base <code>7f3db88c110bac47a5e470bd08432eab953ef760</code> and three at head
+<code>88189cd030059b8ca6161a35bacc05a05a90c02b</code>, each from its own
+<code>git archive</code> copy carrying the five generated files. All six runs pass, so the
+attribution rule the measure declares — caused by the head only if it fails at head in every
+run and passes at base in every run — is not met. Verdict: <strong>not attributable to the
+head</strong>.</p>
+
+<p id="sib-guard-added-failure-check-null-result">The test passing in the serial arm is itself the
+finding: the failure recorded beside the guard did not reproduce under a serial, single-test
+invocation at either revision. A test that fails only under load or concurrency cannot be
+attributed by this instrument, and this fragment does not claim it is absent from the suite —
+only that no run of it here failed. The runner's own faulthandler dump at the 60&#8239;s
+<code>faulthandler_timeout</code> is a slow-import stack trace from <code>torch</code> sourcing its
+custom ops off GPFS, printed while the run continued to a pass; it is not a test failure and is
+not counted as one.</p>
+
+<h2 id="sib-guard-added-failure-check-revisions">Revisions, trees and command</h2>
+<table id="sib-guard-added-failure-check-revisions-table">
+<tbody>
+<tr><th>head</th><td><code>88189cd030059b8ca6161a35bacc05a05a90c02b</code> (<code>docs: record independent lineage insertion controls</code>)</td></tr>
+<tr><th>base</th><td><code>7f3db88c110bac47a5e470bd08432eab953ef760</code> (<code>fix(review): note the findings a composed review would not act on</code>), an ancestor of head by <code>git merge-base --is-ancestor</code></td></tr>
+<tr><th>arm tree</th><td>a fresh <code>git archive &lt;sha&gt; | tar -x</code> per arm under <code>$TMPDIR</code>, plus the five generated files (<code>imas_codex/graph/models.py</code>, <code>imas_codex/graph/dd_models.py</code>, <code>imas_codex/config/models.py</code>, <code>imas_codex/graph/schema_context_data.py</code>, <code>agents/schema-reference.md</code>) copied from the worktree, never linked</td></tr>
+<tr><th>command</th><td><code>env -C &lt;arm&gt; UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=&lt;arm&gt; uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_pool_batch_processors.py::TestComposeDomainContextFromBatch::test_compose_domain_context_from_batch</code></td></tr>
+<tr><th>isolation shown</th><td>each log's header carries <code>module.__file__</code> under the arm's own <code>$TMPDIR</code> tree and the resolved <code>measurement_cwd</code>, so the run is known to have imported the archive's code and not a worktree's</td></tr>
+<tr><th>product/test changes</th><td>none</td></tr>
+</tbody>
+</table>
+
+<h2 id="sib-guard-added-failure-check-runs">Six serial runs, one log each</h2>
+<table id="sib-guard-added-failure-check-runs-table">
+<thead><tr><th>Arm</th><th>Run</th><th>Result</th><th>Log</th></tr></thead>
+<tbody>
+<tr><td>base</td><td>1</td><td><strong>1 passed</strong> in 92.63&#8239;s, <code>EXIT=0</code></td><td><code>logs/base-run1.log</code></td></tr>
+<tr><td>base</td><td>2</td><td><strong>1 passed</strong> in 85.76&#8239;s, <code>EXIT=0</code></td><td><code>logs/base-run2.log</code></td></tr>
+<tr><td>base</td><td>3</td><td><strong>1 passed</strong> in 68.19&#8239;s, <code>EXIT=0</code></td><td><code>logs/base-run3.log</code></td></tr>
+<tr><td>head</td><td>1</td><td><strong>1 passed</strong> in 82.22&#8239;s, <code>EXIT=0</code></td><td><code>logs/head-run1.log</code></td></tr>
+<tr><td>head</td><td>2</td><td><strong>1 passed</strong> in 82.37&#8239;s, <code>EXIT=0</code></td><td><code>logs/head-run2.log</code></td></tr>
+<tr><td>head</td><td>3</td><td><strong>1 passed</strong> in 77.76&#8239;s, <code>EXIT=0</code></td><td><code>logs/head-run3.log</code></td></tr>
+</tbody>
+</table>
+
+<h2 id="sib-guard-added-failure-check-verdict">Verdict</h2>
+<p id="sib-guard-added-failure-check-verdict-line">The declared rule requires a failure at head in
+every run <em>and</em> a pass at base in every run. Base passed 3 of 3 and head has no failure in
+any completed run, so the failure is <strong>not caused by the head</strong>. A test that fails
+only under parallel load cannot be attributed to a revision by this instrument; that measurement
+belongs to the separately dispatched test node that verifies the merged result.</p>
+
+<h2 id="sib-guard-added-failure-check-reproduce">Reproduction</h2>
+<p id="sib-guard-added-failure-check-reproduce-body">The six logs are under
+<code>~/.config/reckon/crew/runs/r-20261110T222743094703-sib-guard-added-failure-check/logs/</code>
+and are regenerated by <code>run-arms.sh</code> in the same run directory.</p>
+</main>
+</body>
+</html>
