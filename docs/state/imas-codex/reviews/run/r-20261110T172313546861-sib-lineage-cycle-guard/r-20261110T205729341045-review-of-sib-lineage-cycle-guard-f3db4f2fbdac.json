@@ -1,0 +1,126 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 9,
+  "call_sites": [
+    "imas_codex/standard_names/edit.py:1559",
+    "imas_codex/standard_names/edit.py:3380",
+    "imas_codex/standard_names/source_invariant.py:55",
+    "imas_codex/standard_names/graph_store/graph_refinement.py:1207",
+    "imas_codex/standard_names/graph_store/graph_source_bindings.py:2805",
+    "imas_codex/standard_names/graph_store/graph_supersession.py:433",
+    "imas_codex/standard_names/graph_store/graph_supersession.py:644",
+    "imas_codex/standard_names/provenance_lifecycle.py:1017",
+    "imas_codex/standard_names/graph_store/graph_source_bindings.py:1937"
+  ],
+  "completed_at": "2026-11-10T21:13:55Z",
+  "dispatched_at": "2026-11-10T20:59:32Z",
+  "figure_inspection": {
+    "render": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T205729341045-review-of-sib-lineage-cycle-guard-f3db4f2fbdac/transaction.png",
+    "source": "docs/figures/sn-integrity-backlog/sib-lineage-cycle-guard/transaction.svg",
+    "verdict": "Labels and arrows are legible and unclipped; visually inspected exact-head SVG rendered with ImageMagick."
+  },
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T172313546861-sib-lineage-cycle-guard/run_provenance_gate.py",
+      "line": "27",
+      "severity": "blocking",
+      "text": "blocking: The repaired full-package gate and 14-file regression cohort invoke eight-worker pytest directly from the worker in fleet job 1291586, as shown by resume-3.jsonl's run_provenance_gate.py repaired package/affected commands and dispatch-detail.json's --overlap --jobid=1291586 launcher; mandatory fleet-node rules require a separate sbatch partition job, so rerun the accepted heavy measurement arms on all_debug or rigel and replace their receipts before accepting this node."
+    },
+    {
+      "file": "tests/standard_names/test_refined_from_cycle_guard.py",
+      "line": "231",
+      "severity": "non-blocking",
+      "text": "non-blocking: The refine/fold/tombstone cycle cases and regeneration cycle case exercise pre-existing preflight refusals; removing the newly added guard calls from graph_refinement.py:1207, edit.py:1559 or graph_supersession.py:433/644 leaves those refusal assertions green, so add insertion-boundary controls after successful preflight or direct mutation-query controls to make those guard-call regressions observable; coordinator disposition is required."
+    }
+  ],
+  "gate_evidence": {
+    "after_suite": {
+      "command": "env TMPDIR=/tmp/reckon-crew-scratch/r-20261110T172313546861-sib-lineage-cycle-guard/provenance-validation/repaired-tmp UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261110T172313546861-sib-lineage-cycle-guard/provenance-validation/repaired:/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T172313546861-sib-lineage-cycle-guard timeout 1500 uv run --no-sync pytest -n 8 -p no:cacheprovider --tb=no --basetemp /tmp/reckon-crew-scratch/r-20261110T172313546861-sib-lineage-cycle-guard/provenance-validation/repaired-pytest-package /tmp/reckon-crew-scratch/r-20261110T172313546861-sib-lineage-cycle-guard/provenance-validation/repaired/tests/standard_names",
+      "completed": true,
+      "exit_status": 1,
+      "failure_count": 14,
+      "failure_ids": [
+        "tests/standard_names/test_catalog_layout_hierarchy.py::TestOrderingCycleDetection::test_export_ledgers_cycle_and_writes_packet",
+        "tests/standard_names/test_compose_prompt_examples_round_trip.py::test_nc_rule_bad_example_has_declared_public_oracle_disposition[NC-25-neutral_beam_injector_beam_tangency_radius]",
+        "tests/standard_names/test_gap_rule_verdicts.py::TestDdCoordinateFieldNames::test_an_isotope_suffix_is_not_a_dd_field_name",
+        "tests/standard_names/test_gap_rule_verdicts.py::TestOrdinalSamples::test_ordinal_gap_is_a_rule_violation_not_a_missing_token[position-arc_of_circle_start_point-None]",
+        "tests/standard_names/test_gap_rule_verdicts.py::TestOrdinalSamples::test_ordinal_gap_is_a_rule_violation_not_a_missing_token[position-thick_line_first_point-None]",
+        "tests/standard_names/test_gap_rule_verdicts.py::TestSettledFoldCoverage::test_contextual_folds_remain_explicitly_unresolved_and_actionable",
+        "tests/standard_names/test_gap_rule_verdicts.py::TestSettledFoldCoverage::test_only_grammar_resolved_folds_are_non_actionable",
+        "tests/standard_names/test_gap_rule_verdicts.py::TestStoredGapReplay::test_genuine_demand_still_asks_for_a_token[subject-lithium_6]",
+        "tests/standard_names/test_geometry_enumeration_collapse.py::test_unregistered_arc_endpoint_rejects_the_ordinal_compound",
+        "tests/standard_names/test_manifest_generability.py::test_a_cut_refuses_a_manifest_it_cannot_generate_rather_than_counting",
+        "tests/standard_names/test_manifest_generability.py::test_a_manifest_whose_sources_all_reach_a_name_is_not_refused",
+        "tests/standard_names/test_manifest_generability.py::test_every_manifest_source_is_carried_or_names_its_blocking_mechanism",
+        "tests/standard_names/test_pool_registry_imports.py::test_pool_phase_import_orders_succeed_in_fresh_process[import imas_codex.cli.sn; import imas_codex.standard_names.turn as t; print(t.TURN_PHASES)]",
+        "tests/standard_names/test_review_name_stages.py::TestWorkerUsesCanonicalModel::test_worker_uses_canonical_model"
+      ],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T172313546861-sib-lineage-cycle-guard/repaired-package-provenance.log",
+      "revision": "46a1062a81761cbb24d97927d18c607c048bf552"
+    },
+    "baseline_suite": {
+      "command": "env TMPDIR=/tmp/reckon-crew-scratch/r-20261110T172313546861-sib-lineage-cycle-guard/resumed-validation/base-tmp UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261110T172313546861-sib-lineage-cycle-guard/resumed-validation/base timeout 1500 uv run --no-sync pytest -n 8 -p no:cacheprovider --tb=no --basetemp /tmp/reckon-crew-scratch/r-20261110T172313546861-sib-lineage-cycle-guard/resumed-validation/base-pytest-traceback-free /tmp/reckon-crew-scratch/r-20261110T172313546861-sib-lineage-cycle-guard/resumed-validation/base/tests/standard_names",
+      "completed": true,
+      "exit_status": 1,
+      "failure_count": 16,
+      "failure_ids": [
+        "tests/standard_names/test_catalog_layout_hierarchy.py::TestOrderingCycleDetection::test_export_ledgers_cycle_and_writes_packet",
+        "tests/standard_names/test_compose_prompt_examples_round_trip.py::test_nc_rule_bad_example_has_declared_public_oracle_disposition[NC-25-neutral_beam_injector_beam_tangency_radius]",
+        "tests/standard_names/test_gap_rule_verdicts.py::TestDdCoordinateFieldNames::test_an_isotope_suffix_is_not_a_dd_field_name",
+        "tests/standard_names/test_gap_rule_verdicts.py::TestOrdinalSamples::test_ordinal_gap_is_a_rule_violation_not_a_missing_token[position-arc_of_circle_start_point-None]",
+        "tests/standard_names/test_gap_rule_verdicts.py::TestOrdinalSamples::test_ordinal_gap_is_a_rule_violation_not_a_missing_token[position-thick_line_first_point-None]",
+        "tests/standard_names/test_gap_rule_verdicts.py::TestSettledFoldCoverage::test_contextual_folds_remain_explicitly_unresolved_and_actionable",
+        "tests/standard_names/test_gap_rule_verdicts.py::TestSettledFoldCoverage::test_only_grammar_resolved_folds_are_non_actionable",
+        "tests/standard_names/test_gap_rule_verdicts.py::TestStoredGapReplay::test_genuine_demand_still_asks_for_a_token[subject-lithium_6]",
+        "tests/standard_names/test_geometry_enumeration_collapse.py::test_unregistered_arc_endpoint_rejects_the_ordinal_compound",
+        "tests/standard_names/test_house_style_checks.py::test_audit_report_carries_the_conformance_findings",
+        "tests/standard_names/test_manifest_generability.py::test_a_cut_refuses_a_manifest_it_cannot_generate_rather_than_counting",
+        "tests/standard_names/test_manifest_generability.py::test_a_manifest_whose_sources_all_reach_a_name_is_not_refused",
+        "tests/standard_names/test_manifest_generability.py::test_every_manifest_source_is_carried_or_names_its_blocking_mechanism",
+        "tests/standard_names/test_pool_registry_imports.py::test_pool_phase_import_orders_succeed_in_fresh_process[import imas_codex.cli.sn; import imas_codex.standard_names.turn as t; print(t.TURN_PHASES)]",
+        "tests/standard_names/test_review_name_stages.py::TestWorkerUsesCanonicalModel::test_worker_uses_canonical_model",
+        "tests/standard_names/test_review_pipeline.py::test_audit_embedding_preflight"
+      ],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T172313546861-sib-lineage-cycle-guard/base-xdist-eight-traceback-free.log",
+      "revision": "7f3db88c110bac47a5e470bd08432eab953ef760"
+    }
+  },
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 9 production call site(s)",
+    "diff": "Read the fourteen commits from 7f3db88c110bac47a5e470bd08432eab953ef760 to f3db4f2fbdacae1781dfb8a54fc8371816adf49c; six production files add shared guarding and seven creation stamps, eight test files cover or model the change, and the evidence fragment and transaction.svg document it without a production correctness defect found.",
+    "done_when": "The source prompt.txt:111 and live plan s52 require per-writer cycle refusal, acyclic insertion, provenance and zero added package failure ids; the recorded graph gate passes 22 checks and package logs yield zero added ids, but the heavy package arms ran in fleet job 1291586 rather than a separate partition job and need compliant replacement evidence.",
+    "goal": "The source prompt.txt:38 asks every REFINED_FROM writer to refuse cycles; graph_foundation.py:237 provides the shared transaction clause and the seven MERGE sites invoke it, while the evidence fragment honestly records that historical edges lack creation provenance.",
+    "manifest": "The source manifest.md:11-20 names fourteen commits, completed base and head gate arms, the guard-removal negative control and the repaired 247-test cohort, and its package failure sets reconcile with the logs rather than treating exit 1 as a clean suite.",
+    "write_paths": "The 16 changed paths are within the initial source prompt.txt:81-92 grants plus the fourteen-test-file extension in resume-3-advice.txt:1; no source file outside that scope changed."
+  },
+  "justifications": {
+    "durability": "test_refined_from_cycle_guard.py:97 catches guard removal with DID NOT RAISE in negative-serial.log, but its identity-writer assertions at lines 231-247 and regeneration assertions at lines 300-302 also pass through pre-existing preflight refusals and do not establish regression sensitivity for those new insertion guards.",
+    "evidence": "Source repaired-graph-provenance.log records 22 passed and completed package logs record 16 baseline versus 14 head failures with zero added ids, but run_provenance_gate.py:27 executes the eight-worker package gate directly in the fleet allocation, contrary to the mandatory measurement placement.",
+    "fit": "graph_foundation.py:237 extends the existing graph-store foundation with one Cypher builder, callers retain their transaction idioms, and added definitions in test_refined_from_cycle_guard.py and test_tombstone_supersede.py:474 use mechanism-based names without plan labels.",
+    "goal_fidelity": "graph_foundation.py:237 and its seven production insertion callers implement a common transaction-aborting reverse-path/self-loop check, and the evidence fragment's reproduction table distinguishes two measured cycle closures from seven inputs already filtered or refused.",
+    "reuse": "Capability searches over imas_codex/standard_names found existing preflight cycle checks in edit.py:2352, graph_refinement.py and graph_supersession.py:555 and the drained-name owner source_invariant.py:67, but no shared locking insertion-time assertion; the new foundation builder supplies that missing capability while callers extend those existing owners and tests reuse existing seed fixtures and the fold transaction double.",
+    "scope_discipline": "The diff's sixteen paths match source manifest.md:3 and the explicit extension in resume-3-advice.txt:1, including the seven test-double repairs necessitated by named relationship properties."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The source prompt.txt:38 asks every REFINED_FROM writer to refuse cycles; graph_foundation.py:237 provides the shared transaction clause and the seven MERGE sites invoke it, while the evidence fragment honestly records that historical edges lack creation provenance.\nVERDICT done_when: The source prompt.txt:111 and live plan s52 require per-writer cycle refusal, acyclic insertion, provenance and zero added package failure ids; the recorded graph gate passes 22 checks and package logs yield zero added ids, but the heavy package arms ran in fleet job 1291586 rather than a separate partition job and need compliant replacement evidence.\nVERDICT write_paths: The 16 changed paths are within the initial source prompt.txt:81-92 grants plus the fourteen-test-file extension in resume-3-advice.txt:1; no source file outside that scope changed.\nVERDICT manifest: The source manifest.md:11-20 names fourteen commits, completed base and head gate arms, the guard-removal negative control and the repaired 247-test cohort, and its package failure sets reconcile with the logs rather than treating exit 1 as a clean suite.\nVERDICT diff: Read the fourteen commits from 7f3db88c110bac47a5e470bd08432eab953ef760 to f3db4f2fbdacae1781dfb8a54fc8371816adf49c; six production files add shared guarding and seven creation stamps, eight test files cover or model the change, and the evidence fragment and transaction.svg document it without a production correctness defect found.\nCALL_SITES: imas_codex/standard_names/edit.py:1559, imas_codex/standard_names/edit.py:3380, imas_codex/standard_names/source_invariant.py:55, imas_codex/standard_names/graph_store/graph_refinement.py:1207, imas_codex/standard_names/graph_store/graph_source_bindings.py:2805, imas_codex/standard_names/graph_store/graph_supersession.py:433, imas_codex/standard_names/graph_store/graph_supersession.py:644, imas_codex/standard_names/provenance_lifecycle.py:1017, imas_codex/standard_names/graph_store/graph_source_bindings.py:1937\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: graph_foundation.py:237 and its seven production insertion callers implement a common transaction-aborting reverse-path/self-loop check, and the evidence fragment's reproduction table distinguishes two measured cycle closures from seven inputs already filtered or refused.\nSCORE evidence: 14\nJUSTIFICATION evidence: Source repaired-graph-provenance.log records 22 passed and completed package logs record 16 baseline versus 14 head failures with zero added ids, but run_provenance_gate.py:27 executes the eight-worker package gate directly in the fleet allocation, contrary to the mandatory measurement placement.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The diff's sixteen paths match source manifest.md:3 and the explicit extension in resume-3-advice.txt:1, including the seven test-double repairs necessitated by named relationship properties.\nSCORE durability: 16\nJUSTIFICATION durability: test_refined_from_cycle_guard.py:97 catches guard removal with DID NOT RAISE in negative-serial.log, but its identity-writer assertions at lines 231-247 and regeneration assertions at lines 300-302 also pass through pre-existing preflight refusals and do not establish regression sensitivity for those new insertion guards.\nSCORE fit: 20\nJUSTIFICATION fit: graph_foundation.py:237 extends the existing graph-store foundation with one Cypher builder, callers retain their transaction idioms, and added definitions in test_refined_from_cycle_guard.py and test_tombstone_supersede.py:474 use mechanism-based names without plan labels.\nSCORE reuse: 20\nJUSTIFICATION reuse: Capability searches over imas_codex/standard_names found existing preflight cycle checks in edit.py:2352, graph_refinement.py and graph_supersession.py:555 and the drained-name owner source_invariant.py:67, but no shared locking insertion-time assertion; the new foundation builder supplies that missing capability while callers extend those existing owners and tests reuse existing seed fixtures and the fold transaction double.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T172313546861-sib-lineage-cycle-guard/run_provenance_gate.py:27 blocking: The repaired full-package gate and 14-file regression cohort invoke eight-worker pytest directly from the worker in fleet job 1291586, as shown by resume-3.jsonl's run_provenance_gate.py repaired package/affected commands and dispatch-detail.json's --overlap --jobid=1291586 launcher; mandatory fleet-node rules require a separate sbatch partition job, so rerun the accepted heavy measurement arms on all_debug or rigel and replace their receipts before accepting this node.\nFINDING tests/standard_names/test_refined_from_cycle_guard.py:231 non-blocking: The refine/fold/tombstone cycle cases and regeneration cycle case exercise pre-existing preflight refusals; removing the newly added guard calls from graph_refinement.py:1207, edit.py:1559 or graph_supersession.py:433/644 leaves those refusal assertions green, so add insertion-boundary controls after successful preflight or direct mutation-query controls to make those guard-call regressions observable; coordinator disposition is required.\n",
+  "review_run_id": "r-20261110T205729341045-review-of-sib-lineage-cycle-guard-f3db4f2fbdac",
+  "reviewed_base_sha": "7f3db88c110bac47a5e470bd08432eab953ef760",
+  "reviewed_head_sha": "f3db4f2fbdacae1781dfb8a54fc8371816adf49c",
+  "reviewed_run_id": "r-20261110T172313546861-sib-lineage-cycle-guard",
+  "scores": {
+    "durability": 16,
+    "evidence": 14,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-10T21:16:35.217310+00:00",
+  "total": 110
+}

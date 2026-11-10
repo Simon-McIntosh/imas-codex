@@ -1,0 +1,439 @@
+{
+  "agent": {
+    "alias": "sol61",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6.1-sol",
+    "sandbox": "read-only"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex",
+  "base_sha": "7d44dea163b6143eeecafea85dca494b3627b7aa",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T205729341045-review-of-sib-lineage-cycle-guard-f3db4f2fbdac/brief.md",
+    "sha256": "9aba171006c64b6e365afb0344fc05955d82c42b3097bdf02f3e3dbb67cda19c"
+  },
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 5387008,
+      "cached_input_tokens_cumulative": 5387008,
+      "input_tokens": 5549140,
+      "input_tokens_cumulative": 5549140,
+      "output_tokens": 18745,
+      "output_tokens_cumulative": 18745,
+      "reasoning_output_tokens": 5028,
+      "reasoning_output_tokens_cumulative": 5028
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": null,
+  "clone_matches": {
+    "reason": "the run asserted no revision pair to compare",
+    "status": "unmeasured"
+  },
+  "commit_resolution": null,
+  "commits": [],
+  "completed_at": "2026-11-10T21:13:55Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-11-10T20:59:32Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": false,
+    "matched_measure": null,
+    "override": false,
+    "role": "review",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.8906098017209129,
+    "plan": "sn-integrity-backlog",
+    "reason": "role-not-enforced:review",
+    "verdict": "exempt"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 1.279119035584854,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-11-13T19:43:11Z, which is after this node's 3600s horizon ending 2026-11-10T21:57:41.866503+00:00",
+    "horizon_ends_at": "2026-11-10T21:57:41.866503+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-11-10T20:57:39Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-11-13T19:43:11Z",
+    "resets_at": "2026-11-14T15:28:13Z",
+    "seconds_until_reset": 325833,
+    "state": "quiet",
+    "utilisation_pct": 59.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-11-10T20:57:39Z",
+    "read_at": "2026-11-10T20:57:41Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 59.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": 380000,
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-10T21:13:55Z",
+    "quota_state": "measured",
+    "quota_windows": [
+      {
+        "observed_at": "2026-11-10T21:13:55Z",
+        "resets_at": 1794670093,
+        "used_percent": 60.0,
+        "window_minutes": 10080
+      }
+    ],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "notional_cost_usd": "no_dated_rate",
+      "rate_basis": "no_dated_rate"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T205729341045-review-of-sib-lineage-cycle-guard-f3db4f2fbdac/manifest.md",
+  "member": "disposable-r-20261110T205729341045-review-of-sib-lineage-cycle-guard-f3db4f2fbdac",
+  "model_key": "sol",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "review-of-sib-lineage-cycle-guard-f3db4f2fbdac",
+  "node_definition": {
+    "admission_findings": [],
+    "after": [],
+    "anchor_paths": [],
+    "brief": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T172313546861-sib-lineage-cycle-guard/review-brief.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T205729341045-review-of-sib-lineage-cycle-guard-f3db4f2fbdac/brief.md",
+    "brief_sha256": "9aba171006c64b6e365afb0344fc05955d82c42b3097bdf02f3e3dbb67cda19c",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "elevated",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1587,
+          "cached_input_tokens": 729368,
+          "input_tokens": 730957,
+          "output_tokens": 147,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 731104,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+      "session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea"
+    },
+    "done_when": "the review for r-20261110T172313546861-sib-lineage-cycle-guard stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run's own baseline_suite and after_suite gate logs; the record is written at one of this run's declared write paths, under review-records/ inside the directory of run r-20261110T172313546861-sib-lineage-cycle-guard, and never in the worktree; the turn ends once that record is stored and the manifest reads complete",
+    "estimated_hours": null,
+    "goal": "attach an independent review to run r-20261110T172313546861-sib-lineage-cycle-guard",
+    "id": "review-of-sib-lineage-cycle-guard-f3db4f2fbdac",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-11-10T20:57:39Z",
+      "read_at": "2026-11-10T20:57:41Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 59.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T205729341045-review-of-sib-lineage-cycle-guard-f3db4f2fbdac/manifest.md",
+    "negative_control": "",
+    "over_fence_reason": "",
+    "peer_scopes": {},
+    "plan": "sn-integrity-backlog",
+    "regenerate_paths": [],
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "review",
+    "section": "§52",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T172313546861-sib-lineage-cycle-guard/review-records/r-20261110T172313546861-sib-lineage-cycle-guard.json",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T172313546861-sib-lineage-cycle-guard/review-records/r-20261110T172313546861-sib-lineage-cycle-guard.at-f3db4f2fbdacae1781dfb8a54fc8371816adf49c.json"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": {
+      "advisory": true,
+      "burn_multiple": 1.278970294090909,
+      "derived": 0.5074394636048281,
+      "drain_hours": 168.0,
+      "effective_limit": 0.5074394636048281,
+      "elapsed_fraction": 0.46130860327711637,
+      "elapsed_hours": 77.49984535055555,
+      "group": "codex-sub",
+      "lift": {
+        "ends_at": "2026-11-11T09:00:01+00:00",
+        "ends_on": "time",
+        "form": "uncapped",
+        "group": "codex-sub",
+        "id": "codex-sub-1794082577-c029e5",
+        "pace_multiple": null,
+        "remaining_seconds": 43308.556738,
+        "scope": "global"
+      },
+      "lift_hold": {
+        "held": false,
+        "kind": "uncapped"
+      },
+      "limited_by": "allowance",
+      "observed_at": "2026-11-10T20:58:12+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.41000000000000003,
+      "remaining_windows": null,
+      "resets_at": "2026-11-14T15:28:13Z",
+      "state": "observed",
+      "utilisation": 0.59,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.6335419999999999,
+      "decided_by": "window",
+      "margin": -0.008541999999999939,
+      "name": "review-of-sib-lineage-cycle-guard-f3db4f2fbdac",
+      "score": 0.625,
+      "state": "observed",
+      "verdict": "split",
+      "window_fill": 0.59
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.443262,
+        "observed_at": "2026-11-10T20:58:12+00:00",
+        "period": "primary",
+        "resets_at": "2026-11-14T15:28:13Z",
+        "state": "observed",
+        "utilisation": 0.59,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "lift_id": "codex-sub-1794082577-c029e5",
+    "member": "codex",
+    "node": "review-of-sib-lineage-cycle-guard-f3db4f2fbdac",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-11-10T20:58:12.443262+00:00",
+    "score": 0.625,
+    "session": null,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:capability",
+    "family": null,
+    "jev_model": "~typesafe/jev-latest",
+    "latency_ms": 5000.808,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 1883.371,
+      "context-estimate": 50.202,
+      "records": 2104.977,
+      "verdict-inputs": 1205.427
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.8906098017209129,
+  "plan_link": null,
+  "promoted_by": "review-self",
+  "promoted_revision": "7d44dea163b6143eeecafea85dca494b3627b7aa",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "id": "r-20261110T205729341045-review-of-sib-lineage-cycle-guard-f3db4f2fbdac",
+    "reviewed_base_sha": "7f3db88c110bac47a5e470bd08432eab953ef760",
+    "reviewed_head_sha": "f3db4f2fbdacae1781dfb8a54fc8371816adf49c",
+    "scores": {
+      "durability": 16,
+      "evidence": 14,
+      "fit": 20,
+      "goal_fidelity": 20,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 110
+  },
+  "review_tier": "full",
+  "role": "review",
+  "route_mode": "explicit",
+  "run_id": "r-20261110T205729341045-review-of-sib-lineage-cycle-guard-f3db4f2fbdac",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§52",
+  "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+  "session_harness": "codex",
+  "session_id": "01a1c743-3e50-7552-adb2-e7fb32dd8900",
+  "session_model": "gpt-6.1-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 5387008,
+    "cumulative_input_tokens": 10936148,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 23773
+  },
+  "time_budget": "60m",
+  "tool_steps": 61.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 863,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-10T21:14:00Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-11-10T21:00:11Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [
+      {
+        "bytes": 67780610,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T205729341045-review-of-sib-lineage-cycle-guard-f3db4f2fbdac/codex-home/cache"
+      },
+      {
+        "bytes": 28814443,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T205729341045-review-of-sib-lineage-cycle-guard-f3db4f2fbdac/codex-home/plugins"
+      }
+    ],
+    "run_id": "r-20261110T205729341045-review-of-sib-lineage-cycle-guard-f3db4f2fbdac",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 159,
+    "worker_pid": 1464558
+  },
+  "worker_seconds": 863,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}
