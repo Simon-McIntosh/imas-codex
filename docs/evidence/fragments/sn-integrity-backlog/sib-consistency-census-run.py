@@ -91,6 +91,11 @@ _TEMPLATE_FEATURES = (
 #: Words that carry no concept identity when a lemma is normalised.
 _LEMMA_STOPWORDS = {"the", "this", "a", "an"}
 
+#: A pronoun or determiner standing where the subject of "is defined by" should
+#: be means the sentence refers back to an earlier subject rather than naming
+#: a concept, so it cannot be a lemma.
+_LEMMA_PRONOUNS = {"it", "this", "that", "these", "they", "which"}
+
 _TEXT_LIMIT = 320
 
 
@@ -105,6 +110,8 @@ def _normalise_lemma(lemma: str) -> str:
     tokens = [t for t in re.split(r"[^a-z0-9]+", lowered) if t]
     while tokens and tokens[0] in _LEMMA_STOPWORDS:
         tokens = tokens[1:]
+    if not tokens or tokens[0] in _LEMMA_PRONOUNS:
+        return ""
     return " ".join(tokens)
 
 
@@ -667,6 +674,33 @@ def planted_control() -> dict[str, Any]:
                 "description": "Density of the identical species.",
                 "documentation": "Density of the identical species.\n\n$$n = n_0$$",
             },
+            # A definitional sentence whose subject is a pronoun refers back to
+            # an earlier subject, so it names no concept and must not create a
+            # concept group of its own.
+            {
+                "id": "planted_pronoun_one",
+                "name_stage": "accepted",
+                "docs_stage": "accepted",
+                "physical_base": "pronoun_quantity",
+                "physics_domain": "transport",
+                "description": "Gradient of the first pronoun quantity.",
+                "documentation": (
+                    "Gradient of the first pronoun quantity.\n\n"
+                    "It is defined by\n\n$$\\nabla Q_1 = dQ_1/dx$$"
+                ),
+            },
+            {
+                "id": "planted_pronoun_typo_guard",
+                "name_stage": "accepted",
+                "docs_stage": "accepted",
+                "physical_base": "pronoun_quantity",
+                "physics_domain": "transport",
+                "description": "Gradient of the second pronoun quantity.",
+                "documentation": (
+                    "Gradient of the second pronoun quantity.\n\n"
+                    "It is defined by\n\n$$\\nabla Q_2 = dQ_2/dx$$"
+                ),
+            },
         ]
         with GraphClient(uri=uri) as graph:
             graph.query(
@@ -719,6 +753,7 @@ def planted_control() -> dict[str, Any]:
                 )
             ),
             "identical_family_not_reported": identical_family is None,
+            "pronoun_concept_not_extracted": "it" not in concepts,
             "planted_concept_detected": planted_concept is not None,
             "planted_concept_definition_variants": (
                 (planted_concept or {}).get("definition_variants")
@@ -736,6 +771,7 @@ def planted_control() -> dict[str, Any]:
             and checks["divergent_family_phrase_variants"] == 2
             and checks["divergent_family_template_variants"] >= 2
             and checks["identical_family_not_reported"]
+            and checks["pronoun_concept_not_extracted"]
             and checks["planted_concept_detected"]
             and checks["planted_concept_definition_variants"] == 2
             and bool(checks["planted_proposal_definition"])
@@ -782,6 +818,11 @@ def _esc(text: Any) -> str:
 
 def _examples(members: list[str], count: int = 2) -> str:
     return ", ".join(f"<code>{_esc(name)}</code>" for name in members[:count])
+
+
+def _share_text(share: float | None) -> str:
+    """A share as a percentage, or ``n/a`` where no member carries it."""
+    return "n/a" if share is None else f"{share:.1%}"
 
 
 def _family_table(families: list[dict[str, Any]]) -> str:
@@ -842,12 +883,12 @@ def _family_examples(families: list[dict[str, Any]]) -> str:
             f"<p>Proposed definition from <code>{_esc(proposed['definition_from'])}</code> "
             f"(anchor rule <code>{_esc(proposed['anchor_rule'])}</code>, phrase "
             f"<em>{_esc(proposed['definition_phrase'])}</em> carried by "
-            f"{proposed['definition_phrase_share']:.1%} of members): "
+            f"{_share_text(proposed['definition_phrase_share'])} of members): "
             f"{_esc(proposed['definition'])}</p>"
             f"<p>Proposed template <code>{_esc(proposed['template_signature'])}</code> "
             f"from <code>{_esc(proposed['template_from'])}</code> "
             f"({_esc(proposed['template_source'])}, "
-            f"{proposed['template_share']:.1%} of members); domain "
+            f"{_share_text(proposed['template_share'])} of members); domain "
             f"<code>{_esc(proposed['domain'])}</code>.</p>"
         )
     return "".join(blocks)
