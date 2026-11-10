@@ -141,6 +141,12 @@ for <code>total_energy_of_calorimetry_component</code>, and resolve
 <code>total_size_of_camera</code> — or have the lead record waivers for the 238
 uncarried sources in <code>waived_sources.yaml</code>. Either route is graph or
 authority work this node may not do.</li>
+<li>A third route exists that this node neither took nor measured:
+<code>sn release --names-only</code> is documented in the tool's own help as
+"Export names without requiring accepted docs (skip docs_stage gate)". It would
+publish names whose documentation is pending, which is a decision about what a
+candidate may contain rather than an operational step, and the dispatch's exact
+command did not carry it. Whether the cut would then complete is unmeasured here.</li>
 <li>Re-run the same cut command unchanged. Every other input is already established
 and reproducible: the batch identity <code>v0.4.0rc8+west-task-2e</code>, the
 231-name candidate roster, the frozen artifact path
