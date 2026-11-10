@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="434">
+<meta name="plan-version" content="435">
 <meta name="plan-modified" content="2026-11-10">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -1373,6 +1373,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s52" data-id="c-run-r-20261109T234131905265-review-of-sib-unaccepted-census-b67a1f0e0915" data-who="reckon-build" data-when="2026-11-09T23:55:08.694Z">
     <div class="r-comment-body"><p>Independent review of sib-unaccepted-census at b67a1f0e0 (base 197de19cd1): parsed, 99/120 across six dimensions with five non-blocking findings and no blocking one; the census records all 920 unaccepted sources and 116 exhausted names once each in exactly one class, reconciling to the live read (6123 live / 5203 accepted / 920 unaccepted / 116 exhausted, status split 616 named / 220 failed / 68 extracted / 16 vocab_gap), and the findings are the source-oriented step and scope copied into the name classes, two self-referential cost and class-sum guards, the attempt-capped label on sub-cap failures, and plan references in source comments. Reviewed head b67a1f0e09157d4e60e44855ee8faa87a4595a5e, base 197de19cd11eb9b247fd9cb9f16ded0d231c775f.</p></div>
+</div>
+<div class="r-comment" data-section="s52" data-id="c-run-r-20261109T222243401168-sib-unaccepted-census" data-who="reckon-build" data-when="2026-11-09T23:38:26Z">
+    <div class="r-comment-body"><p>Census lands: 920 unaccepted live DD sources split 395 scored below the acceptance floor, 239 awaiting review, 92 vocabulary gap, 91 refused by a writer, 90 attempt-capped, 8 never claimed, 5 documentation missing; 116 exhausted names split 101 below the floor, 10 refused by a writer, 4 awaiting review, 1 documentation missing; every item is recorded in the JSON under its class with the state a cohort run scopes by, each class names its sn run step and cohort scope, and expected cost is stated at the full run&#x27;s USD 0.2444 per accepted name and at the measured cohort&#x27;s USD 0.01042 per attempted and USD 0.01795 per named source.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261012T162346807302-review-of-sib-row-census" data-who="reckon-build" data-when="2026-10-12T16:39:58.712Z">
     <div class="r-comment-body"><p>reviewed r-20261012T145528571333-sib-row-census at a7a70db00 against c7b4c626e; total 93/120 (goal_fidelity 15, evidence 13, scope_discipline 19, durability 11, fit 15, reuse 20); two blocking findings — the landing record's verdict tallies and the manifest's row-count both disagree with the 38 rows the census file holds.</p></div>

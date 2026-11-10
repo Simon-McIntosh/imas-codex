@@ -1,0 +1,975 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "197de19cd11eb9b247fd9cb9f16ded0d231c775f",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 7499965,
+      "input_tokens_cumulative": 7499965,
+      "output_tokens": 51157,
+      "output_tokens_cumulative": 51157,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 8880,
+    "files": 3,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "test_pass_symbols_defined",
+        "path": "tests/standard_names/test_audits.py"
+      },
+      "run_function": {
+        "line": 316,
+        "name": "cost_basis",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 341
+    },
+    {
+      "existing_function": {
+        "line": 707,
+        "name": "test_parse_limiter_file_with_segment_header",
+        "path": "tests/discovery/test_device_xml_scanner.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 660,
+        "name": "test_lcdb_file_units_follow_the_named_data_axis",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 252,
+        "name": "test_real_world_compose_error_pattern",
+        "path": "tests/discovery/test_llm_kwargs.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 242,
+        "name": "temp_log_dir",
+        "path": "tests/discovery/test_logging_utils.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 733,
+        "name": "test_cluster_labels_unique_within_scope",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 798,
+        "name": "test_cluster_path_counts_match_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 884,
+        "name": "test_cluster_embedding_dimensions_consistent",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 942,
+        "name": "test_cocos_clusters_have_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 975,
+        "name": "test_physics_clusters_have_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 338,
+        "name": "_load_fixture_graph",
+        "path": "tests/graph_mcp/conftest.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 62,
+        "name": "test_line_anchored_comment_withholds_only_its_identity",
+        "path": "tests/standard_names/test_approve_withholds_on_comments.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 393,
+        "name": "_seed_finalized_successor",
+        "path": "tests/standard_names/test_compose_adopts_pending_stub.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "_seed",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 63,
+        "name": "_snapshot_bytes",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 100,
+        "name": "test_scalar_selected_dedup_removes_other_binding_and_projection",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 370,
+        "name": "test_ineligible_source_retirement_surfaces_orphaned_names",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 350,
+        "name": "test_forwarder_scan_catches_absolute_import_delegation",
+        "path": "tests/standard_names/test_facade_closure.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 127,
+        "name": "test_ordinary_source_migration_admits_a_status_less_source",
+        "path": "tests/standard_names/test_null_status_predicates_manifest.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 544,
+        "name": "test_the_site_guard_rejects_a_wrapped_partial",
+        "path": "tests/standard_names/test_panel_audit_sample.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 146,
+        "name": "test_load_recovery_map_reads_sources_from_a_git_ref",
+        "path": "tests/standard_names/test_provenance_rebuild.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 240,
+        "name": "test_transactional_dry_run_hash_apply_and_replay",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 483,
+        "name": "test_childful_rebind_preserves_parent_closure",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 594,
+        "name": "test_authoritative_sibling_deletes_spurious_stub_and_repairs_scalar",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 677,
+        "name": "test_nonaccepted_sibling_refuses_spurious_stub_deletion",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 725,
+        "name": "test_extra_non_dd_producer_refuses_spurious_stub_deletion_in_graph",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 779,
+        "name": "test_binding_change_between_manifest_and_cas_rolls_back",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 855,
+        "name": "test_new_producer_between_scalar_cas_and_deletion_rolls_back",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_isn_invalid_operator_token_is_terminal",
+        "path": "tests/standard_names/test_refine_failure_classification.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 98,
+        "name": "_write_taxonomy",
+        "path": "tests/standard_names/test_review_checks.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "catalog_root",
+        "path": "tests/standard_names/test_review_comment_triage.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 6,
+        "name": "test_equal_axis_leaf_contrasts_render",
+        "path": "tests/standard_names/test_same_axis_attachment_guidance.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 34,
+        "name": "_seed",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 96,
+        "name": "_seed_mirror_mismatch",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 234,
+        "name": "test_signed_dispositions_apply_all_modes_and_preserve_outside_allowlist",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 747,
+        "name": "test_signed_mirror_repair_applies_scalar_and_projection_classes_exactly",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_approval_keeps_frozen_review_artifact_byte_exact",
+        "path": "tests/standard_names/test_sn_approve_contested_provenance.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "additive_repo",
+        "path": "tests/standard_names/test_sn_approve_tag.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 36,
+        "name": "_seed",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 92,
+        "name": "_participant_snapshot_bytes",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_absent_upstream_stale_source_detaches_and_stays_stale",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 362,
+        "name": "test_set_ssh_hostname_roundtrip",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 205,
+        "name": "test_meta_field_empty_body",
+        "path": "tests/wiki/test_pipeline.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    },
+    {
+      "existing_function": {
+        "line": 329,
+        "name": "test_full_page",
+        "path": "tests/wiki/test_twiki_raw_adapter.py"
+      },
+      "run_function": {
+        "line": 441,
+        "name": "write_html",
+        "path": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py"
+      },
+      "window_line": 523
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "9d43b8925a995ce81ecf33b93df7c0c0c14fe78c",
+    "76dd92cc65bc1d070596f6bcfd96dee17d778ad9",
+    "9788064fd01d0ca691cbc28280f1c2b652bbb5ff",
+    "b67a1f0e09157d4e60e44855ee8faa87a4595a5e"
+  ],
+  "completed_at": "2026-11-09T23:38:26Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-11-09T22:24:47Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "passed",
+  "gate_check": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-unaccepted-census uv run --no-sync python docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T222243401168-sib-unaccepted-census/census-gate.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.8906098017209129,
+    "plan": "sn-integrity-backlog",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-11-09T23:22:45.761516+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-11-09T22:22:45Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 7,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 2,
+    "headroom": 8,
+    "mean_context": 120000,
+    "observed_at": "2026-11-09T22:22:54Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 7,
+      "aggregate_tokens_per_second": 73.586,
+      "detail": "",
+      "mean_tokens_per_second": 73.586,
+      "observed_at": "2026-11-09T22:22:54Z",
+      "runs": 1.0,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-09T23:38:26Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T222243401168-sib-unaccepted-census/manifest.md",
+  "member": "disposable-r-20261109T222243401168-sib-unaccepted-census",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "sib-unaccepted-census",
+  "node_definition": {
+    "admission_findings": [],
+    "after": [],
+    "anchor_paths": [],
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "elevated",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1000,
+          "cached_input_tokens": 391643,
+          "input_tokens": 392645,
+          "output_tokens": 715,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 393360,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+      "session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea"
+    },
+    "done_when": "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census.json assigns each of the live quantity sources without an accepted name (920 on 2026-11-09: 616 named but drafted or reviewed, 221 failed, 68 extracted, 16 vocab_gap; re-read live and reconciled if it moved) and each of the 116 exhausted names to exactly one class, from these: awaiting review, scored below the acceptance floor, documentation missing, refused by a writer, attempt-capped, never claimed, vocabulary gap; class sums reconcile to the live read; each class names the sn run step and scope that advances it and an expected cost from the measured per-name cost of the full run and the cohort reruns; sib-unaccepted-census.html summarises with representative names and sources per class; graph reads only on a compute partition, spend USD 0",
+    "estimated_hours": null,
+    "goal": "Classify every unaccepted live DD quantity source and every exhausted name by what holds it, with the step and cost that advance each class",
+    "id": "sib-unaccepted-census",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-11-09T22:22:45Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 7,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 2,
+      "headroom": 8,
+      "mean_context": 120000,
+      "observed_at": "2026-11-09T22:22:54Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 7,
+        "aggregate_tokens_per_second": 73.586,
+        "detail": "",
+        "mean_tokens_per_second": 73.586,
+        "observed_at": "2026-11-09T22:22:54Z",
+        "runs": 1.0,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T222243401168-sib-unaccepted-census/manifest.md",
+    "negative_control": "none: read-only census, no test path; reconciliation of class sums to the live total is the internal check",
+    "over_fence_reason": "",
+    "peer_scopes": {},
+    "plan": "sn-integrity-backlog",
+    "regenerate_paths": [],
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§52",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census.json",
+      "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census.html",
+      "docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census-run.py",
+      "docs/figures/sn-integrity-backlog/sib-unaccepted-census"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 3338835.0,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "sib-unaccepted-census",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-11-09T22:24:08.758599+00:00",
+    "score": 0.8125,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:capability",
+    "family": null,
+    "jev_model": "~typesafe/jev-latest",
+    "latency_ms": 5000.715,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 1709.833,
+      "context-estimate": 809.795,
+      "records": 1333.81,
+      "verdict-inputs": 2416.703
+    }
+  },
+  "plan": "sn-integrity-backlog",
+  "plan_impl_at_dispatch": 0.8906098017209129,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "b67a1f0e09157d4e60e44855ee8faa87a4595a5e",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "197de19cd11eb9b247fd9cb9f16ded0d231c775f",
+    "reviewed_head_sha": "b67a1f0e09157d4e60e44855ee8faa87a4595a5e",
+    "scores": {
+      "durability": 14,
+      "evidence": 15,
+      "fit": 15,
+      "goal_fidelity": 17,
+      "reuse": 18,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 99
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261109T222243401168-sib-unaccepted-census",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§52",
+  "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+  "session_harness": "claude",
+  "session_id": "ec449ae7-bdeb-4636-b49e-86e9743a2fec",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 19893063,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 1347.918,
+    "generated_tokens": 114697,
+    "generation_seconds": 797.467,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 77.0,
+    "machine_seconds": 550.451,
+    "peak_input_tokens": 177269,
+    "tokens_per_second": 143.83,
+    "wall_tokens_per_second": 85.09
+  },
+  "time_budget": "60m",
+  "tool_steps": 105.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 4419,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-09T23:38:29Z",
+    "last_record_type": "result",
+    "launched_at": "2026-11-09T23:15:50Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [],
+    "run_id": "r-20261109T222243401168-sib-unaccepted-census",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 16722,
+    "worker_pid": 2373404
+  },
+  "worker_seconds": 3072,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
