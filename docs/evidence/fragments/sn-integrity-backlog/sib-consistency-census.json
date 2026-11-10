@@ -10,11 +10,10 @@
    "drafted": 169
   },
   "by_docs_stage": {
-   "accepted": 2000,
+   "accepted": 2036,
    "pending": 942,
-   "reviewed": 52,
-   "drafted": 36,
-   "refining": 3,
+   "reviewed": 53,
+   "refining": 2,
    "exhausted": 1
   },
   "by_physical_base": 166,
@@ -537,6 +536,7 @@
     "physical_base": "atomic_number",
     "member_count": 3,
     "member_template_signatures": {
+     "atomic_number=omwn": 1,
      "ion_atomic_number=own": 1
     },
     "divergence": {
@@ -565,8 +565,13 @@
       "variants_omitted": 0
      },
      "template": {
-      "divergent": false,
+      "divergent": true,
       "signature_variants": [
+       {
+        "signature": "omwn",
+        "members": 1,
+        "example": "atomic_number"
+       },
        {
         "signature": "own",
         "members": 1,
@@ -588,9 +593,9 @@
      "definition": null,
      "definition_phrase": "atomic number is the number",
      "definition_phrase_share": 0.333,
-     "template_signature": "own",
-     "template_from": "ion_atomic_number",
-     "template_share": 1.0,
+     "template_signature": "omwn",
+     "template_from": "atomic_number",
+     "template_share": 0.5,
      "domain": "spectroscopy"
     },
     "members": [
@@ -1025,7 +1030,8 @@
     "physical_base": "charge_number",
     "member_count": 10,
     "member_template_signatures": {
-     "average_charge_number=omwcn": 1
+     "average_charge_number=omwcn": 1,
+     "volume_averaged_ion_charge_state_average_charge_number=omwcn": 1
     },
     "divergence": {
      "definition": {
@@ -1075,7 +1081,7 @@
       "signature_variants": [
        {
         "signature": "omwcn",
-        "members": 1,
+        "members": 2,
         "example": "average_charge_number"
        }
       ]
@@ -1216,7 +1222,8 @@
     "member_count": 3,
     "member_template_signatures": {
      "electron_collisionality_normalized_at_pedestal_top=omwc": 1,
-     "normalized_collisionality=omwc": 1
+     "normalized_collisionality=omwc": 1,
+     "normalized_electron_collisionality=omwcn": 1
     },
     "divergence": {
      "definition": {
@@ -1238,12 +1245,17 @@
       "variants_omitted": 0
      },
      "template": {
-      "divergent": false,
+      "divergent": true,
       "signature_variants": [
        {
         "signature": "omwc",
         "members": 2,
         "example": "electron_collisionality_normalized_at_pedestal_top"
+       },
+       {
+        "signature": "omwcn",
+        "members": 1,
+        "example": "normalized_electron_collisionality"
        }
       ]
      },
@@ -1264,7 +1276,7 @@
      "definition_phrase_share": 0.333,
      "template_signature": "omwc",
      "template_from": "electron_collisionality_normalized_at_pedestal_top",
-     "template_share": 1.0,
+     "template_share": 0.667,
      "domain": "edge_plasma_physics"
     },
     "members": [
@@ -1576,6 +1588,7 @@
      "vertical_coordinate_of_electron_cyclotron_launcher_mirror=omwn": 1,
      "vertical_coordinate_of_launching_position=own": 1,
      "vertical_coordinate_of_measurement_position=omwcn": 1,
+     "vertical_coordinate_of_strike_point=omwn": 1,
      "vertical_coordinate_of_x_point=ocn": 1,
      "y_coordinate_of_ferritic_element_centroid=omwn": 1,
      "z_coordinate_of_divertor_target=omwn": 1,
@@ -1630,7 +1643,7 @@
       "signature_variants": [
        {
         "signature": "omwn",
-        "members": 10,
+        "members": 11,
         "example": "toroidal_coordinate_at_beam_tracing_point"
        },
        {
@@ -1685,7 +1698,7 @@
      "definition_phrase_share": 0.275,
      "template_signature": "omwn",
      "template_from": "toroidal_coordinate_at_beam_tracing_point",
-     "template_share": 0.476,
+     "template_share": 0.5,
      "domain": "radiation_measurement_diagnostics"
     },
     "members": [
@@ -2203,6 +2216,7 @@
      "current_density=omwc": 1,
      "current_density_due_to_anomalous_transport=owcn": 1,
      "current_density_due_to_bootstrap_current_drive=ocn": 1,
+     "current_density_due_to_diamagnetic_drift=omwcn": 1,
      "current_density_due_to_distribution_function_driven=omwcn": 1,
      "current_density_due_to_heat_viscosity=omwcn": 1,
      "current_density_due_to_ion_inertia=omwn": 1,
@@ -2227,6 +2241,7 @@
      "parallel_current_density_at_constraint_position=omwn": 1,
      "parallel_current_density_due_to_anomalous_transport=omwcn": 1,
      "parallel_current_density_due_to_diamagnetic_drift=omwcn": 1,
+     "parallel_current_density_due_to_heat_viscosity=omwcn": 1,
      "parallel_current_density_due_to_wave_driven_current_drive=omwcn": 1,
      "parallel_current_density_per_toroidal_mode_due_to_wave_driven_current_drive=omwcn": 1,
      "parallel_diamagnetic_current_density=omwcn": 1,
@@ -2236,9 +2251,11 @@
      "parallel_normalized_particle_perturbed_current_density=omwc": 1,
      "pfirsch_schlueter_current_density=omwcn": 1,
      "pfirsch_schlueter_current_density_due_to_diamagnetic_drift=omwcn": 1,
+     "radial_current_density_due_to_anomalous_transport=omwcn": 1,
      "radial_diamagnetic_current_density=omwcn": 1,
      "radial_total_current_density_at_wall=omwn": 1,
      "runaway_electron_current_density=omwcn": 1,
+     "toroidal_counter_passing_current_density=omwcn": 1,
      "toroidal_current_density=omwn": 1,
      "toroidal_current_density_due_to_fast_ion=omwn": 1,
      "total_current_density=omwcn": 1,
@@ -2259,9 +2276,9 @@
        },
        {
         "phrase": "toroidal current density",
-        "members": 5,
-        "example": "toroidal_current_density_due_to_diamagnetic_drift",
-        "description": "Toroidal current density due to diamagnetic drift is the signed projection of pressure-gradient-driven electric current onto the toroidal direction in magnetized edge plasma."
+        "members": 6,
+        "example": "toroidal_counter_passing_current_density",
+        "description": "Toroidal current density at a poloidal location associated with the counter-passing particle population, including direct fast-particle charge transport and the associated collisional back-current carried by electrons and thermal ions."
        },
        {
         "phrase": "flux surface",
@@ -2288,15 +2305,15 @@
         "description": "Vertical current density due to heat viscosity is the signed height-axis charge flux driven by heat-viscosity terms in a collisional magnetized-plasma fluid closure."
        }
       ],
-      "variants_omitted": 80
+      "variants_omitted": 79
      },
      "template": {
       "divergent": true,
       "signature_variants": [
        {
         "signature": "omwcn",
-        "members": 27,
-        "example": "current_density_due_to_distribution_function_driven"
+        "members": 31,
+        "example": "current_density_due_to_diamagnetic_drift"
        },
        {
         "signature": "omwn",
@@ -2347,8 +2364,8 @@
      "definition_phrase": "parallel current density",
      "definition_phrase_share": 0.079,
      "template_signature": "omwcn",
-     "template_from": "current_density_due_to_distribution_function_driven",
-     "template_share": 0.562,
+     "template_from": "current_density_due_to_diamagnetic_drift",
+     "template_share": 0.596,
      "domain": "transport"
     },
     "members": [
@@ -2794,6 +2811,7 @@
      "electron_density_at_pedestal_maximum=omwcn": 1,
      "electron_density_at_pellet_path=omwn": 1,
      "fast_ion_density=omwcn": 1,
+     "fast_particle_density=omwcn": 1,
      "flux_surface_averaged_argon_density_at_plasma_boundary=omwcn": 1,
      "flux_surface_averaged_beryllium_density_at_plasma_boundary=omwcn": 1,
      "flux_surface_averaged_boron_density_at_plasma_boundary=omn": 1,
@@ -3037,7 +3055,7 @@
       "signature_variants": [
        {
         "signature": "omwcn",
-        "members": 155,
+        "members": 156,
         "example": "argon_density_at_divertor_target"
        },
        {
@@ -3105,7 +3123,7 @@
      "definition_phrase_share": 0.318,
      "template_signature": "omwcn",
      "template_from": "argon_density_at_divertor_target",
-     "template_share": 0.61,
+     "template_share": 0.612,
      "domain": "transport"
     },
     "members": [
@@ -3472,6 +3490,7 @@
      "neutral_diffusion_coefficient=omwcn": 1,
      "neutral_state_diffusion_coefficient=omwcn": 1,
      "poloidal_electron_diffusion_coefficient=omwcn": 1,
+     "poloidal_ion_diffusion_coefficient=omwcn": 1,
      "poloidal_neutral_internal_state_diffusion_coefficient=omwc": 1,
      "radial_ion_charge_state_diffusion_coefficient=omwcn": 1,
      "radial_ion_diffusion_coefficient=omwcn": 1,
@@ -3525,7 +3544,7 @@
       "signature_variants": [
        {
         "signature": "omwcn",
-        "members": 7,
+        "members": 8,
         "example": "electron_diffusion_coefficient"
        },
        {
@@ -3555,7 +3574,7 @@
      "definition_phrase_share": 0.118,
      "template_signature": "omwcn",
      "template_from": "electron_diffusion_coefficient",
-     "template_share": 0.7,
+     "template_share": 0.727,
      "domain": "transport"
     },
     "members": [
@@ -4092,15 +4111,18 @@
      "flux_surface_averaged_parallel_electric_field_at_plasma_boundary=omwn": 1,
      "flux_surface_averaged_parallel_wave_electric_field_amplitude=omwcn": 1,
      "left_hand_circularly_polarized_wave_electric_field=omwn": 1,
+     "left_hand_circularly_polarized_wave_electric_field_real_part=omwcn": 1,
      "parallel_electric_field_at_plasma_boundary=omwn": 1,
      "parallel_electric_field_at_separatrix=omwn": 1,
      "parallel_wave_electric_field=omwcn": 1,
+     "parallel_wave_electric_field_imaginary_part=omwcn": 1,
      "per_toroidal_mode_flux_surface_averaged_parallel_wave_electric_field_amplitude=omwcn": 1,
      "per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field_amplitude=omwcn": 1,
      "per_toroidal_mode_wave_cross_sectional_right_hand_circularly_polarized_electric_field_amplitude=omwcn": 1,
      "radial_wave_electric_field=omwn": 1,
      "right_hand_circularly_polarized_wave_electric_field=omwcn": 1,
      "right_hand_circularly_polarized_wave_electric_field_amplitude=omn": 1,
+     "right_hand_circularly_polarized_wave_electric_field_imaginary_part=omwcn": 1,
      "right_hand_circularly_polarized_wave_electric_field_real_part=omwn": 1,
      "runaway_electron_critical_electric_field=omwcn": 1,
      "toroidal_wave_electric_field=omwcn": 1,
@@ -4158,7 +4180,7 @@
       "signature_variants": [
        {
         "signature": "omwcn",
-        "members": 11,
+        "members": 14,
         "example": "flux_surface_averaged_parallel_wave_electric_field_amplitude"
        },
        {
@@ -4193,7 +4215,7 @@
      "definition_phrase_share": 0.143,
      "template_signature": "omwcn",
      "template_from": "flux_surface_averaged_parallel_wave_electric_field_amplitude",
-     "template_share": 0.524,
+     "template_share": 0.583,
      "domain": "electromagnetic_wave_diagnostics"
     },
     "members": [
@@ -4534,6 +4556,7 @@
      "electron_energy=omwcn": 1,
      "electron_energy_diffusion_coefficient=omwn": 1,
      "electron_energy_diffusivity=omwcn": 1,
+     "electron_energy_flux=omwn": 1,
      "electron_kinetic_energy_flux_at_wall_due_to_surface_emission=omwcn": 1,
      "energy_confinement_enhancement_factor=omwc": 1,
      "energy_confinement_time=omwn": 1,
@@ -4685,7 +4708,7 @@
        },
        {
         "signature": "omwn",
-        "members": 34,
+        "members": 35,
         "example": "effective_particle_energy"
        },
        {
@@ -4746,7 +4769,7 @@
      "definition_phrase_share": 0.041,
      "template_signature": "omwcn",
      "template_from": "accumulated_energy_due_to_ohmic_dissipation",
-     "template_share": 0.581,
+     "template_share": 0.575,
      "domain": "transport"
     },
     "members": [
@@ -5488,6 +5511,7 @@
      "flux_due_to_eddy_current=omwn": 1,
      "flux_due_to_pumping=ocn": 1,
      "flux_due_to_surface_emission=omwn": 1,
+     "flux_surface_normal_ion_charge_state_particle_flux=omwcn": 1,
      "heat_flux=omwn": 1,
      "incident_ion_particle_flux_at_wall=omwcn": 1,
      "incident_neutral_internal_state_particle_flux_at_wall_due_to_recombination=omwcn": 1,
@@ -5562,7 +5586,7 @@
       "signature_variants": [
        {
         "signature": "omwcn",
-        "members": 23,
+        "members": 24,
         "example": "back_surface_neutron_flux"
        },
        {
@@ -5616,7 +5640,7 @@
      "definition_phrase_share": 0.121,
      "template_signature": "omwcn",
      "template_from": "back_surface_neutron_flux",
-     "template_share": 0.575,
+     "template_share": 0.585,
      "domain": "transport"
     },
     "members": [
@@ -7587,7 +7611,8 @@
      "toroidal_magnetic_flux_at_halo_boundary=omwn": 1,
      "toroidal_magnetic_flux_at_halo_boundary_due_to_poloidal_current=omwcn": 1,
      "toroidal_magnetic_flux_at_plasma_boundary=omwn": 1,
-     "toroidal_magnetic_flux_at_plasma_boundary_due_to_poloidal_current=omwcn": 1
+     "toroidal_magnetic_flux_at_plasma_boundary_due_to_poloidal_current=omwcn": 1,
+     "toroidal_magnetic_flux_due_to_diamagnetic_drift=omwcn": 1
     },
     "divergence": {
      "definition": {
@@ -7642,7 +7667,7 @@
        },
        {
         "signature": "omwcn",
-        "members": 11,
+        "members": 12,
         "example": "cumulative_lost_magnetic_flux_due_to_resistive_dissipation"
        }
       ]
@@ -7669,7 +7694,7 @@
      "definition_phrase_share": 0.364,
      "template_signature": "omwn",
      "template_from": "average_external_magnetic_flux",
-     "template_share": 0.56,
+     "template_share": 0.538,
      "domain": "equilibrium"
     },
     "members": [
@@ -8404,6 +8429,7 @@
      "neutral_momentum_source=omwn": 1,
      "neutral_species_momentum_convection_velocity=omwn": 1,
      "neutral_state_momentum_flux_due_to_diamagnetic_drift=omwcn": 1,
+     "parallel_edge_plasma_momentum_diffusivity=omwcn": 1,
      "parallel_effective_neutral_internal_state_momentum_velocity_due_to_convection=omwn": 1,
      "parallel_gyrocenter_momentum_flux_normalized_of_gyrokinetic_eigenmode_due_to_e_cross_b_drift=omwcn": 1,
      "parallel_gyrocenter_momentum_flux_normalized_of_gyrokinetic_eigenmode_due_to_perturbed_parallel_magnetic_field=omwc": 1,
@@ -8411,6 +8437,7 @@
      "parallel_ion_charge_state_momentum_flux_limiter_coefficient=omwcn": 1,
      "parallel_ion_charge_state_momentum_source=omwcn": 1,
      "parallel_ion_momentum_diffusion_coefficient=omwn": 1,
+     "parallel_ion_momentum_diffusivity=omwcn": 1,
      "parallel_momentum_convection_velocity=omwcn": 1,
      "parallel_neutral_internal_state_momentum_flux_limiter_coefficient=omwn": 1,
      "parallel_neutral_state_momentum_flux_limiter_coefficient=omwcn": 1,
@@ -8420,8 +8447,10 @@
      "plasma_momentum_flux=omcn": 1,
      "poloidal_ion_charge_state_momentum_flux_limiter_coefficient=omwn": 1,
      "poloidal_ion_state_momentum_diffusivity=omwc": 1,
+     "poloidal_ion_state_momentum_flux_limiter_coefficient=omwcn": 1,
      "poloidal_momentum_flux_limiter_coefficient=omwcn": 1,
      "poloidal_neutral_internal_state_momentum_convection_velocity=omwcn": 1,
+     "poloidal_neutral_momentum_convection_velocity=omwcn": 1,
      "poloidal_neutral_momentum_flux_limiter_coefficient=omwcn": 1,
      "poloidal_total_momentum_diffusion_coefficient=omwcn": 1,
      "radial_ion_charge_state_momentum_diffusion_coefficient=omwcn": 1,
@@ -8432,6 +8461,7 @@
      "radial_neutral_state_momentum_flux_limiter_coefficient=omwcn": 1,
      "radial_total_momentum_convection_velocity=omwcn": 1,
      "radial_total_momentum_flux=omwcn": 1,
+     "toroidal_implicit_ion_momentum_source_rate=omwcn": 1,
      "toroidal_ion_charge_state_momentum_flux_limiter_coefficient=omwn": 1,
      "toroidal_ion_charge_state_momentum_source=omwcn": 1,
      "toroidal_ion_momentum_diffusion_coefficient=omwn": 1,
@@ -8462,7 +8492,8 @@
      "vertical_neutral_momentum_diffusivity=omwc": 1,
      "vertical_neutral_momentum_flux_limiter_coefficient=omwcn": 1,
      "vertical_neutral_species_momentum_convection_velocity=omwn": 1,
-     "vertical_neutral_state_momentum_flux_limiter_coefficient=omwcn": 1
+     "vertical_neutral_state_momentum_flux_limiter_coefficient=omwcn": 1,
+     "vertical_plasma_momentum_diffusivity=omwn": 1
     },
     "divergence": {
      "definition": {
@@ -8512,12 +8543,12 @@
       "signature_variants": [
        {
         "signature": "omwcn",
-        "members": 68,
+        "members": 73,
         "example": "diamagnetic_momentum_convection_velocity"
        },
        {
         "signature": "omwn",
-        "members": 35,
+        "members": 36,
         "example": "diamagnetic_momentum_flux"
        },
        {
@@ -8563,7 +8594,7 @@
      "definition_phrase_share": 0.032,
      "template_signature": "omwcn",
      "template_from": "diamagnetic_momentum_convection_velocity",
-     "template_share": 0.591,
+     "template_share": 0.603,
      "domain": "transport"
     },
     "members": [
@@ -8961,6 +8992,7 @@
      "number_density_over_scrape_off_layer=omwn": 1,
      "shattered_pellet_species_number_density_of_pellet=omwn": 1,
      "shattered_pellet_species_number_density_of_pellet_fragment=omwcn": 1,
+     "total_neutral_number_density=omwn": 1,
      "volume_averaged_electron_number_density_over_scrape_off_layer=omwn": 1
     },
     "divergence": {
@@ -9011,7 +9043,7 @@
       "signature_variants": [
        {
         "signature": "omwn",
-        "members": 4,
+        "members": 5,
         "example": "electron_number_density"
        },
        {
@@ -9041,7 +9073,7 @@
      "definition_phrase_share": 0.083,
      "template_signature": "omwn",
      "template_from": "electron_number_density",
-     "template_share": 0.667,
+     "template_share": 0.714,
      "domain": "transport"
     },
     "members": [
@@ -10355,18 +10387,23 @@
      "nuclear_power_density_of_breeder_blanket_layer=omwn": 1,
      "nuclear_power_density_of_breeder_blanket_module=omwcn": 1,
      "nuclear_power_density_of_limiter_tile=omwn": 1,
+     "per_toroidal_mode_fast_electron_power_density=omwn": 1,
+     "per_toroidal_mode_fast_ion_charge_state_power_density=omwn": 1,
+     "per_toroidal_mode_thermal_ion_charge_state_power_density=omwn": 1,
      "per_toroidal_mode_total_absorbed_wave_power_density=omwn": 1,
      "power_density_due_to_collisions=omwcn": 1,
      "power_density_due_to_fusion=omwn": 1,
      "power_density_due_to_radiation=omw": 1,
      "radiated_power_density=omwn": 1,
      "thermal_electron_power_density_due_to_collisions=omwcn": 1,
+     "thermal_ion_absorbed_wave_power_density=omwn": 1,
      "thermal_ion_charge_state_power_density=omwn": 1,
      "thermal_particle_power_density_due_to_thermalization=omwc": 1,
      "total_absorbed_wave_power_density=omwn": 1,
      "total_ion_power_density=omwn": 1,
      "total_thermal_power_density_due_to_conductive_losses=omwn": 1,
      "trapped_power_density=omwcn": 1,
+     "trapped_thermal_ion_charge_state_power_density_due_to_collisions=omwcn": 1,
      "trapped_thermal_ion_power_density_due_to_collisions=omwn": 1
     },
     "divergence": {
@@ -10381,7 +10418,7 @@
        },
        {
         "phrase": "volumetric rate",
-        "members": 8,
+        "members": 9,
         "example": "fast_electron_absorbed_wave_power_density",
         "description": "Volumetric rate at which coherent radio-frequency waves deposit energy into suprathermal electrons, evaluated locally or averaged over a magnetic flux surface."
        },
@@ -10410,19 +10447,19 @@
         "description": "Signed local volumetric rate of Coulomb-collisional energy exchange for a designated electron population, positive for net energy gain."
        }
       ],
-      "variants_omitted": 18
+      "variants_omitted": 17
      },
      "template": {
       "divergent": true,
       "signature_variants": [
        {
         "signature": "omwn",
-        "members": 21,
+        "members": 25,
         "example": "co_passing_power_density"
        },
        {
         "signature": "omwcn",
-        "members": 7,
+        "members": 8,
         "example": "co_passing_fast_ion_power_density_due_to_collisions"
        },
        {
@@ -10459,7 +10496,7 @@
      "definition_phrase_share": 0.262,
      "template_signature": "omwn",
      "template_from": "co_passing_power_density",
-     "template_share": 0.7,
+     "template_share": 0.714,
      "domain": "transport"
     },
     "members": [
@@ -10560,6 +10597,7 @@
      "perpendicular_normalized_perturbed_pressure_bessel_1=omwcn": 1,
      "perpendicular_plasma_pressure_at_post_sawtooth_crash=omwcn": 1,
      "perpendicular_total_fast_ion_pressure=omwcn": 1,
+     "perpendicular_trapped_fast_particle_pressure=omcn": 1,
      "perturbed_plasma_pressure_imaginary_part=omwcn": 1,
      "perturbed_plasma_pressure_real_part=omwcn": 1,
      "perturbed_pressure_bessel_1=omwcn": 1,
@@ -10573,6 +10611,7 @@
      "total_fast_ion_pressure=omwn": 1,
      "total_ion_pressure=omwn": 1,
      "total_neutral_internal_state_pressure=omwn": 1,
+     "total_neutral_pressure=omwcn": 1,
      "total_particle_perturbed_pressure_normalized_of_gyrokinetic_eigenmode=omwcn": 1,
      "vacuum_pressure_of_lower_hybrid_antenna=omwc": 1
     },
@@ -10624,7 +10663,7 @@
       "signature_variants": [
        {
         "signature": "omwcn",
-        "members": 20,
+        "members": 21,
         "example": "coolant_pressure_at_cooling_circuit_inlet"
        },
        {
@@ -10646,6 +10685,11 @@
         "signature": "omw",
         "members": 1,
         "example": "coolant_pressure"
+       },
+       {
+        "signature": "omcn",
+        "members": 1,
+        "example": "perpendicular_trapped_fast_particle_pressure"
        }
       ]
      },
@@ -11634,6 +11678,7 @@
      "second_local_tangential_coordinate_of_hard_xray_detector=omw": 1,
      "second_local_tangential_coordinate_of_neutral_beam_injector=omwn": 1,
      "second_local_tangential_coordinate_of_neutron_detector=omwn": 1,
+     "second_local_tangential_coordinate_of_optical_element=omwn": 1,
      "second_local_tangential_coordinate_of_soft_xray_detector=on": 1
     },
     "divergence": {
@@ -11671,14 +11716,14 @@
       "divergent": true,
       "signature_variants": [
        {
+        "signature": "omwn",
+        "members": 4,
+        "example": "second_local_tangential_coordinate_of_filter"
+       },
+       {
         "signature": "omwcn",
         "members": 3,
         "example": "second_local_tangential_coordinate_of_aperture"
-       },
-       {
-        "signature": "omwn",
-        "members": 3,
-        "example": "second_local_tangential_coordinate_of_filter"
        },
        {
         "signature": "omw",
@@ -11708,9 +11753,9 @@
      "definition": null,
      "definition_phrase": "signed coordinate",
      "definition_phrase_share": 0.5,
-     "template_signature": "omwcn",
-     "template_from": "second_local_tangential_coordinate_of_aperture",
-     "template_share": 0.375,
+     "template_signature": "omwn",
+     "template_from": "second_local_tangential_coordinate_of_filter",
+     "template_share": 0.444,
      "domain": "radiation_measurement_diagnostics"
     },
     "members": [
@@ -11948,6 +11993,7 @@
      "helium_3_source_rate_due_to_gas_injection=omwcn": 1,
      "helium_4_source_rate_due_to_gas_injection=omwn": 1,
      "hydrogen_source_rate_due_to_gas_injection=omwn": 1,
+     "ion_particle_source_rate=omwn": 1,
      "krypton_source_rate_due_to_gas_injection=omwcn": 1,
      "lithium_source_rate_due_to_gas_injection=omwn": 1,
      "methane_carbon_13_source_rate=omwcn": 1,
@@ -12034,7 +12080,7 @@
        },
        {
         "signature": "omwn",
-        "members": 17,
+        "members": 18,
         "example": "deuterium_deuterium_neutron_source_rate_due_to_thermal_fusion"
        },
        {
@@ -12067,7 +12113,7 @@
      "definition_phrase_share": 0.065,
      "template_signature": "omwcn",
      "template_from": "ammonia_deuterated_source_rate",
-     "template_share": 0.667,
+     "template_share": 0.655,
      "domain": "transport"
     },
     "members": [
@@ -12299,6 +12345,8 @@
      "line_averaged_electron_temperature=omwcn": 1,
      "line_averaged_total_ion_temperature=omwn": 1,
      "maximum_surface_temperature=omwcn": 1,
+     "neutral_internal_state_temperature=omwcn": 1,
+     "neutral_temperature=omwn": 1,
      "perturbed_plasma_temperature_imaginary_part=omwn": 1,
      "perturbed_plasma_temperature_real_part=omw": 1,
      "plasma_temperature=omwn": 1,
@@ -12370,12 +12418,12 @@
       "signature_variants": [
        {
         "signature": "omwcn",
-        "members": 22,
+        "members": 23,
         "example": "average_temperature_over_scrape_off_layer"
        },
        {
         "signature": "omwn",
-        "members": 11,
+        "members": 12,
         "example": "electron_temperature_at_pellet_path"
        },
        {
@@ -19897,8 +19945,8 @@
      "perpendicular pressure",
      "pressure"
     ],
-    "member_count": 11,
-    "definition_variants": 11,
+    "member_count": 10,
+    "definition_variants": 10,
     "divergent": true,
     "variants": [
      {
@@ -19946,14 +19994,6 @@
       "member_count": 1,
       "members": [
        "perpendicular_fast_ion_charge_state_pressure"
-      ],
-      "members_total": 1
-     },
-     {
-      "definition": "The perpendicular pressure is defined by the transverse second velocity moment: $$ p_{s,\\perp,\\mathrm{tr}}(\\mathbf{x}) = \\frac{m_s}{2}\\int v_\\perp^2 f_{s,\\mathrm{tr}}(\\mathbf{x},\\mathbf{v})\\,d^3v $$",
-      "member_count": 1,
-      "members": [
-       "perpendicular_trapped_fast_particle_pressure"
       ],
       "members_total": 1
      },
@@ -21753,6 +21793,29 @@
    }
   }
  },
- "generated_at": "2026-11-10T21:34:55+00:00",
- "source": "live Neo4j graph, read-only; no writes, no LLM spend"
+ "generated_at": "2026-11-10T21:36:34+00:00",
+ "source": "live Neo4j graph, read-only; no writes, no LLM spend",
+ "control": {
+  "graph": "disposable Neo4j, empty at start, planted rows only",
+  "planted_rows": [
+   "planted_alpha_quantity",
+   "planted_beta_quantity",
+   "planted_identical_one",
+   "planted_identical_two"
+  ],
+  "checks": {
+   "divergent_family_detected": true,
+   "divergent_family_phrase_variants": 2,
+   "divergent_family_template_variants": 2,
+   "identical_family_not_reported": true,
+   "planted_concept_detected": true,
+   "planted_concept_definition_variants": 2,
+   "passed": true
+  },
+  "census_over_planted": {
+   "families_total": 2,
+   "families_divergent": 1,
+   "concepts_divergent": 1
+  }
+ }
 }
