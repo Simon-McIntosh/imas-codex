@@ -1,0 +1,91 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-10T22:19:40.192Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "sib-vocab-gap-requeue",
+      "recorded_at": "2026-11-10T22:29:41.045739+00:00"
+    },
+    "evidence": {
+      "kind": "folded",
+      "node": "sib-vocab-gap-requeue",
+      "recorded_at": "2026-11-10T22:29:26.512094+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-10T21:59:31Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "sib-vocab-gap-requeue",
+      "recorded_at": "2026-11-10T22:28:38.040027+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "sib-vocab-gap-requeue",
+      "recorded_at": "2026-11-10T22:28:53.596274+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "sib-vocab-gap-requeue",
+      "recorded_at": "2026-11-10T22:29:14.110513+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-vocab-gap-requeue.html",
+      "line": 16,
+      "severity": "blocking",
+      "text": "the production count credits this node with two names its own record attributes to another agent: sib-vocab-gap-requeue.html:94-96 states that a peer run composed two of the 17 to attached with a produced name, transition.json records after_status_counts {attached: 2, extracted: 15} with both dd:nbi/unit/beamlets_group/beamlets/tangency_radii and dd:summary/heating_current_drive/nbi/tangency_radius/value attached to tangency_radius_of_neutral_beam_injector while every other cohort source read extracted, and the pipeline's own summary at run.log:1739-1742 reports names_composed 2 and names_enriched 2, four names in all - so this node produced 4 names and 2 accepted scores, not 6 and 4; the headline the plan will quote overstates this node's output by a third, and every raw number needed to correct it is on disk"
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-vocab-gap-requeue.html",
+      "line": 148,
+      "severity": "non-blocking",
+      "text": "the sentence stating all 17 of this node's sources stood at vocab_gap before the rerun reports the sibling run's leaving status, not the pre-rerun state: the counter is built from transition receipts whose before_status is read from the sibling readback at sib-vocab-gap-requeue-run.py:264, while the node's own transition.json records 15 sources at extracted and 2 at attached when it observed state, so a reader takes a pre-state the node's own receipt contradicts and the outcome table's status-before column is never identified as the cohort baseline"
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-vocab-gap-requeue-run.py",
+      "line": 492,
+      "severity": "non-blocking",
+      "text": "_check re-derives each verdict with the same classify() that produced the stored census verdict, so the guard detects only input drift between census and check time and cannot catch a defect in resolve() or classify() (sib-vocab-gap-requeue-run.py:144 and :169) - the recomputation the fragment's Controls section credits with re-deriving every composable/parked verdict cannot fail on a wrong resolver, only on a changed snapshot, so a regression there survives the check green"
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit against de46fb88; the single commit 7cc4da3e7 adds sib-vocab-gap-requeue-run.py (929 lines) and sib-vocab-gap-requeue.html (178 lines), no production source, no test file, no plan or meta edit",
+    "done_when": "the done_when's per-source token/status/name/score record, cohort count, spend-by-run-id, export-blocking and sourceless-draft figures are all present in the fragment and readback.log, but the gate the manifest names (its `tests:` line, the runner's `check` action) asserts only the composable/parked classification and the eligible set, so the rerun outcomes and every other figure in the done_when are recorded observations with no assertion behind them",
+    "goal": "the goal is to return the cohort's vocab_gap sources whose missing tokens are now in ISN 0.11.0 to composition and rerun them; the census decides 16 of 17 composable with the single park on current_alignment and run.log:2 seeds those 16 into one scoped `sn run --focus ... -c 5.0`, but sib-vocab-gap-requeue.html:89-97 attributes the return to composition to a peer pipeline's startup retry that ran at 21:18:38 before this node acted, so the node reran sources another agent had already moved",
+    "manifest": "read; status complete, one commit, both changed paths, the literal check command, five log paths, a negative-control log with its note, and one rubric line per dimension, but no baseline_suite or after_suite block, so the failure delta rests on the runner's own exit codes rather than on the suite pair the record contract asks for",
+    "write_paths": "the three declared paths are the fragment html, the runner py and the figure directory; git show --stat against the base is 2 files and 1107 insertions, both inside the fence, and the figure directory is correctly unused because the dispatch states the done-when names no artifact"
+  },
+  "justifications": {
+    "durability": "negative-control.log shows the guard refusing a planted payload with two refusals, but sib-vocab-gap-requeue-run.py:492 re-derives each verdict through the same classify() used to build the census, so the check can only see input drift",
+    "evidence": "sib-vocab-gap-requeue.html:16 counts six produced names where transition.json records two of them already attached before the pipeline ran, and sib-vocab-gap-requeue-run.py:512 asserts only the classification half of the done_when",
+    "fit": "the runner follows the sibling evidence idiom it imports at sib-vocab-gap-requeue-run.py:80-85 - one artifact per action under the run directory, a reused source_state reader, HTML rendered from those artifacts - and introduces no plan or stage label in any name",
+    "goal_fidelity": "sib-vocab-gap-requeue.html:89-97 records that retry_vocab_gap_sources_on_grammar_change in a peer's startup performed the status transition, so the node reran the composable set but did not itself return the sources to composition",
+    "reuse": "sib-vocab-gap-requeue-run.py:97 and :119 are parallel accessors rather than forks - segments.py:317 grammar_token_index() reads the installed ISN (0.11.1.dev1 on this host) and cannot answer the version-pinned 0.11.0-versus-0.10.1 question sib-vocab-gap-requeue-run.py:554 asks, so the nearest owner does not cover it",
+    "scope_discipline": "the diff touches only the two declared files, writes no Cypher, moves no plan status, and sib-vocab-gap-requeue-run.py:256-283 delegates the receipt recording to the repository's own retry path rather than performing a direct write"
+  },
+  "project": "imas-codex",
+  "raw_text": "project: imas-codex\nreviewed_run_id: r-20261110T210102261723-sib-vocab-gap-requeue\nreview_run_id: r-20261110T215636081353-review-of-sib-vocab-gap-requeue-7cc4da3e7130\nreviewed_base_sha: de46fb885540ab298aa1b41e1c6c7a81169251b9\nreviewed_head_sha: 7cc4da3e71305b64d7f85ee5635661809e450ee5\nadded_failure_count: 0\nadded_failure_ids: []\nstatus: parsed\n\n# Independent review of sib-vocab-gap-requeue at 7cc4da3e7\n\nReviewed run: r-20261110T210102261723-sib-vocab-gap-requeue\nReviewed head: 7cc4da3e71305b64d7f85ee5635661809e450ee5\nReviewed base: de46fb885540ab298aa1b41e1c6c7a81169251b9\n\nThe reviewed run's manifest records no baseline_suite and no after_suite block, so\nthe added-failure delta is derived from the gate logs it did record: check.log\nEXIT=0 with {\"checked\": 17, \"bad\": []}, negative-control.log EXIT=0 with\nguard_fired true and two refusals, readback.log EXIT=0, run.log EXIT=0. Nothing\nwas added and nothing failed, so added_failure_count is 0 over an empty id list.\n\nVERDICT goal: the goal is to return the cohort's vocab_gap sources whose missing tokens are now in ISN 0.11.0 to composition and rerun them; the census decides 16 of 17 composable with the single park on current_alignment and run.log:2 seeds those 16 into one scoped `sn run --focus ... -c 5.0`, but sib-vocab-gap-requeue.html:89-97 attributes the return to composition to a peer pipeline's startup retry that ran at 21:18:38 before this node acted, so the node reran sources another agent had already moved\nVERDICT done_when: the done_when's per-source token/status/name/score record, cohort count, spend-by-run-id, export-blocking and sourceless-draft figures are all present in the fragment and readback.log, but the gate the manifest names (its `tests:` line, the runner's `check` action) asserts only the composable/parked classification and the eligible set, so the rerun outcomes and every other figure in the done_when are recorded observations with no assertion behind them\nVERDICT write_paths: the three declared paths are the fragment html, the runner py and the figure directory; git show --stat against the base is 2 files and 1107 insertions, both inside the fence, and the figure directory is correctly unused because the dispatch states the done-when names no artifact\nVERDICT manifest: read; status complete, one commit, both changed paths, the literal check command, five log paths, a negative-control log with its note, and one rubric line per dimension, but no baseline_suite or after_suite block, so the failure delta rests on the runner's own exit codes rather than on the suite pair the record contract asks for\nVERDICT diff: read commit by commit against de46fb88; the single commit 7cc4da3e7 adds sib-vocab-gap-requeue-run.py (929 lines) and sib-vocab-gap-requeue.html (178 lines), no production source, no test file, no plan or meta edit\nCALL_SITES: none\nSCORE goal_fidelity: 15\nSCORE evidence: 10\nSCORE scope_discipline: 19\nSCORE durability: 12\nSCORE fit: 17\nSCORE reuse: 14\nJUSTIFICATION goal_fidelity: sib-vocab-gap-requeue.html:89-97 records that retry_vocab_gap_sources_on_grammar_change in a peer's startup performed the status transition, so the node reran the composable set but did not itself return the sources to composition\nJUSTIFICATION evidence: sib-vocab-gap-requeue.html:16 counts six produced names where transition.json records two of them already attached before the pipeline ran, and sib-vocab-gap-requeue-run.py:512 asserts only the classification half of the done_when\nJUSTIFICATION scope_discipline: the diff touches only the two declared files, writes no Cypher, moves no plan status, and sib-vocab-gap-requeue-run.py:256-283 delegates the receipt recording to the repository's own retry path rather than performing a direct write\nJUSTIFICATION durability: negative-control.log shows the guard refusing a planted payload with two refusals, but sib-vocab-gap-requeue-run.py:492 re-derives each verdict through the same classify() used to build the census, so the check can only see input drift\nJUSTIFICATION fit: the runner follows the sibling evidence idiom it imports at sib-vocab-gap-requeue-run.py:80-85 - one artifact per action under the run directory, a reused source_state reader, HTML rendered from those artifacts - and introduces no plan or stage label in any name\nJUSTIFICATION reuse: sib-vocab-gap-requeue-run.py:97 and :119 are parallel accessors rather than forks - segments.py:317 grammar_token_index() reads the installed ISN (0.11.1.dev1 on this host) and cannot answer the version-pinned 0.11.0-versus-0.10.1 question sib-vocab-gap-requeue-run.py:554 asks, so the nearest owner does not cover it\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-vocab-gap-requeue.html:16 blocking: the production count credits this node with two names its own record attributes to another agent: sib-vocab-gap-requeue.html:94-96 states that a peer run composed two of the 17 to attached with a produced name, transition.json records after_status_counts {attached: 2, extracted: 15} with both dd:nbi/unit/beamlets_group/beamlets/tangency_radii and dd:summary/heating_current_drive/nbi/tangency_radius/value attached to tangency_radius_of_neutral_beam_injector while every other cohort source read extracted, and the pipeline's own summary at run.log:1739-1742 reports names_composed 2 and names_enriched 2, four names in all - so this node produced 4 names and 2 accepted scores, not 6 and 4; the headline the plan will quote overstates this node's output by a third, and every raw number needed to correct it is on disk\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-vocab-gap-requeue.html:148 non-blocking: the sentence stating all 17 of this node's sources stood at vocab_gap before the rerun reports the sibling run's leaving status, not the pre-rerun state: the counter is built from transition receipts whose before_status is read from the sibling readback at sib-vocab-gap-requeue-run.py:264, while the node's own transition.json records 15 sources at extracted and 2 at attached when it observed state, so a reader takes a pre-state the node's own receipt contradicts and the outcome table's status-before column is never identified as the cohort baseline\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-vocab-gap-requeue-run.py:492 non-blocking: _check re-derives each verdict with the same classify() that produced the stored census verdict, so the guard detects only input drift between census and check time and cannot catch a defect in resolve() or classify() (sib-vocab-gap-requeue-run.py:144 and :169) - the recomputation the fragment's Controls section credits with re-deriving every composable/parked verdict cannot fail on a wrong resolver, only on a changed snapshot, so a regression there survives the check green\n",
+  "review_run_id": "r-20261110T215636081353-review-of-sib-vocab-gap-requeue-7cc4da3e7130",
+  "reviewed_base_sha": "de46fb885540ab298aa1b41e1c6c7a81169251b9",
+  "reviewed_head_sha": "7cc4da3e71305b64d7f85ee5635661809e450ee5",
+  "reviewed_run_id": "r-20261110T210102261723-sib-vocab-gap-requeue",
+  "scores": {
+    "durability": 12,
+    "evidence": 10,
+    "fit": 17,
+    "goal_fidelity": 15,
+    "reuse": 14,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-10T22:29:49.468419+00:00",
+  "total": 87
+}
