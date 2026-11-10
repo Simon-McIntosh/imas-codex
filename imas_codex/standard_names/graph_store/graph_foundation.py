@@ -239,6 +239,8 @@ def refined_from_cycle_guard_cypher(successor: str, predecessor: str) -> str:
 
     The update-only clause also fits inside a conditional FOREACH, so embedded
     lifecycle writers share exactly the same guard as standalone writers.
+    The caller encloses this clause and its MERGE in one FOREACH update block:
+    each row checks and inserts together instead of prechecking an entire batch.
     Lock both connected lineage components before checking the reverse path;
     adjacent insertions then serialize even when their endpoints differ.
     Reassigning each id to itself takes a write lock without changing its value.
@@ -728,9 +730,8 @@ def _extract_links_from_docs(
     When ``self_name`` is set, a ``name:<self_name>`` reference is
     dropped: prose may legitimately mention the current entry by name
     in one or more paragraphs, but the structured ``links`` index is a
-    cross-reference list and a self-loop is meaningless. The ISNC
-    SQLite catalog enforces UNIQUE(name, link) and a self-reference
-    that survived deduplication used to crash ``validate_catalog``.
+    cross-reference list and a self-loop is meaningless. The structured index
+    therefore omits self-references before the catalog consumes it.
     """
     if not documentation:
         return None
