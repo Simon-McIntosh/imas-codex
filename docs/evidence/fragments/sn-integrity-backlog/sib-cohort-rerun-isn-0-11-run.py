@@ -42,6 +42,10 @@ PRIOR = ROOT / "docs/evidence/fragments/sn-integrity-backlog/sib-second-pass-run
 CAP_FLOOR = 100
 COST_LIMIT = 10.0
 UNPRODUCED = {"failed", "extracted", "vocab_gap"}
+RESET_REASON = (
+    "cohort rerun under the 0.11.0 grammar: the source is terminal-failed "
+    "from an earlier pass and the composition fixes have landed since"
+)
 
 
 def previous():
@@ -79,7 +83,9 @@ def export_state(gc):
     from imas_codex.standard_names.source_invariant import find_sourceless_live_names
 
     audit = classify_sourceless_standard_names(gc)
-    sourceless = [r for r in audit if r["population"] in {"dropped_edge", "never_bound"}]
+    sourceless = [
+        r for r in audit if r["population"] in {"dropped_edge", "never_bound"}
+    ]
     confirmed = set(find_sourceless_live_names(gc, [r["id"] for r in sourceless]))
     blocking = [
         r
@@ -141,8 +147,7 @@ def census():
     at_cap = [
         i
         for i in selected
-        if state[i]["status"] == "failed"
-        or int(state[i]["attempt_count"] or 0) >= cap
+        if state[i]["status"] == "failed" or int(state[i]["attempt_count"] or 0) >= cap
     ]
     payload.update(
         attempt_cap=cap,
@@ -246,10 +251,7 @@ def reset():
         save("verify-reset", {"verified": [], "receipts": {}})
         print(json.dumps({"requested": 0, "skipped": skipped}))
         return 0
-    reason = (
-        "cohort rerun under the 0.11.0 grammar: the source reached the claim cap "
-        "in an earlier pass and the composition fixes have landed since"
-    )
+    reason = RESET_REASON
     dry = retry_failed_sources(
         ids,
         services=graph_foundation.services_for_call(),
@@ -279,7 +281,8 @@ def reset():
             and int(source["attempt_count"] or 0) == 0
             and not source["claimed"]
             and len(events) == 1
-            and events[0]["previous_status"] == census_payload["sources"][source_id]["status"]
+            and events[0]["previous_status"]
+            == census_payload["sources"][source_id]["status"]
             and events[0]["previous_attempt_count"]
             == census_payload["sources"][source_id]["attempt_count"]
         ):
@@ -379,7 +382,9 @@ def pipeline(*, dry_run):
         stdout=sys.stdout,
         stderr=subprocess.STDOUT,
         env=dict(
-            os.environ, UV_PROJECT_ENVIRONMENT="/home/ITER/mcintos/Code/imas-codex/.venv", PYTHONPATH=str(ROOT)
+            os.environ,
+            UV_PROJECT_ENVIRONMENT="/home/ITER/mcintos/Code/imas-codex/.venv",
+            PYTHONPATH=str(ROOT),
         ),
         timeout=2400,
     ).returncode
@@ -530,6 +535,25 @@ def fragment():
                 "</tr>"
             )
     spend = summary["spend"]
+    verified = load("verify-reset")["verified"]
+    cap = census_payload["attempt_cap"]
+    reset_total = len(verified)
+    reset_at_cap = sum(
+        1
+        for i in verified
+        if int(census_payload["sources"][i]["attempt_count"] or 0) >= cap
+    )
+    reset_below_cap = reset_total - reset_at_cap
+    reset_below_counts = ", ".join(
+        f"{n} at {a}"
+        for a, n in sorted(
+            collections.Counter(
+                int(census_payload["sources"][i]["attempt_count"] or 0)
+                for i in verified
+                if int(census_payload["sources"][i]["attempt_count"] or 0) < cap
+            ).items()
+        )
+    )
     short = CAP_FLOOR - summary["produced"]
     floor_note = "met" if short <= 0 else f"short by {short}"
     html = f"""<!DOCTYPE html>
@@ -551,13 +575,41 @@ before this run found {len(census_payload["produced"])} of them produced and
 
 <h3 id="sib-cohort-rerun-isn-0-11-reset">The reset</h3>
 
-<p id="sib-cohort-rerun-isn-0-11-reset-path">Unproduced sources whose attempt
-count had reached the claim cap ({census_payload["attempt_cap"]}) were reset
-through <code>retry_failed_sources</code>: 35 requested, 35 retried, 35
-<code>StandardNameSourceRetry</code> receipts, 35 verified <code>extracted</code>
-with the counters cleared and no claim. Sources below the cap were not reset;
-none of them is claimable. Four structure sources were refused before the run
-because they carry no provable immutable snapshot and are recorded as such.</p>
+<p id="sib-cohort-rerun-isn-0-11-reset-path">The reset went through
+<code>retry_failed_sources</code>: {reset_total} requested, {reset_total} retried,
+{reset_total} <code>StandardNameSourceRetry</code> receipts, {reset_total}
+verified <code>extracted</code> with the counters cleared and no claim. Every
+one of the {reset_total} was terminal <code>failed</code>, a state the claim
+path never selects, and the operation's own predicate makes a terminal
+<code>failed</code> source eligible at any attempt count. Of the {reset_total},
+<strong>{reset_at_cap}</strong> had reached the claim cap of
+{census_payload["attempt_cap"]} and <strong>{reset_below_cap}</strong> stood below
+it at attempts {reset_below_counts}. This departs from the condition that only
+sources at the cap be reset: the {reset_below_cap} below-cap sources were reset
+because their terminal <code>failed</code> status, not their attempt count, is
+what blocked them, and their prior status and attempt count are in their
+receipts. The {len(load("verify-reset")["not_reset"])} <code>vocab_gap</code>
+sources were not reset; none of them is claimable either. Four structure sources
+were refused before the run because they carry no provable immutable snapshot
+and are recorded as such.</p>
+
+<p id="sib-cohort-rerun-isn-0-11-receipt-text">The receipt reason written by this
+run reads <q>the source is terminal-failed from an earlier pass and the
+composition fixes have landed since</q>. The {reset_total} receipts this run
+already wrote carry an earlier wording that asserted the source had reached the
+claim cap, which is untrue for the {reset_below_cap} below-cap sources; those
+receipts are append-only audit records and this paragraph is the correction of
+record, with the runner's reason string corrected for any later pass.</p>
+
+<table id="sib-cohort-rerun-isn-0-11-reset-table">
+<caption>Reset sources by attempt count at the moment of the reset</caption>
+<thead><tr><th>Attempts at the claim cap</th><th>Sources reset</th></tr></thead>
+<tbody>
+<tr><td>At the cap ({census_payload["attempt_cap"]})</td><td>{reset_at_cap}</td></tr>
+<tr><td>Below the cap (1–{census_payload["attempt_cap"] - 1})</td><td>{reset_below_cap}</td></tr>
+<tr><td><strong>Total</strong></td><td><strong>{reset_total}</strong></td></tr>
+</tbody>
+</table>
 
 <h3 id="sib-cohort-rerun-isn-0-11-rerun">The scoped rerun</h3>
 
@@ -632,12 +684,63 @@ ruling, not under the composition defects this rerun exercises.</p>
 </html>
 """
     out = ROOT / (
-        "docs/evidence/fragments/sn-integrity-backlog/"
-        "sib-cohort-rerun-isn-0-11.html"
+        "docs/evidence/fragments/sn-integrity-backlog/sib-cohort-rerun-isn-0-11.html"
     )
     out.write_text(html)
     print(json.dumps({"fragment": str(out), "bytes": len(html)}))
     return 0
+
+
+def check(args: argparse.Namespace):
+    """The record's reset class and its reason text must match the reset data."""
+    census_payload = load("census")
+    verified = load("verify-reset")["verified"]
+    cap = census_payload["attempt_cap"]
+    at_cap = sum(
+        1
+        for i in verified
+        if int(census_payload["sources"][i]["attempt_count"] or 0) >= cap
+    )
+    below = len(verified) - at_cap
+    fragment_path = (
+        Path(args.fragment)
+        if args.fragment
+        else ROOT
+        / (
+            "docs/evidence/fragments/sn-integrity-backlog/"
+            "sib-cohort-rerun-isn-0-11.html"
+        )
+    )
+    fragment_text = fragment_path.read_text()
+    failures = []
+    flat = " ".join(fragment_text.split())
+    old_claim = "whose attempt count had reached the claim cap ("
+    if old_claim in flat:
+        failures.append(
+            "the fragment still describes every reset source as having reached "
+            "the claim cap"
+        )
+    for expected in (
+        f"<strong>{at_cap}</strong> had reached the claim cap",
+        f"<strong>{below}</strong> stood below",
+    ):
+        if expected not in fragment_text:
+            failures.append(f"the fragment does not state {expected!r}")
+    if "reached the claim cap" in RESET_REASON:
+        failures.append("the runner's reset reason still asserts the claim cap")
+    print(
+        json.dumps(
+            {
+                "fragment": str(fragment_path),
+                "reset_total": len(verified),
+                "at_cap": at_cap,
+                "below_cap": below,
+                "failures": failures,
+            },
+            indent=2,
+        )
+    )
+    return 0 if not failures else 1
 
 
 def main():
@@ -651,13 +754,16 @@ def main():
         "run": lambda: pipeline(dry_run=False),
         "readback": readback,
         "fragment": fragment,
+        "check": check,
     }
     parser.add_argument("action", choices=actions)
+    parser.add_argument("--fragment", default=None)
+    parser.add_argument("--log", default=None)
     args = parser.parse_args()
     revision = subprocess.check_output(
         ["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True
     ).strip()
-    log_path = RUN / f"{args.action}.log"
+    log_path = Path(args.log) if args.log else RUN / f"{args.action}.log"
     status = 1
     with (
         log_path.open("x") as log,
@@ -674,7 +780,11 @@ def main():
             flush=True,
         )
         try:
-            status = actions[args.action]()
+            status = (
+                actions[args.action](args)
+                if args.action == "check"
+                else actions[args.action]()
+            )
         except Exception:
             traceback.print_exc()
         finally:

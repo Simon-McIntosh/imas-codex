@@ -17,13 +17,41 @@ before this run found 88 of them produced and
 
 <h3 id="sib-cohort-rerun-isn-0-11-reset">The reset</h3>
 
-<p id="sib-cohort-rerun-isn-0-11-reset-path">Unproduced sources whose attempt
-count had reached the claim cap (5) were reset
-through <code>retry_failed_sources</code>: 35 requested, 35 retried, 35
-<code>StandardNameSourceRetry</code> receipts, 35 verified <code>extracted</code>
-with the counters cleared and no claim. Sources below the cap were not reset;
-none of them is claimable. Four structure sources were refused before the run
-because they carry no provable immutable snapshot and are recorded as such.</p>
+<p id="sib-cohort-rerun-isn-0-11-reset-path">The reset went through
+<code>retry_failed_sources</code>: 35 requested, 35 retried,
+35 <code>StandardNameSourceRetry</code> receipts, 35
+verified <code>extracted</code> with the counters cleared and no claim. Every
+one of the 35 was terminal <code>failed</code>, a state the claim
+path never selects, and the operation's own predicate makes a terminal
+<code>failed</code> source eligible at any attempt count. Of the 35,
+<strong>15</strong> had reached the claim cap of
+5 and <strong>20</strong> stood below
+it at attempts 7 at 1, 9 at 2, 2 at 3, 2 at 4. This departs from the condition that only
+sources at the cap be reset: the 20 below-cap sources were reset
+because their terminal <code>failed</code> status, not their attempt count, is
+what blocked them, and their prior status and attempt count are in their
+receipts. The 16 <code>vocab_gap</code>
+sources were not reset; none of them is claimable either. Four structure sources
+were refused before the run because they carry no provable immutable snapshot
+and are recorded as such.</p>
+
+<p id="sib-cohort-rerun-isn-0-11-receipt-text">The receipt reason written by this
+run reads <q>the source is terminal-failed from an earlier pass and the
+composition fixes have landed since</q>. The 35 receipts this run
+already wrote carry an earlier wording that asserted the source had reached the
+claim cap, which is untrue for the 20 below-cap sources; those
+receipts are append-only audit records and this paragraph is the correction of
+record, with the runner's reason string corrected for any later pass.</p>
+
+<table id="sib-cohort-rerun-isn-0-11-reset-table">
+<caption>Reset sources by attempt count at the moment of the reset</caption>
+<thead><tr><th>Attempts at the claim cap</th><th>Sources reset</th></tr></thead>
+<tbody>
+<tr><td>At the cap (5)</td><td>15</td></tr>
+<tr><td>Below the cap (1–4)</td><td>20</td></tr>
+<tr><td><strong>Total</strong></td><td><strong>35</strong></td></tr>
+</tbody>
+</table>
 
 <h3 id="sib-cohort-rerun-isn-0-11-rerun">The scoped rerun</h3>
 
