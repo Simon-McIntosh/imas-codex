@@ -10,6 +10,7 @@ from imas_codex.discovery.base.claims import retry_on_deadlock
 from imas_codex.standard_names.defaults import (
     DEFAULT_MIN_SCORE,
 )
+from imas_codex.standard_names.pools import pool_admission_params, pool_admission_where
 
 from .graph_foundation import (
     _CLAIM_TIMEOUT_SECONDS,
@@ -317,8 +318,7 @@ def _claim_sn_atomic(
         if restage_review_axis not in {"name", "docs"}:
             raise ValueError("restage_review_axis must be 'name' or 'docs'")
         stage_property = f"{restage_review_axis}_stage"
-        score_property = f"reviewer_score_{restage_review_axis}"
-        stage_set += f", sn.{stage_property} = CASE WHEN sn.{stage_property} = 'reviewed' AND sn.{score_property} >= $min_score THEN 'drafted' ELSE sn.{stage_property} END"
+        stage_set += f", sn.{stage_property} = 'drafted'"
     if drain_scope_id:
         stage_set += ", sn.drain_claim_scope_id = $drain_scope_id"
         params["drain_scope_id"] = drain_scope_id
@@ -609,15 +609,8 @@ def claim_review_names_seed_and_expand(
 
 
 REVIEW_NAME_ELIGIBILITY_WHERE = (
-    "(sn.name_stage = 'drafted' OR "
-    "($drain_scope_id IS NOT NULL AND sn.name_stage = 'reviewed' "
-    "AND sn.reviewer_score_name >= $min_score))"
-    " AND sn.validation_status = 'valid'"
-    " AND NOT (sn.name_stage IN ['superseded', 'exhausted', 'contested'])"
-    " AND sn.description IS NOT NULL"
-    " AND sn.description <> $parent_desc_placeholder"
-    " AND coalesce(sn.origin, '') <> 'derived'"
-    " AND ($facility IS NULL OR sn.facility = $facility)"
+    pool_admission_where("review_name")
+    + " AND ($facility IS NULL OR sn.facility = $facility)"
 )
 
 
@@ -651,18 +644,16 @@ def claim_review_name_batch(
     binding carries the immutable DD snapshot captured on the exact
     ``StandardNameSource`` that produced the name.
     """
-    from imas_codex.standard_names.defaults import (
-        DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+    query_params = pool_admission_params(min_score=min_score)
+    query_params.update(drain_scope_id=drain_scope_id, facility=facility)
+    where = (
+        pool_admission_where(
+            "review_name", scoped_docs=bool(scope_run_id or edits_only)
+        )
+        + " AND ($facility IS NULL OR sn.facility = $facility)"
     )
-
-    query_params: dict[str, services.Any] = {
-        "parent_desc_placeholder": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
-        "drain_scope_id": drain_scope_id,
-        "min_score": min_score,
-        "facility": facility,
-    }
     items = services._claim_sn_atomic(
-        eligibility_where=REVIEW_NAME_ELIGIBILITY_WHERE,
+        eligibility_where=where,
         query_params=query_params,
         batch_size=batch_size,
         timeout_seconds=timeout_seconds,
@@ -671,8 +662,13 @@ def claim_review_name_batch(
         scope_run_id=scope_run_id,
         drain_scope_id=drain_scope_id,
         edits_only=edits_only,
-        restage_review_axis="name" if drain_scope_id else None,
+        restage_review_axis="name",
     )
+    from imas_codex.standard_names.graph_store.graph_audits import (
+        validate_claimed_review_candidates,
+    )
+
+    items = validate_claimed_review_candidates(items)
     return services._verify_name_claim_winners(items, eligible_stage="drafted")
 
 

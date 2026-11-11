@@ -11,6 +11,7 @@ from imas_codex.standard_names.defaults import (
     DEFAULT_MIN_SCORE,
     DEFAULT_REFINE_ROTATIONS,
 )
+from imas_codex.standard_names.pools import pool_admission_params, pool_admission_where
 
 from .graph_foundation import _CLAIM_TIMEOUT_SECONDS
 
@@ -46,18 +47,13 @@ def claim_generate_docs_batch(
     """
     from imas_codex.standard_names.chain_history import name_chain_history
 
-    score_gate = (
-        ""
-        if scope_run_id or edits_only
-        else " AND (sn.reviewer_score_name IS NOT NULL OR (coalesce(sn.origin, '') = 'derived'     AND EXISTS { MATCH (kid:StandardName)-[:HAS_PARENT]->(sn)       WHERE NOT coalesce(kid.name_stage, '') IN       ['superseded', 'exhausted', 'contested'] }))"
+    where = pool_admission_where(
+        "generate_docs", scoped_docs=bool(scope_run_id or edits_only)
     )
-    where = (
-        "sn.name_stage = 'accepted' AND sn.docs_stage = 'pending' AND NOT (sn.name_stage IN ['superseded', 'exhausted', 'contested'])"
-        + score_gate
-    )
+    query_params = pool_admission_params()
     items = services._claim_sn_atomic(
         eligibility_where=where,
-        query_params={},
+        query_params=query_params,
         batch_size=batch_size,
         timeout_seconds=timeout_seconds,
         extra_return_fields=", sn.tags AS tags, sn.reviewer_score_name AS reviewer_score_name, sn.reviewer_comments_name AS reviewer_comments_name, sn.chain_length AS chain_length, sn.docs_stage AS docs_stage, sn.name_stage AS name_stage, sn.edit_mode AS edit_mode, sn.name_hint AS name_hint, sn.docs_hint AS docs_hint, sn.edit_reason AS edit_reason, sn.edit_origin AS edit_origin",
@@ -231,22 +227,10 @@ def claim_refine_docs_batch(
     """
     from imas_codex.standard_names.chain_history import docs_chain_history
 
-    score_gate = (
-        ""
-        if scope_run_id or edits_only
-        else " AND (sn.reviewer_score_name IS NOT NULL OR (coalesce(sn.origin, '') = 'derived'     AND EXISTS { MATCH (kid:StandardName)-[:HAS_PARENT]->(sn)       WHERE NOT coalesce(kid.name_stage, '') IN       ['superseded', 'exhausted', 'contested'] }))"
+    where = pool_admission_where(
+        "refine_docs", scoped_docs=bool(scope_run_id or edits_only)
     )
-    where = (
-        "sn.docs_stage = 'reviewed' AND sn.reviewer_score_docs IS NOT NULL AND (sn.reviewer_score_docs < $min_score OR "
-        + services.has_open_docs_hold_where()
-        + f") AND coalesce(sn.docs_chain_length, 0) < $rotation_cap AND NOT (sn.name_stage IN ['superseded', 'exhausted', 'contested']) AND {services.docs_review_eligibility_where()} AND sn.docs_review_quorum_shortfall IS NULL"
-        + score_gate
-    )
-    query_params: dict[str, Any] = {
-        "min_score": min_score,
-        "rotation_cap": rotation_cap,
-        **services.docs_review_eligibility_params(),
-    }
+    query_params = pool_admission_params(min_score=min_score, rotation_cap=rotation_cap)
     items = services._claim_sn_atomic(
         eligibility_where=where,
         query_params=query_params,

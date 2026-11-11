@@ -186,7 +186,9 @@ def test_recorded_classes_preserve_population_and_admission():
     assert len(states) == 85
     assert sum(state["recorded_count"] for state in states) == 360
     result = classify_identity_state_groups(states, standard_name_pool_predicates())
-    assert result["stranded_count"] == 85
+    assert result["stranded_count"] == 0
+    assert result["claimable_count"] == 43
+    assert result["terminal_for_run_count"] == 42
     assert result["overlap_count"] == 0
 
 
@@ -216,6 +218,7 @@ def _plant_states(graph, states):
         }
         properties.update(
             id=state["identities"][0],
+            physics_domain="equilibrium",
             description={
                 "missing": None,
                 "placeholder": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
@@ -263,7 +266,9 @@ def _plant_states(graph, states):
 
 @pytest.mark.graph
 @pytest.mark.timeout(120)
-def test_rendered_admission_matches_planted_classes(disposable_neo4j_empty):
+def test_rendered_admission_matches_planted_classes(
+    disposable_neo4j_empty, monkeypatch
+):
     controls = control_states()
     states = recorded_states() + list(controls.values())
     ids = {state["identities"][0] for state in states}
@@ -302,5 +307,137 @@ def test_rendered_admission_matches_planted_classes(disposable_neo4j_empty):
             expected = {
                 state["identities"][0] for state in states if predicate.admits(state)
             }
-            assert expected == {f"control_{predicate.pool}"}
+            assert f"control_{predicate.pool}" in expected
             assert {row["id"] for row in rows} == expected
+
+        from imas_codex.cli.sn import _compute_pool_pending
+        from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
+            pool_pending_counts,
+        )
+
+        expected_counts = {
+            predicate.pool: sum(predicate.admits(state) for state in states)
+            for predicate in standard_name_pool_predicates()
+        }
+        assert _compute_pool_pending(
+            graph, domains=None, rotation_cap=3, min_score=0.75
+        ) == {"generate_name": 0, **expected_counts}
+        legacy_counts = pool_pending_counts()
+        assert legacy_counts == {
+            "generate_name": 0,
+            **{
+                pool: count
+                for pool, count in expected_counts.items()
+                if pool != "enrich_parents"
+            },
+        }
+        census_groups = [
+            dict(projected[identity], identities=[identity], count=1)
+            for identity in sorted(ids)
+        ]
+        result = classify_identity_state_groups(
+            census_groups, standard_name_pool_predicates()
+        )
+        assert result["stranded_count"] == 0
+        assert result["overlap_count"] == 0
+        assert result["terminal_for_run_count"] == 42
+        parked_ids = result["terminal_for_run_ids"]
+        before = graph.query(
+            "MATCH (sn:StandardName) WHERE sn.id IN $ids RETURN sn.id AS id, properties(sn) AS properties ORDER BY id",
+            ids=parked_ids,
+        )
+
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            claim_review_name_batch,
+        )
+        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+            claim_generate_docs_batch,
+            claim_refine_docs_batch,
+        )
+        from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
+            claim_enrich_parents_batch,
+        )
+        from imas_codex.standard_names.graph_store.graph_refinement import (
+            claim_refine_name_batch,
+        )
+        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+            claim_review_docs_batch,
+        )
+        from imas_codex.standard_names.worker_tasks import worker_compose_and_validate
+
+        validated = []
+
+        def validate(entry):
+            validated.append(entry["id"])
+            return [], {"pydantic": {"passed": True}}, "valid"
+
+        monkeypatch.setattr(
+            worker_compose_and_validate, "validate_name_candidate", validate
+        )
+        claimers = {
+            "review_name": claim_review_name_batch,
+            "refine_name": claim_refine_name_batch,
+            "generate_docs": claim_generate_docs_batch,
+            "review_docs": claim_review_docs_batch,
+            "refine_docs": claim_refine_docs_batch,
+            "enrich_parents": claim_enrich_parents_batch,
+        }
+        for pool, claim in claimers.items():
+            expected = {
+                state["identities"][0]
+                for state in states
+                if next(
+                    p for p in standard_name_pool_predicates() if p.pool == pool
+                ).admits(state)
+            }
+            claimed = []
+            for _ in range(3):
+                claimed.extend(item["id"] for item in claim(batch_size=200))
+            assert set(claimed) == expected, (
+                pool,
+                expected - set(claimed),
+                set(claimed) - expected,
+            )
+            assert len(claimed) == len(set(claimed)), pool
+        assert set(validated) == {
+            state["identities"][0]
+            for state in states
+            if state["validation_status"] in {None, "pending"}
+            and state["origin"] != "derived"
+            and state["description_state"] == "substantive"
+        }
+        after = graph.query(
+            "MATCH (sn:StandardName) WHERE sn.id IN $ids RETURN sn.id AS id, properties(sn) AS properties ORDER BY id",
+            ids=parked_ids,
+        )
+        assert before == after
+
+
+@pytest.mark.graph
+@pytest.mark.timeout(120)
+def test_invalid_pending_candidate_is_quarantined_before_review(disposable_neo4j_empty):
+    from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        claim_review_name_batch,
+    )
+
+    state = dict(
+        control_states()["review_name"],
+        validation_status="pending",
+        identities=["invalid_name_without_physical_base"],
+    )
+    with GraphClient() as graph:
+        _plant_states(graph, [state])
+        assert claim_review_name_batch(batch_size=1) == []
+        row = graph.query(
+            "MATCH (sn:StandardName {id: $id}) RETURN sn.validation_status AS status, sn.validation_issues AS issues, sn.claim_token AS token",
+            id=state["identities"][0],
+        )[0]
+        assert row["status"] == "quarantined"
+        assert row["issues"]
+        assert row["token"] is None
+        assert claim_review_name_batch(batch_size=1) == []
+        result = classify_identity_state_groups(
+            identity_state_groups(gc=graph), standard_name_pool_predicates()
+        )
+        assert result["stranded_count"] == 0
+        assert result["terminal_for_run_by_reason"] == {"validation_quarantined": 1}

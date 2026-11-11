@@ -349,9 +349,10 @@ def _state_is(field: str, value: Any) -> _PoolCondition:
 
 def identity_state_expressions() -> dict[str, str]:
     """Project the state read by pool admission from one StandardName node."""
-    from imas_codex.standard_names.graph_store.graph_catalog import (
-        docs_review_eligibility_where,
+    from imas_codex.standard_names.graph_store.graph_foundation import (
+        docs_review_winner_query_body,
     )
+    from imas_codex.standard_names.review.holds import has_open_docs_hold_where
 
     return {
         **{
@@ -374,71 +375,199 @@ def identity_state_expressions() -> dict[str, str]:
         "review_quorum_shortfall": "sn.review_quorum_shortfall IS NOT NULL",
         "docs_review_quorum_shortfall": "sn.docs_review_quorum_shortfall IS NOT NULL",
         "has_live_child": "EXISTS { MATCH (child:StandardName)-[:HAS_PARENT]->(sn) WHERE NOT coalesce(child.name_stage, '') IN ['superseded', 'exhausted', 'contested'] }",
-        "has_winning_docs_review": docs_review_eligibility_where(),
+        "has_winning_docs_review": f"EXISTS {{{docs_review_winner_query_body()}}}",
+        "has_open_docs_hold": has_open_docs_hold_where(),
         "claim_active": "sn.claim_token IS NOT NULL OR sn.claimed_at IS NOT NULL",
     }
 
 
-def standard_name_pool_predicates() -> tuple[StandardNamePoolPredicate, ...]:
-    """Return the predicates the StandardName worker pools discriminate on.
+def _terminal_for_run_rules() -> tuple[tuple[str, _PoolCondition], ...]:
+    """Reasons an identity needs external action rather than a pool retry."""
+    return (
+        (
+            "name_review_quorum_shortfall",
+            _state_is("name_stage", "reviewed")
+            & _state_is("review_quorum_shortfall", True),
+        ),
+        (
+            "docs_review_quorum_shortfall",
+            _state_is("docs_stage", "reviewed")
+            & _state_is("docs_review_quorum_shortfall", True),
+        ),
+        ("validation_quarantined", _state_is("validation_status", "quarantined")),
+        (
+            "name_attempt_cap",
+            _state_is("name_stage", "reviewed")
+            & (
+                _state_is("name_score_state", "below")
+                & ~_state_is("name_attempts_under_cap", True)
+                | _state_is("rename_resubmit_capped", True)
+            ),
+        ),
+        (
+            "docs_attempt_cap",
+            _state_is("docs_stage", "reviewed")
+            & ~_state_is("docs_attempts_under_cap", True),
+        ),
+        ("docs_exhausted", _state_is("docs_stage", "exhausted")),
+        (
+            "structural_grounding_missing",
+            _state_is("origin", "derived")
+            & ~_state_is("has_live_child", True)
+            & _state_is("name_score_state", "missing"),
+        ),
+        (
+            "composition_grounding_missing",
+            ~_state_is("origin", "derived")
+            & _state_is("description_state", "missing")
+            & (_state_is("name_stage", "pending") | _state_is("name_stage", None)),
+        ),
+    )
 
-    These objects are attached to :class:`PoolSpec` instances by the loop and
-    are also the input to the totality census.  Keeping the read-only state
-    predicate on the pool specification prevents the census from carrying a
-    second list of claimable lifecycle states.
+
+def standard_name_pool_predicates(
+    *,
+    scoped_docs: bool = False,
+) -> tuple[StandardNamePoolPredicate, ...]:
+    """Return the shared, mutually exclusive pool ownership conditions.
+
+    Unvalidated name candidates belong to review_name for deterministic
+    validation before a reviewer is called. Reviewed documents without a
+    winning review belong to review_docs, never to paid refinement. Explicit
+    docs scopes retain their existing exemption from the name-score gate.
     """
-
     live = ~(
         _state_is("name_stage", "superseded")
         | _state_is("name_stage", "exhausted")
         | _state_is("name_stage", "contested")
+        | _state_is("status", "deprecated")
+        | _state_is("status", "superseded")
     )
+    unheld = ~(
+        _terminal_for_run_rules()[0][1]
+        | _terminal_for_run_rules()[1][1]
+        | _state_is("validation_status", "quarantined")
+    )
+    active = live & unheld
     derived = _state_is("origin", "derived")
     vetted = ~_state_is("name_score_state", "missing") | (
         derived & _state_is("has_live_child", True)
     )
+    substantive = _state_is("description_state", "substantive")
+    validation_pending = _state_is("validation_status", "pending") | _state_is(
+        "validation_status", None
+    )
+    name_entry = _state_is("name_stage", "drafted") | _state_is("name_stage", "pending")
+    name_recovery = (
+        _state_is("name_stage", "reviewed")
+        & (~_state_is("name_score_state", "below") | validation_pending)
+        & ~_state_is("edit_mode", "rename")
+    )
+    if not scoped_docs:
+        name_recovery = name_recovery | (
+            _state_is("name_stage", "accepted")
+            & _state_is("name_score_state", "missing")
+        )
     review_name = (
-        _state_is("name_stage", "drafted")
-        & _state_is("validation_status", "valid")
-        & _state_is("description_state", "substantive")
+        active
         & ~derived
+        & substantive
+        & (_state_is("validation_status", "valid") | validation_pending)
+        & (name_entry | name_recovery)
     )
     refine_name = (
-        _state_is("name_stage", "reviewed")
-        & _state_is("name_score_state", "below")
-        & _state_is("name_attempts_under_cap", True)
-        & ~_state_is("rename_resubmit_capped", True)
-        & ~derived
-        & ~_state_is("review_quorum_shortfall", True)
-    )
-    generate_docs = (
-        _state_is("name_stage", "accepted")
-        & _state_is("docs_stage", "pending")
-        & vetted
-    )
-    review_docs = _state_is("docs_stage", "drafted") & live & vetted
-    refine_docs = (
-        _state_is("docs_stage", "reviewed")
-        & _state_is("docs_score_state", "below")
-        & _state_is("docs_attempts_under_cap", True)
-        & live
-        & _state_is("has_winning_docs_review", True)
-        & ~_state_is("docs_review_quorum_shortfall", True)
-        & vetted
+        active
+        & ~review_name
+        & (
+            _state_is("name_stage", "reviewed")
+            & _state_is("name_score_state", "below")
+            & _state_is("name_attempts_under_cap", True)
+            & ~_state_is("rename_resubmit_capped", True)
+            & ~derived
+        )
     )
     enrich_parents = (
-        derived
-        & _state_is("description_state", "placeholder")
+        active
+        & derived
+        & (
+            _state_is("description_state", "placeholder")
+            | _state_is("description_state", "missing")
+        )
         & _state_is("has_live_child", True)
     )
+    docs_ready = active & _state_is("name_stage", "accepted") & ~enrich_parents
+    if not scoped_docs:
+        docs_ready = docs_ready & vetted
+    generate_docs = (
+        docs_ready
+        & _state_is("name_stage", "accepted")
+        & _state_is("docs_stage", "pending")
+    )
+    review_docs = docs_ready & (
+        _state_is("docs_stage", "drafted")
+        | (
+            _state_is("docs_stage", "reviewed")
+            & (
+                ~_state_is("has_winning_docs_review", True)
+                | (
+                    ~_state_is("docs_score_state", "below")
+                    & ~_state_is("has_open_docs_hold", True)
+                )
+            )
+        )
+    )
+    refine_docs = (
+        docs_ready
+        & ~review_docs
+        & (
+            _state_is("docs_stage", "reviewed")
+            & (
+                _state_is("docs_score_state", "below")
+                | _state_is("has_open_docs_hold", True)
+            )
+            & ~_state_is("docs_score_state", "missing")
+            & _state_is("docs_attempts_under_cap", True)
+            & _state_is("has_winning_docs_review", True)
+        )
+    )
+    return tuple(
+        StandardNamePoolPredicate(pool, condition)
+        for pool, condition in (
+            ("review_name", review_name),
+            ("refine_name", refine_name),
+            ("generate_docs", generate_docs),
+            ("review_docs", review_docs),
+            ("refine_docs", refine_docs),
+            ("enrich_parents", enrich_parents),
+        )
+    )
 
-    return (
-        StandardNamePoolPredicate("review_name", review_name),
-        StandardNamePoolPredicate("refine_name", refine_name),
-        StandardNamePoolPredicate("generate_docs", generate_docs),
-        StandardNamePoolPredicate("review_docs", review_docs),
-        StandardNamePoolPredicate("refine_docs", refine_docs),
-        StandardNamePoolPredicate("enrich_parents", enrich_parents),
+
+def pool_admission_where(pool: str, *, scoped_docs: bool = False) -> str:
+    """Render a pool's rule for claims and pending queries alike."""
+    return next(
+        p
+        for p in standard_name_pool_predicates(scoped_docs=scoped_docs)
+        if p.pool == pool
+    ).cypher()
+
+
+def pool_admission_params(
+    *, min_score: float = 0.75, rotation_cap: int = 3
+) -> dict[str, Any]:
+    """Bind all graph projections used by the shared admission rules."""
+    from imas_codex.standard_names.defaults import (
+        DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+    )
+    from imas_codex.standard_names.graph_store.graph_catalog import (
+        docs_review_eligibility_params,
+    )
+
+    return dict(
+        min_score=min_score,
+        rotation_cap=rotation_cap,
+        parent_desc_placeholder=DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+        **docs_review_eligibility_params(),
     )
 
 
@@ -466,6 +595,7 @@ def identity_state_groups(
         "rename_resubmit_capped",
         "has_live_child",
         "has_winning_docs_review",
+        "has_open_docs_hold",
         "claim_active",
     )
     projection = ",\n         ".join(
@@ -491,6 +621,9 @@ def identity_state_groups(
              AS docs_review_quorum_shortfall,
          has_live_child,
          has_winning_docs_review,
+         has_open_docs_hold,
+         sn.review_quorum_shortfall AS name_hold_reason,
+         sn.docs_review_quorum_shortfall AS docs_hold_reason,
          claim_active,
          collect(sn.id) AS identities
     RETURN name_stage, docs_stage, validation_status, status, origin,
@@ -498,7 +631,8 @@ def identity_state_groups(
            name_attempts_under_cap, docs_attempts_under_cap, edit_mode,
            rename_resubmit_capped, review_quorum_shortfall,
            docs_review_quorum_shortfall, has_live_child,
-           has_winning_docs_review, claim_active, identities,
+           has_winning_docs_review, has_open_docs_hold,
+           name_hold_reason, docs_hold_reason, claim_active, identities,
            size(identities) AS count
     ORDER BY name_stage, docs_stage, validation_status, status, origin
     """
@@ -561,6 +695,10 @@ def classify_identity_state_groups(
     terminal_statuses = {"deprecated", "superseded"}
     population_count = 0
     terminal_count = 0
+    terminal_for_run_count = 0
+    terminal_for_run_ids: list[str] = []
+    terminal_for_run_by_reason: dict[str, int] = {}
+    terminal_for_run_reasons: dict[str, str] = {}
     claimable_count = 0
     overlap_count = 0
     stranded_count = 0
@@ -608,6 +746,27 @@ def classify_identity_state_groups(
                 overlap_ids.extend(identities)
             continue
 
+        parked_reason = next(
+            (reason for reason, rule in _terminal_for_run_rules() if rule(state)), None
+        )
+        if parked_reason:
+            terminal_for_run_count += count
+            terminal_for_run_ids.extend(identities)
+            terminal_for_run_by_reason[parked_reason] = (
+                terminal_for_run_by_reason.get(parked_reason, 0) + count
+            )
+            detail = (
+                state.get("name_hold_reason")
+                if parked_reason == "name_review_quorum_shortfall"
+                else state.get("docs_hold_reason")
+                if parked_reason == "docs_review_quorum_shortfall"
+                else None
+            )
+            terminal_for_run_reasons.update(
+                {identity: str(detail or parked_reason) for identity in identities}
+            )
+            continue
+
         stranded_ids.extend(identities)
         stranded_count += count
         state_key = _state_breakdown_key(state)
@@ -616,6 +775,10 @@ def classify_identity_state_groups(
     return {
         "population_count": population_count,
         "terminal_count": terminal_count,
+        "terminal_for_run_count": terminal_for_run_count,
+        "terminal_for_run_ids": sorted(terminal_for_run_ids),
+        "terminal_for_run_by_reason": dict(sorted(terminal_for_run_by_reason.items())),
+        "terminal_for_run_reasons": terminal_for_run_reasons,
         "claimable_count": claimable_count,
         "stranded_count": stranded_count,
         "stranded_ids": sorted(stranded_ids),

@@ -45,12 +45,14 @@ def _classify(*groups: dict[str, object]) -> dict[str, object]:
 def test_review_quorum_shortfall_is_reported_with_its_state() -> None:
     result = _classify(_group("reviewed_shortfall", review_quorum_shortfall=True))
 
-    assert result["stranded_count"] == 1
-    assert result["stranded_ids"] == ["reviewed_shortfall"]
-    assert list(result["by_state"].values()) == [1]
-    state = next(iter(result["by_state"]))
-    assert "name_stage=reviewed" in state
-    assert "review_quorum_shortfall=true" in state
+    assert result["stranded_count"] == 0
+    assert result["terminal_for_run_count"] == 1
+    assert result["terminal_for_run_ids"] == ["reviewed_shortfall"]
+    assert result["terminal_for_run_by_reason"] == {"name_review_quorum_shortfall": 1}
+    assert not any(
+        p.admits(_group("reviewed_shortfall", review_quorum_shortfall=True))
+        for p in standard_name_pool_predicates()
+    )
 
 
 def test_drafted_quarantined_identity_is_reported() -> None:
@@ -63,8 +65,9 @@ def test_drafted_quarantined_identity_is_reported() -> None:
         )
     )
 
-    assert result["stranded_count"] == 1
-    assert result["stranded_ids"] == ["drafted_quarantined"]
+    assert result["stranded_count"] == 0
+    assert result["terminal_for_run_by_reason"] == {"validation_quarantined": 1}
+    assert result["terminal_for_run_ids"] == ["drafted_quarantined"]
 
 
 def test_identity_admitted_by_a_pool_is_not_reported() -> None:
@@ -82,7 +85,7 @@ def test_identity_admitted_by_a_pool_is_not_reported() -> None:
     assert result["stranded_ids"] == []
 
 
-def test_accepted_name_with_exhausted_docs_is_stranded() -> None:
+def test_accepted_name_with_exhausted_docs_is_terminal_for_run() -> None:
     result = _classify(
         _group(
             "neutron_flux_due_to_fusion",
@@ -94,11 +97,9 @@ def test_accepted_name_with_exhausted_docs_is_stranded() -> None:
 
     assert result["terminal_count"] == 0
     assert result["claimable_count"] == 0
-    assert result["stranded_count"] == 1
-    assert result["stranded_ids"] == ["neutron_flux_due_to_fusion"]
-    state = next(iter(result["by_state"]))
-    assert "name_stage=accepted" in state
-    assert "docs_stage=exhausted" in state
+    assert result["stranded_count"] == 0
+    assert result["terminal_for_run_by_reason"] == {"docs_exhausted": 1}
+    assert result["terminal_for_run_ids"] == ["neutron_flux_due_to_fusion"]
 
 
 def test_accepted_name_with_accepted_docs_is_terminal() -> None:
@@ -162,8 +163,8 @@ def test_duplicate_identity_still_raises() -> None:
 
 def test_grouped_query_and_run_summary_preserve_the_census() -> None:
     rows = [
-        _group("first", review_quorum_shortfall=True),
-        _group("second", review_quorum_shortfall=True),
+        _group("first", name_stage="unknown"),
+        _group("second", name_stage="unknown"),
     ]
     rows[0]["identities"] = ["first", "second"]
     rows[0]["count"] = 2
