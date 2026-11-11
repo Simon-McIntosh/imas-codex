@@ -61,9 +61,28 @@
       "note": "\u00a75's prose no longer asserts a detached-HEAD refusal; it says releases have only been cut from the main checkout and that whether a worktree cut works is unmeasured, and its done-when asks for the successful cut held by a test.",
       "reason": "",
       "when": "2026-11-11T21:08:55.090934+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "fc88cc3755f58d01536d76fdaf0433b6d75e30f5",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a78 is now bounded to imports between modules of imas_codex/standard_names; imports from outside the package, such as imas_codex.settings, are out of scope.",
+      "reason": "",
+      "when": "2026-11-11T21:09:08.091244+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "fc88cc3755f58d01536d76fdaf0433b6d75e30f5",
+      "commit_basis": "edit",
+      "note": "\u00a78 is now bounded to imports between modules of imas_codex/standard_names; imports from outside the package, such as imas_codex.settings, are out of scope.",
+      "reason": "",
+      "when": "2026-11-11T21:09:08.091244+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "",
