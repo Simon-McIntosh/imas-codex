@@ -101,10 +101,36 @@ record.</p>
 <table>
   <thead><tr><th>arm</th><th>revision</th><th>result</th><th>exit</th></tr></thead>
   <tbody>
-    <tr><td>base</td><td><code>39746199e</code></td><td>pending</td><td>—</td></tr>
-    <tr><td>head</td><td><code>c7f64db35</code></td><td>pending</td><td>—</td></tr>
+    <tr><td>base</td><td><code>39746199e</code></td><td>13 failed, 8631 passed, 12 skipped in 138.6s</td><td>1</td></tr>
+    <tr><td>head</td><td><code>c7f64db35</code></td><td>13 failed, 8631 passed, 12 skipped in 148.7s</td><td>1</td></tr>
   </tbody>
 </table>
+
+<p>The two arms fail the <strong>same thirteen ids</strong>: 13 in the base set,
+13 in the head set, an empty difference in both directions. No failure id is
+added by this change and none is removed.</p>
+
+<h4 id="sib-isn-pin-0-11-1-failures">What the thirteen ids are</h4>
+
+<p>The thirteen were characterised by re-running exactly those ids in the
+worktree at the head commit, which splits them into two groups.</p>
+
+<ul>
+  <li><strong>Five are an artefact of the re-check's trees.</strong> They pass in
+  the worktree at the head commit and fail in an archived tree, because they read
+  catalog data this checkout generates outside git:
+  <code>test_cascade_calibration.py</code>,
+  <code>test_catalog_layout_hierarchy.py::TestOrderingCycleDetection</code>, and
+  all three <code>test_manifest_generability.py</code> tests. The focused run
+  passes those five (8 failed, 5 passed).</li>
+  <li><strong>Eight reproduce in the worktree at the head commit</strong>, so they
+  are pre-existing in this environment and outside this node's scope: six in
+  <code>test_gap_rule_verdicts.py</code> (one DD-field-name, two ordinal-sample,
+  two settled-fold and one stored-gap-replay id), one in
+  <code>test_geometry_enumeration_collapse.py</code>, and one in
+  <code>test_compose_prompt_examples_round_trip.py</code>. They fail identically at the base revision, so they
+  are not this node's to fix.</li>
+</ul>
 
 <p><em>Totals, commands and log paths are recorded in the node manifest's
 <code>baseline_suite</code>, <code>after_suite</code> and
