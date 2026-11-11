@@ -43,9 +43,28 @@
       "note": "\u00a72 and \u00a75 now say that any command or option added to run these measures replaces the evidence-directory census script it supersedes, so each measure has one owned instrument; the brief directs promoting the consistency census into the package with a population argument.",
       "reason": "",
       "when": "2026-11-11T21:47:54.338292+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "70e1d1c3ac68c350fe6ad0e9fadf352df089e1ee",
+      "commit_basis": "edit",
+      "finding": "duplicate_owner-1",
+      "note": "\u00a75 now derives its family grouping count from the domain audit's output rather than a second reading of physics_domain.",
+      "reason": "",
+      "when": "2026-11-11T21:48:07.247305+00:00"
     }
   ],
   "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "70e1d1c3ac68c350fe6ad0e9fadf352df089e1ee",
+      "commit_basis": "edit",
+      "note": "\u00a75 now derives its family grouping count from the domain audit's output rather than a second reading of physics_domain.",
+      "reason": "",
+      "when": "2026-11-11T21:48:07.247305+00:00"
+    },
     "reuse_search-1": {
       "action": "acted",
       "by": "",
