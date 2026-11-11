@@ -285,16 +285,98 @@ ReleaseFn = Callable[[dict[str, Any]], Awaitable[None]]
 
 @dataclass(frozen=True)
 class StandardNamePoolPredicate:
-    """One worker pool's read-only predicate over an aggregated name state."""
+    """One worker pool's admission rule in memory and in graph queries."""
 
     pool: str
     admits: Callable[[Mapping[str, Any]], bool]
 
+    def cypher(self, expressions: Mapping[str, str] | None = None) -> str:
+        """Render the same condition used by the in-memory census."""
+        if not isinstance(self.admits, _PoolCondition):
+            raise TypeError(f"Pool {self.pool!r} has no graph admission condition")
+        return self.admits.cypher(expressions or identity_state_expressions())
 
-def _name_form_is_vetted(state: Mapping[str, Any]) -> bool:
-    return state.get("name_score_state") != "missing" or (
-        state.get("origin") == "derived" and bool(state.get("has_live_child"))
+
+@dataclass(frozen=True)
+class _PoolCondition:
+    """A boolean expression evaluated against state or rendered as Cypher."""
+
+    operation: str
+    operands: tuple[Any, ...]
+
+    def __call__(self, state: Mapping[str, Any]) -> bool:
+        if self.operation == "and":
+            return all(term(state) for term in self.operands)
+        if self.operation == "or":
+            return any(term(state) for term in self.operands)
+        if self.operation == "not":
+            return not self.operands[0](state)
+        field, value = self.operands
+        return state.get(field) == value
+
+    def __and__(self, other: _PoolCondition) -> _PoolCondition:
+        return _PoolCondition("and", (self, other))
+
+    def __or__(self, other: _PoolCondition) -> _PoolCondition:
+        return _PoolCondition("or", (self, other))
+
+    def __invert__(self) -> _PoolCondition:
+        return _PoolCondition("not", (self,))
+
+    def cypher(self, expressions: Mapping[str, str]) -> str:
+        if self.operation in {"and", "or"}:
+            joiner = f" {self.operation.upper()} "
+            return (
+                "("
+                + joiner.join(term.cypher(expressions) for term in self.operands)
+                + ")"
+            )
+        if self.operation == "not":
+            return f"NOT ({self.operands[0].cypher(expressions)})"
+        field, value = self.operands
+        expression = expressions[field]
+        if value is True:
+            return f"coalesce(({expression}), false)"
+        if value is None:
+            return f"({expression}) IS NULL"
+        literal = "false" if value is False else "'" + value.replace("'", "''") + "'"
+        return f"coalesce(({expression} = {literal}), false)"
+
+
+def _state_is(field: str, value: Any) -> _PoolCondition:
+    return _PoolCondition("equals", (field, value))
+
+
+def identity_state_expressions() -> dict[str, str]:
+    """Project the state read by pool admission from one StandardName node."""
+    from imas_codex.standard_names.graph_store.graph_catalog import (
+        docs_review_eligibility_where,
     )
+
+    return {
+        **{
+            field: f"sn.{field}"
+            for field in (
+                "name_stage",
+                "docs_stage",
+                "validation_status",
+                "status",
+                "origin",
+                "edit_mode",
+            )
+        },
+        "description_state": "CASE WHEN sn.description IS NULL THEN 'missing' WHEN sn.description = $parent_desc_placeholder THEN 'placeholder' ELSE 'substantive' END",
+        "name_score_state": "CASE WHEN sn.reviewer_score_name IS NULL THEN 'missing' WHEN sn.reviewer_score_name < $min_score THEN 'below' ELSE 'passing' END",
+        "docs_score_state": "CASE WHEN sn.reviewer_score_docs IS NULL THEN 'missing' WHEN sn.reviewer_score_docs < $min_score THEN 'below' ELSE 'passing' END",
+        "name_attempts_under_cap": "coalesce(sn.refine_attempts, coalesce(sn.chain_length, 0)) < $rotation_cap",
+        "docs_attempts_under_cap": "coalesce(sn.docs_chain_length, 0) < $rotation_cap",
+        "rename_resubmit_capped": "coalesce(sn.edit_mode, '') = 'rename' AND coalesce(sn.review_resubmit_count, 0) >= $rotation_cap",
+        "review_quorum_shortfall": "sn.review_quorum_shortfall IS NOT NULL",
+        "docs_review_quorum_shortfall": "sn.docs_review_quorum_shortfall IS NOT NULL",
+        "has_live_child": "EXISTS { MATCH (child:StandardName)-[:HAS_PARENT]->(sn) WHERE NOT coalesce(child.name_stage, '') IN ['superseded', 'exhausted', 'contested'] }",
+        "has_winning_docs_review": docs_review_eligibility_where(),
+        "claim_active": "sn.claim_token IS NOT NULL OR sn.claimed_at IS NOT NULL",
+    }
 
 
 def standard_name_pool_predicates() -> tuple[StandardNamePoolPredicate, ...]:
@@ -306,57 +388,49 @@ def standard_name_pool_predicates() -> tuple[StandardNamePoolPredicate, ...]:
     second list of claimable lifecycle states.
     """
 
-    terminal_stages = {"superseded", "exhausted", "contested"}
-
-    def review_name(state: Mapping[str, Any]) -> bool:
-        return (
-            state.get("name_stage") == "drafted"
-            and state.get("validation_status") == "valid"
-            and state.get("description_state") == "substantive"
-            and state.get("origin") != "derived"
-        )
-
-    def refine_name(state: Mapping[str, Any]) -> bool:
-        return (
-            state.get("name_stage") == "reviewed"
-            and state.get("name_score_state") == "below"
-            and bool(state.get("name_attempts_under_cap"))
-            and not bool(state.get("rename_resubmit_capped"))
-            and state.get("origin") != "derived"
-            and not bool(state.get("review_quorum_shortfall"))
-        )
-
-    def generate_docs(state: Mapping[str, Any]) -> bool:
-        return (
-            state.get("name_stage") == "accepted"
-            and state.get("docs_stage") == "pending"
-            and _name_form_is_vetted(state)
-        )
-
-    def review_docs(state: Mapping[str, Any]) -> bool:
-        return (
-            state.get("docs_stage") == "drafted"
-            and state.get("name_stage") not in terminal_stages
-            and _name_form_is_vetted(state)
-        )
-
-    def refine_docs(state: Mapping[str, Any]) -> bool:
-        return (
-            state.get("docs_stage") == "reviewed"
-            and state.get("docs_score_state") == "below"
-            and bool(state.get("docs_attempts_under_cap"))
-            and state.get("name_stage") not in terminal_stages
-            and bool(state.get("has_winning_docs_review"))
-            and not bool(state.get("docs_review_quorum_shortfall"))
-            and _name_form_is_vetted(state)
-        )
-
-    def enrich_parents(state: Mapping[str, Any]) -> bool:
-        return (
-            state.get("origin") == "derived"
-            and state.get("description_state") == "placeholder"
-            and bool(state.get("has_live_child"))
-        )
+    live = ~(
+        _state_is("name_stage", "superseded")
+        | _state_is("name_stage", "exhausted")
+        | _state_is("name_stage", "contested")
+    )
+    derived = _state_is("origin", "derived")
+    vetted = ~_state_is("name_score_state", "missing") | (
+        derived & _state_is("has_live_child", True)
+    )
+    review_name = (
+        _state_is("name_stage", "drafted")
+        & _state_is("validation_status", "valid")
+        & _state_is("description_state", "substantive")
+        & ~derived
+    )
+    refine_name = (
+        _state_is("name_stage", "reviewed")
+        & _state_is("name_score_state", "below")
+        & _state_is("name_attempts_under_cap", True)
+        & ~_state_is("rename_resubmit_capped", True)
+        & ~derived
+        & ~_state_is("review_quorum_shortfall", True)
+    )
+    generate_docs = (
+        _state_is("name_stage", "accepted")
+        & _state_is("docs_stage", "pending")
+        & vetted
+    )
+    review_docs = _state_is("docs_stage", "drafted") & live & vetted
+    refine_docs = (
+        _state_is("docs_stage", "reviewed")
+        & _state_is("docs_score_state", "below")
+        & _state_is("docs_attempts_under_cap", True)
+        & live
+        & _state_is("has_winning_docs_review", True)
+        & ~_state_is("docs_review_quorum_shortfall", True)
+        & vetted
+    )
+    enrich_parents = (
+        derived
+        & _state_is("description_state", "placeholder")
+        & _state_is("has_live_child", True)
+    )
 
     return (
         StandardNamePoolPredicate("review_name", review_name),
@@ -380,41 +454,26 @@ def identity_state_groups(
     )
     from imas_codex.standard_names.graph_store.graph_catalog import (
         docs_review_eligibility_params,
-        docs_review_eligibility_where,
     )
 
+    expressions = identity_state_expressions()
+    derived_fields = (
+        "description_state",
+        "name_score_state",
+        "docs_score_state",
+        "name_attempts_under_cap",
+        "docs_attempts_under_cap",
+        "rename_resubmit_capped",
+        "has_live_child",
+        "has_winning_docs_review",
+        "claim_active",
+    )
+    projection = ",\n         ".join(
+        f"{expressions[field]} AS {field}" for field in derived_fields
+    )
     query = f"""
     MATCH (sn:StandardName)
-    WITH sn,
-         CASE
-           WHEN sn.description IS NULL THEN 'missing'
-           WHEN sn.description = $parent_desc_placeholder THEN 'placeholder'
-           ELSE 'substantive'
-         END AS description_state,
-         CASE
-           WHEN sn.reviewer_score_name IS NULL THEN 'missing'
-           WHEN sn.reviewer_score_name < $min_score THEN 'below'
-           ELSE 'passing'
-         END AS name_score_state,
-         CASE
-           WHEN sn.reviewer_score_docs IS NULL THEN 'missing'
-           WHEN sn.reviewer_score_docs < $min_score THEN 'below'
-           ELSE 'passing'
-         END AS docs_score_state,
-         coalesce(sn.refine_attempts, coalesce(sn.chain_length, 0))
-             < $rotation_cap AS name_attempts_under_cap,
-         coalesce(sn.docs_chain_length, 0) < $rotation_cap
-             AS docs_attempts_under_cap,
-         coalesce(sn.edit_mode, '') = 'rename'
-             AND coalesce(sn.review_resubmit_count, 0) >= $rotation_cap
-             AS rename_resubmit_capped,
-         EXISTS {{
-           MATCH (child:StandardName)-[:HAS_PARENT]->(sn)
-           WHERE NOT coalesce(child.name_stage, '') IN
-             ['superseded', 'exhausted', 'contested']
-         }} AS has_live_child,
-         {docs_review_eligibility_where()} AS has_winning_docs_review,
-         sn.claim_token IS NOT NULL OR sn.claimed_at IS NOT NULL AS claim_active
+    WITH sn, {projection}
     WITH sn.name_stage AS name_stage,
          sn.docs_stage AS docs_stage,
          sn.validation_status AS validation_status,
