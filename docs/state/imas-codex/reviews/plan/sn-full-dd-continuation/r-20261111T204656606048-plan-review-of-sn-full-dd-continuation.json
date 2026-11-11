@@ -112,6 +112,16 @@
       "finding": "done_when-1",
       "reason": "As the review notes, the creation-time clause and the truncated-copy control carry the measure; the currency clause is redundant, not a hole, and \u00a73's done-when is otherwise edited in this round.",
       "when": "2026-11-11T21:08:07.323204+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "fc88cc3755f58d01536d76fdaf0433b6d75e30f5",
+      "commit_basis": "edit",
+      "finding": "evidence_paths-1",
+      "note": "\u00a73 now records the integrity test and the truncated-copy failure under docs/evidence/fragments/sn-full-dd-continuation/.",
+      "reason": "",
+      "when": "2026-11-11T21:08:18.294596+00:00"
     }
   ],
   "responses": {
@@ -120,6 +130,15 @@
       "by": "",
       "reason": "As the review notes, the creation-time clause and the truncated-copy control carry the measure; the currency clause is redundant, not a hole, and \u00a73's done-when is otherwise edited in this round.",
       "when": "2026-11-11T21:08:07.323204+00:00"
+    },
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "fc88cc3755f58d01536d76fdaf0433b6d75e30f5",
+      "commit_basis": "edit",
+      "note": "\u00a73 now records the integrity test and the truncated-copy failure under docs/evidence/fragments/sn-full-dd-continuation/.",
+      "reason": "",
+      "when": "2026-11-11T21:08:18.294596+00:00"
     },
     "reasoning-1": {
       "action": "acted",
