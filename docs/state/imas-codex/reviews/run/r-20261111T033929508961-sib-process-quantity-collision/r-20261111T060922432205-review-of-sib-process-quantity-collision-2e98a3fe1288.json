@@ -1,0 +1,44 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-11T06:17:16.551Z",
+  "dispatched_at": "2026-11-11T06:10:16Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/export.py",
+      "line": 39,
+      "severity": "non-blocking",
+      "text": "export.py imports the private helpers edit._base_token and segments._registered_physical_bases; it is the only production module in the package reaching into another module's underscore names, and segments exposes grammar_tokens_by_segment publicly, so the capability is reused but through a private surface."
+    },
+    {
+      "file": "tests/standard_names/test_identity_token_collision.py",
+      "line": 24,
+      "severity": "non-blocking",
+      "text": "The pass test asserts only result.passed and issues == [], never that halo_current is a 'process' token and not itself in quantity_tokens, so if the installed vocabulary stopped listing halo_current as a process token the test would pass vacuously with the exemption removed."
+    },
+    {
+      "file": "tests/standard_names/test_identity_token_collision.py",
+      "line": 68,
+      "severity": "non-blocking",
+      "text": "The landed test file has no trailing newline: ruff check reports W292 and `ruff format --check` would reformat it, so the committed file is not clean under the repository's own pre-stage ruff recipe."
+    }
+  ],
+  "project": "imas-codex",
+  "review_run_id": "r-20261111T060922432205-review-of-sib-process-quantity-collision-2e98a3fe1288",
+  "review_text": "VERDICT goal: the goal at prompt.txt:38 is to let the identity-token collision gate admit a published quantity also spelled as a process token; imas_codex/standard_names/export.py:1684-1691 computes the parsed physical base and skips only the 'process' segment for it.\nVERDICT done_when: prompt.txt:106 is measured by tests/standard_names/test_identity_token_collision.py (5 passed, EXIT=0 in targeted-tests-shared-helpers.log), the negative-control mutation (2 failed, EXIT=1 in negative-control-shared-helpers.log), the live export gate line 'identity_token_collision passed=True skipped=False issues=0' at head-release-dry-run-shared-helpers.log:1858 over 1975 emitted identities with halo_current among them, the base-vs-head live delta in base-arm-live-gate-delta.log (base 1 issue on (halo_current, process), head 0), and matched archive suite arms (base 15 failed / 8624 passed, head 14 failed / 8630 passed, EXIT=1 each, completed true).\nVERDICT write_paths: prompt.txt:81-85 grants imas_codex/standard_names/export.py, tests/standard_names/test_identity_token_collision.py, the sn-integrity-backlog fragment and a figures directory; git diff --stat over 06ac2d0c..2e98a3fe1 shows exactly the first three, with the figures directory untouched.\nVERDICT manifest: manifest.md records status complete, four commits, the substituted-state re-measurement, both suite arms with completed=true and full failure id lists, and the negative control path; the tests line carries the literal expanded command, repairing the previous review's placeholder finding.\nVERDICT diff: read c0feba27c, 7641b4fc1, bc26e4521 and 2e98a3fe1 commit by commit against 06ac2d0c20d2511637d15ba603d77cbf89c5aaa4; the first adds the scoped exemption and five regression tests, the next two add and update the evidence fragment, and the last replaces the two duplicated local helpers with the shared segments/edit helpers, which is the repair of the reuse findings raised in the earlier review.\nCALL_SITES: imas_codex/standard_names/export.py:3608\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: export.py:1690 skips exactly the 'process' segment for an identity whose parsed base is a registered physical base, and base-arm-live-gate-delta.log shows the live catalog moving from 1 issue to 0 with only halo_current exempted.\nSCORE evidence: 18\nJUSTIFICATION evidence: every done-when clause has a recorded log (head-release-dry-run-shared-helpers.log:1858 for the live 0-issue gate, base-suite-archive.log and head-suite-archive.log for the matched -n 8 arms with 0 added ids), with a small deduction because the live and targeted arms were measured on the dirty tree that became 2e98a3fe1 rather than on the committed head.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff over 06ac2d0c..2e98a3fe1 touches only export.py, the new collision test and the granted evidence fragment, and carries no plan edit.\nSCORE durability: 17\nJUSTIFICATION durability: negative-control-shared-helpers.log shows removing the exemption reddens test_process_token_parsed_as_quantity_passes and test_exempt_identity_does_not_exempt_its_neighbours, and I confirmed halo_current is segments=('process',) with base 'current', but tests/standard_names/test_identity_token_collision.py:24 asserts no precondition of its own.\nSCORE fit: 15\nJUSTIFICATION fit: export.py:39 imports two private sibling helpers, which no other production module in imas_codex does, and the committed tests/standard_names/test_identity_token_collision.py:68 fails `ruff format --check`.\nSCORE reuse: 19\nJUSTIFICATION reuse: export.py:1623 and 1684-1687 now call segments._registered_physical_bases and edit._base_token instead of the duplicated readers the earlier review named, so no capability is forked; the only deduction is the private import surface.\nFINDING imas_codex/standard_names/export.py:39 non-blocking: export.py reaches into edit._base_token and segments._registered_physical_bases, the only production module importing private siblings while segments exposes grammar_tokens_by_segment publicly.\nFINDING tests/standard_names/test_identity_token_collision.py:24 non-blocking: the pass test asserts only the gate outcome, not that halo_current is a process token, so it would pass vacuously if the vocabulary changed and the exemption were removed.\nFINDING tests/standard_names/test_identity_token_collision.py:68 non-blocking: the committed test file lacks a trailing newline, so ruff check reports W292 and ruff format --check would reformat it.",
+  "reviewed_base_sha": "06ac2d0c20d2511637d15ba603d77cbf89c5aaa4",
+  "reviewed_head_sha": "2e98a3fe12886b2e5c31604933c889fcbc03f353",
+  "reviewed_run_id": "r-20261111T033929508961-sib-process-quantity-collision",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 15,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T06:21:45.898629+00:00",
+  "total": 108
+}
