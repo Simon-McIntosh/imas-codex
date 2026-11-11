@@ -1,0 +1,137 @@
+<h2 id="sib-isn-pin-0-11-1">imas-codex pinned to ISN 0.11.1 and the graph's grammar snapshot synced to it</h2>
+
+<p>Both <code>imas-standard-names</code> pins in <code>pyproject.toml</code> moved
+from <code>==0.11.0</code> to <code>==0.11.1</code> (line 18, the build-system
+requires list, and line 186, the catalog-preview extra). The editable sibling
+override in <code>[tool.uv.sources]</code> is unchanged, so the lock continues to
+resolve the package from <code>../imas-standard-names</code>. The graph's
+grammar snapshot was then moved to 0.11.1 through the repository's own
+grammar-sync path, <code>sync_isn_grammar_to_graph()</code> in
+<code>imas_codex/standard_names/grammar_sync.py</code> — the helper that
+<code>sn run</code>'s startup auto-sync, <code>sn clear</code>'s re-seed and the
+hatch build hook call. No Cypher was written by hand.</p>
+
+<h3 id="sib-isn-pin-0-11-1-lock">Lock</h3>
+
+<p><code>uv lock</code> re-resolves at the new pins and exits 0 with
+<strong>no change to <code>uv.lock</code></strong>. That is the correct result,
+not a missed refresh: an editable path source records neither the requirement
+specifier nor a resolved version, so the lock's only
+<code>imas-standard-names</code> entries are the three references already present
+— the root dependency list, the source record, and the package block whose
+<code>source = { editable = "../imas-standard-names" }</code> is untouched. The
+resolution was re-run from a scratch copy of the bumped <code>pyproject.toml</code>
+placed beside a symlink to the sibling checkout, because this worktree has no
+<code>../imas-standard-names</code> of its own; the resulting lock is byte-identical
+to the committed one.</p>
+
+<h3 id="sib-isn-pin-0-11-1-sync">Grammar sync, before and after</h3>
+
+<p>The sync takes its version label from the installed
+<code>imas_standard_names.__version__</code>. The shared project environment's
+editable install carries <code>0.11.1.dev1+gef1bc401e</code> in its dist metadata
+— a build made before the release tag existed — so a sync driven from that
+environment would have labelled the same content <code>0.11.1.dev1+gef1bc401e</code>
+rather than <code>0.11.1</code>. The sync was therefore driven with the released
+0.11.1 wheel built from tag <code>v0.11.1</code> (<code>85ed43e</code>) on
+<code>PYTHONPATH</code> first and the worktree second, and the run asserts
+<code>imas_standard_names.__version__ == "0.11.1"</code> before writing anything.
+Both module paths are printed by the run, so the reader can confirm the released
+artifact supplied the grammar and the worktree supplied the sync code.</p>
+
+<table>
+  <thead><tr><th>state</th><th>active version</th><th>content digest</th><th>GrammarToken</th><th>GrammarSegment</th><th>templates</th></tr></thead>
+  <tbody>
+    <tr><td>before</td><td>0.11.0</td><td><code>sha256:5eac6bca…</code></td><td>1031</td><td>22</td><td>7</td></tr>
+    <tr><td>after</td><td>0.11.1</td><td><code>sha256:5c1be483…</code></td><td>1038</td><td>22</td><td>7</td></tr>
+  </tbody>
+</table>
+
+<p>The 0.11.1 token count is non-zero and exceeds the previous active version's
+count (1038 against 1031, +7), which is the barrier this node had to clear.
+Segment and template counts are unchanged, as expected: 0.11.1 adds seven
+vocabulary rows to the same closed-vocabulary structure. The sync itself
+reports <code>created_version: true</code>, 22 segments, 853 spec tokens and
+1038 public-context token rows; the graph's <code>GrammarToken</code> count is the
+larger figure because it includes the public-context rows the sync merges beside
+the spec tokens.</p>
+
+<h3 id="sib-isn-pin-0-11-1-readback">Read-backs</h3>
+
+<table>
+  <thead><tr><th>token</th><th>before this node (any version)</th><th>after, as a token of 0.11.1</th><th>segment</th></tr></thead>
+  <tbody>
+    <tr><td><code>pellet_species</code></td><td>absent</td><td>present</td><td><code>subject</code></td></tr>
+    <tr><td><code>plateau_factor</code></td><td>absent</td><td>present</td><td><code>physical_base</code></td></tr>
+    <tr><td><code>current_profile_alignment</code></td><td>absent</td><td>present</td><td><code>physical_base</code></td></tr>
+    <tr><td><code>breakdown_candidate</code></td><td>absent</td><td>present</td><td><code>geometry</code>, <code>path</code>, <code>position</code></td></tr>
+    <tr><td><code>sourced</code></td><td>absent</td><td>present</td><td><code>qualifier</code></td></tr>
+  </tbody>
+</table>
+
+<p>Every one of the five returns zero rows across <em>all</em> synced versions
+before this node's sync, so each is a real before/after discriminator rather than
+a token that was already present. <code>sourced</code> is the sharpest of them:
+it was the previous node's <em>negative</em> control at 0.11.0 — deliberately
+absent there — and it is a 0.11.1 token, so the pair of records shows the release
+boundary exactly.</p>
+
+<h3 id="sib-isn-pin-0-11-1-controls">Controls</h3>
+
+<ul>
+  <li><strong>Positive control.</strong> The same read-back query that returns the
+  five target tokens returns <code>power_convertor</code> with two rows at 0.11.1
+  (segments <code>device</code> and <code>object</code>) and two at 0.11.0, so the
+  instrument is shown to see what is present before any absence is reported.</li>
+  <li><strong>Negative control.</strong> The made-up spelling
+  <code>halo_current_flow</code> returns no <code>GrammarToken</code> row at any
+  version after the sync, and the same query reports the five real tokens
+  present — so a reader cannot mistake a broken query for an absent token.</li>
+</ul>
+
+<h3 id="sib-isn-pin-0-11-1-tests">Tests</h3>
+
+<p><code>tests/standard_names</code> default tier, both arms from a
+<code>git archive</code> of their revision into node-local scratch, with the main
+checkout's <code>.venv</code>. Both archive trees are given the same five
+generated (gitignored) modules copied from the worktree, so neither arm carries
+the archive-only handicap that produced four spurious ids in the previous pin
+record.</p>
+
+<table>
+  <thead><tr><th>arm</th><th>revision</th><th>result</th><th>exit</th></tr></thead>
+  <tbody>
+    <tr><td>base</td><td><code>39746199e</code></td><td>13 failed, 8631 passed, 12 skipped in 138.6s</td><td>1</td></tr>
+    <tr><td>head</td><td><code>c7f64db35</code></td><td>13 failed, 8631 passed, 12 skipped in 148.7s</td><td>1</td></tr>
+  </tbody>
+</table>
+
+<p>The two arms fail the <strong>same thirteen ids</strong>: 13 in the base set,
+13 in the head set, an empty difference in both directions. No failure id is
+added by this change and none is removed.</p>
+
+<h4 id="sib-isn-pin-0-11-1-failures">What the thirteen ids are</h4>
+
+<p>The thirteen were characterised by re-running exactly those ids in the
+worktree at the head commit, which splits them into two groups.</p>
+
+<ul>
+  <li><strong>Five are an artefact of the re-check's trees.</strong> They pass in
+  the worktree at the head commit and fail in an archived tree, because they read
+  catalog data this checkout generates outside git:
+  <code>test_cascade_calibration.py</code>,
+  <code>test_catalog_layout_hierarchy.py::TestOrderingCycleDetection</code>, and
+  all three <code>test_manifest_generability.py</code> tests. The focused run
+  passes those five (8 failed, 5 passed).</li>
+  <li><strong>Eight reproduce in the worktree at the head commit</strong>, so they
+  are pre-existing in this environment and outside this node's scope: six in
+  <code>test_gap_rule_verdicts.py</code> (one DD-field-name, two ordinal-sample,
+  two settled-fold and one stored-gap-replay id), one in
+  <code>test_geometry_enumeration_collapse.py</code>, and one in
+  <code>test_compose_prompt_examples_round_trip.py</code>. They fail identically at the base revision, so they
+  are not this node's to fix.</li>
+</ul>
+
+<p><em>Totals, commands and log paths are recorded in the node manifest's
+<code>baseline_suite</code>, <code>after_suite</code> and
+<code>test_logs</code> keys.</em></p>
