@@ -10,6 +10,7 @@ import json
 import os
 import shlex
 import subprocess
+from datetime import datetime
 from html import escape
 from pathlib import Path
 
@@ -257,7 +258,9 @@ def readback():
         n
         for n in names
         if n["name"] not in prior_names
-        and (n["own_cost_rows"] > 0 or n["last_run_id"] == run["id"])
+        and "generate_name" in n["own_phases"]
+        and datetime.fromisoformat(str(n["created_at"]))
+        >= datetime.fromisoformat(str(run["started_at"]))
     ]
     outcomes = [
         {
@@ -307,6 +310,11 @@ def render():
     before = load("mapping-before")
     result = load("mapping-after")
     summary = result["summary"]
+    for name in result["own_names"]:
+        assert "generate_name" in name["own_phases"]
+        assert datetime.fromisoformat(name["created_at"]) >= datetime.fromisoformat(
+            result["run"]["started_at"]
+        )
 
     def table(headers, rows):
         return (
@@ -325,7 +333,7 @@ def render():
     outcome_rows = []
     for row in result["outcomes"]:
         names = "; ".join(
-            f"{n['name']} ({n['stage']}, score {n['score']}, own cost rows {n['own_cost_rows']})"
+            f"{n['name']} ({n['stage']}, score {n['score']}, own cost rows {n['own_cost_rows']}): {n['description']}"
             for n in row["bound_names"]
         )
         outcome_rows.append(
@@ -350,7 +358,8 @@ def render():
 <p>Mapping input: <code>{escape(str(MAPPING))}</code>, SHA-256 <code>{before["mapping_sha256"]}</code>. Its seven rows intersect the cohort at {len(before["admitted"])} source. Active graph grammar is 0.11.1 with {before["grammar_rows"]} token rows; mapped required token current_profile_alignment is present as a physical base, and the known-present power_convertor control returns device and object rows.</p>
 <p>The current_alignment/value source maps to current_profile_alignment, a current-valued measure of agreement among supplying current-density profiles. It replaces current_alignment_factor and the reviewed current_alignment decomposition; it is not an assumed dimensionless factor. A durable exact-source compose hint carries the approved spelling and unit A through the sanctioned hint writer. No acceptance or text was written directly.</p>
 {table(["DD source", "approved mapped spelling", "source status after", "bound name, stage and score, or refusal", "exact mapped binding"], outcome_rows)}
-<p>Scoped pipeline run <code>{summary["run_id"]}</code>, status {summary["run_status"]}, stop reason {summary["stop_reason"]}; job {load("pipeline-result")["slurm_job_id"]} on partition all; --skip-global-maintenance, -c 3.0 and -t 20. Spend selected only by LLMCost.for_run for this id: USD {summary["spend_usd"]:.6f} of USD 3. Own newly produced names: {summary["own_produced_names"]}, requiring a name absent before and provenance under this run id. Existing and peer-produced names are not counted as own production.</p>
+<p>Scoped pipeline run <code>{summary["run_id"]}</code>, status {summary["run_status"]}, stop reason {summary["stop_reason"]}; job {load("pipeline-result")["slurm_job_id"]} on partition all; --skip-global-maintenance, -c 3.0 and -t 20. Spend selected only by LLMCost.for_run for this id: USD {summary["spend_usd"]:.6f} of USD 3. The run drained its selected source, leaving USD {CAP - summary["spend_usd"]:.6f} unused. Own newly produced names: {summary["own_produced_names"]}, requiring a name absent from the cohort before, a generate_name cost receipt under this run id, and creation after the run started. Existing and peer-produced names are not counted as own production.</p>
+{table(["phase", "calls", "USD"], [[c["phase"], c["calls"], f"{c['usd'] or 0:.6f}"] for c in result["costs"]])}
 {table(["live cohort metric", "before", "after", "floor", "remaining shortfall"], [["sources with produced name, any stage", summary["produced_before"], summary["produced_after"], 100, max(0, 100 - summary["produced_after"])], ["sources with accepted or approved name", summary["accepted_before"], summary["accepted_after"], 100, max(0, 100 - summary["accepted_after"])]])}
 <p>Both arms read all 143 exact source ids live and count each source once, irrespective of how many names it binds. A bound name at any stage satisfies the first metric; accepted or approved satisfies the second. Changes across the cohort are not automatically attributed to this run.</p>
 <h3 id="sib-vocab-gap-requeue-isn-0-11-1-vocabulary-followups">Parked cohort sources outside the approved mapping</h3>
@@ -358,7 +367,7 @@ def render():
 {table(["DD source", "token needed and recorded refusal", "status after"], parked_rows)}
 <h3 id="sib-vocab-gap-requeue-isn-0-11-1-other-mapped-sources">Mapped sources outside this cohort</h3>
 {table(["DD source", "approved spelling", "disposition"], excluded_rows)}
-<p>Receipts, full cohort bindings, steering result, run properties, per-phase spend and attribution are in mapping-before.json, mapping-steering.json, pipeline-result.json and mapping-after.json under <code>{escape(str(RUN))}</code>. The job log is mapping-rerun.log, ending with EXIT=. No product source or tests were changed; the merged-state gate belongs to the coordinator's test node.</p>
+<p>Receipts, full cohort bindings, steering result, run properties, per-phase spend and attribution are in mapping-before.json, mapping-steering.json, pipeline-result.json and mapping-after.json under <code>{escape(str(RUN))}</code>. The completed job log is mapping-rerun-live.log, ending with EXIT=0. The earlier mapping-rerun.log is the failed helper-import attempt and contains no mutation or paid pipeline call. No product source or tests were changed; the merged-state gate belongs to the coordinator's test node. The cohort's produced-binding metric remains one short of 100; acceptance remains 39 short. Further cohort work belongs to the coordinator; this node's entire mapping intersection was processed.</p>
 """
     FRAGMENT.write_text(html)
     return 0
