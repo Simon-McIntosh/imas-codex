@@ -564,6 +564,7 @@ def draw_users(c: Canvas) -> None:
             role,
             size=BAR,
             color=USER_INK,
+            weight="bold",
             ha="left",
             inside=(left, y - height, x1, y),
         )
