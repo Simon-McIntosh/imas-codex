@@ -1,0 +1,409 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "fc99c61f0f311bf33b6ca594ba565398169827b9",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T215736217347-scc-momentum-tip/brief.md",
+    "sha256": "9efed96071a7abd7a85ecf4bb9d645124a6ddafc05d78c5547baaf2da2ad43f2"
+  },
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 11450545,
+      "input_tokens_cumulative": 11450545,
+      "output_tokens": 57433,
+      "output_tokens_cumulative": 57433,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 1236,
+    "files": 3,
+    "removed": 0
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "9cfbd74ce2b0bca45d64aa83ff2f41777459348e"
+  ],
+  "completed_at": "2026-11-11T22:43:31.705Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-11-11T22:07:02Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "passed",
+  "gate_check": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv UV_NO_SYNC=1 uv run --no-sync python docs/evidence/fragments/sn-catalog-consistency/scc-momentum-tip-run.py --run-dir /home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T215736217347-scc-momentum-tip/lineage-census --control",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T215736217347-scc-momentum-tip/lineage-census/control.log"
+  },
+  "impl_move": {
+    "at_complete": 0.012987012987012988,
+    "at_dispatch": 0.012987012987012988,
+    "plan": "sn-catalog-consistency",
+    "reason": "this node prepares the lead's ruling on §4; the section closes only when the ruling is applied",
+    "verdict": "waived"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-11-11T23:04:04.295886+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-11-11T22:04:04Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 17,
+    "binding_observed": "unknown",
+    "detail": "lane document carries no numeric 'mean_context'",
+    "generating": 0,
+    "headroom": 12,
+    "mean_context": "unknown",
+    "observed_at": "2026-11-11T22:04:38Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 17,
+      "aggregate_tokens_per_second": 53.717,
+      "detail": "lane document publishes no numeric 'mean_tokens_per_second' in its 'throughput' block",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": "2026-11-11T22:04:38Z",
+      "runs": 0.0,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-11T22:43:31.705Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T215736217347-scc-momentum-tip/manifest.md",
+  "member": "disposable-r-20261111T215736217347-scc-momentum-tip",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "scc-momentum-tip",
+  "node_definition": {
+    "admission_findings": [],
+    "after": [],
+    "anchor_paths": [],
+    "brief": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T215736217347-scc-momentum-tip/steering.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T215736217347-scc-momentum-tip/brief.md",
+    "brief_sha256": "9efed96071a7abd7a85ecf4bb9d645124a6ddafc05d78c5547baaf2da2ad43f2",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "elevated",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "detail": "the dispatching harness exposed no authoring-turn token usage",
+        "status": "unknown",
+        "tokens": null
+      },
+      "harness": null,
+      "runtime_session_id": null,
+      "session_id": "4f5c460d-ed3a-4460-943c-233208992958"
+    },
+    "done_when": "docs/evidence/fragments/sn-catalog-consistency/scc-momentum-tip.html records both names' DD sources, units, scores, review history, spend and lineage with a proposed survivor and its reason, and the lineage census re-run reports the live-tip and cycle counts and reports a two-tip lineage planted in a disposable graph",
+    "estimated_hours": 1.0,
+    "goal": "bring the two-tip momentum-diffusivity lineage to the lead with its evidence and a proposed survivor",
+    "id": "scc-momentum-tip",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-11-11T22:04:04Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 17,
+      "binding_observed": "unknown",
+      "detail": "lane document carries no numeric 'mean_context'",
+      "generating": 0,
+      "headroom": 12,
+      "mean_context": "unknown",
+      "observed_at": "2026-11-11T22:04:38Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 17,
+        "aggregate_tokens_per_second": 53.717,
+        "detail": "lane document publishes no numeric 'mean_tokens_per_second' in its 'throughput' block",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": "2026-11-11T22:04:38Z",
+        "runs": 0.0,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T215736217347-scc-momentum-tip/manifest.md",
+    "negative_control": "",
+    "over_fence_reason": "",
+    "peer_scopes": {
+      "sib-docs-drain-after-admission": [
+        "docs/evidence/fragments/sn-integrity-backlog/sib-docs-drain-after-admission-run.py",
+        "docs/evidence/fragments/sn-integrity-backlog/sib-docs-drain-after-admission.html",
+        "docs/figures/sn-integrity-backlog/sib-docs-drain-after-admission"
+      ],
+      "sib-drift-refresh-rename-lineage": [
+        "docs/evidence/fragments/sn-integrity-backlog/sib-drift-refresh-rename-lineage.html",
+        "docs/figures/sn-integrity-backlog/sib-drift-refresh-rename-lineage",
+        "imas_codex/standard_names/source_refresh.py",
+        "tests/standard_names/test_source_refresh_rename_lineage.py"
+      ]
+    },
+    "plan": "sn-catalog-consistency",
+    "regenerate_paths": [],
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§4",
+    "spec_level": "guided",
+    "time_budget": "1h",
+    "token_budget": null,
+    "waits_only_after": false,
+    "write_paths": [
+      "docs/evidence/fragments/sn-catalog-consistency/scc-momentum-tip.html",
+      "docs/evidence/fragments/sn-catalog-consistency/scc-momentum-tip.json",
+      "docs/evidence/fragments/sn-catalog-consistency/scc-momentum-tip-run.py",
+      "docs/figures/sn-catalog-consistency/scc-momentum-tip"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 2786319.0,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "scc-momentum-tip",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-11-11T22:05:15.054374+00:00",
+    "score": 0.8125,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "~typesafe/jev-latest",
+    "latency_ms": 5000.853,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {}
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.012987012987012988,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "9cfbd74ce2b0bca45d64aa83ff2f41777459348e",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "fc99c61f0f311bf33b6ca594ba565398169827b9",
+    "reviewed_head_sha": "9cfbd74ce2b0bca45d64aa83ff2f41777459348e",
+    "scores": {
+      "durability": 15,
+      "evidence": 16,
+      "fit": 18,
+      "goal_fidelity": 18,
+      "reuse": 18,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 104
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261111T215736217347-scc-momentum-tip",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§4",
+  "session": "4f5c460d-ed3a-4460-943c-233208992958",
+  "session_harness": "claude",
+  "session_id": "8b7cbc85-ae2f-4214-888a-822064efd66b",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 11450545,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 2130.982,
+    "generated_tokens": 57433,
+    "generation_seconds": 1376.497,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 74.5,
+    "machine_seconds": 754.485,
+    "peak_input_tokens": 171459,
+    "tokens_per_second": 41.72,
+    "wall_tokens_per_second": 26.95
+  },
+  "time_budget": "1h",
+  "tool_steps": 97.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 2189,
+  "watch_override": {
+    "arming_line": "reckon crew watch --project imas-codex",
+    "attach_line": "/home/ITER/mcintos/Code/reckon/.venv/bin/reckon crew follow --project imas-codex --session 4f5c460d-ed3a-4460-943c-233208992958",
+    "requested": true,
+    "session_attached": true,
+    "watcher_live": true
+  },
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-11T22:43:44Z",
+    "last_record_type": "result",
+    "launched_at": "2026-11-11T22:07:26Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [],
+    "run_id": "r-20261111T215736217347-scc-momentum-tip",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 6610,
+    "worker_pid": 704765
+  },
+  "worker_seconds": 2067,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
