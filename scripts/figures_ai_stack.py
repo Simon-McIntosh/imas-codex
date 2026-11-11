@@ -37,7 +37,7 @@ matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
 from matplotlib.colors import to_rgb
-from matplotlib.patches import FancyBboxPatch, Polygon, Rectangle
+from matplotlib.patches import FancyBboxPatch, Polygon
 
 ROOT = Path(__file__).resolve().parents[1]
 FIGURES = ROOT / "docs/figures/ai-stack"
@@ -56,7 +56,7 @@ NEUTRAL_EDGE = "#b4b1aa"
 BAND_FILL = "#f4f3f0"
 USER_INK = "#141414"  # the role names
 # the thin bar under each name, in a deep blue no layer of the stack uses
-USER_FILL = "#2b5c9e"
+USER_FILL = "#4a7bbd"
 
 TITLE, BODY, SMALL = 16, 14, 13  # pt, inside the stack
 BAR = 15  # pt, the user roles
@@ -255,7 +255,7 @@ LAYER_NAMES = {  # the users are named above their bars, in draw_users
 # The widest reach sits lowest, so the bars taper upward as the pyramid does.
 USERS = [
     ("office productivity", "lucy"),
-    ("commissioning engineer · planning · configuration control", "dash"),
+    ("commissioning engineer · planning · configuration", "dash"),
     ("prototyping with domain experts · science · code developer", "sandbox"),
     ("assembly and commissioning · ITER infrastructure", "clive"),
 ]
@@ -563,10 +563,11 @@ def draw_users(c: Canvas) -> None:
         for key in order[: order.index(reach) + 1]:
             cx0, cx1 = INTERFACES[key]
             c.ax.add_patch(
-                Rectangle(
+                FancyBboxPatch(  # fully rounded ends: the radius is half the height
                     (cx0, bar_top - height),
                     cx1 - cx0,
                     height,
+                    boxstyle=f"round,pad=0,rounding_size={height / 2}",
                     facecolor=USER_FILL,
                     edgecolor="none",
                     zorder=3,
