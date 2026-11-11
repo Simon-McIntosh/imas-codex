@@ -11,6 +11,13 @@
   "call_sites": [],
   "completed_at": "2026-11-10T23:29:00Z",
   "dispatched_at": "2026-11-10T23:02:27Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "sib-consistency-census",
+      "recorded_at": "2026-11-11T00:09:08.899278+00:00"
+    }
+  },
   "findings": [
     {
       "description": "The concept regex captures pronoun-led 'It is defined by' text as the concept lemma 'it'; the committed JSON records 36 divergent definitions for it and the HTML includes it among the largest divergent concepts. The planted control never exercises this false-positive case, so the live census presents a pronoun as a shared catalog concept and can misdirect the consistency pass.",
