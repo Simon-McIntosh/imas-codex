@@ -1,0 +1,64 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite": null,
+  "baseline_suite": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-11T22:51:04.363Z",
+  "dispatched_at": "2026-11-11T22:34:56Z",
+  "evidence_notes": [
+    "The source manifest declares empty baseline_suite and after_suite: this is an evidence-only node whose gate is the reader invocation after-1310838.log (EXIT=1), not a pytest arm, so added_failure_count is 0 with no ids to attribute.",
+    "All quoted counts re-derived from before.json and after.json rather than from the fragment's prose; billed phase rows, 1,913 ledger events, 105 accepted-under-run and 21 newly accepted reproduced exactly."
+  ],
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-docs-drain-after-admission-run.py",
+      "line": 183,
+      "severity": "non-blocking",
+      "text": "the gate only bounds billed spend at the cap and asserts cost_is_exact and per-phase priced==calls, so a ledger whose summed llm_cost diverges from the receipt's cost_spent/cost_total would still pass while html:46 claims that reconciliation; verify the two figures against after.json."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-docs-drain-after-admission.html",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "the fragment is tables and prose only with no figure, and the declared docs/figures/sn-integrity-backlog/sib-docs-drain-after-admission path is empty, so the 340-document decline against 105 run acceptances cannot be read at a glance."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "six commits d71e890..7aef43b (9de38d5, 796d979, 22a4efe, 08f21a9, fc245e0, 7aef43b), two files and +241 lines: baseline census, timestamp-type receipt fix, reacceptance split, midpoint receipt and the failed outcome, with no product, test or plan change.",
+    "done_when": "prompt.txt:102 requires one sbatch sn run --flush on partition all at USD 20 from an origin/main checkout with the admission fix reporting live before/after docs stages, census and held counts, stop_reason, run-id acceptances and billed spend; drain.sbatch:2,40 shows the partition and command, the fragment reports every listed quantity, and the gate reds on a non-terminal stop reason (sib-docs-drain-after-admission-run.py:175) at EXIT=1 in after-1310838.log, honestly recording an unmet measure.",
+    "goal": "the source prompt.txt:38 goal is to drain the documentation backlog now that every stranded identity is claimable, and the landed fragment records one 5,653 s capped flush that moved 105 names to accepted documentation but stopped stalled, so the drain ran and the backlog is not drained (sib-docs-drain-after-admission.html:2).",
+    "manifest": "read; it records status failed, job ids 1310773 and 1310838 recorded before the wait, 11.141891 of 20 billed with 0 stranded and 136->148 held, the EXIT=1 refusal, and six rubric lines.",
+    "write_paths": "the source declared two evidence files plus docs/figures/sn-integrity-backlog/sib-docs-drain-after-admission; the diff over the reviewed range touches only the two evidence files."
+  },
+  "justifications": {
+    "durability": "the only failing-on-regression guard is the live reader at sib-docs-drain-after-admission-run.py:26-28,42,172-183 and no test file pins it, so a drift in the fragment's numbers reddens nothing.",
+    "evidence": "every reported figure reconciles with the receipts, after.json census 5,497/0/148/965 and stages 2,028/46/3/926/1 plus 105 exact-run acceptances (21 newly) and 11.141891 USD over 1,913 priced ledger events, and after-1310838.log:1-6 names the revision, imported module and EXIT=1.",
+    "fit": "sib-docs-drain-after-admission-run.py:12 imports the shared pools instrument and the fragment follows the sib-* evidence-fragment convention already used by docs/evidence/fragments/sn-integrity-backlog/sib-catalog-import-source-census-run.py.",
+    "goal_fidelity": "docs/evidence/fragments/sn-integrity-backlog/sib-docs-drain-after-admission.html:2 records stop_reason stalled with accepted documentation down 340 against 138 more accepted names, so the drain the goal names did not complete.",
+    "reuse": "read_state at sib-docs-drain-after-admission-run.py:16 extends pools.identity_state_groups and classify_identity_state_groups instead of re-deriving admission, and no owner of exact-run billed spend by phase exists (imas_codex/cli/sn.py:4340 aggregates StandardNameReview only).",
+    "scope_discipline": "git diff --stat d71e890 7aef43b lists exactly the two declared evidence files, with no product, test, plan or figure path touched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source prompt.txt:38 goal is to drain the documentation backlog now that every stranded identity is claimable, and the landed fragment records one 5,653 s capped flush that moved 105 names to accepted documentation but stopped stalled, so the drain ran and the backlog is not drained (docs/evidence/fragments/sn-integrity-backlog/sib-docs-drain-after-admission.html:2).\nVERDICT done_when: the source prompt.txt:102 done-when requires one sbatch sn run --flush on partition all at USD 20 from an origin/main checkout carrying the admission fix, reporting live before/after docs stages, the stranded census and held count, stop_reason, run-id acceptances and billed spend; drain.sbatch:2,40 shows the partition and the flush command, the fragment reports every listed quantity, and the gate reds when the stop reason is not terminal (sib-docs-drain-after-admission-run.py:175) at EXIT=1 in after-1310838.log, which is the honest record of an unmet measure.\nVERDICT write_paths: the source declared two evidence files plus docs/figures/sn-integrity-backlog/sib-docs-drain-after-admission; the diff over the reviewed range touches only the two evidence files and no other path.\nVERDICT manifest: read; it records status failed, job ids 1310773 and 1310838 recorded before the wait, the 11.141891 of 20 billed spend with 0 stranded and 136->148 held, the EXIT=1 receipt refusal, and its six rubric lines.\nVERDICT diff: six commits d71e890..7aef43b, 9de38d5, 796d979, 22a4efe, 08f21a9, fc245e0, 7aef43b, two files and +241 lines: baseline census, timestamp-type receipt fix, reacceptance split, midpoint receipt and the final failed outcome, with no product, test or plan change.\nCALL_SITES: none\nSCORE goal_fidelity: 8\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-integrity-backlog/sib-docs-drain-after-admission.html:2 records stop_reason stalled with accepted documentation down 340 against 138 more accepted names, so the drain the goal names did not complete.\nSCORE evidence: 18\nJUSTIFICATION evidence: every reported figure reconciles with the receipts, after.json census 5,497/0/148/965 and stages 2,028/46/3/926/1 plus 105 exact-run acceptances (21 newly accepted) and 11.141891 USD over 1,913 priced ledger events, and after-1310838.log:1-6 names the revision, imported module and EXIT=1.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat d71e890 7aef43b lists exactly the two declared evidence files, with no product, test, plan or figure path touched.\nSCORE durability: 9\nJUSTIFICATION durability: the only failing-on-regression guard is the live reader at sib-docs-drain-after-admission-run.py:26-28,42,172-183 and no test file pins it, so a drift in the fragment's numbers reddens nothing.\nSCORE fit: 17\nJUSTIFICATION fit: sib-docs-drain-after-admission-run.py:12 imports the shared pools instrument and the fragment follows the sib-* evidence-fragment convention already used by docs/evidence/fragments/sn-integrity-backlog/sib-catalog-import-source-census-run.py.\nSCORE reuse: 19\nJUSTIFICATION reuse: read_state at sib-docs-drain-after-admission-run.py:16 extends pools.identity_state_groups and classify_identity_state_groups instead of re-deriving admission, and no owner of exact-run billed spend by phase exists (imas_codex/cli/sn.py:4340 aggregates StandardNameReview only).\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-docs-drain-after-admission-run.py:183 non-blocking: the gate only bounds billed spend at the cap and asserts cost_is_exact and per-phase priced==calls, so a ledger whose summed llm_cost diverges from the receipt's cost_spent/cost_total would still pass while html:46 claims that reconciliation, and the claim survives only because I checked the two figures by hand against after.json.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-docs-drain-after-admission.html:1 non-blocking: the fragment is tables and prose only, with no figure, and the declared docs/figures/sn-integrity-backlog/sib-docs-drain-after-admission path is empty, so the 340-document decline against 105 run acceptances cannot be read at a glance as the graphics mandate asks.\n",
+  "review_run_id": "r-20261111T223229991169-review-of-sib-docs-drain-after-admission-7aef43b21297",
+  "reviewed_base_sha": "d71e890e7c6ea363f033b5b9ecb59ee2f9bc5851",
+  "reviewed_head_sha": "7aef43b21297a2ce35e44b0c1e53afc362921130",
+  "reviewed_run_id": "r-20261111T171523372171-sib-docs-drain-after-admission",
+  "scores": {
+    "durability": 9,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 8,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T22:56:59.988725+00:00",
+  "total": 91
+}
