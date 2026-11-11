@@ -1,40 +1,82 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
+<meta charset="utf-8" />
 <meta name="reckon-type" content="evidence-fragment" />
 <meta name="plan-slug" content="sn-integrity-backlog" />
 <meta name="node-id" content="sib-catalog-rc-snapshot" />
-<title>Every export gate passes for the whole catalog, and the cut is refused by the read-only catalog checkout</title>
+<title>Whole-catalog release candidate v0.4.0rc8 is published to the fork, after three refusals and a pin repair</title>
 </head>
 <body>
 <main>
-<h1 id="sib-catalog-rc-snapshot-title">Every export gate passes for the whole catalog, and the cut is refused by the read-only catalog checkout</h1>
+<h1 id="sib-catalog-rc-snapshot-title">Whole-catalog release candidate v0.4.0rc8 is published to the fork, after three refusals and a pin repair</h1>
 
 <p id="sib-catalog-rc-snapshot-summary">
-With main's collision-gate fix merged into the release checkout, the whole-catalog
-dry run passes all eight export gates and measures a healthy ledger: 1975 names
-exported of 2865 candidates, 890 accounted exclusions, zero accounting residue, and
-<code>identity_token_collision</code> at zero issues with <code>halo_current</code>
-present in the export. The next candidate is <code>v0.4.0rc8</code> with no build
-label, as the lead ruled. The release then stops one step later, before publishing,
-with exit 3: the catalog checkout at
-<code>/home/ITER/mcintos/Code/imas-standard-names-catalog</code> is read-only inside
-this node's sandbox, so the release cannot take its publish lock
-(<code>[Errno 30] Read-only file system: …/.sn-publish.lock</code>) and could not
-write a branch, a commit or a tag even if it could. A second finding accompanies it:
-the sibling <code>imas-standard-names</code> checkout is no longer byte-identical to
-the pinned <code>v0.11.0</code> — it now sits at <code>v0.11.0-23-g85ed43e</code> with
-21 added lines across seven grammar files — and the export records that grammar
-version in the catalog it stages.
+The whole catalog is released as <code>v0.4.0rc8</code> on the lead's fork
+(<code>Simon-McIntosh/imas-standard-names-catalog</code>): tag object
+<code>58a96a9a96a978fe8e6e948470f26577907a2bc8</code>, catalog commit
+<code>4a48c6c57d08bc2d77e6e47e456ca10f73996eb0</code>, <strong>1975 names</strong>
+exported and 30 files copied. Nothing was pushed to <code>upstream</code>, and the
+non-batch path opens no review pull request, which is expected.
+</p>
+<p>
+Getting there took three refusals and one pin repair, all recorded below in the order
+they happened: the WEST batch failed <code>manifest_generability</code> on
+documentation-pending sources; the first whole-catalog attempt failed
+<code>identity_token_collision</code> on <code>halo_current</code>; the second passed
+every export gate and then could not publish because this worker's sandbox holds the
+catalog checkout read-only. The final cut was run by the coordinator from the main
+checkout, where the catalog is writable, after <code>imas-codex</code>'s grammar pin
+was raised from <code>0.11.0</code> and the export was re-run against
+<code>v0.11.1</code>. This node verified the resulting refs on the remote rather than
+taking them on report.
 </p>
 
-<h2 id="sib-catalog-rc-snapshot-gates">Gates run, in recipe order</h2>
+<h2 id="sib-catalog-rc-snapshot-outcome">The release, verified on the remote</h2>
+<p>
+<code>tag-verified.log</code> reads the catalog's remotes directly with
+<code>git ls-remote</code> over the port-443 route:
+</p>
+<pre><code>58a96a9a96a978fe8e6e948470f26577907a2bc8    refs/tags/v0.4.0rc8
+4a48c6c57d08bc2d77e6e47e456ca10f73996eb0    refs/heads/main        (origin)
+a06e52052d4776b25e94fdfaa22c2bc6651a98eb    refs/heads/main        (upstream)</code></pre>
+<p>
+The tag exists at the object the coordinator reported, the fork's <code>main</code>
+carries the catalog commit the release wrote, and <code>upstream</code> remains at
+<code>a06e5205</code> — unchanged through every attempt on this node. The tag is an
+annotated tag object rather than a lightweight ref, so the reported identifier is the
+tag object and the commit is the one <code>main</code> points at.
+</p>
+
+<h2 id="sib-catalog-rc-snapshot-unblocked">How the two blockers were cleared</h2>
+<p>
+Both were decisions the coordinator owned, and both are now measurable rather than
+asserted (<code>pin-resolution.log</code>):
+</p>
+<ol>
+<li><strong>The grammar pin.</strong> <code>pyproject.toml</code> in the imas-codex
+main checkout (<code>8549cda47</code>) now pins
+<code>imas-standard-names==0.11.1</code>. The package checkout is exactly
+<code>v0.11.1</code> (<code>git describe --tags</code> returns the bare tag,
+<code>db71094</code>), the package diff against that tag is empty, and the installed
+distribution reports <code>0.11.1</code>. So the export's grammar is the pin's
+grammar, with no byte-identity argument required — the condition the previous attempt
+could not meet when the checkout had moved 23 commits past <code>v0.11.0</code>.</li>
+<li><strong>The read-only catalog checkout.</strong> This node's sandbox cannot write
+<code>/home/ITER/mcintos/Code/imas-standard-names-catalog</code> — it is fenced with
+<code>sandbox: worktree-full</code> and three imas-codex write paths — so the cut was
+run by the coordinator from the main checkout instead. That is the correct split: the
+authority to write the catalog repository is the orchestrator's, not a worker's, and
+the node's job is to say precisely what the cut needed and to verify what it
+produced.</li>
+</ol>
+
+<h2 id="sib-catalog-rc-snapshot-gates">This node's final attempt, in recipe order</h2>
 <p>
 Logs are under the run directory
 <code>r-20261110T200159838141-sib-catalog-rc-snapshot/rc-cut</code>. Every command ran
-from the worktree at <code>9fe021b83</code>, the merge of <code>origin/main</code>
-(<code>5cf9902a3</code>) into the release branch, with
+from the worktree at <code>9fe021b83</code> (the merge of <code>origin/main</code>
+<code>5cf9902a3</code> into the release branch), with
 <code>UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv</code>,
 <code>PYTHONPATH</code> set to the worktree and the port-443 SSH route.
 </p>
@@ -42,24 +84,22 @@ from the worktree at <code>9fe021b83</code>, the merge of <code>origin/main</cod
 <thead><tr><th>Recipe step</th><th>Result</th><th>Evidence</th></tr></thead>
 <tbody>
 <tr><td>1 — preflight help citations</td><td>pass</td><td><code>help-run.log</code>, <code>help-release.log</code>, <code>help-approve.log</code>, <code>help-resolve.log</code>: all four <code>EXIT=0</code></td></tr>
-<tr><td>2 — release state</td><td>pass</td><td><code>status.log</code>: Path <code>/home/ITER/mcintos/Code/imas-standard-names-catalog</code>, State <code>rc</code>, Latest tag <code>v0.4.0rc7+west-task-2e</code>, <code>Batch RC +west-task-2e</code>, both remotes, and the RC continuation offered with no bump flag</td></tr>
-<tr><td>3 — pin and kind census</td><td>census pass; <strong>pin equivalence no longer holds</strong></td><td><code>pin-census.log</code>: <code>{'isn': '0.11.1.dev1+gef1bc401e', 'live': 3149, 'with_kind': 3149, 'disagreements': 0}</code> with the four derivation controls intact. <code>pin-equivalence.log</code>: the checkout is <code>v0.11.0-23-g85ed43e</code> and the package diff against the pinned tag is 7 files, 21 insertions — see the pin section below</td></tr>
-<tr><td>4 — dry run</td><td>gates <strong>pass</strong>; run exits 3 at the publish lock</td><td><code>dryrun.log</code>: <code>EXIT=3</code> with <code>Release error: [Errno 30] Read-only file system: '/home/ITER/mcintos/Code/imas-standard-names-catalog/.sn-publish.lock'</code>; <code>gate-verdict.log</code>: <code>all_gates_passed: True</code> across eight gates</td></tr>
-<tr><td>5 — cut</td><td>not attempted</td><td>the dry run cannot take the same lock the cut needs, so the cut is refused before it starts; <code>refs.log</code> records that no candidate ref exists on either remote</td></tr>
-<tr><td>6 — tag gate, PR checks, preview</td><td>not reached</td><td>no tag was pushed and the non-batch path opens no pull request</td></tr>
+<tr><td>2 — release state</td><td>pass</td><td><code>status.log</code>: Path <code>/home/ITER/mcintos/Code/imas-standard-names-catalog</code>, State <code>rc</code>, Latest tag <code>v0.4.0rc7+west-task-2e</code>, <code>Batch RC +west-task-2e</code>, both remotes, RC continuation offered with no bump flag</td></tr>
+<tr><td>3 — pin and kind census</td><td>census pass; pin equivalence held only after the later pin raise</td><td><code>pin-census.log</code>: <code>{'isn': '0.11.1.dev1+gef1bc401e', 'live': 3149, 'with_kind': 3149, 'disagreements': 0}</code> with the four derivation controls. <code>pin-equivalence.log</code>: at that moment the checkout was <code>v0.11.0-23-g85ed43e</code> — 7 files, 21 insertions against the pinned tag — see the pin section</td></tr>
+<tr><td>4 — dry run</td><td>gates <strong>pass</strong>; run exits 3 at the publish lock</td><td><code>dryrun.log</code>: <code>EXIT=3</code>, <code>Release error: [Errno 30] Read-only file system: '/home/ITER/mcintos/Code/imas-standard-names-catalog/.sn-publish.lock'</code>; <code>gate-verdict.log</code>: <code>all_gates_passed: True</code> across eight gates</td></tr>
+<tr><td>5 — cut</td><td>run by the coordinator from the main checkout</td><td><code>tag-verified.log</code>: tag <code>v0.4.0rc8</code> at <code>58a96a9a</code>, origin <code>main</code> at <code>4a48c6c5</code>, upstream unchanged</td></tr>
+<tr><td>6 — tag gate, PR checks, preview</td><td>no PR by design</td><td>the non-batch release path accepts no review body and opens no pull request; its only flags are refused with "require --batch"</td></tr>
 </tbody>
 </table>
 
-<h2 id="sib-catalog-rc-snapshot-fixed-gate">The gate that refused the previous attempt now passes</h2>
+<h2 id="sib-catalog-rc-snapshot-fixed-gate">The gate that refused the first attempt now passes</h2>
 <p>
-The earlier whole-catalog attempt stopped on
-<code>identity_token_collision</code>: the published identity
-<code>halo_current</code> was also a grammar token in the non-quantity segment
-<code>process</code>. The gate's repair is on main as
+The first whole-catalog attempt stopped on <code>identity_token_collision</code>: the
+published identity <code>halo_current</code> was also a grammar token in the
+non-quantity segment <code>process</code>. The gate's repair is on main as
 <code>2e98a3fe1</code> (refactor of the collision gate onto the shared physical-base
-and parse helpers), landed as <code>5cf9902a3</code>. Merging main into the release
-checkout (<code>9fe021b83</code>, 157 commits) gives the dry run that code, and the
-same gate now reports zero issues:
+and parse helpers), landed as <code>5cf9902a3</code>. With that merged, the same gate
+reports zero issues on the same input:
 </p>
 <pre><code>gate identity_token_collision     passed=True  skipped=False issues=0</code></pre>
 <p>
@@ -79,7 +119,8 @@ candidates it excludes rather than failures. The ledger:
 "accounting_residue": 0     "pruned_links": 825  "validation_failures": 3
 "parse_failures": 0         "gate_failures": 0</code></pre>
 <p>
-The 890 accounted exclusions, by reason:
+The 1975 exported is the count the released candidate carries. The 890 accounted
+exclusions, by reason:
 </p>
 <table id="sib-catalog-rc-snapshot-exclusion-table">
 <thead><tr><th>Exclusion reason</th><th>Candidates</th></tr></thead>
@@ -100,25 +141,25 @@ The 890 accounted exclusions, by reason:
 </tbody>
 </table>
 <p>
-The staged catalog the dry run wrote carries
-<code>candidate_count: 2865</code>, <code>published_count: 1975</code>,
-<code>export_scope: full</code>, <code>cocos_convention: 17</code>,
-<code>source_commit_sha: 9fe021b83</code> and
-<code>generated_at: 2026-11-11T07:25:57+01:00</code>. That replaces the stale WEST
+The catalog the dry run staged carries <code>candidate_count: 2865</code>,
+<code>published_count: 1975</code>, <code>export_scope: full</code>,
+<code>cocos_convention: 17</code>, <code>source_commit_sha: 9fe021b83</code> and
+<code>generated_at: 2026-11-11T07:25:57+01:00</code>. That replaced the stale WEST
 batch export (<code>review_batch: 231</code>, <code>published_count: 104</code>) this
-node recorded earlier as a <code>--skip-export</code> hazard: the hazard no longer
-exists in staging, though <code>--skip-export</code> stays off this node's route for
-the reason that created it.
+node had recorded as a <code>--skip-export</code> hazard. The released candidate was
+produced by the coordinator's later run against the raised pin, so its artifact
+records that run's source commit; the ledger above is what the same export measured
+at the merged head.
 </p>
 
-<h2 id="sib-catalog-rc-snapshot-blocker">The cut is refused by the read-only catalog checkout</h2>
+<h2 id="sib-catalog-rc-snapshot-blocker">Why this node could not publish (kept as the record)</h2>
 <p>
-The run reaches publishing and stops:
+The release reached the publish step and stopped:
 </p>
 <pre><code>Release error: [Errno 30] Read-only file system:
 '/home/ITER/mcintos/Code/imas-standard-names-catalog/.sn-publish.lock'</code></pre>
 <p>
-A direct probe confirms the checkout is unwritable rather than the file being
+A direct probe confirms the checkout is unwritable rather than the file merely being
 present: <code>isnc-write-probe.log</code> runs
 <code>touch /home/ITER/mcintos/Code/imas-standard-names-catalog/.sn-publish.lock.probe</code>
 and gets <code>Read-only file system</code>, exit 1. The cause is this node's
@@ -136,19 +177,19 @@ imas-codex paths —
 publish lock (<code>imas_codex/standard_names/publish.py:375</code>,
 <code>lock_path = isnc / ".sn-publish.lock"</code>, with no path override) and again
 for the review branch, its commit and the release tag. Even <code>--dry-run</code>
-takes the lock, so the block is not a dry-run artefact. This is an authority
-boundary, not a defect in the release tool: the tool reports the filesystem truth,
-and no flag would make a read-only checkout writable.
+takes the lock, so this was not a dry-run artefact. The refusal was a statement about
+authority, not about the release tool, and it is the reason the final cut ran from the
+main checkout.
 </p>
 
-<h2 id="sib-catalog-rc-snapshot-pin">The grammar pin has moved</h2>
+<h2 id="sib-catalog-rc-snapshot-pin">The grammar pin at the time of this attempt</h2>
 <p>
-Step 3's census still passes — 3149 live names, all with a derived kind, zero
+Step 3's census passed — 3149 live names, all with a derived kind, zero
 disagreements, controls reproducing — but the pin-equivalence argument this node
-recorded on the previous attempt no longer holds. The sibling checkout
-<code>.venv</code> imports from is now <code>v0.11.0-23-g85ed43e</code>, 23 commits
-past the pinned tag <code>v0.11.0</code> (<code>9c9443370d</code>), and the package
-diff is real content rather than documentation:
+recorded on the first attempt no longer held. The sibling checkout the environment
+imported from had moved to <code>v0.11.0-23-g85ed43e</code>, 23 commits past the then
+pinned tag <code>v0.11.0</code> (<code>9c9443370d</code>), and the diff was content
+rather than documentation:
 </p>
 <pre><code> imas_standard_names/grammar/model_types.py                       | 3 +++
  imas_standard_names/grammar/vocabularies/locus_registry.yml      | 4 ++++
@@ -159,74 +200,41 @@ diff is real content rather than documentation:
  .../grammar/vocabularies/subjects.yml                            | 1 +
  7 files changed, 21 insertions(+)</code></pre>
 <p>
-Those are the five rework physical bases a peer landed through the review pipeline
+Those were the five rework physical bases a peer landed through the review pipeline
 (<code>71d7d0e</code> "merge: the five rework tokens the lead accepted" and its
-promotions), and they are the vocabulary the export builds names with. The export
-records it honestly — the staged catalog says
-<code>grammar_version: 0.11.0-23-g85ed43e</code> and
-<code>isn_model_version: 0.11.0-23-g85ed43e</code> — but <code>pyproject.toml</code>
-still pins <code>imas-standard-names==0.11.0</code>, and the installed distribution
-metadata is stale at <code>0.11.1.dev1+gef1bc401e</code> while the imported code is
-the 23-commit tree (<code>imas_standard_names.__file__</code> resolves into that
-checkout). A reader who trusted the version string would conclude the export used
-the pinned grammar; it did not.
-</p>
-<p>
-This node did not move that checkout and will not move it back: the new commits are a
-peer's reviewed, promoted work, and reverting them is neither this node's scope nor
-something the release should do silently. The decision belongs to whoever owns the
-cut: either the catalog is released against the advanced grammar, accepting that the
-pin lags, or <code>imas-codex</code>'s pin is raised to the release that carries those
-bases. Both are decisions, not measurements.
+promotions) — the vocabulary the export builds names with. The export recorded it
+honestly (<code>grammar_version: 0.11.0-23-g85ed43e</code> in the staged catalog)
+while <code>pyproject.toml</code> still pinned <code>0.11.0</code> and the installed
+metadata was stale at <code>0.11.1.dev1+gef1bc401e</code>. The resolution was to raise
+the pin to <code>0.11.1</code>, which the section above verifies: pin, checkout and
+installed version now agree.
 </p>
 
-<h2 id="sib-catalog-rc-snapshot-version">The candidate</h2>
+<h2 id="sib-catalog-rc-snapshot-history">The two earlier refusals, kept as history</h2>
 <p>
-<code>compute_next_version</code> on the catalog checkout with no bump returns
-<code>('v0.4.0rc8', '0.4.0rc8')</code> — the whole-catalog candidate the lead ruled,
-continuing the <code>v0.4.0rc7+west-task-2e</code> series and inheriting no batch
-label. <code>next-version.log</code> records the call.
+<strong>The WEST batch</strong> (<code>west_production_dd_paths</code>,
+<code>v0.4.0rc8+west-task-2e</code>) passed preflight and dry run, then
+<code>manifest_generability</code> refused it: of 342 manifest sources, 104 were
+carried and 238 were not, none waived, because 237 sources reached 127 identities
+whose documentation was pending or drafted and one source was a recorded refusal
+(<code>../cut-gate-verdict.log</code>). The lead's ruling made the whole catalog the
+right target for this candidate, but the finding stands for any future batch cut: that
+work needs a documentation drain over 127 identities or lead-authored waivers.
 </p>
-
-<h2 id="sib-catalog-rc-snapshot-next">What unblocks the cut</h2>
-<ol>
-<li>Give the release write access to the catalog checkout. The node needs
-<code>/home/ITER/mcintos/Code/imas-standard-names-catalog</code> among its write
-roots (for the lock, the review branch, the commit and the tag), or the cut must be
-dispatched outside this sandbox with a recorded reason. Nothing else in the run
-changes: the dry run's gates already pass at <code>9fe021b83</code>.</li>
-<li>Rule on the grammar pin. The export used
-<code>v0.11.0-23-g85ed43e</code> while <code>pyproject.toml</code> pins
-<code>0.11.0</code>. Releasing now publishes a catalog whose
-<code>grammar_version</code> is loudly recorded but whose pin disagrees with it.
-Raising the pin first makes the two agree; releasing as-is accepts the lag.</li>
-<li>Then run the cut (<code>--target auto</code>, no batch, no
-<code>--skip-export</code>, no <code>--skip-gate</code>), recipe step 6's tag gate on
-the pushed tag, and report the tag and branch pushed. The non-batch path opens no
-fork review pull request, which is expected.</li>
-</ol>
-
-<h2 id="sib-catalog-rc-snapshot-history">Earlier refusals, kept as history</h2>
 <p>
-Two earlier attempts on this node are recorded in the previous revision of this
-fragment and in the run directory. The WEST batch
-(<code>west_production_dd_paths</code>, <code>v0.4.0rc8+west-task-2e</code>) passed
-preflight and dry run, then <code>manifest_generability</code> refused it: of 342
-manifest sources, 104 were carried and 238 were not, none waived, because 237
-sources reached 127 identities whose documentation was pending or drafted and one
-source was a recorded refusal (<code>../cut-gate-verdict.log</code>). The first
-whole-catalog attempt then stopped on <code>identity_token_collision</code> for
-<code>halo_current</code> (<code>../whole-catalog/gate-verdict.log</code>), which main
-has since repaired. Both findings stand on their own record; neither is what stops
-this attempt.
+<strong>The first whole-catalog attempt</strong> passed preflight, the pin and kind
+census and the dry run's earlier gates, then stopped on
+<code>identity_token_collision</code> for <code>halo_current</code>, one issue that
+stopped emission entirely (<code>exported: 0</code> of 2865)
+(<code>../whole-catalog/gate-verdict.log</code>). The identity was an accepted derived
+parent — <code>docs_stage: accepted</code>, <code>validation_status: valid</code>, two
+children — so that block was vocabulary rather than documentation, and the repair
+above admits it.
 </p>
-
-<h2 id="sib-catalog-rc-snapshot-refs">What was not created</h2>
 <p>
-<code>refs.log</code> reads both remotes directly: the catalog's <code>origin</code>
-holds no <code>review/v0.4.0rc8*</code> branch and no <code>v0.4.0rc8*</code> tag, and
-<code>upstream</code> <code>main</code> is unchanged. Nothing was pushed anywhere, no
-tag exists, and no fork review pull request was opened.
+Both refusals fired in the tool's own gates rather than being inferred, and neither was
+crossed with <code>--skip-export</code> or <code>--skip-gate</code>, which stayed off
+this node's route throughout.
 </p>
 </main>
 </body>
