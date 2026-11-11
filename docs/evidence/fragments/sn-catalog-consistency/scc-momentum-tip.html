@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="docs-project" content="imas-codex">
+<title>One live tip for the momentum-diffusivity-lineage evidence</title></head>
+<body><main>
+<h1 id="scc-momentum-tip-title">One live tip for the momentum-diffusivity lineage</h1>
+<p>This node gathers the evidence the lead needs to rule which of two live tips of one
+lineage survives: DD sources, units, name and documentation scores, review history and
+spend, the lineage around both names, and a proposed survivor. It makes no graph write.
+It also re-runs the committed lineage census and shows that census reporting a two-tip
+lineage planted in a disposable graph.</p>
+<h2 id="scc-momentum-tip-records">Both names as the live graph holds them</h2>
+<p>Read 2026-11-11T22:19:21Z at revision <code>fc99c61f0</code>. Both are accepted, both
+carry unit m^2.s^-1, both sit in domain transport. Neither carries documentation text and
+neither has ever had a documentation review, so both documentation scores are absent: the
+documentation axis compares two empty fields, and any documentation the survivor needs is
+the documentation section's work.</p>
+<table id="scc-momentum-tip-records-table">
+<thead><tr><th>name</th><th>stage</th><th>name score</th><th>docs score</th><th>scored reviews</th><th>name-review spend</th></tr></thead>
+<tbody>
+<tr><td><code id="scc-momentum-tip-a">toroidal_plasma_momentum_diffusivity</code></td><td>accepted</td><td>0.9338</td><td>none</td><td>3</td><td>USD 0.0902</td></tr>
+<tr><td><code id="scc-momentum-tip-b">toroidal_momentum_diffusion_coefficient</code></td><td>accepted</td><td>0.9082</td><td>none</td><td>3</td><td>USD 0.0688</td></tr>
+</tbody>
+</table>
+<p>The stored name scores differ by 0.026 in favour of the plasma name, and the means over
+the three scored reviews differ by 0.117 in the same direction (0.833 against 0.717).</p>
+<h2 id="scc-momentum-tip-dd">The DD sources each name is projected from</h2>
+<table id="scc-momentum-tip-dd-table">
+<thead><tr><th>name</th><th>DD path</th><th>DD documentation</th><th>DD type</th><th>status</th></tr></thead>
+<tbody>
+<tr><td>plasma</td><td><code>edge_transport/model/ggd/momentum/d/phi</code></td><td>Toroidal component, one scalar value per grid-subset element</td><td>generalized-grid array</td><td>composed</td></tr>
+<tr><td>plasma</td><td><code>plasma_transport/model/ggd/momentum/d/phi</code></td><td>Toroidal component, one scalar value per grid-subset element</td><td>generalized-grid array</td><td>composed</td></tr>
+<tr><td>coefficient</td><td><code>core_transport/model/profiles_1d/momentum_phi/d</code></td><td>Effective diffusivity</td><td>1D radial profile</td><td>composed</td></tr>
+</tbody>
+</table>
+<p>The two names cover three DD loci: two generalized-grid loci for the plasma name and
+one core <code>profiles_1d</code> locus for the coefficient name. The coefficient name's
+description does not fit its source, naming a generalized grid while its only source is a
+radial profile. That mismatch argues against keeping that text as the surviving
+description.</p>
+<h2 id="scc-momentum-tip-reviews">Review history and paid spend</h2>
+<table id="scc-momentum-tip-review-table">
+<thead><tr><th>name</th><th>model</th><th>score</th><th>tier</th><th>role</th><th>USD</th><th>reviewed</th></tr></thead>
+<tbody>
+<tr><td>plasma</td><td>qwen3.7-max</td><td>0.825</td><td>good</td><td>canonical</td><td>0.01263</td><td>2026-06-22</td></tr>
+<tr><td>plasma</td><td>minimax-m3</td><td>0.8625</td><td>outstanding</td><td>panel</td><td>0.00099</td><td>2026-06-22</td></tr>
+<tr><td>plasma</td><td>gpt-5.5</td><td>0.8125</td><td>good</td><td>authoritative escalation</td><td>0.07647</td><td>2026-06-22</td></tr>
+<tr><td>plasma</td><td>jev-1.14</td><td>none</td><td>unknown</td><td>routing judgement</td><td>0.00013</td><td>2026-11-11</td></tr>
+<tr><td>coefficient</td><td>qwen3.7-max</td><td>0.75</td><td>good</td><td>canonical</td><td>0.01864</td><td>2026-06-22</td></tr>
+<tr><td>coefficient</td><td>minimax-m3</td><td>0.575</td><td>inadequate</td><td>panel</td><td>0.00615</td><td>2026-06-22</td></tr>
+<tr><td>coefficient</td><td>gpt-5.5</td><td>0.825</td><td>good</td><td>authoritative escalation</td><td>0.04384</td><td>2026-06-22</td></tr>
+<tr><td>coefficient</td><td>jev-1.14</td><td>none</td><td>unknown</td><td>routing judgement</td><td>0.00013</td><td>2026-11-11</td></tr>
+</tbody>
+</table>
+<p>Each name has three scored reviews, all on 2026-06-22, plus a non-canonical routing
+judgement on 2026-11-11 that carries no score. Neither has a documentation review.
+Lifetime name-review spend on the pair is USD 0.1590: USD 0.0902 on the plasma name and
+USD 0.0688 on the coefficient name. A supersede carries both paid histories onto the
+surviving record rather than repeating them.</p>
+<h2 id="scc-momentum-tip-lineage">The lineage: one superseded ancestor, two live tips</h2>
+<p>One weak component holds four names. The superseded ancestor
+<code>toroidal_momentum_diffusivity</code> is refined into both live names, and the
+coefficient name is refined into a further superseded name,
+<code>toroidal_total_plasma_momentum_diffusivity</code>. No name in the component carries
+a signed successor edge, so the ruling's supersede would write the component's first.</p>
+<table id="scc-momentum-tip-lineage-table">
+<thead><tr><th>member</th><th>stage</th><th>name score</th><th>refined from</th></tr></thead>
+<tbody>
+<tr><td><code>toroidal_momentum_diffusivity</code></td><td>superseded</td><td>0.8188</td><td>none</td></tr>
+<tr><td>plasma name</td><td><b>accepted</b></td><td>0.9338</td><td><code>toroidal_momentum_diffusivity</code></td></tr>
+<tr><td>coefficient name</td><td><b>accepted</b></td><td>0.9082</td><td><code>toroidal_momentum_diffusivity</code></td></tr>
+<tr><td><code>toroidal_total_plasma_momentum_diffusivity</code></td><td>superseded</td><td>0.6750</td><td>coefficient name</td></tr>
+</tbody>
+</table>
+<p>The change ledger shows how two tips came to exist. Each live name carries a
+<code>revive_dead_end_identity</code> receipt from 2026-11-07 (22:08:33Z for the plasma
+name, 23:36:13Z) whose reason is that its DD source "independently composed this retired
+identity while no live successor existed". Each name was a dead end in its own lineage
+when its composer met it, and each composer restored the identity rather than inheriting
+the other. The ledger therefore does not support reading either name as the original. A
+later <code>archive_lineage_cycle_edges</code> receipt of 2026-11-11T00:50:20Z broke a
+cycle at the superseded ancestor.</p>
+<h2 id="scc-momentum-tip-proposal">Proposed survivor and its reason</h2>
+<p><b>Proposed survivor: the plasma name, with the coefficient name superseded into it.</b></p>
+<ol id="scc-momentum-tip-reasons">
+<li>Higher name score, 0.9338 against 0.9082, and a higher mean over the scored reviews,
+0.833 against 0.717. The coefficient name's weakest panel score is 0.575, the only
+inadequate tier in the component.</li>
+<li>Wider DD coverage: two generalized-grid loci against one radial-profile locus. Its
+description fits its sources; the coefficient name's description names a grid it does not
+read.</li>
+<li>Its plasma qualifier names the population, separating this concept from the neutral and
+ion-state momentum diffusivities the catalog holds beside it, while the coefficient name
+reads as a bare grid-held coefficient.</li>
+</ol>
+<p><b>The case against, stated plainly.</b> The two names rest on different structures, a
+one-dimensional core profile against a generalized grid, so a lead may judge them two
+concepts rather than one. If so, the lineage edge is what is wrong and the repair belongs
+on the ancestor edge rather than a supersede. This node does not settle that; it
+establishes that one name can list all three loci, and that the loser's sources and paid
+reviews travel onto the survivor.</p>
+<p>Applying the ruling means one signed supersede writing one receipt-stamped successor
+edge, keeping the loser's paid reviews and sources. Spend beyond any documentation
+regeneration the ruling asks for is USD 0.</p>
+<h2 id="scc-momentum-tip-census">The lineage census, re-run</h2>
+<p>The committed census was run with --capture against the live graph at revision
+<code>fc99c61f0</code>. It reads 5497 names and 1771 <code>REFINED_FROM</code> edges,
+cross-checks both of its readings against independent Cypher (3186 live-tip rows
+agreeing, 0 cycle rows agreeing), and reports the following.</p>
+<table id="scc-momentum-tip-census-table">
+<thead><tr><th>reading</th><th>value</th></tr></thead>
+<tbody>
+<tr><td>cycle components</td><td>0</td></tr>
+<tr><td>cycle names</td><td>0</td></tr>
+<tr><td>weak components</td><td>3746</td></tr>
+<tr><td>components with more than one live tip</td><td>19</td></tr>
+<tr><td>this lineage's live tips</td><td><b>2</b>, both names</td></tr>
+<tr><td>this lineage's cycles</td><td>0</td></tr>
+</tbody>
+</table>
+<p>So the census reports two live tips for this lineage and no new cycle. The supersede
+this node proposes is the change that would make that reading one.</p>
+<h2 id="scc-momentum-tip-control">A two-tip lineage planted in a disposable graph</h2>
+<p>A clean live reading shows only that the reader said zero; it does not show the reader
+can report a two-tip lineage when one is there. The control plants in an empty, disposable
+Neo4j instance the exact shape of this lineage, then a fold and a cycle, and reads the
+instance with the same classifier the census uses.</p>
+<table id="scc-momentum-tip-control-table">
+<tbody>
+<tr><td>one superseded ancestor refined into two accepted successors</td><td><b>2</b> live tips</td><td>0 cycles</td></tr>
+<tr><td>the same two names refined into each other</td><td>2 live tips</td><td><b>1</b> cycle</td></tr>
+<tr><td>the two tips folded into one afterwards</td><td><b>1</b> live tip</td><td>0 cycles</td></tr>
+</tbody>
+</table>
+<p>The instance was confirmed empty (<code>MATCH (n) RETURN count(n)</code>) before the
+plant, so no live-graph row can be behind the reading, and it is terminated when the
+control ends. The fold arm is the control on the control: the same instrument that
+reports two tips reports one when the plant has one.</p>
+<h2 id="scc-momentum-tip-spend">Spend</h2>
+<p>This node made no LLM call: USD 0. The stored review spend on the pair is USD 0.1590
+lifetime, quoted above as evidence and not spent here. No documentation regeneration is
+proposed, so the proposal is USD 0 beyond any the lead's ruling asks for.</p>
+<h2 id="scc-momentum-tip-limits">What this node does not do</h2>
+<ul>
+<li>It makes no graph write, no supersede and no documentation edit. The loser is the
+<i>proposed</i> loser; the lead's ruling is the authority.</li>
+<li>It does not decide whether the two names are one concept. It states the evidence for
+one and the case for two.</li>
+<li>It does not apply the change; the signed supersede is a later step.</li>
+</ul>
+</main></body></html>

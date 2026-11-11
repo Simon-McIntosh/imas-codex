@@ -1,0 +1,611 @@
+{
+  "observed_at": "2026-11-11T22:26:22.393535+00:00",
+  "node": "scc-momentum-tip-run",
+  "revision": "fc99c61f0f311bf33b6ca594ba565398169827b9",
+  "live": {
+    "names": [
+      "toroidal_plasma_momentum_diffusivity",
+      "toroidal_momentum_diffusion_coefficient"
+    ],
+    "endpoint": "bolt://98dci4-gpu-0002:7687",
+    "nodes": [
+      {
+        "id": "toroidal_plasma_momentum_diffusivity",
+        "stage": "accepted",
+        "description": "Toroidal component of the total plasma momentum diffusivity.",
+        "documentation": null,
+        "unit": "m^2.s^-1",
+        "status": "draft",
+        "origin": "pipeline",
+        "physics_domain": "transport",
+        "name_score": 0.9338168630169997,
+        "docs_score": null,
+        "review_count": 3,
+        "review_mean": 0.8333333333333334,
+        "llm_cost": 0.09021824999999999,
+        "cost_generate_name": null,
+        "cost_refine_name": null,
+        "cost_review_name": 0.09021824999999999,
+        "cost_review_docs": null,
+        "created_at": "2026-06-22T13:30:30.832000000+00:00",
+        "updated_at": "2026-11-11T18:05:38.169000000+00:00",
+        "source_paths": [
+          "dd:edge_transport/model/ggd/momentum/d/phi",
+          "dd:plasma_transport/model/ggd/momentum/d/phi"
+        ],
+        "superseded_by": null
+      },
+      {
+        "id": "toroidal_momentum_diffusion_coefficient",
+        "stage": "accepted",
+        "description": "Toroidal component of the momentum diffusion coefficient on the generalized grid.",
+        "documentation": null,
+        "unit": "m^2.s^-1",
+        "status": "draft",
+        "origin": null,
+        "physics_domain": "transport",
+        "name_score": 0.9082141607941928,
+        "docs_score": null,
+        "review_count": 3,
+        "review_mean": 0.7166666666666667,
+        "llm_cost": 0.06875672000000001,
+        "cost_generate_name": 0.0,
+        "cost_refine_name": 0.0,
+        "cost_review_name": 0.06875672000000001,
+        "cost_review_docs": null,
+        "created_at": "2026-06-18T18:27:13.278000000+00:00",
+        "updated_at": "2026-11-11T17:56:15.408000000+00:00",
+        "source_paths": [
+          "dd:core_transport/model/profiles_1d/momentum_phi/d"
+        ],
+        "superseded_by": null
+      }
+    ],
+    "sources": [
+      {
+        "name": "toroidal_momentum_diffusion_coefficient",
+        "source": "dd:core_transport/model/profiles_1d/momentum_phi/d",
+        "path": "core_transport/model/profiles_1d/momentum_phi/d",
+        "status": "composed",
+        "source_type": "dd",
+        "dd_paths": [
+          "core_transport/model/profiles_1d/momentum_phi/d"
+        ]
+      },
+      {
+        "name": "toroidal_plasma_momentum_diffusivity",
+        "source": "dd:edge_transport/model/ggd/momentum/d/phi",
+        "path": "edge_transport/model/ggd/momentum/d/phi",
+        "status": "composed",
+        "source_type": "dd",
+        "dd_paths": [
+          "edge_transport/model/ggd/momentum/d/phi"
+        ]
+      },
+      {
+        "name": "toroidal_plasma_momentum_diffusivity",
+        "source": "dd:plasma_transport/model/ggd/momentum/d/phi",
+        "path": "plasma_transport/model/ggd/momentum/d/phi",
+        "status": "composed",
+        "source_type": "dd",
+        "dd_paths": [
+          "plasma_transport/model/ggd/momentum/d/phi"
+        ]
+      }
+    ],
+    "dd_nodes": [
+      {
+        "name": "toroidal_momentum_diffusion_coefficient",
+        "path": "core_transport/model/profiles_1d/momentum_phi/d",
+        "dd_documentation": "Effective diffusivity",
+        "dd_unit": "m^2.s^-1",
+        "data_type": "FLT_1D",
+        "domain": "transport"
+      },
+      {
+        "name": "toroidal_plasma_momentum_diffusivity",
+        "path": "edge_transport/model/ggd/momentum/d/phi",
+        "dd_documentation": "Toroidal component, one scalar value is provided per element in the grid subset.",
+        "dd_unit": "m^2.s^-1",
+        "data_type": "FLT_1D",
+        "domain": "transport"
+      },
+      {
+        "name": "toroidal_plasma_momentum_diffusivity",
+        "path": "plasma_transport/model/ggd/momentum/d/phi",
+        "dd_documentation": "Toroidal component, one scalar value is provided per element in the grid subset.",
+        "dd_unit": "m^2.s^-1",
+        "data_type": "FLT_1D",
+        "domain": "transport"
+      }
+    ],
+    "units": [
+      {
+        "name": "toroidal_plasma_momentum_diffusivity",
+        "unit": "m^2.s^-1"
+      },
+      {
+        "name": "toroidal_momentum_diffusion_coefficient",
+        "unit": "m^2.s^-1"
+      }
+    ],
+    "reviews": [
+      {
+        "name": "toroidal_momentum_diffusion_coefficient",
+        "id": "toroidal_momentum_diffusion_coefficient:names:3bea819a-05fc-4d88-9774-093877f4e571:0",
+        "score": 0.75,
+        "tier": "good",
+        "model": "openrouter/qwen/qwen3.7-max",
+        "llm_cost": 0.01864125,
+        "judge_kind": null,
+        "is_canonical": true,
+        "resolution_method": null,
+        "reviewed_at": "2026-06-22T10:14:10.528776000+00:00"
+      },
+      {
+        "name": "toroidal_momentum_diffusion_coefficient",
+        "id": "toroidal_momentum_diffusion_coefficient:names:3bea819a-05fc-4d88-9774-093877f4e571:1",
+        "score": 0.575,
+        "tier": "inadequate",
+        "model": "openrouter/minimax/minimax-m3",
+        "llm_cost": 0.00615,
+        "judge_kind": null,
+        "is_canonical": false,
+        "resolution_method": null,
+        "reviewed_at": "2026-06-22T10:14:10.528776000+00:00"
+      },
+      {
+        "name": "toroidal_momentum_diffusion_coefficient",
+        "id": "toroidal_momentum_diffusion_coefficient:names:3bea819a-05fc-4d88-9774-093877f4e571:2",
+        "score": 0.825,
+        "tier": "good",
+        "model": "openrouter/openai/gpt-5.5",
+        "llm_cost": 0.043838,
+        "judge_kind": null,
+        "is_canonical": false,
+        "resolution_method": "authoritative_escalation",
+        "reviewed_at": "2026-06-22T10:14:10.528776000+00:00"
+      },
+      {
+        "name": "toroidal_momentum_diffusion_coefficient",
+        "id": "toroidal_momentum_diffusion_coefficient:typesafe-jev-1-14:2026-11-11T17:55:26.847774+00:00",
+        "score": null,
+        "tier": "unknown",
+        "model": "typesafe/jev-1.14",
+        "llm_cost": 0.00012747,
+        "judge_kind": "jev",
+        "is_canonical": false,
+        "resolution_method": "cascade_route",
+        "reviewed_at": "2026-11-11T17:55:26.847774000+00:00"
+      },
+      {
+        "name": "toroidal_plasma_momentum_diffusivity",
+        "id": "toroidal_plasma_momentum_diffusivity:names:a7f2004c-0793-4888-9013-3388acfaaf20:0",
+        "score": 0.825,
+        "tier": "good",
+        "model": "openrouter/qwen/qwen3.7-max",
+        "llm_cost": 0.01262975,
+        "judge_kind": null,
+        "is_canonical": true,
+        "resolution_method": null,
+        "reviewed_at": "2026-06-22T13:56:46.881409000+00:00"
+      },
+      {
+        "name": "toroidal_plasma_momentum_diffusivity",
+        "id": "toroidal_plasma_momentum_diffusivity:names:a7f2004c-0793-4888-9013-3388acfaaf20:1",
+        "score": 0.8625,
+        "tier": "outstanding",
+        "model": "openrouter/minimax/minimax-m3",
+        "llm_cost": 0.00099072,
+        "judge_kind": null,
+        "is_canonical": false,
+        "resolution_method": null,
+        "reviewed_at": "2026-06-22T13:56:46.881409000+00:00"
+      },
+      {
+        "name": "toroidal_plasma_momentum_diffusivity",
+        "id": "toroidal_plasma_momentum_diffusivity:names:a7f2004c-0793-4888-9013-3388acfaaf20:2",
+        "score": 0.8125,
+        "tier": "good",
+        "model": "openrouter/openai/gpt-5.5",
+        "llm_cost": 0.076468,
+        "judge_kind": null,
+        "is_canonical": false,
+        "resolution_method": "authoritative_escalation",
+        "reviewed_at": "2026-06-22T13:56:46.881409000+00:00"
+      },
+      {
+        "name": "toroidal_plasma_momentum_diffusivity",
+        "id": "toroidal_plasma_momentum_diffusivity:typesafe-jev-1-14:2026-11-11T18:05:02.438642+00:00",
+        "score": null,
+        "tier": "unknown",
+        "model": "typesafe/jev-1.14",
+        "llm_cost": 0.00012978,
+        "judge_kind": "jev",
+        "is_canonical": false,
+        "resolution_method": "cascade_route",
+        "reviewed_at": "2026-11-11T18:05:02.438642000+00:00"
+      }
+    ],
+    "changes": [
+      {
+        "attached_to": "toroidal_plasma_momentum_diffusivity",
+        "id": "sn-change:58aafe7e-34b1-490e-ad63-a1d7dc0d201a",
+        "operation": "realign_grammar_segments",
+        "from_name": "toroidal_plasma_momentum_diffusivity",
+        "to_name": "toroidal_plasma_momentum_diffusivity",
+        "reason": "stored grammar segments disagreed with the canonical-name parse",
+        "changed_at": "2026-09-04T00:04:45.550000000+00:00"
+      },
+      {
+        "attached_to": "toroidal_momentum_diffusion_coefficient",
+        "id": "sn-change:dfe00903-a94c-4893-8fe1-a5b9ec755e37",
+        "operation": "realign_grammar_segments",
+        "from_name": "toroidal_momentum_diffusion_coefficient",
+        "to_name": "toroidal_momentum_diffusion_coefficient",
+        "reason": "stored grammar segments disagreed with the canonical-name parse",
+        "changed_at": "2026-09-04T00:04:45.550000000+00:00"
+      },
+      {
+        "attached_to": "toroidal_plasma_momentum_diffusivity",
+        "id": "sn-change:ac063f28-af58-4c71-ac6f-e6b8679368ae",
+        "operation": "revive_dead_end_identity",
+        "from_name": "superseded",
+        "to_name": "drafted",
+        "reason": "source dd:plasma_transport/model/ggd/momentum/d/phi independently composed this retired identity while no live successor existed",
+        "changed_at": "2026-11-07T22:08:33.228000000+00:00"
+      },
+      {
+        "attached_to": "toroidal_momentum_diffusion_coefficient",
+        "id": "sn-change:26ded9d4-46cb-4898-a64a-44f73927d497",
+        "operation": "revive_dead_end_identity",
+        "from_name": "superseded",
+        "to_name": "drafted",
+        "reason": "source dd:core_transport/model/profiles_1d/momentum_phi/d independently composed this retired identity while no live successor existed",
+        "changed_at": "2026-11-07T23:36:13.221000000+00:00"
+      }
+    ],
+    "lineage_changes": [
+      {
+        "id": "sn-change:57ce45ff-4c6d-4202-9cc3-2c6492a3e7cf",
+        "operation": "realign_grammar_segments",
+        "from_name": "toroidal_momentum_diffusivity",
+        "to_name": "toroidal_momentum_diffusivity",
+        "reason": "stored grammar segments disagreed with the canonical-name parse",
+        "changed_at": "2026-09-04T00:04:45.550000000+00:00"
+      },
+      {
+        "id": "sn-change:58aafe7e-34b1-490e-ad63-a1d7dc0d201a",
+        "operation": "realign_grammar_segments",
+        "from_name": "toroidal_plasma_momentum_diffusivity",
+        "to_name": "toroidal_plasma_momentum_diffusivity",
+        "reason": "stored grammar segments disagreed with the canonical-name parse",
+        "changed_at": "2026-09-04T00:04:45.550000000+00:00"
+      },
+      {
+        "id": "sn-change:dfe00903-a94c-4893-8fe1-a5b9ec755e37",
+        "operation": "realign_grammar_segments",
+        "from_name": "toroidal_momentum_diffusion_coefficient",
+        "to_name": "toroidal_momentum_diffusion_coefficient",
+        "reason": "stored grammar segments disagreed with the canonical-name parse",
+        "changed_at": "2026-09-04T00:04:45.550000000+00:00"
+      },
+      {
+        "id": "sn-change:edge-archive:cbae97382cc1ac5d7b26215b60292972c24484b91aa01f5638af007be27fea60:4f6c665fd8340525adb706d6",
+        "operation": "archive_lineage_cycle_edges",
+        "from_name": "toroidal_plasma_momentum_diffusivity",
+        "to_name": "toroidal_momentum_diffusivity",
+        "reason": "break every REFINED_FROM lineage cycle at its superseded members under the lineage-cycle repair rule",
+        "changed_at": "2026-11-11T00:50:20.621000000+00:00"
+      }
+    ],
+    "signed_successors": [],
+    "lineage": {
+      "members": [
+        "toroidal_momentum_diffusion_coefficient",
+        "toroidal_momentum_diffusivity",
+        "toroidal_plasma_momentum_diffusivity",
+        "toroidal_total_plasma_momentum_diffusivity"
+      ],
+      "nodes": [
+        {
+          "id": "toroidal_momentum_diffusion_coefficient",
+          "stage": "accepted",
+          "previous_stage": null,
+          "unit": "m^2.s^-1",
+          "name_score": 0.9082141607941928,
+          "description": "Toroidal component of the momentum diffusion coefficient on the generalized grid."
+        },
+        {
+          "id": "toroidal_momentum_diffusivity",
+          "stage": "superseded",
+          "previous_stage": null,
+          "unit": "m^2.s^-1",
+          "name_score": 0.8187500000000001,
+          "description": "Toroidal component of the total plasma momentum diffusivity"
+        },
+        {
+          "id": "toroidal_plasma_momentum_diffusivity",
+          "stage": "accepted",
+          "previous_stage": null,
+          "unit": "m^2.s^-1",
+          "name_score": 0.9338168630169997,
+          "description": "Toroidal component of the total plasma momentum diffusivity."
+        },
+        {
+          "id": "toroidal_total_plasma_momentum_diffusivity",
+          "stage": "superseded",
+          "previous_stage": null,
+          "unit": "m^2.s^-1",
+          "name_score": 0.675,
+          "description": "Toroidal component of total plasma momentum diffusivity."
+        }
+      ],
+      "edges": [
+        {
+          "successor": "toroidal_momentum_diffusion_coefficient",
+          "predecessor": "toroidal_momentum_diffusivity"
+        },
+        {
+          "successor": "toroidal_plasma_momentum_diffusivity",
+          "predecessor": "toroidal_momentum_diffusivity"
+        },
+        {
+          "successor": "toroidal_total_plasma_momentum_diffusivity",
+          "predecessor": "toroidal_momentum_diffusion_coefficient"
+        }
+      ]
+    },
+    "spend_usd": 0.0,
+    "spend_note": "no LLM call in this read; the run's own model spend is recorded in the manifest"
+  },
+  "census": {
+    "snapshot": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T215736217347-scc-momentum-tip/lineage-census/graph-snapshot.json",
+    "observed_at": "2026-11-11T22:19:21.719720+00:00",
+    "revision": "fc99c61f0f311bf33b6ca594ba565398169827b9",
+    "inventory": {
+      "names": 5497,
+      "ids": 5497,
+      "stages": 5497,
+      "edges": 1771,
+      "changes": 16494,
+      "operations": 16494
+    },
+    "cycle_components": 0,
+    "cycle_names": 0,
+    "components": 3746,
+    "multi_tip_components": 19,
+    "lineage": {
+      "members": [
+        "toroidal_momentum_diffusion_coefficient",
+        "toroidal_momentum_diffusivity",
+        "toroidal_plasma_momentum_diffusivity",
+        "toroidal_total_plasma_momentum_diffusivity"
+      ],
+      "live_members": [
+        "toroidal_momentum_diffusion_coefficient",
+        "toroidal_plasma_momentum_diffusivity"
+      ],
+      "live_tips": [
+        "toroidal_momentum_diffusion_coefficient",
+        "toroidal_plasma_momentum_diffusivity"
+      ],
+      "cycle_names": []
+    },
+    "lineage_live_tip_count": 2,
+    "tip_cross_check_rows": 3186,
+    "cycle_cross_check_rows": 0,
+    "tip_cross_check_agrees": true,
+    "records_for_names": {
+      "toroidal_plasma_momentum_diffusivity": {
+        "stage": "accepted",
+        "unit": "m^2.s^-1",
+        "name_score": 0.9338168630169997,
+        "docs_score": null,
+        "description": "Toroidal component of the total plasma momentum diffusivity."
+      },
+      "toroidal_momentum_diffusion_coefficient": {
+        "stage": "accepted",
+        "unit": "m^2.s^-1",
+        "name_score": 0.9082141607941928,
+        "docs_score": null,
+        "description": "Toroidal component of the momentum diffusion coefficient on the generalized grid."
+      }
+    },
+    "edges_checked": 1771
+  },
+  "disposable_control": {
+    "fixture": {
+      "ancestor": "control_momentum_diffusivity",
+      "tips": [
+        "control_plasma_momentum_diffusivity",
+        "control_momentum_diffusion_coefficient"
+      ],
+      "cycle": [
+        "control_loop_a",
+        "control_loop_b"
+      ]
+    },
+    "arms": {
+      "two_tip": {
+        "nodes": [
+          "control_momentum_diffusion_coefficient",
+          "control_momentum_diffusivity",
+          "control_plasma_momentum_diffusivity"
+        ],
+        "edges": [
+          [
+            "control_momentum_diffusion_coefficient",
+            "control_momentum_diffusivity"
+          ],
+          [
+            "control_plasma_momentum_diffusivity",
+            "control_momentum_diffusivity"
+          ]
+        ],
+        "cycles": [],
+        "components": [
+          {
+            "members": [
+              "control_momentum_diffusion_coefficient",
+              "control_momentum_diffusivity",
+              "control_plasma_momentum_diffusivity"
+            ],
+            "live_members": [
+              "control_momentum_diffusion_coefficient",
+              "control_plasma_momentum_diffusivity"
+            ],
+            "live_tips": [
+              "control_momentum_diffusion_coefficient",
+              "control_plasma_momentum_diffusivity"
+            ],
+            "cycle_names": []
+          }
+        ],
+        "live_tips": [
+          "control_momentum_diffusion_coefficient",
+          "control_plasma_momentum_diffusivity"
+        ],
+        "multi_tip": [
+          {
+            "members": [
+              "control_momentum_diffusion_coefficient",
+              "control_momentum_diffusivity",
+              "control_plasma_momentum_diffusivity"
+            ],
+            "live_tips": [
+              "control_momentum_diffusion_coefficient",
+              "control_plasma_momentum_diffusivity"
+            ]
+          }
+        ]
+      },
+      "two_tip_plus_cycle": {
+        "nodes": [
+          "control_loop_a",
+          "control_loop_b",
+          "control_momentum_diffusion_coefficient",
+          "control_momentum_diffusivity",
+          "control_plasma_momentum_diffusivity"
+        ],
+        "edges": [
+          [
+            "control_loop_a",
+            "control_loop_b"
+          ],
+          [
+            "control_loop_b",
+            "control_loop_a"
+          ],
+          [
+            "control_momentum_diffusion_coefficient",
+            "control_momentum_diffusivity"
+          ],
+          [
+            "control_plasma_momentum_diffusivity",
+            "control_momentum_diffusivity"
+          ]
+        ],
+        "cycles": [
+          [
+            "control_loop_a",
+            "control_loop_b"
+          ]
+        ],
+        "components": [
+          {
+            "members": [
+              "control_loop_a",
+              "control_loop_b"
+            ],
+            "live_members": [
+              "control_loop_a",
+              "control_loop_b"
+            ],
+            "live_tips": [],
+            "cycle_names": [
+              "control_loop_a",
+              "control_loop_b"
+            ]
+          },
+          {
+            "members": [
+              "control_momentum_diffusion_coefficient",
+              "control_momentum_diffusivity",
+              "control_plasma_momentum_diffusivity"
+            ],
+            "live_members": [
+              "control_momentum_diffusion_coefficient",
+              "control_plasma_momentum_diffusivity"
+            ],
+            "live_tips": [
+              "control_momentum_diffusion_coefficient",
+              "control_plasma_momentum_diffusivity"
+            ],
+            "cycle_names": []
+          }
+        ],
+        "live_tips": [
+          "control_momentum_diffusion_coefficient",
+          "control_plasma_momentum_diffusivity"
+        ],
+        "multi_tip": [
+          {
+            "members": [
+              "control_momentum_diffusion_coefficient",
+              "control_momentum_diffusivity",
+              "control_plasma_momentum_diffusivity"
+            ],
+            "live_tips": [
+              "control_momentum_diffusion_coefficient",
+              "control_plasma_momentum_diffusivity"
+            ]
+          }
+        ]
+      },
+      "one_tip": {
+        "nodes": [
+          "control_momentum_diffusion_coefficient",
+          "control_plasma_momentum_diffusivity"
+        ],
+        "edges": [
+          [
+            "control_momentum_diffusion_coefficient",
+            "control_plasma_momentum_diffusivity"
+          ]
+        ],
+        "cycles": [],
+        "components": [
+          {
+            "members": [
+              "control_momentum_diffusion_coefficient",
+              "control_plasma_momentum_diffusivity"
+            ],
+            "live_members": [
+              "control_plasma_momentum_diffusivity"
+            ],
+            "live_tips": [
+              "control_plasma_momentum_diffusivity"
+            ],
+            "cycle_names": []
+          }
+        ],
+        "live_tips": [
+          "control_plasma_momentum_diffusivity"
+        ],
+        "multi_tip": []
+      }
+    },
+    "endpoint": "bolt://127.0.0.1:36977",
+    "empty_before_plant": 0,
+    "counts_after": 2,
+    "assertions": "all passed",
+    "server_log": "/tmp/reckon-crew-scratch/r-20261111T215736217347-scc-momentum-tip/momentum-control-m2zphwwt/logs/neo4j-temp.log"
+  },
+  "spend_usd": 0.0,
+  "reuse": {
+    "lineage_reader": "docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py",
+    "cycle_owner": "imas_codex.standard_names.catalog_ordering_find_cyclic_components"
+  },
+  "spend_note": "this node made no LLM call; the catalog's stored review spend is in live.nodes[].llm_cost"
+}
