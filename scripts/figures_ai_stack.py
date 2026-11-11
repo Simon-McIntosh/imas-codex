@@ -43,8 +43,8 @@ ROOT = Path(__file__).resolve().parents[1]
 FIGURES = ROOT / "docs/figures/ai-stack"
 STEM = "ai-stack"
 
-WIDTH, HEIGHT = 14.0, 6.17  # in: wider than the slide canvas, leaving room for a title
-U = 10  # drawing units per inch, so the axes run 0..140 by 0..61.7
+WIDTH, HEIGHT = 14.0, 6.47  # in: wider than the slide canvas, leaving room for a title
+U = 10  # drawing units per inch, so the axes run 0..140 by 0..64.7
 
 # Deterministic in the ICP knowledge map's relation plum; agentic work in coral where a
 # frontier model drives it, teal where it can also run on-premises.
@@ -54,7 +54,8 @@ INK = "#2b2b2b"
 MUTED = "#5f5f5f"
 NEUTRAL_EDGE = "#b4b1aa"
 BAND_FILL = "#f4f3f0"
-USER_FILL = "#d3d0c8"  # stands clear of the band, still light under bold role names
+USER_FILL = "#e2e2e2"  # a neutral grey that reads on white without weighing on it
+USER_ARROW = "#8c8c8c"
 USER_INK = "#141414"
 
 TITLE, BODY, SMALL = 16, 14, 13  # pt, inside the stack
@@ -239,7 +240,7 @@ LAYERS = {  # (y0, y1) of each band
     "graph": (8.8, 14.8),
     "functions": (15.8, 30.6),
     "interfaces": (31.6, 43.8),
-    "users": (44.8, 60.4),
+    "users": (47.8, 63.4),  # set apart: users stand above the stack
 }
 
 LAYER_NAMES = {
@@ -553,12 +554,16 @@ def draw_users(c: Canvas) -> None:
     _, y1 = LAYERS["users"]
     pitch, height = 3.0, 2.75
     top = y1 - 0.4
+    landing = LAYERS["interfaces"][1] - 0.9  # the top edge of the interface cards
+    arrows: dict[str, tuple[float, float]] = {}
     for i, (role, reach) in enumerate(USERS):
         y = top - i * pitch
         edge0, edge1 = span(y, 0.6)
         left = max(INTERFACES["desktop"][0], edge0)
         x1 = min(INTERFACES[reach][1], edge1)
         c.box(left, y - height, x1, y, edge="none", fill=USER_FILL, lw=0, z=3)
+        # the lowest bar of each reach carries the arrow, so none crosses another bar
+        arrows[reach] = (x1 - 4.5, y - height)
         c.text(
             left + 1.0,
             y - height / 2,
@@ -567,6 +572,23 @@ def draw_users(c: Canvas) -> None:
             color=USER_INK,
             ha="left",
             inside=(left, y - height, x1, y),
+        )
+    # an arrow down from each bar's end marks the farthest interface its roles use;
+    # it stops left of the card's corner, where the on-premises badge sits
+    for x, y in arrows.values():
+        c.ax.annotate(
+            "",
+            xy=(x, landing),
+            xytext=(x, y),
+            arrowprops={
+                "arrowstyle": "-|>",
+                "color": USER_ARROW,
+                "lw": 1.6,
+                "mutation_scale": 14,
+                "shrinkA": 0,
+                "shrinkB": 0,
+            },
+            zorder=2,
         )
 
 
