@@ -166,12 +166,23 @@ def stamp_source_snapshots(
 
 
 def _source_deltas(r: dict[str, Any], resolved: dict[str, Any]) -> list[dict[str, Any]]:
-    """Compare one producing source's live node against the name's snapshot."""
+    """Compare one producing source's live node against the name's snapshot.
+
+    A ``source_path`` difference the ``RENAMED_TO`` lineage fully explains — the
+    snapshot path is a direct or transitive ancestor of the resolved terminal —
+    is carried as a delta flagged ``rename`` rather than a plain path change, so
+    the caller re-stamps the snapshot without steering documentation.
+    """
     deltas = []
     if _norm(r["old_path"]) != _norm(r["new_path"]):
-        deltas.append(
-            {"field": "source_path", "old": r["old_path"], "new": r["new_path"]}
-        )
+        delta: dict[str, Any] = {
+            "field": "source_path",
+            "old": r["old_path"],
+            "new": r["new_path"],
+        }
+        if r.get("lineage_rename_explains"):
+            delta["rename"] = True
+        deltas.append(delta)
     if _norm(r["old_unit"]) != _norm(resolved["unit"]):
         deltas.append({"field": "units", "old": r["old_unit"], "new": resolved["unit"]})
     if _norm(r["old_doc"]) != _norm(resolved["documentation"]):
@@ -297,7 +308,12 @@ def detect_source_drift(
                    sn.source_dd_resolution_ids AS old_resolution_ids,
                    sn.source_dd_resolution_converged_ids AS old_converged_ids,
                    sn.source_dd_resolution_manifest_digest AS old_manifest_digest,
-                   sn.source_dd_resolution_marker AS old_resolution_marker
+                   sn.source_dd_resolution_marker AS old_resolution_marker,
+                   EXISTS {{
+                       MATCH (p0:IMASNode {{id: sn.source_path}})
+                             -[:RENAMED_TO*1..12]->(t0:IMASNode)
+                       WHERE t0.id = n.id
+                   }} AS lineage_rename_explains
             ORDER BY sn.id, src.id
             """,
             sn_ids=sn_ids,
@@ -324,6 +340,7 @@ def detect_source_drift(
                     continue
                 requires_steering = any(
                     delta["field"] in {"source_path", "units", "documentation"}
+                    and not delta.get("rename")
                     for delta in deltas
                 )
                 drifted_here = {
@@ -333,7 +350,8 @@ def detect_source_drift(
                     "docs_stage": r["docs_stage"],
                     "new_path": r["new_path"],
                     "resolved_dd_context": resolved,
-                    "renamed": _norm(r["new_path"]) != _norm(r["anchor_id"]),
+                    "renamed": bool(r.get("lineage_rename_explains"))
+                    or _norm(r["new_path"]) != _norm(r["anchor_id"]),
                     "requires_steering": requires_steering,
                     "deltas": deltas,
                 }
