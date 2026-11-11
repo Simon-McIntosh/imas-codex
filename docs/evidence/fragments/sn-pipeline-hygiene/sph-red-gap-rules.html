@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+</head>
+<body>
+<section id="sph-red-gap-rules-diagnosis">
+  <h3>Seven red gap-rule and geometry ids: stale expectations, no product defect</h3>
+  <p>
+    All seven ids were reproduced first at the base revision
+    <code>5e28aa87</code>, then diagnosed against the installed grammar
+    (<code>imas_standard_names 0.11.1</code>). Every one traced to the same
+    cause class: vocabulary the grammar now registers, which the expectations
+    predate. No product file changed, and no assertion was dropped.
+  </p>
+  <table>
+    <thead>
+      <tr><th>id</th><th>expected</th><th>verdict at base</th><th>diagnosis</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>test_an_isotope_suffix_is_not_a_dd_field_name</code></td>
+        <td><code>absent</code></td>
+        <td><code>false_positive ['subject']</code></td>
+        <td><code>lithium_6</code> is a registered subject token; the DD-slot
+          rule still does not fire, which is what the test is about.</td>
+      </tr>
+      <tr>
+        <td><code>test_genuine_demand_still_asks_for_a_token[subject-lithium_6]</code></td>
+        <td><code>absent</code>, actionable</td>
+        <td><code>false_positive</code></td>
+        <td>Same registration. The fixture is re-mechanised as
+          <code>registered</code> and gains its own assertion rather than being
+          deleted, so the stored token keeps its provenance.</td>
+      </tr>
+      <tr>
+        <td><code>…[position-thick_line_first_point-None]</code></td>
+        <td>reuse target <code>None</code></td>
+        <td>target <code>thick_line</code></td>
+        <td><code>thick_line</code> is a registered geometry-representation
+          token, so dropping the ordinal lands on a real carrier.</td>
+      </tr>
+      <tr>
+        <td><code>…[position-arc_of_circle_start_point-None]</code></td>
+        <td>reuse target <code>None</code></td>
+        <td>target <code>arc_of_circle</code></td>
+        <td>Same: <code>arc_of_circle</code> is now registered.</td>
+      </tr>
+      <tr>
+        <td><code>test_only_grammar_resolved_folds_are_non_actionable</code></td>
+        <td>expected map lacks the two fold tokens</td>
+        <td><code>wrong_slot_placement</code> for
+          <code>(position, oblique)</code>, <code>(geometry, oblique)</code>,
+          <code>(position, arc_of_circle)</code></td>
+        <td><code>oblique</code> and <code>arc_of_circle</code> register under
+          <code>geometry_representation</code>, so a fold reported in another
+          segment names a slot misplacement. All three are still
+          non-actionable; the expected map now says so.</td>
+      </tr>
+      <tr>
+        <td><code>test_contextual_folds_remain_explicitly_unresolved_and_actionable</code></td>
+        <td>every unmechanised fold is <code>absent</code></td>
+        <td>the same three folds are <code>wrong_slot_placement</code></td>
+        <td>Same registration. The three join the set the test treats as
+          mechanically settled, and the unresolved count reconciles.</td>
+      </tr>
+      <tr>
+        <td><code>test_unregistered_arc_endpoint_rejects_the_ordinal_compound</code></td>
+        <td><code>arc_of_circle</code> unregistered</td>
+        <td>target <code>arc_of_circle</code></td>
+        <td>The guard's premise (an unavailable non-ordinal carrier is not
+          borrowed from the ordinal compound) still holds and still needs a
+          witness, so it is retargeted to
+          <code>measurement_plane_start_point</code>, whose locus is
+          unregistered. The registered carrier case is covered by adding the
+          singular arc and thick-line ordinals to the positional-violation
+          parametrisation.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="sph-red-gap-rules-negative-control">
+  <h3>Negative control</h3>
+  <p>
+    These ids are repaired in the tests alone, so the declared mutation is
+    restoring the stale expectation. The run with the base versions of the two
+    test files put back over the repaired tree turns the same seven ids red
+    again and nothing else; the log is named in the manifest's
+    <code>negative_control_log</code>.
+  </p>
+</section>
+
+<section id="sph-red-gap-rules-measure">
+  <h3>Measure</h3>
+  <p>
+    Both arms of <code>tests/standard_names</code> run on a compute partition
+    (<code>all_debug</code>), base revision <code>5e28aa87</code> extracted into
+    scratch and this node's head in its worktree, so the arms differ only in
+    the change under test.
+  </p>
+  <p>
+    base: <span id="sph-red-gap-rules-base-result">pending</span><br>
+    head: <span id="sph-red-gap-rules-measure-head">pending</span>
+  </p>
+</section>
+</body>
+</html>
