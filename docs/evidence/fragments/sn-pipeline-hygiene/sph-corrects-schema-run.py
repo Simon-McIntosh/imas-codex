@@ -153,9 +153,9 @@ def _run_test(uri: str, log_path: Path) -> int:
         timeout=600,
     )
     log_path.write_text(
-        f"# command: {' '.join(command)}\n"
-        f"# endpoint: {uri}\n"
-        f"# revision: {_revision()}\n"
+        f"# revision: {_revision()} tree: {REPO} endpoint: {uri} "
+        f"command: {' '.join(command)}\n"
+        f"# module under test: tests/graph/test_schema_compliance.py\n"
         + completed.stdout
         + completed.stderr
         + f"EXIT={completed.returncode}\n"
