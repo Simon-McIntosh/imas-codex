@@ -125,6 +125,13 @@
       "note": "\u00a71 now bounds the escape: at most three of the 13 ids may be marked strict expected failures, each naming an open section of a live plan that already exists.",
       "reason": "",
       "when": "2026-11-11T20:41:57.044529+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-4",
+      "reason": "As the review itself says, the only control that could fire lives in reckon; the clause that no imas-codex test is altered already blocks the wrong repair.",
+      "when": "2026-11-11T20:42:09.517005+00:00"
     }
   ],
   "responses": {
@@ -163,6 +170,12 @@
       "note": "\u00a71 now bounds the escape: at most three of the 13 ids may be marked strict expected failures, each naming an open section of a live plan that already exists.",
       "reason": "",
       "when": "2026-11-11T20:41:57.044529+00:00"
+    },
+    "done_when-4": {
+      "action": "declined",
+      "by": "",
+      "reason": "As the review itself says, the only control that could fire lives in reckon; the clause that no imas-codex test is altered already blocks the wrong repair.",
+      "when": "2026-11-11T20:42:09.517005+00:00"
     },
     "reasoning-1": {
       "action": "acted",
