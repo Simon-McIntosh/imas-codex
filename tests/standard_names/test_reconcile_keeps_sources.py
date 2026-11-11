@@ -76,7 +76,13 @@ def _state(name_id: str) -> dict:
 
 
 def test_unrecomposable_name_is_not_left_sourceless(disposable_neo4j_uri: str) -> None:
-    """The reconcile must retire, not strand, a name compose cannot re-mint."""
+    """The reconcile must leave a name compose cannot re-mint with its source.
+
+    Releasing the producer is the only way the repair can help a name compose
+    may write again; on a spelling the strict writer rejects the release is
+    final, so the repair must decline it and leave the name with the source it
+    has rather than trading a stuck name for a sourceless one.
+    """
     _seed(UNRECOMPOSABLE)
     with GraphClient() as gc:
         reconcile_descriptionless_composed_names(gc)
@@ -87,10 +93,10 @@ def test_unrecomposable_name_is_not_left_sourceless(disposable_neo4j_uri: str) -
         "the reconcile released the last producer of a name compose cannot "
         f"re-mint and left it live: {state}"
     )
-    assert state["stage"] == "superseded", (
-        "an unrecomposable descriptionless name is a dead end and must be "
-        f"retired rather than re-opened: {state}"
-    )
+    assert state["stage"] == "drafted", state
+    assert state["producers"] == [
+        "dd:test/reconcile/test/reconcile/zorble/width/of/fiber/bundle"
+    ], state
 
 
 def test_recomposable_name_is_reopened(disposable_neo4j_uri: str) -> None:
