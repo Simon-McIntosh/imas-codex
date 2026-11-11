@@ -41,7 +41,30 @@
   "plan_slug": "sn-catalog-consistency",
   "plan_version": 3,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "fc88cc3755f58d01536d76fdaf0433b6d75e30f5",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a72's first item now covers only the name and documentation rows; \u00a75's done-when now requires every grouping row of the batches applied through the one writer or declined with its source-domain reason.",
+      "reason": "",
+      "when": "2026-11-11T21:00:39.415935+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "fc88cc3755f58d01536d76fdaf0433b6d75e30f5",
+      "commit_basis": "edit",
+      "note": "\u00a72's first item now covers only the name and documentation rows; \u00a75's done-when now requires every grouping row of the batches applied through the one writer or declined with its source-domain reason.",
+      "reason": "",
+      "when": "2026-11-11T21:00:39.415935+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-catalog-consistency/r-20261111T204539307654-plan-review-of-sn-catalog-consistency.json",
   "review_run_id": "r-20261111T204539307654-plan-review-of-sn-catalog-consistency",
   "reviewed_blob_sha": "de35705a5a944f3ca386a87902eb3ed05449361f",
   "rubric": "content",
