@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>sib-docs-regression-diagnosis — which writer moved accepted documentation back to pending</title>
+</head>
+<body>
+<h2 id="sib-docs-regression-diagnosis">Accepted documentation regression in drain job 1310773</h2>
+
+<p>Drain job <code>1310773</code> (run <code>9f56f177-cb52-4a19-9edd-4ebc797ec58e</code>, revision
+<code>d71e890e7c6ea363f033b5b9ecb59ee2f9bc5851</code>) moved accepted-name documentation stages
+from <strong>2368 accepted / 80 reviewed / 5 drafted / 413 pending</strong> to
+<strong>2028 / 46 / 3 / 926</strong>. A net 340 names left <code>accepted</code>.</p>
+
+<h3 id="sib-docs-regression-diagnosis-account">Name-by-name account</h3>
+
+<p>Comparing the drain's own <code>before.json</code> and <code>after.json</code> per name:
+<strong>405</strong> names held <code>docs_stage=accepted</code> before and no longer do,
+<strong>21</strong> names entered accepted from another docs stage, and 44 names newly arrived
+in the accepted-name population already carrying accepted docs. 405 − 21 − 44 = 340, the
+headline drop. Six of the 405 left the population entirely (four superseded, two dropped).</p>
+
+<table id="sib-docs-regression-diagnosis-writers">
+<caption>Writer attribution for the 405 names whose docs left accepted</caption>
+<thead><tr><th>Writer</th><th>Names</th><th>Evidence</th></tr></thead>
+<tbody>
+<tr><td><code>refresh_drifted_sources</code> → <code>apply_edit(axis="docs")</code> →
+<code>reset_standard_name_docs</code></td><td>400</td>
+<td>a <code>DocsRevision</code> receipt per name created 17:28:08–17:28:35Z, inside the reset
+window, joined to the drain log's <code>reset_standard_name_docs: 1/1 … (run_id=sn-edit-…)</code>
+lines</td></tr>
+<tr><td>supersession (name stage only; docs left with the population)</td><td>4</td>
+<td><code>current_density_due_to_ohmic_current_drive</code>, <code>diamagnetic_momentum_flux</code>,
+<code>electron_absorbed_wave_power</code>, <code>electron_energy</code> now read
+<code>name_stage=superseded</code> with <code>docs_stage</code> still <code>accepted</code></td></tr>
+<tr><td>name-stage reversal accepted → reviewed</td><td>1</td>
+<td><code>prefill_count</code>: <code>docs_stage</code> still <code>accepted</code>,
+<code>name_stage</code> now <code>reviewed</code></td></tr>
+</tbody>
+</table>
+
+<p>The reset ran for <strong>508</strong> names: 400 of them were in the leave set, and 108
+carried <code>reviewed</code>, <code>drafted</code> or <code>exhausted</code> docs that the same
+call also requeues. Every reset created a <code>DocsRevision</code> snapshot, so the pre-reset
+documentation is recoverable per name.</p>
+
+<h3 id="sib-docs-regression-diagnosis-cause">Cause</h3>
+
+<p><strong>Not</strong> the stranded-identity admission change. <code>generate_docs</code>
+admission still requires <code>docs_stage = 'pending'</code>
+(<code>imas_codex/standard_names/pools.py:551-554</code>), and
+<code>claim_generate_docs_batch</code> verifies <code>eligible_stage="pending"</code>
+(<code>imas_codex/standard_names/graph_store/graph_docs_persistence.py:34-68</code>). A docs-accepted
+name is unreachable by that pool on any path the change touched.</p>
+
+<p><strong>Not</strong> the startup grammar reconcile. <code>reconcile_vocab_gaps</code> deleted one
+false gap and reclassified one (log 18:25:21), and
+<code>retry_vocab_gap_sources_on_grammar_change</code> returned four parked <em>sources</em> to
+<code>extracted</code> under vocabulary <code>01f3670d941bdb6f</code>. Neither writes
+<code>docs_stage</code>.</p>
+
+<p><strong>The startup DD-source drift refresh did it</strong>, called unconditionally from
+<code>run_sn_pools</code> (<code>imas_codex/standard_names/loop.py:2149-2189</code>) with
+<code>include_accepted=True</code> (<code>source_refresh.py:391-505</code>). It logged
+<code>1065 name(s) drifted (0 renamed)</code> at 18:28:08 and steered 508 of them through
+<code>apply_edit(axis="docs")</code>, which calls <code>reset_standard_name_docs</code>
+(<code>edit.py:4434</code>) and sets <code>docs_stage='pending'</code>
+(<code>graph_docs_persistence.py:360-425</code>).</p>
+
+<p>Why 1065 names read as drifted with zero renames: the comparison
+(<code>_source_deltas</code>, <code>source_refresh.py:168-242</code>) tests the stored snapshot's
+<code>source_path</code> against the <em>resolved terminal</em> DD node, and
+<code>source_path</code> is one of the three steering fields
+(<code>source_refresh.py:325-328</code>). A DD version whose <code>RENAMED_TO</code> lineage moved
+the terminal path therefore makes every stamped name a steering candidate. A probe of the 508
+reset names' 600 DD source bindings finds <strong>468 with a path delta</strong> (324 path only,
+138 path + documentation, 6 path + units + documentation) and 132 unchanged; no reset name in the
+sample had a unit-only or documentation-only delta. The rename counter stayed at 0 because
+<code>renamed</code> compares the source's anchor to the terminal, not the snapshot path to the
+terminal — so the run reported "0 renamed" while resetting 508 names.</p>
+
+<h3 id="sib-docs-regression-diagnosis-sourceless">Live names without a DD source</h3>
+
+<p>The drain's source-loss probe reported <strong>9</strong> live names without a source at
+17:27:35Z (log line 49); the graph now holds <strong>10</strong> live names with no producing
+<code>StandardNameSource</code>: <code>beta</code>, <code>coolant_absorbed_energy_accumulated_of_plasma_facing_component</code>,
+<code>deposited_power_at_divertor_target</code>, <code>electron_temperature_at_plasma_boundary</code>,
+<code>line_averaged_neon_density</code>, <code>poloidal_total_momentum_convection_velocity</code>,
+<code>radius_of_soft_xray_detector</code>, <code>ratio_of_diamagnetic_vorticity_to_major_radius</code>,
+<code>voltage_of_diagnostic_antenna</code>, <code>volume_averaged_electron_number_density_over_scrape_off_layer</code>.
+Five of the ten hold accepted documentation (<code>beta</code>,
+<code>coolant_absorbed_energy_accumulated_of_plasma_facing_component</code>,
+<code>electron_temperature_at_plasma_boundary</code>, <code>voltage_of_diagnostic_antenna</code>,
+<code>volume_averaged_electron_number_density_over_scrape_off_layer</code>). Separately, the same
+startup logs <strong>8</strong> live names fed by DD paths absent from the current DD, and
+<code>138</code> source bindings whose <code>source_id</code> is not a DD path at all (all
+<code>derived:</code>). The 9-to-10 difference is one name that changed after the probe; the
+sample here is a live read and names the whole set rather than the log's "first few".</p>
+
+<h3 id="sib-docs-regression-diagnosis-review-name">review_name refusals</h3>
+
+<p><strong>3035</strong> <code>pool[review_name#N] process failed</code> events, every one reading
+<code>DD resolution version must be one exact published version</code> (9106 log lines carry the
+text once tracebacks are counted). Code site:
+<code>worker_tasks/worker_review_names.py:141-146</code> takes
+<code>dd_version = binding.get("dd_version") or ""</code> and passes it to
+<code>resolve_dd_row</code>, whose <code>_validate_exact_version</code>
+(<code>dd_resolutions.py:181-186</code>) rejects the empty string. An empty version is common:
+<strong>590 of 6577</strong> source bindings (589 distinct names, most of them
+<code>derived:</code> sources) carry no <code>dd_version</code>. One such binding kills the whole
+batch process, so a handful of unpinned bindings costs every review_name attempt in the pool.</p>
+
+<h3 id="sib-docs-regression-diagnosis-fixes">Proposed fixes (not made)</h3>
+
+<ul>
+<li><strong>Drift refresh vs accepted docs</strong> — <code>source_refresh.py</code>: a pure
+<code>source_path</code> delta must not steer documentation. Drop <code>source_path</code> from
+<code>requires_steering</code> (re-point and re-stamp instead), and make an unscoped startup sweep
+pass <code>include_accepted=False</code> so a re-stamp never reopens accepted documentation. Also
+fix <code>renamed</code> to compare the snapshot path to the terminal, so the summary cannot read
+"0 renamed" while 508 names are reset.</li>
+<li><strong>Review-name version</strong> — <code>worker_review_names.py:141</code>: when a binding
+has no <code>dd_version</code>, resolve against the published configured version
+(<code>get_dd_version()</code>) or carry the binding as provenance-only; and catch
+<code>ValueError</code> per binding so one unpinned source cannot kill the batch.</li>
+<li><strong>Sourceless names</strong> — no single writer; the ten names need one re-anchor pass
+whose pool is the source-loss probe itself (<code>loop.py</code>, the pass that logs the 9).</li>
+</ul>
+
+<p>Read-only node: no graph writes, no <code>sn run</code>, no LLM spend. Instrument:
+<code>sib-docs-regression-diagnosis-run.py</code>; report <code>attribution.json</code> under the run
+directory. Job <code>1310945</code>, <code>EXIT=0</code>.</p>
+</body>
+</html>
