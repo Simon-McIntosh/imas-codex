@@ -1,38 +1,54 @@
 <section id="sib-docs-drain-after-admission-evidence">
 <h3>Documentation drain after shared admission</h3>
-<p><strong>The drain is still running; no terminal outcome is claimed.</strong> The single USD 20 capped flush is SLURM job <code>1310773</code> on partition <code>all</code>, independently of the coordination allocation. Its pipeline run ID is <code>9f56f177-cb52-4a19-9edd-4ebc797ec58e</code>. The job uses an archive of fetched <code>origin/main</code> revision <code>d71e890e7c6ea363f033b5b9ecb59ee2f9bc5851</code>, carrying the shared admission fix. The log verifies the imported module at <code>/tmp/mcintos-docs-drain-1310773-NhJ5/source/imas_codex/standard_names/pools.py</code>.</p>
-<p>The before read was live at <code>2026-11-11T17:23:55Z</code>. The interim column was read live at <code>2026-11-11T18:47:38Z</code> by the read-only partition job <code>1310871</code>; it is not an after-run measurement.</p>
+<p><strong>The declared drain measure failed.</strong> The one capped flush stopped with <code>stop_reason: stalled</code> after <strong>USD 11.141891 of USD 20</strong>, with <strong>0 stranded identities</strong>. It reported neither no eligible work nor budget exhaustion. USD 8.858109 remained unused because the pipeline stopped early. No second flush was launched.</p>
+<p>The flush was SLURM job <code>1310773</code> on partition <code>all</code>, independently of the coordination allocation. Its pipeline run ID is <code>9f56f177-cb52-4a19-9edd-4ebc797ec58e</code>. The job used an archive of fetched <code>origin/main</code> revision <code>d71e890e7c6ea363f033b5b9ecb59ee2f9bc5851</code>, carrying the shared admission fix. The log verifies the imported module at <code>/tmp/mcintos-docs-drain-1310773-NhJ5/source/imas_codex/standard_names/pools.py</code>.</p>
+<p>The before read was live at <code>2026-11-11T17:23:55Z</code>. The run started at <code>17:24:01Z</code>, stopped at <code>18:58:15Z</code> after 5,653.15 seconds, and finalized at <code>18:59:46Z</code>. Dependent read-only job <code>1310838</code> on <code>all_debug</code> captured the after state at <code>19:00:33Z</code>. The manifest recorded both job IDs before waiting. Neither job was cancelled.</p>
 <table>
-<caption>Accepted names grouped by documentation stage</caption>
-<thead><tr><th>Documentation stage</th><th>Before</th><th>Interim</th></tr></thead>
+<caption>Accepted names grouped by documentation stage, read live before and after</caption>
+<thead><tr><th>Documentation stage</th><th>Before</th><th>After</th><th>Change</th></tr></thead>
 <tbody>
-<tr><td>accepted</td><td>2,368</td><td>2,028</td></tr>
-<tr><td>reviewed</td><td>80</td><td>45</td></tr>
-<tr><td>drafted</td><td>5</td><td>4</td></tr>
-<tr><td>pending</td><td>413</td><td>923</td></tr>
-<tr><td>exhausted</td><td>0</td><td>1</td></tr>
+<tr><td>accepted</td><td>2,368</td><td>2,028</td><td>−340</td></tr>
+<tr><td>reviewed</td><td>80</td><td>46</td><td>−34</td></tr>
+<tr><td>drafted</td><td>5</td><td>3</td><td>−2</td></tr>
+<tr><td>pending</td><td>413</td><td>926</td><td>+513</td></tr>
+<tr><td>exhausted</td><td>0</td><td>1</td><td>+1</td></tr>
 </tbody>
-<tfoot><tr><th>Total accepted names</th><td>2,866</td><td>3,001</td></tr></tfoot>
+<tfoot><tr><th>Total accepted names</th><td>2,866</td><td>3,004</td><td>+138</td></tr></tfoot>
 </table>
-<p>The global accepted-documentation count is down <strong>340</strong> at this checkpoint. Separately, <strong>105 distinct names</strong> currently have accepted documentation, a documentation-review cost record under this run's exact ID, and a review timestamp inside this run. Of those, <strong>21</strong> lacked accepted documentation at the baseline; 84 already had it. This distinguishes reacceptance activity from added coverage and from the global net change.</p>
+<p><strong>105 distinct names</strong> have accepted documentation after the run, a documentation-review cost record under this run's exact ID, and a review timestamp inside this run's start/stop interval. Of those, <strong>21</strong> lacked accepted documentation at the baseline; 84 already had it. These are separate from the global net decrease of 340 accepted documents. All identity lists are retained in <code>after.json</code>.</p>
 <table>
 <caption>Shared admission census</caption>
-<thead><tr><th>Classification</th><th>Before</th><th>Interim</th></tr></thead>
+<thead><tr><th>Classification</th><th>Before</th><th>After</th></tr></thead>
 <tbody>
-<tr><td>Population</td><td>5,486</td><td>5,494</td></tr>
+<tr><td>Population</td><td>5,486</td><td>5,497</td></tr>
 <tr><td>Stranded</td><td>0</td><td>0</td></tr>
 <tr><td>Held for run</td><td>136</td><td>148</td></tr>
-<tr><td>Claimable</td><td>646</td><td>962</td></tr>
+<tr><td>Claimable</td><td>646</td><td>965</td></tr>
 <tr><td>Durably terminal</td><td>4,704</td><td>4,384</td></tr>
 <tr><td>Overlapping pool ownership</td><td>0</td><td>0</td></tr>
 </tbody>
 </table>
-<p>The census uses <code>identity_state_groups</code> and <code>classify_identity_state_groups</code> with the shared instrument's defaults (score threshold 0.75, rotation cap 3), consistently before and after. The pipeline itself uses its configured score threshold 0.85. Each census population reconciles to the graph's node and ID counts. A synthetic unrecognized name stage is classified as one stranded identity, showing that zero is not an instrument that never detects stranding.</p>
-<p>The interim exact-run <code>LLMCost.llm_cost</code> sum is <strong>USD 11.100576 of USD 20</strong>. The run is active, so this is not settled final billing. Its terminal <code>stop_reason</code> is not yet reported. The job must report no eligible work or hit its cap; a further read-only job, <code>1310838</code> on <code>all_debug</code>, is already queued with an <code>afterany:1310773</code> dependency to capture and validate the final live receipt.</p>
-<p>Representative newly docs-accepted identities at this checkpoint:</p>
+<p>The before/after census uses <code>identity_state_groups</code> and <code>classify_identity_state_groups</code> with the shared instrument's defaults (score threshold 0.75, rotation cap 3). The pipeline's own final census, at its configured threshold 0.85 and cap 3, also logged <code>stranded identities=0 by_state={} ids=[]</code>. Each census population reconciles to the graph's node and ID counts. The after read observes all 5,497 ID and name-stage properties, and 5,494 documentation-stage properties. All 3,004 accepted names have a documentation stage. A synthetic unrecognized name stage is classified as one stranded identity, proving that the instrument can detect a stranded state.</p>
+<table>
+<caption>Final billed spend selected by the exact run ID</caption>
+<thead><tr><th>Phase</th><th>Ledger events</th><th>USD</th></tr></thead>
+<tbody>
+<tr><td>generate_docs</td><td>97</td><td>4.370268</td></tr>
+<tr><td>review_docs</td><td>1,547</td><td>3.884455</td></tr>
+<tr><td>refine_docs</td><td>22</td><td>0.939866</td></tr>
+<tr><td>review_name</td><td>224</td><td>1.400136</td></tr>
+<tr><td>refine_name</td><td>19</td><td>0.546860</td></tr>
+<tr><td>prose_adjudication</td><td>2</td><td>0.000306</td></tr>
+<tr><td>enrich_parents</td><td>2</td><td>0.000000</td></tr>
+</tbody>
+<tfoot><tr><th>Total</th><td>1,913</td><td>11.141891</td></tr></tfoot>
+</table>
+<p>Every ledger event has its cost property. The sum reconciles to the final run's <code>cost_spent</code> and <code>cost_total</code>, both USD 11.141891, with <code>cost_is_exact=true</code>. This is billed spend, rather than unspent reservations.</p>
+<p>Representative newly docs-accepted identities:</p>
 <ul>
 <li><code>beam_fraction_of_beamlet_group</code> — particle-number share carried by one Gaussian divergence component of the injected neutral beam at a beamlet group; binding <code>nbi/unit/beamlets_group/divergence_component/particles_fraction</code>; documentation score 0.941384, name score 0.931938.</li>
 <li><code>binormal_wave_electric_field</code> — complex wave-electric-field phasor projected onto the local binormal direction, perpendicular to the static magnetic field and tangent to the flux surface; binding <code>waves/coherent_wave/full_wave/e_field/bi_normal/values</code>; documentation score 0.946152, name score 0.956250.</li>
 </ul>
-<p>Raw receipts and complete logs are retained under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T171523372171-sib-docs-drain-after-admission</code>: <code>before.json</code>, <code>progress-1310871.json</code>, <code>progress-1310871.log</code> (EXIT=0), <code>drain-1310773.log</code>, and the submitted batch scripts. The manifest recorded job IDs before waiting. The final <code>after.json</code>, final census and billed total remain pending; the manifest carries the continuation instructions.</p>
+<p>The after reader saved the complete receipt and refused the measured terminal condition: <code>AssertionError: drain did not reach an eligible terminal condition</code>, followed by <code>EXIT=1</code>. The declaration is therefore unmet even though the admission census stayed at zero stranded. The pipeline failures requiring separate ownership are recorded only in the manifest's <code>outside_scope</code> field.</p>
+<p>Raw receipts and complete logs are retained under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T171523372171-sib-docs-drain-after-admission</code>: <code>before.json</code>, <code>after.json</code>, <code>after-1310838.log</code> (EXIT=1), <code>drain-1310773.log</code> (EXIT=1), and the submitted batch scripts. The raw flush log includes its original scratch reader's timestamp-selection failure; the corrected dependent reader identified the run and produced the complete after receipt. The failed probe and its correction are retained as <code>progress-1310825.log</code> and <code>progress-1310834.log</code>; the latter exits 0. Product source and tests were not changed. No plan state was edited, and no merged-head verification was attempted.</p>
 </section>
