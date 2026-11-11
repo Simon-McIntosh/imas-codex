@@ -1,0 +1,48 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-11T21:20:05.615Z",
+  "dispatched_at": "2026-11-11T21:13:22Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-pipeline-hygiene.html:48",
+      "id": "done_when-1",
+      "reason": "the clause must require the endpoint comparison (the `from_label`/`to_label` pairs already present in `RELATIONSHIPS`) to be added, or a worker's most economical reading is to run the existing type-name test, watch it pass on the planted edge, and call the control met.",
+      "text": "the planted-edge control names \"the repository's schema compliance check\", but `imas_codex/graph/client.py:135` reduces the generated relationship data to `EXPECTED_RELATIONSHIP_TYPES = {rel[1] for rel in RELATIONSHIPS}` \u2014 the relationship type alone \u2014 and `tests/graph/test_schema_compliance.py:42` asserts only `graph_relationship_types - EXPECTED_RELATIONSHIP_TYPES`; endpoint labels are discarded at import and no test in the repository compares an edge's endpoints with a declaration (grep for `labels(startNode`/`labels(endNode` finds none), so a CORRECTS edge planted between labels the declaration does not name is reported by no check and the control as written cannot fail",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "a8eb31c533afa7049069a6378cf005ade94b6cd2",
+  "plan_fingerprint": "ffa4c5b63692652e498d02dc36f0451a646bb1c449aff581ef32f795eae44321",
+  "plan_slug": "sn-pipeline-hygiene",
+  "plan_version": 4,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261111T211214757748-plan-review-of-sn-pipeline-hygiene",
+  "reviewed_blob_sha": "5ed2c27b578e542a7961421001c7dab3995ac183",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 \u00a72 cites no file path, section anchor or commit that could dangle; the identifiers it names (`CORRECTS`, the schema, the generated models) all resolve in the tree; the plan carries no hrefs.",
+    "done_when": "a finding \u2014 \u00a72's negative control names \"the repository's schema compliance check\" reporting a CORRECTS edge planted between undeclared labels, but that check (`tests/graph/test_schema_compliance.py:42`) compares relationship *type names* only, so it passes on exactly the planted edge.",
+    "evidence_paths": "pass \u2014 \u00a72 names no gate-log path at all, so nothing is directed at a scratchpad or node-local temporary directory.",
+    "naming": "pass \u2014 `CORRECTS` is the graph relationship name the evidence writes and the schema must declare, not a plan label, stage name or ticket number, and \u00a72 carries no changelog prose.",
+    "reasoning": "pass \u2014 the stated root cause is confirmed by measurement (20 live CORRECTS edges, all `StandardNameSourceRetry`\u2192`StandardNameSourceRetry`, and no CORRECTS in `imas_codex/schemas/`), the section prescribes no code path or formula, and its endpoint is reachable; its one checkability defect is reported under done_when.",
+    "single_goal": "pass \u2014 \u00a72 carries one deliverable, the CORRECTS relationship declaration with its generated models, distinct from the private-import work now in \u00a78.",
+    "wiring": "pass \u2014 \u00a72 declares no depends-on, informs or gates and is independent of the other sections, which the plan's own independence note matches."
+  },
+  "section_digests": {
+    "_document": "49d63ff082eb6239cfa0f779e09881f0fb672138280a47e33f69518c95bca86a",
+    "s1": "81850637644a27e1d1a1e816ca2493b35e973174c72a47df456d0ccf8ad2dfa6",
+    "s2": "fa5be04e43b333351f806b546247de0dca00c93673e6ecdaad69c7690b4388d6",
+    "s3": "64124ce2ab02981050a98b55a1e0575cc37ac64eb88d8ab1d42b96478aa8099c",
+    "s4": "e19655648e3f9a005df4834ac35f5fb2bc214b6707a17a98b1218f40d3cd2c7d",
+    "s5": "22355c76f1a73f28bb10c96b7844c864ff49c695fe02732dc5952823ab5cfd70",
+    "s6": "8159bf6d6723b63ae9ea529cb516e69681047379b40e53f1271a4f47c9b0194f",
+    "s7": "a32106acdcff60e7fdf2ad612ff1962f13bfa360ce0b1a5c122f5be40f3b7845",
+    "s8": "13be4405cc2536e88c84991c23bd87bb4dab4581fd6c5b114b1ec5a3eedead51"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T21:21:38.612089+00:00",
+  "total": null
+}
