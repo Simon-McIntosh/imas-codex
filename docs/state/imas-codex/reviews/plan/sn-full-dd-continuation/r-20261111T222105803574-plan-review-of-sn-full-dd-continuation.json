@@ -43,6 +43,16 @@
       "note": "The selector parenthetical is removed; \u00a74 keeps only 'scoped by source', which sn run --focus with a source manifest already provides, and the brief says so.",
       "reason": "",
       "when": "2026-11-11T23:13:03.746410+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "a5e781f6c07de8997b7fa9c48d6c53ac9c35a77f",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "\u00a74's limit now also reserves the unspent part of \u00a75's documentation ceiling.",
+      "reason": "",
+      "when": "2026-11-11T23:13:11.064222+00:00"
     }
   ],
   "responses": {
@@ -54,6 +64,15 @@
       "note": "The selector parenthetical is removed; \u00a74 keeps only 'scoped by source', which sn run --focus with a source manifest already provides, and the brief says so.",
       "reason": "",
       "when": "2026-11-11T23:13:03.746410+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "a5e781f6c07de8997b7fa9c48d6c53ac9c35a77f",
+      "commit_basis": "edit",
+      "note": "\u00a74's limit now also reserves the unspent part of \u00a75's documentation ceiling.",
+      "reason": "",
+      "when": "2026-11-11T23:13:11.064222+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-full-dd-continuation/r-20261111T222105803574-plan-review-of-sn-full-dd-continuation.json",
