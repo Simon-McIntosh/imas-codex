@@ -91,11 +91,21 @@ def read_receipt(gc, before, directory):
         run_id=run_id,
     )
     before_stages = {row["id"]: row["docs_stage"] for row in before["accepted_names"]}
-    newly_accepted = [
+    started = datetime.fromisoformat(str(receipt["started_at"]))
+    stopped = (
+        datetime.fromisoformat(str(receipt["stopped_at"]))
+        if receipt.get("stopped_at")
+        else datetime.now(UTC)
+    )
+    accepted_under_run = [
         dict(row)
         for row in touched
         if row["docs_stage"] == "accepted"
-        and before_stages.get(row["id"]) != "accepted"
+        and row["reviewed_at"] is not None
+        and started <= datetime.fromisoformat(str(row["reviewed_at"])) <= stopped
+    ]
+    newly_accepted = [
+        row for row in accepted_under_run if before_stages.get(row["id"]) != "accepted"
     ]
     samples = gc.query(
         "MATCH (n:StandardName) WHERE n.id IN $ids "
@@ -110,6 +120,7 @@ def read_receipt(gc, before, directory):
         "costs": [dict(row) for row in costs],
         "billed_usd": sum(float(row["billed_usd"] or 0) for row in costs),
         "docs_reviewed_under_run_id": [dict(row) for row in touched],
+        "docs_accepted_under_run_id": accepted_under_run,
         "docs_newly_accepted_under_run_id": newly_accepted,
         "representatives": [dict(row) for row in samples],
     }
@@ -154,6 +165,7 @@ def main():
             run_id=state["run"]["id"],
             stop_reason=state["run"].get("stop_reason"),
             billed_usd=state["billed_usd"],
+            reached_docs_accepted=len(state["docs_accepted_under_run_id"]),
             newly_docs_accepted=len(state["docs_newly_accepted_under_run_id"]),
         )
     print(json.dumps(summary, sort_keys=True), flush=True)
