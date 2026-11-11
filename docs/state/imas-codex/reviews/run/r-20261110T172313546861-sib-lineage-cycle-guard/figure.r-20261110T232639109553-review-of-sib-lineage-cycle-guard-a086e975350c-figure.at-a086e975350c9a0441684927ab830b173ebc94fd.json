@@ -12,7 +12,7 @@
     "note": "The committed figcaption explains what the transaction owns and what a failed check does, so it is not a title restatement.",
     "path": "docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-guard.html"
   },
-  "completed_at": "2026-11-10T23:40:00Z",
+  "completed_at": "2026-11-10T23:41:17.564Z",
   "dispatched_at": "2026-11-10T23:29:27Z",
   "disposition_note": "No disposition is set on these findings: the review is read-only and naming a fold target or an exemption belongs to the coordinator.",
   "figure_checks": {
