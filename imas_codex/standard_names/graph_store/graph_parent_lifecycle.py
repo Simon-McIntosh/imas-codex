@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from imas_codex.discovery.base.claims import retry_on_deadlock
+from imas_codex.standard_names.pools import pool_admission_params, pool_admission_where
 
 from . import graph_foundation as foundation
 from .graph_foundation import (
@@ -130,17 +131,17 @@ def pool_pending_counts(
         source_scope += " AND false"
         name_scope += " AND coalesce(sn.edit_status, '') = 'open'"
 
-    score_gate = (
-        ""
-        if (scope_run_id or edits_only)
-        else (
-            " AND (sn.reviewer_score_name IS NOT NULL"
-            " OR (coalesce(sn.origin, '') = 'derived'"
-            " AND EXISTS { MATCH (kid:StandardName)-[:HAS_PARENT]->(sn)"
-            " WHERE NOT (coalesce(kid.name_stage, '') IN"
-            " ['superseded', 'exhausted', 'contested']) }))"
+    params.update(pool_admission_params(min_score=min_score, rotation_cap=rotation_cap))
+    rules = {
+        pool: pool_admission_where(pool, scoped_docs=bool(scope_run_id or edits_only))
+        for pool in (
+            "review_name",
+            "refine_name",
+            "generate_docs",
+            "review_docs",
+            "refine_docs",
         )
-    )
+    }
 
     cypher = f"""
     CALL {{ MATCH (s:StandardNameSource {{status: 'extracted'}})
@@ -148,39 +149,20 @@ def pool_pending_counts(
              {source_claim_where}
              {source_scope}
            RETURN count(s) AS generate_name }}
-    CALL {{ MATCH (sn:StandardName {{name_stage: 'drafted'}})
-           WHERE sn.description IS NOT NULL
-             AND sn.description <> $parent_desc_placeholder
-             AND coalesce(sn.origin, '') <> 'derived'
-             {name_scope}
+    CALL {{ MATCH (sn:StandardName)
+           WHERE {rules["review_name"]} {name_scope}
            RETURN count(sn) AS review_name }}
-    CALL {{ MATCH (sn:StandardName {{name_stage: 'reviewed'}})
-           WHERE sn.reviewer_score_name < $min_score
-             AND coalesce(sn.chain_length, 0) < $rotation_cap
-             AND coalesce(sn.origin, '') <> 'derived'
-             AND NOT (coalesce(sn.edit_mode, '') = 'rename'
-                      AND coalesce(sn.review_resubmit_count, 0)
-                          >= $rotation_cap)
-             {name_scope}
+    CALL {{ MATCH (sn:StandardName)
+           WHERE {rules["refine_name"]} {name_scope}
            RETURN count(sn) AS refine_name }}
-    CALL {{ MATCH (sn:StandardName
-                   {{name_stage: 'accepted', docs_stage: 'pending'}})
-           WHERE true {score_gate}
-             {name_scope}
+    CALL {{ MATCH (sn:StandardName)
+           WHERE {rules["generate_docs"]} {name_scope}
            RETURN count(sn) AS generate_docs }}
-    CALL {{ MATCH (sn:StandardName {{docs_stage: 'drafted'}})
-           WHERE NOT (sn.name_stage IN
-                      ['superseded', 'exhausted', 'contested'])
-             {score_gate}
-             {name_scope}
+    CALL {{ MATCH (sn:StandardName)
+           WHERE {rules["review_docs"]} {name_scope}
            RETURN count(sn) AS review_docs }}
-    CALL {{ MATCH (sn:StandardName {{docs_stage: 'reviewed'}})
-           WHERE sn.reviewer_score_docs < $min_score
-             AND coalesce(sn.docs_chain_length, 0) < $rotation_cap
-             AND NOT (sn.name_stage IN
-                      ['superseded', 'exhausted', 'contested'])
-             {score_gate}
-             {name_scope}
+    CALL {{ MATCH (sn:StandardName)
+           WHERE {rules["refine_docs"]} {name_scope}
            RETURN count(sn) AS refine_docs }}
     RETURN generate_name, review_name, refine_name,
            generate_docs, review_docs, refine_docs
@@ -284,24 +266,23 @@ def _verify_enrich_parents_claim_winners(
     token = items[0].get("claim_token") or ""
     if not token:
         return items
-    from imas_codex.standard_names.defaults import (
-        DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
-    )
-
     ids = [it["id"] for it in items]
+    where = pool_admission_where("enrich_parents").replace(
+        "$parent_desc_placeholder", "$placeholder"
+    )
+    params = pool_admission_params()
+    params["placeholder"] = params.pop("parent_desc_placeholder")
     with services.GraphClient() as gc:
         rows = gc.query(
-            """
+            f"""
             UNWIND $ids AS sid
-            MATCH (sn:StandardName {id: sid})
-            WHERE sn.claim_token = $token
-              AND sn.origin = 'derived'
-              AND sn.description = $placeholder
+            MATCH (sn:StandardName {{id: sid}})
+            WHERE sn.claim_token = $token AND ({where})
             RETURN sn.id AS id
             """,
             ids=ids,
             token=token,
-            placeholder=DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+            **params,
         )
     winners = {r["id"] for r in rows}
     if len(winners) == len(items):
@@ -341,19 +322,8 @@ def claim_enrich_parents_batch(
     Returns claimed items as dicts with ``id``, ``name``, ``kind``, ``unit``,
     ``physics_domain``, ``claim_token``.
     """
-    from imas_codex.standard_names.defaults import (
-        DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
-    )
-
-    where = (
-        "sn.origin = 'derived'"
-        " AND sn.description = $parent_desc_placeholder"
-        " AND EXISTS { MATCH (child:StandardName)-[:HAS_PARENT]->(sn)"
-        "   WHERE NOT coalesce(child.name_stage, '') IN ['superseded', 'exhausted', 'contested'] }"
-    )
-    query_params: dict[str, Any] = {
-        "parent_desc_placeholder": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
-    }
+    where = pool_admission_where("enrich_parents")
+    query_params = pool_admission_params()
     items = services._claim_sn_atomic(
         eligibility_where=where,
         query_params=query_params,

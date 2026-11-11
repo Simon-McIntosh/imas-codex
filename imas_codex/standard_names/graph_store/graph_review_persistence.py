@@ -19,6 +19,7 @@ from imas_codex.standard_names.defaults import (
     DEFAULT_MIN_SCORE,
     DEFAULT_REFINE_ROTATIONS,
 )
+from imas_codex.standard_names.pools import pool_admission_params, pool_admission_where
 from imas_codex.standard_names.review.holds import (
     sync_holds,
 )
@@ -664,40 +665,14 @@ def claim_review_docs_batch(
     ``unit``, ``tags``, ``physics_domain``, ``docs_chain_length``,
     ``claim_token``.
     """
-    # Name-form-vetted gate (same invariant as generate_docs): a real
-    # name-review score OR a structurally-accepted derived parent. CURATIVE-SCOPE
-    # EXCEPTION: under a scope_run_id (curative family-docs wave) the names are
-    # already-accepted and operator-authorised for re-docs, so the name-score
-    # gate is dropped inside the scope (mirrors claim_generate_docs_batch) —
-    # otherwise derived-leaf families draft docs that can never be reviewed.
-    # The same operator authorisation holds under edits_only: an open sn-edit
-    # is an explicit steered proposal on a name whose form is already
-    # authoritative (catalog-imported names carry no reviewer_score_name), so
-    # without this exemption staged docs edits are permanently unclaimable.
-    score_gate = (
-        ""
-        if (scope_run_id or edits_only)
-        else (
-            " AND (sn.reviewer_score_name IS NOT NULL"
-            " OR (coalesce(sn.origin, '') = 'derived'"
-            "     AND EXISTS { MATCH (kid:StandardName)-[:HAS_PARENT]->(sn)"
-            "       WHERE NOT coalesce(kid.name_stage, '') IN"
-            "       ['superseded', 'exhausted', 'contested'] }))"
-        )
+    where = pool_admission_where(
+        "review_docs", scoped_docs=bool(scope_run_id or edits_only)
     )
-    where = (
-        "(sn.docs_stage = 'drafted' OR "
-        "($drain_scope_id IS NOT NULL AND sn.docs_stage = 'reviewed' "
-        "AND sn.reviewer_score_docs >= $min_score))"
-        " AND NOT (sn.name_stage IN ['superseded', 'exhausted', 'contested'])"
-        + score_gate
-    )
+    query_params = pool_admission_params(min_score=min_score)
     if facility is not None:
         where += " AND sn.facility = $facility"
-        query_params: dict[str, foundation.get_services().Any] = {"facility": facility}
-    else:
-        query_params = {}
-    query_params.update(drain_scope_id=drain_scope_id, min_score=min_score)
+        query_params["facility"] = facility
+    query_params["drain_scope_id"] = drain_scope_id
     items = foundation.get_services()._claim_sn_atomic(
         eligibility_where=where,
         query_params=query_params,
@@ -728,7 +703,7 @@ def claim_review_docs_batch(
         scope_run_id=scope_run_id,
         drain_scope_id=drain_scope_id,
         edits_only=edits_only,
-        restage_review_axis="docs" if drain_scope_id else None,
+        restage_review_axis="docs",
     )
     # Drop claim-race losers BEFORE the reviewer quorum spends LLM calls (see
     # _verify_docs_claim_winners). review_docs is gated on docs_stage='drafted'.

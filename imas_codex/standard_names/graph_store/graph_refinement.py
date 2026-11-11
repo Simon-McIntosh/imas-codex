@@ -18,6 +18,7 @@ from imas_codex.standard_names.defaults import (
     DEFAULT_MIN_SCORE,
     DEFAULT_REFINE_ROTATIONS,
 )
+from imas_codex.standard_names.pools import pool_admission_params, pool_admission_where
 
 from .graph_foundation import (
     _CLAIM_TIMEOUT_SECONDS,
@@ -115,32 +116,7 @@ least one attempt, so the fallback never grants budget that was already spent.
 """
 
 
-REFINE_NAME_ELIGIBILITY_WHERE = (
-    "sn.name_stage = 'reviewed'"
-    " AND sn.reviewer_score_name IS NOT NULL"
-    " AND sn.reviewer_score_name < $min_score"
-    # Budget is charged per CLAIMED attempt, not per persisted successor: a
-    # proposal the graph cannot accept (the identity is taken, the persistence
-    # fence refuses it, the candidate is ungrammatical) leaves chain_length at
-    # zero, so gating on lineage depth lets such a name re-claim and re-bill on
-    # every poll for as long as the run lasts.
-    f" AND {REFINE_NAME_ATTEMPTS_SPENT} < $rotation_cap"
-    " AND NOT (sn.name_stage IN ['superseded', 'exhausted', 'contested'])"
-    # A pinned rename that has already spent its re-review budget rests at
-    # 'reviewed' — refine must not re-claim it (it is never rewritten, only
-    # resubmitted; see resubmit_pinned_rename_for_review). Under the cap it
-    # is claimed so the resubmit-to-review can fire.
-    " AND NOT (coalesce(sn.edit_mode, '') = 'rename'"
-    "          AND coalesce(sn.review_resubmit_count, 0) >= $rotation_cap)"
-    # Derived parents are structurally fixed and have no refinement target.
-    " AND coalesce(sn.origin, '') <> 'derived'"
-    # A score the reviewer seats never agreed on is not evidence that the NAME
-    # needs rewriting, so it must not buy a paid refine rotation — a rotation
-    # spent on it can drive a sound name into a rewrite and terminate it.
-    # The name rests here until `sn rescore` re-reviews it against a healthy
-    # chain, which clears the marker.
-    " AND sn.review_quorum_shortfall IS NULL"
-)
+REFINE_NAME_ELIGIBILITY_WHERE = pool_admission_where("refine_name")
 """Canonical graph predicate for name-refinement eligibility."""
 
 
@@ -239,7 +215,9 @@ def claim_refine_name_batch(
 
     items = services._claim_sn_atomic(
         eligibility_where=REFINE_NAME_ELIGIBILITY_WHERE,
-        query_params={"min_score": min_score, "rotation_cap": rotation_cap},
+        query_params=pool_admission_params(
+            min_score=min_score, rotation_cap=rotation_cap
+        ),
         batch_size=batch_size,
         timeout_seconds=timeout_seconds,
         extra_return_fields=(

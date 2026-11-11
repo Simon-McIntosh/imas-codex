@@ -1,0 +1,611 @@
+"""State admission and its Cypher rendering agree on persisted identities."""
+
+import pytest
+
+from imas_codex.graph.client import GraphClient
+from imas_codex.standard_names.defaults import (
+    DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+)
+from imas_codex.standard_names.graph_store.graph_catalog import (
+    docs_review_eligibility_params,
+)
+from imas_codex.standard_names.pools import (
+    classify_identity_state_groups,
+    identity_state_groups,
+    standard_name_pool_predicates,
+)
+
+_STATE_FIELDS = (
+    "name_stage",
+    "docs_stage",
+    "validation_status",
+    "status",
+    "origin",
+    "description_state",
+    "name_score_state",
+    "docs_score_state",
+    "name_attempts_under_cap",
+    "docs_attempts_under_cap",
+    "edit_mode",
+    "rename_resubmit_capped",
+    "review_quorum_shortfall",
+    "docs_review_quorum_shortfall",
+    "has_live_child",
+    "has_winning_docs_review",
+    "claim_active",
+)
+# Each row records a distinct observed state and its population count.
+_STATE_ROWS = (
+    "accepted|pending|valid|draft|derived|placeholder|missing|missing|True|True|None|False|False|False|False|False|False|6",
+    "accepted|pending|valid|draft|derived|substantive|missing|missing|True|True|None|False|False|False|False|False|False|1",
+    "accepted|reviewed|quarantined|draft|pipeline|substantive|passing|below|True|True|None|False|False|True|False|False|False|1",
+    "accepted|reviewed|valid|draft|None|substantive|passing|below|True|True|None|False|False|False|False|False|False|19",
+    "accepted|reviewed|valid|draft|None|substantive|passing|below|True|True|None|False|False|False|True|False|False|1",
+    "accepted|reviewed|valid|draft|None|substantive|passing|below|True|True|hint|False|False|False|False|False|False|3",
+    "accepted|reviewed|valid|draft|None|substantive|passing|below|True|True|hint|False|False|False|True|False|False|1",
+    "accepted|reviewed|valid|draft|None|substantive|passing|passing|True|True|None|False|False|False|False|False|False|13",
+    "accepted|reviewed|valid|draft|None|substantive|passing|passing|True|True|hint|False|False|False|False|False|False|2",
+    "accepted|reviewed|valid|draft|derived|substantive|missing|below|True|True|None|False|False|False|True|False|False|15",
+    "accepted|reviewed|valid|draft|derived|substantive|missing|passing|True|True|None|False|False|False|True|False|False|9",
+    "accepted|reviewed|valid|draft|derived|substantive|missing|passing|True|True|None|False|False|True|True|True|False|1",
+    "accepted|reviewed|valid|draft|pipeline|substantive|missing|below|True|True|None|False|False|False|True|False|False|1",
+    "accepted|reviewed|valid|draft|pipeline|substantive|missing|below|True|True|hint|False|False|False|True|True|False|2",
+    "accepted|reviewed|valid|draft|pipeline|substantive|missing|passing|True|True|hint|False|False|False|True|True|False|1",
+    "accepted|reviewed|valid|draft|pipeline|substantive|passing|passing|True|True|hint|False|False|False|False|False|False|1",
+    "accepted|reviewed|valid|draft|pipeline|substantive|passing|passing|True|True|hint|False|False|False|False|True|False|2",
+    "drafted|accepted|pending|draft|None|substantive|missing|missing|True|True|None|False|False|False|False|False|False|6",
+    "drafted|accepted|pending|draft|None|substantive|missing|missing|True|True|hint|False|False|False|False|False|False|3",
+    "drafted|accepted|pending|draft|None|substantive|missing|missing|True|True|hint|False|False|False|True|False|False|1",
+    "drafted|accepted|pending|draft|None|substantive|missing|passing|False|True|None|False|False|False|False|True|False|1",
+    "drafted|accepted|pending|draft|None|substantive|missing|passing|False|True|hint|False|False|False|False|True|False|1",
+    "drafted|accepted|pending|draft|None|substantive|missing|passing|True|True|None|False|False|False|False|True|False|12",
+    "drafted|accepted|pending|draft|None|substantive|missing|passing|True|True|hint|False|False|False|False|True|False|9",
+    "drafted|accepted|pending|draft|None|substantive|missing|passing|True|True|hint|False|False|False|True|True|False|5",
+    "drafted|accepted|pending|draft|pipeline|substantive|missing|missing|False|True|hint|False|False|False|True|False|False|1",
+    "drafted|accepted|pending|draft|pipeline|substantive|missing|missing|True|True|None|False|False|False|False|False|False|1",
+    "drafted|accepted|pending|draft|pipeline|substantive|missing|missing|True|True|hint|False|False|False|True|False|False|1",
+    "drafted|accepted|pending|draft|pipeline|substantive|missing|passing|False|True|hint|False|False|False|False|True|False|1",
+    "drafted|accepted|pending|draft|pipeline|substantive|missing|passing|True|True|None|False|False|False|False|True|False|1",
+    "drafted|accepted|pending|draft|pipeline|substantive|missing|passing|True|True|hint|False|False|False|False|True|False|3",
+    "drafted|accepted|quarantined|draft|pipeline|substantive|missing|missing|False|True|rename|False|False|False|False|False|False|1",
+    "drafted|exhausted|quarantined|draft|pipeline|substantive|missing|missing|False|False|rename|False|False|False|False|False|False|1",
+    "drafted|pending|pending|draft|None|substantive|missing|below|True|True|hint|False|False|False|False|True|False|1",
+    "drafted|pending|pending|draft|None|substantive|missing|missing|False|True|None|False|False|False|False|False|False|1",
+    "drafted|pending|pending|draft|None|substantive|missing|missing|False|True|hint|False|False|False|False|False|False|2",
+    "drafted|pending|pending|draft|None|substantive|missing|missing|True|True|None|False|False|False|False|False|False|23",
+    "drafted|pending|pending|draft|None|substantive|missing|missing|True|True|hint|False|False|False|False|False|False|42",
+    "drafted|pending|pending|draft|None|substantive|missing|missing|True|True|hint|False|False|False|True|False|False|2",
+    "drafted|pending|pending|draft|None|substantive|missing|missing|True|True|hint|False|False|False|True|True|False|1",
+    "drafted|pending|pending|draft|pipeline|substantive|missing|missing|False|True|None|False|False|False|False|False|False|5",
+    "drafted|pending|pending|draft|pipeline|substantive|missing|missing|False|True|hint|False|False|False|False|False|False|4",
+    "drafted|pending|pending|draft|pipeline|substantive|missing|missing|True|True|None|False|False|False|False|False|False|9",
+    "drafted|pending|pending|draft|pipeline|substantive|missing|missing|True|True|hint|False|False|False|False|False|False|14",
+    "drafted|pending|pending|draft|pipeline|substantive|missing|missing|True|True|hint|False|False|False|True|False|False|2",
+    "drafted|pending|quarantined|draft|None|substantive|missing|missing|True|True|None|False|False|False|False|False|False|6",
+    "drafted|pending|quarantined|draft|None|substantive|missing|missing|True|True|None|False|False|False|True|False|False|1",
+    "drafted|pending|quarantined|draft|None|substantive|missing|missing|True|True|hint|False|False|False|False|False|False|2",
+    "drafted|pending|quarantined|draft|pipeline|substantive|missing|missing|False|True|hint|False|False|False|False|False|False|1",
+    "drafted|pending|quarantined|draft|pipeline|substantive|missing|missing|False|True|rename|False|False|False|False|False|False|1",
+    "drafted|pending|quarantined|draft|pipeline|substantive|missing|missing|True|True|hint|False|False|False|False|False|False|1",
+    "drafted|pending|quarantined|draft|pipeline|substantive|missing|missing|True|True|rename|False|False|False|False|False|False|3",
+    "pending|None|None|draft|derived|missing|missing|missing|True|True|None|False|False|False|True|False|False|2",
+    "pending|None|pending|draft|None|missing|missing|missing|True|True|None|False|False|False|False|False|False|1",
+    "pending|pending|pending|draft|None|missing|missing|missing|True|True|None|False|False|False|False|False|False|3",
+    "reviewed|accepted|valid|draft|pipeline|substantive|below|missing|True|True|hint|False|True|False|False|False|False|4",
+    "reviewed|accepted|valid|draft|pipeline|substantive|below|missing|True|True|rename|False|True|False|False|False|False|3",
+    "reviewed|accepted|valid|draft|pipeline|substantive|below|passing|True|True|None|False|True|False|False|True|False|1",
+    "reviewed|accepted|valid|draft|pipeline|substantive|below|passing|True|True|hint|False|True|False|False|True|False|1",
+    "reviewed|accepted|valid|draft|pipeline|substantive|passing|missing|True|True|hint|False|True|False|False|False|False|1",
+    "reviewed|accepted|valid|draft|pipeline|substantive|passing|passing|True|True|hint|False|False|False|False|True|False|2",
+    "reviewed|pending|quarantined|draft|None|substantive|below|missing|True|True|hint|False|True|False|False|False|False|1",
+    "reviewed|pending|quarantined|draft|None|substantive|passing|missing|True|True|hint|False|True|False|False|False|False|1",
+    "reviewed|pending|quarantined|draft|pipeline|substantive|below|missing|True|True|rename|True|False|False|False|False|False|1",
+    "reviewed|pending|valid|draft|None|substantive|below|missing|False|True|None|False|False|False|False|False|False|1",
+    "reviewed|pending|valid|draft|None|substantive|below|missing|True|True|None|False|True|False|False|False|False|17",
+    "reviewed|pending|valid|draft|None|substantive|below|missing|True|True|hint|False|True|False|False|False|False|16",
+    "reviewed|pending|valid|draft|None|substantive|passing|missing|True|True|None|False|True|False|False|False|False|5",
+    "reviewed|pending|valid|draft|None|substantive|passing|missing|True|True|hint|False|True|False|False|False|False|11",
+    "reviewed|pending|valid|draft|None|substantive|passing|missing|True|True|hint|False|True|False|True|False|False|1",
+    "reviewed|pending|valid|draft|pipeline|substantive|below|missing|True|True|None|False|True|False|False|False|False|10",
+    "reviewed|pending|valid|draft|pipeline|substantive|below|missing|True|True|hint|False|True|False|False|False|False|10",
+    "reviewed|pending|valid|draft|pipeline|substantive|below|missing|True|True|rename|False|True|False|False|False|False|2",
+    "reviewed|pending|valid|draft|pipeline|substantive|below|missing|True|True|rename|False|True|False|True|False|False|1",
+    "reviewed|pending|valid|draft|pipeline|substantive|below|missing|True|True|rename|True|False|False|False|False|False|1",
+    "reviewed|pending|valid|draft|pipeline|substantive|below|passing|True|True|None|False|True|False|True|True|False|2",
+    "reviewed|pending|valid|draft|pipeline|substantive|below|passing|True|True|hint|False|True|False|False|True|False|1",
+    "reviewed|pending|valid|draft|pipeline|substantive|below|passing|True|True|hint|False|True|False|True|True|False|3",
+    "reviewed|pending|valid|draft|pipeline|substantive|passing|missing|False|True|None|False|True|False|False|False|False|1",
+    "reviewed|pending|valid|draft|pipeline|substantive|passing|missing|False|True|rename|False|True|False|False|False|False|1",
+    "reviewed|pending|valid|draft|pipeline|substantive|passing|missing|True|True|None|False|True|False|False|False|False|2",
+    "reviewed|pending|valid|draft|pipeline|substantive|passing|missing|True|True|hint|False|False|False|True|False|False|1",
+    "reviewed|pending|valid|draft|pipeline|substantive|passing|missing|True|True|hint|False|True|False|False|False|False|1",
+    "reviewed|pending|valid|draft|pipeline|substantive|passing|passing|True|True|hint|False|False|False|True|True|False|1",
+    "reviewed|pending|valid|draft|pipeline|substantive|passing|passing|True|True|hint|False|True|False|False|True|False|3",
+)
+
+
+_RECORDED_OWNERS = (
+    "terminal:structural_grounding_missing",
+    "terminal:structural_grounding_missing",
+    "terminal:docs_review_quorum_shortfall",
+    "review_docs",
+    "review_docs",
+    "review_docs",
+    "review_docs",
+    "review_docs",
+    "review_docs",
+    "review_docs",
+    "review_docs",
+    "terminal:docs_review_quorum_shortfall",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_docs",
+    "review_docs",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "terminal:validation_quarantined",
+    "terminal:validation_quarantined",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "terminal:validation_quarantined",
+    "terminal:validation_quarantined",
+    "terminal:validation_quarantined",
+    "terminal:validation_quarantined",
+    "terminal:validation_quarantined",
+    "terminal:validation_quarantined",
+    "terminal:validation_quarantined",
+    "enrich_parents",
+    "terminal:composition_grounding_missing",
+    "terminal:composition_grounding_missing",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:name_review_quorum_shortfall",
+    "review_name",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:validation_quarantined",
+    "terminal:name_attempt_cap",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:name_attempt_cap",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:name_review_quorum_shortfall",
+    "review_name",
+    "terminal:name_review_quorum_shortfall",
+    "review_name",
+    "terminal:name_review_quorum_shortfall",
+)
+
+
+def recorded_states():
+    rows = []
+    for index, encoded in enumerate(_STATE_ROWS):
+        *values, count = encoded.split("|")
+        state = dict(
+            zip(
+                _STATE_FIELDS,
+                (
+                    {"True": True, "False": False, "None": None}.get(value, value)
+                    for value in values
+                ),
+                strict=True,
+            )
+        )
+        state.update(
+            identities=[f"admission_fixture_{index}"],
+            count=1,
+            recorded_count=int(count),
+            expected_owner=_RECORDED_OWNERS[index],
+        )
+        rows.append(state)
+    return rows
+
+
+def control_states():
+    base = dict(
+        recorded_states()[0],
+        origin="pipeline",
+        name_score_state="passing",
+        docs_stage="pending",
+        description_state="substantive",
+        has_live_child=False,
+    )
+    overrides = {
+        "review_name": {"name_stage": "drafted", "name_score_state": "missing"},
+        "refine_name": {"name_stage": "reviewed", "name_score_state": "below"},
+        "generate_docs": {"name_stage": "accepted"},
+        "review_docs": {"name_stage": "accepted", "docs_stage": "drafted"},
+        "refine_docs": {
+            "name_stage": "accepted",
+            "docs_stage": "reviewed",
+            "docs_score_state": "below",
+            "has_winning_docs_review": True,
+        },
+        "enrich_parents": {
+            "name_stage": "pending",
+            "origin": "derived",
+            "description_state": "placeholder",
+            "has_live_child": True,
+            "name_score_state": "missing",
+        },
+    }
+    return {
+        pool: dict(base, **values, identities=[f"control_{pool}"], expected_owner=pool)
+        for pool, values in overrides.items()
+    }
+
+
+def test_recorded_classes_preserve_population_and_admission():
+    states = recorded_states()
+    assert len(states) == 85
+    assert sum(state["recorded_count"] for state in states) == 360
+    result = classify_identity_state_groups(states, standard_name_pool_predicates())
+    assert result["stranded_count"] == 0
+    assert result["claimable_count"] == 43
+    assert result["terminal_for_run_count"] == 42
+    assert result["overlap_count"] == 0
+    for state in states:
+        expected = state["expected_owner"]
+        pools = [p.pool for p in standard_name_pool_predicates() if p.admits(state)]
+        if expected.startswith("terminal:"):
+            assert pools == []
+            parked = classify_identity_state_groups(
+                [state], standard_name_pool_predicates()
+            )
+            assert parked["terminal_for_run_by_reason"] == {
+                expected.removeprefix("terminal:"): 1
+            }
+        else:
+            assert pools == [expected]
+
+
+@pytest.mark.parametrize("pool", list(control_states()))
+def test_each_pool_has_a_positive_control(pool):
+    state = control_states()[pool]
+    assert [
+        predicate.pool
+        for predicate in standard_name_pool_predicates()
+        if predicate.admits(state)
+    ] == [pool]
+
+
+def _plant_states(graph, states):
+    nodes = []
+    for state in states:
+        properties = {
+            key: state[key]
+            for key in (
+                "name_stage",
+                "docs_stage",
+                "validation_status",
+                "status",
+                "origin",
+                "edit_mode",
+            )
+        }
+        properties.update(
+            id=state["identities"][0],
+            physics_domain="equilibrium",
+            description={
+                "missing": None,
+                "placeholder": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+                "substantive": "A measured physical quantity.",
+            }[state["description_state"]],
+            reviewer_score_name={"missing": None, "below": 0.5, "passing": 0.9}[
+                state["name_score_state"]
+            ],
+            reviewer_score_docs={"missing": None, "below": 0.5, "passing": 0.9}[
+                state["docs_score_state"]
+            ],
+            refine_attempts=0 if state["name_attempts_under_cap"] else 3,
+            docs_chain_length=0 if state["docs_attempts_under_cap"] else 3,
+            review_resubmit_count=3 if state["rename_resubmit_capped"] else 0,
+            review_quorum_shortfall="review chain incomplete"
+            if state["review_quorum_shortfall"]
+            else None,
+            docs_review_quorum_shortfall="review chain incomplete"
+            if state["docs_review_quorum_shortfall"]
+            else None,
+            claim_token="owned" if state["claim_active"] else None,
+        )
+        nodes.append(
+            {
+                "properties": properties,
+                "child": state["has_live_child"],
+                "review": state["has_winning_docs_review"],
+            }
+        )
+    graph.query(
+        """
+        UNWIND $nodes AS row
+        CREATE (sn:StandardName) SET sn = row.properties
+        FOREACH (_ IN CASE WHEN row.child THEN [1] ELSE [] END |
+          CREATE (child:StandardName {id: sn.id + '_child', name_stage: 'accepted', docs_stage: 'accepted', status: 'draft'})
+          CREATE (child)-[:HAS_PARENT]->(sn))
+        FOREACH (_ IN CASE WHEN row.review THEN [1] ELSE [] END |
+          CREATE (review:StandardNameReview {id: sn.id + '_review', review_axis: 'docs', review_group_id: sn.id, resolution_method: 'quorum_consensus', score: 0.9, reviewed_at: datetime()})
+          CREATE (sn)-[:HAS_REVIEW]->(review))
+        RETURN count(sn) AS planted
+    """,
+        nodes=nodes,
+    )
+    from imas_codex.standard_names.review.holds import raise_hold
+
+    for state in states:
+        if state.get("has_open_docs_hold"):
+            raise_hold(
+                state["identities"][0],
+                "docs",
+                "docs_lint_error",
+                "Documentation contradicts its definition",
+                "Seeded contradiction",
+                "test",
+                graph=graph,
+            )
+
+
+@pytest.mark.graph
+@pytest.mark.timeout(120)
+def test_rendered_admission_matches_planted_classes(
+    disposable_neo4j_empty, monkeypatch
+):
+    controls = control_states()
+    states = recorded_states() + list(controls.values())
+    ids = {state["identities"][0] for state in states}
+    params = dict(
+        min_score=0.75,
+        rotation_cap=3,
+        parent_desc_placeholder=DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+        **docs_review_eligibility_params(),
+    )
+    with GraphClient() as graph:
+        _plant_states(graph, states)
+        coverage = graph.query(
+            "MATCH (sn:StandardName) WHERE sn.id IN $ids RETURN count(sn) AS n",
+            ids=sorted(ids),
+        )
+        assert coverage == [{"n": 91}]
+        groups = identity_state_groups(gc=graph)
+        projected = {
+            identity: group
+            for group in groups
+            for identity in group["identities"]
+            if identity in ids
+        }
+        assert set(projected) == ids
+        for state in states:
+            actual = projected[state["identities"][0]]
+            expected_projection = {field: state[field] for field in _STATE_FIELDS}
+            if expected_projection["validation_status"] is None:
+                expected_projection["validation_status"] = "pending"
+            assert {
+                field: actual[field] for field in _STATE_FIELDS
+            } == expected_projection
+        census_groups = [
+            dict(projected[identity], identities=[identity], count=1)
+            for identity in sorted(ids)
+        ]
+        result = classify_identity_state_groups(
+            census_groups, standard_name_pool_predicates()
+        )
+        assert result["stranded_count"] == 0
+        assert result["overlap_count"] == 0
+        assert result["terminal_for_run_count"] == 42
+        for predicate in standard_name_pool_predicates():
+            rows = graph.query(
+                f"MATCH (sn:StandardName) WHERE sn.id IN $ids AND ({predicate.cypher()}) RETURN sn.id AS id",
+                ids=sorted(ids),
+                **params,
+            )
+            expected = {
+                state["identities"][0]
+                for state in states
+                if state["expected_owner"] == predicate.pool
+            }
+            assert f"control_{predicate.pool}" in expected
+            assert {row["id"] for row in rows} == expected
+
+        from imas_codex.cli.sn import _compute_pool_pending
+        from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
+            pool_pending_counts,
+        )
+
+        expected_counts = {
+            predicate.pool: sum(
+                state["expected_owner"] == predicate.pool for state in states
+            )
+            for predicate in standard_name_pool_predicates()
+        }
+        assert _compute_pool_pending(
+            graph, domains=None, rotation_cap=3, min_score=0.75
+        ) == {"generate_name": 0, **expected_counts}
+        legacy_counts = pool_pending_counts()
+        assert legacy_counts == {
+            "generate_name": 0,
+            **{
+                pool: count
+                for pool, count in expected_counts.items()
+                if pool != "enrich_parents"
+            },
+        }
+        parked_ids = result["terminal_for_run_ids"]
+        before = graph.query(
+            "MATCH (sn:StandardName) WHERE sn.id IN $ids RETURN sn.id AS id, properties(sn) AS properties ORDER BY id",
+            ids=parked_ids,
+        )
+
+        from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+            claim_review_name_batch,
+        )
+        from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+            claim_generate_docs_batch,
+            claim_refine_docs_batch,
+        )
+        from imas_codex.standard_names.graph_store.graph_parent_lifecycle import (
+            claim_enrich_parents_batch,
+        )
+        from imas_codex.standard_names.graph_store.graph_refinement import (
+            claim_refine_name_batch,
+        )
+        from imas_codex.standard_names.graph_store.graph_review_persistence import (
+            claim_review_docs_batch,
+        )
+        from imas_codex.standard_names.worker_tasks import worker_compose_and_validate
+
+        validated = []
+
+        def validate(entry):
+            validated.append(entry["id"])
+            return [], {"pydantic": {"passed": True}}, "valid"
+
+        monkeypatch.setattr(
+            worker_compose_and_validate, "validate_name_candidate", validate
+        )
+        claimers = {
+            "review_name": claim_review_name_batch,
+            "refine_name": claim_refine_name_batch,
+            "generate_docs": claim_generate_docs_batch,
+            "review_docs": claim_review_docs_batch,
+            "refine_docs": claim_refine_docs_batch,
+            "enrich_parents": claim_enrich_parents_batch,
+        }
+        for pool, claim in claimers.items():
+            expected = {
+                state["identities"][0]
+                for state in states
+                if state["expected_owner"] == pool
+            }
+            claimed = []
+            for _ in range(3):
+                claimed.extend(item["id"] for item in claim(batch_size=200))
+            assert set(claimed) == expected, (
+                pool,
+                expected - set(claimed),
+                set(claimed) - expected,
+            )
+            assert len(claimed) == len(set(claimed)), pool
+        assert set(validated) == {
+            state["identities"][0]
+            for state in states
+            if state["validation_status"] in {None, "pending"}
+            and state["origin"] != "derived"
+            and state["description_state"] == "substantive"
+        }
+        after = graph.query(
+            "MATCH (sn:StandardName) WHERE sn.id IN $ids RETURN sn.id AS id, properties(sn) AS properties ORDER BY id",
+            ids=parked_ids,
+        )
+        assert before == after
+
+
+@pytest.mark.graph
+@pytest.mark.timeout(120)
+def test_invalid_pending_candidate_is_quarantined_before_review(disposable_neo4j_empty):
+    from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
+        claim_review_name_batch,
+    )
+
+    state = dict(
+        control_states()["review_name"],
+        validation_status="pending",
+        identities=["invalid_name_without_physical_base"],
+    )
+    with GraphClient() as graph:
+        _plant_states(graph, [state])
+        assert claim_review_name_batch(batch_size=1) == []
+        row = graph.query(
+            "MATCH (sn:StandardName {id: $id}) RETURN sn.validation_status AS status, sn.validation_issues AS issues, sn.claim_token AS token",
+            id=state["identities"][0],
+        )[0]
+        assert row["status"] == "quarantined"
+        assert row["issues"]
+        assert row["token"] is None
+        assert claim_review_name_batch(batch_size=1) == []
+        result = classify_identity_state_groups(
+            identity_state_groups(gc=graph), standard_name_pool_predicates()
+        )
+        assert result["stranded_count"] == 0
+        assert result["terminal_for_run_by_reason"] == {"validation_quarantined": 1}
+
+
+@pytest.mark.graph
+@pytest.mark.timeout(120)
+def test_passing_docs_with_open_hold_are_owned_by_refinement(disposable_neo4j_empty):
+    from imas_codex.cli.sn import _compute_pool_pending
+    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+        claim_refine_docs_batch,
+    )
+
+    state = dict(
+        control_states()["refine_docs"],
+        docs_score_state="passing",
+        has_open_docs_hold=True,
+    )
+    with GraphClient() as graph:
+        _plant_states(graph, [state])
+        group = next(
+            row
+            for row in identity_state_groups(gc=graph)
+            if state["identities"][0] in row["identities"]
+        )
+        assert group["has_open_docs_hold"] is True
+        assert group["has_winning_docs_review"] is True
+        assert [p.pool for p in standard_name_pool_predicates() if p.admits(group)] == [
+            "refine_docs"
+        ]
+        pending = _compute_pool_pending(
+            graph, domains=None, rotation_cap=3, min_score=0.75
+        )
+        assert pending["refine_docs"] == 1
+        assert pending["review_docs"] == 0
+        assert [item["id"] for item in claim_refine_docs_batch(batch_size=1)] == state[
+            "identities"
+        ]
+
+
+def test_refinement_never_admits_an_unvalidated_name():
+    state = dict(
+        control_states()["refine_name"],
+        validation_status="pending",
+        description_state="missing",
+    )
+    predicate = next(
+        p for p in standard_name_pool_predicates() if p.pool == "refine_name"
+    )
+    assert not predicate.admits(state)

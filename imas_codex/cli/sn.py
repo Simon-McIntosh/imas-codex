@@ -577,41 +577,27 @@ def _compute_pool_progress(
     pending_filter_sn = scope_filter_sn + (
         " AND coalesce(sn.edit_status, '') = 'open'" if edits_only else ""
     )
-    docs_score_gate = (
-        ""
-        if (scope_run_id or edits_only)
-        else (
-            "AND (sn.reviewer_score_name IS NOT NULL"
-            " OR (coalesce(sn.origin, '') = 'derived'"
-            " AND EXISTS { MATCH (kid:StandardName)-[:HAS_PARENT]->(sn)"
-            " WHERE NOT (coalesce(kid.name_stage, '') IN"
-            " ['superseded', 'exhausted', 'contested']) }))"
-        )
-    )
-
-    from imas_codex.standard_names.graph_store.graph_catalog import (
-        docs_review_eligibility_params,
-        docs_review_eligibility_where,
-    )
     from imas_codex.standard_names.graph_store.graph_cost_and_claims import (
         _MAX_COMPOSE_CLAIM_ATTEMPTS,
         _PIPELINE_FROZEN_NAME_STAGES,
         source_claim_predicate,
     )
-    from imas_codex.standard_names.graph_store.graph_refinement import (
-        REFINE_NAME_ATTEMPTS_SPENT,
+    from imas_codex.standard_names.pools import (
+        pool_admission_params,
+        pool_admission_where,
     )
-    from imas_codex.standard_names.review.holds import has_open_docs_hold_where
 
-    refine_attempts_spent = REFINE_NAME_ATTEMPTS_SPENT
-    # Claiming a docs refine reads the open docs veto as well as the score, so
-    # the pending count must accept either: a name held open above the
-    # threshold is claimable, and counting only low scores would leave the
-    # watchdog reporting an empty pool while the claim still returns work.
-    refine_docs_needed = (
-        f"(sn.reviewer_score_docs < $min_score OR {has_open_docs_hold_where()})"
-    )
-    docs_review_eligible = docs_review_eligibility_where()
+    rules = {
+        pool: pool_admission_where(pool, scoped_docs=bool(scope_run_id or edits_only))
+        for pool in (
+            "review_name",
+            "refine_name",
+            "generate_docs",
+            "review_docs",
+            "refine_docs",
+            "enrich_parents",
+        )
+    }
 
     # Count only the sources the generate_name claim can select: a source with
     # no DD path, or already bound to a frozen produced name, is never claimed,
@@ -629,72 +615,42 @@ def _compute_pool_progress(
     }}
     CALL {{
       MATCH (sn:StandardName)
-      WHERE (sn.name_stage = 'drafted' OR
-             ($drain_scope_id IS NOT NULL AND sn.name_stage = 'reviewed'
-              AND sn.reviewer_score_name >= $min_score))
-        AND sn.validation_status = 'valid'
-        AND sn.description IS NOT NULL
-        AND sn.description <> $parent_desc_placeholder
-        AND coalesce(sn.origin, '') <> 'derived'
+      WHERE {rules["review_name"]}
         {domain_filter_sn}
         {pending_filter_sn}
       RETURN count(sn) AS review_name
     }}
     CALL {{
       MATCH (sn:StandardName)
-      WHERE sn.name_stage = 'reviewed'
-        AND sn.reviewer_score_name IS NOT NULL
-        AND sn.reviewer_score_name < $min_score
-        AND {refine_attempts_spent} < $rotation_cap
-        AND coalesce(sn.origin, '') <> 'derived'
-        AND NOT (coalesce(sn.edit_mode, '') = 'rename'
-                 AND coalesce(sn.review_resubmit_count, 0) >= $rotation_cap)
-        AND sn.review_quorum_shortfall IS NULL
+      WHERE {rules["refine_name"]}
         {domain_filter_sn}
         {pending_filter_sn}
       RETURN count(sn) AS refine_name
     }}
     CALL {{
       MATCH (sn:StandardName)
-      WHERE sn.name_stage = 'accepted'
-        AND sn.docs_stage = 'pending'
-        {docs_score_gate}
+      WHERE {rules["generate_docs"]}
         {domain_filter_sn}
         {pending_filter_sn}
       RETURN count(sn) AS generate_docs
     }}
     CALL {{
       MATCH (sn:StandardName)
-      WHERE (sn.docs_stage = 'drafted' OR
-             ($drain_scope_id IS NOT NULL AND sn.docs_stage = 'reviewed'
-              AND sn.reviewer_score_docs >= $min_score))
-        AND NOT (sn.name_stage IN ['superseded', 'exhausted', 'contested'])
-        {docs_score_gate}
+      WHERE {rules["review_docs"]}
         {domain_filter_sn}
         {pending_filter_sn}
       RETURN count(sn) AS review_docs
     }}
     CALL {{
       MATCH (sn:StandardName)
-      WHERE sn.docs_stage = 'reviewed'
-        AND sn.reviewer_score_docs IS NOT NULL
-        AND {refine_docs_needed}
-        AND coalesce(sn.docs_chain_length, 0) < $rotation_cap
-        AND NOT (sn.name_stage IN ['superseded', 'exhausted', 'contested'])
-        AND {docs_review_eligible}
-        AND sn.docs_review_quorum_shortfall IS NULL
-        {docs_score_gate}
+      WHERE {rules["refine_docs"]}
         {domain_filter_sn}
         {pending_filter_sn}
       RETURN count(sn) AS refine_docs
     }}
     CALL {{
       MATCH (sn:StandardName)
-      WHERE sn.origin = 'derived'
-        AND sn.description = $parent_desc_placeholder
-        AND EXISTS {{ MATCH (child:StandardName)-[:HAS_PARENT]->(sn)
-            WHERE NOT (coalesce(child.name_stage, '') IN
-                       ['superseded', 'exhausted', 'contested']) }}
+      WHERE {rules["enrich_parents"]}
         {domain_filter_sn}
         {pending_filter_sn}
       RETURN count(sn) AS enrich_parents
@@ -755,17 +711,10 @@ def _compute_pool_progress(
            generate_docs_done, review_docs_done, refine_docs_done,
            enrich_parents_done
     """
-    from imas_codex.standard_names.defaults import (
-        DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+    params: dict[str, object] = pool_admission_params(
+        min_score=min_score, rotation_cap=rotation_cap
     )
-
-    params: dict[str, object] = {
-        "rotation_cap": rotation_cap,
-        "min_score": min_score,
-        "parent_desc_placeholder": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
-        "drain_scope_id": drain_scope_id,
-        **docs_review_eligibility_params(),
-    }
+    params["drain_scope_id"] = drain_scope_id
 
     params["max_compose_attempts"] = _MAX_COMPOSE_CLAIM_ATTEMPTS
     params["frozen_name_stages"] = list(_PIPELINE_FROZEN_NAME_STAGES)
