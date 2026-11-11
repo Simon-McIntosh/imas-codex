@@ -1,0 +1,95 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-11T20:26:47.369Z",
+  "dispatched_at": "2026-11-11T20:20:36Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-pipeline-hygiene.html:47",
+      "id": "reasoning-1",
+      "reason": "a node told there are two removes two and closes, leaving the same class of defect in twenty-five other places, and the section's stated goal is a closed import boundary.",
+      "text": "\u00a72 asserts \"two modules import a private helper across a module boundary\"; the tree carries 27 cross-module imports of private names in `imas_codex/standard_names/`, five at module level (`export.py:39` `_base_token`, `legacy_authority.py:17` `_load_rules`, `near_duplicates.py:11` `_synonym_matches`, `release_notes.py:29` `_github_slug, _run_git`, `review_triage.py:23` `_contest`)",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-pipeline-hygiene.html:48",
+      "id": "done_when-1",
+      "reason": "the named control cannot fail for the change \u00a72 makes, so the node has no way to show its fix matters and the measure reads green either way.",
+      "text": "\u00a72's control is \"the package import-boundary test passes and fails again when either import is restored\", but the only such test, `tests/standard_names/test_package_import_boundaries.py`, scopes its parametrization to the `graph_store` and `worker_tasks` subpackages (lines 13\u201314) and passes today, so restoring either cited top-level import leaves it green",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-pipeline-hygiene.html:45",
+      "id": "single_goal-1",
+      "reason": "one verdict must certify a graph-schema change and a Python import change, so a landed schema link can be blocked or passed by unrelated import work, and the two cannot be dispatched or reviewed separately.",
+      "text": "\u00a72 delivers both the `CORRECTS` schema declaration (with generated models and a property check) and the closure of cross-module private imports, two independent changes in different subsystems",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-pipeline-hygiene.html:47",
+      "id": "anchors_resolve-1",
+      "reason": "the named exemplar sends a node looking for an import that does not exist in package code, and the unnamed second import leaves the done-when's \"either import\" unenumerable.",
+      "text": "\u00a72 cites \"the stranded-identity review\" with no path or plan anchor, and names \"a private helper of the pools module\" as one of the two imports, while every importer of `imas_codex.standard_names.pools` private names is a test (`test_pool_orchestration_contracts.py`, `test_pool_idle_exhaustion.py`), not a production module",
+      "type": "anchors_resolve",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-pipeline-hygiene.html:63",
+      "id": "done_when-2",
+      "reason": "the section is satisfied by doing nothing, so it cannot show release dispatchability improved; the author must pick the success endpoint or declare the refusal the endpoint with the guarded step named.",
+      "text": "\u00a75's done-when accepts a disjunction, \"the real cut from such a worktree either succeeds against a stand-in remote or refuses naming the one step that needs the coordinator\", and today's detached-HEAD refusal already satisfies the second branch",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-pipeline-hygiene.html:43",
+      "id": "done_when-3",
+      "reason": "the measure that exists to unblock landings can be met by suppressing the signal it exists to restore, so a bound on the escape (or a requirement that the owning section already exists) is what makes the negation bite.",
+      "text": "\u00a71's done-when admits \"an id that cannot be fixed inside this plan is marked a strict expected failure\", unbounded, so marking all thirteen xfail (each xfail does not count as a failing id and is neither skipped nor deleted) satisfies it",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-pipeline-hygiene.html:68",
+      "id": "done_when-4",
+      "reason": "the only control that could fire lives in reckon and outside this plan's reach, so naming one here would add a claim the section cannot check; the existing \"no imas-codex test is altered\" clause already blocks the wrong repair.",
+      "text": "\u00a76 declares no negative control; its done-when is that the reckon project records the defect as a section or followup, which is a record of a hand-off rather than a measure that can fail here",
+      "type": "done_when",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "55af2a7ff77097679125b2d4f0c065462bf7de1b",
+  "plan_fingerprint": "957fc9f4019866f65fa957ea728276cf70b7df91814c26102c0c3f61e3bacbeb",
+  "plan_slug": "sn-pipeline-hygiene",
+  "plan_version": 1,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261111T201916459868-plan-review-of-sn-pipeline-hygiene",
+  "reviewed_blob_sha": "50e7527c5c4cb073a27d96e7b8a91bb82d42b479",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 \u00a72 cites \"the stranded-identity review\" and \"a private helper of the pools module\" with no path or anchor, and no production module imports a private name from `pools`.",
+    "done_when": "a finding \u2014 \u00a72's negative control names an existing test that already passes and does not cover the imports \u00a72 describes, and \u00a75's done-when accepts either success or refusal.",
+    "evidence_paths": "pass \u2014 the plan names no scratchpad or node-local path; \u00a71's \"landing evidence\" and \u00a76's \"landing records\" resolve to a run's landing record, and no ephemeral path is prescribed.",
+    "naming": "pass \u2014 no plan labels, stage names or ticket numbers reach code; `NC-25-...` is an existing rule id inside a parametrized test id and `v0.4.0rc8` is a release artifact.",
+    "reasoning": "a finding \u2014 \u00a72's stated root cause (\"two modules import a private helper\") is contradicted by the tree, which carries 27 cross-module private imports, five of them module-level.",
+    "single_goal": "a finding \u2014 \u00a72 carries two unrelated deliverables, a graph-schema relationship declaration and Python import hygiene, which no single verdict can close.",
+    "wiring": "pass \u2014 the only declared relationship, s7's `data-links=\"sn-integrity-backlog#s17\"`, resolves: that section exists and is `descoped` on 2026-11-11 with the carry recorded to this plan's \u00a77; s1\u2013s6 declare no dependency and the followup f-sph-001 states they are independent, which matches the content."
+  },
+  "section_digests": {
+    "_document": "bad265768e21f11fbd30d82ba2a79c59acac2febc4b2507467914a2af3859ac6",
+    "s1": "8280da675667849d88a98ea9d12afa9c3de20e1a72546b84ba56fe1e517b84cd",
+    "s2": "e643a00a4751c7fbe471e3bc525db39b1ee8edc24bf3291ec4b274aba3f57588",
+    "s3": "64124ce2ab02981050a98b55a1e0575cc37ac64eb88d8ab1d42b96478aa8099c",
+    "s4": "e19655648e3f9a005df4834ac35f5fb2bc214b6707a17a98b1218f40d3cd2c7d",
+    "s5": "ad86caa2363532c7d62182c5af6fae897de87bd457cbd0cf5646e16bfa894323",
+    "s6": "8159bf6d6723b63ae9ea529cb516e69681047379b40e53f1271a4f47c9b0194f",
+    "s7": "a32106acdcff60e7fdf2ad612ff1962f13bfa360ce0b1a5c122f5be40f3b7845"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T20:36:12.352519+00:00",
+  "total": null
+}
