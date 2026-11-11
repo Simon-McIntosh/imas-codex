@@ -43,8 +43,8 @@ ROOT = Path(__file__).resolve().parents[1]
 FIGURES = ROOT / "docs/figures/ai-stack"
 STEM = "ai-stack"
 
-WIDTH, HEIGHT = 14.0, 7.2  # in: wider than the slide canvas, leaving room for a title
-U = 10  # drawing units per inch, so the axes run 0..140 by 0..72
+WIDTH, HEIGHT = 14.0, 6.75  # in: wider than the slide canvas, leaving room for a title
+U = 10  # drawing units per inch, so the axes run 0..140 by 0..67.5
 
 # Deterministic in the ICP knowledge map's relation plum; agentic work in coral where a
 # frontier model drives it, teal where it can also run on-premises.
@@ -240,7 +240,7 @@ LAYERS = {  # (y0, y1) of each band
     "graph": (8.8, 14.8),
     "functions": (15.8, 30.6),
     "interfaces": (31.6, 43.8),
-    "users": (44.8, 67.7),
+    "users": (44.8, 63.2),
 }
 
 LAYER_NAMES = {  # the users are named above their bars, in draw_users
@@ -254,9 +254,8 @@ LAYER_NAMES = {  # the users are named above their bars, in draw_users
 # no one stops at Claude Desktop, because every role needs ITER's data through Lucy.
 # The widest reach sits lowest, so the bars taper upward as the pyramid does.
 USERS = [
-    ("administrative support", "lucy"),
-    ("configuration control", "lucy"),
-    ("commissioning engineer · planning", "dash"),
+    ("office productivity", "lucy"),
+    ("commissioning engineer · planning · configuration control", "dash"),
     ("prototyping with domain experts · science · code developer", "sandbox"),
     ("assembly and commissioning · ITER infrastructure", "clive"),
 ]
