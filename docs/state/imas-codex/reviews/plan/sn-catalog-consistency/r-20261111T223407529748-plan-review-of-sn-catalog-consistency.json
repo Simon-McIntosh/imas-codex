@@ -53,9 +53,28 @@
       "note": "The permission to remove the census's domain reading is withdrawn, so \u00a72 and \u00a73 keep one unchanged instrument.",
       "reason": "",
       "when": "2026-11-11T23:14:01.381325+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "fc99c61f0f311bf33b6ca594ba565398169827b9",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a75's family comparison is restricted to the families present when \u00a75 starts, counted at its start and end.",
+      "reason": "",
+      "when": "2026-11-11T23:14:09.675287+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "fc99c61f0f311bf33b6ca594ba565398169827b9",
+      "commit_basis": "edit",
+      "note": "\u00a75's family comparison is restricted to the families present when \u00a75 starts, counted at its start and end.",
+      "reason": "",
+      "when": "2026-11-11T23:14:09.675287+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "",
