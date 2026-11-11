@@ -56,7 +56,7 @@ NEUTRAL_EDGE = "#b4b1aa"
 BAND_FILL = "#f4f3f0"
 USER_INK = "#141414"  # the role names
 # the thin bar under each name, in a deep blue no layer of the stack uses
-USER_FILL = "#1f4f8f"
+USER_FILL = "#2b5c9e"
 
 TITLE, BODY, SMALL = 16, 14, 13  # pt, inside the stack
 BAR = 15  # pt, the user roles
@@ -252,12 +252,13 @@ LAYER_NAMES = {  # the users are named above their bars, in draw_users
 
 # Top to bottom: each bar's roles reach from Claude Desktop to the interface named, and
 # no one stops at Claude Desktop, because every role needs ITER's data through Lucy.
+# The widest reach sits lowest, so the bars taper upward as the pyramid does.
 USERS = [
-    ("assembly and commissioning · ITER infrastructure", "clive"),
-    ("prototyping with domain experts · science · code developer", "sandbox"),
-    ("commissioning engineer · planning", "dash"),
-    ("configuration control", "lucy"),
     ("administrative support", "lucy"),
+    ("configuration control", "lucy"),
+    ("commissioning engineer · planning", "dash"),
+    ("prototyping with domain experts · science · code developer", "sandbox"),
+    ("assembly and commissioning · ITER infrastructure", "clive"),
 ]
 
 LUCY_TOOLS = [

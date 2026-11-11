@@ -305,7 +305,7 @@ L 246.202435 56.88
 L 246.202435 51.12
 L 107.856 51.12
 z
-" clip-path="url(#paeacd78b7c)" style="fill: #1f4f8f"/>
+" clip-path="url(#paeacd78b7c)" style="fill: #2b5c9e"/>
    </g>
    <g id="patch_21">
     <path d="M 253.402435 56.88
@@ -313,119 +313,119 @@ L 344.419826 56.88
 L 344.419826 51.12
 L 253.402435 51.12
 z
-" clip-path="url(#paeacd78b7c)" style="fill: #1f4f8f"/>
+" clip-path="url(#paeacd78b7c)" style="fill: #2b5c9e"/>
    </g>
    <g id="patch_22">
-    <path d="M 351.619826 56.88
-L 486.325565 56.88
-L 486.325565 51.12
-L 351.619826 51.12
-z
-" clip-path="url(#paeacd78b7c)" style="fill: #1f4f8f"/>
-   </g>
-   <g id="patch_23">
-    <path d="M 493.525565 56.88
-L 657.35687 56.88
-L 657.35687 51.12
-L 493.525565 51.12
-z
-" clip-path="url(#paeacd78b7c)" style="fill: #1f4f8f"/>
-   </g>
-   <g id="patch_24">
-    <path d="M 664.55687 56.88
-L 806.544 56.88
-L 806.544 51.12
-L 664.55687 51.12
-z
-" clip-path="url(#paeacd78b7c)" style="fill: #1f4f8f"/>
-   </g>
-   <g id="patch_25">
     <path d="M 107.856 89.28
 L 246.202435 89.28
 L 246.202435 83.52
 L 107.856 83.52
 z
-" clip-path="url(#paeacd78b7c)" style="fill: #1f4f8f"/>
+" clip-path="url(#paeacd78b7c)" style="fill: #2b5c9e"/>
    </g>
-   <g id="patch_26">
+   <g id="patch_23">
     <path d="M 253.402435 89.28
 L 344.419826 89.28
 L 344.419826 83.52
 L 253.402435 83.52
 z
-" clip-path="url(#paeacd78b7c)" style="fill: #1f4f8f"/>
+" clip-path="url(#paeacd78b7c)" style="fill: #2b5c9e"/>
    </g>
-   <g id="patch_27">
-    <path d="M 351.619826 89.28
-L 486.325565 89.28
-L 486.325565 83.52
-L 351.619826 83.52
-z
-" clip-path="url(#paeacd78b7c)" style="fill: #1f4f8f"/>
-   </g>
-   <g id="patch_28">
-    <path d="M 493.525565 89.28
-L 657.35687 89.28
-L 657.35687 83.52
-L 493.525565 83.52
-z
-" clip-path="url(#paeacd78b7c)" style="fill: #1f4f8f"/>
-   </g>
-   <g id="patch_29">
+   <g id="patch_24">
     <path d="M 107.856 121.68
 L 246.202435 121.68
 L 246.202435 115.92
 L 107.856 115.92
 z
-" clip-path="url(#paeacd78b7c)" style="fill: #1f4f8f"/>
+" clip-path="url(#paeacd78b7c)" style="fill: #2b5c9e"/>
    </g>
-   <g id="patch_30">
+   <g id="patch_25">
     <path d="M 253.402435 121.68
 L 344.419826 121.68
 L 344.419826 115.92
 L 253.402435 115.92
 z
-" clip-path="url(#paeacd78b7c)" style="fill: #1f4f8f"/>
+" clip-path="url(#paeacd78b7c)" style="fill: #2b5c9e"/>
    </g>
-   <g id="patch_31">
+   <g id="patch_26">
     <path d="M 351.619826 121.68
 L 486.325565 121.68
 L 486.325565 115.92
 L 351.619826 115.92
 z
-" clip-path="url(#paeacd78b7c)" style="fill: #1f4f8f"/>
+" clip-path="url(#paeacd78b7c)" style="fill: #2b5c9e"/>
    </g>
-   <g id="patch_32">
+   <g id="patch_27">
     <path d="M 107.856 154.08
 L 246.202435 154.08
 L 246.202435 148.32
 L 107.856 148.32
 z
-" clip-path="url(#paeacd78b7c)" style="fill: #1f4f8f"/>
+" clip-path="url(#paeacd78b7c)" style="fill: #2b5c9e"/>
    </g>
-   <g id="patch_33">
+   <g id="patch_28">
     <path d="M 253.402435 154.08
 L 344.419826 154.08
 L 344.419826 148.32
 L 253.402435 148.32
 z
-" clip-path="url(#paeacd78b7c)" style="fill: #1f4f8f"/>
+" clip-path="url(#paeacd78b7c)" style="fill: #2b5c9e"/>
    </g>
-   <g id="patch_34">
+   <g id="patch_29">
+    <path d="M 351.619826 154.08
+L 486.325565 154.08
+L 486.325565 148.32
+L 351.619826 148.32
+z
+" clip-path="url(#paeacd78b7c)" style="fill: #2b5c9e"/>
+   </g>
+   <g id="patch_30">
+    <path d="M 493.525565 154.08
+L 657.35687 154.08
+L 657.35687 148.32
+L 493.525565 148.32
+z
+" clip-path="url(#paeacd78b7c)" style="fill: #2b5c9e"/>
+   </g>
+   <g id="patch_31">
     <path d="M 107.856 186.48
 L 246.202435 186.48
 L 246.202435 180.72
 L 107.856 180.72
 z
-" clip-path="url(#paeacd78b7c)" style="fill: #1f4f8f"/>
+" clip-path="url(#paeacd78b7c)" style="fill: #2b5c9e"/>
    </g>
-   <g id="patch_35">
+   <g id="patch_32">
     <path d="M 253.402435 186.48
 L 344.419826 186.48
 L 344.419826 180.72
 L 253.402435 180.72
 z
-" clip-path="url(#paeacd78b7c)" style="fill: #1f4f8f"/>
+" clip-path="url(#paeacd78b7c)" style="fill: #2b5c9e"/>
+   </g>
+   <g id="patch_33">
+    <path d="M 351.619826 186.48
+L 486.325565 186.48
+L 486.325565 180.72
+L 351.619826 180.72
+z
+" clip-path="url(#paeacd78b7c)" style="fill: #2b5c9e"/>
+   </g>
+   <g id="patch_34">
+    <path d="M 493.525565 186.48
+L 657.35687 186.48
+L 657.35687 180.72
+L 493.525565 180.72
+z
+" clip-path="url(#paeacd78b7c)" style="fill: #2b5c9e"/>
+   </g>
+   <g id="patch_35">
+    <path d="M 664.55687 186.48
+L 806.544 186.48
+L 806.544 180.72
+L 664.55687 180.72
+z
+" clip-path="url(#paeacd78b7c)" style="fill: #2b5c9e"/>
    </g>
    <g id="patch_36">
     <path d="M 62.784 494.64
@@ -1101,19 +1101,19 @@ z
     <text style="font-weight: 700; font-size: 18px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: middle; fill: #2b2b2b" x="457.2" y="22.122" transform="rotate(-0 457.2 22.122)">users</text>
    </g>
    <g id="text_50">
-    <text style="font-size: 15px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #141414" x="107.856" y="45.577734" transform="rotate(-0 107.856 45.577734)">assembly and commissioning · ITER infrastructure</text>
+    <text style="font-size: 15px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #141414" x="107.856" y="45.555469" transform="rotate(-0 107.856 45.555469)">administrative support</text>
    </g>
    <g id="text_51">
-    <text style="font-size: 15px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #141414" x="107.856" y="77.955469" transform="rotate(-0 107.856 77.955469)">prototyping with domain experts · science · code developer</text>
+    <text style="font-size: 15px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #141414" x="107.856" y="77.977734" transform="rotate(-0 107.856 77.977734)">configuration control</text>
    </g>
    <g id="text_52">
     <text style="font-size: 15px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #141414" x="107.856" y="110.355469" transform="rotate(-0 107.856 110.355469)">commissioning engineer · planning</text>
    </g>
    <g id="text_53">
-    <text style="font-size: 15px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #141414" x="107.856" y="142.777734" transform="rotate(-0 107.856 142.777734)">configuration control</text>
+    <text style="font-size: 15px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #141414" x="107.856" y="142.755469" transform="rotate(-0 107.856 142.755469)">prototyping with domain experts · science · code developer</text>
    </g>
    <g id="text_54">
-    <text style="font-size: 15px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #141414" x="107.856" y="175.155469" transform="rotate(-0 107.856 175.155469)">administrative support</text>
+    <text style="font-size: 15px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #141414" x="107.856" y="175.177734" transform="rotate(-0 107.856 175.177734)">assembly and commissioning · ITER infrastructure</text>
    </g>
    <g id="text_55">
     <text style="font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="897.12" y="19.046438" transform="rotate(-0 897.12 19.046438)">deterministic</text>
