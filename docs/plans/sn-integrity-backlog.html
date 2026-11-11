@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="470">
+<meta name="plan-version" content="471">
 <meta name="plan-modified" content="2026-11-11">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -1403,6 +1403,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s51" data-id="c-run-r-20261110T210102261723-sib-vocab-gap-requeue" data-who="reckon-build" data-when="2026-11-10T22:54:01Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/sn-integrity-backlog/sib-vocab-gap-requeue.html — every vocab_gap source of the 143-source cohort resolved per source against the ISN 0.11.0 snapshot, the 16 that resolve rerun through one scoped `sn run -c 5` on a compute partition (6 sources hold a bound name, of which 2 names were produced under this run's id, 2 by a peer run and 2 are pre-existing names this run bound), and the 1 and the 4 that re-parked listed with the token that is genuinely missing</p></div>
+</div>
+<div class="r-comment" data-section="s51" data-id="c-run-r-20261111T130818506279-sib-isn-pin-0-11-1" data-who="reckon-build" data-when="2026-11-11T13:35:14.917Z">
+    <div class="r-comment-body"><p>sib-isn-pin-0-11-1: imas-standard-names pinned at 0.11.1 in both pyproject sites (the editable source override and uv.lock unchanged, uv lock exits 0 with a byte-identical lock), and the graph&#x27;s grammar snapshot synced to 0.11.1 through sync_isn_grammar_to_graph with 1038 GrammarToken against the previous active 0.11.0&#x27;s 1031, the five named tokens reading back as 0.11.1 tokens, and tests/standard_names adding no failure id against the stated base (13 failed / 8631 passed in both arms).</p></div>
 </div>
 <div class="r-comment" data-section="s52" data-id="c-run-r-20261109T225937325573-review-of-sib-unaccepted-census-76dd92cc65bc" data-who="reckon-build" data-when="2026-11-09T23:09:38.152Z">
     <div class="r-comment-body"><p>Review of r-20261109T222243401168-sib-unaccepted-census read 197de19cd..76dd92cc6 and scores goal_fidelity 13, evidence 12, scope_discipline 20, durability 11, fit 16, reuse 5 (total 77); five findings, two blocking — the JSON persists only 73 of 920 source assignments and 27 of 116 name assignments, and the cost basis declares no cohort rerun ran while the plan records sib-second-pass naming 83 of 143 sources for USD 1.49.</p></div>
