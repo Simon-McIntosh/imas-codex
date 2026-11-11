@@ -33,7 +33,30 @@
   "plan_slug": "sn-catalog-consistency",
   "plan_version": 4,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "406ccef93fbcfe22b6603dee8d6e09c17a230727",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "\u00a75 now declares a wait on sn-integrity-backlog#s52, which produced the batch list it enumerates.",
+      "reason": "",
+      "when": "2026-11-11T21:14:51.312665+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "406ccef93fbcfe22b6603dee8d6e09c17a230727",
+      "commit_basis": "edit",
+      "note": "\u00a75 now declares a wait on sn-integrity-backlog#s52, which produced the batch list it enumerates.",
+      "reason": "",
+      "when": "2026-11-11T21:14:51.312665+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-catalog-consistency/r-20261111T210221144804-plan-review-of-sn-catalog-consistency.json",
   "review_run_id": "r-20261111T210221144804-plan-review-of-sn-catalog-consistency",
   "reviewed_blob_sha": "8d22cd0566810525d5daa9eb633468e00264f925",
   "rubric": "content",
