@@ -1,0 +1,177 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite": {
+    "command": "uv run --no-sync pytest -p no:cacheprovider -n 8 tests/standard_names",
+    "completed": true,
+    "exit_status": 1,
+    "failure_count": 9,
+    "failure_ids": [
+      "tests/standard_names/test_compose_prompt_examples_round_trip.py::test_nc_rule_bad_example_has_declared_public_oracle_disposition[NC-25-neutral_beam_injector_beam_tangency_radius]",
+      "tests/standard_names/test_cascade_calibration.py::test_matched_policy_rebuilds_from_frozen_scores_and_receipts",
+      "tests/standard_names/test_geometry_enumeration_collapse.py::test_unregistered_arc_endpoint_rejects_the_ordinal_compound",
+      "tests/standard_names/test_gap_rule_verdicts.py::TestStoredGapReplay::test_genuine_demand_still_asks_for_a_token[subject-lithium_6]",
+      "tests/standard_names/test_gap_rule_verdicts.py::TestSettledFoldCoverage::test_only_grammar_resolved_folds_are_non_actionable",
+      "tests/standard_names/test_gap_rule_verdicts.py::TestSettledFoldCoverage::test_contextual_folds_remain_explicitly_unresolved_and_actionable",
+      "tests/standard_names/test_gap_rule_verdicts.py::TestOrdinalSamples::test_ordinal_gap_is_a_rule_violation_not_a_missing_token[position-thick_line_first_point-None]",
+      "tests/standard_names/test_gap_rule_verdicts.py::TestOrdinalSamples::test_ordinal_gap_is_a_rule_violation_not_a_missing_token[position-arc_of_circle_start_point-None]",
+      "tests/standard_names/test_gap_rule_verdicts.py::TestDdCoordinateFieldNames::test_an_isotope_suffix_is_not_a_dd_field_name"
+    ],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T235848757037-sib-reconcile-source-drop/gate-logs/head-suite-final.log",
+    "revision": "dfdb2f1bee7748aa0860da41d948f8472e04452d"
+  },
+  "assertion_analysis": [
+    {
+      "file": "tests/standard_names/test_reconcile_keeps_sources.py",
+      "lines": "98-105",
+      "regression": "Restore the unconditional source-edge deletion and pending-stage update; the source-presence, drafted-stage and producer assertions fail."
+    },
+    {
+      "file": "tests/standard_names/test_reconcile_keeps_sources.py",
+      "lines": "121-123",
+      "regression": "Make the guard reject every name; the accepted electron_temperature control no longer becomes pending with an extracted source."
+    },
+    {
+      "self_referential_assertions": "none found"
+    }
+  ],
+  "baseline_suite": {
+    "command": "uv run --no-sync pytest -p no:cacheprovider -n 8 tests/standard_names",
+    "completed": true,
+    "exit_status": 1,
+    "failure_count": 13,
+    "failure_ids": [
+      "tests/standard_names/test_compose_prompt_examples_round_trip.py::test_nc_rule_bad_example_has_declared_public_oracle_disposition[NC-25-neutral_beam_injector_beam_tangency_radius]",
+      "tests/standard_names/test_cascade_calibration.py::test_matched_policy_rebuilds_from_frozen_scores_and_receipts",
+      "tests/standard_names/test_catalog_layout_hierarchy.py::TestOrderingCycleDetection::test_export_ledgers_cycle_and_writes_packet",
+      "tests/standard_names/test_gap_rule_verdicts.py::TestStoredGapReplay::test_genuine_demand_still_asks_for_a_token[subject-lithium_6]",
+      "tests/standard_names/test_manifest_generability.py::test_every_manifest_source_is_carried_or_names_its_blocking_mechanism",
+      "tests/standard_names/test_geometry_enumeration_collapse.py::test_unregistered_arc_endpoint_rejects_the_ordinal_compound",
+      "tests/standard_names/test_manifest_generability.py::test_a_cut_refuses_a_manifest_it_cannot_generate_rather_than_counting",
+      "tests/standard_names/test_manifest_generability.py::test_a_manifest_whose_sources_all_reach_a_name_is_not_refused",
+      "tests/standard_names/test_gap_rule_verdicts.py::TestSettledFoldCoverage::test_only_grammar_resolved_folds_are_non_actionable",
+      "tests/standard_names/test_gap_rule_verdicts.py::TestSettledFoldCoverage::test_contextual_folds_remain_explicitly_unresolved_and_actionable",
+      "tests/standard_names/test_gap_rule_verdicts.py::TestOrdinalSamples::test_ordinal_gap_is_a_rule_violation_not_a_missing_token[position-thick_line_first_point-None]",
+      "tests/standard_names/test_gap_rule_verdicts.py::TestOrdinalSamples::test_ordinal_gap_is_a_rule_violation_not_a_missing_token[position-arc_of_circle_start_point-None]",
+      "tests/standard_names/test_gap_rule_verdicts.py::TestDdCoordinateFieldNames::test_an_isotope_suffix_is_not_a_dd_field_name"
+    ],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T235848757037-sib-reconcile-source-drop/gate-logs/base-suite.log",
+    "revision": "9b42761afdd8c5f59d5b523a35ca55b1608fd19e"
+  },
+  "call_sites": [
+    "imas_codex/standard_names/graph_store/graph_audits.py:2186",
+    "imas_codex/standard_names/graph_ops.py:201",
+    "imas_codex/standard_names/graph_store/__init__.py:81"
+  ],
+  "completed_at": "2026-11-11T05:28:47Z",
+  "dimension_dispositions": {
+    "scope_discipline": {
+      "kind": "exempted",
+      "reason": "the score rests on the two scope findings, both answered by explicit crew widen grants",
+      "recorded_at": "2026-11-11T05:31:25.785372+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-11T04:52:51Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "graph_audits.py was granted by the coordinator with crew widen after the node located the fix site there; it is in the run's node write_paths",
+      "recorded_at": "2026-11-11T05:31:01.050801+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "tests/standard_names/test_reconcile_descriptionless.py was granted by the coordinator with crew widen; it is in the run's node write_paths",
+      "recorded_at": "2026-11-11T05:31:13.028426+00:00"
+    }
+  },
+  "findings": [
+    {
+      "disposition": null,
+      "file": "imas_codex/standard_names/graph_store/graph_audits.py",
+      "line": 2248,
+      "severity": "blocking",
+      "text": "The production implementation is outside the dispatch's exclusive scope, which lists graph_source_bindings.py, source_invariant.py and graph_foundation.py but not graph_audits.py; the source manifest's orientation_write_paths list cannot silently expand the prompt fence, so this change must be returned for an explicit scope decision before landing."
+    },
+    {
+      "disposition": null,
+      "file": "tests/standard_names/test_reconcile_descriptionless.py",
+      "line": 37,
+      "severity": "blocking",
+      "text": "This added seed map and the changes in this test file are absent from both the dispatch write-path fence and the source manifest's orientation_write_paths, so the test edits exceed the exclusive write grant and must be resolved before landing."
+    },
+    {
+      "disposition": "exempted",
+      "disposition_reason": "The source manifest states the base revision, the log has a completed summary and failure ids, and the comparison produces zero added failures; the missing header limits reproducibility but does not alter the measured set.",
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T235848757037-sib-reconcile-source-drop/gate-logs/base-suite.log",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "The base suite log starts with a benchmark warning and has no revision, tree or command header, so the output itself does not bind the 13-failure baseline to the stated base revision."
+    }
+  ],
+  "justifications": {
+    "durability": "tests/standard_names/test_reconcile_keeps_sources.py:98-105 fails if the old path releases the only producer, and lines 121-123 preserve the valid-name re-open; these assert literal lifecycle state rather than comparing output to the input variable.",
+    "evidence": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T235848757037-sib-reconcile-source-drop/base-reconcile-reproduction.log records 1 failed and 1 passed, /home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T235848757037-sib-reconcile-source-drop/gate-logs/graph-head-final.log records 9 passed, and the head suite's 9 failure ids are contained in the base suite's 13; /home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T235848757037-sib-reconcile-source-drop/gate-logs/base-suite.log lacks its own revision and command header.",
+    "fit": "imas_codex/standard_names/graph_store/graph_audits.py:2272-2291 uses existing typed local-import and logging patterns, with no plan-labelled source names.",
+    "goal_fidelity": "imas_codex/standard_names/graph_store/graph_audits.py:2285-2291 partitions candidates by the strict writer parser, and docs/evidence/fragments/sn-integrity-backlog/sib-reconcile-source-drop.html:56-68 records the signed restore and 4-to-3 live read.",
+    "reuse": "imas_codex/standard_names/graph_store/graph_audits.py:2273-2275 delegates strict validation to grammar_adapter.parse_canonical_name, whose owner at imas_codex/standard_names/grammar_adapter.py:117-125 performs strict parse and exact compose equality.",
+    "scope_discipline": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T235848757037-sib-reconcile-source-drop/prompt.txt:81-87 grants six paths, but the final diff also changes imas_codex/standard_names/graph_store/graph_audits.py and tests/standard_names/test_reconcile_descriptionless.py."
+  },
+  "project": "imas-codex",
+  "report_lines": [
+    "VERDICT goal: The source prompt goal is to find and close the startup reconcile that left a fourth live draft without a DD source; the fragment names the responsible reconcile and the final code keeps sources for names the strict parser refuses (/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T235848757037-sib-reconcile-source-drop/prompt.txt:37; docs/evidence/fragments/sn-integrity-backlog/sib-reconcile-source-drop.html:34-39).",
+    "VERDICT done_when: The source prompt requires base reproduction, head pass, zero new suite failure ids and a signed restore from four sourceless drafts to three; /home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T235848757037-sib-reconcile-source-drop/base-reconcile-reproduction.log:33-34, /home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T235848757037-sib-reconcile-source-drop/gate-logs/graph-head-final.log:27-28, /home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T235848757037-sib-reconcile-source-drop/gate-logs/base-suite.log:868-881, /home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T235848757037-sib-reconcile-source-drop/gate-logs/head-suite-final.log:808-818 and docs/evidence/fragments/sn-integrity-backlog/sib-reconcile-source-drop.html:44-68 record these results (/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T235848757037-sib-reconcile-source-drop/prompt.txt:107-108).",
+    "VERDICT write_paths: The dispatch fence grants imas_codex/standard_names/graph_store/graph_source_bindings.py, imas_codex/standard_names/source_invariant.py, imas_codex/standard_names/graph_store/graph_foundation.py, tests/standard_names/test_reconcile_keeps_sources.py, the evidence fragment and figure directory; the final diff also changes imas_codex/standard_names/graph_store/graph_audits.py and tests/standard_names/test_reconcile_descriptionless.py outside that fence (/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T235848757037-sib-reconcile-source-drop/prompt.txt:81-87; /home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T235848757037-sib-reconcile-source-drop/manifest.md:3).",
+    "VERDICT manifest: The source manifest records its base, nine commits, test results, reproduction, live restore and rubric self-check, while its orientation path list conflicts with the dispatch fence (/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T235848757037-sib-reconcile-source-drop/manifest.md:1-18, 91-116); this review is complete at [manifest.md](/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T045122048869-review-of-sib-reconcile-source-drop-95ee43c7becc/manifest.md), with two parsed records and 0 added suite failures.",
+    "VERDICT diff: I reviewed all nine commits from 825e9077361aaecd6c5e3fc9dca1a4805842c167 through 95ee43c7becccfb1b463d93212d7840fa1609ad2 against base 9b42761afdd8c5f59d5b523a35ca55b1608fd19e; the final diff changes imas_codex/standard_names/graph_store/graph_audits.py, tests/standard_names/test_reconcile_keeps_sources.py, tests/standard_names/test_reconcile_descriptionless.py, docs/evidence/fragments/sn-integrity-backlog/sib-reconcile-source-drop.html and docs/figures/sn-integrity-backlog/sib-reconcile-source-drop/sourceless-drafts.svg.",
+    "CALL_SITES: imas_codex/standard_names/graph_store/graph_audits.py:2186, imas_codex/standard_names/graph_ops.py:201, imas_codex/standard_names/graph_store/__init__.py:81",
+    "SCORE goal_fidelity: 19",
+    "JUSTIFICATION goal_fidelity: graph_audits.py:2285-2291 partitions candidates by the strict writer parser, and the evidence fragment records the signed restore and the 4-to-3 live read at lines 56-68.",
+    "SCORE evidence: 15",
+    "JUSTIFICATION evidence: base-reconcile-reproduction.log records 1 failed and 1 passed, graph-head-final.log records 9 passed, and the head suite's 9 failure ids are contained in the base suite's 13; base-suite.log lacks its own revision and command header.",
+    "SCORE scope_discipline: 6",
+    "JUSTIFICATION scope_discipline: source prompt.txt:81-87 grants six paths, but the final diff also changes graph_audits.py and test_reconcile_descriptionless.py.",
+    "SCORE durability: 18",
+    "JUSTIFICATION durability: test_reconcile_keeps_sources.py:98-105 fails if the old path releases the only producer, and lines 121-123 preserve the valid-name re-open; these assert literal lifecycle state rather than comparing output to the input variable.",
+    "SCORE fit: 18",
+    "JUSTIFICATION fit: graph_audits.py:2272-2291 uses the existing typed local-import and logging style, with no plan-labelled source names.",
+    "SCORE reuse: 20",
+    "JUSTIFICATION reuse: graph_audits.py:2273-2275 delegates strict validation to grammar_adapter.parse_canonical_name, whose owner at grammar_adapter.py:117-125 performs strict parse and exact compose equality.",
+    "FINDING imas_codex/standard_names/graph_store/graph_audits.py:2248 blocking: The production implementation is outside the dispatch's exclusive scope, which lists graph_source_bindings.py, source_invariant.py and graph_foundation.py but not graph_audits.py; the source manifest's orientation_write_paths list cannot silently expand the prompt fence, so this change must be returned for an explicit scope decision before landing.",
+    "FINDING tests/standard_names/test_reconcile_descriptionless.py:37 blocking: This added seed map and the changes in this test file are absent from both the dispatch write-path fence and the source manifest's orientation_write_paths, so the test edits exceed the exclusive write grant and must be resolved before landing.",
+    "FINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T235848757037-sib-reconcile-source-drop/gate-logs/base-suite.log:1 non-blocking: The base suite log starts with a benchmark warning and has no revision, tree or command header, so the output itself does not bind the 13-failure baseline to the stated base revision; disposition exempted because the source manifest states the base revision and the log's summary and failure ids support the measured set, though the missing header limits reproducibility."
+  ],
+  "review_run_id": "r-20261111T045122048869-review-of-sib-reconcile-source-drop-95ee43c7becc",
+  "reviewed_base_sha": "9b42761afdd8c5f59d5b523a35ca55b1608fd19e",
+  "reviewed_commits": [
+    "825e9077361aaecd6c5e3fc9dca1a4805842c167",
+    "e7eb707b5e96055c340ae2c22fc37497840421a2",
+    "a34259584042c785c17f3c25674963376b243381",
+    "8563194f4111e33d2cef9720ad0389004b63acc2",
+    "840a17d1eba46ad46af5842c06d09a3ebe56cfbe",
+    "af8ee7841fd8af4bdb7950d4fc46ce715d06f8a9",
+    "dfdb2f1bee7748aa0860da41d948f8472e04452d",
+    "16c8bcb218ef32f3482175fc6e5c98fc45e91f3a",
+    "95ee43c7becccfb1b463d93212d7840fa1609ad2"
+  ],
+  "reviewed_head_sha": "95ee43c7becccfb1b463d93212d7840fa1609ad2",
+  "reviewed_run_id": "r-20261110T235848757037-sib-reconcile-source-drop",
+  "scores": {
+    "durability": 18,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 6
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T05:32:24.848927+00:00",
+  "total": 96,
+  "verdicts": {
+    "diff": "I reviewed all nine commits from 825e9077361aaecd6c5e3fc9dca1a4805842c167 through 95ee43c7becccfb1b463d93212d7840fa1609ad2 against base 9b42761afdd8c5f59d5b523a35ca55b1608fd19e; the final diff changes imas_codex/standard_names/graph_store/graph_audits.py, tests/standard_names/test_reconcile_keeps_sources.py, tests/standard_names/test_reconcile_descriptionless.py, docs/evidence/fragments/sn-integrity-backlog/sib-reconcile-source-drop.html and docs/figures/sn-integrity-backlog/sib-reconcile-source-drop/sourceless-drafts.svg.",
+    "done_when": "The source prompt requires base reproduction, head pass, zero new suite failure ids and a signed restore from four sourceless drafts to three; /home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T235848757037-sib-reconcile-source-drop/base-reconcile-reproduction.log:33-34, /home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T235848757037-sib-reconcile-source-drop/gate-logs/graph-head-final.log:27-28, /home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T235848757037-sib-reconcile-source-drop/gate-logs/base-suite.log:868-881, /home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T235848757037-sib-reconcile-source-drop/gate-logs/head-suite-final.log:808-818 and docs/evidence/fragments/sn-integrity-backlog/sib-reconcile-source-drop.html:44-68 record these results (/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T235848757037-sib-reconcile-source-drop/prompt.txt:107-108).",
+    "goal": "The source prompt goal is to find and close the startup reconcile that left a fourth live draft without a DD source; the fragment names the responsible reconcile and the final code keeps sources for names the strict parser refuses (/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T235848757037-sib-reconcile-source-drop/prompt.txt:37; docs/evidence/fragments/sn-integrity-backlog/sib-reconcile-source-drop.html:34-39).",
+    "manifest": "The source manifest records its base, nine commits, test results, reproduction, live restore and rubric self-check, while its orientation path list conflicts with the dispatch fence (/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T235848757037-sib-reconcile-source-drop/manifest.md:1-18, 91-116); this review is complete at [manifest.md](/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T045122048869-review-of-sib-reconcile-source-drop-95ee43c7becc/manifest.md), with two parsed records and 0 added suite failures.",
+    "write_paths": "The dispatch fence grants imas_codex/standard_names/graph_store/graph_source_bindings.py, imas_codex/standard_names/source_invariant.py, imas_codex/standard_names/graph_store/graph_foundation.py, tests/standard_names/test_reconcile_keeps_sources.py, the evidence fragment and figure directory; the final diff also changes imas_codex/standard_names/graph_store/graph_audits.py and tests/standard_names/test_reconcile_descriptionless.py outside that fence (/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T235848757037-sib-reconcile-source-drop/prompt.txt:81-87; /home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T235848757037-sib-reconcile-source-drop/manifest.md:3)."
+  }
+}
