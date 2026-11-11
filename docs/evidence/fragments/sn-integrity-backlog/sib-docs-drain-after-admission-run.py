@@ -50,17 +50,24 @@ def read_state(gc):
     }
 
 
-def read_receipt(gc, before):
+def read_receipt(gc, before, directory):
     rows = gc.query(
-        "MATCH (r:SNRun) WHERE r.started_at >= datetime($since) "
-        "RETURN properties(r) AS receipt ORDER BY r.started_at LIMIT 100",
-        since=before["observed_at"],
+        "MATCH (r:SNRun) WHERE r.cost_limit = 20 "
+        "RETURN properties(r) AS receipt ORDER BY r.created_at DESC LIMIT 100",
+    )
+    (directory / "receipt-candidates.json").write_text(
+        json.dumps([dict(row["receipt"]) for row in rows], indent=2, default=str) + "\n"
     )
     candidates = []
     for row in rows:
         receipt = dict(row["receipt"])
         flags = json.loads(receipt.get("invocation_flags") or "{}")
-        if flags.get("flush") and flags.get("cost_limit") == 20:
+        started = datetime.fromisoformat(str(receipt["started_at"]))
+        if (
+            started >= datetime.fromisoformat(before["observed_at"])
+            and flags.get("flush")
+            and flags.get("cost_limit") == 20
+        ):
             candidates.append(receipt)
     assert len(candidates) == 1, f"ambiguous drain receipt: {candidates}"
     receipt = candidates[0]
@@ -118,7 +125,7 @@ def main():
         state = read_state(gc)
         if args.phase != "before":
             before = json.loads((directory / "before.json").read_text())
-            state.update(read_receipt(gc, before))
+            state.update(read_receipt(gc, before, directory))
     state["revision"] = (
         subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
         if (Path.cwd() / ".git").exists()
