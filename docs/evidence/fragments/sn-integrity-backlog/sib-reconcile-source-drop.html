@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>The descriptionless-name reconcile released a producer the writer cannot re-mint</title></head>
+<body>
+<section id="sib-reconcile-source-drop-record">
+<h2 id="sib-reconcile-source-drop-result">The fourth sourceless live draft was released by the startup reconcile, not by compose</h2>
+<p>A live draft lost its last DD source because <code>reconcile_descriptionless_composed_names</code> deletes a name's <code>PRODUCED_NAME</code> edge and returns the source to <code>extracted</code> on the assumption that compose will write the name again. That assumption fails for a spelling the strict grammar writer refuses. The name then sits live at <code>pending</code> with no producer, no path to a description, and no path back to a binding: <code>sn attach</code> refuses a <code>pending</code> target and the stage advance requires the description only compose could write. The reconcile now partitions its candidates by that predicate and releases a source only for names compose can mint again.</p>
+
+<h3 id="sib-reconcile-source-drop-identity">The live draft that became sourceless</h3>
+<table id="sib-reconcile-source-drop-target">
+<thead><tr><th>Identity</th><th>DD source</th><th>Before 2026-11-10T20:19:35Z</th><th>After</th></tr></thead>
+<tbody>
+<tr><td><code>second_local_tangential_width_of_fiber_bundle</code></td><td><code>dd:spectrometer_visible/channel/fibre_bundle/geometry/x2_width</code><br>Full width of the rectangular visible-spectrometer fibre-bundle entrance aperture along its second local tangential axis.</td><td>drafted, one composed producer, recorded spend USD 0.003509</td><td>pending, description null, no producer, source <code>extracted</code> with its <code>produced_sn_id</code> cleared</td></tr>
+</tbody></table>
+<p>The strict writer refuses the <code>_fiber_bundle</code> spelling; <code>second_local_tangential_width_of_fibre_bundle</code> is the grammar-valid alternative. The name was retired as a refused pending placeholder on 2026-11-08 and revived by compose on 2026-11-10, so this release is the second time the same spelling decided its fate.</p>
+
+<h3 id="sib-reconcile-source-drop-timeline">The step that dropped the last source</h3>
+<table id="sib-reconcile-source-drop-steps">
+<thead><tr><th>Time (UTC, 2026-11-10)</th><th>Event</th><th>Effect on the source</th></tr></thead>
+<tbody>
+<tr><td>19:56:29Z</td><td>compose <code>revive_dead_end_identity</code>, run <code>47a566d7-70f8-43ce-91d8-67cc8f7d1cad</code></td><td>superseded → drafted; the provisional producer survives under recorded-spend protection</td></tr>
+<tr><td>20:10:57Z</td><td>sourceless-draft read, before</td><td><strong>3</strong> names</td></tr>
+<tr><td>20:19:35Z</td><td>startup <code>reconcile_descriptionless_composed_names</code> (<code>imas_codex/standard_names/graph_store/graph_audits.py</code>)</td><td>logs “re-opened 1 name(s) carrying no description — 1 source(s) returned to 'extracted'”; deletes the edge, drops the stage, clears <code>produced_sn_id</code></td></tr>
+<tr><td>20:24:30Z</td><td><code>reconcile_standard_name_source_paths</code></td><td>re-materialises <code>source_paths</code> (which is why the name's <code>updated_at</code> moved twice)</td></tr>
+<tr><td>20:59:51Z</td><td>sourceless-draft read, after</td><td><strong>4</strong> names</td></tr>
+</tbody></table>
+<p>The two other startup reconciles that ran in the same window are exonerated: <code>reconcile_grammar_segments</code> realigned <code>ion_source_rate</code>, and <code>reconcile_source_status_liveness</code> returned 0 orphaned sources. The re-open writes no <code>StandardNameChange</code> and no supersession, so the release is silent, and the export gate reports it only later as a sourceless draft with population <code>dropped_edge</code>.</p>
+
+<figure id="sib-reconcile-source-drop-fig">
+<img src="/imas-codex/figures/sn-integrity-backlog/sib-reconcile-source-drop/sourceless-drafts.svg" alt="Sourceless live drafts step from 3 to 4 at the reconcile and back to 3 at the restore; the red marker is the released draft."/>
+<figcaption>Export-gate sourceless live drafts across the 2026-11-10 flush startup. The level changes at the two events, not at the read times: the reconcile releases the producer at 20:19:35Z and the signed restore rebinds it at 2026-11-11T01:27:12Z. The markers are the three reads that pin the level on either side of each jump.</figcaption>
+</figure>
+
+<h3 id="sib-reconcile-source-drop-invariant">Why the writer invariant did not refuse it</h3>
+<p>The source invariant is consulted by writers around a <em>move</em> or a <em>bind</em>: <code>find_sourceless_live_names</code> and <code>require_producing_sources</code> in <code>source_invariant.py</code> answer whether a live name still has a producer, and <code>supersede_names_losing_last_source</code> is the writer that acts on the answer. This reconcile is neither. It performs a bare edge deletion plus a stage change in one statement, consults no invariant, and has no branch that could refuse. The invariant is correct and was never asked.</p>
+
+<h3 id="sib-reconcile-source-drop-fix">The repair</h3>
+<p><code>graph_foundation._strict_grammar_accepts(name)</code> answers whether the strict writer can emit the spelling again, using the same strict parse and lossless recompose round trip the writer uses. The parse diagnostics cannot stand in for it: <code>_parse_grammar</code> reports <code>[]</code> for a rejection and for a valid name carrying warnings alike, so it cannot distinguish accept from reject. An unavailable grammar package answers <em>not accepted</em>, because compose cannot mint a name without the parser either.</p>
+<p><code>reconcile_descriptionless_composed_names</code> now reads its candidates, partitions them by that predicate, and re-opens only the names compose can mint again. A name the strict writer rejects keeps its composed producer, stays live and claimable, and is logged by id: its only correct destination is a signed retirement with a named successor, which is a separate authority. Everything else about the re-open is unchanged, including the active-claim exclusion and the idempotence rule.</p>
+<p>Commits: <code>e7eb707b5</code> (product), <code>825e90773</code> (regression cases), <code>a34259584</code> (tolerate a query double's row shape), <code>8563194f4</code> (seed spellings the strict writer accepts).</p>
+
+<h3 id="sib-reconcile-source-drop-gates">Gates</h3>
+<table id="sib-reconcile-source-drop-gate-table">
+<thead><tr><th>Gate</th><th>Base <code>9b42761af</code></th><th>Head <code>8563194f4</code></th><th>Evidence</th></tr></thead>
+<tbody>
+<tr><td><code>tests/standard_names</code>, <code>-n 8</code></td><td>13 failed, 8625 passed, 12 skipped</td><td>9 failed, 8630 passed, 11 skipped</td><td><a href="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T235848757037-sib-reconcile-source-drop/gate-logs/base-suite.log">base</a>, <a href="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T235848757037-sib-reconcile-source-drop/gate-logs/head-suite-seeds.log">head</a></td></tr>
+<tr><td>Graph tier, <code>-m graph</code></td><td>1 failed, 1 passed (regression file only)</td><td>9 passed, 1 warning in 74.69s (both reconcile files)</td><td><a href="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T235848757037-sib-reconcile-source-drop/base-reconcile-reproduction.log">base</a>, <a href="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T235848757037-sib-reconcile-source-drop/gate-logs/graph-head-seeds.log">head</a></td></tr>
+</tbody></table>
+<p><strong>The suite arms add no failure id.</strong> The nine head failures are all present in the base arm's thirteen; the four base-only ids are pre-existing flakes (<code>test_manifest_generability</code> ×3 and <code>test_catalog_layout_hierarchy::test_export_ledgers_cycle_and_writes_packet</code>) that did not recur. The delta is computed from the two failure-id files, not from the counts: <a href="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T235848757037-sib-reconcile-source-drop/gate-logs/base-failures.txt">base ids</a>, <a href="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T235848757037-sib-reconcile-source-drop/gate-logs/head-failures-seeds.txt">head ids</a>. The head arm was taken twice, before and after the seed fix, and reports the same totals and the same nine ids both times.</p>
+<p>The base arm is a <code>git archive</code> extraction of the stated revision on a compute node, with the shared environment reused read-only. The graph cases run on the disposable Neo4j the standard-names conftest provisions; the project graph is refused by that fixture.</p>
+<p>The graph-tier seed fix matters to this node's own evidence. The sibling reconcile cases seeded synthetic ids of the form <code>test_reconcile_descriptionless__&lt;tag&gt;_&lt;uuid&gt;</code>, which the strict writer rejects, so the guarded reconcile declined them and three cases measured nothing. Each case now seeds one catalog-shaped spelling the strict writer accepts, kept distinct per case; the cleanup fixture wipes those spellings as well as the prefixed ids. All nine graph cases in the two files pass at head.</p>
+
+<h3 id="sib-reconcile-source-drop-control">Negative control</h3>
+<p>Declared: <em>revert the writer fix: the regression test fails, leaving a sourceless live name.</em> Performed by restoring both changed modules from <code>9b42761af</code> in place, running the single case, and copying the fixed files back. <a href="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T235848757037-sib-reconcile-source-drop/negative-control.log">The control log</a> reports <code>FAILED test_unrecomposable_name_is_not_left_sourceless</code> reading <code>{'stage': 'pending', 'status': 'draft', 'producers': [], 'receipts': []}</code> — the released name is live with nothing producing it. At head the same case passes and reads <code>stage='drafted'</code> with the composed producer retained.</p>
+
+<h3 id="sib-reconcile-source-drop-restore">The dropped binding, restored through the signed path</h3>
+<p>The <code>flush-unaccepted</code> job was gone before any write. The export gate read <strong>4</strong> sourceless drafts before the restore, this name among them.</p>
+<p><code>sn attach</code> is the ordinary verb for binding an unbound path, and it could not be used: it refuses a target whose stage may not hold a binding, reporting “<code>second_local_tangential_width_of_fiber_bundle</code> is at name_stage <code>pending</code> and may not acquire a source; only accepted, approved, drafted, reviewed can hold a binding”. That refusal is the dead end the fix exists to prevent, stated by the code itself. The restore therefore used <code>bind_recovery_sources</code>, the transactional recovery binder the catalog path uses, together with a <code>StandardNameChange</code> receipt recorded in the same judgement:</p>
+<table id="sib-reconcile-source-drop-restore-table">
+<thead><tr><th>Field</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>Before</td><td>stage <code>pending</code>, source <code>extracted</code>, <code>produced_sn_id</code> null, 0 produced edges</td></tr>
+<tr><td>Bound</td><td><code>dd:spectrometer_visible/channel/fibre_bundle/geometry/x2_width</code>, source_type <code>dd</code>, status <code>attached</code></td></tr>
+<tr><td>Receipt</td><td><code>sn-change:7b9cd45b-45be-4e0c-9166-d158efebbd98</code>, operation <code>restore_reconcile_released_source</code>, origin <code>signed_restore</code></td></tr>
+<tr><td>After</td><td>stage <code>pending</code>, source <code>attached</code>, <code>produced_sn_id</code> set, 1 produced edge</td></tr>
+<tr><td>Export gate</td><td><strong>4 → 3</strong> sourceless live drafts, gate failures 0</td></tr>
+</tbody></table>
+<p>The runner is <a href="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T235848757037-sib-reconcile-source-drop/restore-binding.py"><code>restore-binding.py</code></a>: dry-run by default posture, <code>--apply</code> explicit, with a compare-and-swap preflight that refuses unless the graph is exactly in the state the reconcile left. A later read at the close of this node returns <strong>3</strong> sourceless drafts, gate failures 0, and they are <code>line_averaged_neon_density</code>, <code>radius_of_soft_xray_detector</code> and <code>ratio_of_diamagnetic_vorticity_to_major_radius</code> — the unchanged pre-existing population, all at population <code>dropped_edge</code>.</p>
+
+<h3 id="sib-reconcile-source-drop-scope">Scope</h3>
+<p>No plan status, declaration or followup was edited. The suite arms ran on <code>all_debug</code>; the graph cases and the live reads are light and ran from the coordinator's node. No model calls were made by this node, so provider spend is zero.</p>
+</section>
+</body>
+</html>
