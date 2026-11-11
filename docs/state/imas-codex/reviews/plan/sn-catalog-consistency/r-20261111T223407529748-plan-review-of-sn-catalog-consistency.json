@@ -1,0 +1,64 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-11T23:08:47.631Z",
+  "dispatched_at": "2026-11-11T23:01:28Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:76",
+      "id": "reasoning-1",
+      "reason": "a worker sent to close on a count \"derived from the domain audit's output\" would find the audit cannot produce it, and would either add an undeclared field or silently fall back to the census measure the section just replaced.",
+      "text": "the section says \"the family count is derived from the domain audit's output, so one instrument reads physics_domain for both measures\", but the audit's row set and `NameDomainState` carry no `physical_base`, and family membership is a census concept (`census_families` groups rows by `n.physical_base`) \u2014 so the second done-when item cannot be measured from the instrument the section names without an addition the section does not declare among its deliverables",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:76",
+      "id": "wiring-1",
+      "reason": "removing that reading mid-pass leaves \u00a72's before/after and \u00a73's comparison resting on two differently scoped instruments, so the removal needs a declared ordering or dependency rather than a permissive sentence.",
+      "text": "the new sentence authorises removing \"the consistency census's own domain reading\", but \u00a72's third done-when item counts with \"the same committed instrument\" at both ends and \u00a73's second item records the census's divergent-family count beside \u00a72's reading; \u00a75 depends only on `sn-integrity-backlog#s52`, and followup f-scc-001 explicitly lets \u00a72 and \u00a75 run together",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:77",
+      "id": "done_when-1",
+      "reason": "names the continuation adds can raise the count past 98 with every \u00a75 repair complete, so the verdict would report the concurrent run rather than this section's work; \u00a72's identical defect was answered by restricting the comparison to a population measured at both ends.",
+      "text": "the measure requires the family count to be \"lower than the consistency census's 2026-11-10 reading of 98\", an absolute comparison against a reading taken over 130 families and 3,034 names while \u00a71's lead ruling lets the full-DD continuation run before or beside this pass",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "fc99c61f0f311bf33b6ca594ba565398169827b9",
+  "plan_fingerprint": "d07ec8cd1ca27bfcf59d0a171e8abfb6566d48044de563ecb2a683d82fba73b3",
+  "plan_slug": "sn-catalog-consistency",
+  "plan_version": 7,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261111T223407529748-plan-review-of-sn-catalog-consistency",
+  "reviewed_blob_sha": "790157328b6237b9a671b9984feb31eb316501ae",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 sib-consistency-batches.json, sib-consistency-census.json, sn-catalog-grouping#s3 and sn-integrity-backlog#s52 all resolve.",
+    "done_when": "a finding \u2014 \u00a75 compares an absolute family count against the 2026-11-10 reading of 98 over a universe a concurrent run keeps changing.",
+    "evidence_paths": "pass \u2014 \u00a75 introduces no evidence or gate path; the artifacts it cites are committed under docs/evidence/fragments/.",
+    "naming": "pass \u2014 the changed text carries no plan labels, stage names, ticket numbers or changelog prose.",
+    "reasoning": "a finding \u2014 the section states that one instrument reads physics_domain for both measures, but the audit's output carries no family key, so the family count is not derivable from it as the section claims.",
+    "single_goal": "pass \u2014 \u00a75 closes on one stored-decision agreement measure, and the change deliberately binds the family count to the same instrument.",
+    "wiring": "a finding \u2014 \u00a75's new authority to remove the consistency census's domain reading changes the instrument \u00a72 and \u00a73 measure with, and \u00a75 declares no relationship to either."
+  },
+  "section_digests": {
+    "_document": "60da5223ce5c0ad0f73555a1988b66e7737b9e961a9e0c99e0cd3f569bc93745",
+    "s1": "c69f79e72b8fe8652e9dcd8632a35ca7eaa3a205fd5ee3e2ee98bc74afc136ba",
+    "s2": "d6eeae749f1fbb4116cbd68cb82b00351768cf4aeb4fa0b37300fa91b5c170f7",
+    "s3": "fdb01b1d5aaf1af353a55b177f9d2b8b87660bf4648fb8922544d39899e8a2c7",
+    "s4": "ef7bd7f314233248216f8598211014764b74d1c74c308db48db9ab9390a33d55",
+    "s5": "ad26c5816b0012dc8dd8aedd5369ecbe7b9667ddec42fce60c25914b11c6795c",
+    "s6": "e35c4bf32892d9b90e8392b5e1171957f4973d937daaccdee3ab610d3c1c937e",
+    "s7": "abb53d14a3cb7db35add3d596e723e7c0e012bbee6e7f328d2b7b520a5956700",
+    "s8": "124c4cffdc2b27efae89ba41f97a27ff57b01c0b53ce596b6c025f1e6523e626"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T23:11:38.676216+00:00",
+  "total": null
+}
