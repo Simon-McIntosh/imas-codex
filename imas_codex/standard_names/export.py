@@ -1604,12 +1604,20 @@ def _graph_node_to_entry_dict(node: dict[str, Any]) -> dict[str, Any]:
 
 
 @lru_cache(maxsize=1)
+def _physical_base_tokens() -> frozenset[str]:
+    """Return the installed ISN vocabulary's physical base tokens."""
+    from imas_standard_names import get_grammar_context
+
+    vocabularies = get_grammar_context()["grammar"]["vocabularies"]
+    return frozenset(vocabularies["physical_bases"])
+
+
+@lru_cache(maxsize=1)
 def _identity_token_segments() -> tuple[dict[str, tuple[str, ...]], frozenset[str]]:
     """Return live token segments and the token classes that denote quantities."""
     from imas_standard_names import get_grammar_context
 
     vocabularies = get_grammar_context()["grammar"]["vocabularies"]
-    physical_bases = set(vocabularies["physical_bases"])
     geometry_carriers = set(vocabularies["geometry_carriers"])
     locus_tokens = set(vocabularies["locus_registry"])
 
@@ -1617,8 +1625,29 @@ def _identity_token_segments() -> tuple[dict[str, tuple[str, ...]], frozenset[st
     for token in locus_tokens:
         segments[token] = ("locus",)
 
-    quantity_tokens = frozenset(physical_bases | geometry_carriers)
+    quantity_tokens = frozenset(set(_physical_base_tokens()) | geometry_carriers)
     return segments, quantity_tokens
+
+
+@lru_cache(maxsize=1024)
+def _identity_quantity_base(identity: str) -> str | None:
+    """Return the physical base *identity* parses to, or ``None``.
+
+    A process token spells a cause: "due to X" names the quantity X as its
+    cause, so a published identity spelled like one still names a quantity of
+    its own.  Only a spelling the installed grammar parses with a physical base
+    says which quantity that is; anything the parser refuses stays a collision.
+    """
+    from imas_standard_names import parse
+
+    try:
+        ir = parse(identity, strict=True).ir
+    except (TypeError, ValueError):
+        return None
+    base = ir.base
+    if base is None or base.token not in _physical_base_tokens():
+        return None
+    return base.token
 
 
 def _token_registry_entry(token: str) -> str:
@@ -1659,7 +1688,13 @@ def _token_registry_entry(token: str) -> str:
 def _identity_token_collision_gate(
     domain_entries: dict[str, list[dict[str, Any]]],
 ) -> GateResult:
-    """Reject published identities equal to non-quantity grammar tokens."""
+    """Reject published identities equal to non-quantity grammar tokens.
+
+    A process token is exempt: "due to X" names the quantity X as its cause, so
+    an identity the grammar parses with a physical base is that quantity rather
+    than the process token standing in for a name.  Every other segment still
+    collides, as does a process token the grammar cannot parse as a quantity.
+    """
     segments_by_token, quantity_tokens = _identity_token_segments()
     issues: list[dict[str, Any]] = []
     for entries in domain_entries.values():
@@ -1669,7 +1704,10 @@ def _identity_token_collision_gate(
             if not segments or identity in quantity_tokens:
                 continue
             registry_entry = _token_registry_entry(identity)
+            process_quantity_base = _identity_quantity_base(identity)
             for segment in segments:
+                if segment == "process" and process_quantity_base is not None:
+                    continue
                 issues.append(
                     {
                         "type": "identity_token_collision",
