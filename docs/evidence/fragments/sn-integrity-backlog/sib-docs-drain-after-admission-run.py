@@ -3,17 +3,265 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import json
 import os
 import subprocess
+from collections import Counter
 from datetime import UTC, datetime
+from decimal import Decimal
+from html.parser import HTMLParser
 from pathlib import Path
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names import pools
+
+class EvidenceHTML(HTMLParser):
+    """Read visible table cells and explicitly bound narrative values."""
+
+    def __init__(self):
+        super().__init__()
+        self.tables = []
+        self.metrics = {}
+        self.table = self.row = self.cell = self.metric = None
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "table":
+            assert self.table is None, "nested evidence table"
+            self.table = []
+        elif tag == "tr" and self.table is not None:
+            self.row = []
+        elif tag in {"td", "th"} and self.row is not None:
+            self.cell = []
+        elif tag == "span" and "data-check" in dict(attrs):
+            key = dict(attrs)["data-check"]
+            assert key not in self.metrics and self.metric is None, "duplicate metric"
+            self.metric = (key, [])
+
+    def handle_data(self, data):
+        if self.cell is not None:
+            self.cell.append(data)
+        if self.metric is not None:
+            self.metric[1].append(data)
+
+    def handle_endtag(self, tag):
+        if tag in {"td", "th"} and self.cell is not None:
+            self.row.append(" ".join("".join(self.cell).split()))
+            self.cell = None
+        elif tag == "tr" and self.row is not None:
+            self.table.append(self.row)
+            self.row = None
+        elif tag == "table" and self.table is not None:
+            self.tables.append(self.table)
+            self.table = None
+        elif tag == "span" and self.metric is not None:
+            key, parts = self.metric
+            self.metrics[key] = "".join(parts).strip()
+            self.metric = None
+
+
+def money(value):
+    return Decimal(str(value)).quantize(Decimal("0.000001"))
+
+
+def validate_receipt(state):
+    """Reconcile phase-ledger observations against the independent run mirrors."""
+    run, costs = state["run"], state["costs"]
+    assert costs and all(row["calls"] == row["priced"] for row in costs)
+    assert len({row["phase"] for row in costs}) == len(costs), "duplicate phase"
+    billed = money(sum(Decimal(str(row["billed_usd"])) for row in costs))
+    assert billed == money(state["billed_usd"]), "snapshot billing disagrees"
+    assert billed == money(run["cost_spent"]), "cost_spent disagrees with ledger"
+    assert billed == money(run["cost_total"]), "cost_total disagrees with ledger"
+    assert sum(row["calls"] for row in costs) == run["events_total"], (
+        "event count disagrees"
+    )
+    assert run["cost_is_exact"] is True, "billing is not exact"
+    assert money(run["cost_limit"]) == 20, "unexpected authorization"
+    assert 0 <= billed <= 20, "billed spend exceeded authorization"
+
+
+def verify_report(before, after, fragment):
+    """Check saved receipts and rendered report values without a live connection."""
+    validate_receipt(after)
+    counts = []
+    for state in (before, after):
+        census, coverage = state["census"], state["coverage"]
+        assert (
+            census["population_count"] == coverage["candidates"] == coverage["with_id"]
+        )
+        assert (
+            sum(
+                census[key]
+                for key in (
+                    "terminal_count",
+                    "terminal_for_run_count",
+                    "claimable_count",
+                    "stranded_count",
+                )
+            )
+            == census["population_count"]
+        ), "census does not reconcile"
+        assert state["instrument_control"]["unknown_stage_stranded_count"] == 1
+        names = state["accepted_names"]
+        assert len({row["id"] for row in names}) == len(names), (
+            "duplicate accepted name"
+        )
+        count = Counter(row["docs_stage"] for row in names)
+        assert count == {
+            row["docs_stage"]: row["count"]
+            for row in state["stages"]
+            if row["name_stage"] == "accepted"
+        }, "accepted-name enumeration disagrees with stage aggregation"
+        counts.append(count)
+    run = after["run"]
+    started = datetime.fromisoformat(run["started_at"])
+    stopped = datetime.fromisoformat(run["stopped_at"])
+    accepted = {
+        row["id"]
+        for row in after["docs_reviewed_under_run_id"]
+        if row["docs_stage"] == "accepted"
+        and row["reviewed_at"] is not None
+        and started <= datetime.fromisoformat(row["reviewed_at"]) <= stopped
+    }
+    prior = {row["id"]: row["docs_stage"] for row in before["accepted_names"]}
+    newly = {name for name in accepted if prior.get(name) != "accepted"}
+    for key, expected in (
+        ("docs_accepted_under_run_id", accepted),
+        ("docs_newly_accepted_under_run_id", newly),
+    ):
+        ids = [row["id"] for row in after[key]]
+        assert len(ids) == len(set(ids)) and set(ids) == expected, key + " disagrees"
+    parsed = EvidenceHTML()
+    parsed.feed(fragment)
+    stage_rows = [["Documentation stage", "Before", "After", "Change"]]
+    for stage in ("accepted", "reviewed", "drafted", "pending", "exhausted"):
+        left, right = (count[stage] for count in counts)
+        delta = right - left
+        change = f"+{delta:,}" if delta > 0 else f"−{-delta:,}" if delta < 0 else "0"
+        stage_rows.append([stage, f"{left:,}", f"{right:,}", change])
+    totals = [sum(count.values()) for count in counts]
+    stage_rows.append(
+        [
+            "Total accepted names",
+            *(f"{n:,}" for n in totals),
+            f"{totals[1] - totals[0]:+,}",
+        ]
+    )
+    census_rows = [["Classification", "Before", "After"]]
+    for label, key in (
+        ("Population", "population_count"),
+        ("Stranded", "stranded_count"),
+        ("Held for run", "terminal_for_run_count"),
+        ("Claimable", "claimable_count"),
+        ("Durably terminal", "terminal_count"),
+        ("Overlapping pool ownership", "overlap_count"),
+    ):
+        census_rows.append([label, *(f"{s['census'][key]:,}" for s in (before, after))])
+    costs = {row["phase"]: row for row in after["costs"]}
+    phase_order = (
+        "generate_docs",
+        "review_docs",
+        "refine_docs",
+        "review_name",
+        "refine_name",
+        "prose_adjudication",
+        "enrich_parents",
+    )
+    assert set(costs) == set(phase_order), "unreported ledger phase"
+    spend_rows = [["Phase", "Ledger events", "USD"]] + [
+        [
+            phase,
+            f"{costs[phase]['calls']:,}",
+            f"{money(costs[phase]['billed_usd']):.6f}",
+        ]
+        for phase in phase_order
+    ]
+    spend_rows.append(
+        ["Total", f"{run['events_total']:,}", f"{money(after['billed_usd']):.6f}"]
+    )
+    assert parsed.tables == [stage_rows, census_rows, spend_rows], (
+        "visible report table drift"
+    )
+    expected_metrics = {
+        "terminal_verdict": "met"
+        if run["stop_reason"] in {"no_eligible_work", "budget_exhausted"}
+        else "failed",
+        "stop_reason": run["stop_reason"],
+        "run_id": run["id"],
+        "billed_usd": f"{money(after['billed_usd']):.6f}",
+        "cost_limit": "20",
+        "unused_usd": f"{money(20 - money(after['billed_usd'])):.6f}",
+        "stranded_after": str(after["census"]["stranded_count"]),
+        "accepted_under_run": str(len(accepted)),
+        "newly_accepted": str(len(newly)),
+        "previously_accepted": str(len(accepted - newly)),
+        "accepted_docs_decline": str(counts[0]["accepted"] - counts[1]["accepted"]),
+        "cost_spent": f"{money(run['cost_spent']):.6f}",
+        "cost_total": f"{money(run['cost_total']):.6f}",
+    }
+    assert parsed.metrics == expected_metrics, "narrative report metric drift"
+    return {
+        "evidence_verified": True,
+        "stop_reason": run["stop_reason"],
+        "terminal_measure_met": run["stop_reason"]
+        in {"no_eligible_work", "budget_exhausted"},
+        "accepted_under_run": len(accepted),
+        "newly_accepted": len(newly),
+    }
+
+
+def check_report_guards(before, after, fragment):
+    """Refuse independent corruptions of visible text and saved billing mirrors."""
+    verify_report(before, after, fragment)
+    cases = {}
+    for field in ("cost_spent", "cost_total", "events_total"):
+        changed = copy.deepcopy(after)
+        changed["run"][field] += 1
+        cases[field] = (changed, fragment)
+    changed = copy.deepcopy(after)
+    text = fragment
+    for field in ("cost_spent", "cost_total"):
+        original = money(after["run"][field])
+        changed["run"][field] += 1
+        target = f'<span data-check="{field}">{original:.6f}</span>'
+        replacement = f'<span data-check="{field}">{original + 1:.6f}</span>'
+        assert text.count(target) == 1, "billing mirror mutation has no unique target"
+        text = text.replace(target, replacement)
+    cases["billing_mirrors_and_report"] = (changed, text)
+    changed = copy.deepcopy(after)
+    changed["run"]["events_total"] += 1
+    target = f"<th>Total</th><td>{after['run']['events_total']:,}</td>"
+    assert fragment.count(target) == 1, "event total mutation has no unique target"
+    cases["event_total_and_report"] = (
+        changed,
+        fragment.replace(
+            target, f"<th>Total</th><td>{changed['run']['events_total']:,}</td>"
+        ),
+    )
+    visible = f"<td>{Counter(row['docs_stage'] for row in after['accepted_names'])['accepted']:,}</td>"
+    assert fragment.count(visible) == 1, "visible table mutation has no unique target"
+    cases["visible_stage_count"] = (after, fragment.replace(visible, "<td>0</td>"))
+    marker = '<span data-check="accepted_under_run">'
+    assert fragment.count(marker) == 1, "narrative mutation has no unique target"
+    cases["visible_run_count"] = (after, fragment.replace(marker, marker + "0"))
+    marker = '<span data-check="terminal_verdict">failed</span>'
+    assert fragment.count(marker) == 1, "completion mutation has no unique target"
+    cases["false_completion_claim"] = (
+        after,
+        fragment.replace(marker, marker.replace("failed", "completed")),
+    )
+    for name, (state, text) in cases.items():
+        try:
+            verify_report(before, state, text)
+        except AssertionError as exc:
+            print(f"REFUSED {name}: {exc}")
+        else:
+            raise AssertionError(f"guard accepted corruption: {name}")
+    print(f"report_guard_checks={len(cases)} all_refused=true")
 
 
 def read_state(gc):
+    from imas_codex.standard_names import pools
+
     groups = pools.identity_state_groups(gc=gc)
     census = pools.classify_identity_state_groups(
         groups, pools.standard_name_pool_predicates()
@@ -128,10 +376,32 @@ def read_receipt(gc, before, directory):
 
 def main():
     parser = argparse.ArgumentParser(__doc__)
-    parser.add_argument("phase", choices=["before", "after", "progress"])
+    parser.add_argument(
+        "phase", choices=["before", "after", "progress", "verify", "self-check"]
+    )
     parser.add_argument("--directory", type=Path, required=True)
+    parser.add_argument(
+        "--fragment",
+        type=Path,
+        default=Path(__file__).with_name(
+            Path(__file__).name.replace("-run.py", ".html")
+        ),
+    )
     args = parser.parse_args()
     directory = args.directory
+    if args.phase in {"verify", "self-check"}:
+        before = json.loads((directory / "before.json").read_text())
+        after = json.loads((directory / "after.json").read_text())
+        fragment = args.fragment.read_text()
+        result = verify_report(before, after, fragment)
+        if args.phase == "self-check":
+            check_report_guards(before, after, fragment)
+        print(json.dumps(result, sort_keys=True))
+        return
+
+    from imas_codex.graph.client import GraphClient
+    from imas_codex.standard_names import pools
+
     with GraphClient() as gc:
         state = read_state(gc)
         if args.phase != "before":
@@ -172,15 +442,11 @@ def main():
     assert census["stranded_count"] == 0, "stranded identities remain"
     assert census["overlap_count"] == 0, "overlapping admission rules"
     if args.phase == "after":
+        validate_receipt(state)
         assert state["run"].get("stop_reason") in {
             "no_eligible_work",
             "budget_exhausted",
         }, "drain did not reach an eligible terminal condition"
-        assert state["run"].get("cost_is_exact") is True, "billing is not exact"
-        assert state["costs"] and all(
-            row["calls"] == row["priced"] for row in state["costs"]
-        )
-        assert state["billed_usd"] <= 20, "billed spend exceeded authorization"
 
 
 if __name__ == "__main__":
