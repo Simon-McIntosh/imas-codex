@@ -1,0 +1,19 @@
+{
+  "classifier_listed": [
+    "planted_sourceless_name"
+  ],
+  "classifier_populations": {
+    "never_bound": 1
+  },
+  "endpoint": "bolt://127.0.0.1:43361",
+  "generated_at": "2026-11-11T22:23:39.272564+00:00",
+  "graph_writes": 1,
+  "graph_writes_note": "disposable Neo4j only; the live graph is untouched",
+  "invariant_bound_excluded": true,
+  "invariant_listed": [
+    "planted_sourceless_name"
+  ],
+  "invariant_planted_listed": true,
+  "planted_bound_excluded": true,
+  "planted_sourceless_listed": true
+}
