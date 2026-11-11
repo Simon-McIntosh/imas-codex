@@ -31,6 +31,11 @@
       "kind": "exempted",
       "reason": "non-blocking, noted at landing",
       "recorded_at": "2026-11-11T20:25:01.266636+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "non-blocking, noted at landing",
+      "recorded_at": "2026-11-11T20:25:07.813732+00:00"
     }
   },
   "findings": [
