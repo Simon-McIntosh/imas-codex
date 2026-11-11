@@ -1,108 +1,115 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8">
-<title>A DD path move that lineage explains is a rename, not a documentation reset</title></head>
+<title>The startup drift refresh compares each source against its own snapshot</title></head>
 <body><main>
-<h1>A DD path move that lineage explains is a rename, not a documentation reset</h1>
+<h1>The startup drift refresh compares each source against its own snapshot</h1>
 
 <p id="sib-drift-refresh-rename-lineage-what">The startup DD-source drift refresh
-compared a name's stored <code>source_path</code> snapshot against the terminal path
-its producing source resolves to, and appended a <code>source_path</code> delta
-whenever the two differed. Every such delta was counted as content drift, so the
-refresh steered a documentation refine and reset the name's docs — even when the
-Data Dictionary had only renamed the path. This node makes that comparison read
-<code>RENAMED_TO</code> lineage: a snapshot path that is a direct or transitive
-ancestor of the resolved terminal is a rename.</p>
+compared every producing source of a name against the <em>name's single</em>
+<code>source_path</code> snapshot. A name with more than one DD source therefore
+read as drifted whenever a sibling source resolved to a different path — not
+because anything had changed, but because the comparison was between two
+different sources. Every such row steered a documentation refine and reset the
+name's docs. This node compares each binding against the snapshot that belongs
+to <em>that</em> source, and keeps a <code>RENAMED_TO</code> path move classified
+as a rename rather than a steering delta.</p>
 
 <h2 id="sib-drift-refresh-rename-lineage-mechanism">Mechanism</h2>
 <ul>
-<li id="sib-drift-refresh-rename-lineage-mechanism-query">The detect query now
-returns <code>lineage_rename_explains</code>, an <code>EXISTS</code> subquery over
-<code>(sn.source_path)-[:RENAMED_TO*1..12]-&gt;(t0)</code> with
-<code>t0.id = n.id</code>, so the flag is answered by the graph for each row.</li>
-<li id="sib-drift-refresh-rename-lineage-mechanism-delta"><code>_source_deltas</code>
-carries that delta with <code>"rename": true</code>; the delta is still reported,
-so the record still names the move.</li>
-<li id="sib-drift-refresh-rename-lineage-mechanism-steering"><code>requires_steering</code>
-excludes a rename-flagged <code>source_path</code> delta and nothing else, so units
-and documentation deltas steer exactly as before, and a path change no lineage
+<li id="sib-drift-refresh-rename-lineage-mechanism-recorded"><code>_RESOLVE_SOURCE_TERMINAL</code>
+binds <code>recorded_binding</code>: true when the source's anchor is the
+identity the name's snapshot was taken from, or is connected to it by a
+<code>RENAMED_TO</code> move in either direction.</li>
+<li id="sib-drift-refresh-rename-lineage-mechanism-persource">The snapshot fields
+that reach the comparison are per source: <code>old_path</code>,
+<code>old_unit</code> and <code>old_doc</code> take the source's own captured
+<code>dd_path</code>, <code>dd_unit</code> and <code>dd_documentation</code>, and
+fall back to the name's snapshot <em>only</em> for the recorded binding. A
+sibling source is never compared against another source's snapshot.</li>
+<li id="sib-drift-refresh-rename-lineage-mechanism-skip"><code>_source_deltas</code>
+compares a field only when the source carries it, so a binding with no snapshot
+of its own produces no delta at all rather than a spurious path difference.</li>
+<li id="sib-drift-refresh-rename-lineage-mechanism-provenance">The provenance
+fields — raw unit, raw documentation, resolution identities, digest, typed marker
+— describe the <em>name</em>, so they are compared only for the recorded
+binding.</li>
+<li id="sib-drift-refresh-rename-lineage-mechanism-rename">A <code>source_path</code>
+difference the <code>RENAMED_TO</code> lineage fully explains — the per-source
+snapshot path is a direct or transitive ancestor of the resolved terminal — is
+carried as a delta flagged <code>"rename": true</code>. It is reported, counted
+in the <code>renamed</code> counter, and excluded from
+<code>requires_steering</code>, so it re-stamps the snapshot without resetting
+documentation.</li>
+<li id="sib-drift-refresh-rename-lineage-mechanism-steering">Units and
+documentation deltas steer exactly as before, and a path change no lineage
 explains still steers.</li>
-<li id="sib-drift-refresh-rename-lineage-mechanism-counter">The drift record's
-<code>renamed</code> verdict, and therefore the summary's <code>renamed</code>
-counter, is true for a lineage-explained move even when the source anchor already
-sits on the terminal path.</li>
-<li id="sib-drift-refresh-rename-lineage-mechanism-restamp">A rename-only drift takes
-the existing re-stamp branch: the snapshot is written to the terminal path, so the
-next run is a no-op rather than a second false drift.</li>
 </ul>
 
 <h2 id="sib-drift-refresh-rename-lineage-measure">Measure: read-only live dry run</h2>
 <p id="sib-drift-refresh-rename-lineage-measure-arms">Both arms are
 <code>refresh_drifted_sources(dry_run=True)</code> against the live graph from a
-<code>git archive</code> of revision <code>55af2a7ff</code> with the main checkout's
-<code>.venv</code>.</p>
+<code>git archive</code> of the pre-node revision <code>55af2a7ff</code> with the
+main checkout's <code>.venv</code>; the after arm carries this node's working
+tree.</p>
 <table id="sib-drift-refresh-rename-lineage-measure-table">
 <tr><th>arm</th><th>detected</th><th>renamed</th><th>steered</th><th>exit</th></tr>
 <tr><td>before (base)</td><td>1061</td><td>0</td><td>0 (dry run)</td><td>0</td></tr>
-<tr><td>after (this node)</td><td>1061</td><td>0</td><td>0 (dry run)</td><td>0</td></tr>
+<tr><td>after (this node)</td><td>84</td><td>13</td><td>0 (dry run)</td><td>0</td></tr>
 </table>
 
-<p id="sib-drift-refresh-rename-lineage-measure-finding">The count does not fall, and
-that is a measurement about the live population rather than about the predicate: a
-read-only probe over the same bindings counts 3247 whose snapshot path differs from
-their resolved terminal, and <strong>0</strong> of them are reachable from the
-snapshot along <code>RENAMED_TO</code>.</p>
+<p id="sib-drift-refresh-rename-lineage-measure-finding">The drift population
+falls from 1061 names to 84, and 13 of the remaining rows are lineage-explained
+renames that now re-stamp instead of steering: 977 of the previous reports were
+sibling sources compared against another source's snapshot.</p>
 
-<p id="sib-drift-refresh-rename-lineage-measure-control">The zero is instrumented, not
-assumed. The same predicate returns <code>true</code> on a pair known to carry the
-relation — <code>charge_exchange/channel/identifier</code> reaches
-<code>charge_exchange/channel/name</code> and <code>…/description</code> — while the
-drifted pairs return <code>false</code> because their snapshot nodes carry no outgoing
-edge at all (for example
-<code>edge_profiles/ggd/j_parallel_viscosity/r</code>, which has no
-<code>RENAMED_TO</code> neighbour and is not the ancestry of the
-<code>mhd/ggd/j_r/values</code> terminal it resolves to). The graph holds 2864
-<code>RENAMED_TO</code> edges, so the relation is present and the empty line is about
-these rows.</p>
-
-<p id="sib-drift-refresh-rename-lineage-measure-consequence">What this node therefore
-fixes is the classification, not today's count: a lineage-shaped move no longer
-resets documentation. The 1061 live drifts are not lineage-shaped — their snapshot
-paths are stale, non-lineage identities — so a residual of 1061 genuine deltas
-remains, and the documentation-reset risk those rows carry is not retired by this
-node.</p>
+<p id="sib-drift-refresh-rename-lineage-measure-residual">A census over the
+after arm resolves the 84 that remain: <strong>72</strong> carry a
+<code>units</code> delta, <strong>13</strong> a lineage-explained
+<code>source_path</code> rename, and <strong>1</strong> a
+<code>documentation</code> delta (one name carries two of these). All 72 unit
+deltas compare a source's own captured DD unit against the live node's unit, for
+example <code>co_passing_thermal_particle_source_rate</code>
+(<code>s^-1.m^-3</code>) and <code>diamagnetic_conductivity</code>
+(<code>ohm^-1.m^-1</code>); they are real per-source unit changes and keep
+steering, as they should.</p>
 
 <h2 id="sib-drift-refresh-rename-lineage-tests">Tests</h2>
 <ul>
-<li id="sib-drift-refresh-rename-lineage-tests-fixtures">Five tests in
+<li id="sib-drift-refresh-rename-lineage-tests-fixtures">Seven tests in
 <code>tests/standard_names/test_source_refresh_rename_lineage.py</code>: a
-lineage-only move steers nothing and counts one rename (and re-stamps the terminal
-path); its delta carries <code>"rename": true</code>; a lineage move plus a unit
-change still steers; a path change with no lineage still steers; and the detect
-query still asks the graph for the flag.</li>
+lineage-only move steers nothing, counts one rename and re-stamps the terminal
+path; its delta carries <code>"rename": true</code>; a lineage move plus a unit
+change still steers; a path change with no lineage still steers; a two-source
+name whose second source is unchanged does not steer (the sibling is never
+compared against the name's snapshot); a single-source name whose own path or
+unit genuinely changed still steers; and the detect query still asks the graph
+for the rename flag.</li>
 <li id="sib-drift-refresh-rename-lineage-tests-gate">Gate:
 <code>tests/standard_names</code> default tier, both arms from a
-<code>git archive</code> of the same revision with the main checkout's
-<code>.venv</code>. Base 22 failed / 8627 passed; head 22 failed / 8632 passed
-(the five new tests). The failing-id sets are byte-identical, so this node adds no
-failure.</li>
-<li id="sib-drift-refresh-rename-lineage-tests-control">Negative control: reverting
-the three source lines that implement the lineage check makes the lineage-only
-fixture steer a docs reset again; 3 of 5 tests fail, including
-<code>test_lineage_only_move_steers_no_docs_reset_and_counts_one_rename</code>.</li>
+<code>git archive</code> of revision <code>55af2a7ff</code> with the main
+checkout's <code>.venv</code>. Base 22 failed / 8626 passed; head 22 failed /
+8633 passed (the seven new tests). The failing-id sets are identical, so this
+node adds no failure.</li>
+<li id="sib-drift-refresh-rename-lineage-tests-control">Negative control: with
+the three lines that implement the lineage rename reverted, 4 of the 7 fixtures
+fail, including
+<code>test_lineage_only_move_steers_no_docs_reset_and_counts_one_rename</code>,
+which then steers a docs reset again.</li>
 </ul>
 
 <h2 id="sib-drift-refresh-rename-lineage-limits">Limits and notes</h2>
 <ul>
 <li id="sib-drift-refresh-rename-lineage-limits-sync">The shared
-<code>.venv</code> does not carry <code>pytest-xdist</code>, which the gate command
-needs. A <code>uv sync --extra test</code> against the main checkout was refused as
-a read-only file system under the worker fence, and duplicating the environment is
-not permitted, so the gate ran with an ephemeral overlay
-(<code>uv run --no-sync --with pytest-xdist</code>), which installs nothing into the
-shared environment.</li>
-<li id="sib-drift-refresh-rename-lineage-limits-not-closed">This node does not
-explain why 3247 snapshot paths are stale non-lineage identities, nor whether the
-refresh should re-stamp those without steering; that is a separate question with its
-own census.</li>
+<code>.venv</code> does not carry <code>pytest-xdist</code>, which the gate
+command needs. A <code>uv sync --extra test</code> against the main checkout is
+refused as a read-only file system under the worker fence, and duplicating the
+environment is not permitted, so the gate runs with an ephemeral overlay
+(<code>uv run --no-sync --with pytest-xdist</code>), which installs nothing into
+the shared environment.</li>
+<li id="sib-drift-refresh-rename-lineage-limits-not-closed">The 72 residual unit
+deltas are genuine per-source changes, not sibling artifacts; whether their
+documentation refine is the right response is the existing drift policy and is
+not changed here. A source that carries no captured unit and is not the recorded
+binding is not compared on units at all, so its unit drift is not reported.</li>
 </ul>
 </main></body></html>
