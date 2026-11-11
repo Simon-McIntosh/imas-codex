@@ -89,9 +89,22 @@
       "finding": "thin_wrapper-1",
       "reason": "The worker settles the method and the endpoint is unchanged; the node's brief cites this review's reuse map and names the existing owner to extend. The brief routes the candidate path through the existing body and link helpers.",
       "when": "2026-11-11T21:48:50.557961+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "duplicate_owner-1",
+      "reason": "The worker settles the method and the endpoint is unchanged; the node's brief cites this review's reuse map and names the existing owner to extend. The brief places the endpoint comparison as a second assertion beside the existing relationship-type check, and the declaration beside the existing relationship slots.",
+      "when": "2026-11-11T21:48:58.271344+00:00"
     }
   ],
   "responses": {
+    "duplicate_owner-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The worker settles the method and the endpoint is unchanged; the node's brief cites this review's reuse map and names the existing owner to extend. The brief places the endpoint comparison as a second assertion beside the existing relationship-type check, and the declaration beside the existing relationship slots.",
+      "when": "2026-11-11T21:48:58.271344+00:00"
+    },
     "reuse_search-1": {
       "action": "acted",
       "by": "",
