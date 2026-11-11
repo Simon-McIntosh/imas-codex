@@ -1,0 +1,56 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-11T23:22:31.490Z",
+  "dispatched_at": "2026-11-11T23:18:04Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-pipeline-hygiene.html:10",
+      "id": "reasoning-1",
+      "reason": "the summary is what the plan index shows a coordinator sizing the work, and it understates \u00a78 (3.0 effort hours, 31 names) as a two-import cleanup, which is the same under-scoping the earlier reviews corrected in \u00a72.",
+      "text": "the `plan-summary` meta still reads \"close two private imports\" while \u00a78 at :80 states 31 private names across 24 import statements, so the plan's one-line scope description is the old, withdrawn figure",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-pipeline-hygiene.html:80",
+      "id": "reasoning-2",
+      "reason": "the done-when records before and after counts without fixing 31 as a target, so no node acts differently; it is a wording precision the author may tighten to \"31 name occurrences\".",
+      "text": "\u00a78 says \"31 private names ... across 24 import statements\", but 31 is the count of name occurrences: the tree carries 27 distinct private names over those 24 statements because `_TransactionQueryAdapter` is imported five times",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "c7afaf13fa8ffe547b9ae447bac728f40cc79678",
+  "plan_fingerprint": "d500712aab6dd904e7651c2036c82a425e91212319da01146d5ef89795df5e12",
+  "plan_slug": "sn-pipeline-hygiene",
+  "plan_version": 8,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261111T231648687999-plan-review-of-sn-pipeline-hygiene",
+  "reviewed_blob_sha": "4b1b70be538736aad79fa5af61bbc9646981d5d3",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `imas_codex/standard_names` and its top-level modules resolve, the cited boundary test resolves as `tests/standard_names/test_package_import_boundaries.py`, and `tests/standard_names` resolves.",
+    "done_when": "pass \u2014 \u00a78's done-when is measurable (count goes to zero, before/after counts recorded) and names a negative control that can fail: the boundary test must fail when any one closed import is restored.",
+    "evidence_paths": "pass \u2014 \u00a78 routes its counts and its list of newly public names to the landing evidence, the repository's durable record; nothing is placed in a scratchpad or node-local path.",
+    "naming": "pass \u2014 \u00a78 names packages, modules and a behaviour rule; no plan label, stage name, ticket number or version tag appears in it.",
+    "reasoning": "a finding \u2014 \u00a78's own claims check out against the tree (below), but the document's `plan-summary` still states the superseded \"close two private imports\", which contradicts \u00a78's 31 names.",
+    "single_goal": "pass \u2014 \u00a78 carries one deliverable (no top-level module imports another top-level module's private names); the boundary-test rule is its control, not a second deliverable.",
+    "wiring": "pass \u2014 the plan is standalone (its own `plan-standalone` meta says no section waits on it and nothing downstream waits on it), the followup states \u00a71\u2013\u00a76 and \u00a78 are independent, and \u00a77's only declared link, `sn-integrity-backlog#s17`, resolves (`docs/plans/sn-integrity-backlog.html` carries `id=\"s17\"`)."
+  },
+  "section_digests": {
+    "_document": "49d63ff082eb6239cfa0f779e09881f0fb672138280a47e33f69518c95bca86a",
+    "s1": "81850637644a27e1d1a1e816ca2493b35e973174c72a47df456d0ccf8ad2dfa6",
+    "s2": "e9d021306c93e843cfa1ad6c6c66f401b766ba90335edf46b9827be8671de3e5",
+    "s3": "a205991a491d3ca44d31ed4fd17f44659f56c383526f7ed4ee27ad22f9520561",
+    "s4": "e19655648e3f9a005df4834ac35f5fb2bc214b6707a17a98b1218f40d3cd2c7d",
+    "s5": "22355c76f1a73f28bb10c96b7844c864ff49c695fe02732dc5952823ab5cfd70",
+    "s6": "8159bf6d6723b63ae9ea529cb516e69681047379b40e53f1271a4f47c9b0194f",
+    "s7": "a32106acdcff60e7fdf2ad612ff1962f13bfa360ce0b1a5c122f5be40f3b7845",
+    "s8": "9184f184a9f2ddb78dec7b0531d8b432c88fd2002754aeb216e3b029dda9c2da"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T23:28:32.559654+00:00",
+  "total": null
+}
