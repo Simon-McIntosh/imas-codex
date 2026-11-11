@@ -36,11 +36,15 @@ from imas_codex.standard_names.canonical import (
     reorder_entry_dict,
 )
 from imas_codex.standard_names.catalog_ordering import order_entries_by_hierarchy
+from imas_codex.standard_names.edit import _base_token
 from imas_codex.standard_names.protection import PROTECTED_FIELDS
 from imas_codex.standard_names.provenance_lifecycle import (
     fetch_public_semantic_sources,
 )
-from imas_codex.standard_names.segments import grammar_token_index
+from imas_codex.standard_names.segments import (
+    _registered_physical_bases,
+    grammar_token_index,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -1604,15 +1608,6 @@ def _graph_node_to_entry_dict(node: dict[str, Any]) -> dict[str, Any]:
 
 
 @lru_cache(maxsize=1)
-def _physical_base_tokens() -> frozenset[str]:
-    """Return the installed ISN vocabulary's physical base tokens."""
-    from imas_standard_names import get_grammar_context
-
-    vocabularies = get_grammar_context()["grammar"]["vocabularies"]
-    return frozenset(vocabularies["physical_bases"])
-
-
-@lru_cache(maxsize=1)
 def _identity_token_segments() -> tuple[dict[str, tuple[str, ...]], frozenset[str]]:
     """Return live token segments and the token classes that denote quantities."""
     from imas_standard_names import get_grammar_context
@@ -1625,29 +1620,8 @@ def _identity_token_segments() -> tuple[dict[str, tuple[str, ...]], frozenset[st
     for token in locus_tokens:
         segments[token] = ("locus",)
 
-    quantity_tokens = frozenset(set(_physical_base_tokens()) | geometry_carriers)
+    quantity_tokens = frozenset(set(_registered_physical_bases()) | geometry_carriers)
     return segments, quantity_tokens
-
-
-@lru_cache(maxsize=1024)
-def _identity_quantity_base(identity: str) -> str | None:
-    """Return the physical base *identity* parses to, or ``None``.
-
-    A process token spells a cause: "due to X" names the quantity X as its
-    cause, so a published identity spelled like one still names a quantity of
-    its own.  Only a spelling the installed grammar parses with a physical base
-    says which quantity that is; anything the parser refuses stays a collision.
-    """
-    from imas_standard_names import parse
-
-    try:
-        ir = parse(identity, strict=True).ir
-    except (TypeError, ValueError):
-        return None
-    base = ir.base
-    if base is None or base.token not in _physical_base_tokens():
-        return None
-    return base.token
 
 
 def _token_registry_entry(token: str) -> str:
@@ -1704,9 +1678,16 @@ def _identity_token_collision_gate(
             if not segments or identity in quantity_tokens:
                 continue
             registry_entry = _token_registry_entry(identity)
-            process_quantity_base = _identity_quantity_base(identity)
+            # A process token spells a cause: "due to X" names the quantity X as
+            # its cause, so an identity the grammar parses with a physical base
+            # is that quantity, not the process token standing in for a name.
+            process_base = _base_token(identity)
+            process_is_quantity = (
+                process_base is not None
+                and process_base in _registered_physical_bases()
+            )
             for segment in segments:
-                if segment == "process" and process_quantity_base is not None:
+                if segment == "process" and process_is_quantity:
                     continue
                 issues.append(
                     {

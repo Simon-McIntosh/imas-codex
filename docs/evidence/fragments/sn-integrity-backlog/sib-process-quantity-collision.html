@@ -8,6 +8,12 @@ it as an identity standing in for a grammar token. Under the lead's 2026-11-11 r
 grammar parses the identity with a physical base; every other segment, and every process
 token the grammar cannot parse, still collides.</p>
 
+<p>The gate carries no vocabulary or parser of its own. It reads the physical-base set
+through <code>segments._registered_physical_bases</code> and parses an identity through
+<code>edit._base_token</code>, both already used elsewhere in the package, so the
+exemption cannot drift from the installed grammar independently of the rest of the
+tooling.</p>
+
 <h3 id="sib-process-quantity-collision-reproduction">The refusal, reproduced</h3>
 
 <p>At base <code>06ac2d0c2</code> the gate refuses the identity with one issue:</p>
@@ -68,3 +74,11 @@ in <code>test_gap_rule_verdicts.py</code>, <code>test_manifest_generability.py</
 <code>test_house_style_checks.py</code>, <code>test_catalog_layout_hierarchy.py</code> and
 <code>test_pool_registry_imports.py</code>; none imports or exercises the identity collision
 gate, and none is in this node's changed surface.</p>
+
+<p>These arms predate the substitution onto the shared helpers and are not re-run for it.
+The change replaces a vocabulary read and a parse with the package's existing equivalents,
+and the targeted file, the negative control and the live export report are all re-measured
+at the substituted state: five tests pass, the negative control still fails two ids at
+<code>EXIT=1</code>, and the export report again reads
+<code>identity_token_collision passed=True issues=0</code> with <code>halo_current</code>
+among the 1,975 emitted identities.</p>
