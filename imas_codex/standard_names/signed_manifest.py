@@ -48,6 +48,7 @@ from imas_codex.graph.models import (
     RepairRowIdentity,
     RepairSelection,
 )
+from imas_codex.standard_names import catalog_ordering
 
 logger = logging.getLogger(__name__)
 
@@ -8963,25 +8964,24 @@ def _edge_archive_member_snapshots(
     }
 
 
-def _edge_archive_has_cycle(edges: Sequence[Mapping[str, Any]]) -> bool:
-    adjacency: dict[str, set[str]] = defaultdict(set)
+def _edge_archive_cycle_components(
+    edges: Sequence[Mapping[str, Any]],
+) -> list[set[str]]:
+    """Cycle components among *edges*, as the catalog-ordering owner finds them.
+
+    The cycle definition is owned by ``catalog_ordering`` and applied to this
+    same relation by the lineage-cycle census, so this adapts an edge list to
+    that owner rather than carrying a second traversal.
+    """
+    nodes = {
+        str(edge[endpoint])
+        for edge in edges
+        for endpoint in ("successor", "predecessor")
+    }
+    children: dict[str, list[str]] = defaultdict(list)
     for edge in edges:
-        adjacency[str(edge["successor"])].add(str(edge["predecessor"]))
-    state: dict[str, int] = {}
-
-    def visit(node: str) -> bool:
-        if state.get(node) == 1:
-            return True
-        if state.get(node) == 2:
-            return False
-        state[node] = 1
-        for nxt in sorted(adjacency.get(node, ())):
-            if visit(nxt):
-                return True
-        state[node] = 2
-        return False
-
-    return any(visit(node) for node in sorted(adjacency))
+        children[str(edge["successor"])].append(str(edge["predecessor"]))
+    return catalog_ordering._find_cyclic_components(nodes, children)
 
 
 def _edge_archive_preview(
@@ -9089,7 +9089,7 @@ def _edge_archive_preview(
                 }
             )
         remaining = [edge for edge in live if edge["element_id"] not in declared_ids]
-        if _edge_archive_has_cycle(remaining):
+        if _edge_archive_cycle_components(remaining):
             refusals.append(
                 {
                     "row_id": key,
@@ -9306,7 +9306,7 @@ def _apply_edge_archive(
                         raise SignedManifestConflict(
                             "archived component kept an edge it did not sign"
                         )
-                    if _edge_archive_has_cycle(remaining):
+                    if _edge_archive_cycle_components(remaining):
                         raise SignedManifestConflict(
                             "archived component still holds a cycle"
                         )

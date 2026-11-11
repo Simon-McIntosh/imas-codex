@@ -17,6 +17,7 @@ from pathlib import Path
 import pytest
 
 from imas_codex.graph.client import GraphClient
+from imas_codex.standard_names import catalog_ordering
 from imas_codex.standard_names.signed_manifest import (
     SignedManifestAuthorityError,
     apply_signed_manifest,
@@ -335,6 +336,52 @@ def test_preview_writes_nothing_and_reports_the_signed_manifest(tmp_path):
     assert result["manifest_sha256"]
     assert len(_live_edges()) == 2
     assert _receipts() == []
+
+
+def test_the_residual_cycle_judgment_delegates_to_the_ordering_owner(
+    tmp_path, monkeypatch
+):
+    """The cycle test applied to the surviving edges is the ordering owner's."""
+    _seed(
+        {"delegated_parent": "superseded", "delegated_child": "accepted"},
+        [
+            ("delegated_parent", "delegated_child"),
+            ("delegated_child", "delegated_parent"),
+        ],
+    )
+    component = _component(
+        ["delegated_parent", "delegated_child"], ["delegated_child"], "single-live"
+    )
+    path, file_sha256, payload_sha256 = _write_authority(
+        tmp_path,
+        [component],
+        [_snapshot("delegated_parent", "delegated_child", component)],
+    )
+
+    calls: list[tuple[set[str], dict[str, list[str]]]] = []
+
+    def owner(nodes, children):
+        calls.append(
+            (set(nodes), {key: list(value) for key, value in children.items()})
+        )
+        return [set(nodes)]
+
+    monkeypatch.setattr(catalog_ordering, "_find_cyclic_components", owner)
+
+    result = _apply(path, file_sha256, payload_sha256, apply=False)
+
+    assert result["outcome"] == "refused"
+    assert any(
+        "leaves a cycle in the component" in refusal["reason"]
+        for refusal in result["refusals"]
+    )
+    assert len(_live_edges()) == 2
+    assert calls == [
+        (
+            {"delegated_child", "delegated_parent"},
+            {"delegated_child": ["delegated_parent"]},
+        )
+    ]
 
 
 def test_apply_requires_the_authorized_manifest_sha256(tmp_path):
