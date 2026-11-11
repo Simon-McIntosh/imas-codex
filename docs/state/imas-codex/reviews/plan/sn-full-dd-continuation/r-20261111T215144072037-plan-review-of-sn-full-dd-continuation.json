@@ -94,6 +94,13 @@
       "note": "\u00a73 drops the currency-instrument clause, which measures existence not age; the creation-time clause and the whole-stream integrity test with its truncated-copy control carry the measure, and the brief names get_backup_currency and _is_full_recovery_archive as the owners to extend.",
       "reason": "",
       "when": "2026-11-11T22:20:10.982344+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "duplicate_owner-2",
+      "reason": "The worker settles the method and the endpoint is unchanged; the \u00a74 and \u00a75 briefs name the package-level docs-axis stats in graph_catalog.py and the export report's own fields as the readers to call.",
+      "when": "2026-11-11T22:20:21.425247+00:00"
     }
   ],
   "responses": {
@@ -114,6 +121,12 @@
       "note": "\u00a73 drops the currency-instrument clause, which measures existence not age; the creation-time clause and the whole-stream integrity test with its truncated-copy control carry the measure, and the brief names get_backup_currency and _is_full_recovery_archive as the owners to extend.",
       "reason": "",
       "when": "2026-11-11T22:20:10.982344+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "declined",
+      "by": "",
+      "reason": "The worker settles the method and the endpoint is unchanged; the \u00a74 and \u00a75 briefs name the package-level docs-axis stats in graph_catalog.py and the export report's own fields as the readers to call.",
+      "when": "2026-11-11T22:20:21.425247+00:00"
     },
     "reuse_search-1": {
       "action": "acted",
