@@ -342,6 +342,45 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "8623ff42e7893258debb46509e60d4a43a900d77",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "",
+    "ledger_index_removed": "/home/ITER/mcintos/.cache/reckon/ledger-c5bff93ce58c6b65366ef87aadc972ba96afee8b2128c4d7e2c414d73b6c0c1e-v5.sqlite",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 894,
+    "scratch_host": "98dci4-clu-2023.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261110T195748248733-sib-flush-unaccepted",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 894,
+        "path": "/tmp/reckon-crew-scratch/r-20261110T195748248733-sib-flush-unaccepted"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-flush-unaccepted",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],
