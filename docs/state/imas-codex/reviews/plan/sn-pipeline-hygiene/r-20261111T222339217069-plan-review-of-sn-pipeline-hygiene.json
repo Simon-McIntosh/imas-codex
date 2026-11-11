@@ -1,0 +1,56 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-11T22:44:50.723Z",
+  "dispatched_at": "2026-11-11T22:28:03Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-pipeline-hygiene.html:80",
+      "id": "done_when-1",
+      "reason": "a node that closes the 31 and records its before/after counts meets the prose exactly while 109 package-wide violations remain, so the section would be closed with its own stated endpoint unmet, or would discover a 4.5x larger scope after estimating the node at 3.0 hours.",
+      "text": "\u00a78's done-when requires that \"no production module in imas_codex/standard_names imports a private name from another module of that package\", which reaches every module under the package including its subpackages, while the stated baseline of 31 names across 24 statements counts only top-level-importer-to-top-level-target imports; measured on this tree, the package-wide figure is 140 private names across 94 import statements (70 statements, 109 names involve subpackage modules), and only the top-to-top subset reproduces 31/24",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-pipeline-hygiene.html:80",
+      "id": "reasoning-1",
+      "reason": "a worker reads the named five as the module-level work list and leaves six module-level violations standing, so the section's most visible half-scope is understated by more than half.",
+      "text": "\u00a78 says \"The five module-level statements among them carry six names\", but under the same top-level-to-top-level counting method the tree has eleven module-level statements carrying fourteen names; the six omitted are `catalog_reconcile.py:31` `_normalize_field`, `docs_gates.py:15` `_dimension_container`/`_dimensions_overlap`/`_unit_dimensions`, `edit.py:98` `_isn_round_trip_ok`, `export.py:44` `_registered_physical_bases`, `harmonize.py:40` `_pattern_family_rows_query`, `provenance_lifecycle.py:27` `_load_signed_stale_source_rows`",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "fc99c61f0f311bf33b6ca594ba565398169827b9",
+  "plan_fingerprint": "dec205e38d5dd79c8a2c0b12639e9b6fe09b244492b12fef8b37a87d92c47934",
+  "plan_slug": "sn-pipeline-hygiene",
+  "plan_version": 6,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261111T222339217069-plan-review-of-sn-pipeline-hygiene",
+  "reviewed_blob_sha": "600ec941eaaae31936ed70f86eb43596c712ab0d",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every module and symbol \u00a78 names resolves (`_base_token` edit.py:621, `_load_rules` unit_overrides.py:91, `_synonym_matches` audits.py:1273, `_github_slug`/`_run_git` catalog_release.py:1479/401, `_contest` promote.py:872), and both pyproject pins exist (pyproject.toml:18, :186 at 0.11.1).",
+    "done_when": "a finding \u2014 \u00a78's done-when bounds the endpoint to the whole package while its stated baseline counts only top-level-to-top-level imports.",
+    "evidence_paths": "pass \u2014 \u00a78's landing evidence and \u00a73's graph-tier test both land in the repository's durable test and evidence paths, not a scratch tree.",
+    "naming": "pass \u2014 no plan labels, stage names or ticket numbers reach the code either unit describes.",
+    "reasoning": "a finding \u2014 \u00a78 states five module-level statements carrying six names, but its own counting method finds eleven carrying fourteen.",
+    "single_goal": "pass \u2014 \u00a73 delivers the ISN pin guard and \u00a78 delivers the private-import closure, one deliverable each.",
+    "wiring": "pass \u2014 the plan is standalone, so no depends-on/informs/gates are owed; s7's `sn-integrity-backlog#s17` link resolves and that section is descoped back to this plan's \u00a77, so the pair agrees."
+  },
+  "section_digests": {
+    "_document": "49d63ff082eb6239cfa0f779e09881f0fb672138280a47e33f69518c95bca86a",
+    "s1": "81850637644a27e1d1a1e816ca2493b35e973174c72a47df456d0ccf8ad2dfa6",
+    "s2": "e9d021306c93e843cfa1ad6c6c66f401b766ba90335edf46b9827be8671de3e5",
+    "s3": "a205991a491d3ca44d31ed4fd17f44659f56c383526f7ed4ee27ad22f9520561",
+    "s4": "e19655648e3f9a005df4834ac35f5fb2bc214b6707a17a98b1218f40d3cd2c7d",
+    "s5": "22355c76f1a73f28bb10c96b7844c864ff49c695fe02732dc5952823ab5cfd70",
+    "s6": "8159bf6d6723b63ae9ea529cb516e69681047379b40e53f1271a4f47c9b0194f",
+    "s7": "a32106acdcff60e7fdf2ad612ff1962f13bfa360ce0b1a5c122f5be40f3b7845",
+    "s8": "93570a9ca4d2197a495035a07c3c457d93fd9cd9e8211e103284abc44da6f85f"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T23:01:44.854708+00:00",
+  "total": null
+}
