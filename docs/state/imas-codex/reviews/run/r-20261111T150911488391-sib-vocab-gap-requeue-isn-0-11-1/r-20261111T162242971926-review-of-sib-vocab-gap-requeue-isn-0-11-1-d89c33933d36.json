@@ -1,0 +1,127 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": [
+    {
+      "fails_if": "The active ISNGrammarVersion is absent or not 0.11.1, or the source read returns a different number of rows than ids asked for; the first is the node's own premise and would redden on a grammar rollover.",
+      "lines": "58,63"
+    },
+    {
+      "fails_if": "The 0.11.1 token read returns fewer than 1000 rows or loses the known-present power_convertor control, catching an instrument that sees nothing.",
+      "lines": "99"
+    },
+    {
+      "fails_if": "A mapped row's new token spelling is missing from the 0.11.1 token set; it reads the graph independently of the mapping file, so a dropped grammar row reddens it.",
+      "lines": "102"
+    },
+    {
+      "fails_if": "The source is already claimed, the retry reports anything but one retried source, or the compose hint reports not applied; each reads a writer's returned receipt rather than the input.",
+      "lines": "171,181,191"
+    },
+    {
+      "fails_if": "More than one SNRun names the focus manifest, which would make run-scoped cost attribution ambiguous.",
+      "lines": "239"
+    },
+    {
+      "fails_if": "Any of the four parked sources changes status or captured state; it compares the live after-snapshot to the independently captured mapping-before.json, so a stray write or a newly resolvable token reddens it.",
+      "lines": "251"
+    },
+    {
+      "fails_if": "Summed LLMCost for the run exceeds the 3.0 cap.",
+      "lines": "253"
+    },
+    {
+      "fails_if": "Nothing: both predicates were applied when own_names was built at :262-268, so these assertions hold whatever the pipeline did; recorded as a finding.",
+      "lines": "314-317"
+    }
+  ],
+  "assertion_independence": "The parked-state equality at :251, the spend ceiling at :253, the armed-grammar checks at :58 and :99 and the mapping-spelling check at :102 each compare graph-read values against independently captured inputs or constants. The two assertions at :314-317 are not independent of the list they test and are recorded as a non-blocking finding.",
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/standard_names/graph_store/graph_source_bindings.py:233 (set_source_compose_hint)",
+    "imas_codex/standard_names/graph_store/graph_source_bindings.py:2333 (retry_failed_sources)",
+    "imas_codex/standard_names/graph_store/graph_foundation.py:90 (services_for_call)",
+    "imas_codex/cli sn run (the pipeline the gate invokes)"
+  ],
+  "completed_at": "2026-11-11T16:42:07.408Z",
+  "dispatched_at": "2026-11-11T16:25:08Z",
+  "failure_delta_evidence": {
+    "after_suite": null,
+    "baseline_suite": null,
+    "note": "The reviewed run recorded empty baseline_suite and after_suite fields, so no failure delta is derivable; added_failure_count is 0 over an empty id list rather than a measured zero. The node's only executed gate is the scoped pipeline run, whose log ends EXIT=0."
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-vocab-gap-requeue-isn-0-11-1.html",
+      "line": "31-34",
+      "severity": "non-blocking",
+      "text": "non-blocking: the parked-source table carries the recorded 0.11.0-era refusal text as the only statement about the token, and never reports the per-source answer the done_when names - whether ISN 0.11.1 now carries it, read from the active grammar. The run script computes the 0.11.1 token set at lines 95-102 and applies it only to admitted mapping rows, so mapping-before.json holds no presence record for the four parked tokens. The node's conclusion is nevertheless correct: an independent read of the active grammar version 0.11.1 returns one physical_base row for current_profile_alignment, two rows for the power_convertor positive control, and zero rows for plasma_current_element_thick_line, electron_cyclotron_power_deposition_peak, ion_cyclotron_power_deposition_peak and lower_hybrid_power_deposition_peak. Record that query and its four zero counts in the fragment so the parked verdict rests on a measurement rather than on the stored refusal."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-vocab-gap-requeue-isn-0-11-1-run.py",
+      "line": "314-317",
+      "severity": "non-blocking",
+      "text": "non-blocking: render() re-asserts on result['own_names'] the same two predicates that built that list at lines 262-268 (a generate_name phase in own_phases, and created_at at or after run started_at), so both assertions are tautologies that cannot redden whatever the pipeline did. The attribution guard that does work is the filter itself, and nothing asserts it; the assertions that carry real weight are the parkled-state equality at line 251, the spend ceiling at line 253 and the armed-grammar check at lines 58 and 99."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-vocab-gap-requeue-isn-0-11-1-run.py",
+      "line": "294",
+      "severity": "non-blocking",
+      "text": "non-blocking: the summary field parked_controls_unchanged is len(payload['parked']), a constant 4 that counts the controls examined rather than measuring that any is unchanged; the measurement is the equality assertion at line 251, which aborts the run before this field is written. A reader who quotes the field as the check is quoting the input set, so name it parked_controls_asserted or carry the comparison's own count."
+    }
+  ],
+  "independent_checks": {
+    "active_grammar": "Read the live graph: ISNGrammarVersion active 0.11.1.",
+    "note": "This read confirms the node's substantive conclusion - the four parked tokens are genuinely absent from the active grammar and current_profile_alignment is present - while showing the fragment does not itself carry that measurement.",
+    "token_presence_0_11_1": "current_profile_alignment 1 row (physical_base); power_convertor 2 rows (device, object); plasma_current_element_thick_line 0; electron_cyclotron_power_deposition_peak 0; ion_cyclotron_power_deposition_peak 0; lower_hybrid_power_deposition_peak 0."
+  },
+  "item_verdicts": {
+    "call_sites": "Verified 4 production entry points the evidence drives",
+    "diff": "Read all six commits against d500e8eab; they build the runner, record and then correct a blocked admission, pass wired graph services to the source writers, and land the final fragment with the accepted binding, both cohort metrics, per-phase spend and the four parked refusals.",
+    "done_when": "Read prompt.txt:125 and mapping-rerun-live.log; its head names revision 6e16ddded and its SUMMARY line records run 324cb70e, produced 98 to 99, accepted 60 to 61 against floor 100 of 143, one own-produced name and spend 0.081372 of 3.0, but the per-parked-source 0.11.1 presence answer is absent.",
+    "goal": "Read the source goal at prompt.txt:38 and the resume ruling at resume-1-advice.txt:1; the landed work reruns the one cohort source whose reworked spelling the node can admit and reports the four other re-parked sources as parked, rather than rerunning sources whose token the active grammar lacks.",
+    "manifest": "Read the source manifest.md; status complete with six commits, tests as the sbatch invocation of mapping-rerun-live.sbatch, its log ending EXIT=0, and empty baseline_suite and after_suite fields.",
+    "write_paths": "Read prompt.txt:80-83 and the source manifest orientation_write_paths; all six commits touch exactly the two declared file paths."
+  },
+  "justifications": {
+    "durability": "The guards live in a hand-run script; run.py:251 and :253 would redden, but the attribution assertions at :314-317 restate the filter at :262-268 and cannot fail, and nothing asserts the rendered fragment against mapping-after.json.",
+    "evidence": "mapping-rerun-live.log records EXIT=0 with a SUMMARY line and per-phase costs read by for_run, and mapping-before.json records the power_convertor positive control, yet the four parked tokens are never queried against 0.11.1 and parked_controls_unchanged reports the input count rather than the comparison at run.py:251.",
+    "fit": "The fragment uses the same id-prefix and table shape as its sibling sib-vocab-gap-requeue.html, and the runner's symbols name mechanisms with no plan label in code.",
+    "goal_fidelity": "The fragment records the admitted source moving to a bound current_profile_alignment at accepted, but its headline claim holds for one source of five and the other four are asserted absent only through stored refusal text.",
+    "reuse": "The runner reuses source_state from the sibling evidence fragment rather than reimplementing it, and no public owner for token-value presence exists in imas_codex/standard_names.",
+    "scope_discipline": "Every path in d500e8eab..d89c33933 is one of the two declared write paths, the fragment's element ids are all node-prefixed, and no plan, index or product source was touched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: Read the source goal at prompt.txt:38 and the resume ruling at resume-1-advice.txt:1; the landed work reruns the one cohort source whose reworked spelling the node can admit (dd:summary/global_quantities/current_alignment/value) and reports the four other re-parked sources as parked, rather than rerunning sources whose token the active grammar lacks.\nVERDICT done_when: Read prompt.txt:125 and the gate log mapping-rerun-live.log: its head names revision 6e16ddded and the swallowed command, and its SUMMARY line records run 324cb70e, stop_reason no_eligible_work, produced 98 to 99, accepted 60 to 61 against floor 100 of 143, own_produced_names 1 and spend 0.081372 of 3.0; one element is missing, the per parked source answer whether 0.11.1 carries its token.\nVERDICT write_paths: Read prompt.txt:80-83 and the source manifest orientation_write_paths; all six commits d500e8eab..d89c33933 touch exactly the two declared file paths and no third path.\nVERDICT manifest: Read the source manifest.md; it states status complete, lists the six commits, records tests as the sbatch invocation of mapping-rerun-live.sbatch and the log ending EXIT=0, and its baseline_suite and after_suite fields are both empty, so no failure delta is claimed.\nVERDICT diff: Read all six commits against d500e8eab; they build the evidence runner, commit an intermediate fragment recording a blocked admission, correct admission to the approved rework mapping, pass wired graph services to the source writers, and land the final fragment recording the accepted binding, the two cohort metrics, the per-phase spend and the four parked refusals.\nCALL_SITES: imas_codex/standard_names/graph_store/graph_source_bindings.py:233 (set_source_compose_hint), imas_codex/standard_names/graph_store/graph_source_bindings.py:2333 (retry_failed_sources), imas_codex/standard_names/graph_store/graph_foundation.py:90 (services_for_call), imas_codex/cli sn run (the pipeline the gate invokes)\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: The landed fragment at docs/evidence/fragments/sn-integrity-backlog/sib-vocab-gap-requeue-isn-0-11-1.html:5-10 records the admitted source moving to a bound current_profile_alignment at accepted, but its headline 'now that ISN 0.11.1 carries them' holds for one source of five and the other four are asserted absent only through stored refusal text.\nSCORE evidence: 14\nJUSTIFICATION evidence: mapping-rerun-live.log records EXIT=0 with a SUMMARY line and per-phase costs read by for_run, and mapping-before.json records the power_convertor positive control, yet the four parked tokens are never queried against 0.11.1 and the summary field parked_controls_unchanged reports the input count rather than the comparison at run.py:251.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: Every path in d500e8eab..d89c33933 is one of the two declared write paths, the fragment's element ids are all prefixed with the node id, and no plan, index or product source was touched.\nSCORE durability: 12\nJUSTIFICATION durability: The guards live in a hand-run script rather than a test, the parked-state equality at run.py:251 and the spend ceiling at :253 would genuinely redden, but the attribution assertions at run.py:314-317 restate the filter at :262-268 and cannot fail, and nothing asserts the rendered fragment against mapping-after.json.\nSCORE fit: 18\nJUSTIFICATION fit: docs/evidence/fragments/sn-integrity-backlog/sib-vocab-gap-requeue-isn-0-11-1.html uses the same h2/h3 id-prefix and table shape as its sibling sib-vocab-gap-requeue.html, and every symbol in the runner names a mechanism (snapshot, prepare, readback, render) with no plan label in code.\nSCORE reuse: 17\nJUSTIFICATION reuse: the evidence runner at docs/evidence/fragments/sn-integrity-backlog/sib-vocab-gap-requeue-isn-0-11-1-run.py:45-51 reuses source_state by importing docs/evidence/fragments/sn-integrity-backlog/sib-second-pass-run.py:60 rather than reimplementing it, and a capability search of imas_codex/standard_names found no public owner for token-value presence, only private helpers _resolve_synced_segments and _resolve_grammar_token_version in graph_store/graph_catalog.py:1735-1900.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-vocab-gap-requeue-isn-0-11-1.html:31-34 non-blocking: the parked table reports the stored 0.11.0 refusal as its only statement about the token and never records whether active grammar 0.11.1 carries it, which the done_when names as a required per-source element; run.py:95-102 builds the 0.11.1 token set and applies it only to admitted rows, so mapping-before.json holds no presence record for the four parked tokens, though an independent read confirms all four are absent and current_profile_alignment is present.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-vocab-gap-requeue-isn-0-11-1-run.py:314-317 non-blocking: render() re-asserts on own_names the two predicates that produced own_names at :262-268, so neither assertion can redden and the attribution guard the node reports is not actually asserted.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-vocab-gap-requeue-isn-0-11-1-run.py:294 non-blocking: parked_controls_unchanged is len(payload['parked']), a constant counting the controls examined rather than measuring that they are unchanged, whose real check is the equality assertion at :251.\n",
+  "reuse_search": {
+    "added_definitions": "No production function, class or module is added. The runner adds only evidence-local helpers (save, load, source_reader, snapshot, prepare, execute, readback, render) and takes source_state from the existing sibling fragment; the grammar-token reads have no public owner in the package, only private catalog helpers for segment and version resolution.",
+    "capabilities": [
+      "read a StandardNameSource's status, refusal and produced names",
+      "read the active ISN grammar version and its token vocabulary",
+      "render an evidence fragment as HTML tables"
+    ],
+    "owners_opened": [
+      "docs/evidence/fragments/sn-integrity-backlog/sib-second-pass-run.py:60 source_state",
+      "imas_codex/standard_names/graph_store/graph_catalog.py:1735 _resolve_grammar_token_version",
+      "imas_codex/standard_names/graph_store/graph_catalog.py:1877 _resolve_synced_segments",
+      "imas_codex/standard_names/grammar_query.py:44 select_grammar_version"
+    ]
+  },
+  "review_run_id": "r-20261111T162242971926-review-of-sib-vocab-gap-requeue-isn-0-11-1-d89c33933d36",
+  "review_scope": "Full review only: six commits d500e8eab72071be07d872aa1a79f136dd63b6fc..d89c33933d36d01d33286e8ce09c007ed44d65d5, two files, +423 lines, all inside the declared write paths.",
+  "reviewed_base_sha": "d500e8eab72071be07d872aa1a79f136dd63b6fc",
+  "reviewed_head_sha": "d89c33933d36d01d33286e8ce09c007ed44d65d5",
+  "reviewed_run_id": "r-20261111T150911488391-sib-vocab-gap-requeue-isn-0-11-1",
+  "scores": {
+    "durability": 12,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 16,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T16:42:46.508001+00:00",
+  "total": 97
+}
