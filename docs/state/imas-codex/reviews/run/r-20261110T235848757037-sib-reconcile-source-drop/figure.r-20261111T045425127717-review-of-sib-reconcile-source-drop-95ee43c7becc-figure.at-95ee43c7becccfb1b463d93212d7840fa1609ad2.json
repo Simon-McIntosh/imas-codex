@@ -1,0 +1,47 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-11T05:04:22.608Z",
+  "dispatched_at": "2026-11-11T04:56:54Z",
+  "figures": [
+    {
+      "caption_source": "docs/evidence/fragments/sn-integrity-backlog/sib-reconcile-source-drop.html figure id sib-reconcile-source-drop-fig",
+      "judged_from": "the rendered PNG attached to this review as image-0.png (1400x581 RGBA), opened and inspected at full size and in 4x crops of the legend, the reconcile annotation, and the restore annotation; no SVG was opened, listed, read or rendered",
+      "path": "docs/figures/sn-integrity-backlog/sib-reconcile-source-drop/sourceless-drafts.svg",
+      "rubric": {
+        "contrast": "pass \u2014 annotation text is #333333/#555555 on white (measured about 12.6:1 and 7.1:1); the red direct label and marker clear white at about 6:1 and the blue series at about 5.4:1.",
+        "data_ink": "pass \u2014 one 3 pt step line, three markers and two dotted event rules carry the message; the only further ink is the labelled y=3 population rule.",
+        "decoration": "pass \u2014 no gradient, background fill, shading or frame; the top and right spines are absent and both reference rules are dotted hairlines.",
+        "label_collision": "pass \u2014 no legend entry, tick label, axis label, annotation or direct label is clipped by the canvas or overlaps another label or the plotted data; the largest measured gap is about 14 px between the restore annotation's right edge and the restore event rule.",
+        "legibility": "pass \u2014 the two-step series, the two dotted event rules and all annotation text are readable at full size and in the 4x crops.",
+        "table_form": "pass \u2014 a count sampled across about 4.5 hours with two step changes is a time series; a four-row table would lose the before/after structure around the two events."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "file": "docs/figures/sn-integrity-backlog/sib-reconcile-source-drop/sourceless-drafts.svg",
+      "id": "f19ed6b4cc0",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The y-axis is truncated to roughly 2.55-4.45 with ticks only at 3 and 4, so a single-draft change fills about 53 percent of the panel height. A reader taking the vertical excursion for magnitude reads a near-doubling and a collapse where the population moved by one draft; the annotations and the direct '4' label do carry the true values, which is why this does not stop a reader reading the figure."
+    },
+    {
+      "file": "docs/figures/sn-integrity-backlog/sib-reconcile-source-drop/sourceless-drafts.svg",
+      "id": "f19ed6b4cc0",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The 20:59:51Z export-gate read is drawn as a 9 pt blue marker and then completely covered by the 12 pt red marker at the same coordinates, so the render shows two blue read markers where the caption says the markers are 'the three reads'. The level at that instant is still visible and the red marker carries the intended highlight, so nothing is unreadable; what is lost is the reader's ability to count the reads and to see that the released draft was itself observed at a gate read."
+    }
+  ],
+  "project": "imas-codex",
+  "review_run_id": "r-20261111T045425127717-review-of-sib-reconcile-source-drop-95ee43c7becc-figure",
+  "reviewed_base_sha": "9b42761afdd8c5f59d5b523a35ca55b1608fd19e",
+  "reviewed_head_sha": "95ee43c7becccfb1b463d93212d7840fa1609ad2",
+  "reviewed_run_id": "r-20261110T235848757037-sib-reconcile-source-drop",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T05:07:10.674738+00:00",
+  "total": null
+}
