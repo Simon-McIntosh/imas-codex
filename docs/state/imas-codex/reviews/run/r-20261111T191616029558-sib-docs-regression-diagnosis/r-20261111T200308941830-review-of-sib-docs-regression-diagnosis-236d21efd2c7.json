@@ -1,0 +1,59 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "The reviewed run is a read-only evidence node whose write paths hold no test file; its classification.json carries baseline_suite null and after_suite null, so there are no suite arms to diff and no added failure id exists.",
+  "completed_at": "2026-11-11T20:19:40.610Z",
+  "dispatched_at": "2026-11-11T20:05:10Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T191616029558-sib-docs-regression-diagnosis/negative-control.py",
+      "line": 18,
+      "severity": "non-blocking",
+      "text": "the stable-sample arm cannot fail: assigns() reads attribution[\"per_name\"], which the instrument populates only for names in the leave set (run.py:318), so a name that stayed accepted is never a key and bad is always empty; the declared negative control is falsifiable only in its leave-set half."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-docs-regression-diagnosis.html",
+      "line": 102,
+      "severity": "non-blocking",
+      "text": "\"every one reading DD resolution version must be one exact published version\" is a universal the instrument never measures: it counts failure events and refusal text as two independent tallies (run.py:270-275), and 3035 failures against 9106 text occurrences is consistent with the conjunction rather than evidence of it."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-docs-regression-diagnosis.html",
+      "line": 84,
+      "severity": "non-blocking",
+      "text": "the sourceless section reports the drain's 9 and the live 10 and explains only the 9-to-10 step, leaving the done_when's stated \"3 after the source-drop repair\" unreconciled, so a reader cannot tell whether the earlier repair regressed or the two probes count different populations."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-docs-regression-diagnosis-run.py",
+      "line": 189,
+      "severity": "non-blocking",
+      "text": "_drift_probe repeats the stored-snapshot-versus-terminal comparison owned by source_refresh.py's _RESOLVE_SOURCE_TERMINAL (:47-52) and _source_deltas (:168-242) instead of calling them, so a change to the steering fields would leave this instrument measuring a different delta than the writer it blames."
+    }
+  ],
+  "justifications": {
+    "durability": "negative-control.py:15 reads a[\"per_name\"], which sib-docs-regression-diagnosis-run.py:318 populates only for leave-set names, so the stable-sample arm is vacuous and only the leave-set arm can redden.",
+    "evidence": "attribution.json records 405 left / 400 reset / 508 resets and every count reconciles against the drain's own before.json and after.json, but the negative control's falsifying half cannot fail and the review_name \"every one\" universal is two independent tallies rather than a conjunction.",
+    "fit": "both files follow the docs/evidence/fragments/sn-integrity-backlog/ <node>.html plus <node>-run.py pattern of its siblings; the HTML lacks a trailing newline.",
+    "goal_fidelity": "sib-docs-regression-diagnosis.html:62-81 names the drift refresh as the writer and source_refresh.py:325-328 as the mechanism, with the stranded-identity change and the vocabulary reconcile excluded by code site at html:49-61.",
+    "reuse": "sib-docs-regression-diagnosis-run.py:189 re-implements the RENAMED_TO terminal resolution and snapshot comparison that source_refresh.py:47-52 (_RESOLVE_SOURCE_TERMINAL) and _source_deltas at source_refresh.py:168-242 already own.",
+    "scope_discipline": "the commit touches only the two declared evidence paths, with no plan edit, no graph write and no sn run."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: read the reviewed manifest's goal against the landed fragment docs/evidence/fragments/sn-integrity-backlog/sib-docs-regression-diagnosis.html:62, which names the startup DD-source drift refresh as the writer of the 400 reset names and rules the other two candidate causes out by code path.\nVERDICT done_when: the done_when's per-writer counts, cause decisions with code sites, sourceless set and review_name refusals are all present and recorded in attribution.json (405 left, 400 reset, 508 resets, 10 sourceless, 590 of 6577 bindings unpinned), but the done_when's \"3 after the source-drop repair\" figure is never reconciled against the 9 and 10 the fragment reports.\nVERDICT write_paths: the dispatch declared sib-docs-regression-diagnosis.html, sib-docs-regression-diagnosis-run.py and an optional docs/figures path; the diff changes exactly the first two and the figure path is unused.\nVERDICT manifest: read; it records commit 236d21efd2c, status complete, read-only graph job 1310945 with EXIT=0 and a header printing revision, tree and imported module, the negative-control log, and no suite arms because the node writes no test file.\nVERDICT diff: read the single commit 236d21efd2 against base 412c451c7 commit by commit; two new files, 534 insertions, no deletions, no production source touched.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: sib-docs-regression-diagnosis.html:62-81 names the drift refresh as the writer and source_refresh.py:325-328 as the mechanism, with the stranded-identity change and the vocabulary reconcile excluded by code site at html:49-61.\nSCORE evidence: 15\nJUSTIFICATION evidence: attribution.json records 405 left / 400 reset / 508 resets and every count reconciles against the drain's own before.json and after.json, but the negative control's falsifying half cannot fail and the review_name \"every one\" universal is two independent tallies rather than a conjunction.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the commit touches only the two declared evidence paths, with no plan edit, no graph write and no sn run.\nSCORE durability: 8\nJUSTIFICATION durability: negative-control.py:15 reads a[\"per_name\"], which sib-docs-regression-diagnosis-run.py:318 populates only for leave-set names, so the stable-sample arm is vacuous and only the leave-set arm can redden.\nSCORE fit: 17\nJUSTIFICATION fit: both files follow the docs/evidence/fragments/sn-integrity-backlog/ <node>.html plus <node>-run.py pattern of its siblings; the HTML lacks a trailing newline.\nSCORE reuse: 5\nJUSTIFICATION reuse: sib-docs-regression-diagnosis-run.py:189 re-implements the RENAMED_TO terminal resolution and snapshot comparison that source_refresh.py:47-52 (_RESOLVE_SOURCE_TERMINAL) and _source_deltas at source_refresh.py:168-242 already own.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T191616029558-sib-docs-regression-diagnosis/negative-control.py:18 non-blocking: the stable-sample arm cannot fail, because assigns() reads attribution[\"per_name\"], which the instrument populates only for names in the leave set (run.py:318), so a name that stayed accepted is never a key and bad is always empty; the declared negative control is therefore falsifiable only in its leave-set half, and the guard that would catch a writer wrongly attributed to a stable name does not exist.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-docs-regression-diagnosis.html:102 non-blocking: \"every one reading DD resolution version must be one exact published version\" is a universal the instrument never measures, since it counts the failure events and the refusal text as two independent tallies (run.py:270-275); 3035 failures against 9106 text occurrences is consistent with, not evidence of, the conjunction.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-docs-regression-diagnosis.html:84 non-blocking: the sourceless section reports the drain's 9 and the live 10 and explains only the 9-to-10 step, leaving the done_when's stated \"3 after the source-drop repair\" unreconciled, so a reader cannot tell whether the earlier repair regressed or the two probes count different populations.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-docs-regression-diagnosis-run.py:189 non-blocking: _drift_probe repeats the stored-snapshot-versus-terminal comparison owned by source_refresh.py's _RESOLVE_SOURCE_TERMINAL (:47-52) and _source_deltas (:168-242) instead of calling them, so a change to the steering fields would leave this instrument silently measuring a different delta than the writer it blames.\n",
+  "review_run_id": "r-20261111T200308941830-review-of-sib-docs-regression-diagnosis-236d21efd2c7",
+  "reviewed_base_sha": "412c451c7eb7b7cf146f8b7f9e5caff39e2eea2b",
+  "reviewed_head_sha": "236d21efd2c79576bbba49656c88276fa005bd3d",
+  "reviewed_run_id": "r-20261111T191616029558-sib-docs-regression-diagnosis",
+  "scores": {
+    "durability": 8,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T20:19:54.778237+00:00",
+  "total": 82
+}
