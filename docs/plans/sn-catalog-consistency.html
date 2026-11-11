@@ -19,11 +19,11 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names,catalog-release">
   <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;}">
-  <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;sn-integrity-backlog#s52&quot;],&quot;s3&quot;:[&quot;sn-catalog-consistency#s2&quot;,&quot;sn-full-dd-continuation#s4&quot;]}">
+  <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;sn-integrity-backlog#s52&quot;],&quot;s3&quot;:[&quot;sn-catalog-consistency#s2&quot;,&quot;sn-full-dd-continuation#s4&quot;],&quot;s5&quot;:[&quot;sn-integrity-backlog#s52&quot;]}">
   <title>One Concept, One Definition: The Catalog Consistency Pass | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="6">
 <meta name="plan-modified" content="2026-11-11">
 </head>
 <body>
@@ -41,15 +41,15 @@
 
     <h2 id="s2">§2 — The consistency batches, applied</h2>
     <section data-reckon="section" data-id="s2" data-effort-hours="8.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="sn-integrity-backlog#s52"></section>
-    <p>Apply the batches the sizing node lists, each through <code>sn edit</code> with a stated reason, renames in their own batches and never mixed with documentation edits. Batch 1 is the flux-surface-average family, the worked example the rest follow. Each concept ends with the one definition and template the census proposes for its family, unless the lead rules otherwise on a batch the coordinator brings with its evidence. This section changes names, definitions and documentation only: it makes no <code>physics_domain</code> change, and the grouping rows of the batches are §5's. It owns every name and documentation batch, the release-candidate rename batch and the advisory documentation batches included; only the batches for the two-tip momentum-diffusivity lineage belong to §4.</p>
+    <p>Apply the batches the sizing node lists, each through <code>sn edit</code> with a stated reason, renames in their own batches and never mixed with documentation edits. Batch 1 is the flux-surface-average family, the worked example the rest follow. Each concept ends with the one definition and template the census proposes for its family, unless the lead rules otherwise on a batch the coordinator brings with its evidence. This section changes names, definitions and documentation only: it makes no <code>physics_domain</code> change, and the grouping rows of the batches are §5's. It owns every name and documentation batch, the release-candidate rename batch and the advisory documentation batches included; only the rename batch for the two-tip momentum-diffusivity lineage belongs to §4, and the documentation rows of that lineage's names stay here.</p>
     <p>Spend draws on the USD 350 full-DD approval of 2026-11-07, which this pass shares with <code>sn-full-dd-continuation</code>; that plan's run limit is computed after every draw on the approval, this pass's included. The first USD 60 is authorised as a tranche. When the measured rate projects the remaining batches past it, the coordinator brings the lead that projection, and the lead's ruling on the remaining batches is recorded on this section before any of them runs. The sized estimates use the documentation rate, while <code>sn edit</code> also pays for review, so batch 1 measures the real per-name cost and every later batch runs under a ceiling of that measured rate times its name count, plus a quarter.</p>
     <p><strong>Done when:</strong></p>
     <ul>
-      <li>every name and documentation row in <code>docs/evidence/fragments/sn-integrity-backlog/sib-consistency-batches.json</code>, except the two-tip lineage's, is applied, declined with its reason, or held under the lead's recorded spend ruling, and each applied change carries an <code>sn edit</code> reason;</li>
+      <li>every name and documentation row in <code>docs/evidence/fragments/sn-integrity-backlog/sib-consistency-batches.json</code>, except the two-tip lineage's rename batch, is applied, declined with its reason, or held under the lead's recorded spend ruling, and each applied change carries an <code>sn edit</code> reason;</li>
       <li>the flux-surface-average family reads with one definition and one documentation template across all its live members, as a named witness;</li>
       <li>over the families and names the batches touched, the consistency census counts fewer divergent families and fewer multiply-defined concepts after the last batch than the same committed instrument counted in that population before batch 1, so names the continuation run creates elsewhere cannot move the comparison;</li>
       <li>the census still counts a family planted with two divergent definitions in a disposable graph, and stays silent on an identical one;</li>
-      <li>spend per batch is recorded beside its estimate and the measured rate, and the pass total beside its USD 60 cap and the approval's remaining balance;</li>
+      <li>spend per batch is recorded beside its estimate and the measured rate, and the pass total beside the authorised USD 60 tranche, any recorded lead ruling past it, and the approval's remaining balance;</li>
       <li>the export gate's blocking set stays 0, and the count of sourceless live drafts among the touched names does not rise across the pass.</li>
     </ul>
 
