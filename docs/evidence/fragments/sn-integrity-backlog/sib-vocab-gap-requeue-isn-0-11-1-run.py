@@ -156,7 +156,8 @@ def prepare():
 
 def execute():
     prepare()
-    from imas_codex.standard_names.graph_store import (
+    from imas_codex.standard_names.graph_store import graph_foundation
+    from imas_codex.standard_names.graph_store.graph_source_bindings import (
         retry_failed_sources,
         set_source_compose_hint,
     )
@@ -172,12 +173,14 @@ def execute():
         ):
             reset = retry_failed_sources(
                 [sid],
+                services=graph_foundation.services_for_call(),
                 reason="Approved vocabulary rework is now registered; retry against the mapped complete spelling.",
             )
             hints.append({"source": sid, "retry": reset})
             assert reset["retried"] == 1, reset
         hint = set_source_compose_hint(
             sid,
+            services=graph_foundation.services_for_call(),
             hint=f"Use the approved complete spelling {row['spelling']}. {row['description']} Preserve the DD unit A: this is a current-valued profile-alignment figure of merit, not a dimensionless factor. The former current_alignment_factor request is replaced by this registered physical base.",
             reason="The approved source-to-spelling rework mapping replaces the former vocabulary request; the mapped physical base is registered in active ISN grammar.",
             replace=True,
