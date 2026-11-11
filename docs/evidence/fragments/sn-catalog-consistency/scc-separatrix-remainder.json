@@ -1,12 +1,12 @@
 {
  "node": "scc-separatrix-remainder",
- "generated_at": "2026-11-11T22:37:33+00:00",
+ "generated_at": "2026-11-11T22:53:31+00:00",
  "read_only": true,
  "population_rule": "live StandardName with a produced DD path carrying 'separatrix' on either source edge, or a name ending _at_separatrix / _at_plasma_boundary",
  "totals": {
-  "population": 212,
-  "live": 105,
-  "superseded_tombstones": 107,
+  "population": 211,
+  "live": 107,
+  "superseded_tombstones": 104,
   "by_locus": {
    "diagnostic_separatrix_distance": 4,
    "equilibrium_boundary": 1,
@@ -14,11 +14,11 @@
    "pedestal_fit_separatrix": 1,
    "separatrix": 43,
    "separatrix_average": 44,
-   "unresolved": 9
+   "unresolved": 11
   },
   "by_action": {
    "keep": 103,
-   "supersede_onto_holder": 2
+   "supersede_onto_holder": 4
   }
  },
  "suffix_by_locus": {
@@ -54,38 +54,6 @@
   }
  },
  "collisions": [
-  {
-   "id": "argon_density_at_separatrix",
-   "status": "draft",
-   "unit": "m^-3",
-   "physics_domain": "general",
-   "locus": "separatrix",
-   "loci_present": [
-    "separatrix"
-   ],
-   "locus_meaning": "local value evaluated at the separatrix",
-   "locus_paths": [
-    "summary/local/separatrix/n_i/argon/value"
-   ],
-   "all_paths": [
-    "summary/local/separatrix/n_i/argon/value"
-   ],
-   "current_locator": "_at_separatrix",
-   "required_locator": "at_plasma_boundary",
-   "proposed_action": "keep",
-   "proposed_target": "argon_density_at_separatrix",
-   "collision": "required spelling is held by a superseded tombstone",
-   "blocked_spelling": "argon_density_at_plasma_boundary",
-   "rationale": "the separatrix locator is argon_density_at_plasma_boundary, but that spelling is a superseded tombstone; the name is kept until the lead rules between composing fresh and leaving the locator as it is",
-   "chain": {
-    "refined_from": [],
-    "refined_into": [],
-    "has_successor": [],
-    "predecessor": [],
-    "parent_children": []
-   },
-   "tombstones": []
-  },
   {
    "id": "deuterium_tritium_density_flux_surface_averaged_at_plasma_boundary",
    "status": "draft",
@@ -253,38 +221,6 @@
    "tombstones": []
   },
   {
-   "id": "toroidal_tritium_velocity_at_separatrix",
-   "status": "draft",
-   "unit": "m.s^-1",
-   "physics_domain": "edge_plasma_physics",
-   "locus": "separatrix",
-   "loci_present": [
-    "separatrix"
-   ],
-   "locus_meaning": "local value evaluated at the separatrix",
-   "locus_paths": [
-    "summary/local/separatrix/velocity_phi/tritium/value"
-   ],
-   "all_paths": [
-    "summary/local/separatrix/velocity_phi/tritium/value"
-   ],
-   "current_locator": "_at_separatrix",
-   "required_locator": "at_plasma_boundary",
-   "proposed_action": "keep",
-   "proposed_target": "toroidal_tritium_velocity_at_separatrix",
-   "collision": "required spelling is held by a superseded tombstone",
-   "blocked_spelling": "toroidal_tritium_velocity_at_plasma_boundary",
-   "rationale": "the separatrix locator is toroidal_tritium_velocity_at_plasma_boundary, but that spelling is a superseded tombstone; the name is kept until the lead rules between composing fresh and leaving the locator as it is",
-   "chain": {
-    "refined_from": [],
-    "refined_into": [],
-    "has_successor": [],
-    "predecessor": [],
-    "parent_children": []
-   },
-   "tombstones": []
-  },
-  {
    "id": "tungsten_density_at_separatrix",
    "status": "draft",
    "unit": "m^-3",
@@ -328,7 +264,7 @@
  ],
  "names": [
   {
-   "id": "argon_density_at_separatrix",
+   "id": "argon_density_at_plasma_boundary",
    "status": "draft",
    "unit": "m^-3",
    "physics_domain": "general",
@@ -343,16 +279,48 @@
    "all_paths": [
     "summary/local/separatrix/n_i/argon/value"
    ],
-   "current_locator": "_at_separatrix",
+   "current_locator": "_at_plasma_boundary",
    "required_locator": "at_plasma_boundary",
    "proposed_action": "keep",
-   "proposed_target": "argon_density_at_separatrix",
-   "collision": "required spelling is held by a superseded tombstone",
-   "blocked_spelling": "argon_density_at_plasma_boundary",
-   "rationale": "the separatrix locator is argon_density_at_plasma_boundary, but that spelling is a superseded tombstone; the name is kept until the lead rules between composing fresh and leaving the locator as it is",
+   "proposed_target": "argon_density_at_plasma_boundary",
+   "collision": null,
+   "blocked_spelling": null,
+   "rationale": "already ends in the separatrix locator",
+   "chain": {
+    "refined_from": [
+     "argon_density_at_separatrix"
+    ],
+    "refined_into": [],
+    "has_successor": [],
+    "predecessor": [],
+    "parent_children": []
+   },
+   "tombstones": []
+  },
+  {
+   "id": "argon_density_at_separatrix",
+   "status": "draft",
+   "unit": "m^-3",
+   "physics_domain": "general",
+   "locus": "unresolved",
+   "loci_present": [
+    "unresolved"
+   ],
+   "locus_meaning": "no produced DD path on either source edge",
+   "locus_paths": [],
+   "all_paths": [],
+   "current_locator": "_at_separatrix",
+   "required_locator": null,
+   "proposed_action": "supersede_onto_holder",
+   "proposed_target": "argon_density_at_plasma_boundary",
+   "collision": null,
+   "blocked_spelling": null,
+   "rationale": "no produced DD path; a live name carries the concept",
    "chain": {
     "refined_from": [],
-    "refined_into": [],
+    "refined_into": [
+     "argon_density_at_plasma_boundary"
+    ],
     "has_successor": [],
     "predecessor": [],
     "parent_children": []
@@ -825,18 +793,14 @@
    "rationale": "already ends in the separatrix_average locator",
    "chain": {
     "refined_from": [
-     "argon_density_at_plasma_boundary",
      "argon_density_flux_surface_averaged_at_plasma_boundary"
     ],
     "refined_into": [],
     "has_successor": [],
-    "predecessor": [
-     "argon_density_at_plasma_boundary"
-    ],
+    "predecessor": [],
     "parent_children": []
    },
    "tombstones": [
-    "argon_density_at_plasma_boundary",
     "argon_density_flux_surface_averaged_at_plasma_boundary"
    ]
   },
@@ -3244,7 +3208,7 @@
    "tombstones": []
   },
   {
-   "id": "toroidal_beryllium_velocity",
+   "id": "toroidal_beryllium_velocity_at_plasma_boundary",
    "status": "draft",
    "unit": "m.s^-1",
    "physics_domain": "edge_plasma_physics",
@@ -3259,15 +3223,17 @@
    "all_paths": [
     "summary/local/separatrix/velocity_phi/beryllium/value"
    ],
-   "current_locator": null,
+   "current_locator": "_at_plasma_boundary",
    "required_locator": "at_plasma_boundary",
    "proposed_action": "keep",
-   "proposed_target": "toroidal_beryllium_velocity",
+   "proposed_target": "toroidal_beryllium_velocity_at_plasma_boundary",
    "collision": null,
    "blocked_spelling": null,
-   "rationale": "the name's trailing locator is neither _at_separatrix nor _at_plasma_boundary, so it is outside the two spellings this census rewrites",
+   "rationale": "already ends in the separatrix locator",
    "chain": {
-    "refined_from": [],
+    "refined_from": [
+     "toroidal_beryllium_velocity"
+    ],
     "refined_into": [],
     "has_successor": [],
     "predecessor": [],
@@ -3838,7 +3804,7 @@
    "tombstones": []
   },
   {
-   "id": "toroidal_tritium_velocity_at_separatrix",
+   "id": "toroidal_tritium_velocity_at_plasma_boundary",
    "status": "draft",
    "unit": "m.s^-1",
    "physics_domain": "edge_plasma_physics",
@@ -3853,16 +3819,48 @@
    "all_paths": [
     "summary/local/separatrix/velocity_phi/tritium/value"
    ],
-   "current_locator": "_at_separatrix",
+   "current_locator": "_at_plasma_boundary",
    "required_locator": "at_plasma_boundary",
    "proposed_action": "keep",
-   "proposed_target": "toroidal_tritium_velocity_at_separatrix",
-   "collision": "required spelling is held by a superseded tombstone",
-   "blocked_spelling": "toroidal_tritium_velocity_at_plasma_boundary",
-   "rationale": "the separatrix locator is toroidal_tritium_velocity_at_plasma_boundary, but that spelling is a superseded tombstone; the name is kept until the lead rules between composing fresh and leaving the locator as it is",
+   "proposed_target": "toroidal_tritium_velocity_at_plasma_boundary",
+   "collision": null,
+   "blocked_spelling": null,
+   "rationale": "already ends in the separatrix locator",
+   "chain": {
+    "refined_from": [
+     "toroidal_tritium_velocity_at_separatrix"
+    ],
+    "refined_into": [],
+    "has_successor": [],
+    "predecessor": [],
+    "parent_children": []
+   },
+   "tombstones": []
+  },
+  {
+   "id": "toroidal_tritium_velocity_at_separatrix",
+   "status": "draft",
+   "unit": "m.s^-1",
+   "physics_domain": "edge_plasma_physics",
+   "locus": "unresolved",
+   "loci_present": [
+    "unresolved"
+   ],
+   "locus_meaning": "no produced DD path on either source edge",
+   "locus_paths": [],
+   "all_paths": [],
+   "current_locator": "_at_separatrix",
+   "required_locator": null,
+   "proposed_action": "supersede_onto_holder",
+   "proposed_target": "toroidal_tritium_velocity_at_plasma_boundary",
+   "collision": null,
+   "blocked_spelling": null,
+   "rationale": "no produced DD path; a live name carries the concept",
    "chain": {
     "refined_from": [],
-    "refined_into": [],
+    "refined_into": [
+     "toroidal_tritium_velocity_at_plasma_boundary"
+    ],
     "has_successor": [],
     "predecessor": [],
     "parent_children": []
@@ -4121,22 +4119,6 @@
    "refined_into": [],
    "must_not_be_revived_by_chain": [
     "poloidal_angle_of_plasma_boundary_gap"
-   ]
-  },
-  {
-   "id": "argon_density_at_plasma_boundary",
-   "status": "superseded",
-   "locus": "separatrix_average",
-   "locus_meaning": "flux-surface averaged over the separatrix",
-   "locus_paths": [
-    "summary/local/separatrix_average/n_i/argon/value_error_index"
-   ],
-   "refined_from": [],
-   "refined_into": [
-    "flux_surface_averaged_argon_density_at_plasma_boundary"
-   ],
-   "must_not_be_revived_by_chain": [
-    "flux_surface_averaged_argon_density_at_plasma_boundary"
    ]
   },
   {
@@ -4814,22 +4796,6 @@
    ]
   },
   {
-   "id": "toroidal_beryllium_velocity_at_plasma_boundary",
-   "status": "superseded",
-   "locus": "unresolved",
-   "locus_meaning": "no produced DD path on either source edge",
-   "locus_paths": [],
-   "refined_from": [
-    "toroidal_flux_surface_averaged_beryllium_velocity_at_separatrix"
-   ],
-   "refined_into": [
-    "toroidal_flux_surface_averaged_beryllium_velocity_at_plasma_boundary"
-   ],
-   "must_not_be_revived_by_chain": [
-    "toroidal_flux_surface_averaged_beryllium_velocity_at_plasma_boundary"
-   ]
-  },
-  {
    "id": "toroidal_beryllium_velocity_at_separatrix",
    "status": "superseded",
    "locus": "unresolved",
@@ -4944,7 +4910,6 @@
    "locus_meaning": "no produced DD path on either source edge",
    "locus_paths": [],
    "refined_from": [
-    "toroidal_beryllium_velocity_at_plasma_boundary",
     "toroidal_flux_surface_averaged_beryllium_velocity_at_separatrix"
    ],
    "refined_into": [
@@ -4964,11 +4929,9 @@
    ],
    "refined_from": [],
    "refined_into": [
-    "toroidal_beryllium_velocity_at_plasma_boundary",
     "toroidal_flux_surface_averaged_beryllium_velocity_at_plasma_boundary"
    ],
    "must_not_be_revived_by_chain": [
-    "toroidal_beryllium_velocity_at_plasma_boundary",
     "toroidal_flux_surface_averaged_beryllium_velocity_at_plasma_boundary"
    ]
   },
@@ -5212,9 +5175,7 @@
    "locus": "unresolved",
    "locus_meaning": "no produced DD path on either source edge",
    "locus_paths": [],
-   "refined_from": [
-    "toroidal_tritium_velocity_at_plasma_boundary"
-   ],
+   "refined_from": [],
    "refined_into": [
     "toroidal_tritium_velocity_flux_surface_averaged_at_plasma_boundary"
    ],
@@ -5481,20 +5442,6 @@
    "must_not_be_revived_by_chain": []
   },
   {
-   "id": "toroidal_tritium_velocity_at_plasma_boundary",
-   "status": "superseded",
-   "locus": "unresolved",
-   "locus_meaning": "no produced DD path on either source edge",
-   "locus_paths": [],
-   "refined_from": [],
-   "refined_into": [
-    "toroidal_flux_surface_averaged_tritium_velocity_at_plasma_boundary"
-   ],
-   "must_not_be_revived_by_chain": [
-    "toroidal_flux_surface_averaged_tritium_velocity_at_plasma_boundary"
-   ]
-  },
-  {
    "id": "toroidal_tritium_velocity_flux_surface_averaged_at_plasma_boundary",
    "status": "superseded",
    "locus": "unresolved",
@@ -5701,17 +5648,16 @@
   ],
   "tombstones_on_the_located_names": [
    "toroidal_tritium_velocity",
-   "toroidal_tritium_velocity_at_plasma_boundary",
    "toroidal_tritium_velocity_flux_surface_averaged_at_plasma_boundary"
   ]
  },
  "cross_check": {
-  "independent_population_count": 105,
-  "census_live_count": 105,
+  "independent_population_count": 107,
+  "census_live_count": 107,
   "in_graph_not_in_census": [],
   "in_census_not_in_graph": [],
   "agrees": true,
-  "live_names_known_to_graph": 3276
+  "live_names_known_to_graph": 3279
  },
  "invariants": {
   "checked": [

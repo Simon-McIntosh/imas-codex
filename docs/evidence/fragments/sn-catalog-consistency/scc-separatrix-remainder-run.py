@@ -41,9 +41,12 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import subprocess
 import sys
 import time
 from collections import Counter, defaultdict
+from dataclasses import asdict
 from datetime import UTC, datetime
 from html import escape
 from pathlib import Path
@@ -53,6 +56,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from imas_codex.graph.client import GraphClient  # noqa: E402
+from imas_codex.standard_names import edit  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
 NODE = "scc-separatrix-remainder"
@@ -238,7 +242,20 @@ def main(argv: list[str] | None = None) -> int:
         choices=("tombstone-target", "cross-check"),
         help="introduce a known defect so the invariant check can be shown refusing it",
     )
+    parser.add_argument(
+        "--run-now",
+        action="store_true",
+        help="run every rename case the rulings cover, then read the state back",
+    )
+    parser.add_argument("--run-id", default=None)
+    parser.add_argument(
+        "--probe",
+        action="store_true",
+        help="persist the writer's dry run without writing any graph state",
+    )
     args = parser.parse_args(argv)
+    if args.run_now:
+        return run_cases(args)
     started = datetime.now(UTC).isoformat(timespec="seconds")
     out: dict = {"node": NODE, "generated_at": started, "read_only": True}
 
@@ -694,11 +711,12 @@ def render(d: dict) -> str:
     t = d["totals"]
     cc = d["cross_check"]
     parts = [
-        '<h2 id="sib-separatrix-locus-census">Separatrix locus census</h2>',
-        "<p>Read-only census of every live standard name tied to the separatrix "
-        "loci, produced from the live graph by "
-        "<code>sib-separatrix-locus-census-run.py</code>. No write is made; this "
-        "record proposes the suffix mapping the lead rules on.</p>",
+        f'<h3 id="{NODE}-census">Separatrix locus census (post-apply read-back)</h3>',
+        "<p>Census of every live standard name tied to the separatrix loci, read "
+        "from the census population in the live graph by "
+        f'<code>{NODE}-run.py</code>. This run writes only this evidence record; '
+        "the renames it reports are applied separately through the signed rename "
+        "writer, and the numbers below are the read-back taken afterwards.</p>",
         "<h3>Population</h3>",
         "<table><thead><tr><th>measure</th><th>count</th></tr></thead><tbody>",
     ]
@@ -900,6 +918,134 @@ def render(d: dict) -> str:
     parts.append("</ul>")
 
     return "\n".join(parts) + "\n"
+
+
+OUT_OF_LINE_QUERY = """
+MATCH (n:StandardName) WHERE n.name_stage <> 'superseded'
+OPTIONAL MATCH (s:StandardNameSource)-[:PRODUCED_NAME]->(n)
+OPTIONAL MATCH (i:IMASNode)-[:HAS_STANDARD_NAME]->(n)
+WITH n, collect(DISTINCT s.dd_path) AS sp, collect(DISTINCT i.id) AS ip
+RETURN n.id AS id, sp, ip ORDER BY id
+"""
+
+APPLY_REASON = (
+    "Use X_at_plasma_boundary for a local separatrix value and "
+    "flux_surface_averaged_X_at_plasma_boundary for its surface average."
+)
+
+
+def out_of_line(gc):
+    """Live names whose spelling disagrees with the locus their sources mean."""
+    rows = []
+    for r in query(gc, "out_of_line", OUT_OF_LINE_QUERY):
+        paths = set()
+        for p in list(r["sp"] or []) + list(r["ip"] or []):
+            paths.add(str(p).removeprefix("dd:").strip("/"))
+        loci, telling = locus_of(sorted(paths), r["id"])
+        locus = loci[0] if len(loci) == 1 else "mixed"
+        want = desired_name(r["id"], locus)
+        if want == r["id"]:
+            continue
+        rows.append(
+            {
+                "id": r["id"],
+                "locus": locus,
+                "paths": telling,
+                "target": want,
+            }
+        )
+    return rows
+
+def run_cases(args):
+    run_id = args.run_id or (
+        "sn-edit-" + datetime.now(UTC).strftime("%Y%m%dT%H%M%S")
+    )
+    revision = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], text=True
+    ).strip()
+    with GraphClient() as gc:
+        results = probe_and_apply(gc, run_id, not args.probe)
+    payload = {
+        "node": NODE,
+        "run_id": run_id,
+        "revision": revision,
+        "observed_at": datetime.now(UTC).isoformat(timespec="seconds"),
+        "convention": APPLY_REASON,
+        "cases": results,
+    }
+    out = os.environ.get("SCC_CASES_OUT")
+    if out:
+        Path(out).write_text(json.dumps(payload, indent=1, default=str) + "\n")
+    print("CASES " + json.dumps(
+        [{k: r.get(k) for k in ("id", "target", "fate", "reclaim_case", "blocked")}
+         for r in results], default=str))
+    return 0
+
+
+def probe_and_apply(gc, run_id, do_apply):
+    cases = out_of_line(gc)
+    holders = {}
+    for case in cases:
+        holders.setdefault(case["target"], []).append(case["id"])
+    results = []
+    for case in cases:
+        rec = dict(case)
+        rec["contested"] = len(holders[case["target"]]) > 1
+        if rec["contested"]:
+            rec["fate"] = "needs_ruling"
+            rec["blocked"] = (
+                "two live names require this one spelling: "
+                + ", ".join(sorted(holders[case["target"]]))
+            )
+            results.append(rec)
+            continue
+        planned = asdict(
+            edit.apply_edit(
+                target=case["id"],
+                rename=case["target"],
+                reason=APPLY_REASON,
+                origin="agent",
+                scope="only_self",
+                dry_run=True,
+                gc=gc,
+            )
+        )
+        rec["dry_run_actions"] = planned["actions"]
+        if planned["blocked"]:
+            rec["fate"] = "needs_ruling"
+            rec["blocked"] = planned["blocked"]
+            results.append(rec)
+            continue
+        rec["reclaim_case"] = next(
+            (
+                a.split("reclaim case ")[1].split(":")[0]
+                for a in planned["actions"]
+                if "reclaim case " in a
+            ),
+            None,
+        )
+        if do_apply:
+            done = asdict(
+                edit.apply_edit(
+                    target=case["id"],
+                    rename=case["target"],
+                    reason=APPLY_REASON,
+                    origin="agent",
+                    scope="only_self",
+                    dry_run=False,
+                    gc=gc,
+                )
+            )
+            rec["applied"] = done
+            ok = bool(done["applied"]) and not done["blocked"]
+            rec["fate"] = "applied" if ok else "apply_refused"
+            rec["successor"] = done["successor"]
+            if not ok:
+                rec["blocked"] = done["blocked"]
+        else:
+            rec["fate"] = "admitted"
+        results.append(rec)
+    return results
 
 
 if __name__ == "__main__":
