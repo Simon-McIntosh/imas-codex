@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-catalog-consistency">
+  <meta name="plan-title" content="One Concept, One Definition: The Catalog Consistency Pass">
+  <meta name="plan-summary" content="Apply the sized consistency batches through sn edit, clear the release-candidate warnings and settle live-name domains, so each concept reads one way.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="19.25">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-sprint" content="S19">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="standard-names,catalog-release">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;sn-integrity-backlog#s52&quot;],&quot;s3&quot;:[&quot;sn-catalog-consistency#s2&quot;,&quot;sn-full-dd-continuation#s4&quot;]}">
+  <title>One Concept, One Definition: The Catalog Consistency Pass | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-11-11">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — Where the catalog stands, measured 2026-11-10 to 2026-11-11</h2>
+    <section data-reckon="section" data-id="s1" data-effort-hours="0.25" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section>
+    <p>The lead judges the catalog by its consistency: one definition per concept, one documentation template per family, one grouping. On that measure it is not yet releasable, though its per-name scores are high. This plan carries that work forward from <code>sn-integrity-backlog</code>, which is closing, and from the unfinished repair in <code>sn-catalog-grouping</code> §3.</p>
+    <ul>
+      <li>The read-only census <code>sib-consistency-census</code> grouped the 3,034 live accepted and drafted names into 130 <code>physical_base</code> families and 474 shared-concept groups. 125 families diverge: 98 on the phrase used for the shared concept, 98 on documentation template and 98 on <code>physics_domain</code> grouping. 91 concepts are defined more than one way, and the flux-surface average is written with 25 distinct definitions across 25 members. The census instrument and its disposable-graph control are in <code>docs/evidence/fragments/sn-integrity-backlog/sib-consistency-census.json</code> and its fragment.</li>
+      <li>The whole-catalog release candidate <code>v0.4.0rc8</code>, on the fork only, exports 1,975 of 2,865 accepted names, with 890 accounted exclusions and no unaccounted residue. Its warnings name documentation that links to names the cut does not export, and the unit pairs of the <code>momentum_flux</code> and <code>momentum_source</code> families.</li>
+      <li>The lineage-cycle repair left one lineage with two live tips: <code>toroidal_plasma_momentum_diffusivity</code> beside <code>toroidal_momentum_diffusion_coefficient</code>.</li>
+      <li>The sizing node <code>sib-consistency-batches</code>, dispatched 2026-11-11 under <code>sn-integrity-backlog</code> §52, splits the 125 families into <code>sn edit</code> batches of at most 25 names by physics domain, keeps renames in batches of their own, puts the flux-surface-average family in batch 1, assigns the release-candidate warnings and the two-tip lineage to batches, and estimates each batch's cost. It makes no graph write.</li>
+    </ul>
+    <p>Lead ruling, 2026-11-11: the full-DD continuation does not wait for this pass. The batches can start before or beside the run, and §3's final census is taken after the run so it covers the names the run creates.</p>
+
+    <h2 id="s2">§2 — The consistency batches, applied</h2>
+    <section data-reckon="section" data-id="s2" data-effort-hours="8.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="sn-integrity-backlog#s52"></section>
+    <p>Apply the batches the sizing node lists, each through <code>sn edit</code> with a stated reason, renames in their own batches and never mixed with documentation edits. Batch 1 is the flux-surface-average family, the worked example the rest follow. Each concept ends with the one definition and template the census proposes for its family, unless the lead rules otherwise on a batch the coordinator brings with its evidence.</p>
+    <p>Spend draws on the USD 350 full-DD approval of 2026-11-07. Each batch runs under a ceiling of its sized estimate plus a quarter, and a batch whose estimate exceeds USD 50 goes to the lead before it runs.</p>
+    <p><strong>Done when:</strong></p>
+    <ul>
+      <li>every batch in <code>docs/evidence/fragments/sn-integrity-backlog/sib-consistency-batches.json</code> is applied or recorded as declined with its reason, and each applied change carries an <code>sn edit</code> reason;</li>
+      <li>the flux-surface-average family reads with one definition and one documentation template across all its live members, as a named witness;</li>
+      <li>the consistency census, re-run with the committed instrument after the last batch, counts fewer divergent families and fewer multiply-defined concepts than its 2026-11-10 reading of 125 and 91;</li>
+      <li>the census still counts a family planted with two divergent definitions in a disposable graph, and stays silent on an identical one;</li>
+      <li>spend per batch is recorded beside its estimate and the remaining full-DD cap;</li>
+      <li>the export gate's blocking set stays 0 and the count of sourceless live drafts does not rise across the pass.</li>
+    </ul>
+
+    <h2 id="s3">§3 — The release candidate cut clean, after the run</h2>
+    <section data-reckon="section" data-id="s3" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>The final measure of this plan, taken once §2's batches and the full-DD continuation run have both landed, so it covers the names the run creates. A whole-catalog export dry run, from the main checkout and never pushed, shows what a release would carry and what it would warn about.</p>
+    <p><strong>Done when:</strong></p>
+    <ul>
+      <li>the dry run reports no documentation link to a name the cut does not export, and no unit warning on the <code>momentum_flux</code> or <code>momentum_source</code> families, or lists each remaining warning with the reason it stands;</li>
+      <li>the consistency census is re-run over the post-run catalog and its divergent-family count is recorded beside §2's reading; any family the run newly made divergent is either applied through <code>sn edit</code> or listed with its reason;</li>
+      <li>an export dry run of a catalog with one planted dangling documentation link reports that link, so a clean result is shown to be able to fail;</li>
+      <li>the export gate's blocking set is 0.</li>
+    </ul>
+
+    <h2 id="s4">§4 — One live tip for the momentum-diffusivity lineage</h2>
+    <section data-reckon="section" data-id="s4" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+    <p><code>toroidal_plasma_momentum_diffusivity</code> and <code>toroidal_momentum_diffusion_coefficient</code> are both live tips of one lineage. The coordinator brings the lead both names with their DD sources, units, scores and paid history, and a proposed survivor. If the sizing node has placed the pair in a batch, that batch carries the ruling and this section records it.</p>
+    <p><strong>Done when:</strong> the lead's ruling is recorded here; the losing name is superseded through the signed path with one receipt-stamped successor edge to the survivor, its sources and paid reviews kept; the lineage census reports one live tip for this lineage and no new cycle; spend is USD 0 beyond any documentation regeneration the ruling asks for.</p>
+
+    <h2 id="s5">§5 — Live-name domains agree with the decision the writer stores</h2>
+    <section data-reckon="section" data-id="s5" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="sn-catalog-grouping#s3"></section>
+    <p>Carried from <code>sn-catalog-grouping</code> §3, whose code half has landed: every domain write goes through the one writer, a guard test holds it there, and the domain audit is the instrument. What it left is the repair of the live names. On 2026-10-15, after the DD re-classification, 1,477 of 2,677 live names carried a domain other than the derivation's answer, 1,701 the wrong source domains, 777 edges that disagreed and 212 no domain.</p>
+    <p><strong>Done when:</strong> the domain audit, run over every live name, reports zero names whose stored domain, source domains and edges disagree with the stored decision, or lists each residual name with its reason; every repair went through the one writer; the before and after audit counts are recorded; the audit still reports a name planted with disagreeing edges in a disposable graph; spend on domain decisions is recorded.</p>
+
+    <h2 id="s6">§6 — One separatrix locus, one suffix: the last five names</h2>
+    <section data-reckon="section" data-id="s6" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="sn-integrity-backlog#s49"></section>
+    <p>Carried from <code>sn-integrity-backlog</code> §49. Under the lead's 2026-11-07 ruling a value at the separatrix is named <code>X_at_plasma_boundary</code> and a separatrix average <code>flux_surface_averaged_X_at_plasma_boundary</code>. The signed renames and closing-lineage reclaims brought 93 of the 98 census names into line; the history-apart reclaim the lead then ruled has landed. Still out of line: the exact boundary spelling of the tritium velocity, and the two cases whose tombstone ends on a different live concept, starting with <code>electron_temperature_at_separatrix</code> to <code>thermal_electron_temperature_at_plasma_boundary</code>, which go to the lead.</p>
+    <p><strong>Done when:</strong> a live read-back of the census population shows one suffix per DD locus, with any exception the lead ruled listed by name; every change went through a signed path and no tombstone was revived; spend is at most USD 2.</p>
+
+    <h2 id="s7">§7 — No live name without a DD source, except those held on purpose</h2>
+    <section data-reckon="section" data-id="s7" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="sn-integrity-backlog#s46"></section>
+    <p>Carried from <code>sn-integrity-backlog</code> §46, whose retirement of 131 sourceless exhausted drafts has landed under the lead's 2026-10-29 ruling. Left for the lead then: 16 non-exhausted sourceless names (6 accepted, 8 pending, 2 reviewed), <code>deposited_power_at_divertor_target</code>, which the writer refused because it has a live structural child, and the nine accepted names with no producing source recorded in question <code>q-scc-nine-unsourced-names</code>. Later repairs have since reduced the count of sourceless live drafts to 4 at the 2026-11-11 flush read. The coordinator re-reads the population and brings the lead each name with the live holder of its recorded source, if any.</p>
+    <p><strong>Done when:</strong> a live read-back lists no sourceless live name except derived parents and the names held from release under the lead's rulings, each held name listed with the ruling that holds it; each change went through the signed retirement, rebind or supersede path with a receipt; spend is USD 0.</p>
+
+    <h2 id="s8">§8 — Chain-cap identities with no sourced ancestor, re-measured</h2>
+    <section data-reckon="section" data-id="s8" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links="sn-integrity-backlog#s22"></section>
+    <p>Carried from <code>sn-integrity-backlog</code> §22, which waited on the lead's choice between rebuilding provenance and holding the identities out of the cut. The 92 measured on 2026-10-12 predate the orphan, sourceless-draft and lineage-cycle retirements, so the count is re-read first with the committed census instrument and its controls.</p>
+    <p><strong>Done when:</strong> the census is re-run and its count recorded; if no such identity is among those a whole-catalog cut would publish, the section closes on that reading; otherwise the lead has chosen between rebuilding provenance and holding the identities from the cut, and a re-run after the treatment reports zero among the published set, with the census's planted control still firing.</p>
+
+    
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-scc-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-11-11" data-recommends-skill="/reckon-build sn-catalog-consistency §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Apply the sized batches, flux-surface average first</h4>
+    <div class="r-fu-body"><p>§2 starts as soon as the sizing node in <code>sn-integrity-backlog</code> §52 lands its batch list. §4 to §8 are independent of it and of each other and can run beside it; §3 is the final measure and waits for §2 and for the continuation run.</p></div>
+    <pre class="r-fu-prompt">/reckon-build sn-catalog-consistency §2</pre>
+    </article>
+</section>
+  <section data-reckon="questions" id="questions" class="r-questions">
+<h2><span class="sec">§</span> Open questions</h2>
+<div class="r-q" data-id="q-scc-nine-unsourced-names" data-section="s7" data-status="open" data-opened-by="reckon-review" data-opened-at="2026-11-11T19:00:00Z" data-resolved-at="" data-resolved-by="">
+    <p class="r-q-body"><p>Carried from <code>sn-integrity-backlog</code> question <code>q-sib-nine-unsourced-names</code> (2026-10-12): nine accepted, documented, valid names had no producing source, two of them with spend. Demote, delete or re-source each? §7 re-reads the population before this comes to the lead.</p></p>
+    </div>
+<div class="r-q" data-id="q-scc-two-identities" data-section="s7" data-status="open" data-opened-by="reckon-review" data-opened-at="2026-11-11T19:00:00Z" data-resolved-at="" data-resolved-by="">
+    <p class="r-q-body"><p>Carried from <code>sn-integrity-backlog</code> question <code>q-sib-two-identities</code>: two identities, among them <code>radial_coordinate_of_reflector</code>, need a physics adjudication on DD semantics and catalog convention before their <code>sn edit</code> proposals.</p></p>
+    </div>
+<div class="r-q" data-id="q-scc-regeneration-scope" data-section="s8" data-status="open" data-opened-by="reckon-review" data-opened-at="2026-11-11T19:00:00Z" data-resolved-at="" data-resolved-by="">
+    <p class="r-q-body"><p>Carried from <code>sn-integrity-backlog</code> question <code>q-sib-regeneration-scope</code>: regenerate or repair, the scope decision that also absorbs the 31 born-ungrounded rows. §8's re-measure decides whether it is still needed.</p></p>
+    </div>
+</section>
+</main>
+</body>
+</html>

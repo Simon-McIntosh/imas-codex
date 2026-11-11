@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-pipeline-hygiene">
+  <meta name="plan-title" content="Standard-Name Pipeline Hygiene: Red Tests, Loose Boundaries, Release Plumbing">
+  <meta name="plan-summary" content="Fix or own the 13 tests red on main, declare the CORRECTS link, close two private imports, pin-test ISN, and let releases run from a worker.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="mid">
+  <meta name="plan-effort-hours" content="22.5">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-sprint" content="S19">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="standard-names,catalog-release">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;deferred&quot;}">
+  <meta name="plan-standalone" content="Each section repairs a defect no other live plan consumes, and nothing downstream waits on this plan.">
+  <title>Standard-Name Pipeline Hygiene: Red Tests, Loose Boundaries, Release Plumbing | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-11-11">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — The 13 tests red on main are fixed or owned</h2>
+    <section data-reckon="section" data-id="s1" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>Thirteen tests in <code>tests/standard_names</code> fail at every base and head measured on 2026-11-11, including both arms of the last landing. They block no landing, but they hide regressions in every one. The ids:</p>
+    <ul>
+      <li><code>test_cascade_calibration.py::test_matched_policy_rebuilds_from_frozen_scores_and_receipts</code></li>
+      <li><code>test_catalog_layout_hierarchy.py::TestOrderingCycleDetection::test_export_ledgers_cycle_and_writes_packet</code></li>
+      <li><code>test_compose_prompt_examples_round_trip.py::test_nc_rule_bad_example_has_declared_public_oracle_disposition[NC-25-neutral_beam_injector_beam_tangency_radius]</code></li>
+      <li><code>test_gap_rule_verdicts.py</code>: <code>test_an_isotope_suffix_is_not_a_dd_field_name</code>, the two <code>test_ordinal_gap_is_a_rule_violation_not_a_missing_token</code> cases (<code>arc_of_circle_start_point</code>, <code>thick_line_first_point</code>), <code>test_contextual_folds_remain_explicitly_unresolved_and_actionable</code>, <code>test_only_grammar_resolved_folds_are_non_actionable</code> and <code>test_genuine_demand_still_asks_for_a_token[subject-lithium_6]</code></li>
+      <li><code>test_geometry_enumeration_collapse.py::test_unregistered_arc_endpoint_rejects_the_ordinal_compound</code></li>
+      <li><code>test_manifest_generability.py</code>: <code>test_a_cut_refuses_a_manifest_it_cannot_generate_rather_than_counting</code>, <code>test_a_manifest_whose_sources_all_reach_a_name_is_not_refused</code> and <code>test_every_manifest_source_is_carried_or_names_its_blocking_mechanism</code></li>
+    </ul>
+    <p>Each is diagnosed first: a product defect, a stale test, or an ISN vocabulary change the test predates. The fix follows the diagnosis; a test is never weakened to pass.</p>
+    <p><strong>Done when:</strong> the default <code>tests/standard_names</code> run on a compute partition reports none of the 13 ids failing at the merged head; each id's diagnosis is recorded in the landing evidence; each product fix is shown to matter by the test failing again when that fix alone is reverted; an id that cannot be fixed inside this plan is marked a strict expected failure naming its owning plan section, and none is skipped or deleted; the suite adds no failure id against the stated base.</p>
+
+    <h2 id="s2">§2 — The receipt-correction link in the schema, and two private imports closed</h2>
+    <section data-reckon="section" data-id="s2" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>The receipt-correction records written on 2026-11-10 link to the receipts they correct through a <code>CORRECTS</code> relationship the graph schema does not declare. Separately, two modules import a private helper across a module boundary inside the standard-names package; the stranded-identity review named one, a private helper of the pools module.</p>
+    <p><strong>Done when:</strong> the schema declares <code>CORRECTS</code> with its endpoints, the generated models carry it, and the repository's Cypher property check passes over every statement that reads or writes it; the two cross-module imports of private names are gone, either through a public name the owning module exports or by moving the caller; the package import-boundary test passes and fails again when either import is restored.</p>
+
+    <h2 id="s3">§3 — The ISN pin is held by a test</h2>
+    <section data-reckon="section" data-id="s3" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>The ISN version is pinned in two places in <code>pyproject.toml</code>, and the graph serves a grammar snapshot synced from one of them. Two pin bumps this month were verified by hand.</p>
+    <p><strong>Done when:</strong> a default-tier test fails when the two pyproject pins disagree with each other or with the installed package's version, and passes at head; a planted disagreement in a copied <code>pyproject.toml</code> turns it red; a graph-tier test compares the active grammar snapshot's version with the pin.</p>
+
+    <h2 id="s4">§4 — A whole-catalog release candidate opens a fork pull request</h2>
+    <section data-reckon="section" data-id="s4" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+    <p>The release CLI opens a review pull request only for batch releases, so the whole-catalog candidate <code>v0.4.0rc8</code> reached the fork as a tag with nothing for a reviewer to read. A whole-catalog candidate should open the same kind of review request on the fork. Nothing in this section pushes to the upstream catalog repository.</p>
+    <p><strong>Done when:</strong> a whole-catalog release against a stand-in fork remote opens one review pull request on the fork, whose body uses markdown links rather than bare URLs; the same run against an upstream remote refuses before any push; tests cover both, and the batch path is unchanged.</p>
+
+    <h2 id="s5">§5 — A release can run from a fenced worker</h2>
+    <section data-reckon="section" data-id="s5" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+    <p>The release CLI refuses a detached HEAD, and every worker runs in a detached worktree, so only a coordinator in the main checkout can cut a tag. A release is ordinary pipeline work and should be dispatchable.</p>
+    <p><strong>Done when:</strong> a release dry run inside a detached worktree completes and reports the tag it would cut; the real cut from such a worktree either succeeds against a stand-in remote or refuses naming the one step that needs the coordinator; the main-checkout path is unchanged; the guard that stops a release cut from an unmerged revision still fires.</p>
+
+    <h2 id="s6">§6 — The landing parser's warning-count defect is raised on reckon</h2>
+    <section data-reckon="section" data-id="s6" data-effort-hours="0.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>reckon's landing check counts warning lines a test prints as test failures. On 2026-11-11 that turned two imas-codex landings, among them <code>sib-stranded-pool-admission</code>, into failed verdicts although their suite arms carried identical failure ids. The defect is in reckon, so this section raises it there and does not patch it here.</p>
+    <p><strong>Done when:</strong> the reckon project carries the defect as a plan section or followup, with the two runs' landing records as evidence; this section records its reference; no imas-codex test is altered to avoid printing a warning.</p>
+
+    <h2 id="s7">§7 — Off-path repairs, held until the first upstream catalog release</h2>
+    <section data-reckon="section" data-id="s7" data-effort-hours="8.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="deferred" data-links="sn-integrity-backlog#s17"></section>
+    <p>Carried from <code>sn-integrity-backlog</code> §17: rows the 2026-10-12 census placed off the release path, each with its proposed repair in that census. The parked-disposition net has no caller; the parked census cohort is wider than its writer's; the parked refusal raises the wrong exception; four bypasses of the defaulted-attribute guard; names labelled scaffolding while carrying reviewed documentation; recovering origin and status from generation evidence; a schema digest node; released manifests recording worktree paths; reviewer swings wider than the exhaustion margin; the declared-attribute check judging 5 of 18 sites; an unreachable embedder becoming a finding. Four open questions travel with them: whether stages are terminal under each domain route, whether one DD path may hold several source nodes, the three schema allowances, and the lead questions <code>unbound-source-backlog</code> recorded.</p>
+    <p>Once the first upstream catalog release is cut, each row is re-confirmed on the live graph and becomes a section of its own; a row that no longer reproduces is dropped with that reading.</p>
+
+    
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-sph-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-11-11" data-recommends-skill="/reckon-build sn-pipeline-hygiene §1" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">The red tests first, because they hide regressions in every landing</h4>
+    <div class="r-fu-body"><p>§1 to §6 are independent and can run in parallel; §7 waits on the first upstream catalog release.</p></div>
+    <pre class="r-fu-prompt">/reckon-build sn-pipeline-hygiene §1</pre>
+    </article>
+</section>
+  <section data-reckon="questions" id="questions" class="r-questions">
+<h2><span class="sec">§</span> Open questions</h2>
+<div class="r-q" data-id="q-sph-terminal-stages" data-section="s7" data-status="open" data-opened-by="reckon-review" data-opened-at="2026-11-11T19:00:00Z" data-resolved-at="" data-resolved-by="">
+    <p class="r-q-body"><p>Carried from <code>sn-integrity-backlog</code> question <code>q-sib-terminal-stages</code>: which stages are terminal under which domain routes on the release path?</p></p>
+    </div>
+<div class="r-q" data-id="q-sph-path-source-cardinality" data-section="s7" data-status="open" data-opened-by="reckon-review" data-opened-at="2026-11-11T19:00:00Z" data-resolved-at="" data-resolved-by="">
+    <p class="r-q-body"><p>Carried from <code>sn-integrity-backlog</code> question <code>q-sib-path-source-cardinality</code>: may one DD path hold several source nodes? Dual-bound rows are corrected or blessed by the ruling.</p></p>
+    </div>
+<div class="r-q" data-id="q-sph-schema-allowances" data-section="s7" data-status="open" data-opened-by="reckon-review" data-opened-at="2026-11-11T19:00:00Z" data-resolved-at="" data-resolved-by="">
+    <p class="r-q-body"><p>Carried from <code>sn-integrity-backlog</code> question <code>q-sib-schema-allowances</code>: three properties the schema and the live graph disagree about sit in a permanent allowance. Keep the allowance, or widen durable schema authority to operational state?</p></p>
+    </div>
+<div class="r-q" data-id="q-sph-four-lead-questions" data-section="s7" data-status="open" data-opened-by="reckon-review" data-opened-at="2026-11-11T19:00:00Z" data-resolved-at="" data-resolved-by="">
+    <p class="r-q-body"><p>Carried from <code>sn-integrity-backlog</code> question <code>q-sib-four-lead-questions</code>: the four questions <code>unbound-source-backlog</code> recorded for the lead, among them graph checkpoint cadence and the embedder contract. The WEST pull request among them lapsed with the retirement of <code>sn-west-prototype-release</code>.</p></p>
+    </div>
+</section>
+</main>
+</body>
+</html>

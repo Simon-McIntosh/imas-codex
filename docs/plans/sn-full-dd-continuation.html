@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-full-dd-continuation">
+  <meta name="plan-title" content="The Rest Of The DD Composed: The Full-DD Continuation Run">
+  <meta name="plan-summary" content="Bring the rerun cohort to 100, checkpoint the graph, then run the census&#x27;s advanceable classes through sn run within what remains of the USD 350 cap.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="8.75">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-sprint" content="S19">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="standard-names">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;sn-integrity-backlog#s52&quot;],&quot;s4&quot;:[&quot;sn-full-dd-continuation#s2&quot;,&quot;sn-full-dd-continuation#s3&quot;,&quot;sn-integrity-backlog#s52&quot;]}">
+  <title>The Rest Of The DD Composed: The Full-DD Continuation Run | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-11-11">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — Where the run stands, measured 2026-11-11</h2>
+    <section data-reckon="section" data-id="s1" data-effort-hours="0.25" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section>
+    <p>The lead approved a full-DD standard-name run on 2026-11-07 under a USD 350 cap, and on 2026-11-09 ruled to restart it and iterate until its issues close. This plan carries the continuation forward from <code>sn-integrity-backlog</code> §51 and §52, which is closing.</p>
+    <ul>
+      <li>Of 6,123 live DD sources that are physical quantities, 5,203 (85.0%) had an accepted name on 2026-11-09. The census <code>sib-unaccepted-census</code> placed each of the 920 unaccepted in one class: 395 below the acceptance floor, 239 awaiting review, 92 vocabulary gap, 91 refused by a writer, 90 attempt-capped, 8 never claimed and 5 missing documentation. After the 2026-11-10 flush the accepted count read 5,210.</li>
+      <li>Every gate the 2026-11-09 ruling set has landed except one: the lineage cycles are repaired (68 components to 0) and guarded at every writer, the stranded-identity admission is fixed (368 to 0), and ISN 0.11.1 is published and pinned. The rerun cohort stands at 99 of 143 sources produced, against its floor of 100.</li>
+      <li>Lead ruling, 2026-11-11: the run does not wait for the catalog-consistency pass; consistency is fixed after it, in <code>sn-catalog-consistency</code>.</li>
+    </ul>
+
+    <h2 id="s2">§2 — The rerun cohort reaches 100 of 143</h2>
+    <section data-reckon="section" data-id="s2" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="sn-integrity-backlog#s51"></section>
+    <p>Carried from <code>sn-integrity-backlog</code> §51. 99 of the 143 cohort sources read back as produced, 61 of them accepted. Of the rest, about 8 are refused on operator chains such as <code>normalize…</code> and <code>imaginary_part…</code>, 4 are structure sources with no immutable snapshot, and 4 need ISN tokens nobody has proposed yet. One more produced source meets the floor; the others are read back with their reasons.</p>
+    <p><strong>Done when:</strong> at least 100 of the 143 cohort sources read back as produced by the cohort's committed read-back; every other source reads back failed with its reason and claim-outcome receipts, or <code>vocab_gap</code> with the missing token named; spend is at most USD 10 and recorded beside the remaining cap; the export gate's blocking set stays 0 and sourceless live drafts do not rise.</p>
+
+    <h2 id="s3">§3 — A verified graph checkpoint before the run</h2>
+    <section data-reckon="section" data-id="s3" data-effort-hours="0.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+    <p>The run writes thousands of names, so it starts from a checkpoint taken after the documentation drain under <code>sn-integrity-backlog</code> §52 has ended, while no graph writer is running. On 2026-11-11 the newest offsite copy dated from 30 October and the newest local export from 7 November.</p>
+    <p><strong>Done when:</strong> one checkpoint exists whose creation time is after the drain's last graph write; the repository's checkpoint currency instrument reads it as current; its archive passes an integrity test of the whole stream; the graph is back up and answers a read afterwards.</p>
+
+    <h2 id="s4">§4 — The continuation run</h2>
+    <section data-reckon="section" data-id="s4" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="sn-integrity-backlog#s52"></section>
+    <p>Once the cohort meets its floor, the checkpoint is taken and the documentation drain has landed, run the census classes marked advanceable through <code>sn run</code>, scoped by source, on a compute partition, with one signed reset with receipts for attempt-capped sources. The run's cost limit is no larger than the census estimate for the classes it runs and never larger than what remains of the USD 350 approval, computed at dispatch from the run records under it. A run that would need more goes to the lead first.</p>
+    <p><strong>Done when:</strong></p>
+    <ul>
+      <li>the accepted count of live quantity sources, by the census's own query, is at least 5,503, which is 300 above the 2026-11-09 baseline of 5,203;</li>
+      <li>the census is re-run and every source still unaccepted carries its class and a reason, with the class sums reconciling to the live total, and a source planted outside every class makes them disagree;</li>
+      <li>spend per run is recorded beside the remaining cap;</li>
+      <li>the export gate's blocking set stays 0, the count of sourceless live drafts does not rise, and the lineage census reports no new cycle.</li>
+    </ul>
+
+    
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-sfdc-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-11-11" data-recommends-skill="/reckon-build sn-full-dd-continuation §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">One more cohort source, then the checkpoint, then the run</h4>
+    <div class="r-fu-body"><p>§2 and §3 can run now and in parallel; the run in §4 waits on both and on the documentation drain under <code>sn-integrity-backlog</code> §52.</p></div>
+    <pre class="r-fu-prompt">/reckon-build sn-full-dd-continuation §2</pre>
+    </article>
+</section>
+  <section data-reckon="questions" id="questions" class="r-questions">
+<h2><span class="sec">§</span> Open questions</h2>
+<div class="r-q" data-id="q-sfdc-strain-gauge-token" data-section="s2" data-status="open" data-opened-by="reckon-review" data-opened-at="2026-11-11T19:00:00Z" data-resolved-at="" data-resolved-by="">
+    <p class="r-q-body"><p>Carried from <code>sn-integrity-backlog</code> question <code>q-sib-strain-gauge-token</code>: six strain-gauge measurement-direction names wait on a non-ordinal ISN token. Does ISN gain one, or are the six folded or held?</p></p>
+    </div>
+<div class="r-q" data-id="q-sfdc-new-coverage" data-section="s4" data-status="open" data-opened-by="reckon-review" data-opened-at="2026-11-11T19:00:00Z" data-resolved-at="" data-resolved-by="">
+    <p class="r-q-body"><p>Carried from <code>sn-integrity-backlog</code> question <code>q-sib-new-coverage</code>: new coverage beyond the DD run, namely rebuilding the MAST source manifest on the hardened graph and filing the measured Data Dictionary defects upstream. Which, and when? The composition-pass sizing it also asked about is this plan's §4.</p></p>
+    </div>
+</section>
+</main>
+</body>
+</html>
