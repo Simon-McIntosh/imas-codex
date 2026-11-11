@@ -33,7 +33,30 @@
   "plan_slug": "sn-catalog-consistency",
   "plan_version": 6,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "70e1d1c3ac68c350fe6ad0e9fadf352df089e1ee",
+      "commit_basis": "edit",
+      "finding": "reuse_search-1",
+      "note": "\u00a72 and \u00a75 now say that any command or option added to run these measures replaces the evidence-directory census script it supersedes, so each measure has one owned instrument; the brief directs promoting the consistency census into the package with a population argument.",
+      "reason": "",
+      "when": "2026-11-11T21:47:54.338292+00:00"
+    }
+  ],
+  "responses": {
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "70e1d1c3ac68c350fe6ad0e9fadf352df089e1ee",
+      "commit_basis": "edit",
+      "note": "\u00a72 and \u00a75 now say that any command or option added to run these measures replaces the evidence-directory census script it supersedes, so each measure has one owned instrument; the brief directs promoting the consistency census into the package with a population argument.",
+      "reason": "",
+      "when": "2026-11-11T21:47:54.338292+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-catalog-consistency/r-20261111T211603645639-plan-review-of-sn-catalog-consistency.json",
   "review_run_id": "r-20261111T211603645639-plan-review-of-sn-catalog-consistency",
   "reviewed_blob_sha": "6ac7a6bc809085a3493d0f53f21c46c326e132d8",
   "rubric": "design",
