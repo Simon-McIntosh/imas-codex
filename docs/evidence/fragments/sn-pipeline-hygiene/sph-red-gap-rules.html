@@ -100,8 +100,15 @@
     the change under test.
   </p>
   <p>
-    base: <span id="sph-red-gap-rules-base-result">pending</span><br>
-    head: <span id="sph-red-gap-rules-measure-head">pending</span>
+    base: <span id="sph-red-gap-rules-base-result">12 failed, 8639 passed,
+    13 skipped, 520 deselected</span> — the seven ids above plus
+    <code>test_catalog_layout_hierarchy</code>, the three
+    <code>test_manifest_generability</code> ids and
+    <code>test_compose_prompt_examples_round_trip[NC-25-…]</code>.<br>
+    head: <span id="sph-red-gap-rules-measure-head">1 failed, 8654 passed,
+    12 skipped, 520 deselected</span> — the seven ids pass; the single red is
+    <code>test_compose_prompt_examples_round_trip[NC-25-…]</code>, a sibling
+    node's id, so no failure id is added against the base.
   </p>
 </section>
 </body>
