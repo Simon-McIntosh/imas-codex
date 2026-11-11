@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="475">
+<meta name="plan-version" content="476">
 <meta name="plan-modified" content="2026-11-11">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -1484,6 +1484,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s52" data-id="c-run-r-20261111T170249911109-review-of-sib-stranded-pool-admission-5e0d8e8696f0" data-who="reckon-build" data-when="2026-11-11T17:12:02.466Z">
     <div class="r-comment-body"><p>Independent review of sib-stranded-pool-admission at 5e0d8e86: goal_fidelity 18, evidence 17, scope_discipline 6, durability 18, fit 16, reuse 19, zero added failures (13 ids at both arms), three non-blocking findings (seven changed files outside the declared fence; run-terminal classes classified by the census rather than written through a terminal writer; a private pools.py helper imported across a module boundary).</p></div>
+</div>
+<div class="r-comment" data-section="s52" data-id="c-run-r-20261111T150606194953-sib-stranded-pool-admission" data-who="reckon-build" data-when="2026-11-11T16:59:36Z">
+    <div class="r-comment-body"><p>Shared admission now drives claims, CLI progress/pending and census; all 85 historical classes (360 identities) have one pool or a preserved run-terminal reason. Disposable graph: 43 owned classes, 42 parked, zero stranded/overlap; live stranded 368 to 0, 136 terminal-for-run, 646 claimable. Focused 73 passed; archived default-tier arms have identical 13 failure ids (zero added); declared rollback strands 43 classes.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261012T162346807302-review-of-sib-row-census" data-who="reckon-build" data-when="2026-10-12T16:39:58.712Z">
     <div class="r-comment-body"><p>reviewed r-20261012T145528571333-sib-row-census at a7a70db00 against c7b4c626e; total 93/120 (goal_fidelity 15, evidence 13, scope_discipline 19, durability 11, fit 15, reuse 20); two blocking findings — the landing record's verdict tallies and the manifest's row-count both disagree with the 38 rows the census file holds.</p></div>
