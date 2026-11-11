@@ -2,6 +2,13 @@
   "added_failure_count": 0,
   "added_failure_ids": [],
   "completed_at": "2026-11-11T17:12:02.466Z",
+  "dimension_dispositions": {
+    "scope_discipline": {
+      "kind": "exempted",
+      "reason": "every file outside the original fence was granted by the coordinator with crew widen (six claim and pending owners, graph_audits.py, cli/sn.py and the census test) before the worker edited it",
+      "recorded_at": "2026-11-11T17:13:19.111953+00:00"
+    }
+  },
   "dispatched_at": "2026-11-11T17:04:00Z",
   "findings": [
     {
