@@ -246,7 +246,7 @@ LAYER_NAMES = {
     "users": ["users"],
     "interfaces": ["interfaces"],
     "functions": ["functions"],
-    "graph": ["knowledge", "graph"],
+    "graph": ["graph"],
     "icp": ["ICP4"],
 }
 
