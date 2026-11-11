@@ -1,0 +1,64 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-11T23:24:24.732Z",
+  "dispatched_at": "2026-11-11T23:19:12Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:77",
+      "id": "done_when-1",
+      "reason": "without a family planted divergent on `physics_domain`, the section's headline measure cannot fail, so its closure proves nothing.",
+      "text": "the new endpoint (\"the count whose live members carry more than one `physics_domain` is lower at its end than at its start\") has no control that shows it can fire: the only planted control \u00a75 declares is \"a name planted with disagreeing edges\", which exercises the domain audit's per-name edge agreement, and the census's committed planted control in `sib-consistency-census.json` records `divergent_family_phrase_variants: 2` and `divergent_family_template_variants: 2` with no domain variant, so the one axis the new measure counts is the one axis no committed control reads; a pass whose count does not move is then indistinguishable from a counter blind to that axis.",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:77",
+      "id": "reasoning-1",
+      "reason": "one clause naming the family-counting instrument keeps the node from deriving family membership from an audit that cannot carry it, which is the mistake the previous review round already caught in this section.",
+      "text": "the section names exactly one instrument (\"the domain audit is the instrument\", line 75) and the audit's row set and `NameDomainState` carry no `physical_base`, so a node reading \u00a75's done-when has to reach for family membership where it does not exist; \u00a72's done-when names its instrument explicitly (\"the consistency census counts \u2026 the same committed instrument\"), and the census is the only committed instrument that groups by `physical_base` at all.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:77",
+      "id": "reasoning-2",
+      "reason": "counting the same name population at both ends (members live at the start reading) makes the measure report \u00a75's own work, as \u00a72's done-when already does for the batches it touches.",
+      "text": "the comparison fixes the family population at start (\"over the families present when this section starts\") but not the member population, while \u00a71's lead ruling (line 40) lets the full-DD continuation run beside this pass and that run targets new accepted names that land in existing `physical_base` families; a family \u00a75 brought to agreement can acquire a divergent new member before the end reading and report as still divergent, and the count moves through names \u00a75 never touched.",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "c7afaf13fa8ffe547b9ae447bac728f40cc79678",
+  "plan_fingerprint": "4a36fda6532b1f359d0fdf32eaff0683c71ec21e30a292c1673380aa3ccc4531",
+  "plan_slug": "sn-catalog-consistency",
+  "plan_version": 8,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261111T231822589163-plan-review-of-sn-catalog-consistency",
+  "reviewed_blob_sha": "70b7fcc72df6628034c66eed5589b84bd481edb6",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `sn-catalog-grouping#s3` resolves to `id=\"s3\"` in that plan (a descoped section whose live-name repair it hands to \u00a75), and both cited JSON artifacts exist at the named path.",
+    "done_when": "a finding \u2014 the new family-divergence measure at line 77 has no control on the axis it counts; the section's planted control exercises the domain audit's per-name edges, and the census's own planted control records no domain variant.",
+    "evidence_paths": "pass \u2014 every artifact \u00a75 cites (`sib-consistency-batches.json`, the disposable-graph control) sits on the committed evidence path, not a scratch or node-local path.",
+    "naming": "pass \u2014 \u00a75's text carries no plan labels, stage names, ticket numbers or changelog prose into anything a later node would name.",
+    "reasoning": "a finding \u2014 the section's only named instrument is the domain audit, whose rows carry no `physical_base`, so the family count it now requires has no stated instrument; and the start/end comparison runs on start-time families but not a start-time member set, while the full-DD continuation may add live members to those families mid-pass.",
+    "single_goal": "pass \u2014 per-name domain agreement and the family-level roll-up are one property at two scales, and the family item's \"or shown to draw on DD sources whose domains differ\" keeps it compatible with the audit item.",
+    "wiring": "pass \u2014 \u00a75's `plan-section-depends-on` entry (`sn-integrity-backlog#s52`, line 22) names the node that produced the batch list its done-when enumerates, and the batch artifact's rename rows carry no grouping axis, so \u00a75 needs no wait on \u00a72."
+  },
+  "section_digests": {
+    "_document": "60da5223ce5c0ad0f73555a1988b66e7737b9e961a9e0c99e0cd3f569bc93745",
+    "s1": "c69f79e72b8fe8652e9dcd8632a35ca7eaa3a205fd5ee3e2ee98bc74afc136ba",
+    "s2": "d6eeae749f1fbb4116cbd68cb82b00351768cf4aeb4fa0b37300fa91b5c170f7",
+    "s3": "fdb01b1d5aaf1af353a55b177f9d2b8b87660bf4648fb8922544d39899e8a2c7",
+    "s4": "ef7bd7f314233248216f8598211014764b74d1c74c308db48db9ab9390a33d55",
+    "s5": "f5149fa795ad5b14f17e72c6fcfa04c7fde4e2512b7e0877f4f355eb1269d238",
+    "s6": "e35c4bf32892d9b90e8392b5e1171957f4973d937daaccdee3ab610d3c1c937e",
+    "s7": "abb53d14a3cb7db35add3d596e723e7c0e012bbee6e7f328d2b7b520a5956700",
+    "s8": "124c4cffdc2b27efae89ba41f97a27ff57b01c0b53ce596b6c025f1e6523e626"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T23:58:33.648750+00:00",
+  "total": null
+}
