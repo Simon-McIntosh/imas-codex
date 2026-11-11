@@ -9,6 +9,11 @@
   "call_sites": [],
   "completed_at": "2026-11-11T22:51:04.363Z",
   "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "repair-of-sib-docs-drain-after-admission-7aef43b21297",
+      "recorded_at": "2026-11-11T23:19:04.306021+00:00"
+    },
     "goal_fidelity": {
       "kind": "folded",
       "node": "repair-of-sib-docs-drain-after-admission-7aef43b21297",
