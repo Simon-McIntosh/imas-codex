@@ -247,7 +247,7 @@ LAYER_NAMES = {
     "interfaces": ["interfaces"],
     "functions": ["functions"],
     "graph": ["knowledge", "graph"],
-    "icp": ["ITER", "Collaborative", "Platform"],
+    "icp": ["ICP4"],
 }
 
 # Top to bottom: each bar's roles reach from Claude Desktop to the interface named, and
@@ -319,10 +319,8 @@ def draw_bands(c: Canvas) -> None:
 def draw_layer_names(c: Canvas) -> None:
     for key, lines in LAYER_NAMES.items():
         y0, y1 = LAYERS[key]
-        # the graph and platform bands sit close, so their names part: the graph's
-        # rides high in its band, the platform's tightens and drops low in its own
-        pitch = 2.75 if key == "icp" else 2.9
-        mid = (y0 + y1) / 2 + {"graph": 0.9, "icp": -0.7}.get(key, 0.0)
+        pitch = 2.9
+        mid = (y0 + y1) / 2
         for i, line in enumerate(lines):
             y = mid + (len(lines) - 1) / 2 * pitch - i * pitch
             # each line leans on the pyramid's slope at its own height
