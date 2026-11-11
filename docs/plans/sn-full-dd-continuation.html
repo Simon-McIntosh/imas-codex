@@ -23,7 +23,7 @@
   <title>The Rest Of The DD Composed: The Full-DD Continuation Run | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
 <meta name="plan-modified" content="2026-11-11">
 </head>
 <body>
@@ -40,12 +40,12 @@
     <h2 id="s2">§2 — The rerun cohort reaches 100 of 143</h2>
     <section data-reckon="section" data-id="s2" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="sn-integrity-backlog#s51"></section>
     <p>Carried from <code>sn-integrity-backlog</code> §51. 99 of the 143 cohort sources read back as produced, 61 of them accepted. Of the rest, about 8 are refused on operator chains such as <code>normalize…</code> and <code>imaginary_part…</code>, 4 are structure sources with no immutable snapshot, and 4 need ISN tokens nobody has proposed yet. One more produced source meets the floor; the others are read back with their reasons.</p>
-    <p><strong>Done when:</strong> at least 100 of the 143 cohort sources read back as produced by the cohort's committed read-back; every other source reads back failed with its reason and claim-outcome receipts, or <code>vocab_gap</code> with the missing token named; spend is at most USD 10 and recorded beside the remaining cap; the export gate's blocking set stays 0 and sourceless live drafts do not rise.</p>
+    <p><strong>Done when:</strong> at least 100 of the 143 cohort sources read back as produced by the cohort's committed read-back, recorded under <code>docs/evidence/fragments/sn-full-dd-continuation/</code>; the read-back reports a source planted as attempted but not produced in a disposable graph as not produced; every other source reads back failed with its reason and claim-outcome receipts, or <code>vocab_gap</code> with the missing token named; spend is at most USD 10 and recorded beside the remaining cap; the export gate's blocking set stays 0 and sourceless live drafts do not rise.</p>
 
     <h2 id="s3">§3 — A verified graph checkpoint before the run</h2>
     <section data-reckon="section" data-id="s3" data-effort-hours="0.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
     <p>The run writes thousands of names, so it starts from a checkpoint taken after the documentation drain under <code>sn-integrity-backlog</code> §52 has ended, while no graph writer is running. On 2026-11-11 the newest offsite copy dated from 30 October and the newest local export from 7 November.</p>
-    <p><strong>Done when:</strong> one checkpoint exists whose creation time is after the drain's last graph write; the repository's checkpoint currency instrument reads it as current; its archive passes an integrity test of the whole stream; the graph is back up and answers a read afterwards.</p>
+    <p><strong>Done when:</strong> one checkpoint exists whose creation time is after the drain's last graph write; the repository's checkpoint currency instrument reads it as current; its archive passes an integrity test of the whole stream, and the same test fails on a deliberately truncated copy; the graph is back up and answers a read afterwards.</p>
 
     <h2 id="s4">§4 — The continuation run</h2>
     <section data-reckon="section" data-id="s4" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="sn-integrity-backlog#s52"></section>
@@ -53,8 +53,8 @@
     <p><strong>Done when:</strong></p>
     <ul>
       <li>the accepted count of live quantity sources, by the census's own query, is at least 5,503, which is 300 above the 2026-11-09 baseline of 5,203;</li>
-      <li>the census is re-run and every source still unaccepted carries its class and a reason, with the class sums reconciling to the live total, and a source planted outside every class makes them disagree;</li>
-      <li>spend per run is recorded beside the remaining cap;</li>
+      <li>the census is re-run and recorded under <code>docs/evidence/fragments/sn-full-dd-continuation/</code>, and every source still unaccepted carries its class and a reason, with the class sums reconciling to the live total; a source planted outside every class in a disposable graph, never in the live population, makes them disagree;</li>
+      <li>spend per run is recorded in the same fragment beside the remaining cap, computed after every draw on the approval, <code>sn-catalog-consistency</code> §2 included;</li>
       <li>the export gate's blocking set stays 0, the count of sourceless live drafts does not rise, and the lineage census reports no new cycle.</li>
     </ul>
 

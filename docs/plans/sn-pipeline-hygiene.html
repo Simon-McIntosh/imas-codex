@@ -18,12 +18,12 @@
   <meta name="plan-sprint" content="S19">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names,catalog-release">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;deferred&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;deferred&quot;,&quot;s8&quot;:&quot;implementable&quot;}">
   <meta name="plan-standalone" content="Each section repairs a defect no other live plan consumes, and nothing downstream waits on this plan.">
   <title>Standard-Name Pipeline Hygiene: Red Tests, Loose Boundaries, Release Plumbing | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="3">
 <meta name="plan-modified" content="2026-11-11">
 </head>
 <body>
@@ -40,12 +40,12 @@
       <li><code>test_manifest_generability.py</code>: <code>test_a_cut_refuses_a_manifest_it_cannot_generate_rather_than_counting</code>, <code>test_a_manifest_whose_sources_all_reach_a_name_is_not_refused</code> and <code>test_every_manifest_source_is_carried_or_names_its_blocking_mechanism</code></li>
     </ul>
     <p>Each is diagnosed first: a product defect, a stale test, or an ISN vocabulary change the test predates. The fix follows the diagnosis; a test is never weakened to pass.</p>
-    <p><strong>Done when:</strong> the default <code>tests/standard_names</code> run on a compute partition reports none of the 13 ids failing at the merged head; each id's diagnosis is recorded in the landing evidence; each product fix is shown to matter by the test failing again when that fix alone is reverted; an id that cannot be fixed inside this plan is marked a strict expected failure naming its owning plan section, and none is skipped or deleted; the suite adds no failure id against the stated base.</p>
+    <p><strong>Done when:</strong> the default <code>tests/standard_names</code> run on a compute partition reports none of the 13 ids failing at the merged head; each id's diagnosis is recorded in the landing evidence; each product fix is shown to matter by the test failing again when that fix alone is reverted; at most three of the 13 ids may instead be marked strict expected failures, each naming an open section of a live plan that exists when the mark lands, and none is skipped or deleted; the suite adds no failure id against the stated base.</p>
 
-    <h2 id="s2">§2 — The receipt-correction link in the schema, and two private imports closed</h2>
+    <h2 id="s2">§2 — The receipt-correction link declared in the graph schema</h2>
     <section data-reckon="section" data-id="s2" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
-    <p>The receipt-correction records written on 2026-11-10 link to the receipts they correct through a <code>CORRECTS</code> relationship the graph schema does not declare. Separately, two modules import a private helper across a module boundary inside the standard-names package; the stranded-identity review named one, a private helper of the pools module.</p>
-    <p><strong>Done when:</strong> the schema declares <code>CORRECTS</code> with its endpoints, the generated models carry it, and the repository's Cypher property check passes over every statement that reads or writes it; the two cross-module imports of private names are gone, either through a public name the owning module exports or by moving the caller; the package import-boundary test passes and fails again when either import is restored.</p>
+    <p>The receipt-correction records written on 2026-11-10 link to the receipts they correct through a <code>CORRECTS</code> relationship the graph schema does not declare.</p>
+    <p><strong>Done when:</strong> the schema declares <code>CORRECTS</code> with its endpoints, the generated models carry it, and the repository's Cypher property check passes over every statement that reads or writes it, and fails on a planted statement that reads a property the declaration does not carry.</p>
 
     <h2 id="s3">§3 — The ISN pin is held by a test</h2>
     <section data-reckon="section" data-id="s3" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
@@ -60,7 +60,7 @@
     <h2 id="s5">§5 — A release can run from a fenced worker</h2>
     <section data-reckon="section" data-id="s5" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
     <p>The release CLI refuses a detached HEAD, and every worker runs in a detached worktree, so only a coordinator in the main checkout can cut a tag. A release is ordinary pipeline work and should be dispatchable.</p>
-    <p><strong>Done when:</strong> a release dry run inside a detached worktree completes and reports the tag it would cut; the real cut from such a worktree either succeeds against a stand-in remote or refuses naming the one step that needs the coordinator; the main-checkout path is unchanged; the guard that stops a release cut from an unmerged revision still fires.</p>
+    <p><strong>Done when:</strong> a release dry run inside a detached worktree completes and reports the tag it would cut; the real cut from such a worktree succeeds against a stand-in remote; the main-checkout path is unchanged; the guard that stops a release cut from an unmerged revision still fires.</p>
 
     <h2 id="s6">§6 — The landing parser's warning-count defect is raised on reckon</h2>
     <section data-reckon="section" data-id="s6" data-effort-hours="0.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
@@ -74,11 +74,15 @@
 
     
 
+    <h2 id="s8">§8 — No module imports another&#x27;s private names</h2>
+<section data-reckon="section" data-id="s8" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<p>On 2026-11-11 the standard-names package carried 27 imports of a private name across a module boundary, five of them at module level: <code>_base_token</code> in <code>export.py</code>, <code>_load_rules</code> in <code>legacy_authority.py</code>, <code>_synonym_matches</code> in <code>near_duplicates.py</code>, <code>_github_slug</code> and <code>_run_git</code> in <code>release_notes.py</code>, and <code>_contest</code> in <code>review_triage.py</code>. The package's import-boundary test covers only two subpackages, so it passes over all of them.</p><p><strong>Done when:</strong> no production module in <code>imas_codex/standard_names</code> imports a private name from another module, each closed either through a public name the owning module exports or by moving the caller, with the before and after counts recorded; the import-boundary test covers the package's top-level modules as well as its subpackages, passes at head, and fails when any one closed import is restored; behaviour is unchanged, and <code>tests/standard_names</code> adds no failure id against the stated base.</p>
+
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
 <article class="r-fu" data-id="f-sph-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-11-11" data-recommends-skill="/reckon-build sn-pipeline-hygiene §1" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">The red tests first, because they hide regressions in every landing</h4>
-    <div class="r-fu-body"><p>§1 to §6 are independent and can run in parallel; §7 waits on the first upstream catalog release.</p></div>
+    <div class="r-fu-body"><p>§1 to §6 and §8 are independent and can run in parallel; §7 waits on the first upstream catalog release.</p></div>
     <pre class="r-fu-prompt">/reckon-build sn-pipeline-hygiene §1</pre>
     </article>
 </section>

@@ -23,7 +23,7 @@
   <title>One Concept, One Definition: The Catalog Consistency Pass | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="3">
 <meta name="plan-modified" content="2026-11-11">
 </head>
 <body>
@@ -41,16 +41,16 @@
 
     <h2 id="s2">§2 — The consistency batches, applied</h2>
     <section data-reckon="section" data-id="s2" data-effort-hours="8.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="sn-integrity-backlog#s52"></section>
-    <p>Apply the batches the sizing node lists, each through <code>sn edit</code> with a stated reason, renames in their own batches and never mixed with documentation edits. Batch 1 is the flux-surface-average family, the worked example the rest follow. Each concept ends with the one definition and template the census proposes for its family, unless the lead rules otherwise on a batch the coordinator brings with its evidence.</p>
-    <p>Spend draws on the USD 350 full-DD approval of 2026-11-07. Each batch runs under a ceiling of its sized estimate plus a quarter, and a batch whose estimate exceeds USD 50 goes to the lead before it runs.</p>
+    <p>Apply the batches the sizing node lists, each through <code>sn edit</code> with a stated reason, renames in their own batches and never mixed with documentation edits. Batch 1 is the flux-surface-average family, the worked example the rest follow. Each concept ends with the one definition and template the census proposes for its family, unless the lead rules otherwise on a batch the coordinator brings with its evidence. This section changes names, definitions and documentation only: it makes no <code>physics_domain</code> change, and the grouping placements of the batches are §5's. The batches for the two-tip momentum-diffusivity lineage belong to §4, and the release-candidate renames of the <code>momentum_flux</code> and <code>momentum_source</code> unit pairs to §3.</p>
+    <p>Spend draws on the USD 350 full-DD approval of 2026-11-07, which this pass shares with <code>sn-full-dd-continuation</code>; that plan's run limit is computed after every draw on the approval, this pass's included. The whole pass is capped at USD 60, and spending beyond it goes to the lead with the measured rate. The sized estimates use the documentation rate, while <code>sn edit</code> also pays for review, so batch 1 measures the real per-name cost and every later batch runs under a ceiling of that measured rate times its name count, plus a quarter.</p>
     <p><strong>Done when:</strong></p>
     <ul>
-      <li>every batch in <code>docs/evidence/fragments/sn-integrity-backlog/sib-consistency-batches.json</code> is applied or recorded as declined with its reason, and each applied change carries an <code>sn edit</code> reason;</li>
+      <li>every batch in <code>docs/evidence/fragments/sn-integrity-backlog/sib-consistency-batches.json</code> is applied or recorded as declined with its reason, except the batches §3 and §4 own, and each applied change carries an <code>sn edit</code> reason;</li>
       <li>the flux-surface-average family reads with one definition and one documentation template across all its live members, as a named witness;</li>
-      <li>the consistency census, re-run with the committed instrument after the last batch, counts fewer divergent families and fewer multiply-defined concepts than its 2026-11-10 reading of 125 and 91;</li>
+      <li>over the families and names the batches touched, the consistency census counts fewer divergent families and fewer multiply-defined concepts after the last batch than the same committed instrument counted in that population before batch 1, so names the continuation run creates elsewhere cannot move the comparison;</li>
       <li>the census still counts a family planted with two divergent definitions in a disposable graph, and stays silent on an identical one;</li>
-      <li>spend per batch is recorded beside its estimate and the remaining full-DD cap;</li>
-      <li>the export gate's blocking set stays 0 and the count of sourceless live drafts does not rise across the pass.</li>
+      <li>spend per batch is recorded beside its estimate and the measured rate, and the pass total beside its USD 60 cap and the approval's remaining balance;</li>
+      <li>the export gate's blocking set stays 0, and the count of sourceless live drafts among the touched names does not rise across the pass.</li>
     </ul>
 
     <h2 id="s3">§3 — The release candidate cut clean, after the run</h2>
@@ -67,12 +67,13 @@
     <h2 id="s4">§4 — One live tip for the momentum-diffusivity lineage</h2>
     <section data-reckon="section" data-id="s4" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
     <p><code>toroidal_plasma_momentum_diffusivity</code> and <code>toroidal_momentum_diffusion_coefficient</code> are both live tips of one lineage. The coordinator brings the lead both names with their DD sources, units, scores and paid history, and a proposed survivor. If the sizing node has placed the pair in a batch, that batch carries the ruling and this section records it.</p>
-    <p><strong>Done when:</strong> the lead's ruling is recorded here; the losing name is superseded through the signed path with one receipt-stamped successor edge to the survivor, its sources and paid reviews kept; the lineage census reports one live tip for this lineage and no new cycle; spend is USD 0 beyond any documentation regeneration the ruling asks for.</p>
+    <p><strong>Done when:</strong> the lead's ruling is recorded here; the losing name is superseded through the signed path with one receipt-stamped successor edge to the survivor, its sources and paid reviews kept; the lineage census reports one live tip for this lineage and no new cycle, and reports a two-tip lineage planted in a disposable graph; spend is USD 0 beyond any documentation regeneration the ruling asks for.</p>
 
     <h2 id="s5">§5 — Live-name domains agree with the decision the writer stores</h2>
     <section data-reckon="section" data-id="s5" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="sn-catalog-grouping#s3"></section>
     <p>Carried from <code>sn-catalog-grouping</code> §3, whose code half has landed: every domain write goes through the one writer, a guard test holds it there, and the domain audit is the instrument. What it left is the repair of the live names. On 2026-10-15, after the DD re-classification, 1,477 of 2,677 live names carried a domain other than the derivation's answer, 1,701 the wrong source domains, 777 edges that disagreed and 212 no domain.</p>
-    <p><strong>Done when:</strong> the domain audit, run over every live name, reports zero names whose stored domain, source domains and edges disagree with the stored decision, or lists each residual name with its reason; every repair went through the one writer; the before and after audit counts are recorded; the audit still reports a name planted with disagreeing edges in a disposable graph; spend on domain decisions is recorded.</p>
+    <p>This section also owns grouping across each family, which §2 leaves alone: on 2026-11-10 the consistency census found 98 of 125 divergent families diverging on <code>physics_domain</code>. A family whose members carry different domains is either brought to agreement through the one writer or shown to draw on DD sources whose domains differ.</p>
+    <p><strong>Done when:</strong> the domain audit, run over every live name, reports zero names whose stored domain, source domains and edges disagree with the stored decision, or lists each residual name with its reason; the consistency census's grouping axis counts fewer families whose members disagree on <code>physics_domain</code> than its 2026-11-10 reading of 98, and lists each remaining such family with the source-domain reason its members differ; every repair went through the one writer; the before and after counts are recorded; the audit still reports a name planted with disagreeing edges in a disposable graph; spend on domain decisions is recorded.</p>
 
     <h2 id="s6">§6 — One separatrix locus, one suffix: the last five names</h2>
     <section data-reckon="section" data-id="s6" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="sn-integrity-backlog#s49"></section>
@@ -82,7 +83,7 @@
     <h2 id="s7">§7 — No live name without a DD source, except those held on purpose</h2>
     <section data-reckon="section" data-id="s7" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="sn-integrity-backlog#s46"></section>
     <p>Carried from <code>sn-integrity-backlog</code> §46, whose retirement of 131 sourceless exhausted drafts has landed under the lead's 2026-10-29 ruling. Left for the lead then: 16 non-exhausted sourceless names (6 accepted, 8 pending, 2 reviewed), <code>deposited_power_at_divertor_target</code>, which the writer refused because it has a live structural child, and the nine accepted names with no producing source recorded in question <code>q-scc-nine-unsourced-names</code>. Later repairs have since reduced the count of sourceless live drafts to 4 at the 2026-11-11 flush read. The coordinator re-reads the population and brings the lead each name with the live holder of its recorded source, if any.</p>
-    <p><strong>Done when:</strong> a live read-back lists no sourceless live name except derived parents and the names held from release under the lead's rulings, each held name listed with the ruling that holds it; each change went through the signed retirement, rebind or supersede path with a receipt; spend is USD 0.</p>
+    <p><strong>Done when:</strong> a live read-back lists no sourceless live name except derived parents and the names held from release under the lead's rulings, each held name listed with the ruling that holds it; the read-back lists a live name planted with no producing source in a disposable graph; each change went through the signed retirement, rebind or supersede path with a receipt; spend is USD 0.</p>
 
     <h2 id="s8">§8 — Chain-cap identities with no sourced ancestor, re-measured</h2>
     <section data-reckon="section" data-id="s8" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links="sn-integrity-backlog#s22"></section>
@@ -95,7 +96,7 @@
 <h2><span class="sec">§</span> Followups</h2>
 <article class="r-fu" data-id="f-scc-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-11-11" data-recommends-skill="/reckon-build sn-catalog-consistency §2" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Apply the sized batches, flux-surface average first</h4>
-    <div class="r-fu-body"><p>§2 starts as soon as the sizing node in <code>sn-integrity-backlog</code> §52 lands its batch list. §4 to §8 are independent of it and of each other and can run beside it; §3 is the final measure and waits for §2 and for the continuation run.</p></div>
+    <div class="r-fu-body"><p>§2 starts when the sizing node in <code>sn-integrity-backlog</code> §52 lands its batch list. §5 owns the grouping axis and §2 makes no domain change, so the two may run together; §4 and §6 to §8 are independent of both. §3 is the final measure and waits for §2 and for the continuation run.</p></div>
     <pre class="r-fu-prompt">/reckon-build sn-catalog-consistency §2</pre>
     </article>
 </section>
