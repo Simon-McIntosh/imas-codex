@@ -51,6 +51,16 @@
       "note": "\u00a72's first item now covers only the name and documentation rows; \u00a75's done-when now requires every grouping row of the batches applied through the one writer or declined with its source-domain reason.",
       "reason": "",
       "when": "2026-11-11T21:00:39.415935+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "fc88cc3755f58d01536d76fdaf0433b6d75e30f5",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "\u00a72 now owns every name and documentation batch, the rename batch 272 (with source_rate_due_to_beam_beam_fusion) and the six advisory batches included; only the two-tip lineage is ceded, to \u00a74. \u00a73's unit measure now covers every name the rename batch touched.",
+      "reason": "",
+      "when": "2026-11-11T21:00:51.433397+00:00"
     }
   ],
   "responses": {
@@ -62,6 +72,15 @@
       "note": "\u00a72's first item now covers only the name and documentation rows; \u00a75's done-when now requires every grouping row of the batches applied through the one writer or declined with its source-domain reason.",
       "reason": "",
       "when": "2026-11-11T21:00:39.415935+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "fc88cc3755f58d01536d76fdaf0433b6d75e30f5",
+      "commit_basis": "edit",
+      "note": "\u00a72 now owns every name and documentation batch, the rename batch 272 (with source_rate_due_to_beam_beam_fusion) and the six advisory batches included; only the two-tip lineage is ceded, to \u00a74. \u00a73's unit measure now covers every name the rename batch touched.",
+      "reason": "",
+      "when": "2026-11-11T21:00:51.433397+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-catalog-consistency/r-20261111T204539307654-plan-review-of-sn-catalog-consistency.json",
