@@ -43,6 +43,16 @@
       "note": "\u00a72 now requires the read-back to report a source planted as attempted-but-not-produced in a disposable graph as not produced; \u00a73 requires the integrity test to fail on a deliberately truncated copy of the archive.",
       "reason": "",
       "when": "2026-11-11T20:40:22.819888+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "55af2a7ff77097679125b2d4f0c065462bf7de1b",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "\u00a74's planted source is now stated to be planted in a disposable graph, never in the live population.",
+      "reason": "",
+      "when": "2026-11-11T20:40:36.447567+00:00"
     }
   ],
   "responses": {
@@ -54,6 +64,15 @@
       "note": "\u00a72 now requires the read-back to report a source planted as attempted-but-not-produced in a disposable graph as not produced; \u00a73 requires the integrity test to fail on a deliberately truncated copy of the archive.",
       "reason": "",
       "when": "2026-11-11T20:40:22.819888+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "55af2a7ff77097679125b2d4f0c065462bf7de1b",
+      "commit_basis": "edit",
+      "note": "\u00a74's planted source is now stated to be planted in a disposable graph, never in the live population.",
+      "reason": "",
+      "when": "2026-11-11T20:40:36.447567+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-full-dd-continuation/r-20261111T201752488863-plan-review-of-sn-full-dd-continuation.json",
