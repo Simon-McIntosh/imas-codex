@@ -43,8 +43,8 @@ ROOT = Path(__file__).resolve().parents[1]
 FIGURES = ROOT / "docs/figures/ai-stack"
 STEM = "ai-stack"
 
-WIDTH, HEIGHT = 14.0, 6.75  # in: wider than the slide canvas, leaving room for a title
-U = 10  # drawing units per inch, so the axes run 0..140 by 0..67.5
+WIDTH, HEIGHT = 14.0, 6.4  # in: wider than the slide canvas, leaving room for a title
+U = 10  # drawing units per inch, so the axes run 0..140 by 0..64
 
 # Deterministic in the ICP knowledge map's relation plum; agentic work in coral where a
 # frontier model drives it, teal where it can also run on-premises.
@@ -232,8 +232,10 @@ class Canvas:
 # so the infrastructure is the widest base and the users sit at the narrow top. The
 # layer names lean against its right-hand slope, beside their band.
 
-CENTRE, BASE_HALF, SLOPE = 63.5, 58.5, 0.2  # half-width = BASE_HALF - SLOPE * y
-LAYER_GAP = 1.5  # between a band's sloped right edge and its name
+# set right of centre, leaving the left for the layer names and the right for the
+# graph's name and the legend
+CENTRE, BASE_HALF, SLOPE = 70.5, 56.5, 0.2  # half-width = BASE_HALF - SLOPE * y
+LAYER_GAP = 1.5  # between a band's sloped edge and its name
 
 LAYERS = {  # (y0, y1) of each band
     "icp": (2.6, 7.8),
@@ -243,12 +245,13 @@ LAYERS = {  # (y0, y1) of each band
     "users": (44.8, 63.2),
 }
 
-LAYER_NAMES = {  # the users are named above their bars, in draw_users
+LAYER_NAMES = {  # the users are named beside their bars, in draw_users
     "interfaces": ["interfaces"],
     "functions": ["functions"],
     "graph": ["graph"],
     "icp": ["ICP4"],
 }
+RIGHT_NAMES = {"graph"}  # named on the right; every other layer on the left
 
 # Top to bottom: each bar's roles reach from Claude Desktop to the interface named, and
 # no one stops at Claude Desktop, because every role needs ITER's data through Lucy.
@@ -327,8 +330,11 @@ def draw_layer_names(c: Canvas) -> None:
         for i, line in enumerate(lines):
             y = mid + (len(lines) - 1) / 2 * pitch - i * pitch
             # each line leans on the pyramid's slope at its own height
-            x = span(y, 0)[1] + LAYER_GAP
-            c.text(x, y, line, size=OUTER, ha="left", weight="bold")
+            if key in RIGHT_NAMES:
+                x, ha = span(y, 0)[1] + LAYER_GAP, "left"
+            else:
+                x, ha = span(y, 0)[0] - LAYER_GAP, "right"
+            c.text(x, y, line, size=OUTER, ha=ha, weight="bold")
 
 
 def draw_foundation(c: Canvas) -> None:
@@ -470,7 +476,7 @@ def draw_functions(c: Canvas) -> None:
 def draw_interfaces(c: Canvas) -> None:
     y0, y1 = LAYERS["interfaces"]
     y0, y1 = y0 + 0.6, y1 - 0.9
-    cols = spread(*span(y1), [19, 12.5, 18.5, 22.5, 19.5])
+    cols = spread(*span(y1), [18.5, 12.5, 17.5, 24, 19])
     for key, xs in zip(
         ["desktop", "lucy", "dash", "sandbox", "clive"], cols, strict=True
     ):
@@ -542,9 +548,16 @@ def draw_users(c: Canvas) -> None:
     _, y1 = LAYERS["users"]
     pitch, label_h, gap, height = 4.5, 2.3, 0.1, 0.8
     top = y1 - 0.4
-    # the users stand above the stack, so their name sits over the bars, centred
-    x0, x1 = INTERFACES["desktop"][0], INTERFACES["clive"][1]
-    c.text((x0 + x1) / 2, y1 + 1.8, "users", size=OUTER, weight="bold")
+    # named on the left, like the layers, centred on the block of roles
+    last_bar = top - (len(USERS) - 1) * pitch - label_h - gap - height
+    c.text(
+        INTERFACES["desktop"][0] - LAYER_GAP,
+        (top + last_bar) / 2,
+        "users",
+        size=OUTER,
+        weight="bold",
+        ha="right",
+    )
     order = list(INTERFACES)
     for i, (role, reach) in enumerate(USERS):
         y = top - i * pitch
@@ -576,8 +589,10 @@ def draw_users(c: Canvas) -> None:
 
 
 def draw_legend(c: Canvas) -> None:
-    # top right, in the clear space beside the user bars
-    x, y = WIDTH * U - 19.0, HEIGHT * U - 2.2
+    # lower right, beside the stack whose colours it explains, clear of the slope
+    # down to its lowest entry
+    y = LAYERS["interfaces"][1] - 1.5
+    x = span(y - 9.5, 0)[1] + 1.5
     for i, (label, kind) in enumerate(
         [
             ("deterministic", "deterministic"),
