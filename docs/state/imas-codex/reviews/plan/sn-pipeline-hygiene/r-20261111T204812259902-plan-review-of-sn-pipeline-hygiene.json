@@ -51,6 +51,16 @@
       "note": "\u00a72's done-when now requires the generated models to carry CORRECTS, the live CORRECTS edges to read back against the declared endpoints, and the schema compliance check to report a CORRECTS edge planted between undeclared labels in a disposable graph.",
       "reason": "",
       "when": "2026-11-11T21:08:42.254815+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "fc88cc3755f58d01536d76fdaf0433b6d75e30f5",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "\u00a75's prose no longer asserts a detached-HEAD refusal; it says releases have only been cut from the main checkout and that whether a worktree cut works is unmeasured, and its done-when asks for the successful cut held by a test.",
+      "reason": "",
+      "when": "2026-11-11T21:08:55.090934+00:00"
     }
   ],
   "responses": {
@@ -62,6 +72,15 @@
       "note": "\u00a72's done-when now requires the generated models to carry CORRECTS, the live CORRECTS edges to read back against the declared endpoints, and the schema compliance check to report a CORRECTS edge planted between undeclared labels in a disposable graph.",
       "reason": "",
       "when": "2026-11-11T21:08:42.254815+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "fc88cc3755f58d01536d76fdaf0433b6d75e30f5",
+      "commit_basis": "edit",
+      "note": "\u00a75's prose no longer asserts a detached-HEAD refusal; it says releases have only been cut from the main checkout and that whether a worktree cut works is unmeasured, and its done-when asks for the successful cut held by a test.",
+      "reason": "",
+      "when": "2026-11-11T21:08:55.090934+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-pipeline-hygiene/r-20261111T204812259902-plan-review-of-sn-pipeline-hygiene.json",
