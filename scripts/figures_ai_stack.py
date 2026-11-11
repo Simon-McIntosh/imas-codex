@@ -544,11 +544,12 @@ def draw_users(c: Canvas) -> None:
     # the users stand above the stack, so their name sits over the bars, centred
     x0, x1 = INTERFACES["desktop"][0], INTERFACES["clive"][1]
     c.text((x0 + x1) / 2, y1 + 1.8, "users", size=OUTER, weight="bold")
+    order = list(INTERFACES)
     for i, (role, reach) in enumerate(USERS):
         y = top - i * pitch
-        edge0, edge1 = span(y, 0.6)
-        left = max(INTERFACES["desktop"][0], edge0)
-        x1 = min(INTERFACES[reach][1], edge1)
+        # the bar runs from Claude Desktop's left edge to the right edge of the
+        # farthest interface the role uses, so its ends fall on the columns below
+        left, x1 = INTERFACES[order[0]][0], INTERFACES[reach][1]
         c.box(left, y - height, x1, y, edge="none", fill=USER_FILL, lw=0, z=3)
         c.text(
             left + 1.0,

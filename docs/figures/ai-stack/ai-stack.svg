@@ -300,67 +300,67 @@ L 38.88 370.08
 " clip-path="url(#p54d78ba9e4)" style="fill: none; stroke: #8e3a8e; stroke-width: 1.6; stroke-linecap: square"/>
    </g>
    <g id="patch_20">
-    <path d="M 135.36 53.64
-L 779.04 53.64
-Q 785.52 53.64 785.52 47.16
-L 785.52 40.32
-Q 785.52 33.84 779.04 33.84
-L 135.36 33.84
-Q 128.88 33.84 128.88 40.32
-L 128.88 47.16
-Q 128.88 53.64 135.36 53.64
+    <path d="M 114.336 53.64
+L 800.064 53.64
+Q 806.544 53.64 806.544 47.16
+L 806.544 40.32
+Q 806.544 33.84 800.064 33.84
+L 114.336 33.84
+Q 107.856 33.84 107.856 40.32
+L 107.856 47.16
+Q 107.856 53.64 114.336 53.64
 z
 " clip-path="url(#p54d78ba9e4)" style="fill: #e2e2e2"/>
    </g>
    <g id="patch_21">
-    <path d="M 131.04 75.24
+    <path d="M 114.336 75.24
 L 650.87687 75.24
 Q 657.35687 75.24 657.35687 68.76
 L 657.35687 61.92
 Q 657.35687 55.44 650.87687 55.44
-L 131.04 55.44
-Q 124.56 55.44 124.56 61.92
-L 124.56 68.76
-Q 124.56 75.24 131.04 75.24
+L 114.336 55.44
+Q 107.856 55.44 107.856 61.92
+L 107.856 68.76
+Q 107.856 75.24 114.336 75.24
 z
 " clip-path="url(#p54d78ba9e4)" style="fill: #e2e2e2"/>
    </g>
    <g id="patch_22">
-    <path d="M 126.72 96.84
+    <path d="M 114.336 96.84
 L 479.845565 96.84
 Q 486.325565 96.84 486.325565 90.36
 L 486.325565 83.52
 Q 486.325565 77.04 479.845565 77.04
-L 126.72 77.04
-Q 120.24 77.04 120.24 83.52
-L 120.24 90.36
-Q 120.24 96.84 126.72 96.84
+L 114.336 77.04
+Q 107.856 77.04 107.856 83.52
+L 107.856 90.36
+Q 107.856 96.84 114.336 96.84
 z
 " clip-path="url(#p54d78ba9e4)" style="fill: #e2e2e2"/>
    </g>
    <g id="patch_23">
-    <path d="M 122.4 118.44
+    <path d="M 114.336 118.44
 L 337.939826 118.44
 Q 344.419826 118.44 344.419826 111.96
 L 344.419826 105.12
 Q 344.419826 98.64 337.939826 98.64
-L 122.4 98.64
-Q 115.92 98.64 115.92 105.12
-L 115.92 111.96
-Q 115.92 118.44 122.4 118.44
+L 114.336 98.64
+Q 107.856 98.64 107.856 105.12
+L 107.856 111.96
+Q 107.856 118.44 114.336 118.44
 z
 " clip-path="url(#p54d78ba9e4)" style="fill: #e2e2e2"/>
    </g>
    <g id="patch_24">
-    <path d="M 118.08 140.04
+    <path d="M 114.336 140.04
 L 337.939826 140.04
 Q 344.419826 140.04 344.419826 133.56
 L 344.419826 126.72
 Q 344.419826 120.24 337.939826 120.24
-L 118.08 120.24
-Q 111.6 120.24 111.6 126.72
-L 111.6 133.56
-Q 111.6 140.04 118.08 140.04
+L 114.336 120.24
+Q 107.856 120.24 107.856 126.72
+L 107.856 133.56
+Q 107.856 140.04 114.336 140.04
 z
 " clip-path="url(#p54d78ba9e4)" style="fill: #e2e2e2"/>
    </g>
@@ -1038,19 +1038,19 @@ z
     <text style="font-weight: 700; font-size: 18px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: middle; fill: #2b2b2b" x="457.2" y="22.122" transform="rotate(-0 457.2 22.122)">users</text>
    </g>
    <g id="text_50">
-    <text style="font-size: 15px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #141414" x="136.08" y="47.197734" transform="rotate(-0 136.08 47.197734)">assembly and commissioning · ITER infrastructure</text>
+    <text style="font-size: 15px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #141414" x="115.056" y="47.197734" transform="rotate(-0 115.056 47.197734)">assembly and commissioning · ITER infrastructure</text>
    </g>
    <g id="text_51">
-    <text style="font-size: 15px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #141414" x="131.76" y="68.775469" transform="rotate(-0 131.76 68.775469)">prototyping with domain experts · science · code developer</text>
+    <text style="font-size: 15px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #141414" x="115.056" y="68.775469" transform="rotate(-0 115.056 68.775469)">prototyping with domain experts · science · code developer</text>
    </g>
    <g id="text_52">
-    <text style="font-size: 15px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #141414" x="127.44" y="90.375469" transform="rotate(-0 127.44 90.375469)">commissioning engineer · planning</text>
+    <text style="font-size: 15px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #141414" x="115.056" y="90.375469" transform="rotate(-0 115.056 90.375469)">commissioning engineer · planning</text>
    </g>
    <g id="text_53">
-    <text style="font-size: 15px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #141414" x="123.12" y="111.997734" transform="rotate(-0 123.12 111.997734)">configuration control</text>
+    <text style="font-size: 15px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #141414" x="115.056" y="111.997734" transform="rotate(-0 115.056 111.997734)">configuration control</text>
    </g>
    <g id="text_54">
-    <text style="font-size: 15px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #141414" x="118.8" y="133.575469" transform="rotate(-0 118.8 133.575469)">administrative support</text>
+    <text style="font-size: 15px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #141414" x="115.056" y="133.575469" transform="rotate(-0 115.056 133.575469)">administrative support</text>
    </g>
    <g id="text_55">
     <text style="font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="897.12" y="19.046438" transform="rotate(-0 897.12 19.046438)">deterministic</text>
