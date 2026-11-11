@@ -96,6 +96,13 @@
       "finding": "duplicate_owner-1",
       "reason": "The worker settles the method and the endpoint is unchanged; the node's brief cites this review's reuse map and names the existing owner to extend. The brief places the endpoint comparison as a second assertion beside the existing relationship-type check, and the declaration beside the existing relationship slots.",
       "when": "2026-11-11T21:48:58.271344+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "duplicate_owner-2",
+      "reason": "The worker settles the method and the endpoint is unchanged; the node's brief cites this review's reuse map and names the existing owner to extend. The brief names both copies of the on-main guard and the existing ancestry check, so the repair covers the CLI pre-flight as well as the release module.",
+      "when": "2026-11-11T21:49:06.447509+00:00"
     }
   ],
   "responses": {
@@ -104,6 +111,12 @@
       "by": "",
       "reason": "The worker settles the method and the endpoint is unchanged; the node's brief cites this review's reuse map and names the existing owner to extend. The brief places the endpoint comparison as a second assertion beside the existing relationship-type check, and the declaration beside the existing relationship slots.",
       "when": "2026-11-11T21:48:58.271344+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "declined",
+      "by": "",
+      "reason": "The worker settles the method and the endpoint is unchanged; the node's brief cites this review's reuse map and names the existing owner to extend. The brief names both copies of the on-main guard and the existing ancestry check, so the repair covers the CLI pre-flight as well as the release module.",
+      "when": "2026-11-11T21:49:06.447509+00:00"
     },
     "reuse_search-1": {
       "action": "acted",
