@@ -1,0 +1,167 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "A figure review runs no suite, so the zero and the empty list are declared rather than measured. No suite delta is claimed.",
+  "attachment_map": {
+    "image-0.png": "docs/figures/sn-integrity-backlog/sib-lineage-cycle-repair/rule-application.svg"
+  },
+  "attachment_note": "One rendered image was attached and was opened with this node's own Read tool before any verdict was formed. It is a 1400x540 RGBA PNG. Attribution is by content, not filename: the reviewed range 9b42761afd..7fbf45c44 adds exactly one figure, docs/figures/sn-integrity-backlog/sib-lineage-cycle-repair/rule-application.svg, and no other image or SVG, and the committed caption in docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-repair.html describes exactly what the picture shows, a single-live component and a no-live-member component before and after the edge archive. No SVG was opened, read, searched, listed, rendered or git-shown by this review, and no image other than the named PNG was opened; every verdict below is read from that PNG's pixels, measured with Pillow and numpy against it.",
+  "caption_check": {
+    "caption_not_changed": true,
+    "caption_repeats_title_only": false,
+    "note": "The committed figcaption states the rule applied to each component shape and defines the dashed red encoding.",
+    "path": "docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-repair.html"
+  },
+  "completed_at": "2026-11-11T01:30:00Z",
+  "dispatched_at": "2026-11-11T01:16:58Z",
+  "disposition_note": "No disposition is set on the finding: the review is read-only, and naming a fold target or an exemption belongs to the coordinator.",
+  "figure_checks": {
+    "attachment_format": "PNG 1400x540 RGBA",
+    "attachment_opened": true,
+    "background": "#ffffff",
+    "content_bbox_px": [
+      120,
+      15,
+      1231,
+      533
+    ],
+    "content_clipped": false,
+    "content_fraction_of_canvas_height": 0.961,
+    "content_fraction_of_canvas_width": 0.794,
+    "contrast": {
+      "strokes_and_legend_333333_on_white": "12.6:1",
+      "text_222222_on_white": "15.9:1"
+    },
+    "distinct_rgb_values": 154,
+    "empty_margin_px": {
+      "bottom": 7,
+      "left": 120,
+      "right": 169,
+      "top": 15
+    },
+    "fill_pixels": {
+      "archived_strokes": 1688,
+      "blue_nodes": 4033,
+      "grey_nodes": 12092,
+      "kept_strokes_and_legend": 2587
+    },
+    "gradients_or_shaded_fills": false,
+    "legend_box_px": [
+      300,
+      517,
+      1100,
+      532
+    ],
+    "legend_clear_of_bottom_edge_px": 8,
+    "node_boxes_px": {
+      "blue": [
+        [
+          477,
+          89,
+          528,
+          140
+        ],
+        [
+          1170,
+          89,
+          1221,
+          140
+        ]
+      ],
+      "grey": [
+        [
+          139,
+          159,
+          189,
+          210
+        ],
+        [
+          831,
+          159,
+          882,
+          210
+        ],
+        [
+          159,
+          347,
+          210,
+          397
+        ],
+        [
+          851,
+          347,
+          902,
+          397
+        ],
+        [
+          464,
+          412,
+          515,
+          463
+        ],
+        [
+          1156,
+          412,
+          1207,
+          463
+        ]
+      ]
+    },
+    "overlapping_text_pairs": [],
+    "panels": "2x2 schematic; titles 'before the archive' / 'after the archive' over 'one live member' and 'no live member'",
+    "series_colours": {
+      "archived_edge": "#c0392b",
+      "kept_edge": "#333333",
+      "live_node": "#2f6db3",
+      "superseded_node": "#8f8f8f",
+      "text": "#222222"
+    },
+    "text_boxes_found": 21,
+    "text_px_heights": {
+      "node_labels": 13,
+      "titles": 15
+    },
+    "tightest_label_to_stroke_gap_px": 2,
+    "tightest_label_to_stroke_where": "bottom-left panel, 'superseded' label right edge to the archived-edge dashed stroke"
+  },
+  "findings": [
+    {
+      "disposition": null,
+      "file": "docs/figures/sn-integrity-backlog/sib-lineage-cycle-repair/rule-application.svg",
+      "id": "f1-superseded-label-touches-archived-arc",
+      "line": 314,
+      "severity": "non-blocking",
+      "summary": "In the bottom-left panel ('before the archive - no live member') the archived-edge dashed stroke passes within about 2 px of the right edge of the upper-left 'superseded' label (measured on the attached PNG: no red pixel lies inside the label box 135-233 x 406-422, and the nearest red stroke pixel sits 2 px to its right). Nothing is illegible at full size, and the label offset y - 0.17 at script line 314 is what sets the proximity, so this does not block. At the ~900 px reckon column the figure is downscaled by about 0.64, which turns the 2 px gutter into roughly 1 px and can make the word and the curve read as touching; a small increase in the label offset, or a slightly larger arc radius for the retired_a -> retired_b edge, would restore clear white between them."
+    }
+  ],
+  "item_verdicts": {
+    "contrast": "pass",
+    "data_ink": "pass",
+    "decoration": "pass",
+    "label_collision": "pass",
+    "legibility": "pass",
+    "table_form": "pass"
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261111T011432320135-review-of-sib-lineage-cycle-repair-7fbf45c44c49-figure",
+  "reviewed_base_sha": "9b42761afdd8c5f59d5b523a35ca55b1608fd19e",
+  "reviewed_figures": [
+    "docs/figures/sn-integrity-backlog/sib-lineage-cycle-repair/rule-application.svg"
+  ],
+  "reviewed_head_sha": "7fbf45c44c493eb56498ae186ee3220e26cacac2",
+  "reviewed_run_id": "r-20261111T000311936909-sib-lineage-cycle-repair",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: PASS - four titled panels read at a glance: the top row shows one live member, the bottom row shows no live member, and the left column is before the archive while the right column is after it. Node labels name the entity ('live name kept', 'superseded member', 'superseded') and a single bottom legend decodes the two edge styles, so no part of the picture needs a lookup. Titles render at 15 px and node labels at 13 px (13 pt and 11 pt on the 1400 px canvas).",
+    "RUBRIC data_ink: PASS - the ink is six node discs, up to two edge strokes per panel and 21 text segments on plain white; the figure carries 154 distinct RGB values, which are five flat series colours plus their antialiasing edges. Every drawn mark encodes something: node colour encodes live versus superseded, stroke style and colour encode kept versus archived.",
+    "RUBRIC decoration: PASS - white background, no gradient, no frame, no box or theme styling, no shaded band, no grid; nothing is drawn that is not one of the data marks or its label.",
+    "RUBRIC contrast: PASS - text is #222222 on #ffffff, 15.9:1, and the legend and kept edges are #333333, 12.6:1, both far above their thresholds; the archived edge is #c0392b and the live node #2f6db3, each a solid flat hue that clears 3:1 against white.",
+    "RUBRIC table_form: PASS - the content is a four-panel before/after schematic of a two-node component, which is correctly a diagram: the information is topology and direction of a lineage edge, not values that would be clearer as rows.",
+    "RUBRIC label_collision: PASS - 21 text boxes were extracted from the PNG and no pair overlaps; no text is clipped, with the drawn content ending at x=1231 of 1400, y=533 of 540. The tightest clearance is the 'superseded' label against the archived-edge curve in the bottom-left panel (about 2 px), recorded as non-blocking finding f1.",
+    "RUBRIC caption_check: PASS - the figcaption explains the rule for each component shape and the edge encoding rather than restating the four panel titles."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T01:27:34.981527+00:00",
+  "total": null
+}

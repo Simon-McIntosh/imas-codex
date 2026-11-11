@@ -1,0 +1,50 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-11T01:26:13.011Z",
+  "dispatched_at": "2026-11-11T01:13:52Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T000311936909-sib-lineage-cycle-repair/manifest.md",
+      "line": 24,
+      "severity": "non-blocking",
+      "text": "The structured after_suite record names revision 6346aa9f5 and tree mcintos-suite-8cORWv, but the log path it cites was produced at 7fbf45c44 in tree mcintos-suite-54Kbet, so the arm cannot be re-run from the record as written even though its failure ids match the delivered head."
+    },
+    {
+      "file": "imas_codex/standard_names/signed_manifest.py",
+      "line": 9187,
+      "severity": "non-blocking",
+      "text": "\"admitted\" is len(edges) minus the count of distinct refusal row ids, so a single component-level refusal subtracts one from the admitted total instead of excluding every edge of that component, misreporting the count in the receipt."
+    },
+    {
+      "file": "imas_codex/standard_names/signed_manifest.py",
+      "line": 8966,
+      "severity": "non-blocking",
+      "text": "_edge_archive_has_cycle re-implements directed cycle detection that catalog_ordering._find_cyclic_components (line 186) already owns and that the census applies to the same REFINED_FROM relation, so this duplicates a shared owner rather than wrapping it."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T000311936909-sib-lineage-cycle-repair/census-after.log",
+      "line": 17,
+      "severity": "non-blocking",
+      "text": "multi_tip_components rises from 18 to 19 because archiving the superseded-to-live edge makes toroidal_plasma_momentum_diffusivity a live tip alongside toroidal_momentum_diffusion_coefficient, and the landing fragment and manifest do not report or explain that second live tip."
+    }
+  ],
+  "project": "imas-codex",
+  "report": "VERDICT goal: prompt.txt:38 sets the goal to remove the REFINED_FROM edges that close lineage cycles, archiving each into a signed receipt; imas_codex/standard_names/signed_manifest.py:8702-9141 adds exactly that edge-archive operation and the census re-read records 68 cycle components before and 0 after.\nVERDICT done_when: prompt.txt:146-150 requires a before/after census from sib-lineage-cycle-census-run.py, an edge-archive operation whose receipt preserves the full edge snapshot, a disposable-graph test that archives a planted cycle and refuses an edge outside the manifest, and zero added tests/standard_names failure ids; census-before.log:17 and census-after.log:17 record 68/144 to 0/0 and test_signed_edge_archive.log:26 records 6 passed, with identical 13-id failure sets in suite-base.log and suite-head.log.\nVERDICT write_paths: manifest.md:5 declares five paths; git diff --stat 9b42761afdd8c5f59d5b523a35ca55b1608fd19e..7fbf45c44c493eb56498ae186ee3220e26cacac2 touches exactly those five (signed_manifest.py, test_signed_edge_archive.py, the driver, the fragment and rule-application.svg) and no other path in any of the three commits.\nVERDICT manifest: read in full; status complete, the tests line names the focused -m graph gate, test_logs names five logs that exist on disk, and baseline_suite/after_suite record 13 failed / 8625 passed per arm with identical failure ids.\nVERDICT diff: read commit by commit against base 9b42761afd: 6346aa9f5 adds the adapter and its 6 tests, f44cdf747 adds the census-driven run driver, 7fbf45c44 adds the fragment, its figure and the driver's report path; 2948 inserted lines, no deletions outside the driver's own rewrite.\nCALL_SITES: imas_codex/standard_names/signed_manifest.py:apply_signed_manifest\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: signed_manifest.py:8702 compose_edge_archive_authority refuses a single-live component whose archived edge leaves a live member (line 8780) and 9141 _apply_edge_archive mints one receipt per edge before deleting it, which is the rule the plan section states.\nSCORE evidence: 15\nJUSTIFICATION evidence: the focused gate and both suite arms are recorded and reconcile on failure ids, but manifest.md:24 records the head arm at revision 6346aa9f5 in tree mcintos-suite-8cORWv while the log it cites (suite-head.log) was run at 7fbf45c44 in tree mcintos-suite-54Kbet.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the three landed commits lies inside the five grants at prompt.txt:81-86, and the diff contains nothing the goal does not imply beyond the figure the landing contract explicitly permits.\nSCORE durability: 19\nJUSTIFICATION durability: negative-control.log:100 shows 5 of 6 tests failing with the adapter dispatch removed, and tests/standard_names/test_signed_edge_archive.py:221 asserts the post-apply graph state independently of the values the test supplied.\nSCORE fit: 18\nJUSTIFICATION fit: the adapter is installed as a sibling branch beside the existing structural and lifecycle adapters in signed_manifest.py:9437 and reuses _canonical_bytes, _digest and _receipt_rows rather than restating them.\nSCORE reuse: 5\nJUSTIFICATION reuse: signed_manifest.py:8966 adds its own directed-cycle test although imas_codex/standard_names/catalog_ordering.py:186 _find_cyclic_components already owns that capability and is what the census applies to this same relation.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T000311936909-sib-lineage-cycle-repair/manifest.md:24 non-blocking: the structured after_suite record names revision 6346aa9f5 and tree mcintos-suite-8cORWv, but the log path it cites was produced at 7fbf45c44 in tree mcintos-suite-54Kbet, so the arm cannot be re-run from the record as written even though its failure ids match the delivered head.\nFINDING imas_codex/standard_names/signed_manifest.py:9187 non-blocking: \"admitted\" is len(edges) minus the count of distinct refusal row ids, so a single component-level refusal subtracts one from the admitted total instead of excluding every edge of that component, misreporting the count in the receipt.\nFINDING imas_codex/standard_names/signed_manifest.py:8966 non-blocking: _edge_archive_has_cycle re-implements directed cycle detection that catalog_ordering._find_cyclic_components (line 186) already owns and that the census applies to the same REFINED_FROM relation, so this duplicates a shared owner rather than wrapping it.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T000311936909-sib-lineage-cycle-repair/census-after.log:17 non-blocking: multi_tip_components rises from 18 to 19 because archiving the superseded-to-live edge makes toroidal_plasma_momentum_diffusivity a live tip alongside toroidal_momentum_diffusion_coefficient, and the landing fragment and manifest do not report or explain that second live tip.\n",
+  "review_run_id": "r-20261111T011211546121-review-of-sib-lineage-cycle-repair-7fbf45c44c49",
+  "reviewed_base_sha": "9b42761afdd8c5f59d5b523a35ca55b1608fd19e",
+  "reviewed_head_sha": "7fbf45c44c493eb56498ae186ee3220e26cacac2",
+  "reviewed_run_id": "r-20261111T000311936909-sib-lineage-cycle-repair",
+  "scores": {
+    "durability": 19,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T01:32:06.028029+00:00",
+  "total": 96
+}
