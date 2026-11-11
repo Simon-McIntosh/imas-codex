@@ -12,7 +12,7 @@
     "note": "The committed figcaption states the rule applied to each component shape and defines the dashed red encoding.",
     "path": "docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-repair.html"
   },
-  "completed_at": "2026-11-11T01:30:00Z",
+  "completed_at": "2026-11-11T01:27:32.670Z",
   "dispatched_at": "2026-11-11T01:16:58Z",
   "disposition_note": "No disposition is set on the finding: the review is read-only, and naming a fold target or an exemption belongs to the coordinator.",
   "figure_checks": {
