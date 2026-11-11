@@ -25,7 +25,30 @@
   "plan_slug": "sn-pipeline-hygiene",
   "plan_version": 6,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "5512cba60e42df66765f72e54d3f982492ddec18",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a78's prose and done-when are bounded to imports between the package's top-level modules; subpackages keep their existing sibling rule and are outside this section.",
+      "reason": "",
+      "when": "2026-11-11T23:13:29.374483+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "5512cba60e42df66765f72e54d3f982492ddec18",
+      "commit_basis": "edit",
+      "note": "\u00a78's prose and done-when are bounded to imports between the package's top-level modules; subpackages keep their existing sibling rule and are outside this section.",
+      "reason": "",
+      "when": "2026-11-11T23:13:29.374483+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-pipeline-hygiene/r-20261111T222339217069-plan-review-of-sn-pipeline-hygiene.json",
   "review_run_id": "r-20261111T222339217069-plan-review-of-sn-pipeline-hygiene",
   "reviewed_blob_sha": "600ec941eaaae31936ed70f86eb43596c712ab0d",
   "rubric": "content",
