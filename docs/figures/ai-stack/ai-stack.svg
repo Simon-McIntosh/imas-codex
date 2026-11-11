@@ -1107,10 +1107,10 @@ z
     <text style="font-size: 13px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: middle; fill: #2b2b2b" x="672.669513" y="304.676703" transform="rotate(-0 672.669513 304.676703)">facility docs</text>
    </g>
    <g id="text_34">
-    <text style="font-weight: 700; font-size: 16px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: middle; fill: #2b2b2b" x="800.863088" y="286.585" transform="rotate(-0 800.863088 286.585)">REPL</text>
+    <text style="font-weight: 700; font-size: 16px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: middle; fill: #2b2b2b" x="800.863088" y="286.585" transform="rotate(-0 800.863088 286.585)">codegen</text>
    </g>
    <g id="text_35">
-    <text style="font-size: 13px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: middle; fill: #5f5f5f" x="800.863088" y="306.477812" transform="rotate(-0 800.863088 306.477812)">code generation</text>
+    <text style="font-size: 13px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: middle; fill: #5f5f5f" x="800.863088" y="306.477812" transform="rotate(-0 800.863088 306.477812)">Python</text>
    </g>
    <g id="text_36">
     <text style="font-weight: 700; font-size: 16px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: middle; fill: #2b2b2b" x="237.465443" y="194.1995" transform="rotate(-0 237.465443 194.1995)">Claude Desktop</text>

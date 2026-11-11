@@ -8,8 +8,9 @@ An illustration of an architecture, not a census. Reading from the bottom:
   itself becomes ITER infrastructure: durable, owned, and drawn with the ringed
   nodes of the ICP knowledge-map figures;
 - a **function layer** of read-only tools over the graph (Lucy tools, imas-codex
-  tools), third-party connectors (Outlook, Jira, Confluence) to the left, and a
-  REPL to the right as a code-generation route for whatever the tools do not cover;
+  tools), third-party connectors (Outlook, Jira, Confluence) to the left, and
+  codegen to the right: Python the model writes and runs, for whatever the tools do
+  not cover;
 - the **interfaces** people use: Claude Desktop, Lucy chat, domain dashboards, a
   sandbox, and Clive, a Claude orchestrator. Every interface but Claude Desktop can
   also run on **on-premises inference**, open-weight models on ITER's own GPUs;
@@ -480,8 +481,8 @@ def draw_functions(c: Canvas) -> None:
     )
     c.group(ix[0], y0, ix[1], y1, "imas-codex tools")
     grid(c, ix[0] + pad, ix[1] - pad, y1 - header, CODEX_TOOLS, 2)
-    # the REPL: generated code, run against the graph, for whatever no tool covers
-    c.card(rx[0], y0, rx[1], y1, "REPL", "code generation", kind="frontier")
+    # codegen: Python the model writes and runs against the graph, where no tool fits
+    c.card(rx[0], y0, rx[1], y1, "codegen", "Python", kind="frontier")
 
 
 def draw_interfaces(c: Canvas) -> None:
