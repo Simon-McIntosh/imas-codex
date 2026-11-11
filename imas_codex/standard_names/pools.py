@@ -397,12 +397,18 @@ def identity_state_expressions() -> dict[str, str | _CategoricalProjection]:
             for field in (
                 "name_stage",
                 "docs_stage",
-                "validation_status",
                 "status",
                 "origin",
                 "edit_mode",
             )
         },
+        "validation_status": _CategoricalProjection(
+            {
+                "valid": "sn.validation_status = 'valid'",
+                "quarantined": "sn.validation_status = 'quarantined'",
+                "pending": "sn.validation_status IS NULL OR sn.validation_status = 'pending'",
+            }
+        ),
         "description_state": _CategoricalProjection(
             {
                 "missing": "sn.description IS NULL",
@@ -522,7 +528,7 @@ def standard_name_pool_predicates(
         active
         & ~review_name
         & (
-            _state_is("validation_status", "valid")
+            ~_state_is("validation_status", "pending")
             & _state_is("name_stage", "reviewed")
             & _state_is("name_score_state", "below")
             & _state_is("name_attempts_under_cap", True)
@@ -676,6 +682,7 @@ def identity_state_groups(
 
     expressions = identity_state_expressions()
     derived_fields = (
+        "validation_status",
         "description_state",
         "name_score_state",
         "docs_score_state",
@@ -695,7 +702,7 @@ def identity_state_groups(
     WITH sn, {projection}
     WITH sn.name_stage AS name_stage,
          sn.docs_stage AS docs_stage,
-         sn.validation_status AS validation_status,
+         validation_status,
          sn.status AS status,
          sn.origin AS origin,
          description_state,

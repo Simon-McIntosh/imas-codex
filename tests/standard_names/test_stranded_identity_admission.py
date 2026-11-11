@@ -124,6 +124,95 @@ _STATE_ROWS = (
 )
 
 
+_RECORDED_OWNERS = (
+    "terminal:structural_grounding_missing",
+    "terminal:structural_grounding_missing",
+    "terminal:docs_review_quorum_shortfall",
+    "review_docs",
+    "review_docs",
+    "review_docs",
+    "review_docs",
+    "review_docs",
+    "review_docs",
+    "review_docs",
+    "review_docs",
+    "terminal:docs_review_quorum_shortfall",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_docs",
+    "review_docs",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "terminal:validation_quarantined",
+    "terminal:validation_quarantined",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "review_name",
+    "terminal:validation_quarantined",
+    "terminal:validation_quarantined",
+    "terminal:validation_quarantined",
+    "terminal:validation_quarantined",
+    "terminal:validation_quarantined",
+    "terminal:validation_quarantined",
+    "terminal:validation_quarantined",
+    "enrich_parents",
+    "terminal:composition_grounding_missing",
+    "terminal:composition_grounding_missing",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:name_review_quorum_shortfall",
+    "review_name",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:validation_quarantined",
+    "terminal:name_attempt_cap",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:name_attempt_cap",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:name_review_quorum_shortfall",
+    "terminal:name_review_quorum_shortfall",
+    "review_name",
+    "terminal:name_review_quorum_shortfall",
+    "review_name",
+    "terminal:name_review_quorum_shortfall",
+)
+
+
 def recorded_states():
     rows = []
     for index, encoded in enumerate(_STATE_ROWS):
@@ -142,6 +231,7 @@ def recorded_states():
             identities=[f"admission_fixture_{index}"],
             count=1,
             recorded_count=int(count),
+            expected_owner=_RECORDED_OWNERS[index],
         )
         rows.append(state)
     return rows
@@ -176,7 +266,7 @@ def control_states():
         },
     }
     return {
-        pool: dict(base, **values, identities=[f"control_{pool}"])
+        pool: dict(base, **values, identities=[f"control_{pool}"], expected_owner=pool)
         for pool, values in overrides.items()
     }
 
@@ -190,6 +280,19 @@ def test_recorded_classes_preserve_population_and_admission():
     assert result["claimable_count"] == 43
     assert result["terminal_for_run_count"] == 42
     assert result["overlap_count"] == 0
+    for state in states:
+        expected = state["expected_owner"]
+        pools = [p.pool for p in standard_name_pool_predicates() if p.admits(state)]
+        if expected.startswith("terminal:"):
+            assert pools == []
+            parked = classify_identity_state_groups(
+                [state], standard_name_pool_predicates()
+            )
+            assert parked["terminal_for_run_by_reason"] == {
+                expected.removeprefix("terminal:"): 1
+            }
+        else:
+            assert pools == [expected]
 
 
 @pytest.mark.parametrize("pool", list(control_states()))
@@ -308,9 +411,22 @@ def test_rendered_admission_matches_planted_classes(
         assert set(projected) == ids
         for state in states:
             actual = projected[state["identities"][0]]
-            assert {field: actual[field] for field in _STATE_FIELDS} == {
-                field: state[field] for field in _STATE_FIELDS
-            }
+            expected_projection = {field: state[field] for field in _STATE_FIELDS}
+            if expected_projection["validation_status"] is None:
+                expected_projection["validation_status"] = "pending"
+            assert {
+                field: actual[field] for field in _STATE_FIELDS
+            } == expected_projection
+        census_groups = [
+            dict(projected[identity], identities=[identity], count=1)
+            for identity in sorted(ids)
+        ]
+        result = classify_identity_state_groups(
+            census_groups, standard_name_pool_predicates()
+        )
+        assert result["stranded_count"] == 0
+        assert result["overlap_count"] == 0
+        assert result["terminal_for_run_count"] == 42
         for predicate in standard_name_pool_predicates():
             rows = graph.query(
                 f"MATCH (sn:StandardName) WHERE sn.id IN $ids AND ({predicate.cypher()}) RETURN sn.id AS id",
@@ -318,7 +434,9 @@ def test_rendered_admission_matches_planted_classes(
                 **params,
             )
             expected = {
-                state["identities"][0] for state in states if predicate.admits(state)
+                state["identities"][0]
+                for state in states
+                if state["expected_owner"] == predicate.pool
             }
             assert f"control_{predicate.pool}" in expected
             assert {row["id"] for row in rows} == expected
@@ -329,7 +447,9 @@ def test_rendered_admission_matches_planted_classes(
         )
 
         expected_counts = {
-            predicate.pool: sum(predicate.admits(state) for state in states)
+            predicate.pool: sum(
+                state["expected_owner"] == predicate.pool for state in states
+            )
             for predicate in standard_name_pool_predicates()
         }
         assert _compute_pool_pending(
@@ -344,16 +464,6 @@ def test_rendered_admission_matches_planted_classes(
                 if pool != "enrich_parents"
             },
         }
-        census_groups = [
-            dict(projected[identity], identities=[identity], count=1)
-            for identity in sorted(ids)
-        ]
-        result = classify_identity_state_groups(
-            census_groups, standard_name_pool_predicates()
-        )
-        assert result["stranded_count"] == 0
-        assert result["overlap_count"] == 0
-        assert result["terminal_for_run_count"] == 42
         parked_ids = result["terminal_for_run_ids"]
         before = graph.query(
             "MATCH (sn:StandardName) WHERE sn.id IN $ids RETURN sn.id AS id, properties(sn) AS properties ORDER BY id",
@@ -399,9 +509,7 @@ def test_rendered_admission_matches_planted_classes(
             expected = {
                 state["identities"][0]
                 for state in states
-                if next(
-                    p for p in standard_name_pool_predicates() if p.pool == pool
-                ).admits(state)
+                if state["expected_owner"] == pool
             }
             claimed = []
             for _ in range(3):

@@ -196,7 +196,10 @@ def test_grouped_query_and_run_summary_preserve_the_census() -> None:
     assert "collect(sn.id) AS identities" in graph.query_text
     assert "sn.name_stage AS name_stage" in graph.query_text
     assert "sn.docs_stage AS docs_stage" in graph.query_text
-    assert "sn.validation_status AS validation_status" in graph.query_text
+    assert (
+        "sn.validation_status IS NULL OR sn.validation_status = 'pending'"
+        in graph.query_text
+    )
     assert "sn.status AS status" in graph.query_text
     assert result["stranded_count"] == 2
 
