@@ -1,0 +1,83 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-11T22:00:07.141Z",
+  "dispatched_at": "2026-11-11T21:52:38Z",
+  "findings": [
+    {
+      "anchor": "docs/evidence/fragments/sn-integrity-backlog/sib-cohort-rerun-isn-0-11-run.py:33",
+      "id": "reuse_search-1",
+      "reason": "the section should carry the cohort as a committed manifest and extend the existing 143-source read-back, otherwise its \"committed read-back\" reads a file no repository holds.",
+      "text": "the read-back \u00a72 asks for is already implemented and committed: this script reruns every unproduced source of the 143-source cohort and reads each one back with its reason (`produced`/`unproduced_outside_classes` at lines 132-187, cost capped at 10.0 USD at line 44), so the work \u00a72 needs is a parameterisation of an existing reader, not new machinery. Its `COHORT_FILE` at line 9 points outside the repository at `/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T051738232687-sib-second-pass/cohort.json`, and `cohort_ids()` hard-asserts exactly 143 (lines 68-71), so \"the cohort's committed read-back\" is committed while the cohort it reads is not; a fresh clone cannot reproduce \u00a72's endpoint. The owning mechanism for a committed, typed scope is `imas_codex/standard_names/sources_manifest.py:114` (`load_sources_file`) and `:187` (`load_focus_file`), which `sn run --batch/--focus` already consumes.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-full-dd-continuation.html#s4",
+      "id": "deep_module-1",
+      "reason": "the reconciliation clause is unachievable across separate timed queries, so \u00a74 must ask for one snapshot-consistent reading rather than four.",
+      "text": "\u00a74's done-when joins four readings (census classes with sums reconciling to the live total, accepted count \u2265 5,503, export-gate blocking set 0, lineage census with no new cycle) that are taken as separate graph queries while \u00a74's own run writes the graph; \"the class sums reconciling to the live total\" is only true of a single snapshot, so as designed the reconciliation is a comparison of different states and will either disagree spuriously or be made to agree by adjusting scope. The deep alternative is one reader over one snapshot that emits the census, the accepted count and the guard readings together, which is also what makes the planted-outside-every-class negative control meaningful (a planted node changes the total and must move exactly one class). Shared classification already exists to build on: `imas_codex/standard_names/graph_store/graph_source_bindings.py:2077` (`classify_parked_source`) and `:2051` (`CAP_PARKED_DISPOSITIONS`), and coverage reporting exists at `imas_codex/standard_names/coverage.py:244` (`compute_coverage`, exposed as `sn coverage` at `imas_codex/cli/sn.py:3742`).",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/evidence/fragments/sn-integrity-backlog/sib-cohort-rerun-isn-0-11-run.py:1",
+      "id": "thin_wrapper-1",
+      "reason": "without either an extension or a stated reason, the plan silently commits the repository to a second copy of the same read-back, which is the pattern already 123 scripts deep.",
+      "text": "\u00a72's endpoint is the same read-back this 600-line script performs end to end (live read of all cohort sources, per-source reason, export state, cost), so a new script written into `docs/evidence/fragments/sn-full-dd-continuation/` would be a thin layer over machinery that takes a grammar version, a cohort file and a cost cap as parameters. Nothing in \u00a72 names behaviour the existing script lacks: it already records produced/accepted with reasons and submits a cost-capped rerun. The justification for a parallel script \u2014 if there is one \u2014 belongs in the node brief, not left implicit; the honest change is to parameterise the existing script and let \u00a72 cite it.",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/graph/neo4j_ops.py:595",
+      "id": "duplicate_owner-1",
+      "reason": "as written, \u00a73's gate passes on an unverified archive taken before the writers stopped, which is the exact failure the section exists to prevent.",
+      "text": "\u00a73's done-when conjoins \"creation time is after the last graph write of every \u00a752 run\" with \"the repository's checkpoint currency instrument reads it as current\", but `get_backup_currency` states in its own docstring (lines 478-486) that the verdict is the archive's existence and verified contents and is \"not a measured age\", because an export taken to bring the service back can never show zero lag; `age_seconds` is carried \"for information only\". So the instrument cannot produce the first clause at all, and the second clause passes on any archive meeting `_is_full_recovery_archive` (`imas_codex/graph/neo4j_ops.py:522`), which only asserts that a gzip tar contains a non-empty `graph.dump` member. \u00a73's \"integrity test of the whole stream\" therefore also has no owner \u2014 no stream verification exists in `imas_codex/graph/neo4j_ops.py`, `imas_codex/graph/offsite.py`, or `imas_codex/cli/graph/`. The owner to extend is `get_backup_currency` plus `_is_full_recovery_archive`, adding a quiescence stamp compared against the writers' recorded last-write times and a real stream verification, rather than defining a second checkpoint-currency notion beside them.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/evidence/fragments/sn-integrity-backlog/sib-flush-unaccepted-run.py:64",
+      "id": "duplicate_owner-2",
+      "reason": "naming the owners turns three duplicated readings into three calls, and \u00a75's metric otherwise has no single definition to compare before against after.",
+      "text": "every reading \u00a74 and \u00a75 need for their guard clauses is re-derived in per-plan evidence scripts instead of extended from a package owner, and the census is 123 `*-run.py` files under `docs/evidence/fragments/` across 8 plans, 44 of them in `sn-integrity-backlog` alone: docs-stage counts are defined as `docs_stage_counts` here and re-derived inline at `sib-consistency-census-run.py:535` (`by_docs_stage`) and `:315`, `:361`, `:546` (`docs_stage == \"accepted\"`), and selected again at `sib-full-run-failure-diagnosis-run.py:41`; the lineage-cycle census is `sib-lineage-cycle-census-run.py:1` while the guard it audits lives at `imas_codex/standard_names/graph_store/graph_foundation.py:237` (`refined_from_cycle_guard_cypher`); the export gate's sourceless/dormant-sourceless reading is `sib-export-live-source-gate.html:32-39` while the report field it reads is owned by `imas_codex/standard_names/export.py` (`dormant_sourceless_names`); and the unaccepted census itself is `sib-unaccepted-census-run.py:1`. \u00a75's \"before and after counts by documentation stage\" would be a fifth copy of the same five-line Cypher, and \u00a74's three guard readings a second or third copy of each. The docs-stage owner to extend is `imas_codex/standard_names/graph_store/graph_catalog.py:1514` (docs-axis coverage stats) \u2014 one reader, called by both sections.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-full-dd-continuation.html#s4",
+      "id": "interface_budget-1",
+      "reason": "a section that adds a selector family must state what it retires, and \u00a74's own scope wording depends on which of the two it chooses.",
+      "text": "the supplied counts are public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0, and \u00a74 adds surface to the CLI selector family without naming what it retires or merges: it requires the run to be \"scoped by source\", while `sn run` scopes by DD path (`--focus`/`--batch` through `imas_codex/standard_names/sources_manifest.py:114`) or by existing SN identity (`--name`, `imas_codex/cli/sn.py:1477`), and the manifest discriminator accepts only `sn_sources` (flattened `<ids>/<path>` DD paths) and `sn_names` (SN ids) \u2014 `imas_codex/standard_names/sources_manifest.py:187` raises on anything else. The census classes are keyed by `StandardNameSource` id, which is a third kind, so \u00a74 either adds a third manifest kind or a CLI selector and does not say so, nor what it replaces (the per-plan scripts' ad-hoc id lists in `docs/evidence/fragments/` are what such a selector would retire).",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "fc99c61f0f311bf33b6ca594ba565398169827b9",
+  "plan_fingerprint": "274f37dda4dad0d3157b2261481b527b4d7e1ace9befd2ddb79a743096ad8929",
+  "plan_slug": "sn-full-dd-continuation",
+  "plan_version": 6,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261111T215144072037-plan-review-of-sn-full-dd-continuation",
+  "reviewed_blob_sha": "357bc09247bf8f1eeadebac1cd6ed62132d34a21",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 \u00a74's census, accepted count and three guard readings are specified as separate readings taken around a run that writes the graph, so the reconciliation clause cannot hold as designed.",
+    "duplicate_owner": "a finding \u2014 \u00a73 delegates checkpoint currency to an instrument that does not measure what \u00a73 requires, and \u00a74/\u00a75's guard and docs-stage readings are re-derived in per-plan scripts when package-level owners exist.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a74's \"scoped by source\" needs a source-id selector that the existing manifest kinds do not provide, and the section names nothing it retires or merges.",
+    "reuse_search": "a finding \u2014 \u00a72's cohort read-back already exists as a committed script, and the 143-source cohort identity it depends on is not in the repository, so the endpoint is not reproducible from a fresh clone.",
+    "thin_wrapper": "a finding \u2014 a second evidence-fragment read-back under `sn-full-dd-continuation/` would forward to the same reads the existing cohort script already performs, with no behaviour it lacks and no justification stated."
+  },
+  "section_digests": {
+    "_document": "687ba927f5bd26f8820871ab346e1dd7924dd0b95f506110a32751e1da3d0a39",
+    "s1": "6edb6bfc73bfa8f3d3435cdd83ea2fde91367cf006a53a93995f459601295db8",
+    "s2": "3d1690607596f8357d10f84f951914dea77216d8550c12bc6153c4b5b1c5b664",
+    "s3": "2721ffe28ddf29dbfe0d59d54c45bf0fe847b5c60ecea7d16008efeb53c91511",
+    "s4": "1be6133181a37d07f60dc75ac5a2e6866812ea9422d2bc947ef707d42b382914",
+    "s5": "a614251b6db02eeb2d301ff08bd600197bf4d06263bc82cafa595b87633bfadc"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T22:17:40.842875+00:00",
+  "total": null
+}
