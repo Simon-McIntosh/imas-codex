@@ -41,7 +41,30 @@
   "plan_slug": "sn-pipeline-hygiene",
   "plan_version": 3,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "fc88cc3755f58d01536d76fdaf0433b6d75e30f5",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "\u00a72's done-when now requires the generated models to carry CORRECTS, the live CORRECTS edges to read back against the declared endpoints, and the schema compliance check to report a CORRECTS edge planted between undeclared labels in a disposable graph.",
+      "reason": "",
+      "when": "2026-11-11T21:08:42.254815+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "fc88cc3755f58d01536d76fdaf0433b6d75e30f5",
+      "commit_basis": "edit",
+      "note": "\u00a72's done-when now requires the generated models to carry CORRECTS, the live CORRECTS edges to read back against the declared endpoints, and the schema compliance check to report a CORRECTS edge planted between undeclared labels in a disposable graph.",
+      "reason": "",
+      "when": "2026-11-11T21:08:42.254815+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-pipeline-hygiene/r-20261111T204812259902-plan-review-of-sn-pipeline-hygiene.json",
   "review_run_id": "r-20261111T204812259902-plan-review-of-sn-pipeline-hygiene",
   "reviewed_blob_sha": "c626affc17610ef364f231c0f40c5a8e6867e4ee",
   "rubric": "content",
