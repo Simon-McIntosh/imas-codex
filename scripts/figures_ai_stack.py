@@ -43,8 +43,8 @@ ROOT = Path(__file__).resolve().parents[1]
 FIGURES = ROOT / "docs/figures/ai-stack"
 STEM = "ai-stack"
 
-WIDTH, HEIGHT = 14.0, 6.62  # in: wider than the slide canvas, leaving room for a title
-U = 10  # drawing units per inch, so the axes run 0..140 by 0..66.2
+WIDTH, HEIGHT = 14.0, 6.47  # in: wider than the slide canvas, leaving room for a title
+U = 10  # drawing units per inch, so the axes run 0..140 by 0..64.7
 
 # Deterministic in the ICP knowledge map's relation plum; agentic work in coral where a
 # frontier model drives it, teal where it can also run on-premises.
@@ -56,6 +56,7 @@ NEUTRAL_EDGE = "#b4b1aa"
 BAND_FILL = "#f4f3f0"
 USER_FILL = "#e2e2e2"  # a neutral grey that reads on white without weighing on it
 USER_INK = "#141414"
+USER_GUIDE = "#9a9a9a"
 
 TITLE, BODY, SMALL = 16, 14, 13  # pt, inside the stack
 BAR = 15  # pt, the user roles
@@ -239,7 +240,7 @@ LAYERS = {  # (y0, y1) of each band
     "graph": (8.8, 14.8),
     "functions": (15.8, 30.6),
     "interfaces": (31.6, 43.8),
-    "users": (46.3, 61.9),  # set apart: users stand above the stack
+    "users": (44.8, 60.4),
 }
 
 LAYER_NAMES = {  # the users are named above their bars, in draw_users
@@ -545,6 +546,19 @@ def draw_users(c: Canvas) -> None:
     x0, x1 = INTERFACES["desktop"][0], INTERFACES["clive"][1]
     c.text((x0 + x1) / 2, y1 + 1.8, "users", size=OUTER, weight="bold")
     order = list(INTERFACES)
+    # dashed guides up from both edges of every interface card mark the columns,
+    # so each bar's end reads against the split it stops at
+    guide_bottom = LAYERS["interfaces"][1] - 0.9  # the cards' top edge
+    for gx0, gx1 in INTERFACES.values():
+        for gx in (gx0, gx1):
+            c.ax.plot(
+                [gx, gx],
+                [guide_bottom, top],
+                color=USER_GUIDE,
+                lw=1.0,
+                linestyle=(0, (3, 3)),
+                zorder=4,
+            )
     for i, (role, reach) in enumerate(USERS):
         y = top - i * pitch
         # the bar runs from Claude Desktop's left edge to the right edge of the
