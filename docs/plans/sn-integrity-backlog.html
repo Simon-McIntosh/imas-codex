@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="462">
+<meta name="plan-version" content="463">
 <meta name="plan-modified" content="2026-11-11">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -1445,6 +1445,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s52" data-id="c-run-r-20261111T011211546121-review-of-sib-lineage-cycle-repair-7fbf45c44c49" data-who="reckon-build" data-when="2026-11-11T01:26:13.011Z">
     <div class="r-comment-body"><p>Independent review of sib-lineage-cycle-repair at head 7fbf45c44c493eb56498ae186ee3220e26cacac2 records scores goal_fidelity 19, evidence 15, scope_discipline 20, durability 19, fit 18, reuse 5 (total 96), status parsed, zero added test failures against the reviewed base 9b42761afd whose 13 failing ids are identical in both arms, and four non-blocking findings: the manifest after_suite record names revision 6346aa9f5 and tree 8cORWv while the log it cites ran at 7fbf45c44 in tree 54Kbet; the edge-archive admitted count subtracts refusal row ids from the edge count; _edge_archive_has_cycle duplicates catalog_ordering._find_cyclic_components; and the census live-tip count rises 18 to 19 without being reported.</p></div>
+</div>
+<div class="r-comment" data-section="s52" data-id="c-run-r-20261111T020159228681-review-of-sib-lineage-cycle-repair-0bf57eb71ef5" data-who="reckon-build" data-when="2026-11-11T02:12:08.315Z">
+    <div class="r-comment-body"><p>Independent review of the commit r-20261111T000311936909-sib-lineage-cycle-repair gained after its first review records scores goal_fidelity 19, evidence 14, scope_discipline 20, durability 18, fit 17, reuse 20 (total 108), status parsed, reviewed_base_sha 7fbf45c44c493eb56498ae186ee3220e26cacac2 and reviewed_head_sha 0bf57eb71ef54f910c96ac981f1bdd482f7c18b8, zero added test failures derived from the reviewed run&#x27;s own base and head suite arms (13 identical failure ids, 8625 passed, 12 skipped in each), and one non-blocking finding: the focused gate log test_signed_edge_archive-repair.log names revision 7fbf45c44 in its header while it reports 7 tests, and the delegation test exists only at 0bf57eb71</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261012T162346807302-review-of-sib-row-census" data-who="reckon-build" data-when="2026-10-12T16:39:58.712Z">
     <div class="r-comment-body"><p>reviewed r-20261012T145528571333-sib-row-census at a7a70db00 against c7b4c626e; total 93/120 (goal_fidelity 15, evidence 13, scope_discipline 19, durability 11, fit 15, reuse 20); two blocking findings — the landing record's verdict tallies and the manifest's row-count both disagree with the 38 rows the census file holds.</p></div>
