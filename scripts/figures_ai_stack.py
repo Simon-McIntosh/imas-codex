@@ -303,7 +303,10 @@ def grid(c: Canvas, x0, x1, top, names, cols, *, kinds=None, height=2.8, pitch=3
 
 
 def draw_bands(c: Canvas) -> None:
-    for y0, y1 in LAYERS.values():
+    # the users stand on the stack rather than forming a layer of it, so no band
+    for key, (y0, y1) in LAYERS.items():
+        if key == "users":
+            continue
         (a0, a1), (b0, b1) = span(y0, 0), span(y1, 0)
         c.ax.add_patch(
             Polygon(
