@@ -65,7 +65,30 @@
   "plan_slug": "sn-pipeline-hygiene",
   "plan_version": 1,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "55af2a7ff77097679125b2d4f0c065462bf7de1b",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The private-import work moves to a new \u00a78 whose endpoint is every cross-module import of a private name in imas_codex/standard_names closed, measured at 27 (five at module level) on 2026-11-11, not two.",
+      "reason": "",
+      "when": "2026-11-11T20:40:54.698073+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "55af2a7ff77097679125b2d4f0c065462bf7de1b",
+      "commit_basis": "edit",
+      "note": "The private-import work moves to a new \u00a78 whose endpoint is every cross-module import of a private name in imas_codex/standard_names closed, measured at 27 (five at module level) on 2026-11-11, not two.",
+      "reason": "",
+      "when": "2026-11-11T20:40:54.698073+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-pipeline-hygiene/r-20261111T201916459868-plan-review-of-sn-pipeline-hygiene.json",
   "review_run_id": "r-20261111T201916459868-plan-review-of-sn-pipeline-hygiene",
   "reviewed_blob_sha": "50e7527c5c4cb073a27d96e7b8a91bb82d42b479",
   "rubric": "content",
