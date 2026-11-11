@@ -1,0 +1,72 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-11T20:57:00.056Z",
+  "dispatched_at": "2026-11-11T20:46:39Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-catalog-consistency.html:48",
+      "id": "done_when-1",
+      "reason": "a \u00a72 node hits 15 batches it must apply and cannot, and the 582 domain placements have no section that owes them applied.",
+      "text": "\u00a72's first done-when item requires every batch in sib-consistency-batches.json applied, except the batches \u00a73 and \u00a74 own, while the section's own prose (line 44) says it makes no physics_domain change and that the grouping placements are \u00a75's; the artifact's rows carry edit axes d/g: 582 rows are g-only and 135 batches mix d and g (15 batches are entirely g-only, 56 rows). `sn edit --axis` accepts only name|docs|both (`.claude/skills/sn-edit/SKILL.md:26`), so a \u00a72 node cannot apply those rows at all, and \u00a75's done-when does not require those 56 placements applied \u2014 it only requires the census's divergent count to fall below 98. The measure therefore fails a compliant \u00a72 and closes a \u00a75 that never touched them",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-catalog-consistency.html:44",
+      "id": "wiring-1",
+      "reason": "one name's rename and 147 export-set-driven documentation edits are each owed by the section that measures them and excluded by the section that could apply them, so both fall between two done-whens.",
+      "text": "\u00a72 cedes \"the release-candidate renames of the momentum_flux and momentum_source unit pairs\" to \u00a73, but the artifact's rename batch is batch-272 with three rows, the third being source_rate_due_to_beam_beam_fusion; \u00a73 has no prose or done-when item that owns a rename, and its unit-warning measure (line 61) names only the momentum_flux and momentum_source families, so the third name's warning can stand while \u00a73 passes. The same gap covers the six advisory batches (274\u2013279, 147 names, documentation edits pruned against rc8's export set): \u00a72 keeps them by default because only \u00a73's and \u00a74's are excepted, yet \u00a73's first done-when item is precisely the warning set those edits clear",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-catalog-consistency.html:45",
+      "id": "reasoning-1",
+      "reason": "as written the node either breaches its own cap or fails its first done-when, and the escalation the text implies is not a declared dependency.",
+      "text": "the new whole-pass cap of USD 60 is 37% of the sizing artifact's own total estimate of USD 159.115 at the documentation rate, and `sn edit` also pays for review, so the measured rate will be higher still; item 1 of the done-when (\"every batch \u2026 applied\") and item 5 (\"the pass total beside its USD 60 cap\") cannot both hold, and item 1 carries no clause making the lead's lift of the cap a precondition",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-catalog-consistency.html:85",
+      "id": "reasoning-2",
+      "reason": "\u00a77 already requires the coordinator to re-read the population before briefing the lead, so the stale figure changes no action, only the expectation.",
+      "text": "\u00a77 gives the population as \"4 at the 2026-11-11 flush read\", but the newest committed read (sib-reconcile-source-drop.html, \"4 \u2192 3 sourceless live drafts\", signed restore 2026-11-11T01:27:12Z) records the count at 3 after the rebound producer",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "fc88cc3755f58d01536d76fdaf0433b6d75e30f5",
+  "plan_fingerprint": "25b219603701eb49468178af185e706c2a56b36d2c928009fdd68d5a216d4f61",
+  "plan_slug": "sn-catalog-consistency",
+  "plan_version": 3,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261111T204539307654-plan-review-of-sn-catalog-consistency",
+  "reviewed_blob_sha": "de35705a5a944f3ca386a87902eb3ed05449361f",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 sib-consistency-batches.json, sib-consistency-census.json, sn-integrity-backlog#s52, sn-full-dd-continuation#s4 and sn-catalog-grouping#s3 all resolve; \u00a75's 98-of-125 grouping figure reproduces from the census (grouping inconsistent on 98 of 125 families), and \u00a72's estimate rate of USD 0.055 matches docs_rate_usd_per_name.",
+    "done_when": "a finding \u2014 \u00a72's done-when binds every batch in the sizing artifact, 150 of which carry grouping rows that `sn edit` has no axis for and \u00a72 assigns to \u00a75.",
+    "evidence_paths": "pass \u2014 every named artifact is a committed path under docs/evidence/fragments/sn-integrity-backlog/.",
+    "naming": "pass \u2014 no plan labels, stage names or ticket numbers reach the text.",
+    "reasoning": "two findings \u2014 the pass cap and the required full coverage cannot both hold, and \u00a77's population figure is stale against the newest committed read.",
+    "single_goal": "pass \u2014 each section names one deliverable; \u00a75's two clauses are both stored-domain repair through the one writer.",
+    "wiring": "a finding \u2014 \u00a72 cedes the release-candidate rename batch and leaves six advisory batches to a \u00a73 that declares neither."
+  },
+  "section_digests": {
+    "_document": "60da5223ce5c0ad0f73555a1988b66e7737b9e961a9e0c99e0cd3f569bc93745",
+    "s1": "c69f79e72b8fe8652e9dcd8632a35ca7eaa3a205fd5ee3e2ee98bc74afc136ba",
+    "s2": "bade80ddadb3b03e420e57a01537267b8820c33cac320b2020252dc9712b52fb",
+    "s3": "57836fc7d40140cbc86f34f4c41b3997c74959c126cf30d5204898dca0509073",
+    "s4": "ef7bd7f314233248216f8598211014764b74d1c74c308db48db9ab9390a33d55",
+    "s5": "9eebe4c04c1cefe98175f1bb207b29f0e9b1dab5d4ae40fe88d5f44a0b187a15",
+    "s6": "e35c4bf32892d9b90e8392b5e1171957f4973d937daaccdee3ab610d3c1c937e",
+    "s7": "24463db6c76f164370c1b313efadd44be180e2c45fb24b7f146f7ed10d941bf7",
+    "s8": "124c4cffdc2b27efae89ba41f97a27ff57b01c0b53ce596b6c025f1e6523e626"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T20:58:14.894590+00:00",
+  "total": null
+}
