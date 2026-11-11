@@ -71,6 +71,16 @@
       "note": "The USD 60 is now a first tranche: when the measured rate projects the remaining batches past it, the coordinator brings the lead the projection, and \u00a72's first item accepts batches held on the lead's recorded spend ruling.",
       "reason": "",
       "when": "2026-11-11T21:01:03.807678+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "fc88cc3755f58d01536d76fdaf0433b6d75e30f5",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "\u00a77's population figure now reads 3, from the newest committed read after the source-drop restore.",
+      "reason": "",
+      "when": "2026-11-11T21:01:20.863742+00:00"
     }
   ],
   "responses": {
@@ -91,6 +101,15 @@
       "note": "The USD 60 is now a first tranche: when the measured rate projects the remaining batches past it, the coordinator brings the lead the projection, and \u00a72's first item accepts batches held on the lead's recorded spend ruling.",
       "reason": "",
       "when": "2026-11-11T21:01:03.807678+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "fc88cc3755f58d01536d76fdaf0433b6d75e30f5",
+      "commit_basis": "edit",
+      "note": "\u00a77's population figure now reads 3, from the newest committed read after the source-drop restore.",
+      "reason": "",
+      "when": "2026-11-11T21:01:20.863742+00:00"
     },
     "wiring-1": {
       "action": "acted",
