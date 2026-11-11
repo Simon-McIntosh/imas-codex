@@ -1,0 +1,73 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-11T14:59:46.116Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "scored against the superseded PR deliverable; the release was cut by the coordinator from the main checkout because the worker sandbox cannot write the catalog checkout, and the tag is verified on the fork",
+      "recorded_at": "2026-11-11T14:59:59.280384+00:00"
+    },
+    "goal_fidelity": {
+      "kind": "exempted",
+      "reason": "scored against the superseded PR deliverable; the release was cut by the coordinator from the main checkout because the worker sandbox cannot write the catalog checkout, and the tag is verified on the fork",
+      "recorded_at": "2026-11-11T15:00:04.258661+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-11T14:52:32Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-catalog-rc-snapshot.html",
+      "id": "e9850d7d0b7",
+      "line": 19,
+      "severity": "blocking",
+      "text": "blocking: the goal requires a fork review pull request for the lead and the done_when requires its checks and Pages preview to return 200 and the fragment to record the PR link and preview link, but the landed head records that no review pull request exists and the table at line 91 reads \"no PR by design\", so the stated deliverable is unmet; the repair is either the PR or a coordinator-recorded waiver of that clause."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-catalog-rc-snapshot.html",
+      "id": "aa9bfd2ab47",
+      "line": 91,
+      "severity": "non-blocking",
+      "text": "non-blocking: the done_when's step-6 gate on the pushed tag (domain_invalid=0, kind_disagreement=0, escapes=0, continuations=0, reformatted=0) has no log anywhere in the run directory, because the cut was run by the coordinator after this node's final attempt, so the release rests on the refs check alone for that measure."
+    },
+    {
+      "file": "rc-cut/refs.log",
+      "id": "f316ea9493b",
+      "line": 22,
+      "severity": "non-blocking",
+      "text": "non-blocking: the log holds a successful probe ending EXIT=0 at line 11 followed by a second probe that failed on port 22 and ends EXIT=128, so its last EXIT line reads as a failed measurement although the manifest's artifacts line at manifest.md:19 cites it as the empty-refs evidence."
+    },
+    {
+      "file": "manifest.md",
+      "id": "6f934963287",
+      "line": 16,
+      "severity": "non-blocking",
+      "text": "non-blocking: the tests line names the recipe dry-run command, whose own rc-cut/dryrun.log ends EXIT=3, rather than the passing gate-verdict command, so a promotion that fills its gate receipt from this line reads a failure while the recorded passing measure sits only in test_logs."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-catalog-rc-snapshot.html",
+      "id": "72aebd3407b",
+      "line": 19,
+      "severity": "non-blocking",
+      "text": "non-blocking: the claim \"30 files copied\" has no receipt in the run directory, being quoted from the coordinator's cut report, so a later reader cannot check it against any log this run kept."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to cut the next catalog release candidate with a fork review pull request for the lead; the landed fragment at docs/evidence/fragments/sn-integrity-backlog/sib-catalog-rc-snapshot.html:16-20 records v0.4.0rc8 on the fork at tag object 58a96a9a over catalog commit 4a48c6c5 with 1975 names, but states at :19-20 that no review pull request exists.\nVERDICT done_when: the done_when names eleven measures including a dry run that exits 0, a step-6 gate on the pushed tag, and a fork review PR whose checks and Pages preview return 200; rc-cut/dryrun.log ends EXIT=3, rc-cut/gate-verdict.log ends EXIT=0 over the eight export gates, rc-cut/tag-verified.log proves the refs on both remotes, and no log in the run directory measures the step-6 tag gate or any PR or preview check.\nVERDICT write_paths: the declared paths are the evidence fragment, imas_codex/standard_names/manifests/reviews and docs/figures/sn-integrity-backlog/sib-catalog-rc-snapshot; every authored change across the eight commits sits in docs/evidence/fragments/sn-integrity-backlog/sib-catalog-rc-snapshot.html, and the only other path in the range is the merge commit 9fe021b83 that carries origin/main into the release checkout.\nVERDICT manifest: read; it reports status complete, names the recipe dry-run command as its gate, lists fourteen rc-cut logs, and leaves baseline_suite and after_suite null because the node is unarmed; its artifacts line describes refs.log as the empty-refs evidence although that log's last line is EXIT=128.\nVERDICT diff: read all eight commits against a839cece4 commit by commit; the seven docs commits are successive rewrites of the one fragment (128 insertions, then 104/77, 6, 115/110, 15, 169/117 and 124/116) and 9fe021b83 is a merge of origin/main, so no source, test or figure file changes.\nCALL_SITES: none\nSCORE goal_fidelity: 12\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-integrity-backlog/sib-catalog-rc-snapshot.html:16 records the published v0.4.0rc8 candidate, but the goal's fork review pull request is absent and the same file at :19-20 says so.\nSCORE evidence: 11\nJUSTIFICATION evidence: rc-cut/gate-verdict.log and rc-cut/tag-verified.log are real receipts with EXIT=0, but rc-cut/dryrun.log ends EXIT=3 and nothing records the done_when's pushed-tag gate or the PR checks and preview the done_when requires to return 200.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every authored line in the diff is confined to docs/evidence/fragments/sn-integrity-backlog/sib-catalog-rc-snapshot.html, inside the first declared write path; the only out-of-scope paths arrive through the origin/main merge at 9fe021b83.\nSCORE durability: 4\nJUSTIFICATION durability: the change is documentation only and adds no assertion, and both suite arms are null in the reviewed manifest, so nothing fails if the fragment's claims regress.\nSCORE fit: 17\nJUSTIFICATION fit: the fragment follows the existing docs/evidence/fragments/sn-integrity-backlog/sib-<section>.html idiom, and its commits carry conventional subjects with bodies and no plan identifier or attribution.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds no definition and forks no capability; it cites the existing imas_codex/standard_names/publish.py:375 lock path and the run's own gate scripts rather than reimplementing them.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-catalog-rc-snapshot.html:19 blocking: the goal requires a fork review pull request for the lead and the done_when requires its checks and Pages preview to return 200 and the fragment to record the PR link and preview link, but the landed head records that no review pull request exists and the table at line 91 reads \"no PR by design\", so the stated deliverable is unmet; the repair is either the PR or a coordinator-recorded waiver of that clause.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-catalog-rc-snapshot.html:91 non-blocking: the done_when's step-6 gate on the pushed tag (domain_invalid=0, kind_disagreement=0, escapes=0, continuations=0, reformatted=0) has no log anywhere in the run directory, because the cut was run by the coordinator after this node's final attempt, so the release rests on the refs check alone for that measure.\nFINDING rc-cut/refs.log:22 non-blocking: the log holds a successful probe ending EXIT=0 at line 11 followed by a second probe that failed on port 22 and ends EXIT=128, so its last EXIT line reads as a failed measurement although the manifest's artifacts line at manifest.md:19 cites it as the empty-refs evidence.\nFINDING manifest.md:16 non-blocking: the tests line names the recipe dry-run command, whose own rc-cut/dryrun.log ends EXIT=3, rather than the passing gate-verdict command, so a promotion that fills its gate receipt from this line reads a failure while the recorded passing measure sits only in test_logs.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-catalog-rc-snapshot.html:19 non-blocking: the claim \"30 files copied\" has no receipt in the run directory, being quoted from the coordinator's cut report, so a later reader cannot check it against any log this run kept.\n",
+  "review_run_id": "r-20261111T145132747637-review-of-sib-catalog-rc-snapshot-b118d599612b",
+  "reviewed_base_sha": "a839cece46b71a4d196628e28dda4bd8e586ad75",
+  "reviewed_head_sha": "b118d599612bedca0b59150f5976e16217a28b8a",
+  "reviewed_run_id": "r-20261110T200159838141-sib-catalog-rc-snapshot",
+  "scores": {
+    "durability": 4,
+    "evidence": 11,
+    "fit": 17,
+    "goal_fidelity": 12,
+    "reuse": 20,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T14:57:53.245781+00:00",
+  "total": 82
+}
