@@ -1,0 +1,49 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "Derived from the reviewed run's own arms: gate-base.log and gate-head.log both complete with 22 FAILED ids and the two sorted id sets diff to empty, so no failure id is added by this change.",
+  "completed_at": "2026-11-11T22:21:34.534Z",
+  "dispatched_at": "2026-11-11T22:06:51Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_source_refresh_rename_lineage.py",
+      "id": "rev-1",
+      "line": 240,
+      "severity": "non-blocking",
+      "text": "two of the three assertions in the query test cannot fail for the defect they claim to guard - \"RENAMED_TO*1..12\" is already in the pre-existing OPTIONAL MATCH clause of the detect query and \"sn.source_path\" is in its WHERE clause, so only \"lineage_rename_explains\" discriminates; an existence-only mutation (EXISTS replaced by a literal true) keeps this test green."
+    },
+    {
+      "file": "imas_codex/standard_names/source_refresh.py",
+      "id": "rev-2",
+      "line": 531,
+      "severity": "non-blocking",
+      "text": "the rename-only branch re-stamps the name snapshot and returns without calling _repoint_source (source_refresh.py:441, called at :538), so the producing source stays anchored to the superseded identity and its captured src.dd_path is left stale; a source that carries dd_path therefore re-reports the same lineage rename on every startup instead of converging."
+    }
+  ],
+  "justifications": {
+    "durability": "negative-control.log records 4 failed of 7 under the three-line revert, so the rename guard genuinely reddens, but tests/standard_names/test_source_refresh_rename_lineage.py:240-241 assert substrings that hold without the flag.",
+    "evidence": "gate-base.log and gate-head.log both end in a completed run with EXIT=1 and the same 22 FAILED ids, but gate-head.log's header pins revision 55af2a7ff+working-tree rather than the commit, so the exact tree the head arm measured is only recoverable by hashing drift-arms-ufqCWD/head.",
+    "fit": "source_refresh.py:191-240 keeps the module's dict-of-deltas idiom and its docstring style, and no symbol or comment carries a plan label.",
+    "goal_fidelity": "imas_codex/standard_names/source_refresh.py:386-390 keeps a lineage-explained source_path delta out of requires_steering, and dry-run-after.log records 84 detected / 13 renamed against 1061 / 0 before.",
+    "reuse": "the diff adds no new capability owner; it extends _RESOLVE_SOURCE_TERMINAL (source_refresh.py:53) and _source_deltas (source_refresh.py:191), and a search over imas_codex for another snapshot-drift owner found only graph_source_bindings.py:2745, whose removed-path resolution is a different mechanism.",
+    "scope_discipline": "every path in git diff 55af2a7ff..6742a8b60 is one of the three declared write paths; the per-source comparison at source_refresh.py:53-75 exceeds the goal sentence but is what the done-when's expected fall from ~1065 requires."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: read the node goal (\"stop the startup DD-source drift refresh from resetting documentation when only the DD rename lineage moved the path\") against the landed diff; imas_codex/standard_names/source_refresh.py:357-361 computes lineage_rename_explains and :386-390 excludes a rename-flagged delta from requires_steering, so a lineage-only move re-stamps instead of resetting docs.\nVERDICT done_when: the done-when asks for a lineage-only move to steer no docs reset and count one rename, units/doc changes to still steer, a live read-only dry run with before/after drifted and renamed counts, and default-tier arms adding no failure id; gate-base.log/gate-head.log and dry-run-before.log/dry-run-after.log carry all four, and the seven named fixtures pass at the head arm tree.\nVERDICT write_paths: the dispatch fenced four paths (source_refresh.py, test_source_refresh_rename_lineage.py, the landing fragment, a figures directory); git diff 55af2a7ff..6742a8b60 touches the first three and nothing else, and the figures directory is unused.\nVERDICT manifest: read; it declares status complete, three commits, the per-source mechanism, the dry-run figures 1061/0 -> 84/13, both gate arms at 22 failed with identical ids, and a red negative control naming four fixtures.\nVERDICT diff: read commit by commit against base 55af2a7ff; 224b7b1d4 adds the lineage rename flag and predicate, b02ccdb05 rebinds old_path/old_unit/old_doc per source behind recorded_binding, 6742a8b60 adds the 115-line landing fragment, for 436 insertions and 17 deletions across three files.\nCALL_SITES: imas_codex/standard_names/loop.py:2160-2185 (run_sn_pools -> refresh_drifted_sources), imas_codex/standard_names/graph_store/graph_docs_persistence.py:130-132 and :344-346 (stamp_source_snapshots after documentation writes)\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/source_refresh.py:386-390 keeps a lineage-explained source_path delta out of requires_steering, and dry-run-after.log records 84 detected / 13 renamed against 1061 / 0 before.\nSCORE evidence: 17\nJUSTIFICATION evidence: gate-base.log and gate-head.log both end in a completed run with EXIT=1 and the same 22 FAILED ids, but gate-head.log's header pins revision 55af2a7ff+working-tree rather than the commit, so the exact tree the head arm measured is only recoverable by hashing drift-arms-ufqCWD/head.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every path in git diff 55af2a7ff..6742a8b60 is one of the three declared write paths; the per-source comparison at source_refresh.py:53-75 exceeds the goal sentence but is what the done-when's expected fall from ~1065 requires.\nSCORE durability: 16\nJUSTIFICATION durability: negative-control.log records 4 failed of 7 under the three-line revert, so the rename guard genuinely reddens, but tests/standard_names/test_source_refresh_rename_lineage.py:240-241 assert substrings that hold without the flag.\nSCORE fit: 18\nJUSTIFICATION fit: source_refresh.py:191-240 keeps the module's dict-of-deltas idiom and its docstring style, and no symbol or comment carries a plan label.\nSCORE reuse: 19\nJUSTIFICATION reuse: the diff adds no new capability owner; it extends _RESOLVE_SOURCE_TERMINAL (source_refresh.py:53) and _source_deltas (source_refresh.py:191), and a search over imas_codex for another snapshot-drift owner found only graph_source_bindings.py:2745, whose removed-path resolution is a different mechanism.\nFINDING tests/standard_names/test_source_refresh_rename_lineage.py:240 non-blocking: two of the three assertions in the query test cannot fail for the defect they claim to guard - \"RENAMED_TO*1..12\" is already in the pre-existing OPTIONAL MATCH clause of the detect query and \"sn.source_path\" is in its WHERE clause, so only \"lineage_rename_explains\" discriminates; an existence-only mutation (EXISTS replaced by a literal true) keeps this test green.\nFINDING imas_codex/standard_names/source_refresh.py:531 non-blocking: the rename-only branch re-stamps the name snapshot and returns without calling _repoint_source (source_refresh.py:441, called at :538), so the producing source stays anchored to the superseded identity and its captured src.dd_path is left stale; a source that carries dd_path therefore re-reports the same lineage rename on every startup instead of converging.",
+  "review_run_id": "r-20261111T220434808231-review-of-sib-drift-refresh-rename-lineage-6742a8b602d2",
+  "reviewed_base_sha": "55af2a7ff77097679125b2d4f0c065462bf7de1b",
+  "reviewed_head_sha": "6742a8b602d2a1592177f4fb4a9a687bea270cb6",
+  "reviewed_run_id": "r-20261111T200024669905-sib-drift-refresh-rename-lineage",
+  "scores": {
+    "durability": 16,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T22:21:45.871531+00:00",
+  "total": 106
+}
