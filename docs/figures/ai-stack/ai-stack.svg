@@ -70,53 +70,53 @@ z
    </g>
    <g id="line2d_1">
     <path d="M 93.1536 413.28
-L 238.77216 376.56
-" clip-path="url(#p9477d53642)" style="fill: none; stroke: #8e3a8e; stroke-opacity: 0.5; stroke-width: 1.2; stroke-linecap: square"/>
+L 93.1536 376.56
+" clip-path="url(#p9477d53642)" style="fill: none; stroke: #8e3a8e; stroke-opacity: 0.7; stroke-width: 2.4"/>
    </g>
    <g id="line2d_2">
     <path d="M 174.0528 413.28
-L 287.31168 376.56
-" clip-path="url(#p9477d53642)" style="fill: none; stroke: #8e3a8e; stroke-opacity: 0.5; stroke-width: 1.2; stroke-linecap: square"/>
+L 174.0528 376.56
+" clip-path="url(#p9477d53642)" style="fill: none; stroke: #8e3a8e; stroke-opacity: 0.7; stroke-width: 2.4"/>
    </g>
    <g id="line2d_3">
     <path d="M 254.952 413.28
-L 335.8512 376.56
-" clip-path="url(#p9477d53642)" style="fill: none; stroke: #8e3a8e; stroke-opacity: 0.5; stroke-width: 1.2; stroke-linecap: square"/>
+L 254.952 376.56
+" clip-path="url(#p9477d53642)" style="fill: none; stroke: #8e3a8e; stroke-opacity: 0.7; stroke-width: 2.4"/>
    </g>
    <g id="line2d_4">
     <path d="M 335.8512 413.28
-L 384.39072 376.56
-" clip-path="url(#p9477d53642)" style="fill: none; stroke: #8e3a8e; stroke-opacity: 0.5; stroke-width: 1.2; stroke-linecap: square"/>
+L 335.8512 376.56
+" clip-path="url(#p9477d53642)" style="fill: none; stroke: #8e3a8e; stroke-opacity: 0.7; stroke-width: 2.4"/>
    </g>
    <g id="line2d_5">
     <path d="M 416.7504 413.28
-L 432.93024 376.56
-" clip-path="url(#p9477d53642)" style="fill: none; stroke: #8e3a8e; stroke-opacity: 0.5; stroke-width: 1.2; stroke-linecap: square"/>
+L 416.7504 376.56
+" clip-path="url(#p9477d53642)" style="fill: none; stroke: #8e3a8e; stroke-opacity: 0.7; stroke-width: 2.4"/>
    </g>
    <g id="line2d_6">
     <path d="M 497.6496 413.28
-L 481.46976 376.56
-" clip-path="url(#p9477d53642)" style="fill: none; stroke: #8e3a8e; stroke-opacity: 0.5; stroke-width: 1.2; stroke-linecap: square"/>
+L 497.6496 376.56
+" clip-path="url(#p9477d53642)" style="fill: none; stroke: #8e3a8e; stroke-opacity: 0.7; stroke-width: 2.4"/>
    </g>
    <g id="line2d_7">
     <path d="M 578.5488 413.28
-L 530.00928 376.56
-" clip-path="url(#p9477d53642)" style="fill: none; stroke: #8e3a8e; stroke-opacity: 0.5; stroke-width: 1.2; stroke-linecap: square"/>
+L 578.5488 376.56
+" clip-path="url(#p9477d53642)" style="fill: none; stroke: #8e3a8e; stroke-opacity: 0.7; stroke-width: 2.4"/>
    </g>
    <g id="line2d_8">
     <path d="M 659.448 413.28
-L 578.5488 376.56
-" clip-path="url(#p9477d53642)" style="fill: none; stroke: #8e3a8e; stroke-opacity: 0.5; stroke-width: 1.2; stroke-linecap: square"/>
+L 659.448 376.56
+" clip-path="url(#p9477d53642)" style="fill: none; stroke: #8e3a8e; stroke-opacity: 0.7; stroke-width: 2.4"/>
    </g>
    <g id="line2d_9">
     <path d="M 740.3472 413.28
-L 627.08832 376.56
-" clip-path="url(#p9477d53642)" style="fill: none; stroke: #8e3a8e; stroke-opacity: 0.5; stroke-width: 1.2; stroke-linecap: square"/>
+L 740.3472 376.56
+" clip-path="url(#p9477d53642)" style="fill: none; stroke: #8e3a8e; stroke-opacity: 0.7; stroke-width: 2.4"/>
    </g>
    <g id="line2d_10">
     <path d="M 821.2464 413.28
-L 675.62784 376.56
-" clip-path="url(#p9477d53642)" style="fill: none; stroke: #8e3a8e; stroke-opacity: 0.5; stroke-width: 1.2; stroke-linecap: square"/>
+L 821.2464 376.56
+" clip-path="url(#p9477d53642)" style="fill: none; stroke: #8e3a8e; stroke-opacity: 0.7; stroke-width: 2.4"/>
    </g>
    <g id="patch_7">
     <path d="M 77.04 376.56
@@ -318,7 +318,7 @@ Q 130.752 12.24 130.752 18.72
 L 130.752 25.56
 Q 130.752 32.04 137.232 32.04
 z
-" clip-path="url(#p9477d53642)" style="fill: #dedcd7"/>
+" clip-path="url(#p9477d53642)" style="fill: #e9e7e2"/>
    </g>
    <g id="patch_22">
     <path d="M 132.912 53.64
@@ -331,7 +331,7 @@ Q 126.432 33.84 126.432 40.32
 L 126.432 47.16
 Q 126.432 53.64 132.912 53.64
 z
-" clip-path="url(#p9477d53642)" style="fill: #dedcd7"/>
+" clip-path="url(#p9477d53642)" style="fill: #e9e7e2"/>
    </g>
    <g id="patch_23">
     <path d="M 128.592 75.24
@@ -344,7 +344,7 @@ Q 122.112 55.44 122.112 61.92
 L 122.112 68.76
 Q 122.112 75.24 128.592 75.24
 z
-" clip-path="url(#p9477d53642)" style="fill: #dedcd7"/>
+" clip-path="url(#p9477d53642)" style="fill: #e9e7e2"/>
    </g>
    <g id="patch_24">
     <path d="M 124.272 96.84
@@ -357,7 +357,7 @@ Q 117.792 77.04 117.792 83.52
 L 117.792 90.36
 Q 117.792 96.84 124.272 96.84
 z
-" clip-path="url(#p9477d53642)" style="fill: #dedcd7"/>
+" clip-path="url(#p9477d53642)" style="fill: #e9e7e2"/>
    </g>
    <g id="patch_25">
     <path d="M 119.952 118.44
@@ -370,7 +370,7 @@ Q 113.472 98.64 113.472 105.12
 L 113.472 111.96
 Q 113.472 118.44 119.952 118.44
 z
-" clip-path="url(#p9477d53642)" style="fill: #dedcd7"/>
+" clip-path="url(#p9477d53642)" style="fill: #e9e7e2"/>
    </g>
    <g id="patch_26">
     <path d="M 62.784 440.64
@@ -964,12 +964,12 @@ z
    </g>
    <g id="text_19">
     <g id="patch_50">
-     <path d="M 375.493594 405.980438
-L 538.906406 405.980438
-L 538.906406 383.859563
-L 375.493594 383.859563
+     <path d="M 378.013594 403.460438
+L 536.386406 403.460438
+L 536.386406 386.379563
+L 378.013594 386.379563
 z
-" style="fill: #ffffff; stroke: #ffffff; stroke-linejoin: miter"/>
+" style="fill: #ffffff"/>
     </g>
     <text style="font-weight: 700; font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: middle; fill: #8e3a8e" x="457.2" y="398.126438" transform="rotate(-0 457.2 398.126438)">extract, transform, load</text>
    </g>
@@ -1076,19 +1076,19 @@ z
     <text style="font-size: 13px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: middle; fill: #5f5f5f" x="732.373043" y="202.352188" transform="rotate(-0 732.373043 202.352188)">DeepSeek v4.1 Flash</text>
    </g>
    <g id="text_54">
-    <text style="font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="137.952" y="25.367219" transform="rotate(-0 137.952 25.367219)">assembly and commissioning · ITER infrastructure</text>
+    <text style="font-size: 15px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #141414" x="137.952" y="25.597734" transform="rotate(-0 137.952 25.597734)">assembly and commissioning · ITER infrastructure</text>
    </g>
    <g id="text_55">
-    <text style="font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="133.632" y="46.946438" transform="rotate(-0 133.632 46.946438)">prototyping with domain experts · science · code developer</text>
+    <text style="font-size: 15px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #141414" x="133.632" y="47.175469" transform="rotate(-0 133.632 47.175469)">prototyping with domain experts · science · code developer</text>
    </g>
    <g id="text_56">
-    <text style="font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="129.312" y="68.546437" transform="rotate(-0 129.312 68.546437)">commissioning engineer · planning</text>
+    <text style="font-size: 15px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #141414" x="129.312" y="68.775469" transform="rotate(-0 129.312 68.775469)">commissioning engineer · planning</text>
    </g>
    <g id="text_57">
-    <text style="font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="124.992" y="90.167219" transform="rotate(-0 124.992 90.167219)">configuration control</text>
+    <text style="font-size: 15px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #141414" x="124.992" y="90.397734" transform="rotate(-0 124.992 90.397734)">configuration control</text>
    </g>
    <g id="text_58">
-    <text style="font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="120.672" y="111.746438" transform="rotate(-0 120.672 111.746438)">administrative support</text>
+    <text style="font-size: 15px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #141414" x="120.672" y="111.975469" transform="rotate(-0 120.672 111.975469)">administrative support</text>
    </g>
    <g id="text_59">
     <text style="font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="34.56" y="19.046438" transform="rotate(-0 34.56 19.046438)">deterministic</text>

@@ -54,10 +54,11 @@ INK = "#2b2b2b"
 MUTED = "#5f5f5f"
 NEUTRAL_EDGE = "#b4b1aa"
 BAND_FILL = "#f4f3f0"
-USER_FILL = "#dedcd7"
+USER_FILL = "#e9e7e2"  # light enough that the role names read clearly on it
+USER_INK = "#141414"
 
 TITLE, BODY, SMALL = 16, 14, 13  # pt, inside the stack
-BAR = 14  # pt, the user roles
+BAR = 15  # pt, the user roles
 OUTER = 18  # pt, the layer names
 OUTER_SMALL = 14  # pt, the legend and the annotations outside the boxes
 PT = 7.2  # points per drawing unit
@@ -343,14 +344,15 @@ def draw_foundation(c: Canvas) -> None:
             weight="bold",
             inside=(x, y0, xe, y1),
         )
-        # each source fans into the graph
+        # each source rises straight into the graph
         xm = (x + xe) / 2
         c.ax.plot(
-            [xm, CENTRE + (xm - CENTRE) * 0.6],
+            [xm, xm],
             [y1, g0],
             color=c.roles.deterministic,
-            lw=1.2,
-            alpha=0.5,
+            lw=2.4,
+            alpha=0.7,
+            solid_capstyle="butt",
             zorder=1,
         )
     c.text(
@@ -360,7 +362,8 @@ def draw_foundation(c: Canvas) -> None:
         size=OUTER_SMALL,
         weight="bold",
         color=c.roles.deterministic,
-        backgroundcolor="white",
+        # a tight white backing, so the lines it crosses still show above and below
+        bbox={"facecolor": "white", "edgecolor": "none", "pad": 1.5},
     )
     # the graph becomes ITER infrastructure, alongside the platform it is built on
     bottom, top = LAYERS["icp"][0], LAYERS["graph"][1]
@@ -569,6 +572,7 @@ def draw_users(c: Canvas) -> None:
             y - height / 2,
             role,
             size=BAR,
+            color=USER_INK,
             ha="left",
             inside=(left, y - height, x1, y),
         )
