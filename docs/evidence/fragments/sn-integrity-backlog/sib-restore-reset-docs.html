@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-integrity-backlog">
+<meta name="node-id" content="sib-restore-reset-docs">
+<title>Restoring the documentation reset from the DocsRevision snapshots</title>
+</head>
+<body>
+<main>
+<h2 id="sib-restore-reset-docs-title">Restoring the 400 accepted docs the drift refresh reset</h2>
+
+<p id="sib-restore-reset-docs-attribution">The drain's own <code>before.json</code> and
+<code>after.json</code> give <strong>405</strong> names that held <code>docs_stage=accepted</code>
+before the drain and not after. Joined to the <strong>508</strong> <code>DocsRevision</code>
+snapshots created in the reset window (2026-11-11T17:28:00Z–17:29:00Z, one per reset name),
+<strong>400</strong> names are attributed: each has a leave-set entry and its own pre-reset
+snapshot. The remaining 108 snapshots belong to names that carried reviewed, drafted or
+exhausted docs, which the same call also requeued.</p>
+
+<h3 id="sib-restore-reset-docs-partition">Partition of the attributed 400</h3>
+
+<table id="sib-restore-reset-docs-partition-table">
+<caption>Partition of the 400 attributed names</caption>
+<thead><tr><th>Partition</th><th>Names</th><th>Disposition</th></tr></thead>
+<tbody>
+<tr><td>(a) already accepted again</td><td>0</td><td>untouched — no reset name had regained
+<code>docs_stage=accepted</code> when this node ran</td></tr>
+<tr><td>(b) still content-drifted</td><td>9</td><td>left for regeneration: the corrected
+refresh's read-only comparison still reports <code>requires_steering</code> for these names</td></tr>
+<tr><td>(c) restored from snapshot</td><td>391</td><td>documentation, description, docs model
+and acceptance score restored from each name's own snapshot; <code>docs_stage=accepted</code>
+written through the signed repair manifest</td></tr>
+</tbody>
+</table>
+
+<p id="sib-restore-reset-docs-partition-sum">0 + 9 + 391 = 400, the attributed set.</p>
+
+<p id="sib-restore-reset-docs-drift">The corrected refresh at <code>origin/main</code> reports
+<strong>84</strong> drifted names and <strong>13</strong> renames graph-wide, and
+<strong>9</strong> of the attributed names still carry a content delta. The drain's startup
+refresh reset these names for a pure <code>source_path</code> delta that the corrected
+comparison no longer treats as documentation drift, which is why 391 of the 400 hold a snapshot
+whose text is still the accepted text.</p>
+
+<p id="sib-restore-reset-docs-b">The nine left for regeneration:
+<code>ion_state_source_rate</code>, <code>neutral_source_rate</code>,
+<code>parallel_conductivity</code>, <code>poloidal_angle_of_flux_surface</code>,
+<code>poloidal_conductivity</code>, <code>radial_conductivity</code>,
+<code>thermal_particle_source_rate</code>, <code>toroidal_conductivity</code>,
+<code>vertical_conductivity</code>.</p>
+
+<h3 id="sib-restore-reset-docs-restore">Restore through the signed repair manifest</h3>
+
+<p id="sib-restore-reset-docs-path">No purpose-built writer restores documentation from a
+<code>DocsRevision</code>: the reset's inverse does not exist, and <code>promote.py</code>
+records the design position that a wording revert is a new <code>sn edit</code>. The restore
+therefore goes through the repository's signed repair path — <code>build_repair_authority</code>
+schema <code>imas-codex.repair-authority.v1</code> applied by
+<code>apply_signed_manifest</code> — with one <code>set_properties</code> row per name carrying
+its snapshot text and a row id <code>restore:&lt;name&gt;:&lt;DocsRevision id&gt;</code>, so every
+admitted row's receipt names the snapshot it restored from. Raw Cypher is never used.</p>
+
+<p id="sib-restore-reset-docs-restore-result">Restore result: <strong>__RESTORE_RESULT__</strong>.
+The controlled field is <code>docs_stage</code> and the documentation text; the read-back below
+compares each restored name's live documentation to its snapshot text and its
+<code>docs_stage</code> to <code>accepted</code>.</p>
+
+<h3 id="sib-restore-reset-docs-readback">Read-back</h3>
+
+<pre id="sib-restore-reset-docs-readback-block">__READBACK__</pre>
+
+<h3 id="sib-restore-reset-docs-control">Negative control</h3>
+
+<p id="sib-restore-reset-docs-negative-control">A name in partition (a) or (b) must receive no
+restore write and no receipt. Partition (a) is empty, so the control is drawn from (b):
+<code>parallel_conductivity</code> carries no <code>set_properties</code> row in any batch
+authority, and it is re-read after the restore to show its documentation and stage unchanged.
+The instrument's authority rows are composed only from <code>restore_plan</code>, which is
+partition (c) alone.</p>
+
+<h3 id="sib-restore-reset-docs-counts">Accepted-name docs_stage counts</h3>
+
+<p id="sib-restore-reset-docs-counts-block">Before: <code>__BEFORE__</code>. After:
+<code>__AFTER__</code>.</p>
+
+<p id="sib-restore-reset-docs-instrument">Instrument:
+<code>sib-restore-reset-docs-run.py</code>; census and restore reports under the run directory.
+No LLM spend and no <code>sn run</code>.</p>
+</main>
+</body>
+</html>
