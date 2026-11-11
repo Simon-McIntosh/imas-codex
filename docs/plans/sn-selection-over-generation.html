@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="sn-selection-over-generation">
   <meta name="plan-title" content="Select, Don&#x27;t Generate: New Jev Patterns For Standard Names">
   <meta name="plan-summary" content="Prototype untried Jev patterns: grammar segments chosen from the vocabulary, links and anchors selected, prompts reranked, risk-ordered reading.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="mid">
   <meta name="plan-effort-hours" content="12.5">
   <meta name="plan-capability-version" content="1.0">
@@ -19,13 +19,13 @@
   <meta name="plan-sprint" content="S18">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names">
-  <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;sn-judgment-evaluation#s4&quot;],&quot;s3&quot;:[&quot;sn-judgment-evaluation#s3&quot;],&quot;s4&quot;:[&quot;sn-judgment-evaluation#s3&quot;],&quot;s5&quot;:[&quot;sn-judgment-evaluation#s4&quot;,&quot;sn-review-through-jev#s3&quot;],&quot;s6&quot;:[&quot;sn-judgment-evaluation#s3&quot;,&quot;sn-review-through-jev#s3&quot;],&quot;s7&quot;:[&quot;sn-judgment-evaluation#s3&quot;,&quot;sn-harmonize-command#s3&quot;]}">
+  <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[],&quot;s3&quot;:[],&quot;s4&quot;:[],&quot;s5&quot;:[],&quot;s6&quot;:[],&quot;s7&quot;:[]}">
   <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;}">
   <title>Select, Don't Generate | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="166">
-<meta name="plan-modified" content="2026-10-21">
+<meta name="plan-version" content="167">
+<meta name="plan-modified" content="2026-11-11">
 </head>
 <body>
   <main class="plan-doc">
@@ -168,10 +168,11 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-ssog-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-review" data-written-at="2026-10-12" data-recommends-skill="/reckon-build sn-selection-over-generation §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ssog-001" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-review" data-written-at="2026-10-12" data-recommends-skill="/reckon-build sn-selection-over-generation §3" data-resolved-at="2026-11-11T20:05:42+00:00" data-resolved-by="reckon-review">
     <h4 class="r-fu-title">Links and prompt reranks need no golden beyond a small labelled sample; start there</h4>
     <div class="r-fu-body"><p>§3 and §4 measure against small coordinator-labelled samples and can run as soon as the evaluation module exists. §2, §5 and §6 wait on golden A.</p></div>
     <pre class="r-fu-prompt">/reckon-build sn-selection-over-generation §3</pre>
+    <p class="r-fu-outcome">done — no followup. Closed in the S18 portfolio review of 2026-11-11: all seven sections closed with their measures and adopt verdicts between 2026-10-13 and 2026-10-21. The opening followup's premise, that §2, §5 and §6 waited on golden A, lapsed when those sections closed.</p>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -240,6 +241,24 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261013T134620047974-review-of-ssog-segment-arm2-measure-9f1f4ee362b8" data-who="reckon-build" data-when="2026-10-13T14:02:39.009Z">
     <div class="r-comment-body"><p>independent review of r-20261013T111910803936-ssog-segment-arm2-measure at head 9f1f4ee36 over base 92fe5353bf: SOUND WITH FINDINGS, six dimensions goal_fidelity 19, evidence 17, scope_discipline 20, durability 10, fit 18, reuse 19, total 103, two follow-on findings, no blocking finding; the record is the deliverable and is stored to the reviews store under both keys</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261013T053826483169-review-of-ssog-link-label-sheet-92ee6e571f1e" data-who="reckon-build" data-when="2026-10-13T05:56:49.621Z">
+    <div class="r-comment-body"><p>Independent review of ssog-link-label-sheet (head 92ee6e571f1e0f77aa7d85e709e7cb41e0769617) stored: goal_fidelity 19, evidence 18, scope_discipline 20, durability 18, fit 19, reuse 14; four follow-on findings, none blocking.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261013T051848429980-ssog-link-label-sheet" data-who="reckon-build" data-when="2026-10-13T05:36:56.962Z">
+    <div class="r-comment-body"><p>Self-link detection (find_name_links/find_self_links) and the link-label Jev state added to doc_links.py; the sheet ssog-link-label-sheet.json holds 180 links (all 74 self-links, 19 domains), each with Jev's probability; run spend USD 0.0037.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261013T081950747970-review-of-ssog-link-auc" data-who="reckon-build" data-when="2026-10-13T08:32:28.443Z">
+    <div class="r-comment-body"><p>Reviewed ssog-link-auc at 3cd8fced: parsed record scoring goal_fidelity 19, evidence 18, scope_discipline 20, durability 6, fit 17, reuse 20 (total 100), added_failure_count 0 from the reviewed run's own baseline/after gate logs, two follow-on findings in ssog-link-auc.html:45 and :47 where the disagreement prose mis-pairs a link text/probability and a target with the results JSON; the figures themselves are correct and independently reproduced.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261013T084654086762-review-of-ssog-link-auc-724028e20d69" data-who="reckon-build" data-when="2026-10-13T09:02:01.144Z">
+    <div class="r-comment-body"><p>Review of r-20261013T070846395404-ssog-link-auc at head 724028e2 (base 61689727): goal_fidelity 20, evidence 18, scope_discipline 20, durability 6, fit 17, reuse 20 (total 101); added_failure_count 0; three follow-on findings (a documented-but-unimplemented per-row check at ssog-link-auc-run.py:233, the plan node id in the docstring at :3, and a stale revision header on run1.log:1), no blocking finding.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261013T070846395404-ssog-link-auc" data-who="reckon-build" data-when="2026-10-13T08:46:17.520Z">
+    <div class="r-comment-body"><p>Landed ssog-link-auc: Jev's link-label AUC over 180 coordinator-labelled links is 0.757 (0.679-0.823); the deterministic self-link baseline scores 0.799 and the paired difference Jev-minus-baseline is -0.043 (-0.133-0.041), so this sample does not separate them; the shuffled-label control is 0.488 (0.392-0.583).</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-close-s3" data-who="reckon-build" data-when="2026-10-13T09:05:00Z">
+    <div class="r-comment-body"><p>§3 landed: Jev's link-label AUC is 0.757 (0.68 to 0.82) over 180 labelled links. The deterministic self-link flag alone scores 0.799, and the paired difference is −0.04 (−0.13 to +0.04). On non-self links Jev scores 0.759 (0.61 to 0.89, 13 bad links). The self-link check carries the measurable value; the judgment is not shown to add to it at this sample size (merge <code>e14a6b0eb</code>, review 101/120). <a href="/imas-codex/evidence/archive/sn-selection-over-generation-landed.html#s3">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261013T012137597192-review-of-ssog-comparator-rerank-4a1e53c1c23b" data-who="reckon-build" data-when="2026-10-13T01:30:27.987Z">
     <div class="r-comment-body"><p>Review stored for r-20261013T005036802056-ssog-comparator-rerank at base c98a0d42d head 4a1e53c1c: goal_fidelity 19, evidence 14, scope_discipline 19, durability 16, fit 18, reuse 20 (total 106); 0 added failures (base 0 vs head 0); three follow-on findings, no blocking findings.</p></div>
@@ -319,23 +338,41 @@
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261015T053235974427-review-of-ssog-rerank-acceptance-large-6b6c459c0e09" data-who="reckon-build" data-when="2026-10-15T05:51:17.900Z">
     <div class="r-comment-body"><p>not-run (a review node writes no repository path; both outputs are review records under the crew reviews store, outside any worktree)</p></div>
 </div>
-<div class="r-comment" data-section="s3" data-id="c-run-r-20261013T053826483169-review-of-ssog-link-label-sheet-92ee6e571f1e" data-who="reckon-build" data-when="2026-10-13T05:56:49.621Z">
-    <div class="r-comment-body"><p>Independent review of ssog-link-label-sheet (head 92ee6e571f1e0f77aa7d85e709e7cb41e0769617) stored: goal_fidelity 19, evidence 18, scope_discipline 20, durability 18, fit 19, reuse 14; four follow-on findings, none blocking.</p></div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261018T065448997877-review-of-ssog-risk-order-64c6b7f57a03" data-who="reckon-build" data-when="2026-10-18T07:10:16.444Z">
+    <div class="r-comment-body"><p>review stored for run r-20261017T215136022889-ssog-risk-order at head 64c6b7f57a034e9fc813e1275405653dd7ef610d; two blocking findings (19 name rows scored on a single audit check, and a tautological shuffle negative control) and four follow-on findings; no plan edit, promotion lands it as a comment</p></div>
 </div>
-<div class="r-comment" data-section="s3" data-id="c-run-r-20261013T051848429980-ssog-link-label-sheet" data-who="reckon-build" data-when="2026-10-13T05:36:56.962Z">
-    <div class="r-comment-body"><p>Self-link detection (find_name_links/find_self_links) and the link-label Jev state added to doc_links.py; the sheet ssog-link-label-sheet.json holds 180 links (all 74 self-links, 19 domains), each with Jev's probability; run spend USD 0.0037.</p></div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261018T083513906958-review-of-ssog-risk-order-f7f3390bc910" data-who="reckon-build" data-when="2026-10-18T08:52:15.340Z">
+    <div class="r-comment-body"><p>review record for r-20261017T215136022889-ssog-risk-order at reviewed head f7f3390bc910 stored under review-records/ (total 76; scores goal_fidelity 16, evidence 14, scope_discipline 19, durability 8, fit 14, reuse 5; 2 blocking, 4 follow-on); the reviewed run is a measurement node, so the grader dispatches no TU resolution</p></div>
 </div>
-<div class="r-comment" data-section="s3" data-id="c-run-r-20261013T081950747970-review-of-ssog-link-auc" data-who="reckon-build" data-when="2026-10-13T08:32:28.443Z">
-    <div class="r-comment-body"><p>Reviewed ssog-link-auc at 3cd8fced: parsed record scoring goal_fidelity 19, evidence 18, scope_discipline 20, durability 6, fit 17, reuse 20 (total 100), added_failure_count 0 from the reviewed run's own baseline/after gate logs, two follow-on findings in ssog-link-auc.html:45 and :47 where the disagreement prose mis-pairs a link text/probability and a target with the results JSON; the figures themselves are correct and independently reproduced.</p></div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261018T101849503877-review-of-ssog-risk-order-890d803490fb" data-who="reckon-build" data-when="2026-10-18T10:38:10.488Z">
+    <div class="r-comment-body"><p>review record written at both declared paths under review-records/ inside run r-20261017T215136022889-ssog-risk-order; not written to any worktree; no plan edit, promotion lands it as a comment on imas-codex:sn-selection-over-generation §5</p></div>
 </div>
-<div class="r-comment" data-section="s3" data-id="c-run-r-20261013T084654086762-review-of-ssog-link-auc-724028e20d69" data-who="reckon-build" data-when="2026-10-13T09:02:01.144Z">
-    <div class="r-comment-body"><p>Review of r-20261013T070846395404-ssog-link-auc at head 724028e2 (base 61689727): goal_fidelity 20, evidence 18, scope_discipline 20, durability 6, fit 17, reuse 20 (total 101); added_failure_count 0; three follow-on findings (a documented-but-unimplemented per-row check at ssog-link-auc-run.py:233, the plan node id in the docstring at :3, and a stale revision header on run1.log:1), no blocking finding.</p></div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261018T114557807718-review-of-ssog-risk-order-3b1d84d1ec5d" data-who="reckon-build" data-when="2026-10-18T11:57:00Z">
+    <div class="r-comment-body"><p>Parsed review record stored at both declared review-records paths for reviewed base f8a85ca9a0ba4d2fc4c50d7ba36db97e8244e710 and head 3b1d84d1ec5dcf0e66a30604a7a744e4a0852c3b; promotion owns plan comment and no worktree files changed.</p></div>
 </div>
-<div class="r-comment" data-section="s3" data-id="c-run-r-20261013T070846395404-ssog-link-auc" data-who="reckon-build" data-when="2026-10-13T08:46:17.520Z">
-    <div class="r-comment-body"><p>Landed ssog-link-auc: Jev's link-label AUC over 180 coordinator-labelled links is 0.757 (0.679-0.823); the deterministic self-link baseline scores 0.799 and the paired difference Jev-minus-baseline is -0.043 (-0.133-0.041), so this sample does not separate them; the shuffled-label control is 0.488 (0.392-0.583).</p></div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261018T124741333681-review-of-ssog-risk-order-7ee81c3660ea" data-who="reckon-build" data-when="2026-10-18T13:06:08.589Z">
+    <div class="r-comment-body"><p>review stored for the run reviewed at base f8a85ca9a0ba4d2fc4c50d7ba36db97e8244e710 and head 7ee81c3660eaf906183a703408e30a852bce35e9; scores goal_fidelity 17, evidence 13, scope_discipline 20, durability 12, fit 15, reuse 12 (total 89); one blocking finding and three follow-on; promotion lands it as a comment on imas-codex:sn-selection-over-generation §5 and no plan is edited here.</p></div>
 </div>
-<div class="r-comment" data-section="s3" data-id="c-close-s3" data-who="reckon-build" data-when="2026-10-13T09:05:00Z">
-    <div class="r-comment-body"><p>§3 landed: Jev's link-label AUC is 0.757 (0.68 to 0.82) over 180 labelled links. The deterministic self-link flag alone scores 0.799, and the paired difference is −0.04 (−0.13 to +0.04). On non-self links Jev scores 0.759 (0.61 to 0.89, 13 bad links). The self-link check carries the measurable value; the judgment is not shown to add to it at this sample size (merge <code>e14a6b0eb</code>, review 101/120). <a href="/imas-codex/evidence/archive/sn-selection-over-generation-landed.html#s3">evidence</a></p></div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261018T171524629328-review-of-ssog-risk-order-0a9221bfde65" data-who="reckon-build" data-when="2026-10-18T17:37:26.554Z">
+    <div class="r-comment-body"><p>review record stored at both declared write paths under the reviewed run's review-records directory; no source edits, nothing to merge or push</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261017T215136022889-ssog-risk-order" data-who="reckon-build" data-when="2026-10-18T14:07:48Z">
+    <div class="r-comment-body"><p>committed locally across 670cc4d6e, e0a60e02e, 890d80349, 3b1d84d1e and 7ee81c366, worktree clean at HEAD; not merged or pushed (the coordinator owns integration)</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-close-s5" data-who="reckon-build" data-when="2026-10-18T18:05:00Z">
+    <div class="r-comment-body"><p>§5 closed with a negative result. A Jev risk order recalls known defects barely above random on golden A: 0.30 at 25% read, against 0.25 random and a band of 0.22 to 0.29. On golden C it is at random. The incumbent score order is unavailable on names and at random on descriptions. Reading time is not yet better spent by this order than by any other. The order stays a measured prototype and is not wired into the polish or review pass (merge <code>cf60d1f63</code>, review 99/120, USD 0.02). <a href="/imas-codex/evidence/archive/sn-selection-over-generation-landed.html#s5-risk-order">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261018T191725929719-review-of-ssog-learned-acceptance-9e9401ee7c6c" data-who="reckon-build" data-when="2026-10-18T19:27:49Z">
+    <div class="r-comment-body"><p>Stored a parsed independent review for source head 9e9401ee7c6c335070ac7417110df0645409f749 with six scores, six checklist items, two blocking findings, two follow-on findings, and an explicit unmeasured suite-failure delta.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261018T203456490768-review-of-ssog-learned-acceptance-d569aa57d33a" data-who="reckon-build" data-when="2026-10-18T20:41:20Z">
+    <div class="r-comment-body"><p>Independent review of source run r-20261018T181146245440-ssog-learned-acceptance at base 7b5c7dff3cb9bce817b8dc0a1b9b8e638e26cdd1 and head d569aa57d33a661cdda70b1528b5a4a686132ae0 stored as a parsed record under review-records/; six scores total 87/120, four follow-on findings and no blocking finding.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261018T181146245440-ssog-learned-acceptance" data-who="reckon-build" data-when="2026-10-18T20:22:21Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance.html — validation AUC 0.706 (95% interval 0.645-0.759) for the fitted logistic model against 0.645 (0.588-0.699) for the hand-set composite; paired difference +0.061 (95% interval -0.001 to +0.126) reaches zero, so the model is not adopted; the fitted weights are published beside the verdict, named by check id.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-close-s6" data-who="reckon-build" data-when="2026-10-18T21:00:00Z">
+    <div class="r-comment-body"><p>§6 closed: not adopted. The learned weighting reads validation AUC 0.706 against the hand-set composite's 0.645. The paired gain, +0.061 [−0.001, +0.126], reaches zero, so it does not beat the composite by more than its interval as the section's rule requires. The weights are published for reuse; the learned order is not wired (merge <code>1868e988f</code>, review 87, USD 0). <a href="/imas-codex/evidence/archive/sn-selection-over-generation-landed.html#s6-learned-acceptance">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-s7-lead-ruling" data-who="Simon McIntosh" data-when="2026-10-18T07:10:00Z">
     <div class="r-comment-body"><p>Lead ruling, 2026-10-18: run §7's full A/B now, ten families at most USD 30. Order: first the Jev anchor scorer, built beside <code>select_anchor</code> without changing either of its callers. Then the A/B in a scratch copy of the graph, never the live one. Each family is harmonized once from the heuristic anchor and once from the Jev anchor pinned through the existing <code>harmonized_anchor</code> record.</p></div>
@@ -623,43 +660,7 @@
     <div class="r-comment-body"><p>§7 closed: the heuristic anchor stays. Re-run on the fixed tree, the Jev anchor ties on lint (8 against 8) and lowers four member scores across two of the three differing families. It wins only the aperture coordinates. Six families agree. Spend over both rounds stayed inside the USD 50 ceiling. The verdict is computed from the records, and its caveats are in the evidence. <a href="/imas-codex/evidence/archive/sn-selection-over-generation-landed.html#s7-anchor-verdict">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261021T034837746521-ssog-anchor-ab-rerun-aggregate" data-who="reckon-build" data-when="2026-10-21T04:42:47.399Z">
-    <div class="r-comment-body"><p>docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-rerun-aggregate.html and its JSON, written by the aggregate runner; landed in the one commit 78876bbfb on this worktree&#x27;s branch</p></div>
-</div>
-<div class="r-comment" data-section="s5" data-id="c-run-r-20261018T065448997877-review-of-ssog-risk-order-64c6b7f57a03" data-who="reckon-build" data-when="2026-10-18T07:10:16.444Z">
-    <div class="r-comment-body"><p>review stored for run r-20261017T215136022889-ssog-risk-order at head 64c6b7f57a034e9fc813e1275405653dd7ef610d; two blocking findings (19 name rows scored on a single audit check, and a tautological shuffle negative control) and four follow-on findings; no plan edit, promotion lands it as a comment</p></div>
-</div>
-<div class="r-comment" data-section="s5" data-id="c-run-r-20261018T083513906958-review-of-ssog-risk-order-f7f3390bc910" data-who="reckon-build" data-when="2026-10-18T08:52:15.340Z">
-    <div class="r-comment-body"><p>review record for r-20261017T215136022889-ssog-risk-order at reviewed head f7f3390bc910 stored under review-records/ (total 76; scores goal_fidelity 16, evidence 14, scope_discipline 19, durability 8, fit 14, reuse 5; 2 blocking, 4 follow-on); the reviewed run is a measurement node, so the grader dispatches no TU resolution</p></div>
-</div>
-<div class="r-comment" data-section="s5" data-id="c-run-r-20261018T101849503877-review-of-ssog-risk-order-890d803490fb" data-who="reckon-build" data-when="2026-10-18T10:38:10.488Z">
-    <div class="r-comment-body"><p>review record written at both declared paths under review-records/ inside run r-20261017T215136022889-ssog-risk-order; not written to any worktree; no plan edit, promotion lands it as a comment on imas-codex:sn-selection-over-generation §5</p></div>
-</div>
-<div class="r-comment" data-section="s5" data-id="c-run-r-20261018T114557807718-review-of-ssog-risk-order-3b1d84d1ec5d" data-who="reckon-build" data-when="2026-10-18T11:57:00Z">
-    <div class="r-comment-body"><p>Parsed review record stored at both declared review-records paths for reviewed base f8a85ca9a0ba4d2fc4c50d7ba36db97e8244e710 and head 3b1d84d1ec5dcf0e66a30604a7a744e4a0852c3b; promotion owns plan comment and no worktree files changed.</p></div>
-</div>
-<div class="r-comment" data-section="s5" data-id="c-run-r-20261018T124741333681-review-of-ssog-risk-order-7ee81c3660ea" data-who="reckon-build" data-when="2026-10-18T13:06:08.589Z">
-    <div class="r-comment-body"><p>review stored for the run reviewed at base f8a85ca9a0ba4d2fc4c50d7ba36db97e8244e710 and head 7ee81c3660eaf906183a703408e30a852bce35e9; scores goal_fidelity 17, evidence 13, scope_discipline 20, durability 12, fit 15, reuse 12 (total 89); one blocking finding and three follow-on; promotion lands it as a comment on imas-codex:sn-selection-over-generation §5 and no plan is edited here.</p></div>
-</div>
-<div class="r-comment" data-section="s5" data-id="c-run-r-20261018T171524629328-review-of-ssog-risk-order-0a9221bfde65" data-who="reckon-build" data-when="2026-10-18T17:37:26.554Z">
-    <div class="r-comment-body"><p>review record stored at both declared write paths under the reviewed run's review-records directory; no source edits, nothing to merge or push</p></div>
-</div>
-<div class="r-comment" data-section="s5" data-id="c-run-r-20261017T215136022889-ssog-risk-order" data-who="reckon-build" data-when="2026-10-18T14:07:48Z">
-    <div class="r-comment-body"><p>committed locally across 670cc4d6e, e0a60e02e, 890d80349, 3b1d84d1e and 7ee81c366, worktree clean at HEAD; not merged or pushed (the coordinator owns integration)</p></div>
-</div>
-<div class="r-comment" data-section="s5" data-id="c-close-s5" data-who="reckon-build" data-when="2026-10-18T18:05:00Z">
-    <div class="r-comment-body"><p>§5 closed with a negative result. A Jev risk order recalls known defects barely above random on golden A: 0.30 at 25% read, against 0.25 random and a band of 0.22 to 0.29. On golden C it is at random. The incumbent score order is unavailable on names and at random on descriptions. Reading time is not yet better spent by this order than by any other. The order stays a measured prototype and is not wired into the polish or review pass (merge <code>cf60d1f63</code>, review 99/120, USD 0.02). <a href="/imas-codex/evidence/archive/sn-selection-over-generation-landed.html#s5-risk-order">evidence</a></p></div>
-</div>
-<div class="r-comment" data-section="s6" data-id="c-run-r-20261018T191725929719-review-of-ssog-learned-acceptance-9e9401ee7c6c" data-who="reckon-build" data-when="2026-10-18T19:27:49Z">
-    <div class="r-comment-body"><p>Stored a parsed independent review for source head 9e9401ee7c6c335070ac7417110df0645409f749 with six scores, six checklist items, two blocking findings, two follow-on findings, and an explicit unmeasured suite-failure delta.</p></div>
-</div>
-<div class="r-comment" data-section="s6" data-id="c-run-r-20261018T203456490768-review-of-ssog-learned-acceptance-d569aa57d33a" data-who="reckon-build" data-when="2026-10-18T20:41:20Z">
-    <div class="r-comment-body"><p>Independent review of source run r-20261018T181146245440-ssog-learned-acceptance at base 7b5c7dff3cb9bce817b8dc0a1b9b8e638e26cdd1 and head d569aa57d33a661cdda70b1528b5a4a686132ae0 stored as a parsed record under review-records/; six scores total 87/120, four follow-on findings and no blocking finding.</p></div>
-</div>
-<div class="r-comment" data-section="s6" data-id="c-run-r-20261018T181146245440-ssog-learned-acceptance" data-who="reckon-build" data-when="2026-10-18T20:22:21Z">
-    <div class="r-comment-body"><p>docs/evidence/fragments/sn-selection-over-generation/ssog-learned-acceptance.html — validation AUC 0.706 (95% interval 0.645-0.759) for the fitted logistic model against 0.645 (0.588-0.699) for the hand-set composite; paired difference +0.061 (95% interval -0.001 to +0.126) reaches zero, so the model is not adopted; the fitted weights are published beside the verdict, named by check id.</p></div>
-</div>
-<div class="r-comment" data-section="s6" data-id="c-close-s6" data-who="reckon-build" data-when="2026-10-18T21:00:00Z">
-    <div class="r-comment-body"><p>§6 closed: not adopted. The learned weighting reads validation AUC 0.706 against the hand-set composite's 0.645. The paired gain, +0.061 [−0.001, +0.126], reaches zero, so it does not beat the composite by more than its interval as the section's rule requires. The weights are published for reuse; the learned order is not wired (merge <code>1868e988f</code>, review 87, USD 0). <a href="/imas-codex/evidence/archive/sn-selection-over-generation-landed.html#s6-learned-acceptance">evidence</a></p></div>
+    <div class="r-comment-body"><p>docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-rerun-aggregate.html and its JSON, written by the aggregate runner; landed in the one commit 78876bbfb on this worktree's branch</p></div>
 </div>
 </section>
 </main>
