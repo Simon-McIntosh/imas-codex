@@ -1,0 +1,62 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-11T21:23:31.711Z",
+  "dispatched_at": "2026-11-11T21:16:59Z",
+  "findings": [
+    {
+      "anchor": "docs/evidence/fragments/sn-integrity-backlog/sib-consistency-census-run.py:1",
+      "id": "reuse_search-1",
+      "reason": "a measure repeated six times across a multi-week pass needs one owned, importable instrument with a scoped population argument; otherwise each node forks its own copy and the \"before\" and \"after\" numbers stop being comparable, which is the plan's central claim.",
+      "text": "the consistency census the plan re-runs in \u00a7\u00a72, 3 and 5 is a 1095-line CLI-only script living in an evidence directory, not an importable instrument; its argparse exposes only `--json --html --planted --live` (`:1033-1047`), so \u00a72's \"same committed instrument counted in that population before batch 1\" has no scoped mode and must be post-filtered from two full runs, while the package that owns this domain (`imas_codex/standard_names/families.py:215 detect_families`, `imas_codex/standard_names/domain_audit.py:365 audit_domains`) has no census entry point. Instances of the same type that this plan depends on: `sib-lineage-cycle-census-run.py:1` (1301 lines, \u00a74's one-live-tip and cycle report \u2014 the commit and shape of the file it names in its done-when), `sib-separatrix-locus-census-run.py:1` (906 lines, \u00a76's suffix-per-locus read-back), `sib-live-sourceless-sheet-run.py:1` (\u00a77's sourceless read-back), and `docs/evidence/fragments/sn-integrity-backlog/sib-unsourced-ancestry-census.html:1` (\u00a78's chain-cap-identity re-measure \u2014 an HTML fragment with no `-run.py` beside it, so the \"re-read with the committed census instrument\" that \u00a78's done-when requires cannot actually be re-run from what is committed).",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/domain_audit.py:365",
+      "id": "duplicate_owner-1",
+      "reason": "two independent readers of `physics_domain` will eventually disagree about the same store, and \u00a75's done-when grades both axes in one sentence; the section should say the grouping count is derived from the audit instrument's output rather than a second census query.",
+      "text": "\u00a75 asks for two counts of the same property \u2014 the families whose members disagree on `physics_domain` (census, `:326-330`, 98 of 125 on 2026-11-10) and the names whose stored domain disagrees with the stored decision (the audit) \u2014 and the design would build the first as a second direct graph reader inside the census rather than deriving it from the audit result `audit_domains` already returns (`DomainAuditResult`, `domain_audit.py:182`); the audit module today has no caller outside `tests/standard_names/test_domain_audit.py`.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/cli/sn.py:478",
+      "id": "interface_budget-1",
+      "reason": "the pass is presented as a data operation with no interface change, but meeting two of its done-whens adds CLI surface that no section accounts for; the audit entry point must be named in the plan text as new surface (with the census script retired or promoted in its place), or the audits must be specified as runs of existing commands.",
+      "text": "\u00a75's done-when (\"the domain audit, run over every live name\") has no CLI entry to run: `grep` over `imas_codex/cli/` returns no `domain-audit` command and `audit_domains` is referenced only by its own test module, so the node must add a command or a new flag; \u00a72's scoped comparison likewise implies a new census option (no `--scope`/`--population` exists at `sib-consistency-census-run.py:1033`). With the supplied counts at public_definitions 0 / cli_options 0 / mcp_views 0 / refusal_families 0, neither section names anything it retires or merges, or says why nothing can be.",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "70e1d1c3ac68c350fe6ad0e9fadf352df089e1ee",
+  "plan_fingerprint": "096f2b2f8a36fc25ad6ccd9f9456034c4066b7d34f3b2c7fadc50bf815162fd7",
+  "plan_slug": "sn-catalog-consistency",
+  "plan_version": 6,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261111T211603645639-plan-review-of-sn-catalog-consistency",
+  "reviewed_blob_sha": "6ac7a6bc809085a3493d0f53f21c46c326e132d8",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the consistency census already hides graph reads, two grouping axes, proposal derivation and a disposable-graph planted control behind four flags (`sib-consistency-census-run.py:1033-1047`); the plan proposes no spread of small modules, and its other endpoints reuse existing commands.",
+    "duplicate_owner": "a finding \u2014 \u00a75's grouping axis makes the 98 divergent families the target of a second, independent `physics_domain` reading implemented inside the census (`sib-consistency-census-run.py:326-330`) while `imas_codex/standard_names/domain_audit.py:365` already owns that measurement, so the two counts of one property can disagree.",
+    "interface_budget": "a finding \u2014 supplied counts are public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a75's endpoint (run the domain audit over every live name) and \u00a72's scoped before/after require CLI surface that does not exist today and neither section names anything it retires or merges, or states why nothing can be.",
+    "reuse_search": "a finding \u2014 `sn edit`, `sn supersede`, the export gates and `domain_audit` all exist and are reused, but every measuring instrument the plan re-runs (\u00a7\u00a72, 3, 4, 5, 6, 8) is a one-off `*-census-run.py` under `docs/evidence/fragments/sn-integrity-backlog/` with no package owner, and one of them (\u00a78) has no run script committed at all.",
+    "thin_wrapper": "pass \u2014 no new layer is proposed over existing machinery: `sn edit` (`imas_codex/cli/sn.py:6903`), `sn supersede` (`imas_codex/cli/sn.py:7425`), `sn release --export-only --gate-only` (`imas_codex/cli/sn.py:4905`) and `domain_decision` are the existing surfaces, and the plan asks for their use rather than a parallel path."
+  },
+  "section_digests": {
+    "_document": "60da5223ce5c0ad0f73555a1988b66e7737b9e961a9e0c99e0cd3f569bc93745",
+    "s1": "c69f79e72b8fe8652e9dcd8632a35ca7eaa3a205fd5ee3e2ee98bc74afc136ba",
+    "s2": "15c902b776977940f118b350d8fc995265395aa45aa223537f626c6f80f298fe",
+    "s3": "fdb01b1d5aaf1af353a55b177f9d2b8b87660bf4648fb8922544d39899e8a2c7",
+    "s4": "ef7bd7f314233248216f8598211014764b74d1c74c308db48db9ab9390a33d55",
+    "s5": "876c35b1192ffd9730b94492bc59d27772706fb855cf03a1e06bccb925b3edf8",
+    "s6": "e35c4bf32892d9b90e8392b5e1171957f4973d937daaccdee3ab610d3c1c937e",
+    "s7": "abb53d14a3cb7db35add3d596e723e7c0e012bbee6e7f328d2b7b520a5956700",
+    "s8": "124c4cffdc2b27efae89ba41f97a27ff57b01c0b53ce596b6c025f1e6523e626"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T21:43:25.657077+00:00",
+  "total": null
+}
