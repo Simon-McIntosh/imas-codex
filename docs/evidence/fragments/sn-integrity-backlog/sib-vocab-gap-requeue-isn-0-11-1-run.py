@@ -7,6 +7,7 @@ import argparse
 import importlib.util
 import json
 import re
+from html import escape
 from pathlib import Path
 
 from imas_codex.graph.client import GraphClient
@@ -135,9 +136,87 @@ def census():
     return 0
 
 
+def confirm():
+    before = json.loads((RUN / "census.json").read_text())
+    assert not before["eligible"], "Eligible sources require a scoped pipeline run"
+    state = source_reader()(sorted(before["sources"]))
+    cohort = source_reader()([row["id"] for row in before["cohort"]])
+    with GraphClient() as gc:
+        stages = gc.query(
+            "UNWIND $ids AS id MATCH (s:StandardNameSource {id:id})-[:PRODUCED_NAME]->(n:StandardName) RETURN id AS id, collect(DISTINCT n.name_stage) AS stages",
+            ids=sorted(cohort),
+        )
+    accepted = sum(
+        any(s in ("accepted", "approved") for s in r["stages"]) for r in stages
+    )
+    controls = []
+    for sid, row in before["sources"].items():
+        assert not row["token_rows"]
+        assert state[sid] == row["live"], (sid, row["live"], state[sid])
+        if row["live"]["status"] == "vocab_gap":
+            controls.append(sid)
+    assert len(controls) == 4
+    result = {
+        "accepted_before": before["accepted_sources"],
+        "accepted_after": accepted,
+        "floor": 100,
+        "cohort": 143,
+        "eligible": 0,
+        "scoped_run_launched": False,
+        "run_id": None,
+        "own_produced_names": 0,
+        "spend_usd": 0,
+        "cap_usd": 3,
+        "absent_token_controls_still_parked": controls,
+    }
+    (RUN / "confirmation.json").write_text(json.dumps(result, indent=2) + "\n")
+    print(json.dumps(result, indent=2))
+    rows = []
+    for sid, row in before["sources"].items():
+        token = row["token"] + (
+            "; decomposition: " + row["decomposition_token"]
+            if "decomposition_token" in row
+            else ""
+        )
+        cells = [
+            sid.removeprefix("dd:"),
+            row["segment"],
+            token,
+            "absent, including aliases",
+            state[sid]["status"],
+            state[sid]["last_error"],
+        ]
+        rows.append(
+            "<tr>" + "".join("<td>" + escape(str(c)) + "</td>" for c in cells) + "</tr>"
+        )
+    additions = ", ".join(sorted({t["value"] for t in before["release_additions"]}))
+    witnesses = []
+    for row in before["cohort"]:
+        for name in row["names"]:
+            if name["stage"] in ("accepted", "approved"):
+                witnesses.append(
+                    f"{row['id']}: {name['name']} ({name['stage']}, score {name['score']})"
+                )
+        if len(witnesses) >= 2:
+            break
+    FRAGMENT.write_text(f"""<h2 id="sib-vocab-gap-requeue-isn-0-11-1">Retry blocked: the requested tokens remain absent from active ISN 0.11.1</h2>
+<p>The active graph snapshot is 0.11.1, digest <code>{escape(before["active"][0]["digest"])}</code>, with {before["grammar_rows"]} GrammarToken rows. The same read sees <code>power_convertor</code> twice (device and object), and the release additions <code>{escape(additions)}</code>. All requested spellings and their aliases return no matching row.</p>
+<p>The predecessor fragment records four sources that returned to vocab_gap and one additional source excluded for missing current_alignment. Each is listed below with its live refusal. None has a bound name, name stage or review score. This node changes no source state and launches no paid pipeline: the admission set is empty.</p>
+<table><thead><tr><th>DD source</th><th>segment</th><th>waited-on spelling</th><th>0.11.1</th><th>live status, both reads</th><th>live refusal</th></tr></thead><tbody>
+{chr(10).join(rows)}
+</tbody></table>
+<p>The recorded defect still reproduces: <q>missing geometry vocabulary token 'electron_cyclotron_power_deposition_peak'</q>; the other three re-parked sources likewise retain their original refusals. The negative control reads all four again and asserts their complete captured state unchanged, status vocab_gap, no binding, absent token and exclusion from the empty admission set. It does not mutate production data.</p>
+<p><code>current_alignment_factor</code> is the source's requested figure-of-merit spelling; its reviewed decomposition requires <code>current_alignment</code>. The release instead registers <code>current_profile_alignment</code> as a physical base with no alias to either spelling. That spelling names profile alignment directly. Whether to replace the reviewed decomposition with this base is a semantic ruling still needed; this read does not establish equivalence or authorize that substitution.</p>
+<p>The cohort acceptance measure counts a source once if a PRODUCED_NAME target is at accepted or approved. Before admission: {result["accepted_before"]} of 143; after the empty admission decision: {accepted} of 143; required floor: 100 (shortfall {100 - accepted}). The two measurements are live reads, not a pipeline before/after result. Known accepted witnesses establish the query can see accepted bindings: {escape("; ".join(witnesses))}.</p>
+<p>Own run id: none; own produced names: 0; spend: USD 0 of USD 3. No cost reservation, capacity limit or scheduling delay withheld the spend: no source satisfied the token-presence admission condition. The requested scoped run on partition all remains unperformed.</p>
+<p>Evidence: census job 1310643 on all_debug, census.json and census.log, followed by confirmation.json and confirmation.log, under <code>{escape(str(RUN))}</code>. The committed helper reproduces both reads. No source or tests were changed. The coordinator must settle an accepted vocabulary spelling or approve a specific decomposition before dispatching the scoped rerun.</p>
+""")
+    return 0
+
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("action", choices=["census"])
+    parser.add_argument("action", choices=["census", "confirm"])
     args = parser.parse_args()
     print(f"# module: {__file__}", flush=True)
     print(f"# cwd: {Path.cwd().resolve()}", flush=True)
