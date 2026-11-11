@@ -113,6 +113,16 @@
       "note": "\u00a78 now states its census as 31 private names across 24 statements and requires a private-name rule inside the existing boundary test, distinct from the sibling-import rule its subpackages keep.",
       "reason": "",
       "when": "2026-11-11T21:49:14.668700+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "47ba92f4b2ca8574fa76d59168894612c4c11d5b",
+      "commit_basis": "edit",
+      "finding": "interface_budget-1",
+      "note": "\u00a78 now requires every name made public to be listed in the landing evidence with the reason it cannot stay private or be moved with its caller, and \u00a72 states the relationship it declares is already present in the graph, so the declaration records existing state rather than adding a surface.",
+      "reason": "",
+      "when": "2026-11-11T21:49:21.549542+00:00"
     }
   ],
   "responses": {
@@ -136,6 +146,15 @@
       "by": "",
       "reason": "The worker settles the method and the endpoint is unchanged; the node's brief cites this review's reuse map and names the existing owner to extend. The brief names both copies of the on-main guard and the existing ancestry check, so the repair covers the CLI pre-flight as well as the release module.",
       "when": "2026-11-11T21:49:06.447509+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "47ba92f4b2ca8574fa76d59168894612c4c11d5b",
+      "commit_basis": "edit",
+      "note": "\u00a78 now requires every name made public to be listed in the landing evidence with the reason it cannot stay private or be moved with its caller, and \u00a72 states the relationship it declares is already present in the graph, so the declaration records existing state rather than adding a surface.",
+      "reason": "",
+      "when": "2026-11-11T21:49:21.549542+00:00"
     },
     "reuse_search-1": {
       "action": "acted",
