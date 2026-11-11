@@ -1,0 +1,60 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-11T20:25:35.235Z",
+  "dispatched_at": "2026-11-11T20:18:50Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-full-dd-continuation.html:43",
+      "id": "done_when-1",
+      "reason": "without a planted not-produced source and a deliberately truncated archive, neither gate can show it fires, and \u00a74's planted-source control is the model the other two sections should follow.",
+      "text": "\u00a72's done-when offers only regression guards (export gate 0, sourceless drafts not rising) for a measure that is a read-back count, so a read-back that counted attempted instead of produced sources would pass it; \u00a73 line 48 likewise names an integrity test of the whole stream with no control showing that a truncated or corrupt copy fails it",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-full-dd-continuation.html:57",
+      "id": "done_when-2",
+      "reason": "the control needs its execution mode stated, or meeting it leaves a planted source in the population the census reconciles, which is the defect class this plan's own guards exist to prevent.",
+      "text": "\u00a74's control \"a source planted outside every class makes them disagree\" reads as a write into the live source population, and the plan does not say it is planted in a disposable graph and retracted, on a repository that spent several sections recovering stray and sourceless live sources",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-full-dd-continuation.html:55",
+      "id": "evidence_paths-1",
+      "reason": "a done-when whose output has no named durable location cannot be checked by a later reader, and this is the one line the author can add without touching any mechanism.",
+      "text": "the \u00a74 done-when requires a re-run census whose class sums reconcile and spend recorded beside the remaining cap, but names no path for either, and \u00a72 line 43 refers to \"the cohort's committed read-back\" without one, so the evidence can land in a run directory rather than in docs/evidence/fragments/ as the parent \u00a752 required",
+      "type": "evidence_paths",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "55af2a7ff77097679125b2d4f0c065462bf7de1b",
+  "plan_fingerprint": "20c96d1a79a5daa657e209bd3eb0337cc178a05ebb44bd27259596ed74dc7cc7",
+  "plan_slug": "sn-full-dd-continuation",
+  "plan_version": 1,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261111T201752488863-plan-review-of-sn-full-dd-continuation",
+  "reviewed_blob_sha": "9f9ed4001f6f760c7b174375e34d77359b5c4d59",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 sn-integrity-backlog \u00a751 and \u00a752 both exist (verified: the documentation drain `sib-docs-*` sits under s52), questions q-sib-strain-gauge-token and q-sib-new-coverage both resolve in that plan, sn-catalog-consistency.html exists, the census fragment docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census.html exists and carries the class table, ISN 0.11.1 is pinned in pyproject.toml:18, the cited operator chains `normalize_operator_chain` and `imaginary_part` both exist in imas_standard_names, the checkpoint-currency instrument resolves to `imas-codex graph status` (README.md:731-735, current/stale/no_backup), and \u00a73's dates match the export listing (the 20261030 export and the 20261107 export were the newest two on 2026-11-11).",
+    "done_when": "a finding \u2014 \u00a72 and \u00a73 each state a measurable primary outcome with no declared negative control, while \u00a74's planted-source control is the only one in the plan.",
+    "evidence_paths": "a finding \u2014 \u00a74 requires a reconciled re-run census and per-run spend but names no durable path for either, and \u00a72 names \"the cohort's committed read-back\" without a path, where sn-integrity-backlog \u00a752 named docs/evidence/fragments/sn-integrity-backlog/ explicitly.",
+    "naming": "pass \u2014 the plan names graph vocabulary (`vocab_gap`, attempt-capped) as data, not plan labels, and no ticket, plan-stage or version identifier is carried into a named symbol or file.",
+    "reasoning": "pass \u2014 \u00a71's stated facts match the cited evidence (5203/6123 = 85.0%, the seven census classes sum to 920, 5503 = 5203 + 300), every measure is obtainable from the census's own query against the live graph, and the sections fix endpoints rather than code paths; \u00a74's \"scoped by source, with one signed reset with receipts\" names the same advancing step the census records for that class rather than an implementation.",
+    "single_goal": "pass \u2014 \u00a72 (cohort floor), \u00a73 (one checkpoint) and \u00a74 (the continuation run to a stated accepted-count floor) each name one deliverable; \u00a74's export-gate, sourceless-draft and lineage-clause are guards on that deliverable, not a second one.",
+    "wiring": "pass \u2014 `plan-section-depends-on` declares s3\u2192sn-integrity-backlog#s52 and s4\u2192{s2, s3, sn-integrity-backlog#s52}, and each declared target exists; s2 correctly declares no dependency on sn-integrity-backlog#s51, which is `descoped` and whose 100-of-143 floor this plan carries forward."
+  },
+  "section_digests": {
+    "_document": "896783928670535faa74894298fc4f61506cd7598dc1af6c5dbca2f23b1da1ff",
+    "s1": "6edb6bfc73bfa8f3d3435cdd83ea2fde91367cf006a53a93995f459601295db8",
+    "s2": "f2706d333eefce06d4eb7fefd6e170631103d4b83409dff2eef25a867c11d3b4",
+    "s3": "6f072c155d17fdfc965c3e4a435b8f51a14b213af1795d01a17874bbe1b7cb47",
+    "s4": "6d2b456a5a26a49142dd20b858105c5fba0cc574abdad0c95e14f42b59a7c9ce"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T20:35:14.052507+00:00",
+  "total": null
+}
