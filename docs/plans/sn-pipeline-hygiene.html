@@ -23,7 +23,7 @@
   <title>Standard-Name Pipeline Hygiene: Red Tests, Loose Boundaries, Release Plumbing | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="5">
 <meta name="plan-modified" content="2026-11-11">
 </head>
 <body>
@@ -45,7 +45,7 @@
     <h2 id="s2">§2 — The receipt-correction link declared in the graph schema</h2>
     <section data-reckon="section" data-id="s2" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>The receipt-correction records written on 2026-11-10 link to the receipts they correct through a <code>CORRECTS</code> relationship the graph schema does not declare.</p>
-    <p><strong>Done when:</strong> the schema declares <code>CORRECTS</code> with its endpoints, the generated models carry it, every live <code>CORRECTS</code> edge reads back with the endpoint labels the declaration names, and the repository's schema compliance check reports a <code>CORRECTS</code> edge planted between labels the declaration does not name in a disposable graph.</p>
+    <p><strong>Done when:</strong> the schema declares <code>CORRECTS</code> with its endpoints, the generated models carry it, every live <code>CORRECTS</code> edge reads back with the endpoint labels the declaration names, and a graph check that compares each <code>CORRECTS</code> edge's endpoint labels with the declared pair, added where none exists, reports a <code>CORRECTS</code> edge planted between labels the declaration does not name in a disposable graph; a check that compares relationship type names alone does not meet this.</p>
 
     <h2 id="s3">§3 — The ISN pin is held by a test</h2>
     <section data-reckon="section" data-id="s3" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
