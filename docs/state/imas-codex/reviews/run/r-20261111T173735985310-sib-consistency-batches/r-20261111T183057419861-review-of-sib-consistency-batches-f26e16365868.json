@@ -2,6 +2,13 @@
   "added_failure_count": 0,
   "added_failure_ids": [],
   "completed_at": "2026-11-11T18:43:32.867Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "read-only sizing estimate that edits nothing; every edit batch it proposes is dispatched as its own reviewed node that re-reads its rows against the census before any sn edit",
+      "recorded_at": "2026-11-11T18:44:05.279935+00:00"
+    }
+  },
   "dispatched_at": "2026-11-11T18:32:17Z",
   "findings": [
     "docs/evidence/fragments/sn-integrity-backlog/sib-consistency-batches-run.py:503 non-blocking: the five controls are computed into a dict and recorded in the artifact but never gate the run \u2014 main() returns 0 at line 857 whatever they say, so a regression that pushed a batch past the cap or mixed a rename into a documentation batch would still exit 0 and leave a healthy-looking gate log; the file carries no assertion at all.",
