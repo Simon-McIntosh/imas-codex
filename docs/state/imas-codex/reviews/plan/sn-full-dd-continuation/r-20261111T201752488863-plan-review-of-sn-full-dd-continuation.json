@@ -53,6 +53,16 @@
       "note": "\u00a74's planted source is now stated to be planted in a disposable graph, never in the live population.",
       "reason": "",
       "when": "2026-11-11T20:40:36.447567+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "55af2a7ff77097679125b2d4f0c065462bf7de1b",
+      "commit_basis": "edit",
+      "finding": "evidence_paths-1",
+      "note": "\u00a72 and \u00a74 now record their read-back, census and spend under docs/evidence/fragments/sn-full-dd-continuation/.",
+      "reason": "",
+      "when": "2026-11-11T20:40:46.939779+00:00"
     }
   ],
   "responses": {
@@ -73,6 +83,15 @@
       "note": "\u00a74's planted source is now stated to be planted in a disposable graph, never in the live population.",
       "reason": "",
       "when": "2026-11-11T20:40:36.447567+00:00"
+    },
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "55af2a7ff77097679125b2d4f0c065462bf7de1b",
+      "commit_basis": "edit",
+      "note": "\u00a72 and \u00a74 now record their read-back, census and spend under docs/evidence/fragments/sn-full-dd-continuation/.",
+      "reason": "",
+      "when": "2026-11-11T20:40:46.939779+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-full-dd-continuation/r-20261111T201752488863-plan-review-of-sn-full-dd-continuation.json",
