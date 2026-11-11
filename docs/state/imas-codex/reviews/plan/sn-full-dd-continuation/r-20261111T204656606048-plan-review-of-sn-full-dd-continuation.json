@@ -95,6 +95,16 @@
       "note": "\u00a74 now names the classes the run covers (awaiting review, below the acceptance floor, attempt-capped after the signed reset, never claimed, documentation missing, and refused-by-writer sources whose recorded refusal no longer reproduces) and excludes the vocabulary-gap class; the limit is those classes' census cost estimate.",
       "reason": "",
       "when": "2026-11-11T21:07:41.150845+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "fc88cc3755f58d01536d76fdaf0433b6d75e30f5",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "The followup now says \u00a72 runs now and \u00a73 waits until no \u00a752 run is writing the graph.",
+      "reason": "",
+      "when": "2026-11-11T21:07:55.507439+00:00"
     }
   ],
   "responses": {
@@ -124,6 +134,15 @@
       "note": "\u00a74 now names the classes the run covers (awaiting review, below the acceptance floor, attempt-capped after the signed reset, never claimed, documentation missing, and refused-by-writer sources whose recorded refusal no longer reproduces) and excludes the vocabulary-gap class; the limit is those classes' census cost estimate.",
       "reason": "",
       "when": "2026-11-11T21:07:41.150845+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "fc88cc3755f58d01536d76fdaf0433b6d75e30f5",
+      "commit_basis": "edit",
+      "note": "The followup now says \u00a72 runs now and \u00a73 waits until no \u00a752 run is writing the graph.",
+      "reason": "",
+      "when": "2026-11-11T21:07:55.507439+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-full-dd-continuation/r-20261111T204656606048-plan-review-of-sn-full-dd-continuation.json",
