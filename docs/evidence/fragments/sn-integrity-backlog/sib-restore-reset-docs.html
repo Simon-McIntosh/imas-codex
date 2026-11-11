@@ -62,14 +62,36 @@ schema <code>imas-codex.repair-authority.v1</code> applied by
 its snapshot text and a row id <code>restore:&lt;name&gt;:&lt;DocsRevision id&gt;</code>, so every
 admitted row's receipt names the snapshot it restored from. Raw Cypher is never used.</p>
 
-<p id="sib-restore-reset-docs-restore-result">Restore result: <strong>__RESTORE_RESULT__</strong>.
-The controlled field is <code>docs_stage</code> and the documentation text; the read-back below
-compares each restored name's live documentation to its snapshot text and its
-<code>docs_stage</code> to <code>accepted</code>.</p>
+<p id="sib-restore-reset-docs-restore-result">Restore result: <strong>212 of the 391 partition-(c) names</strong> are
+<code>docs_stage=accepted</code> again after the signed restore; <strong>179 are not</strong>, so the
+node's evidence gate is <strong>not met</strong>. Every admitted row wrote its snapshot text and
+<code>docs_stage=accepted</code>; every refused row was refused by the
+<code>structural-legitimacy</code> guard with the reason <code>target has a live structural
+child</code>, which no batch composition in this node's authority can satisfy. The controlled
+field is <code>docs_stage</code> and the documentation text; the read-back below compares each
+name's live documentation to its snapshot text and its <code>docs_stage</code> to
+<code>accepted</code>.</p>
+
+<p id="sib-restore-reset-docs-blocker">Two conditions stopped the restore short. First, the
+<code>structural-legitimacy</code> guard refuses a <code>set_properties</code> row on any
+<code>StandardName</code> that owns a live structural child, and 179 of the 391 names do; the
+signed path offers no purpose-built adapter for a documentation restore, so there is no
+mutation kind that both writes the snapshot and passes that guard. Second, the authorization
+window is short: a cohort preview re-read a few minutes later produces a fresh closure digest
+that no longer matches the authorized <code>manifest_sha256</code>, so each cohort had to be
+re-previewed immediately before its apply. The batches that did apply are idempotent and
+replay-detectable (<code>already_applied</code>), so a later run with a writer that the guard
+admits resumes from the 212 already restored.
 
 <h3 id="sib-restore-reset-docs-readback">Read-back</h3>
 
-<pre id="sib-restore-reset-docs-readback-block">__READBACK__</pre>
+<pre id="sib-restore-reset-docs-readback-block">partition (c) = 391 names, re-read after the restore
+  docs_stage: accepted 212, pending 177, reviewed 1, exhausted 1
+  documentation equals own DocsRevision snapshot text: 379 of 391
+  admitted signed rows: 1 per restored name, row id restore:&lt;name&gt;:&lt;DocsRevision id&gt;
+  refused rows: structural-legitimacy, "target has a live structural child"
+control (partition b) parallel_conductivity: no authority row, no receipt;
+  docs_stage pending, documentation unchanged</pre>
 
 <h3 id="sib-restore-reset-docs-control">Negative control</h3>
 
@@ -82,8 +104,10 @@ partition (c) alone.</p>
 
 <h3 id="sib-restore-reset-docs-counts">Accepted-name docs_stage counts</h3>
 
-<p id="sib-restore-reset-docs-counts-block">Before: <code>__BEFORE__</code>. After:
-<code>__AFTER__</code>.</p>
+<p id="sib-restore-reset-docs-counts-block">Before: <code>accepted 2107, pending 1108, reviewed 46,
+drafted 3, exhausted 3, null 1</code>. After: <code>accepted 2319, pending 897, reviewed 45,
+drafted 3, exhausted 3, null 1</code> — 212 names moved from pending or reviewed to accepted,
+and no name moved the other way.</p>
 
 <p id="sib-restore-reset-docs-instrument">Instrument:
 <code>sib-restore-reset-docs-run.py</code>; census and restore reports under the run directory.
