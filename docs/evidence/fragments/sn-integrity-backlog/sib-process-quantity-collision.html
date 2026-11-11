@@ -1,0 +1,84 @@
+<h2 id="sib-process-quantity-collision">A published quantity spelled like a process token is no longer a collision</h2>
+
+<p><strong>The export identity-token collision gate now admits a published quantity whose
+spelling is also a process token.</strong> <code>halo_current</code> is a process token and
+also the halo current, a quantity with physical base <code>current</code>. The gate refused
+it as an identity standing in for a grammar token. Under the lead's 2026-11-11 ruling that
+"due to X" names the quantity X as its cause, the process segment is exempt when the
+grammar parses the identity with a physical base; every other segment, and every process
+token the grammar cannot parse, still collides.</p>
+
+<p>The gate carries no vocabulary or parser of its own. It reads the physical-base set
+through <code>segments._registered_physical_bases</code> and parses an identity through
+<code>edit._base_token</code>, both already used elsewhere in the package, so the
+exemption cannot drift from the installed grammar independently of the rest of the
+tooling.</p>
+
+<h3 id="sib-process-quantity-collision-reproduction">The refusal, reproduced</h3>
+
+<p>At base <code>06ac2d0c2</code> the gate refuses the identity with one issue:</p>
+<pre>gate passed: False issue count: 1
+identity_token_collision halo_current process</pre>
+
+<p>Run at head the same gate call passes with no issue. Over the live published population
+(1,975 emitted identities in the day's export report) the base predicate reports exactly
+one issue, <code>('halo_current', 'process')</code>, and the head predicate reports none,
+exempting that one identity with base <code>current</code>.</p>
+
+<h3 id="sib-process-quantity-collision-live-dry-run">The live dry run</h3>
+
+<p><code>uv run imas-codex sn release --dry-run</code> over the live graph reads
+<code>2,865</code> candidates and <code>1,975</code> emitted identities, and reports
+<code>identity_token_collision passed=True issues=0 advisories=0</code>.
+<code>halo_current</code> is among the emitted identities, so the pass is not an absence of
+the case the gate exists for. Every other gate in that report passes as well, with
+<code>all_gates_passed true</code>. The dry run then stops at the publisher's lock file,
+which is a read-only ISNC checkout in this sandbox rather than a gate failure; the export
+leg and its report are complete before that point.</p>
+
+<h3 id="sib-process-quantity-collision-tests">Tests</h3>
+
+<p><code>tests/standard_names/test_identity_token_collision.py</code> covers five cases:
+the exempt identity passes; a component token (<code>toroidal</code>, which carries both the
+component and coordinate segments) still fails with its issues; a locus token still fails
+with its registry citation; a process token the grammar cannot parse
+(<code>anomalous_transport</code>) still fails; and the exemption does not extend to a
+non-exempt identity published beside it. The file is red when the exemption is removed,
+failing <code>test_process_token_parsed_as_quantity_passes</code> and
+<code>test_exempt_identity_does_not_exempt_its_neighbours</code> at <code>EXIT=1</code>
+with the one <code>identity_token_collision</code> issue restored.</p>
+
+<h3 id="sib-process-quantity-collision-suite-arms">Suite arms</h3>
+
+<p>Both arms run from <code>git archive</code> trees of their own revision, with one command:
+<code>python -m pytest -p no:cacheprovider -n 8 --dist loadgroup -m 'not slow and not
+graph' tests/standard_names</code> against the repository's environment, a separate
+<code>--basetemp</code> per arm. The header of each log records the revision, the tree, the
+resolved <code>imas_codex.standard_names.export.__file__</code> and whether the exemption
+line is present, so each arm is proven to be measuring its own tree.</p>
+
+<table>
+<tr><th>arm</th><th>revision</th><th>exemption</th><th>result</th><th>exit</th></tr>
+<tr><td>base</td><td><code>06ac2d0c2</code></td><td>absent</td><td>15 failed, 8,624 passed, 12 skipped (362.9 s)</td><td>1</td></tr>
+<tr><td>head</td><td><code>7641b4fc1</code></td><td>present</td><td>14 failed, 8,630 passed, 12 skipped (374.0 s)</td><td>1</td></tr>
+</table>
+
+<p><strong>No failure id is added at head.</strong> All fourteen head failures are also
+base failures. The one id that fails in the base arm alone
+(<code>test_pool_compose_retry.py::TestPoolComposeRetry::test_retry_exhausted_falls_through</code>)
+fails at <em>both</em> revisions when run in isolation, so it is load-sensitive flakiness
+in either direction rather than a head regression or a head fix. The shared failures sit
+in <code>test_gap_rule_verdicts.py</code>, <code>test_manifest_generability.py</code>,
+<code>test_compose_prompt_examples_round_trip.py</code>,
+<code>test_geometry_enumeration_collapse.py</code>,
+<code>test_house_style_checks.py</code>, <code>test_catalog_layout_hierarchy.py</code> and
+<code>test_pool_registry_imports.py</code>; none imports or exercises the identity collision
+gate, and none is in this node's changed surface.</p>
+
+<p>These arms predate the substitution onto the shared helpers and are not re-run for it.
+The change replaces a vocabulary read and a parse with the package's existing equivalents,
+and the targeted file, the negative control and the live export report are all re-measured
+at the substituted state: five tests pass, the negative control still fails two ids at
+<code>EXIT=1</code>, and the export report again reads
+<code>identity_token_collision passed=True issues=0</code> with <code>halo_current</code>
+among the 1,975 emitted identities.</p>
