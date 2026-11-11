@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "added_failure_note": "The reviewed run is a read-only evidence node whose write paths hold no test file; its classification.json carries baseline_suite null and after_suite null, so there are no suite arms to diff and no added failure id exists.",
   "completed_at": "2026-11-11T20:19:40.610Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "sib-drift-refresh-rename-lineage",
+      "recorded_at": "2026-11-11T20:20:29.563293+00:00"
+    }
+  },
   "dispatched_at": "2026-11-11T20:05:10Z",
   "findings": [
     {
