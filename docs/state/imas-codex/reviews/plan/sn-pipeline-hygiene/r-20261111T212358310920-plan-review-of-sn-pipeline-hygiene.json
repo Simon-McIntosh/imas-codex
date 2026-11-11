@@ -65,7 +65,30 @@
   "plan_slug": "sn-pipeline-hygiene",
   "plan_version": 5,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "47ba92f4b2ca8574fa76d59168894612c4c11d5b",
+      "commit_basis": "edit",
+      "finding": "reuse_search-1",
+      "note": "\u00a73 now extends the existing pin-agreement test with the installed-version and grammar-snapshot comparisons it lacks, rather than asking for the guard that already exists.",
+      "reason": "",
+      "when": "2026-11-11T21:48:30.003712+00:00"
+    }
+  ],
+  "responses": {
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "47ba92f4b2ca8574fa76d59168894612c4c11d5b",
+      "commit_basis": "edit",
+      "note": "\u00a73 now extends the existing pin-agreement test with the installed-version and grammar-snapshot comparisons it lacks, rather than asking for the guard that already exists.",
+      "reason": "",
+      "when": "2026-11-11T21:48:30.003712+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-pipeline-hygiene/r-20261111T212358310920-plan-review-of-sn-pipeline-hygiene.json",
   "review_run_id": "r-20261111T212358310920-plan-review-of-sn-pipeline-hygiene",
   "reviewed_blob_sha": "d6d4a12ed3b3ab92d7c392ac95b2da4fb9a92c75",
   "rubric": "design",
