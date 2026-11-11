@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-pipeline-hygiene">
+<meta name="node-id" content="sph-pin-test">
+<title>The ISN pin is held by a test: 0.11.1 in pyproject, installed, and active in the graph</title>
+</head>
+<body>
+<main>
+<h1 id="sph-pin-test-title">Three statements of the ISN version agree at 0.11.1, and each comparison refuses a planted mismatch</h1>
+
+<p id="sph-pin-test-summary">The pin was compared with itself and with nothing else. It is now compared, in a
+default-tier test, with the installed distribution's version, and in a graph-tier test with the
+version of the <code>ISNGrammarVersion</code> node marked active. At the head revision all three read
+<code>0.11.1</code>. Planting a mismatch in either comparison turns the corresponding test red and names
+the two versions, so neither comparison can pass by doing nothing.</p>
+
+<h2 id="sph-pin-test-states">The three statements of the version</h2>
+<table id="sph-pin-test-states-table">
+<thead><tr><th>Statement</th><th>Read from</th><th>Value at head</th></tr></thead>
+<tbody>
+<tr><th>pin (first entry)</th><td><code>pyproject.toml</code> <code>[project].dependencies</code></td><td><code>imas-standard-names==0.11.1</code></td></tr>
+<tr><th>pin (second entry)</th><td><code>pyproject.toml</code> <code>[dependency-groups]</code></td><td><code>imas-standard-names==0.11.1</code></td></tr>
+<tr><th>installed</th><td><code>importlib.metadata.version("imas-standard-names")</code></td><td><code>0.11.1</code> (editable source at the ISN checkout)</td></tr>
+<tr><th>graph snapshot</th><td><code>MATCH (v:ISNGrammarVersion {active: true}) RETURN v.version</code></td><td><code>0.11.1</code>, <code>content_digest</code> <code>sha256:5c1be48…916c</code></td></tr>
+</tbody>
+</table>
+
+<p id="sph-pin-test-query">The snapshot query returned exactly one row, and it carried a version — the
+check that the instrument sees something known present before any comparison is reported. The writer
+of that node is <code>imas_codex.standard_names.grammar_sync</code>, which rotates <code>active</code>
+across synced versions; the test imports that module so the coupling to its owner is stated rather
+than assumed.</p>
+
+<h2 id="sph-pin-test-gates">Arms</h2>
+<table id="sph-pin-test-gates-table">
+<thead><tr><th>Arm</th><th>Command</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>default tier, head</td><td><code>pytest tests/core/test_isn_pin_agreement.py -m 'not slow and not graph' -p no:cacheprovider -v</code></td><td><strong>2 passed</strong>, <code>EXIT=0</code></td></tr>
+<tr><td>graph tier, head</td><td><code>pytest tests/graph/test_isn_grammar_snapshot_pin.py -m graph -p no:cacheprovider -v</code></td><td><strong>1 passed</strong> in 13.21s, <code>EXIT=0</code></td></tr>
+<tr><td>negative control</td><td>the default-tier file with a plugin that makes the ISN distribution's metadata report <code>0.11.2</code> while the pin stays <code>0.11.1</code></td><td><strong>1 failed, 1 passed</strong>. <code>FAILED tests/core/test_isn_pin_agreement.py::test_isn_pin_matches_the_installed_package</code>, <code>EXIT=1</code></td></tr>
+<tr><td>graph comparison, planted</td><td><code>sph-pin-test-run.py</code> calls the graph comparison with a snapshot version of <code>0.11.0</code></td><td><code>AssertionError</code>: "pyproject pins imas-standard-names==0.11.1 but the graph's active grammar snapshot is 0.11.0"</td></tr>
+</tbody>
+</table>
+
+<p id="sph-pin-test-mutation">The installed-side mismatch is planted at the metadata lookup rather than by
+installing a different package, because the environment is the shared project <code>.venv</code> that
+every peer session on this workstation uses. The metadata value is the only thing the test reads to
+learn the installed version, so planting it produces exactly the state a pin bump without a package
+bump leaves behind, and the test refuses it. The planted value <code>0.11.2</code> is a version the
+distribution does not hold at head, so the passing arm cannot be the planted one.</p>
+
+<h2 id="sph-pin-test-scope">What changed</h2>
+<ul id="sph-pin-test-scope-list">
+<li><code>tests/core/test_isn_pin_agreement.py</code> — the pin extraction moved into <code>pinned_isn_version()</code>, and <code>test_isn_pin_matches_the_installed_package</code> compares it with <code>importlib.metadata.version</code>. The original agreement test is unchanged in what it asserts.</li>
+<li><code>tests/graph/test_isn_grammar_snapshot_pin.py</code> — new, graph-marked: compares the active snapshot version with the same pin, importing the extraction from the default-tier file so one extraction serves both tiers.</li>
+</ul>
+
+<p id="sph-pin-test-logs">Logs: <code>sph-pin-test-head-core.log</code>,
+<code>sph-pin-test-head-graph.log</code>, <code>sph-pin-test-negative-control.log</code>,
+<code>sph-pin-test-record.log</code>, beside the run manifest. The record script is
+<code>sph-pin-test-run.py</code> and its output <code>sph-pin-test.json</code>.</p>
+</main>
+</body>
+</html>
