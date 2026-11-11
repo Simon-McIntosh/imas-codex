@@ -1,0 +1,31 @@
+{
+  "detached_head": {
+    "worktree_add_rc": 0,
+    "branch_show_current": "",
+    "ancestor_of_main": true
+  },
+  "merged": [
+    {
+      "guard": "catalog_release._check_on_main",
+      "verdict": "admitted",
+      "error": null
+    },
+    {
+      "guard": "cli.release._check_on_main",
+      "verdict": "admitted",
+      "error": null
+    }
+  ],
+  "unmerged": [
+    {
+      "guard": "catalog_release._check_on_main",
+      "verdict": "refused",
+      "error": "ISNC is on a detached head whose commits are not contained in main. Switch first: cd /tmp/reckon-crew-scratch/r-20261111T222140784389-sph-worktree-release/tmpwf03cyrq/wt && git checkout main"
+    },
+    {
+      "guard": "cli.release._check_on_main",
+      "verdict": "refused",
+      "error": "Detached head is not merged into main. Switch first: git checkout main"
+    }
+  ]
+}

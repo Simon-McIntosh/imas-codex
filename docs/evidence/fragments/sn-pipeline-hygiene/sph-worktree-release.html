@@ -1,0 +1,41 @@
+<section id="sph-worktree-release" data-reckon="evidence">
+  <h2>§5 — A release can run from a detached worktree</h2>
+
+  <p>Both on-main pre-flight guards read <code>git branch --show-current</code>,
+  which prints nothing on a detached head, so every release cut from a worker's
+  worktree was refused before any other check ran. Measured on the pre-change
+  tree: a detached worktree whose head is the tip of <code>main</code> was
+  refused by both guards with <em>"current: "</em> in the message.</p>
+
+  <p>Each guard now admits a detached head only when
+  <code>git merge-base --is-ancestor HEAD main</code> succeeds, the same
+  ancestry test the release-branch preparation already uses. A named branch
+  other than <code>main</code> is still refused, and a detached head carrying a
+  commit <code>main</code> has never seen is refused before the version is
+  computed, so the tag cannot land on an unreviewed revision. The clean-tree
+  and synced checks are unchanged.</p>
+
+  <table id="sph-worktree-release-verdicts">
+    <thead>
+      <tr><th>worktree head</th><th>catalog guard</th><th>CLI guard</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>detached at the tip of main</td><td>admitted</td><td>admitted</td></tr>
+      <tr><td>detached with an unmerged commit</td><td>refused</td><td>refused</td></tr>
+    </tbody>
+  </table>
+
+  <p id="sph-worktree-release-cut">A release cut run from a real detached
+  worktree against a local bare stand-in remote rehearses the tag it would cut
+  (<code>v1.0.0rc1</code>) and then creates it: the tag exists in the worktree
+  and on the stand-in remote. The same cut from an unmerged detached head is
+  refused with one error and no tag. Evidence:
+  <code>docs/evidence/fragments/sn-pipeline-hygiene/sph-worktree-release.json</code>,
+  produced by <code>sph-worktree-release-run.py</code>.</p>
+
+  <p id="sph-worktree-release-gate">Gate: 77 tests pass across
+  <code>tests/standard_names/test_catalog_release.py</code> and
+  <code>tests/standard_names/test_cli_release.py</code>, including six new
+  tests. Removing the ancestry branch from either guard (restoring the
+  branch-name check) turns all six red, the cut test among them.</p>
+</section>
