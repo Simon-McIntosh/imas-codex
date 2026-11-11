@@ -630,29 +630,6 @@ def _parse_grammar(name: str) -> dict[str, Any]:
     }
 
 
-def _strict_grammar_accepts(name: str) -> bool:
-    """Return whether the strict writer can emit ``name`` again.
-
-    Uses the same strict ``parse``/``compose`` round-trip as
-    :func:`_parse_grammar`, but answers the accept/reject question directly:
-    the diagnostics list is empty both for a name the parser rejects and for a
-    valid name that merely carries warnings, so it cannot stand in for it.
-
-    An unavailable grammar package answers ``False``. Compose cannot mint a
-    name without the parser either, so an unknown verdict must not be read as
-    permission to release the name's last producer.
-    """
-    try:
-        from imas_standard_names import compose, parse
-    except ImportError:
-        return False
-    try:
-        return compose(parse(name, strict=True).ir) == name
-    except Exception as exc:
-        logger.debug("ISN strict grammar rejected '%s': %s", name, exc)
-        return False
-
-
 def _semantic_ir_expression(ir: Any) -> str:
     """Render a recursive public grammar IR as a compact semantic expression.
 

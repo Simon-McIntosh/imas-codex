@@ -2263,11 +2263,32 @@ def reconcile_descriptionless_composed_names(
             )
             if row.get("id")
         ]
-        reopen = [
-            name for name in candidates if foundation._strict_grammar_accepts(name)
-        ]
-        qualified = set(reopen)
-        stranded = [name for name in candidates if name not in qualified]
+        # The strict writer decides whether compose can mint a spelling again.
+        # A name it refuses would be released with no path back to a producer,
+        # and no path to the description the stage advance needs. An
+        # unavailable grammar package answers "refused": compose cannot mint
+        # anything without the parser either, so an unknown verdict must never
+        # be read as permission to release a name's last producer.
+        try:
+            from imas_codex.standard_names.grammar_adapter import (
+                parse_canonical_name,
+            )
+        except ImportError:
+            parse_canonical_name = None
+
+        reopen: list[str] = []
+        stranded: list[str] = []
+        for name in candidates:
+            if parse_canonical_name is None:
+                stranded.append(name)
+                continue
+            try:
+                parse_canonical_name(name)
+            except Exception as exc:
+                logger.debug("ISN strict grammar refused '%s': %s", name, exc)
+                stranded.append(name)
+            else:
+                reopen.append(name)
         rows = (
             client.query(
                 """
