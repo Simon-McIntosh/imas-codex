@@ -115,6 +115,16 @@
       "note": "\u00a75's done-when now names the success endpoint only: the real cut from a detached worktree succeeds against a stand-in remote.",
       "reason": "",
       "when": "2026-11-11T20:41:44.166824+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "55af2a7ff77097679125b2d4f0c065462bf7de1b",
+      "commit_basis": "edit",
+      "finding": "done_when-3",
+      "note": "\u00a71 now bounds the escape: at most three of the 13 ids may be marked strict expected failures, each naming an open section of a live plan that already exists.",
+      "reason": "",
+      "when": "2026-11-11T20:41:57.044529+00:00"
     }
   ],
   "responses": {
@@ -144,6 +154,15 @@
       "note": "\u00a75's done-when now names the success endpoint only: the real cut from a detached worktree succeeds against a stand-in remote.",
       "reason": "",
       "when": "2026-11-11T20:41:44.166824+00:00"
+    },
+    "done_when-3": {
+      "action": "acted",
+      "by": "",
+      "commit": "55af2a7ff77097679125b2d4f0c065462bf7de1b",
+      "commit_basis": "edit",
+      "note": "\u00a71 now bounds the escape: at most three of the 13 ids may be marked strict expected failures, each naming an open section of a live plan that already exists.",
+      "reason": "",
+      "when": "2026-11-11T20:41:57.044529+00:00"
     },
     "reasoning-1": {
       "action": "acted",
