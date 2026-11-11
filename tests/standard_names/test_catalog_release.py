@@ -18,6 +18,7 @@ from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
 
+import click
 import pytest
 import yaml
 
@@ -217,6 +218,177 @@ def _isolate_release_preflight(monkeypatch):
         "imas_codex.standard_names.catalog_release._tag_exists",
         lambda *_args, **_kwargs: True,
     )
+
+
+def _stand_in_remote(repo: Path, tmp_path: Path) -> Path:
+    """A local bare repository standing in for the release remote."""
+    remote = tmp_path / "origin.git"
+    _git("init", "--bare", str(remote), cwd=tmp_path)
+    _git("remote", "add", "origin", str(remote), cwd=repo)
+    _git("push", "-q", "origin", "main", cwd=repo)
+    return remote
+
+
+def _detached_worktree(repo: Path, tmp_path: Path) -> Path:
+    """A worktree with no checked-out branch, at a head merged into main."""
+    wt = tmp_path / "wt"
+    _git("worktree", "add", "--detach", str(wt), "main", cwd=repo)
+    assert _git("branch", "--show-current", cwd=wt).stdout.strip() == ""
+    return wt
+
+
+def _staging_with_catalog(tmp_path: Path) -> Path:
+    staging = tmp_path / "staging"
+    staging.mkdir()
+    (staging / "catalog.yml").write_text("names: []\n", encoding="utf-8")
+    return staging
+
+
+class _SilentPublisher:
+    """Publish nothing: the cut tags the revision already checked out."""
+
+    def __init__(self) -> None:
+        self.calls: list[dict] = []
+
+    def __call__(self, **kwargs):
+        self.calls.append(kwargs)
+        return SimpleNamespace(errors=[], files_copied=0, commit_sha=None)
+
+
+class _SilentGitHub:
+    def create_pull_request(self, **_kwargs):
+        raise AssertionError("an RC cut must not open a pull request")
+
+
+def _prepare_cut(repo: Path, monkeypatch, tag: str = "v1.0.0rc1") -> None:
+    monkeypatch.setattr(
+        "imas_codex.standard_names.catalog_release.compute_next_version",
+        lambda *_args, **_kwargs: (tag, tag.lstrip("v")),
+    )
+
+
+def test_a_release_cut_from_a_detached_worktree_creates_the_tag(
+    tagged_repo, tmp_path, monkeypatch
+):
+    """A worktree head merged into main is admitted and the tag is created."""
+    _stand_in_remote(tagged_repo, tmp_path)
+    wt = _detached_worktree(tagged_repo, tmp_path)
+    staging = _staging_with_catalog(tmp_path)
+    publisher = _SilentPublisher()
+    _prepare_cut(tagged_repo, monkeypatch)
+
+    rehearsal = run_release(
+        wt,
+        "candidate",
+        bump="minor",
+        remote="origin",
+        skip_export=True,
+        staging_dir=staging,
+        publisher=publisher,
+        github_client=_SilentGitHub(),
+        dry_run=True,
+    )
+
+    assert rehearsal.errors == []
+    assert rehearsal.git_tag == "v1.0.0rc1"
+    assert _git("tag", "-l", "v1.0.0rc1", cwd=wt).stdout.strip() == ""
+
+    report = run_release(
+        wt,
+        "candidate",
+        bump="minor",
+        remote="origin",
+        skip_export=True,
+        staging_dir=staging,
+        publisher=publisher,
+        github_client=_SilentGitHub(),
+    )
+
+    assert report.errors == []
+    assert report.git_tag == "v1.0.0rc1"
+    assert report.pushed is True
+    assert _git("tag", "-l", "v1.0.0rc1", cwd=wt).stdout.strip() == "v1.0.0rc1"
+    pushed = _git("ls-remote", "--tags", "origin", "refs/tags/v1.0.0rc1", cwd=wt)
+    assert pushed.stdout.strip(), "the tag reached the stand-in remote"
+
+
+def test_a_release_cut_from_an_unmerged_detached_head_is_refused(
+    tagged_repo, tmp_path, monkeypatch
+):
+    """A detached head carrying commits main has never seen is refused."""
+    _stand_in_remote(tagged_repo, tmp_path)
+    wt = _detached_worktree(tagged_repo, tmp_path)
+    (wt / "unreviewed.txt").write_text("not on main\n", encoding="utf-8")
+    _git("add", "unreviewed.txt", cwd=wt)
+    _git("commit", "-qm", "unreviewed work", cwd=wt)
+    staging = _staging_with_catalog(tmp_path)
+    publisher = _SilentPublisher()
+    _prepare_cut(tagged_repo, monkeypatch)
+
+    report = run_release(
+        wt,
+        "candidate",
+        bump="minor",
+        remote="origin",
+        skip_export=True,
+        staging_dir=staging,
+        publisher=publisher,
+        github_client=_SilentGitHub(),
+    )
+
+    assert len(report.errors) == 1
+    assert "detached head" in report.errors[0]
+    assert report.git_tag == ""
+    assert _git("tag", "-l", cwd=wt).stdout.strip() == ""
+    assert publisher.calls == []
+
+
+def test_the_catalog_guard_accepts_a_detached_head_merged_into_main(
+    tagged_repo, tmp_path
+):
+    from imas_codex.standard_names.catalog_release import _check_on_main
+
+    wt = _detached_worktree(tagged_repo, tmp_path)
+
+    _check_on_main(wt)
+
+
+def test_the_cli_guard_accepts_a_detached_head_merged_into_main(
+    tagged_repo, tmp_path, monkeypatch
+):
+    from imas_codex.cli.release import _check_on_main
+
+    wt = _detached_worktree(tagged_repo, tmp_path)
+    monkeypatch.chdir(wt)
+
+    _check_on_main()
+
+
+def test_the_catalog_guard_refuses_an_unmerged_detached_head(tagged_repo, tmp_path):
+    from imas_codex.standard_names.catalog_release import _check_on_main
+
+    wt = _detached_worktree(tagged_repo, tmp_path)
+    (wt / "unreviewed.txt").write_text("not on main\n", encoding="utf-8")
+    _git("add", "unreviewed.txt", cwd=wt)
+    _git("commit", "-qm", "unreviewed work", cwd=wt)
+
+    with pytest.raises(ValueError, match="detached head"):
+        _check_on_main(wt)
+
+
+def test_the_cli_guard_refuses_an_unmerged_detached_head(
+    tagged_repo, tmp_path, monkeypatch
+):
+    from imas_codex.cli.release import _check_on_main
+
+    wt = _detached_worktree(tagged_repo, tmp_path)
+    (wt / "unreviewed.txt").write_text("not on main\n", encoding="utf-8")
+    _git("add", "unreviewed.txt", cwd=wt)
+    _git("commit", "-qm", "unreviewed work", cwd=wt)
+    monkeypatch.chdir(wt)
+
+    with pytest.raises(click.ClickException, match="not merged"):
+        _check_on_main()
 
 
 def test_release_targeting_origin_does_not_run_the_public_grammar_gate(
