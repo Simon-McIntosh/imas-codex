@@ -105,6 +105,16 @@
       "note": "The unresolvable pools-module exemplar and the unnamed review are gone; \u00a78 names the five module-level imports the review found (export.py, legacy_authority.py, near_duplicates.py, release_notes.py, review_triage.py).",
       "reason": "",
       "when": "2026-11-11T20:41:30.360127+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "55af2a7ff77097679125b2d4f0c065462bf7de1b",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "\u00a75's done-when now names the success endpoint only: the real cut from a detached worktree succeeds against a stand-in remote.",
+      "reason": "",
+      "when": "2026-11-11T20:41:44.166824+00:00"
     }
   ],
   "responses": {
@@ -125,6 +135,15 @@
       "note": "\u00a78's done-when requires the import-boundary test to cover the package's top-level modules as well as its subpackages, and to fail when any one closed import is restored.",
       "reason": "",
       "when": "2026-11-11T20:41:05.356628+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "55af2a7ff77097679125b2d4f0c065462bf7de1b",
+      "commit_basis": "edit",
+      "note": "\u00a75's done-when now names the success endpoint only: the real cut from a detached worktree succeeds against a stand-in remote.",
+      "reason": "",
+      "when": "2026-11-11T20:41:44.166824+00:00"
     },
     "reasoning-1": {
       "action": "acted",
