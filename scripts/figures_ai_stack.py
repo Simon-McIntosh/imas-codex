@@ -37,14 +37,14 @@ matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
 from matplotlib.colors import to_rgb
-from matplotlib.patches import FancyBboxPatch, Polygon
+from matplotlib.patches import FancyBboxPatch, Polygon, Rectangle
 
 ROOT = Path(__file__).resolve().parents[1]
 FIGURES = ROOT / "docs/figures/ai-stack"
 STEM = "ai-stack"
 
-WIDTH, HEIGHT = 14.0, 6.47  # in: wider than the slide canvas, leaving room for a title
-U = 10  # drawing units per inch, so the axes run 0..140 by 0..64.7
+WIDTH, HEIGHT = 14.0, 6.95  # in: wider than the slide canvas, leaving room for a title
+U = 10  # drawing units per inch, so the axes run 0..140 by 0..69.5
 
 # Deterministic in the ICP knowledge map's relation plum; agentic work in coral where a
 # frontier model drives it, teal where it can also run on-premises.
@@ -54,9 +54,10 @@ INK = "#2b2b2b"
 MUTED = "#5f5f5f"
 NEUTRAL_EDGE = "#b4b1aa"
 BAND_FILL = "#f4f3f0"
-USER_FILL = "#e2e2e2"  # a neutral grey that reads on white without weighing on it
-USER_INK = "#141414"
-USER_GUIDE = "#9a9a9a"
+USER_INK = "#141414"  # the role names
+USER_FILL = (
+    "#3b72b8"  # the thin bar under each name, in a blue no layer of the stack uses
+)
 
 TITLE, BODY, SMALL = 16, 14, 13  # pt, inside the stack
 BAR = 15  # pt, the user roles
@@ -240,7 +241,7 @@ LAYERS = {  # (y0, y1) of each band
     "graph": (8.8, 14.8),
     "functions": (15.8, 30.6),
     "interfaces": (31.6, 43.8),
-    "users": (44.8, 60.4),
+    "users": (44.8, 65.2),
 }
 
 LAYER_NAMES = {  # the users are named above their bars, in draw_users
@@ -540,40 +541,38 @@ def draw_interfaces(c: Canvas) -> None:
 
 def draw_users(c: Canvas) -> None:
     _, y1 = LAYERS["users"]
-    pitch, height = 3.0, 2.75
+    pitch, label_h, gap, height = 4.0, 2.3, 0.1, 0.8
     top = y1 - 0.4
     # the users stand above the stack, so their name sits over the bars, centred
     x0, x1 = INTERFACES["desktop"][0], INTERFACES["clive"][1]
     c.text((x0 + x1) / 2, y1 + 1.8, "users", size=OUTER, weight="bold")
     order = list(INTERFACES)
-    # dashed guides up from both edges of every interface card mark the columns,
-    # so each bar's end reads against the split it stops at
-    guide_bottom = LAYERS["interfaces"][1] - 0.9  # the cards' top edge
-    for gx0, gx1 in INTERFACES.values():
-        for gx in (gx0, gx1):
-            c.ax.plot(
-                [gx, gx],
-                [guide_bottom, top],
-                color=USER_GUIDE,
-                lw=1.0,
-                linestyle=(0, (3, 3)),
-                zorder=4,
-            )
     for i, (role, reach) in enumerate(USERS):
         y = top - i * pitch
-        # the bar runs from Claude Desktop's left edge to the right edge of the
-        # farthest interface the role uses, so its ends fall on the columns below
-        left, x1 = INTERFACES[order[0]][0], INTERFACES[reach][1]
-        c.box(left, y - height, x1, y, edge="none", fill=USER_FILL, lw=0, z=3)
+        # the role's name on its own line, and under it a thin bar of one cell per
+        # interface the role uses, each cell edge to edge with its card below
+        left = INTERFACES[order[0]][0]
         c.text(
-            left + 1.0,
-            y - height / 2,
+            left,
+            y - label_h / 2,
             role,
             size=BAR,
             color=USER_INK,
             ha="left",
-            inside=(left, y - height, x1, y),
         )
+        bar_top = y - label_h - gap
+        for key in order[: order.index(reach) + 1]:
+            cx0, cx1 = INTERFACES[key]
+            c.ax.add_patch(
+                Rectangle(
+                    (cx0, bar_top - height),
+                    cx1 - cx0,
+                    height,
+                    facecolor=USER_FILL,
+                    edgecolor="none",
+                    zorder=3,
+                )
+            )
 
 
 def draw_legend(c: Canvas) -> None:
