@@ -465,17 +465,6 @@ def draw_functions(c: Canvas) -> None:
     # the REPL: generated code, run against the graph, for whatever no tool covers
     c.card(rx[0], y0, rx[1], y1, "REPL", "code generation", kind="frontier")
 
-    # read-only access from the function layer down into the graph
-    xa = lx[0] + 4.0
-    g1 = LAYERS["graph"][1] - 0.6
-    c.ax.annotate(
-        "",
-        xy=(xa, g1 - 0.1),
-        xytext=(xa, y0),
-        arrowprops={"arrowstyle": "-|>", "color": INK, "lw": 1.4, "mutation_scale": 14},
-        zorder=8,
-    )
-
 
 def draw_interfaces(c: Canvas) -> None:
     y0, y1 = LAYERS["interfaces"]

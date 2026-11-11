@@ -852,16 +852,6 @@ z
      <use xlink:href="#m6dca541c59" x="719.3088" y="399.6" style="fill: #2b2b2b; stroke: #2b2b2b"/>
     </g>
    </g>
-   <g id="patch_48">
-    <path d="M 217.69144 359.843906
-Q 217.69144 366.480578 217.69144 371.552003
-" style="fill: none; stroke: #2b2b2b; stroke-width: 1.4; stroke-linecap: round"/>
-    <path d="M 220.49144 365.952003
-L 217.69144 371.552003
-L 214.89144 365.952003
-z
-" style="fill: #2b2b2b; stroke: #2b2b2b; stroke-width: 1.4; stroke-linecap: round"/>
-   </g>
    <g id="line2d_42">
     <defs>
      <path id="m93257e1731" d="M 0 7
