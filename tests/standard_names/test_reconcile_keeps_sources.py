@@ -33,10 +33,14 @@ RECOMPOSABLE = "electron_temperature"
 
 
 def _seed(name_id: str) -> None:
-    """Create a descriptionless live draft produced by one composed DD source."""
+    """Create a descriptionless live draft produced by one composed DD source.
+
+    The test asks for :func:`disposable_neo4j_empty`, which empties the shared
+    disposable endpoint before the case runs, so this plants its own nodes and
+    deletes nothing.
+    """
     dd_path = "test/reconcile/" + name_id.replace("_", "/")
     with GraphClient() as gc:
-        gc.query("MATCH (n) DETACH DELETE n")
         gc.query(
             """
             CREATE (sn:StandardName {
@@ -75,7 +79,9 @@ def _state(name_id: str) -> dict:
     return rows[0]
 
 
-def test_unrecomposable_name_is_not_left_sourceless(disposable_neo4j_uri: str) -> None:
+def test_unrecomposable_name_is_not_left_sourceless(
+    disposable_neo4j_empty: str,
+) -> None:
     """The reconcile must leave a name compose cannot re-mint with its source.
 
     Releasing the producer is the only way the repair can help a name compose
@@ -99,7 +105,7 @@ def test_unrecomposable_name_is_not_left_sourceless(disposable_neo4j_uri: str) -
     ], state
 
 
-def test_recomposable_name_is_reopened(disposable_neo4j_uri: str) -> None:
+def test_recomposable_name_is_reopened(disposable_neo4j_empty: str) -> None:
     """The documented re-open survives: compose can still rewrite the prose."""
     _seed(RECOMPOSABLE)
     with GraphClient() as gc:
