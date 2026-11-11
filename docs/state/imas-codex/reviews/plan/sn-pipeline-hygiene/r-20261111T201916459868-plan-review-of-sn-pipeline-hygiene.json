@@ -75,9 +75,28 @@
       "note": "The private-import work moves to a new \u00a78 whose endpoint is every cross-module import of a private name in imas_codex/standard_names closed, measured at 27 (five at module level) on 2026-11-11, not two.",
       "reason": "",
       "when": "2026-11-11T20:40:54.698073+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "55af2a7ff77097679125b2d4f0c065462bf7de1b",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a78's done-when requires the import-boundary test to cover the package's top-level modules as well as its subpackages, and to fail when any one closed import is restored.",
+      "reason": "",
+      "when": "2026-11-11T20:41:05.356628+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "55af2a7ff77097679125b2d4f0c065462bf7de1b",
+      "commit_basis": "edit",
+      "note": "\u00a78's done-when requires the import-boundary test to cover the package's top-level modules as well as its subpackages, and to fail when any one closed import is restored.",
+      "reason": "",
+      "when": "2026-11-11T20:41:05.356628+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "",
