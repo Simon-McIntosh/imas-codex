@@ -122,6 +122,16 @@
       "note": "\u00a73 now records the integrity test and the truncated-copy failure under docs/evidence/fragments/sn-full-dd-continuation/.",
       "reason": "",
       "when": "2026-11-11T21:08:18.294596+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "fc88cc3755f58d01536d76fdaf0433b6d75e30f5",
+      "commit_basis": "edit",
+      "finding": "evidence_paths-2",
+      "note": "\u00a72's spend is now recorded in the same fragment as its read-back.",
+      "reason": "",
+      "when": "2026-11-11T21:08:29.632011+00:00"
     }
   ],
   "responses": {
@@ -139,6 +149,15 @@
       "note": "\u00a73 now records the integrity test and the truncated-copy failure under docs/evidence/fragments/sn-full-dd-continuation/.",
       "reason": "",
       "when": "2026-11-11T21:08:18.294596+00:00"
+    },
+    "evidence_paths-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "fc88cc3755f58d01536d76fdaf0433b6d75e30f5",
+      "commit_basis": "edit",
+      "note": "\u00a72's spend is now recorded in the same fragment as its read-back.",
+      "reason": "",
+      "when": "2026-11-11T21:08:29.632011+00:00"
     },
     "reasoning-1": {
       "action": "acted",
