@@ -53,6 +53,16 @@
       "note": "Item 5 now records the pass total beside the authorised tranche and any recorded lead ruling past it.",
       "reason": "",
       "when": "2026-11-11T21:15:00.207497+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "406ccef93fbcfe22b6603dee8d6e09c17a230727",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "\u00a72 now cedes only the lineage's rename batch to \u00a74, so the documentation row of toroidal_momentum_diffusion_coefficient stays in \u00a72.",
+      "reason": "",
+      "when": "2026-11-11T21:15:08.215773+00:00"
     }
   ],
   "responses": {
@@ -64,6 +74,15 @@
       "note": "Item 5 now records the pass total beside the authorised tranche and any recorded lead ruling past it.",
       "reason": "",
       "when": "2026-11-11T21:15:00.207497+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "406ccef93fbcfe22b6603dee8d6e09c17a230727",
+      "commit_basis": "edit",
+      "note": "\u00a72 now cedes only the lineage's rename batch to \u00a74, so the documentation row of toroidal_momentum_diffusion_coefficient stays in \u00a72.",
+      "reason": "",
+      "when": "2026-11-11T21:15:08.215773+00:00"
     },
     "wiring-1": {
       "action": "acted",
