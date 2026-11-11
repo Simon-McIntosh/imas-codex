@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-catalog-consistency">
+<meta name="node-id" content="scc-chaincap-remeasure">
+<title>Landing record — scc-chaincap-remeasure</title>
+</head>
+<body>
+<main>
+<h1 id="scc-chaincap-remeasure-title">Chain-cap identities with no sourced ancestor, re-measured</h1>
+
+<p id="scc-chaincap-remeasure-summary">
+The 2026-10-12 census recorded 92 chain-cap identities whose refinement lineage
+reaches no sourced name; it predates the orphan, sourceless-draft and
+lineage-cycle retirements, so it was re-read on the live graph at commit
+<code>fc99c61f0</code>.
+<strong>73 chain-cap identities have no sourced ancestor, and none of them is
+among those a whole-catalog cut would publish.</strong> The 73 are carried by no
+producer edge, so their only route into a cut is a live structural child, and
+the one that reaches the export population at all is held by a release-authority
+rule. The section therefore closes on this reading, as the section's own
+done-when provides, with no lead choice between rebuilding provenance and
+holding the identities from the cut yet required.
+</p>
+
+<h2 id="scc-chaincap-remeasure-definitions">The definitions, carried unchanged</h2>
+<ul id="scc-chaincap-remeasure-definition-list">
+<li><strong>chain-cap</strong> — <code>sn.chain_length &gt;= 3</code>.</li>
+<li><strong>unsourced</strong> — <code>NOT EXISTS { MATCH (:StandardNameSource)-[:PRODUCED_NAME]-&gt;(sn) }</code>.</li>
+<li><strong>has a sourced ancestor</strong> — <code>EXISTS { MATCH (sn)-[:REFINED_FROM*1..10]-&gt;(a:StandardName) WHERE EXISTS { MATCH (:StandardNameSource)-[:PRODUCED_NAME]-&gt;(a) } }</code>.</li>
+<li><strong>would publish</strong> — the export gate's own population read, eligibility
+classifier and score gate, at a whole-catalog cut's defaults
+(<code>min_score</code> 0.65, <code>include_unreviewed</code> false, no domain
+restriction, <code>names_only</code> false). The instrument calls
+<code>_fetch_export_population</code>, <code>_classify_export_population</code>
+and <code>_run_gate_c</code> rather than restating their rules.</li>
+</ul>
+
+<h2 id="scc-chaincap-remeasure-census">The census</h2>
+<table id="scc-chaincap-remeasure-census-table">
+<thead><tr><th>Measure</th><th>Live value</th><th>2026-10-12</th></tr></thead>
+<tbody>
+<tr><td>chain-cap total</td><td>179</td><td>174</td></tr>
+<tr><td>unsourced chain-cap</td><td>93</td><td>102</td></tr>
+<tr><td>— with a sourced ancestor at any depth</td><td>20</td><td>10</td></tr>
+<tr><td>— with no sourced ancestor at any depth</td><td><strong>73</strong></td><td>92</td></tr>
+<tr><td>— no-ancestor identities inside the export population</td><td>1</td><td>—</td></tr>
+<tr><td>— no-ancestor identities publish-eligible</td><td><strong>0</strong></td><td>—</td></tr>
+<tr><td>— no-ancestor identities a whole-catalog cut would publish</td><td><strong>0</strong></td><td>—</td></tr>
+</tbody>
+</table>
+<p id="scc-chaincap-remeasure-accounting">
+The split closes, and the counts are the size of the identity lists the same
+predicates return rather than a separate count:
+</p>
+<pre id="scc-chaincap-remeasure-accounting-block">20 with a sourced ancestor + 73 with none = 93 unsourced   (split == independent total)
+chain-cap total 179 &gt;= unsourced 93
+ancestry parts disjoint and a partition of the unsourced cohort: true</pre>
+
+<h2 id="scc-chaincap-remeasure-publish">The publish boundary</h2>
+<p id="scc-chaincap-remeasure-publish-prose">
+A whole-catalog cut reads 3,004 identities into its population, classifies 1,683
+of them eligible, and publishes 1,682 after the score gate. Exactly one identity
+from the 73 reaches that population:
+</p>
+<table id="scc-chaincap-remeasure-publish-table">
+<thead><tr><th>Identity</th><th>Population</th><th>Eligible</th><th>Published</th><th>Recorded reason</th></tr></thead>
+<tbody>
+<tr>
+<td><code>coolant_absorbed_energy_accumulated_of_plasma_facing_component</code></td>
+<td>yes</td><td>no</td><td>no</td>
+<td><code>release_hold_no_dd_source</code></td>
+</tr>
+</tbody>
+</table>
+<p id="scc-chaincap-remeasure-publish-note">
+The mechanism is structural rather than incidental: an unsourced identity has no
+<code>PRODUCED_NAME</code> edge, so the export gate's producing-source test can
+only be satisfied for it by a live structural child, and the one identity that
+carries one is held by a release-authority rule before eligibility is reached.
+The remaining 72 are absent from the population at the <code>name_stage</code>
+boundary, so they never reach a cut.
+</p>
+
+<h2 id="scc-chaincap-remeasure-controls">Controls</h2>
+<p id="scc-chaincap-remeasure-controls-prose">
+Two kinds of control ran. The positive controls answer over the live label, so an
+absence is a predicate looking through a populated edge set rather than an
+inability to match; the planted control runs the identical counters against
+fixtures in a disposable Neo4j instance started on a disposable endpoint, so a
+live zero is a reading rather than a predicate that never fires.
+</p>
+<table id="scc-chaincap-remeasure-controls-table">
+<thead><tr><th>Control</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>live: <code>StandardName</code> reachable from a producer</td><td>3,360</td></tr>
+<tr><td>live: <code>PRODUCED_NAME</code> edges</td><td>6,728</td></tr>
+<tr><td>live: <code>StandardName</code> with a populated <code>chain_length</code></td><td>3,954</td></tr>
+<tr><td>live: <code>REFINED_FROM</code> edges</td><td>1,771</td></tr>
+<tr><td>planted: disposable instance empty before planting</td><td>0 nodes</td></tr>
+<tr><td>planted: chain-cap fixtures / with ancestor / without ancestor</td><td>3 / 1 / 2</td></tr>
+<tr><td>planted: published set</td><td>the two fixtures carrying a live child</td></tr>
+<tr><td>planted: childless fixture exclusion reason</td><td><code>no_producing_source</code></td></tr>
+<tr><td>planted: no-ancestor identities at the publish boundary</td><td>1 (non-zero, so the fixture is countable)</td></tr>
+<tr><td>slowest recorded statement</td><td>0.025 s</td></tr>
+</tbody>
+</table>
+<p id="scc-chaincap-remeasure-controls-note">
+The planted fixtures differ only where the tests read: same stage, validation,
+documentation review and score, one carrying a produced ancestor two
+<code>REFINED_FROM</code> hops away, one carrying a live child, one carrying
+neither. The census separated them exactly (1 with, 2 without) and the publish
+asymmetry is the one claimed above.
+</p>
+
+<h2 id="scc-chaincap-remeasure-instrument">The instrument</h2>
+<p id="scc-chaincap-remeasure-instrument-prose">
+The 2026-10-12 census left no run script, so this one is committed beside this
+record: <a href="/imas-codex/evidence/fragments/sn-catalog-consistency/scc-chaincap-remeasure-run.py"><code>scc-chaincap-remeasure-run.py</code></a>,
+with its recorded measures in <a href="/imas-codex/evidence/fragments/sn-catalog-consistency/scc-chaincap-remeasure.json"><code>scc-chaincap-remeasure.json</code></a>.
+Three modes: <code>capture</code> reads the live graph, <code>control</code>
+starts the disposable instance and plants the fixtures,
+<code>verify</code> re-asserts the accounting over a recorded capture.
+<code>capture</code> writes the summary beside the instrument and, when
+<code>--out</code> is given, the complete capture there: the full capture names
+every published identity and every exclusion reason at 429 kB, so it is kept in
+the run directory rather than in the repository, and the summary carries every
+number this record cites.
+</p>
+<pre id="scc-chaincap-remeasure-instrument-command">python docs/evidence/fragments/sn-catalog-consistency/scc-chaincap-remeasure-run.py --mode control
+python docs/evidence/fragments/sn-catalog-consistency/scc-chaincap-remeasure-run.py --mode capture</pre>
+
+<h2 id="scc-chaincap-remeasure-result">Result</h2>
+<p id="scc-chaincap-remeasure-verdict">
+<strong>73 chain-cap identities with no sourced ancestor; 0 of them are among
+those a whole-catalog cut would publish.
+The census's planted control fires.</strong> Every census query names its row set
+(the <code>StandardName</code> label filtered by <code>chain-cap</code> and the
+unsourced predicate) and every ancestry walk is depth-bounded at
+<code>*1..10</code>. The capture recorded every statement's elapsed time itself:
+the slowest was 0.025 s, two orders of magnitude below the ten-second ceiling,
+and the whole mode ran inside the one-hour debug partition window. Spend USD 0:
+no LLM call was made and nothing was captured except by <code>MATCH</code>.
+</p>
+</main>
+</body>
+</html>
