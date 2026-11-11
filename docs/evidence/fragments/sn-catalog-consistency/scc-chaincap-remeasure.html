@@ -61,8 +61,8 @@ ancestry parts disjoint and a partition of the unsourced cohort: true</pre>
 
 <h2 id="scc-chaincap-remeasure-publish">The publish boundary</h2>
 <p id="scc-chaincap-remeasure-publish-prose">
-A whole-catalog cut reads 3,004 identities into its population, classifies 1,683
-of them eligible, and publishes 1,682 after the score gate. Exactly one identity
+A whole-catalog cut reads 3,001 identities into its population, classifies 1,682
+of them eligible, and publishes 1,681 after the score gate. Exactly one identity
 from the 73 reaches that population:
 </p>
 <table id="scc-chaincap-remeasure-publish-table">
@@ -82,6 +82,14 @@ only be satisfied for it by a live structural child, and the one identity that
 carries one is held by a release-authority rule before eligibility is reached.
 The remaining 72 are absent from the population at the <code>name_stage</code>
 boundary, so they never reach a cut.
+</p>
+<p id="scc-chaincap-remeasure-publish-drift">
+The graph is live, so the cut's own totals move between runs: two captures nine
+minutes apart read a 3,004- then a 3,001-identity population and published
+1,682 then 1,681, as concurrent retirement work landed elsewhere. The census
+counts and the zero recorded here were identical in both runs, which is the
+measure this record rests on; the totals above are quoted from the committed
+capture.
 </p>
 
 <h2 id="scc-chaincap-remeasure-controls">Controls</h2>

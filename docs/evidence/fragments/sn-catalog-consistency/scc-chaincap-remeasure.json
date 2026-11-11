@@ -1,18 +1,18 @@
 {
-  "captured_at": "2026-11-11T22:42:47.277623+00:00",
+  "captured_at": "2026-11-11T22:51:25.328785+00:00",
   "chain_cap_at_publish_boundary": [],
   "controls": {
     "chain_length_populated": 3954,
     "produced_edges": 6728,
     "produced_names": 3360,
-    "refined_from_edges": 1771
+    "refined_from_edges": 1770
   },
   "counts": {
     "chain_cap_total": 179,
     "no_ancestor_in_population": 1,
     "no_ancestor_publish_eligible": 0,
     "no_ancestor_would_publish": 0,
-    "published_total": 1682,
+    "published_total": 1681,
     "unsourced_total": 93,
     "with_sourced_ancestor": 20,
     "without_sourced_ancestor": 73
@@ -213,7 +213,7 @@
   },
   "problems": [],
   "publish": {
-    "eligible_size": 1683,
+    "eligible_size": 1682,
     "exclusion_reason_counts": {
       "documentation_not_accepted": 749,
       "invalid_validation_status": 46,
@@ -222,7 +222,7 @@
       "release_hold_dd_recipient_unresolved": 1,
       "release_hold_dual_bound_source_conflict": 1,
       "release_hold_no_dd_source": 4,
-      "resolution_unrecorded": 270,
+      "resolution_unrecorded": 268,
       "validation_observation_missing": 101
     },
     "no_ancestor_exclusion_reasons": {
@@ -232,8 +232,8 @@
       "coolant_absorbed_energy_accumulated_of_plasma_facing_component"
     ],
     "no_ancestor_score_exclusions": {},
-    "population_size": 3004,
-    "published_size": 1682,
+    "population_size": 3001,
+    "published_size": 1681,
     "rules": {
       "bound_adjacent_half_width": 0.05625,
       "domain": null,
@@ -261,16 +261,16 @@
       "without_sourced_ancestor": "MATCH (sn:StandardName) WHERE sn.chain_length >= 3 AND NOT EXISTS { MATCH (:StandardNameSource)-[:PRODUCED_NAME]->(sn) } AND NOT EXISTS { MATCH (sn)-[:REFINED_FROM*1..10]->(a:StandardName) WHERE EXISTS { MATCH (:StandardNameSource)-[:PRODUCED_NAME]->(a) } } RETURN sn.id AS id ORDER BY id"
     }
   },
-  "revision": "fc99c61f0f311bf33b6ca594ba565398169827b9",
+  "revision": "c9bb3c280bb41384e8588a733b41a5d45e87fde3",
   "spend_usd": 0,
   "timings": {
-    "chain_cap_total": 0.0248,
-    "chain_length_populated": 0.0219,
-    "produced_edges": 0.0131,
-    "produced_names": 0.0144,
-    "refined_from_edges": 0.0021,
-    "unsourced_total": 0.0242,
-    "with_sourced_ancestor": 0.0255,
-    "without_sourced_ancestor": 0.025
+    "chain_cap_total": 0.0244,
+    "chain_length_populated": 0.0243,
+    "produced_edges": 0.0156,
+    "produced_names": 0.0157,
+    "refined_from_edges": 0.0027,
+    "unsourced_total": 0.0249,
+    "with_sourced_ancestor": 0.0251,
+    "without_sourced_ancestor": 0.0256
   }
 }
