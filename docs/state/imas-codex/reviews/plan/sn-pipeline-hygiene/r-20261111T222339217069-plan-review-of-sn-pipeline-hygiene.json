@@ -35,6 +35,16 @@
       "note": "\u00a78's prose and done-when are bounded to imports between the package's top-level modules; subpackages keep their existing sibling rule and are outside this section.",
       "reason": "",
       "when": "2026-11-11T23:13:29.374483+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "5512cba60e42df66765f72e54d3f982492ddec18",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The module-level enumeration and its count are removed from \u00a78; the node brief carries the enumeration.",
+      "reason": "",
+      "when": "2026-11-11T23:13:40.997588+00:00"
     }
   ],
   "responses": {
@@ -46,6 +56,15 @@
       "note": "\u00a78's prose and done-when are bounded to imports between the package's top-level modules; subpackages keep their existing sibling rule and are outside this section.",
       "reason": "",
       "when": "2026-11-11T23:13:29.374483+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "5512cba60e42df66765f72e54d3f982492ddec18",
+      "commit_basis": "edit",
+      "note": "The module-level enumeration and its count are removed from \u00a78; the node brief carries the enumeration.",
+      "reason": "",
+      "when": "2026-11-11T23:13:40.997588+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-pipeline-hygiene/r-20261111T222339217069-plan-review-of-sn-pipeline-hygiene.json",
