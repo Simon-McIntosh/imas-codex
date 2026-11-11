@@ -1,0 +1,66 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "imas_codex/standard_names/graph_store/graph_audits.py:2186 reconcile_reviewable_name_stage calls reconcile_descriptionless_composed_names",
+    "imas_codex/standard_names/loop.py:1957 run_sn_pools startup reconcile reaches reconcile_reviewable_name_stage",
+    "imas_codex/standard_names/graph_ops.py:201 re-exports reconcile_descriptionless_composed_names"
+  ],
+  "completed_at": "2026-11-11T04:23:15.832Z",
+  "dispatched_at": "2026-11-11T04:09:37Z",
+  "findings": [
+    {
+      "disposition_suggestion": "folded",
+      "file": "imas_codex/standard_names/graph_store/graph_foundation.py",
+      "line": 633,
+      "severity": "non-blocking",
+      "summary": "_strict_grammar_accepts re-implements the strict accept predicate that imas_codex/standard_names/grammar_adapter.py:117 parse_canonical_name already owns (parse strict, compose, compare, raise on mismatch), and graph_foundation.py:691 already imports from that module, so the new definition forks an owned capability instead of extending it."
+    },
+    {
+      "disposition_suggestion": "folded",
+      "file": "tests/standard_names/test_reconcile_keeps_sources.py",
+      "line": 39,
+      "severity": "non-blocking",
+      "summary": "_seed wipes the whole shared disposable graph with MATCH (n) DETACH DELETE n although the test does not request disposable_neo4j_empty, so when the full -m graph tier runs in one worker it destroys session-scoped data other modules planted and their failures land as order-dependent flakes."
+    },
+    {
+      "disposition_suggestion": "folded",
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-reconcile-source-drop.html",
+      "line": 47,
+      "severity": "non-blocking",
+      "summary": "The graph-tier row quotes '9 passed, 1 warning in 74.69s' from an unpersisted in-session run while the log it links, gate-logs/graph-head-seeds.log, reports 109.36s, and the correction to that row is an uncommitted working-tree edit so the merged fragment keeps the mismatched figure."
+    }
+  ],
+  "justifications": {
+    "durability": "tests/standard_names/test_reconcile_keeps_sources.py:92 fails when the release is reinstated, as negative-control.log shows (FAILED test_unrecomposable_name_is_not_left_sourceless, producers [], name live), while test_recomposable_name_is_reopened guards the opposite over-reach; both assertions read the graph back through production functions rather than repeating an input.",
+    "evidence": "tests/standard_names adds no failure id: gate-logs/base-suite.log (13 failed, 8625 passed) and gate-logs/head-suite-seeds.log (9 failed, 8630 passed), with head-failures-seeds.txt a subset of base-failures.txt; the graph tier is gate-logs/graph-head-seeds.log ending in EXIT=0, and the pre-fix failure is base-reconcile-reproduction.log; the live 4-to-3 read-back of the restore is carried by the manifest and transcript only, with no standalone log.",
+    "fit": "graph_foundation.py:633 sits beside the module's existing _parse_grammar and follows its parse/compose round trip, and no symbol, comment or filename in the diff carries a plan, ticket or version label.",
+    "goal_fidelity": "imas_codex/standard_names/graph_store/graph_audits.py:2261-2269 partitions the reconcile's candidates by graph_foundation._strict_grammar_accepts and releases a source only for names the strict writer can mint, which closes the path that stranded the fourth live draft; verified live that the predicate answers False for second_local_tangential_width_of_fiber_bundle and True for second_local_tangential_width_of_fibre_bundle.",
+    "reuse": "imas_codex/standard_names/grammar_adapter.py:117 parse_canonical_name already owns the strict parse-compose-compare acceptance predicate and graph_foundation.py:691 already imports from it, so _strict_grammar_accepts at graph_foundation.py:633 duplicates the owner instead of extending it.",
+    "scope_discipline": "Every path in the diff is inside a granted scope, the two extra files (graph_audits.py, test_reconcile_descriptionless.py) having been granted in resume-1-advice.txt and resume-2-advice.txt; one one-line fragment edit remains uncommitted at docs/evidence/fragments/sn-integrity-backlog/sib-reconcile-source-drop.html:47 and so is outside any shipped commit."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261111T040851190727-review-of-sib-reconcile-source-drop-840a17d1eba4",
+  "reviewed_base_sha": "9b42761afdd8c5f59d5b523a35ca55b1608fd19e",
+  "reviewed_head_sha": "840a17d1eba46ad46af5842c06d09a3ebe56cfbe",
+  "reviewed_run_id": "r-20261110T235848757037-sib-reconcile-source-drop",
+  "scores": {
+    "durability": 18,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T04:28:23.359079+00:00",
+  "total": 93,
+  "verdicts": {
+    "diff": "Read commit by commit from 9b42761af to 840a17d1e: 825e90773 adds the regression file, e7eb707b5 lands the writer guard in graph_audits.py and graph_foundation.py, a34259584 narrows the candidate read to id-bearing rows, 8563194f4 re-seeds the descriptionless cases with mintable spellings, and 840a17d1e adds the evidence fragment and the 1244-line SVG figure; all six files are inside granted scopes.",
+    "done_when": "The done_when asks for the fragment to name the draft and the reconcile step, a writer fix with a disposable-graph regression failing at base and passing at head, a signed restore with live read-back at 3, and no added failure id in tests/standard_names with -n 8; the manifest and gate-logs/ carry each of these, and base-failures.txt to head-failures-seeds.txt shows the head set as a subset of the base set.",
+    "goal": "The goal is to find and close the startup-reconcile path that left a fourth live draft without a DD source; graph_audits.py:2261-2269 now releases a producer only when graph_foundation._strict_grammar_accepts can re-mint the spelling, and the predicate reads False for second_local_tangential_width_of_fiber_bundle when run against the landed tree.",
+    "manifest": "Read in full: it states status complete, names the five commits, the two gate logs, the negative-control log, and the live read-back at 3 sourceless drafts; its baseline_suite and after_suite blocks are absent so the delta had to be derived from gate-logs/base-failures.txt and gate-logs/head-failures-seeds.txt.",
+    "write_paths": "The source prompt fences six paths and the manifest adds graph_audits.py; resume-1-advice.txt grants graph_audits.py and resume-2-advice.txt grants tests/standard_names/test_reconcile_descriptionless.py, so both files outside the original fence were granted before being edited."
+  }
+}
