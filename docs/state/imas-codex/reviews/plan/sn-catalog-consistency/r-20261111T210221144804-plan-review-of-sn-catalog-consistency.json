@@ -1,0 +1,64 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-11T21:09:46.094Z",
+  "dispatched_at": "2026-11-11T21:03:16Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:76",
+      "id": "wiring-1",
+      "reason": "without the declaration nothing orders \u00a75 after the sizing node, so \u00a75 can be dispatched with no row list to enumerate and the figure of 1,384 grouping placements cannot be produced.",
+      "text": "\u00a75's done-when requires \"every grouping row of `docs/evidence/fragments/sn-integrity-backlog/sib-consistency-batches.json`\" applied or declined, but \u00a75 declares no `depends-on`; the `plan-section-depends-on` meta (line 22) lists `sn-integrity-backlog#s52` only for \u00a72, and that section is still `implementable` in the backlog plan",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:52",
+      "id": "done_when-1",
+      "reason": "the done-when states a ceiling the prose says can be exceeded, so a worker must either treat 60 as the pass limit (the rule this section was corrected away from, against a sized estimate of USD 159.12) or record a total above \"its cap\" and close on an item reading as failed.",
+      "text": "item 5 requires \"the pass total beside its USD 60 cap\", while line 45 defines the first USD 60 as a tranche that the lead may rule past and item 1 (line 48) accepts batches \"held under the lead's recorded spend ruling\"",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:48",
+      "id": "done_when-2",
+      "reason": "read literally the done-when removes that row from \u00a72 with no section adopting it, so the pass can close with one documentation row untouched and both sections green.",
+      "text": "item 1 excludes \"the two-tip lineage's\" rows, but the lineage's second live tip `toroidal_momentum_diffusion_coefficient` also carries a documentation row (batch-104, axis `d`) that \u00a74 owns nowhere: \u00a74's done-when covers the ruling, the loser's supersede and the lineage census only, while line 44 cedes just \"the batches for the two-tip momentum-diffusivity lineage\" (the rename batch)",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "406ccef93fbcfe22b6603dee8d6e09c17a230727",
+  "plan_fingerprint": "2abaaf06777807b30670844b644b0447bbf98cee49ab8755c0ad899eabc1cdba",
+  "plan_slug": "sn-catalog-consistency",
+  "plan_version": 4,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261111T210221144804-plan-review-of-sn-catalog-consistency",
+  "reviewed_blob_sha": "8d22cd0566810525d5daa9eb633468e00264f925",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the snapshot's `data-links` resolve: `sn-integrity-backlog#s52` (s2), `sn-integrity-backlog#s49` (s6), `sn-integrity-backlog#s46` (s7), `sn-integrity-backlog#s22` (s8), `sn-catalog-grouping#s3` (s5) and `sn-full-dd-continuation#s4` (declared dependency `s3`) all name sections present in their plans, and both cited evidence files exist.",
+    "done_when": "a finding \u2014 \u00a72's item 5 still measures the pass total against a \"USD 60 cap\" that the section's own prose (line 45) makes a first tranche the lead may rule past, and item 1's \"except the two-tip lineage's\" exclusion is broader than the prose it rests on.",
+    "evidence_paths": "pass \u2014 the reviewed units consume committed evidence under `docs/evidence/fragments/sn-integrity-backlog/` (`sib-consistency-batches.json`, `sib-consistency-census.json`), both present at the reviewed revision; no evidence is directed to a scratchpad or node-local path.",
+    "naming": "pass \u2014 the changed units introduce no symbols, filenames or comments, and carry no plan labels, stage names or ticket numbers.",
+    "reasoning": "pass \u2014 the three checks hold on the changed units. Root cause matches the cited evidence (the census's 98 of 125 grouping divergence and the batches artifact's 2893 placements); the endpoints are checkable with declared negative controls (a planted divergent family in \u00a72, a planted dangling link in \u00a73, a planted disagreeing-edge name in \u00a75); and the s2 witness end-state is reachable from the batch list \u2014 batch-001 carries 24 of the concept group's 25 members and the 25th, `flux_surface_averaged_tritium_density_at_plasma_boundary`, is the name the proposal takes its anchor definition from (`proposals[\"concept-flux surface average\"].definition_from`), so applying the batch converges the group on that member's definition. No unit prescribes an implementation.",
+    "single_goal": "pass \u2014 \u00a72 delivers the applied batches, and \u00a75's two measures are both `physics_domain` agreement (name-level audit and family grouping), one property with one gate.",
+    "wiring": "a finding \u2014 \u00a75's done-when now enumerates the rows of `sib-consistency-batches.json`, an artifact produced under `sn-integrity-backlog` \u00a752, yet \u00a75 declares no `depends-on` while \u00a72 does."
+  },
+  "section_digests": {
+    "_document": "60da5223ce5c0ad0f73555a1988b66e7737b9e961a9e0c99e0cd3f569bc93745",
+    "s1": "c69f79e72b8fe8652e9dcd8632a35ca7eaa3a205fd5ee3e2ee98bc74afc136ba",
+    "s2": "b1a59a087c50eefee5f0336acd16cea3760e1495302caaf888a24faecf8004bf",
+    "s3": "fdb01b1d5aaf1af353a55b177f9d2b8b87660bf4648fb8922544d39899e8a2c7",
+    "s4": "ef7bd7f314233248216f8598211014764b74d1c74c308db48db9ab9390a33d55",
+    "s5": "876c35b1192ffd9730b94492bc59d27772706fb855cf03a1e06bccb925b3edf8",
+    "s6": "e35c4bf32892d9b90e8392b5e1171957f4973d937daaccdee3ab610d3c1c937e",
+    "s7": "abb53d14a3cb7db35add3d596e723e7c0e012bbee6e7f328d2b7b520a5956700",
+    "s8": "124c4cffdc2b27efae89ba41f97a27ff57b01c0b53ce596b6c025f1e6523e626"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T21:13:42.394510+00:00",
+  "total": null
+}
