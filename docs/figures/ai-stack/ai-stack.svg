@@ -267,28 +267,28 @@ z
 " clip-path="url(#p54d78ba9e4)" style="fill: #faefeb; stroke: #cf5f36; stroke-width: 1.6; stroke-linejoin: miter"/>
    </g>
    <g id="patch_18">
-    <path d="M 15.12 23.76
-L 22.32 23.76
-Q 28.8 23.76 28.8 17.28
-L 28.8 14.4
-Q 28.8 7.92 22.32 7.92
-L 15.12 7.92
-Q 8.64 7.92 8.64 14.4
-L 8.64 17.28
-Q 8.64 23.76 15.12 23.76
+    <path d="M 877.68 23.76
+L 884.88 23.76
+Q 891.36 23.76 891.36 17.28
+L 891.36 14.4
+Q 891.36 7.92 884.88 7.92
+L 877.68 7.92
+Q 871.2 7.92 871.2 14.4
+L 871.2 17.28
+Q 871.2 23.76 877.68 23.76
 z
 " clip-path="url(#p54d78ba9e4)" style="fill: #f4ebf4; stroke: #8e3a8e; stroke-width: 1.6; stroke-linejoin: miter"/>
    </g>
    <g id="patch_19">
-    <path d="M 15.12 45.36
-L 22.32 45.36
-Q 28.8 45.36 28.8 38.88
-L 28.8 36
-Q 28.8 29.52 22.32 29.52
-L 15.12 29.52
-Q 8.64 29.52 8.64 36
-L 8.64 38.88
-Q 8.64 45.36 15.12 45.36
+    <path d="M 877.68 45.36
+L 884.88 45.36
+Q 891.36 45.36 891.36 38.88
+L 891.36 36
+Q 891.36 29.52 884.88 29.52
+L 877.68 29.52
+Q 871.2 29.52 871.2 36
+L 871.2 38.88
+Q 871.2 45.36 877.68 45.36
 z
 " clip-path="url(#p54d78ba9e4)" style="fill: #faefeb; stroke: #cf5f36; stroke-width: 1.6; stroke-linejoin: miter"/>
    </g>
@@ -897,7 +897,7 @@ z
    </g>
    <g id="line2d_46">
     <g clip-path="url(#p54d78ba9e4)">
-     <use xlink:href="#m93257e1731" x="18.72" y="67.68" style="fill: #1d8585; stroke: #ffffff; stroke-width: 2"/>
+     <use xlink:href="#m93257e1731" x="881.28" y="67.68" style="fill: #1d8585; stroke: #ffffff; stroke-width: 2"/>
     </g>
    </g>
    <g id="text_1">
@@ -1063,16 +1063,16 @@ z
     <text style="font-size: 15px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #141414" x="118.8" y="133.575469" transform="rotate(-0 118.8 133.575469)">administrative support</text>
    </g>
    <g id="text_55">
-    <text style="font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="34.56" y="19.046438" transform="rotate(-0 34.56 19.046438)">deterministic</text>
+    <text style="font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="897.12" y="19.046438" transform="rotate(-0 897.12 19.046438)">deterministic</text>
    </g>
    <g id="text_56">
-    <text style="font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="34.56" y="40.667219" transform="rotate(-0 34.56 40.667219)">frontier</text>
+    <text style="font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="897.12" y="40.667219" transform="rotate(-0 897.12 40.667219)">frontier</text>
    </g>
    <g id="text_57">
-    <text style="font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="34.56" y="62.246438" transform="rotate(-0 34.56 62.246438)">open-weight</text>
+    <text style="font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="897.12" y="62.246438" transform="rotate(-0 897.12 62.246438)">open-weight</text>
    </g>
    <g id="text_58">
-    <text style="font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="34.56" y="79.526437" transform="rotate(-0 34.56 79.526437)">workers</text>
+    <text style="font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="897.12" y="79.526437" transform="rotate(-0 897.12 79.526437)">workers</text>
    </g>
   </g>
  </g>

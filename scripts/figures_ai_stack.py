@@ -573,7 +573,8 @@ def draw_users(c: Canvas) -> None:
 
 
 def draw_legend(c: Canvas) -> None:
-    x, y = 1.2, HEIGHT * U - 2.2
+    # top right, in the clear space beside the user bars
+    x, y = WIDTH * U - 19.0, HEIGHT * U - 2.2
     for i, (label, kind) in enumerate(
         [
             ("deterministic", "deterministic"),
