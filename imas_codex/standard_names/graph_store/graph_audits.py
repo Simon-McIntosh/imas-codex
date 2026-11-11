@@ -2243,6 +2243,8 @@ def reconcile_descriptionless_composed_names(
     own = gc is None
     client = foundation.get_services().GraphClient() if own else gc
     try:
+        # A graph double answers with rows of its own shape; only an id-bearing
+        # row is one this statement asked for.
         candidates = [
             str(row["id"])
             for row in client.query(
@@ -2259,6 +2261,7 @@ def reconcile_descriptionless_composed_names(
                 ORDER BY id
                 """
             )
+            if row.get("id")
         ]
         reopen = [
             name for name in candidates if foundation._strict_grammar_accepts(name)
