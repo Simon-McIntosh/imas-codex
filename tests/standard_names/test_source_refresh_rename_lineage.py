@@ -56,9 +56,10 @@ def _row(
     anchor_id: str | None = None,
     old_unit: str = "W.m^-2",
     new_unit: str = "W.m^-2",
-    old_doc: str = "Flux.",
+    old_doc: str | None = "Flux.",
     new_doc: str = "Flux.",
     lineage: bool = False,
+    recorded_binding: bool = True,
 ) -> dict:
     resolved = sr._resolved_source_context(new_path, new_unit, new_doc)
     return {
@@ -80,7 +81,20 @@ def _row(
         "old_manifest_digest": resolved["dd_resolution_manifest_digest"],
         "old_resolution_marker": resolved["_dd_resolution_marker"],
         "lineage_rename_explains": lineage,
+        "recorded_binding": recorded_binding,
     }
+
+
+def _sibling_row(*, new_path: str) -> dict:
+    """A producing source the name's snapshot was never taken from."""
+    return _row(
+        old_path=None,
+        old_unit=None,
+        old_doc=None,
+        new_path=new_path,
+        anchor_id=new_path,
+        recorded_binding=False,
+    )
 
 
 def _steer_recorder(monkeypatch) -> list[str]:
@@ -167,6 +181,47 @@ def test_path_change_with_no_lineage_still_steers(monkeypatch):
 
     summary = sr.refresh_drifted_sources(gc=graph)
 
+    assert steered == ["poloidal_flux_axis"]
+    assert summary["steered"] == 1
+
+
+def test_two_source_name_whose_second_source_is_unchanged_does_not_steer(monkeypatch):
+    # A name with two DD sources carries ONE snapshot path. Comparing every binding
+    # against it reads the sibling source as drifted purely because it is a
+    # different path; each binding must be compared against its own snapshot.
+    recorded = _row(old_path=SNAPSHOT_PATH, new_path=TERMINAL_PATH, lineage=True)
+    sibling = _sibling_row(new_path="mhd/ggd/j_r/values")
+    graph = _FakeGC([recorded, sibling])
+    steered = _steer_recorder(monkeypatch)
+
+    summary = sr.refresh_drifted_sources(gc=graph)
+
+    assert steered == []
+    assert summary["steered"] == 0
+    drifted = sr.detect_source_drift(gc=_FakeGC([recorded, sibling]))
+    # Only the recorded binding's lineage-only move is reported; the sibling is
+    # not a drift at all.
+    assert [d["source_id"] for d in drifted] == [recorded["source_id"]]
+    assert drifted[0]["requires_steering"] is False
+
+
+def test_single_source_whose_own_snapshot_changed_still_steers(monkeypatch):
+    # The per-source comparison must not silence a real change on the source the
+    # snapshot was taken from: the snapshot's own path and unit are what move.
+    changed_path = _row(
+        old_path=SNAPSHOT_PATH,
+        new_path="equilibrium/time_slice/profiles_1d/j_phi",
+        anchor_id="equilibrium/time_slice/profiles_1d/psi",
+    )
+    steered = _steer_recorder(monkeypatch)
+
+    summary = sr.refresh_drifted_sources(gc=_FakeGC([changed_path]))
+    assert steered == ["poloidal_flux_axis"]
+    assert summary["steered"] == 1
+
+    steered = _steer_recorder(monkeypatch)
+    changed_unit = _row(old_unit="m^-2.s^-1", new_unit="W.m^-2")
+    summary = sr.refresh_drifted_sources(gc=_FakeGC([changed_unit]))
     assert steered == ["poloidal_flux_axis"]
     assert summary["steered"] == 1
 

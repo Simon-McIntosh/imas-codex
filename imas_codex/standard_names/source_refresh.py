@@ -40,15 +40,38 @@ _RESOLVE_TERMINAL = """
     WITH sn, head(collect(n)) AS n
 """
 
-#: Resolve one producing source's anchor ``(o)`` to its current terminal node.
-#: Unlike :data:`_RESOLVE_TERMINAL` it keeps one row per source instead of
-#: collapsing a name's sources to one, so a name producing from several paths is
-#: compared against each of them. Leaves ``src``, ``sn``, ``o``, and ``n`` (the
-#: live node, null when the anchor is absent from the graph) bound.
+#: Resolve one producing source's anchor ``(o)`` to its current terminal node,
+#: then bind the snapshot that belongs to *this* source. ``recorded_binding``
+#: is true when the source is the one the name's snapshot was taken from (equal
+#: identities, or one a ``RENAMED_TO`` move connects to the other). ``old_path``,
+#: ``old_unit`` and ``old_doc`` take the source's own captured DD values when it
+#: carries them, and otherwise the name's snapshot only for the recorded
+#: binding, so a sibling source is never compared against another source's
+#: snapshot. Leaves ``src``, ``sn``, ``old_path``, ``old_unit``, ``old_doc``,
+#: ``recorded_binding`` and ``n`` (the live node, null when the anchor is absent
+#: from the graph) bound.
 _RESOLVE_SOURCE_TERMINAL = """
     OPTIONAL MATCH (o)-[:RENAMED_TO*1..12]->(t:IMASNode)
     WHERE NOT exists { (t)-[:RENAMED_TO]->() }
     WITH src, sn, o, coalesce(head(collect(t)), o) AS n
+    WITH src, sn, o, n,
+         (src.source_id = sn.source_path
+          OR EXISTS {
+              MATCH (a:IMASNode {id: src.source_id})
+                    -[:RENAMED_TO*1..12]->(b:IMASNode {id: sn.source_path})
+          }
+          OR EXISTS {
+              MATCH (b:IMASNode {id: sn.source_path})
+                    -[:RENAMED_TO*1..12]->(a:IMASNode {id: src.source_id})
+          }) AS recorded_binding
+    WITH src, sn, o, n, recorded_binding,
+         coalesce(src.dd_path,
+                  CASE WHEN recorded_binding THEN sn.source_path END) AS old_path,
+         coalesce(src.dd_unit,
+                  CASE WHEN recorded_binding THEN sn.source_unit END) AS old_unit,
+         coalesce(src.dd_documentation,
+                  CASE WHEN recorded_binding THEN sn.source_documentation END)
+             AS old_doc
 """
 
 
@@ -169,12 +192,27 @@ def _source_deltas(r: dict[str, Any], resolved: dict[str, Any]) -> list[dict[str
     """Compare one producing source's live node against the name's snapshot.
 
     A ``source_path`` difference the ``RENAMED_TO`` lineage fully explains — the
-    snapshot path is a direct or transitive ancestor of the resolved terminal —
-    is carried as a delta flagged ``rename`` rather than a plain path change, so
+    snapshot path is a ``RENAMED_TO`` ancestor of the resolved terminal — is
+    carried as a delta flagged ``rename`` rather than a plain path change, so
     the caller re-stamps the snapshot without steering documentation.
+
+    ``old_path``, ``old_unit`` and ``old_doc`` are this source's own snapshot
+    (see :data:`_RESOLVE_SOURCE_TERMINAL`); a field the source never captured is
+    null and is not compared, so a name with several sources is never read as
+    drifted because a sibling's path differs. The provenance fields describe
+    the *name*, so they are compared only for the binding the name's snapshot
+    was taken from.
     """
     deltas = []
-    if _norm(r["old_path"]) != _norm(r["new_path"]):
+    if (
+        r.get("old_path") is None
+        and r.get("old_unit") is None
+        and r.get("old_doc") is None
+    ):
+        # This source has no snapshot of its own and is not the source the
+        # name's snapshot recorded: there is nothing to compare it against.
+        return deltas
+    if r.get("old_path") is not None and _norm(r["old_path"]) != _norm(r["new_path"]):
         delta: dict[str, Any] = {
             "field": "source_path",
             "old": r["old_path"],
@@ -183,9 +221,13 @@ def _source_deltas(r: dict[str, Any], resolved: dict[str, Any]) -> list[dict[str
         if r.get("lineage_rename_explains"):
             delta["rename"] = True
         deltas.append(delta)
-    if _norm(r["old_unit"]) != _norm(resolved["unit"]):
+    if r.get("old_unit") is not None and _norm(r["old_unit"]) != _norm(
+        resolved["unit"]
+    ):
         deltas.append({"field": "units", "old": r["old_unit"], "new": resolved["unit"]})
-    if _norm(r["old_doc"]) != _norm(resolved["documentation"]):
+    if r.get("old_doc") is not None and _norm(r["old_doc"]) != _norm(
+        resolved["documentation"]
+    ):
         deltas.append(
             {
                 "field": "documentation",
@@ -193,6 +235,8 @@ def _source_deltas(r: dict[str, Any], resolved: dict[str, Any]) -> list[dict[str
                 "new": resolved["documentation"],
             }
         )
+    if not r.get("recorded_binding", True):
+        return deltas
     published = resolved["published_dd_context"]
     if _norm(r.get("old_raw_unit")) != _norm(published.get("unit")):
         deltas.append(
@@ -300,9 +344,10 @@ def detect_source_drift(
             RETURN sn.id AS sn_id, src.id AS source_id, o.id AS anchor_id,
                    sn.name_stage AS name_stage,
                    sn.docs_stage AS docs_stage,
-                   sn.source_unit AS old_unit, n.unit AS new_unit,
-                   sn.source_documentation AS old_doc, n.documentation AS new_doc,
-                   sn.source_path AS old_path, n.id AS new_path,
+                   old_unit, n.unit AS new_unit,
+                   old_doc, n.documentation AS new_doc,
+                   old_path, n.id AS new_path,
+                   recorded_binding,
                    sn.source_raw_unit AS old_raw_unit,
                    sn.source_raw_documentation AS old_raw_doc,
                    sn.source_dd_resolution_ids AS old_resolution_ids,
@@ -310,7 +355,7 @@ def detect_source_drift(
                    sn.source_dd_resolution_manifest_digest AS old_manifest_digest,
                    sn.source_dd_resolution_marker AS old_resolution_marker,
                    EXISTS {{
-                       MATCH (p0:IMASNode {{id: sn.source_path}})
+                       MATCH (p0:IMASNode {{id: old_path}})
                              -[:RENAMED_TO*1..12]->(t0:IMASNode)
                        WHERE t0.id = n.id
                    }} AS lineage_rename_explains
