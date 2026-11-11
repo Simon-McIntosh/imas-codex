@@ -125,6 +125,16 @@
       "note": "\u00a72's before/after comparison is now restricted to the families and names the batches touched, measured on that population at both ends, so names the continuation run creates elsewhere cannot move it; the sourceless-draft guard is read over the same population.",
       "reason": "",
       "when": "2026-11-11T20:39:51.029890+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "55af2a7ff77097679125b2d4f0c065462bf7de1b",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "\u00a74 now requires the lineage census to report a two-tip lineage planted in a disposable graph, and \u00a77 requires the read-back to list a live name planted with no producing source in a disposable graph.",
+      "reason": "",
+      "when": "2026-11-11T20:40:04.384723+00:00"
     }
   ],
   "responses": {
@@ -136,6 +146,15 @@
       "note": "\u00a72's before/after comparison is now restricted to the families and names the batches touched, measured on that population at both ends, so names the continuation run creates elsewhere cannot move it; the sourceless-draft guard is read over the same population.",
       "reason": "",
       "when": "2026-11-11T20:39:51.029890+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "55af2a7ff77097679125b2d4f0c065462bf7de1b",
+      "commit_basis": "edit",
+      "note": "\u00a74 now requires the lineage census to report a two-tip lineage planted in a disposable graph, and \u00a77 requires the read-back to list a live name planted with no producing source in a disposable graph.",
+      "reason": "",
+      "when": "2026-11-11T20:40:04.384723+00:00"
     },
     "reasoning-1": {
       "action": "acted",
