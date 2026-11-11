@@ -101,6 +101,16 @@
       "finding": "duplicate_owner-2",
       "reason": "The worker settles the method and the endpoint is unchanged; the \u00a74 and \u00a75 briefs name the package-level docs-axis stats in graph_catalog.py and the export report's own fields as the readers to call.",
       "when": "2026-11-11T22:20:21.425247+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "fc99c61f0f311bf33b6ca594ba565398169827b9",
+      "commit_basis": "edit",
+      "finding": "interface_budget-1",
+      "note": "\u00a74 now says that if a source-id selector is added to sn run for this, it replaces the ad hoc source-id lists in evidence scripts, which is the surface it retires.",
+      "reason": "",
+      "when": "2026-11-11T22:20:30.814875+00:00"
     }
   ],
   "responses": {
@@ -127,6 +137,15 @@
       "by": "",
       "reason": "The worker settles the method and the endpoint is unchanged; the \u00a74 and \u00a75 briefs name the package-level docs-axis stats in graph_catalog.py and the export report's own fields as the readers to call.",
       "when": "2026-11-11T22:20:21.425247+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "fc99c61f0f311bf33b6ca594ba565398169827b9",
+      "commit_basis": "edit",
+      "note": "\u00a74 now says that if a source-id selector is added to sn run for this, it replaces the ad hoc source-id lists in evidence scripts, which is the surface it retires.",
+      "reason": "",
+      "when": "2026-11-11T22:20:30.814875+00:00"
     },
     "reuse_search-1": {
       "action": "acted",
