@@ -228,7 +228,12 @@ def claim_refine_docs_batch(
     from imas_codex.standard_names.chain_history import docs_chain_history
 
     where = pool_admission_where(
-        "refine_docs", scoped_docs=bool(scope_run_id or edits_only)
+        "refine_docs",
+        scoped_docs=bool(scope_run_id or edits_only),
+        expressions={
+            "has_winning_docs_review": services.docs_review_eligibility_where(),
+            "has_open_docs_hold": services.has_open_docs_hold_where(),
+        },
     )
     query_params = pool_admission_params(min_score=min_score, rotation_cap=rotation_cap)
     items = services._claim_sn_atomic(

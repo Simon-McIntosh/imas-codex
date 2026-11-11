@@ -290,11 +290,27 @@ class StandardNamePoolPredicate:
     pool: str
     admits: Callable[[Mapping[str, Any]], bool]
 
-    def cypher(self, expressions: Mapping[str, str] | None = None) -> str:
+    def cypher(
+        self, expressions: Mapping[str, str | _CategoricalProjection] | None = None
+    ) -> str:
         """Render the same condition used by the in-memory census."""
         if not isinstance(self.admits, _PoolCondition):
             raise TypeError(f"Pool {self.pool!r} has no graph admission condition")
         return self.admits.cypher(expressions or identity_state_expressions())
+
+
+@dataclass(frozen=True)
+class _CategoricalProjection:
+    """Named states and their graph conditions share one projection table."""
+
+    conditions: Mapping[str, str]
+
+    def __str__(self) -> str:
+        branches = " ".join(
+            f"WHEN {condition} THEN '{value}'"
+            for value, condition in self.conditions.items()
+        )
+        return f"CASE {branches} ELSE null END"
 
 
 @dataclass(frozen=True)
@@ -323,7 +339,7 @@ class _PoolCondition:
     def __invert__(self) -> _PoolCondition:
         return _PoolCondition("not", (self,))
 
-    def cypher(self, expressions: Mapping[str, str]) -> str:
+    def cypher(self, expressions: Mapping[str, str | _CategoricalProjection]) -> str:
         if self.operation in {"and", "or"}:
             joiner = f" {self.operation.upper()} "
             return (
@@ -332,9 +348,30 @@ class _PoolCondition:
                 + ")"
             )
         if self.operation == "not":
-            return f"NOT ({self.operands[0].cypher(expressions)})"
+            child = self.operands[0]
+            if child.operation in {"and", "or"}:
+                opposite = "or" if child.operation == "and" else "and"
+                return _PoolCondition(
+                    opposite, tuple(~term for term in child.operands)
+                ).cypher(expressions)
+            if child.operation == "not":
+                return child.operands[0].cypher(expressions)
+            field, value = child.operands
+            expression = str(expressions[field])
+            if value is True and expression.endswith(" IS NOT NULL"):
+                return expression.removesuffix(" IS NOT NULL") + " IS NULL"
+            if isinstance(value, str) and value and expression == f"sn.{field}":
+                literal = value.replace("'", "''")
+                return f"coalesce({expression}, '') <> '{literal}'"
+            return f"NOT ({child.cypher(expressions)})"
         field, value = self.operands
-        expression = expressions[field]
+        projection = expressions[field]
+        if (
+            isinstance(projection, _CategoricalProjection)
+            and value in projection.conditions
+        ):
+            return f"coalesce(({projection.conditions[value]}), false)"
+        expression = str(projection)
         if value is True:
             return f"coalesce(({expression}), false)"
         if value is None:
@@ -347,7 +384,7 @@ def _state_is(field: str, value: Any) -> _PoolCondition:
     return _PoolCondition("equals", (field, value))
 
 
-def identity_state_expressions() -> dict[str, str]:
+def identity_state_expressions() -> dict[str, str | _CategoricalProjection]:
     """Project the state read by pool admission from one StandardName node."""
     from imas_codex.standard_names.graph_store.graph_foundation import (
         docs_review_winner_query_body,
@@ -366,7 +403,13 @@ def identity_state_expressions() -> dict[str, str]:
                 "edit_mode",
             )
         },
-        "description_state": "CASE WHEN sn.description IS NULL THEN 'missing' WHEN sn.description = $parent_desc_placeholder THEN 'placeholder' ELSE 'substantive' END",
+        "description_state": _CategoricalProjection(
+            {
+                "missing": "sn.description IS NULL",
+                "placeholder": "sn.description = $parent_desc_placeholder",
+                "substantive": "sn.description IS NOT NULL AND sn.description <> $parent_desc_placeholder",
+            }
+        ),
         "name_score_state": "CASE WHEN sn.reviewer_score_name IS NULL THEN 'missing' WHEN sn.reviewer_score_name < $min_score THEN 'below' ELSE 'passing' END",
         "docs_score_state": "CASE WHEN sn.reviewer_score_docs IS NULL THEN 'missing' WHEN sn.reviewer_score_docs < $min_score THEN 'below' ELSE 'passing' END",
         "name_attempts_under_cap": "coalesce(sn.refine_attempts, coalesce(sn.chain_length, 0)) < $rotation_cap",
@@ -479,7 +522,8 @@ def standard_name_pool_predicates(
         active
         & ~review_name
         & (
-            _state_is("name_stage", "reviewed")
+            _state_is("validation_status", "valid")
+            & _state_is("name_stage", "reviewed")
             & _state_is("name_score_state", "below")
             & _state_is("name_attempts_under_cap", True)
             & ~_state_is("rename_resubmit_capped", True)
@@ -543,13 +587,20 @@ def standard_name_pool_predicates(
     )
 
 
-def pool_admission_where(pool: str, *, scoped_docs: bool = False) -> str:
+def pool_admission_where(
+    pool: str,
+    *,
+    scoped_docs: bool = False,
+    expressions: Mapping[str, str] | None = None,
+) -> str:
     """Render a pool's rule for claims and pending queries alike."""
+    projections = identity_state_expressions()
+    projections.update(expressions or {})
     return next(
         p
         for p in standard_name_pool_predicates(scoped_docs=scoped_docs)
         if p.pool == pool
-    ).cypher()
+    ).cypher(projections)
 
 
 def pool_admission_params(
@@ -569,6 +620,44 @@ def pool_admission_params(
         parent_desc_placeholder=DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
         **docs_review_eligibility_params(),
     )
+
+
+def _validate_claimed_review_candidates(
+    items: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Validate unvalidated review claims without spending on a reviewer.
+
+    The validation writer releases its token atomically. Valid candidates are
+    claimed for review on the next poll; quarantined ones retain their issues
+    and require a validated successor. Already validated claims stay owned.
+    """
+    from imas_codex.standard_names.graph_store.graph_catalog_reset import (
+        mark_names_validated,
+    )
+    from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
+        validate_name_candidate,
+    )
+
+    ready = []
+    for item in items:
+        if item.get("validation_status", "valid") == "valid":
+            ready.append(item)
+            continue
+        if item.get("validation_status") not in {None, "pending"}:
+            continue
+        issues, summary, status = validate_name_candidate(item)
+        mark_names_validated(
+            item["claim_token"],
+            [
+                {
+                    "id": item["id"],
+                    "validation_issues": issues,
+                    "validation_layer_summary": summary,
+                    "validation_status": status,
+                }
+            ],
+        )
+    return ready
 
 
 def identity_state_groups(
@@ -771,6 +860,13 @@ def classify_identity_state_groups(
         stranded_count += count
         state_key = _state_breakdown_key(state)
         by_state[state_key] = by_state.get(state_key, 0) + count
+
+    if terminal_for_run_count:
+        logger.info(
+            "identity census: terminal_for_run=%d by_reason=%s",
+            terminal_for_run_count,
+            dict(sorted(terminal_for_run_by_reason.items())),
+        )
 
     return {
         "population_count": population_count,

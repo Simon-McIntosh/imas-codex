@@ -267,7 +267,11 @@ def _verify_enrich_parents_claim_winners(
     if not token:
         return items
     ids = [it["id"] for it in items]
-    where = pool_admission_where("enrich_parents")
+    where = pool_admission_where("enrich_parents").replace(
+        "$parent_desc_placeholder", "$placeholder"
+    )
+    params = pool_admission_params()
+    params["placeholder"] = params.pop("parent_desc_placeholder")
     with services.GraphClient() as gc:
         rows = gc.query(
             f"""
@@ -278,7 +282,7 @@ def _verify_enrich_parents_claim_winners(
             """,
             ids=ids,
             token=token,
-            **pool_admission_params(),
+            **params,
         )
     winners = {r["id"] for r in rows}
     if len(winners) == len(items):

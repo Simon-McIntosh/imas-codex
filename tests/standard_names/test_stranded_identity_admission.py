@@ -262,6 +262,19 @@ def _plant_states(graph, states):
     """,
         nodes=nodes,
     )
+    from imas_codex.standard_names.review.holds import raise_hold
+
+    for state in states:
+        if state.get("has_open_docs_hold"):
+            raise_hold(
+                state["identities"][0],
+                "docs",
+                "docs_lint_error",
+                "Documentation contradicts its definition",
+                "Seeded contradiction",
+                "test",
+                graph=graph,
+            )
 
 
 @pytest.mark.graph
@@ -441,3 +454,50 @@ def test_invalid_pending_candidate_is_quarantined_before_review(disposable_neo4j
         )
         assert result["stranded_count"] == 0
         assert result["terminal_for_run_by_reason"] == {"validation_quarantined": 1}
+
+
+@pytest.mark.graph
+@pytest.mark.timeout(120)
+def test_passing_docs_with_open_hold_are_owned_by_refinement(disposable_neo4j_empty):
+    from imas_codex.cli.sn import _compute_pool_pending
+    from imas_codex.standard_names.graph_store.graph_docs_persistence import (
+        claim_refine_docs_batch,
+    )
+
+    state = dict(
+        control_states()["refine_docs"],
+        docs_score_state="passing",
+        has_open_docs_hold=True,
+    )
+    with GraphClient() as graph:
+        _plant_states(graph, [state])
+        group = next(
+            row
+            for row in identity_state_groups(gc=graph)
+            if state["identities"][0] in row["identities"]
+        )
+        assert group["has_open_docs_hold"] is True
+        assert group["has_winning_docs_review"] is True
+        assert [p.pool for p in standard_name_pool_predicates() if p.admits(group)] == [
+            "refine_docs"
+        ]
+        pending = _compute_pool_pending(
+            graph, domains=None, rotation_cap=3, min_score=0.75
+        )
+        assert pending["refine_docs"] == 1
+        assert pending["review_docs"] == 0
+        assert [item["id"] for item in claim_refine_docs_batch(batch_size=1)] == state[
+            "identities"
+        ]
+
+
+def test_refinement_never_admits_an_unvalidated_name():
+    state = dict(
+        control_states()["refine_name"],
+        validation_status="pending",
+        description_state="missing",
+    )
+    predicate = next(
+        p for p in standard_name_pool_predicates() if p.pool == "refine_name"
+    )
+    assert not predicate.admits(state)

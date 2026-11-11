@@ -10,7 +10,11 @@ from imas_codex.discovery.base.claims import retry_on_deadlock
 from imas_codex.standard_names.defaults import (
     DEFAULT_MIN_SCORE,
 )
-from imas_codex.standard_names.pools import pool_admission_params, pool_admission_where
+from imas_codex.standard_names.pools import (
+    _validate_claimed_review_candidates,
+    pool_admission_params,
+    pool_admission_where,
+)
 
 from .graph_foundation import (
     _CLAIM_TIMEOUT_SECONDS,
@@ -318,7 +322,7 @@ def _claim_sn_atomic(
         if restage_review_axis not in {"name", "docs"}:
             raise ValueError("restage_review_axis must be 'name' or 'docs'")
         stage_property = f"{restage_review_axis}_stage"
-        stage_set += f", sn.{stage_property} = 'drafted'"
+        stage_set += f", sn.{stage_property} = CASE WHEN sn.{stage_property} IS NULL OR sn.{stage_property} IN ['pending', 'reviewed', 'accepted'] THEN 'drafted' ELSE sn.{stage_property} END"
     if drain_scope_id:
         stage_set += ", sn.drain_claim_scope_id = $drain_scope_id"
         params["drain_scope_id"] = drain_scope_id
@@ -664,11 +668,7 @@ def claim_review_name_batch(
         edits_only=edits_only,
         restage_review_axis="name",
     )
-    from imas_codex.standard_names.graph_store.graph_audits import (
-        validate_claimed_review_candidates,
-    )
-
-    items = validate_claimed_review_candidates(items)
+    items = _validate_claimed_review_candidates(items)
     return services._verify_name_claim_winners(items, eligible_stage="drafted")
 
 

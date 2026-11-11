@@ -43,11 +43,21 @@ def _classify(*groups: dict[str, object]) -> dict[str, object]:
 
 
 def test_review_quorum_shortfall_is_reported_with_its_state() -> None:
-    result = _classify(_group("reviewed_shortfall", review_quorum_shortfall=True))
+    state = _group(
+        "reviewed_shortfall",
+        review_quorum_shortfall=True,
+        name_hold_reason="Only one reviewer returned a verdict",
+    )
+    before = dict(state)
+    result = _classify(state)
 
     assert result["stranded_count"] == 0
     assert result["terminal_for_run_count"] == 1
     assert result["terminal_for_run_ids"] == ["reviewed_shortfall"]
+    assert result["terminal_for_run_reasons"] == {
+        "reviewed_shortfall": "Only one reviewer returned a verdict"
+    }
+    assert state == before
     assert result["terminal_for_run_by_reason"] == {"name_review_quorum_shortfall": 1}
     assert not any(
         p.admits(_group("reviewed_shortfall", review_quorum_shortfall=True))

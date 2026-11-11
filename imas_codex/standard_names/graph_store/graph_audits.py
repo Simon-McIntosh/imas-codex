@@ -279,44 +279,6 @@ PROMOTE_STRANDED_DOCS_WHERE = (
 )
 
 
-def validate_claimed_review_candidates(
-    items: list[dict[str, Any]],
-) -> list[dict[str, Any]]:
-    """Validate unvalidated review claims without spending on a reviewer.
-
-    The validation writer releases its token atomically. Valid candidates are
-    claimed for review on the next poll; quarantined ones retain their issues
-    and require a validated successor. Already validated claims stay owned.
-    """
-    from imas_codex.standard_names.graph_store.graph_catalog_reset import (
-        mark_names_validated,
-    )
-    from imas_codex.standard_names.worker_tasks.worker_compose_and_validate import (
-        validate_name_candidate,
-    )
-
-    ready = []
-    for item in items:
-        if item.get("validation_status", "valid") == "valid":
-            ready.append(item)
-            continue
-        if item.get("validation_status") not in {None, "pending"}:
-            continue
-        issues, summary, status = validate_name_candidate(item)
-        mark_names_validated(
-            item["claim_token"],
-            [
-                {
-                    "id": item["id"],
-                    "validation_issues": issues,
-                    "validation_layer_summary": summary,
-                    "validation_status": status,
-                }
-            ],
-        )
-    return ready
-
-
 def promote_stranded_reviewed(
     min_score: float = DEFAULT_MIN_SCORE,
     *,
