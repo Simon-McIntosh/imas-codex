@@ -43,8 +43,8 @@ ROOT = Path(__file__).resolve().parents[1]
 FIGURES = ROOT / "docs/figures/ai-stack"
 STEM = "ai-stack"
 
-WIDTH, HEIGHT = 14.0, 6.45  # in: wider than the slide canvas, leaving room for a title
-U = 10  # drawing units per inch, so the axes run 0..140 by 0..64.5
+WIDTH, HEIGHT = 14.0, 6.17  # in: wider than the slide canvas, leaving room for a title
+U = 10  # drawing units per inch, so the axes run 0..140 by 0..61.7
 
 # Deterministic in the ICP knowledge map's relation plum; agentic work in coral where a
 # frontier model drives it, teal where it can also run on-premises.
@@ -236,10 +236,10 @@ LAYER_GAP = 1.5  # between a band's sloped right edge and its name
 
 LAYERS = {  # (y0, y1) of each band
     "icp": (2.6, 7.8),
-    "graph": (11.6, 17.6),
-    "functions": (18.6, 33.4),
-    "interfaces": (34.4, 46.6),
-    "users": (47.6, 63.2),
+    "graph": (8.8, 14.8),
+    "functions": (15.8, 30.6),
+    "interfaces": (31.6, 43.8),
+    "users": (44.8, 60.4),
 }
 
 LAYER_NAMES = {
@@ -319,8 +319,10 @@ def draw_bands(c: Canvas) -> None:
 def draw_layer_names(c: Canvas) -> None:
     for key, lines in LAYER_NAMES.items():
         y0, y1 = LAYERS[key]
-        pitch = 2.9
-        mid = (y0 + y1) / 2
+        # the graph and platform bands sit close, so their names part: the graph's
+        # rides high in its band, the platform's tightens and drops low in its own
+        pitch = 2.75 if key == "icp" else 2.9
+        mid = (y0 + y1) / 2 + {"graph": 0.9, "icp": -0.7}.get(key, 0.0)
         for i, line in enumerate(lines):
             y = mid + (len(lines) - 1) / 2 * pitch - i * pitch
             # each line leans on the pyramid's slope at its own height
@@ -355,16 +357,6 @@ def draw_foundation(c: Canvas) -> None:
             solid_capstyle="butt",
             zorder=1,
         )
-    c.text(
-        CENTRE,
-        (y1 + g0) / 2,
-        "extract, transform, load",
-        size=OUTER_SMALL,
-        weight="bold",
-        color=c.roles.deterministic,
-        # a tight white backing, so the lines it crosses still show above and below
-        bbox={"facecolor": "white", "edgecolor": "none", "pad": 1.5},
-    )
     # the graph becomes ITER infrastructure, alongside the platform it is built on
     bottom, top = LAYERS["icp"][0], LAYERS["graph"][1]
     xb = 4.4
@@ -375,15 +367,17 @@ def draw_foundation(c: Canvas) -> None:
         lw=1.6,
         zorder=3,
     )
-    c.text(
-        xb - 1.6,
-        (bottom + top) / 2,
-        "ITER infrastructure",
-        size=OUTER_SMALL - 1,
-        rotation=90,
-        color=c.roles.deterministic,
-        weight="bold",
-    )
+    # two rotated lines, read bottom to top, so the label fits beside the bracket
+    for x, line in [(xb - 3.1, "ITER"), (xb - 1.1, "infrastructure")]:
+        c.text(
+            x,
+            (bottom + top) / 2,
+            line,
+            size=OUTER_SMALL - 2,
+            rotation=90,
+            color=c.roles.deterministic,
+            weight="bold",
+        )
 
 
 def draw_graph(c: Canvas) -> None:
@@ -480,9 +474,6 @@ def draw_functions(c: Canvas) -> None:
         xytext=(xa, y0),
         arrowprops={"arrowstyle": "-|>", "color": INK, "lw": 1.4, "mutation_scale": 14},
         zorder=8,
-    )
-    c.text(
-        xa + 1.0, (g1 + y0) / 2, "read-only", size=OUTER_SMALL, color=MUTED, ha="left"
     )
 
 
