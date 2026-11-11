@@ -1,0 +1,52 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-11T21:22:33.635Z",
+  "dispatched_at": "2026-11-11T21:11:53Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-full-dd-continuation.html:52",
+      "id": "reasoning-1",
+      "reason": "as written, a coordinator sizes and briefs s4 believing the run eats into the failed drain's pending documentation, while the run can only touch 5 documentation-missing sources and the done-when cannot show the backlog moved, leaving 976 names and a 340-name documentation regression with no owning section.",
+      "text": "s4 states \"The documentation backlog may still be open when the run starts; its classes are among those the run advances\", but the backlog the drain actually left is a name-level one: `sib-docs-drain-after-admission` (commit 7aef43b21) records documentation stages after its stalled run as accepted 2,028, reviewed 46, drafted 3, pending 926, exhausted 1, with accepted documentation falling 340 net, whereas the census class s4 can advance for documentation is \"documentation missing\" at 5 sources (because the run is scoped by source), and s4's done-when measures no documentation stage at all \u2014 so the sentence promises progress on a 976-name backlog that nothing in the plan measures or owns.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-full-dd-continuation.html:52",
+      "id": "reasoning-2",
+      "reason": "the exclusion is unambiguous in effect for this run and the done-when does not require any vocabulary-gap source, so the ambiguity costs a reader one lookup rather than sending the run down a wrong path.",
+      "text": "s4 excludes the vocabulary-gap class \"until the ISN release carrying its tokens is pinned\" but names no such release or section, while \u00a71 already records ISN 0.11.1 as \"published and pinned\" and the census still classes 92 sources at vocabulary gap, so the exclusion's stated exit condition reads as already satisfied and the only release identifier for the gap tokens (`imas-standard-names:dd-gap-vocabulary#s4`) lives in the sibling plan rather than here.",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "a8eb31c533afa7049069a6378cf005ade94b6cd2",
+  "plan_fingerprint": "7d559a8ee96f34b535c1a58d4d5001f3b83c38141e5fa4e11d98db18ab67a945",
+  "plan_slug": "sn-full-dd-continuation",
+  "plan_version": 4,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261111T211053107120-plan-review-of-sn-full-dd-continuation",
+  "reviewed_blob_sha": "29f15531f5cc2264cda526e8cd25755932bc73ca",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `sn-integrity-backlog` \u00a752 (`docs/plans/sn-integrity-backlog.html:305`) exists, `sn-catalog-consistency` \u00a72 (`docs/plans/sn-catalog-consistency.html:43`) exists and authorises the USD 60 tranche s4 reserves against, and the drain claim resolves to commit `7aef43b21` (\"docs: record stalled documentation drain outcome\"), whose record confirms a failed terminal condition (`stop_reason: stalled`, USD 11.14 of USD 20, 0 stranded).",
+    "done_when": "pass \u2014 s3 carries a falsifiable control (the archive integrity test must fail on a deliberately truncated copy) and s4 carries two (a source planted outside every class in a disposable graph makes the class sums disagree; \u00a72's planted attempted-but-not-produced source), on top of directly measurable counts.",
+    "evidence_paths": "pass \u2014 both units' gates write under `docs/evidence/fragments/sn-full-dd-continuation/`, a durable repo path, not a run or node-local scratch tree.",
+    "naming": "pass \u2014 neither unit names a code symbol, file to implement, or tracker label; `sn run` and the signed reset are named as the run's endpoint, not as an implementation to write.",
+    "reasoning": "a finding \u2014 s4's claim that the failed documentation drain's \"classes are among those the run advances\" is not supported by the drain's own record, which leaves 976 names short of accepted documentation while the only documentation class in the census is 5 sources.",
+    "single_goal": "pass \u2014 s3 delivers one checkpoint and s4 delivers one continuation run; neither carries a second deliverable.",
+    "wiring": "pass \u2014 s3/s4's `depends-on` edges resolve (`sn-full-dd-continuation#s2`, `#s3`, `sn-integrity-backlog#s52`), and the \u00a752 edge is satisfiable rather than deadlocked because the S18 review record at `docs/plans/sn-integrity-backlog.html:1500` says \u00a752 is descoped once its two in-flight runs land, which is exactly the condition s3 now states (no \u00a752 run writing the graph)."
+  },
+  "section_digests": {
+    "_document": "896783928670535faa74894298fc4f61506cd7598dc1af6c5dbca2f23b1da1ff",
+    "s1": "6edb6bfc73bfa8f3d3435cdd83ea2fde91367cf006a53a93995f459601295db8",
+    "s2": "3d1690607596f8357d10f84f951914dea77216d8550c12bc6153c4b5b1c5b664",
+    "s3": "2721ffe28ddf29dbfe0d59d54c45bf0fe847b5c60ecea7d16008efeb53c91511",
+    "s4": "1364bf382a3d60b063e43aaa5481f768b00ec191811ac8b331592b1450658b75"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T21:41:20.696397+00:00",
+  "total": null
+}
