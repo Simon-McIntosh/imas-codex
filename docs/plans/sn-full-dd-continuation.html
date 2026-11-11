@@ -19,12 +19,12 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names">
   <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
-  <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;sn-integrity-backlog#s52&quot;],&quot;s4&quot;:[&quot;sn-full-dd-continuation#s2&quot;,&quot;sn-full-dd-continuation#s3&quot;,&quot;sn-integrity-backlog#s52&quot;],&quot;s5&quot;:[&quot;sn-integrity-backlog#s52&quot;]}">
+  <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;sn-integrity-backlog#s52&quot;],&quot;s4&quot;:[&quot;sn-full-dd-continuation#s2&quot;,&quot;sn-full-dd-continuation#s3&quot;,&quot;sn-integrity-backlog#s52&quot;],&quot;s5&quot;:[&quot;sn-integrity-backlog#s52&quot;,&quot;sn-full-dd-continuation#s4&quot;]}">
   <title>The Rest Of The DD Composed: The Full-DD Continuation Run | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="7">
-<meta name="plan-modified" content="2026-11-11">
+<meta name="plan-version" content="9">
+<meta name="plan-modified" content="2026-11-12">
 </head>
 <body>
   <main class="plan-doc">
@@ -49,8 +49,8 @@
 
     <h2 id="s4">§4 — The continuation run</h2>
     <section data-reckon="section" data-id="s4" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="sn-integrity-backlog#s52"></section>
-    <p>Once the cohort meets its floor and the checkpoint is taken, run these census classes through <code>sn run</code>, scoped by source, on a compute partition (if a source selector is added to <code>sn run</code> for this, it replaces the ad hoc source-id lists in the evidence scripts): awaiting review, below the acceptance floor, attempt-capped (after one signed reset with receipts), never claimed, documentation missing, and the refused-by-writer sources whose recorded refusal no longer reproduces. The vocabulary-gap class is excluded until the ISN release carrying its tokens is pinned. The run is scoped by source, so it does not drain the name-level documentation backlog the stalled drain left; §5 owns that.</p>
-    <p>The run's cost limit is no larger than the census's cost estimate for those classes, and never larger than the USD 350 approval's remaining balance less the unspent part of the USD 60 tranche authorised to <code>sn-catalog-consistency</code> §2, both computed at dispatch from the run records under the approval. A run that would need more goes to the lead first.</p>
+    <p>Once the cohort meets its floor and the checkpoint is taken, run these census classes through <code>sn run</code>, scoped by source, on a compute partition: awaiting review, below the acceptance floor, attempt-capped (after one signed reset with receipts), never claimed, documentation missing, and the refused-by-writer sources whose recorded refusal no longer reproduces. The vocabulary-gap class is excluded until the ISN release carrying its tokens is pinned. The run is scoped by source, so it does not drain the name-level documentation backlog the stalled drain left; §5 owns that.</p>
+    <p>The run's cost limit is no larger than the census's cost estimate for those classes, and never larger than the USD 350 approval's remaining balance less the unspent part of the USD 60 tranche authorised to <code>sn-catalog-consistency</code> §2 and the unspent part of §5's documentation ceiling, all computed at dispatch from the run records under the approval. A run that would need more goes to the lead first.</p>
     <p><strong>Done when:</strong></p>
     <ul>
       <li>the accepted count of live quantity sources, by the census's own query, is at least 5,503, which is 300 above the 2026-11-09 baseline of 5,203;</li>
@@ -63,13 +63,13 @@
 
     <h2 id="s5">§5 — The documentation backlog the stalled drain left</h2>
 <section data-reckon="section" data-id="s5" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="sn-integrity-backlog#s52"></section>
-<p>The documentation drain under <code>sn-integrity-backlog</code> §52 stopped on 2026-11-11 with <code>stop_reason: stalled</code>, after USD 11.14 of its USD 20, and drained nothing on balance. Read live before and after, accepted names rose from 2,866 to 3,004, while those with accepted documentation fell from 2,368 to 2,028 and those with pending documentation rose from 413 to 926. The run in §4 is scoped by source, so it does not reach this name-level backlog. The cause of the stall and of the fall is under investigation in §52, so this section starts once no §52 run is writing the graph.</p><p>Spend draws on the USD 350 approval, under a ceiling of the measured documentation rate times the backlog, plus a quarter; §4's limit reserves the unspent part of that ceiling.</p><p><strong>Done when:</strong> among accepted names, the count with accepted documentation is at least the 2,368 read before the drain, and every accepted name whose documentation is not accepted is listed with its stage and the recorded reason it stands; the before and after counts by documentation stage are recorded under <code>docs/evidence/fragments/sn-full-dd-continuation/</code> with the spend beside the ceiling and the approval's remaining balance; the read-back counts a name planted with pending documentation in a disposable graph; the export gate's blocking set stays 0.</p>
+<p>The documentation drain under <code>sn-integrity-backlog</code> §52 stopped on 2026-11-11 with <code>stop_reason: stalled</code>, after USD 11.14 of its USD 20, and drained nothing on balance. Read live before and after, accepted names rose from 2,866 to 3,004, while those with accepted documentation fell from 2,368 to 2,028 and those with pending documentation rose from 413 to 926. The run in §4 is scoped by source, so it does not reach this name-level backlog. The cause of the stall and of the fall is under investigation in §52, so this section starts once no §52 run is writing the graph.</p><p>Spend draws on the USD 350 approval, under a ceiling of the measured documentation rate times the backlog, plus a quarter; §4's limit reserves the unspent part of that ceiling. It starts after §4 has taken its post-run reading, so no documentation write overlaps that reading.</p><p><strong>Done when:</strong> among accepted names, the count with accepted documentation is at least the 2,368 read before the drain, and every accepted name whose documentation is not accepted is listed with its stage and the recorded reason it stands; the before and after counts by documentation stage are recorded under <code>docs/evidence/fragments/sn-full-dd-continuation/</code> with the spend beside the ceiling and the approval's remaining balance; the read-back counts a name planted with pending documentation in a disposable graph; the export gate's blocking set stays 0.</p>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
 <article class="r-fu" data-id="f-sfdc-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-11-11" data-recommends-skill="/reckon-build sn-full-dd-continuation §2" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">One more cohort source, then the checkpoint, then the run</h4>
-    <div class="r-fu-body"><p>§2 can run now. §3 and §5 wait until no <code>sn-integrity-backlog</code> §52 run is writing the graph, and the run in §4 waits on §2 and §3.</p></div>
+    <div class="r-fu-body"><p>§2 can run now. §3 waits until no <code>sn-integrity-backlog</code> §52 run is writing the graph; the run in §4 waits on §2 and §3; §5 follows §4.</p></div>
     <pre class="r-fu-prompt">/reckon-build sn-full-dd-continuation §2</pre>
     </article>
 </section>

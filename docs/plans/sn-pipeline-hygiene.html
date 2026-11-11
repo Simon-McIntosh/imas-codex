@@ -23,8 +23,8 @@
   <title>Standard-Name Pipeline Hygiene: Red Tests, Loose Boundaries, Release Plumbing | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="7">
-<meta name="plan-modified" content="2026-11-11">
+<meta name="plan-version" content="8">
+<meta name="plan-modified" content="2026-11-12">
 </head>
 <body>
   <main class="plan-doc">
@@ -77,7 +77,7 @@
 
     <h2 id="s8">§8 — No module imports another&#x27;s private names</h2>
 <section data-reckon="section" data-id="s8" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
-<p>On 2026-11-11 the standard-names package carried 31 private names imported from one of its modules into another, across 24 import statements. The five module-level statements among them carry six names: <code>_base_token</code> in <code>export.py</code>, <code>_load_rules</code> in <code>legacy_authority.py</code>, <code>_synonym_matches</code> in <code>near_duplicates.py</code>, <code>_github_slug</code> and <code>_run_git</code> in <code>release_notes.py</code>, and <code>_contest</code> in <code>review_triage.py</code>. The package's import-boundary test checks only two subpackages, and its rule there forbids every import between sibling modules, a rule the package's top-level modules cannot meet, so it passes over all of them.</p><p><strong>Done when:</strong> no production module in <code>imas_codex/standard_names</code> imports a private name from another module of that package (imports from outside it, such as from <code>imas_codex.settings</code>, are outside this section), each closed either by moving the caller or through a public name the owning module exports, with the before and after counts recorded and every name made public listed in the landing evidence with the reason it can neither stay private nor move with its caller; the existing import-boundary test gains a private-name rule over the package's top-level modules, kept distinct from the sibling-import rule its subpackages keep, passes at head, and fails when any one closed import is restored; behaviour is unchanged, and <code>tests/standard_names</code> adds no failure id against the stated base.</p>
+<p>On 2026-11-11 the standard-names package carried 31 private names imported from one of its top-level modules into another, across 24 import statements. Its subpackages are outside this section: they keep their own sibling-import rule. The package's import-boundary test checks only two subpackages, and its rule there forbids every import between sibling modules, a rule the package's top-level modules cannot meet, so it passes over all of them.</p><p><strong>Done when:</strong> no top-level module of <code>imas_codex/standard_names</code> imports a private name from another top-level module of that package (imports from outside the package, such as from <code>imas_codex.settings</code>, and imports involving its subpackages are outside this section), each closed either by moving the caller or through a public name the owning module exports, with the before and after counts recorded and every name made public listed in the landing evidence with the reason it can neither stay private nor move with its caller; the existing import-boundary test gains a private-name rule over the package's top-level modules, kept distinct from the sibling-import rule its subpackages keep, passes at head, and fails when any one closed import is restored; behaviour is unchanged, and <code>tests/standard_names</code> adds no failure id against the stated base.</p>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
