@@ -256,7 +256,7 @@ LAYER_NAMES = {  # the users are named above their bars, in draw_users
 USERS = [
     ("office productivity", "lucy"),
     ("commissioning engineer · planning · configuration", "dash"),
-    ("prototyping with domain experts · science · code developer", "sandbox"),
+    ("domain expert prototyping · software refactor and development", "sandbox"),
     ("assembly and commissioning · ITER infrastructure", "clive"),
 ]
 
