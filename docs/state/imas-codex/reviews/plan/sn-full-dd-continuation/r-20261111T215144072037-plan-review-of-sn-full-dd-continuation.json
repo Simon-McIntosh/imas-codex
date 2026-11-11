@@ -67,9 +67,28 @@
       "note": "\u00a72 now requires the 143-source cohort committed in the repository as a manifest that the read-back reads; the brief directs extending the existing cohort read-back script rather than writing another.",
       "reason": "",
       "when": "2026-11-11T22:19:32.238148+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "fc99c61f0f311bf33b6ca594ba565398169827b9",
+      "commit_basis": "edit",
+      "finding": "deep_module-1",
+      "note": "\u00a74 now requires the census, the accepted count and the guard readings to come from one reading taken after the run ends with no writer running, recorded together.",
+      "reason": "",
+      "when": "2026-11-11T22:19:46.429227+00:00"
     }
   ],
   "responses": {
+    "deep_module-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "fc99c61f0f311bf33b6ca594ba565398169827b9",
+      "commit_basis": "edit",
+      "note": "\u00a74 now requires the census, the accepted count and the guard readings to come from one reading taken after the run ends with no writer running, recorded together.",
+      "reason": "",
+      "when": "2026-11-11T22:19:46.429227+00:00"
+    },
     "reuse_search-1": {
       "action": "acted",
       "by": "",
