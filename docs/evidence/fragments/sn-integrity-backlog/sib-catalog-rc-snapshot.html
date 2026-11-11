@@ -152,6 +152,21 @@ wrong target for this candidate, but the finding stands on its own for any futur
 cut, and it is the reason the whole-catalog path is the one recorded in detail above.
 </p>
 
+<h2 id="sib-catalog-rc-snapshot-staging">A hazard left in the staging directory</h2>
+<p>
+The refused whole-catalog exports wrote no catalog because the gate stops emission
+before that point, but the staging directory still holds
+<code>~/.cache/imas-codex/staging/catalog.yml</code> from the earlier WEST batch export:
+<code>review_batch: 231</code>, <code>candidate_count: 231</code>,
+<code>published_count: 104</code>, generated 2026-11-10 and stamped with source commit
+<code>ddfcc9398</code>. That file is publishable content for a different target. A cut
+run with <code>--skip-export</code> against a whole-catalog tag would publish these 104
+WEST names as the catalog, with nothing in the release output saying so, which is a
+second reason <code>--skip-export</code> is not a way past this gate. This node did not
+delete or move it: the staging directory is shared cache outside its write scope, and
+the call belongs to whoever next runs the release.
+</p>
+
 <h2 id="sib-catalog-rc-snapshot-refs">What was not created</h2>
 <p>
 <code>refs.log</code> records both negatives from the repositories themselves: the
