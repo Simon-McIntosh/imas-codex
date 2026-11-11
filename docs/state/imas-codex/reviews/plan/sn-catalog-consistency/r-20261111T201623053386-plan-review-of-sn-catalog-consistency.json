@@ -1,0 +1,96 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-11T20:28:24.112Z",
+  "dispatched_at": "2026-11-11T20:17:33Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-catalog-consistency.html:44",
+      "id": "reasoning-1",
+      "reason": "\u00a72 can pass every one of its measures with the grouping dimension it was sized for entirely untouched, leaving the plan's stated goal unowned.",
+      "text": "\u00a72's endpoint ends at \"the one definition and template\", while the batches it applies carry the grouping axis on 1,384 of their 2,893 name placements and \u00a71 reports 98 of 125 families diverging on `physics_domain` grouping; `sn edit` offers no domain mode (its `--axis` accepts only `name|docs|both`), and \u00a75's done-when measures a name against its own stored decision rather than agreement across a family, so no section closes family-level grouping",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-catalog-consistency.html:44",
+      "id": "wiring-1",
+      "reason": "the defect sn-catalog-grouping \u00a73 that \u00a75 carries forward is precisely disagreement between writers over one domain property, so \u00a72 running first recreates it and \u00a72 running second discards \u00a75's repair.",
+      "text": "\u00a72 changes `physics_domain` on 1,384 placements while \u00a75 repairs the same property through the one writer, and neither section's depends-on nor followup f-scc-001's \"\u00a74 to \u00a78 are independent of it and of each other\" (plan.html:98) acknowledges the overlap",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-catalog-consistency.html:48",
+      "id": "wiring-2",
+      "reason": "as written \u00a72 cannot reach its done-when until a ruling obtained elsewhere lands, and a coordinator cannot order the two from the declarations.",
+      "text": "\u00a72's done-when requires every sized batch applied, but two of the 279 batches are the lineage rename and the release-candidate advisory renames, whose survivor and treatment only \u00a74's lead ruling and \u00a73's post-run measure produce; neither \u00a73 nor \u00a74 declares a relationship to \u00a72 in either direction",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-catalog-consistency.html:45",
+      "id": "reasoning-2",
+      "reason": "two plans consume one cap and neither reconciles the draws, so the pass can exhaust the budget the continuation run was approved against with no point at which anyone chose it.",
+      "text": "the only spend control is per batch, \"a batch whose estimate exceeds USD 50 goes to the lead\", but the sizing artifact's largest batch is USD 1.38 (25 names at the USD 0.055 rate) so the rule can never fire; the pass total of USD 159.12 is therefore never a lead decision, while sn-full-dd-continuation \u00a74 draws its limit from the same USD 350 approval (\"never larger than what remains\"), of which sn-integrity-backlog \u00a752 records USD 280 remaining and \u00a71 rules the two workstreams concurrent",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-catalog-consistency.html:45",
+      "id": "reasoning-3",
+      "reason": "a ceiling derived from a documentation rate applied to review-priced work understates the spend it is meant to bound, and \u00a72's done-when requires spend recorded beside an estimate that measures a different operation.",
+      "text": "each batch's ceiling is its \"sized estimate plus a quarter\", but the sizing artifact states its cost is \"the measured documentation rate of $0.055 per name\", whereas \u00a72's work is `sn edit`, which rides the generate\u2192review\u2192score pipeline (its inline review carries its own `--cost-limit`, default USD 1.0)",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-catalog-consistency.html:50",
+      "id": "done_when-1",
+      "reason": "a count taken beside a name-creating run can fall or rise without the pass changing anything, so the measure cannot tell a good pass from a bad one.",
+      "text": "\u00a72 compares absolute counts against the 2026-11-10 reading of 125 and 91 and, at plan.html:53, requires the sourceless-draft count not to rise, while \u00a71's lead ruling lets the batches run before or beside the full-DD continuation, whose \u00a74 targets 300 new accepted names entering the same families; \u00a73 has the escape clause \u00a72 lacks (\"any family the run newly made divergent is either applied \u2026 or listed with its reason\", plan.html:62)",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-catalog-consistency.html:70",
+      "id": "done_when-2",
+      "reason": "a read-back never shown to fire cannot distinguish a repaired catalogue from a query that returns nothing whatever the graph holds.",
+      "text": "\u00a74 closes on \"the lineage census reports one live tip for this lineage and no new cycle\", and \u00a77 at plan.html:85 closes on a live read-back listing no sourceless name, and neither declares a planted case; \u00a72, \u00a73, \u00a75 and \u00a78 each declare one (a planted divergent family, a planted dangling link, a planted disagreeing name, the census's planted control)",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "55af2a7ff77097679125b2d4f0c065462bf7de1b",
+  "plan_fingerprint": "0243a90230d577b61f46fb3c50fb734ad1e70e5d0ad71f60e1cf3115d712d4fd",
+  "plan_slug": "sn-catalog-consistency",
+  "plan_version": 1,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261111T201623053386-plan-review-of-sn-catalog-consistency",
+  "reviewed_blob_sha": "a5f229a45138b82dd74bf67f2ad50264d07854ea",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 sn-integrity-backlog \u00a752, \u00a749, \u00a746 and \u00a722, sn-catalog-grouping \u00a73 and sn-full-dd-continuation \u00a74 all exist in this tree, both cited fragment JSONs exist, and every number \u00a71 cites reproduces against the census JSON (3,034 names, 130 families, 125 divergent, 98/98/98 per dimension, 91 concepts, 25 variants over 25 members).",
+    "done_when": "a finding \u2014 \u00a72 compares absolute census counts (125 divergent families, 91 concepts, and a sourceless-draft count that must not rise) taken while the DD continuation run creates new names beside it (plan.html:50, 53); \u00a74 and \u00a77 name no negative control for the read-back they close on (plan.html:70, 85).",
+    "evidence_paths": "pass \u2014 the census and batches evidence resolve at docs/evidence/fragments/sn-integrity-backlog/sib-consistency-census.json and sib-consistency-batches.json, and the section gates report library instruments (the census re-run, the domain audit, the export dry run) rather than a node-local temporary path.",
+    "naming": "pass \u2014 the plan names no code symbol, file or function for a worker to implement, and carries no plan label, ticket number or version tag into a name.",
+    "reasoning": "a finding \u2014 the plan's own goal (\"one grouping\", plan.html:33) is not closed by any section: \u00a72's endpoint is \"one definition and template\" (plan.html:44) and \u00a75's done-when only makes each name agree with its own stored decision (plan.html:75), which one family with ten different decisions satisfies.",
+    "single_goal": "pass \u2014 \u00a72 through \u00a78 each name one deliverable (the batches applied, the cut clean, one live tip, domains agreeing, one suffix, no sourceless name, the chain-cap re-measure) and their gates judge that deliverable.",
+    "wiring": "a finding \u2014 \u00a72's done-when requires every sized batch applied, including the lineage and unit-pair rename batches whose survivor/ruling only \u00a74 and \u00a73 can obtain, and no depends-on or ordering is declared between \u00a72, \u00a73 and \u00a74 (plan.html:48, 69, 98); \u00a72 and \u00a75 also both write `physics_domain` over overlapping names with no declared relationship (plan.html:44, 75)."
+  },
+  "section_digests": {
+    "_document": "60da5223ce5c0ad0f73555a1988b66e7737b9e961a9e0c99e0cd3f569bc93745",
+    "s1": "c69f79e72b8fe8652e9dcd8632a35ca7eaa3a205fd5ee3e2ee98bc74afc136ba",
+    "s2": "56f8936a4cc64cdf7ca17a79a7c8a69dd968a7e2a68ccea5f44d8e2c6458b7b0",
+    "s3": "57836fc7d40140cbc86f34f4c41b3997c74959c126cf30d5204898dca0509073",
+    "s4": "3cdcd5eb526e7d9321a23fe71d1bb1e4c7a576677294255374e3f4daebd19732",
+    "s5": "53bab7d6babbaa077add38d6a9c004720d01fd6faedecc00a37628895479f5c0",
+    "s6": "e35c4bf32892d9b90e8392b5e1171957f4973d937daaccdee3ab610d3c1c937e",
+    "s7": "3f9f3f34753d6b2e0235b0aeaff8faa376d18f933ed89e57a6eafcfd5cb8fdcb",
+    "s8": "124c4cffdc2b27efae89ba41f97a27ff57b01c0b53ce596b6c025f1e6523e626"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T20:34:08.432070+00:00",
+  "total": null
+}
