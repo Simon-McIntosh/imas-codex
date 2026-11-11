@@ -1,0 +1,38 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-11T13:47:31.862Z",
+  "dispatched_at": "2026-11-11T13:37:13Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T130818506279-sib-isn-pin-0-11-1/manifest.md",
+      "line": 19,
+      "severity": "non-blocking",
+      "text": "the negative_control_note cites graph_after.json inside the run directory, but the file was written to node-local scratch under /tmp and is gone, so the cited control artefact cannot be opened by a later reader."
+    },
+    {
+      "file": "tests/core/test_isn_pin_agreement.py",
+      "line": 45,
+      "severity": "non-blocking",
+      "text": "the owner test asserts only that the two pins agree on one version and not which version, so reverting both sites to 0.11.0 keeps every test green and no test asserts the graph's active grammar version, leaving the pin's value unguarded against regression."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The goal is to pin imas-codex to ISN v0.11.1 and sync the graph's grammar snapshot; at the reviewed head pyproject.toml:18 and pyproject.toml:186 both read \"imas-standard-names==0.11.1\", and the live graph's active ISNGrammarVersion is 0.11.1 with 1038 GrammarToken over 22 segments while 0.11.0 is inactive at 1031.\nVERDICT done_when: The done-when names both pins, the lock, the graph version with a non-zero token count, five named token read-backs and both standard-names suite arms; the manifest records tests_base.log and tests_head.log at 13 failed / 8631 passed each, and I re-read both summaries, their EXIT=1 lines and their identical failure-id sets, and I independently re-queried the live graph for the active version, the per-version token counts, the five tokens and both controls.\nVERDICT write_paths: The declared scope is pyproject.toml, uv.lock, docs/evidence/fragments/sn-integrity-backlog/sib-isn-pin-0-11-1.html and docs/figures/sn-integrity-backlog/sib-isn-pin-0-11-1; the diff touches only pyproject.toml (two one-line pin edits) and the evidence fragment, leaving uv.lock and the figures directory untouched, and uv.lock is correctly unchanged because its imas-standard-names entries carry an editable path source and no version, so the bump has nothing to re-resolve.\nVERDICT manifest: The manifest reports status complete with three commits, both suite arms, the graph before/after counts and a negative control; the arm summaries, failure ids and live graph state all check out, but its negative_control_note cites a graph_after.json that no longer exists because it was written to node-local scratch, and the uv lock run is claimed with no log.\nVERDICT diff: Read all three commits against 39746199e: c7f64db35 moves both pin sites, e0c73e12a adds the evidence fragment and c069538af adds the suite-arm section; pyproject.toml carries only the two pin lines and the fragment is additive prose and tables, with no source or test change, and the recorded head arm ran at c7f64db35 with the two later commits touching only that fragment.\nCALL_SITES: imas_codex/cli/sn.py:1403, imas_codex/cli/sn.py:5744, hatch_build_hooks.py:202\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: pyproject.toml:18 and pyproject.toml:186 read ==0.11.1 and the live graph's active ISNGrammarVersion is 0.11.1 with 1038 tokens, both verified against the graph rather than the record.\nSCORE evidence: 16\nJUSTIFICATION evidence: the two arm summaries in tests_base.log and tests_head.log are recorded with identical failure-id sets, but the manifest's negative_control_note cites a missing graph_after.json and no log backs the \"uv lock exits 0\" claim.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff is pyproject.toml or docs/evidence/fragments/sn-integrity-backlog/sib-isn-pin-0-11-1.html, both inside the declared write paths.\nSCORE durability: 9\nJUSTIFICATION durability: tests/core/test_isn_pin_agreement.py:45 asserts only that the two pins agree with each other, so reverting both sites to 0.11.0 leaves the suite green and nothing asserts the graph's active grammar version.\nSCORE fit: 18\nJUSTIFICATION fit: the change is a two-line pin bump at pyproject.toml:18 and pyproject.toml:186 plus a fragment in the directory's existing sib-<section>.html idiom, with conventional subjects and bodies carrying no plan id or attribution.\nSCORE reuse: 20\nJUSTIFICATION reuse: no definition is added; the graph write goes through the repository's own imas_codex/standard_names/grammar_sync.py:258 and the existing pin-agreement owner tests/core/test_isn_pin_agreement.py:32 already covers both sites rather than being duplicated.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T130818506279-sib-isn-pin-0-11-1/manifest.md:19 non-blocking: the negative_control_note cites graph_after.json inside the run directory, but the file was written to node-local scratch under /tmp and is gone, so the cited control artefact cannot be opened by a later reader.\nFINDING tests/core/test_isn_pin_agreement.py:45 non-blocking: the owner test asserts only that the two pins agree on one version and not which version, so reverting both sites to 0.11.0 keeps every test green and no test asserts the graph's active grammar version, leaving the pin's value unguarded against regression.",
+  "review_run_id": "r-20261111T133610829753-review-of-sib-isn-pin-0-11-1-c069538af8d3",
+  "reviewed_base_sha": "39746199e5f0ce26641794d64235da69ff069a78",
+  "reviewed_head_sha": "c069538af8d33fd78fed7a379ad804b84c2a0407",
+  "reviewed_run_id": "r-20261111T130818506279-sib-isn-pin-0-11-1",
+  "scores": {
+    "durability": 9,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T13:53:23.226145+00:00",
+  "total": 102
+}
