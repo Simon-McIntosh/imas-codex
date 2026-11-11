@@ -105,9 +105,22 @@
       "note": "The followup now says \u00a72 runs now and \u00a73 waits until no \u00a752 run is writing the graph.",
       "reason": "",
       "when": "2026-11-11T21:07:55.507439+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "As the review notes, the creation-time clause and the truncated-copy control carry the measure; the currency clause is redundant, not a hole, and \u00a73's done-when is otherwise edited in this round.",
+      "when": "2026-11-11T21:08:07.323204+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "As the review notes, the creation-time clause and the truncated-copy control carry the measure; the currency clause is redundant, not a hole, and \u00a73's done-when is otherwise edited in this round.",
+      "when": "2026-11-11T21:08:07.323204+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "",
