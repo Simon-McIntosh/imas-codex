@@ -25,7 +25,30 @@
   "plan_slug": "sn-full-dd-continuation",
   "plan_version": 4,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "a8eb31c533afa7049069a6378cf005ade94b6cd2",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "\u00a74 no longer claims the run advances the drain's backlog; a new \u00a75 owns the documentation backlog the stalled drain left, measured on the documentation stage of every live name.",
+      "reason": "",
+      "when": "2026-11-11T21:47:38.633382+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "a8eb31c533afa7049069a6378cf005ade94b6cd2",
+      "commit_basis": "edit",
+      "note": "\u00a74 no longer claims the run advances the drain's backlog; a new \u00a75 owns the documentation backlog the stalled drain left, measured on the documentation stage of every live name.",
+      "reason": "",
+      "when": "2026-11-11T21:47:38.633382+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-full-dd-continuation/r-20261111T211053107120-plan-review-of-sn-full-dd-continuation.json",
   "review_run_id": "r-20261111T211053107120-plan-review-of-sn-full-dd-continuation",
   "reviewed_blob_sha": "29f15531f5cc2264cda526e8cd25755932bc73ca",
   "rubric": "content",
