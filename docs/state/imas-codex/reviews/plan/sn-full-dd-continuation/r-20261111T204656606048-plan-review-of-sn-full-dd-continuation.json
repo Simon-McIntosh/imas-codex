@@ -1,0 +1,92 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-11T21:00:57.069Z",
+  "dispatched_at": "2026-11-11T20:47:52Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-full-dd-continuation.html:52",
+      "id": "reasoning-1",
+      "reason": "the plan asserts a precondition its own evidence contradicts, so \u00a74 would either stall permanently or start with the documentation backlog it believes is drained still open, which is exactly the state its sourceless-drafts guard is meant to bound.",
+      "text": "\u00a74's third precondition reads \"the documentation drain has landed\", but the drain's only recorded outcome (commit 7aef43b21, 2026-11-11 20:04, one hour before this plan's change at 21:02) states it ended on a FAILED terminal condition and deliberately does not claim the backlog drained, and that commit is reachable from no branch at all (`git for-each-ref --contains 7aef43b21` returns nothing, and it is not an ancestor of origin/main); a coordinator therefore either never sees the precondition met or sees it met by a record saying the drain failed, and the plan does not say which state the run is allowed to start from",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-full-dd-continuation.html:57",
+      "id": "reasoning-2",
+      "reason": "as written, either the limit accounts for a draw that has not happened yet (impossible at dispatch) or the recorded cap is only final after another plan's node runs, so the node's spend guard can be satisfied by arithmetic that never bounds the total.",
+      "text": "the spent-and-remaining-cap bullet requires the remaining cap be \"computed after every draw on the approval, sn-catalog-consistency \u00a72 included\", while \u00a71 (line 37) and the S18 ruling recorded at sn-integrity-backlog.html:1500 both say the run does not wait for the consistency pass, whose own \u00a72 draws up to USD 60 from the same approval; nothing in the plan reserves that draw at dispatch, so the run's limit can be computed against a remainder a later draw erodes and together overshoot the USD 350 approval",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-full-dd-continuation.html:52",
+      "id": "reasoning-3",
+      "reason": "the run's scope and its cost limit are both defined against a marking the cited artifact does not carry, so two coordinators would dispatch different class sets and reach different limits from the same plan.",
+      "text": "\u00a74 scopes the run to \"the census classes marked advanceable\" and sizes it by \"the census estimate for the classes it runs\", but docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census.json carries no advanceable marking on any class: each of the seven classes carries count, step, scope and a cost band, and the vocabulary-gap class's step is irrelevant until a separate vocabulary release lands",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-full-dd-continuation.html:67",
+      "id": "wiring-1",
+      "reason": "the followup is the dispatch instruction a coordinator acts on, and it directs the one node whose evidence is invalidated by running it early.",
+      "text": "followup f-sfdc-001 says \"\u00a72 and \u00a73 can run now and in parallel\", but \u00a73 declares depends-on sn-integrity-backlog#s52 (frontmatter line 22) and its done-when requires a checkpoint whose creation time is after the drain's last graph write, so a coordinator dispatching \u00a73 from this followup takes the checkpoint before the drain's writes and fails \u00a73's own measure",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-full-dd-continuation.html:48",
+      "id": "done_when-1",
+      "reason": "the sibling clause requiring the creation time to follow the drain's last graph write is what actually catches a stale archive, so the unfalsifiable clause is redundant rather than a hole in the measure.",
+      "text": "\"the repository's checkpoint currency instrument reads it as current\" holds however \u00a73 behaves: get_backup_currency returns `current` whenever any verified recovery archive exists and treats archive age as no part of the verdict, and \u00a73 itself records a local export from 7 November already present, so the clause passes on the pre-existing archive",
+      "type": "done_when",
+      "would_change": false
+    },
+    {
+      "anchor": "docs/plans/sn-full-dd-continuation.html:48",
+      "id": "evidence_paths-1",
+      "reason": "a later reader could not open the record.",
+      "text": "\u00a73's done-when rests on two gate results, the archive's whole-stream integrity test and the same test failing on a deliberately truncated copy, and names no path for either, so the only evidence that the test bites can land in a run directory or a node-local temporary path",
+      "type": "evidence_paths",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-full-dd-continuation.html:43",
+      "id": "evidence_paths-2",
+      "reason": "the spend line is the one number the approval's remaining balance is computed from, and without a durable location it can be recorded where a later reader cannot reconcile it against \u00a74's.",
+      "text": "\u00a72 places the committed read-back under docs/evidence/fragments/sn-full-dd-continuation/ but leaves its other measurement, \"spend is at most USD 10 and recorded beside the remaining cap\", with no path, while the parallel clause in \u00a74 pins spend to that fragment",
+      "type": "evidence_paths",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "fc88cc3755f58d01536d76fdaf0433b6d75e30f5",
+  "plan_fingerprint": "e9f87b8c151249857d147821f92792119371e66208babbab5376ab5983717d85",
+  "plan_slug": "sn-full-dd-continuation",
+  "plan_version": 2,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261111T204656606048-plan-review-of-sn-full-dd-continuation",
+  "reviewed_blob_sha": "10c49ec50bfe5c3f8a7a5d49e8a59e8170281183",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 sn-integrity-backlog#s51 and #s52 resolve, sn-catalog-consistency \u00a72 resolves and independently confirms it draws on the same USD 350 approval, sib-unaccepted-census.json exists under the fragments directory, and the checkpoint currency instrument exists in imas_codex/graph/neo4j_ops.py:595 and is described in imas_codex/graph/AGENTS.md.",
+    "done_when": "a finding \u2014 \u00a73's \"the repository's checkpoint currency instrument reads it as current\" cannot fail on the pre-existing 7 November export, though its creation-time clause and truncated-copy control do carry the measure.",
+    "evidence_paths": "a finding \u2014 \u00a72's spend and \u00a73's integrity and truncated-copy logs carry no durable path, while the read-back, census and \u00a74 spend are now placed under docs/evidence/fragments/sn-full-dd-continuation/.",
+    "naming": "pass \u2014 the changed units name no code symbol, file or step sequence; `sn run`, `sn edit` and the sib-*/census node ids are pipeline product and plan-record names, and no changelog prose reaches them.",
+    "reasoning": "a finding \u2014 \u00a74 states the documentation drain \"has landed\" when the only recorded outcome is a failed terminal condition, sizes the run against a class marking the census does not carry, and records its remaining cap against a same-plan approval another pass draws on after it, under a ruling that it must not wait for that pass.",
+    "single_goal": "pass \u2014 \u00a72 carries the cohort floor, \u00a73 the checkpoint, \u00a74 the run; each closes on one verdict with its guards listed beneath it.",
+    "wiring": "a finding \u2014 the followup at docs/plans/sn-full-dd-continuation.html:67 says \u00a72 and \u00a73 can run now in parallel, while \u00a73's declared depends-on (sn-integrity-backlog#s52) and its done-when require the checkpoint after the drain's last graph write; every other relationship (s4 on s2/s3/s52, s3 on s52) resolves correctly, and the \u00a752 nodes both have landed outcomes on record."
+  },
+  "section_digests": {
+    "_document": "896783928670535faa74894298fc4f61506cd7598dc1af6c5dbca2f23b1da1ff",
+    "s1": "6edb6bfc73bfa8f3d3435cdd83ea2fde91367cf006a53a93995f459601295db8",
+    "s2": "4297beb7b0326b78325805c0119dfdce9507f126a90c0eb17fc249c0adf1b0bd",
+    "s3": "1bc87c8ca4f7bd7b1c107bc09942ea12a9b3e76c1e238706b4dc69ac2c03e88f",
+    "s4": "1b4920de10d558388efd0addd7cc4897f90c4cb0dab737589795e3c9a61e8cf8"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T21:05:09.807886+00:00",
+  "total": null
+}
