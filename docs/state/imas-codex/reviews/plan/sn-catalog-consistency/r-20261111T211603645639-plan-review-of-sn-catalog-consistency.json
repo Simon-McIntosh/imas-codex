@@ -53,6 +53,16 @@
       "note": "\u00a75 now derives its family grouping count from the domain audit's output rather than a second reading of physics_domain.",
       "reason": "",
       "when": "2026-11-11T21:48:07.247305+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "70e1d1c3ac68c350fe6ad0e9fadf352df089e1ee",
+      "commit_basis": "edit",
+      "finding": "interface_budget-1",
+      "note": "\u00a72 and \u00a75 now name the surface they may add (a scoped census entry point and a domain-audit entry point) and what it retires (the evidence-directory census scripts it replaces).",
+      "reason": "",
+      "when": "2026-11-11T21:48:17.250430+00:00"
     }
   ],
   "responses": {
@@ -64,6 +74,15 @@
       "note": "\u00a75 now derives its family grouping count from the domain audit's output rather than a second reading of physics_domain.",
       "reason": "",
       "when": "2026-11-11T21:48:07.247305+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "70e1d1c3ac68c350fe6ad0e9fadf352df089e1ee",
+      "commit_basis": "edit",
+      "note": "\u00a72 and \u00a75 now name the surface they may add (a scoped census entry point and a domain-audit entry point) and what it retires (the evidence-directory census scripts it replaces).",
+      "reason": "",
+      "when": "2026-11-11T21:48:17.250430+00:00"
     },
     "reuse_search-1": {
       "action": "acted",
