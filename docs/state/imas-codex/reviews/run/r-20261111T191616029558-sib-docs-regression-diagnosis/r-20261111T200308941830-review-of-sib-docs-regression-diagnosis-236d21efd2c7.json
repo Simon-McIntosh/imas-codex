@@ -8,6 +8,11 @@
       "kind": "folded",
       "node": "sib-drift-refresh-rename-lineage",
       "recorded_at": "2026-11-11T20:20:29.563293+00:00"
+    },
+    "reuse": {
+      "kind": "folded",
+      "node": "sib-drift-refresh-rename-lineage",
+      "recorded_at": "2026-11-11T20:20:43.686331+00:00"
     }
   },
   "dispatched_at": "2026-11-11T20:05:10Z",
