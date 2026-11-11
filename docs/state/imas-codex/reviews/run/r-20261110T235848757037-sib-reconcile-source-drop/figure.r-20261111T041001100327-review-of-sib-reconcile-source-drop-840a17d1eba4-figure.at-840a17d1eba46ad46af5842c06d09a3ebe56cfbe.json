@@ -1,0 +1,46 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-11T04:17:35.396Z",
+  "dispatched_at": "2026-11-11T04:10:50Z",
+  "figures": [
+    {
+      "judged_from": "rendered PNG attached to this review (image-0.png), not from the SVG source",
+      "path": "docs/figures/sn-integrity-backlog/sib-reconcile-source-drop/sourceless-drafts.svg",
+      "rubric": {
+        "contrast": "pass \u2014 all text is #333333, #555555 or black on white, comfortably above 4.5:1; the red direct label and markers clear white by a wide margin.",
+        "data_ink": "pass \u2014 one 3 pt step line and three 9-12 pt markers carry the whole message; the only other ink is the dotted population rule and two dotted event rules, each of which states a datum the prose uses.",
+        "decoration": "pass \u2014 no gradient, background fill, shading, frame or theme; top and right spines are absent and the two reference rules are dotted hairlines.",
+        "label_collision": "pass \u2014 every annotation, tick label, axis label and legend entry sits in clear space; none is clipped by the canvas and none touches the step line, the markers or the dotted rules.",
+        "legibility": "pass \u2014 the step from 3 to 4 and back to 3 reads at a glance; both event annotations and all three reference labels are legible at full-size and when the page is scanned for the level change.",
+        "table_form": "pass \u2014 a count sampled at three instants across 4.5 hours is a time series, not tabular information; four rows of text would lose the before/after structure around the two events."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "file": "docs/figures/sn-integrity-backlog/sib-reconcile-source-drop/sourceless-drafts.svg",
+      "id": "f19ed6b4cc0",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The y-axis is truncated to about 2.55-4.45 with ticks only at 3 and 4, so a change of one draft in the count fills roughly 53 percent of the panel height. A reader who takes the vertical excursion for magnitude reads a near-doubling rise and a collapse where the level moved by a single draft; the annotations do carry the true values (3 drafts, 4), which is why this does not stop a reader reading the figure."
+    },
+    {
+      "file": "docs/figures/sn-integrity-backlog/sib-reconcile-source-drop/sourceless-drafts.svg",
+      "id": "f19ed6b4cc0",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The 20:59:51Z export-gate read is plotted as a 9 pt blue marker and then completely covered by the 12 pt red marker drawn at the same coordinates, so the render shows two blue read markers where the caption says the markers are 'the three reads'. The count at that instant is still visible, and the red marker carries the deliberate highlight, so nothing is unreadable; what is lost is the reader's ability to count the reads and to see that the released draft was itself observed at a gate read."
+    }
+  ],
+  "project": "imas-codex",
+  "review_run_id": "r-20261111T041001100327-review-of-sib-reconcile-source-drop-840a17d1eba4-figure",
+  "reviewed_base_sha": "9b42761afdd8c5f59d5b523a35ca55b1608fd19e",
+  "reviewed_head_sha": "840a17d1eba46ad46af5842c06d09a3ebe56cfbe",
+  "reviewed_run_id": "r-20261110T235848757037-sib-reconcile-source-drop",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T04:20:22.508362+00:00",
+  "total": null
+}
