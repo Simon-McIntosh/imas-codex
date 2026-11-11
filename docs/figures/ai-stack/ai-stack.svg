@@ -293,10 +293,10 @@ z
 " clip-path="url(#pa1f89cf429)" style="fill: #faefeb; stroke: #cf5f36; stroke-width: 1.6; stroke-linejoin: miter"/>
    </g>
    <g id="line2d_11">
-    <path d="M 38.88 442.08
-L 31.68 442.08
-L 31.68 354.24
-L 38.88 354.24
+    <path d="M 917.856 442.08
+L 925.056 442.08
+L 925.056 354.24
+L 917.856 354.24
 " clip-path="url(#pa1f89cf429)" style="fill: none; stroke: #8e3a8e; stroke-width: 1.6; stroke-linecap: square"/>
    </g>
    <g id="patch_20">
@@ -1014,7 +1014,7 @@ z
     <text style="font-weight: 700; font-size: 18px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: end; fill: #2b2b2b" x="123.408" y="297.882562" transform="rotate(-0 123.408 297.882562)">functions</text>
    </g>
    <g id="text_3">
-    <text style="font-weight: 700; font-size: 18px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #2b2b2b" x="908.208" y="379.962562" transform="rotate(-0 908.208 379.962562)">graph</text>
+    <text style="font-weight: 700; font-size: 18px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: end; fill: #2b2b2b" x="106.992" y="379.962562" transform="rotate(-0 106.992 379.962562)">graph</text>
    </g>
    <g id="text_4">
     <text style="font-weight: 700; font-size: 18px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: end; fill: #2b2b2b" x="97.488" y="427.589438" transform="rotate(-0 97.488 427.589438)">ICP4</text>
@@ -1050,10 +1050,10 @@ z
     <text style="font-weight: 700; font-size: 14px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: middle; fill: #2b2b2b" x="858.6864" y="426.649563" transform="rotate(-0 858.6864 426.649563)">DS</text>
    </g>
    <g id="text_15">
-    <text style="font-weight: 700; font-size: 12px; font-family: 'Arial', 'Nimbus Sans', sans-serif; fill: #8e3a8e" transform="translate(12.108375 411.767812) rotate(-90)">ITER</text>
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Arial', 'Nimbus Sans', sans-serif; fill: #8e3a8e" transform="translate(944.627625 384.552188) rotate(-270)">ITER</text>
    </g>
    <g id="text_16">
-    <text style="font-weight: 700; font-size: 12px; font-family: 'Arial', 'Nimbus Sans', sans-serif; fill: #8e3a8e" transform="translate(26.508375 437.19375) rotate(-90)">infrastructure</text>
+    <text style="font-weight: 700; font-size: 12px; font-family: 'Arial', 'Nimbus Sans', sans-serif; fill: #8e3a8e" transform="translate(930.227625 359.12625) rotate(-270)">infrastructure</text>
    </g>
    <g id="text_17">
     <text style="font-weight: 700; font-size: 16px; font-family: 'Arial', 'Nimbus Sans', sans-serif; text-anchor: start; fill: #8e3a8e" x="142.128" y="379.5045" transform="rotate(-0 142.128 379.5045)">ITER knowledge graph</text>

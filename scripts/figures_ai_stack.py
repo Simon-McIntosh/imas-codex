@@ -251,7 +251,6 @@ LAYER_NAMES = {  # the users are named beside their bars, in draw_users
     "graph": ["graph"],
     "icp": ["ICP4"],
 }
-RIGHT_NAMES = {"graph"}  # named on the right; every other layer on the left
 
 # Top to bottom: each bar's roles reach from Claude Desktop to the interface named, and
 # no one stops at Claude Desktop, because every role needs ITER's data through Lucy.
@@ -329,12 +328,9 @@ def draw_layer_names(c: Canvas) -> None:
         mid = (y0 + y1) / 2
         for i, line in enumerate(lines):
             y = mid + (len(lines) - 1) / 2 * pitch - i * pitch
-            # each line leans on the pyramid's slope at its own height
-            if key in RIGHT_NAMES:
-                x, ha = span(y, 0)[1] + LAYER_GAP, "left"
-            else:
-                x, ha = span(y, 0)[0] - LAYER_GAP, "right"
-            c.text(x, y, line, size=OUTER, ha=ha, weight="bold")
+            # each line leans on the pyramid's left slope at its own height
+            x = span(y, 0)[0] - LAYER_GAP
+            c.text(x, y, line, size=OUTER, ha="right", weight="bold")
 
 
 def draw_foundation(c: Canvas) -> None:
@@ -365,23 +361,24 @@ def draw_foundation(c: Canvas) -> None:
             zorder=1,
         )
     # the graph becomes ITER infrastructure, alongside the platform it is built on
+    # bracketed on the right, beside the base of the pyramid
     bottom, top = LAYERS["icp"][0], LAYERS["graph"][1]
-    xb = 4.4
+    xb = span(bottom, 0)[1] + 2.0
     c.ax.plot(
-        [xb + 1, xb, xb, xb + 1],
+        [xb - 1, xb, xb, xb - 1],
         [bottom, bottom, top, top],
         color=c.roles.deterministic,
         lw=1.6,
         zorder=3,
     )
-    # two rotated lines, read bottom to top, so the label fits beside the bracket
-    for x, line in [(xb - 3.1, "ITER"), (xb - 1.1, "infrastructure")]:
+    # two rotated lines, read top to bottom, so the label fits beside the bracket
+    for x, line in [(xb + 3.1, "ITER"), (xb + 1.1, "infrastructure")]:
         c.text(
             x,
             (bottom + top) / 2,
             line,
             size=OUTER_SMALL - 2,
-            rotation=90,
+            rotation=270,
             color=c.roles.deterministic,
             weight="bold",
         )
