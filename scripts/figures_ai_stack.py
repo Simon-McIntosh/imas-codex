@@ -43,8 +43,8 @@ ROOT = Path(__file__).resolve().parents[1]
 FIGURES = ROOT / "docs/figures/ai-stack"
 STEM = "ai-stack"
 
-WIDTH, HEIGHT = 14.0, 6.95  # in: wider than the slide canvas, leaving room for a title
-U = 10  # drawing units per inch, so the axes run 0..140 by 0..69.5
+WIDTH, HEIGHT = 14.0, 7.2  # in: wider than the slide canvas, leaving room for a title
+U = 10  # drawing units per inch, so the axes run 0..140 by 0..72
 
 # Deterministic in the ICP knowledge map's relation plum; agentic work in coral where a
 # frontier model drives it, teal where it can also run on-premises.
@@ -55,9 +55,8 @@ MUTED = "#5f5f5f"
 NEUTRAL_EDGE = "#b4b1aa"
 BAND_FILL = "#f4f3f0"
 USER_INK = "#141414"  # the role names
-USER_FILL = (
-    "#3b72b8"  # the thin bar under each name, in a blue no layer of the stack uses
-)
+# the thin bar under each name, in a deep blue no layer of the stack uses
+USER_FILL = "#1f4f8f"
 
 TITLE, BODY, SMALL = 16, 14, 13  # pt, inside the stack
 BAR = 15  # pt, the user roles
@@ -241,7 +240,7 @@ LAYERS = {  # (y0, y1) of each band
     "graph": (8.8, 14.8),
     "functions": (15.8, 30.6),
     "interfaces": (31.6, 43.8),
-    "users": (44.8, 65.2),
+    "users": (44.8, 67.7),
 }
 
 LAYER_NAMES = {  # the users are named above their bars, in draw_users
@@ -541,7 +540,7 @@ def draw_interfaces(c: Canvas) -> None:
 
 def draw_users(c: Canvas) -> None:
     _, y1 = LAYERS["users"]
-    pitch, label_h, gap, height = 4.0, 2.3, 0.1, 0.8
+    pitch, label_h, gap, height = 4.5, 2.3, 0.1, 0.8
     top = y1 - 0.4
     # the users stand above the stack, so their name sits over the bars, centred
     x0, x1 = INTERFACES["desktop"][0], INTERFACES["clive"][1]
