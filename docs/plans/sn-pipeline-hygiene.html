@@ -18,12 +18,12 @@
   <meta name="plan-sprint" content="S19">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names,catalog-release">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;deferred&quot;,&quot;s8&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;deferred&quot;,&quot;s8&quot;:&quot;implementable&quot;}">
   <meta name="plan-standalone" content="Each section repairs a defect no other live plan consumes, and nothing downstream waits on this plan.">
   <title>Standard-Name Pipeline Hygiene: Red Tests, Loose Boundaries, Release Plumbing | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="6">
+<meta name="plan-version" content="7">
 <meta name="plan-modified" content="2026-11-11">
 </head>
 <body>
@@ -64,7 +64,7 @@
     <p><strong>Done when:</strong> a release dry run inside a detached worktree completes and reports the tag it would cut; the real cut from such a worktree succeeds against a stand-in remote; the main-checkout path is unchanged; the guard that stops a release cut from an unmerged revision still fires.</p>
 
     <h2 id="s6">§6 — The landing parser's warning-count defect is raised on reckon</h2>
-    <section data-reckon="section" data-id="s6" data-effort-hours="0.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s6" data-effort-hours="0.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section>
     <p>reckon's landing check counts warning lines a test prints as test failures. On 2026-11-11 that turned two imas-codex landings, among them <code>sib-stranded-pool-admission</code>, into failed verdicts although their suite arms carried identical failure ids. The defect is in reckon, so this section raises it there and does not patch it here.</p>
     <p><strong>Done when:</strong> the reckon project carries the defect as a plan section or followup, with the two runs' landing records as evidence; this section records its reference; no imas-codex test is altered to avoid printing a warning.</p>
 
@@ -101,6 +101,11 @@
 <div class="r-q" data-id="q-sph-four-lead-questions" data-section="s7" data-status="open" data-opened-by="reckon-review" data-opened-at="2026-11-11T19:00:00Z" data-resolved-at="" data-resolved-by="">
     <p class="r-q-body"><p>Carried from <code>sn-integrity-backlog</code> question <code>q-sib-four-lead-questions</code>: the four questions <code>unbound-source-backlog</code> recorded for the lead, among them graph checkpoint cadence and the embedder contract. The WEST pull request among them lapsed with the retirement of <code>sn-west-prototype-release</code>.</p></p>
     </div>
+</section>
+<section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s6" data-id="c-close-s6" data-who="reckon-build" data-when="2026-11-11T22:40:00Z">
+    <div class="r-comment-body"><p>§6 closed: the defect is carried on reckon as <code>reckon:a-promotion-reads-the-evidence-it-is-given#s18</code> with followup <code>@f-aprteig-018</code>, citing both landings; no imas-codex test was changed. <a href="/imas-codex/evidence/archive/sn-pipeline-hygiene-landed.html#s6-raised-on-reckon">evidence</a></p></div>
+</div>
 </section>
 </main>
 </body>

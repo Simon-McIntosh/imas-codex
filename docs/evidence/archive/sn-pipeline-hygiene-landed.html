@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="sn-pipeline-hygiene-landed">
+  <meta name="plan-title" content="Standard-Name Pipeline Hygiene: Red Tests, Loose Boundaries, Release Plumbing — landed record">
+  <meta name="plan-summary" content="Landing record for Standard-Name Pipeline Hygiene: Red Tests, Loose Boundaries, Release Plumbing: evidence appended by section.">
+  <meta name="plan-evidence-for" content="sn-pipeline-hygiene">
+  <title>Standard-Name Pipeline Hygiene: Red Tests, Loose Boundaries, Release Plumbing — landed record | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+ <main class="plan-doc">
+  <h1>Standard-Name Pipeline Hygiene: Red Tests, Loose Boundaries, Release Plumbing — landed record</h1>
+  <p>Landing record for Standard-Name Pipeline Hygiene: Red Tests, Loose Boundaries, Release Plumbing: evidence appended by section.</p>
+
+
+   <section id="s6-raised-on-reckon" data-evidence-origin="append">
+    <h2>§6 — the landing parser&#x27;s warning-count defect is carried on reckon</h2>
+    <p>Raised with the reckon coordinator on 2026-11-11 and recorded there as <code>reckon:a-promotion-reads-the-evidence-it-is-given#s18</code>, "A printed warning is not a failing test", with open followup <code>@f-aprteig-018</code>, pushed to reckon's main. Its rationale cites both imas-codex landings: <code>r-20261111T033929508961-sib-process-quantity-collision</code>, whose suite arms read 15 failing ids at base and 14 at head while two warning lines printed by the catalog-layout hierarchy-cycle test were counted as new failures, and <code>r-20261111T150606194953-sib-stranded-pool-admission</code>, with identical failing ids in both arms. Reckon's endpoint: the landing check counts only tests pytest reports as failed or errored, by node id, and never reads printed lines as failing ids. No imas-codex test was altered.</p>
+  </section>
+
+</main>
+</body>
+</html>
