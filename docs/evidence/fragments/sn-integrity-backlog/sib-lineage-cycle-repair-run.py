@@ -28,6 +28,7 @@ import json
 import shlex
 import subprocess
 import sys
+from collections import defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[4]
@@ -325,6 +326,7 @@ def draw_figure(target: Path) -> None:
                         positions[start],
                         positions[end],
                         arrowstyle="-|>",
+                        connectionstyle="arc3,rad=0.22",
                         mutation_scale=16,
                         linewidth=2.4 if retained else 2.6,
                         color=KEPT_COLOUR if retained else ARCHIVED_COLOUR,
@@ -350,7 +352,7 @@ def draw_figure(target: Path) -> None:
     )
     fig.tight_layout(rect=(0, 0.05, 1, 1))
     target.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(target, format="svg", metadata={"Date": None})
+    fig.savefig(target, format=target.suffix.lstrip("."), metadata={"Date": None})
     plt.close(fig)
 
 
@@ -437,20 +439,33 @@ def write_fragment(
         )
     counts += "</tbody></table>"
 
-    member_rows = ""
+    archived_from: dict[str, set[str]] = defaultdict(set)
+    for edge in planned["archived_edges"]:
+        archived_from[edge["component"]].add(edge["successor"])
+
+    live_rows = ""
     for entry in sorted(
-        planned["components"],
-        key=lambda item: (item["rule"], item["component"]),
-    )[:12]:
-        member_rows += (
+        (item for item in planned["components"] if item["rule"] == "single-live"),
+        key=lambda item: item["live_members"][0],
+    ):
+        live_rows += (
             "<tr><td><code>"
-            + _escape(entry["component"])
+            + _escape(entry["live_members"][0])
             + "</code></td><td>"
-            + _escape(entry["rule"])
+            + _escape(", ".join(sorted(archived_from[entry["component"]])))
             + "</td><td>"
-            + _escape(", ".join(entry["live_members"]) or "none")
-            + "</td><td>"
-            + str(entry["internal_edges"])
+            + str(entry["archived_edges"])
+            + "</td></tr>"
+        )
+
+    retired_rows = ""
+    for entry in sorted(
+        (item for item in planned["components"] if item["rule"] == "no-live"),
+        key=lambda item: item["members"],
+    ):
+        retired_rows += (
+            "<tr><td>"
+            + _escape(", ".join(entry["members"]))
             + "</td><td>"
             + str(entry["archived_edges"])
             + "</td></tr>"
@@ -499,13 +514,18 @@ def write_fragment(
     html = f"""<section id="{stem}">
 <style>#{stem} table {{table-layout:fixed;width:100%;overflow-wrap:anywhere}} #{stem} code {{white-space:normal;overflow-wrap:anywhere}}</style>
 <h2>Every refined-from lineage cycle is broken by a signed edge archive</h2>
-<p>The lineage-cycle census was run before and after the repair. It reads <strong>{summary["before_cycle_components"]} cycle components over {summary["before_cycle_names"]} names</strong> before the archive ({summary["before_observed_at"]}) and <strong>{summary["after_cycle_components"]} cycle components over {summary["after_cycle_names"]} names</strong> after it ({summary["after_observed_at"]}), from {summary["before_lineage_edges"]} to {summary["after_lineage_edges"]} <code>REFINED_FROM</code> edges. The archive removed <strong>{summary["archived_edges"]} edges</strong> and minted <strong>{summary["receipts"]} signed receipts</strong>, one per edge, each carrying the full edge snapshot: endpoints, relationship type, element id and properties. Of the {summary["before_cycle_components"]} components, {rules.get("single-live", 0)} had one live member, which kept its name while every edge leaving a superseded member was archived, and {rules.get("no-live", 0)} had no live member, so every internal edge was archived. {held}</p>
+<p>The lineage-cycle census was run before and after the repair. It reads <strong>{summary["before_cycle_components"]} cycle components over {summary["before_cycle_names"]} names</strong> before the archive ({summary["before_observed_at"]}) and <strong>{summary["after_cycle_components"]} cycle components over {summary["after_cycle_names"]} names</strong> after it ({summary["after_observed_at"]}), from {summary["before_lineage_edges"]} to {summary["after_lineage_edges"]} <code>REFINED_FROM</code> edges. The archive removed <strong>{summary["archived_edges"]} edges</strong> and minted <strong>{summary["receipts"]} signed receipts</strong>, one per edge, each carrying the full edge snapshot: endpoints, relationship type, element id and properties. Of the {summary["before_cycle_components"]} components, {rules.get("single-live", 0)} had one live member: that name and its own lineage were kept, and every edge leaving a superseded member was archived. The other {rules.get("no-live", 0)} had no live member, so every internal edge was archived. {held}</p>
 <figure id="{stem}-rule"><img src="{figure_src}" alt="Two planted lineage components before and after the archive: a single-live pair loses only the superseded member's edge, and a two-member retired pair loses both."/><figcaption>The rule applied to the two component shapes. A single-live component keeps the live name and archives every edge leaving a superseded member; a component with no live member archives all of its internal edges. Dashed red edges are archived into a signed receipt and removed.</figcaption></figure>
 <h3 id="{stem}-counts-heading">Measured before and after</h3>
 {counts}
-<p>The table below lists the components of each rule, the first twelve in component order; every component in <code>plan.json</code> carries the same five fields. No edge was chosen by name order or creation time: the selection is component membership plus the endpoint lifecycle, and the signed authority records both.</p>
-<table id="{stem}-components"><thead><tr><th>Component</th><th>Rule</th><th>Live member</th><th>Internal edges</th><th>Archived</th></tr></thead><tbody>
-{member_rows}</tbody></table>
+<h3 id="{stem}-kept">One live member: the name kept, and the members whose edges were archived</h3>
+<p>Every component in this table kept its live name and that name's own lineage. The edge removed in each case leaves a superseded member, so the cycle closes and no live identity moves. The selection is component membership plus the endpoint lifecycle; no edge was chosen by name order or creation time.</p>
+<table id="{stem}-components"><thead><tr><th>Live name kept</th><th>Superseded member whose edge was archived</th><th>Edges archived</th></tr></thead><tbody>
+{live_rows}</tbody></table>
+<h3 id="{stem}-retired">No live member: every internal edge archived</h3>
+<p>Neither member of these components is live, so the component carries no lineage for any identity to keep. Each internal edge was archived into a receipt and removed, and both names remain in the graph with their lifecycle unchanged.</p>
+<table id="{stem}-retired-table"><thead><tr><th>Members, all superseded</th><th>Edges archived</th></tr></thead><tbody>
+{retired_rows}</tbody></table>
 {multi_live_block}
 <h3 id="{stem}-receipts">Signed archive</h3>
 <p>The cohort is one authority file signed by two digests, its file SHA-256 <code>{_escape(summary["authority_file_sha256"])}</code> and its canonical payload SHA-256 <code>{_escape(summary["authority_payload_sha256"])}</code>. The operation re-read the live component edges inside the applying transaction, refused nothing, minted one <code>StandardNameChange</code> receipt per edge with operation <code>archive_lineage_cycle_edges</code>, deleted each edge by its element id, and read every member's lifecycle and its producing-source, review and document counts back unchanged before committing. {retained} edges inside the archived components were retained: those leaving the live member, which is that name's own lineage.</p>
