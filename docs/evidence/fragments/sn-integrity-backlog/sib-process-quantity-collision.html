@@ -44,15 +44,27 @@ with the one <code>identity_token_collision</code> issue restored.</p>
 
 <h3 id="sib-process-quantity-collision-suite-arms">Suite arms</h3>
 
-<p>The head arm over <code>tests/standard_names</code> at <code>-n 8</code> reports
-<code>9 failed, 8,635 passed, 11 skipped</code> and finishes at <code>EXIT=1</code>. The
-nine failing ids are in <code>test_gap_rule_verdicts.py</code> (6),
-<code>test_compose_prompt_examples_round_trip.py</code> (1),
-<code>test_geometry_enumeration_collapse.py</code> (1) and
-<code>test_pool_registry_imports.py</code> (1); none imports or exercises the identity
-collision gate, and none is in this node's changed surface. The base arm at
-<code>-n 8</code> did not reach a readable summary in three attempts: two runs ended in an
-xdist <code>INTERNALERROR</code> when a worker died on a 30-second
-<code>pytest-timeout</code>, and the third, with the per-test timeout raised to 180 s, was
-still running at the deadline. The base-arm gap is recorded in the manifest as unmet
-rather than as a passing delta.</p>
+<p>Both arms run from <code>git archive</code> trees of their own revision, with one command:
+<code>python -m pytest -p no:cacheprovider -n 8 --dist loadgroup -m 'not slow and not
+graph' tests/standard_names</code> against the repository's environment, a separate
+<code>--basetemp</code> per arm. The header of each log records the revision, the tree, the
+resolved <code>imas_codex.standard_names.export.__file__</code> and whether the exemption
+line is present, so each arm is proven to be measuring its own tree.</p>
+
+<table>
+<tr><th>arm</th><th>revision</th><th>exemption</th><th>result</th><th>exit</th></tr>
+<tr><td>base</td><td><code>06ac2d0c2</code></td><td>absent</td><td>15 failed, 8,624 passed, 12 skipped (362.9 s)</td><td>1</td></tr>
+<tr><td>head</td><td><code>7641b4fc1</code></td><td>present</td><td>14 failed, 8,630 passed, 12 skipped (374.0 s)</td><td>1</td></tr>
+</table>
+
+<p><strong>No failure id is added at head.</strong> All fourteen head failures are also
+base failures. The one id that fails in the base arm alone
+(<code>test_pool_compose_retry.py::TestPoolComposeRetry::test_retry_exhausted_falls_through</code>)
+fails at <em>both</em> revisions when run in isolation, so it is load-sensitive flakiness
+in either direction rather than a head regression or a head fix. The shared failures sit
+in <code>test_gap_rule_verdicts.py</code>, <code>test_manifest_generability.py</code>,
+<code>test_compose_prompt_examples_round_trip.py</code>,
+<code>test_geometry_enumeration_collapse.py</code>,
+<code>test_house_style_checks.py</code>, <code>test_catalog_layout_hierarchy.py</code> and
+<code>test_pool_registry_imports.py</code>; none imports or exercises the identity collision
+gate, and none is in this node's changed surface.</p>
