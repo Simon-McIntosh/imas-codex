@@ -1,0 +1,63 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-10T23:23:23.241Z",
+  "dispatched_at": "2026-11-10T23:10:32Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "prose precision in a measurement fragment; the six arm logs and the measured revisions 7f3db88c and 88189cd0 are recorded beside it, and 88189cd0 is an ancestor of the guard head a086e975 that will land",
+      "recorded_at": "2026-11-10T23:35:05.848655+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "prose precision in a measurement fragment; the six arm logs and the measured revisions 7f3db88c and 88189cd0 are recorded beside it, and 88189cd0 is an ancestor of the guard head a086e975 that will land",
+      "recorded_at": "2026-11-10T23:35:19.521089+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "prose precision in a measurement fragment; the six arm logs and the measured revisions 7f3db88c and 88189cd0 are recorded beside it, and 88189cd0 is an ancestor of the guard head a086e975 that will land",
+      "recorded_at": "2026-11-10T23:35:34.571017+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-guard-added-failure-check.html",
+      "line": 16,
+      "severity": "non-blocking",
+      "text": "the fragment measures \"the failure recorded beside the guard\" without citing the record that reported it - no run id, log path or plan anchor - so a reader cannot confirm that this test is the one that failed there, and the failure's own text was never captured in the run directory the fragment points at."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-guard-added-failure-check.html",
+      "line": 24,
+      "severity": "non-blocking",
+      "text": "the paragraph says the faulthandler dump \"is a slow-import stack trace from torch sourcing its custom ops off GPFS\", which holds for five of the six logs; logs/base-run3.log carries the same posixpath and importlib frames with zero torch frames, so the sentence generalises over a log it cites."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-guard-added-failure-check.html",
+      "line": 56,
+      "severity": "non-blocking",
+      "text": "the verdict reads \"the failure is not caused by the head\" without restating that head means 88189cd030059b8ca6161a35bacc05a05a90c02b, which is not an ancestor of 5382599d9 and is not yet on origin/main, so a reader landing the guard later should not read the verdict as covering a revision whose content differs from the measured one."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to measure whether one suite failure added beside the guard is caused by it; docs/evidence/fragments/sn-integrity-backlog/sib-guard-added-failure-check.html:16-22 states the six-run verdict against the declared attribution rule for base 7f3db88c110bac47a5e470bd08432eab953ef760 and head 88189cd030059b8ca6161a35bacc05a05a90c02b.\nVERDICT done_when: the done_when names three serial runs per arm with one log each and the rule \"caused by the head only if it fails at head in every run and passes at base in every run\"; run-arms.sh:19-36 releases both arms from git archive into $TMPDIR, copies the five generated files, and the six logs' own summary lines read 1 passed at 92.63/85.76/68.19 s (base) and 82.22/82.37/77.76 s (head), which is what the fragment's table records.\nVERDICT write_paths: the two declared paths are the fragment html and docs/figures/sn-integrity-backlog/sib-guard-added-failure-check; git show --stat 5382599d9 is one file, 70 insertions, inside the fence, and the figures directory is correctly absent because the dispatch states the node writes no figure.\nVERDICT manifest: read; status complete, one commit 5382599d9, one changed path, the literal gate command pointing at run-arms.sh, six log paths, measurement_module and measurement_cwd per arm, a negative_control recorded as none with its reason that the base arm is the comparison, and one rubric line per dimension; it carries no baseline_suite or after_suite block, so the added-failure delta is read from the six arm logs it does name.\nVERDICT diff: read commit by commit against 0ca35cd15c; the single commit 5382599d9ff10336e612e2cf7beb4603fec818aa adds one new evidence fragment carrying the revisions table, the six-run table, the verdict and the reproduction pointer, and changes no product or test file.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-integrity-backlog/sib-guard-added-failure-check.html:55-60 applies the declared rule to both arms and returns not-attributable, but the fragment never names the record that reported the failure it measures, so the premise is asserted rather than cited.\nSCORE evidence: 17\nJUSTIFICATION evidence: each log at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T222743094703-sib-guard-added-failure-check/logs/ carries its revision, arm tree, module.__file__ under $TMPDIR, cwd, command and a bare EXIT=0 line, and every figure in the fragment's table at line 44-51 matches the log's own summary line verbatim.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat 5382599d9 names only docs/evidence/fragments/sn-integrity-backlog/sib-guard-added-failure-check.html, which is the node's declared path, and the tree carries no other change.\nSCORE durability: 10\nJUSTIFICATION durability: the arm script lives at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T222743094703-sib-guard-added-failure-check/run-arms.sh rather than in the repository, and the fragment's table at line 44-51 is prose no check reconciles against those logs, so nothing in the landed change reddens if a figure is later mistyped.\nSCORE fit: 18\nJUSTIFICATION fit: the fragment follows the sibling convention with reckon-type, plan-slug and node-id meta and every element id prefixed by the node id, as sib-load-sensitive-tests.html does, and introduces no plan or stage label in a name.\nSCORE reuse: 20\nJUSTIFICATION reuse: a search over imas_codex/ and tests/ for a git-archive two-revision arm harness, for a bisect helper and for the string \"git archive\" found no existing owner, and run-arms.sh reuses the main checkout's .venv through UV_PROJECT_ENVIRONMENT with --no-sync so no second environment is built and no shared one is synced.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-guard-added-failure-check.html:16 non-blocking: the fragment measures \"the failure recorded beside the guard\" without citing the record that reported it - no run id, log path or plan anchor - so a reader cannot confirm that this test is the one that failed there, and the failure's own text was never captured in the run directory the fragment points at.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-guard-added-failure-check.html:24 non-blocking: the paragraph says the faulthandler dump \"is a slow-import stack trace from torch sourcing its custom ops off GPFS\", which holds for five of the six logs; logs/base-run3.log carries the same posixpath and importlib frames with zero torch frames, so the sentence generalises over a log it cites.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-guard-added-failure-check.html:56 non-blocking: the verdict reads \"the failure is not caused by the head\" without restating that head means 88189cd030059b8ca6161a35bacc05a05a90c02b, which is not an ancestor of 5382599d9 and is not yet on origin/main, so a reader landing the guard later should not read the verdict as covering a revision whose content differs from the measured one.\n",
+  "review_run_id": "r-20261110T230723855882-review-of-sib-guard-added-failure-check-5382599d9ff1",
+  "reviewed_base_sha": "0ca35cd15c78c49aedefc7e93ecbeace41e034b4",
+  "reviewed_head_sha": "5382599d9ff10336e612e2cf7beb4603fec818aa",
+  "reviewed_run_id": "r-20261110T222743094703-sib-guard-added-failure-check",
+  "scores": {
+    "durability": 10,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-10T23:45:21.541901+00:00",
+  "total": 102
+}

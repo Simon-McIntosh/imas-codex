@@ -1,0 +1,33 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-11T02:12:08.315Z",
+  "dispatched_at": "2026-11-11T02:04:28Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T000311936909-sib-lineage-cycle-repair/test_signed_edge_archive-repair.log",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "The gate log's header names revision 7fbf45c44, but the log contains 7 items including test_the_residual_cycle_judgment_delegates_to_the_ordering_owner, which exists only at 0bf57eb71 (test_signed_edge_archive.py:341; the file at 7fbf45c44 holds 6 tests), so the log does not name the revision it measured and cannot be re-run from its own header even though the manifest's tests: line and the file sha256 749d476c both name the committed 0bf57eb71 content."
+    }
+  ],
+  "project": "imas-codex",
+  "report": "VERDICT goal: the source node's goal (prompt.txt:38) is to remove the REFINED_FROM edges that close lineage cycles, archiving each into a signed receipt; this delta commit keeps that rule and only moves the residual-cycle judgment inside it, so signed_manifest.py:8967-8984 now adapts the surviving edge list to catalog_ordering._find_cyclic_components instead of carrying its own recursive traversal.\nVERDICT done_when: the done_when requires an edge-archive operation whose receipt preserves the full edge snapshot and a disposable-graph test that archives a planted cycle and refuses an edge outside the manifest, with no added tests/standard_names failure ids; tests/standard_names/test_signed_edge_archive.py:341 adds the delegation test, test_signed_edge_archive-repair.log:25 records 7 passed, and suite-base.log/suite-head.log carry the identical 13 failure ids at 9b42761afd and 0bf57eb71 (0 added).\nVERDICT write_paths: manifest.md lists five granted paths including imas_codex/standard_names/signed_manifest.py and tests/standard_names/test_signed_edge_archive.py; git diff --stat 7fbf45c44..0bf57eb71 touches exactly those two files (67 insertions, 20 deletions) and nothing else.\nVERDICT manifest: read in full; status complete, after_suite now records revision 0bf57eb71 with exit_status 1, completed true and the same 13 failure ids as the base arm, and test_logs name test_signed_edge_archive-repair.log whose summary line 25 records 7 passed, although that log's own header at line 1 names 7fbf45c44.\nVERDICT diff: read commit by commit against base 7fbf45c44; the one commit removes _edge_archive_has_cycle (its 19-line recursive DFS) and adds _edge_archive_cycle_components at signed_manifest.py:8967, swapping both call sites at lines 9092 and 9309, with no other behaviour touched and no orphan reference to the removed helper left in imas_codex/.\nCALL_SITES: imas_codex/cli/sn.py:9058, imas_codex/standard_names/signed_manifest.py:9449\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: signed_manifest.py:8967-8984 gives the preview refusal at line 9092 and the apply postcondition at line 9309 one shared verdict source, so both read the catalog-ordering owner's cycle definition rather than a private one while the archive rule is unchanged.\nSCORE evidence: 14\nJUSTIFICATION evidence: the base and head suite arms reconcile on failure ids with 0 added, but test_signed_edge_archive-repair.log:1 names revision 7fbf45c44 while the log at line 25 reports 7 tests, so the focused gate's own header does not name the revision it measured.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 7fbf45c44..0bf57eb71 touches only signed_manifest.py and tests/standard_names/test_signed_edge_archive.py, both inside the five grants recorded in manifest.md.\nSCORE durability: 18\nJUSTIFICATION durability: negative-control-repair.log records test_signed_edge_archive.py:373 failing with 'would_apply' vs 'refused' when 0bf57eb71 is reverted, and the test's expected children map at test_signed_edge_archive.py:371-376 is a literal, independent of what the code passes in.\nSCORE fit: 17\nJUSTIFICATION fit: signed_manifest.py:51 imports the sibling module and calls the underscored catalog_ordering._find_cyclic_components, matching the convention the run's own census driver already uses but reaching a private symbol from production code where no public wrapper exists.\nSCORE reuse: 20\nJUSTIFICATION reuse: the only added definition, signed_manifest.py:8967, extends catalog_ordering._find_cyclic_components (catalog_ordering.py:186) rather than re-implementing it; the search over imas_codex/standard_names found no owner for an edge-list-to-children adapter (catalog_ordering.py:89-105 builds that map inline), so the six inline lines fork nothing.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T000311936909-sib-lineage-cycle-repair/test_signed_edge_archive-repair.log:1 non-blocking: the gate log's header names revision 7fbf45c44, but the log contains 7 items including test_the_residual_cycle_judgment_delegates_to_the_ordering_owner, which exists only at 0bf57eb71 (test_signed_edge_archive.py:341; the file at 7fbf45c44 holds 6 tests), so the log does not name the revision it measured and cannot be re-run from its own header even though the manifest's tests: line and the file sha256 749d476c both name the committed 0bf57eb71 content.\n",
+  "review_run_id": "r-20261111T020159228681-review-of-sib-lineage-cycle-repair-0bf57eb71ef5",
+  "review_scope": "the single commit 0bf57eb71 gained after the review recorded at 7fbf45c44; imas_codex/standard_names/signed_manifest.py and tests/standard_names/test_signed_edge_archive.py only",
+  "reviewed_base_sha": "7fbf45c44c493eb56498ae186ee3220e26cacac2",
+  "reviewed_head_sha": "0bf57eb71ef54f910c96ac981f1bdd482f7c18b8",
+  "reviewed_run_id": "r-20261111T000311936909-sib-lineage-cycle-repair",
+  "scores": {
+    "durability": 18,
+    "evidence": 14,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T02:21:17.648770+00:00",
+  "total": 108
+}

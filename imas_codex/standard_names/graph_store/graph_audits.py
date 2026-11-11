@@ -2225,6 +2225,14 @@ def reconcile_descriptionless_composed_names(
     the finalize advances it; if it lands elsewhere the ``'pending'`` node keeps
     no false claim on the review pool.
 
+    A name whose spelling the strict grammar writer rejects is not repaired.
+    Compose can only emit names the strict parser accepts, so such a name can
+    never be produced again: releasing its source would be final, and its only
+    effect would be to leave the name live with no producer at all. Those names
+    keep their composed source and are logged for a signed retirement with a
+    named successor, which is the only path that can decide what they should
+    become.
+
     Idempotent: once the sources are freed no ``composed``/``attached``
     non-derived source points at the name, so a second pass matches nothing.
     Sources under an active claim are left alone — the compose worker holding
@@ -2235,35 +2243,87 @@ def reconcile_descriptionless_composed_names(
     own = gc is None
     client = foundation.get_services().GraphClient() if own else gc
     try:
-        rows = client.query(
-            """
-            MATCH (src:StandardNameSource)-[produced:PRODUCED_NAME]->
-                  (sn:StandardName)
-            WHERE coalesce(sn.name_stage, '') IN ['', 'pending', 'drafted']
-              AND (sn.description IS NULL OR trim(sn.description) = '')
-              AND coalesce(sn.origin, '') <> 'derived'
-              AND coalesce(src.source_type, '') <> 'derived'
-              AND src.status IN ['composed', 'attached']
-              AND src.claim_token IS NULL
-            WITH sn, collect(DISTINCT src) AS sources,
-                 collect(DISTINCT produced) AS produced_edges
-            SET sn.updated_at = datetime(), sn.name_stage = 'pending',
-                sn.source_paths = [
-                  path IN coalesce(sn.source_paths, [])
-                  WHERE NOT path IN [source IN sources | source.id]
-                ]
-            FOREACH (edge IN produced_edges | DELETE edge)
-            FOREACH (source IN sources |
-              SET source.status         = 'extracted',
-                  source.attempt_count  = 0,
-                  source.claimed_at     = null,
-                  source.claim_token    = null,
-                  source.produced_sn_id = null,
-                  source.composed_at    = null
+        # A graph double answers with rows of its own shape; only an id-bearing
+        # row is one this statement asked for.
+        candidates = [
+            str(row["id"])
+            for row in client.query(
+                """
+                MATCH (src:StandardNameSource)-[:PRODUCED_NAME]->
+                      (sn:StandardName)
+                WHERE coalesce(sn.name_stage, '') IN ['', 'pending', 'drafted']
+                  AND (sn.description IS NULL OR trim(sn.description) = '')
+                  AND coalesce(sn.origin, '') <> 'derived'
+                  AND coalesce(src.source_type, '') <> 'derived'
+                  AND src.status IN ['composed', 'attached']
+                  AND src.claim_token IS NULL
+                RETURN DISTINCT sn.id AS id
+                ORDER BY id
+                """
             )
-            RETURN count(DISTINCT sn) AS names,
-                   sum(size(sources)) AS sources_freed
-            """
+            if row.get("id")
+        ]
+        # The strict writer decides whether compose can mint a spelling again.
+        # A name it refuses would be released with no path back to a producer,
+        # and no path to the description the stage advance needs. An
+        # unavailable grammar package answers "refused": compose cannot mint
+        # anything without the parser either, so an unknown verdict must never
+        # be read as permission to release a name's last producer.
+        try:
+            from imas_codex.standard_names.grammar_adapter import (
+                parse_canonical_name,
+            )
+        except ImportError:
+            parse_canonical_name = None
+
+        reopen: list[str] = []
+        stranded: list[str] = []
+        for name in candidates:
+            if parse_canonical_name is None:
+                stranded.append(name)
+                continue
+            try:
+                parse_canonical_name(name)
+            except Exception as exc:
+                logger.debug("ISN strict grammar refused '%s': %s", name, exc)
+                stranded.append(name)
+            else:
+                reopen.append(name)
+        rows = (
+            client.query(
+                """
+                MATCH (src:StandardNameSource)-[produced:PRODUCED_NAME]->
+                      (sn:StandardName)
+                WHERE coalesce(sn.name_stage, '') IN ['', 'pending', 'drafted']
+                  AND (sn.description IS NULL OR trim(sn.description) = '')
+                  AND coalesce(sn.origin, '') <> 'derived'
+                  AND coalesce(src.source_type, '') <> 'derived'
+                  AND src.status IN ['composed', 'attached']
+                  AND src.claim_token IS NULL
+                  AND sn.id IN $reopen
+                WITH sn, collect(DISTINCT src) AS sources,
+                     collect(DISTINCT produced) AS produced_edges
+                SET sn.updated_at = datetime(), sn.name_stage = 'pending',
+                    sn.source_paths = [
+                      path IN coalesce(sn.source_paths, [])
+                      WHERE NOT path IN [source IN sources | source.id]
+                    ]
+                FOREACH (edge IN produced_edges | DELETE edge)
+                FOREACH (source IN sources |
+                  SET source.status         = 'extracted',
+                      source.attempt_count  = 0,
+                      source.claimed_at     = null,
+                      source.claim_token    = null,
+                      source.produced_sn_id = null,
+                      source.composed_at    = null
+                )
+                RETURN count(DISTINCT sn) AS names,
+                       sum(size(sources)) AS sources_freed
+                """,
+                reopen=reopen,
+            )
+            if reopen
+            else []
         )
     finally:
         if own:
@@ -2271,6 +2331,14 @@ def reconcile_descriptionless_composed_names(
 
     names_reopened = int(rows[0].get("names") or 0) if rows else 0
     sources_reopened = int(rows[0].get("sources_freed") or 0) if rows else 0
+    if stranded:
+        logger.info(
+            "reconcile_descriptionless_composed_names: kept %d name(s) with no "
+            "description because the strict writer cannot mint their spelling, "
+            "so their composed source is the last one they can have: %s",
+            len(stranded),
+            ", ".join(stranded),
+        )
     if names_reopened:
         logger.info(
             "reconcile_descriptionless_composed_names: re-opened %d name(s) "

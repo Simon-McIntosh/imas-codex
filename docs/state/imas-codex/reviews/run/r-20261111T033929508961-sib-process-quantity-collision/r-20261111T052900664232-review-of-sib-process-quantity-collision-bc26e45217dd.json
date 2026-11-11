@@ -1,0 +1,58 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-11T05:48:22Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "sib-process-quantity-collision",
+      "recorded_at": "2026-11-11T05:56:06.744701+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-11T05:30:26Z",
+  "findings": [
+    {
+      "disposition": "exempted",
+      "disposition_reason": "This affects maintainability only and does not change collision correctness.",
+      "file": "imas_codex/standard_names/export.py",
+      "id": "f69a8c51dae",
+      "line": 1607,
+      "severity": "non-blocking",
+      "text": "_physical_base_tokens duplicates the installed physical-base vocabulary set already provided by standard_names/segments.py:_registered_physical_bases at line 648."
+    },
+    {
+      "disposition": "exempted",
+      "disposition_reason": "This is a localized reuse defect and the measured gate behavior remains correct.",
+      "file": "imas_codex/standard_names/export.py",
+      "id": "f91f0a4d0bd",
+      "line": 1633,
+      "severity": "non-blocking",
+      "text": "_identity_quantity_base duplicates identity-to-physical-base parsing already provided by standard_names/edit.py:_base_token at line 626."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T033929508961-sib-process-quantity-collision/manifest.md",
+      "id": "fbb9cf53548",
+      "line": 11,
+      "severity": "blocking",
+      "text": "tests and baseline_suite/after_suite command fields contain unresolved <tree> and <scratch> placeholders, contrary to the source prompt literal-command requirement, so the manifest cannot supply the declared replayable gate command even though the log headers contain expanded commands."
+    }
+  ],
+  "project": "imas-codex",
+  "review_run_id": "r-20261111T052900664232-review-of-sib-process-quantity-collision-bc26e45217dd",
+  "review_text": "VERDICT goal: the source prompt at prompt.txt:38 asks the identity-token collision gate to admit a published quantity also spelled as a process token; export.py:1709-1710 limits that exemption to the process segment when the parsed identity has a physical base.\nVERDICT done_when: prompt.txt:106 is measured by five targeted tests (5 passed), the negative-control mutation (2 intended tests fail), the live population gate log (1,975 identities; base 1 issue, head 0), and completed archive suite arms (15 base failures, 14 head failures, no added ids); the full release dry run ends at the read-only publisher lock (EXIT=3), while the allowed direct gate-call measure is recorded in base-arm-live-gate-delta.log.\nVERDICT write_paths: prompt.txt:81-85 grants export.py, the collision test, the evidence fragment and a figure directory; the three changed paths in commits c0feba27c, 7641b4fc1 and bc26e4521 are all within that grant.\nVERDICT manifest: the source manifest records the three commits, complete base/head archive arms and log paths at manifest.md:6-19, but its tests and suite command fields retain <tree> and <scratch> placeholders at manifest.md:11,15,27 despite the source prompt requiring literal commands.\nVERDICT diff: read c0feba27c, 7641b4fc1 and bc26e4521 commit by commit against 06ac2d0c20d2511637d15ba603d77cbf89c5aaa4; the first adds the scoped exemption and five regression tests, and the latter two add and update the evidence fragment.\nCALL_SITES: imas_codex/standard_names/export.py:3627\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: export.py:1707-1710 skips only the process segment for a strict parse with a physical base, matching the stated behavior.\nSCORE evidence: 13\nJUSTIFICATION evidence: base-arm-live-gate-delta.log and the complete suite logs support the gate result and zero added failures, but manifest.md:11,15,27 do not record replayable literal commands as required.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the commit diff changes only export.py, test_identity_token_collision.py and the granted evidence fragment from prompt.txt:81-85.\nSCORE durability: 18\nJUSTIFICATION durability: test_identity_token_collision.py:20-68 covers the exemption and preserved component, locus, non-quantity process and neighboring-token behavior, and negative-control-removed-exemption.log shows two regression tests fail when the exemption is removed.\nSCORE fit: 17\nJUSTIFICATION fit: export.py:1606-1710 follows the module's cached grammar lookup and GateResult idiom, with names tied to the mechanism.\nSCORE reuse: 4\nJUSTIFICATION reuse: export.py:1607 and 1633 add capabilities already owned by segments.py:648 and edit.py:626 without extending those owners.\nFINDING imas_codex/standard_names/export.py:1607 non-blocking: _physical_base_tokens duplicates the installed physical-base vocabulary set already provided by standard_names/segments.py:_registered_physical_bases at line 648; disposition=exempted because this affects maintainability only and does not change collision correctness.\nFINDING imas_codex/standard_names/export.py:1633 non-blocking: _identity_quantity_base duplicates identity-to-physical-base parsing already provided by standard_names/edit.py:_base_token at line 626; disposition=exempted because this is a localized reuse defect and the measured gate behavior remains correct.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T033929508961-sib-process-quantity-collision/manifest.md:11 blocking: tests and baseline_suite/after_suite command fields contain unresolved <tree> and <scratch> placeholders, contrary to the source prompt's literal-command requirement, so the manifest cannot supply the declared replayable gate command even though the log headers contain expanded commands.",
+  "reviewed_base_sha": "06ac2d0c20d2511637d15ba603d77cbf89c5aaa4",
+  "reviewed_head_sha": "bc26e45217ddefd7e98f36d76c9bd18819b22feb",
+  "reviewed_run_id": "r-20261111T033929508961-sib-process-quantity-collision",
+  "scores": {
+    "durability": 18,
+    "evidence": 13,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 4,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T05:56:13.324662+00:00",
+  "total": 91
+}

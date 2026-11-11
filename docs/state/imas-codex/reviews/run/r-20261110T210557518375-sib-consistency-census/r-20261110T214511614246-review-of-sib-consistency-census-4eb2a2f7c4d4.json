@@ -1,0 +1,128 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-10T22:05:31.066Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "sib-consistency-census",
+      "recorded_at": "2026-11-10T22:09:07.239257+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-10T21:48:17Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "sib-consistency-census",
+      "recorded_at": "2026-11-10T22:07:12.011165+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "sib-consistency-census",
+      "recorded_at": "2026-11-10T22:07:30.222528+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "sib-consistency-census",
+      "recorded_at": "2026-11-10T22:07:48.384964+00:00"
+    },
+    "3": {
+      "kind": "folded",
+      "node": "sib-consistency-census",
+      "recorded_at": "2026-11-10T22:08:07.974934+00:00"
+    },
+    "4": {
+      "kind": "folded",
+      "node": "sib-consistency-census",
+      "recorded_at": "2026-11-10T22:08:31.043254+00:00"
+    },
+    "5": {
+      "kind": "folded",
+      "node": "sib-consistency-census",
+      "recorded_at": "2026-11-10T22:08:49.071486+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-consistency-census-run.py",
+      "id": "faeae0b4e09",
+      "line": "280",
+      "severity": "blocking",
+      "text": "blocking: census_families pops each member's description at line 280 before calling _anchor(members) at line 301, and _anchor (lines 235-238) selects only members whose description is set, so it returns {} and lines 357-358 write definition_from null and definition null for all 127 divergent families; the done_when requires 'a proposed single definition and template per family', so the deliverable's definition proposal is absent everywhere while the HTML and landing line carry the template proposal as if the family entry were complete. Reproduced in-process with the landed module on two synthetic members of one physical_base: census_families returned {\"definition_from\": null, \"definition\": null, \"definition_phrase\": \"radial flux\"} while _anchor on the same intact rows returned id a_one."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-consistency-census-run.py",
+      "id": "feac10c277c",
+      "line": "145",
+      "severity": "non-blocking",
+      "text": "non-blocking: base_phrase cuts its phrase only at the closed preposition set _CONCEPT_CUTS (lines 102-129), so a qualifier that precedes the base noun is kept and counted as a different definition: the magnetic_field family's variants are 'imaginary part', 'toroidal magnetic field', 'flux surface average' and 'magnitude' (JSON members 5/5/3/3), and the energy family's modal variant is 'fick s law proportionality coefficient relating the density', all of which are distinct quantities sharing a grammar base rather than one concept defined differently. The docstring at lines 133-137 asserts the opposite ('not the ordinary fact that two members describe different quantities'), so the headline '123 definition' overstates definition disagreement and would mis-size the follow-on consistency pass that is briefed from this census."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-consistency-census-run.py",
+      "id": "f1fc32363af",
+      "line": "72",
+      "severity": "non-blocking",
+      "text": "non-blocking: the 'opening' template feature compiles to r'^\\S', which matches every non-empty documentation body, so it contributes a constant 'o' to every signature and carries no information; template_signature at line 155 therefore cannot distinguish bodies that all open with text from any other pair, and the modal signature reported for the ten largest families is 'omwcn' across the board."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-consistency-census.html",
+      "id": "f80802acdb3",
+      "line": "4",
+      "severity": "non-blocking",
+      "text": "non-blocking: the ten-largest-families table (line 4) carries no example member or example text, only counts and a proposed phrase, so the done_when's 'summarises counts and the ten largest families with examples' is met only in the JSON; the per-family examples that do exist in the JSON (divergence.definition.phrase_variants[].example and .description) are dropped from the committed summary."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T210557518375-sib-consistency-census/manifest.md",
+      "id": "fcdc71b10fb",
+      "line": "16",
+      "severity": "non-blocking",
+      "text": "non-blocking: evidence_inputs quotes figures the committed artifact cannot support \u2014 'docs_stage accepted 1919 / pending 1005' where the JSON records 2036/942 plus reviewed 53, refining 2, exhausted 1 (summing to the 3034 universe, which the manifest's pair does not), and 'parallel component' (87/87), 'angular coordinate' (63/46), 'it' (39/39), 'volume average' (18/18) where the JSON carries 85/85, 65/47, 41/41 and 19/19 \u2014 so the landing record mixes an earlier live read with the committed one and a reader cannot reconcile the two."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-consistency-census-run.py",
+      "id": "f4998977fc9",
+      "line": "233",
+      "severity": "non-blocking",
+      "text": "non-blocking: _anchor re-implements the family anchor rule owned by imas_codex/standard_names/families.py:517 select_anchor, whose docstring states it is the one rule shared by the docs prompt and the harmonize command; the census neither imports nor extends it, drops its Data-Dictionary-source entailment and its accepted-parent priority, and the docstring at lines 233-237 ('Follows the family anchor rule used by the docs pipeline') therefore claims a parity the code does not have."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none",
+    "diff": "Read commit by commit from de46fb885 to 4eb2a2f7c: 1bacd4d14 adds a 704-line read-only census script, its 861483-byte JSON and a 12-line HTML fragment, and 4eb2a2f7c adds the disposable-graph planted control to the script and the control block to the JSON and HTML.",
+    "done_when": "prompt.txt:108 requires every divergent family with its members, divergent texts side by side and a proposed single definition and template per family; sib-consistency-census.json:1 omits the proposed definition for every family (definition_from null, definition null in all 127) and satisfies the witness, planted-control, template-proposal and summary clauses.",
+    "goal": "prompt.txt:38 asks for a census of families whose members carry divergent definitions, documentation templates or groupings; sib-consistency-census.json reports 130 families, 127 divergent (123 definition phrase, 98 template, 98 grouping) and 471 concept groups, 88 divergent, with the flux-surface-average concept as a 25-variant witness.",
+    "manifest": "The reviewed manifest.md records two commits (1bacd4d14, 4eb2a2f7c), the literal gate command, census-live.log and census-planted.log, a negative_control_log that is a passing run, and evidence_inputs figures (docs_stage 1919/1005, 'parallel component' 87/87, 'angular coordinate' 63/46) that disagree with the committed JSON (2036/942, 85/85, 65/47).",
+    "write_paths": "The diff of sib-consistency-census-run.py, sib-consistency-census.json and sib-consistency-census.html lies wholly inside the four declared write paths under docs/evidence/fragments/sn-integrity-backlog/ and docs/figures/sn-integrity-backlog/sib-consistency-census."
+  },
+  "justifications": {
+    "durability": "The planted control in sib-consistency-census-run.py:474 feeds a failing condition into main's exit at line 690, so a detection regression reddens the run, but no check covers the proposed-definition output (line 357-358) that is broken now, and the recorded negative_control_log is a passing run (EXIT=0) rather than a demonstrated refusal.",
+    "evidence": "census-planted.log records names=3034 families=130 divergent=127 concepts=471 divergent=88 with a passing planted control and EXIT=0, and the committed JSON reconciles with the landed code (577 stored phrases all reproduce through base_phrase), but the gate asserts nothing about proposed.definition, so it passed while that done_when clause was unmet.",
+    "fit": "The module follows the surrounding evidence-fragment idiom (typed helpers, module docstring, private functions, json output), but the _anchor docstring at line 233 claims to follow the docs pipeline's anchor rule while its implementation omits that rule's DD-source entailment and its sort is broken by the caller.",
+    "goal_fidelity": "The census in docs/evidence/fragments/sn-integrity-backlog/sib-consistency-census-run.py:255 reports all three required axes over 3034 names and names the flux-surface-average witness correctly, but its definition axis at line 145 cuts only at a closed preposition set, so 123 of 130 families are flagged for what is mostly the ordinary variety of sibling quantities, and the proposed definition it promises is null for every family.",
+    "reuse": "sib-consistency-census-run.py:233 adds _anchor, a second implementation of anchor-member selection that imas_codex/standard_names/families.py:517 select_anchor already owns and that its own docstring says it follows; the census neither imports nor extends the owner.",
+    "scope_discipline": "git diff de46fb885..4eb2a2f7c touches only sib-consistency-census-run.py, .json and .html, all inside the four granted write paths, with no product source, test or plan edit."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source goal at prompt.txt:38 asks for a census of families whose members carry divergent definitions, documentation templates or groupings; docs/evidence/fragments/sn-integrity-backlog/sib-consistency-census.json reports 130 multi-member families, 127 divergent and 471 concept groups with 88 divergent, but its definition axis measures description openings rather than definitions of a shared concept.\nVERDICT done_when: prompt.txt:108 requires members, divergent texts side by side and a proposed single definition and template per family; the committed JSON meets the witness, planted-control, template-proposal and summary clauses but records proposed.definition_from and proposed.definition as null in all 127 divergent families.\nVERDICT write_paths: the diff touches docs/evidence/fragments/sn-integrity-backlog/sib-consistency-census-run.py, sib-consistency-census.json and sib-consistency-census.html, all inside the four granted write paths, and creates nothing under docs/figures/ or any product path.\nVERDICT manifest: read; it records commits 1bacd4d14 and 4eb2a2f7c, the literal gate command, census-live.log and census-planted.log at EXIT=0, and evidence_inputs figures that partly disagree with the artifact they summarise.\nVERDICT diff: read both commits against base de46fb885540ab298aa1b41e1c6c7a81169251b9; 22537 insertions across the three declared files, the second commit adding only the disposable-graph planted control and the summary fragment.\nCALL_SITES: none\nSCORE goal_fidelity: 12\nJUSTIFICATION goal_fidelity: sib-consistency-census-run.py:255 reports all three axes and names the flux-surface-average witness, but its definition axis at line 145 flags qualifier variety as definition divergence in 123 of 130 families and its proposed definition is null everywhere.\nSCORE evidence: 15\nJUSTIFICATION evidence: census-planted.log records the counts and a passing planted control at EXIT=0 and the committed JSON reconciles with the landed code, but the gate asserts nothing about proposed.definition so it passed with that done_when clause unmet.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff de46fb885..4eb2a2f7c touches only the three declared files, with no product source, test or plan edit.\nSCORE durability: 11\nJUSTIFICATION durability: the planted control at sib-consistency-census-run.py:474 reddens main's exit at line 690 if detection regresses, but nothing covers the proposed-definition output at lines 357-358 and the recorded negative_control_log is a passing run rather than a shown refusal.\nSCORE fit: 15\nJUSTIFICATION fit: the module follows the surrounding evidence-fragment idiom, but the _anchor docstring at line 233 claims a pipeline rule its implementation at lines 233-248 does not follow.\nSCORE reuse: 4\nJUSTIFICATION reuse: sib-consistency-census-run.py:233 re-implements anchor selection that imas_codex/standard_names/families.py:517 select_anchor already owns, without importing or extending it.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-consistency-census-run.py:280 blocking: descriptions are popped at line 280 before _anchor is called at line 301, so proposed.definition and definition_from are null in all 127 families and the done_when's proposed definition is absent everywhere.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-consistency-census-run.py:145 non-blocking: base_phrase cuts only at prepositions, so preceding-adjective qualifiers are counted as divergent definitions and the 123-family definition figure overstates disagreement.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-consistency-census-run.py:72 non-blocking: the 'opening' template feature matches every non-empty body, contributing a constant letter to every signature.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-consistency-census.html:4 non-blocking: the ten-largest-families table carries no example member or text, so the done_when's 'with examples' is met only in the JSON.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T210557518375-sib-consistency-census/manifest.md:16 non-blocking: evidence_inputs quotes docs_stage and concept counts that disagree with the committed JSON, mixing two live reads in the landing record.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-consistency-census-run.py:233 non-blocking: _anchor duplicates imas_codex/standard_names/families.py:517 select_anchor and its docstring claims a parity it does not have.",
+  "review_run_id": "r-20261110T214511614246-review-of-sib-consistency-census-4eb2a2f7c4d4",
+  "reviewed_base_sha": "de46fb885540ab298aa1b41e1c6c7a81169251b9",
+  "reviewed_head_sha": "4eb2a2f7c4d47ab01acff967e658e45c1639cc0e",
+  "reviewed_run_id": "r-20261110T210557518375-sib-consistency-census",
+  "scores": {
+    "durability": 11,
+    "evidence": 15,
+    "fit": 15,
+    "goal_fidelity": 12,
+    "reuse": 4,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-10T22:58:00+00:00",
+  "total": 76
+}

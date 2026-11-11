@@ -1,0 +1,455 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 3,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "a839cece46b71a4d196628e28dda4bd8e586ad75",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 1944679,
+      "input_tokens_cumulative": 1944679,
+      "output_tokens": 13386,
+      "output_tokens_cumulative": 13386,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 1,
+    "files": 1,
+    "removed": 1
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "8623ff42e7893258debb46509e60d4a43a900d77"
+  ],
+  "completed_at": "2026-11-11T00:51:54Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-11-10T20:02:24Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "passed",
+  "gate_check": {
+    "command": "uv run --no-sync python docs/evidence/fragments/sn-integrity-backlog/sib-flush-unaccepted-run.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T195748248733-sib-flush-unaccepted/after-final.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.8906098017209129,
+    "plan": "sn-integrity-backlog",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-11-10T20:57:52.785136+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-11-10T19:57:52Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 28,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 2,
+    "headroom": 10,
+    "mean_context": 45000,
+    "observed_at": "2026-11-10T19:57:25Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 28,
+      "aggregate_tokens_per_second": 475.351,
+      "detail": "",
+      "mean_tokens_per_second": 74.274,
+      "observed_at": "2026-11-10T19:57:25Z",
+      "runs": 6.4,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-11T00:51:54Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T195748248733-sib-flush-unaccepted/manifest.md",
+  "member": "disposable-r-20261110T195748248733-sib-flush-unaccepted",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "sib-flush-unaccepted",
+  "node_definition": {
+    "admission_findings": [],
+    "after": [],
+    "anchor_paths": [],
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "elevated",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 195,
+          "cached_input_tokens": 689736,
+          "input_tokens": 689933,
+          "output_tokens": 204,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 690137,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+      "session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea"
+    },
+    "done_when": "uv run --no-sync imas-codex sn run --flush runs on the compute node in repeated foreground passes (-t 50 each, -c 60 cumulative across passes, selected by this run's own spend records) until a pass claims no work or the cap is reached, never minting a new source name; docs/evidence/fragments/sn-integrity-backlog/sib-flush-unaccepted.html records, read with the census's own query before and after, the accepted count of live DD quantity sources (5,203 before on 2026-11-09), the drafted and reviewed name counts, the census classes 'awaiting review' (239) and 'scored below the acceptance floor' (395) before and after, the spend per pass beside the cap, the export gate's blocking set (must stay 0) and the sourceless live draft count (must not rise); approved and contested rows are unchanged (ID-ordered properties hash before and after)",
+    "estimated_hours": null,
+    "goal": "Drain review, refine, documentation and parent enrichment for the names already in the pipeline with sn run --flush",
+    "id": "sib-flush-unaccepted",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-11-10T19:57:52Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 28,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 2,
+      "headroom": 10,
+      "mean_context": 45000,
+      "observed_at": "2026-11-10T19:57:25Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 28,
+        "aggregate_tokens_per_second": 475.351,
+        "detail": "",
+        "mean_tokens_per_second": 74.274,
+        "observed_at": "2026-11-10T19:57:25Z",
+        "runs": 6.4,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T195748248733-sib-flush-unaccepted/manifest.md",
+    "negative_control": "the approved and contested rows hash identically before and after while at least one non-frozen name advances; equality with zero work done is absent evidence and fails the node",
+    "over_fence_reason": "repeated 50-minute pipeline passes under a USD 60 cap drain several hundred names; the passes are foreground and resumable",
+    "peer_scopes": {
+      "sib-cohort-rerun-isn-0-11": [
+        "docs/evidence/fragments/sn-integrity-backlog/sib-cohort-rerun-isn-0-11-run.py",
+        "docs/evidence/fragments/sn-integrity-backlog/sib-cohort-rerun-isn-0-11.html",
+        "docs/figures/sn-integrity-backlog/sib-cohort-rerun-isn-0-11"
+      ],
+      "sib-lineage-cycle-guard": [
+        "docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-guard.html",
+        "docs/figures/sn-integrity-backlog/sib-lineage-cycle-guard",
+        "imas_codex/standard_names/edit.py",
+        "imas_codex/standard_names/graph_store/graph_claim_release.py",
+        "imas_codex/standard_names/graph_store/graph_foundation.py",
+        "imas_codex/standard_names/graph_store/graph_refinement.py",
+        "imas_codex/standard_names/graph_store/graph_source_bindings.py",
+        "imas_codex/standard_names/graph_store/graph_supersession.py",
+        "imas_codex/standard_names/provenance_lifecycle.py",
+        "imas_codex/standard_names/source_invariant.py",
+        "tests/standard_names/test_refined_from_cycle_guard.py"
+      ]
+    },
+    "plan": "sn-integrity-backlog",
+    "regenerate_paths": [],
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§52",
+    "spec_level": "guided",
+    "time_budget": "4h",
+    "token_budget": null,
+    "write_paths": [
+      "docs/evidence/fragments/sn-integrity-backlog/sib-flush-unaccepted.html",
+      "docs/evidence/fragments/sn-integrity-backlog/sib-flush-unaccepted-run.py",
+      "docs/figures/sn-integrity-backlog/sib-flush-unaccepted"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 3242067.0,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "sib-flush-unaccepted",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-11-10T20:01:01.788535+00:00",
+    "score": 0.7375,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:jev",
+    "family": null,
+    "jev_model": "~typesafe/jev-latest",
+    "latency_ms": 5006.229,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 1730.108,
+      "context-estimate": 143.704,
+      "records": 1687.267,
+      "verdict-inputs": 1305.448
+    }
+  },
+  "plan": "sn-integrity-backlog",
+  "plan_impl_at_dispatch": 0.8906098017209129,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "8623ff42e7893258debb46509e60d4a43a900d77",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "",
+    "ledger_index_removed": "/home/ITER/mcintos/.cache/reckon/ledger-c5bff93ce58c6b65366ef87aadc972ba96afee8b2128c4d7e2c414d73b6c0c1e-v5.sqlite",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 894,
+    "scratch_host": "98dci4-clu-2023.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261110T195748248733-sib-flush-unaccepted",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 894,
+        "path": "/tmp/reckon-crew-scratch/r-20261110T195748248733-sib-flush-unaccepted"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f554c2d-3a28-4c55-8645-67a1e8a30dea/sib-flush-unaccepted",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "a839cece46b71a4d196628e28dda4bd8e586ad75",
+    "reviewed_head_sha": "8623ff42e7893258debb46509e60d4a43a900d77",
+    "scores": {
+      "durability": 10,
+      "evidence": 13,
+      "fit": 18,
+      "goal_fidelity": 13,
+      "reuse": 17,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 90
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261110T195748248733-sib-flush-unaccepted",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§52",
+  "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+  "session_harness": "claude",
+  "session_id": "61103fcf-c099-4101-8670-c6f3ed4d6528",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 18818992,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 440.42,
+    "generated_tokens": 100956,
+    "generation_seconds": -358.948,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 59.5,
+    "machine_seconds": 799.368,
+    "peak_input_tokens": 136937,
+    "wall_tokens_per_second": 229.23
+  },
+  "time_budget": "4h",
+  "tool_steps": 99.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 17370,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 3,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-11T00:52:04Z",
+    "last_record_type": "result",
+    "launched_at": "2026-11-10T23:05:22Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [],
+    "run_id": "r-20261110T195748248733-sib-flush-unaccepted",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 15478,
+    "worker_pid": 2140987
+  },
+  "worker_seconds": 15275,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

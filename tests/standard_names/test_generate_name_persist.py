@@ -1966,7 +1966,9 @@ class TestSupersedePriorSourceNames:
         cypher = _transaction_call(tx, "old.name_stage = 'superseded'").args[0]
         # The predecessor is marked superseded and linked via REFINED_FROM.
         assert "old.name_stage = 'superseded'" in cypher
-        assert "MERGE (new)-[:REFINED_FROM]->(old)" in cypher
+        assert "MERGE (new)-[lineage_edge:REFINED_FROM]->(old)" in cypher
+        assert "ON CREATE SET lineage_edge.writer" in cypher
+        assert "lineage_edge.created_at = datetime()" in cypher
         # A structural parent is exempt by origin: it belongs to the admission
         # gate, not to any one source. An imported name is NOT exempt by origin
         # alone — the graph plus the review pipeline is the source of truth, so

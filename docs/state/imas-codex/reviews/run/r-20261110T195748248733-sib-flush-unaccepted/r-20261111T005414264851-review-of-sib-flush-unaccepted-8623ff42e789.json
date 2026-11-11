@@ -1,0 +1,58 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "The reviewed node declared baseline_suite: none and after_suite: none. It changes no product source and adds no test, so there is no suite arm pair to diff; its two gate logs (before.log, after-final.log) are census measurement runs that each end EXIT=0, not test suites. Zero added failures is the absence of a suite, confirmed by reading the reviewed manifest and the run directory rather than by a green suite.",
+  "completed_at": "2026-11-11T01:07:38.846Z",
+  "dispatched_at": "2026-11-11T00:56:17Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-flush-unaccepted.html",
+      "line": 1,
+      "severity": "non-blocking",
+      "summary": "The method paragraph states that both phases were measured by sib-flush-unaccepted-run.py, but the committed script always writes digest_sensitivity_control and docs_stage_counts and before.json carries neither, so the before arm was taken by an uncommitted script version; its observed_at 2026-11-10T20:10:57Z is 17 minutes before the script first landed in 41bb68f53 at 20:27:45Z, and the baseline of the node's whole delta therefore cannot be reproduced from the repository."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-flush-unaccepted.html",
+      "line": 1,
+      "severity": "non-blocking",
+      "summary": "The final verdict paragraph opens with as to both halves of the fence hold, while the table in the same section records sourceless live drafts 3 to 4 and the done_when says that count must not rise; the clause that follows qualifies it to the second pass alone, so the opening claim overstates the drain as a whole and a reader who reads only the verdict takes away a conclusion its own table contradicts."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-flush-unaccepted.html",
+      "line": 1,
+      "severity": "non-blocking",
+      "summary": "The documentation gain, which is the node's headline claim, does not reconcile with itself: five hundred of the 529 reviewed names are said to be currently at docs_stage=accepted carrying a drain stamp, five hundred and six are then subtracted from the 3212 accepted to reconstruct the 2706 baseline, and six names are unaccounted for between those two figures, so neither the +506 nor the baseline it implies can be reproduced from the sentence as written."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-flush-unaccepted-run.py",
+      "line": 1,
+      "severity": "non-blocking",
+      "summary": "The granted figure path docs/figures/sn-integrity-backlog/sib-flush-unaccepted is unused and no figure was produced, so a before and after comparison of the census classes, which is decision-relevant data the graphics mandate says to illustrate, ships as table rows only."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "six commits against a839cece contain 284 added lines and no deletions, all inside docs/evidence/fragments/sn-integrity-backlog/ and none of them product source, test or plan content.",
+    "done_when": "the done_when asks for accepted live DD sources, drafted and reviewed name counts, the awaiting-review and below-floor census classes, spend per pass beside the cap, an export gate that must stay 0 and a sourceless count that must not rise; sib-flush-unaccepted-run.py measures the first six and records them, and records the seventh rising 3 to 4.",
+    "goal": "the node's goal is a sn run --flush drain of review, refine, documentation and parent enrichment; sib-flush-unaccepted.html:1 records documentation moving 2706 to 3212 and four names reaching accepted, while review is flat at 109 and parent enrichment has no measure anywhere in the record.",
+    "manifest": "the manifest reports status complete with the full before and after table, the sourceless rise, the reconstructed docs baseline and USD 58.3597 billed of a USD 60 ceiling, all of which reconcile with after-final.json and its log.",
+    "write_paths": "the declared paths are the fragment HTML, its runner and docs/figures/sn-integrity-backlog/sib-flush-unaccepted; the diff touches only the first two and leaves the figure directory empty."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is a sn run --flush drain of review, refine, documentation and parent enrichment; docs/evidence/fragments/sn-integrity-backlog/sib-flush-unaccepted.html:1 records documentation moving 2706 to 3212 and four names reaching accepted, while review is flat at 109 and parent enrichment has no measure anywhere in the module docstring's own list of pools.\nVERDICT done_when: the done_when asks for accepted live DD sources, drafted and reviewed name counts, the awaiting-review and below-floor census classes, spend per pass beside the cap, an export gate that must stay 0 and a sourceless count that must not rise; docs/evidence/fragments/sn-integrity-backlog/sib-flush-unaccepted-run.py measures the first six and records them, and records the seventh rising 3 to 4.\nVERDICT write_paths: the declared paths are the fragment HTML, its runner and docs/figures/sn-integrity-backlog/sib-flush-unaccepted; the diff touches only the first two and leaves the figure directory empty.\nVERDICT manifest: the manifest reports status complete with the full before and after table, the sourceless rise, the reconstructed docs baseline and USD 58.3597 billed of a USD 60 ceiling, all of which reconcile with after-final.json and its log.\nVERDICT diff: six commits against a839cece contain 284 added lines and no deletions, all inside docs/evidence/fragments/sn-integrity-backlog/ and none of them product source, test or plan content.\nCALL_SITES: none\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-integrity-backlog/sib-flush-unaccepted.html:1 records the +506 documentation gain and +4 names but carries no measure at all for the parent-enrichment pool its own intro names as part of the drain.\nSCORE evidence: 13\nJUSTIFICATION evidence: docs/evidence/fragments/sn-integrity-backlog/sib-flush-unaccepted.html:1 claims both phases were measured by the committed runner, but before.json lacks digest_sensitivity_control and docs_stage_counts which that runner always writes and was observed 17 minutes before the runner's first commit.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the diff at docs/evidence/fragments/sn-integrity-backlog/sib-flush-unaccepted-run.py and sib-flush-unaccepted.html is one of the declared write paths, and no product source, test or plan file is touched.\nSCORE durability: 10\nJUSTIFICATION durability: docs/evidence/fragments/sn-integrity-backlog/sib-flush-unaccepted-run.py adds no assertion and its gate exits 0 whatever the numbers are, so nothing reddens if a measure regresses, and its one falsifiable control hashes the accepted cohort rather than the empty guarded one.\nSCORE fit: 18\nJUSTIFICATION fit: the fragment follows the minified single-line evidence-fragment shape of its sibling docs/evidence/fragments/sn-integrity-backlog/sib-unaccepted-census.html, and commit 3f4569131 removed the one plan-section reference from the runner docstring.\nSCORE reuse: 17\nJUSTIFICATION reuse: sib-flush-unaccepted-run.py loads sib-unaccepted-census-run.py for source_rows and classify_source and calls export.run_export rather than re-deriving either, and a search of imas_codex/standard_names for def *counts and def *digest found only private per-module helpers, no owner of a stage histogram or cohort digest.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-flush-unaccepted.html:1 non-blocking: the method paragraph states both phases were measured by sib-flush-unaccepted-run.py, but the committed script always writes digest_sensitivity_control and docs_stage_counts and before.json carries neither, so the before arm came from an uncommitted script version observed at 2026-11-10T20:10:57Z, 17 minutes before that script first landed in 41bb68f53 at 20:27:45Z, and the baseline of the node's whole delta cannot be reproduced from the repository.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-flush-unaccepted.html:1 non-blocking: the final verdict opens with \"Both halves of the fence hold\" while the table in the same section records sourceless live drafts 3 to 4 and the done_when says that count must not rise; the following clause qualifies it to the second pass alone, so the opening claim overstates the drain as a whole.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-flush-unaccepted.html:1 non-blocking: the documentation gain, the node's headline claim, does not reconcile with itself, stating that 500 of the 529 reviewed names are currently at docs_stage=accepted with a drain stamp and then subtracting 506 from the 3212 accepted to reconstruct the 2706 baseline, leaving six names unaccounted for between the two figures.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-flush-unaccepted-run.py:1 non-blocking: the granted figure path docs/figures/sn-integrity-backlog/sib-flush-unaccepted is unused and no figure was produced, so the before and after census comparison ships as table rows only.\n",
+  "review_run_id": "r-20261111T005414264851-review-of-sib-flush-unaccepted-8623ff42e789",
+  "reviewed_base_sha": "a839cece46b71a4d196628e28dda4bd8e586ad75",
+  "reviewed_head_sha": "8623ff42e7893258debb46509e60d4a43a900d77",
+  "reviewed_run_id": "r-20261110T195748248733-sib-flush-unaccepted",
+  "scores": {
+    "durability": 10,
+    "evidence": 13,
+    "fit": 18,
+    "goal_fidelity": 13,
+    "reuse": 17,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T01:10:04.291451+00:00",
+  "total": 90
+}

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The twenty below-cap reset receipts carry an appended correction</title>
+</head>
+<body>
+<section id="sib-retry-receipt-correction-record">
+<h2 id="sib-retry-receipt-correction-heading">Corrections for the below-cap reset receipts</h2>
+
+<p id="sib-retry-receipt-correction-defect">The cohort rerun reset 35 terminal-failed sources through
+<code>retry_failed_sources</code>. Fifteen of them stood at the compose claim cap
+of 5 and twenty below it, distributed as {&quot;1&quot;: 7, &quot;2&quot;: 9, &quot;3&quot;: 2, &quot;4&quot;: 2}.
+The receipt each source received asserted that it had reached the claim cap,
+which was untrue for the twenty. Reproduced live before any write, on all twenty
+originals: <q>cohort rerun under the 0.11.0 grammar: the source reached the claim cap in an earlier pass and the composition fixes have landed since</q>. A passing suite cannot show that wording; this
+node read it from the receipts themselves, and every one of the twenty carried
+the identical string.</p>
+
+<p id="sib-retry-receipt-correction-append">This node appends one new <code>StandardNameSourceRetry</code>
+record per below-cap source and touches nothing else. Each correction carries the
+true attempt count at reset in <code>previous_attempt_count</code>, states in its
+<code>reason</code> that the reset stood below the cap of 5,
+names the receipt it corrects in <code>correction_of</code>, and is linked to that
+receipt by a <code>CORRECTS</code> relationship. The originals are neither edited
+nor deleted: their <code>reason</code> and <code>retried_at</code> read back
+identical to the pre-write snapshot, all 35 cohort-rerun receipts still stand
+uncorrected, and the 20 sources were not written to. Spend USD 0.</p>
+
+<table id="sib-retry-receipt-correction-histogram">
+<caption>Reset sources by attempt count at the three-way split of the 35</caption>
+<thead><tr><th>Attempts at reset</th><th>Sources below the cap</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>7</td></tr><tr><td>2</td><td>9</td></tr><tr><td>3</td><td>2</td></tr><tr><td>4</td><td>2</td></tr>
+<tr><td><strong>Below cap</strong></td><td><strong>20</strong></td></tr>
+<tr><td><strong>At cap (5)</strong></td><td><strong>15</strong></td></tr>
+<tr><td><strong>Total reset</strong></td><td><strong>35</strong></td></tr>
+</tbody>
+</table>
+
+<h3 id="sib-retry-receipt-correction-corrections-heading">The twenty corrections</h3>
+<table id="sib-retry-receipt-correction-corrections-table">
+<caption>One appended correction per source reset below the claim cap</caption>
+<thead><tr><th>Source</th><th>Attempts at reset</th><th>Corrected receipt</th><th>Correction record</th></tr></thead>
+<tbody>
+<tr><td><code>dd:mhd_linear/time_slice/toroidal_mode/plasma/displacement_parallel/imaginary</code></td><td>1</td><td><code>source-retry:3e35a432-10d9-4e1d-a4c7-309bf68684ea</code></td><td><code>source-retry-correction:ea4b9a9c-0789-4fa7-8202-bee5abdc5531</code></td></tr>
+<tr><td><code>dd:mhd_linear/time_slice/toroidal_mode/plasma/displacement_perpendicular/imaginary</code></td><td>1</td><td><code>source-retry:3d924652-c24b-4f08-bcb4-b944b5a42aaa</code></td><td><code>source-retry-correction:70eaa380-c94f-411f-9ab0-204b7eef3646</code></td></tr>
+<tr><td><code>dd:mhd_linear/time_slice/toroidal_mode/plasma/displacement_perpendicular/real</code></td><td>1</td><td><code>source-retry:e00e3227-1313-470e-b65d-2ca18bf6fbbb</code></td><td><code>source-retry-correction:99c524b4-78f0-43bd-a895-81b74073aa21</code></td></tr>
+<tr><td><code>dd:nbi/unit/beamlets_group/tangency_radius</code></td><td>1</td><td><code>source-retry:536f9a97-1a10-4a14-9c7b-c75833753717</code></td><td><code>source-retry-correction:93f89996-e7fd-4ec7-978f-cd6c0033dc0d</code></td></tr>
+<tr><td><code>dd:wall/description_2d/vessel/unit/annular/outline_outer/r</code></td><td>1</td><td><code>source-retry:f0623268-cdf1-4ad7-a8fd-40e697b6d544</code></td><td><code>source-retry-correction:c416b72d-dffd-4262-82ae-83800a91ec5f</code></td></tr>
+<tr><td><code>dd:wall/description_ggd/ggd/energy_fluxes/radiation/incident/values</code></td><td>1</td><td><code>source-retry:4bc72338-8839-4f4a-99f9-7e06fc59386f</code></td><td><code>source-retry-correction:d0f93a64-3b90-4913-aeb5-3493575cac48</code></td></tr>
+<tr><td><code>dd:waves/coherent_wave/profiles_2d/e_field_n_phi/parallel/amplitude</code></td><td>1</td><td><code>source-retry:e6e5f00e-d1f6-4285-8bd2-5265f735075b</code></td><td><code>source-retry-correction:de72bd33-9d20-4a57-b37f-47cd5ea78fce</code></td></tr>
+<tr><td><code>dd:core_transport/model/flux_multiplier</code></td><td>2</td><td><code>source-retry:a098b38d-afc5-4cf0-81c4-373889a25f19</code></td><td><code>source-retry-correction:4f7a24b0-692e-43f9-be75-cefe20ce6873</code></td></tr>
+<tr><td><code>dd:ece/channel/delta_position_suprathermal/r</code></td><td>2</td><td><code>source-retry:b6a25e8c-06cf-49ef-85a8-763a02ed545d</code></td><td><code>source-retry-correction:f1b28163-8bdc-4e6c-9a1b-bff35bd35a06</code></td></tr>
+<tr><td><code>dd:gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_gyrocenter/heat_flux_parallel</code></td><td>2</td><td><code>source-retry:533f9aed-8964-4c9c-8e75-cc6c70d9e919</code></td><td><code>source-retry-correction:1561c428-2efe-491d-8344-3adc2fd14a72</code></td></tr>
+<tr><td><code>dd:gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_gyrocenter/pressure</code></td><td>2</td><td><code>source-retry:d20013dc-3f3b-4e61-b3cc-36d2942a58e8</code></td><td><code>source-retry-correction:c352aaec-0727-40db-808a-320f6ddbdc54</code></td></tr>
+<tr><td><code>dd:gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_particle/heat_flux_parallel</code></td><td>2</td><td><code>source-retry:bc139256-9553-46f0-818c-3d5e10d28fe6</code></td><td><code>source-retry-correction:fa8f1ea5-622f-492d-99d3-ae415cb6ce51</code></td></tr>
+<tr><td><code>dd:gyrokinetics_local/non_linear/fields_intensity_3d/phi_potential_perturbed_norm</code></td><td>2</td><td><code>source-retry:5285183c-c209-4b30-9bd3-00ed5045c402</code></td><td><code>source-retry-correction:0c723fd3-b8df-4f13-9cbe-a6cc6ff5822e</code></td></tr>
+<tr><td><code>dd:gyrokinetics_local/species/velocity_phi_gradient_norm</code></td><td>2</td><td><code>source-retry:cfcddf42-7678-4873-b185-279272054658</code></td><td><code>source-retry-correction:2bee5f12-b8c6-44d8-a835-de83bc0bb3a6</code></td></tr>
+<tr><td><code>dd:magnetics/flux_loop/gm9</code></td><td>2</td><td><code>source-retry:048cd729-6073-426c-9061-6dff1e65795c</code></td><td><code>source-retry-correction:f51f6e1e-5e33-4124-9c04-2fffba779ea5</code></td></tr>
+<tr><td><code>dd:plasma_transport/model/flux_multiplier</code></td><td>2</td><td><code>source-retry:f5e57a7b-eed5-449d-b430-f20a159cd18a</code></td><td><code>source-retry-correction:9e53a342-a6d1-49ee-ad9c-5e5847cbc8ea</code></td></tr>
+<tr><td><code>dd:camera_ir/fibre_bundle/fibre_radius</code></td><td>3</td><td><code>source-retry:af6aee09-bed2-4d8c-a12f-c7cf1d894458</code></td><td><code>source-retry-correction:9003ef4c-6c8e-4bcc-bbcb-0036f7bc1e83</code></td></tr>
+<tr><td><code>dd:gyrokinetics_local/linear/wavevector/eigenmode/moments_norm_particle/v_parallel_energy_perpendicular</code></td><td>3</td><td><code>source-retry:d26dc32b-8f73-464d-9877-af34488e4423</code></td><td><code>source-retry-correction:c950ea9d-1edd-42b2-a2b7-d02345c02cb3</code></td></tr>
+<tr><td><code>dd:gyrokinetics_local/flux_surface/pressure_gradient_norm</code></td><td>4</td><td><code>source-retry:da6ac896-f07a-4bce-9b0c-85b08e3b5a67</code></td><td><code>source-retry-correction:5fb525e3-03ab-4fc8-ba4b-82bfa8f22e04</code></td></tr>
+<tr><td><code>dd:summary/pedestal_fits/mtanh/stability/bootstrap_current_hager/alpha_critical/value</code></td><td>4</td><td><code>source-retry:f779fd85-b624-420a-a388-0a5f40a968c9</code></td><td><code>source-retry-correction:f16e5e3f-500c-4d3a-8826-4b9a835da8ce</code></td></tr>
+</tbody>
+</table>
+
+<h3 id="sib-retry-receipt-correction-readback-heading">Read-back</h3>
+<table id="sib-retry-receipt-correction-readback-table">
+<caption>Live read after the append</caption>
+<thead><tr><th>Reading</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>Correction records for the twenty sources</td><td><strong>20</strong></td></tr>
+<tr><td>Correction records in the graph</td><td><strong>20</strong></td></tr>
+<tr><td>Each linked to exactly one original</td><td>true</td></tr>
+<tr><td>Every correction states an attempt count below the cap</td><td>true</td></tr>
+<tr><td>Originals unchanged in reason and timestamp</td><td>true</td></tr>
+<tr><td>Sources written</td><td>0</td></tr>
+</tbody>
+</table>
+
+<h3 id="sib-retry-receipt-correction-negative-heading">Negative control</h3>
+
+<p id="sib-retry-receipt-correction-negative-text">The declared control is that a source reset at the cap
+must receive no correction record. The same statement that wrote the twenty rows
+above was run against
+<code>dd:camera_ir/fibre_bundle/geometry/x1_width</code>, which was reset at
+attempt_count 5 of a cap of 5. It
+wrote 0 rows, so the guard fires, and the twenty-row positive
+arm shows the statement is not vacuous.</p>
+</section>
+</body>
+</html>

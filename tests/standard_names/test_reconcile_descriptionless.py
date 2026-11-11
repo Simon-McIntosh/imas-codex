@@ -29,6 +29,21 @@ import pytest
 
 _PREFIX = "test_reconcile_descriptionless__"
 
+#: Seed spellings, one per case, all of them names the strict grammar writer can
+#: mint again. The repair re-opens a name by releasing its producer and leaving
+#: compose to rewrite it, so a spelling compose cannot mint is skipped by design
+#: and the case would measure nothing. The disposable graph keeps these out of
+#: the catalog, and :func:`_clean` removes them either side of every case.
+_SEEDS = {
+    "stranded": "electron_temperature",
+    "described": "ion_temperature",
+    "idempotent": "electron_density",
+    "via_entrypoint": "ion_density",
+    "pending_no_prose": "plasma_current",
+    "guard_no_prose": "loop_voltage",
+    "guard_prose": "electron_pressure",
+}
+
 
 @pytest.fixture()
 def _gc():
@@ -51,14 +66,19 @@ def _clean(_gc):
                 f"MATCH (n:{label}) WHERE n.id CONTAINS $p DETACH DELETE n",
                 p=_PREFIX,
             )
+            _gc.query(
+                f"MATCH (n:{label}) WHERE n.id IN $ids DETACH DELETE n",
+                ids=list(_SEEDS.values()),
+            )
 
     _wipe()
     yield
     _wipe()
 
 
-def _uid(tag: str) -> str:
-    return f"{_PREFIX}{tag}_{uuid.uuid4().hex[:8]}"
+def _seed_name(tag: str) -> str:
+    """The name this case seeds, spelled so the strict writer accepts it."""
+    return _SEEDS[tag]
 
 
 def _bind(
@@ -141,7 +161,7 @@ def test_reconcile_reopens_descriptionless_drafted_name(_gc, _clean):
         reconcile_descriptionless_composed_names,
     )
 
-    stranded = _uid("stranded")
+    stranded = _seed_name("stranded")
     stranded_source = _bind(_gc, name_id=stranded, description=None)
 
     result = reconcile_descriptionless_composed_names(gc=_gc)
@@ -169,7 +189,7 @@ def test_reconcile_leaves_a_described_drafted_name_untouched(_gc, _clean):
         reconcile_reviewable_name_stage,
     )
 
-    described = _uid("described")
+    described = _seed_name("described")
     described_source = _bind(
         _gc, name_id=described, description="Electron temperature at the pedestal top."
     )
@@ -190,7 +210,7 @@ def test_reconcile_is_idempotent_over_a_reopened_name(_gc, _clean):
         reconcile_descriptionless_composed_names,
     )
 
-    stranded = _uid("idempotent")
+    stranded = _seed_name("idempotent")
     _bind(_gc, name_id=stranded, description=None)
 
     reconcile_descriptionless_composed_names(gc=_gc)
@@ -212,7 +232,7 @@ def test_startup_reconcile_performs_the_repair(_gc, _clean):
         reconcile_reviewable_name_stage,
     )
 
-    stranded = _uid("via_entrypoint")
+    stranded = _seed_name("via_entrypoint")
     stranded_source = _bind(_gc, name_id=stranded, description=None)
 
     reconcile_reviewable_name_stage(gc=_gc)
@@ -233,7 +253,7 @@ def test_reconcile_does_not_advance_a_descriptionless_pending_name(_gc, _clean):
         reconcile_reviewable_name_stage,
     )
 
-    pending = _uid("pending_no_prose")
+    pending = _seed_name("pending_no_prose")
     _bind(_gc, name_id=pending, description=None, name_stage="pending")
 
     reconcile_reviewable_name_stage(gc=_gc)
@@ -286,7 +306,7 @@ def test_finalize_refuses_to_draft_a_name_with_no_description(_gc, _clean):
         _finalize_generated_name_stage,
     )
 
-    prose_less = _uid("guard_no_prose")
+    prose_less = _seed_name("guard_no_prose")
     item = _claimed_compose_product(_gc, name_id=prose_less, description=None)
 
     _finalize_generated_name_stage([item])
@@ -301,7 +321,7 @@ def test_finalize_still_drafts_a_name_that_carries_prose(_gc, _clean):
         _finalize_generated_name_stage,
     )
 
-    with_prose = _uid("guard_prose")
+    with_prose = _seed_name("guard_prose")
     item = _claimed_compose_product(
         _gc, name_id=with_prose, description="Line averaged neon density."
     )

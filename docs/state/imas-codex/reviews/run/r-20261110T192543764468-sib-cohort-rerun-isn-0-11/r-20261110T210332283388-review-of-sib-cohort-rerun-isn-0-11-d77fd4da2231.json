@@ -1,0 +1,82 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured by the reviewed run's own evidence: its census records no baseline_suite or after_suite arms (the node declares `negative_control: none: an operational run with no test path`), so no suite delta could be derived; 0 is not a claim that a suite ran clean.",
+  "call_sites": "none",
+  "completed_at": "2026-11-10T21:18:34.865Z",
+  "dispatched_at": "2026-11-10T21:05:45Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the headline counts are the measure; the per-attempt table is read from census.json in the same commit",
+      "recorded_at": "2026-11-10T21:21:24.597198+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "wording only; the 15-at-cap and 20-below split is stated and the 20 are listed",
+      "recorded_at": "2026-11-10T21:21:39.723559+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "the gate log's revision is the run's parent; the fragment-only correction commit changes no measured code",
+      "recorded_at": "2026-11-10T21:21:52.845593+00:00"
+    },
+    "3": {
+      "kind": "folded",
+      "node": "sib-retry-receipt-correction",
+      "recorded_at": "2026-11-10T21:22:10.262366+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-cohort-rerun-isn-0-11-run.py",
+      "line": "723",
+      "severity": "non-blocking",
+      "text": "the check asserts only the two headline counts, so the per-attempt distribution and the reset table could drift from census.json while the gate stays green"
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-cohort-rerun-isn-0-11.html",
+      "line": "28",
+      "severity": "non-blocking",
+      "text": "the corrected paragraph reads \"stood below it at attempts 7 at 1, 9 at 2, 2 at 3, 2 at 4\", which is hard to parse in the paragraph the repair exists to make unambiguous"
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T192543764468-sib-cohort-rerun-isn-0-11/check.log",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "the cited gate log's revision header names the parent 4f71570c5, so the recorded receipt cannot by its own content be tied to the landed head d77fd4da2"
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-cohort-rerun-isn-0-11.html",
+      "line": "38",
+      "severity": "non-blocking",
+      "text": "the correction of the 35 existing receipts' reason text lives only in this fragment, so a graph reader of the StandardNameSourceRetry records still sees the false claim-cap wording with no pointer to the correction"
+    }
+  ],
+  "item_verdicts": {
+    "diff": "pass one commit of 166 insertions and 28 deletions over the two declared evidence files, nothing outside the fence",
+    "done_when": "pass the reset clause the prior review called blocking now matches the data and names the departure; the operational measures of the done_when are unchanged by this delta",
+    "goal": "pass the delta repairs both blocking findings; the reset class is now stated as 15 at the cap and 20 below, recomputed from census.json and verify-reset.json",
+    "manifest": "pass it records both shas, the class split, the departure and the corrected reason, and `crew check --manifest` returns ok:true",
+    "write_paths": "pass git show --stat d77fd4da2 lists only the two declared evidence files"
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to rerun the \u00a751 cohort's unproduced sources against the 0.11.0 grammar and read back each outcome, and the delta d77fd4da2 over 4f71570c5 repairs the two blocking findings by making the reset record state its true class (15 of 35 at the cap of 5, 20 below at 1-4, all 35 terminal `failed` and unclaimed), which I recomputed from census.json and verify-reset.json.\nVERDICT done_when: the done_when requires a reason for every unproduced source, a per-source before/after status, and the reset recorded honestly; the delta touches only the reset clause and the reason constant, and its own `check` action (sib-cohort-rerun-isn-0-11.html:21-46) recomputes the reset class from the frozen census and fails when the fragment or the reason returns to the claim-cap wording.\nVERDICT write_paths: the declared paths are sib-cohort-rerun-isn-0-11.html, sib-cohort-rerun-isn-0-11-run.py and the figures directory; git show --stat d77fd4da2 lists exactly the first two (166 insertions, 28 deletions) and no figure.\nVERDICT manifest: read at run manifest.md - it records both commits 4f71570c5 and d77fd4da2, the class split, the departure, the corrected reason constant and seven run-directory logs, and `reckon crew check --manifest` returns ok:true; its negative_control_log line carries two comma-separated paths where the contract asks for one bare path, which the audit does not refuse.\nVERDICT diff: read commit by commit over 4f71570c5..d77fd4da2 - d77fd4da2 adds a RESET_REASON constant (run.py:45), the reset-class and receipt-text paragraphs plus a class table in the fragment, a `check` action (run.py:694-746) with --fragment/--log options, and mechanical ruff re-wrapping of lines it already touched.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: the corrected paragraph at sib-cohort-rerun-isn-0-11.html:21-35 is accurate against census.json (15 at cap, 20 below at 7-at-1/9-at-2/2-at-3/2-at-4, 16 vocab_gap not reset), but the 35 receipts already written keep the false reason and the correction lives only in the repo fragment.\nSCORE evidence: 17\nJUSTIFICATION evidence: check.log records EXIT=0 with at_cap 15 and below_cap 20 recomputed from the frozen census, and I reproduced that EXIT=0 at head and an EXIT=1 on a scratch copy carrying the old sentence reinstated, though check.log's own header stamps the parent revision 4f71570c5 rather than the landed head.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every hunk of d77fd4da2 lies in the two declared fragment files, with only mechanical line re-wrapping of code the commit already edits.\nSCORE durability: 15\nJUSTIFICATION durability: sib-cohort-rerun-isn-0-11-run.py:717-730 fails when the fragment regains the old claim or RESET_REASON regains \"reached the claim cap\", demonstrated red in check-negative.log and check-negative-reason.log and reproduced by me, but :723-727 asserts only the two headline counts so the distribution prose and the class table are unguarded.\nSCORE fit: 18\nJUSTIFICATION fit: the added action follows the sibling revision/command/EXIT header and action-dispatch idiom of the same runner (sib-cohort-rerun-isn-0-11-run.py:744-790), every element id stays prefixed with the node id, and the constant is named by meaning.\nSCORE reuse: 19\nJUSTIFICATION reuse: the search over the 36 sibling fragment runners in docs/evidence/fragments/sn-integrity-backlog and over imas_codex for an attempt-cap or fragment-consistency validator found no owner of this check, and the delta reuses retry_failed_sources and the node's own load()/RUN readers rather than reimplementing them.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-cohort-rerun-isn-0-11-run.py:723 non-blocking: the check asserts only the two headline counts, so the per-attempt distribution \"7 at 1, 9 at 2, 2 at 3, 2 at 4\" and the reset table could drift from census.json while the gate stays green.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-cohort-rerun-isn-0-11.html:28 non-blocking: the corrected paragraph reads \"stood below it at attempts 7 at 1, 9 at 2, 2 at 3, 2 at 4\", which is hard to parse and invites misreading of the distribution in the paragraph the repair exists to make unambiguous.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T192543764468-sib-cohort-rerun-isn-0-11/check.log:1 non-blocking: the cited gate log's revision header names 4f71570c5, the parent, so the recorded receipt cannot by its own content be tied to the landed head d77fd4da2; I re-ran the same check at the head and got EXIT=0.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-cohort-rerun-isn-0-11.html:38 non-blocking: the correction of the 35 already-written receipts' reason text lives only in this fragment, so a reader of the StandardNameSourceRetry audit records in the graph still sees the false claim-cap wording with no pointer to the correction.\n",
+  "review_run_id": "r-20261110T210332283388-review-of-sib-cohort-rerun-isn-0-11-d77fd4da2231",
+  "reviewed_base_sha": "4f71570c572a7b79a2c2b8f35fbe9528de7a65f4",
+  "reviewed_head_sha": "d77fd4da223151c3e7985efe3d016aed781b92c1",
+  "reviewed_run_id": "r-20261110T192543764468-sib-cohort-rerun-isn-0-11",
+  "rubric": "text",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 16,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-10T21:26:31.567127+00:00",
+  "total": 104
+}

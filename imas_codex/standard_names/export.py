@@ -36,11 +36,15 @@ from imas_codex.standard_names.canonical import (
     reorder_entry_dict,
 )
 from imas_codex.standard_names.catalog_ordering import order_entries_by_hierarchy
+from imas_codex.standard_names.edit import _base_token
 from imas_codex.standard_names.protection import PROTECTED_FIELDS
 from imas_codex.standard_names.provenance_lifecycle import (
     fetch_public_semantic_sources,
 )
-from imas_codex.standard_names.segments import grammar_token_index
+from imas_codex.standard_names.segments import (
+    _registered_physical_bases,
+    grammar_token_index,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -1609,7 +1613,6 @@ def _identity_token_segments() -> tuple[dict[str, tuple[str, ...]], frozenset[st
     from imas_standard_names import get_grammar_context
 
     vocabularies = get_grammar_context()["grammar"]["vocabularies"]
-    physical_bases = set(vocabularies["physical_bases"])
     geometry_carriers = set(vocabularies["geometry_carriers"])
     locus_tokens = set(vocabularies["locus_registry"])
 
@@ -1617,7 +1620,7 @@ def _identity_token_segments() -> tuple[dict[str, tuple[str, ...]], frozenset[st
     for token in locus_tokens:
         segments[token] = ("locus",)
 
-    quantity_tokens = frozenset(physical_bases | geometry_carriers)
+    quantity_tokens = frozenset(set(_registered_physical_bases()) | geometry_carriers)
     return segments, quantity_tokens
 
 
@@ -1659,7 +1662,13 @@ def _token_registry_entry(token: str) -> str:
 def _identity_token_collision_gate(
     domain_entries: dict[str, list[dict[str, Any]]],
 ) -> GateResult:
-    """Reject published identities equal to non-quantity grammar tokens."""
+    """Reject published identities equal to non-quantity grammar tokens.
+
+    A process token is exempt: "due to X" names the quantity X as its cause, so
+    an identity the grammar parses with a physical base is that quantity rather
+    than the process token standing in for a name.  Every other segment still
+    collides, as does a process token the grammar cannot parse as a quantity.
+    """
     segments_by_token, quantity_tokens = _identity_token_segments()
     issues: list[dict[str, Any]] = []
     for entries in domain_entries.values():
@@ -1669,7 +1678,17 @@ def _identity_token_collision_gate(
             if not segments or identity in quantity_tokens:
                 continue
             registry_entry = _token_registry_entry(identity)
+            # A process token spells a cause: "due to X" names the quantity X as
+            # its cause, so an identity the grammar parses with a physical base
+            # is that quantity, not the process token standing in for a name.
+            process_base = _base_token(identity)
+            process_is_quantity = (
+                process_base is not None
+                and process_base in _registered_physical_bases()
+            )
             for segment in segments:
+                if segment == "process" and process_is_quantity:
+                    continue
                 issues.append(
                     {
                         "type": "identity_token_collision",

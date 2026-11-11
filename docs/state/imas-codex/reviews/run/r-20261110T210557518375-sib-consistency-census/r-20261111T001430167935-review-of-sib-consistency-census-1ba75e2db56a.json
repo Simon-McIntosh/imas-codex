@@ -1,0 +1,29 @@
+{
+  "added_failure_count": null,
+  "added_failure_ids": null,
+  "completed_at": "2026-11-11T00:41:10Z",
+  "dispatched_at": "2026-11-11T00:16:24Z",
+  "evidence_note": "The source manifest has no baseline_suite or after_suite entries; added_failure_count and added_failure_ids cannot be derived from the required comparison without inventing a zero.",
+  "findings": [
+    "FINDING docs/evidence/fragments/sn-integrity-backlog/sib-consistency-census-run.py:767 non-blocking: proposals_complete copies the census's own complete flag, so an incorrectly always-true flag can satisfy this check; disposition exempted because the planted fixture separately checks nonempty proposal fields and the recorded live artifact reports 125/125 for this revision.",
+    "FINDING docs/evidence/fragments/sn-integrity-backlog/sib-consistency-census-run.py:343 non-blocking: the comment says the fallback is the modal accepted member, but line 346 selects the minimum id; disposition exempted because the emitted fallback label and deterministic selection keep the current artifact interpretable."
+  ],
+  "project": "imas-codex",
+  "review_run_id": "r-20261111T001430167935-review-of-sib-consistency-census-1ba75e2db56a",
+  "review_text": "VERDICT goal: the source prompt at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T210557518375-sib-consistency-census/prompt.txt:38 asks for a census of catalog families with divergent definitions, documentation templates or groupings; the script supplies family and concept census outputs.\nVERDICT done_when: the source prompt at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T210557518375-sib-consistency-census/prompt.txt:108 requires a live read, per-family proposals, the flux-surface-average witness, an HTML summary and a planted divergent family; the JSON and HTML artifacts plus census-planted.log record these.\nVERDICT write_paths: the source manifest at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T210557518375-sib-consistency-census/manifest.md:3 declares four fragment/figure paths; all three changed paths in line 8 are within that scope.\nVERDICT manifest: the source manifest at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T210557518375-sib-consistency-census/manifest.md:5-18 reports complete, five commits, three changed paths, the exact gate command, its log, and the census metrics; it has no baseline_suite or after_suite entries.\nVERDICT diff: the five commits from base de46fb885540ab298aa1b41e1c6c7a81169251b9 to head 1ba75e2db56a9bb482d617ef0008b2f0e3afde70 change only the declared census script, JSON and HTML; the final commit adds the pronoun guard and records its control result.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: sib-consistency-census-run.py:285 groups and reports family phrase, template and domain divergence, while :444-506 separately reports shared-concept definition variants and the named witness.\nSCORE evidence: 17\nJUSTIFICATION evidence: the source manifest:11-16 records the exact live-plus-planted command and output metrics, and census-planted.log ends EXIT=0 with the 3034-name summary; the review's required failure delta remains unknown because the source manifest records no baseline or after suite.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: source manifest:3 declares the allowed paths and :8 lists only the three fragment paths present in the base-to-head diff.\nSCORE durability: 16\nJUSTIFICATION durability: sib-consistency-census-run.py:737-779 checks two divergent family variants, the identical-family negative control, two planted concept definitions, the pronoun exclusion and nonempty proposals; restoring pronoun acceptance makes :756 false and the main gate exits nonzero, while :767 only repeats the census's own completion flag.\nSCORE fit: 18\nJUSTIFICATION fit: sib-consistency-census-run.py uses the repository GraphClient and disposable Neo4j helper, and family_anchor delegates to standard_names/families.py:517; the fallback comment at :343 inaccurately describes the minimum-id selection at :346.\nSCORE reuse: 19\nJUSTIFICATION reuse: family_anchor wraps standard_names/families.py:517, and searches of harmonize.py:107, docs_gates.py and audits.py found no existing owner for this three-axis census or its shared-concept report.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-consistency-census-run.py:767 non-blocking: proposals_complete copies the census's own complete flag, so an incorrectly always-true flag can satisfy this check; disposition exempted because the planted fixture separately checks nonempty proposal fields and the recorded live artifact reports 125/125 for this revision.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-consistency-census-run.py:343 non-blocking: the comment says the fallback is the modal accepted member, but line 346 selects the minimum id; disposition exempted because the emitted fallback label and deterministic selection keep the current artifact interpretable.",
+  "reviewed_base_sha": "de46fb885540ab298aa1b41e1c6c7a81169251b9",
+  "reviewed_head_sha": "1ba75e2db56a9bb482d617ef0008b2f0e3afde70",
+  "reviewed_run_id": "r-20261110T210557518375-sib-consistency-census",
+  "scores": {
+    "durability": 16,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T00:45:13.670603+00:00",
+  "total": 108
+}

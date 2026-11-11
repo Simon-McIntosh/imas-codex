@@ -1,0 +1,172 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "A figure review runs no suite, so the zero and the empty list are declared rather than measured. No suite delta is claimed.",
+  "attachment_map": {
+    "image-0.png": "docs/figures/sn-integrity-backlog/sib-lineage-cycle-guard/transaction.svg"
+  },
+  "attachment_note": "One rendered image was attached to this review run and was opened with this node's own Read tool before any verdict was formed. It is a 1399x720 RGBA PNG. Attribution is by content, not filename: the reviewed range 7f3db88c11..a086e97535 adds docs/figures/sn-integrity-backlog/sib-lineage-cycle-guard/transaction.svg and no other figure, and the committed caption in docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-guard.html describes a transaction that moves sources, locks connected names and checks lineage before merging a safe edge or rolling back. The attached picture is exactly that: a three-step left-to-right chain ('Move sources if required' -> 'Lock connected lineage names' -> 'Check reverse path and self-loop') splitting into 'Merge safe edge' and 'Refuse and roll back the transaction'. No SVG was opened, read, searched, listed, rendered or git-shown by this review, and no image other than the named PNG was opened; every verdict below is read from that PNG's pixels. Measurements were taken with Pillow and numpy against that PNG only.",
+  "caption_check": {
+    "caption_not_changed": true,
+    "caption_repeats_title_only": false,
+    "note": "The committed figcaption explains what the transaction owns and what a failed check does, so it is not a title restatement.",
+    "path": "docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-guard.html"
+  },
+  "completed_at": "2026-11-10T23:41:17.564Z",
+  "dispatched_at": "2026-11-10T23:29:27Z",
+  "disposition_note": "No disposition is set on these findings: the review is read-only and naming a fold target or an exemption belongs to the coordinator.",
+  "figure_checks": {
+    "attachment_format": "PNG 1399x720 RGBA (8-bit/color RGBA, non-interlaced)",
+    "attachment_opened": true,
+    "background": "#ffffff",
+    "branch_fork_gap_rows_px": [
+      339,
+      379
+    ],
+    "connector_boxes_px": {
+      "branch_lower": [
+        980,
+        380,
+        1072,
+        486
+      ],
+      "branch_upper": [
+        980,
+        233,
+        1072,
+        338
+      ],
+      "step_1_to_2": [
+        277,
+        350,
+        374,
+        368
+      ],
+      "step_2_to_3": [
+        627,
+        350,
+        704,
+        368
+      ]
+    },
+    "connector_colour": "#666666",
+    "content_bbox_px": [
+      100,
+      200,
+      1297,
+      526
+    ],
+    "content_clipped": false,
+    "content_fraction_of_canvas_height": 0.454,
+    "distinct_rgb_values": 64,
+    "empty_band_above_px": 200,
+    "empty_band_below_px": 194,
+    "label_boxes_px": {
+      "Check reverse path / and self-loop": [
+        737,
+        334,
+        931,
+        384
+      ],
+      "Lock connected / lineage names": [
+        421,
+        334,
+        578,
+        384
+      ],
+      "Merge safe edge": [
+        1120,
+        200,
+        1279,
+        218
+      ],
+      "Move sources / if required": [
+        96,
+        335,
+        234,
+        384
+      ],
+      "Refuse and roll back / the transaction": [
+        1102,
+        488,
+        1297,
+        526
+      ]
+    },
+    "label_on_stroke_detected": false,
+    "label_overlap_detected": false,
+    "min_connector_to_label_distance_px": 30.3,
+    "single_line_glyph_height_px": 19,
+    "svg_read_by_this_review": false,
+    "text_colour": "#262626"
+  },
+  "figure_verdicts": [
+    {
+      "attachment": "image-0.png",
+      "figure": "docs/figures/sn-integrity-backlog/sib-lineage-cycle-guard/transaction.svg",
+      "rubric": {
+        "contrast": "PASS. Text #262626 measures 15.1:1 on white; connectors #666666 measure 5.7:1.",
+        "data_ink": "PASS. Five text blocks plus four connector strokes, 64 distinct RGB values total, no fills, gradients or shading. The whole drawn content is 1197 x 326 px inside a 1399 x 720 px canvas.",
+        "decoration": "PASS. White background, flat monochrome strokes, no grid, frame, shadow or themed styling.",
+        "label_collision": "PASS. No clipping: the content bounding box stops 98 px short of the right edge and 194 px above the bottom. No label overlaps another label or a connector; the nearest pair is the upper branch arrow ending at y 338 and the preceding two-line labels ending at y 384, horizontally 49 px apart.",
+        "legibility": "PASS. Five labels, each fully drawn: 'Move sources if required' (96,335)-(234,384), 'Lock connected lineage names' (421,334)-(578,384), 'Check reverse path and self-loop' (737,334)-(931,384), 'Merge safe edge' (1120,200)-(1279,218), 'Refuse and roll back the transaction' (1102,488)-(1297,526). Single-line glyph height measures 19 px on a 1399 px canvas, so at a roughly 900 px column the text renders near 12 px, small but readable; recorded as non-blocking finding f1.",
+        "table_form": "PASS. A sequential transaction with a merge-or-refuse divergence is a flow, not tabular information drawn as a picture."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "disposition": null,
+      "file": "docs/figures/sn-integrity-backlog/sib-lineage-cycle-guard/transaction.svg",
+      "id": "f1-transaction-vertical-whitespace",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The canvas is vertically underused, so the text renders smaller than it needs to. Measured on the attached PNG: the drawn content occupies rows 200-526 of 720 (45.4% of the height), leaving a 200 px empty band above and a 194 px empty band below, while horizontally the content spans 100-1297 of 1399. A single-row diagram on a 7.2 in tall canvas therefore puts 16 pt-equivalent labels at about 12 px in a ~900 px column, below body-text size. A reader can read it, so this does not block; tightening the canvas height to the diagram would let the same content render at a normal size."
+    },
+    {
+      "disposition": null,
+      "file": "docs/figures/sn-integrity-backlog/sib-lineage-cycle-guard/transaction.svg",
+      "id": "f2-refusal-branch-not-distinguished",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The refusal outcome is drawn identically to the success outcome: both branch labels are #262626 text and both branch connectors are #666666 strokes of the same weight. The figure exists to show that a failed cycle check refuses and rolls back, which is its safety-critical branch, yet a reader scanning the split cannot tell which arm refuses without reading both labels in full. Nothing is illegible, so this does not block; a distinct treatment for the refusal arm (weight, dash, or the project's limit colour) would let it read pre-attentively."
+    },
+    {
+      "disposition": null,
+      "file": "docs/figures/sn-integrity-backlog/sib-lineage-cycle-guard/transaction.svg",
+      "id": "f3-branch-fork-origin-implicit",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The two branch connectors do not meet at a drawn fork. Measured on the PNG, their tails both sit at x 980 but the upper runs y 233-338 and the lower y 380-486, leaving rows 339-379 with no ink in the x 960-1000 column, and no connector joins the preceding label 'Check reverse path and self-loop' (right edge x 931) to that point. The split is still readable as a split because the two diagonals sit under and over the step they follow, but a reader traces two separated diagonals back to the previous step rather than following one drawn fork. Non-blocking."
+    }
+  ],
+  "item_verdicts": {
+    "contrast": "pass",
+    "data_ink": "pass",
+    "decoration": "pass",
+    "label_collision": "pass",
+    "legibility": "pass",
+    "table_form": "pass"
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261110T232639109553-review-of-sib-lineage-cycle-guard-a086e975350c-figure",
+  "reviewed_base_sha": "7f3db88c110bac47a5e470bd08432eab953ef760",
+  "reviewed_figures": [
+    "docs/figures/sn-integrity-backlog/sib-lineage-cycle-guard/transaction.svg"
+  ],
+  "reviewed_head_sha": "a086e975350c9a0441684927ab830b173ebc94fd",
+  "reviewed_run_id": "r-20261110T172313546861-sib-lineage-cycle-guard",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: PASS - all five labels render at full text size and read at a glance; the chain then the two-way split is unambiguous. The text is smaller than it needs to be because the diagram uses only rows 200-526 of the 720-row canvas, recorded as non-blocking finding f1.",
+    "RUBRIC data_ink: PASS - the ink is five text blocks and four connector strokes on white, nothing else; the 64 distinct RGB values are those flat colours plus their antialiasing edges, with no fills, gradients, bands or shading.",
+    "RUBRIC decoration: PASS - plain white background, no gradient, no box or theme styling; every drawn mark carries meaning.",
+    "RUBRIC contrast: PASS - labels are #262626 on white (15.1:1) and connectors #666666 (5.7:1), both far above their thresholds; the lighter greys in the palette are glyph and stroke antialiasing, not separate marks.",
+    "RUBRIC table_form: PASS - the content is an ordered three-step flow with one two-way outcome, which is correctly a diagram rather than information that belongs in a table.",
+    "RUBRIC label_collision: PASS - the five label boxes are disjoint (nearest pair 'Merge safe edge' at y 200-218 and the upper connector ending at y 233, a 15 px gap), no label touches a stroke (closest approach 30.3 px), and the content bounding box 100-1297 x 200-526 sits wholly inside the 1399x720 canvas."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-10T23:41:22.144835+00:00",
+  "total": null
+}

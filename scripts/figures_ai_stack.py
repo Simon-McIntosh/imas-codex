@@ -43,8 +43,8 @@ ROOT = Path(__file__).resolve().parents[1]
 FIGURES = ROOT / "docs/figures/ai-stack"
 STEM = "ai-stack"
 
-WIDTH, HEIGHT = 14.0, 6.45  # in: wider than the slide canvas, leaving room for a title
-U = 10  # drawing units per inch, so the axes run 0..140 by 0..64.5
+WIDTH, HEIGHT = 14.0, 6.62  # in: wider than the slide canvas, leaving room for a title
+U = 10  # drawing units per inch, so the axes run 0..140 by 0..66.2
 
 # Deterministic in the ICP knowledge map's relation plum; agentic work in coral where a
 # frontier model drives it, teal where it can also run on-premises.
@@ -54,10 +54,11 @@ INK = "#2b2b2b"
 MUTED = "#5f5f5f"
 NEUTRAL_EDGE = "#b4b1aa"
 BAND_FILL = "#f4f3f0"
-USER_FILL = "#dedcd7"
+USER_FILL = "#e2e2e2"  # a neutral grey that reads on white without weighing on it
+USER_INK = "#141414"
 
 TITLE, BODY, SMALL = 16, 14, 13  # pt, inside the stack
-BAR = 14  # pt, the user roles
+BAR = 15  # pt, the user roles
 OUTER = 18  # pt, the layer names
 OUTER_SMALL = 14  # pt, the legend and the annotations outside the boxes
 PT = 7.2  # points per drawing unit
@@ -235,18 +236,17 @@ LAYER_GAP = 1.5  # between a band's sloped right edge and its name
 
 LAYERS = {  # (y0, y1) of each band
     "icp": (2.6, 7.8),
-    "graph": (11.6, 17.6),
-    "functions": (18.6, 33.4),
-    "interfaces": (34.4, 46.6),
-    "users": (47.6, 63.2),
+    "graph": (8.8, 14.8),
+    "functions": (15.8, 30.6),
+    "interfaces": (31.6, 43.8),
+    "users": (46.3, 61.9),  # set apart: users stand above the stack
 }
 
-LAYER_NAMES = {
-    "users": ["users"],
+LAYER_NAMES = {  # the users are named above their bars, in draw_users
     "interfaces": ["interfaces"],
     "functions": ["functions"],
-    "graph": ["knowledge", "graph"],
-    "icp": ["ITER", "Collaborative", "Platform"],
+    "graph": ["graph"],
+    "icp": ["ICP4"],
 }
 
 # Top to bottom: each bar's roles reach from Claude Desktop to the interface named, and
@@ -302,7 +302,10 @@ def grid(c: Canvas, x0, x1, top, names, cols, *, kinds=None, height=2.8, pitch=3
 
 
 def draw_bands(c: Canvas) -> None:
-    for y0, y1 in LAYERS.values():
+    # the users stand on the stack rather than forming a layer of it, so no band
+    for key, (y0, y1) in LAYERS.items():
+        if key == "users":
+            continue
         (a0, a1), (b0, b1) = span(y0, 0), span(y1, 0)
         c.ax.add_patch(
             Polygon(
@@ -343,25 +346,17 @@ def draw_foundation(c: Canvas) -> None:
             weight="bold",
             inside=(x, y0, xe, y1),
         )
-        # each source fans into the graph
+        # each source rises straight into the graph
         xm = (x + xe) / 2
         c.ax.plot(
-            [xm, CENTRE + (xm - CENTRE) * 0.6],
+            [xm, xm],
             [y1, g0],
             color=c.roles.deterministic,
-            lw=1.2,
-            alpha=0.5,
+            lw=2.4,
+            alpha=0.7,
+            solid_capstyle="butt",
             zorder=1,
         )
-    c.text(
-        CENTRE,
-        (y1 + g0) / 2,
-        "extract, transform, load",
-        size=OUTER_SMALL,
-        weight="bold",
-        color=c.roles.deterministic,
-        backgroundcolor="white",
-    )
     # the graph becomes ITER infrastructure, alongside the platform it is built on
     bottom, top = LAYERS["icp"][0], LAYERS["graph"][1]
     xb = 4.4
@@ -372,15 +367,17 @@ def draw_foundation(c: Canvas) -> None:
         lw=1.6,
         zorder=3,
     )
-    c.text(
-        xb - 1.6,
-        (bottom + top) / 2,
-        "ITER infrastructure",
-        size=OUTER_SMALL - 1,
-        rotation=90,
-        color=c.roles.deterministic,
-        weight="bold",
-    )
+    # two rotated lines, read bottom to top, so the label fits beside the bracket
+    for x, line in [(xb - 3.1, "ITER"), (xb - 1.1, "infrastructure")]:
+        c.text(
+            x,
+            (bottom + top) / 2,
+            line,
+            size=OUTER_SMALL - 2,
+            rotation=90,
+            color=c.roles.deterministic,
+            weight="bold",
+        )
 
 
 def draw_graph(c: Canvas) -> None:
@@ -468,20 +465,6 @@ def draw_functions(c: Canvas) -> None:
     # the REPL: generated code, run against the graph, for whatever no tool covers
     c.card(rx[0], y0, rx[1], y1, "REPL", "code generation", kind="frontier")
 
-    # read-only access from the function layer down into the graph
-    xa = lx[0] + 4.0
-    g1 = LAYERS["graph"][1] - 0.6
-    c.ax.annotate(
-        "",
-        xy=(xa, g1 - 0.1),
-        xytext=(xa, y0),
-        arrowprops={"arrowstyle": "-|>", "color": INK, "lw": 1.4, "mutation_scale": 14},
-        zorder=8,
-    )
-    c.text(
-        xa + 1.0, (g1 + y0) / 2, "read-only", size=OUTER_SMALL, color=MUTED, ha="left"
-    )
-
 
 def draw_interfaces(c: Canvas) -> None:
     y0, y1 = LAYERS["interfaces"]
@@ -558,24 +541,30 @@ def draw_users(c: Canvas) -> None:
     _, y1 = LAYERS["users"]
     pitch, height = 3.0, 2.75
     top = y1 - 0.4
+    # the users stand above the stack, so their name sits over the bars, centred
+    x0, x1 = INTERFACES["desktop"][0], INTERFACES["clive"][1]
+    c.text((x0 + x1) / 2, y1 + 1.8, "users", size=OUTER, weight="bold")
+    order = list(INTERFACES)
     for i, (role, reach) in enumerate(USERS):
         y = top - i * pitch
-        edge0, edge1 = span(y, 0.6)
-        left = max(INTERFACES["desktop"][0], edge0)
-        x1 = min(INTERFACES[reach][1], edge1)
+        # the bar runs from Claude Desktop's left edge to the right edge of the
+        # farthest interface the role uses, so its ends fall on the columns below
+        left, x1 = INTERFACES[order[0]][0], INTERFACES[reach][1]
         c.box(left, y - height, x1, y, edge="none", fill=USER_FILL, lw=0, z=3)
         c.text(
             left + 1.0,
             y - height / 2,
             role,
             size=BAR,
+            color=USER_INK,
             ha="left",
             inside=(left, y - height, x1, y),
         )
 
 
 def draw_legend(c: Canvas) -> None:
-    x, y = 1.2, HEIGHT * U - 2.2
+    # top right, in the clear space beside the user bars
+    x, y = WIDTH * U - 19.0, HEIGHT * U - 2.2
     for i, (label, kind) in enumerate(
         [
             ("deterministic", "deterministic"),

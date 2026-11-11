@@ -23,6 +23,7 @@ import hashlib
 import json
 import logging
 import re
+from collections import defaultdict
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -47,6 +48,7 @@ from imas_codex.graph.models import (
     RepairRowIdentity,
     RepairSelection,
 )
+from imas_codex.standard_names import catalog_ordering
 
 logger = logging.getLogger(__name__)
 
@@ -206,6 +208,22 @@ _ARCHIVE_RECONSTRUCTABLE_COUNTERPART_LABELS = frozenset(
     {"StandardNameReview", "DocsRevision", "StandardNameSource"}
 )
 
+_EDGE_ARCHIVE_ADAPTER = "edge-archive"
+_EDGE_ARCHIVE_MUTATION = "archive-lineage-cycle-edges"
+_EDGE_ARCHIVE_GUARDS = (
+    "signed-edge-snapshot-manifest",
+    "component-edge-closure",
+    _COLLATERAL_IMMUTABILITY,
+)
+_EDGE_ARCHIVE_SCHEMA = "imas-codex.edge-archive.v1"
+_EDGE_ARCHIVE_OPERATION = "archive_lineage_cycle_edges"
+_EDGE_ARCHIVE_RECEIPT_SCHEMA = "imas-codex.signed-edge-archive-receipt.v1"
+_EDGE_ARCHIVE_RELATIONSHIP = "REFINED_FROM"
+# The lineage relationships an archived cycle can close. Kept to the relation the
+# repair rules were ruled for; a manifest naming another one is refused rather
+# than silently archived under the same receipts.
+_EDGE_ARCHIVE_RELATIONSHIPS = frozenset({"REFINED_FROM"})
+
 
 def _archive_counterpart_identity(value: Any) -> str | int:
     """Return a signed counterpart identity without changing its property type."""
@@ -360,6 +378,16 @@ class _ArchiveReconstructionAuthority:
     counterparts: tuple[dict[str, Any], ...]
     edges: tuple[dict[str, Any], ...]
     archive_roles: dict[str, dict[str, int]]
+    file_sha256: str
+    payload_sha256: str
+
+
+@dataclass(frozen=True)
+class _EdgeArchiveAuthority:
+    operation_id: str
+    operation: str
+    components: tuple[dict[str, Any], ...]
+    edges: tuple[dict[str, Any], ...]
     file_sha256: str
     payload_sha256: str
 
@@ -8672,6 +8700,654 @@ def _apply_archive_reconstruction(
             client.close()
 
 
+def compose_edge_archive_authority(
+    *,
+    operation_id: str,
+    components: Sequence[Mapping[str, Any]],
+    edges: Sequence[Mapping[str, Any]],
+) -> dict[str, Any]:
+    """Sign one closed edge-archive manifest into the authority artifact.
+
+    ``components`` names each cycle component the archive touches, with its
+    full membership, its live members and the rule that selected its edges.
+    ``edges`` names every edge to archive, each carrying the snapshot read from
+    the graph. The signature covers the whole payload, so a reader can check
+    that the edges and the components they belong to were composed together.
+    """
+    if not isinstance(operation_id, str) or not operation_id.strip():
+        raise SignedManifestAuthorityError(
+            "edge archive operation_id must be non-empty"
+        )
+    normalized_components: dict[str, dict[str, Any]] = {}
+    for component in components:
+        if not isinstance(component, Mapping):
+            raise SignedManifestAuthorityError(
+                "edge archive component must be an object"
+            )
+        key = str(component.get("component") or "")
+        members = component.get("members")
+        live_members = component.get("live_members")
+        rule = component.get("rule")
+        if not key or not isinstance(members, list) or not members:
+            raise SignedManifestAuthorityError(
+                "edge archive component needs an id and its members"
+            )
+        if not isinstance(live_members, list):
+            raise SignedManifestAuthorityError(
+                "edge archive component needs its live members"
+            )
+        if rule not in {"single-live", "no-live"}:
+            raise SignedManifestAuthorityError(
+                "edge archive component rule must be single-live or no-live"
+            )
+        normalized_members = [str(member) for member in members]
+        if len(set(normalized_members)) != len(normalized_members):
+            raise SignedManifestAuthorityError(
+                "edge archive component members must be unique"
+            )
+        normalized_live = [str(member) for member in live_members]
+        if not set(normalized_live) <= set(normalized_members):
+            raise SignedManifestAuthorityError(
+                "edge archive live members must be component members"
+            )
+        if rule == "single-live" and len(normalized_live) != 1:
+            raise SignedManifestAuthorityError(
+                "single-live edge archive component needs exactly one live member"
+            )
+        if rule == "no-live" and normalized_live:
+            raise SignedManifestAuthorityError(
+                "no-live edge archive component must carry no live member"
+            )
+        if key in normalized_components:
+            raise SignedManifestAuthorityError(
+                f"edge archive component is declared twice: {key}"
+            )
+        normalized_components[key] = {
+            "component": key,
+            "members": sorted(normalized_members),
+            "live_members": sorted(normalized_live),
+            "rule": rule,
+        }
+    normalized_edges: list[dict[str, Any]] = []
+    seen_pairs: set[tuple[str, str]] = set()
+    for edge in edges:
+        if not isinstance(edge, Mapping):
+            raise SignedManifestAuthorityError("edge archive edge must be an object")
+        successor = str(edge.get("successor") or "")
+        predecessor = str(edge.get("predecessor") or "")
+        relationship_type = str(edge.get("relationship_type") or "")
+        element_id = str(edge.get("element_id") or "")
+        component_key = str(edge.get("component") or "")
+        properties = edge.get("properties")
+        if not successor or not predecessor or not element_id:
+            raise SignedManifestAuthorityError(
+                "edge archive edge needs successor, predecessor and element id"
+            )
+        if relationship_type not in _EDGE_ARCHIVE_RELATIONSHIPS:
+            raise SignedManifestAuthorityError(
+                f"edge archive relationship is outside the signed set: {relationship_type}"
+            )
+        if not isinstance(properties, dict):
+            raise SignedManifestAuthorityError(
+                "edge archive edge needs its properties snapshot"
+            )
+        component = normalized_components.get(component_key)
+        if component is None:
+            raise SignedManifestAuthorityError(
+                f"edge archive edge names an undeclared component: {component_key}"
+            )
+        if (
+            successor not in component["members"]
+            or predecessor not in component["members"]
+        ):
+            raise SignedManifestAuthorityError(
+                "edge archive edge endpoints must both be members of its component"
+            )
+        if (
+            component["rule"] == "single-live"
+            and successor in component["live_members"]
+        ):
+            raise SignedManifestAuthorityError(
+                "single-live edge archive may only remove edges out of a superseded member"
+            )
+        pair = (successor, predecessor)
+        if pair in seen_pairs:
+            raise SignedManifestAuthorityError(
+                f"edge archive declares one edge twice: {successor} -> {predecessor}"
+            )
+        seen_pairs.add(pair)
+        normalized_edges.append(
+            {
+                "successor": successor,
+                "predecessor": predecessor,
+                "relationship_type": relationship_type,
+                "element_id": element_id,
+                "component": component_key,
+                "properties": dict(properties),
+                "successor_stage": edge.get("successor_stage"),
+                "successor_status": edge.get("successor_status"),
+                "predecessor_stage": edge.get("predecessor_stage"),
+                "predecessor_status": edge.get("predecessor_status"),
+            }
+        )
+    ordered_edges = sorted(
+        normalized_edges,
+        key=lambda item: (item["component"], item["successor"], item["predecessor"]),
+    )
+    payload = {
+        "schema": _EDGE_ARCHIVE_SCHEMA,
+        "operation_id": operation_id,
+        "operation": _EDGE_ARCHIVE_OPERATION,
+        "components": [
+            normalized_components[key] for key in sorted(normalized_components)
+        ],
+        "edges": ordered_edges,
+    }
+    return {**payload, "signature": {"sha256": signed_payload_sha256(payload)}}
+
+
+def _load_edge_archive_authority(
+    path: str | Path,
+    *,
+    expected_file_sha256: str,
+    expected_payload_sha256: str,
+) -> _EdgeArchiveAuthority:
+    """Load one closed edge-archive authority artifact."""
+    _require_sha256(expected_file_sha256, "authority_file_sha256")
+    _require_sha256(expected_payload_sha256, "authority_payload_sha256")
+    raw = Path(path).read_bytes()
+    file_sha256 = hashlib.sha256(raw).hexdigest()
+    if file_sha256 != expected_file_sha256:
+        raise SignedManifestAuthorityError("authority file SHA-256 mismatch")
+    try:
+        data = json.loads(raw)
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise SignedManifestAuthorityError(
+            "authority file is not canonical JSON"
+        ) from exc
+    if not isinstance(data, dict) or data.get("schema") != _EDGE_ARCHIVE_SCHEMA:
+        raise SignedManifestAuthorityError("edge archive requires its schema")
+    payload_sha256 = signed_payload_sha256(data)
+    if payload_sha256 != expected_payload_sha256:
+        raise SignedManifestAuthorityError("canonical signed-payload SHA-256 mismatch")
+    signature = data.get("signature")
+    if not isinstance(signature, dict) or signature.get("sha256") != payload_sha256:
+        raise SignedManifestAuthorityError(
+            "authority signature does not match canonical signed payload"
+        )
+    operation = data.get("operation")
+    if operation != _EDGE_ARCHIVE_OPERATION:
+        raise SignedManifestAuthorityError(
+            "edge archive requires its canonical operation"
+        )
+    recomposed = compose_edge_archive_authority(
+        operation_id=str(data.get("operation_id") or ""),
+        components=data.get("components") or [],
+        edges=data.get("edges") or [],
+    )
+    if signed_payload_sha256(recomposed) != payload_sha256:
+        raise SignedManifestAuthorityError(
+            "edge archive payload does not normalize to its signature"
+        )
+    normalized = {key: value for key, value in recomposed.items() if key != "signature"}
+    return _EdgeArchiveAuthority(
+        operation_id=str(normalized["operation_id"]),
+        operation=str(operation),
+        components=tuple(normalized["components"]),
+        edges=tuple(normalized["edges"]),
+        file_sha256=file_sha256,
+        payload_sha256=payload_sha256,
+    )
+
+
+def _edge_archive_live_edges(
+    query: _Query, members: Sequence[str]
+) -> list[dict[str, Any]]:
+    """Read every signed-relationship edge whose endpoints are all members."""
+    rows = query.query(
+        """// edge-archive-component-edges
+        MATCH (successor:StandardName)-[edge:REFINED_FROM]->(predecessor:StandardName)
+        WHERE successor.id IN $members AND predecessor.id IN $members
+        RETURN successor.id AS successor, predecessor.id AS predecessor,
+               elementId(edge) AS element_id, properties(edge) AS properties
+        ORDER BY successor, predecessor""",
+        members=list(members),
+    )
+    return [
+        {
+            "successor": str(row["successor"]),
+            "predecessor": str(row["predecessor"]),
+            "element_id": str(row["element_id"]),
+            "properties": dict(row["properties"] or {}),
+        }
+        for row in rows
+    ]
+
+
+def _edge_archive_member_snapshots(
+    query: _Query, members: Sequence[str]
+) -> dict[str, dict[str, Any]]:
+    """Read each member's lifecycle and its collateral link counts."""
+    rows = query.query(
+        """// edge-archive-member-state
+        UNWIND $members AS member_id
+        MATCH (node:StandardName {id: member_id})
+        CALL {
+            WITH node
+            MATCH (source:StandardNameSource)-[:PRODUCED_NAME]->(node)
+            RETURN count(source) AS sources
+        }
+        CALL {
+            WITH node
+            MATCH (node)-[:HAS_REVIEW]->(review:StandardNameReview)
+            RETURN count(review) AS reviews
+        }
+        CALL {
+            WITH node
+            MATCH (node)-[:DOCS_REVISION_OF]->(revision:DocsRevision)
+            RETURN count(revision) AS documents
+        }
+        RETURN node.id AS id, node.name_stage AS name_stage, node.status AS status,
+               sources, reviews, documents
+        ORDER BY id""",
+        members=list(members),
+    )
+    return {
+        str(row["id"]): {
+            "name_stage": row["name_stage"],
+            "status": row["status"],
+            "sources": int(row["sources"]),
+            "reviews": int(row["reviews"]),
+            "documents": int(row["documents"]),
+        }
+        for row in rows
+    }
+
+
+def _edge_archive_cycle_components(
+    edges: Sequence[Mapping[str, Any]],
+) -> list[set[str]]:
+    """Cycle components among *edges*, as the catalog-ordering owner finds them.
+
+    The cycle definition is owned by ``catalog_ordering`` and applied to this
+    same relation by the lineage-cycle census, so this adapts an edge list to
+    that owner rather than carrying a second traversal.
+    """
+    nodes = {
+        str(edge[endpoint])
+        for edge in edges
+        for endpoint in ("successor", "predecessor")
+    }
+    children: dict[str, list[str]] = defaultdict(list)
+    for edge in edges:
+        children[str(edge["successor"])].append(str(edge["predecessor"]))
+    return catalog_ordering._find_cyclic_components(nodes, children)
+
+
+def _edge_archive_preview(
+    query: _Query, authority: _EdgeArchiveAuthority, reason: str
+) -> tuple[dict[str, Any], list[dict[str, str]]]:
+    """Compare the signed snapshots against the live component edges."""
+    refusals: list[dict[str, str]] = []
+    declared_by_component: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for edge in authority.edges:
+        declared_by_component[str(edge["component"])].append(dict(edge))
+    components: list[dict[str, Any]] = []
+    for component in authority.components:
+        key = str(component["component"])
+        members = list(component["members"])
+        declared = declared_by_component.get(key, [])
+        declared_ids = {str(edge["element_id"]) for edge in declared}
+        live = _edge_archive_live_edges(query, members)
+        live_ids = {edge["element_id"] for edge in live}
+        snapshots = _edge_archive_member_snapshots(query, members)
+        missing = sorted({str(s) for s in members} - set(snapshots))
+        if missing:
+            refusals.append(
+                {
+                    "row_id": key,
+                    "reason": "component members are not all live identities: "
+                    + ", ".join(missing),
+                }
+            )
+        live_members = sorted(
+            member_id
+            for member_id, state in snapshots.items()
+            if state["name_stage"] != "superseded"
+        )
+        if live_members != list(component["live_members"]):
+            refusals.append(
+                {
+                    "row_id": key,
+                    "reason": "component liveness differs from the signed manifest",
+                }
+            )
+        for edge in declared:
+            if str(edge["element_id"]) not in live_ids:
+                refusals.append(
+                    {
+                        "row_id": str(edge["successor"]),
+                        "reason": "signed edge is not live: "
+                        f"{edge['successor']} -> {edge['predecessor']}",
+                    }
+                )
+                continue
+        live_by_id = {edge["element_id"]: edge for edge in live}
+        for edge in declared:
+            current = live_by_id.get(str(edge["element_id"]))
+            if current is None:
+                continue
+            if _canonical_bytes(current["properties"]) != _canonical_bytes(
+                edge["properties"]
+            ):
+                refusals.append(
+                    {
+                        "row_id": str(edge["successor"]),
+                        "reason": "live edge properties differ from the signed snapshot: "
+                        f"{edge['successor']} -> {edge['predecessor']}",
+                    }
+                )
+            snap = snapshots.get(str(edge["successor"]))
+            if snap is not None and (
+                edge.get("successor_stage") is not None
+                and snap["name_stage"] != edge.get("successor_stage")
+            ):
+                refusals.append(
+                    {
+                        "row_id": str(edge["successor"]),
+                        "reason": "successor lifecycle differs from the signed snapshot",
+                    }
+                )
+        # The rule fixes which internal edges must go: every one when no member
+        # is live, and every edge out of a superseded member when exactly one
+        # member is live. An edge the rule requires that the manifest omits is a
+        # refusal, and so is a signed edge the rule does not select -- either
+        # way the archive would not be the rule's archive.
+        live_set = set(component["live_members"])
+        required = [
+            edge
+            for edge in live
+            if component["rule"] == "no-live" or edge["successor"] not in live_set
+        ]
+        required_ids = {edge["element_id"] for edge in required}
+        omitted = sorted(required_ids - declared_ids)
+        if omitted:
+            refusals.append(
+                {
+                    "row_id": key,
+                    "reason": "live edge the rule requires is outside the manifest: "
+                    + ", ".join(omitted),
+                }
+            )
+        unselected = sorted(declared_ids - required_ids)
+        if unselected:
+            refusals.append(
+                {
+                    "row_id": key,
+                    "reason": "signed edge is not selected by the component rule: "
+                    + ", ".join(unselected),
+                }
+            )
+        remaining = [edge for edge in live if edge["element_id"] not in declared_ids]
+        if _edge_archive_cycle_components(remaining):
+            refusals.append(
+                {
+                    "row_id": key,
+                    "reason": "archiving the signed edges leaves a cycle in the component",
+                }
+            )
+        components.append(
+            {
+                "component": key,
+                "members": members,
+                "live_members": list(component["live_members"]),
+                "rule": component["rule"],
+                "declared_edges": declared,
+                "live_edges": live,
+                "member_snapshots": snapshots,
+            }
+        )
+    manifest = {
+        "schema": SIGNED_MANIFEST_SCHEMA,
+        "operation_id": authority.operation_id,
+        "operation": authority.operation,
+        "reason": reason,
+        "authority_payload_sha256": authority.payload_sha256,
+        "components": components,
+    }
+    return manifest, sorted(refusals, key=lambda item: (item["row_id"], item["reason"]))
+
+
+def _edge_archive_change_id(manifest_sha256: str, element_id: str) -> str:
+    digest = hashlib.sha256(element_id.encode()).hexdigest()[:24]
+    return f"sn-change:edge-archive:{manifest_sha256}:{digest}"
+
+
+def _edge_archive_replay(
+    query: _Query, authority: _EdgeArchiveAuthority
+) -> dict[str, Any] | None:
+    rows = _receipt_rows(query, authority.operation, authority.payload_sha256)
+    if not rows:
+        return None
+    return {
+        "schema": _EDGE_ARCHIVE_RECEIPT_SCHEMA,
+        "outcome": "replayed",
+        "changed": 0,
+        "receipts": [dict(row["properties"]) for row in rows],
+        "authority_payload_sha256": authority.payload_sha256,
+    }
+
+
+def _apply_edge_archive(
+    authority_path: str | Path,
+    *,
+    authority_file_sha256: str | None,
+    authority_payload_sha256: str | None,
+    mutation_kind: str | None,
+    guard_set: tuple[str, ...] | None,
+    reason: str,
+    apply: bool,
+    manifest_sha256: str | None,
+    run_id: str | None,
+    gc: Any | None,
+) -> dict[str, Any]:
+    if mutation_kind != _EDGE_ARCHIVE_MUTATION or guard_set != _EDGE_ARCHIVE_GUARDS:
+        raise SignedManifestAuthorityError(
+            "edge archive requires its exact closed mutation and guard set"
+        )
+    if authority_file_sha256 is None or authority_payload_sha256 is None:
+        raise SignedManifestAuthorityError(
+            "edge archive requires file and payload digests"
+        )
+    if not reason.strip():
+        raise ValueError("edge archive requires a non-empty reason")
+    authority = _load_edge_archive_authority(
+        authority_path,
+        expected_file_sha256=authority_file_sha256,
+        expected_payload_sha256=authority_payload_sha256,
+    )
+    if apply and manifest_sha256 is None:
+        raise ValueError("edge archive apply requires manifest_sha256")
+    client = gc if gc is not None else GraphClient()
+    own_client = gc is None
+    try:
+        with client.session() as session:
+            transaction = session.begin_transaction()
+            query = _TransactionQuery(transaction)
+            try:
+                replay = _edge_archive_replay(query, authority)
+                if replay is not None:
+                    transaction.rollback()
+                    return replay
+                manifest, refusals = _edge_archive_preview(query, authority, reason)
+                digest = _digest(manifest)
+                counts = {
+                    "components": len(authority.components),
+                    "edges": len(authority.edges),
+                    "admitted": len(authority.edges)
+                    - len({item["row_id"] for item in refusals}),
+                    "refused": len(refusals),
+                }
+                if not apply or refusals:
+                    transaction.rollback()
+                    return {
+                        "schema": _EDGE_ARCHIVE_RECEIPT_SCHEMA,
+                        "outcome": "refused" if refusals else "would_apply",
+                        "changed": 0,
+                        "would_change": 0 if refusals else len(authority.edges),
+                        "counts": counts,
+                        "refusals": refusals,
+                        "manifest": manifest,
+                        "manifest_sha256": digest,
+                    }
+                if digest != manifest_sha256:
+                    raise SignedManifestConflict(
+                        "fresh edge-archive closure does not match authorized SHA-256"
+                    )
+                receipts = []
+                for edge in authority.edges:
+                    snapshot = {
+                        "successor": edge["successor"],
+                        "predecessor": edge["predecessor"],
+                        "relationship_type": edge["relationship_type"],
+                        "element_id": edge["element_id"],
+                        "properties": edge["properties"],
+                        "successor_stage": edge["successor_stage"],
+                        "successor_status": edge["successor_status"],
+                        "predecessor_stage": edge["predecessor_stage"],
+                        "predecessor_status": edge["predecessor_status"],
+                    }
+                    change_id = _edge_archive_change_id(digest, edge["element_id"])
+                    recorded = query.query(
+                        """// edge-archive-mint-receipt
+                        MATCH (successor:StandardName {id: $successor})
+                        CREATE (change:StandardNameChange {
+                          id: $change_id,
+                          from_name: $predecessor,
+                          to_name: $successor,
+                          operation: $operation,
+                          reason: $reason,
+                          origin: 'signed_manifest',
+                          run_id: $run_id,
+                          changed_at: datetime(),
+                          internal: true,
+                          component: $component,
+                          relationship_type: $relationship_type,
+                          edge_element_id: $element_id,
+                          edge_snapshot: $edge_snapshot,
+                          manifest_sha256: $manifest_sha256,
+                          authority_file_sha256: $authority_file_sha256,
+                          authority_payload_sha256: $authority_payload_sha256
+                        })
+                        MERGE (successor)-[:HAS_INTERNAL_CHANGE]->(change)
+                        RETURN change.id AS change_id""",
+                        successor=edge["successor"],
+                        predecessor=edge["predecessor"],
+                        change_id=change_id,
+                        operation=authority.operation,
+                        reason=reason,
+                        run_id=run_id,
+                        component=edge["component"],
+                        relationship_type=edge["relationship_type"],
+                        element_id=edge["element_id"],
+                        edge_snapshot=json.dumps(snapshot, sort_keys=True, default=str),
+                        manifest_sha256=digest,
+                        authority_file_sha256=authority.file_sha256,
+                        authority_payload_sha256=authority.payload_sha256,
+                    )
+                    if len(recorded) != 1:
+                        raise SignedManifestConflict(
+                            "edge-archive receipt could not be minted"
+                        )
+                    deleted = query.query(
+                        """// edge-archive-delete-edge
+                        MATCH (successor:StandardName {id: $successor})
+                              -[edge:REFINED_FROM]->
+                              (predecessor:StandardName {id: $predecessor})
+                        WHERE elementId(edge) = $element_id
+                        DELETE edge
+                        RETURN count(*) AS changed""",
+                        successor=edge["successor"],
+                        predecessor=edge["predecessor"],
+                        element_id=edge["element_id"],
+                    )
+                    if not deleted or int(deleted[0]["changed"]) != 1:
+                        raise SignedManifestConflict(
+                            "signed edge changed before it was archived: "
+                            f"{edge['successor']} -> {edge['predecessor']}"
+                        )
+                    receipts.append(str(recorded[0]["change_id"]))
+                postcondition: list[dict[str, Any]] = []
+                for component in authority.components:
+                    key = str(component["component"])
+                    members = list(component["members"])
+                    declared_ids = {
+                        str(edge["element_id"])
+                        for edge in authority.edges
+                        if str(edge["component"]) == key
+                    }
+                    remaining = _edge_archive_live_edges(query, members)
+                    expected = [
+                        edge
+                        for edge in next(
+                            item["live_edges"]
+                            for item in manifest["components"]
+                            if item["component"] == key
+                        )
+                        if str(edge["element_id"]) not in declared_ids
+                    ]
+                    if sorted(
+                        (item["element_id"], item["successor"], item["predecessor"])
+                        for item in remaining
+                    ) != sorted(
+                        (item["element_id"], item["successor"], item["predecessor"])
+                        for item in expected
+                    ):
+                        raise SignedManifestConflict(
+                            "archived component kept an edge it did not sign"
+                        )
+                    if _edge_archive_cycle_components(remaining):
+                        raise SignedManifestConflict(
+                            "archived component still holds a cycle"
+                        )
+                    before = next(
+                        item["member_snapshots"]
+                        for item in manifest["components"]
+                        if item["component"] == key
+                    )
+                    after = _edge_archive_member_snapshots(query, members)
+                    if after != before:
+                        raise SignedManifestConflict(
+                            "edge archive changed a member's lifecycle or collateral links"
+                        )
+                    postcondition.append(
+                        {
+                            "component": key,
+                            "remaining_edges": len(remaining),
+                            "members": after,
+                        }
+                    )
+                transaction.commit()
+                return {
+                    "schema": _EDGE_ARCHIVE_RECEIPT_SCHEMA,
+                    "outcome": "applied",
+                    "changed": len(authority.edges),
+                    "receipts": receipts,
+                    "counts": counts,
+                    "postcondition": postcondition,
+                    "manifest_sha256": digest,
+                    "authority_file_sha256": authority.file_sha256,
+                    "authority_payload_sha256": authority.payload_sha256,
+                }
+            except BaseException:
+                if not transaction.closed:
+                    transaction.rollback()
+                raise
+    finally:
+        if own_client:
+            client.close()
+
+
 @retry_on_deadlock()
 def apply_signed_manifest(
     authority_path: str | Path | dict[str, Any],
@@ -8760,6 +9436,27 @@ def apply_signed_manifest(
             manifest_sha256=manifest_sha256,
             gc=gc,
             client_factory=client_factory,
+        )
+    if authority_adapter == _EDGE_ARCHIVE_ADAPTER:
+        if legacy_args:
+            raise SignedManifestAuthorityError(
+                "edge archive does not accept positional adapter arguments"
+            )
+        if not isinstance(authority_path, str | Path):
+            raise SignedManifestAuthorityError(
+                "edge archive requires a signed authority file"
+            )
+        return _apply_edge_archive(
+            authority_path,
+            authority_file_sha256=authority_file_sha256,
+            authority_payload_sha256=authority_payload_sha256,
+            mutation_kind=mutation_kind,
+            guard_set=guard_set,
+            reason=reason,
+            apply=apply,
+            manifest_sha256=manifest_sha256,
+            run_id=run_id,
+            gc=gc,
         )
     if authority_adapter == _STRUCTURAL_EDGE_ADAPTER:
         if authority_path != {} or len(legacy_args) != 2:

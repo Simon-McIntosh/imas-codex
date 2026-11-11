@@ -42,6 +42,9 @@ class _State:
     sources: dict[str, dict[str, Any]] = field(default_factory=dict)
     backings: dict[str, dict[str, Any]] = field(default_factory=dict)
     refined_from: list[tuple[str, str]] = field(default_factory=list)
+    refined_from_properties: dict[tuple[str, str], dict[str, Any]] = field(
+        default_factory=dict
+    )
     changes: dict[str, dict[str, Any]] = field(default_factory=dict)
     change_links: list[tuple[str, str]] = field(default_factory=list)
     reviews: dict[str, dict[str, Any]] = field(default_factory=dict)
@@ -156,6 +159,9 @@ class _Transaction:
                     successor,
                     "name",
                     predecessor,
+                    properties=self.state.refined_from_properties.get(
+                        (successor, predecessor)
+                    ),
                 )
             )
         for index, (owner, change_id) in enumerate(self.state.change_links):
@@ -465,6 +471,19 @@ class _Transaction:
             )
         ]
 
+    def _merge_lineage(self, cypher: str, params: dict[str, Any]) -> None:
+        """Mirror edge creation and each declared provenance assignment."""
+        lineage = (params["into_id"], params["old_id"])
+        if lineage in self.state.refined_from:
+            return
+        self.state.refined_from.append(lineage)
+        properties: dict[str, Any] = {}
+        if "lineage_edge.writer = 'edit.supersede_into'" in cypher:
+            properties["writer"] = "edit.supersede_into"
+        if "lineage_edge.created_at = datetime($changed_at)" in cypher:
+            properties["created_at"] = DateTime.from_iso_format(params["changed_at"])
+        self.state.refined_from_properties[lineage] = properties
+
     def run(self, cypher: str, **params: Any) -> list[dict[str, Any]]:
         if "ATOMIC_FOLD_SNAPSHOT" in cypher or "ATOMIC_FOLD_POSTFLIGHT" in cypher:
             return self._snapshot(params["old_id"], params["into_id"])
@@ -610,9 +629,7 @@ class _Transaction:
                 old["edit_status"] = "applied"
             target["source_paths"] = list(params["target_paths"])
             target["updated_at"] = params["changed_at"]
-            lineage = (params["into_id"], params["old_id"])
-            if lineage not in self.state.refined_from:
-                self.state.refined_from.append(lineage)
+            self._merge_lineage(cypher, params)
             return [
                 {
                     "old_stage": "superseded",

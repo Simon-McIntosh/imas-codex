@@ -1,0 +1,76 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-10T22:48:56.106Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "one-off backfill of 20 receipts; the append is idempotent through its NOT EXISTS guard and a regression test would assert a population that never recurs once the requeue stops resetting below-cap sources",
+      "recorded_at": "2026-11-10T22:54:29.651612+00:00"
+    },
+    "reuse": {
+      "kind": "folded",
+      "node": "sib-retry-correction-schema",
+      "recorded_at": "2026-11-10T22:54:40.938669+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-10T22:34:12Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-retry-receipt-correction-run.py",
+      "line": 45,
+      "severity": "non-blocking",
+      "text": "_CORRECTION_WRITE duplicates the StandardNameSourceRetry event creation owned by imas_codex/standard_names/graph_store/graph_source_bindings.py:2435 rather than extending it, so the done_when's clause that the correction be appended through the repository's retry-receipt writer is unmet and a future change to the label's required attributes would leave these 20 records unchecked."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-retry-receipt-correction-run.py",
+      "line": 336,
+      "severity": "non-blocking",
+      "text": "the readback assertion original_attempts != attempts compares a value the write copied from the same source under a guard that requires the original to equal it, so the two sides move together and the assertion cannot fail on any regression of this change; the attempts < cap and corrected_targets == 1 checks are guaranteed the same way, leaving only the 20/20 counts independent."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-retry-receipt-correction.html",
+      "line": 78,
+      "severity": "non-blocking",
+      "text": "the 'Originals unchanged in reason and timestamp' and 'Sources written 0' rows rest on a heredoc measurement recorded only in verify-intact.log, not on a phase of the committed runner (select, originals, negative, apply, readback), so the fragment's strongest non-mutation claim cannot be reproduced from the landed artefact; I reproduced it independently and it holds."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "no production runtime code reaches this change: the runner is a one-off evidence script under docs/evidence and is imported by nothing, and a repository-wide search for readers of StandardNameSourceRetry found only writers in graph_source_bindings.py, provenance_lifecycle.py and attachment_audit.py.",
+    "diff": "read commit by commit against 73cf96a3: one commit, 482 added lines across the runner (388) and the fragment (94), with no edits to existing files and no fixture or test changes.",
+    "done_when": "the done_when asks for one new record per below-cap source appended through the repository's retry-receipt writer, a 20-record linked read-back, the fragment listing them, no other graph write and USD 0; the readback.log gate asserts 20 of 20 linked with problems [] and verify-intact.log records the originals and sources unwritten, but the writer clause is not satisfied because sib-retry-receipt-correction-run.py:45 issues its own Cypher and no append-only repository writer exists.",
+    "goal": "the node goal is to append a correcting receipt to each of the 20 retry receipts that misstate why a source was reset, and sib-retry-receipt-correction.html:24-63 lists 20 corrections whose live nodes I re-read as present, correction_of-linked to the originals and stating the true attempt count.",
+    "manifest": "read; it records status complete, commit 9b5b327c4, the readback gate command, five logs, the negative control, and an implementation note that no append-only writer exists; its rubric lines answer all six dimensions.",
+    "write_paths": "the manifest declares docs/evidence/fragments/sn-integrity-backlog/sib-retry-receipt-correction.html, sib-retry-receipt-correction-run.py and docs/figures/sn-integrity-backlog/sib-retry-receipt-correction; git diff 73cf96a3..9b5b327c4 changes only the first two."
+  },
+  "justifications": {
+    "durability": "no test exists for this change: the only guards live in docs/evidence/fragments/sn-integrity-backlog/sib-retry-receipt-correction-run.py:336 and re-check predicates the same write's WHERE clause already enforced, so a restored graph or a dropped CORRECTS edge would be caught only by re-running the one-off script.",
+    "evidence": "readback.log records correction_count 20, graph_correction_total 20, linked true, problems [] at EXIT=0 and negative-control.log records rows_written 0 refused true against a 20-row positive arm, and my own read-only re-query returned the same 20 corrections with attempts 1-4 under a cap of 5.",
+    "fit": "the runner follows the phase/argparse/save-load structure of its sibling docs/evidence/fragments/sn-integrity-backlog/sib-cohort-rerun-isn-0-11-run.py:58 and reuses the StandardNameSourceRetry label and its required attributes, though the plan-abbreviated sib- filename and fragment ids inherit the directory's existing plan naming.",
+    "goal_fidelity": "docs/evidence/fragments/sn-integrity-backlog/sib-retry-receipt-correction.html:24 lists twenty correction rows whose live counterparts I re-read as 20 StandardNameSourceRetry nodes carrying correction_of and exactly one CORRECTS edge each, so the goal's deliverable is present, though the record is written by the node's own Cypher rather than by the retry-receipt writer the done_when named.",
+    "reuse": "no append-only correction capability exists in the repository, but the CREATE/SET of the retry event at sib-retry-receipt-correction-run.py:45 duplicates the shape owned by imas_codex/standard_names/graph_store/graph_source_bindings.py:2435 instead of extending it, and the owner's reset semantics are what the fence excluded.",
+    "scope_discipline": "the diff touches exactly two files, both inside the three declared write paths, and leaves docs/figures/sn-integrity-backlog/sib-retry-receipt-correction unused; originals.json receipts read back with identical reason and retried_at in my own re-query."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to append a correcting receipt to each of the 20 retry receipts that misstate why a source was reset, and sib-retry-receipt-correction.html:24-63 lists 20 corrections whose live nodes I re-read as present, correction_of-linked to the originals and stating the true attempt count.\nVERDICT done_when: the done_when asks for one new record per below-cap source appended through the repository's retry-receipt writer, a 20-record linked read-back, the fragment listing them, no other graph write and USD 0; the readback.log gate asserts 20 of 20 linked with problems [] and verify-intact.log records the originals and sources unwritten, but the writer clause is not satisfied because sib-retry-receipt-correction-run.py:45 issues its own Cypher and no append-only repository writer exists.\nVERDICT write_paths: the manifest declares docs/evidence/fragments/sn-integrity-backlog/sib-retry-receipt-correction.html, sib-retry-receipt-correction-run.py and docs/figures/sn-integrity-backlog/sib-retry-receipt-correction; git diff 73cf96a3..9b5b327c4 changes only the first two.\nVERDICT manifest: read; it records status complete, commit 9b5b327c4, the readback gate command, five logs, the negative control, and an implementation note that no append-only writer exists; its rubric lines answer all six dimensions.\nVERDICT diff: read commit by commit against 73cf96a3: one commit, 482 added lines across the runner (388) and the fragment (94), with no edits to existing files and no fixture or test changes.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: sib-retry-receipt-correction.html:24 lists twenty correction rows whose live counterparts I re-read as 20 StandardNameSourceRetry nodes carrying correction_of and exactly one CORRECTS edge each, so the goal's deliverable is present, though the record is written by the node's own Cypher rather than by the retry-receipt writer the done_when named.\nSCORE evidence: 17\nJUSTIFICATION evidence: readback.log records correction_count 20, graph_correction_total 20, linked true, problems [] at EXIT=0 and negative-control.log records rows_written 0 refused true against a 20-row positive arm, and my own read-only re-query returned the same 20 corrections with attempts 1-4 under a cap of 5.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the diff touches exactly two files, both inside the three declared write paths, and originals.json receipts read back with identical reason and retried_at in my own re-query.\nSCORE durability: 8\nJUSTIFICATION durability: no test exists for this change: the only guards live in sib-retry-receipt-correction-run.py:336 and re-check predicates the same write's WHERE clause already enforced.\nSCORE fit: 15\nJUSTIFICATION fit: the runner follows the phase/argparse/save-load structure of its sibling sib-cohort-rerun-isn-0-11-run.py:58 and reuses the StandardNameSourceRetry label and its required attributes.\nSCORE reuse: 8\nJUSTIFICATION reuse: no append-only correction capability exists in the repository, but the event creation at sib-retry-receipt-correction-run.py:45 duplicates the shape owned by imas_codex/standard_names/graph_store/graph_source_bindings.py:2435 instead of extending it.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-retry-receipt-correction-run.py:45 non-blocking: _CORRECTION_WRITE duplicates the StandardNameSourceRetry event creation owned by imas_codex/standard_names/graph_store/graph_source_bindings.py:2435 rather than extending it, so the done_when's writer clause is unmet and a future change to the label's required attributes would leave these 20 records unchecked.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-retry-receipt-correction-run.py:336 non-blocking: the readback assertion original_attempts != attempts compares a value the write copied from the same source under a guard requiring equality, so it cannot fail on a regression of this change; only the 20/20 counts are independent.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-retry-receipt-correction.html:78 non-blocking: the 'Originals unchanged' and 'Sources written 0' rows rest on a heredoc measurement recorded only in verify-intact.log, not on a phase of the committed runner, so that claim cannot be reproduced from the landed artefact.\n",
+  "review_run_id": "r-20261110T223154221775-review-of-sib-retry-receipt-correction-9b5b327c4019",
+  "reviewed_base": "73cf96a30e1fc3571f53706a77d1d215b7c57d0c",
+  "reviewed_base_sha": "73cf96a30e1fc3571f53706a77d1d215b7c57d0c",
+  "reviewed_head": "9b5b327c4019a13896d121cde4f6c998e561bc6d",
+  "reviewed_head_sha": "9b5b327c4019a13896d121cde4f6c998e561bc6d",
+  "reviewed_run_id": "r-20261110T215919887569-sib-retry-receipt-correction",
+  "scores": {
+    "durability": 8,
+    "evidence": 17,
+    "fit": 15,
+    "goal_fidelity": 17,
+    "reuse": 8,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-10T23:16:44.378536+00:00",
+  "total": 84
+}
