@@ -23,7 +23,7 @@
   <title>The Rest Of The DD Composed: The Full-DD Continuation Run | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="4">
 <meta name="plan-modified" content="2026-11-11">
 </head>
 <body>
@@ -40,21 +40,22 @@
     <h2 id="s2">§2 — The rerun cohort reaches 100 of 143</h2>
     <section data-reckon="section" data-id="s2" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="sn-integrity-backlog#s51"></section>
     <p>Carried from <code>sn-integrity-backlog</code> §51. 99 of the 143 cohort sources read back as produced, 61 of them accepted. Of the rest, about 8 are refused on operator chains such as <code>normalize…</code> and <code>imaginary_part…</code>, 4 are structure sources with no immutable snapshot, and 4 need ISN tokens nobody has proposed yet. One more produced source meets the floor; the others are read back with their reasons.</p>
-    <p><strong>Done when:</strong> at least 100 of the 143 cohort sources read back as produced by the cohort's committed read-back, recorded under <code>docs/evidence/fragments/sn-full-dd-continuation/</code>; the read-back reports a source planted as attempted but not produced in a disposable graph as not produced; every other source reads back failed with its reason and claim-outcome receipts, or <code>vocab_gap</code> with the missing token named; spend is at most USD 10 and recorded beside the remaining cap; the export gate's blocking set stays 0 and sourceless live drafts do not rise.</p>
+    <p><strong>Done when:</strong> at least 100 of the 143 cohort sources read back as produced by the cohort's committed read-back, recorded under <code>docs/evidence/fragments/sn-full-dd-continuation/</code>; the read-back reports a source planted as attempted but not produced in a disposable graph as not produced; every other source reads back failed with its reason and claim-outcome receipts, or <code>vocab_gap</code> with the missing token named; spend is at most USD 10 and recorded in the same fragment beside the remaining cap; the export gate's blocking set stays 0 and sourceless live drafts do not rise.</p>
 
     <h2 id="s3">§3 — A verified graph checkpoint before the run</h2>
     <section data-reckon="section" data-id="s3" data-effort-hours="0.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
-    <p>The run writes thousands of names, so it starts from a checkpoint taken after the documentation drain under <code>sn-integrity-backlog</code> §52 has ended, while no graph writer is running. On 2026-11-11 the newest offsite copy dated from 30 October and the newest local export from 7 November.</p>
-    <p><strong>Done when:</strong> one checkpoint exists whose creation time is after the drain's last graph write; the repository's checkpoint currency instrument reads it as current; its archive passes an integrity test of the whole stream, and the same test fails on a deliberately truncated copy; the graph is back up and answers a read afterwards.</p>
+    <p>The run writes thousands of names, so it starts from a checkpoint taken once no <code>sn-integrity-backlog</code> §52 run is writing the graph and no other graph writer is running. The documentation drain under §52 ended on 2026-11-11 without draining its backlog, so the checkpoint waits on the writers stopping, not on the backlog clearing. On 2026-11-11 the newest offsite copy dated from 30 October and the newest local export from 7 November.</p>
+    <p><strong>Done when:</strong> one checkpoint exists whose creation time is after the last graph write of every §52 run; the repository's checkpoint currency instrument reads it as current; its archive passes an integrity test of the whole stream, and the same test fails on a deliberately truncated copy, both recorded under <code>docs/evidence/fragments/sn-full-dd-continuation/</code>; the graph is back up and answers a read afterwards.</p>
 
     <h2 id="s4">§4 — The continuation run</h2>
     <section data-reckon="section" data-id="s4" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="sn-integrity-backlog#s52"></section>
-    <p>Once the cohort meets its floor, the checkpoint is taken and the documentation drain has landed, run the census classes marked advanceable through <code>sn run</code>, scoped by source, on a compute partition, with one signed reset with receipts for attempt-capped sources. The run's cost limit is no larger than the census estimate for the classes it runs and never larger than what remains of the USD 350 approval, computed at dispatch from the run records under it. A run that would need more goes to the lead first.</p>
+    <p>Once the cohort meets its floor and the checkpoint is taken, run these census classes through <code>sn run</code>, scoped by source, on a compute partition: awaiting review, below the acceptance floor, attempt-capped (after one signed reset with receipts), never claimed, documentation missing, and the refused-by-writer sources whose recorded refusal no longer reproduces. The vocabulary-gap class is excluded until the ISN release carrying its tokens is pinned. The documentation backlog may still be open when the run starts; its classes are among those the run advances.</p>
+    <p>The run's cost limit is no larger than the census's cost estimate for those classes, and never larger than the USD 350 approval's remaining balance less the unspent part of the USD 60 tranche authorised to <code>sn-catalog-consistency</code> §2, both computed at dispatch from the run records under the approval. A run that would need more goes to the lead first.</p>
     <p><strong>Done when:</strong></p>
     <ul>
       <li>the accepted count of live quantity sources, by the census's own query, is at least 5,503, which is 300 above the 2026-11-09 baseline of 5,203;</li>
       <li>the census is re-run and recorded under <code>docs/evidence/fragments/sn-full-dd-continuation/</code>, and every source still unaccepted carries its class and a reason, with the class sums reconciling to the live total; a source planted outside every class in a disposable graph, never in the live population, makes them disagree;</li>
-      <li>spend per run is recorded in the same fragment beside the remaining cap, computed after every draw on the approval, <code>sn-catalog-consistency</code> §2 included;</li>
+      <li>spend per run is recorded in the same fragment beside the remaining balance and the reserve held for <code>sn-catalog-consistency</code> §2;</li>
       <li>the export gate's blocking set stays 0, the count of sourceless live drafts does not rise, and the lineage census reports no new cycle.</li>
     </ul>
 
@@ -64,7 +65,7 @@
 <h2><span class="sec">§</span> Followups</h2>
 <article class="r-fu" data-id="f-sfdc-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-11-11" data-recommends-skill="/reckon-build sn-full-dd-continuation §2" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">One more cohort source, then the checkpoint, then the run</h4>
-    <div class="r-fu-body"><p>§2 and §3 can run now and in parallel; the run in §4 waits on both and on the documentation drain under <code>sn-integrity-backlog</code> §52.</p></div>
+    <div class="r-fu-body"><p>§2 can run now. §3 waits until no <code>sn-integrity-backlog</code> §52 run is writing the graph, and the run in §4 waits on §2 and §3.</p></div>
     <pre class="r-fu-prompt">/reckon-build sn-full-dd-continuation §2</pre>
     </article>
 </section>

@@ -23,7 +23,7 @@
   <title>Standard-Name Pipeline Hygiene: Red Tests, Loose Boundaries, Release Plumbing | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="4">
 <meta name="plan-modified" content="2026-11-11">
 </head>
 <body>
@@ -45,7 +45,7 @@
     <h2 id="s2">§2 — The receipt-correction link declared in the graph schema</h2>
     <section data-reckon="section" data-id="s2" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>The receipt-correction records written on 2026-11-10 link to the receipts they correct through a <code>CORRECTS</code> relationship the graph schema does not declare.</p>
-    <p><strong>Done when:</strong> the schema declares <code>CORRECTS</code> with its endpoints, the generated models carry it, and the repository's Cypher property check passes over every statement that reads or writes it, and fails on a planted statement that reads a property the declaration does not carry.</p>
+    <p><strong>Done when:</strong> the schema declares <code>CORRECTS</code> with its endpoints, the generated models carry it, every live <code>CORRECTS</code> edge reads back with the endpoint labels the declaration names, and the repository's schema compliance check reports a <code>CORRECTS</code> edge planted between labels the declaration does not name in a disposable graph.</p>
 
     <h2 id="s3">§3 — The ISN pin is held by a test</h2>
     <section data-reckon="section" data-id="s3" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
@@ -59,7 +59,7 @@
 
     <h2 id="s5">§5 — A release can run from a fenced worker</h2>
     <section data-reckon="section" data-id="s5" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
-    <p>The release CLI refuses a detached HEAD, and every worker runs in a detached worktree, so only a coordinator in the main checkout can cut a tag. A release is ordinary pipeline work and should be dispatchable.</p>
+    <p>Releases have so far been cut only by a coordinator from the main checkout, on the understanding that the release path needs a checked-out branch, while every worker runs in a detached worktree. Whether a cut from a worktree works today has not been measured. A release is ordinary pipeline work and should be dispatchable.</p>
     <p><strong>Done when:</strong> a release dry run inside a detached worktree completes and reports the tag it would cut; the real cut from such a worktree succeeds against a stand-in remote; the main-checkout path is unchanged; the guard that stops a release cut from an unmerged revision still fires.</p>
 
     <h2 id="s6">§6 — The landing parser's warning-count defect is raised on reckon</h2>
@@ -76,7 +76,7 @@
 
     <h2 id="s8">§8 — No module imports another&#x27;s private names</h2>
 <section data-reckon="section" data-id="s8" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
-<p>On 2026-11-11 the standard-names package carried 27 imports of a private name across a module boundary, five of them at module level: <code>_base_token</code> in <code>export.py</code>, <code>_load_rules</code> in <code>legacy_authority.py</code>, <code>_synonym_matches</code> in <code>near_duplicates.py</code>, <code>_github_slug</code> and <code>_run_git</code> in <code>release_notes.py</code>, and <code>_contest</code> in <code>review_triage.py</code>. The package's import-boundary test covers only two subpackages, so it passes over all of them.</p><p><strong>Done when:</strong> no production module in <code>imas_codex/standard_names</code> imports a private name from another module, each closed either through a public name the owning module exports or by moving the caller, with the before and after counts recorded; the import-boundary test covers the package's top-level modules as well as its subpackages, passes at head, and fails when any one closed import is restored; behaviour is unchanged, and <code>tests/standard_names</code> adds no failure id against the stated base.</p>
+<p>On 2026-11-11 the standard-names package carried 27 imports of a private name from one of its modules into another, five of them module-level statements carrying six names: <code>_base_token</code> in <code>export.py</code>, <code>_load_rules</code> in <code>legacy_authority.py</code>, <code>_synonym_matches</code> in <code>near_duplicates.py</code>, <code>_github_slug</code> and <code>_run_git</code> in <code>release_notes.py</code>, and <code>_contest</code> in <code>review_triage.py</code>. The package's import-boundary test covers only two subpackages, so it passes over all of them.</p><p><strong>Done when:</strong> no production module in <code>imas_codex/standard_names</code> imports a private name from another module of that package (imports from outside it, such as from <code>imas_codex.settings</code>, are outside this section), each closed either through a public name the owning module exports or by moving the caller, with the before and after counts recorded; the import-boundary test covers the package's top-level modules as well as its subpackages, passes at head, and fails when any one closed import is restored; behaviour is unchanged, and <code>tests/standard_names</code> adds no failure id against the stated base.</p>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
