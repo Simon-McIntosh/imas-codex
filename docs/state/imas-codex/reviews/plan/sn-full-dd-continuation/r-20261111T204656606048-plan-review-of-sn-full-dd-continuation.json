@@ -65,7 +65,30 @@
   "plan_slug": "sn-full-dd-continuation",
   "plan_version": 2,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "fc88cc3755f58d01536d76fdaf0433b6d75e30f5",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The drain ended failed (stalled), so \u00a73 and \u00a74 now start once no sn-integrity-backlog \u00a752 run is writing the graph, not once the drain has landed; \u00a74 states the documentation backlog may be open at its start and the documentation-missing and awaiting-review classes are among those it runs.",
+      "reason": "",
+      "when": "2026-11-11T21:07:11.890526+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "fc88cc3755f58d01536d76fdaf0433b6d75e30f5",
+      "commit_basis": "edit",
+      "note": "The drain ended failed (stalled), so \u00a73 and \u00a74 now start once no sn-integrity-backlog \u00a752 run is writing the graph, not once the drain has landed; \u00a74 states the documentation backlog may be open at its start and the documentation-missing and awaiting-review classes are among those it runs.",
+      "reason": "",
+      "when": "2026-11-11T21:07:11.890526+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-full-dd-continuation/r-20261111T204656606048-plan-review-of-sn-full-dd-continuation.json",
   "review_run_id": "r-20261111T204656606048-plan-review-of-sn-full-dd-continuation",
   "reviewed_blob_sha": "10c49ec50bfe5c3f8a7a5d49e8a59e8170281183",
   "rubric": "content",
