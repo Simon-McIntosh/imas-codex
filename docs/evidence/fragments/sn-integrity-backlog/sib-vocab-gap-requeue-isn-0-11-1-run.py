@@ -1,12 +1,15 @@
 #!/usr/bin/env python
-"""Read source refusals and active vocabulary before admitting a scoped retry."""
+"""Admit cohort sources by the approved rework mapping and measure their rerun."""
 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import importlib.util
 import json
-import re
+import os
+import shlex
+import subprocess
 from html import escape
 from pathlib import Path
 
@@ -16,8 +19,8 @@ ROOT = Path(__file__).resolve().parents[4]
 RUN = Path(
     "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T150911488391-sib-vocab-gap-requeue-isn-0-11-1"
 )
-PREDECESSOR = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T210102261723-sib-vocab-gap-requeue"
+MAPPING = Path(
+    "/home/ITER/mcintos/Code/imas-standard-names/docs/evidence/fragments/dd-gap-vocabulary/doubtful-rework.json"
 )
 COHORT_INPUT = Path(
     "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T192543764468-sib-cohort-rerun-isn-0-11/census.json"
@@ -26,15 +29,16 @@ FRAGMENT = (
     ROOT
     / "docs/evidence/fragments/sn-integrity-backlog/sib-vocab-gap-requeue-isn-0-11-1.html"
 )
-VERSION = "0.11.1"
-CONTROL_TOKEN = "power_convertor"
-RELEASE_TOKENS = [
-    "pellet_species",
-    "plateau_factor",
-    "current_profile_alignment",
-    "breakdown_candidate",
-    "sourced",
-]
+FOCUS = RUN / "mapped-sources.json"
+CAP = 3.0
+
+
+def save(name, payload):
+    (RUN / f"{name}.json").write_text(json.dumps(payload, indent=2, default=str) + "\n")
+
+
+def load(name):
+    return json.loads((RUN / f"{name}.json").read_text())
 
 
 def source_reader():
@@ -45,178 +49,321 @@ def source_reader():
     return module.source_state
 
 
-def census():
-    prior = json.loads((PREDECESSOR / "readback.json").read_text())["outcomes"]
-    targets = {}
-    for sid, row in prior.items():
-        if row["after_status"] == "vocab_gap":
-            segment, token = re.search(
-                r"missing (\w+) vocabulary token '([^']+)'", row["after_error"]
-            ).groups()
-            targets[sid] = {
-                "segment": segment,
-                "token": token,
-                "recorded_refusal": row["after_error"],
-            }
-    sid = "dd:summary/global_quantities/current_alignment/value"
-    targets[sid] = {
-        "segment": "physical_base",
-        "token": "current_alignment_factor",
-        "decomposition_token": "current_alignment",
-        "recorded_refusal": "Predecessor excluded this source because its reviewed decomposition still required current_alignment.",
-    }
-    assert len(targets) == 5, targets
-    cohort = sorted(json.loads(COHORT_INPUT.read_text())["sources"])
-    assert len(cohort) == 143
-    read_sources = source_reader()
-    state = read_sources(sorted(targets))
+def snapshot(ids):
     with GraphClient() as gc:
         active = gc.query(
             "MATCH (v:ISNGrammarVersion {active:true}) RETURN v.version AS version, v.content_digest AS digest"
         )
-        assert len(active) == 1 and active[0]["version"] == VERSION, active
-        tokens = gc.query(
-            "MATCH (t:GrammarToken {version:$version}) RETURN t.value AS value, t.segment AS segment, t.aliases AS aliases, t.description AS description",
-            version=VERSION,
+        assert len(active) == 1 and active[0]["version"] == "0.11.1", active
+        rows = gc.query(
+            "UNWIND $ids AS id MATCH (s:StandardNameSource {id:id}) OPTIONAL MATCH (s)-[:PRODUCED_NAME]->(n:StandardName) RETURN id AS id, s.status AS status, s.last_error AS refusal, collect(DISTINCT {name:n.id, stage:n.name_stage, score:n.reviewer_score_name}) AS names ORDER BY id",
+            ids=ids,
         )
-        assert len(tokens) >= 1000 and all(t["value"] and t["segment"] for t in tokens)
-        assert any(t["value"] == CONTROL_TOKEN for t in tokens)
-        accepted = gc.query(
-            "UNWIND $ids AS id MATCH (s:StandardNameSource {id:id}) OPTIONAL MATCH (s)-[:PRODUCED_NAME]->(n:StandardName) RETURN id AS id, s.status AS status, collect(DISTINCT {name:n.id, stage:n.name_stage, score:n.reviewer_score_name}) AS names ORDER BY id",
-            ids=cohort,
-        )
-        assert len(accepted) == 143
-    for sid, row in targets.items():
-        row["live"] = state[sid]
-        spellings = [row["token"]] + (
-            [row["decomposition_token"]] if "decomposition_token" in row else []
-        )
-        row["token_rows"] = [
-            t
-            for t in tokens
-            if t["value"] in spellings
-            or any(a in spellings for a in t["aliases"] or [])
-        ]
-        row["admitted"] = bool(row["token_rows"])
-    count = sum(
-        any(n["stage"] in ("accepted", "approved") for n in r["names"])
-        for r in accepted
-    )
-    payload = {
+        assert len(rows) == len(ids)
+    return {
         "active": active,
-        "grammar_rows": len(tokens),
-        "positive_control": [t for t in tokens if t["value"] == CONTROL_TOKEN],
-        "release_additions": [t for t in tokens if t["value"] in RELEASE_TOKENS],
-        "sources": targets,
-        "eligible": sorted(s for s, r in targets.items() if r["admitted"]),
-        "cohort": accepted,
-        "accepted_sources": count,
-        "floor": 100,
-        "size": 143,
+        "sources": source_reader()(ids),
+        "rows": rows,
+        "produced": sum(any(n["name"] for n in r["names"]) for r in rows),
+        "accepted": sum(
+            any(n["stage"] in ("accepted", "approved") for n in r["names"])
+            for r in rows
+        ),
     }
-    (RUN / "census.json").write_text(json.dumps(payload, indent=2, default=str) + "\n")
-    print(
+
+
+def prepare():
+    cohort = sorted(json.loads(COHORT_INPUT.read_text())["sources"])
+    assert len(cohort) == 143
+    mapping = json.loads(MAPPING.read_text())
+    entries = [
+        {
+            "source": "dd:" + s,
+            "spelling": r["reworked_spelling"],
+            "description": r["description"],
+            "required_binding": r.get("required_binding"),
+            "new_tokens": r["new_tokens"],
+        }
+        for r in mapping["rows"]
+        for s in r["source_paths"]
+    ]
+    admitted = [r for r in entries if r["source"] in cohort]
+    assert admitted
+    before = snapshot(cohort)
+    with GraphClient() as gc:
+        tokens = gc.query(
+            "MATCH (t:GrammarToken {version:$version}) RETURN t.value AS value, t.segment AS segment",
+            version="0.11.1",
+        )
+    assert len(tokens) >= 1000 and any(t["value"] == "power_convertor" for t in tokens)
+    values = {t["value"] for t in tokens}
+    for row in admitted:
+        assert all(t["spelling"] in values for t in row["new_tokens"]), row
+    selected = {r["source"] for r in admitted}
+    parked = {
+        s: r
+        for s, r in before["sources"].items()
+        if r["status"] == "vocab_gap" and s not in selected
+    }
+    save(
+        "mapping-before",
+        {
+            "mapping_path": str(MAPPING),
+            "mapping_sha256": hashlib.sha256(MAPPING.read_bytes()).hexdigest(),
+            "all_mapping_rows": entries,
+            "admitted": admitted,
+            "excluded_mapping": [r for r in entries if r["source"] not in cohort],
+            "before": before,
+            "parked": parked,
+            "grammar_rows": len(tokens),
+            "positive_control": [t for t in tokens if t["value"] == "power_convertor"],
+        },
+    )
+    grouped = {}
+    for sid in sorted(selected):
+        family, _, path = sid.removeprefix("dd:").partition("/")
+        grouped.setdefault(family, []).append(path)
+    FOCUS.write_text(
         json.dumps(
             {
-                k: payload[k]
-                for k in (
-                    "active",
-                    "grammar_rows",
-                    "eligible",
-                    "accepted_sources",
-                    "floor",
-                    "size",
-                )
+                "kind": "sn_sources",
+                "schema_version": 1,
+                "name": "mapped-vocabulary-retry",
+                "title": "Approved vocabulary rework cohort retry",
+                "description": "Exact intersection of the cohort and approved source-to-spelling mapping.",
+                "sources": grouped,
             },
             indent=2,
         )
+        + "\n"
     )
-    for sid, row in targets.items():
-        print(json.dumps({"source": sid, **row}, default=str))
+    print(
+        json.dumps(
+            {
+                "admitted": admitted,
+                "mapping_rows": len(entries),
+                "outside_cohort": len(entries) - len(admitted),
+                "produced_before": before["produced"],
+                "accepted_before": before["accepted"],
+                "parked_controls": len(parked),
+            },
+            default=str,
+        ),
+        flush=True,
+    )
     return 0
 
 
-def confirm():
-    before = json.loads((RUN / "census.json").read_text())
-    assert not before["eligible"], "Eligible sources require a scoped pipeline run"
-    state = source_reader()(sorted(before["sources"]))
-    cohort = source_reader()([row["id"] for row in before["cohort"]])
-    with GraphClient() as gc:
-        stages = gc.query(
-            "UNWIND $ids AS id MATCH (s:StandardNameSource {id:id})-[:PRODUCED_NAME]->(n:StandardName) RETURN id AS id, collect(DISTINCT n.name_stage) AS stages",
-            ids=sorted(cohort),
-        )
-    accepted = sum(
-        any(s in ("accepted", "approved") for s in r["stages"]) for r in stages
+def execute():
+    prepare()
+    from imas_codex.standard_names.graph_store import (
+        retry_failed_sources,
+        set_source_compose_hint,
     )
-    controls = []
-    for sid, row in before["sources"].items():
-        assert not row["token_rows"]
-        assert state[sid] == row["live"], (sid, row["live"], state[sid])
-        if row["live"]["status"] == "vocab_gap":
-            controls.append(sid)
-    assert len(controls) == 4
-    result = {
-        "accepted_before": before["accepted_sources"],
-        "accepted_after": accepted,
-        "floor": 100,
-        "cohort": 143,
-        "eligible": 0,
-        "scoped_run_launched": False,
-        "run_id": None,
-        "own_produced_names": 0,
-        "spend_usd": 0,
-        "cap_usd": 3,
-        "absent_token_controls_still_parked": controls,
+
+    payload = load("mapping-before")
+    hints = []
+    for row in payload["admitted"]:
+        sid = row["source"]
+        state = source_reader()([sid])[sid]
+        assert not state["claimed"], state
+        if state["status"] == "failed" or (
+            state["status"] == "extracted" and (state["attempt_count"] or 0) >= 5
+        ):
+            reset = retry_failed_sources(
+                [sid],
+                reason="Approved vocabulary rework is now registered; retry against the mapped complete spelling.",
+            )
+            hints.append({"source": sid, "retry": reset})
+            assert reset["retried"] == 1, reset
+        hint = set_source_compose_hint(
+            sid,
+            hint=f"Use the approved complete spelling {row['spelling']}. {row['description']} Preserve the DD unit A: this is a current-valued profile-alignment figure of merit, not a dimensionless factor. The former current_alignment_factor request is replaced by this registered physical base.",
+            reason="The approved source-to-spelling rework mapping replaces the former vocabulary request; the mapped physical base is registered in active ISN grammar.",
+            replace=True,
+        )
+        hints.append({"source": sid, "hint": hint})
+        save("mapping-steering", hints)
+        assert hint["applied"], hint
+    command = [
+        "uv",
+        "run",
+        "--no-sync",
+        "imas-codex",
+        "sn",
+        "run",
+        "--focus",
+        str(FOCUS),
+        "--skip-global-maintenance",
+        "-c",
+        str(CAP),
+        "-t",
+        "20",
+    ]
+    print("# pipeline command: " + shlex.join(command), flush=True)
+    result = subprocess.run(
+        command,
+        cwd=ROOT,
+        env=dict(
+            os.environ,
+            UV_PROJECT_ENVIRONMENT="/home/ITER/mcintos/Code/imas-codex/.venv",
+            PYTHONPATH=str(ROOT),
+        ),
+        timeout=1800,
+    )
+    save(
+        "pipeline-result",
+        {
+            "command": command,
+            "exit_code": result.returncode,
+            "slurm_job_id": os.environ.get("SLURM_JOB_ID"),
+        },
+    )
+    readback()
+    return result.returncode
+
+
+def readback():
+    payload = load("mapping-before")
+    ids = sorted(payload["before"]["sources"])
+    after = snapshot(ids)
+    with GraphClient() as gc:
+        runs = gc.query(
+            "MATCH (r:SNRun) WHERE r.invocation CONTAINS $focus RETURN properties(r) AS run ORDER BY r.started_at",
+            focus=str(FOCUS),
+        )
+        assert len(runs) == 1, runs
+        run = runs[0]["run"]
+        costs = gc.query(
+            "MATCH (c:LLMCost {for_run:$run}) RETURN c.phase AS phase, count(c) AS calls, sum(c.llm_cost) AS usd ORDER BY phase",
+            run=run["id"],
+        )
+        names = gc.query(
+            "UNWIND $ids AS id MATCH (s:StandardNameSource {id:id})-[:PRODUCED_NAME]->(n:StandardName) OPTIONAL MATCH (c:LLMCost {for_run:$run}) WHERE n.id IN coalesce(c.standard_name_ids,[]) RETURN id AS source, n.id AS name, n.name_stage AS stage, n.description AS description, n.reviewer_score_name AS score, n.created_at AS created_at, n.last_run_id AS last_run_id, count(c) AS own_cost_rows, collect(DISTINCT c.phase) AS own_phases ORDER BY id,n.id",
+            ids=[r["source"] for r in payload["admitted"]],
+            run=run["id"],
+        )
+    for sid, state in payload["parked"].items():
+        assert after["sources"][sid] == state, (sid, state, after["sources"][sid])
+    spend = sum(c["usd"] or 0 for c in costs)
+    assert spend <= CAP, (spend, CAP)
+    prior_names = {
+        n["name"] for r in payload["before"]["rows"] for n in r["names"] if n["name"]
     }
-    (RUN / "confirmation.json").write_text(json.dumps(result, indent=2) + "\n")
-    print(json.dumps(result, indent=2))
-    rows = []
-    for sid, row in before["sources"].items():
-        token = row["token"] + (
-            "; decomposition: " + row["decomposition_token"]
-            if "decomposition_token" in row
-            else ""
+    own = [
+        n
+        for n in names
+        if n["name"] not in prior_names
+        and (n["own_cost_rows"] > 0 or n["last_run_id"] == run["id"])
+    ]
+    outcomes = [
+        {
+            "source": r["source"],
+            "mapped_spelling": r["spelling"],
+            "after": after["sources"][r["source"]],
+            "bound_names": [n for n in names if n["source"] == r["source"]],
+            "exact_mapped_binding": any(
+                n["source"] == r["source"] and n["name"] == r["spelling"] for n in names
+            ),
+        }
+        for r in payload["admitted"]
+    ]
+    summary = {
+        "run_id": run["id"],
+        "run_status": run.get("status"),
+        "stop_reason": run.get("stop_reason"),
+        "cohort": 143,
+        "floor": 100,
+        "produced_before": payload["before"]["produced"],
+        "produced_after": after["produced"],
+        "accepted_before": payload["before"]["accepted"],
+        "accepted_after": after["accepted"],
+        "admitted": len(outcomes),
+        "own_produced_names": len({n["name"] for n in own}),
+        "spend_usd": spend,
+        "cap_usd": CAP,
+        "parked_controls_unchanged": len(payload["parked"]),
+    }
+    save(
+        "mapping-after",
+        {
+            "summary": summary,
+            "run": run,
+            "after": after,
+            "outcomes": outcomes,
+            "own_names": own,
+            "costs": costs,
+        },
+    )
+    print("SUMMARY " + json.dumps(summary, default=str), flush=True)
+    render()
+    return 0
+
+
+def render():
+    before = load("mapping-before")
+    result = load("mapping-after")
+    summary = result["summary"]
+
+    def table(headers, rows):
+        return (
+            "<table><thead><tr>"
+            + "".join("<th>" + escape(str(c)) + "</th>" for c in headers)
+            + "</tr></thead><tbody>\n"
+            + "\n".join(
+                "<tr>"
+                + "".join("<td>" + escape(str(c)) + "</td>" for c in row)
+                + "</tr>"
+                for row in rows
+            )
+            + "\n</tbody></table>"
         )
-        cells = [
-            sid.removeprefix("dd:"),
-            row["segment"],
-            token,
-            "absent, including aliases",
-            state[sid]["status"],
-            state[sid]["last_error"],
-        ]
-        rows.append(
-            "<tr>" + "".join("<td>" + escape(str(c)) + "</td>" for c in cells) + "</tr>"
+
+    outcome_rows = []
+    for row in result["outcomes"]:
+        names = "; ".join(
+            f"{n['name']} ({n['stage']}, score {n['score']}, own cost rows {n['own_cost_rows']})"
+            for n in row["bound_names"]
         )
-    additions = ", ".join(sorted({t["value"] for t in before["release_additions"]}))
-    witnesses = []
-    for row in before["cohort"]:
-        for name in row["names"]:
-            if name["stage"] in ("accepted", "approved"):
-                witnesses.append(
-                    f"{row['id']}: {name['name']} ({name['stage']}, score {name['score']})"
-                )
-        if len(witnesses) >= 2:
-            break
-    FRAGMENT.write_text(f"""<h2 id="sib-vocab-gap-requeue-isn-0-11-1">Retry blocked: the requested tokens remain absent from active ISN 0.11.1</h2>
-<p>The active graph snapshot is 0.11.1, digest <code>{escape(before["active"][0]["digest"])}</code>, with {before["grammar_rows"]} GrammarToken rows. The same read sees <code>power_convertor</code> twice (device and object), and the release additions <code>{escape(additions)}</code>. All requested spellings and their aliases return no matching row.</p>
-<p>The predecessor fragment records four sources that returned to vocab_gap and one additional source excluded for missing current_alignment. Each is listed below with its live refusal. None has a bound name, name stage or review score. This node changes no source state and launches no paid pipeline: the admission set is empty.</p>
-<table><thead><tr><th>DD source</th><th>segment</th><th>waited-on spelling</th><th>0.11.1</th><th>live status, both reads</th><th>live refusal</th></tr></thead><tbody>
-{chr(10).join(rows)}
-</tbody></table>
-<p>The recorded defect still reproduces: <q>missing geometry vocabulary token 'electron_cyclotron_power_deposition_peak'</q>; the other three re-parked sources likewise retain their original refusals. The negative control reads all four again and asserts their complete captured state unchanged, status vocab_gap, no binding, absent token and exclusion from the empty admission set. It does not mutate production data.</p>
-<p><code>current_alignment_factor</code> is the source's requested figure-of-merit spelling; its reviewed decomposition requires <code>current_alignment</code>. The release instead registers <code>current_profile_alignment</code> as a physical base with no alias to either spelling. That spelling names profile alignment directly. Whether to replace the reviewed decomposition with this base is a semantic ruling still needed; this read does not establish equivalence or authorize that substitution.</p>
-<p>The cohort acceptance measure counts a source once if a PRODUCED_NAME target is at accepted or approved. Before admission: {result["accepted_before"]} of 143; after the empty admission decision: {accepted} of 143; required floor: 100 (shortfall {100 - accepted}). The two measurements are live reads, not a pipeline before/after result. Known accepted witnesses establish the query can see accepted bindings: {escape("; ".join(witnesses))}.</p>
-<p>Own run id: none; own produced names: 0; spend: USD 0 of USD 3. No cost reservation, capacity limit or scheduling delay withheld the spend: no source satisfied the token-presence admission condition. The requested scoped run on partition all remains unperformed.</p>
-<p>Evidence: census job 1310643 on all_debug, census.json and census.log, followed by confirmation.json and confirmation.log, under <code>{escape(str(RUN))}</code>. The committed helper reproduces both reads. No source or tests were changed. The coordinator must settle an accepted vocabulary spelling or approve a specific decomposition before dispatching the scoped rerun.</p>
-""")
+        outcome_rows.append(
+            [
+                row["source"],
+                row["mapped_spelling"],
+                row["after"]["status"],
+                names or row["after"]["last_error"],
+                row["exact_mapped_binding"],
+            ]
+        )
+    parked_rows = [
+        [sid, state["last_error"], result["after"]["sources"][sid]["status"]]
+        for sid, state in before["parked"].items()
+    ]
+    excluded_rows = [
+        [r["source"], r["spelling"], "outside 143-source cohort"]
+        for r in before["excluded_mapping"]
+    ]
+    html = f"""<h2 id="sib-vocab-gap-requeue-isn-0-11-1">Approved source rework admitted and rerun under USD 3</h2>
+<p>Correction of the initial admission decision: admission uses membership in the approved source-to-spelling mapping, regardless of source status. The former requested spelling need not remain registered. The earlier USD 0 blocked attempt and its census and confirmation receipts are preserved in git and the run directory; this record supersedes its admission conclusion. The accepted/approved measure of 60 was also not the section floor metric: the floor counts a PRODUCED_NAME binding at any stage.</p>
+<p>Mapping input: <code>{escape(str(MAPPING))}</code>, SHA-256 <code>{before["mapping_sha256"]}</code>. Its seven rows intersect the cohort at {len(before["admitted"])} source. Active graph grammar is 0.11.1 with {before["grammar_rows"]} token rows; mapped required token current_profile_alignment is present as a physical base, and the known-present power_convertor control returns device and object rows.</p>
+<p>The current_alignment/value source maps to current_profile_alignment, a current-valued measure of agreement among supplying current-density profiles. It replaces current_alignment_factor and the reviewed current_alignment decomposition; it is not an assumed dimensionless factor. A durable exact-source compose hint carries the approved spelling and unit A through the sanctioned hint writer. No acceptance or text was written directly.</p>
+{table(["DD source", "approved mapped spelling", "source status after", "bound name, stage and score, or refusal", "exact mapped binding"], outcome_rows)}
+<p>Scoped pipeline run <code>{summary["run_id"]}</code>, status {summary["run_status"]}, stop reason {summary["stop_reason"]}; job {load("pipeline-result")["slurm_job_id"]} on partition all; --skip-global-maintenance, -c 3.0 and -t 20. Spend selected only by LLMCost.for_run for this id: USD {summary["spend_usd"]:.6f} of USD 3. Own newly produced names: {summary["own_produced_names"]}, requiring a name absent before and provenance under this run id. Existing and peer-produced names are not counted as own production.</p>
+{table(["live cohort metric", "before", "after", "floor", "remaining shortfall"], [["sources with produced name, any stage", summary["produced_before"], summary["produced_after"], 100, max(0, 100 - summary["produced_after"])], ["sources with accepted or approved name", summary["accepted_before"], summary["accepted_after"], 100, max(0, 100 - summary["accepted_after"])]])}
+<p>Both arms read all 143 exact source ids live and count each source once, irrespective of how many names it binds. A bound name at any stage satisfies the first metric; accepted or approved satisfies the second. Changes across the cohort are not automatically attributed to this run.</p>
+<h3 id="sib-vocab-gap-requeue-isn-0-11-1-vocabulary-followups">Parked cohort sources outside the approved mapping</h3>
+<p>Every source below remains parked and excluded. The readback asserts its complete captured state is unchanged. Its refusal records the token and missing physical carrier; these are vocabulary follow-ups, not admitted work.</p>
+{table(["DD source", "token needed and recorded refusal", "status after"], parked_rows)}
+<h3 id="sib-vocab-gap-requeue-isn-0-11-1-other-mapped-sources">Mapped sources outside this cohort</h3>
+{table(["DD source", "approved spelling", "disposition"], excluded_rows)}
+<p>Receipts, full cohort bindings, steering result, run properties, per-phase spend and attribution are in mapping-before.json, mapping-steering.json, pipeline-result.json and mapping-after.json under <code>{escape(str(RUN))}</code>. The job log is mapping-rerun.log, ending with EXIT=. No product source or tests were changed; the merged-state gate belongs to the coordinator's test node.</p>
+"""
+    FRAGMENT.write_text(html)
     return 0
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("action", choices=["census", "confirm"])
+    parser.add_argument("action", choices=["prepare", "execute", "readback", "render"])
     args = parser.parse_args()
     print(f"# module: {__file__}", flush=True)
     print(f"# cwd: {Path.cwd().resolve()}", flush=True)
