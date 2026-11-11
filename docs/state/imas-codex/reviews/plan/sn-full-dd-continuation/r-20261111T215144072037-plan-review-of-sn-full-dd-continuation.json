@@ -57,7 +57,30 @@
   "plan_slug": "sn-full-dd-continuation",
   "plan_version": 6,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "fc99c61f0f311bf33b6ca594ba565398169827b9",
+      "commit_basis": "edit",
+      "finding": "reuse_search-1",
+      "note": "\u00a72 now requires the 143-source cohort committed in the repository as a manifest that the read-back reads; the brief directs extending the existing cohort read-back script rather than writing another.",
+      "reason": "",
+      "when": "2026-11-11T22:19:32.238148+00:00"
+    }
+  ],
+  "responses": {
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "fc99c61f0f311bf33b6ca594ba565398169827b9",
+      "commit_basis": "edit",
+      "note": "\u00a72 now requires the 143-source cohort committed in the repository as a manifest that the read-back reads; the brief directs extending the existing cohort read-back script rather than writing another.",
+      "reason": "",
+      "when": "2026-11-11T22:19:32.238148+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-full-dd-continuation/r-20261111T215144072037-plan-review-of-sn-full-dd-continuation.json",
   "review_run_id": "r-20261111T215144072037-plan-review-of-sn-full-dd-continuation",
   "reviewed_blob_sha": "357bc09247bf8f1eeadebac1cd6ed62132d34a21",
   "rubric": "design",
