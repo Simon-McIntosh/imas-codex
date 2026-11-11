@@ -1,0 +1,61 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-11T23:22:47.175Z",
+  "dispatched_at": "2026-11-11T23:16:16Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-full-dd-continuation.html:66",
+      "id": "reasoning-1",
+      "reason": "one clause fixing which reading both clauses use (ceiling and reserve computed from the same backlog, or \u00a75 capped at the amount \u00a74 reserved) closes a real-money gap in the cost guard, and without it the coordinator's \u00a74 limit and \u00a75 cap disagree by whatever \u00a74 adds to the backlog.",
+      "text": "\u00a75's ceiling is \"the measured documentation rate times the backlog, plus a quarter\", where \"the backlog\" is what \u00a75 reads at its own start (after \u00a74 has run), while \u00a74's limit reserves \"the unspent part of \u00a75's documentation ceiling \u2026 computed at dispatch\" from the pre-\u00a74 backlog; \u00a74's done-when requires +300 accepted sources, which adds accepted names whose documentation is pending, so the post-\u00a74 backlog is larger than the reserved one. Read the other way \u2014 the ceiling fixed at \u00a74's dispatch \u2014 \u00a75 is instead sized on a backlog \u00a74 is about to grow and may be under-funded by the same difference. Either reading leaves one of the two clauses wrong, and in the first the growth is drawn from the USD 60 tranche reserved for `sn-catalog-consistency` \u00a72.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-full-dd-continuation.html:66",
+      "id": "done_when-1",
+      "reason": "adding the reported stage to the control makes it able to fail on the classification the measure depends on; without it the control passes on a read-back that cannot detect the backlog at all.",
+      "text": "\u00a75's negative control reads \"the read-back counts a name planted with pending documentation in a disposable graph\"; it constrains only that the planted name is counted somewhere, not that it is reported as pending rather than as accepted, so a read-back that classifies every name as accepted-documented still satisfies the control while the section's measure (\"every accepted name whose documentation is not accepted\") is wrong. \u00a72's analogous control states the required classification explicitly (\"as not produced\"), and \u00a75 does not.",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-full-dd-continuation.html:66",
+      "id": "evidence_paths-1",
+      "reason": "a worker dispatched to \u00a75 cannot check the premise (the fall from 2,368 to 2,028) from anything the plan points at, so the plan should cite a landed record path and that record must be merged.",
+      "text": "\u00a75 states the drain's before/after counts and its USD 11.14 spend as fact, but its only citation is `sn-integrity-backlog` \u00a752, whose content records none of those figures; the record that does (`docs/evidence/fragments/sn-integrity-backlog/sib-docs-drain-after-admission.html`, commit `7aef43b21`) is not present in the tree at `origin/main` (`c7afaf13f`), so a later reader opening the plan's citation cannot verify the premise the section is built on.",
+      "type": "evidence_paths",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "c7afaf13fa8ffe547b9ae447bac728f40cc79678",
+  "plan_fingerprint": "bd9c49deafa912b157755bb40e726f11fba5c1d3eb75c5e5ea730014469a92d1",
+  "plan_slug": "sn-full-dd-continuation",
+  "plan_version": 9,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261111T231528503862-plan-review-of-sn-full-dd-continuation",
+  "reviewed_blob_sha": "5419c436c632e2dc5f43ca3860cd351aa907ff79",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `sn-integrity-backlog` \u00a752 resolves, and the evidence destination `docs/evidence/fragments/sn-full-dd-continuation/` is the plan's stated output path rather than a citation; \u00a75 carries no file or commit anchor that fails to resolve.",
+    "done_when": "a finding \u2014 \u00a75's planted-name control does not require the read-back to report the planted name as pending rather than accepted (`sn-full-dd-continuation.html:66`), so a read-back that ignores documentation stage still passes it.",
+    "evidence_paths": "a finding \u2014 \u00a75's before/after counts and spend have no openable record on the branch the plan is served from; the drain fragment exists only in commit `7aef43b21`, which is not an ancestor of `origin/main`.",
+    "naming": "pass \u2014 \u00a75's text introduces no symbols, and `stop_reason`, stage names and section labels are surface terms, not plan labels carried into code.",
+    "reasoning": "a finding \u2014 \u00a75's documentation ceiling and \u00a74's reservation of it are computed from two different backlog readings (`sn-full-dd-continuation.html:66` vs line 53), so the stated bound between the two draws and the USD 60 consistency tranche does not hold under either reading.",
+    "single_goal": "pass \u2014 \u00a75 names one deliverable (restore and account for the name-level accepted-documentation backlog), with its census as the record of that same measure.",
+    "wiring": "pass \u2014 s5's `depends-on` of `sn-integrity-backlog#s52` and `data-id=\"s5\"` s4 (`sn-full-dd-continuation.html:22`) agrees with \u00a75's text (\"starts once no \u00a752 run is writing the graph\", \"starts after \u00a74 has taken its post-run reading\") and with followup f-sfdc-001."
+  },
+  "section_digests": {
+    "_document": "687ba927f5bd26f8820871ab346e1dd7924dd0b95f506110a32751e1da3d0a39",
+    "s1": "6edb6bfc73bfa8f3d3435cdd83ea2fde91367cf006a53a93995f459601295db8",
+    "s2": "0685f8ecfe2877442317711cdd765607eba5e0b9e9f44a51b65954020d68e962",
+    "s3": "ab19f940f4ac471bd28ace7cbc2c493228d057ab3ff0af70892c2a687f09888a",
+    "s4": "22de508ea21eb877a5d802a38abcf10b3d39dab3150af74debb327371bd1f25a",
+    "s5": "32a423980ecdeef87ab12c2874c5365f2e98795d3903351896487f408dc132d5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T23:50:14.835096+00:00",
+  "total": null
+}
