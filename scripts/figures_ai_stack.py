@@ -54,7 +54,7 @@ INK = "#2b2b2b"
 MUTED = "#5f5f5f"
 NEUTRAL_EDGE = "#b4b1aa"
 BAND_FILL = "#f4f3f0"
-USER_FILL = "#e9e7e2"  # light enough that the role names read clearly on it
+USER_FILL = "#d3d0c8"  # stands clear of the band, still light under bold role names
 USER_INK = "#141414"
 
 TITLE, BODY, SMALL = 16, 14, 13  # pt, inside the stack
