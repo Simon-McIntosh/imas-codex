@@ -550,7 +550,8 @@ def draw_interfaces(c: Canvas) -> None:
 
     # every interface but Claude Desktop can also run on ITER's own GPUs
     x0, x1 = INTERFACES["dash"]
-    c.onprem_badge(x1 - 0.8, y1 - 3.0 - 3.5)
+    # on the digest card's top-right corner, clear of its centred label
+    c.onprem_badge(x1 - 0.8 + 2.0, y1 - 3.0 - 3.5)
     for key in ["lucy", "sandbox", "clive"]:
         c.onprem_badge(INTERFACES[key][1], y1)
 
