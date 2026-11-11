@@ -1,0 +1,61 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-11T22:32:29.611Z",
+  "dispatched_at": "2026-11-11T22:22:26Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-full-dd-continuation.html:52",
+      "id": "reasoning-1",
+      "reason": "the sentence belongs in the node brief, not the plan, and as written it sends a node to build a selector and rewrite evidence scripts for scoping that `sn run --focus <manifest>` already provides.",
+      "text": "the new parenthetical \"if a source selector is added to sn run for this, it replaces the ad hoc source-id lists in the evidence scripts\" prescribes implementation. A section is not to name a code path, a step sequence, or a function to extend, and this one does all three: it names a CLI command to modify, the code change (adding a selector), and a downstream refactor of the evidence scripts. It is also conditionally stated, so it never says whether the selector is required, and the premise is contradicted by the tool: `sn run --focus` already accepts a `sn-sources` manifest and expands it to focus paths (imas_codex/cli/sn.py:1498-1512), which is exactly the source scoping \u00a74 needs. A worker dispatched from this text must first test the plan's guess against the code, and the review round is spent there instead of on the run",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-full-dd-continuation.html:53",
+      "id": "reasoning-2",
+      "reason": "\u00a75's plan of record depends on a reserve \u00a74 does not compute, and the fix is one subtraction in \u00a74's limit or a corrected \u00a75 claim.",
+      "text": "\u00a74's cost limit is \"the USD 350 approval's remaining balance less the unspent part of the USD 60 tranche authorised to sn-catalog-consistency \u00a72\", while the plan's new \u00a75 (line 66) states \"\u00a74's limit reserves the unspent part of that ceiling\", its own documentation ceiling of measured rate times backlog. \u00a74's stated formula contains no such reserve, so the two claims cannot both hold: a coordinator sizing to \u00a74's limit as written may spend the whole remaining balance and leave \u00a75 unfunded, while \u00a75 reads in good faith as though it were protected. Before this round \u00a74 had no reserve at all and the objection was about draws on the approval; the reserve mechanism was added for sn-catalog-consistency and not extended to the section the same edit introduced",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-full-dd-continuation.html:57",
+      "id": "wiring-1",
+      "reason": "a coordinator dispatching from the table can start \u00a75 beside \u00a74 and make \u00a74's done-when unreachable, so \u00a75's depends-on needs s4 (or the window needs an explicit precedence rule).",
+      "text": "\u00a74's new census clause requires that \"the census, the accepted count and the guard readings below come from one reading taken after the run ends, with no graph writer running, and are recorded together\", but the plan's dependency table (line 22) gives \u00a75 depends-on sn-integrity-backlog#s52 only, and followup f-sfdc-001 (line 72) likewise starts \u00a75 as soon as no \u00a752 run is writing \u2014 so \u00a75, which writes documentation to the graph, may legally be mid-run when \u00a74 takes its single reading. The two sections are then unsatisfiable together: \u00a74's gate cannot be met while \u00a75 writes, and nothing orders \u00a75 after \u00a74",
+      "type": "wiring",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "a5e781f6c07de8997b7fa9c48d6c53ac9c35a77f",
+  "plan_fingerprint": "5aca56017cd1e25dafaf83920768bd45d9aa59ab00c5a2ec3152a858d75fc890",
+  "plan_slug": "sn-full-dd-continuation",
+  "plan_version": 7,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261111T222105803574-plan-review-of-sn-full-dd-continuation",
+  "reviewed_blob_sha": "e282a74c454d17a422f34af3678c85773bdceba8",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 sn-integrity-backlog \u00a752 and sn-catalog-consistency \u00a72 both exist at the cited ids, and the evidence fragment path is a directory the run creates rather than a pointer to something renamed or deleted.",
+    "done_when": "pass \u2014 s3's whole-stream integrity test with the truncated-copy failure, and s4's source planted outside every class, each name a control that can fail, and both gate results carry a durable path.",
+    "evidence_paths": "pass \u2014 \u00a73's integrity test, \u00a74's census, spend and guard readings all land under docs/evidence/fragments/sn-full-dd-continuation/.",
+    "naming": "pass \u2014 neither reviewed section carries a plan label, ticket number or version tag into a symbol, and both state mechanism rather than change history.",
+    "reasoning": "a finding \u2014 \u00a74 now prescribes an implementation change (a source selector added to sn run, replacing source-id lists in evidence scripts) and, since this is the replaced text alongside it, its own parenthetical also makes a claim the code does not support.",
+    "single_goal": "pass \u2014 s3 delivers one verified checkpoint; \u00a74 delivers one measured run to 5,503 accepted names.",
+    "wiring": "a finding \u2014 \u00a75 declares depends-on sn-integrity-backlog#s52 only, so it may write the graph concurrently with \u00a74, which is exactly what \u00a74's new single-reading clause forbids."
+  },
+  "section_digests": {
+    "_document": "687ba927f5bd26f8820871ab346e1dd7924dd0b95f506110a32751e1da3d0a39",
+    "s1": "6edb6bfc73bfa8f3d3435cdd83ea2fde91367cf006a53a93995f459601295db8",
+    "s2": "0685f8ecfe2877442317711cdd765607eba5e0b9e9f44a51b65954020d68e962",
+    "s3": "ab19f940f4ac471bd28ace7cbc2c493228d057ab3ff0af70892c2a687f09888a",
+    "s4": "ffd560cdf0c35763e0e794727f3cd4bd3ee709beef3816f9e123176871ad8935",
+    "s5": "a614251b6db02eeb2d301ff08bd600197bf4d06263bc82cafa595b87633bfadc"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T23:09:50.717092+00:00",
+  "total": null
+}
