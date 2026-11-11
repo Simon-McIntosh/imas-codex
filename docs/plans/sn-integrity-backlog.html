@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="474">
+<meta name="plan-version" content="475">
 <meta name="plan-modified" content="2026-11-11">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="sn-west-prototype-release">
@@ -1481,6 +1481,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s52" data-id="c-run-r-20261110T200159838141-sib-catalog-rc-snapshot" data-who="reckon-build" data-when="2026-11-11T14:49:34Z">
     <div class="r-comment-body"><p>Released v0.4.0rc8 on the Simon-McIntosh fork — tag object 58a96a9a96a978fe8e6e948470f26577907a2bc8 over catalog commit 4a48c6c57d08bc2d77e6e47e456ca10f73996eb0, carrying 1975 exported names of 2865 candidates with 890 accounted exclusions and zero unaccounted residue; nothing was pushed to upstream and the non-batch path opens no review pull request, and this node verified the tag and both remotes with git ls-remote.</p></div>
+</div>
+<div class="r-comment" data-section="s52" data-id="c-run-r-20261111T170249911109-review-of-sib-stranded-pool-admission-5e0d8e8696f0" data-who="reckon-build" data-when="2026-11-11T17:12:02.466Z">
+    <div class="r-comment-body"><p>Independent review of sib-stranded-pool-admission at 5e0d8e86: goal_fidelity 18, evidence 17, scope_discipline 6, durability 18, fit 16, reuse 19, zero added failures (13 ids at both arms), three non-blocking findings (seven changed files outside the declared fence; run-terminal classes classified by the census rather than written through a terminal writer; a private pools.py helper imported across a module boundary).</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261012T162346807302-review-of-sib-row-census" data-who="reckon-build" data-when="2026-10-12T16:39:58.712Z">
     <div class="r-comment-body"><p>reviewed r-20261012T145528571333-sib-row-census at a7a70db00 against c7b4c626e; total 93/120 (goal_fidelity 15, evidence 13, scope_discipline 19, durability 11, fit 15, reuse 20); two blocking findings — the landing record's verdict tallies and the manifest's row-count both disagree with the 38 rows the census file holds.</p></div>

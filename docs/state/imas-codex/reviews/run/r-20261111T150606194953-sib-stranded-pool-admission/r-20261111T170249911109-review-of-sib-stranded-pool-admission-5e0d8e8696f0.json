@@ -1,0 +1,57 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-11T17:12:02.466Z",
+  "dispatched_at": "2026-11-11T17:04:00Z",
+  "findings": [
+    {
+      "file": "imas_codex/cli/sn.py",
+      "line": 586,
+      "severity": "non-blocking",
+      "summary": "seven of the ten changed files lie outside the node's declared exclusive write paths; the edits are implied by the goal but the coordinator must ratify the extra paths rather than treat the fence as satisfied"
+    },
+    {
+      "file": "imas_codex/standard_names/pools.py",
+      "line": 845,
+      "severity": "non-blocking",
+      "summary": "classes the done_when says must be recorded terminal through an existing terminal writer are instead only classified as run-terminal by the census, writing nothing to the graph; the choice preserves the hold for sn rescore but leaves the reason in the census result rather than on the identity"
+    },
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_cost_and_claims.py",
+      "line": 14,
+      "severity": "non-blocking",
+      "summary": "a private _-prefixed helper is imported from imas_codex/standard_names/pools.py into a graph_store module, so the admission package's private surface is now a cross-module contract that a rename would break silently"
+    }
+  ],
+  "gate_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T150606194953-sib-stranded-pool-admission/suite-baseline-wired.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T150606194953-sib-stranded-pool-admission/suite-head-delivered.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T150606194953-sib-stranded-pool-admission/negative-control-1310730.log"
+  ],
+  "item_verdicts": {
+    "call_sites": "the claim and pending queries in cli/sn.py, five graph_store modules and the census in loop.py all render from the shared pool admission owner.",
+    "diff": "read commit by commit from d500e8eab to 5e0d8e86; it replaces five hand-written admission predicates with one dual in-memory/Cypher condition tree and routes every claim and pending query through it.",
+    "done_when": "the done_when names tests/standard_names/test_stranded_identity_admission.py, a read-only live census before and after, and a class table in sib-stranded-pool-admission.html; all three are present and their results are recorded.",
+    "goal": "the node goal is that every stranded identity class with attempts under its cap is claimable by exactly one worker pool; imas_codex/standard_names/pools.py:455 makes the six pool predicates one shared, mutually exclusive condition set and the census drops from 368 stranded identities to zero.",
+    "manifest": "read; it states the 13-vs-13 gate result with zero added ids, the 73-passed focused arm, the 5-failed negative control, and the live census 368->0.",
+    "write_paths": "the manifest declares four exclusive paths; the diff changes those three plus imas_codex/cli/sn.py, five graph_store modules and the census test, recorded in changed_paths but outside the fence."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is that every stranded identity class with attempts under its cap is claimable by exactly one worker pool; imas_codex/standard_names/pools.py:455 makes the six pool predicates one shared, mutually exclusive condition set and the census drops from 368 stranded identities to zero.\nVERDICT done_when: the done_when names tests/standard_names/test_stranded_identity_admission.py, a read-only live census before and after, and a sib-stranded-pool-admission.html class table carrying count, intended owner and base refusal for all 85 classes; all three are present in the diff and their results are recorded in the manifest's baseline_suite, after_suite and live-baseline-wired/live-head-delivered.json.\nVERDICT write_paths: the manifest declares four exclusive paths (pools.py, the admission test, the evidence fragment, a figures directory); the diff changes those three plus imas_codex/cli/sn.py, five imas_codex/standard_names/graph_store modules and tests/standard_names/test_stranded_identity_census.py, all recorded honestly in changed_paths but outside the fence.\nVERDICT manifest: read; it states the gate result (13 failed / 8631 passed baseline, 13 failed / 8639 passed at head, zero added ids), the 73-passed focused arm, the 5-failed negative control at negative-control-1310730.log, and the live census 368->0 with 136 terminal-for-run.\nVERDICT diff: read commit by commit from d500e8eab to 5e0d8e86 across six commits; it replaces five separately hand-written Cypher admission predicates with one dual in-memory/Cypher condition tree in pools.py, routes every claim and pending query through it, and adds deterministic pre-review validation.\nCALL_SITES: imas_codex/cli/sn.py:_compute_pool_progress, imas_codex/standard_names/graph_store/graph_cost_and_claims.py:claim_review_name_batch, imas_codex/standard_names/graph_store/graph_docs_persistence.py:claim_generate_docs_batch, imas_codex/standard_names/graph_store/graph_docs_persistence.py:claim_refine_docs_batch, imas_codex/standard_names/graph_store/graph_refinement.py:claim_refine_name_batch, imas_codex/standard_names/graph_store/graph_review_persistence.py:claim_review_docs_batch, imas_codex/standard_names/graph_store/graph_parent_lifecycle.py:pool_pending_counts, imas_codex/standard_names/loop.py:classify_identity_state_groups\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/pools.py:455 renders every pool from one shared exclusion set and the census at imas_codex/standard_names/pools.py:845 moves the remaining classes to a named run-terminal reason, leaving zero stranded with zero overlap.\nSCORE evidence: 17\nJUSTIFICATION evidence: the receipt suites are recorded in suite-baseline-wired.log and suite-head-delivered.log with the same 13 ids, and the live pair live-baseline-wired.json/live-head-delivered.json records stranded 368->0, though the done_when's \"existing terminal writer\" clause is met by a census classification rather than a write (imas_codex/standard_names/pools.py:845).\nSCORE scope_discipline: 6\nJUSTIFICATION scope_discipline: only imas_codex/standard_names/pools.py, tests/standard_names/test_stranded_identity_admission.py and the evidence fragment are inside the declared paths; imas_codex/cli/sn.py and five graph_store modules are outside them.\nSCORE durability: 18\nJUSTIFICATION durability: tests/standard_names/test_stranded_identity_admission.py:279 asserts stranded_count == 0 against the independently hand-maintained _RECORDED_OWNERS table, and the declared rollback in negative-control-1310730.log reddens it with \"assert 43 == 0\".\nSCORE fit: 16\nJUSTIFICATION fit: the change follows the module idiom of imas_codex/standard_names/graph_store/graph_refinement.py:119 and introduces no forbidden name, but imports the private _validate_claimed_review_candidates across a module boundary at imas_codex/standard_names/graph_store/graph_cost_and_claims.py:14.\nSCORE reuse: 19\nJUSTIFICATION reuse: the change consolidates five duplicated admission Cypher strings into the single owner at imas_codex/standard_names/pools.py:470 and delegates validation to the existing worker_compose_and_validate.validate_name_candidate rather than forking it.\nFINDING imas_codex/cli/sn.py:586 non-blocking: seven of the ten changed files lie outside the node's declared exclusive write paths; the edits are implied by the goal but the coordinator must ratify the extra paths rather than treat the fence as satisfied.\nFINDING imas_codex/standard_names/pools.py:845 non-blocking: classes the done_when says must be recorded terminal through an existing terminal writer are instead only classified as run-terminal by the census, writing nothing to the graph; the choice preserves the hold for sn rescore but leaves the reason in the census result rather than on the identity.\nFINDING imas_codex/standard_names/graph_store/graph_cost_and_claims.py:14 non-blocking: a private _-prefixed helper is imported from imas_codex/standard_names/pools.py into a graph_store module, so the admission package's private surface is now a cross-module contract that a rename would break silently.\n",
+  "review_run_id": "r-20261111T170249911109-review-of-sib-stranded-pool-admission-5e0d8e8696f0",
+  "reviewed_base_sha": "d500e8eab72071be07d872aa1a79f136dd63b6fc",
+  "reviewed_head_sha": "5e0d8e8696f02591d275c16fd992e6b7a8cfd6a6",
+  "reviewed_run_id": "r-20261111T150606194953-sib-stranded-pool-admission",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 6
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T17:12:58.667394+00:00",
+  "total": 94
+}
