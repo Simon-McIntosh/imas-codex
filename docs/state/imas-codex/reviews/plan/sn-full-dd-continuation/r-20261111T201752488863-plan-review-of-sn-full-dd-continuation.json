@@ -33,7 +33,30 @@
   "plan_slug": "sn-full-dd-continuation",
   "plan_version": 1,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "55af2a7ff77097679125b2d4f0c065462bf7de1b",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a72 now requires the read-back to report a source planted as attempted-but-not-produced in a disposable graph as not produced; \u00a73 requires the integrity test to fail on a deliberately truncated copy of the archive.",
+      "reason": "",
+      "when": "2026-11-11T20:40:22.819888+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "55af2a7ff77097679125b2d4f0c065462bf7de1b",
+      "commit_basis": "edit",
+      "note": "\u00a72 now requires the read-back to report a source planted as attempted-but-not-produced in a disposable graph as not produced; \u00a73 requires the integrity test to fail on a deliberately truncated copy of the archive.",
+      "reason": "",
+      "when": "2026-11-11T20:40:22.819888+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-full-dd-continuation/r-20261111T201752488863-plan-review-of-sn-full-dd-continuation.json",
   "review_run_id": "r-20261111T201752488863-plan-review-of-sn-full-dd-continuation",
   "reviewed_blob_sha": "9f9ed4001f6f760c7b174375e34d77359b5c4d59",
   "rubric": "content",
