@@ -259,7 +259,7 @@ USERS = [
     ("office productivity", "lucy"),
     ("commissioning engineer · planning · configuration", "dash"),
     ("domain expert prototyping · software refactor and development", "sandbox"),
-    ("assembly and commissioning · infrastructure", "clive"),
+    ("assembly and commissioning support · knowledge infrastructure", "clive"),
 ]
 
 LUCY_TOOLS = [
