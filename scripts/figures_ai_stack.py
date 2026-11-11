@@ -259,7 +259,7 @@ USERS = [
     ("office productivity", "lucy"),
     ("commissioning engineer · planning · configuration", "dash"),
     ("domain expert prototyping · software refactor and development", "sandbox"),
-    ("assembly and commissioning · ITER infrastructure", "clive"),
+    ("assembly and commissioning · infrastructure", "clive"),
 ]
 
 LUCY_TOOLS = [
@@ -321,16 +321,30 @@ def draw_bands(c: Canvas) -> None:
         )
 
 
-def draw_layer_names(c: Canvas) -> None:
+def label_x(c: Canvas) -> float:
+    """The left edge shared by every layer name: where 'functions' starts.
+
+    'functions' is the widest name on the widest band it names, so it sets the column;
+    measured by drawing it once, since that is the width the figure will show.
+    """
+    y = sum(LAYERS["functions"]) / 2
+    probe = c.ax.text(0, y, "functions", fontsize=OUTER, weight="bold")
+    c.fig.canvas.draw()
+    bbox = probe.get_window_extent(c.fig.canvas.get_renderer())
+    (x0, _), (x1, _) = c.ax.transData.inverted().transform([(bbox.x0, 0), (bbox.x1, 0)])
+    probe.remove()
+    return span(y, 0)[0] - LAYER_GAP - (x1 - x0)
+
+
+def draw_layer_names(c: Canvas, x: float) -> None:
+    """Name each layer at its band's mid-height, all from one left-aligned column."""
     for key, lines in LAYER_NAMES.items():
         y0, y1 = LAYERS[key]
         pitch = 2.9
         mid = (y0 + y1) / 2
         for i, line in enumerate(lines):
             y = mid + (len(lines) - 1) / 2 * pitch - i * pitch
-            # each line leans on the pyramid's left slope at its own height
-            x = span(y, 0)[0] - LAYER_GAP
-            c.text(x, y, line, size=OUTER, ha="right", weight="bold")
+            c.text(x, y, line, size=OUTER, ha="left", weight="bold")
 
 
 def draw_foundation(c: Canvas) -> None:
@@ -541,20 +555,13 @@ def draw_interfaces(c: Canvas) -> None:
         c.onprem_badge(INTERFACES[key][1], y1)
 
 
-def draw_users(c: Canvas) -> None:
+def draw_users(c: Canvas, x: float) -> None:
     _, y1 = LAYERS["users"]
     pitch, label_h, gap, height = 4.5, 2.3, 0.1, 0.8
     top = y1 - 0.4
     # named on the left, like the layers, centred on the block of roles
     last_bar = top - (len(USERS) - 1) * pitch - label_h - gap - height
-    c.text(
-        INTERFACES["desktop"][0] - LAYER_GAP,
-        (top + last_bar) / 2,
-        "users",
-        size=OUTER,
-        weight="bold",
-        ha="right",
-    )
+    c.text(x, (top + last_bar) / 2, "users", size=OUTER, weight="bold", ha="left")
     order = list(INTERFACES)
     for i, (role, reach) in enumerate(USERS):
         y = top - i * pitch
@@ -629,12 +636,13 @@ def draw_legend(c: Canvas) -> None:
 def draw(draft: Path | None) -> Path:
     c = Canvas(Roles(*COLOURS))
     draw_bands(c)
-    draw_layer_names(c)
+    names_x = label_x(c)
+    draw_layer_names(c, names_x)
     draw_foundation(c)
     draw_graph(c)
     draw_functions(c)
     draw_interfaces(c)
-    draw_users(c)
+    draw_users(c, names_x)
     draw_legend(c)
     if draft is not None:
         c.check_layout(refuse=False)
