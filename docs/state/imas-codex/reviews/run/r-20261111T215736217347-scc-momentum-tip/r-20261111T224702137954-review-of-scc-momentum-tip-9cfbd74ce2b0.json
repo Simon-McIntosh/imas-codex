@@ -1,0 +1,83 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run declares neither a baseline_suite nor an after_suite arm: its gate is an evidence runner, not a pytest suite, and its recorded arms (lineage-census/capture.log, capture-momentum.log, assemble.log, control.log) each end in a bare EXIT=0 line. Reading the run's own log set, no failing test id exists on either side, so the added-failure pair is 0 and [].",
+  "base_log_revision": "fc99c61f0f311bf33b6ca594ba565398169827b9",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-11T23:14:22.402Z",
+  "dispatched_at": "2026-11-11T23:04:11Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "cosmetic or provenance note on a one-off evidence page; the figures the lead's ruling rests on are verified against the census logs",
+      "recorded_at": "2026-11-11T23:22:39.566940+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "cosmetic or provenance note on a one-off evidence page; the figures the lead's ruling rests on are verified against the census logs",
+      "recorded_at": "2026-11-11T23:22:51.546646+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "cosmetic or provenance note on a one-off evidence page; the figures the lead's ruling rests on are verified against the census logs",
+      "recorded_at": "2026-11-11T23:23:49.827143+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-catalog-consistency/scc-momentum-tip.html",
+      "line": "6",
+      "severity": "non-blocking",
+      "text": "non-blocking: the h1 (and the <title> at :4, which also reads 'momentum-diffusivity-lineage' with a hyphen where a space belongs) heads the fragment 'One live tip for the momentum-diffusivity lineage' as a present fact, while the same page's census table at :113-121 and the graph report two live tips; a reader who skims the headline reads the lead's ruling as already applied, and the node makes no graph write."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-consistency/scc-momentum-tip.html",
+      "line": "13",
+      "severity": "non-blocking",
+      "text": "non-blocking: 'Read 2026-11-11T22:19:21Z at revision fc99c61f0' attaches the census snapshot's observed_at to the two names' records, which were captured in a separate read (lineage-census/capture-momentum.log, 22:21Z); the live block in scc-momentum-tip.json carries no observation timestamp, so the read time stated for the records cannot be verified from the record itself, even though its values are corroborated by the snapshot's records_for_names."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-consistency/scc-momentum-tip-run.py",
+      "line": "436",
+      "severity": "non-blocking",
+      "text": "non-blocking: the assemble log the manifest cites (lineage-census/assemble.log) carries runner_sha256 bddc9b8cbef3... and writes scc-momentum-tip-run.json, matching neither the committed runner's sha 9bf18209c35f... nor the committed artifact's name, so the committed JSON was assembled by an earlier draft of the script and the recorded command cannot regenerate it; the census block does reproduce exactly from the committed runner against the retained snapshot, so the unproven half is the live-records block, whose values the snapshot corroborates."
+    }
+  ],
+  "head_log_revision": "9cfbd74ce2b0bca45d64aa83ff2f41777459348e",
+  "item_aggregate": 6,
+  "justifications": {
+    "durability": "scc-momentum-tip-run.py:296-303 asserts the fold arm reads one live tip and no cycle after the two-tip arm read two, so a regression in the census tip predicate reddens the one_tip assertion; the guards run only when the fragment runner is invoked with --control, and nothing in tests/ exercises them.",
+    "evidence": "the done_when's control is recorded in lineage-census/control.log:7 at revision 9cfbd74ce (\"CONTROL two_tip live_tips=2 cycles=0 | cycle_arm cycles=1 | one_tip live_tips=1\") with EXIT=0, and the census numbers in scc-momentum-tip.json's census block reproduce exactly when the committed runner's census_readings is re-run over the retained graph-snapshot.json and independently when the snapshot is counted directly (5497 names, 1771 edges, 0 cycles, 19 multi-tip components, 2 live tips for this lineage).",
+    "fit": "the fragment follows the 123 sibling docs/evidence/fragments/*-run.py files' shape (revision/tree/command/module/sha256 header, bare EXIT= line) and the page's element ids are prefixed scc-momentum-tip, though the h1 at :6 states an outcome the page's own census table contradicts.",
+    "goal_fidelity": "docs/evidence/fragments/sn-catalog-consistency/scc-momentum-tip.html:93-106 names toroidal_plasma_momentum_diffusivity as the proposed survivor with three reasons plus the case against, and the DD, score, review-history and spend tables at :20-88 carry the evidence the goal asks for.",
+    "reuse": "scc-momentum-tip-run.py:52-57 imports the committed census's classify by path instead of re-deriving tip selection, :232-234 uses imas_codex/graph/temp_neo4j.py:start_temp_neo4j as the owner of disposable instances, and census_readings at :180-215 reads the stored snapshot counts rather than classifying again.",
+    "scope_discipline": "git diff --name-status fc99c61f0..9cfbd74ce adds exactly the three files the node declared, scc-momentum-tip-run.py, scc-momentum-tip.html and scc-momentum-tip.json, and nothing else."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to bring the two-tip momentum-diffusivity lineage to the lead with its evidence and a proposed survivor; docs/evidence/fragments/sn-catalog-consistency/scc-momentum-tip.html:93-106 names toroidal_plasma_momentum_diffusivity as the proposed survivor with three reasons and the case against, and the DD, score, review and spend tables at :20-88 carry the evidence.\nVERDICT done_when: the done_when asks the fragment to record both names' DD sources, units, scores, review history, spend and lineage with a proposed survivor, and the census re-run to report live-tip and cycle counts plus a two-tip plant in a disposable graph; lineage-census/control.log:7 at revision 9cfbd74ce records 'CONTROL two_tip live_tips=2 cycles=0 | cycle_arm cycles=1 | one_tip live_tips=1' with EXIT=0, and the census readings in scc-momentum-tip.json were re-derived from graph-snapshot.json and agree (5497 names, 1771 edges, 0 cycles, 19 multi-tip components, 2 live tips here).\nVERDICT write_paths: the node was fenced to scc-momentum-tip.html, scc-momentum-tip.json and scc-momentum-tip-run.py under docs/evidence/fragments/sn-catalog-consistency/; git diff --name-status fc99c61f0..9cfbd74ce adds exactly those three and nothing else.\nVERDICT manifest: read; status complete, commits 9cfbd74ce, changed_paths the three fragments, tests the runner's --control invocation, test_logs naming four logs that each end in EXIT=0, and no baseline_suite or after_suite arm because the gate is an evidence runner rather than a suite.\nVERDICT diff: read the single commit 9cfbd74ce against fc99c61f0; 1236 insertions across the runner, the HTML fragment and its JSON record, all inside the fence, with the census's classify imported rather than re-derived.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-catalog-consistency/scc-momentum-tip.html:93-106 names the survivor, its three reasons and the case against, with the record tables above it.\nSCORE evidence: 16\nJUSTIFICATION evidence: lineage-census/control.log:7 records the control reading at rev 9cfbd74ce with EXIT=0 and the census block reproduces exactly from the committed runner over graph-snapshot.json, though assemble.log's runner_sha256 differs from the committed script's.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --name-status fc99c61f0..9cfbd74ce lists only the three declared fragment paths.\nSCORE durability: 15\nJUSTIFICATION durability: scc-momentum-tip-run.py:296-303 fails if the fold arm does not read one live tip after the two-tip arm read two, but nothing in tests/ runs those guards.\nSCORE fit: 18\nJUSTIFICATION fit: the fragment matches the 123 sibling docs/evidence/fragments/*-run.py header and EXIT conventions, and the h1 at :6 is the one name that claims more than the page shows.\nSCORE reuse: 18\nJUSTIFICATION reuse: scc-momentum-tip-run.py:52-57 imports the committed census's classify and :232 uses imas_codex/graph/temp_neo4j.py:start_temp_neo4j, forking no capability.\nFINDING docs/evidence/fragments/sn-catalog-consistency/scc-momentum-tip.html:6 non-blocking: the h1 heads the fragment 'One live tip for the momentum-diffusivity lineage' as present fact while the census table at :113-121 reports two live tips, so a skimming reader reads an unapplied ruling as done.\nFINDING docs/evidence/fragments/sn-catalog-consistency/scc-momentum-tip.html:13 non-blocking: 'Read 2026-11-11T22:19:21Z' is the census snapshot's observed_at, and the live records were captured separately at 22:21Z with no timestamp stored in scc-momentum-tip.json, so the stated read time is not verifiable from the record.\nFINDING docs/evidence/fragments/sn-catalog-consistency/scc-momentum-tip-run.py:436 non-blocking: lineage-census/assemble.log carries runner_sha256 bddc9b8c and writes scc-momentum-tip-run.json, so the committed JSON was assembled by an earlier draft and the recorded command cannot regenerate it.\n",
+  "review_run_id": "r-20261111T224702137954-review-of-scc-momentum-tip-9cfbd74ce2b0",
+  "reviewed_base_sha": "fc99c61f0f311bf33b6ca594ba565398169827b9",
+  "reviewed_head_sha": "9cfbd74ce2b0bca45d64aa83ff2f41777459348e",
+  "reviewed_run_id": "r-20261111T215736217347-scc-momentum-tip",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261111T224702137954-review-of-scc-momentum-tip-9cfbd74ce2b0"
+  },
+  "reviewer_run_id": "r-20261111T224702137954-review-of-scc-momentum-tip-9cfbd74ce2b0",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T23:28:31.370772+00:00",
+  "total": 104
+}
