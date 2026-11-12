@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="docs-project" content="imas-codex">
+<title>One live tip for the momentum-diffusivity lineage: the fold applied</title></head>
+<body><main>
+<h1 id="scc-momentum-supersede-title">One live tip for the momentum-diffusivity lineage</h1>
+
+<p>Applies the lead's 2026-11-12 ruling through the signed supersede path. The
+losing name <code id="scc-momentum-supersede-loser">toroidal_momentum_diffusion_coefficient</code>
+is folded into <code id="scc-momentum-supersede-survivor">toroidal_plasma_momentum_diffusivity</code>
+with one receipt-stamped successor edge, after the preview arm refused the fold
+and named its reason. The survivor now carries the loser's
+<code>core_transport/model/profiles_1d/momentum_phi/d</code> source binding, the
+loser keeps all four of its reviews, and the committed lineage census reads
+<strong>two live tips before and one after</strong> with <strong>zero cycle
+components at both readings</strong>. Its planted control still reports two live
+tips for the two-tip shape and one for the folded one, so the one-tip reading is
+shown to be able to fail. Spend USD 0.</p>
+
+<h2 id="scc-momentum-supersede-ruling">The ruling this node applies</h2>
+<p><code>toroidal_plasma_momentum_diffusivity</code> survives; the losing name is
+superseded onto it with its sources and paid reviews kept. The evidence the lead
+ruled on (name scores 0.9338 against 0.9082, review means 0.833 against 0.717,
+two DD loci against one, both m<sup>2</sup>/s) is in
+<a href="/imas-codex/evidence/fragments/sn-catalog-consistency/scc-momentum-tip.html">the tip census fragment</a>.</p>
+
+<h2 id="scc-momentum-supersede-writes">Two signed writes, each previewed first</h2>
+<p>The fold's first preview refused:</p>
+<pre id="scc-momentum-supersede-refusal">Error: name 'toroidal_momentum_diffusion_coefficient' has another successor lineage; fold is ambiguous</pre>
+<p>The second claim is an edge from the retired tombstone
+<code>toroidal_total_plasma_momentum_diffusivity</code> onto the coefficient. That
+tombstone's own retirement row records that the supersession census found <em>no
+supersession event</em> for it, and its description, total plasma momentum
+diffusivity, names the survivor's concept rather than the coefficient's, so the
+edge carries neither ledger backing nor the right referent. It was removed
+through the signed lineage removal, which records the judgement in the ledger;
+the fold then previewed clean and was applied.</p>
+<table id="scc-momentum-supersede-writes-table">
+<thead><tr><th>write</th><th>arm</th><th>result</th><th>change row</th></tr></thead>
+<tbody>
+<tr><td><code>sn remove-lineage</code></td><td>preview</td><td>would remove the tombstone-to-coefficient edge; predecessor name_stage=accepted; remaining lineage inbound=0, outbound=1</td><td>none (preview)</td></tr>
+<tr><td><code>sn remove-lineage</code></td><td>apply</td><td>removed as previewed</td><td><code>sn-change:1f4dd329-c708-4c79-afb4-345591915a0b</code>, operation <code>remove_refined_from_relationship</code>, 2026-11-12T06:47:12Z</td></tr>
+<tr><td><code>sn supersede</code></td><td>preview</td><td>would supersede the coefficient into the survivor; sources to carry 1, 1 would have no live name otherwise</td><td>none (preview)</td></tr>
+<tr><td><code>sn supersede</code></td><td>apply</td><td>superseded the coefficient into the survivor; sources carried 1</td><td><code>sn-change:09b880cd-7110-41f3-9213-ac96c075d8f0</code>, operation <code>fold_identity</code>, 2026-11-12T06:47:32Z</td></tr>
+</tbody>
+</table>
+
+<h2 id="scc-momentum-supersede-post">What the survivor and the tombstone hold now</h2>
+<pre id="scc-momentum-supersede-edge">(toroidal_plasma_momentum_diffusivity)-[:REFINED_FROM {writer: 'edit.supersede_into',
+  created_at: '2026-11-12T06:47:32.839964+00:00'}]->(toroidal_momentum_diffusion_coefficient)</pre>
+<p>That edge is the only edge into the loser: one edge before the fold, none
+between the fold and the write, one after. The fold wrote a typed
+before/expected-after receipt into the change ledger; its sealed fields give
+<code>receipt_type=standard_name_identity_fold</code>, schema 1,
+<code>predecessor_stage=accepted</code>, one source
+(<code>dd:core_transport/model/profiles_1d/momentum_phi/d</code>), one
+projection, and its postflight exact-state proof held before commit. The
+receipt text's SHA-256 is
+<code id="scc-momentum-supersede-receipt-sha">d3eb4bc4de7c5015e15ae4b504e4bc424d1370be8a068960a560d1296465a32f</code>.</p>
+<table id="scc-momentum-supersede-post-table">
+<thead><tr><th>property</th><th>loser</th><th>survivor</th></tr></thead>
+<tbody>
+<tr><td>name_stage</td><td>superseded (from accepted)</td><td>accepted</td></tr>
+<tr><td>DD source paths</td><td>none</td><td>edge_transport/model/ggd/momentum/d/phi, plasma_transport/model/ggd/momentum/d/phi, core_transport/model/profiles_1d/momentum_phi/d</td></tr>
+<tr><td>attached reviews</td><td>4, unchanged</td><td>4</td></tr>
+<tr><td>incoming successor edges</td><td>1, stamped by edit.supersede_into</td><td>0</td></tr>
+</tbody>
+</table>
+
+<h2 id="scc-momentum-supersede-census">The lineage census, before and after</h2>
+<table id="scc-momentum-supersede-census-table">
+<thead><tr><th>reading</th><th>names</th><th>edges</th><th>lineage live tips</th><th>cycle components</th><th>multi-tip lineages (whole graph)</th></tr></thead>
+<tbody>
+<tr><td>before, 06:46:28Z</td><td>5497</td><td>1770</td><td>2 (coefficient, plasma)</td><td>0</td><td>19</td></tr>
+<tr><td>after, 06:47:41Z</td><td>5497</td><td>1770</td><td>1 (plasma)</td><td>0</td><td>18</td></tr>
+</tbody>
+</table>
+<p>Both readings ran at revision <code>8acae47ecc</code> and both cross-checked
+their tip set against an independent Cypher predicate, which agreed. In a
+disposable Neo4j the same classifier reported two live tips for a planted
+ancestor with two live successors, one after folding one of them, and one cycle
+component for a planted reciprocal pair — the three arm assertions passed.</p>
+
+<h2 id="scc-momentum-supersede-reproduce">Reproduction and spend</h2>
+<p>The instrument is
+<a href="/imas-codex/evidence/fragments/sn-catalog-consistency/scc-momentum-supersede-run.py">scc-momentum-supersede-run.py</a>,
+whose <code>--phase</code> flags name each arm in the order they ran; its JSON
+companion holds every arm's command, output and readings. It reuses the
+committed census in
+<a href="/imas-codex/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census.html">the integrity-backlog evidence</a>
+for the tip reading rather than re-deriving it. Spend USD 0: the fold, the
+removal and both census readings are deterministic graph operations with no model
+call.</p>
+</main></body></html>
