@@ -1,14 +1,14 @@
-# revision: f9b4b1966cb8a4ae7107b312285d34545e1b8bd6
+# revision: 7aeb8ac460115aa761c836758aecd0c8a9963f5e
 # tree: /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdbc-name-definition-probes
 # module: /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdbc-name-definition-probes/imas_codex/standard_names/review/name_definition_probes.py
 # cwd: /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdbc-name-definition-probes
 # command: cd /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdbc-name-definition-probes && uv run --no-sync python -m pytest /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdbc-name-definition-probes/tests/standard_names/test_name_definition_probes.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdbc-name-definition-probes/tests/standard_names/test_review_checks.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdbc-name-definition-probes/tests/standard_names/test_name_definition_agreement.py -p no:cacheprovider --no-header --timeout=180
 
 ============================= test session starts ==============================
-collected 30 items
+collected 31 items
 
-tests/standard_names/test_name_definition_probes.py .........            [ 30%]
-tests/standard_names/test_review_checks.py .............                 [ 73%]
+tests/standard_names/test_name_definition_probes.py ..........           [ 32%]
+tests/standard_names/test_review_checks.py .............                 [ 74%]
 tests/standard_names/test_name_definition_agreement.py ........          [100%]
 
 =============================== warnings summary ===============================
@@ -19,13 +19,13 @@ tests/standard_names/test_name_definition_agreement.py ........          [100%]
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
 ============================= slowest 10 durations =============================
-3.38s call     tests/standard_names/test_name_definition_agreement.py::test_a_flagged_name_is_refused_without_a_recorded_reason
-0.41s setup    tests/standard_names/test_name_definition_probes.py::test_definition_states_a_normalisation_the_name_lacks
-0.08s setup    tests/standard_names/test_review_checks.py::test_every_check_is_decided_exactly_once
-0.08s setup    tests/standard_names/test_name_definition_agreement.py::test_a_flagged_name_is_refused_without_a_recorded_reason
-0.03s call     tests/standard_names/test_review_checks.py::test_evidence_fields_are_carried_by_the_review_state
-0.03s call     tests/standard_names/test_review_checks.py::test_negative_control_unplanted_field_is_rejected
+3.84s call     tests/standard_names/test_name_definition_agreement.py::test_a_flagged_name_is_refused_without_a_recorded_reason
+0.40s setup    tests/standard_names/test_name_definition_probes.py::test_definition_states_a_normalisation_the_name_lacks
+0.09s setup    tests/standard_names/test_review_checks.py::test_every_check_is_decided_exactly_once
+0.09s setup    tests/standard_names/test_name_definition_agreement.py::test_a_flagged_name_is_refused_without_a_recorded_reason
+0.04s call     tests/standard_names/test_review_checks.py::test_evidence_fields_are_carried_by_the_review_state
+0.04s call     tests/standard_names/test_review_checks.py::test_negative_control_unplanted_field_is_rejected
 
 (4 durations < 0.005s hidden.  Use -vv to show these durations.)
-======================== 30 passed, 1 warning in 9.23s =========================
+======================== 31 passed, 1 warning in 10.22s ========================
 EXIT=0
