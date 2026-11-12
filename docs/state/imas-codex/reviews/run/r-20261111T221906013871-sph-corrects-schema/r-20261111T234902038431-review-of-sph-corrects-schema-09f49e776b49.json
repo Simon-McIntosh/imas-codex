@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured by the reviewed run: its manifest names no baseline_suite or after_suite arm, only the focused gate over the new test (gate-live.log: 1 passed, EXIT=0), a clean arm (nc-clean.log: 1 passed, EXIT=0) and a red arm (negative-control.log: 1 failed, EXIT=1) on a disposable graph. No FAILED id appears in any of those logs, so no added failure is derivable and the count is recorded as 0 on that reading rather than from a before/after suite pair.",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/graph/schema.py:109 (GraphSchema.relationships derives the new slot into a Relationship for any schema consumer)",
+    "imas_codex/graph/schema_context.py:213 and imas_codex/graph/schema_context.py:251 (RELATIONSHIPS filtered into the LLM schema context)",
+    "imas_codex/graph/client.py:135 (EXPECTED_RELATIONSHIP_TYPES derives from the same generated RELATIONSHIPS)"
+  ],
+  "completed_at": "2026-11-12T00:11:00.892Z",
+  "dispatched_at": "2026-11-11T23:57:12Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-pipeline-hygiene/sph-corrects-schema.html",
+      "id": "fdeefaabca2",
+      "line": "57",
+      "severity": "non-blocking",
+      "text": "non-blocking: the quoted red-arm summary line reads \"1 failed, 1 warning in 63.77s\", a line that appears in no log on disk; the negative-control.log the same fragment cites records \"1 failed, 1 warning in 22.42s\" with EXIT=1, so the excerpt the fragment presents as that log's tail is from an earlier run, and a reader reconciling the fragment against its log finds a mismatch even though the assertion text and FAILED id do match."
+    },
+    {
+      "file": "tests/graph/test_schema_compliance.py",
+      "id": "f695585c075",
+      "line": "100",
+      "severity": "non-blocking",
+      "text": "non-blocking: the check passes vacuously when the graph holds zero CORRECTS edges, because checked_edges is only reported and never asserted, so a later loss of the 20 edges the node measured would leave the test green; the disposable-graph arms are what show the live green is not vacuous, and pinning an edge count would make the check brittle against legitimate graph rebuilds."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read commit by commit from base 8466f0e0c to head 09f49e776; 9f4b800b3 adds the yaml slot, the test method and three evidence artifacts, and 09f49e776 only rewrites the evidence script's log-header line to one line, so the code under test is identical across both commits and the gate at 9f4b800b3 covers the head.",
+    "done_when": "the done_when asks for four facts and the gate covers each \u2014 the yaml declaration at imas_codex/schemas/standard_name.yaml:3589, the generated tuple ('StandardNameSourceRetry', 'CORRECTS', 'StandardNameSourceRetry', 'one') at imas_codex/graph/schema_context_data.py:2501 with the corrects field at imas_codex/graph/models.py:9092, live.json recording 20 edges across 1 declared pair with 0 mislabelled, and negative-control.log recording the planted StandardNameSource->StandardName edge failing at EXIT=1 while nc-clean.log passes at EXIT=0 on the same disposable graph.",
+    "goal": "the node goal is to declare the CORRECTS relationship with its endpoints and add an endpoint-comparing check beside the existing relationship-type check; imas_codex/schemas/standard_name.yaml:3589 declares StandardNameSourceRetry.corrects with range StandardNameSourceRetry and annotation relationship_type: CORRECTS, and tests/graph/test_schema_compliance.py:64 adds test_corrects_edges_join_declared_endpoints inside TestLabelsAndRelationships immediately after test_all_relationship_types_in_schema, so the goal is met exactly.",
+    "manifest": "read; status complete, the gate recorded as 1 passed EXIT=0, a clean arm at EXIT=0 and a red arm at EXIT=1, and every log it names exists on disk with the stated result, except the red-arm summary time quoted in the evidence fragment, which is a different run's line (see FINDING).",
+    "write_paths": "the declared paths are imas_codex/schemas/standard_name.yaml, tests/graph/test_schema_compliance.py and the docs/evidence/fragments/sn-pipeline-hygiene/sph-corrects-schema artifacts plus a figures directory; the diff 8466f0e0c..09f49e776 touches five files and every one is inside that set, with the gitignored generated models copied locally and never staged."
+  },
+  "justifications": {
+    "durability": "tests/graph/test_schema_compliance.py:74 reads the declared pair from the generated RELATIONSHIPS and reddens when the yaml slot is removed, and :100 compares live graph labels against that pair and is shown red on the planted undeclared edge in negative-control.log, so both assertions are independent of the values the test supplies; it passes vacuously on a graph with zero CORRECTS edges.",
+    "evidence": "gate-live.log records \"1 passed\" EXIT=0 at revision 9f4b800b3 for the named test id and live.json records 20 edges across 1 declared pair with 0 mislabelled, but the fragment at docs/evidence/fragments/sn-pipeline-hygiene/sph-corrects-schema.html:57 quotes a red-arm summary line that its own cited log does not contain.",
+    "fit": "the new method, the module-level import guard at tests/graph/test_schema_compliance.py:17-20 mirroring imas_codex/graph/client.py:132-138, and the pytest.mark.graph placement all follow the surrounding file, but the helper _declared_endpoint_pairs at :25 projects the generated tuple list where the schema owner already exposes the same pairs.",
+    "goal_fidelity": "imas_codex/schemas/standard_name.yaml:3589 carries the slot with range StandardNameSourceRetry and relationship_type CORRECTS, and tests/graph/test_schema_compliance.py:64 adds the endpoint assertion exactly where the brief asked, beside test_all_relationship_types_in_schema.",
+    "reuse": "the nearest owner of \"endpoint pairs for a relationship type\" is GraphSchema.relationships at imas_codex/graph/schema.py:109 (the yaml-derived source) with imas_codex/graph/schema_context.py:251 as the other RELATIONSHIPS filter; tests/graph/test_schema_compliance.py:25 duplicates that projection against the generated artefact rather than extending the owner, a deliberate choice because the done_when requires the generated models carry the declaration, and the evidence script properly reuses tests/standard_names/conftest.py::_start_empty_neo4j for its disposable graph.",
+    "scope_discipline": "all five paths in 8466f0e0c..09f49e776 are inside the manifest's declared write paths and the second commit touches only the in-scope evidence script."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to declare the CORRECTS relationship with its endpoints and add an endpoint-comparing check beside the existing relationship-type check; imas_codex/schemas/standard_name.yaml:3589 declares StandardNameSourceRetry.corrects with range StandardNameSourceRetry and annotation relationship_type: CORRECTS, and tests/graph/test_schema_compliance.py:64 adds test_corrects_edges_join_declared_endpoints inside TestLabelsAndRelationships immediately after test_all_relationship_types_in_schema, so the goal is met exactly.\nVERDICT done_when: the done_when asks for four facts and the gate covers each \u2014 the yaml declaration at imas_codex/schemas/standard_name.yaml:3589, the generated tuple ('StandardNameSourceRetry', 'CORRECTS', 'StandardNameSourceRetry', 'one') at imas_codex/graph/schema_context_data.py:2501 with the corrects field at imas_codex/graph/models.py:9092, live.json recording 20 edges across 1 declared pair with 0 mislabelled, and negative-control.log recording the planted StandardNameSource->StandardName edge failing at EXIT=1 while nc-clean.log passes at EXIT=0 on the same disposable graph.\nVERDICT write_paths: the declared paths are imas_codex/schemas/standard_name.yaml, tests/graph/test_schema_compliance.py and the docs/evidence/fragments/sn-pipeline-hygiene/sph-corrects-schema artifacts plus a figures directory; the diff 8466f0e0c..09f49e776 touches five files and every one is inside that set, with the gitignored generated models copied locally and never staged.\nVERDICT manifest: read; status complete, the gate recorded as 1 passed EXIT=0, a clean arm at EXIT=0 and a red arm at EXIT=1, and every log it names exists on disk with the stated result, except the red-arm summary time quoted in the evidence fragment, which is a different run's line (see FINDING).\nVERDICT diff: read commit by commit from base 8466f0e0c to head 09f49e776; 9f4b800b3 adds the yaml slot, the test method and three evidence artifacts, and 09f49e776 only rewrites the evidence script's log-header line to one line, so the code under test is identical across both commits and the gate at 9f4b800b3 covers the head.\nCALL_SITES: imas_codex/graph/schema.py:109 (GraphSchema.relationships derives the new slot into a Relationship for any schema consumer), imas_codex/graph/schema_context.py:213 and imas_codex/graph/schema_context.py:251 (RELATIONSHIPS filtered into the LLM schema context), imas_codex/graph/client.py:135 (EXPECTED_RELATIONSHIP_TYPES derives from the same generated RELATIONSHIPS)\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/schemas/standard_name.yaml:3589 carries the slot with range StandardNameSourceRetry and relationship_type CORRECTS, and tests/graph/test_schema_compliance.py:64 adds the endpoint assertion exactly where the brief asked, beside test_all_relationship_types_in_schema.\nSCORE evidence: 18\nJUSTIFICATION evidence: gate-live.log records \"1 passed\" EXIT=0 at revision 9f4b800b3 for the named test id and live.json records 20 edges across 1 declared pair with 0 mislabelled, but the fragment at docs/evidence/fragments/sn-pipeline-hygiene/sph-corrects-schema.html:57 quotes a red-arm summary line that its own cited log does not contain.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: all five paths in 8466f0e0c..09f49e776 are inside the manifest's declared write paths and the second commit touches only the in-scope evidence script.\nSCORE durability: 19\nJUSTIFICATION durability: tests/graph/test_schema_compliance.py:74 reads the declared pair from the generated RELATIONSHIPS and reddens when the yaml slot is removed, and :100 compares live graph labels against that pair and is shown red on the planted undeclared edge in negative-control.log, so both assertions are independent of the values the test supplies; it passes vacuously on a graph with zero CORRECTS edges.\nSCORE fit: 16\nJUSTIFICATION fit: the new method, the module-level import guard at tests/graph/test_schema_compliance.py:17-20 mirroring imas_codex/graph/client.py:132-138, and the pytest.mark.graph placement all follow the surrounding file, but the helper _declared_endpoint_pairs at :25 projects the generated tuple list where the schema owner already exposes the same pairs.\nSCORE reuse: 17\nJUSTIFICATION reuse: the nearest owner of \"endpoint pairs for a relationship type\" is GraphSchema.relationships at imas_codex/graph/schema.py:109 (the yaml-derived source) with imas_codex/graph/schema_context.py:251 as the other RELATIONSHIPS filter; tests/graph/test_schema_compliance.py:25 duplicates that projection against the generated artefact rather than extending the owner, a deliberate choice because the done_when requires the generated models carry the declaration, and the evidence script properly reuses tests/standard_names/conftest.py::_start_empty_neo4j for its disposable graph.\nFINDING docs/evidence/fragments/sn-pipeline-hygiene/sph-corrects-schema.html:57 non-blocking: the quoted red-arm summary line reads \"1 failed, 1 warning in 63.77s\", a line that appears in no log on disk; the negative-control.log the same fragment cites records \"1 failed, 1 warning in 22.42s\" with EXIT=1, so the excerpt the fragment presents as that log's tail is from an earlier run, and a reader reconciling the fragment against its log finds a mismatch even though the assertion text and FAILED id do match.\nFINDING tests/graph/test_schema_compliance.py:100 non-blocking: the check passes vacuously when the graph holds zero CORRECTS edges, because checked_edges is only reported and never asserted, so a later loss of the 20 edges the node measured would leave the test green; the disposable-graph arms are what show the live green is not vacuous, and pinning an edge count would make the check brittle against legitimate graph rebuilds.",
+  "review_node": "review-of-sph-corrects-schema-09f49e776b49",
+  "review_run_id": "r-20261111T234902038431-review-of-sph-corrects-schema-09f49e776b49",
+  "reviewed_base_sha": "8466f0e0c6ea3e1e8b34c369952139a9225e47d2",
+  "reviewed_head_sha": "09f49e776b495b8eb24fd67142bd23bd411ebd19",
+  "reviewed_run_id": "r-20261111T221906013871-sph-corrects-schema",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261111T234902038431-review-of-sph-corrects-schema-09f49e776b49"
+  },
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 16,
+    "goal_fidelity": 20,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T00:07:54.792592+00:00",
+  "total": 110
+}

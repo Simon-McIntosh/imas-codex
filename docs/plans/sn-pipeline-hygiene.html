@@ -23,7 +23,7 @@
   <title>Standard-Name Pipeline Hygiene: Red Tests, Loose Boundaries, Release Plumbing | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="16">
+<meta name="plan-version" content="17">
 <meta name="plan-modified" content="2026-11-12">
 </head>
 <body>
@@ -117,6 +117,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261111T221906013871-sph-corrects-schema" data-who="reckon-build" data-when="2026-11-11T23:03:03.725Z">
     <div class="r-comment-body"><p>Declared StandardNameSourceRetry.corrects (range StandardNameSourceRetry, relationship_type CORRECTS); generated RELATIONSHIPS now carries ('StandardNameSourceRetry','CORRECTS','StandardNameSourceRetry','one'); new test_corrects_edges_join_declared_endpoints passes on the live graph's 20 CORRECTS edges across 1 declared label pair with 0 mislabelled, and fails on a CORRECTS edge planted StandardNameSource-&gt;StandardName in a disposable graph.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261111T234902038431-review-of-sph-corrects-schema-09f49e776b49" data-who="reckon-build" data-when="2026-11-12T00:11:00.892Z">
+    <div class="r-comment-body"><p>Stored a parsed review of r-20261111T221906013871-sph-corrects-schema at review-records/r-20261111T221906013871-sph-corrects-schema.at-09f49e776b495b8eb24fd67142bd23bd411ebd19.json, reading base 8466f0e0c6ea3e1e8b34c369952139a9225e47d2 and head 09f49e776b495b8eb24fd67142bd23bd411ebd19: scores goal_fidelity 20, evidence 18, scope_discipline 20, durability 19, fit 16, reuse 17 (total 110), two non-blocking findings and no blocking defect, so the node is fit to land.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-close-s3" data-who="reckon-build" data-when="2026-11-12T00:45:00Z">
     <div class="r-comment-body"><p>§3 closed (<code>sph-pin-test</code>, commits <code>05e3ad0bc</code> and <code>47bec63c4</code>, review 109). The existing pin-agreement test now also compares the pin with the installed package, and a graph-tier test compares it with the active grammar snapshot; all three read 0.11.1, and a planted installed-version mismatch turns the default-tier test red. <a href="/imas-codex/evidence/fragments/sn-pipeline-hygiene/sph-pin-test.html">evidence</a></p></div>
