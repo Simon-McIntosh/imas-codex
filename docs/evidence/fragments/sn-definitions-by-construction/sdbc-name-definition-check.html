@@ -3,11 +3,14 @@
 
   <p class="ledger">
     <strong>Measure.</strong> On the held-out two thirds of §4's labelled names the
-    check finds <strong>14 of 47</strong> names labelled as mismatched
-    (<strong>29.8 %</strong> recall) and flags <strong>11 of 207</strong> names labelled
-    as agreeing (<strong>5.3 %</strong> false-flag rate). The recall floor of 80 %
-    is <strong>not met</strong>; the false-flag ceiling of 10 % is met. Counts are
-    from <code>name-definition-check-results.json</code>.
+    delivered check — a deterministic first pass and a typed judgment read by the
+    review seat, either of which flags — finds <strong>28 of 47</strong> names
+    labelled as mismatched (<strong>59.6 %</strong> recall) and flags
+    <strong>27 of 207</strong> names labelled as agreeing (<strong>13.0 %</strong>
+    false-flag rate). The recall floor of 80 % is <strong>not met</strong> and the
+    false-flag ceiling of 10 % is exceeded by the union. The deterministic pass
+    alone finds 14 of 47 at 11 of 207 and the judgment alone 16 of 47 at 17 of 207.
+    Counts are from <code>name-definition-check-results.json</code>.
   </p>
 
   <h3>What was built</h3>
@@ -79,11 +82,9 @@
       families are 17 of the 47 held-out mismatches and the rules recognise them
       only when the definition uses the catalog's own umbrella wording. Reaching
       80 % needs a read of what the definition quantifies, which is the judgment
-      the pipeline's review seat exists to make. This node delivers the working
-      deterministic check, its taxonomy entry and its refusal test, and records
-      the measure that says a deterministic rule is not sufficient. Turning the
-      entry into a Jev question is the next decision, and it belongs to the
-      coordinator.
+      the pipeline's review seat exists to make. That judgment was built and is
+      measured below; it carries the umbrella class the lexical rule cannot and
+      still misses the floor, so the node is filed blocked rather than closed.
     </p>
   </div>
 
@@ -114,16 +115,20 @@
     its family, file and unit.
   </p>
 
-  <h3>Abstract parents</h3>
+  <h3>Abstract parents, from the pipeline's state rather than from prose</h3>
 
   <p>
-    The catalog files carry no parent flag, so the census reads the definition
-    wording. Three published definitions declare an umbrella explicitly: one
-    states one quantity and two state no single quantity
-    (<code>abstract_parent_census</code> in the results file). Those two are the
-    section's defect: an abstract parent published with a definition that fixes no
-    single quantity. The other 19 umbrella names §4 labelled are not published
-    with that wording, which is why the lexical check misses them.
+    The catalog files carry no parent flag, so counting from the definition
+    wording undercounts badly: only three published definitions declare an
+    umbrella explicitly, one stating one quantity and two stating no single
+    quantity. The pipeline's own state is the instrument — read from
+    <code>HAS_PARENT</code>, <strong>546 of 1,975</strong> published names are
+    derived parents (they carry at least one accepted child), and 107 of the 381
+    labelled names are — which is why an umbrella is recognised from the graph's
+    state rather than from any wording in its own definition. The judgment finds
+    9 of the 13 names §4 labelled as umbrellas. Whether each of the 546 is
+    published with a definition that fixes one quantity is the adjudication the
+    blocked manifest asks the lead to make; the node may not settle it.
   </p>
 
   <h3>Readers disagreeing</h3>
@@ -193,18 +198,6 @@
     of 2 device-part restrictions. The lexical pass is the stronger reader of
     equivalent-electron conventions; the judgment is the stronger reader of
     umbrellas; neither reads a restriction to one object or one layer.
-  </p>
-
-  <h3>Abstract parents, from the pipeline's state</h3>
-
-  <p>
-    Read from <code>HAS_PARENT</code> rather than from prose,
-    <strong>546 of 1,975</strong> published names are derived parents (they have
-    at least one accepted child). Of the 381 labelled names, 107 are derived
-    parents and the judgment finds 9 of the 13 that §4 labelled as umbrellas. The
-    section's requirement — that an abstract parent be published with a
-    definition stating one quantity, or not published — is measurable from this
-    state, and it is what the blocked manifest asks the lead to adjudicate.
   </p>
 
   <h3>The names the two readers disagree on</h3>
