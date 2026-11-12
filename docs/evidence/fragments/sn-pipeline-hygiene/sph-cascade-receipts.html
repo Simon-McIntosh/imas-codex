@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-pipeline-hygiene">
+<meta name="node-id" content="sph-cascade-receipts">
+<title>Original calibration answers cannot be recovered from surviving evidence</title>
+</head>
+<body><main>
+<h1 id="sph-cascade-receipts-title">Original calibration answers are missing</h1>
+<p id="sph-cascade-receipts-outcome"><strong>Blocked pending a calibration decision.</strong>
+The rebuild cannot be made reproducible from committed inputs without recovering
+its original per-question answers or authorizing a new calibration. No production
+source, tests, fixtures or threshold artifact changed. The periodic-stack-dump
+fixture and 600-second test timeout remain intact.</p>
+<p id="sph-cascade-receipts-reproduction">At base
+<code>c8113cdfdf4f7e65cdff47ff48608346ddaebf4f</code>, the focused calibration file
+completed with <strong>10 passed, 1 skipped, 1 warning in 18.72s; EXIT=0</strong>.
+The target reported <code>SKIPPED [1] tests/standard_names/test_cascade_calibration.py:99: frozen calibration receipts are not installed</code>.
+Both default receipt paths were confirmed absent. A green exit therefore does
+not establish that the rebuild ran.</p>
+<table id="sph-cascade-receipts-survivors">
+<thead><tr><th>Source inspected</th><th>What survives</th><th>Why it cannot restore the original inputs</th></tr></thead>
+<tbody>
+<tr><td><a href="/imas-codex/evidence/fragments/sn-review-through-jev/srtj-evidence-supply-results.json">Name evidence result</a></td><td>701 compressed input states; decompressed count agrees with the recorded count</td><td>0 states contain answers. The collector saved answers to the deleted JSONL; its committed result embeds only the states.</td></tr>
+<tr><td><a href="/imas-codex/evidence/fragments/sn-review-through-jev/srtj-docs-measure-results.json">Earlier documentation measurement</a></td><td>540 receipts, all answered</td><td>This is an earlier measurement, not the score-arm package used by the shipped calibration.</td></tr>
+<tr><td><a href="/imas-codex/evidence/fragments/sn-review-through-jev/srtj-docs-score-arm-results.json">Documentation score-arm result</a></td><td>Frozen path and SHA-256</td><td>The package itself is not embedded. Its freezer collected calibration context, validation context and new receipts into the deleted XZ file.</td></tr>
+<tr><td>Live graph, bounded by golden identities</td><td>Name: 720 identities, 702 found, 2126 reviews, 17 with answers. Documentation: 400 identities, all found, 2129 reviews, 294 with answers.</td><td>No answer-bearing review in either cohort is dated from 2026-10-15 inclusive to 2026-10-19 exclusive, the original collection window. Current answers are not the frozen experimental answers.</td></tr>
+<tr><td>Tracked history of the two original receipt filenames and the proposed fixture filenames</td><td>No matching paths</td><td>No tracked copy of either original receipt was found.</td></tr>
+</tbody></table>
+<p id="sph-cascade-receipts-controls">The graph inventory is aimed at
+<code>StandardName.id</code> through <code>HAS_REVIEW</code>, filtered by the
+schema-declared <code>review_axis</code>. Every counted review has an ID, axis and
+review date. Nonzero answer and probability counts on both axes establish that
+the query sees the same fields it reports absent for the historical window.
+The earlier documentation package's 540 answered receipts also establish that
+the decompression and receipt inspection can find answers when present.
+The original name collector calls the review function and writes its returned
+answers to JSONL; it does not persist those experimental answers as graph reviews.</p>
+<p id="sph-cascade-receipts-thresholds">The committed threshold file remains
+SHA-256 <code>a0aa1e74be4b0a50c182de10f6da72e9974e3f04568736e3ddb2c13e3578024a</code>.
+It expects name receipt hash
+<code>e998be186272ad0be4b4fc66283f194dc3b30c7e3d3f338b317f449b2e729eda</code>
+and documentation receipt hash
+<code>de689527ec16379a32f8f4da09aa954d215b9cfaeb04fb744b34316f41bab892</code>.
+The matched artifact retains aggregate scores and fitted models, which do not
+recover the original per-question probabilities. No inferred probabilities,
+replacement scores or relaxed equality assertion were introduced.</p>
+<table id="sph-cascade-receipts-options">
+<thead><tr><th>Lead option</th><th>What changes</th><th>Required next action</th></tr></thead>
+<tbody>
+<tr><td>Regenerate the calibration</td><td>Collect and commit new frozen inputs, refit and revalidate the calibration. Shipped cutoffs, model-selection results and intervals may change.</td><td>Authorize collection scope and spend, then dispatch recalibration with holdout validation, durable fixtures and a mutation control.</td></tr>
+<tr><td>Retire the rebuild check</td><td>Keep the shipped cutoffs and models; remove the unavailable-input rebuild obligation and replace its skip with an explicitly approved test disposition. Exact regeneration from the original experiment is no longer claimed.</td><td>Record the ruling, then dispatch the corresponding test and repository-local default handling changes.</td></tr>
+</tbody></table>
+<p id="sph-cascade-receipts-record">Reproduction log:
+<code>r-20261112T025432279846-sph-cascade-receipts/base.log</code>.
+Provenance inventory: <code>provenance.log</code>, SLURM job <code>1311310</code>
+on <code>all_debug</code>, <code>EXIT=0</code>.
+Both logs are in the assigned reckon run directory. The committed
+<a href="/imas-codex/evidence/fragments/sn-pipeline-hygiene/sph-cascade-receipts-run.py">inventory runner</a>
+records the bounded query and source decoding. No LLM calls were made;
+additional LLM spend was USD 0. No new check was written, so a frozen-row mutation
+control cannot be produced until reconstruction or recalibration is authorized.</p>
+</main></body></html>
