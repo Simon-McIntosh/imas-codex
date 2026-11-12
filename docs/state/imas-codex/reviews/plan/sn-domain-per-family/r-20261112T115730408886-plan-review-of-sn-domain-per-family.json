@@ -25,7 +25,30 @@
   "plan_slug": "sn-domain-per-family",
   "plan_version": 21,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "bea8c0f9a3ad43e0efcef54509e464fbb976bdfa",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "the opening paragraph now says the landed decision already files safety_factor and greenwald_density at the readers domain, and that source-bounded options fail only where no source lives in the concept domain",
+      "reason": "",
+      "when": "2026-11-12T13:16:54.332695+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "bea8c0f9a3ad43e0efcef54509e464fbb976bdfa",
+      "commit_basis": "edit",
+      "note": "the opening paragraph now says the landed decision already files safety_factor and greenwald_density at the readers domain, and that source-bounded options fail only where no source lives in the concept domain",
+      "reason": "",
+      "when": "2026-11-12T13:16:54.332695+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-domain-per-family/r-20261112T115730408886-plan-review-of-sn-domain-per-family.json",
   "review_run_id": "r-20261112T115730408886-plan-review-of-sn-domain-per-family",
   "reviewed_blob_sha": "4fb698e5d322f9683dab31ec53c24ab9c71b2738",
   "rubric": "content",
