@@ -1,0 +1,46 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T15:27:56.412Z",
+  "dispatched_at": "2026-11-12T15:23:32Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-full-dd-continuation.html:66",
+      "id": "wiring-1",
+      "reason": "it adds one clause to the ceiling (\"less the unspent part of the USD 60 tranche authorised to `sn-catalog-consistency` \u00a72\") plus the matching depend-on, and without it the ceiling can read affordable against a balance that is already committed.",
+      "text": "\u00a75's ceiling is \"the spend per name \u2026 times the backlog \u2026 plus a quarter\" against \"the approval's remaining balance\", and it says \"Spend draws on what remains of the USD 350 approval after \u00a74\", but \u00a74 (line 53) protects \"the unspent part of the USD 60 tranche authorised to `sn-catalog-consistency` \u00a72\" and \u00a75 neither deducts it nor declares `sn-catalog-consistency#s2`; since that section is still `implementable` and \u00a75 has no dependency ordering it after that section, a \u00a75 that closes under its ceiling can spend money already authorised elsewhere",
+      "type": "wiring",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "c31dbeaa1df882b92c35fd9ea6e9770b5fb19d54",
+  "plan_fingerprint": "4fa8ee20f699c284d2e8285c7643e3cec306f36124e3066834870fca41cb7ecd",
+  "plan_slug": "sn-full-dd-continuation",
+  "plan_version": 23,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T152234757483-plan-review-of-sn-full-dd-continuation",
+  "reviewed_blob_sha": "a1796f50d7a9b55c7cd3e5d39661802f2a5ede78",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `sib-docs-drain-after-admission.html`, `sib-restore-reset-docs.html`, `sib-drift-refresh-rename-lineage.html` and `sn-integrity-backlog#s52` all resolve, and s52 is `done`.",
+    "done_when": "pass \u2014 s5's floor now names a countable outcome (\"at least half of them reach accepted documentation\"), carries two negative controls (a planted pending name read back as pending; an unnamed demotion), and can fail.",
+    "evidence_paths": "pass \u2014 the drain record, the restoration record and the outbound fragment directory all resolve under `docs/evidence/fragments/`, no scratch path.",
+    "naming": "pass \u2014 s5 adds no symbol, file or comment, and its plan-section references are plan-to-plan text, not code labels.",
+    "reasoning": "pass \u2014 every figure s5 states is the figure its cited record carries (2,866\u21923,004; 2,368\u21922,028; 413\u2192926; USD 11.141891; 21 newly docs-accepted; 405 left / 400 attributed; 391 restored; 1,061\u219284; 2,107/1,108 and 2,497/721), the endpoint is reachable, and the section prescribes no code path or step sequence.",
+    "single_goal": "pass \u2014 s5 delivers one thing, the documentation backlog drained; the diagnosis it once carried now sits in the descoped \u00a76.",
+    "wiring": "a finding \u2014 s5 draws on the same USD 350 approval as `sn-catalog-consistency` \u00a72 but declares only `sn-integrity-backlog#s52` and `sn-full-dd-continuation#s4`, and its spend text omits the tranche reserve \u00a74 honours."
+  },
+  "section_digests": {
+    "_document": "16ae1c71c9e5740bc6d2aa601f5df44baba94934b41f3f8c6736012e92b11e2d",
+    "s1": "6edb6bfc73bfa8f3d3435cdd83ea2fde91367cf006a53a93995f459601295db8",
+    "s2": "0685f8ecfe2877442317711cdd765607eba5e0b9e9f44a51b65954020d68e962",
+    "s3": "ab19f940f4ac471bd28ace7cbc2c493228d057ab3ff0af70892c2a687f09888a",
+    "s4": "5744cc83050583629c2f3f175e2174793aadf280f7db5c92a9a320d71df0aada",
+    "s5": "58f1ba258ad1d5c9730b228f5dcdc64e89d9630efbb96e79508f17d42e65d858",
+    "s6": "b69f4c480a9cf3a5bb789f9ec172fd784a2950de5ff28f25eb6162d59232fd0e"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T16:24:52.067448+00:00",
+  "total": null
+}
