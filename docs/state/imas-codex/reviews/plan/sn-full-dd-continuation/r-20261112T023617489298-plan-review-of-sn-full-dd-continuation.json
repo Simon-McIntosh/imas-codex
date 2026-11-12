@@ -1,0 +1,53 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T02:42:53.221Z",
+  "dispatched_at": "2026-11-12T02:37:01Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-full-dd-continuation.html:66",
+      "id": "reasoning-1",
+      "reason": "the wrong denominator sets the spend basis at a fifth of what the cited record supports, so \u00a75 would be dispatched to spend about five times its own declared ceiling and its lead-escalation check would never fire.",
+      "text": "\u00a75 fixes its ceiling's rate as \"the spend per name whose documentation reached accepted under the drain's run id (USD 11.14 over 105 names, about USD 0.11)\", but the record it cites for that figure states of those 105 names that \"21 lacked accepted documentation at the baseline; 84 already had it\" \u2014 so the spend per name that actually reached accepted documentation is USD 11.14 / 21 \u2248 USD 0.53, nearly five times the stated rate; the ceiling this feeds (about USD 0.11 times the backlog read at its start, plus a quarter) is the threshold that decides whether \u00a75 runs or goes to the lead, so an understatement of ~5x turns a spend of roughly USD 650 over a ~1,230-name backlog, which exceeds the USD 350 approval and must reach the lead, into roughly USD 163, which proceeds",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-full-dd-continuation.html:66",
+      "id": "wiring-1",
+      "reason": "the plan never says whether \u00a75 derives the demotion mechanism or cites \u00a752's, so the node's completion is either duplicated work or unattainable under its stated precondition.",
+      "text": "\u00a75's new done-when requires \"the mechanism that lowered accepted documentation during the 2026-11-11 drain is named in the fragment with evidence\", while the same section opens by stating that cause \"is under investigation in \u00a752\" and its only declared dependency on sn-integrity-backlog#s52 is a start condition reached \"once no \u00a752 run is writing the graph\", not once \u00a752 reports; a worker reading \u00a75 therefore either re-derives \u00a752's investigation inside \u00a75 (duplicate spend and a second verdict on one question) or cannot satisfy its own done-when from anything the plan declares it will have",
+      "type": "wiring",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "c31a9b9781a224d9b2af24dec869e340e3c89a82",
+  "plan_fingerprint": "9c8c384891d9373d4ddbdbdabd19a8b9d95ee362a25f175a5f3143bc6df25e19",
+  "plan_slug": "sn-full-dd-continuation",
+  "plan_version": 11,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T023617489298-plan-review-of-sn-full-dd-continuation",
+  "reviewed_blob_sha": "69331d1ba5973efee70b3a9743cec5ebdb58f70b",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 docs/evidence/fragments/sn-integrity-backlog/sib-docs-drain-after-admission.html is tracked at HEAD, sn-integrity-backlog#s52 exists, and \u00a75's data-links attribute resolves; every figure \u00a75 quotes (2,866\u21923,004; 2,368\u21922,028; 413\u2192926; USD 11.14 of USD 20; stalled) is present in that record.",
+    "done_when": "pass \u2014 every clause can fail: the documentation count is a threshold above the present 2,028, the planted pending name must read pending rather than accepted (negative control), and the demotion clause fails on any demotion without a recorded reason; before/after counts and spend sit on a durable path.",
+    "evidence_paths": "pass \u2014 the added before/after counts by stage, the spend, the ceiling and the approval's remaining balance are recorded under docs/evidence/fragments/sn-full-dd-continuation/, and the drain record \u00a75 cites is tracked at HEAD.",
+    "naming": "pass \u2014 the section names no symbol, file or function to extend, and carries no plan label, ticket number or changelog prose.",
+    "reasoning": "a finding \u2014 \u00a75's ceiling rate divides the drain's USD 11.14 by 105 names as though all of them reached accepted documentation, but the cited record states 84 of those 105 already had accepted documentation at the baseline.",
+    "single_goal": "pass \u2014 the added mechanism clause sits on the same causal chain as the restoration target (documenting names is undone if the demotion mechanism is unidentified); the duplication of \u00a752's investigation is filed under wiring, where the fix belongs.",
+    "wiring": "a finding \u2014 \u00a75's done-when requires the demotion mechanism to be named with evidence, while its only declared dependency on sn-integrity-backlog#s52 is a start condition (\"once no \u00a752 run is writing the graph\"), not the report that would supply it."
+  },
+  "section_digests": {
+    "_document": "687ba927f5bd26f8820871ab346e1dd7924dd0b95f506110a32751e1da3d0a39",
+    "s1": "6edb6bfc73bfa8f3d3435cdd83ea2fde91367cf006a53a93995f459601295db8",
+    "s2": "0685f8ecfe2877442317711cdd765607eba5e0b9e9f44a51b65954020d68e962",
+    "s3": "ab19f940f4ac471bd28ace7cbc2c493228d057ab3ff0af70892c2a687f09888a",
+    "s4": "bb1dab2780e535f42b616684910da0afcff6cbcff4989de929f0dcfe4369a9ad",
+    "s5": "2ea800d7456cfd9d6ab13787df7e87d26ad4c0cbe99a36719a5240ad29079c9f"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T02:49:35.002524+00:00",
+  "total": null
+}
