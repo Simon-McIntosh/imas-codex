@@ -88,6 +88,13 @@
       "note": "The geometry id now reads test_unregistered_locus_rejects_the_ordinal_compound, the name the test carries.",
       "reason": "",
       "when": "2026-11-12T01:33:54.654845+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-2",
+      "reason": "\u00a77 is deferred and its rows become sections with their own done-whens once the first upstream catalog release is cut, as the review notes; no node dispatches against it.",
+      "when": "2026-11-12T01:34:15.868148+00:00"
     }
   ],
   "responses": {
@@ -113,7 +120,7 @@
       "action": "declined",
       "by": "",
       "reason": "\u00a77 is deferred and its rows become sections with their own done-whens once the first upstream catalog release is cut, as the review notes; no node dispatches against it.",
-      "when": "2026-11-12T01:33:27.182845+00:00"
+      "when": "2026-11-12T01:34:15.868148+00:00"
     },
     "reasoning-1": {
       "action": "acted",
