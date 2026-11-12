@@ -35,6 +35,16 @@
       "note": "\u00a75 now draws the 60 at random from every domain file that holds a single name and measures the three named names apart, outside the draw",
       "reason": "",
       "when": "2026-11-12T07:17:21.708383+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "ceb662906aaf26968dbabbff472a79ac0f1b68df",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "\u00a75 now records the count of families below the confidence floor under the widened options beside the count under \u00a72's, lists each, and bounds it at one family in ten",
+      "reason": "",
+      "when": "2026-11-12T07:17:44.000287+00:00"
     }
   ],
   "responses": {
@@ -46,6 +56,15 @@
       "note": "\u00a75 now draws the 60 at random from every domain file that holds a single name and measures the three named names apart, outside the draw",
       "reason": "",
       "when": "2026-11-12T07:17:21.708383+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "ceb662906aaf26968dbabbff472a79ac0f1b68df",
+      "commit_basis": "edit",
+      "note": "\u00a75 now records the count of families below the confidence floor under the widened options beside the count under \u00a72's, lists each, and bounds it at one family in ten",
+      "reason": "",
+      "when": "2026-11-12T07:17:44.000287+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-domain-per-family/r-20261112T062247908148-plan-review-of-sn-domain-per-family.json",
