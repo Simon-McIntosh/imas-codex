@@ -1,0 +1,53 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T09:42:07.265Z",
+  "dispatched_at": "2026-11-12T09:36:34Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-domain-per-family/r-20261112T093536586768-plan-review-of-sn-domain-per-family/plan.html:92",
+      "id": "done_when-1",
+      "reason": "the clause \"on the same families\" already pins the population, so the node must measure \u00a72's decision on the 37 and the ambiguity costs a clarification rather than a wrong result.",
+      "text": "bullet 2 asks for \"\u00a72's reading of the same share on the same families\", but \u00a72's recorded reading is produced on its own label set of at least 30 families labelled by one reader (`docs/evidence/fragments/sn-domain-per-family/family-label-set.json` holds 197 unlabelled families; its `labelled` field is false), while the 37 here are the blind sheet's two-reader families, so no recorded \u00a72 reading exists on these families and a node may compare mismatched denominators",
+      "type": "done_when",
+      "would_change": false
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-domain-per-family/r-20261112T093536586768-plan-review-of-sn-domain-per-family/plan.html:92",
+      "id": "reasoning-1",
+      "reason": "both arms run through the same per-family decision over the same families (\u00a72 already reports its live split count in the plan's own comment record), so the number is obtainable without a new pass.",
+      "text": "bullet 4 asks for the below-floor count \"beside the number under \u00a72's options\" over the live catalog, a second full arm that no section commissions and bullet 8 does not cost; \u00a72 demonstrates only on eight seeded families and its labelled set",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "11a84b946514102f6698a2529bab9d23fa1f9e74",
+  "plan_fingerprint": "9fe6bc05105b18fd129846544b6f0fa3ee3b8f733270a88b74e1efc1e56e9376",
+  "plan_slug": "sn-domain-per-family",
+  "plan_version": 14,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T093536586768-plan-review-of-sn-domain-per-family",
+  "reviewed_blob_sha": "c26213148d2f781118a7603feec8244eddb93c05",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `docs/evidence/fragments/sn-domain-family-labels/`, its `disputed-items.json` (12 items), and `docs/evidence/fragments/sn-domain-per-family/` all exist, and `sn-catalog-grouping` records 0.560 (84 of 150), the 0.597 floor and the 150 labelled names at plan.html:415,424 as cited.",
+    "done_when": "a finding \u2014 bullet 2 ties its comparison arm to \"\u00a72's reading\", which is recorded on \u00a72's own 30-plus labelled families, not on the blind sheet's 37.",
+    "evidence_paths": "pass \u2014 `docs/evidence/fragments/sn-domain-per-family/` and `docs/evidence/fragments/sn-domain-family-labels/` are committed paths, the gate log is required under the first, and neither is a scratchpad or node-local path.",
+    "naming": "pass \u2014 no plan labels, ticket numbers or changelog prose reach the section's substance; the measurements are named by what they measure.",
+    "reasoning": "pass \u2014 the stated cause (options bounded by a name's own source domains) is the one \u00a71's census evidences, the 0.560 refusal of the flat choice is the cited artifact's own number, the absolute 0.597 bar can fail, and no code path, step sequence or formula is prescribed (\"which wider option set clears the bar is the node's to find\").",
+    "single_goal": "pass \u2014 the section delivers one thing, a wider option set measured against an absolute floor, and states it \"adds no second decision\".",
+    "wiring": "pass \u2014 `plan-section-depends-on` gives s5 -> s2, s3 -> s2 + s5, and the followup body (\"\u00a75 widens the options of \u00a72's decision and waits for \u00a72\") says the same thing; no relationship points at the wrong node."
+  },
+  "section_digests": {
+    "_document": "a51467f2608b0391d702adeb276c2cb877c9a7a8c44801d06b57e4038ee14b5b",
+    "s1": "3d2539102f47a199cec8a14a89d42968505b563a51a390ee64710cc35f227476",
+    "s2": "aa40e5c5659822e9d8c22d4cd2fc0823ad3615e0d88e3bfdd032248dbfce0b3c",
+    "s3": "81754c7454a907e859184cc5850ebc11c5882110ed5cca5b1b19629460c1cb2b",
+    "s4": "02a78d9adf06476e76fb104849bcb4b1b0a2065ec569400e183771b85461eb4c",
+    "s5": "c53f8fb27dfbc34b05583759c448aeb0d1b35ebfe53e4613f2601e03d1036dc8"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T10:07:18.705212+00:00",
+  "total": null
+}
