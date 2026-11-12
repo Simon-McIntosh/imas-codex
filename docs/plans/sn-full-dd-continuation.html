@@ -23,7 +23,7 @@
   <title>The Rest Of The DD Composed: The Full-DD Continuation Run | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="17">
+<meta name="plan-version" content="18">
 <meta name="plan-modified" content="2026-11-12">
 </head>
 <body>
@@ -89,6 +89,9 @@
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261112T035757070901-review-of-sfdc-cohort-floor-504d281c8b11" data-who="reckon-build" data-when="2026-11-12T04:14:29.271Z">
     <div class="r-comment-body"><p>landing: independent review of run r-20261112T014614393815-sfdc-cohort-floor at d79799257559478c0ed9e677946a81ae1057a061..504d281c8b110c24df9de9b80d1b1be25d71ee3b; goal met (read-back 104 of 143 against the floor of 100), evidence 15/20 because no assertion binds the floor to an exit status, scope clean (four changed paths, all declared), five non-blocking findings recorded and none blocking; stored parsed at both granted review-record paths.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261112T014614393815-sfdc-cohort-floor" data-who="reckon-build" data-when="2026-11-12T02:17:05.806Z">
+    <div class="r-comment-body"><p>landing: sfdc-cohort-floor reran the 44 unproduced cohort sources after resetting the 31 terminal-failed ones through retry_failed_sources with 31 verified receipts, taking the cohort from 99 to 104 of 143 produced (floor 100, met); spend USD 0.084578 of the USD 10 cap, leaving USD 205.762333 of the USD 350 approval; export gate blocking set 0, sourceless live drafts 3 then 3; a disposable-graph control shows an attempted source read back as not produced while a produced control reads as produced.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20261112-waits-on-generator-repair" data-who="reckon-review (session 07a8cbfa)" data-when="2026-11-12T04:20:00Z">
     <div class="r-comment-body"><p>§4 and §5 now wait on the generator repairs. Measured on <code>v0.4.0rc8</code>: every definition is written whole per name and every domain is decided per name, which is why all 20 species families diverge in wording and 8 of 20 are split across domain files. A run started before <code>sn-definitions-by-construction</code> §2 and §3 and <code>sn-domain-per-family</code> §2 land pays for names that the live rewrite then pays for again. §2, §3 and §6 of this plan are unaffected and proceed. Lead instruction 2026-11-12: this repair has priority.</p></div>
