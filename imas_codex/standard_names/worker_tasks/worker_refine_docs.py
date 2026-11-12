@@ -61,6 +61,7 @@ async def process_refine_docs_batch(
         persist_refined_docs,
         release_refine_docs_failed_claims,
     )
+    from imas_codex.standard_names.graph_store.graph_foundation import get_services
     from imas_codex.standard_names.models import RefinedDocs
 
     rotation_cap = DEFAULT_REFINE_ROTATIONS
@@ -392,6 +393,7 @@ async def process_refine_docs_batch(
                         error_msg=str(exc)[:500],
                         eligible_stage="refining",
                         tag="docs_refine_exhaust",
+                        services=get_services(),
                     )
                 else:
                     await _asyncio.to_thread(

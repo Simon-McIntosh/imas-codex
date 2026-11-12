@@ -765,6 +765,7 @@ async def process_generate_docs_batch(
         persist_generated_docs,
         release_generate_docs_failed_claims,
     )
+    from imas_codex.standard_names.graph_store.graph_foundation import get_services
     from imas_codex.standard_names.models import GeneratedDocs
 
     model = get_model("sn-docs")
@@ -1027,6 +1028,7 @@ async def process_generate_docs_batch(
                         error_msg=str(_doc_exc),
                         eligible_stage="pending",
                         tag="docs_generate_refusal",
+                        services=get_services(),
                     )
                 else:
                     await _asyncio.to_thread(

@@ -78,6 +78,7 @@ def _refine_patches(answer, *, terminal_stage: dict, calls: list, exhausted: Mag
     )
 
 
+@pytest.mark.timeout(120)
 @pytest.mark.asyncio
 async def test_contradicting_answer_reaches_terminal_state_within_the_bound():
     """An answer that contradicts the settled population exhausts the name.
