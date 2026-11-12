@@ -799,13 +799,34 @@ def compute_next_version(
 # =============================================================================
 
 
-def _check_on_main(isnc_path: Path) -> None:
+def _check_on_main(isnc_path: Path, *, base_ref: str = "main") -> None:
+    """Require the release to be cut from *base_ref* or from a merged head.
+
+    A worktree carries no checked-out branch, so ``branch --show-current``
+    prints nothing there. A detached head is admitted only when its commits
+    are already contained in ``base_ref``: anything else would tag a revision
+    the reviewed branch never carried.
+    """
     result = _run_git("branch", "--show-current", cwd=isnc_path)
     branch = result.stdout.strip()
-    if branch != "main":
+    if branch == base_ref:
+        return
+    if branch:
         raise ValueError(
-            f"ISNC not on main branch (current: {branch}). "
-            f"Switch first: cd {isnc_path} && git checkout main"
+            f"ISNC not on {base_ref} branch (current: {branch}). "
+            f"Switch first: cd {isnc_path} && git checkout {base_ref}"
+        )
+
+    merged = (
+        _run_git(
+            "merge-base", "--is-ancestor", "HEAD", base_ref, cwd=isnc_path
+        ).returncode
+        == 0
+    )
+    if not merged:
+        raise ValueError(
+            "ISNC is on a detached head whose commits are not contained in "
+            f"{base_ref}. Switch first: cd {isnc_path} && git checkout {base_ref}"
         )
 
 
@@ -1444,9 +1465,11 @@ def run_release(
     logger.info("Created tag %s", git_tag)
 
     # ── Push commit + tag ──────────────────────────────────
-    # Push main branch first (if there's a new commit)
+    # Push the released commit onto the remote's main (if there's a new one).
+    # Pushing the literal ref would publish whatever local `main` holds, which
+    # on a detached head is not the commit this cut just made.
     if report.commit_sha:
-        push_result = _run_git("push", effective_remote, "main", cwd=isnc_path)
+        push_result = _run_git("push", effective_remote, "HEAD:main", cwd=isnc_path)
         if push_result.returncode != 0:
             # Roll back the tag on push failure
             _run_git("tag", "-d", git_tag, cwd=isnc_path)
