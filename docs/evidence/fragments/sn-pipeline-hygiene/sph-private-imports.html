@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+</head>
+<body>
+<section id="sph-private-imports-summary">
+  <h3>A private-name import rule over the package's top-level modules</h3>
+  <p>
+    The boundary test now fails when a top-level module of
+    <code>imas_codex/standard_names</code> imports a private name from another
+    top-level module. It is a separate rule from the sibling-import rule the
+    package's two subpackages keep. Sites that are not yet closed are listed in
+    one explicit exemption set naming module, line and name; an entry whose site
+    has closed fails as stale, so the list can only shrink.
+  </p>
+  <table id="sph-private-imports-census">
+    <thead><tr><th>measure</th><th>before</th><th>at this head</th></tr></thead>
+    <tbody>
+      <tr><td>private names imported between top-level modules</td><td>31</td><td>24</td></tr>
+      <tr><td>import statements</td><td>24</td><td>18</td></tr>
+      <tr><td>closed module-level statements</td><td>&mdash;</td><td>6</td></tr>
+    </tbody>
+  </table>
+  <p>
+    The six closed statements are the module-level imports in
+    <code>export.py</code> (two), <code>legacy_authority.py</code>,
+    <code>near_duplicates.py</code>, <code>release_notes.py</code> and
+    <code>review_triage.py</code>. Each consumer now imports a public name.
+  </p>
+</section>
+
+<section id="sph-private-imports-public-names">
+  <h3>The names made public, and why each cannot stay private or move</h3>
+  <table>
+    <thead><tr><th>public name</th><th>consumer</th><th>reason</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>edit.base_token</code></td>
+        <td><code>export.py</code></td>
+        <td>The grammar's physical base token for a name, used by the
+          identity-token collision audit. Moving it would duplicate the parser
+          call the owning module already holds.</td>
+      </tr>
+      <tr>
+        <td><code>segments.registered_physical_bases</code></td>
+        <td><code>export.py</code></td>
+        <td>The grammar's physical-base vocabulary; it is already the module's
+          public subject, exposed only through a private cached loader.</td>
+      </tr>
+      <tr>
+        <td><code>unit_overrides.load_rules</code></td>
+        <td><code>legacy_authority.py</code></td>
+        <td>The cached override rule set; legacy authority enumerates rules to
+          name which carrier retired a row. No public accessor existed.</td>
+      </tr>
+      <tr>
+        <td><code>audits.synonym_matches</code></td>
+        <td><code>near_duplicates.py</code></td>
+        <td>Raw (row, cosine) match pairs. The public
+          <code>synonym_check</code> formats issue strings and drops the
+          unrounded cosine the near-duplicate pairs are built from.</td>
+      </tr>
+      <tr>
+        <td><code>promote.contest</code></td>
+        <td><code>review_triage.py</code></td>
+        <td>The contest write, public beside
+          <code>list_contested</code>/<code>resolve_contested_override</code>/
+          <code>revert_contested</code>.</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    In <code>release_notes.py</code> the git helpers moved into the consumer
+    rather than being made public: <code>catalog_release.py</code> is a
+    concurrent peer's write path, so the private aliases there could not be
+    touched.
+  </p>
+</section>
+
+<section id="sph-private-imports-exemptions">
+  <h3>The remaining exemption list</h3>
+  <p>
+    Eighteen statements (24 names) are exempt until later nodes close them:
+    <code>attachment_audit.py</code> (2), <code>benchmark_roles.py</code>,
+    <code>campaign_pricing.py</code>, <code>catalog_reconcile.py</code>,
+    <code>docs_gates.py</code>, <code>edit.py</code>, <code>export.py</code>,
+    <code>harmonize.py</code>, <code>promote.py</code>,
+    <code>protection.py</code>, <code>provenance_lifecycle.py</code> (4),
+    <code>provenance_rebuild.py</code>, <code>release_notes.py</code> and
+    <code>signed_manifest.py</code>.
+  </p>
+</section>
+
+<section id="sph-private-imports-gate">
+  <h3>Evidence</h3>
+  <p>
+    The rule passes at head and fails when a closed import is restored: the
+    negative control copies the package, restores
+    <code>from imas_codex.standard_names.unit_overrides import _load_rules</code>
+    in <code>legacy_authority.py</code>, and the rule reports that site. Gate
+    logs are under <code>~/.cache/imas-codex-s19/</code>.
+  </p>
+</section>
+</body>
+</html>
