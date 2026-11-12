@@ -43,6 +43,16 @@
       "note": "\u00a72 now times five starts on the fleet node with its load average recorded beside the base revision measured in the same sitting, in addition to the quiet-node median",
       "reason": "",
       "when": "2026-11-12T01:39:17.533335+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "c64c2b4626d27a0b303d3ea8930a5a525e37b9b9",
+      "commit_basis": "edit",
+      "finding": "evidence_paths-1",
+      "note": "\u00a72 now names docs/evidence/fragments/serve-answers-inside-the-connect-limit/ for the timings, loads, base-revision arms and the control's base failure",
+      "reason": "",
+      "when": "2026-11-12T01:39:30.602201+00:00"
     }
   ],
   "responses": {
@@ -54,6 +64,15 @@
       "note": "\u00a72 now times five starts on the fleet node with its load average recorded beside the base revision measured in the same sitting, in addition to the quiet-node median",
       "reason": "",
       "when": "2026-11-12T01:39:17.533335+00:00"
+    },
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "c64c2b4626d27a0b303d3ea8930a5a525e37b9b9",
+      "commit_basis": "edit",
+      "note": "\u00a72 now names docs/evidence/fragments/serve-answers-inside-the-connect-limit/ for the timings, loads, base-revision arms and the control's base failure",
+      "reason": "",
+      "when": "2026-11-12T01:39:30.602201+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/serve-answers-inside-the-connect-limit/r-20261112T011531423849-plan-review-of-serve-answers-inside-the-connect-limit.json",
