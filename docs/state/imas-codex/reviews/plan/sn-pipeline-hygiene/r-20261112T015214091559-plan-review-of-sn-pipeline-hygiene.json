@@ -1,0 +1,56 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T02:06:27.014Z",
+  "dispatched_at": "2026-11-12T01:53:31Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-pipeline-hygiene/r-20261112T015214091559-plan-review-of-sn-pipeline-hygiene/plan.html:33",
+      "id": "reasoning-1",
+      "reason": "the section's 13-id scope and 6.0 h effort rest on that count, and a dispatched node would build a base arm, find those ids green, and have to re-diagnose a premise rather than the tests.",
+      "text": "the opening claims thirteen tests failed at every base measured on 2026-11-11, but \u00a71's own comment for `sph-red-other` records that the catalog-layout and three manifest-generability ids \"were already green at base\" and that the cascade-calibration id \"does not fail, it skips\", while the `sph-red-gap-rules` comment records its base arm as 12 failed / 8639 passed; no base measurement shows thirteen failing, and at least four ids were never red there",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-pipeline-hygiene/r-20261112T015214091559-plan-review-of-sn-pipeline-hygiene/plan.html:43",
+      "id": "done_when-1",
+      "reason": "a node can never satisfy the first branch, so the section's remaining item falls entirely on the fallback lead ruling, which the section does not assign to anyone or say what evidence the ruling needs.",
+      "text": "the branch \"runs without skipping from inputs committed in the repository, reconstructed only if the committed calibration thresholds rebuild from them unchanged\" cannot be met: `build()` writes `\"source_receipts\": str(receipts)` into each axis block (`imas_codex/standard_names/review/cascade_calibration.py:548`) and `test_matched_policy_rebuilds_from_frozen_scores_and_receipts` asserts full equality with the committed artifact (`tests/standard_names/test_cascade_calibration.py:112`), so a rebuild driven by an in-repository copy of the receipts emits a different path field and fails the equality check unless the committed `cascade_thresholds.json` is itself rewritten \u2014 the exact move the section was changed to prevent",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "4f0a413b2d24f1b42f46bc7dac40367241b13e1d",
+  "plan_fingerprint": "402610ebe7280f8378b875e4940b6d5b991f21cdb503c3b535541e44d996ccf9",
+  "plan_slug": "sn-pipeline-hygiene",
+  "plan_version": 24,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T015214091559-plan-review-of-sn-pipeline-hygiene",
+  "reviewed_blob_sha": "3cefca0e5d43aa944307b03c5243c00e3b716cf4",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 all eleven named test functions and both parametrizations resolve in tests/standard_names, and the geometry id names the function the file defines.",
+    "done_when": "a finding \u2014 the new cascade branch requires the id to run \"from inputs committed in the repository\" and the thresholds to rebuild from them unchanged, but the artifact embeds the receipt's absolute path, so the branch cannot be satisfied without rewriting the shipped calibration.",
+    "evidence_paths": "pass \u2014 the diagnosis record is placed in the landing evidence (docs/evidence fragments/archive, where \u00a72, \u00a73 and \u00a75 already write), and the gate runs on a compute partition; no scratchpad path is named.",
+    "naming": "pass \u2014 \u00a71 names no symbol to add or change; the ids are existing test identities, and no plan label, stage name or ticket number is carried into code.",
+    "reasoning": "a finding \u2014 the opening's \"Thirteen tests in tests/standard_names failed at every base measured on 2026-11-11\" is not what \u00a71's own comments record.",
+    "single_goal": "pass \u2014 \u00a71 carries one deliverable, the thirteen red ids fixed or explicitly owned, and its ids list, diagnosis rule and controls all serve that.",
+    "wiring": "pass \u2014 \u00a71 declares no depends-on/informs/gates and the plan's `plan-standalone` meta states each section repairs a defect nothing downstream consumes; the implementable status matches a section with no upstream wait."
+  },
+  "section_digests": {
+    "_document": "e887bb3cd3aabc5d770baee9b75d62f9060b3acd8cf9ce6521b85731ecb3d369",
+    "s1": "362d02bd3696712c8284b5b6ca658955e72a70a0184112f389004ad3e4180987",
+    "s2": "e9d021306c93e843cfa1ad6c6c66f401b766ba90335edf46b9827be8671de3e5",
+    "s3": "a205991a491d3ca44d31ed4fd17f44659f56c383526f7ed4ee27ad22f9520561",
+    "s4": "e19655648e3f9a005df4834ac35f5fb2bc214b6707a17a98b1218f40d3cd2c7d",
+    "s5": "22355c76f1a73f28bb10c96b7844c864ff49c695fe02732dc5952823ab5cfd70",
+    "s6": "8159bf6d6723b63ae9ea529cb516e69681047379b40e53f1271a4f47c9b0194f",
+    "s7": "a32106acdcff60e7fdf2ad612ff1962f13bfa360ce0b1a5c122f5be40f3b7845",
+    "s8": "1b61eb49b7e3985650f5e8b81e1658ef1d47c219e7f293bc18878de8199fdfdb"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T02:32:41.829297+00:00",
+  "total": null
+}
