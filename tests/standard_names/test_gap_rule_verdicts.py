@@ -120,6 +120,13 @@ class TestSettledFoldCoverage:
         expected = {
             ("physical_base", "heat_flux"): "decomposable",
             ("position", "detector"): "ambiguous_known_token",
+            # The grammar registers ``oblique`` and ``arc_of_circle`` as
+            # geometry-representation modifiers, so a fold reported in another
+            # segment now names a slot misplacement rather than a gap.  Both
+            # stay non-actionable; the fold has nothing left to resolve.
+            ("position", "oblique"): "wrong_slot_placement",
+            ("geometry", "oblique"): "wrong_slot_placement",
+            ("position", "arc_of_circle"): "wrong_slot_placement",
         }
         expected.update(
             {
@@ -177,6 +184,11 @@ class TestSettledFoldCoverage:
         mechanically_resolved = {
             ("physical_base", "heat_flux"),
             ("position", "detector"),
+            # Registered by the grammar as geometry-representation modifiers:
+            # the fold's own token is now a slot misplacement, not a gap.
+            ("position", "oblique"),
+            ("geometry", "oblique"),
+            ("position", "arc_of_circle"),
         }
         mechanically_resolved.update(_public_advisory_aliases())
         unresolved = 0
@@ -210,8 +222,8 @@ class TestOrdinalSamples:
             ("position", "lines_of_sight_second_point", "line_of_sight"),
             ("position", "conductor_start_point", "conductor"),
             ("position", "conductor_element_intermediate_point", None),
-            ("position", "thick_line_first_point", None),
-            ("position", "arc_of_circle_start_point", None),
+            ("position", "thick_line_first_point", "thick_line"),
+            ("position", "arc_of_circle_start_point", "arc_of_circle"),
             ("position", "first_point", None),
             ("position", "starting_position", "position"),
             ("component", "second_coordinate", "coordinate"),
@@ -285,9 +297,15 @@ class TestDdCoordinateFieldNames:
         assert not is_actionable_gap("component", "x1")
 
     def test_an_isotope_suffix_is_not_a_dd_field_name(self):
-        """``lithium_6`` is a genuine isotope distinction — it stays a real request."""
+        """``lithium_6`` is an isotope distinction, and the grammar carries it.
+
+        Its ``6`` is a mass number, not a coordinate slot, so the DD-field rule
+        must not fire; the token itself is registered, so it resolves as a
+        false positive rather than as a vocabulary request.
+        """
         assert dd_indexed_field_words("lithium_6") == ()
-        assert classify_gap("subject", "lithium_6")[0] == "absent"
+        assert classify_gap("subject", "lithium_6")[0] == "false_positive"
+        assert not is_actionable_gap("subject", "lithium_6")
 
     def test_a_bare_index_is_never_offered_as_a_token_to_request(self):
         assert "'6'" not in describe_gap("subject", "lithium_6").guidance
@@ -408,7 +426,9 @@ class TestSymbolShorthandInAQuotient:
 
 #: Stored gap records, one per mechanism, replayed to check the shipped verdicts.
 #: Drawn verbatim from the stored population (id, segment and token as written)
-#: and annotated with the mechanism each one exercises.
+#: and annotated with the mechanism each one exercises.  A mechanism records how
+#: the token reads against the installed grammar, so a token the grammar has
+#: since registered moves from ``genuine`` to ``registered`` rather than out.
 STORED_GAP_FIXTURES: tuple[tuple[str, str, str], ...] = (
     # ordinality and DD-primitive structure
     ("ordinal", "position", "line_of_sight_second_point"),
@@ -445,12 +465,13 @@ STORED_GAP_FIXTURES: tuple[tuple[str, str, str], ...] = (
         "physical_base",
         "flux_surface_averaged_squared_radial_gradient_over_square_magnetic_field",
     ),
+    # registered by the grammar since the stored population was collected
+    ("registered", "subject", "lithium_6"),
     # genuine narrow demand — must stay a real request
     ("genuine", "physical_base", "detection_efficiency"),
     ("added", "physical_base", "focal_length"),
     ("genuine", "physical_base", "groove_density"),
     ("genuine", "physical_base", "substrate"),
-    ("genuine", "subject", "lithium_6"),
     ("reuse", "position", "rectangle_centre"),
 )
 
@@ -469,6 +490,16 @@ class TestStoredGapReplay:
         category = classify_gap(segment, token)[0]
         assert category != "absent", f"{token} ({mechanism}) still reads as absent"
         assert category in NON_ACTIONABLE_GAP_CATEGORIES
+
+    @pytest.mark.parametrize(
+        ("segment", "token"),
+        [(s, t) for m, s, t in STORED_GAP_FIXTURES if m == "registered"],
+    )
+    def test_a_token_the_grammar_now_registers_is_a_false_positive(
+        self, segment, token
+    ):
+        assert classify_gap(segment, token)[0] == "false_positive"
+        assert not is_actionable_gap(segment, token)
 
     @pytest.mark.parametrize(
         ("segment", "token"),

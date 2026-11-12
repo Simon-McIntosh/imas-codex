@@ -213,6 +213,8 @@ def test_ordinal_base_tokens_do_not_compose(bad_base):
         "end_samples",
         "arcs_of_circle_start_point",
         "arcs_of_circle_end_points",
+        "arc_of_circle_start_point",
+        "thick_line_first_point",
     ],
 )
 def test_endpoint_samples_are_positional_rule_violations(token):
@@ -221,14 +223,14 @@ def test_endpoint_samples_are_positional_rule_violations(token):
     assert classify_gap("position", token)[0] == "rule_violation"
 
 
-def test_unregistered_arc_endpoint_rejects_the_ordinal_compound():
-    """An unavailable non-ordinal carrier is a narrow gap, not a borrowed locus."""
-    forbidden = "arc_of_circle_start_point"
+def test_unregistered_locus_rejects_the_ordinal_compound():
+    """An unavailable non-ordinal carrier is a wrong slot, not a borrowed locus."""
+    forbidden = "measurement_plane_start_point"
     verdict = describe_gap("position", forbidden)
 
     assert verdict.category == "rule_violation"
     assert verdict.reuse_target is None
-    assert "'arc_of_circle'" in verdict.guidance
+    assert "'measurement_plane'" in verdict.guidance
     assert "itself unregistered" in verdict.guidance
     assert "not the ordinal compound" in verdict.guidance
 
