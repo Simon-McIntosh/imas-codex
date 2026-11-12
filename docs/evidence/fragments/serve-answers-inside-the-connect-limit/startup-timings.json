@@ -1,0 +1,635 @@
+[
+  {
+    "label": "base",
+    "note": "base revision, initialize, 98dci4-clu-3141.iter.org",
+    "argv": [
+      "uv",
+      "run",
+      "--no-sync",
+      "--project",
+      "/home/ITER/mcintos/.cache/imas-codex-saicl/base-tree",
+      "imas-codex",
+      "serve"
+    ],
+    "cwd": "/home/ITER/mcintos/.cache/imas-codex-saicl/base-tree",
+    "host": "98dci4-clu-3141.iter.org",
+    "utc": "2026-11-12T07:02:50+00:00",
+    "runs": [
+      {
+        "seconds_to_answer": 9.039,
+        "answered": true,
+        "error": null,
+        "loadavg_before": [
+          4.52,
+          5.2,
+          5.92
+        ],
+        "loadavg_after": [
+          4.74,
+          5.22,
+          5.92
+        ],
+        "protocol_version": "2024-11-05",
+        "stderr_tail": "                     \ud83c\udf89 Update available: 4.1.8                          \u2502\n\u2502                      Run: pip install --upgrade fastmcp                      \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\n\n[11/12/26 08:03:00] INFO     Starting MCP server 'imas-codex'   transport.py:209\n                             with transport 'stdio'                             \n"
+      },
+      {
+        "seconds_to_answer": 8.014,
+        "answered": true,
+        "error": null,
+        "loadavg_before": [
+          4.68,
+          5.2,
+          5.91
+        ],
+        "loadavg_after": [
+          4.78,
+          5.22,
+          5.91
+        ],
+        "protocol_version": "2024-11-05",
+        "stderr_tail": "                     \ud83c\udf89 Update available: 4.1.8                          \u2502\n\u2502                      Run: pip install --upgrade fastmcp                      \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\n\n[11/12/26 08:03:13] INFO     Starting MCP server 'imas-codex'   transport.py:209\n                             with transport 'stdio'                             \n"
+      },
+      {
+        "seconds_to_answer": 8.231,
+        "answered": true,
+        "error": null,
+        "loadavg_before": [
+          4.64,
+          5.18,
+          5.9
+        ],
+        "loadavg_after": [
+          4.7,
+          5.17,
+          5.89
+        ],
+        "protocol_version": "2024-11-05",
+        "stderr_tail": "                     \ud83c\udf89 Update available: 4.1.8                          \u2502\n\u2502                      Run: pip install --upgrade fastmcp                      \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\n\n[11/12/26 08:03:26] INFO     Starting MCP server 'imas-codex'   transport.py:209\n                             with transport 'stdio'                             \n"
+      },
+      {
+        "seconds_to_answer": 8.336,
+        "answered": true,
+        "error": null,
+        "loadavg_before": [
+          4.73,
+          5.17,
+          5.88
+        ],
+        "loadavg_after": [
+          4.67,
+          5.15,
+          5.87
+        ],
+        "protocol_version": "2024-11-05",
+        "stderr_tail": "                     \ud83c\udf89 Update available: 4.1.8                          \u2502\n\u2502                      Run: pip install --upgrade fastmcp                      \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\n\n[11/12/26 08:03:39] INFO     Starting MCP server 'imas-codex'   transport.py:209\n                             with transport 'stdio'                             \n"
+      },
+      {
+        "seconds_to_answer": 8.317,
+        "answered": true,
+        "error": null,
+        "loadavg_before": [
+          4.86,
+          5.18,
+          5.88
+        ],
+        "loadavg_after": [
+          5.04,
+          5.21,
+          5.88
+        ],
+        "protocol_version": "2024-11-05",
+        "stderr_tail": "                     \ud83c\udf89 Update available: 4.1.8                          \u2502\n\u2502                      Run: pip install --upgrade fastmcp                      \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\n\n[11/12/26 08:03:52] INFO     Starting MCP server 'imas-codex'   transport.py:209\n                             with transport 'stdio'                             \n"
+      }
+    ],
+    "median_seconds": 8.317,
+    "max_seconds": 9.039
+  },
+  {
+    "label": "new",
+    "note": "working tree, initialize, 98dci4-clu-3141.iter.org",
+    "argv": [
+      "uv",
+      "run",
+      "--no-sync",
+      "--project",
+      "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/saicl-lazy-command-group",
+      "imas-codex",
+      "serve"
+    ],
+    "cwd": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/saicl-lazy-command-group",
+    "host": "98dci4-clu-3141.iter.org",
+    "utc": "2026-11-12T07:03:58+00:00",
+    "runs": [
+      {
+        "seconds_to_answer": 3.875,
+        "answered": true,
+        "error": null,
+        "loadavg_before": [
+          5.04,
+          5.2,
+          5.88
+        ],
+        "loadavg_after": [
+          5.04,
+          5.2,
+          5.87
+        ],
+        "protocol_version": "2024-11-05",
+        "stderr_tail": "                     \ud83c\udf89 Update available: 4.1.8                          \u2502\n\u2502                      Run: pip install --upgrade fastmcp                      \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\n\n[11/12/26 08:04:02] INFO     Starting MCP server 'imas-codex'   transport.py:209\n                             with transport 'stdio'                             \n"
+      },
+      {
+        "seconds_to_answer": 3.804,
+        "answered": true,
+        "error": null,
+        "loadavg_before": [
+          5.03,
+          5.2,
+          5.87
+        ],
+        "loadavg_after": [
+          5.35,
+          5.26,
+          5.88
+        ],
+        "protocol_version": "2024-11-05",
+        "stderr_tail": "                     \ud83c\udf89 Update available: 4.1.8                          \u2502\n\u2502                      Run: pip install --upgrade fastmcp                      \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\n\n[11/12/26 08:04:10] INFO     Starting MCP server 'imas-codex'   transport.py:209\n                             with transport 'stdio'                             \n"
+      },
+      {
+        "seconds_to_answer": 3.727,
+        "answered": true,
+        "error": null,
+        "loadavg_before": [
+          5.24,
+          5.24,
+          5.87
+        ],
+        "loadavg_after": [
+          5.24,
+          5.24,
+          5.87
+        ],
+        "protocol_version": "2024-11-05",
+        "stderr_tail": "                     \ud83c\udf89 Update available: 4.1.8                          \u2502\n\u2502                      Run: pip install --upgrade fastmcp                      \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\n\n[11/12/26 08:04:19] INFO     Starting MCP server 'imas-codex'   transport.py:209\n                             with transport 'stdio'                             \n"
+      },
+      {
+        "seconds_to_answer": 3.792,
+        "answered": true,
+        "error": null,
+        "loadavg_before": [
+          5.22,
+          5.24,
+          5.87
+        ],
+        "loadavg_after": [
+          5.29,
+          5.25,
+          5.87
+        ],
+        "protocol_version": "2024-11-05",
+        "stderr_tail": "                     \ud83c\udf89 Update available: 4.1.8                          \u2502\n\u2502                      Run: pip install --upgrade fastmcp                      \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\n\n[11/12/26 08:04:28] INFO     Starting MCP server 'imas-codex'   transport.py:209\n                             with transport 'stdio'                             \n"
+      },
+      {
+        "seconds_to_answer": 3.807,
+        "answered": true,
+        "error": null,
+        "loadavg_before": [
+          5.1,
+          5.21,
+          5.85
+        ],
+        "loadavg_after": [
+          5.33,
+          5.26,
+          5.86
+        ],
+        "protocol_version": "2024-11-05",
+        "stderr_tail": "                     \ud83c\udf89 Update available: 4.1.8                          \u2502\n\u2502                      Run: pip install --upgrade fastmcp                      \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\n\n[11/12/26 08:04:37] INFO     Starting MCP server 'imas-codex'   transport.py:209\n                             with transport 'stdio'                             \n"
+      }
+    ],
+    "median_seconds": 3.804,
+    "max_seconds": 3.875
+  },
+  {
+    "label": "base",
+    "note": "base revision, serve --help, 98dci4-clu-3141.iter.org",
+    "argv": [
+      "uv",
+      "run",
+      "--no-sync",
+      "--project",
+      "/home/ITER/mcintos/.cache/imas-codex-saicl/base-tree",
+      "imas-codex",
+      "serve"
+    ],
+    "cwd": "/home/ITER/mcintos/.cache/imas-codex-saicl/base-tree",
+    "host": "98dci4-clu-3141.iter.org",
+    "utc": "2026-11-12T07:04:42+00:00",
+    "runs": [
+      {
+        "seconds_to_answer": 6.884,
+        "answered": true,
+        "error": null,
+        "loadavg_before": [
+          5.63,
+          5.32,
+          5.88
+        ],
+        "loadavg_after": [
+          5.42,
+          5.28,
+          5.87
+        ],
+        "protocol_version": null,
+        "stderr_tail": ""
+      },
+      {
+        "seconds_to_answer": 6.563,
+        "answered": true,
+        "error": null,
+        "loadavg_before": [
+          5.42,
+          5.28,
+          5.87
+        ],
+        "loadavg_after": [
+          5.12,
+          5.22,
+          5.84
+        ],
+        "protocol_version": null,
+        "stderr_tail": ""
+      },
+      {
+        "seconds_to_answer": 6.552,
+        "answered": true,
+        "error": null,
+        "loadavg_before": [
+          5.12,
+          5.22,
+          5.84
+        ],
+        "loadavg_after": [
+          4.95,
+          5.18,
+          5.82
+        ],
+        "protocol_version": null,
+        "stderr_tail": ""
+      },
+      {
+        "seconds_to_answer": 6.792,
+        "answered": true,
+        "error": null,
+        "loadavg_before": [
+          4.95,
+          5.18,
+          5.82
+        ],
+        "loadavg_after": [
+          4.87,
+          5.16,
+          5.81
+        ],
+        "protocol_version": null,
+        "stderr_tail": ""
+      },
+      {
+        "seconds_to_answer": 7.037,
+        "answered": true,
+        "error": null,
+        "loadavg_before": [
+          4.87,
+          5.16,
+          5.81
+        ],
+        "loadavg_after": [
+          4.96,
+          5.18,
+          5.81
+        ],
+        "protocol_version": null,
+        "stderr_tail": ""
+      }
+    ],
+    "median_seconds": 6.792,
+    "max_seconds": 7.037
+  },
+  {
+    "label": "new",
+    "note": "working tree, serve --help, 98dci4-clu-3141.iter.org",
+    "argv": [
+      "uv",
+      "run",
+      "--no-sync",
+      "--project",
+      "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/saicl-lazy-command-group",
+      "imas-codex",
+      "serve"
+    ],
+    "cwd": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/saicl-lazy-command-group",
+    "host": "98dci4-clu-3141.iter.org",
+    "utc": "2026-11-12T07:05:16+00:00",
+    "runs": [
+      {
+        "seconds_to_answer": 0.363,
+        "answered": true,
+        "error": null,
+        "loadavg_before": [
+          4.96,
+          5.18,
+          5.81
+        ],
+        "loadavg_after": [
+          4.96,
+          5.18,
+          5.81
+        ],
+        "protocol_version": null,
+        "stderr_tail": ""
+      },
+      {
+        "seconds_to_answer": 0.168,
+        "answered": true,
+        "error": null,
+        "loadavg_before": [
+          4.96,
+          5.18,
+          5.81
+        ],
+        "loadavg_after": [
+          4.96,
+          5.18,
+          5.81
+        ],
+        "protocol_version": null,
+        "stderr_tail": ""
+      },
+      {
+        "seconds_to_answer": 0.162,
+        "answered": true,
+        "error": null,
+        "loadavg_before": [
+          4.96,
+          5.18,
+          5.81
+        ],
+        "loadavg_after": [
+          4.96,
+          5.18,
+          5.81
+        ],
+        "protocol_version": null,
+        "stderr_tail": ""
+      },
+      {
+        "seconds_to_answer": 0.173,
+        "answered": true,
+        "error": null,
+        "loadavg_before": [
+          4.96,
+          5.18,
+          5.81
+        ],
+        "loadavg_after": [
+          4.96,
+          5.18,
+          5.81
+        ],
+        "protocol_version": null,
+        "stderr_tail": ""
+      },
+      {
+        "seconds_to_answer": 0.164,
+        "answered": true,
+        "error": null,
+        "loadavg_before": [
+          4.96,
+          5.18,
+          5.81
+        ],
+        "loadavg_after": [
+          4.96,
+          5.18,
+          5.81
+        ],
+        "protocol_version": null,
+        "stderr_tail": ""
+      }
+    ],
+    "median_seconds": 0.168,
+    "max_seconds": 0.363
+  },
+  {
+    "label": "base",
+    "note": "base revision on the fleet node, initialize, 98dci4-clu-2023.iter.org",
+    "argv": [
+      "uv",
+      "run",
+      "--no-sync",
+      "--project",
+      "/home/ITER/mcintos/.cache/imas-codex-saicl/base-tree",
+      "imas-codex",
+      "serve"
+    ],
+    "cwd": "/home/ITER/mcintos/.cache/imas-codex-saicl/base-tree",
+    "host": "98dci4-clu-2023.iter.org",
+    "utc": "2026-11-12T07:05:20+00:00",
+    "runs": [
+      {
+        "seconds_to_answer": 23.947,
+        "answered": true,
+        "error": null,
+        "loadavg_before": [
+          27.65,
+          29.03,
+          33.26
+        ],
+        "loadavg_after": [
+          27.33,
+          28.85,
+          33.09
+        ],
+        "protocol_version": "2024-11-05",
+        "stderr_tail": "                     \ud83c\udf89 Update available: 4.1.8                          \u2502\n\u2502                      Run: pip install --upgrade fastmcp                      \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\n\n[11/12/26 08:05:44] INFO     Starting MCP server 'imas-codex'   transport.py:209\n                             with transport 'stdio'                             \n"
+      },
+      {
+        "seconds_to_answer": 22.174,
+        "answered": true,
+        "error": null,
+        "loadavg_before": [
+          27.07,
+          28.77,
+          33.04
+        ],
+        "loadavg_after": [
+          28.66,
+          28.96,
+          33.01
+        ],
+        "protocol_version": "2024-11-05",
+        "stderr_tail": "                     \ud83c\udf89 Update available: 4.1.8                          \u2502\n\u2502                      Run: pip install --upgrade fastmcp                      \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\n\n[11/12/26 08:06:11] INFO     Starting MCP server 'imas-codex'   transport.py:209\n                             with transport 'stdio'                             \n"
+      }
+    ],
+    "median_seconds": 23.947,
+    "max_seconds": 23.947
+  },
+  {
+    "label": "new",
+    "note": "working tree on the fleet node, initialize, 98dci4-clu-2023.iter.org",
+    "argv": [
+      "uv",
+      "run",
+      "--no-sync",
+      "--project",
+      "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/saicl-lazy-command-group",
+      "imas-codex",
+      "serve"
+    ],
+    "cwd": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/saicl-lazy-command-group",
+    "host": "98dci4-clu-2023.iter.org",
+    "utc": "2026-11-12T07:06:17+00:00",
+    "runs": [
+      {
+        "seconds_to_answer": 11.462,
+        "answered": true,
+        "error": null,
+        "loadavg_before": [
+          29.09,
+          29.04,
+          33.01
+        ],
+        "loadavg_after": [
+          30.66,
+          29.38,
+          33.06
+        ],
+        "protocol_version": "2024-11-05",
+        "stderr_tail": "                     \ud83c\udf89 Update available: 4.1.8                          \u2502\n\u2502                      Run: pip install --upgrade fastmcp                      \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\n\n[11/12/26 08:06:28] INFO     Starting MCP server 'imas-codex'   transport.py:209\n                             with transport 'stdio'                             \n"
+      },
+      {
+        "seconds_to_answer": 13.103,
+        "answered": true,
+        "error": null,
+        "loadavg_before": [
+          29.8,
+          29.23,
+          32.99
+        ],
+        "loadavg_after": [
+          32.4,
+          29.81,
+          33.14
+        ],
+        "protocol_version": "2024-11-05",
+        "stderr_tail": "                     \ud83c\udf89 Update available: 4.1.8                          \u2502\n\u2502                      Run: pip install --upgrade fastmcp                      \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\n\n[11/12/26 08:06:46] INFO     Starting MCP server 'imas-codex'   transport.py:209\n                             with transport 'stdio'                             \n"
+      },
+      {
+        "seconds_to_answer": 10.716,
+        "answered": true,
+        "error": null,
+        "loadavg_before": [
+          33.57,
+          30.1,
+          33.22
+        ],
+        "loadavg_after": [
+          32.16,
+          29.91,
+          33.12
+        ],
+        "protocol_version": "2024-11-05",
+        "stderr_tail": "                     \ud83c\udf89 Update available: 4.1.8                          \u2502\n\u2502                      Run: pip install --upgrade fastmcp                      \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\n\n[11/12/26 08:07:02] INFO     Starting MCP server 'imas-codex'   transport.py:209\n                             with transport 'stdio'                             \n"
+      },
+      {
+        "seconds_to_answer": 11.978,
+        "answered": true,
+        "error": null,
+        "loadavg_before": [
+          31.34,
+          29.78,
+          33.06
+        ],
+        "loadavg_after": [
+          29.74,
+          29.51,
+          32.92
+        ],
+        "protocol_version": "2024-11-05",
+        "stderr_tail": "                     \ud83c\udf89 Update available: 4.1.8                          \u2502\n\u2502                      Run: pip install --upgrade fastmcp                      \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\n\n[11/12/26 08:07:19] INFO     Starting MCP server 'imas-codex'   transport.py:209\n                             with transport 'stdio'                             \n"
+      },
+      {
+        "seconds_to_answer": 12.768,
+        "answered": true,
+        "error": null,
+        "loadavg_before": [
+          28.4,
+          29.24,
+          32.81
+        ],
+        "loadavg_after": [
+          30.62,
+          29.69,
+          32.92
+        ],
+        "protocol_version": "2024-11-05",
+        "stderr_tail": "                     \ud83c\udf89 Update available: 4.1.8                          \u2502\n\u2502                      Run: pip install --upgrade fastmcp                      \u2502\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n\n\n[11/12/26 08:07:37] INFO     Starting MCP server 'imas-codex'   transport.py:209\n                             with transport 'stdio'                             \n"
+      }
+    ],
+    "median_seconds": 11.978,
+    "max_seconds": 13.103
+  },
+  {
+    "label": "new",
+    "note": "working tree on the fleet node, serve --help, 98dci4-clu-2023.iter.org",
+    "argv": [
+      "uv",
+      "run",
+      "--no-sync",
+      "--project",
+      "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/saicl-lazy-command-group",
+      "imas-codex",
+      "serve"
+    ],
+    "cwd": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/saicl-lazy-command-group",
+    "host": "98dci4-clu-2023.iter.org",
+    "utc": "2026-11-12T07:07:42+00:00",
+    "runs": [
+      {
+        "seconds_to_answer": 1.827,
+        "answered": true,
+        "error": null,
+        "loadavg_before": [
+          30.65,
+          29.71,
+          32.91
+        ],
+        "loadavg_after": [
+          32.2,
+          30.05,
+          33.01
+        ],
+        "protocol_version": null,
+        "stderr_tail": ""
+      },
+      {
+        "seconds_to_answer": 0.593,
+        "answered": true,
+        "error": null,
+        "loadavg_before": [
+          32.2,
+          30.05,
+          33.01
+        ],
+        "loadavg_after": [
+          32.2,
+          30.05,
+          33.01
+        ],
+        "protocol_version": null,
+        "stderr_tail": ""
+      }
+    ],
+    "median_seconds": 1.827,
+    "max_seconds": 1.827
+  }
+]

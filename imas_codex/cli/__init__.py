@@ -1,11 +1,14 @@
 """CLI interface for IMAS Codex Server.
 
-Modular CLI structure with command groups split by functionality.
+Modular CLI structure with command groups split by functionality. Each command
+module is imported when that command runs, so starting one command does not pay
+for every other command's imports.
 """
 
 # Warning filters are set in imas_codex/__init__.py at package import time
 # to ensure they're applied before any aiohttp imports.
 
+import importlib
 import logging
 
 import click
@@ -24,8 +27,124 @@ except ModuleNotFoundError:
 logger = logging.getLogger(__name__)
 
 
+# name -> (module, attribute, help shown in the top-level listing).
+# The help text sits here because `--help` must not import the module.
+_COMMANDS: dict[str, tuple[str, str, str]] = {
+    "config": (
+        "imas_codex.cli.config_cli",
+        "config",
+        "Manage private facility configs, secrets, and local-host settings.",
+    ),
+    "credentials": (
+        "imas_codex.cli.credentials",
+        "credentials",
+        "Manage service credentials.",
+    ),
+    "discover": (
+        "imas_codex.cli.discover",
+        "discover",
+        "Discover facility resources with graph-led exploration.",
+    ),
+    "embed": ("imas_codex.cli.embed", "embed", "Manage GPU embedding server."),
+    "facilities": (
+        "imas_codex.cli.facilities",
+        "facilities",
+        "Manage facility configurations.",
+    ),
+    "graph": ("imas_codex.cli.graph", "graph", "Manage graph database lifecycle."),
+    "host": (
+        "imas_codex.cli.host",
+        "host",
+        "Node load monitoring and SSH target management.",
+    ),
+    "hpc": (
+        "imas_codex.cli.compute",
+        "hpc",
+        "Manage SLURM HPC jobs for heavy workloads.",
+    ),
+    "imas": (
+        "imas_codex.cli.imas_dd",
+        "imas",
+        "IMAS data dictionary, mappings, and IDS assembly.",
+    ),
+    "llm": (
+        "imas_codex.cli.llm_cli",
+        "llm",
+        "Manage LiteLLM proxy server for centralized LLM routing.",
+    ),
+    "release": (
+        "imas_codex.cli.release",
+        "release",
+        "State-machine release: semantic version bumps, graph publishing, tagging.",
+    ),
+    "serve": ("imas_codex.cli.serve", "serve", "Start the IMAS Codex MCP server."),
+    "sn": (
+        "imas_codex.cli.sn",
+        "sn",
+        "Standard name generation and management.",
+    ),
+    "tools": (
+        "imas_codex.cli.tools",
+        "tools",
+        "Manage development tools and Python environment.",
+    ),
+    "tunnel": (
+        "imas_codex.cli.tunnel",
+        "tunnel",
+        "Manage SSH tunnels to remote services.",
+    ),
+}
+
+
+class DeferredCommandGroup(click.Group):
+    """A command group that imports a command module only when needed.
+
+    ``list_commands`` and ``format_commands`` answer from the table alone, so
+    ``--help`` exits without importing any command module. ``get_command``
+    imports the module the first time the command is resolved and caches the
+    result in the command's normal ``commands`` mapping.
+    """
+
+    def list_commands(self, ctx: click.Context) -> list[str]:
+        return sorted(set(_COMMANDS) | set(self.commands))
+
+    def get_command(self, ctx: click.Context, cmd_name: str) -> click.Command | None:
+        registered = self.commands.get(cmd_name)
+        if registered is not None:
+            return registered
+        target = _COMMANDS.get(cmd_name)
+        if target is None:
+            return None
+        module_name, attribute, _ = target
+        command = getattr(importlib.import_module(module_name), attribute)
+        self.commands[cmd_name] = command
+        return command
+
+    def format_commands(
+        self, ctx: click.Context, formatter: click.HelpFormatter
+    ) -> None:
+        names = []
+        for name in self.list_commands(ctx):
+            resolved = self.commands.get(name)
+            if resolved is not None and resolved.hidden:
+                continue
+            names.append(name)
+        if not names:
+            return
+        limit = formatter.width - 6 - max(len(name) for name in names)
+        rows = []
+        for name in names:
+            resolved = self.commands.get(name)
+            if resolved is not None:
+                rows.append((name, resolved.get_short_help_str(limit)))
+            else:
+                rows.append((name, _COMMANDS[name][2]))
+        with formatter.section("Commands"):
+            formatter.write_dl(rows)
+
+
 # Create the main CLI group
-@click.group(invoke_without_command=True)
+@click.group(cls=DeferredCommandGroup, invoke_without_command=True)
 @click.option(
     "--version",
     is_flag=True,
@@ -55,43 +174,5 @@ def main(ctx: click.Context, version: bool) -> None:
     if ctx.invoked_subcommand is None:
         click.echo(ctx.get_help())
 
-
-def register_commands() -> None:
-    """Register all command groups with the main CLI."""
-    from imas_codex.cli.compute import hpc
-    from imas_codex.cli.config_cli import config
-    from imas_codex.cli.credentials import credentials
-    from imas_codex.cli.discover import discover
-    from imas_codex.cli.embed import embed
-    from imas_codex.cli.facilities import facilities
-    from imas_codex.cli.graph import graph
-    from imas_codex.cli.host import host
-    from imas_codex.cli.imas_dd import imas
-    from imas_codex.cli.llm_cli import llm
-    from imas_codex.cli.release import release
-    from imas_codex.cli.serve import serve
-    from imas_codex.cli.sn import sn
-    from imas_codex.cli.tools import tools
-    from imas_codex.cli.tunnel import tunnel
-
-    main.add_command(serve)
-    main.add_command(graph)
-    main.add_command(llm)
-    main.add_command(tunnel)
-    main.add_command(config)
-    main.add_command(hpc)
-    main.add_command(discover)
-    main.add_command(embed)
-    main.add_command(imas)
-    main.add_command(sn)
-    main.add_command(tools)
-    main.add_command(host)
-    main.add_command(facilities)
-    main.add_command(release)
-    main.add_command(credentials)
-
-
-# Register commands at import time
-register_commands()
 
 __all__ = ["main"]

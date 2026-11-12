@@ -1,0 +1,41 @@
+<section id="saicl-lazy-command-group" class="r-evidence" data-node="saicl-lazy-command-group">
+<h2>§2 — First answer in under ten seconds</h2>
+<p id="saicl-lazy-command-group-verdict">The command group now resolves each command module when that command is invoked, so <code>imas-codex serve</code> imports <code>serve</code> and nothing else. On the debug-partition node the median of five cold starts fell from 8.32 s to 3.80 s to first answer, and <code>serve --help</code> from 6.79 s to 0.17 s. On the fleet node, at a load average of 27–34, the five starts answered in 10.72–13.10 s (median 11.98 s) against a base-revision pair of 23.95 s and 22.17 s.</p>
+
+<h3 id="saicl-lazy-command-group-change">What changed</h3>
+<p><code>register_commands()</code> imported all fifteen command modules at package import, so every command — including the MCP server entry point — paid for every other command's imports. It is replaced by a table of (module, attribute, help) entries and a <code>DeferredCommandGroup</code> that imports a module in <code>get_command</code> only. <code>list_commands</code> and <code>format_commands</code> answer from the table, so <code>--help</code> never imports a command module; the help strings moved into the table for that reason.</p>
+
+<h3 id="saicl-lazy-command-group-attribution">Where the base revision's time went</h3>
+<p>Measured in the base tree at a load average of 28, against a 23.95 s answer in the same sitting:</p>
+<table>
+<thead><tr><th>Part</th><th>Base revision</th><th>This change</th></tr></thead>
+<tbody>
+<tr><td>uv plus interpreter start</td><td>0.50 s</td><td>0.24 s</td></tr>
+<tr><td><code>import imas_codex.cli</code> — eager registration of fifteen command modules</td><td>15.58 s</td><td>0.24 s</td></tr>
+<tr><td><code>import imas_codex.llm.server</code> (fastmcp, graph models, schema runtime)</td><td>5.16 s</td><td>6.78 s</td></tr>
+<tr><td><code>AgentsServer(...)</code> construction</td><td>1.39 s</td><td>1.10 s</td></tr>
+<tr><td>stdio handshake to the answer</td><td>1.32 s</td><td>remaining</td></tr>
+</tbody>
+</table>
+<p id="saicl-lazy-command-group-attributed">The named parts account for 22.63 s of the 23.95 s base-revision answer, 94.5 %, so the 7.6 s §1 left unexplained is inside the eager-import term: that term pulled <code>litellm</code> and the <code>linkml_runtime</code> schema stack in through the discovery and graph command modules, and the same imports recurred inside the server's own import chain. The eager term is what the lazy table removes.</p>
+
+<h3 id="saicl-lazy-command-group-timings">Timings</h3>
+<table>
+<thead><tr><th>Node</th><th>Load average</th><th>Arm</th><th>Runs (s)</th><th>Median</th></tr></thead>
+<tbody>
+<tr><td>98dci4-clu-3141 (all_debug)</td><td>4.5–5.2</td><td>base, initialize</td><td>9.04, 8.01, 8.23, 8.34, 8.32</td><td>8.32</td></tr>
+<tr><td>98dci4-clu-3141 (all_debug)</td><td>5.0–5.2</td><td>this change, initialize</td><td>3.88, 3.80, 3.73, 3.79, 3.81</td><td>3.80</td></tr>
+<tr><td>98dci4-clu-3141 (all_debug)</td><td>4.9–5.6</td><td>base, <code>serve --help</code></td><td>6.88, 6.56, 6.55, 6.79, 7.04</td><td>6.79</td></tr>
+<tr><td>98dci4-clu-3141 (all_debug)</td><td>5.0</td><td>this change, <code>serve --help</code></td><td>0.36, 0.17, 0.16, 0.17, 0.16</td><td>0.17</td></tr>
+<tr><td>98dci4-clu-2023 (fleet)</td><td>27.1–27.6</td><td>base, initialize</td><td>23.95, 22.17</td><td>23.95</td></tr>
+<tr><td>98dci4-clu-2023 (fleet)</td><td>28.4–33.6</td><td>this change, initialize</td><td>11.46, 13.10, 10.72, 11.98, 12.77</td><td>11.98</td></tr>
+<tr><td>98dci4-clu-2023 (fleet)</td><td>30.0–32.2</td><td>this change, <code>serve --help</code></td><td>1.83, 0.59</td><td>1.83</td></tr>
+</tbody>
+</table>
+<p>Every run spawns the server from the committed <code>.mcp.json</code> recipe, rewritten only for its <code>--project</code> argument so each arm resolves its own tree. Records: <a href="/imas-codex/evidence/fragments/serve-answers-inside-the-connect-limit/startup-timings.json">startup-timings.json</a>; the timing script is <a href="/imas-codex/evidence/fragments/serve-answers-inside-the-connect-limit/startup-timing-run.py">startup-timing-run.py</a>.</p>
+
+<h3 id="saicl-lazy-command-group-control">The control, failing at the base revision</h3>
+<p>Two tests were added. <code>test_help_imports_no_command_module</code> asserts that <code>imas-codex --help</code> exits with no command module in <code>sys.modules</code>. <code>test_initialize_path_imports_only_the_serve_command</code> resolves <code>serve</code> through the group, builds the object that answers <code>initialize</code>, and asserts that no other command module and not <code>litellm</code> was imported. Both pass in this tree (21 passed across the two touched test files, 64 passed across <code>tests/test_cli.py</code> and <code>tests/core/test_cli.py</code>). Run against the base tree they fail, and their own output names the cause:</p>
+<blockquote id="saicl-lazy-command-group-control-output"><code>AssertionError: ['imas_codex.cli.compute', 'imas_codex.cli.config_cli', … 'imas_codex.cli.tunnel']</code> and <code>AssertionError: litellm imported</code> — 2 failed.</blockquote>
+<p>The tool list is unchanged in each of the three serve modes: 38 tools by default, 31 read-only, 15 DD-only, identical by name to the base revision.</p>
+</section>
