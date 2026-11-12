@@ -202,21 +202,250 @@ def _incumbent() -> dict[str, str]:
 
 
 async def _decide_all(
-    families: dict[str, dict], model: str
+    families: dict[str, dict], model: str, *, bounded: bool
 ) -> dict[str, Any]:
+    """Decide every family once under one option set, one judgment per family."""
     ids_map = ids_domain_map()
     decisions: dict[str, Any] = {}
-    semaphore = asyncio.Semaphore(8)
+    semaphore = asyncio.Semaphore(16)
 
     async def one(key: str) -> None:
         family = families[key]
         async with semaphore:
             decisions[key] = await decide_family_domain(
-                key, family["members"], ids_map, model=model
+                key,
+                family["members"],
+                ids_map,
+                model=model,
+                bounded_by_sources=bounded,
             )
 
     await asyncio.gather(*(one(key) for key in sorted(families)))
     return decisions
+
+
+def _family_comparison(
+    family_targets: list[dict[str, Any]],
+    by_key: dict[str, dict],
+    decisions: dict[str, Any],
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """The member-share reading over the agreed sheet families, for one arm."""
+    family_rows: list[dict[str, Any]] = []
+    counted_members = 0
+    family_matches = 0
+    stored_matches = 0
+    for target in family_targets:
+        family = by_key[target["family_key"]]
+        decision = decisions[target["family_key"]]
+        members = family["members"]
+        row_matches = sum(
+            1 for m in members if _filed_domain(decision, m) == target["reference"]
+        )
+        row_stored = sum(
+            1
+            for m in members
+            if str(m.get("physics_domain") or "") == target["reference"]
+        )
+        family_rows.append(
+            {
+                **{k: v for k, v in target.items() if k != "family_key"},
+                "family_key": target["family_key"],
+                "live_members": len(members),
+                "choice": decision.choice,
+                "probability": decision.probability,
+                "decided": decision.decided,
+                "undecided_reason": decision.undecided_reason,
+                "family_matches": row_matches,
+                "stored_matches": row_stored,
+                "family_share": round(row_matches / len(members), 4) if members else 0.0,
+                "stored_share": round(row_stored / len(members), 4) if members else 0.0,
+                "section_one": target["pattern"] in SECTION_ONE_PATTERNS,
+            }
+        )
+        if len(members) >= 3:
+            counted_members += len(members)
+            family_matches += row_matches
+            stored_matches += row_stored
+
+    families_of_three = [r for r in family_rows if r["live_members"] >= 3]
+    comparison = {
+        "families_measured": len(families_of_three),
+        "section_one_families_measured": sum(
+            1 for r in families_of_three if r["section_one"]
+        ),
+        "members_measured": counted_members,
+        "family_match_share": round(family_matches / counted_members, 4)
+        if counted_members
+        else 0.0,
+        "stored_match_share": round(stored_matches / counted_members, 4)
+        if counted_members
+        else 0.0,
+        "families_where_family_share_higher": sum(
+            1 for r in families_of_three if r["family_share"] > r["stored_share"]
+        ),
+        "families_where_stored_share_higher": sum(
+            1 for r in families_of_three if r["stored_share"] > r["family_share"]
+        ),
+        "disagreements": [
+            {
+                "pattern": r["pattern"],
+                "reference": r["reference"],
+                "decision": r["choice"],
+                "members": r["live_members"],
+            }
+            for r in families_of_three
+            if r["decided"] and r["choice"] != r["reference"]
+        ],
+    }
+    return comparison, family_rows
+
+
+def _single_comparison(
+    single_targets: list[dict[str, Any]],
+    by_key: dict[str, dict],
+    decisions: dict[str, Any],
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """The drawn and named single-name reading, for one arm."""
+    single_rows: list[dict[str, Any]] = []
+    drawn_family = drawn_stored = drawn_count = 0
+    named_rows: list[dict[str, Any]] = []
+    for target in single_targets:
+        family = by_key[target["family_key"]]
+        decision = decisions[target["family_key"]]
+        member = next((m for m in family["members"] if m["id"] == target["name"]), None)
+        if member is None:
+            continue
+        filed = _filed_domain(decision, member)
+        stored = str(member.get("physics_domain") or "")
+        row = {
+            **target,
+            "filed": filed,
+            "stored": stored,
+            "family_choice": decision.choice,
+            "probability": decision.probability,
+            "decided": decision.decided,
+            "undecided_reason": decision.undecided_reason,
+            "family_match": filed == target["reference"],
+            "stored_match": stored == target["reference"],
+        }
+        single_rows.append(row)
+        if target["named"]:
+            named_rows.append(row)
+        else:
+            drawn_count += 1
+            drawn_family += int(row["family_match"])
+            drawn_stored += int(row["stored_match"])
+
+    singles = {
+        "drawn_measured": drawn_count,
+        "drawn_family_share": round(drawn_family / drawn_count, 4)
+        if drawn_count
+        else 0.0,
+        "drawn_stored_share": round(drawn_stored / drawn_count, 4)
+        if drawn_count
+        else 0.0,
+        "drawn_undecided": sum(
+            1 for r in single_rows if not r["named"] and not r["decided"]
+        ),
+        "named": named_rows,
+        "disagreements": [
+            {
+                "name": r["name"],
+                "reference": r["reference"],
+                "decision": r["filed"],
+                "stored": r["stored"],
+            }
+            for r in single_rows
+            if not r["family_match"]
+        ],
+    }
+    return singles, single_rows
+
+
+def _calibration_comparison(
+    calibration: list[dict[str, str]],
+    calibration_family: dict[str, str],
+    by_key: dict[str, dict],
+    decisions: dict[str, Any],
+    incumbent: dict[str, str],
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """The calibration regression reading, for one arm."""
+    calibration_rows: list[dict[str, Any]] = []
+    family_hits = stored_hits = 0
+    undecided_calibration = 0
+    for row in calibration:
+        key = calibration_family.get(row["name"])
+        if key is None:
+            continue
+        family = by_key[key]
+        decision = decisions[key]
+        member = next((m for m in family["members"] if m["id"] == row["name"]), None)
+        if member is None:
+            continue
+        filed = _filed_domain(decision, member)
+        stored = incumbent.get(row["name"]) or str(member.get("physics_domain") or "")
+        calibration_rows.append(
+            {
+                "name": row["name"],
+                "label": row["label"],
+                "split": row["split"],
+                "family_size": len(family["members"]),
+                "filed": filed,
+                "stored": stored,
+                "family_match": filed == row["label"],
+                "stored_match": stored == row["label"],
+                "decided": decision.decided,
+            }
+        )
+        family_hits += int(filed == row["label"])
+        stored_hits += int(stored == row["label"])
+        undecided_calibration += int(not decision.decided)
+
+    total_cal = len(calibration_rows)
+    calibration_reading = {
+        "names_measured": total_cal,
+        "single_member_families": sum(
+            1 for r in calibration_rows if r["family_size"] == 1
+        ),
+        "family_accuracy": round(family_hits / total_cal, 4) if total_cal else 0.0,
+        "stored_accuracy": round(stored_hits / total_cal, 4) if total_cal else 0.0,
+        "undecided": undecided_calibration,
+        "accuracy_basis": (
+            "family_accuracy files an undecided name at its stored domain, which "
+            "is what the landed decision leaves it holding; family_accuracy_strict "
+            "counts every undecided name as wrong"
+        ),
+        **_strict_reading(calibration_rows, stored_hits),
+    }
+    return calibration_reading, calibration_rows
+
+
+def _undecided_rows(
+    needed: dict[str, dict],
+    by_key: dict[str, dict],
+    decisions: dict[str, Any],
+    seat: str,
+    ids_map: dict[str, str],
+) -> list[dict[str, Any]]:
+    """Every undecided family with its two leading domains, for one arm."""
+    undecided_rows: list[dict[str, Any]] = []
+    for key in sorted(needed):
+        decision = decisions[key]
+        if decision.decided:
+            continue
+        family = by_key[key]
+        leading = asyncio.run(_leading_domains(key, family, seat, ids_map))
+        undecided_rows.append(
+            {
+                "family_key": key,
+                "member_count": len(family["members"]),
+                "members": [m["id"] for m in family["members"]],
+                "candidates": list(decision.candidates),
+                "reason": decision.undecided_reason,
+                "leading": leading,
+            }
+        )
+    return undecided_rows
 
 
 async def _leading_domains(
@@ -315,7 +544,7 @@ def _provenance(seat: str) -> dict[str, Any]:
             "uv run --no-sync python "
             "docs/evidence/fragments/sn-domain-per-family/"
             "labelled-comparison-run.py --output "
-            "docs/evidence/fragments/sn-domain-per-family/labelled-comparison.json"
+            "docs/evidence/fragments/sn-domain-per-family/widened-options.json"
         ),
         "reproduce": (
             "re-running spends one judgment per family again; --from-existing "
@@ -461,237 +690,111 @@ def main() -> int:
     for key in calibration_family.values():
         needed[key] = by_key[key]
 
-    decisions = asyncio.run(_decide_all(needed, seat))
+    decisions_widened = asyncio.run(_decide_all(needed, seat, bounded=False))
+    decisions_bounded = asyncio.run(_decide_all(needed, seat, bounded=True))
     ids_map = ids_domain_map()
-
-    # ---- the labelled family comparison ---------------------------------
-    family_rows: list[dict[str, Any]] = []
-    counted_members = 0
-    family_matches = 0
-    stored_matches = 0
-    for target in family_targets:
-        family = by_key[target["family_key"]]
-        decision = decisions[target["family_key"]]
-        members = family["members"]
-        row_matches = sum(
-            1 for m in members if _filed_domain(decision, m) == target["reference"]
-        )
-        row_stored = sum(
-            1 for m in members if str(m.get("physics_domain") or "") == target["reference"]
-        )
-        family_rows.append(
-            {
-                **{k: v for k, v in target.items() if k != "family_key"},
-                "family_key": target["family_key"],
-                "live_members": len(members),
-                "choice": decision.choice,
-                "probability": decision.probability,
-                "decided": decision.decided,
-                "undecided_reason": decision.undecided_reason,
-                "family_matches": row_matches,
-                "stored_matches": row_stored,
-                "family_share": round(row_matches / len(members), 4) if members else 0.0,
-                "stored_share": round(row_stored / len(members), 4) if members else 0.0,
-                "section_one": target["pattern"] in SECTION_ONE_PATTERNS,
-            }
-        )
-        if len(members) >= 3:
-            counted_members += len(members)
-            family_matches += row_matches
-            stored_matches += row_stored
-
-    families_of_three = [r for r in family_rows if r["live_members"] >= 3]
-    comparison = {
-        "families_measured": len(families_of_three),
-        "section_one_families_measured": sum(
-            1 for r in families_of_three if r["section_one"]
-        ),
-        "members_measured": counted_members,
-        "family_match_share": round(family_matches / counted_members, 4)
-        if counted_members
-        else 0.0,
-        "stored_match_share": round(stored_matches / counted_members, 4)
-        if counted_members
-        else 0.0,
-        "families_where_family_share_higher": sum(
-            1 for r in families_of_three if r["family_share"] > r["stored_share"]
-        ),
-        "families_where_stored_share_higher": sum(
-            1 for r in families_of_three if r["stored_share"] > r["family_share"]
-        ),
-        "disagreements": [
-            {
-                "pattern": r["pattern"],
-                "reference": r["reference"],
-                "decision": r["choice"],
-                "members": r["live_members"],
-            }
-            for r in families_of_three
-            if r["decided"] and r["choice"] != r["reference"]
-        ],
-    }
-
-    # ---- the agreed single names ----------------------------------------
-    single_rows: list[dict[str, Any]] = []
-    drawn_family = drawn_stored = drawn_count = 0
-    named_rows: list[dict[str, Any]] = []
-    for target in single_targets:
-        family = by_key[target["family_key"]]
-        decision = decisions[target["family_key"]]
-        member = next((m for m in family["members"] if m["id"] == target["name"]), None)
-        if member is None:
-            continue
-        filed = _filed_domain(decision, member)
-        stored = str(member.get("physics_domain") or "")
-        row = {
-            **target,
-            "filed": filed,
-            "stored": stored,
-            "family_choice": decision.choice,
-            "probability": decision.probability,
-            "decided": decision.decided,
-            "undecided_reason": decision.undecided_reason,
-            "family_match": filed == target["reference"],
-            "stored_match": stored == target["reference"],
-        }
-        single_rows.append(row)
-        if target["named"]:
-            named_rows.append(row)
-        else:
-            drawn_count += 1
-            drawn_family += int(row["family_match"])
-            drawn_stored += int(row["stored_match"])
-
-    singles = {
-        "drawn_measured": drawn_count,
-        "drawn_family_share": round(drawn_family / drawn_count, 4) if drawn_count else 0.0,
-        "drawn_stored_share": round(drawn_stored / drawn_count, 4) if drawn_count else 0.0,
-        "drawn_undecided": sum(1 for r in single_rows if not r["named"] and not r["decided"]),
-        "named": named_rows,
-        "disagreements": [
-            {
-                "name": r["name"],
-                "reference": r["reference"],
-                "decision": r["filed"],
-                "stored": r["stored"],
-            }
-            for r in single_rows
-            if not r["family_match"]
-        ],
-    }
-
-    # ---- the calibration regression -------------------------------------
     incumbent = _incumbent()
-    calibration_rows: list[dict[str, Any]] = []
-    family_hits = stored_hits = 0
-    undecided_calibration = 0
-    for row in calibration:
-        key = calibration_family.get(row["name"])
-        if key is None:
-            continue
-        family = by_key[key]
-        decision = decisions[key]
-        member = next((m for m in family["members"] if m["id"] == row["name"]), None)
-        if member is None:
-            continue
-        filed = _filed_domain(decision, member)
-        stored = incumbent.get(row["name"]) or str(member.get("physics_domain") or "")
-        calibration_rows.append(
-            {
-                "name": row["name"],
-                "label": row["label"],
-                "split": row["split"],
-                "family_size": len(family["members"]),
-                "filed": filed,
-                "stored": stored,
-                "family_match": filed == row["label"],
-                "stored_match": stored == row["label"],
-                "decided": decision.decided,
-            }
+
+    arms: dict[str, Any] = {}
+    for arm, decisions in (
+        ("widened", decisions_widened),
+        ("bounded", decisions_bounded),
+    ):
+        comparison, family_rows = _family_comparison(family_targets, by_key, decisions)
+        singles, single_rows = _single_comparison(
+            single_targets, by_key, decisions
         )
-        family_hits += int(filed == row["label"])
-        stored_hits += int(stored == row["label"])
-        undecided_calibration += int(not decision.decided)
-
-    total_cal = len(calibration_rows)
-    calibration_reading = {
-        "names_measured": total_cal,
-        "single_member_families": sum(
-            1 for r in calibration_rows if r["family_size"] == 1
-        ),
-        "family_accuracy": round(family_hits / total_cal, 4) if total_cal else 0.0,
-        "stored_accuracy": round(stored_hits / total_cal, 4) if total_cal else 0.0,
-        "undecided": undecided_calibration,
-        "accuracy_basis": (
-            "family_accuracy files an undecided name at its stored domain, which "
-            "is what the landed decision leaves it holding; family_accuracy_strict "
-            "counts every undecided name as wrong"
-        ),
-        **_strict_reading(calibration_rows, stored_hits),
-    }
-
-    # ---- undecided families, with their two leading domains -------------
-    undecided_rows: list[dict[str, Any]] = []
-    for key in sorted(needed):
-        decision = decisions[key]
-        if decision.decided:
-            continue
-        family = by_key[key]
-        leading = asyncio.run(_leading_domains(key, family, seat, ids_map))
-        undecided_rows.append(
-            {
-                "family_key": key,
-                "member_count": len(family["members"]),
-                "members": [m["id"] for m in family["members"]],
-                "candidates": list(decision.candidates),
-                "reason": decision.undecided_reason,
-                "leading": leading,
-            }
+        calibration_reading, calibration_rows = _calibration_comparison(
+            calibration, calibration_family, by_key, decisions, incumbent
         )
+        undecided_rows = _undecided_rows(needed, by_key, decisions, seat, ids_map)
+        judged = [d for d in decisions.values() if len(d.candidates) > 1]
+        cost = round(sum(float(d.cost or 0.0) for d in decisions.values()), 6)
+        arms[arm] = {
+            "judgments": {
+                "families_decided": len(decisions),
+                "judgments_paid": len(judged),
+                "no_call_families": len(decisions) - len(judged),
+                "cost_usd": cost,
+                "cost_per_decision_usd": round(cost / len(judged), 8) if judged else 0.0,
+                "live_families_scanned": len(families),
+            },
+            "family_comparison": comparison,
+            "family_rows": family_rows,
+            "single_names": singles,
+            "single_rows": single_rows,
+            "calibration": calibration_reading,
+            "calibration_rows": calibration_rows,
+            "undecided": undecided_rows,
+            "undecided_summary": _undecided_summary(undecided_rows),
+        }
 
-    judged = [d for d in decisions.values() if len(d.candidates) > 1]
+    widened = arms["widened"]
+    bounded = arms["bounded"]
     payload = {
         "seat": seat,
         "confidence_floor": CONFIDENCE_FLOOR,
         "provenance": _provenance(seat),
         "reader_agreement": agreement,
         "sheet_families_mapping_to_more_than_one_decision_family": multi_mapped,
-        "judgments": {
-            "families_decided": len(decisions),
-            "judgments_paid": len(judged),
-            "no_call_families": len(decisions) - len(judged),
-            "cost_usd": round(sum(float(d.cost or 0.0) for d in decisions.values()), 6),
-            "live_families_scanned": len(families),
-        },
-        "family_comparison": comparison,
-        "family_rows": family_rows,
-        "single_names": singles,
-        "single_rows": single_rows,
-        "calibration": calibration_reading,
-        "calibration_rows": calibration_rows,
-        "undecided": undecided_rows,
-        "undecided_summary": _undecided_summary(undecided_rows),
+        "judgments": widened["judgments"],
+        "family_comparison": widened["family_comparison"],
+        "family_rows": widened["family_rows"],
+        "single_names": widened["single_names"],
+        "single_rows": widened["single_rows"],
+        "calibration": widened["calibration"],
+        "calibration_rows": widened["calibration_rows"],
+        "undecided": widened["undecided"],
+        "undecided_summary": widened["undecided_summary"],
+        "arms": arms,
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with args.output.open("w") as handle:
         json.dump(payload, handle, indent=1)
         handle.write("\n")
 
-    print(json.dumps(
-        {
-            "seat": seat,
-            "agreement": agreement["agreed_by_kind"],
-            "families_measured": comparison["families_measured"],
-            "family_share": comparison["family_match_share"],
-            "stored_share": comparison["stored_match_share"],
-            "drawn_singles": (singles["drawn_measured"], singles["drawn_family_share"], singles["drawn_stored_share"]),
-            "calibration": calibration_reading,
-            "judgments": payload["judgments"],
-            "undecided": len(undecided_rows),
-            "multi_mapped": len(multi_mapped),
-        },
-        indent=1,
-    ))
+    print(
+        json.dumps(
+            {
+                "seat": seat,
+                "agreement": agreement["agreed_by_kind"],
+                "widened": {
+                    "family": widened["family_comparison"]["family_match_share"],
+                    "stored": widened["family_comparison"]["stored_match_share"],
+                    "drawn_singles": (
+                        widened["single_names"]["drawn_measured"],
+                        widened["single_names"]["drawn_family_share"],
+                        widened["single_names"]["drawn_stored_share"],
+                    ),
+                    "calibration_strict": widened["calibration"][
+                        "family_accuracy_strict"
+                    ],
+                    "undecided_multi": widened["undecided_summary"][
+                        "with_two_or_more_members"
+                    ],
+                    "judgments": widened["judgments"],
+                },
+                "bounded": {
+                    "family": bounded["family_comparison"]["family_match_share"],
+                    "stored": bounded["family_comparison"]["stored_match_share"],
+                    "drawn_singles": (
+                        bounded["single_names"]["drawn_measured"],
+                        bounded["single_names"]["drawn_family_share"],
+                        bounded["single_names"]["drawn_stored_share"],
+                    ),
+                    "calibration_strict": bounded["calibration"][
+                        "family_accuracy_strict"
+                    ],
+                    "undecided_multi": bounded["undecided_summary"][
+                        "with_two_or_more_members"
+                    ],
+                    "judgments": bounded["judgments"],
+                },
+                "multi_mapped": len(multi_mapped),
+            },
+            indent=1,
+        )
+    )
     return 0
 
 
