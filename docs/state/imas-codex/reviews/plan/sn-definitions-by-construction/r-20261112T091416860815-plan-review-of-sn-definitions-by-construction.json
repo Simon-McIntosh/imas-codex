@@ -17,7 +17,30 @@
   "plan_slug": "sn-definitions-by-construction",
   "plan_version": 9,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "11a84b946514102f6698a2529bab9d23fa1f9e74",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a72 now leaves a name the review does not decide out of both arms, counts it, and requires ten names decided in both arms",
+      "reason": "",
+      "when": "2026-11-12T09:35:23.867787+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "11a84b946514102f6698a2529bab9d23fa1f9e74",
+      "commit_basis": "edit",
+      "note": "\u00a72 now leaves a name the review does not decide out of both arms, counts it, and requires ten names decided in both arms",
+      "reason": "",
+      "when": "2026-11-12T09:35:23.867787+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-definitions-by-construction/r-20261112T091416860815-plan-review-of-sn-definitions-by-construction.json",
   "review_run_id": "r-20261112T091416860815-plan-review-of-sn-definitions-by-construction",
   "reviewed_blob_sha": "f7ddd221623e9cc41a2a4182cc5d34623ff09882",
   "rubric": "content",
