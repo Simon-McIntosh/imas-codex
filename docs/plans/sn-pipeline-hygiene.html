@@ -23,24 +23,24 @@
   <title>Standard-Name Pipeline Hygiene: Red Tests, Loose Boundaries, Release Plumbing | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="21">
+<meta name="plan-version" content="22">
 <meta name="plan-modified" content="2026-11-12">
 </head>
 <body>
   <main class="plan-doc">
     <h2 id="s1">§1 — The 13 tests red on main are fixed or owned</h2>
     <section data-reckon="section" data-id="s1" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
-    <p>Thirteen tests in <code>tests/standard_names</code> fail at every base and head measured on 2026-11-11, including both arms of the last landing. They block no landing, but they hide regressions in every one. The ids:</p>
+    <p>Thirteen tests in <code>tests/standard_names</code> failed at every base and head measured on 2026-11-11, including both arms of the last landing. They block no landing, but they hide regressions in every one. By 2026-11-12 twelve pass at head; the cascade-calibration id instead skips, because the frozen receipt files it reads were deleted with the reckon run directories that held them, so it measures nothing. The ids:</p>
     <ul>
       <li><code>test_cascade_calibration.py::test_matched_policy_rebuilds_from_frozen_scores_and_receipts</code></li>
       <li><code>test_catalog_layout_hierarchy.py::TestOrderingCycleDetection::test_export_ledgers_cycle_and_writes_packet</code></li>
       <li><code>test_compose_prompt_examples_round_trip.py::test_nc_rule_bad_example_has_declared_public_oracle_disposition[NC-25-neutral_beam_injector_beam_tangency_radius]</code></li>
       <li><code>test_gap_rule_verdicts.py</code>: <code>test_an_isotope_suffix_is_not_a_dd_field_name</code>, the two <code>test_ordinal_gap_is_a_rule_violation_not_a_missing_token</code> cases (<code>arc_of_circle_start_point</code>, <code>thick_line_first_point</code>), <code>test_contextual_folds_remain_explicitly_unresolved_and_actionable</code>, <code>test_only_grammar_resolved_folds_are_non_actionable</code> and <code>test_genuine_demand_still_asks_for_a_token[subject-lithium_6]</code></li>
-      <li><code>test_geometry_enumeration_collapse.py::test_unregistered_arc_endpoint_rejects_the_ordinal_compound</code></li>
+      <li><code>test_geometry_enumeration_collapse.py::test_unregistered_locus_rejects_the_ordinal_compound</code></li>
       <li><code>test_manifest_generability.py</code>: <code>test_a_cut_refuses_a_manifest_it_cannot_generate_rather_than_counting</code>, <code>test_a_manifest_whose_sources_all_reach_a_name_is_not_refused</code> and <code>test_every_manifest_source_is_carried_or_names_its_blocking_mechanism</code></li>
     </ul>
     <p>Each is diagnosed first: a product defect, a stale test, or an ISN vocabulary change the test predates. The fix follows the diagnosis; a test is never weakened to pass.</p>
-    <p><strong>Done when:</strong> the default <code>tests/standard_names</code> run on a compute partition reports none of the 13 ids failing at the merged head; each id's diagnosis is recorded in the landing evidence; each product fix is shown to matter by the test failing again when that fix alone is reverted; at most three of the 13 ids may instead be marked strict expected failures, each naming an open section of a live plan that exists when the mark lands, and none is skipped or deleted; the suite adds no failure id against the stated base.</p>
+    <p><strong>Done when:</strong> the default <code>tests/standard_names</code> run on a compute partition reports none of the 13 ids failing at the merged head, and the cascade-calibration id runs without skipping from inputs committed in the repository; each id's diagnosis is recorded in the landing evidence; each product fix is shown to matter by the test failing again when that fix alone is reverted; at most three of the 13 ids may instead be marked strict expected failures, each naming an open section of a live plan that exists when the mark lands, and none is skipped or deleted; the suite adds no failure id against the stated base.</p>
 
     <h2 id="s2">§2 — The receipt-correction link declared in the graph schema</h2>
     <section data-reckon="section" data-id="s2" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
