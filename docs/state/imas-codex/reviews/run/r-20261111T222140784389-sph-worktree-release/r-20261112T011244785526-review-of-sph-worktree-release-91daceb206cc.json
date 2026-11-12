@@ -1,0 +1,54 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run is an implement role and filed no baseline_suite, so the delta is taken from its after_suite alone: revision 91daceb206cc5025f764b1207b71241394249f40, exit_status 0, completed true, failure_count 0, failure_ids [] in /home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T222140784389-sph-worktree-release/gate-release-suites.log, whose summary line reads '78 passed, 1 warning in 7.69s' followed by a bare EXIT=0. A head arm with zero failures cannot have added one. The six FAILED ids in negative-control.log are the worker's declared red arms (catalog guard 3, CLI guard 2, push ref 1), not added failures of the landed change.",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/cli/sn.py:5127 release command -> run_release",
+    "imas_codex/standard_names/catalog_release.py:1273 run_release resolves the default publisher",
+    "imas_codex/standard_names/publish.py:580 run_publish sets report.commit_sha, the condition that gates the push"
+  ],
+  "completed_at": "2026-11-12T01:26:01.258Z",
+  "dispatched_at": "2026-11-12T01:17:56Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T222140784389-sph-worktree-release/negative-control.log",
+      "line": 3,
+      "severity": "non-blocking",
+      "text": "The negative-control header names revision bfac8317a, but the push arm it runs (negative-control.log:113-144) executes test_a_release_cut_that_commits_delivers_its_commit_to_the_remote_main, which was introduced at d5cf1d817 and does not exist at bfac8317a; the arms therefore ran against uncommitted working-tree content, so the log's provenance line cannot be reconciled with any committed revision and a reader cannot tell which tree the red arms measured. The prior review recorded the same defect against the previous log (review at bfac8317a, finding on negative-control.log:1); the gate log itself is correct, naming 91daceb20."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read both commits. d5cf1d817 changes one line of the push ref plus a comment and adds a 49-line test with its committing publisher double; 91daceb20 updates the evidence fragment's gate and delivery paragraphs. 69 insertions, 6 deletions, nothing outside scope.",
+    "done_when": "The node's measure is that the cut's tag and remote main name the released commit and the release suites stay green; the gate log records 78 passed at EXIT=0 at 91daceb20 and the delivery test at test_catalog_release.py:356/361 asserts both refs on the stand-in remote, and the negative-control push arm fails on that same assertion when the ref is reverted.",
+    "goal": "The goal of this increment (and the part of the node's goal the earlier review found unmet) is that a detached cut delivers its own commit; catalog_release.py:1472 now sends HEAD to the remote's main and the delivery test at tests/standard_names/test_catalog_release.py:330 asserts the remote main and the tag both resolve to it.",
+    "manifest": "Read; it records the two new commits (d5cf1d817, 91daceb20), the after_suite at 91daceb20 with failure_count 0 and exit_status 0, the negative-control log with three arms 3/2/1 failed, and its checkpoint states the delivery defect is repaired; baseline_suite is null.",
+    "write_paths": "The node declared eight write paths; `git diff --stat bfac8317a..91daceb20` shows three changed files \u2014 docs/evidence/fragments/sn-pipeline-hygiene/sph-worktree-release.html, imas_codex/standard_names/catalog_release.py, tests/standard_names/test_catalog_release.py \u2014 and every one is inside the declared set."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_catalog_release.py:356 fails on the stand-in remote's own `refs/heads/main` when the push is reverted to the literal `main` (observed at negative-control.log:142-152 with distinct shas on each side), so the guard is independent of the value the code under test reports.",
+    "evidence": "the after_suite log /home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T222140784389-sph-worktree-release/gate-release-suites.log records 78 passed and EXIT=0 at revision 91daceb20, and negative-control.log:142 records the delivery test failing on `remote_main == released` when the push ref is reverted to `main`, but the negative-control header at negative-control.log:3 names revision bfac8317a, which does not contain the test that arm ran, and no baseline_suite was filed.",
+    "fit": "the change uses the `HEAD:<branch>` push form already used in imas_codex/standard_names/promote.py:413, keeps the file's `_run_git` helper and error-rollback idiom at catalog_release.py:1468-1480, and its comment states the mechanism with no plan, sprint or ticket identifier.",
+    "goal_fidelity": "imas_codex/standard_names/catalog_release.py:1472 now pushes `HEAD:main` instead of the literal `main`, so a candidate cut that commits delivers that commit to the remote's main and the tag no longer names a revision main lacks, closing the pre-existing finding the earlier review recorded against the same block.",
+    "reuse": "no new mechanism is introduced: the push reuses the file's existing `_run_git` path, `HEAD:<branch>` is the form promote.py:413 already owns, and `_CommittingPublisher` at tests/standard_names/test_catalog_release.py:258 mirrors the sibling `_SilentPublisher` test double rather than adding a second release driver.",
+    "scope_discipline": "`git diff --stat bfac8317a..91daceb20` touches exactly imas_codex/standard_names/catalog_release.py, tests/standard_names/test_catalog_release.py and the evidence fragment, all inside the node's declared write paths, with no unrelated edit folded in."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the increment under review is 'a detached cut delivers its own commit'; imas_codex/standard_names/catalog_release.py:1472 pushes HEAD:main and the delivery test asserts the remote refs resolve to that commit.\nVERDICT done_when: the gate at 91daceb20 records 78 passed at EXIT=0 and tests/standard_names/test_catalog_release.py:356,361 assert the stand-in remote's main and tag both name the released commit.\nVERDICT write_paths: `git diff --stat bfac8317a..91daceb20` changes three files and each is inside the node's declared write paths.\nVERDICT manifest: read; it records both commits, the 91daceb20 after_suite with failure_count 0, and the three red arms, and files no baseline_suite.\nVERDICT diff: read commit by commit; d5cf1d817 is the one-line push-ref change plus its committing-publisher test, 91daceb20 is the evidence fragment, 69 insertions and 6 deletions all inside scope.\nCALL_SITES: imas_codex/cli/sn.py:5127 release command -> run_release, imas_codex/standard_names/catalog_release.py:1273 default publisher resolution, imas_codex/standard_names/publish.py:580 run_publish sets commit_sha which gates the push\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/catalog_release.py:1472 now sends HEAD to the remote main so the released commit reaches it and the tag no longer names a revision main lacks.\nSCORE evidence: 16\nJUSTIFICATION evidence: gate-release-suites.log records 78 passed at EXIT=0 at 91daceb20, but negative-control.log:3 names revision bfac8317a for arms that run a test introduced at d5cf1d817, and no baseline_suite was filed.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: `git diff --stat bfac8317a..91daceb20` shows exactly the three declared paths and no unrelated edit.\nSCORE durability: 18\nJUSTIFICATION durability: tests/standard_names/test_catalog_release.py:356 fails on the remote's own refs/heads/main when the push ref is reverted to `main`, as negative-control.log:142-152 shows with distinct shas.\nSCORE fit: 19\nJUSTIFICATION fit: the change reuses the `HEAD:<branch>` push form of imas_codex/standard_names/promote.py:413 and the file's own _run_git and tag-rollback idiom at catalog_release.py:1468-1480.\nSCORE reuse: 18\nJUSTIFICATION reuse: no new mechanism is added; HEAD:<branch> is the form promote.py:413 already owns and _CommittingPublisher at tests/standard_names/test_catalog_release.py:258 mirrors the sibling _SilentPublisher double.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T222140784389-sph-worktree-release/negative-control.log:3 non-blocking: the header names revision bfac8317a while its push arm runs a test introduced at d5cf1d817, so the red arms measured uncommitted working-tree content and the provenance line matches no committed revision.",
+  "review_run_id": "r-20261112T011244785526-review-of-sph-worktree-release-91daceb206cc",
+  "reviewed_base_sha": "bfac8317a7ea3282f0175a9873b4487a7fa32c95",
+  "reviewed_head_sha": "91daceb206cc5025f764b1207b71241394249f40",
+  "reviewed_run_id": "r-20261111T222140784389-sph-worktree-release",
+  "scores": {
+    "durability": 18,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T01:29:08.701646+00:00",
+  "total": 110
+}
