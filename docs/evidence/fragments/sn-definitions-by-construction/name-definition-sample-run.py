@@ -71,6 +71,8 @@ def main() -> int:
     )
     ap.add_argument("--compose-json", type=Path)
     ap.add_argument("--compose-html", type=Path)
+    ap.add_argument("--second-reader-sheet", type=Path)
+    ap.add_argument("--second-reader-labels", type=Path)
     args = ap.parse_args()
 
     files = load(args.catalog)
@@ -161,7 +163,18 @@ def main() -> int:
     if args.labels:
         if not (args.compose_json and args.compose_html):
             raise SystemExit("--labels needs both --compose-json and --compose-html")
-        compose(Path(args.out), Path(args.labels), args.compose_json, args.compose_html)
+        reader = None
+        if args.second_reader_sheet and args.second_reader_labels:
+            reader = join_second_reader(
+                args.second_reader_sheet, args.second_reader_labels
+            )
+        compose(
+            Path(args.out),
+            Path(args.labels),
+            args.compose_json,
+            args.compose_html,
+            reader,
+        )
     return 0
 
 
@@ -187,7 +200,114 @@ CLASS_DEFINITIONS = {
 }
 
 
-def compose(sample_path, labels_path, json_out, html_out):
+RULING = {
+    "date": "2026-11-12",
+    "text": "a bare species name counts ions summed over all charge states, with neutral "
+    "atoms excluded",
+    "effect": "a name that states a species and a definition that states the ion population "
+    "only name the same quantity, so the pop-ion-only wording is agreement rather than a "
+    "missing qualifier",
+    "relabelled": ("qualifier-missing-from-name", "pop-ion-only"),
+}
+
+
+def class_under_ruling(cls, pattern):
+    """The class once the species-population ruling is applied to the recorded class."""
+    return "agrees" if (cls, pattern) == RULING["relabelled"] else cls
+
+
+def tally(rows, key, published):
+    """Count one class column and project it per file onto the published set."""
+    counts = dict.fromkeys(CLASS_ORDER, 0)
+    for row in rows:
+        counts[row[key]] += 1
+    sampled = {}
+    for row in rows:
+        sampled[row["file"]] = sampled.get(row["file"], 0) + 1
+    proj = dict.fromkeys(CLASS_ORDER, 0.0)
+    for fname, n_total in published.items():
+        n_drawn = sampled.get(fname, 0)
+        if not n_drawn:
+            continue
+        for c in CLASS_ORDER:
+            in_file = sum(1 for r in rows if r["file"] == fname and r[key] == c)
+            proj[c] += in_file / n_drawn * n_total
+    n = len(rows)
+    total = sum(published.values())
+    return {
+        "counts": counts,
+        "share": {c: round(counts[c] / n, 4) for c in CLASS_ORDER},
+        "projected": {c: round(proj[c], 1) for c in CLASS_ORDER},
+        "projected_rounded": {c: int(round(proj[c])) for c in CLASS_ORDER},
+        "naive": {c: round(counts[c] / n * total, 1) for c in CLASS_ORDER},
+    }
+
+
+def kappa(pairs):
+    """Cohen's kappa for two binary columns given as a list of (a, b) pairs."""
+    n = len(pairs)
+    if not n:
+        return None
+    observed = sum(1 for a, b in pairs if a == b) / n
+    pa = sum(a for a, _ in pairs) / n
+    pb = sum(b for _, b in pairs) / n
+    expected = pa * pb + (1 - pa) * (1 - pb)
+    return None if expected >= 1 else (observed - expected) / (1 - expected)
+
+
+def join_second_reader(sheet_path, labels_path):
+    """Map the second reader's item ids to names, then to the class it gave each name."""
+    sheet = json.loads(sheet_path.read_text())
+    labels = json.loads(labels_path.read_text())
+    by_id = {item["id"]: item["name"] for item in sheet["items"]}
+    return {by_id[x["id"]]: x["class"] for x in labels if x["id"] in by_id}
+
+
+def agreement(rows, reader):
+    """Compare the second reader's classes to this record's, joined by name."""
+    mine = {row["name"]: row for row in rows}
+    pairs = [
+        (
+            name,
+            mine[name]["class"],
+            mine[name]["class_under_ruling"],
+            mine[name]["pattern"],
+            cls,
+        )
+        for name, cls in reader.items()
+        if name in mine
+    ]
+    binary = [
+        (0 if p[2] == "agrees" else 1, 0 if p[4] == "agrees" else 1) for p in pairs
+    ]
+    return {
+        "joined": len(pairs),
+        "names_the_reader_labelled_not_in_sample": sorted(set(reader) - set(mine)),
+        "exact_class_agreement_recorded": sum(1 for p in pairs if p[1] == p[4]),
+        "exact_class_agreement_under_ruling": sum(1 for p in pairs if p[2] == p[4]),
+        "exact_class_agreement_under_ruling_share": round(
+            sum(1 for p in pairs if p[2] == p[4]) / len(pairs), 4
+        ),
+        "mismatch_versus_agrees_agreement": round(
+            sum(1 for a, b in binary if a == b) / len(binary), 4
+        ),
+        "mismatch_versus_agrees_kappa": round(kappa(binary), 4),
+        "disagreements": [
+            {
+                "name": p[0],
+                "class_recorded": p[1],
+                "class_under_ruling": p[2],
+                "pattern": p[3],
+                "class_second_reader": p[4],
+            }
+            for p in pairs
+            if p[2] != p[4]
+        ],
+        "disagreements_unresolved": True,
+    }
+
+
+def compose(sample_path, labels_path, json_out, html_out, reader=None):
     """Join the drawn sample to the reader's labels and emit the record."""
     sample = json.loads(sample_path.read_text())
     rows = sample["rows"]
@@ -196,28 +316,17 @@ def compose(sample_path, labels_path, json_out, html_out):
 
     for n, row in enumerate(rows, 1):
         row["class"], row["pattern"] = by_index[n]
+        row["class_under_ruling"] = class_under_ruling(row["class"], row["pattern"])
 
-    counts = dict.fromkeys(CLASS_ORDER, 0)
-    for row in rows:
-        counts[row["class"]] += 1
     n_sample = len(rows)
-
     published = sample["per_file_published"]
     sampled_per_file = {}
     for row in rows:
         sampled_per_file[row["file"]] = sampled_per_file.get(row["file"], 0) + 1
 
-    # Stratified projection: each file's class shares applied to its own published count.
-    proj = dict.fromkeys(CLASS_ORDER, 0.0)
-    for fname, n_total in published.items():
-        n_drawn = sampled_per_file.get(fname, 0)
-        if not n_drawn:
-            continue
-        for c in CLASS_ORDER:
-            in_file = sum(1 for r in rows if r["file"] == fname and r["class"] == c)
-            proj[c] += in_file / n_drawn * n_total
-
-    naive = {c: counts[c] / n_sample * sample["published_total"] for c in CLASS_ORDER}
+    recorded = tally(rows, "class", published)
+    ruled = tally(rows, "class_under_ruling", published)
+    counts, proj, naive = recorded["counts"], recorded["projected"], recorded["naive"]
 
     cited = []
     for row in rows:
@@ -277,10 +386,10 @@ def compose(sample_path, labels_path, json_out, html_out):
         "class_definitions": CLASS_DEFINITIONS,
         "reader": "one reader, reading name, description, documentation and unit together; "
         "no pipeline judge, review check or decide_batch produced any label",
+        "ruling": RULING,
+        "headline_reading": "class_under_ruling",
         "class_counts": counts,
-        "class_share_of_sample": {
-            c: round(counts[c] / n_sample, 4) for c in CLASS_ORDER
-        },
+        "class_share_of_sample": recorded["share"],
         "projection": {
             "method": "per-file stratified: each file's class share applied to that file's "
             "published count, summed over the 28 files",
@@ -291,6 +400,15 @@ def compose(sample_path, labels_path, json_out, html_out):
             "naive_sample_share_projected": {
                 c: round(naive[c], 1) for c in CLASS_ORDER
             },
+        },
+        "class_counts_under_ruling": ruled["counts"],
+        "class_share_of_sample_under_ruling": ruled["share"],
+        "projection_under_ruling": {
+            "method": "the same per-file stratified projection, taken over the class the ruling "
+            "gives each row",
+            "per_class_projected": ruled["projected"],
+            "per_class_projected_rounded": ruled["projected_rounded"],
+            "naive_sample_share_projected": ruled["naive"],
         },
         "cited_names": cited,
         "pattern_groups": pattern_groups,
@@ -306,15 +424,24 @@ def compose(sample_path, labels_path, json_out, html_out):
                 "directory, which shows the dimension check finds a conflict known to be present",
             },
         },
-        "second_reader": {
-            "status": "unmet in this record",
-            "why": "a second reading must be made by a reader with no sight of this record's "
-            "labels, and this node cannot supply one: a nested agent is refused inside the run, "
-            "and labelling the subset twice here would not be an independent reading",
-            "subset_prepared": "60 names drawn with seed 7714 across all 28 files",
-            "subset_indices": subset_indices,
-            "agreement": None,
-        },
+        "second_reader": (
+            {
+                "status": "met",
+                "reader": "a separate reader, with no sight of this record's labels, and told "
+                "the species-population ruling before it read",
+                "joined_by": "name, through the sheet's item id",
+                "subset_prepared": "60 names drawn with seed 7714 across all 28 files",
+                "subset_indices": subset_indices,
+                **agreement(rows, reader),
+            }
+            if reader
+            else {
+                "status": "unmet in this record",
+                "subset_prepared": "60 names drawn with seed 7714 across all 28 files",
+                "subset_indices": subset_indices,
+                "agreement": None,
+            }
+        ),
         "rows": rows,
     }
 
@@ -327,6 +454,10 @@ def compose(sample_path, labels_path, json_out, html_out):
 def render_html(p):
     """Render the record as an evidence fragment."""
     n = p["draw"]["sample_size"]
+    ru = p["class_counts_under_ruling"]
+    su = p["class_share_of_sample_under_ruling"]
+    pu = p["projection_under_ruling"]["per_class_projected"]
+    moved = sum(1 for row in p["rows"] if row["class_under_ruling"] != row["class"])
     rows = ""
     for r in p["rows"]:
         rows += (
@@ -335,6 +466,7 @@ def render_html(p):
             f"<td><code>{r['unit'] or '—'}</code></td>"
             f"<td>{r['file'].replace('.yml', '')}</td>"
             f"<td>{r['class']}</td>"
+            f"<td>{r['class_under_ruling']}</td>"
             f"<td>{'' if r['pattern'] == '-' else r['pattern']}</td>"
             "</tr>\n"
         )
@@ -346,7 +478,9 @@ def render_html(p):
             f"<td>{p['class_counts'][c]}</td>"
             f"<td>{p['class_share_of_sample'][c] * 100:.1f}&#8201;%</td>"
             f"<td>{p['projection']['per_class_projected'][c]}</td>"
-            f"<td>{p['projection']['naive_sample_share_projected'][c]}</td>"
+            f"<td>{ru[c]}</td>"
+            f"<td>{su[c] * 100:.1f}&#8201;%</td>"
+            f"<td>{pu[c]}</td>"
             "</tr>\n"
         )
     cited_rows = "".join(
@@ -367,6 +501,37 @@ def render_html(p):
         "</tr>\n"
         for g in p["pattern_groups"]
     )
+    sr = p["second_reader"]
+    if sr.get("status") == "met":
+        dis_rows = "".join(
+            "<tr>"
+            f"<td><code>{d['name']}</code></td>"
+            f"<td>{d['class_recorded']}</td>"
+            f"<td>{d['class_under_ruling']}</td>"
+            f"<td>{d['class_second_reader']}</td>"
+            "</tr>\n"
+            for d in sr["disagreements"]
+        )
+        sr_html = f"""<p>A separate reader, with no sight of this record's labels and told the
+species-population ruling before it read, labelled the same 60 names. Joining the two sets by name,
+<strong>{sr["exact_class_agreement_under_ruling"]} of {sr["joined"]} carry the same class</strong>
+({sr["exact_class_agreement_under_ruling_share"] * 100:.1f}&#8201;%) under the ruling, and
+{sr["exact_class_agreement_recorded"]} of {sr["joined"]} under the labels as first recorded. Read as
+the cruder question the labels answer first — mismatch or agreement — the two agree on
+{sr["mismatch_versus_agrees_agreement"] * 100:.1f}&#8201;% of the subset, Cohen's
+&kappa;&#8201;=&#8201;{sr["mismatch_versus_agrees_kappa"]:.3f}.</p>
+<p id="sdbc-name-definition-count-disagreement-note">The {len(sr["disagreements"])} disagreements are
+listed as they stand. Neither reader's class is preferred and none is resolved here.</p>
+<table id="sdbc-name-definition-count-disagree-table">
+<thead><tr><th>Name</th><th>Class recorded</th><th>Under ruling</th><th>Second reader</th></tr></thead>
+<tbody>
+{dis_rows}</tbody>
+</table>"""
+    else:
+        sr_html = (
+            "<p>That reading is not in this record, and a second reading taken by this node "
+            "would not be independent.</p>"
+        )
     per_file = "".join(
         "<tr>"
         f"<td>{f.replace('.yml', '')}</td>"
@@ -395,27 +560,30 @@ def render_html(p):
 (<code>{p["catalog_revision"][:8]}</code>) were drawn across all {p["draw"]["files"]} domain files,
 in proportion to each file's published count and with a floor of {p["draw"]["floor_per_file"]} per
 file that has that many. Each was labelled by reading its name, description, documentation and
-unit together. <strong>{p["class_counts"]["agrees"]} agree with their name and
-{n - p["class_counts"]["agrees"]} do not</strong>: {p["class_counts"]["qualifier-missing-from-name"]}
-carry a qualifier the name lacks, {p["class_counts"]["definition-narrower-than-name"]} are narrower
-than the name, {p["class_counts"]["abstract-parent-as-quantity"]} publish an abstract parent as a
-quantity, and {p["class_counts"]["unit-does-not-fit-name"]} has a unit whose dimension does not fit
-its name. Projected per file onto the published set, the first class accounts for about
-{p["projection"]["per_class_projected_rounded"]["qualifier-missing-from-name"]}
-names.
+unit together. <strong>Under the species-population ruling {ru["agrees"]} agree with their name and
+{n - ru["agrees"]} do not</strong>: {ru["qualifier-missing-from-name"]}
+carry a qualifier the name lacks, {ru["definition-narrower-than-name"]} are narrower
+than the name, {ru["abstract-parent-as-quantity"]} publish an abstract parent as a
+quantity, and {ru["unit-does-not-fit-name"]} has a unit whose dimension does not fit
+its name. Projected per file onto the published set, the qualifier class accounts for about
+{pu["qualifier-missing-from-name"]} names.
 </p>
 
-<h2 id="sdbc-name-definition-count-verdict">What the sample measures</h2>
+<h2 id="sdbc-name-definition-count-verdict">What the sample measures, both ways</h2>
+<p id="sdbc-name-definition-count-ruling-text">The ruling of {p["ruling"]["date"]} changed one
+wording: {p["ruling"]["text"]}. The right-hand columns are the headline reading, with the {moved}
+names whose only defect was that wording moved to <em>agrees</em>; the left-hand columns keep the
+labels as first recorded, so both readings stay in the record.</p>
 <table id="sdbc-name-definition-count-classes">
-<thead><tr><th>Class</th><th>In sample</th><th>Share</th><th>Projected (stratified)</th><th>Projected (naive)</th></tr></thead>
+<thead><tr><th>Class</th><th>Sample (recorded)</th><th>Share</th><th>Projected (recorded)</th><th>Sample (ruling)</th><th>Share (ruling)</th><th>Projected (ruling)</th></tr></thead>
 <tbody>
 {class_rows}</tbody>
 </table>
 <p id="sdbc-name-definition-count-projection">The stratified projection applies each file's
 class share to that file's own published count and sums over the files, which is what makes the
 per-file floor harmless: a file drawn at 10 of 34 contributes its own rate, not a
-sample-wide rate. The naive column repeats the sample share unchanged and is given only for
-comparison.</p>
+sample-wide rate. The same projection is applied to both readings, so the two columns differ only
+by the {moved} names the ruling moved, never by method.</p>
 
 <h2 id="sdbc-name-definition-count-cited">The ten names the opening census cited</h2>
 <p>Each was added outside the random draw. {sum(1 for c in p["cited_names"] if c["agrees_with_plan"])} of {len(p["cited_names"])} carry the class the census gave them.</p>
@@ -436,7 +604,8 @@ record's unit check, because a census already committed beside this file lists t
 
 <h2 id="sdbc-name-definition-count-patterns">The wordings that produced the mismatches</h2>
 <p>Each pattern is a sentence or convention a writer re-uses, so a class read down this table is
-read as a family of wordings rather than as a count of unrelated defects.</p>
+read as a family of wordings rather than as a count of unrelated defects. The classes are the ones
+recorded; under the ruling, the pop-ion-only row is agreement.</p>
 <table id="sdbc-name-definition-count-pattern-table">
 <thead><tr><th>Class</th><th>Wording</th><th>Count</th><th>Examples</th></tr></thead>
 <tbody>
@@ -454,16 +623,13 @@ catalog revision alone.</p>
 </table>
 
 <h2 id="sdbc-name-definition-count-second-reader">The second reading</h2>
-<p>A 60-name subset was drawn with seed 7714 across all {p["draw"]["files"]} files and left
-unlabelled for a reader who has not seen this record's labels. <strong>That reading is not in this
-record.</strong> A second reading taken by this node would not be independent, so it is left for a
-separately dispatched reader, and the agreement between the two is to be recorded with it.</p>
+{sr_html}
 
 <h2 id="sdbc-name-definition-count-rows">The labelled rows</h2>
 <details>
 <summary>All {n} rows</summary>
 <table id="sdbc-name-definition-count-row-table">
-<thead><tr><th>Name</th><th>Unit</th><th>File</th><th>Class</th><th>Wording</th></tr></thead>
+<thead><tr><th>Name</th><th>Unit</th><th>File</th><th>Class recorded</th><th>Under ruling</th><th>Wording</th></tr></thead>
 <tbody>
 {rows}</tbody>
 </table>
