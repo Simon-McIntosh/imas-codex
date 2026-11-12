@@ -71,7 +71,6 @@ from fastmcp import FastMCP
 from neo4j.exceptions import ServiceUnavailable
 from ruamel.yaml import YAML
 
-from imas_codex.graph.query_builder import render_chunk_source
 from imas_codex.llm._warmup import warmup
 from imas_codex.llm.prompt_loader import (
     PromptDefinition,
@@ -622,6 +621,10 @@ def _code_chunk_search_query() -> str:
     ``source_facility`` is read from the chunk itself, which carries the
     facility the chunk writer stamped on it.
     """
+    # Deferred: importing the query builder imports the graph package and its
+    # schema runtime, which must not happen while the server is starting up.
+    from imas_codex.graph.query_builder import render_chunk_source
+
     return (
         f"{render_chunk_source('node', 'source_file')}\n"
         "RETURN [k IN keys(node) "

@@ -175,3 +175,118 @@ class TestIncludeStandardNames:
         names = _tool_names(server)
         missing = SN_TOOLS - names
         assert not missing, f"Expected standard name tools not registered: {missing}"
+
+
+BASE_TOOL_NAMES = {
+    "default": frozenset(
+        {
+            "add_to_graph",
+            "check_dd_paths",
+            "check_standard_names",
+            "edit_standard_name",
+            "fetch_content",
+            "fetch_dd_error_fields",
+            "fetch_dd_paths",
+            "fetch_standard_names",
+            "find_related_dd_paths",
+            "find_related_standard_names",
+            "get_dd_catalog",
+            "get_dd_changelog",
+            "get_dd_cocos_fields",
+            "get_dd_identifiers",
+            "get_dd_migration_guide",
+            "get_dd_version_context",
+            "get_dd_versions",
+            "get_facility_coverage",
+            "get_graph_schema",
+            "get_ids_summary",
+            "get_logs",
+            "get_standard_name_summary",
+            "list_dd_paths",
+            "list_grammar_vocabulary",
+            "list_logs",
+            "list_promotion_candidates",
+            "list_standard_names",
+            "repl",
+            "search_code",
+            "search_dd_clusters",
+            "search_dd_paths",
+            "search_docs",
+            "search_signals",
+            "search_standard_names",
+            "signal_analytics",
+            "tail_logs",
+            "trace_standard_name_provenance",
+            "update_facility_config",
+        }
+    ),
+    "read_only": frozenset(
+        {
+            "check_dd_paths",
+            "check_standard_names",
+            "fetch_content",
+            "fetch_dd_error_fields",
+            "fetch_dd_paths",
+            "fetch_standard_names",
+            "find_related_dd_paths",
+            "find_related_standard_names",
+            "get_dd_catalog",
+            "get_dd_changelog",
+            "get_dd_cocos_fields",
+            "get_dd_identifiers",
+            "get_dd_migration_guide",
+            "get_dd_version_context",
+            "get_dd_versions",
+            "get_facility_coverage",
+            "get_graph_schema",
+            "get_ids_summary",
+            "get_standard_name_summary",
+            "list_dd_paths",
+            "list_grammar_vocabulary",
+            "list_promotion_candidates",
+            "list_standard_names",
+            "search_code",
+            "search_dd_clusters",
+            "search_dd_paths",
+            "search_docs",
+            "search_signals",
+            "search_standard_names",
+            "signal_analytics",
+            "trace_standard_name_provenance",
+        }
+    ),
+    "dd_only": frozenset(
+        {
+            "check_dd_paths",
+            "fetch_dd_error_fields",
+            "fetch_dd_paths",
+            "find_related_dd_paths",
+            "get_dd_catalog",
+            "get_dd_changelog",
+            "get_dd_cocos_fields",
+            "get_dd_identifiers",
+            "get_dd_migration_guide",
+            "get_dd_version_context",
+            "get_dd_versions",
+            "get_ids_summary",
+            "list_dd_paths",
+            "search_dd_clusters",
+            "search_dd_paths",
+        }
+    ),
+}
+
+
+@pytest.mark.parametrize(
+    ("mode", "kwargs"),
+    [
+        ("default", {"read_only": False, "dd_only": False}),
+        ("read_only", {"read_only": True, "dd_only": False}),
+        ("dd_only", {"dd_only": True}),
+    ],
+)
+def test_tool_names_per_serve_mode(mode, kwargs) -> None:
+    """The server answers with the same tool names it exposed before the
+    command group resolved its command modules on demand.
+    """
+    assert _tool_names(AgentsServer(**kwargs)) == BASE_TOOL_NAMES[mode]
