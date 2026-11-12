@@ -105,6 +105,13 @@
       "finding": "duplicate_owner-2",
       "reason": "the reuse map goes into the node brief, which names this owner as the module to extend; the plan states the endpoint and names no module (the single domain writer and its guard tests; \u00a72's done-when already requires the guard test to pass unchanged)",
       "when": "2026-11-12T02:02:39.961179+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "finding": "duplicate_owner-3",
+      "reason": "the reuse map goes into the node brief, which names this owner as the module to extend; the plan states the endpoint and names no module (the family-agreement count is added to the existing domain audit)",
+      "when": "2026-11-12T02:02:51.795290+00:00"
     }
   ],
   "responses": {
@@ -122,6 +129,12 @@
       "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
       "reason": "the reuse map goes into the node brief, which names this owner as the module to extend; the plan states the endpoint and names no module (the single domain writer and its guard tests; \u00a72's done-when already requires the guard test to pass unchanged)",
       "when": "2026-11-12T02:02:39.961179+00:00"
+    },
+    "duplicate_owner-3": {
+      "action": "declined",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "reason": "the reuse map goes into the node brief, which names this owner as the module to extend; the plan states the endpoint and names no module (the family-agreement count is added to the existing domain audit)",
+      "when": "2026-11-12T02:02:51.795290+00:00"
     },
     "reuse_search-1": {
       "action": "declined",
