@@ -99,7 +99,7 @@ second pass resumed from the 212 already restored without re-writing any of them
   admitted signed rows: one per name, each receipt carrying docs_revision_id
   cohorts: 90 rows applied, 89 rows applied; previews would_apply, no refusal
 control (partition b) parallel_conductivity: no authority row, no receipt;
-  docs_stage pending, documentation unchanged</pre>
+  docs_stage pending, not accepted</pre>
 
 <h3 id="sib-restore-reset-docs-control">Negative control</h3>
 
@@ -108,7 +108,9 @@ restore write and no receipt. Partition (a) is empty, so the control is drawn fr
 <code>parallel_conductivity</code> carries no restore row in any cohort authority — neither a
 <code>set_properties</code> row from the first pass nor a
 <code>restore-documentation-from-revision</code> row from the second — and no receipt of either
-kind, and it is re-read after the restore to show its documentation and stage unchanged. The
+kind, and it is re-read after the restore: it is absent from <code>restore_plan</code>, it still
+carries <code>docs_stage=pending</code>, and it has zero restore receipts (log:
+<code>negative-control.log</code>, which exits 0 only when all three hold). The
 instrument's authority rows are composed only from <code>restore_plan</code>, which is partition
 (c) alone.</p>
 
