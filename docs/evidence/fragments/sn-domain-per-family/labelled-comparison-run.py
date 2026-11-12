@@ -579,6 +579,27 @@ def _provenance(seat: str) -> dict[str, Any]:
     }
 
 
+def _undecided_multi_member_listing(payload: dict[str, Any]) -> dict[str, Any]:
+    """The undecided multi-member families of the reported arm, by size.
+
+    A family of one member leaves nothing to disagree about, so only the
+    multi-member families are listed: each one is a body of names the
+    decision declined to place, and the two leading domains say where its
+    judgment was leaning without reaching the floor.
+    """
+    rows = [
+        {
+            "family_key": row["family_key"],
+            "member_count": row["member_count"],
+            "leading": row["leading"],
+        }
+        for row in payload["arms"][payload["reported_arm"]]["undecided"]
+        if row["member_count"] >= 2
+    ]
+    rows.sort(key=lambda row: row["member_count"], reverse=True)
+    return {"arm": payload["reported_arm"], "families": len(rows), "rows": rows}
+
+
 def _derive_from_existing(path: Path, revision: str = "") -> int:
     """Re-derive the strict reading and the undecided summary from committed rows.
 
@@ -598,6 +619,7 @@ def _derive_from_existing(path: Path, revision: str = "") -> int:
         "counts every undecided name as wrong",
     )
     payload["undecided_summary"] = _undecided_summary(payload["undecided"])
+    payload["undecided_multi_member_listing"] = _undecided_multi_member_listing(payload)
     payload.setdefault("provenance", {})
     payload["provenance"].update(
         {
@@ -744,6 +766,71 @@ def _bars_failed(reading: dict[str, Any], bounded: dict[str, Any]) -> list[str]:
     return failed
 
 
+def _one_option_report(
+    families: list[dict],
+    sheet_keys: set[str],
+    calibration_keys: set[str],
+    seat: str,
+) -> dict[str, Any]:
+    """The families whose option union collapses to one domain, and their moves.
+
+    A family with no Data Dictionary sources of its own — a derived parent —
+    has ``general`` as its only option, so the bounded decision takes it at
+    probability 1.0 without a judgment. Every such family in the live catalog
+    is put to the wider question here and its move recorded, because that is
+    the population the escalated set exists to reach.
+    """
+    ids_map = ids_domain_map()
+    single = {
+        family["key"]: family
+        for family in families
+        if len(family_candidate_domains(family["members"], ids_map)) == 1
+    }
+    decisions = asyncio.run(
+        _decide_all(single, seat, option_set="fallback_escalated", concurrency=32)
+    )
+    calls = _JUDGMENT_CALLS[0]
+    cost = round(sum(float(d.cost or 0.0) for d in decisions.values()), 6)
+
+    def population(keys: set[str]) -> dict[str, Any]:
+        chosen = [key for key in single if key in keys]
+        moved = [
+            key
+            for key in chosen
+            if decisions[key].choice != next(iter(decisions[key].candidates or ()))
+            and decisions[key].choice is not None
+        ]
+        return {
+            "families": len(chosen),
+            "moved": len(moved),
+            "moved_families": sorted(moved)[:20],
+        }
+
+    return {
+        "live_catalog": {
+            "one_option_families": len(single),
+            "moved": sum(
+                1
+                for key, decision in decisions.items()
+                if decision.choice is not None
+                and decision.choice
+                != family_candidate_domains(single[key]["members"], ids_map)[0]
+            ),
+            "judgments_paid": calls,
+            "cost_usd": cost,
+            "cost_per_decision_usd": round(cost / calls, 8) if calls else 0.0,
+        },
+        "sheet_items": population(sheet_keys),
+        "calibration_names": population(calibration_keys),
+        "basis": (
+            "a family's option union always holds `general`, so it collapses to "
+            "one option only when the family has no Data Dictionary source at "
+            "all; every such family is escalated here and 'moved' counts the "
+            "ones the judgment placed above `general`"
+        ),
+    }
+
+
 def _filed_domain(decision: Any, member: dict) -> str:
     """The domain a member is filed under: the family's choice, else its stored."""
     if decision is not None and decision.decided:
@@ -849,7 +936,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--option-set",
-        choices=("bounded", "widened", "fallback"),
+        choices=("bounded", "widened", "fallback", "fallback_escalated"),
         default="fallback",
         help="the option set the --all-live pass decides under",
     )
@@ -906,7 +993,7 @@ def main() -> int:
         needed[key] = by_key[key]
 
     decided: dict[str, tuple[dict[str, Any], int]] = {}
-    for option_set in ("bounded", "widened", "fallback"):
+    for option_set in ("bounded", "widened", "fallback", "fallback_escalated"):
         decisions = asyncio.run(_decide_all(needed, seat, option_set=option_set))
         decided[option_set] = (decisions, _JUDGMENT_CALLS[0])
     ids_map = ids_domain_map()
@@ -951,10 +1038,10 @@ def main() -> int:
     reported = next(
         (
             name
-            for name in ("fallback", "widened")
+            for name in ("fallback_escalated", "fallback", "widened")
             if readings[name]["clears_every_bar"]
         ),
-        "widened",
+        "fallback_escalated",
     )
     arm = arms[reported]
     payload = {
@@ -974,6 +1061,12 @@ def main() -> int:
         "undecided": arm["undecided"],
         "undecided_summary": arm["undecided_summary"],
         "readings": readings,
+        "one_option_families": _one_option_report(
+            families,
+            {target["family_key"] for target in family_targets},
+            set(calibration_family.values()),
+            seat,
+        ),
         "arms": arms,
         "refused_option_sets": _REFUSED_OPTION_SETS,
     }

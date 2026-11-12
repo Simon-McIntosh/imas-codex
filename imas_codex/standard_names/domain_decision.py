@@ -94,7 +94,12 @@ CONFIDENCE_FLOOR: float = 0.68
 #: domains the family's sources supply, ``widened`` the whole bands those
 #: domains fall in, and ``fallback`` the bounded set first with the widened set
 #: only for a family the bounded answer leaves undecided.
-OPTION_SETS: tuple[str, ...] = ("bounded", "widened", "fallback")
+OPTION_SETS: tuple[str, ...] = (
+    "bounded",
+    "widened",
+    "fallback",
+    "fallback_escalated",
+)
 
 
 def _pretty(raw: str) -> str:
@@ -666,7 +671,11 @@ def build_family_state(
 
 
 def build_family_domain_question(
-    options: Sequence[str], member_count: int, *, widened: bool = True
+    options: Sequence[str],
+    member_count: int,
+    *,
+    widened: bool = True,
+    prior: str | None = None,
 ) -> dict[str, Any]:
     """The second stage: which domain of the chosen band the family belongs to."""
     instructions = (
@@ -685,6 +694,13 @@ def build_family_domain_question(
         if widened
         else build_family_question(options, member_count)[QUESTION]["instructions"]
     )
+    if prior is not None:
+        instructions += (
+            f" Every source path this family's names are drawn from is stored "
+            f"under {prior}, which is the domain the family would keep when no "
+            "option plainly fits; that is where the data lives, not where the "
+            "quantity belongs."
+        )
     order = sorted(options, key=lambda d: (band_of(d) != "general", d))
     return {
         QUESTION: {
@@ -785,6 +801,8 @@ async def _decide_widened(
     members: Sequence[Mapping[str, Any]],
     ids_map: Mapping[str, str],
     model: str,
+    *,
+    prior: str | None = None,
 ) -> FamilyDomainDecision:
     """One Choice over the band-widened option set.
 
@@ -793,6 +811,12 @@ async def _decide_widened(
     is offered, so the concept's own domain can be chosen even where no source
     lives. A single call keeps the option list short enough that a decided
     answer stays above :data:`CONFIDENCE_FLOOR`.
+
+    ``prior`` is the domain a family with a single source domain would
+    otherwise keep without a judgment. When it is given, an answer that places
+    nothing above the floor, or a call that fails, leaves the family holding
+    ``prior`` rather than undecided: the source domain remains the answer until
+    a judgment displaces it.
     """
     if not members:
         return FamilyDomainDecision(
@@ -808,6 +832,8 @@ async def _decide_widened(
     options = widened_candidate_domains(members, ids_map)
 
     def held(reason: str, cost: float) -> FamilyDomainDecision:
+        if prior is not None:
+            return kept(cost)
         return FamilyDomainDecision(
             family_id=family_id,
             members=member_ids,
@@ -820,9 +846,22 @@ async def _decide_widened(
             cost=cost,
         )
 
+    def kept(cost: float) -> FamilyDomainDecision:
+        """The family keeps its only source domain; the judgment did not displace it."""
+        return FamilyDomainDecision(
+            family_id=family_id,
+            members=member_ids,
+            candidates=options,
+            choice=prior,
+            probability=None,
+            model=model,
+            decided_at=datetime.now(UTC).isoformat(),
+            cost=cost,
+        )
+
     results, cost = await decide_batch(
         [build_family_state(family_id, members, ids_map, options)],
-        build_family_domain_question(options, len(members)),
+        build_family_domain_question(options, len(members), prior=prior),
         model=model,
         service=SERVICE_TAG,
         concurrency=CONCURRENCY,
@@ -944,9 +983,20 @@ async def decide_family_domain(
         the bounded set first, and the widened set only for a family the
         bounded answer leaves undecided, so a family the narrow options already
         settle is never re-litigated and a family they cannot place is still
-        offered the concept's own domain.
+        offered the concept's own domain;
+    ``fallback_escalated``
+        ``fallback``, with a family whose bounded options collapse to one
+        domain also put to the widened question. Such a family would otherwise
+        take its source domain at probability 1.0 without any judgment, which
+        is the case this decision exists to get right: a name whose only source
+        sits in another part of the dictionary can never be placed. The source
+        domain is stated in the question as evidence, and the family keeps it
+        when the judgment puts nothing above the floor. This is the opt-in set:
+        it is the fallback behaviour with that shortcut removed, and it is what
+        a caller asking for a source-independent decision should name.
 
-    A family whose options collapse to one domain takes it without a call. A
+    Under ``bounded``, ``widened`` and ``fallback`` a family whose options
+    collapse to one domain takes it without a call. A
     recorded lead correction wins over the Choice and applies to the whole
     family. A call that fails, or a choice below :data:`CONFIDENCE_FLOOR`,
     leaves the family undecided and names the reason: the caller writes none
@@ -973,9 +1023,19 @@ async def decide_family_domain(
     bounded = await _decide_bounded(
         family_id, member_ids, members, options, model, ids_map=ids_map
     )
-    if option_set == "bounded" or bounded.decided:
+    single_source = options[0] if len(options) == 1 else None
+    if option_set == "fallback":
+        if bounded.decided:
+            return bounded
+        widened = await _decide_widened(family_id, member_ids, members, ids_map, model)
+        return replace(widened, cost=bounded.cost + widened.cost)
+    if option_set != "fallback_escalated":
         return bounded
-    widened = await _decide_widened(family_id, member_ids, members, ids_map, model)
+    if bounded.decided and single_source is None:
+        return bounded
+    widened = await _decide_widened(
+        family_id, member_ids, members, ids_map, model, prior=single_source
+    )
     return replace(widened, cost=bounded.cost + widened.cost)
 
 

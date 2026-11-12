@@ -233,3 +233,109 @@ def test_the_fallback_set_does_not_re_litigate_a_placed_family(
     assert len(asked) == 1, "a decided family is not offered the wider options"
     assert decision.choice == SOURCE_DOMAIN
     assert decision.cost == pytest.approx(1.5)
+
+
+#: A family whose members carry no Data Dictionary sources at all. The option
+#: union is then ``general`` alone, so the family is decided at probability 1.0
+#: without any judgment and never reaches a wider question.
+SOURCELESS = [
+    {
+        "id": "some_derived_parent",
+        "description": "A parent whose members carry no Data Dictionary source of their own.",
+        "physics_domain": "general",
+        "domain_correction": None,
+        "sources": {},
+    }
+]
+PRIOR = "general"
+
+
+def test_a_single_option_family_is_put_to_the_wider_question(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The sourceless family is asked, with its single option stated as evidence."""
+    asked: list[dict] = []
+
+    async def decide(states, questions, **_kwargs):  # noqa: ANN001
+        asked.append(questions[dd.QUESTION])
+        options = list(questions[dd.QUESTION]["criteria"])
+        choice = CONCEPT if CONCEPT in options else options[0]
+        return [
+            ({dd.QUESTION: {"choice": choice, "probabilities": {choice: 0.87}}}, 0.5)
+        ], 1.0
+
+    monkeypatch.setattr(dd, "decide_batch", decide)
+
+    decision = asyncio.run(
+        dd.decide_family_domain(
+            "sourceless-family",
+            SOURCELESS,
+            {},
+            model="stub",
+            option_set="fallback_escalated",
+        )
+    )
+    assert len(asked) == 1, "the single-option family is asked exactly once"
+    assert CONCEPT in asked[0]["criteria"], "the wider options are offered"
+    assert PRIOR in asked[0]["instructions"], (
+        "the family's single option is stated to the judgment as evidence"
+    )
+    assert decision.decided, decision.undecided_reason
+    assert decision.choice == CONCEPT
+
+
+def test_a_single_option_family_keeps_its_option_below_the_floor(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A judgment that places nothing above the floor leaves the family's option."""
+
+    async def decide(states, questions, **_kwargs):  # noqa: ANN001
+        options = list(questions[dd.QUESTION]["criteria"])
+        return [
+            (
+                {
+                    dd.QUESTION: {
+                        "choice": options[0],
+                        "probabilities": {options[0]: 0.35},
+                    }
+                },
+                0.5,
+            )
+        ], 1.0
+
+    monkeypatch.setattr(dd, "decide_batch", decide)
+
+    decision = asyncio.run(
+        dd.decide_family_domain(
+            "sourceless-family",
+            SOURCELESS,
+            {},
+            model="stub",
+            option_set="fallback_escalated",
+        )
+    )
+    assert decision.decided
+    assert decision.choice == PRIOR
+    assert decision.probability is None, (
+        "the family is kept by its single option, not by a probability above the floor"
+    )
+
+
+def test_the_fallback_set_still_takes_a_single_option_without_a_judgment(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The set the escalated one extends keeps its no-call shortcut."""
+
+    async def decide(states, questions, **_kwargs):  # noqa: ANN001
+        raise AssertionError("a one-option family needs no judgment")
+
+    monkeypatch.setattr(dd, "decide_batch", decide)
+
+    decision = asyncio.run(
+        dd.decide_family_domain(
+            "sourceless-family", SOURCELESS, {}, model="stub", option_set="fallback"
+        )
+    )
+    assert decision.decided
+    assert decision.choice == PRIOR
+    assert decision.probability == 1.0
