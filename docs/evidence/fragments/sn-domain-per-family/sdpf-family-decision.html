@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>One domain decision per family</title>
+<style>
+body{font-family:system-ui,sans-serif;max-width:60rem;margin:2rem auto;line-height:1.5;padding:0 1rem}
+code{background:#f4f4f4;padding:.1em .3em;border-radius:3px}
+table{border-collapse:collapse;margin:1rem 0}
+th,td{border-bottom:1px solid #ddd;padding:.3rem .6rem;text-align:left}
+td.n{text-align:right;font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<h1>One domain decision per family</h1>
+<p>A name's physics domain is decided for the concept it names, and every member
+of a family receives that one decision. The family is the repository's pattern
+family with the locus held fixed: names sharing quantity, operator, process and
+entity, and differing only in species, charge state, component or device. The
+decision offers the union of every member's candidate domains, asks one Choice,
+stores one record on a <code>StandardNameDomainFamily</code> node, and writes it
+to every member through <code>write_name_domain</code>, the single writer.</p>
+
+<h2 id="sdpf-family-decision-what">What changed</h2>
+<table>
+<tr><th>Path</th><th>Change</th></tr>
+<tr><td><code>standard_names/families.py</code></td>
+<td><code>DOMAIN_FAMILY_HELD_SEGMENTS</code>, <code>domain_family_key</code>, <code>fetch_domain_family</code>, <code>fetch_domain_families</code></td></tr>
+<tr><td><code>standard_names/domain_decision.py</code></td>
+<td><code>decide_family_domain</code>, <code>store_family_decision</code>,
+<code>read_family_decision</code>, <code>fan_out_family_decision</code>,
+<code>decide_and_write_family</code></td></tr>
+<tr><td><code>schemas/standard_name.yaml</code></td>
+<td><code>StandardName.domain_family_id</code> and the
+<code>StandardNameDomainFamily</code> record</td></tr>
+<tr><td><code>tests/standard_names/test_family_domain_decision.py</code></td>
+<td>the decision's unit tests and the disposable-graph read-back</td></tr>
+</table>
+
+<h2 id="sdpf-family-decision-measure">Measure</h2>
+<table>
+<tr><th>Reading</th><th class="n">Value</th></tr>
+<tr><td>Gate, non-graph arm (<code>EXIT=0</code>)</td><td class="n">43 passed, 0 failed</td></tr>
+<tr><td>Judgments paid per family (three-member family)</td><td class="n">1</td></tr>
+<tr><td>Judgments paid per member under the per-name path</td><td class="n">1 each</td></tr>
+<tr><td>Families planted in the read-back</td><td class="n">8</td></tr>
+<tr><td>Family records stored for those families</td><td class="n">8</td></tr>
+<tr><td>Distinct domains across the disjoint planted family</td><td class="n">1</td></tr>
+<tr><td>Distinct domains the per-name path gives the same two names</td><td class="n">2</td></tr>
+</table>
+
+<h2 id="sdpf-family-decision-open">Not settled here</h2>
+<p>The labelled multi-member family set is assembled by this node unlabelled and
+labelled by an independently dispatched reader; the share reading that needs them is
+waiting on that reader. The calibration regression reading over the
+<code>sn-catalog-grouping</code> labels is not measured.</p>
+</body>
+</html>

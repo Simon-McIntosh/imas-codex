@@ -1197,6 +1197,16 @@ classes:
       domain_correction_reason:
         description: Why the recorded domain correction was made.
         range: string
+      domain_family_id:
+        description: >-
+          Id of the domain family whose single stored decision this name
+          reads. Names that share a quantity, operator, process and locus share
+          a family, so two siblings cannot be filed under different domains.
+          The domain is decided once and stored on the family; this scalar is
+          the pointer a reader follows to that record.
+        range: string
+        annotations:
+          relationship_type: IN_DOMAIN_FAMILY
       primary_cluster_id:
         description: >-
           ID of the primary semantic cluster this standard name belongs to.
@@ -2304,6 +2314,52 @@ classes:
         required: true
       description:
         description: Human-readable description of this locus.
+
+  StandardNameDomainFamily:
+    description: >-
+      One stored physics-domain decision, shared by every member of a family.
+      A family holds a quantity, operator, process, entity and locus fixed, so
+      its members name one concept that differs only in species, charge state,
+      component or device. The decision is asked once for the whole family and
+      stored here; each member reads it through its ``domain_family_id``, so
+      siblings cannot be filed under different domains.
+
+      Inbound relationships:
+        - (StandardName)-[:IN_DOMAIN_FAMILY]->(StandardNameDomainFamily)
+
+      Example Cypher:
+        MATCH (sn:StandardName)-[:IN_DOMAIN_FAMILY]->(f:StandardNameDomainFamily)
+        RETURN sn.id, f.choice
+    class_uri: sn:StandardNameDomainFamily
+    attributes:
+      id:
+        identifier: true
+      candidates:
+        description: The candidate domains the family's one Choice offered.
+        multivalued: true
+        range: string
+      choice:
+        description: >-
+          The domain the family's decision chose, null when the family is
+          undecided and none of its members is written.
+        range: string
+      probability:
+        description: >-
+          The probability the model gave the domain it chose for the family. A
+          family below the confidence floor stays undecided.
+        range: float
+      model:
+        description: The model that decided the family's physics domain.
+        range: string
+      decided_at:
+        description: When the family's decision was taken (ISO-8601 UTC).
+        range: string
+      member_count:
+        description: How many members the decision covers.
+        range: integer
+      undecided_reason:
+        description: Why the family is undecided, or null when it is decided.
+        range: string
 
   ReviewHold:
     description: A separately triageable finding that blocks acceptance while open.
