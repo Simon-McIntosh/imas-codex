@@ -45,7 +45,8 @@ ROOT = Path(__file__).resolve().parents[4]
 LABEL_DIR = ROOT / "docs/evidence/fragments/sn-domain-family-labels"
 CALIBRATION_DIR = ROOT / "docs/evidence/fragments/sn-catalog-grouping"
 
-#: The eight species families §1 measured split, by their sheet pattern.
+#: The eight species families whose members the catalog files across more than
+#: one domain, by their sheet pattern.
 SECTION_ONE_PATTERNS = (
     "<X>_density",
     "ratio_of_volume_averaged_<X>_density_to_volume_averaged_electron_density",
@@ -57,7 +58,8 @@ SECTION_ONE_PATTERNS = (
     "toroidal_<X>_velocity_at_magnetic_axis",
 )
 
-#: The three names §5 singles out; they are reported apart from the drawn draw.
+#: The three names whose sources pin them to a domain the concept does not
+#: share; they are reported apart from the drawn draw.
 NAMED = ("safety_factor", "greenwald_density", "voltage_of_valve")
 
 
