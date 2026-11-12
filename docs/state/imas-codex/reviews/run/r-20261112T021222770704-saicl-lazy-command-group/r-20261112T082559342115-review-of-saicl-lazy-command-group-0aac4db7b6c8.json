@@ -1,0 +1,104 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run carries no baseline_suite or after_suite block, so this is derived from the arm logs it cites on disk: the after arm /home/ITER/mcintos/.cache/imas-codex-saicl/logs/head-gate-final.log ends '69 passed' with EXIT=0 and no FAILED id, and the base arm /home/ITER/mcintos/.cache/imas-codex-saicl/logs/negative-control.log ends '3 failed' with EXIT=1 whose ids are the three new guard tests at the base revision; no failure is added at the head.",
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/llm/server.py:859 _search_code_chunks -> _code_chunk_search_query",
+    "imas_codex/cli/serve.py:110 from imas_codex.llm.server import AgentsServer",
+    "imas_codex/llm/__init__.py:13 from imas_codex.llm.server import AgentsServer",
+    "imas_codex/llm/server.py:83 warmup.start() at module import"
+  ],
+  "completed_at": "2026-11-12T08:37:55.266Z",
+  "dispatched_at": "2026-11-12T08:27:46Z",
+  "findings": [
+    {
+      "file": "tests/discovery/test_engine_import_order.py",
+      "line": "150",
+      "severity": "non-blocking",
+      "text": "non-blocking: assert f\"VERDICT=clean {warmup_state}\" in result.stdout compares the child's output against the same warmup_state the test itself interpolated into that child's script, so both sides move together and the assertion holds whenever the returncode is zero; the guard's real teeth are the child's sys.modules assertions reached through line 147, and this line adds no independent failure condition."
+    },
+    {
+      "file": "tests/discovery/test_engine_import_order.py",
+      "line": "84",
+      "severity": "non-blocking",
+      "text": "non-blocking: test_help_imports_no_command_module asserts only the fourteen command modules via _loaded_from(_DEFERRED_MODULES), while the done_when requires a test to fail when the language-model client library or the schema runtime is imported 'by the time imas-codex --help exits'; no assertion covers litellm, imas_codex.graph or linkml_runtime on the help path, so that half of the clause has no guard even though the measured 0.13 s help start implies those imports are absent."
+    },
+    {
+      "file": "docs/evidence/fragments/serve-answers-inside-the-connect-limit/guard-verdicts.json",
+      "line": "6",
+      "severity": "non-blocking",
+      "text": "non-blocking: the method field claims the warm arm pre-imports imas_codex.llm.server 'so warmup.start() has already run before the guard's own subprocesses', but the guard spawns a fresh interpreter per run via _run_fresh_interpreter, which inherits no sys.modules, so every run starts its own warm-up; the cold and warm arms therefore assert against the same child-process state and the twenty runs do not measure the cross-state stability the record claims."
+    },
+    {
+      "file": "docs/evidence/fragments/serve-answers-inside-the-connect-limit/startup-timings.json",
+      "line": "1506",
+      "severity": "non-blocking",
+      "text": "non-blocking: attribution.base_named_parts_seconds is 7.11 s, but the same record's base steps have incrementals 5.583 + 0.501 + 1.101 + 0.402 = 7.587 s and a cumulative median of 7.616 s, so the committed figures do not yield the stated 7.11 s and the named parts exceed the 7.25 s whole start they are subtracted from; differencing medians of separate cumulative runs is not a valid decomposition, so the 98.1 % headline cannot be re-derived from the record that states it."
+    },
+    {
+      "file": "docs/evidence/fragments/serve-answers-inside-the-connect-limit/saicl-lazy-command-group.html",
+      "line": "19",
+      "severity": "non-blocking",
+      "text": "non-blocking: the 'Named parts, cumulative' row reads 7.11 s while the five rows above it in the same table sum to 0.03 + 5.58 + 0.50 + 1.10 + 0.40 = 7.61 s, so the table contradicts itself and the 98.1 % prose at line 24 rests on the number its own rows do not support."
+    },
+    {
+      "file": "docs/evidence/fragments/serve-answers-inside-the-connect-limit/startup-timings.json",
+      "line": "115",
+      "severity": "non-blocking",
+      "text": "non-blocking: the committed records and startup-timing-parts.py point their new arm at a .reckon-worktrees path and their base arm at ~/.cache/imas-codex-saicl/base-tree, both of which are reclaimed, so the re-derivability the fragment promises fails as soon as either is cleaned up and a later reader can only read the numbers, not regenerate them."
+    },
+    {
+      "file": "imas_codex/cli/sn.py",
+      "line": "7130",
+      "severity": "non-blocking",
+      "text": "non-blocking: the comment correction is in a file that appears in neither the declared write paths nor the reopen's granted_paths, and the resume advice named only the server and sn_tools comments; the manifest discloses it under scope_note, but the scope was not extended before the write."
+    },
+    {
+      "file": "tests/discovery/test_engine_import_order.py",
+      "line": "66",
+      "severity": "non-blocking",
+      "text": "non-blocking: the new comment reads 'the warm-up threads import modules concurrently, and iterating sys.modules... iterate a copy so the verdict is stable' \u2014 the ellipsis breaks the sentence, so the reason the snapshot exists is not stated in prose a reader can follow."
+    },
+    {
+      "file": "docs/evidence/fragments/serve-answers-inside-the-connect-limit/startup-timings.json",
+      "line": "325",
+      "severity": "non-blocking",
+      "text": "non-blocking: the reported fleet-node five met the 15 s bound only after being re-taken at load 28-32; the earlier five at load 37-48 produced a 15.61 s start and a 13.14 s median, so the bound holds at the quieter load and is missed at the load the base arm was timed at (48.5), and the html states this but the comparison pairs a load-48 base against a load-28 change."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read both commits against base 8365c9c9e7f2 commit by commit: 9a1c18b3d moves the schema-runtime import and widens the guard, 0aac4db7b adds the parts script, the parts record in startup-timings.json and guard-verdicts.json and refreshes the fragment.",
+    "done_when": "the done_when names eight clauses; the gained commits carry the schema-runtime guard, the twenty-run verdict record, a committed parts record and re-taken debug- and fleet-node starts, evidenced by head-gate-final.log (69 passed, EXIT=0) and negative-control.log (3 failed, EXIT=1).",
+    "goal": "the goal is to close the three gaps the prior review named against serve-answers-inside-the-connect-limit \u00a72; commits 9a1c18b3d and 0aac4db7b defer the query-builder import at imas_codex/llm/server.py:622, widen the guard at tests/discovery/test_engine_import_order.py:100 and commit the parts and guard-verdict records.",
+    "manifest": "read; it reports status complete, the three-file gate at 69 passed, the twenty-run guard record and the re-taken arms, and names every log it cites, including the negative control.",
+    "write_paths": "the source node declared seven paths in its dispatch and granted two more on reopen (imas_codex/llm/server.py, imas_codex/llm/sn_tools.py); the gained diff touches eight files of which imas_codex/cli/sn.py, guard-verdicts.json and startup-timing-parts.py lie outside both sets."
+  },
+  "justifications": {
+    "durability": "tests/discovery/test_engine_import_order.py:105 reddens if the server.py import returns to module level, as base-schema-probe.log isolates imas_codex.graph and linkml_runtime on that path, but line 150 compares the output against the same parameter the test interpolated.",
+    "evidence": "head-gate-final.log records 69 passed with EXIT=0 and negative-control.log 3 failed with EXIT=1, but startup-timings.json:1506 states 7.11 s for the named parts where its own steps sum to 7.587 s.",
+    "fit": "the parametrised arm and stub follow tests/discovery/test_engine_import_order.py:37's _run_fresh_interpreter idiom, but the new comment at line 66 is garbled.",
+    "goal_fidelity": "imas_codex/llm/server.py:622 defers the query-builder import into the function that uses it, so the schema runtime is off the initialize path the goal names.",
+    "reuse": "the change extends the existing guard in tests/discovery/test_engine_import_order.py rather than adding a helper, a search for sys.modules assertions finding only tests/build/test_sync_grammar_hook.py for a different capability, and server.py:624 reuses the function-local import idiom already at imas_codex/llm/sn_tools.py:911.",
+    "scope_discipline": "imas_codex/cli/sn.py:7130 is outside both the declared write paths and the reopen's granted_paths, and two evidence files are new siblings rather than declared paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to close the three gaps the prior review named against serve-answers-inside-the-connect-limit \u00a72; commits 9a1c18b3d and 0aac4db7b defer the query-builder import at imas_codex/llm/server.py:622, widen the guard at tests/discovery/test_engine_import_order.py:100 and commit the parts and guard-verdict records.\nVERDICT done_when: the done_when names eight clauses; the gained commits carry the schema-runtime guard, the twenty-run verdict record, a committed parts record and re-taken debug- and fleet-node starts, evidenced by head-gate-final.log (69 passed, EXIT=0) and negative-control.log (3 failed, EXIT=1).\nVERDICT write_paths: the source node declared seven paths in its dispatch and granted two more on reopen (imas_codex/llm/server.py, imas_codex/llm/sn_tools.py); the gained diff touches eight files of which imas_codex/cli/sn.py, guard-verdicts.json and startup-timing-parts.py lie outside both sets.\nVERDICT manifest: read; it reports status complete, the three-file gate at 69 passed, the twenty-run guard record and the re-taken arms, and names every log it cites, including the negative control.\nVERDICT diff: read both commits against base 8365c9c9e7f2 commit by commit: 9a1c18b3d moves the schema-runtime import and widens the guard, 0aac4db7b adds the parts script, the parts record in startup-timings.json and guard-verdicts.json and refreshes the fragment.\nCALL_SITES: imas_codex/llm/server.py:859 _search_code_chunks -> _code_chunk_search_query, imas_codex/cli/serve.py:110 from imas_codex.llm.server import AgentsServer, imas_codex/llm/__init__.py:13 from imas_codex.llm.server import AgentsServer, imas_codex/llm/server.py:83 warmup.start() at module import\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/llm/server.py:622 defers the query-builder import into the function that uses it, so the schema runtime is off the initialize path the goal names.\nSCORE evidence: 14\nJUSTIFICATION evidence: head-gate-final.log records 69 passed with EXIT=0 and negative-control.log 3 failed with EXIT=1, but startup-timings.json:1506 states 7.11 s for the named parts where its own steps sum to 7.587 s.\nSCORE scope_discipline: 13\nJUSTIFICATION scope_discipline: imas_codex/cli/sn.py:7130 is outside both the declared write paths and the reopen's granted_paths, and two evidence files are new siblings rather than declared paths.\nSCORE durability: 15\nJUSTIFICATION durability: tests/discovery/test_engine_import_order.py:105 reddens if the server.py import returns to module level, as base-schema-probe.log isolates imas_codex.graph and linkml_runtime on that path, but line 150 compares the output against the same parameter the test interpolated.\nSCORE fit: 16\nJUSTIFICATION fit: the parametrised arm and stub follow tests/discovery/test_engine_import_order.py:37's _run_fresh_interpreter idiom, but the new comment at line 66 is garbled.\nSCORE reuse: 19\nJUSTIFICATION reuse: the change extends the existing guard in tests/discovery/test_engine_import_order.py rather than adding a helper, a search for sys.modules assertions finding only tests/build/test_sync_grammar_hook.py for a different capability, and server.py:624 reuses the function-local import idiom already at imas_codex/llm/sn_tools.py:911.\nFINDING tests/discovery/test_engine_import_order.py:150 non-blocking: assert f\"VERDICT=clean {warmup_state}\" in result.stdout compares the child's output against the same warmup_state the test itself interpolated into that child's script, so both sides move together and the assertion holds whenever the returncode is zero; the guard's real teeth are the child's sys.modules assertions reached through line 147, and this line adds no independent failure condition.\nFINDING tests/discovery/test_engine_import_order.py:84 non-blocking: test_help_imports_no_command_module asserts only the fourteen command modules via _loaded_from(_DEFERRED_MODULES), while the done_when requires a test to fail when the language-model client library or the schema runtime is imported 'by the time imas-codex --help exits'; no assertion covers litellm, imas_codex.graph or linkml_runtime on the help path, so that half of the clause has no guard even though the measured 0.13 s help start implies those imports are absent.\nFINDING docs/evidence/fragments/serve-answers-inside-the-connect-limit/guard-verdicts.json:6 non-blocking: the method field claims the warm arm pre-imports imas_codex.llm.server 'so warmup.start() has already run before the guard's own subprocesses', but the guard spawns a fresh interpreter per run via _run_fresh_interpreter, which inherits no sys.modules, so every run starts its own warm-up; the cold and warm arms therefore assert against the same child-process state and the twenty runs do not measure the cross-state stability the record claims.\nFINDING docs/evidence/fragments/serve-answers-inside-the-connect-limit/startup-timings.json:1506 non-blocking: attribution.base_named_parts_seconds is 7.11 s, but the same record's base steps have incrementals 5.583 + 0.501 + 1.101 + 0.402 = 7.587 s and a cumulative median of 7.616 s, so the committed figures do not yield the stated 7.11 s and the named parts exceed the 7.25 s whole start they are subtracted from; differencing medians of separate cumulative runs is not a valid decomposition, so the 98.1 % headline cannot be re-derived from the record that states it.\nFINDING docs/evidence/fragments/serve-answers-inside-the-connect-limit/saicl-lazy-command-group.html:19 non-blocking: the 'Named parts, cumulative' row reads 7.11 s while the five rows above it in the same table sum to 0.03 + 5.58 + 0.50 + 1.10 + 0.40 = 7.61 s, so the table contradicts itself and the 98.1 % prose at line 24 rests on the number its own rows do not support.\nFINDING docs/evidence/fragments/serve-answers-inside-the-connect-limit/startup-timings.json:115 non-blocking: the committed records and startup-timing-parts.py point their new arm at a .reckon-worktrees path and their base arm at ~/.cache/imas-codex-saicl/base-tree, both of which are reclaimed, so the re-derivability the fragment promises fails as soon as either is cleaned up and a later reader can only read the numbers, not regenerate them.\nFINDING imas_codex/cli/sn.py:7130 non-blocking: the comment correction is in a file that appears in neither the declared write paths nor the reopen's granted_paths, and the resume advice named only the server and sn_tools comments; the manifest discloses it under scope_note, but the scope was not extended before the write.\nFINDING tests/discovery/test_engine_import_order.py:66 non-blocking: the new comment reads 'the warm-up threads import modules concurrently, and iterating sys.modules... iterate a copy so the verdict is stable' \u2014 the ellipsis breaks the sentence, so the reason the snapshot exists is not stated in prose a reader can follow.\nFINDING docs/evidence/fragments/serve-answers-inside-the-connect-limit/startup-timings.json:325 non-blocking: the reported fleet-node five met the 15 s bound only after being re-taken at load 28-32; the earlier five at load 37-48 produced a 15.61 s start and a 13.14 s median, so the bound holds at the quieter load and is missed at the load the base arm was timed at (48.5), and the html states this but the comparison pairs a load-48 base against a load-28 change.",
+  "review_node": "review-of-saicl-lazy-command-group-0aac4db7b6c8",
+  "review_run_id": "r-20261112T082559342115-review-of-saicl-lazy-command-group-0aac4db7b6c8",
+  "reviewed_base_sha": "8365c9c9e7f29866af9ab5d611904e59d73117e1",
+  "reviewed_head_sha": "0aac4db7b6c88e69f5e18bb0c62bf936d8520413",
+  "reviewed_run_id": "r-20261112T021222770704-saicl-lazy-command-group",
+  "scores": {
+    "durability": 15,
+    "evidence": 14,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 13
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T08:41:00.461470+00:00",
+  "total": 95
+}
