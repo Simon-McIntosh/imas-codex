@@ -1,0 +1,44 @@
+{
+  "approval_cap": 350.0,
+  "approval_remaining": 205.762333,
+  "approval_spent_total": 144.237667,
+  "cohort_size": 143,
+  "cost_limit": 10.0,
+  "drafts_after": 3,
+  "drafts_before": 3,
+  "export_blocking": 0,
+  "floor": 100,
+  "floor_met": true,
+  "negative_control": {
+    "absent_read_as_produced": false,
+    "ok": true,
+    "present_read_as_produced": true
+  },
+  "pin_eligible": 40,
+  "pin_refused": 4,
+  "produced_after": 104,
+  "produced_before": 99,
+  "reset_verified": 31,
+  "run_id": "54d30200-7348-4636-9fd0-d89cb1e67bd4",
+  "run_status": "started",
+  "selected": 44,
+  "selected_produced": 5,
+  "spend": 0.084578,
+  "status_counts_after": {
+    "attached": 49,
+    "composed": 44,
+    "extracted": 18,
+    "failed": 26,
+    "stale": 1,
+    "vocab_gap": 5
+  },
+  "status_counts_before": {
+    "attached": 46,
+    "composed": 42,
+    "extracted": 13,
+    "failed": 41,
+    "stale": 1
+  },
+  "stop_reason": null,
+  "unproduced": 39
+}
