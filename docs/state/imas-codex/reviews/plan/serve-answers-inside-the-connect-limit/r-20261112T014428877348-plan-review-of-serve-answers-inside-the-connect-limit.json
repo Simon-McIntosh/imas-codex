@@ -1,0 +1,80 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T01:54:53.668Z",
+  "dispatched_at": "2026-11-12T01:45:37Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/cli/__init__.py:95",
+      "id": "reuse_search-1",
+      "reason": "it fixes the node's scope to one change in the command group and tells the node the measurement that proves it, instead of a per-library whack-a-mole that the report would have to rediscover.",
+      "text": "the endpoint is blocked by one eager call, `register_commands()`, which at import time imports all fifteen command modules (`imas_codex/cli/__init__.py:61-75`); measured, \u00a72's target command `imas_codex.cli.serve` costs 8 ms and `imas_codex.cli.discover` costs 28.8 s of a 30 s import, so the design the brief should carry is lazy resolution in the existing group (`click.Group.get_command` / a deferred command table) so that no command module is imported until its name is invoked, with the full command list in `--help` still produced from the table \u2014 not a per-module deferral of `litellm` inside `serve`",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/llm/_warmup.py:16",
+      "id": "reuse_search-2",
+      "reason": "a node that reaches for a new deferral while this one sits unused at the wrong point in the sequence builds the parallel mechanism the plan's own rubric warns about.",
+      "text": "a deferred-import mechanism for exactly this problem already exists and is defeated by the site above: `_warmup` starts one background thread per heavy group precisely so the server \"complete its stdio handshake \u2026 while the slow imports proceed in parallel\", and `warmup.start()` runs at `imas_codex/llm/server.py:83` \u2014 which is reached only from inside `serve()` at `imas_codex/cli/serve.py:110`, i.e. after the eager group registration has already burned 20-30 s on the same imports synchronously; the endpoint must be stated against this mechanism (start the deferral before the group resolves, or make the group lazy so warmup is not racing a cost already paid)",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/graph/__init__.py:26",
+      "id": "reuse_search-3",
+      "reason": "these are the named parts \u00a72's 90 % attribution rule already requires the node to account for; naming them in the brief saves the node the profiling pass, but the endpoint does not change.",
+      "text": "census of the eager-import sites on the serve path that the lazy-group change must leave alone but the record must account for: `imas_codex/graph/__init__.py:26` runs `ensure_models_fresh()` and `:55` imports `graph.schema` (+`linkml_runtime`, 5.1 s) and `graph.models` at package import; `imas_codex/cli/discover/sequence.py` \u2192 `imas_codex/discovery/base/services.py` \u2192 `imas_codex/discovery/base/facility.py` reach that package; and `imas_codex/discovery/paths/scorer.py` imports `litellm` (21.5 s)",
+      "type": "reuse_search",
+      "would_change": false
+    },
+    {
+      "anchor": "docs/plans/serve-answers-inside-the-connect-limit.html#s2",
+      "id": "deep_module-1",
+      "reason": "the negative control is the only mechanical thing that can distinguish the deep change from a special-case wrapper, and as written it cannot.",
+      "text": "the guard \u00a72 specifies (\"a test fails when starting the server imports the language-model client library\") is narrower than the endpoint in a way that lets a wrong design pass: `litellm` is imported by a *sibling* command module (`discovery/paths/scorer.py` via `cli/discover`), never by the serve path, so a design that special-cases `serve` \u2014 a `--fast` flag, a conditional import in `serve.py`, a second entry point \u2014 passes the guard and still crosses the client limit, because the handshake cost the plan is fixing is the group registration, not one library; the guard should be asserted at the boundary the client sees (no heavy group imported when `imas-codex --help` exits and when the protocol's `initialize` is answered), over the whole heavy set rather than one library",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "tests/discovery/test_engine_import_order.py:12",
+      "id": "duplicate_owner-1",
+      "reason": "the node brief should extend these two files; two parallel harnesses would drift, and the tool enumerator reads a private registry attribute that only one owner should track.",
+      "text": "census of existing harnesses the \u00a72 checks would re-implement: `_run_fresh_interpreter` (`tests/discovery/test_engine_import_order.py:12-21`) already spawns a fresh interpreter with `PYTHONPATH` set and asserts on `sys.modules`, in a module whose docstring is \"Import order checks for discovery engines and CLI registration\" \u2014 this is the owner of an import-boundary guard, and a serve-startup guard belongs beside it (or in a helper it exports) rather than as a second subprocess harness; and the tool-list parity check \u00a72 requires has an owner too \u2014 `tests/llm/test_tool_schemas.py:20-25` `_tool_names()` walks the server's registered tool components and is driven by an `AgentsServer(dd_only=True)` fixture (`:31-34`) that needs no Neo4j",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/cli/serve.py:110",
+      "id": "duplicate_owner-2",
+      "reason": "it changes how the evidence script is written, not what the endpoint claims; the plan already fixes the quantity, tolerance and control.",
+      "text": "a second-order duplicate the brief must close: the startup record \u00a72 asks for (spawn as `.mcp.json` does, time to first `initialize`) has no owner anywhere in `scripts/` or `tests/`, and `.mcp.json` is the one place a spawn recipe is also encoded \u2014 the design should take the spawn recipe from the committed `.mcp.json` (`uv run --no-sync --project \u2026 imas-codex serve`) rather than hand-copying the argv into an evidence script, so a change to the configuration cannot silently diverge from the timings the plan cites",
+      "type": "duplicate_owner",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "4a7c953bb89f511fd172eac662055195230624c4",
+  "plan_fingerprint": "24b5d68fabd8691bae631c5d67c112b7acf6a7618e359cf58ce75c23f2f48f90",
+  "plan_slug": "serve-answers-inside-the-connect-limit",
+  "plan_version": 0,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T014428877348-plan-review-of-serve-answers-inside-the-connect-limit",
+  "reviewed_blob_sha": "c7a20ed2e5cea480aeba48e854421c66a1516be0",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 the endpoint is one deep change inside the command group, but \u00a72's guard pins a single library import rather than the handshake boundary, so a shallow per-module deferral would satisfy it while the dominant cost survives.",
+    "duplicate_owner": "a finding \u2014 the new fresh-interpreter import guard and the tool-list parity check each duplicate a harness that already exists in tests.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72 adds no CLI option, no MCP view and no refusal family, and requires the tool list to be identical by name in all three serve modes.",
+    "reuse_search": "a finding \u2014 the codebase already owns a deferred-import mechanism (`imas_codex/llm/_warmup.py`) and one eagerly-importing command group defeats it; the design must extend those, not add a third deferral path.",
+    "thin_wrapper": "pass \u2014 \u00a72 adds no layer over existing machinery; it changes what an existing entry point costs before it exists."
+  },
+  "section_digests": {
+    "_document": "5e2c783815e69924c53eb2d6d4d73623b019a3ec61c110aef2ee43e3849cb0b6",
+    "s1": "6c87335b00f52a7c2a64ee7c06ad022be9bc7092987c1e229639aea06016d904",
+    "s2": "082c68714eb24a6b8f73cc7fd3a3d86b86ffc90308b0edba2b19bb1a205b0a6e"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T01:59:32.501675+00:00",
+  "total": null
+}
