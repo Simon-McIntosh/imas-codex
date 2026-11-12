@@ -95,6 +95,16 @@
       "finding": "duplicate_owner-2",
       "reason": "the reuse map goes into the node brief, which names this owner as the module to extend; the plan states the endpoint and names no module (the unit-override record and the existing dimension-equality test)",
       "when": "2026-11-12T02:01:56.113813+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "4a7c953bb89f511fd172eac662055195230624c4",
+      "commit_basis": "edit",
+      "finding": "interface_budget-1",
+      "note": "\u00a72 and \u00a75 now state that their refusals are further classes of the existing documentation conformance findings and review checks, and \u00a77 that its refusals join the existing export gates; each says no new refusal family or option is added",
+      "reason": "",
+      "when": "2026-11-12T02:02:06.022202+00:00"
     }
   ],
   "responses": {
@@ -115,6 +125,15 @@
       "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
       "reason": "the reuse map goes into the node brief, which names this owner as the module to extend; the plan states the endpoint and names no module (the unit-override record and the existing dimension-equality test)",
       "when": "2026-11-12T02:01:56.113813+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "4a7c953bb89f511fd172eac662055195230624c4",
+      "commit_basis": "edit",
+      "note": "\u00a72 and \u00a75 now state that their refusals are further classes of the existing documentation conformance findings and review checks, and \u00a77 that its refusals join the existing export gates; each says no new refusal family or option is added",
+      "reason": "",
+      "when": "2026-11-12T02:02:06.022202+00:00"
     },
     "reuse_search-1": {
       "action": "declined",
