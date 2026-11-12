@@ -1,0 +1,53 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T07:29:17.578Z",
+  "dispatched_at": "2026-11-12T07:19:32Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-domain-per-family.html:92",
+      "id": "reasoning-1",
+      "reason": "a node building \u00a75 needs an absolute pass bar; without one the section's passing evidence can sit below the floor the sibling plan fixed for the same label set, and the cost lands on the live graph in \u00a73.",
+      "text": "\u00a75 asserts the widening improves the answer and cites `sn-catalog-grouping` only for its calibration labels; that plan records the closest measured instance of this exact change (sn-catalog-grouping.html:415,424: \"one flat Choice over all 32 domains ... derived name-domain accuracy was 0.560 (84 of 150 labelled names) ... with a floor of 0.597\", rejected under the rule fixed before its run), while \u00a75's accuracy gates are relative only \u2014 bullet 3 asks only to be \"not lower\" than \u00a72's regression reading and no bullet sets an absolute floor for the widened decisions \u2014 so \u00a75 can pass its own gate at an accuracy the repository already refused for this judgment, and \u00a73 would then write that answer to the live graph",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-domain-per-family.html:92",
+      "id": "done_when-1",
+      "reason": "the bound is the only thing standing between a widening that produces many undecided families and \u00a73's one-ruling-at-a-time path, and as a fraction of an unstated denominator it bounds neither.",
+      "text": "the new bullet bounds undecided families at \"at most one family in ten\" and gives as its reason \"so \u00a73 is not left to settle the catalog one ruling at a time\", but the plan states no family population anywhere and the only census it cites counts 20 multi-member species families among 1,975 names (`published-family-census.txt:1`), so under \u00a72's rule that \"a name with no siblings is its own family\" the denominator is dominated by single-member families \u2014 a tenth of that population is dozens of lead rulings, the very outcome the bullet says it prevents, and because \u00a75's premise is that single names held the narrowest options, those are also the families most likely to fall below the widened floor",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "ceb662906aaf26968dbabbff472a79ac0f1b68df",
+  "plan_fingerprint": "1a399e67e0af0992e152625ba3a1bf96ae8742270cb3a77211bffc5391055c88",
+  "plan_slug": "sn-domain-per-family",
+  "plan_version": 6,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T071800850857-plan-review-of-sn-domain-per-family",
+  "reviewed_blob_sha": "dfae6d141dbe9b62e89fccc7abf1a3aebb26b524",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `sn-catalog-grouping` holds the calibration labels (`scg-domain-label-sheet.json`, 73 calibration rows), `sn-catalog-consistency` \u00a75 (lines 73-76) declares its wait on this plan's \u00a73, the two census files exist, and 698 of 1,975 is the operator census's transport count.",
+    "done_when": "a finding \u2014 \u00a75's new confidence-floor bullet (plan.html:92) bounds undecided families at \"one family in ten\" without ever stating the family population it is a tenth of, and `published-family-census.txt` records only 20 species families (281 members) of the 1,975 names, so most families under \u00a72's definition are single names that \u00a75's own premise says the widening affects most.",
+    "evidence_paths": "pass \u2014 \u00a75 names `docs/evidence/fragments/sn-domain-per-family/` (which exists) for the label set and the gate log, and names `all_debug` for the gate, so nothing lands in a node-local temporary path.",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or version tags reach a symbol or comment in \u00a75; the section numbers used are plan references, which plan text may carry.",
+    "reasoning": "a finding \u2014 \u00a75's premise is that offering every catalog domain makes the answer right, but the sibling plan it cites for its labels records the same widening measured at 0.560 for a flat Choice over all 32 domains, below the 0.597 floor fixed there, while \u00a75 sets only relative bars (\"higher\", \"not lower\") and no absolute floor.",
+    "single_goal": "pass \u2014 \u00a75 carries one deliverable, the option set of \u00a72's single family decision, and states it \"adds no second decision\".",
+    "wiring": "pass \u2014 `plan-section-depends-on` declares `s5: [s2]`, \u00a73 declares `[s2, s5]` and \u00a74 `[s3]`, and the followup body states the same order (\u00a75 waits for \u00a72; \u00a73 for \u00a72 and \u00a75; \u00a74 for \u00a73)."
+  },
+  "section_digests": {
+    "_document": "a51467f2608b0391d702adeb276c2cb877c9a7a8c44801d06b57e4038ee14b5b",
+    "s1": "3d2539102f47a199cec8a14a89d42968505b563a51a390ee64710cc35f227476",
+    "s2": "aa40e5c5659822e9d8c22d4cd2fc0823ad3615e0d88e3bfdd032248dbfce0b3c",
+    "s3": "e374d958c4cb02c7ca4fb0bd10cf955e67a2db108246fdce729094bd09570c8c",
+    "s4": "02a78d9adf06476e76fb104849bcb4b1b0a2065ec569400e183771b85461eb4c",
+    "s5": "ba3671258e6dc1bec4a13e1950502dfd047a8e4326d79ca89bc21e3ccad8de11"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T07:42:03.809793+00:00",
+  "total": null
+}
