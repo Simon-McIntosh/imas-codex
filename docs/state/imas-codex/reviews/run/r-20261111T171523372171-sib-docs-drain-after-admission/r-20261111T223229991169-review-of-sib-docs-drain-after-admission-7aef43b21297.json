@@ -10,9 +10,9 @@
   "completed_at": "2026-11-11T22:51:04.363Z",
   "dimension_dispositions": {
     "durability": {
-      "kind": "folded",
-      "node": "repair-of-sib-docs-drain-after-admission-7aef43b21297",
-      "recorded_at": "2026-11-12T00:25:39.690463+00:00"
+      "kind": "exempted",
+      "reason": "the drain failed by design of its measure: it stopped stalled and exposed the drift-refresh documentation reset, which sib-docs-regression-diagnosis attributed and sib-drift-refresh-rename-lineage fixed; this run lands as a failed measurement whose evidence those nodes cite",
+      "recorded_at": "2026-11-12T00:26:14.592670+00:00"
     },
     "goal_fidelity": {
       "kind": "exempted",
