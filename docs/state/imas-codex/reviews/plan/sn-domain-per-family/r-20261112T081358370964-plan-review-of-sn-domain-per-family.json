@@ -1,0 +1,53 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T08:21:40.840Z",
+  "dispatched_at": "2026-11-12T08:14:45Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-domain-per-family/r-20261112T081358370964-plan-review-of-sn-domain-per-family/plan.html:92",
+      "id": "done_when-1",
+      "reason": "the section's central measurement can be unrunnable as written, and a node that finds too few single names must either ask the lead or silently substitute names, changing what the gate measures.",
+      "text": "bullet 1's gate rests on \"at least 60 single-member names drawn at random across every domain file that holds one\", but no cited artifact counts single-member names: \u00a71's census reports species families of three or more members only (20 families, 281 names), \u00a72's committed label set carries min_members 3 and 2,086 member ids over 197 families against 1,975 published names, and the operator census gives per-domain totals without family size. A node therefore cannot show the draw is possible \u2014 60 single names spread over the files, and the count in each \u2014 before it is the thing being measured",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-domain-per-family/r-20261112T081358370964-plan-review-of-sn-domain-per-family/plan.html:92",
+      "id": "done_when-2",
+      "reason": "the section passes or fails on an absolute bar whose two readings (all labelled names with a fallback versus decided names only) differ in both directions, so the node must choose the definition that decides its own verdict.",
+      "text": "bullet 3 requires \"the accuracy under the widened options ... is at least the 0.597 floor that plan fixed\", a floor measured on 150 labelled names with no confidence floor and no stored-domain fallback, while bullet 1 now fixes a different basis (a below-floor name counts at its stored domain) and bullet 4 applies that fallback to single names; bullet 3 states no basis, and the calibration names are Data Dictionary paths, for which a \"stored domain\" may not exist at all",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "b4533d2c211e51cdf0073dded23a233ea58a68eb",
+  "plan_fingerprint": "1ea4651f0656b892ad49f4f9fedb29aa7c01a184417411707590d6dd0426f25e",
+  "plan_slug": "sn-domain-per-family",
+  "plan_version": 10,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T081358370964-plan-review-of-sn-domain-per-family",
+  "reviewed_blob_sha": "11241825e062246f1098e18edf774b6e4b441f8a",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 sn-catalog-grouping resolves and carries the 0.560 (84 of 150) and 0.597 figures \u00a75 quotes at its lines 415 and 424; the evidence directory resolves; the 698-of-1,975 and 28-domain-file counts reconcile against the operator census.",
+    "done_when": "a finding \u2014 \u00a75's primary gate draws \"at least 60 single-member names ... across every domain file that holds one\" while neither the plan nor the evidence it cites states how many single-member names exist or how they fall across the 28 domain files; and bullet 3's absolute 0.597 bar does not state the basis. Both are findings below.",
+    "evidence_paths": "pass \u2014 the label set and gate log are committed under docs/evidence/fragments/sn-domain-per-family/, which exists and already holds \u00a72's label set and decision logs; no temporary or node-local path is named.",
+    "naming": "pass \u2014 \u00a75 introduces no plan label, stage name, ticket number or version tag; every named string is a catalog name, a domain file or an evidence path.",
+    "reasoning": "pass \u2014 the stated cause (options bounded by a name's own Data Dictionary sources, so a source-bound answer cannot be escaped) matches \u00a71's mechanism statement and its two named examples; the widened option set is decidable per family and the planted-name control in bullet 7 can fail. The two defects found are in how the gate is specified, not in the mechanism.",
+    "single_goal": "pass \u2014 \u00a75 delivers one thing: the option set grows beyond a name's source domains, decided by the one family decision \u00a72 builds, with no second decision and no separate write path added.",
+    "wiring": "pass \u2014 meta declares s5 depends on s2 and s3 depends on s2 and s5; the followup body states the same order (\u00a75 waits for \u00a72; \u00a73 waits for \u00a72 and \u00a75), and every target resolves."
+  },
+  "section_digests": {
+    "_document": "a51467f2608b0391d702adeb276c2cb877c9a7a8c44801d06b57e4038ee14b5b",
+    "s1": "3d2539102f47a199cec8a14a89d42968505b563a51a390ee64710cc35f227476",
+    "s2": "aa40e5c5659822e9d8c22d4cd2fc0823ad3615e0d88e3bfdd032248dbfce0b3c",
+    "s3": "81754c7454a907e859184cc5850ebc11c5882110ed5cca5b1b19629460c1cb2b",
+    "s4": "02a78d9adf06476e76fb104849bcb4b1b0a2065ec569400e183771b85461eb4c",
+    "s5": "0be4fb23d4ec63d51c2c103a10b53e069b231b31d6822eaab22c54b84888c54a"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T08:31:26.334365+00:00",
+  "total": null
+}
