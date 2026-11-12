@@ -1,0 +1,53 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T11:36:18.369Z",
+  "dispatched_at": "2026-11-12T11:30:48Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-domain-per-family.html:92",
+      "id": "done_when-1",
+      "reason": "the section's headline comparison would otherwise be gated on a population of 37 the plan has already proven unmeasurable, and the worker must either fail the bullet or silently drop two families.",
+      "text": "\u00a75's second bullet requires the reading \"on the 37 families of the blind sheet that both readers gave the same domain ... measured in the same run\", but the \u00a72 comparison committed with this document change measured 35: `labelled-comparison.json` carries `sheet_families_mapping_to_more_than_one_decision_family` with 2 entries (item-077 `<X>_current_density_due_to_<X>_viscosity`, item-084 `<X>_coordinate_of_<X>_magnetic_field_probe`), each of which straddles two decision families, so those two agreed sheet families have no single decision to read against; the bullet neither excludes them nor records them, leaving a \u00a75 worker unable to tell a structural floor from a shortfall",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-domain-per-family.html:119",
+      "id": "reasoning-1",
+      "reason": "the two disputed families are already routed to `g-sdpf-disputed-items` and the six agreed families sit inside the 35 measured, so both the declaration and the dispatch stand; only the commentary's arithmetic is wrong.",
+      "text": "the \u00a72 close comment states \"five of the eight families \u00a71 names carry a label both readers agree on; two of the other three are among the twelve disputed items awaiting the lead's ruling\", but the committed sheet holds all eight and its two readers agree on six (item-001, item-052, item-054, item-073, item-104 and item-113 agree; only item-006 and item-053 differ), and `labelled-comparison.json`'s own `section_one_families_measured` reads 5 while its 35 `family_rows` contain six \u00a71 patterns, so the record both understates the coverage and implies an eighth family carrying no label at all",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "bf5b8b3f797eb79494b485ae24974a40f1f7adda",
+  "plan_fingerprint": "d8a463b8e47480aa6cde5bf7644e0ae4158f0a022f794819b778b4015c81cca4",
+  "plan_slug": "sn-domain-per-family",
+  "plan_version": 19,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T112917991229-plan-review-of-sn-domain-per-family",
+  "reviewed_blob_sha": "49e51f0c267a4c52f17b03673cbcb9cdafa11505",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `disputed-items.json` resolves and holds 12 items with `lead_ruling: null` on every one, so the gate is measurable and currently open; `sdpf-family-decision.html`, `sdpf-labelled-comparison.html` and `labelled-comparison.json` all resolve, and both gate logs are committed with a final bare `EXIT=0`.",
+    "done_when": "a finding \u2014 \u00a75's second bullet (line 92) measures \"on the 37 families of the blind sheet that both readers gave the same domain\", but the \u00a72 comparison landed with this change measured 35, because two agreed sheet families each map to more than one decision family and `labelled-comparison.json` records them without the plan saying what to do with them.",
+    "evidence_paths": "pass \u2014 the gate's required evidence (`docs/evidence/fragments/sn-domain-family-labels/disputed-items.json`) and both \u00a72 fragments (`sdpf-family-decision.html`, `sdpf-labelled-comparison.html`, `labelled-comparison.json`) are committed under `docs/evidence/fragments/`; no scratchpad or node-local path is named.",
+    "naming": "pass \u2014 the changed unit adds no symbol, file, gate id or comment that carries a plan label, stage name or ticket number into code; the identifiers are evidence-data keys, which is where the plan's glossary belongs.",
+    "reasoning": "a finding \u2014 the \u00a72 close comment at line 119 miscounts the eight \u00a71 families' reader coverage against its own committed artifact, stating five agreed and \"two of the other three\" disputed where the sheet holds all eight and the readers agree on six.",
+    "single_goal": "pass \u2014 the close record covers \u00a72's one deliverable (one domain decision per family, every member reading it), and the new gate carries exactly one measure, the lead's ruling on each of the 12 disputed sheet items.",
+    "wiring": "pass \u2014 the new gate `g-sdpf-disputed-items` is attached to \u00a73 (`data-section=\"s3\" data-gated-sections=\"s3\"`), \u00a73's declared depends-on lists `s2` and `s5`, both of which exist and are declared at lines 22-23, and the followup at line 98 names the same two waits plus the lead's ruling."
+  },
+  "section_digests": {
+    "_document": "f250140e0efd072e27479d27052893ba71f3bb380d4e1353ed009647ac246472",
+    "s1": "3d2539102f47a199cec8a14a89d42968505b563a51a390ee64710cc35f227476",
+    "s2": "aa40e5c5659822e9d8c22d4cd2fc0823ad3615e0d88e3bfdd032248dbfce0b3c",
+    "s3": "81754c7454a907e859184cc5850ebc11c5882110ed5cca5b1b19629460c1cb2b",
+    "s4": "02a78d9adf06476e76fb104849bcb4b1b0a2065ec569400e183771b85461eb4c",
+    "s5": "9d613186883439372024df798c168969456f782cea0efaf018684c448f3399d4"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T11:54:21.800112+00:00",
+  "total": null
+}
