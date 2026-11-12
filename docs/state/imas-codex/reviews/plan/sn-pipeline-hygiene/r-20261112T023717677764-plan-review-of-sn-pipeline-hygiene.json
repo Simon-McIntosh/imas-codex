@@ -17,7 +17,24 @@
   "plan_slug": "sn-pipeline-hygiene",
   "plan_version": 27,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "As the review notes, content_sha256 is a derived digest, not a calibrated value, so the node reaches the same endpoint; the done-when already restricts the comparison to calibrated values.",
+      "when": "2026-11-12T02:52:21.011103+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "As the review notes, content_sha256 is a derived digest, not a calibrated value, so the node reaches the same endpoint; the done-when already restricts the comparison to calibrated values.",
+      "when": "2026-11-12T02:52:21.011103+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-pipeline-hygiene/r-20261112T023717677764-plan-review-of-sn-pipeline-hygiene.json",
   "review_run_id": "r-20261112T023717677764-plan-review-of-sn-pipeline-hygiene",
   "reviewed_blob_sha": "b6f820135e4b7e5963694b554b086c3da30f5320",
   "rubric": "content",
