@@ -1,0 +1,61 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T09:20:55.921Z",
+  "dispatched_at": "2026-11-12T09:13:57Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-domain-per-family/r-20261112T091255384431-plan-review-of-sn-domain-per-family/plan.html:92",
+      "id": "done_when-1",
+      "reason": "the gate as written measures two quantities that are not comparable, so the author must restate it as the same 37 families decided under \u00a72's own options, or as a member-name share over the same names, for the comparison to carry any information about the widening.",
+      "text": "\u00a75's second bullet reads \"on the 37 families of the blind sheet that both readers gave the same domain, the share of families whose one decision is the reader's domain is recorded beside \u00a72's reading and is not lower\", while \u00a72's reading is defined at plan.html:59 as \"the share of member names the per-family decision files under the reader's domain \u2026 beside the share the per-name decision does, and is higher\" on \"at least 30 families \u2026 each given one domain by a reader\" \u2014 a member-name share on \u00a72's own label population; so \"not lower\" compares a family share on 37 blind-sheet families with a name share on a different set, and can pass while the widened options made the answer worse, or fail for composition reasons",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-domain-per-family/r-20261112T091255384431-plan-review-of-sn-domain-per-family/plan.html:92",
+      "id": "evidence_paths-1",
+      "reason": "the node would write its gate log and the disputed-item list somewhere the later reader of \u00a72's and \u00a73's evidence does not look, which is exactly the durability failure the evidence-path rule exists to prevent.",
+      "text": "\u00a75's last bullet requires the gate log to be \"committed under the evidence directory\" and the paragraph says the disputed items are listed \"in this section's evidence\", but no evidence directory is named in \u00a75: the only path it names is `docs/evidence/fragments/sn-domain-family-labels/` (the readers' sheet), while \u00a72 (plan.html:62) and \u00a73 (plan.html:67) both name `docs/evidence/fragments/sn-domain-per-family/`, so a node has two existing directories that both satisfy the words and no rule to choose",
+      "type": "evidence_paths",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-domain-per-family/r-20261112T091255384431-plan-review-of-sn-domain-per-family/plan.html:92",
+      "id": "anchors_resolve-1",
+      "reason": "the set is fully recoverable from the two committed label files, and \u00a75's fifth bullet already requires the node to list every decision-versus-reader disagreement, so no node is sent to a path that does not resolve.",
+      "text": "\"The 12 items they disagree on, 3 families and 9 single names, are listed with both readers' domains in this section's evidence\" names no committed listing: `docs/evidence/fragments/sn-domain-family-labels/` holds `labels.json` and `labels-second-reader.json` (113 rows each) plus two notes files that discuss hard distinctions but list no disputed set, so the 12 are derivable by joining the two files rather than listed",
+      "type": "anchors_resolve",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "1f83ca4e2eb25922b620b279006e7ee19a7ecee7",
+  "plan_fingerprint": "e350fadc22dda6a1700b89ea153defbc72dd7810e519e6fc1a2243e88a5f91bd",
+  "plan_slug": "sn-domain-per-family",
+  "plan_version": 12,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T091255384431-plan-review-of-sn-domain-per-family",
+  "reviewed_blob_sha": "34c860efae4baa96597b340d0943d6e48314db6d",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 the paragraph asserts \"The 12 items they disagree on, 3 families and 9 single names, are listed with both readers' domains in this section's evidence\", and no committed artifact lists them; the cited directory, sheet and both label files do resolve, and the plan's counts all reconcile with them (40 families, 70 drawn singles, 3 named names, 37/61 agreement, 12 disputes).",
+    "done_when": "a finding \u2014 \u00a75's second bullet gates on \"the share of families \u2026 is recorded beside \u00a72's reading and is not lower\", but \u00a72's reading is a share of member names on \u00a72's own labelled families, so the gate compares two different quantities on two different populations.",
+    "evidence_paths": "a finding \u2014 \u00a75's last bullet commits the gate log \"under the evidence directory\" and its paragraph refers to \"this section's evidence\", but \u00a75 names no evidence directory anywhere, and the only path it names is the readers' sheet directory.",
+    "naming": "pass \u2014 \u00a75 introduces no symbol, file or comment, and carries no plan labels, stage names, ticket numbers or version tags; the only identifier-like text is the data path and the existing `sn-catalog-grouping` plan name.",
+    "reasoning": "pass \u2014 the stated cause is the one the cited evidence shows (transport 698 of 1,975 in `published-operator-census.txt`, and the two readers' blind labels file `greenwald_density` under core_plasma_physics and `safety_factor` under equilibrium against their stored transport), the endpoint is reachable and can fail (an absolute 0.597 floor against the measured 0.560, plus a planted-name control whose second arm must not receive the concept's domain), and the section names no code path, step sequence or function.",
+    "single_goal": "pass \u2014 \u00a75 delivers one thing, a widened option set for \u00a72's one family decision; its bullets measure that change (accuracy against the reader labels, floor-bound families, live-copy shares, cost) rather than carrying a second deliverable.",
+    "wiring": "pass \u2014 `plan-section-depends-on` declares `\"s5\": [\"sn-domain-per-family#s2\"]` and `\"s3\": [\"sn-domain-per-family#s2\",\"sn-domain-per-family#s5\"]`, and the followup body at plan.html:96 repeats the same order (\u00a75 waits for \u00a72; \u00a73 waits for \u00a72 and \u00a75)."
+  },
+  "section_digests": {
+    "_document": "a51467f2608b0391d702adeb276c2cb877c9a7a8c44801d06b57e4038ee14b5b",
+    "s1": "3d2539102f47a199cec8a14a89d42968505b563a51a390ee64710cc35f227476",
+    "s2": "aa40e5c5659822e9d8c22d4cd2fc0823ad3615e0d88e3bfdd032248dbfce0b3c",
+    "s3": "81754c7454a907e859184cc5850ebc11c5882110ed5cca5b1b19629460c1cb2b",
+    "s4": "02a78d9adf06476e76fb104849bcb4b1b0a2065ec569400e183771b85461eb4c",
+    "s5": "9d3ff242b3cb133fc163bb24ca7576def45beaab20c4ce5772d5ca9adf6ab97f"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T09:31:51.048073+00:00",
+  "total": null
+}
