@@ -1,0 +1,53 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T12:02:54.463Z",
+  "dispatched_at": "2026-11-12T11:58:37Z",
+  "findings": [
+    {
+      "anchor": "plan.html:92",
+      "id": "reasoning-1",
+      "reason": "the section's motivating instance is already resolved by the option set it proposes to widen, so the paragraph misstates the defect the section exists to fix and the named-name evidence in bullet 1 cannot show what the paragraph says it shows.",
+      "text": "the paragraph says \"a name with no siblings is still offered only the domains of its own Data Dictionary sources, so `safety_factor` and `greenwald_density` stay under transport\", but the committed `docs/evidence/fragments/sn-domain-per-family/labelled-comparison.json` records both with `stored: transport` and `filed: equilibrium` / `filed: core_plasma_physics` (`stored_match: false`, `family_match: true`) under the landed \u00a72 decision \u2014 its own sources already offer the concept's domain, so the per-family decision does not leave them under transport. A node reading \u00a75 would treat these two as names the widening must rescue and would measure the widening against a baseline that already answers them correctly.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:92",
+      "id": "done_when-1",
+      "reason": "both arms are measured in one run, so whatever convention the node applies to the widened arm applies to \u00a72's arm too, and the comparison stays like-for-like without the plan stating it.",
+      "text": "bullet 2 requires the widened member-name share to be \"not lower\" than \u00a72's on the same 35 families, but fixes no rule for a family the widened decision leaves below the floor, whereas bullet 1 counts a below-floor single at its stored domain and bullet 4 counts undecided families separately; the same family could contribute its stored domain or be dropped from the denominator, and the bar passes under one reading and not the other.",
+      "type": "done_when",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "66d9279c15f3f1bca1c7b9381f8eea3e302294f0",
+  "plan_fingerprint": "3eb2765b10bba8ad77fd446f1043205dbd6fb0754a61b1b5645389d20f7a9e25",
+  "plan_slug": "sn-domain-per-family",
+  "plan_version": 21,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T115730408886-plan-review-of-sn-domain-per-family",
+  "reviewed_blob_sha": "4fb698e5d322f9683dab31ec53c24ab9c71b2738",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `docs/evidence/fragments/sn-domain-family-labels/`, `disputed-items.json` and the `sn-catalog-grouping` plan all resolve; the section carries no href to resolve.",
+    "done_when": "a finding \u2014 bullet 2 fixes no convention for a family the widened decision leaves below the confidence floor, while bullet 1 states one for single names and bullet 4 for the count, so the member-name share has two admissible readings.",
+    "evidence_paths": "pass \u2014 the section names `docs/evidence/fragments/sn-domain-per-family/` for its evidence and gate log, and that directory exists in the repository with committed gate logs.",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or version tags enter anything the section asks to be written; the `\u00a7`-references are plan-internal cross-references.",
+    "reasoning": "a finding \u2014 the section's opening instance, that `safety_factor` and `greenwald_density` \"stay under transport\" under source-bounded options, is contradicted by the plan's own committed comparison, which files both at the readers' domain already.",
+    "single_goal": "pass \u2014 \u00a75 delivers one thing, the widened option set and its measurement against declared bars; every bullet measures that one change.",
+    "wiring": "pass \u2014 \u00a75 declares `depends-on: s2`, \u00a73 declares `depends-on: [s2, s5]`, and gate `g-sdpf-disputed-items` sits on s3, which is the section the paragraph's \"before \u00a73 writes\" clause constrains."
+  },
+  "section_digests": {
+    "_document": "f250140e0efd072e27479d27052893ba71f3bb380d4e1353ed009647ac246472",
+    "s1": "3d2539102f47a199cec8a14a89d42968505b563a51a390ee64710cc35f227476",
+    "s2": "aa40e5c5659822e9d8c22d4cd2fc0823ad3615e0d88e3bfdd032248dbfce0b3c",
+    "s3": "81754c7454a907e859184cc5850ebc11c5882110ed5cca5b1b19629460c1cb2b",
+    "s4": "02a78d9adf06476e76fb104849bcb4b1b0a2065ec569400e183771b85461eb4c",
+    "s5": "6c60bb378daccadf2d976be427c2ada641a276ba93f1f4b06b25c3444ad7908f"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T13:13:45.808697+00:00",
+  "total": null
+}
