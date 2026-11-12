@@ -25,7 +25,30 @@
   "plan_slug": "sn-domain-per-family",
   "plan_version": 16,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "bf5b8b3f797eb79494b485ae24974a40f1f7adda",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "\u00a72 is declared done with its close comment, and the followup now prompts \u00a75",
+      "reason": "",
+      "when": "2026-11-12T11:28:46.181813+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "bf5b8b3f797eb79494b485ae24974a40f1f7adda",
+      "commit_basis": "edit",
+      "note": "\u00a72 is declared done with its close comment, and the followup now prompts \u00a75",
+      "reason": "",
+      "when": "2026-11-12T11:28:46.181813+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-domain-per-family/r-20261112T101302701909-plan-review-of-sn-domain-per-family.json",
   "review_run_id": "r-20261112T101302701909-plan-review-of-sn-domain-per-family",
   "reviewed_blob_sha": "efe3a83ff1a7a3c36a9ce4b3e9dc5f2b6c7367b2",
   "rubric": "content",
