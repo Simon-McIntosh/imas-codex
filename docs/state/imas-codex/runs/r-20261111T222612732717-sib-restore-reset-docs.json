@@ -1,0 +1,2012 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 3,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "8466f0e0c6ea3e1e8b34c369952139a9225e47d2",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 2826707,
+      "input_tokens_cumulative": 2826707,
+      "output_tokens": 8766,
+      "output_tokens_cumulative": 8766,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 1465,
+    "files": 4,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_governed_description_omits_storage_rank",
+        "path": "tests/standard_names/test_audit_check_precision.py"
+      },
+      "run_function": {
+        "line": 7199,
+        "name": "_docs_restore_preview",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 7250
+    },
+    {
+      "existing_function": {
+        "line": 1723,
+        "name": "test_version_context",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 7879,
+        "name": "_apply_source_exchange",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 7940
+    },
+    {
+      "existing_function": {
+        "line": 2389,
+        "name": "test_fronts_database_page_lists_signals",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 7879,
+        "name": "_apply_source_exchange",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 7940
+    },
+    {
+      "existing_function": {
+        "line": 93,
+        "name": "test_a_field_label_is_emptied_from_the_evidence",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "run_function": {
+        "line": 7879,
+        "name": "_apply_source_exchange",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 7942
+    },
+    {
+      "existing_function": {
+        "line": 138,
+        "name": "test_a_label_source_keeps_the_field_path_that_can_deny_a_claim",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "run_function": {
+        "line": 7879,
+        "name": "_apply_source_exchange",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 7942
+    },
+    {
+      "existing_function": {
+        "line": 254,
+        "name": "test_a_claim_that_fixes_its_locus_still_vetoes_on_a_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "run_function": {
+        "line": 7879,
+        "name": "_apply_source_exchange",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 7942
+    },
+    {
+      "existing_function": {
+        "line": 275,
+        "name": "test_the_judge_never_sees_a_field_label",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "run_function": {
+        "line": 7879,
+        "name": "_apply_source_exchange",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 7942
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_a_generic_claim_about_a_locus_is_settled_before_the_judge",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "run_function": {
+        "line": 7879,
+        "name": "_apply_source_exchange",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 7942
+    },
+    {
+      "existing_function": {
+        "line": 457,
+        "name": "test_an_asserted_combination_still_vetoes_on_its_denial",
+        "path": "tests/standard_names/test_contradiction_veto_question.py"
+      },
+      "run_function": {
+        "line": 7879,
+        "name": "_apply_source_exchange",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 7942
+    },
+    {
+      "existing_function": {
+        "line": 155,
+        "name": "test_cocos_source_path_supplies_label_from_dd_reader",
+        "path": "tests/standard_names/test_jev_name_review.py"
+      },
+      "run_function": {
+        "line": 7879,
+        "name": "_apply_source_exchange",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 7942
+    },
+    {
+      "existing_function": {
+        "line": 399,
+        "name": "enrich",
+        "path": "tests/standard_names/test_review_source_context.py"
+      },
+      "run_function": {
+        "line": 7879,
+        "name": "_apply_source_exchange",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 7942
+    },
+    {
+      "existing_function": {
+        "line": 1040,
+        "name": "test_lineages_section_present_when_populated",
+        "path": "tests/tools/test_migration_guide.py"
+      },
+      "run_function": {
+        "line": 7879,
+        "name": "_apply_source_exchange",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 7940
+    },
+    {
+      "existing_function": {
+        "line": 126,
+        "name": "test_transient_lock_only_write_is_exempt",
+        "path": "tests/graph/test_updated_at_coverage.py"
+      },
+      "run_function": {
+        "line": 8438,
+        "name": "_apply_lifecycleless_stub_reconcile",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 8622
+    },
+    {
+      "existing_function": {
+        "line": 338,
+        "name": "_load_fixture_graph",
+        "path": "tests/graph_mcp/conftest.py"
+      },
+      "run_function": {
+        "line": 8438,
+        "name": "_apply_lifecycleless_stub_reconcile",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 8622
+    },
+    {
+      "existing_function": {
+        "line": 62,
+        "name": "test_line_anchored_comment_withholds_only_its_identity",
+        "path": "tests/standard_names/test_approve_withholds_on_comments.py"
+      },
+      "run_function": {
+        "line": 8438,
+        "name": "_apply_lifecycleless_stub_reconcile",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 8622
+    },
+    {
+      "existing_function": {
+        "line": 285,
+        "name": "test_structural_parent_projection_stub_is_adopted",
+        "path": "tests/standard_names/test_compose_adopts_pending_stub.py"
+      },
+      "run_function": {
+        "line": 8438,
+        "name": "_apply_lifecycleless_stub_reconcile",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 8622
+    },
+    {
+      "existing_function": {
+        "line": 393,
+        "name": "_seed_finalized_successor",
+        "path": "tests/standard_names/test_compose_adopts_pending_stub.py"
+      },
+      "run_function": {
+        "line": 8438,
+        "name": "_apply_lifecycleless_stub_reconcile",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 8622
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "_seed",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 8438,
+        "name": "_apply_lifecycleless_stub_reconcile",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 8622
+    },
+    {
+      "existing_function": {
+        "line": 63,
+        "name": "_snapshot_bytes",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 8438,
+        "name": "_apply_lifecycleless_stub_reconcile",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 8622
+    },
+    {
+      "existing_function": {
+        "line": 100,
+        "name": "test_scalar_selected_dedup_removes_other_binding_and_projection",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 8438,
+        "name": "_apply_lifecycleless_stub_reconcile",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 8622
+    },
+    {
+      "existing_function": {
+        "line": 370,
+        "name": "test_ineligible_source_retirement_surfaces_orphaned_names",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 8438,
+        "name": "_apply_lifecycleless_stub_reconcile",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 8622
+    },
+    {
+      "existing_function": {
+        "line": 61,
+        "name": "test_stale_detach_postcondition_counts_a_status_less_producer",
+        "path": "tests/standard_names/test_null_status_predicates_manifest.py"
+      },
+      "run_function": {
+        "line": 8438,
+        "name": "_apply_lifecycleless_stub_reconcile",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 8622
+    },
+    {
+      "existing_function": {
+        "line": 127,
+        "name": "test_ordinary_source_migration_admits_a_status_less_source",
+        "path": "tests/standard_names/test_null_status_predicates_manifest.py"
+      },
+      "run_function": {
+        "line": 8438,
+        "name": "_apply_lifecycleless_stub_reconcile",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 8622
+    },
+    {
+      "existing_function": {
+        "line": 240,
+        "name": "test_transactional_dry_run_hash_apply_and_replay",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 8438,
+        "name": "_apply_lifecycleless_stub_reconcile",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 8622
+    },
+    {
+      "existing_function": {
+        "line": 483,
+        "name": "test_childful_rebind_preserves_parent_closure",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 8438,
+        "name": "_apply_lifecycleless_stub_reconcile",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 8622
+    },
+    {
+      "existing_function": {
+        "line": 533,
+        "name": "test_late_failure_rolls_back_materialized_parent",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 8438,
+        "name": "_apply_lifecycleless_stub_reconcile",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 8622
+    },
+    {
+      "existing_function": {
+        "line": 594,
+        "name": "test_authoritative_sibling_deletes_spurious_stub_and_repairs_scalar",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 8438,
+        "name": "_apply_lifecycleless_stub_reconcile",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 8622
+    },
+    {
+      "existing_function": {
+        "line": 677,
+        "name": "test_nonaccepted_sibling_refuses_spurious_stub_deletion",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 8438,
+        "name": "_apply_lifecycleless_stub_reconcile",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 8622
+    },
+    {
+      "existing_function": {
+        "line": 725,
+        "name": "test_extra_non_dd_producer_refuses_spurious_stub_deletion_in_graph",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 8438,
+        "name": "_apply_lifecycleless_stub_reconcile",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 8622
+    },
+    {
+      "existing_function": {
+        "line": 779,
+        "name": "test_binding_change_between_manifest_and_cas_rolls_back",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 8438,
+        "name": "_apply_lifecycleless_stub_reconcile",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 8622
+    },
+    {
+      "existing_function": {
+        "line": 855,
+        "name": "test_new_producer_between_scalar_cas_and_deletion_rolls_back",
+        "path": "tests/standard_names/test_reconcile_lifecycleless_stubs.py"
+      },
+      "run_function": {
+        "line": 8438,
+        "name": "_apply_lifecycleless_stub_reconcile",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 8622
+    },
+    {
+      "existing_function": {
+        "line": 34,
+        "name": "_seed",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 8438,
+        "name": "_apply_lifecycleless_stub_reconcile",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 8622
+    },
+    {
+      "existing_function": {
+        "line": 96,
+        "name": "_seed_mirror_mismatch",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 8438,
+        "name": "_apply_lifecycleless_stub_reconcile",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 8622
+    },
+    {
+      "existing_function": {
+        "line": 234,
+        "name": "test_signed_dispositions_apply_all_modes_and_preserve_outside_allowlist",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 8438,
+        "name": "_apply_lifecycleless_stub_reconcile",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 8622
+    },
+    {
+      "existing_function": {
+        "line": 747,
+        "name": "test_signed_mirror_repair_applies_scalar_and_projection_classes_exactly",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 8438,
+        "name": "_apply_lifecycleless_stub_reconcile",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 8622
+    },
+    {
+      "existing_function": {
+        "line": 83,
+        "name": "_seed_signed_live_rows",
+        "path": "tests/standard_names/test_stale_source_detach.py"
+      },
+      "run_function": {
+        "line": 8438,
+        "name": "_apply_lifecycleless_stub_reconcile",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 8622
+    },
+    {
+      "existing_function": {
+        "line": 36,
+        "name": "_seed",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 8438,
+        "name": "_apply_lifecycleless_stub_reconcile",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 8622
+    },
+    {
+      "existing_function": {
+        "line": 92,
+        "name": "_participant_snapshot_bytes",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 8438,
+        "name": "_apply_lifecycleless_stub_reconcile",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 8622
+    },
+    {
+      "existing_function": {
+        "line": 122,
+        "name": "test_direct_ancestor_fold_preserves_lineage_and_retargets_source",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 8438,
+        "name": "_apply_lifecycleless_stub_reconcile",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 8622
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_absent_upstream_stale_source_detaches_and_stays_stale",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 8438,
+        "name": "_apply_lifecycleless_stub_reconcile",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 8622
+    },
+    {
+      "existing_function": {
+        "line": 452,
+        "name": "test_concurrent_authority_drift_invalidates_apply",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 8438,
+        "name": "_apply_lifecycleless_stub_reconcile",
+        "path": "imas_codex/standard_names/signed_manifest.py"
+      },
+      "window_line": 8622
+    },
+    {
+      "existing_function": {
+        "line": 112,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_ordinary_source_migration.py"
+      },
+      "run_function": {
+        "line": 29,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 37
+    },
+    {
+      "existing_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "run_function": {
+        "line": 29,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 37
+    },
+    {
+      "existing_function": {
+        "line": 93,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_signed_manifest_operator.py"
+      },
+      "run_function": {
+        "line": 29,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 37
+    },
+    {
+      "existing_function": {
+        "line": 72,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_signed_supersede_edge.py"
+      },
+      "run_function": {
+        "line": 29,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 37
+    },
+    {
+      "existing_function": {
+        "line": 108,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_source_target_reconciliation.py"
+      },
+      "run_function": {
+        "line": 29,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 37
+    },
+    {
+      "existing_function": {
+        "line": 133,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_structural_release.py"
+      },
+      "run_function": {
+        "line": 29,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 37
+    },
+    {
+      "existing_function": {
+        "line": 91,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_structural_reparent.py"
+      },
+      "run_function": {
+        "line": 29,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 37
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_structural_source_revival.py"
+      },
+      "run_function": {
+        "line": 29,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 37
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_supersede_successor_scalar.py"
+      },
+      "run_function": {
+        "line": 29,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 37
+    },
+    {
+      "existing_function": {
+        "line": 96,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_unbound_source_attachment.py"
+      },
+      "run_function": {
+        "line": 29,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 37
+    },
+    {
+      "existing_function": {
+        "line": 55,
+        "name": "client",
+        "path": "tests/standard_names/test_attachment_stranding_hold.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "client",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 87
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "client",
+        "path": "tests/standard_names/test_dd_residue_release.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "client",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 87
+    },
+    {
+      "existing_function": {
+        "line": 27,
+        "name": "client",
+        "path": "tests/standard_names/test_null_status_predicates_others.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "client",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 87
+    },
+    {
+      "existing_function": {
+        "line": 141,
+        "name": "client",
+        "path": "tests/standard_names/test_ordinary_source_migration.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "client",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 87
+    },
+    {
+      "existing_function": {
+        "line": 110,
+        "name": "client",
+        "path": "tests/standard_names/test_rewire_relocation_retire.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "client",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 87
+    },
+    {
+      "existing_function": {
+        "line": 195,
+        "name": "client",
+        "path": "tests/standard_names/test_signed_manifest_operator.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "client",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 87
+    },
+    {
+      "existing_function": {
+        "line": 35,
+        "name": "client",
+        "path": "tests/standard_names/test_signed_supersede_edge.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "client",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 87
+    },
+    {
+      "existing_function": {
+        "line": 137,
+        "name": "client",
+        "path": "tests/standard_names/test_source_target_reconciliation.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "client",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 87
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "client",
+        "path": "tests/standard_names/test_structural_release.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "client",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 87
+    },
+    {
+      "existing_function": {
+        "line": 120,
+        "name": "client",
+        "path": "tests/standard_names/test_structural_reparent.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "client",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 87
+    },
+    {
+      "existing_function": {
+        "line": 138,
+        "name": "client",
+        "path": "tests/standard_names/test_structural_source_revival.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "client",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 87
+    },
+    {
+      "existing_function": {
+        "line": 32,
+        "name": "client",
+        "path": "tests/standard_names/test_supersede_successor_scalar.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "client",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 87
+    },
+    {
+      "existing_function": {
+        "line": 125,
+        "name": "client",
+        "path": "tests/standard_names/test_unbound_source_attachment.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "client",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 88
+    },
+    {
+      "existing_function": {
+        "line": 186,
+        "name": "test_show_reports_exact_paths_and_is_read_only",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 255
+    },
+    {
+      "existing_function": {
+        "line": 47,
+        "name": "context_row",
+        "path": "tests/graph/test_dd_build_classify_tree.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 281
+    },
+    {
+      "existing_function": {
+        "line": 581,
+        "name": "test_returns_list_of_dicts",
+        "path": "tests/graph/test_dd_domain_classifier.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 281
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "context_row",
+        "path": "tests/graph/test_dd_domain_classifier_jev.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 281
+    },
+    {
+      "existing_function": {
+        "line": 8,
+        "name": "_search_fixture",
+        "path": "tests/ids/test_slot_context.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 255
+    },
+    {
+      "existing_function": {
+        "line": 2503,
+        "name": "test_search_docs_includes_matching_signals",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 256
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "sample_standard_names",
+        "path": "tests/standard_names/conftest.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 281
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "_ctx",
+        "path": "tests/standard_names/fanout/test_refine_baseline_noop.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 280
+    },
+    {
+      "existing_function": {
+        "line": 27,
+        "name": "_full_item",
+        "path": "tests/standard_names/test_compose_names_context.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 255
+    },
+    {
+      "existing_function": {
+        "line": 1573,
+        "name": "test_get_exact_gap_includes_observations_and_state_history",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 281
+    },
+    {
+      "existing_function": {
+        "line": 164,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_dd_residue_release.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 283
+    },
+    {
+      "existing_function": {
+        "line": 118,
+        "name": "test_docs_prompt_renders_cocos_section",
+        "path": "tests/standard_names/test_docs_cocos_injection.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 280
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_enrich_populates_source_paths",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 256
+    },
+    {
+      "existing_function": {
+        "line": 110,
+        "name": "test_enrich_populates_dd_source_docs_and_aliases",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 256
+    },
+    {
+      "existing_function": {
+        "line": 333,
+        "name": "test_generate_docs_user_template_renders_source_paths",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 280
+    },
+    {
+      "existing_function": {
+        "line": 404,
+        "name": "test_generate_docs_user_template_renders_without_dd_context",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 280
+    },
+    {
+      "existing_function": {
+        "line": 427,
+        "name": "test_ineligible_source_retirement_refuses_eligible_backing",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 303
+    },
+    {
+      "existing_function": {
+        "line": 379,
+        "name": "test_export_emits_generic_source_bindings_and_preserves_accounting",
+        "path": "tests/standard_names/test_export_exclusion_ledger.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 280
+    },
+    {
+      "existing_function": {
+        "line": 48,
+        "name": "_row",
+        "path": "tests/standard_names/test_ordinary_source_migration.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 256
+    },
+    {
+      "existing_function": {
+        "line": 112,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_ordinary_source_migration.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 283
+    },
+    {
+      "existing_function": {
+        "line": 84,
+        "name": "_claim_state",
+        "path": "tests/standard_names/test_refine_claim_recovery.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 280
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "_make_name_context",
+        "path": "tests/standard_names/test_refine_prompts.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 280
+    },
+    {
+      "existing_function": {
+        "line": 204,
+        "name": "_specification",
+        "path": "tests/standard_names/test_repair_authority_builder.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 284
+    },
+    {
+      "existing_function": {
+        "line": 28,
+        "name": "_full_review_item",
+        "path": "tests/standard_names/test_review_names_context.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 255
+    },
+    {
+      "existing_function": {
+        "line": 399,
+        "name": "enrich",
+        "path": "tests/standard_names/test_review_source_context.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 256
+    },
+    {
+      "existing_function": {
+        "line": 43,
+        "name": "_row",
+        "path": "tests/standard_names/test_rewire_relocation_retire.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 255
+    },
+    {
+      "existing_function": {
+        "line": 241,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_rewire_relocation_retire.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 283
+    },
+    {
+      "existing_function": {
+        "line": 183,
+        "name": "test_search_post_filter_kind",
+        "path": "tests/standard_names/test_search_streams.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 256
+    },
+    {
+      "existing_function": {
+        "line": 29,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 289
+    },
+    {
+      "existing_function": {
+        "line": 93,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_signed_manifest_operator.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 283
+    },
+    {
+      "existing_function": {
+        "line": 266,
+        "name": "_authority",
+        "path": "tests/standard_names/test_signed_source_exchange.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 282
+    },
+    {
+      "existing_function": {
+        "line": 72,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_signed_supersede_edge.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 283
+    },
+    {
+      "existing_function": {
+        "line": 39,
+        "name": "_authority",
+        "path": "tests/standard_names/test_signed_supersede_replay.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 280
+    },
+    {
+      "existing_function": {
+        "line": 108,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_source_target_reconciliation.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 273
+    },
+    {
+      "existing_function": {
+        "line": 133,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_structural_release.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 283
+    },
+    {
+      "existing_function": {
+        "line": 91,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_structural_reparent.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 283
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_structural_source_revival.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 283
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_supersede_successor_scalar.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 283
+    },
+    {
+      "existing_function": {
+        "line": 34,
+        "name": "_row",
+        "path": "tests/standard_names/test_unbound_source_attachment.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 256
+    },
+    {
+      "existing_function": {
+        "line": 96,
+        "name": "_write_authority",
+        "path": "tests/standard_names/test_unbound_source_attachment.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 283
+    },
+    {
+      "existing_function": {
+        "line": 440,
+        "name": "test_build_process_table_multi_node",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 255
+    },
+    {
+      "existing_function": {
+        "line": 339,
+        "name": "test_hybrid_boost_dual_match",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 256
+    },
+    {
+      "existing_function": {
+        "line": 388,
+        "name": "test_text_only_match_included",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 256
+    },
+    {
+      "existing_function": {
+        "line": 433,
+        "name": "test_full_searchhit_metadata",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 256
+    },
+    {
+      "existing_function": {
+        "line": 503,
+        "name": "test_vector_query_includes_node_category_filter",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 256
+    },
+    {
+      "existing_function": {
+        "line": 571,
+        "name": "test_ids_coverage_in_summary",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 256
+    },
+    {
+      "existing_function": {
+        "line": 668,
+        "name": "test_text_only_match_uses_text_score",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 256
+    },
+    {
+      "existing_function": {
+        "line": 706,
+        "name": "test_dual_match_boosted",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 256
+    },
+    {
+      "existing_function": {
+        "line": 746,
+        "name": "test_enrichment_includes_lifecycle",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 256
+    },
+    {
+      "existing_function": {
+        "line": 216,
+        "name": "test_format_path_context_report_renders_cocos_kin_and_badges",
+        "path": "tests/tools/test_dd_search_quality.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 255
+    },
+    {
+      "existing_function": {
+        "line": 260,
+        "name": "test_linked_pages_relationships",
+        "path": "tests/wiki/test_graph_ops_unit.py"
+      },
+      "run_function": {
+        "line": 234,
+        "name": "test_set_properties_is_still_refused_on_the_same_live_child_name",
+        "path": "tests/standard_names/test_signed_docs_restore.py"
+      },
+      "window_line": 282
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "8fee17e92822a0289edc14e8fa48bae1d3a24cd2",
+    "e42d6b2c39d68eb11682b602c7f77328c8173112",
+    "dd4d753b2b8da9d060084cb16341d10c3beb85d2",
+    "1baaf5d5630b6ff0ffb3d923aac1a36a3025fb44",
+    "377ebb4a57e9be3389ac05ab5537094ca292a22d",
+    "748927474661a6e796a9ee686ab15b7d09ace6c6"
+  ],
+  "completed_at": "2026-11-12T01:29:37Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-11-11T22:27:56Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "passed",
+  "gate_check": {
+    "command": "env -C /tmp/reckon-crew-scratch/r-20261111T222612732717-sib-restore-reset-docs/graph-control/head UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261111T222612732717-sib-restore-reset-docs/graph-control/head /home/ITER/mcintos/Code/imas-codex/.venv/bin/python -m pytest -m graph -p no:cacheprovider tests/standard_names/test_signed_docs_restore.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T222612732717-sib-restore-reset-docs/gate-graph-head.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.9584415584415584,
+    "plan": "sn-integrity-backlog",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-11-11T23:26:14.588718+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-11-11T22:26:14Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 6,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 8,
+    "headroom": 3,
+    "mean_context": 120000,
+    "observed_at": "2026-11-11T22:26:11Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 6,
+      "aggregate_tokens_per_second": 415.817,
+      "detail": "",
+      "mean_tokens_per_second": 63.003,
+      "observed_at": "2026-11-11T22:26:11Z",
+      "runs": 6.6,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-12T01:29:37Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T222612732717-sib-restore-reset-docs/manifest.md",
+  "member": "disposable-r-20261111T222612732717-sib-restore-reset-docs",
+  "model_key": "flash",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/standard_names/test_signed_docs_restore.py::test_docs_restore_is_admitted_on_a_name_with_a_live_structural_child",
+      "tests/standard_names/test_signed_docs_restore.py::test_docs_restore_refuses_a_payload_carrying_a_structural_field"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "baseline_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/standard_names/test_signed_docs_restore.py::test_docs_restore_is_admitted_on_a_name_with_a_live_structural_child",
+      "tests/standard_names/test_signed_docs_restore.py::test_docs_restore_refuses_a_payload_carrying_a_structural_field"
+    ],
+    "control_run_failed": true,
+    "declaration": "a name in partition (a) or (b) must receive no restore write and no receipt",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T222612732717-sib-restore-reset-docs/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T222612732717-sib-restore-reset-docs/negative-control.log",
+    "test_paths": [
+      "tests/standard_names/test_signed_docs_restore.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "sib-restore-reset-docs",
+  "node_definition": {
+    "admission_findings": [],
+    "after": [],
+    "anchor_paths": [],
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "elevated",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 2740,
+          "cached_input_tokens": 592077,
+          "input_tokens": 594819,
+          "output_tokens": 1738,
+          "reasoning_output_tokens": 436,
+          "total_tokens": 596557,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+      "session_id": "4f554c2d-3a28-4c55-8645-67a1e8a30dea"
+    },
+    "done_when": "docs/evidence/fragments/sn-integrity-backlog/sib-restore-reset-docs.html lists the names whose accepted documentation was reset by refresh_drifted_sources at the startup of sn run job 1310773 (the 400 attributed in docs/evidence/fragments/sn-integrity-backlog/sib-docs-regression-diagnosis.html, each with a DocsRevision snapshot created 2026-11-11 17:28:08-17:28:35Z), and partitions them: (a) names currently at docs_stage accepted again, left untouched; (b) names whose sources are among the genuine drifts the corrected refresh still reports (a read-only dry run of refresh_drifted_sources at origin/main), left for regeneration; (c) every remaining name, restored to its pre-reset documentation and docs_stage accepted from its own DocsRevision snapshot through the repository's signed write path, each with a receipt naming the snapshot it restored from; the counts (a)+(b)+(c) sum to the attributed set; a read-back shows each (c) name's documentation equals its snapshot text and its docs_stage is accepted; a control name in (a) shows unchanged documentation; accepted-name docs_stage counts before and after are reported; no LLM spend and no sn run; if the repository has no signed writer that restores documentation from a DocsRevision, stop and report the write site needed rather than writing raw Cypher",
+    "estimated_hours": null,
+    "goal": "Restore the accepted documentation the drift refresh reset during the 2026-11-11 drain from its DocsRevision snapshots",
+    "id": "sib-restore-reset-docs",
+    "images": [],
+    "inputs": [
+      "docs/evidence/fragments/sn-integrity-backlog/sib-docs-regression-diagnosis.html"
+    ],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-11-11T22:26:14Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 6,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 8,
+      "headroom": 3,
+      "mean_context": 120000,
+      "observed_at": "2026-11-11T22:26:11Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 6,
+        "aggregate_tokens_per_second": 415.817,
+        "detail": "",
+        "mean_tokens_per_second": 63.003,
+        "observed_at": "2026-11-11T22:26:11Z",
+        "runs": 6.6,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T222612732717-sib-restore-reset-docs/manifest.md",
+    "negative_control": "a name in partition (a) or (b) must receive no restore write and no receipt",
+    "over_fence_reason": "",
+    "peer_scopes": {
+      "scc-chaincap-remeasure": [
+        "docs/evidence/fragments/sn-catalog-consistency/scc-chaincap-remeasure-run.py",
+        "docs/evidence/fragments/sn-catalog-consistency/scc-chaincap-remeasure.html",
+        "docs/evidence/fragments/sn-catalog-consistency/scc-chaincap-remeasure.json",
+        "docs/figures/sn-catalog-consistency/scc-chaincap-remeasure"
+      ],
+      "scc-momentum-tip": [
+        "docs/evidence/fragments/sn-catalog-consistency/scc-momentum-tip-run.py",
+        "docs/evidence/fragments/sn-catalog-consistency/scc-momentum-tip.html",
+        "docs/evidence/fragments/sn-catalog-consistency/scc-momentum-tip.json",
+        "docs/figures/sn-catalog-consistency/scc-momentum-tip"
+      ],
+      "scc-separatrix-remainder": [
+        "docs/evidence/fragments/sn-catalog-consistency/scc-separatrix-remainder-run.py",
+        "docs/evidence/fragments/sn-catalog-consistency/scc-separatrix-remainder.html",
+        "docs/evidence/fragments/sn-catalog-consistency/scc-separatrix-remainder.json",
+        "docs/figures/sn-catalog-consistency/scc-separatrix-remainder"
+      ],
+      "scc-sourceless-names": [
+        "docs/evidence/fragments/sn-catalog-consistency/scc-sourceless-names-run.py",
+        "docs/evidence/fragments/sn-catalog-consistency/scc-sourceless-names.html",
+        "docs/evidence/fragments/sn-catalog-consistency/scc-sourceless-names.json",
+        "docs/figures/sn-catalog-consistency/scc-sourceless-names"
+      ],
+      "sib-docs-drain-after-admission": [
+        "docs/evidence/fragments/sn-integrity-backlog/sib-docs-drain-after-admission-run.py",
+        "docs/evidence/fragments/sn-integrity-backlog/sib-docs-drain-after-admission.html",
+        "docs/figures/sn-integrity-backlog/sib-docs-drain-after-admission"
+      ],
+      "sph-corrects-schema": [
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-corrects-schema-run.py",
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-corrects-schema.html",
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-corrects-schema.json",
+        "imas_codex/schemas/standard_name.yaml",
+        "tests/graph/test_schema_compliance.py"
+      ],
+      "sph-pin-test": [
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-pin-test-run.py",
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-pin-test.html",
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-pin-test.json",
+        "tests/core/test_isn_pin_agreement.py",
+        "tests/graph/test_isn_grammar_snapshot_pin.py"
+      ],
+      "sph-private-imports": [
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-private-imports-run.py",
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-private-imports.html",
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-private-imports.json",
+        "imas_codex/standard_names/export.py",
+        "imas_codex/standard_names/legacy_authority.py",
+        "imas_codex/standard_names/near_duplicates.py",
+        "imas_codex/standard_names/release_notes.py",
+        "imas_codex/standard_names/review_triage.py",
+        "tests/standard_names/test_package_import_boundaries.py"
+      ],
+      "sph-rc-fork-pr": [
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-rc-fork-pr-run.py",
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-rc-fork-pr.html",
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-rc-fork-pr.json",
+        "imas_codex/cli/release.py",
+        "imas_codex/standard_names/catalog_release.py",
+        "tests/standard_names/test_catalog_release.py",
+        "tests/standard_names/test_cli_release.py"
+      ],
+      "sph-red-gap-rules": [
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-red-gap-rules-run.py",
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-red-gap-rules.html",
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-red-gap-rules.json",
+        "docs/figures/sn-pipeline-hygiene/sph-red-gap-rules",
+        "tests/standard_names/test_gap_rule_verdicts.py",
+        "tests/standard_names/test_geometry_enumeration_collapse.py"
+      ],
+      "sph-red-other": [
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-red-other-run.py",
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-red-other.html",
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-red-other.json",
+        "docs/figures/sn-pipeline-hygiene/sph-red-other",
+        "tests/standard_names/test_cascade_calibration.py",
+        "tests/standard_names/test_catalog_layout_hierarchy.py",
+        "tests/standard_names/test_compose_prompt_examples_round_trip.py",
+        "tests/standard_names/test_manifest_generability.py"
+      ],
+      "sph-worktree-release": [
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-worktree-release-run.py",
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-worktree-release.html",
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-worktree-release.json",
+        "imas_codex/cli/release.py",
+        "imas_codex/standard_names/catalog_release.py",
+        "tests/standard_names/test_catalog_release.py",
+        "tests/standard_names/test_cli_release.py"
+      ]
+    },
+    "plan": "sn-integrity-backlog",
+    "regenerate_paths": [],
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§52",
+    "spec_level": "open",
+    "time_budget": "90m",
+    "token_budget": null,
+    "waits_only_after": false,
+    "write_paths": [
+      "docs/evidence/fragments/sn-integrity-backlog/sib-restore-reset-docs.html",
+      "docs/evidence/fragments/sn-integrity-backlog/sib-restore-reset-docs-run.py",
+      "docs/figures/sn-integrity-backlog/sib-restore-reset-docs",
+      "imas_codex/standard_names/signed_manifest.py",
+      "tests/standard_names/test_signed_docs_restore.py"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 5646652.0,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "sib-restore-reset-docs",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-11-11T22:27:14.755603+00:00",
+    "score": 0.83125,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:snapshot",
+    "family": null,
+    "jev_model": "~typesafe/jev-latest",
+    "latency_ms": 5000.81,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 867.575,
+      "context-estimate": 151.764,
+      "records": 696.29,
+      "verdict-inputs": 1271.217
+    }
+  },
+  "plan": "sn-integrity-backlog",
+  "plan_impl_at_dispatch": 0.9584415584415584,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "748927474661a6e796a9ee686ab15b7d09ace6c6",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "8466f0e0c6ea3e1e8b34c369952139a9225e47d2",
+    "reviewed_head_sha": "748927474661a6e796a9ee686ab15b7d09ace6c6",
+    "scores": {
+      "durability": 18,
+      "evidence": 16,
+      "fit": 18,
+      "goal_fidelity": 20,
+      "reuse": 18,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 110
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261111T222612732717-sib-restore-reset-docs",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§52",
+  "session": "4f554c2d-3a28-4c55-8645-67a1e8a30dea",
+  "session_harness": "claude",
+  "session_id": "ccab2402-de12-4615-a9fa-28283f361328",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "open",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 29389509,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 627.514,
+    "generated_tokens": 136924,
+    "generation_seconds": 164.572,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 64.0,
+    "machine_seconds": 462.942,
+    "peak_input_tokens": 147347,
+    "tokens_per_second": 832.0,
+    "wall_tokens_per_second": 218.2
+  },
+  "time_budget": "90m",
+  "tool_steps": 129.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 10901,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 3,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-12T01:29:52Z",
+    "last_record_type": "result",
+    "launched_at": "2026-11-12T01:18:51Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [],
+    "run_id": "r-20261111T222612732717-sib-restore-reset-docs",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 15593,
+    "worker_pid": 1607642
+  },
+  "worker_seconds": 8628,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
