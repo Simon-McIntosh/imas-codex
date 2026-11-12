@@ -17,7 +17,30 @@
   "plan_slug": "sn-domain-per-family",
   "plan_version": 31,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "e81c6c553c29f2ad1fc44d9992b713123ab6fe70",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "Both sections now say a held-split member is decided as a single name under section 5's options with its own sources as evidence, not bounded to its sources.",
+      "reason": "",
+      "when": "2026-11-12T21:02:59.420416+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "e81c6c553c29f2ad1fc44d9992b713123ab6fe70",
+      "commit_basis": "edit",
+      "note": "Both sections now say a held-split member is decided as a single name under section 5's options with its own sources as evidence, not bounded to its sources.",
+      "reason": "",
+      "when": "2026-11-12T21:02:59.420416+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-domain-per-family/r-20261112T201807833229-plan-review-of-sn-domain-per-family.json",
   "review_run_id": "r-20261112T201807833229-plan-review-of-sn-domain-per-family",
   "reviewed_blob_sha": "e4974669b7b1f98e3f0cd9c40ec5a9b4755562e3",
   "rubric": "content",
