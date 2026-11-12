@@ -1,0 +1,62 @@
+<section id="sph-rc-fork-pr" data-reckon="evidence">
+  <h2>§4 — A whole-catalog candidate opens a fork review pull request</h2>
+
+  <p>Only the final branch of the catalog cut opened a pull request, so a
+  whole-catalog candidate reached the fork as a tag and nothing else: the
+  reviewer had no page carrying the catalog diff, no body, and no link to the
+  export accounting. The candidate <code>v0.4.0rc8</code> reached the fork in
+  exactly that state.</p>
+
+  <p id="sph-rc-fork-pr-delivery">A candidate now reaches the fork as the
+  branch <code>release/&lt;tag&gt;</code> plus one pull request raised in the
+  fork itself (<code>repo</code> and <code>head_owner</code> both the fork), so
+  the request carries a readable diff. The body names the candidate revision
+  and, when the export wrote accounting, the per-reason exclusion report — both
+  as markdown links. The exclusion-ledger helper the review-batch path uses
+  appends nothing here: a whole-catalog cut has no focus manifest to hold a
+  ledger, so that leg of the reuse map has no input on this path.</p>
+
+  <p id="sph-rc-fork-pr-refusal">A candidate aimed at the upstream catalog is
+  refused before anything is published — before the export, before the tag,
+  before the first push. The upstream remote is recognised by name and by the
+  repository it resolves to, so a checkout that clones the canonical catalog
+  under another name is refused too. The package release CLI's upstream guard
+  carried the same gap: it ran only under <code>if final</code>, so a candidate
+  pointed at upstream passed. Its condition is extended rather than a second
+  guard added — <code>final</code> now requires upstream, and a candidate
+  requires the fork.</p>
+
+  <table id="sph-rc-fork-pr-verdicts">
+    <thead>
+      <tr><th>candidate's remote</th><th>before</th><th>after</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>fork (<code>origin</code>)</td><td>tag only, no review surface</td><td>branch + one fork pull request</td></tr>
+      <tr><td>upstream</td><td>published upstream</td><td>refused before any push</td></tr>
+    </tbody>
+  </table>
+
+  <p id="sph-rc-fork-pr-transport">The fork-branch delivery applies only to a
+  candidate: the final path keeps its own transport (branch pushed to the fork,
+  pull request against upstream), and the batch path
+  (<code>run_review_release</code>) is untouched. A checkout that records no
+  GitHub fork identity — a mirror, or a local stand-in remote — keeps the
+  previous transport, pushing the released commit to the remote's main, and
+  opens no request.</p>
+
+  <p id="sph-rc-fork-pr-gate">Gate: <strong>157 passed, 1 deselected,
+  EXIT=0</strong> across
+  <code>tests/standard_names/test_catalog_release_candidate_pr.py</code> (4
+  tests), <code>tests/standard_names/test_catalog_release.py</code>,
+  <code>tests/standard_names/test_review_release.py</code> and
+  <code>tests/cli/test_release.py</code>, so the batch and final paths carry
+  their existing coverage unchanged. The negative control applied the two
+  declared mutations together — the candidate <code>pr_creator</code> call
+  removed, the candidate condition dropped from the upstream refusal — and both
+  new measure tests failed
+  (<code>test_a_whole_catalog_candidate_opens_one_review_pull_request</code>,
+  <code>test_a_whole_catalog_candidate_refuses_an_upstream_remote</code>), with
+  <code>EXIT=1</code>. Logs:
+  <code>gate.log</code> and <code>negative-control.log</code> under
+  <code>~/.config/reckon/crew/runs/r-20261112T145652398799-sph-rc-fork-pr/</code>.</p>
+</section>
