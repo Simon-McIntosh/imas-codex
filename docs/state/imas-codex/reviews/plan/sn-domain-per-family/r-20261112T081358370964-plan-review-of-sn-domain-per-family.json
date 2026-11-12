@@ -25,7 +25,30 @@
   "plan_slug": "sn-domain-per-family",
   "plan_version": 10,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "affc144c12b109c6c901c0f926a800f144790b11",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a75 now cites the committed blind sheet: 70 single names drawn from the 1,370 published names that share their pattern with no other, labelled by two readers",
+      "reason": "",
+      "when": "2026-11-12T08:33:35.422504+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "affc144c12b109c6c901c0f926a800f144790b11",
+      "commit_basis": "edit",
+      "note": "\u00a75 now cites the committed blind sheet: 70 single names drawn from the 1,370 published names that share their pattern with no other, labelled by two readers",
+      "reason": "",
+      "when": "2026-11-12T08:33:35.422504+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-domain-per-family/r-20261112T081358370964-plan-review-of-sn-domain-per-family.json",
   "review_run_id": "r-20261112T081358370964-plan-review-of-sn-domain-per-family",
   "reviewed_blob_sha": "11241825e062246f1098e18edf774b6e4b441f8a",
   "rubric": "content",
