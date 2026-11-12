@@ -1,0 +1,142 @@
+[
+ {
+  "id": "item-01",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "locally or averaged over a magnetic flux surface",
+  "reason": "The name states a local volumetric quantity, but the definition also admits a flux-surface-averaged form and restricts the power to direct RF wave absorption by the fast population."
+ },
+ {
+  "id": "item-02",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "defined relative to the first module",
+  "reason": "The name states a forward-wave phase, but the quantity is reference-relative: the phase of each module against the forward-wave phasor of the first reference module."
+ },
+ {
+  "id": "item-03",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "medium",
+  "evidence": "is the poloidal specialization of this general coordinate concept",
+  "reason": "The definition presents an umbrella coordinate concept whose concrete forms are supplied by specialisations such as the poloidal angle."
+ },
+ {
+  "id": "item-04",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the net radiofrequency power absorbed by the plasma from all electron-cyclotron wave sources",
+  "reason": "The name states total power due to electron-cyclotron heating, and the definition sums the absorbed power of all such sources, which is the same scope."
+ },
+ {
+  "id": "item-05",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the projection of that row reference point onto $\\hat{Z}$",
+  "reason": "A vertical coordinate of an antenna row is naturally the Z-projection of the same row's reference point, matching what the name denotes."
+ },
+ {
+  "id": "item-06",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "high",
+  "evidence": "This parent quantity denotes the full vector bootstrap-current-density contribution. Component or projection quantities are more specific descendants",
+  "reason": "The definition declares an umbrella vector quantity whose components and projections are fixed by more specific descendant names."
+ },
+ {
+  "id": "item-07",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "It represents the parallel current contribution rather than the total plasma current",
+  "reason": "The name states a current from fusion reactions, but the definition adds the identifying qualifier that this is the field-parallel contribution only."
+ },
+ {
+  "id": "item-08",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "sums the number densities of all positive oxygen ionization states, counting each ion once. Neutral oxygen atoms are excluded",
+  "reason": "Under the catalog convention a bare species name counts ions summed over charge states with neutrals excluded, which is exactly what the definition states."
+ },
+ {
+  "id": "item-09",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "The average is formed from the local ion density at the plasma boundary by applying inverse-poloidal-flux-gradient weighting over the surface",
+  "reason": "The name already states a flux-surface average of ion density at the plasma boundary, and the inverse-flux-gradient weighting is the standard meaning of that average."
+ },
+ {
+  "id": "item-10",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "This quantity is charge-state-summed over xenon ions and is not a local point value, a volume average, or a density that includes neutral xenon",
+  "reason": "A bare species name counts ions, and the name already states the flux-surface average at the plasma boundary, so the definition's scope matches it."
+ },
+ {
+  "id": "item-11",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "This quantity applies specifically to ionized tritium and excludes neutral tritium",
+  "reason": "Under the catalog convention a bare species name counts ions, and the definition states the local density of tritium ions on the last closed flux surface."
+ },
+ {
+  "id": "item-12",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "This quantity applies to tungsten ions evaluated at the plasma boundary and sums over all positive ionization states. It excludes neutral tungsten",
+  "reason": "The name states a tungsten density at the separatrix, and the definition is the charge-state-summed ion density there, matching the bare-species convention."
+ },
+ {
+  "id": "item-13",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the equivalent blackbody temperature associated with the detected electron cyclotron emission intensity at that channel's selected frequency",
+  "reason": "Radiative temperature is the brightness temperature of the detected ECE intensity, which is the quantity the name denotes at the specified channel."
+ },
+ {
+  "id": "item-14",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "The refractive-index vector describes electromagnetic phase propagation relative to propagation in vacuum",
+  "reason": "The name states a scalar refractive index, but the definition is a vector retaining propagation direction and signed components."
+ },
+ {
+  "id": "item-15",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "high",
+  "evidence": "This parent quantity does not specify a particular magnetic-flux component or surface orientation. Concrete component names supply that specialization",
+  "reason": "The definition declares an umbrella quantity whose component and surface-orientation forms are fixed by concrete child names."
+ },
+ {
+  "id": "item-16",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "The reference scale is defined by a whole-plasma, current-based normalization rather than by the poloidal field at a particular point",
+  "reason": "Poloidal beta is the current-based pressure ratio standard for that name, so the definition states the scope the name denotes."
+ },
+ {
+  "id": "item-17",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "flux-surface-averaged isotropic part of the kinetic stress carried by the thermal and nonthermal populations of a specified species",
+  "reason": "The name states a particle pressure, but the definition adds the identifying qualifier that it is a flux-surface-averaged isotropic stress of a specified species."
+ },
+ {
+  "id": "item-18",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "expressed as an equivalent-electron inventory",
+  "reason": "The definition states the inventory in units of ten equivalent electrons per molecule rather than as a molecular count, which the name does not convey."
+ },
+ {
+  "id": "item-19",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the global energy-confinement timescale predicted by the IPB98(y,2) empirical scaling law",
+  "reason": "The name names the IPB98(y,2) scaling, and the definition is the empirical prediction of global energy confinement time, which is that scaling's quantity."
+ },
+ {
+  "id": "item-20",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the radial projection of a first-order, complex perturbed magnetic vector-potential eigenfunction in the vacuum region",
+  "reason": "The name states the radial perturbed vacuum magnetic vector potential, which is exactly the radial projection the definition describes."
+ }
+]
