@@ -1,0 +1,37 @@
+# revision: cf84bbb8f2f25defd8a068689826dfe4572c045c
+# tree: /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdpf-family-decision
+# host: 98dci4-clu-3141
+# cwd: /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdpf-family-decision
+# mutation: the family path is replaced by one per-name call per member
+mutated
+# command: uv run --no-sync pytest tests/standard_names/test_family_domain_decision.py::test_a_planted_disjoint_family_receives_one_domain -p no:cacheprovider --timeout=300 -m graph --tb=line
+============================= test session starts ==============================
+collected 1 item
+
+tests/standard_names/test_family_domain_decision.py F                    [100%]
+
+=================================== FAILURES ===================================
+E   AssertionError: the family receives one domain, got {'sn:e2e-disjoint:electron': 'transport', 'sn:e2e-disjoint:krypton': 'edge_plasma_physics'}
+    assert {'edge_plasma..., 'transport'} == {'transport'}
+      
+      Extra items in the left set:
+      'edge_plasma_physics'
+      Use -v to get more diff
+---------------------------- Captured stdout setup -----------------------------
+  Starting temp Neo4j instance...
+/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdpf-family-decision/tests/standard_names/test_family_domain_decision.py:361: AssertionError: the family receives one domain, got {'sn:e2e-disjoint:electron': 'transport', 'sn:e2e-disjoint:krypton': 'edge_plasma_physics'}
+=============================== warnings summary ===============================
+../../../../imas-codex/.venv/lib/python3.12/site-packages/_pytest/config/__init__.py:1434
+  /home/ITER/mcintos/Code/imas-codex/.venv/lib/python3.12/site-packages/_pytest/config/__init__.py:1434: PytestConfigWarning: Unknown config option: cache_dir
+  
+    self._warn_or_fail_if_strict(f"Unknown config option: {key}\n")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 10 durations =============================
+13.91s setup    tests/standard_names/test_family_domain_decision.py::test_a_planted_disjoint_family_receives_one_domain
+10.44s teardown tests/standard_names/test_family_domain_decision.py::test_a_planted_disjoint_family_receives_one_domain
+2.50s call     tests/standard_names/test_family_domain_decision.py::test_a_planted_disjoint_family_receives_one_domain
+=========================== short test summary info ============================
+FAILED tests/standard_names/test_family_domain_decision.py::test_a_planted_disjoint_family_receives_one_domain
+======================== 1 failed, 1 warning in 32.27s =========================
+EXIT=1

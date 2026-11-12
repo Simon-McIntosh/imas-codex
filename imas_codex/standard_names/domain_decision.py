@@ -49,17 +49,28 @@ __all__ = [
     "SEAT",
     "DomainCorrection",
     "DomainDecision",
+    "FamilyDomainDecision",
+    "FamilyDomainOutcome",
     "NameDomainWrite",
     "band_of",
     "band_umbrella",
+    "build_family_question",
+    "build_family_state",
     "build_question",
     "build_state",
     "candidate_domains",
+    "decide_and_write_family",
     "decide_domain",
+    "decide_family_domain",
     "derived_parent_domain_decision",
     "dominant_domain",
+    "family_candidate_domains",
+    "family_path_counts",
+    "fan_out_family_decision",
     "ids_domain_map",
     "option_text",
+    "read_family_decision",
+    "store_family_decision",
     "undecided",
     "write_name_domain",
 ]
@@ -526,4 +537,388 @@ def write_name_domain(
         decided=correction is not None or decision.decided,
         correction=correction_domain,
         reason=reason,
+    )
+
+
+# ---------------------------------------------------------------------------
+# One decision per family
+# ---------------------------------------------------------------------------
+#
+# A name's domain describes the concept it names, and a concept is shared by
+# every member of its family: X_density and krypton_density measure the same
+# quantity, so they belong in the same domain. Deciding each name separately
+# offers each only its own sources' domains, so two siblings sourced from
+# different parts of the DD cannot agree. The family decision offers the union
+# of every member's options, asks one Choice, stores it once, and writes it to
+# every member through :func:`write_name_domain`.
+
+
+@dataclass(frozen=True)
+class FamilyDomainDecision:
+    """The single domain decision a family carries, or why it is undecided."""
+
+    family_id: str
+    members: tuple[str, ...]
+    candidates: tuple[str, ...]
+    choice: str | None
+    probability: float | None
+    model: str | None
+    decided_at: str | None
+    undecided_reason: str | None = None
+    corrected: bool = False
+    cost: float = 0.0
+
+    @property
+    def decided(self) -> bool:
+        return self.choice is not None and self.undecided_reason is None
+
+
+@dataclass(frozen=True)
+class FamilyDomainOutcome:
+    """What one family's decision did: the record, the writes, the holdouts."""
+
+    decision: FamilyDomainDecision
+    writes: tuple[NameDomainWrite, ...]
+    unwritten: tuple[str, ...]
+
+
+def family_candidate_domains(
+    members: Sequence[Mapping[str, Any]], ids_map: Mapping[str, str]
+) -> tuple[str, ...]:
+    """The domains every member's sources together supply for the family.
+
+    Options are the union across members, so a member with one unusual source
+    neither narrows nor widens the choice alone.
+    """
+    found: set[str] = set()
+    for member in members:
+        found |= set(candidate_domains(member.get("sources") or {}, ids_map))
+    return tuple(sorted(found))
+
+
+def family_path_counts(members: Sequence[Mapping[str, Any]]) -> dict[str, int]:
+    """Path-domain counts across the whole family, most frequent first."""
+    merged: dict[str, str | None] = {}
+    for index, member in enumerate(members):
+        for path, domain in (member.get("sources") or {}).items():
+            merged[f"{index}:{path}"] = domain
+    return path_counts(merged)
+
+
+def build_family_state(
+    family_id: str,
+    members: Sequence[Mapping[str, Any]],
+    ids_map: Mapping[str, str],
+    options: Sequence[str],
+) -> dict[str, Any]:
+    """The state a family's Choice is asked of, carrying every member's sources."""
+    counts = family_path_counts(members)
+    return {
+        "family": family_id,
+        "member_count": len(members),
+        "members": [
+            {
+                "name": member.get("id") or "",
+                "description": member.get("description") or "",
+                "source_paths": [
+                    {"path": path, "stored_domain": domain or "unclassified"}
+                    for path, domain in sorted((member.get("sources") or {}).items())
+                ],
+            }
+            for member in members
+        ],
+        "source_path_count_by_candidate_domain": {
+            domain: counts.get(domain, 0) for domain in options
+        },
+    }
+
+
+def build_family_question(options: Sequence[str], member_count: int) -> dict[str, Any]:
+    """The Choice for a family: one domain for every name it holds.
+
+    The question states the family is decided once for all its members, so the
+    model judges the concept the members share rather than any one member's
+    own sources.
+    """
+    instructions = (
+        f"Choose the one physics domain that best describes this family of "
+        f"{member_count} standard names, which measure the same quantity at "
+        "the same locus and differ only in species, charge state, component or "
+        "device. Judge the concept the family names, not which IDS carries "
+        "any one member's sources: every member receives the domain you "
+        "choose. Every option is a domain the Data Dictionary supplies for at "
+        "least one member's source paths, the domain of one of their source "
+        "IDSs, a broader band umbrella one of those falls under, or general. "
+        "Prefer the most specific option that plainly fits the quantity; "
+        "choose general only when no narrower option fits. The options are "
+        "listed most specific first."
+    )
+    order = sorted(options, key=lambda d: (band_of(d) != "general", d))
+    return {
+        QUESTION: {
+            "type": "choice",
+            "instructions": instructions,
+            "criteria": {domain: option_text(domain) for domain in order},
+        }
+    }
+
+
+def _family_recorded_correction(
+    members: Sequence[Mapping[str, Any]],
+) -> str | None:
+    """The domain a recorded lead correction gives the family, if one does.
+
+    A correction recorded on any member applies to the family, because the
+    family is one concept. Members whose corrections disagree leave the
+    family to its own Choice rather than picking one arbitrarily.
+    """
+    recorded = {
+        str(member["domain_correction"])
+        for member in members
+        if member.get("domain_correction")
+    }
+    return recorded.pop() if len(recorded) == 1 else None
+
+
+async def decide_family_domain(
+    family_id: str,
+    members: Sequence[Mapping[str, Any]],
+    ids_map: Mapping[str, str],
+    *,
+    model: str,
+) -> FamilyDomainDecision:
+    """Ask Jev one domain Choice for the whole family and return the decision.
+
+    A family whose options collapse to one domain takes it without a call. A
+    recorded lead correction wins over the Choice and applies to the whole
+    family. A call that fails, or a choice below :data:`CONFIDENCE_FLOOR`,
+    leaves the family undecided and names the reason: the caller writes none
+    of its members.
+    """
+    member_ids = tuple(str(member.get("id")) for member in members)
+    options = family_candidate_domains(members, ids_map)
+    corrected_domain = _family_recorded_correction(members)
+    if corrected_domain is not None:
+        return FamilyDomainDecision(
+            family_id=family_id,
+            members=member_ids,
+            candidates=options,
+            choice=corrected_domain,
+            probability=1.0,
+            model="recorded-correction",
+            decided_at=datetime.now(UTC).isoformat(),
+            corrected=True,
+        )
+    if len(options) <= 1:
+        return FamilyDomainDecision(
+            family_id=family_id,
+            members=member_ids,
+            candidates=options,
+            choice=options[0] if options else None,
+            probability=1.0,
+            model=model,
+            decided_at=datetime.now(UTC).isoformat(),
+        )
+    results, cost = await decide_batch(
+        [build_family_state(family_id, members, ids_map, options)],
+        build_family_question(options, len(members)),
+        model=model,
+        service=SERVICE_TAG,
+        concurrency=CONCURRENCY,
+    )
+    answer: dict[str, Any] | None = None
+    if results and results[0]:
+        answers = results[0][0]
+        if isinstance(answers, dict):
+            answer = answers.get(QUESTION)
+
+    def held(reason: str) -> FamilyDomainDecision:
+        return FamilyDomainDecision(
+            family_id=family_id,
+            members=member_ids,
+            candidates=options,
+            choice=None,
+            probability=None,
+            model=model,
+            decided_at=None,
+            undecided_reason=reason,
+            cost=cost,
+        )
+
+    if not isinstance(answer, dict):
+        return held("the Jev call returned no answer")
+    choice = answer.get("choice")
+    probabilities = {
+        str(k): float(v) for k, v in (answer.get("probabilities") or {}).items()
+    }
+    probability = probabilities.get(str(choice))
+    if choice not in options:
+        return held(f"the choice {choice!r} is not one of the candidates")
+    if probability is None:
+        return held("the answer carried no probability")
+    if probability < CONFIDENCE_FLOOR:
+        return held(
+            f"chosen probability {probability:.3f} is below the floor "
+            + f"{CONFIDENCE_FLOOR:.2f}"
+        )
+    return FamilyDomainDecision(
+        family_id=family_id,
+        members=member_ids,
+        candidates=options,
+        choice=str(choice),
+        probability=probability,
+        model=model,
+        decided_at=datetime.now(UTC).isoformat(),
+        cost=cost,
+    )
+
+
+#: One record per family, holding the decision every member reads. The family
+#: node owns the decision; the name owns only the id of the family it reads, so
+#: the members of a family cannot disagree about the domain.
+_STORE_FAMILY_DECISION = """
+MERGE (f:StandardNameDomainFamily {id: $family_id})
+SET f.candidates = $candidates,
+    f.choice = $choice,
+    f.probability = $probability,
+    f.model = $model,
+    f.decided_at = $decided_at,
+    f.member_count = $member_count,
+    f.undecided_reason = $undecided_reason
+WITH f
+UNWIND $members AS member_id
+MATCH (sn:StandardName {id: member_id})
+MERGE (sn)-[:IN_DOMAIN_FAMILY]->(f)
+SET sn.domain_family_id = $family_id
+RETURN count(*) AS linked
+"""
+
+#: The record a member reads: its family's single decision.
+_READ_FAMILY_DECISION = """
+MATCH (sn:StandardName {id: $sn_id})-[:IN_DOMAIN_FAMILY]->(f:StandardNameDomainFamily)
+RETURN f.id AS family_id,
+       f.candidates AS candidates,
+       f.choice AS choice,
+       f.probability AS probability,
+       f.model AS model,
+       f.decided_at AS decided_at,
+       f.undecided_reason AS undecided_reason
+"""
+
+
+def store_family_decision(gc: Any, decision: FamilyDomainDecision) -> int:
+    """Store the family's decision once and point every member at the record.
+
+    Returns the number of members linked. A member the graph does not hold is
+    not linked; the record itself is still stored, so a later read finds it.
+    """
+    rows = list(
+        gc.query(
+            _STORE_FAMILY_DECISION,
+            family_id=decision.family_id,
+            candidates=list(decision.candidates),
+            choice=decision.choice,
+            probability=decision.probability,
+            model=decision.model,
+            decided_at=decision.decided_at,
+            member_count=len(decision.members),
+            undecided_reason=decision.undecided_reason,
+            members=list(decision.members),
+        )
+        or []
+    )
+    return int(rows[0].get("linked") or 0) if rows else 0
+
+
+def read_family_decision(gc: Any, sn_id: str) -> FamilyDomainDecision | None:
+    """The single stored decision *sn_id* reads, or ``None`` when it has none."""
+    rows = list(gc.query(_READ_FAMILY_DECISION, sn_id=sn_id) or [])
+    if not rows:
+        return None
+    row = dict(rows[0])
+    return FamilyDomainDecision(
+        family_id=str(row.get("family_id") or ""),
+        members=(),
+        candidates=tuple(row.get("candidates") or ()),
+        choice=row.get("choice"),
+        probability=row.get("probability"),
+        model=row.get("model"),
+        decided_at=row.get("decided_at"),
+        undecided_reason=row.get("undecided_reason"),
+    )
+
+
+def fan_out_family_decision(
+    gc: Any, decision: FamilyDomainDecision
+) -> tuple[NameDomainWrite, ...]:
+    """Write the family's one decision to every member through the one writer.
+
+    An undecided family writes nothing: the caller names every member in the
+    outcome's ``unwritten`` list instead. A corrected family writes the
+    correction to every member, so a recorded correction applies to the family.
+    """
+    if not decision.decided:
+        return ()
+    correction = (
+        DomainCorrection(
+            domain=str(decision.choice),
+            reason="recorded lead correction for the family",
+        )
+        if decision.corrected
+        else None
+    )
+    writes: list[NameDomainWrite] = []
+    for member_id in decision.members:
+        writes.append(
+            write_name_domain(
+                gc,
+                member_id,
+                DomainDecision(
+                    name=member_id,
+                    candidates=decision.candidates,
+                    choice=decision.choice,
+                    probability=decision.probability,
+                    model=decision.model,
+                    decided_at=decision.decided_at,
+                ),
+                correction=correction,
+            )
+        )
+    return tuple(writes)
+
+
+def decide_and_write_family(
+    gc: Any,
+    sn_id: str,
+    ids_map: Mapping[str, str],
+    *,
+    model: str,
+    family: Mapping[str, Any] | None = None,
+) -> FamilyDomainOutcome:
+    """Decide one family's domain once and write it to every member.
+
+    *family* is the read from
+    :func:`imas_codex.standard_names.families.fetch_domain_family` for
+    *sn_id*, and is read when not supplied. This is the entry point a caller
+    needs: option union across the members, one judgment, one stored record,
+    and a fan-out through :func:`write_name_domain`.
+    """
+    if family is None:
+        from imas_codex.standard_names.families import fetch_domain_family
+
+        family = fetch_domain_family(sn_id, gc)
+    members = list(family.get("members") or [])
+    family_id = str(family.get("key") or "")
+    decision = asyncio.run(
+        decide_family_domain(family_id, members, ids_map, model=model)
+    )
+    store_family_decision(gc, decision)
+    writes = fan_out_family_decision(gc, decision)
+    written = {entry.sn_id for entry in writes}
+    return FamilyDomainOutcome(
+        decision=decision,
+        writes=writes,
+        unwritten=tuple(
+            member["id"] for member in members if member["id"] not in written
+        ),
     )

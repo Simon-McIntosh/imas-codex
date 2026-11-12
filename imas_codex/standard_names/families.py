@@ -451,19 +451,24 @@ PATTERN_VARIATION_AXES: tuple[str, ...] = (
 PATTERN_SEGMENTS: tuple[str, ...] = PATTERN_INVARIANT_SEGMENTS + PATTERN_VARIATION_AXES
 
 
+def _segment_projection(alias: str, segments: Sequence[str]) -> str:
+    """Cypher projecting *alias*'s *segments* as comparable strings."""
+    return ",\n".join(f"     coalesce({alias}.{seg}, '') AS {seg}" for seg in segments)
+
+
+def _segment_equality(alias: str, segments: Sequence[str]) -> str:
+    """Cypher equality predicates binding *alias* to a projected seed set."""
+    return "\n  AND ".join(f"coalesce({alias}.{seg}, '') = {seg}" for seg in segments)
+
+
 def _invariant_projection(alias: str) -> str:
     """Cypher projecting *alias*'s invariant segments as comparable strings."""
-    return ",\n".join(
-        f"     coalesce({alias}.{seg}, '') AS {seg}"
-        for seg in PATTERN_INVARIANT_SEGMENTS
-    )
+    return _segment_projection(alias, PATTERN_INVARIANT_SEGMENTS)
 
 
 def _invariant_equality(alias: str) -> str:
     """Cypher equality predicates binding *alias* to a projected seed."""
-    return "\n  AND ".join(
-        f"coalesce({alias}.{seg}, '') = {seg}" for seg in PATTERN_INVARIANT_SEGMENTS
-    )
+    return _segment_equality(alias, PATTERN_INVARIANT_SEGMENTS)
 
 
 DOCS_STAGE_ACCEPTED = "accepted"
@@ -1195,3 +1200,172 @@ def fetch_family_base(base_id: str, gc: Any) -> dict[str, Any]:
         or []
     )
     return dict(rows[0]) if rows else {}
+
+
+# ---------------------------------------------------------------------------
+# Domain families — a name's physics domain is decided for the concept
+# ---------------------------------------------------------------------------
+
+#: Segments the domain decision holds fixed on top of the invariant ones.
+#: A pattern family treats the locus as prose variation, so ``X_density`` and
+#: ``X_density_at_pedestal_top`` are pattern-mates. A domain is about the
+#: concept, and a density at the pedestal top is in a different domain from the
+#: same density at the magnetic axis, so the locus is part of the family's
+#: identity here and does not vary.
+DOMAIN_FAMILY_HELD_SEGMENTS: tuple[str, ...] = ("position", "geometry", "region")
+
+#: Every grammar segment that fixes a domain family's identity.
+DOMAIN_FAMILY_SEGMENTS: tuple[str, ...] = (
+    PATTERN_INVARIANT_SEGMENTS + DOMAIN_FAMILY_HELD_SEGMENTS
+)
+
+
+def domain_family_key(segments: Mapping[str, Any]) -> str:
+    """The stable id of the domain family a name's decision is stored for.
+
+    The key is the held and invariant segment values in declaration order, so
+    two names carry the same key exactly when they share a quantity, operator,
+    process, entity and locus. It is a plain string so it can be a node id.
+    """
+    return "|".join(
+        f"{seg}={_segment_value(dict(segments), seg)}" for seg in DOMAIN_FAMILY_SEGMENTS
+    )
+
+
+# The seed's domain family: every live name sharing its held + invariant
+# signature, with the DD domains of each member's own sources. The sources are
+# what the decision's options are drawn from, so they are read with the member
+# rather than once per member.
+_DOMAIN_FAMILY_MEMBERS_QUERY = f"""
+MATCH (seed:StandardName {{id: $sn_id}})
+WHERE coalesce(seed.name_stage, '') <> $superseded
+WITH
+{_segment_projection("seed", DOMAIN_FAMILY_SEGMENTS)}
+MATCH (m:StandardName)
+WHERE {_segment_equality("m", DOMAIN_FAMILY_SEGMENTS)}
+  AND coalesce(m.name_stage, '') <> $superseded
+OPTIONAL MATCH (src:StandardNameSource)-[:PRODUCED_NAME]->(m)
+OPTIONAL MATCH (src)-[:FROM_DD_PATH]->(dd:IMASNode)
+WITH
+{_segment_projection("m", DOMAIN_FAMILY_SEGMENTS)},
+     m, collect({{
+       path: src.id,
+       domain: dd.physics_domain
+     }}) AS sources
+RETURN m.id AS id,
+       m.description AS description,
+       m.physics_domain AS physics_domain,
+       m.domain_correction AS domain_correction,
+       sources,
+       {", ".join(DOMAIN_FAMILY_SEGMENTS)}
+ORDER BY m.id
+"""
+
+
+def fetch_domain_family(sn_id: str, gc: Any) -> dict[str, Any]:
+    """Return the domain family *sn_id* belongs to, with every member's sources.
+
+    The family is every live (non-superseded) StandardName sharing the seed's
+    invariant segments and held locus segments. The seed's own row is always
+    present, so a name with no sibling is a family of one and is decided as the
+    per-name path decides it.
+
+    Returns ``{"key": <family id>, "segments": {...}, "members": [rows]}``,
+    each member row carrying ``id``, ``description``, ``physics_domain``,
+    ``domain_correction`` and ``sources`` (a ``{path: stored domain}`` map, its
+    domain ``None`` where the DD has not classified the path). Returns an empty
+    ``members`` list when the seed is absent or superseded.
+    """
+    rows = [
+        dict(row)
+        for row in (
+            gc.query(
+                _DOMAIN_FAMILY_MEMBERS_QUERY,
+                sn_id=sn_id,
+                superseded=_LIVE_STAGE_EXCLUSION,
+            )
+            or []
+        )
+    ]
+    members: list[dict[str, Any]] = []
+    for row in rows:
+        sources: dict[str, str | None] = {}
+        for entry in row.get("sources") or []:
+            path = entry.get("path")
+            if path:
+                sources[str(path)] = entry.get("domain")
+        members.append(
+            {
+                "id": row.get("id"),
+                "description": row.get("description") or "",
+                "physics_domain": row.get("physics_domain"),
+                "domain_correction": row.get("domain_correction"),
+                "sources": sources,
+            }
+        )
+    segments = (
+        {seg: row.get(seg) or "" for seg in DOMAIN_FAMILY_SEGMENTS} if rows else {}
+    )
+    return {
+        "key": domain_family_key(segments) if segments else "",
+        "segments": segments,
+        "members": members,
+    }
+
+
+def fetch_domain_families(gc: Any, *, min_size: int = 1) -> list[dict[str, Any]]:
+    """Enumerate every live domain family with at least *min_size* members.
+
+    The grouping is the same signature :func:`fetch_domain_family` keys one
+    family on, built from the same two constants, so the two cannot disagree
+    about what makes a family. Members carry the same columns as the seeded
+    read. Read-only: it never writes.
+    """
+    query = f"""
+MATCH (m:StandardName)
+WHERE coalesce(m.name_stage, '') <> $superseded
+OPTIONAL MATCH (src:StandardNameSource)-[:PRODUCED_NAME]->(m)
+OPTIONAL MATCH (src)-[:FROM_DD_PATH]->(dd:IMASNode)
+WITH
+{_segment_projection("m", DOMAIN_FAMILY_SEGMENTS)},
+     m, collect({{path: src.id, domain: dd.physics_domain}}) AS sources
+WITH {", ".join(DOMAIN_FAMILY_SEGMENTS)},
+     collect({{
+       id: m.id,
+       description: m.description,
+       physics_domain: m.physics_domain,
+       domain_correction: m.domain_correction,
+       sources: sources
+     }}) AS members
+WHERE size(members) >= $min_size
+RETURN {", ".join(DOMAIN_FAMILY_SEGMENTS)}, members
+"""
+    rows = [
+        dict(row)
+        for row in (
+            gc.query(query, min_size=min_size, superseded=_LIVE_STAGE_EXCLUSION) or []
+        )
+    ]
+    families: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        segments = {seg: row.get(seg) or "" for seg in DOMAIN_FAMILY_SEGMENTS}
+        key = domain_family_key(segments)
+        family = families.setdefault(
+            key, {"key": key, "segments": segments, "members": []}
+        )
+        for entry in row.get("members") or []:
+            sources: dict[str, str | None] = {}
+            for source in entry.get("sources") or []:
+                path = source.get("path")
+                if path:
+                    sources[str(path)] = source.get("domain")
+            family["members"].append(
+                {
+                    "id": entry.get("id"),
+                    "description": entry.get("description") or "",
+                    "physics_domain": entry.get("physics_domain"),
+                    "domain_correction": entry.get("domain_correction"),
+                    "sources": sources,
+                }
+            )
+    return list(families.values())
