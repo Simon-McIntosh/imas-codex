@@ -31,7 +31,7 @@ import asyncio
 import json
 from collections import Counter
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from functools import lru_cache
 from typing import Any
@@ -89,6 +89,12 @@ CONCURRENCY = 8
 #: it; the derivation and the accuracy above it are recorded in
 #: ``docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-writer.html``.
 CONFIDENCE_FLOOR: float = 0.68
+
+#: The option sets the one family decision can be offered. ``bounded`` is the
+#: domains the family's sources supply, ``widened`` the whole bands those
+#: domains fall in, and ``fallback`` the bounded set first with the widened set
+#: only for a family the bounded answer leaves undecided.
+OPTION_SETS: tuple[str, ...] = ("bounded", "widened", "fallback")
 
 
 def _pretty(raw: str) -> str:
@@ -848,44 +854,16 @@ async def _decide_widened(
     )
 
 
-async def decide_family_domain(
+async def _decide_bounded(
     family_id: str,
+    member_ids: tuple[str, ...],
     members: Sequence[Mapping[str, Any]],
-    ids_map: Mapping[str, str],
-    *,
+    options: tuple[str, ...],
     model: str,
-    bounded_by_sources: bool = True,
+    *,
+    ids_map: Mapping[str, str],
 ) -> FamilyDomainDecision:
-    """Ask Jev one domain Choice for the whole family and return the decision.
-
-    Passing
-    ``bounded_by_sources=True`` keeps the options to the family's source
-    domains, which is the shipped behaviour until a widened set clears the
-    measured accuracy and confidence bars; the widened set is opt-in so the
-    two can be measured against each other in one run.
-
-    A family whose options collapse to one domain takes it without a call. A
-    recorded lead correction wins over the Choice and applies to the whole
-    family. A call that fails, or a choice below :data:`CONFIDENCE_FLOOR`,
-    leaves the family undecided and names the reason: the caller writes none
-    of its members.
-    """
-    member_ids = tuple(str(member.get("id")) for member in members)
-    options = family_candidate_domains(members, ids_map)
-    corrected_domain = _family_recorded_correction(members)
-    if corrected_domain is not None:
-        return FamilyDomainDecision(
-            family_id=family_id,
-            members=member_ids,
-            candidates=options,
-            choice=corrected_domain,
-            probability=1.0,
-            model="recorded-correction",
-            decided_at=datetime.now(UTC).isoformat(),
-            corrected=True,
-        )
-    if not bounded_by_sources:
-        return await _decide_widened(family_id, member_ids, members, ids_map, model)
+    """One Choice over the domains the family's own sources supply."""
     if len(options) <= 1:
         return FamilyDomainDecision(
             family_id=family_id,
@@ -903,11 +881,7 @@ async def decide_family_domain(
         service=SERVICE_TAG,
         concurrency=CONCURRENCY,
     )
-    answer: dict[str, Any] | None = None
-    if results and results[0]:
-        answers = results[0][0]
-        if isinstance(answers, dict):
-            answer = answers.get(QUESTION)
+    answer = _answer_of(results, QUESTION)
 
     def held(reason: str) -> FamilyDomainDecision:
         return FamilyDomainDecision(
@@ -925,10 +899,7 @@ async def decide_family_domain(
     if not isinstance(answer, dict):
         return held("the Jev call returned no answer")
     choice = answer.get("choice")
-    probabilities = {
-        str(k): float(v) for k, v in (answer.get("probabilities") or {}).items()
-    }
-    probability = probabilities.get(str(choice))
+    probability = _probabilities(answer).get(str(choice))
     if choice not in options:
         return held(f"the choice {choice!r} is not one of the candidates")
     if probability is None:
@@ -948,6 +919,64 @@ async def decide_family_domain(
         decided_at=datetime.now(UTC).isoformat(),
         cost=cost,
     )
+
+
+async def decide_family_domain(
+    family_id: str,
+    members: Sequence[Mapping[str, Any]],
+    ids_map: Mapping[str, str],
+    *,
+    model: str,
+    option_set: str = "bounded",
+) -> FamilyDomainDecision:
+    """Ask Jev one domain Choice for the whole family and return the decision.
+
+    ``option_set`` selects which domains the Choice is offered:
+
+    ``bounded``
+        the domains the family's own sources supply, which is the shipped
+        behaviour;
+    ``widened``
+        every domain of every band a source domain falls in, every band
+        umbrella, and ``general``, so the sources' stored domains are evidence
+        rather than a bound;
+    ``fallback``
+        the bounded set first, and the widened set only for a family the
+        bounded answer leaves undecided, so a family the narrow options already
+        settle is never re-litigated and a family they cannot place is still
+        offered the concept's own domain.
+
+    A family whose options collapse to one domain takes it without a call. A
+    recorded lead correction wins over the Choice and applies to the whole
+    family. A call that fails, or a choice below :data:`CONFIDENCE_FLOOR`,
+    leaves the family undecided and names the reason: the caller writes none
+    of its members.
+    """
+    if option_set not in OPTION_SETS:
+        raise ValueError(f"unknown option set {option_set!r}")
+    member_ids = tuple(str(member.get("id")) for member in members)
+    options = family_candidate_domains(members, ids_map)
+    corrected_domain = _family_recorded_correction(members)
+    if corrected_domain is not None:
+        return FamilyDomainDecision(
+            family_id=family_id,
+            members=member_ids,
+            candidates=options,
+            choice=corrected_domain,
+            probability=1.0,
+            model="recorded-correction",
+            decided_at=datetime.now(UTC).isoformat(),
+            corrected=True,
+        )
+    if option_set == "widened":
+        return await _decide_widened(family_id, member_ids, members, ids_map, model)
+    bounded = await _decide_bounded(
+        family_id, member_ids, members, options, model, ids_map=ids_map
+    )
+    if option_set == "bounded" or bounded.decided:
+        return bounded
+    widened = await _decide_widened(family_id, member_ids, members, ids_map, model)
+    return replace(widened, cost=bounded.cost + widened.cost)
 
 
 #: One record per family, holding the decision every member reads. The family

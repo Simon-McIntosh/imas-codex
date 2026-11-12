@@ -26,10 +26,11 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from imas_codex.graph.client import GraphClient
-from imas_codex.settings import get_model
 from imas_codex.discovery.base.judgment import decide_batch
+from imas_codex.graph.client import GraphClient
 from imas_codex.graph.dd_domain_classifier import SERVICE_TAG
+from imas_codex.settings import get_model
+from imas_codex.standard_names import domain_decision as _dd
 from imas_codex.standard_names.domain_decision import (
     CONFIDENCE_FLOOR,
     QUESTION,
@@ -41,6 +42,15 @@ from imas_codex.standard_names.domain_decision import (
     ids_domain_map,
 )
 from imas_codex.standard_names.families import fetch_domain_families
+
+
+async def _counted_decide_batch(*args: Any, **kwargs: Any) -> Any:
+    """Count the judgments an arm pays before delegating to ``decide_batch``."""
+    _JUDGMENT_CALLS[0] += 1
+    return await decide_batch(*args, **kwargs)
+
+
+_dd.decide_batch = _counted_decide_batch
 
 ROOT = Path(__file__).resolve().parents[4]
 LABEL_DIR = ROOT / "docs/evidence/fragments/sn-domain-family-labels"
@@ -105,7 +115,9 @@ def _reader_agreement() -> dict[str, Any]:
     }
 
 
-def _index_families(families: list[dict[str, Any]]) -> tuple[dict[str, dict], dict[str, dict]]:
+def _index_families(
+    families: list[dict[str, Any]],
+) -> tuple[dict[str, dict], dict[str, dict]]:
     by_name: dict[str, dict] = {}
     by_key: dict[str, dict] = {}
     for family in families:
@@ -196,19 +208,24 @@ def _calibration_rows() -> list[dict[str, str]]:
 def _incumbent() -> dict[str, str]:
     raw = _load(CALIBRATION_DIR / "scg-domain-incumbent.json")
     return {
-        str(name): str(row.get("physics_domain") or "")
-        for name, row in raw.items()
+        str(name): str(row.get("physics_domain") or "") for name, row in raw.items()
     }
+
+
+#: The ``decide_batch`` calls paid by the arm in flight. The fallback set makes
+#: a second call for a family the narrow options cannot place, so the count of
+#: calls is what the arm is billed for and not the count of families.
+_JUDGMENT_CALLS: list[int] = [0]
 
 
 async def _decide_all(
     families: dict[str, dict],
     model: str,
     *,
-    bounded: bool,
+    option_set: str,
     concurrency: int = 16,
 ) -> dict[str, Any]:
-    """Decide every family once under one option set, one judgment per family."""
+    """Decide every family once under one option set."""
     ids_map = ids_domain_map()
     decisions: dict[str, Any] = {}
     semaphore = asyncio.Semaphore(concurrency)
@@ -221,9 +238,10 @@ async def _decide_all(
                 family["members"],
                 ids_map,
                 model=model,
-                bounded_by_sources=bounded,
+                option_set=option_set,
             )
 
+    _JUDGMENT_CALLS[0] = 0
     await asyncio.gather(*(one(key) for key in sorted(families)))
     return decisions
 
@@ -261,7 +279,9 @@ def _family_comparison(
                 "undecided_reason": decision.undecided_reason,
                 "family_matches": row_matches,
                 "stored_matches": row_stored,
-                "family_share": round(row_matches / len(members), 4) if members else 0.0,
+                "family_share": round(row_matches / len(members), 4)
+                if members
+                else 0.0,
                 "stored_share": round(row_stored / len(members), 4) if members else 0.0,
                 "section_one": target["pattern"] in SECTION_ONE_PATTERNS,
             }
@@ -568,7 +588,9 @@ def _derive_from_existing(path: Path, revision: str = "") -> int:
     with path.open() as handle:
         payload = json.load(handle)
     stored_hits = sum(1 for row in payload["calibration_rows"] if row["stored_match"])
-    payload["calibration"].update(_strict_reading(payload["calibration_rows"], stored_hits))
+    payload["calibration"].update(
+        _strict_reading(payload["calibration_rows"], stored_hits)
+    )
     payload["calibration"].setdefault(
         "accuracy_basis",
         "family_accuracy files an undecided name at its stored domain, which is "
@@ -580,8 +602,7 @@ def _derive_from_existing(path: Path, revision: str = "") -> int:
     payload["provenance"].update(
         {
             "revised_at": datetime.now(UTC).isoformat(),
-            "revision": revision
-            or payload.get("provenance", {}).get("revision", ""),
+            "revision": revision or payload.get("provenance", {}).get("revision", ""),
             "module": "imas_codex/standard_names/domain_decision.py",
             "writes_to_graph": False,
             "graph_access": "read-only",
@@ -595,7 +616,9 @@ def _derive_from_existing(path: Path, revision: str = "") -> int:
         json.dump(payload, handle, indent=1)
         handle.write("\n")
     print(json.dumps(payload["calibration"], indent=1))
-    print(json.dumps(_undecided_summary(payload["undecided"])["largest"]["member_count"]))
+    print(
+        json.dumps(_undecided_summary(payload["undecided"])["largest"]["member_count"])
+    )
     return 0
 
 
@@ -612,26 +635,113 @@ def _check_fragment(fragment: Path, artifact: Path) -> int:
     html = fragment.read_text()
     with artifact.open() as handle:
         data = json.load(handle)
-    largest = ((data.get("undecided_summary") or {}).get("largest") or {})
+    largest = (data.get("undecided_summary") or {}).get("largest") or {}
     calibration = data.get("calibration") or {}
 
     claimed = re.search(r"family of (?:<strong>)?(\d+)(?:</strong>)? members", html)
     claim = int(claimed.group(1)) if claimed else None
     actual = largest.get("member_count")
     size_ok = claim is not None and claim == actual
-    print(
-        f"check:undecided-largest claim={claim} artifact={actual} ok={size_ok}"
-    )
+    print(f"check:undecided-largest claim={claim} artifact={actual} ok={size_ok}")
 
     strict = calibration.get("family_accuracy_strict")
-    strict_text = f"{strict * 100:.2f}" if isinstance(strict, (int, float)) else "absent"
+    strict_text = (
+        f"{strict * 100:.2f}" if isinstance(strict, (int, float)) else "absent"
+    )
     contradicts = "counted as wrong" in html
-    strict_ok = isinstance(strict, (int, float)) and strict_text in html and not contradicts
+    strict_ok = (
+        isinstance(strict, (int, float)) and strict_text in html and not contradicts
+    )
     print(
         f"check:calibration-strict claim={strict_text}% "
         f"artifact={strict_text}% contradicted_basis={contradicts} ok={strict_ok}"
     )
     return 0 if (size_ok and strict_ok) else 1
+
+
+#: The bars the measurement is taken against. The stored baselines are read
+#: from the same run; these are the fixed floors the section names.
+CALIBRATION_FLOOR_STRICT = 0.597
+UNDECIDED_MULTI_BOUND = 20
+
+#: Option sets measured and refused in an earlier run of this harness, kept
+#: here because their per-family rows were overwritten by the run that followed
+#: and the readings are the record of why they were refused.
+_REFUSED_OPTION_SETS = {
+    "band-split two-stage": {
+        "revision": "6d1bd724f",
+        "family_match_share": 0.4780,
+        "drawn_family_share": 0.6230,
+        "calibration_strict": 0.4556,
+        "undecided_with_two_or_more_members": 39,
+        "judgments_paid": 217,
+        "cost_usd": 0.061835,
+        "note": (
+            "a band step then a domain step, with the two probabilities "
+            "multiplied; the product falls below the floor even when both "
+            "steps are confident, so families the narrow options had placed "
+            "become undecided"
+        ),
+    }
+}
+
+
+def _reading(arm: dict[str, Any]) -> dict[str, Any]:
+    """The five readings a bar is taken on, for one arm."""
+    return {
+        "family_match_share": arm["family_comparison"]["family_match_share"],
+        "stored_family_match_share": arm["family_comparison"]["stored_match_share"],
+        "drawn_family_share": arm["single_names"]["drawn_family_share"],
+        "drawn_stored_share": arm["single_names"]["drawn_stored_share"],
+        "calibration_strict": arm["calibration"]["family_accuracy_strict"],
+        "undecided_with_two_or_more_members": arm["undecided_summary"][
+            "with_two_or_more_members"
+        ],
+        "judgments_paid": arm["judgments"]["judgments_paid"],
+        "cost_usd": arm["judgments"]["cost_usd"],
+        "cost_per_decision_usd": arm["judgments"]["cost_per_decision_usd"],
+    }
+
+
+def _bars_failed(reading: dict[str, Any], bounded: dict[str, Any]) -> list[str]:
+    """The bars an arm does not clear, each named with what it read."""
+    failed = []
+    if reading["family_match_share"] <= reading["stored_family_match_share"]:
+        failed.append(
+            "family member share "
+            f"{reading['family_match_share']:.4f} is not above the stored "
+            f"{reading['stored_family_match_share']:.4f}"
+        )
+    if reading["family_match_share"] < bounded["family_match_share"]:
+        failed.append(
+            "family member share "
+            f"{reading['family_match_share']:.4f} is below the source-bounded "
+            f"{bounded['family_match_share']:.4f}"
+        )
+    if reading["drawn_family_share"] <= reading["drawn_stored_share"]:
+        failed.append(
+            "drawn single-name share "
+            f"{reading['drawn_family_share']:.4f} is not above the stored "
+            f"{reading['drawn_stored_share']:.4f}"
+        )
+    if reading["calibration_strict"] < CALIBRATION_FLOOR_STRICT:
+        failed.append(
+            f"calibration accuracy with undecided counted wrong "
+            f"{reading['calibration_strict']:.4f} is below {CALIBRATION_FLOOR_STRICT}"
+        )
+    if reading["calibration_strict"] < bounded["calibration_strict"]:
+        failed.append(
+            "calibration accuracy with undecided counted wrong "
+            f"{reading['calibration_strict']:.4f} is below the source-bounded "
+            f"{bounded['calibration_strict']:.4f}"
+        )
+    if reading["undecided_with_two_or_more_members"] > UNDECIDED_MULTI_BOUND:
+        failed.append(
+            "multi-member families below the floor "
+            f"{reading['undecided_with_two_or_more_members']} is above "
+            f"{UNDECIDED_MULTI_BOUND}"
+        )
+    return failed
 
 
 def _filed_domain(decision: Any, member: dict) -> str:
@@ -641,10 +751,10 @@ def _filed_domain(decision: Any, member: dict) -> str:
     return str(member.get("physics_domain") or "")
 
 
-def _all_live(output: Path, seat: str) -> int:
+def _all_live(output: Path, seat: str, option_set: str) -> int:
     """The transport and general share over every live family, never written.
 
-    Every live family is decided under the widened options in memory; a name
+    Every live family is decided under *option_set* in memory; a name
     in an undecided family keeps its stored domain, which is what a live pass
     would leave it holding. The twenty largest moves between domains are
     listed by family so a physicist can read what the widening would change.
@@ -655,7 +765,7 @@ def _all_live(output: Path, seat: str) -> int:
         families = fetch_domain_families(gc, min_size=1)
     indexed = {family["key"]: family for family in families}
     decisions = asyncio.run(
-        _decide_all(indexed, seat, bounded=False, concurrency=32)
+        _decide_all(indexed, seat, option_set=option_set, concurrency=32)
     )
     stored_counts: Counter[str] = Counter()
     filed_counts: Counter[str] = Counter()
@@ -673,16 +783,18 @@ def _all_live(output: Path, seat: str) -> int:
             if filed != stored:
                 moves[(stored, filed)] += 1
                 family_moves.setdefault((stored, filed), []).append(family["key"])
-    judged = [d for d in decisions.values() if len(d.candidates) > 1]
+    calls = _JUDGMENT_CALLS[0]
+    cost = round(sum(float(d.cost or 0.0) for d in decisions.values()), 6)
     payload = {
         "seat": seat,
+        "option_set": option_set,
         "provenance": _provenance(seat),
         "families": len(families),
         "names": total,
         "writes_to_graph": False,
         "graph_access": "read-only",
         "stored_domain_counts": dict(stored_counts.most_common()),
-        "widened_domain_counts": dict(filed_counts.most_common()),
+        "filed_domain_counts": dict(filed_counts.most_common()),
         "transport": {
             "stored": stored_counts.get("transport", 0),
             "widened": filed_counts.get("transport", 0),
@@ -693,15 +805,9 @@ def _all_live(output: Path, seat: str) -> int:
         },
         "judgments": {
             "families_decided": len(decisions),
-            "judgments_paid": len(judged),
-            "cost_usd": round(
-                sum(float(d.cost or 0.0) for d in decisions.values()), 6
-            ),
-            "cost_per_decision_usd": round(
-                sum(float(d.cost or 0.0) for d in decisions.values()) / len(judged), 8
-            )
-            if judged
-            else 0.0,
+            "judgments_paid": calls,
+            "cost_usd": cost,
+            "cost_per_decision_usd": round(cost / calls, 8) if calls else 0.0,
         },
         "largest_moves": [
             {
@@ -742,6 +848,12 @@ def main() -> int:
         help="decide every live family and record the transport and general share",
     )
     parser.add_argument(
+        "--option-set",
+        choices=("bounded", "widened", "fallback"),
+        default="fallback",
+        help="the option set the --all-live pass decides under",
+    )
+    parser.add_argument(
         "--check-fragment",
         type=Path,
         default=None,
@@ -761,7 +873,7 @@ def main() -> int:
         return _derive_from_existing(args.output, revision=args.revision)
 
     if args.all_live:
-        return _all_live(args.output, get_model(SEAT))
+        return _all_live(args.output, get_model(SEAT), args.option_set)
 
     seat = get_model(SEAT)
     agreement = _reader_agreement()
@@ -793,33 +905,30 @@ def main() -> int:
     for key in calibration_family.values():
         needed[key] = by_key[key]
 
-    decisions_widened = asyncio.run(_decide_all(needed, seat, bounded=False))
-    decisions_bounded = asyncio.run(_decide_all(needed, seat, bounded=True))
+    decided: dict[str, tuple[dict[str, Any], int]] = {}
+    for option_set in ("bounded", "widened", "fallback"):
+        decisions = asyncio.run(_decide_all(needed, seat, option_set=option_set))
+        decided[option_set] = (decisions, _JUDGMENT_CALLS[0])
     ids_map = ids_domain_map()
     incumbent = _incumbent()
 
     arms: dict[str, Any] = {}
-    for arm, decisions in (
-        ("widened", decisions_widened),
-        ("bounded", decisions_bounded),
-    ):
+    for arm, (decisions, calls) in decided.items():
         comparison, family_rows = _family_comparison(family_targets, by_key, decisions)
-        singles, single_rows = _single_comparison(
-            single_targets, by_key, decisions
-        )
+        singles, single_rows = _single_comparison(single_targets, by_key, decisions)
         calibration_reading, calibration_rows = _calibration_comparison(
             calibration, calibration_family, by_key, decisions, incumbent
         )
         undecided_rows = _undecided_rows(needed, by_key, decisions, seat, ids_map)
-        judged = [d for d in decisions.values() if len(d.candidates) > 1]
         cost = round(sum(float(d.cost or 0.0) for d in decisions.values()), 6)
         arms[arm] = {
+            "option_set": arm,
             "judgments": {
                 "families_decided": len(decisions),
-                "judgments_paid": len(judged),
-                "no_call_families": len(decisions) - len(judged),
+                "judgments_paid": calls,
+                "no_call_families": len(decisions) - calls,
                 "cost_usd": cost,
-                "cost_per_decision_usd": round(cost / len(judged), 8) if judged else 0.0,
+                "cost_per_decision_usd": round(cost / calls, 8) if calls else 0.0,
                 "live_families_scanned": len(families),
             },
             "family_comparison": comparison,
@@ -832,24 +941,39 @@ def main() -> int:
             "undecided_summary": _undecided_summary(undecided_rows),
         }
 
-    widened = arms["widened"]
-    bounded = arms["bounded"]
+    readings = {name: _reading(arm) for name, arm in arms.items()}
+    bounded_reading = readings["bounded"]
+    for reading in readings.values():
+        reading["bars_failed"] = _bars_failed(reading, bounded_reading)
+        reading["clears_every_bar"] = not reading["bars_failed"]
+    reported = next(
+        (
+            name
+            for name in ("fallback", "widened")
+            if readings[name]["clears_every_bar"]
+        ),
+        "widened",
+    )
+    arm = arms[reported]
     payload = {
         "seat": seat,
         "confidence_floor": CONFIDENCE_FLOOR,
         "provenance": _provenance(seat),
         "reader_agreement": agreement,
+        "reported_arm": reported,
         "sheet_families_mapping_to_more_than_one_decision_family": multi_mapped,
-        "judgments": widened["judgments"],
-        "family_comparison": widened["family_comparison"],
-        "family_rows": widened["family_rows"],
-        "single_names": widened["single_names"],
-        "single_rows": widened["single_rows"],
-        "calibration": widened["calibration"],
-        "calibration_rows": widened["calibration_rows"],
-        "undecided": widened["undecided"],
-        "undecided_summary": widened["undecided_summary"],
+        "judgments": arm["judgments"],
+        "family_comparison": arm["family_comparison"],
+        "family_rows": arm["family_rows"],
+        "single_names": arm["single_names"],
+        "single_rows": arm["single_rows"],
+        "calibration": arm["calibration"],
+        "calibration_rows": arm["calibration_rows"],
+        "undecided": arm["undecided"],
+        "undecided_summary": arm["undecided_summary"],
+        "readings": readings,
         "arms": arms,
+        "refused_option_sets": _REFUSED_OPTION_SETS,
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with args.output.open("w") as handle:
@@ -861,38 +985,8 @@ def main() -> int:
             {
                 "seat": seat,
                 "agreement": agreement["agreed_by_kind"],
-                "widened": {
-                    "family": widened["family_comparison"]["family_match_share"],
-                    "stored": widened["family_comparison"]["stored_match_share"],
-                    "drawn_singles": (
-                        widened["single_names"]["drawn_measured"],
-                        widened["single_names"]["drawn_family_share"],
-                        widened["single_names"]["drawn_stored_share"],
-                    ),
-                    "calibration_strict": widened["calibration"][
-                        "family_accuracy_strict"
-                    ],
-                    "undecided_multi": widened["undecided_summary"][
-                        "with_two_or_more_members"
-                    ],
-                    "judgments": widened["judgments"],
-                },
-                "bounded": {
-                    "family": bounded["family_comparison"]["family_match_share"],
-                    "stored": bounded["family_comparison"]["stored_match_share"],
-                    "drawn_singles": (
-                        bounded["single_names"]["drawn_measured"],
-                        bounded["single_names"]["drawn_family_share"],
-                        bounded["single_names"]["drawn_stored_share"],
-                    ),
-                    "calibration_strict": bounded["calibration"][
-                        "family_accuracy_strict"
-                    ],
-                    "undecided_multi": bounded["undecided_summary"][
-                        "with_two_or_more_members"
-                    ],
-                    "judgments": bounded["judgments"],
-                },
+                "reported_arm": reported,
+                "readings": readings,
                 "multi_mapped": len(multi_mapped),
             },
             indent=1,
