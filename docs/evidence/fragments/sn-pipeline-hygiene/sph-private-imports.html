@@ -23,10 +23,13 @@
     </tbody>
   </table>
   <p>
-    The six closed statements are the module-level imports in
+    The six closed module-level statements are the imports in
     <code>export.py</code> (two), <code>legacy_authority.py</code>,
     <code>near_duplicates.py</code>, <code>release_notes.py</code> and
-    <code>review_triage.py</code>. Each consumer now imports a public name.
+    <code>review_triage.py</code>; the seventh is the function-local
+    <code>_github_slug</code> import in <code>promote.py</code>, which the rule
+    reports wherever the statement sits. Each consumer now imports a public
+    name.
   </p>
 </section>
 
