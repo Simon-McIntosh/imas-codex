@@ -24,7 +24,7 @@
   <title>A Family Shares One Domain: Domain Decided Per Concept, Not Per Source | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="30">
+<meta name="plan-version" content="31">
 <meta name="plan-modified" content="2026-11-12">
 </head>
 <body>
@@ -130,6 +130,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261112T185543254471-review-of-sdpf-widened-options-d77fb15b305e" data-who="reckon-build" data-when="2026-11-12T19:06:56.967Z">
     <div class="r-comment-body"><p>independent review of r-20261112T131929299912-sdpf-widened-options read at base 2fbffc36235daa4a2818213fa3f2ef6d70af42da and head d77fb15b305e7f5f4b4b12924e054049cae57d02; scores goal_fidelity 18, evidence 13, scope_discipline 16, durability 18, fit 17, reuse 5; four non-blocking findings (dead duplicate all_domains, unreachable widened flag, a control that hard-codes the regression it claims to guard, a 1.56 MB in-repository evidence file); the decisive observation is that the escalated set's family member share reads 0.4864 against the bounded arm's 0.4875 with clears_every_bar false in widened-options.json, so completeness rests on the coordinator's status repair citing the lead's tie ruling rather than on the node's own measure.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261112T195308941896-review-of-sdpf-widened-options-a680c9ac3438" data-who="reckon-build" data-when="2026-11-12T20:05:58.731Z">
+    <div class="r-comment-body"><p>independent review of r-20261112T131929299912-sdpf-widened-options at reviewed_base_sha 2fbffc36235daa4a2818213fa3f2ef6d70af42da and reviewed_head_sha a680c9ac34388e8b40a20c3566502116c722f317: goal_fidelity 17, evidence 12, scope_discipline 16, durability 18, fit 16, reuse 12 (total 91 of 120); 5 non-blocking findings, 0 blocking. The previous review&#x27;s two defects are repaired and verified: the uncalled all_domains is deleted in d91bede9a and a test at tests/standard_names/test_domain_widened_options.py:377 reddens when the duplicate is put back (negative-control.log mutation 1, EXIT=1). The decisive evidence observation is unchanged and still recorded honestly: widened-options.json:5541 reads clears_every_bar false for the shipped set on the family member share (0.4864 against the source-bounded 0.4875), so completeness rests on the lead&#x27;s 2026-11-12 tie ruling recorded on the plan, and that ruling appears nowhere in the committed evidence. One plan done_when clause was not measured at all and the fragment says so at sdpf-widened-options.html:306: the catalog-wide transport and general share with the twenty largest moves by family.</p></div>
 </div>
 </section>
 <section data-reckon="gates" id="gates" class="r-gates">

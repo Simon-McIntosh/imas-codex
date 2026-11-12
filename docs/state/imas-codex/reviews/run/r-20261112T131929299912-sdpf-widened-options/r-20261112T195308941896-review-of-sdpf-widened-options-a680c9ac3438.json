@@ -1,0 +1,81 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed manifest carries no baseline_suite or after_suite block (both null in the run's classification.json), so no arm delta is recorded from them; the committed gate log docs/evidence/fragments/sn-domain-per-family/sdpf-widened-options-gate.log at revision d91bede9a records 19 passed / 1 deselected / EXIT=0 and 6 passed / 4 deselected / EXIT=0 with no FAILED line, so the head arm fails nothing and the added count is 0 over an empty id list.",
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/standard_names/domain_decision.py:decide_and_write_family"
+  ],
+  "completed_at": "2026-11-12T20:05:58.731Z",
+  "dispatched_at": "2026-11-12T19:55:57Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-domain-per-family/sdpf-widened-options.html",
+      "line": 306,
+      "severity": "non-blocking",
+      "summary": "the plan's catalog-wide transport/general share and twenty largest moves were not measured"
+    },
+    {
+      "file": "docs/evidence/fragments/sn-domain-per-family/widened-options.json",
+      "line": 5541,
+      "severity": "non-blocking",
+      "summary": "the shipped arm's artifact reads clears_every_bar false and the lead's tie ruling appears nowhere in the committed evidence"
+    },
+    {
+      "file": "imas_codex/standard_names/domain_decision.py",
+      "line": 663,
+      "severity": "non-blocking",
+      "summary": "build_family_domain_question duplicates build_family_question's Choice construction instead of sharing it"
+    },
+    {
+      "file": "docs/evidence/fragments/sn-domain-per-family/sdpf-widened-options-gate.log",
+      "line": 1,
+      "severity": "non-blocking",
+      "summary": "gate log records no partition or job id, so the all_debug claim is manifest-only"
+    },
+    {
+      "file": "docs/evidence/fragments/sn-domain-per-family/sdpf-widened-options.html",
+      "line": 60,
+      "severity": "non-blocking",
+      "summary": "the declared figure path was never created and the four-arm comparison carries no graphic"
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read commit by commit; one module, two test files, four evidence artefacts",
+    "done_when": "met except the family member share, which the lead ruled a tie; gate log, calibration, single names, undecided bound, planted clause and cost all recorded",
+    "goal": "met: widened option set offered and measured against the agreed reference",
+    "manifest": "complete after a coordinator status repair citing the lead ruling; no baseline/after suite arm recorded",
+    "write_paths": "inside the fence, with one dispatch-typo filename and one declared-but-absent path"
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_domain_widened_options.py:84 and :377 and tests/standard_names/test_family_domain_decision.py:406 each redden under one of the three recorded mutations at EXIT=1.",
+    "evidence": "docs/evidence/fragments/sn-domain-per-family/widened-options.json:5541 records clears_every_bar false and sdpf-widened-options.html:306 states the catalog-wide share was not measured.",
+    "fit": "imas_codex/standard_names/domain_decision.py:663 repeats the criteria construction of :730 rather than sharing it.",
+    "goal_fidelity": "imas_codex/standard_names/domain_decision.py:956 defaults option_set to fallback_escalated and :1205 decide_and_write_family wires split_undecided_family for an undecided family.",
+    "reuse": "imas_codex/standard_names/domain_decision.py:764 extends :612 family_candidate_domains by calling it, while :663 duplicates :730 build_family_question.",
+    "scope_discipline": "every node commit path is inside the declared fence, but widened-options.json is 1,558,361 bytes and the declared figure path was never created."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is that the one family domain decision is offered options not bounded by its sources and is measured against the agreed reader labels; imas_codex/standard_names/domain_decision.py:764 widened_candidate_domains offers every domain of every source band plus every band umbrella plus general, :956 defaults option_set to fallback_escalated, and docs/evidence/fragments/sn-domain-per-family/widened-options.json records all four sets over the agreed 101-item reference and the 113-item ruled reference, so the goal is met.\nVERDICT done_when: the dispatched done_when asks for a higher drawn single-name share than stored, a family member share not lower than the source-bounded arm in the same run, calibration at least 0.597 and not lower than that arm, at most 24 multi-member families below the floor, a planted unrelated-source name placed under the widened set only, judgments and cost per decision recorded, and the all_debug gate log committed; the gate log at revision d91bede9a records 19 passed / EXIT=0 and 6 passed / EXIT=0, widened-options.json single_names reads 0.6557 against stored 0.5410 and calibration 0.6272 strict against 0.6036, undecided_summary reads 24, and the planted clause is met by the widened arm (sdpf-widened-options.html:103 reads yes for widened, no for both fallback shapes); the one clause unmet on the node's own measure is the family member share, 0.4864 against 0.4875.\nVERDICT write_paths: the declared scope is domain_decision.py, families.py, three test files, the harness, widened-options.json, the fragment and the gate log; every path in the twelve node commits is one of them, imas_codex/standard_names/families.py and tests/standard_names/test_domain_decision.py carry no change although declared, and the declared name tests/standard_names/test_domain_family_decision.py does not exist (the touched file is test_family_domain_decision.py, which the manifest's scope_note records as a dispatch typo).\nVERDICT manifest: read; status complete after a coordinator status repair whose manifest.md.asdelivered reads blocked, with the reason citing the lead ruling of 2026-11-12; twelve commits b154adafd..a680c9ac3, changed_paths naming the seven touched files, the gate log at d91bede9a and three negative-control mutations at EXIT=1; baseline_suite and after_suite are absent from the manifest, so no arm delta is recorded.\nVERDICT diff: read commit by commit from base 2fbffc362 to head a680c9ac3; the substantive change is imas_codex/standard_names/domain_decision.py (+245/-35 across six commits: OPTION_SETS, domain_bands, band_domains, build_family_domain_question, widened_candidate_domains, _decide_widened, _decide_bounded, the decide_family_domain dispatcher, split_undecided_family and the decide_and_write_family wiring) beside two test files and four evidence artefacts, and the repair commit d91bede9a deletes the uncalled all_domains and the dead widened flag the previous review named.\nCALL_SITES: imas_codex/standard_names/domain_decision.py:decide_and_write_family\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/domain_decision.py:956 defaults option_set to fallback_escalated and :1179 decide_and_write_family calls split_undecided_family at :1205 instead of fan_out_family_decision, so the shipped decision can choose a domain no source lives in and a family the floor refuses is written per member.\nSCORE evidence: 12\nJUSTIFICATION evidence: docs/evidence/fragments/sn-domain-per-family/widened-options.json:5541 records clears_every_bar false for the shipped set, its bars_failed naming the family member share 0.4864 against the source-bounded 0.4875, and sdpf-widened-options.html:306 states the plan's catalog-wide transport and general share with the twenty largest moves was not measured at all.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: every path in the twelve node commits is inside the declared fence, but docs/evidence/fragments/sn-domain-per-family/widened-options.json is 1,558,361 bytes, above the landing contract's limit for an in-repository data file, and docs/figures/sn-domain-per-family/sdpf-widened-options is declared and never created.\nSCORE durability: 18\nJUSTIFICATION durability: tests/standard_names/test_domain_widened_options.py:84 reddens when widened_candidate_domains is mutated to return the source domains (negative-control.log mutation 2: 4 failed, EXIT=1), tests/standard_names/test_domain_widened_options.py:377 reddens when the duplicate domain order is put back (mutation 1: 1 failed, EXIT=1), and tests/standard_names/test_family_domain_decision.py:406 reddens when the split is removed (mutation 3: 1 failed, EXIT=1).\nSCORE fit: 16\nJUSTIFICATION fit: the additions follow the module's one-helper-per-question idiom (imas_codex/standard_names/domain_decision.py:785 _decide_widened beside :883 _decide_bounded) and add no plan or ticket label, but :663 build_family_domain_question repeats the criteria construction of :730 build_family_question rather than sharing it.\nSCORE reuse: 12\nJUSTIFICATION reuse: the previous review's duplicate all_domains is deleted and imas_codex/standard_names/domain_decision.py:764 widened_candidate_domains extends :612 family_candidate_domains by calling it, while :663 build_family_domain_question duplicates the Choice construction its owner :730 build_family_question already provides.\nFINDING docs/evidence/fragments/sn-domain-per-family/sdpf-widened-options.html:306 non-blocking: the plan's done_when requires the decision run over every live family in a disposable copy with the share of names under transport and under general recorded beside the present 698 of 1,975 and the general count, with the twenty largest moves listed by family, and the fragment states this pass was not run, so one delivered clause of the section's measure is absent; it belongs to the live-pass node rather than to this one, so it is recorded for a fold instead of holding a change whose code is complete.\nFINDING docs/evidence/fragments/sn-domain-per-family/widened-options.json:5541 non-blocking: the shipped arm's own record reads clears_every_bar false with bars_failed naming the family member share, and neither the artifact nor the fragment records the lead ruling of 2026-11-12 that accepts the three-name gap as a tie, so a later reader of the committed evidence alone sees a default that fails its own harness with the ruling living only on the plan and in the coordinator's status repair.\nFINDING imas_codex/standard_names/domain_decision.py:663 non-blocking: build_family_domain_question repeats the sorted-order and option_text criteria construction of build_family_question at :730 line for line, differing only in the instruction text and the prior paragraph, so a change to how a domain Choice is laid out must now be made in two places; the repair that removed the widened flag removed the parameterisation point and left two builders where one wording argument would serve.\nFINDING docs/evidence/fragments/sn-domain-per-family/sdpf-widened-options-gate.log:1 non-blocking: the log header records the revision, tree, module, cwd and command but no partition or SLURM job id, so the done_when clause that the gate ran on the all_debug partition is asserted only in the manifest and cannot be checked from the committed log a reader can open.\nFINDING docs/evidence/fragments/sn-domain-per-family/sdpf-widened-options.html:60 non-blocking: the four option sets are compared across five bars in prose tables only, the declared figure path docs/figures/sn-domain-per-family/sdpf-widened-options was never created, and the fragment carries no graphic, so the reading that decides which set ships is harder to compare than the data warrants.",
+  "review_node": "review-of-sdpf-widened-options-a680c9ac3438",
+  "review_run_id": "r-20261112T195308941896-review-of-sdpf-widened-options-a680c9ac3438",
+  "reviewed_base_sha": "2fbffc36235daa4a2818213fa3f2ef6d70af42da",
+  "reviewed_head_sha": "a680c9ac34388e8b40a20c3566502116c722f317",
+  "reviewed_run_id": "r-20261112T131929299912-sdpf-widened-options",
+  "reviewer": "deepseek-v4.1-flash",
+  "scores": {
+    "durability": 18,
+    "evidence": 12,
+    "fit": 16,
+    "goal_fidelity": 17,
+    "reuse": 12,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T20:06:26.157918+00:00",
+  "total": 91
+}
