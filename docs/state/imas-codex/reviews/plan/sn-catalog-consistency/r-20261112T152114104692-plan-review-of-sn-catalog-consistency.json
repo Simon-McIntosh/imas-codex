@@ -1,0 +1,56 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T15:26:17.838Z",
+  "dispatched_at": "2026-11-12T15:22:11Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:50",
+      "id": "done_when-1",
+      "reason": "the node either re-applies a row \u00a76 already changed or reports incomplete with the work actually done, and one clause admitting a \u00a76-settled row as applied fixes it.",
+      "text": "done-when item 2 closes s2 only on rows \"applied through `sn edit` or declined with its reason\", but the changed prose (line 44) makes \u00a72 re-reads rows after \u00a76 lands and take \"only the rows still standing\", so a row \u00a76 already settled is neither applied by this section nor declined and the node cannot be closed on the item as written",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:51",
+      "id": "done_when-2",
+      "reason": "the plan needs one line saying a `batch-272` row may only be declined in a way that clears its advisory, or the witness must name the declines it tolerates.",
+      "text": "done-when item 3 requires the release-candidate unit-pair advisory list to name none of the three `batch-272` names, while item 2 (line 50) permits declining any of those rows with a reason; a declined rename leaves its advisory standing, so the two items disagree on what closes the section",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "c31dbeaa1df882b92c35fd9ea6e9770b5fb19d54",
+  "plan_fingerprint": "def140e4afa285bca18af92cf0ed912fc7a8725959757efe36c3145baeb4ba89",
+  "plan_slug": "sn-catalog-consistency",
+  "plan_version": 33,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T152114104692-plan-review-of-sn-catalog-consistency",
+  "reviewed_blob_sha": "0ab2ed449a5d02c42104e306bc8eb584c12d1a5c",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the sizing artifact, the two plan sections cited, and the three named batches all resolve in the tree.",
+    "done_when": "a finding \u2014 done-when item 2 (line 50) admits only \"applied through `sn edit` or declined\", while the changed prose (line 44) adds a third outcome, \"records each row \u00a76 already settled\".",
+    "evidence_paths": "pass \u2014 the batch list and the release-candidate advisory list sit in a committed evidence fragment, and the census script is named by its evidence directory; nothing in the changed text points at a session-scratch path.",
+    "naming": "pass \u2014 the changed text introduces no plan labels or version tags into symbols; `batch-272`/`batch-274`\u2013`279` are artifact identifiers quoted as data.",
+    "reasoning": "pass \u2014 the stated root cause (per-member regeneration) is the one the recorded root-cause trace gives, \u00a76 can genuinely settle a unit-pair row, and the changed text prescribes no code path, step sequence or function.",
+    "single_goal": "pass \u2014 \u00a72 carries one deliverable, the consistency batches applied, with the release-candidate rows as its named sub-population.",
+    "wiring": "pass \u2014 s2 declares `sn-integrity-backlog#s52` and `sn-definitions-by-construction#s6`, both present in `plan-section-depends-on` (line 22) and both needed by the re-read the new prose requires."
+  },
+  "section_digests": {
+    "_document": "11f26c61b9c1b623d2ee0cccd12073818b97111edfbe33dd7fa873d7a4ea26b6",
+    "s1": "c69f79e72b8fe8652e9dcd8632a35ca7eaa3a205fd5ee3e2ee98bc74afc136ba",
+    "s2": "27ce0057d20e750129084b95b4b46aecc88e3a18830c81ca0f721446c2269dd7",
+    "s3": "aa1fea350fe30f045ccc80ea17e474ba76d1f634673cf083a8205d5245fb5357",
+    "s4": "ef7bd7f314233248216f8598211014764b74d1c74c308db48db9ab9390a33d55",
+    "s5": "b4ab3db4aa1dcab8fe59cef3b1b0d0a9df32510c951813cd2720aa098724eb07",
+    "s6": "e35c4bf32892d9b90e8392b5e1171957f4973d937daaccdee3ab610d3c1c937e",
+    "s7": "abb53d14a3cb7db35add3d596e723e7c0e012bbee6e7f328d2b7b520a5956700",
+    "s8": "124c4cffdc2b27efae89ba41f97a27ff57b01c0b53ce596b6c025f1e6523e626"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T16:23:16.009587+00:00",
+  "total": null
+}

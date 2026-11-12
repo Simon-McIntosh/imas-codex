@@ -253,6 +253,124 @@ def _successors(name_id: str) -> list[str]:
     return list(rows[0]["successors"]) if rows else []
 
 
+LOCATOR_TARGET = "toroidal_argon_velocity_at_separatrix"
+LOCATOR_TOMBSTONE = "toroidal_argon_velocity_at_plasma_boundary"
+LOCATOR_HOLDER = "flux_surface_averaged_toroidal_argon_velocity_at_plasma_boundary"
+
+
+def _seed_locator_only_case(gc: GraphClient) -> None:
+    """Two spellings of one quantity; the average holds the tombstone's spelling.
+
+    The tombstone records no source path of its own and its live successor
+    sits at the averaged container, so neither the tombstone nor the
+    renaming name has a single locus to compare — the shape the locus
+    comparisons cannot decide.
+    """
+    _name(gc, LOCATOR_TARGET, stage="accepted", source_paths=[VALUE_PATH])
+    _name(gc, LOCATOR_TOMBSTONE, stage="superseded", source_paths=[])
+    _name(gc, LOCATOR_HOLDER, stage="accepted", source_paths=[AVERAGE_PATH])
+    _lineage(gc, LOCATOR_HOLDER, LOCATOR_TOMBSTONE)
+    _review(gc, LOCATOR_TOMBSTONE, "review:locator:1")
+    _source(gc, LOCATOR_TARGET, VALUE_PATH)
+    _source(gc, LOCATOR_HOLDER, AVERAGE_PATH)
+
+
+def test_locator_only_rename_archives_beside_a_differently_located_holder(
+    seed_dd_resolutions,
+):
+    """A spelling that only moves vocabulary passes once its history is aside."""
+    _reset()
+    seed_dd_resolutions([{"path": VALUE_PATH, "effective": "m/s"}])
+    with GraphClient() as gc:
+        _seed_locator_only_case(gc)
+
+    plan = apply_edit(
+        target=LOCATOR_TARGET,
+        rename=LOCATOR_TOMBSTONE,
+        reason="the boundary locator is spelled at_plasma_boundary",
+        gc=GraphClient(),
+    )
+    assert plan.blocked is None, plan.blocked
+    assert plan.applied is True
+    assert plan.successor == LOCATOR_TOMBSTONE
+
+    live = _read(LOCATOR_TOMBSTONE)
+    assert live["reviews"] == []
+    assert live["sources"] == [f"dd:{VALUE_PATH}"]
+
+    archive = _archive_for(LOCATOR_TOMBSTONE)
+    assert archive["holder"] == LOCATOR_HOLDER
+    assert archive["reviews"] == ["review:locator:1"]
+
+    receipt = _receipt(LOCATOR_TOMBSTONE)
+    assert receipt["reason"]["case"] == "lead_ruled_locator"
+    assert receipt["reason"]["holders"] == [LOCATOR_HOLDER]
+    assert receipt["reason"]["reclaiming_name"] == LOCATOR_TARGET
+
+    # The holder keeps the average and its own source.
+    assert _read(LOCATOR_HOLDER)["sources"] == [f"dd:{AVERAGE_PATH}"]
+    assert _read(LOCATOR_TARGET)["name_stage"] == "superseded"
+
+
+def test_locator_only_rename_archives_an_unheld_quantity_its_lineage_records(
+    seed_dd_resolutions,
+):
+    """No live holder is admitted when the lineage still records the quantity."""
+    _reset()
+    seed_dd_resolutions([{"path": VALUE_PATH, "effective": "m/s"}])
+    retired = "toroidal_cumulative_argon_momentum_at_separatrix"
+    with GraphClient() as gc:
+        _name(gc, LOCATOR_TARGET, stage="accepted", source_paths=[VALUE_PATH])
+        _name(gc, LOCATOR_TOMBSTONE, stage="superseded", source_paths=[])
+        _name(gc, retired, stage="superseded", source_paths=[])
+        _lineage(gc, retired, LOCATOR_TOMBSTONE)
+        _review(gc, LOCATOR_TOMBSTONE, "review:unheld:1")
+        _source(gc, LOCATOR_TARGET, VALUE_PATH)
+
+    plan = apply_edit(
+        target=LOCATOR_TARGET,
+        rename=LOCATOR_TOMBSTONE,
+        reason="the boundary locator is spelled at_plasma_boundary",
+        gc=GraphClient(),
+    )
+    assert plan.blocked is None, plan.blocked
+    assert plan.applied is True
+
+    archive = _archive_for(LOCATOR_TOMBSTONE)
+    assert archive["holder"] is None
+    assert archive["reviews"] == ["review:unheld:1"]
+    assert archive["lineage"] == [retired]
+
+    receipt = _receipt(LOCATOR_TOMBSTONE)
+    assert receipt["reason"]["case"] == "lead_ruled_locator"
+    assert receipt["reason"]["holders"] == []
+    assert _read(LOCATOR_TOMBSTONE)["sources"] == [f"dd:{VALUE_PATH}"]
+
+
+def test_locator_only_rename_is_refused_when_a_live_holder_shares_the_locus():
+    """A live successor sitting at the renaming name's locus keeps the id."""
+    _reset()
+    with GraphClient() as gc:
+        _name(gc, LOCATOR_TARGET, stage="accepted", source_paths=[VALUE_PATH])
+        _name(gc, LOCATOR_TOMBSTONE, stage="superseded", source_paths=[])
+        _name(gc, LOCATOR_HOLDER, stage="accepted", source_paths=[VALUE_PATH])
+        _lineage(gc, LOCATOR_HOLDER, LOCATOR_TOMBSTONE)
+        _source(gc, LOCATOR_TARGET, VALUE_PATH)
+
+    plan = apply_edit(
+        target=LOCATOR_TARGET,
+        rename=LOCATOR_TOMBSTONE,
+        reason="the boundary locator is spelled at_plasma_boundary",
+        gc=GraphClient(),
+    )
+    assert plan.applied is False
+    assert plan.blocked is not None
+    with GraphClient() as gc:
+        assert (
+            gc.query("MATCH (n:ArchivedStandardName) RETURN count(n) AS n")[0]["n"] == 0
+        )
+
+
 def test_a_tombstone_with_no_live_holder_at_its_locus_is_refused():
     """Without a live successor holding the quantity, the id stays protected."""
     _reset()

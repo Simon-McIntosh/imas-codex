@@ -1035,7 +1035,7 @@ class TestRefineGrammarFailureNotCrashLoop:
             ),
             patch("imas_codex.graph.client.GraphClient"),
             patch(
-                "imas_codex.standard_names.graph_store.graph_claim_release._mark_refine_docs_exhausted",
+                "imas_codex.standard_names.graph_store.graph_claim_release._mark_docs_exhausted",
             ) as mock_exhaust,
             patch(
                 "imas_codex.standard_names.graph_store.graph_docs_persistence.release_refine_docs_failed_claims",

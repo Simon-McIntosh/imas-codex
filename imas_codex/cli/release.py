@@ -21,6 +21,8 @@ from pathlib import Path
 
 import click
 
+_UPSTREAM_OWNER = "iterorganization"
+
 # ============================================================================
 # Version computation
 # ============================================================================
@@ -455,11 +457,13 @@ def _get_remote_owner(remote: str) -> str | None:
     return None
 
 
-def _check_final_targets_upstream(remote: str) -> None:
-    """Verify that final releases target the upstream (iterorganization) repo.
+def _check_release_target(remote: str, *, final: bool) -> None:
+    """Verify the release remote matches the kind of release being cut.
 
-    RC releases are allowed on any remote (forks), but final/stable releases
-    must be pushed to the canonical upstream repository.
+    A final/stable release belongs on the canonical upstream repository. A
+    release candidate belongs on the fork: pointing it at upstream would
+    publish unreviewed catalog bytes to the canonical repository, so it is
+    refused here, before the first push.
     """
     owner = _get_remote_owner(remote)
     if owner is None:
@@ -469,13 +473,22 @@ def _check_final_targets_upstream(remote: str) -> None:
         )
         return
 
-    if owner != "iterorganization":
+    if final:
+        if owner != _UPSTREAM_OWNER:
+            raise click.ClickException(
+                f"Final releases must target upstream ({_UPSTREAM_OWNER}). "
+                f"Remote '{remote}' points to '{owner}'. "
+                f"Use --remote upstream"
+            )
+        click.echo(f"  ✓ Final release targets upstream ({_UPSTREAM_OWNER})")
+        return
+
+    if owner == _UPSTREAM_OWNER:
         raise click.ClickException(
-            f"Final releases must target upstream (iterorganization). "
-            f"Remote '{remote}' points to '{owner}'. "
-            f"Use --remote upstream"
+            f"Release candidates must target the fork. Remote '{remote}' points "
+            f"to upstream ({_UPSTREAM_OWNER}). Use --remote origin"
         )
-    click.echo("  ✓ Final release targets upstream (iterorganization)")
+    click.echo(f"  ✓ Release candidate targets the fork ({owner})")
 
 
 def _remote_slug(remote: str) -> tuple[str, str] | None:
@@ -1418,8 +1431,8 @@ def release(
     _check_remote_exists(remote)
     _check_clean_tree(dry_run, strict=not is_rc)
     _check_synced(remote, dry_run)
+    _check_release_target(remote, final=final)
     if final:
-        _check_final_targets_upstream(remote)
         _check_ci_passed(remote, dry_run)
     click.echo()
 

@@ -82,7 +82,7 @@ from __future__ import annotations
 import hashlib
 import json
 import uuid
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence
 from contextlib import suppress
 from copy import deepcopy
 from dataclasses import dataclass, field
@@ -1895,6 +1895,25 @@ def _bound_source_ids(gc: GraphClient, sn_id: str) -> list[str]:
     return sorted({row["source_id"] for row in rows if row.get("source_id")})
 
 
+#: Marked readback of which bound sources the current data dictionary no
+#: longer realises. A source goes stale when the DD path it points at is
+#: removed, and such a binding can never satisfy a migration's
+#: compare-and-set, so a rename that carried it would refuse a rename that has
+#: nothing wrong with it.
+_STALE_SOURCE_IDS_QUERY = """
+// EDIT_FETCH_STALE_SOURCE_IDS
+MATCH (source:StandardNameSource)-[:PRODUCED_NAME]->(sn:StandardName {id: $id})
+WHERE coalesce(source.status, '') = 'stale'
+RETURN source.id AS source_id
+"""
+
+
+def _stale_source_ids(gc: GraphClient, sn_id: str) -> set[str]:
+    """The stale bound sources of ``sn_id`` at read time."""
+    rows = gc.query(_STALE_SOURCE_IDS_QUERY, id=sn_id)
+    return {row["source_id"] for row in rows if row.get("source_id")}
+
+
 def _carry_rename_sources(
     gc: GraphClient,
     *,
@@ -1932,9 +1951,38 @@ def _carry_rename_sources(
     names is its own defect, so the predecessor must claim none of them.
 
     Returns the receipt line describing what was carried.
+
+    A binding whose data-dictionary path has been removed carries a stale
+    status and can never satisfy a migration's compare-and-set. It is not
+    carried and does not count as a shortfall: it stays recorded against the
+    predecessor it produced, with the status that says its path is gone, and
+    the receipt names it so the reader of the live name knows what the
+    dictionary took away.
     """
     if not expected_source_ids:
         return f"no producing source bound to {old_name!r} — nothing to carry"
+
+    # A binding whose DD path the current data dictionary no longer realises
+    # cannot be carried: the migration's compare-and-set refuses a stale
+    # source, and refusing every rename of a name that once sat on a removed
+    # path would punish the name for the dictionary's history. It stays where
+    # it is — recorded against the retired spelling with its stale status —
+    # and the receipt names it.
+    stale = sorted(_stale_source_ids(gc, old_name) & set(expected_source_ids))
+    stale_note = (
+        f"; {len(stale)} stale binding(s) stay with {old_name!r}, their "
+        f"data-dictionary path removed: {', '.join(stale)}"
+        if stale
+        else ""
+    )
+    expected_source_ids = [
+        source_id for source_id in expected_source_ids if source_id not in stale
+    ]
+    if not expected_source_ids:
+        return (
+            f"no live producing source bound to {old_name!r} — nothing to carry"
+            f"{stale_note}"
+        )
 
     held = set(_bound_source_ids(gc, new_name))
     stranded = [source_id for source_id in expected_source_ids if source_id not in held]
@@ -1983,9 +2031,12 @@ def _carry_rename_sources(
     if carried:
         return (
             f"carried {len(expected_source_ids)} producing source(s) to "
-            f"{new_name!r} ({carried} by explicit migration)"
+            f"{new_name!r} ({carried} by explicit migration){stale_note}"
         )
-    return f"verified {len(expected_source_ids)} producing source(s) on {new_name!r}"
+    return (
+        f"verified {len(expected_source_ids)} producing source(s) on "
+        f"{new_name!r}{stale_note}"
+    )
 
 
 def _fold_target_paths(
@@ -3190,6 +3241,13 @@ MATCH (sn:StandardName {id: $id})
 RETURN sn.source_paths AS source_paths
 """
 
+_RECLAIM_DESCENDANT_COUNT_QUERY = """
+// EDIT_RECLAIM_DESCENDANTS
+MATCH (sn:StandardName {id: $id})
+OPTIONAL MATCH (descendant:StandardName)-[:REFINED_FROM*1..]->(sn)
+RETURN count(DISTINCT descendant) AS descendants
+"""
+
 # The reclaim adds (tomb)-[:REFINED_FROM]->(old), so a cycle appears when a
 # path from the retired name already reaches the tombstone. Read inside the
 # write transaction, before anything is written.
@@ -3209,6 +3267,10 @@ class _ReclaimCase:
     revived_stage: str | None = None
     # The live name a history-apart reclaim moves the tombstone's history to.
     holder: str | None = None
+    # Every live successor that receives a link to the archived history. A
+    # lead-ruled reclaim may archive beside more than one of them, or beside
+    # none when its quantity has no live holder left.
+    holders: tuple[str, ...] = ()
     detail: str = ""
 
 
@@ -3227,6 +3289,41 @@ def _dd_locus(source_paths: Iterable[Any]) -> str | None:
         if isinstance(path, str) and "/" in path
     }
     return containers.pop() if len(containers) == 1 else None
+
+
+def _dd_loci(source_paths: Iterable[Any]) -> set[str]:
+    """Every data-dictionary container a set of source paths sits in.
+
+    :func:`_dd_locus` answers with the one container a name occupies and
+    ``None`` when it occupies several; a name whose sources span two
+    containers has no single locus, but each of its loci is still a fact that
+    a comparison needs.
+    """
+    return {
+        path.rsplit("/", 1)[0]
+        for path in source_paths or ()
+        if isinstance(path, str) and "/" in path
+    }
+
+
+#: The two trailing tokens a plasma-boundary locus is spelled with. A rename
+#: that changes only this token keeps the quantity and moves it onto the other
+#: vocabulary.
+_BOUNDARY_LOCATORS = ("at_plasma_boundary", "at_separatrix")
+
+
+def _boundary_head(name_id: str) -> str | None:
+    """The name with its trailing plasma-boundary locator removed.
+
+    Two ids with the same head name one quantity under the two locator
+    vocabularies, so a rename between them moves a spelling without moving a
+    meaning. An id carrying neither locator yields ``None``.
+    """
+    for locator in _BOUNDARY_LOCATORS:
+        suffix = f"_{locator}"
+        if name_id.endswith(suffix):
+            return name_id[: -len(suffix)]
+    return None
 
 
 def _reclaim_spelling_case(
@@ -3338,11 +3435,90 @@ def _reclaim_spelling_case(
                     "the same locus"
                 ),
             )
+    # ``lead_ruled_locator`` — the renaming name differs from the tombstone
+    # only in the trailing plasma-boundary locator, so the two spellings name
+    # one quantity under the two locator vocabularies.
+    lead_ruled = _reclaim_locator_only_case(
+        gc, target=target, new_name=new_name, tips=tips
+    )
+    if lead_ruled is not None:
+        return lead_ruled
     return _ReclaimCase(
         case=None,
         tombstone=tombstone,
         detail="neither reclaim case holds",
     )
+
+
+def _reclaim_locator_only_case(
+    gc: GraphClient, *, target: str, new_name: str, tips: Sequence[str]
+) -> _ReclaimCase | None:
+    """Admit a locator-only rename when no live successor needs the spelling.
+
+    A tombstone's spelling is handed over only when nothing live depends on
+    the id. The other identity must therefore be a *different quantity*, and
+    two shapes establish that:
+
+    * the tombstone still has live successors, but every one of them sits at
+      a data-dictionary container the renaming name's own sources do not
+      occupy — an average beside a local value, say. Those successors keep
+      their history through the archived identity and lose nothing they read;
+    * the tombstone has no live successor at all, yet it was refined into at
+      least one identity, so the lineage itself records where its quantity
+      went. The archived identity is then the only holder of that record,
+      which is what keeps the quantity readable after the spelling passes.
+
+    A tombstone with neither a live successor nor any descendant is refused:
+    nothing would remain that records its quantity, and the spelling would
+    silently come to mean something else.
+
+    Both shapes are additionally gated on the two ids sharing a head once
+    their trailing plasma-boundary locator is removed, which is a rename
+    across two locator vocabularies rather than a new meaning taking an old
+    name.
+    """
+    head_old = _boundary_head(target)
+    if head_old is None or head_old != _boundary_head(new_name):
+        return None
+    target_rows = gc.query(_RECLAIM_NAME_PATHS_QUERY, id=target)
+    target_loci = (
+        _dd_loci(target_rows[0].get("source_paths") or ()) if target_rows else set()
+    )
+    others = tuple(tip for tip in tips if tip != target)
+    if others:
+        other_loci: set[str] = set()
+        for tip in others:
+            rows = gc.query(_RECLAIM_NAME_PATHS_QUERY, id=tip)
+            other_loci |= _dd_loci(rows[0].get("source_paths") or ()) if rows else set()
+        if not other_loci & target_loci:
+            return _ReclaimCase(
+                case="lead_ruled_locator",
+                holders=others,
+                holder=others[0] if len(others) == 1 else None,
+                detail=(
+                    "the two spellings share the head "
+                    f"{head_old!r} and differ only in the boundary locator; "
+                    "every live successor "
+                    f"({', '.join(repr(tip) for tip in others)}) sits at a "
+                    "locus the renaming name does not occupy, so none of them "
+                    "reads the freed id"
+                ),
+            )
+        return None
+    descendant_rows = gc.query(_RECLAIM_DESCENDANT_COUNT_QUERY, id=new_name)
+    descendants = descendant_rows[0].get("descendants") if descendant_rows else 0
+    if descendants:
+        return _ReclaimCase(
+            case="lead_ruled_locator",
+            detail=(
+                "the two spellings share the head "
+                f"{head_old!r} and differ only in the boundary locator; the "
+                "tombstone has no live successor but was refined into "
+                f"{descendants} identity(ies), so the archive is the only "
+                "holder of the quantity its spelling recorded"
+            ),
+        )
+    return None
 
 
 _RECLAIM_MUTATION_QUERY = (
@@ -3596,9 +3772,13 @@ def _apply_reclaim_rename(
 
 _ARCHIVE_RECLAIM_HISTORY_QUERY = """
 // ATOMIC_ARCHIVE_RECLAIM_HISTORY
-MATCH (tomb:StandardName {id: $tomb_id}), (holder:StandardName {id: $holder_id})
+MATCH (tomb:StandardName {id: $tomb_id})
 WHERE tomb.name_stage = 'superseded'
+OPTIONAL MATCH (holder:StandardName)
+WHERE holder.id IN $holder_ids
   AND coalesce(holder.name_stage, '') <> 'superseded'
+WITH tomb, [candidate IN collect(holder) WHERE candidate IS NOT NULL] AS holders
+WHERE size(holders) = size($holder_ids)
 SET tomb.id = $archive_id,
     tomb.archived_from = $tomb_id,
     tomb.archived_at = datetime($changed_at),
@@ -3608,7 +3788,8 @@ SET tomb.id = $archive_id,
     tomb.updated_at = datetime($changed_at)
 REMOVE tomb:StandardName
 SET tomb:ArchivedStandardName
-MERGE (holder)-[:HAS_ARCHIVED_HISTORY]->(tomb)
+FOREACH (holder IN holders |
+  MERGE (holder)-[:HAS_ARCHIVED_HISTORY]->(tomb))
 CREATE (change:StandardNameChange {
   id: $change_id,
   from_name: $tomb_id,
@@ -3620,9 +3801,10 @@ CREATE (change:StandardNameChange {
   changed_at: datetime($changed_at),
   internal: true
 })
-MERGE (holder)-[:HAS_INTERNAL_CHANGE]->(change)
+FOREACH (holder IN holders |
+  MERGE (holder)-[:HAS_INTERNAL_CHANGE]->(change))
 MERGE (tomb)-[:HAS_INTERNAL_CHANGE]->(change)
-RETURN tomb.id AS archive_id, holder.id AS holder_id
+RETURN tomb.id AS archive_id, size(holders) AS holder_count
 """
 
 _RESTORE_ARCHIVE_RECLAIM_QUERY = """
@@ -3640,13 +3822,20 @@ SET archived:StandardName,
     archived.updated_at = datetime($changed_at)
 WITH archived
 OPTIONAL MATCH (holder)-[link:HAS_ARCHIVED_HISTORY]->(archived)
-DELETE link
+WITH archived, collect(link) AS links
+FOREACH (link IN links | DELETE link)
 WITH archived
 OPTIONAL MATCH (archived)-[:HAS_INTERNAL_CHANGE]->(change:StandardNameChange {
   operation: 'archive_reclaim_history', to_name: $archive_id
 })
 DETACH DELETE change
 """
+
+
+def _reclaim_holder_label(reclaim: _ReclaimCase) -> str:
+    """The live identities an archived history is linked to, for a message."""
+    holders = list(reclaim.holders) or ([reclaim.holder] if reclaim.holder else [])
+    return ", ".join(repr(holder) for holder in holders) or "no live holder"
 
 
 def _archive_history_for_reclaim(
@@ -3672,7 +3861,7 @@ def _archive_history_for_reclaim(
     Returns ``(archive_id, change_id)``. A fresh archive id is minted per
     reclaim so no archived identity stands in for another.
     """
-    assert reclaim.holder is not None, "a history-apart reclaim names its holder"
+    holders = list(reclaim.holders) or ([reclaim.holder] if reclaim.holder else [])
     archive_id = f"archived:{tombstone_id}:{uuid.uuid4().hex[:12]}"
     change_id = f"sn-change:archive-reclaim-history:{uuid.uuid4().hex}"
     tomb_locus = _dd_locus(reclaim.tombstone.get("source_paths") or ())
@@ -3682,7 +3871,8 @@ def _archive_history_for_reclaim(
             "detail": reclaim.detail,
             "tombstone": tombstone_id,
             "archive": archive_id,
-            "holder": reclaim.holder,
+            "holder": holders[0] if len(holders) == 1 else None,
+            "holders": holders,
             "reclaiming_name": target,
             "tombstone_locus": tomb_locus,
             "reason": reason,
@@ -3698,7 +3888,7 @@ def _archive_history_for_reclaim(
                 for row in transaction.run(
                     _ARCHIVE_RECLAIM_HISTORY_QUERY,
                     tomb_id=tombstone_id,
-                    holder_id=reclaim.holder,
+                    holder_ids=holders,
                     archive_id=archive_id,
                     reclaiming_name=target,
                     change_id=change_id,
@@ -3805,7 +3995,7 @@ def _apply_rename(
             # its history, while the other archives that history beside the
             # holder before the freed spelling is claimed.
             reclaim = _reclaim_spelling_case(gc, target=target, new_name=new_name)
-            if reclaim.case == "history_apart":
+            if reclaim.case in ("history_apart", "lead_ruled_locator"):
                 # The tombstone's history moves beside its holder before the
                 # spelling is freed, so the rename below mints the live name
                 # on an id that no longer carries that history.
@@ -4002,9 +4192,9 @@ def _apply_rename(
         if history_apart is not None:
             actions.append(
                 f"[dry-run] would archive tombstone {refine_root_new!r} beside "
-                f"its live holder {history_apart.holder!r}, carrying its "
-                "history, reviews and lineage off the spelling before the "
-                "rename takes the freed id"
+                f"its live holder(s) {_reclaim_holder_label(history_apart)}, "
+                "carrying its history, reviews and lineage off the spelling "
+                "before the rename takes the freed id"
             )
         actions.append(
             f"[dry-run] would carry {len(producing_source_ids)} producing "
@@ -4045,8 +4235,8 @@ def _apply_rename(
         )
         actions.append(
             f"archived the history of tombstone {refine_root_new!r} as "
-            f"{archived[0]!r}, linked to its live holder "
-            f"{history_apart.holder!r} (receipt {archived[1]})"
+            f"{archived[0]!r}, linked to its live holder(s) "
+            f"{_reclaim_holder_label(history_apart)} (receipt {archived[1]})"
         )
     try:
         result = persist_refined_name(

@@ -1,0 +1,53 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-12T15:19:08.733Z",
+  "dispatched_at": "2026-11-12T15:13:39Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_catalog_release_candidate_pr.py",
+      "line": 130,
+      "severity": "non-blocking",
+      "text": "tests/standard_names/test_catalog_release_candidate_pr.py:130 \u2014 the only fork-delivery test injects fork_owner='reviewer' and upstream_repo='iterorganization/imas-standard-names', so it exercises the injected fallback at imas_codex/standard_names/catalog_release.py:1262-1270, not the derivation production takes: imas_codex/cli/sn.py:5127 passes neither argument, so the fork owner and repo come from _github_slug(isnc_path, 'origin'). That branch has no test; a regression in it makes the candidate fall back to pushing the remote's main (the behaviour this node removes) while the suite stays green."
+    },
+    {
+      "file": "imas_codex/standard_names/catalog_release.py",
+      "line": 1214,
+      "severity": "non-blocking",
+      "text": "imas_codex/standard_names/catalog_release.py:1214-1233 \u2014 the refusal's two resolved-URL branches (remote resolving to the upstream owner, and remote resolving to the same repository as the 'upstream' remote) are unexercised: the only refusal test passes remote='upstream', which the name branch at line 1204 short-circuits. The evidence fragment docs/evidence/fragments/sn-pipeline-hygiene/sph-rc-fork-pr.html states the upstream remote is 'recognised by name and by the repository it resolves to'; no test asserts the second half, so the claim could go false without a red test."
+    },
+    {
+      "file": "imas_codex/standard_names/catalog_release.py",
+      "line": 1309,
+      "severity": "non-blocking",
+      "text": "imas_codex/standard_names/catalog_release.py:1309-1337 \u2014 an error after the branch push (a pr_creator failure, an ExportReportLinkError, or a preview-link invariant failure) deletes the local tag but leaves release/<tag> pushed on the fork, so a failed candidate cut leaves a stale branch whose name the next attempt would reuse without warning."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is that a whole-catalog candidate opens a fork review pull request and refuses an upstream remote; imas_codex/standard_names/catalog_release.py:1627-1650 delivers the candidate as branch release/<tag> plus one fork request, and the refusal at line 1414 fires before the export, the tag and every push.\nVERDICT done_when: the done_when asks that a stand-in fork remote yield one markdown-linked review request, that an upstream remote refuse before any push, and that the batch path be unchanged; tests/standard_names/test_catalog_release_candidate_pr.py:107-195 asserts all three halves and the gate also runs tests/standard_names/test_review_release.py for the batch path.\nVERDICT write_paths: the declared paths are imas_codex/standard_names/catalog_release.py, imas_codex/cli/release.py, tests/standard_names/test_catalog_release_candidate_pr.py, docs/evidence/fragments/sn-pipeline-hygiene/sph-rc-fork-pr.html and docs/figures/sn-pipeline-hygiene/sph-rc-fork-pr; the diff touches the first four and no figure directory.\nVERDICT manifest: read at runs/r-20261112T145652398799-sph-rc-fork-pr/manifest.md; it records gate.log as '157 passed, 1 deselected, EXIT=0', the negative-control.log with two failing ids, and a disclosed outside_scope note about the pre-existing _SilentGitHub helper.\nVERDICT diff: read commit by commit from 36f22faf \u2014 094a053c6 adds the candidate transport and the extended CLI guard (catalog_release.py +176, cli/release.py +33, the new test file), and 53e35bee4 adds only the evidence fragment.\nCALL_SITES: imas_codex/cli/sn.py:5127 (run_release, the production entry that reaches the new candidate path), imas_codex/cli/release.py:1434 (_check_release_target, the extended CLI guard)\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/catalog_release.py:1627-1650 opens exactly one request with repo and head_owner both the fork and skips the HEAD:main push, and line 1414 refuses an upstream candidate before the export runs.\nSCORE evidence: 17\nJUSTIFICATION evidence: the gate log carries revision 094a053c, the literal command, the '157 passed, 1 deselected' summary and EXIT=0, and negative-control.log turns the two measure tests red (EXIT=1) under both declared mutations.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in `git diff --stat 36f22faf..53e35bee4` is one of the four source paths the manifest declares, with no plan edit and no generated model staged.\nSCORE durability: 14\nJUSTIFICATION durability: tests/standard_names/test_catalog_release_candidate_pr.py:160-172 reads the pushed branch and the tag back from the stand-in remote, so a transport regression reddens, but the production fork-identity derivation at catalog_release.py:1262 and the two resolved-URL refusal branches at line 1214 carry no assertion.\nSCORE fit: 17\nJUSTIFICATION fit: the new code follows the module's report-dataclass and append-error-then-return idiom (catalog_release.py:1240-1345) and adds no plan, ticket or version label to a name or comment.\nSCORE reuse: 14\nJUSTIFICATION reuse: the body is composed through the existing body_with_export_report_link and _write_and_verify_review_preview_link helpers and _github_slug is reused, but the push-then-request-then-preview sequence is a third inline copy beside catalog_release.py:1579-1620 and 2465-2495, and no extracted owner for it exists in the module.\nFINDING tests/standard_names/test_catalog_release_candidate_pr.py:130 non-blocking: the only fork-delivery test injects fork_owner and upstream_repo, so it exercises catalog_release.py:1262-1270's fallback rather than the _github_slug derivation that imas_codex/cli/sn.py:5127 makes production take.\nFINDING imas_codex/standard_names/catalog_release.py:1214 non-blocking: the two resolved-URL refusal branches are unexercised because the only refusal test names the remote 'upstream', short-circuiting at line 1204, so the fragment's 'recognised by the repository it resolves to' claim has no test.\nFINDING imas_codex/standard_names/catalog_release.py:1309 non-blocking: a failure after the branch push rolls back the tag but leaves release/<tag> on the fork.",
+  "review_run_id": "r-20261112T151156953996-review-of-sph-rc-fork-pr-53e35bee416f",
+  "reviewed_base_sha": "36f22faf376d5b7be18189b87dbb6d47ac12bfdd",
+  "reviewed_head_sha": "53e35bee416faf560a76b008c4af4ac745dd35d8",
+  "reviewed_run_id": "r-20261112T145652398799-sph-rc-fork-pr",
+  "rubric": "code",
+  "scores": {
+    "durability": 14,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 14,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T15:23:17.035039+00:00",
+  "total": 101,
+  "verdicts": {
+    "call_sites": "CALL_SITES: imas_codex/cli/sn.py:5127 (run_release, the production entry that reaches the new candidate path), imas_codex/cli/release.py:1434 (_check_release_target, the extended CLI guard)",
+    "diff": "VERDICT diff: read commit by commit from 36f22faf \u2014 094a053c6 adds the candidate transport and the extended CLI guard (catalog_release.py +176, cli/release.py +33, the new test file), and 53e35bee4 adds only the evidence fragment.",
+    "done_when": "VERDICT done_when: the done_when asks that a stand-in fork remote yield one markdown-linked review request, that an upstream remote refuse before any push, and that the batch path be unchanged; tests/standard_names/test_catalog_release_candidate_pr.py:107-195 asserts all three halves and the gate also runs tests/standard_names/test_review_release.py for the batch path.",
+    "goal": "VERDICT goal: the node goal is that a whole-catalog candidate opens a fork review pull request and refuses an upstream remote; imas_codex/standard_names/catalog_release.py:1627-1650 delivers the candidate as branch release/<tag> plus one fork request, and the refusal at line 1414 fires before the export, the tag and every push.",
+    "manifest": "VERDICT manifest: read at runs/r-20261112T145652398799-sph-rc-fork-pr/manifest.md; it records gate.log as '157 passed, 1 deselected, EXIT=0', the negative-control.log with two failing ids, and a disclosed outside_scope note about the pre-existing _SilentGitHub helper.",
+    "write_paths": "VERDICT write_paths: the declared paths are imas_codex/standard_names/catalog_release.py, imas_codex/cli/release.py, tests/standard_names/test_catalog_release_candidate_pr.py, docs/evidence/fragments/sn-pipeline-hygiene/sph-rc-fork-pr.html and docs/figures/sn-pipeline-hygiene/sph-rc-fork-pr; the diff touches the first four and no figure directory."
+  }
+}

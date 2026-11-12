@@ -39,6 +39,7 @@ _SEMVER_RE = re.compile(
 
 _RC_REMOTE = "origin"
 _FINAL_REMOTE = "upstream"
+_UPSTREAM_OWNER = "iterorganization"
 _PACKAGE_INDEX_TIMEOUT_SECONDS = 5.0
 _PACKAGE_INDEX_URL = "https://pypi.org/pypi/imas-standard-names/json"
 
@@ -1194,6 +1195,151 @@ def _check_pages_status(isnc_path: Path) -> bool | None:
     return bool(result.stdout.strip())
 
 
+def _candidate_upstream_refusal(isnc_path: Path, remote: str) -> str | None:
+    """Return why a candidate may not publish to *remote*, or None.
+
+    A catalog candidate is the revision a reviewer reads before the catalog
+    becomes canonical, so the fork is the only remote it may reach. The
+    upstream catalog is recognised by the remote's name and by the repository
+    the remote resolves to, so a checkout that names the canonical repository
+    something other than ``upstream`` is refused as well.
+    """
+    if remote == _FINAL_REMOTE:
+        return (
+            f"A catalog release candidate must target the fork ({_RC_REMOTE}); "
+            f"remote '{remote}' is the upstream catalog. Cut the candidate on "
+            "the fork and merge it there — nothing in a candidate release "
+            "pushes upstream."
+        )
+    target = _github_slug(isnc_path, remote)
+    if target is None:
+        return None
+    if target[0].casefold() == _UPSTREAM_OWNER:
+        return (
+            f"A catalog release candidate must target the fork ({_RC_REMOTE}); "
+            f"remote '{remote}' resolves to the upstream catalog "
+            f"({target[0]}/{target[1]}). Cut the candidate on the fork and "
+            "merge it there — nothing in a candidate release pushes upstream."
+        )
+    upstream = _github_slug(isnc_path, _FINAL_REMOTE)
+    if upstream is not None and target == upstream:
+        return (
+            f"A catalog release candidate must target the fork ({_RC_REMOTE}); "
+            f"remote '{remote}' resolves to the same catalog repository as "
+            f"'{_FINAL_REMOTE}' ({target[0]}/{target[1]}). Cut the candidate on "
+            "the fork and merge it there."
+        )
+    return None
+
+
+def _open_candidate_review_request(
+    isnc_path: Path,
+    *,
+    git_tag: str,
+    message: str,
+    report: ReleaseReport,
+    pr_creator: Any,
+    github_client: Any | None,
+    fork_remote: str,
+    fork_owner: str | None,
+    upstream_repo: str | None,
+    staging_dir: Path,
+) -> bool:
+    """Deliver a whole-catalog candidate as a branch plus one fork pull request.
+
+    The candidate reaches the fork as ``release/<tag>`` so the pull request
+    carries a readable diff, and its body carries the addresses a reviewer
+    needs — the candidate revision and, when the export wrote accounting, the
+    per-reason exclusion report — as markdown links rather than bare URLs.
+
+    Returns False when the checkout records no fork identity to open the
+    request against, which leaves the caller's direct delivery to the remote's
+    main as the transport for a mirror or a stand-in that is not a GitHub fork.
+    A refused or failed request appends to ``report.errors`` and returns True:
+    the reviewer-facing delivery was attempted, so the caller must not fall
+    back to publishing the candidate unreviewed.
+    """
+    fork_slug = _github_slug(isnc_path, fork_remote)
+    owner = fork_slug[0] if fork_slug is not None else fork_owner
+    catalog = fork_slug[1] if fork_slug is not None else None
+    if catalog is None and upstream_repo is not None:
+        catalog = upstream_repo.split("/", 1)[1]
+    if owner is None or catalog is None:
+        logger.warning(
+            "Candidate %s opens no review pull request: the checkout records no "
+            "GitHub fork identity for remote '%s'",
+            git_tag,
+            fork_remote,
+        )
+        return False
+    fork_repo = f"{owner}/{catalog}"
+
+    branch = f"release/{git_tag}"
+    report.branch = branch
+    pushed = _run_git("push", fork_remote, f"HEAD:refs/heads/{branch}", cwd=isnc_path)
+    if pushed.returncode != 0:
+        report.errors.append(
+            f"failed to push candidate branch {branch} to {fork_remote}: "
+            f"{pushed.stderr.strip()}"
+        )
+        return True
+
+    body = (
+        f"Whole-catalog release candidate for `{git_tag}`.\n\n"
+        "This pull request carries the candidate catalog onto the fork for "
+        "review. The version tag is cut only once the merged catalog is folded "
+        "back into the graph.\n\n"
+        f"Candidate revision: [{git_tag} on {fork_repo}]"
+        f"(https://github.com/{fork_repo}/releases/tag/{git_tag})\n"
+    )
+    if (staging_dir / ".export_report.json").is_file():
+        try:
+            body = body_with_export_report_link(
+                body,
+                checkout=isnc_path,
+                fork_owner=owner,
+                upstream_repo=upstream_repo or fork_repo,
+                branch=branch,
+            )
+        except ExportReportLinkError as exc:
+            report.errors.append(f"{type(exc).__name__}: {exc}")
+            return True
+
+    try:
+        pr_number, pr_url = pr_creator(
+            branch=branch,
+            base="main",
+            title=message,
+            body=body,
+            repo=fork_repo,
+            head_owner=owner,
+        )
+    except Exception as exc:
+        report.errors.append(f"could not open the pull request: {exc}")
+        return True
+    report.pr_number = pr_number
+    report.pr_url = pr_url
+
+    if github_client is not None:
+        if pr_number is None:
+            report.errors.append(
+                "ReviewPreviewLinkInvariantError: GitHub did not return a PR "
+                "number, so the preview address cannot be constructed"
+            )
+            return True
+        try:
+            _write_and_verify_review_preview_link(
+                github_client,
+                repo=fork_repo,
+                pr_number=pr_number,
+                body=body,
+            )
+        except ReviewPreviewLinkInvariantError as exc:
+            report.errors.append(f"{type(exc).__name__}: {exc}")
+            return True
+    return True
+
+
 # =============================================================================
 # Main release function
 # =============================================================================
@@ -1268,6 +1414,11 @@ def run_release(
     version_remote = remote or (_FINAL_REMOTE if final else _RC_REMOTE)
     effective_remote = _RC_REMOTE if final else version_remote
     report.remote = effective_remote
+    if is_rc:
+        refusal = _candidate_upstream_refusal(isnc_path, version_remote)
+        if refusal is not None:
+            report.errors.append(refusal)
+            return report
     exporter = exporter or _default_exporter
     publisher = publisher or _default_publisher
     if github_client is None and pr_creator is None:
@@ -1473,11 +1624,34 @@ def run_release(
         return report
     logger.info("Created tag %s", git_tag)
 
+    # ── Candidate review request ───────────────────────────
+    # A candidate is what a reviewer reads before the catalog becomes
+    # canonical, so it reaches the fork as a branch plus one pull request.
+    # A checkout with no GitHub fork identity records no review surface;
+    # the direct delivery below is then the transport, as for a mirror.
+    review_opened = False
+    if is_rc:
+        review_opened = _open_candidate_review_request(
+            isnc_path,
+            git_tag=git_tag,
+            message=message,
+            report=report,
+            pr_creator=pr_creator,
+            github_client=github_client,
+            fork_remote=effective_remote,
+            fork_owner=fork_owner,
+            upstream_repo=upstream_repo,
+            staging_dir=staging_dir,
+        )
+        if report.errors:
+            _run_git("tag", "-d", git_tag, cwd=isnc_path)
+            return report
+
     # ── Push commit + tag ──────────────────────────────────
     # Push the released commit onto the remote's main (if there's a new one).
     # Pushing the literal ref would publish whatever local `main` holds, which
     # on a detached head is not the commit this cut just made.
-    if report.commit_sha:
+    if report.commit_sha and not review_opened:
         push_result = _run_git("push", effective_remote, "HEAD:main", cwd=isnc_path)
         if push_result.returncode != 0:
             # Roll back the tag on push failure

@@ -19,12 +19,12 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names,catalog-release">
   <meta name="plan-blocks" content="sn-catalog-consistency">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
   <meta name="plan-section-depends-on" content="{&quot;s5&quot;:[&quot;sn-definitions-by-construction#s4&quot;],&quot;s6&quot;:[&quot;sn-definitions-by-construction#s2&quot;,&quot;sn-definitions-by-construction#s3&quot;,&quot;sn-definitions-by-construction#s4&quot;,&quot;sn-definitions-by-construction#s5&quot;],&quot;s7&quot;:[&quot;sn-definitions-by-construction#s6&quot;,&quot;sn-domain-per-family#s3&quot;]}">
   <title>One Wording Per Concept, By Construction | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="22">
+<meta name="plan-version" content="24">
 <meta name="plan-modified" content="2026-11-12">
 </head>
 <body>
@@ -54,7 +54,7 @@
     </ul>
 
     <h2 id="s2">§2 — The shared parts of a definition are rendered from one stored wording</h2>
-    <section data-reckon="section" data-id="s2" data-effort-hours="7.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s2" data-effort-hours="7.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="done" data-links=""></section>
     <p>A definition has parts that belong to a concept shared with other names, and parts that belong to this name alone. The shared parts are the operator applied (a flux-surface average, a volume average, a line average, a derivative), the population counted (which charge states, whether neutral atoms are included) and the locus (the plasma boundary, the pedestal top). Each shared part has one stored wording, with its equation where it has one, and appears in every name that uses it as that wording, with only the quantity's own symbol and words substituted. The model writes what is specific to the name. The stored wording for a concept the grammar library already defines is that library's; a wording this repository adds is recorded where a reviewer can read and change it, and is proposed upstream. A definition whose shared part departs from the stored wording is reported as a further class of the documentation conformance findings the writer already acts on; no new refusal family is added beside them.</p>
     <p>The population a species name counts is settled once for the catalog and recorded as a decision on this plan before the node is dispatched: the coordinator brings the lead the Data Dictionary's own definition of the species densities and the split §1 describes and §4 counts.</p>
     <p>Done when:</p>
@@ -153,6 +153,12 @@
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="_top" data-id="c-close-s2" data-who="reckon-build" data-when="2026-11-12T14:40:00Z">
+    <div class="r-comment-body"><p>§2 closed. Settled shared parts are given to the model before it writes, and a definition that alters or contradicts one is refused before storage on both the first-draft and the refine writer; such a name now stops in the docs-exhausted state after one model call inside a bound of three instead of being re-claimed every pass, through one marker both writers share. The documentation review accepted 11 of 15 written definitions against 11 of 15 published ones, all 15 decided in both arms, and no review reason named a rendered shared sentence. Writing one family member cost USD 0.012 against a median USD 0.152 per name. Limits the reviews recorded: the comparison ran in a disposable copy without Data Dictionary path context in either arm; the altered-wording class acts before storage only and is not a hold at review; and the marker test's parameter assertions compare values the test itself passed in, so the statement assertions carry the guard.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-s5-lead-ruling-instrument" data-who="Simon McIntosh" data-when="2026-11-12T16:12:00Z">
+    <div class="r-comment-body"><p>Lead ruling, 2026-11-12. The check that a name and its definition agree is a chat review seat reading each name against its definition, scored against the names both readers of <code>docs/evidence/fragments/sn-name-definition-second-reading/two-reader-labels.json</code> labelled alike (55 flagged, 258 passed). The lexical and judgment union reached 28 of 47 mismatches with 27 of 207 false flags and is not the instrument.</p></div>
+</div>
 <div class="r-comment" data-section="s1" data-id="c-20261112-registry-conformance" data-who="reckon-review (session 07a8cbfa)" data-when="2026-11-12T02:20:00Z">
     <div class="r-comment-body"><p>Measured after this section was written: the documentation conformance check the writer already runs, applied to all 1,975 published names, reports at least one finding on 548 of them. 150 are a density opening that departs from its template, 16 a line-average equation and 13 a flux-surface-average equation that is not the canonical one, 12 a volume-average equation, and 30 a plasma-boundary definition or gloss the registry forbids. 243 published names select no registry entry at all. The check exists and passes none of this to the export, which is why names written before a wording was settled were published unchanged. Output and script: <code>docs/evidence/fragments/sn-definitions-by-construction/published-registry-conformance.txt</code>.</p></div>
 </div>
@@ -175,7 +181,7 @@
     <div class="r-comment-body"><p>independent review of r-20261112T115056502453-sdbc-rendered-wording-repair at 9542d488d: 6 dimensions scored (goal_fidelity 18, evidence 13, scope_discipline 17, durability 13, fit 18, reuse 5; total 84), all six checklist items answered, 5 production call sites named, 3 non-blocking findings (a forked docs-exhausted marker duplicating graph_claim_release.py:1230, a negative control that reddens by pytest-timeout rather than by its assertion, and an untested new Cypher behind a mock)</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261112T115056502453-sdbc-rendered-wording-repair" data-who="reckon-build" data-when="2026-11-12T13:05:56Z">
-    <div class="r-comment-body"><p>rendered shared wording repaired on both writers: a definition that contradicts the settled population now reaches the terminal docs-exhausted state in 1 model call inside a bound of 3 (was released to review and re-charged every pass); the refine description repair, the generate-path terminal state and the renderer&#x27;s removal filter are each covered by a test that fails when the repair is removed (3 mutation logs, each FAILED), and the altered-wording class is recorded as acting pre-storage only rather than as a review hold</p></div>
+    <div class="r-comment-body"><p>rendered shared wording repaired on both writers: a definition that contradicts the settled population now reaches the terminal docs-exhausted state in 1 model call inside a bound of 3 (was released to review and re-charged every pass); the refine description repair, the generate-path terminal state and the renderer's removal filter are each covered by a test that fails when the repair is removed (3 mutation logs, each FAILED), and the altered-wording class is recorded as acting pre-storage only rather than as a review hold</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261112T075018136012-review-of-sdbc-unit-spelling-723d44eabf52" data-who="reckon-build" data-when="2026-11-12T08:11:23.275Z">
     <div class="r-comment-body"><p>independent review of r-20261112T020847184170-sdbc-unit-spelling at head 723d44eab scores goal_fidelity 17, evidence 13, scope_discipline 18, durability 15, fit 16, reuse 5, with added_failure_count 0 and five non-blocking findings (evidence fragment says 43 divergences against the artifact's 44; manifest says 1630 quantities against the artifact's 1608; gate logs are headed revision 043171ac2 whose tree lacks the graph test they run; the disposable-graph write assertion echoes a value the code under test produced; quantity_dimension_issues duplicates the name-vs-unit owner in audits.py)</p></div>

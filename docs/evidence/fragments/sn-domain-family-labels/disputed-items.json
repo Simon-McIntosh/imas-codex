@@ -16,7 +16,11 @@
     "confidence": "medium",
     "reason": "A vertical external-coil field specified on a control surface is the field used for vertical position and shape control."
    },
-   "lead_ruling": null
+   "lead_ruling": {
+    "domain": "equilibrium",
+    "reason": "Other domains were checked first: magnetic_field_systems covers the coil hardware and excludes the field it produces, magnetohydrodynamics covers modes, and no domain names a non-axisymmetric vacuum field; it falls to equilibrium although it is not a Grad-Shafranov quantity.",
+    "ruled": "2026-11-12"
+   }
   },
   {
    "id": "item-006",
@@ -33,7 +37,11 @@
     "confidence": "medium",
     "reason": "Ion density on the last closed flux surface is a plasma-boundary, edge-region quantity."
    },
-   "lead_ruling": null
+   "lead_ruling": {
+    "domain": "edge_plasma_physics",
+    "reason": "A density on the last closed flux surface is an edge quantity.",
+    "ruled": "2026-11-12"
+   }
   },
   {
    "id": "item-007",
@@ -50,7 +58,11 @@
     "confidence": "medium",
     "reason": "The centre coordinate of a passive conducting annulus is machine field-hardware geometry."
    },
-   "lead_ruling": null
+   "lead_ruling": {
+    "domain": "magnetic_field_systems",
+    "reason": "Geometry of passive machine conductors.",
+    "ruled": "2026-11-12"
+   }
   },
   {
    "id": "item-012",
@@ -67,7 +79,11 @@
     "confidence": "medium",
     "reason": "The lower energy bound of an X-ray crystal spectrometer pixel is an X-ray detection property."
    },
-   "lead_ruling": null
+   "lead_ruling": {
+    "domain": "spectroscopy",
+    "reason": "A setting of an emission-spectroscopy instrument.",
+    "ruled": "2026-11-12"
+   }
   },
   {
    "id": "item-014",
@@ -84,7 +100,11 @@
     "confidence": "low",
     "reason": "The bias voltage of a mass-spectrometer channel sets the ion-signal gain of a species-resolving spectrometer."
    },
-   "lead_ruling": null
+   "lead_ruling": {
+    "domain": "plasma_measurement_diagnostics",
+    "reason": "Generic diagnostic hardware; a mass spectrometer is not optical spectroscopy.",
+    "ruled": "2026-11-12"
+   }
   },
   {
    "id": "item-019",
@@ -101,7 +121,11 @@
     "confidence": "medium",
     "reason": "The cross-section orientation angle of a plasma filament is a scrape-off-layer filament geometry quantity."
    },
-   "lead_ruling": null
+   "lead_ruling": {
+    "domain": "equilibrium",
+    "reason": "A filament is plasma structure as modelled; neither reader chose this domain.",
+    "ruled": "2026-11-12"
+   }
   },
   {
    "id": "item-042",
@@ -118,7 +142,11 @@
     "confidence": "medium",
     "reason": "Current in an axisymmetric passive loop is induced current in passive machine conductors."
    },
-   "lead_ruling": null
+   "lead_ruling": {
+    "domain": "magnetic_field_systems",
+    "reason": "Induced current in passive machine conductors.",
+    "ruled": "2026-11-12"
+   }
   },
   {
    "id": "item-049",
@@ -135,7 +163,11 @@
     "confidence": "medium",
     "reason": "Electromagnetic body-force density is the magnetic-force density of the plasma and conducting structures."
    },
-   "lead_ruling": null
+   "lead_ruling": {
+    "domain": "equilibrium",
+    "reason": "The body force is the force-balance term of the equilibrium.",
+    "ruled": "2026-11-12"
+   }
   },
   {
    "id": "item-053",
@@ -152,7 +184,11 @@
     "confidence": "high",
     "reason": "Flux-surface-averaged ion density at the plasma boundary is an edge quantity."
    },
-   "lead_ruling": null
+   "lead_ruling": {
+    "domain": "edge_plasma_physics",
+    "reason": "A flux-surface average on the last closed flux surface is an edge quantity.",
+    "ruled": "2026-11-12"
+   }
   },
   {
    "id": "item-055",
@@ -169,7 +205,11 @@
     "confidence": "medium",
     "reason": "The arclength of a traced field line is a magnetic geometry quantity."
    },
-   "lead_ruling": null
+   "lead_ruling": {
+    "domain": "equilibrium",
+    "reason": "Field-line arclength is magnetic geometry, not tied to the start-up phase.",
+    "ruled": "2026-11-12"
+   }
   },
   {
    "id": "item-075",
@@ -186,7 +226,11 @@
     "confidence": "medium",
     "reason": "The major radius of the wall point nearest the plasma boundary is first-wall geometry."
    },
-   "lead_ruling": null
+   "lead_ruling": {
+    "domain": "equilibrium",
+    "reason": "The closest wall point defines the plasma-wall gap of the equilibrium boundary description.",
+    "ruled": "2026-11-12"
+   }
   },
   {
    "id": "item-091",
@@ -203,7 +247,11 @@
     "confidence": "medium",
     "reason": "Parallel particle diffusivity of a species in the edge fluid model is an edge transport coefficient."
    },
-   "lead_ruling": null
+   "lead_ruling": {
+    "domain": "transport",
+    "reason": "A diffusivity is a transport coefficient wherever it is evaluated.",
+    "ruled": "2026-11-12"
+   }
   }
  ]
 }

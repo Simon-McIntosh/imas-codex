@@ -1,0 +1,43 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run records no baseline_suite and no after_suite arm (both null in its manifest), so no base-to-head difference can be taken from its own records; its head gate log /home/ITER/mcintos/.cache/imas-codex-sdbc-one-docs-exhaust-marker/gate.log names revision 6d9636a5d, reports `114 passed, 1 warning in 217.53s` and ends with a bare `EXIT=0`, so no failing test exists at the head to attribute to this change",
+  "call_sites": [
+    "imas_codex/standard_names/worker_tasks/worker_generate_docs.py:1025",
+    "imas_codex/standard_names/worker_tasks/worker_refine_docs.py:390"
+  ],
+  "completed_at": "2026-11-12T14:25:41.457Z",
+  "dispatched_at": "2026-11-12T14:19:53Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_docs_exhaust_marker.py",
+      "line": 99,
+      "severity": "non-blocking",
+      "text": "`test_statement_capture_is_the_shared_recorder` asserts `isinstance(_RecordingServices().client, RecordingGraphClient)` over a fixture the test constructs itself, so it cannot fail on any change to production code and guards only this file's own class hierarchy; it also does not catch a second recorder added beside `_RecordingServices` while that fixture stays on the shared owner, so the reuse repair's only general check is `duplicate_recorder_check.py` on the run record, which no suite runs."
+    },
+    {
+      "file": "tests/standard_names/test_docs_exhaust_marker.py",
+      "line": 89,
+      "severity": "non-blocking",
+      "text": "the parameter-name loop added at head has no mutation receipt: the four query-mutation logs the manifest cites each carry a `# revision: 62323048b` header, so the assertions gained at 6d9636a5d are backed by a green run only, and lines 92-96 still compare the values the test itself passed in against the marker's own passthrough."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is that both documentation writers mark a name docs-exhausted through one function whose query a test exercises; at 6d9636a5d `imas_codex/standard_names/graph_store/graph_claim_release.py:1230` remains the only definition and `git grep \"docs_stage = 'exhausted'\"` over imas_codex/ returns its query at graph_claim_release.py:1255, and the gained commit changes only tests/standard_names/test_docs_exhaust_marker.py.\nVERDICT done_when: the done_when asks that the marker's statement and parameters be read at the client boundary for each stage and that each assertion be shown failing with its part of the query changed; tests/standard_names/test_docs_exhaust_marker.py:68-96 reads the statement and parameters for both writers and :213-225 reads them again through each writer's real refusal path, but the four mutation logs cited as the falsification were produced at 62323048b (each log's `# revision:` header) and neither assertion gained at head was shown failing.\nVERDICT write_paths: the node declared eight write paths including tests/standard_names/test_docs_exhaust_marker.py; `git show --stat 6d9636a5d` lists that one file only, 31 insertions and 22 deletions, so the gained commit is inside the declared scope.\nVERDICT manifest: read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T131152989236-sdbc-one-docs-exhaust-marker/manifest.md; status is `complete`, tests carries the literal command, and its head gate log names revision 6d9636a5d with `114 passed` and a bare `EXIT=0`, while baseline_suite and after_suite are both null.\nVERDICT diff: read 6d9636a5d against its base 62323048b commit by commit; it deletes `_FakeGraphClient` and `_FakeServices`' second recorder, adds `_ClientContext` subclassing tests/recording_graph_client.py:18, an isinstance guard at :99, a parameter-name loop at :89, and hoists the `_mark_docs_exhausted` import to module level; no production source changed.\nCALL_SITES: imas_codex/standard_names/worker_tasks/worker_generate_docs.py:1025, imas_codex/standard_names/worker_tasks/worker_refine_docs.py:390\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/graph_store/graph_claim_release.py:1230 stays the single owner with one copy of the transition query at graph_claim_release.py:1255, and the gained commit is test-only.\nSCORE evidence: 16\nJUSTIFICATION evidence: /home/ITER/mcintos/.cache/imas-codex-sdbc-one-docs-exhaust-marker/gate.log names 6d9636a5d and ends `114 passed` then `EXIT=0`, but the mutation logs it leans on were run at 62323048b and the manifest records no baseline or after suite arm.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: `git show --stat 6d9636a5d` touches only tests/standard_names/test_docs_exhaust_marker.py, inside the eight declared write paths, and adds nothing the goal does not imply.\nSCORE durability: 16\nJUSTIFICATION durability: the parameter-name loop at tests/standard_names/test_docs_exhaust_marker.py:89 reddens if a clause is literalised, but the isinstance guard at :99 only tests the file's own fixture and the reuse repair's general check lives on the run record rather than in the suite.\nSCORE fit: 19\nJUSTIFICATION fit: the `_ClientContext` subclass follows the extension point tests/recording_graph_client.py:8-10 documents, as tests/graph/test_dd_path_domain_upsert.py:9 already does, and no added name carries a plan or ticket label.\nSCORE reuse: 20\nJUSTIFICATION reuse: the gained commit removes the second recorder and reads tests/recording_graph_client.py:18's `calls` list, extending the owner for the context-manager form instead of duplicating its capture.\nFINDING tests/standard_names/test_docs_exhaust_marker.py:99 non-blocking: `test_statement_capture_is_the_shared_recorder` asserts `isinstance(_RecordingServices().client, RecordingGraphClient)` over a fixture the test constructs itself, so it cannot fail on any production change and guards only this file's own class hierarchy; a second recorder added beside `_RecordingServices` would leave it green, and the only general check is `duplicate_recorder_check.py` on the run record, which no suite runs.\nFINDING tests/standard_names/test_docs_exhaust_marker.py:89 non-blocking: the parameter-name loop gained at head has no mutation receipt, because the four query-mutation logs each carry `# revision: 62323048b`, and lines 92-96 still compare the values the test itself passed in against the marker's passthrough.\n",
+  "review_run_id": "r-20261112T141736121570-review-of-sdbc-one-docs-exhaust-marker-6d9636a5d5c0",
+  "reviewed_base_sha": "62323048bc99d165ac7f2b8344702a7ad51e02c2",
+  "reviewed_head_sha": "6d9636a5d5c0135e31a25a1353a92f96b253b3fe",
+  "reviewed_run_id": "r-20261112T131152989236-sdbc-one-docs-exhaust-marker",
+  "scores": {
+    "durability": 16,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T14:27:16.524263+00:00",
+  "total": 110
+}
