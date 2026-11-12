@@ -63,27 +63,40 @@ EXIT=0</pre>
 </tbody>
 </table>
 
-<h4>Review score beside the score the published name carries</h4>
+<h4>Every written name, with the regime that produced each score</h4>
 
 <table>
-<thead><tr><th>Name</th><th>Written review score</th><th>Published <code>reviewer_score_docs</code></th><th>Published <code>review_mean_score</code></th></tr></thead>
+<thead><tr><th>Name</th><th>New score</th><th>New regime</th><th>Earlier score</th><th>Earlier regime</th><th>Passed</th></tr></thead>
 <tbody>
-<tr><td><code>argon_density</code></td><td>0.850</td><td>0.869</td><td>0.845</td></tr>
-<tr><td><code>boron_density</code></td><td>0.850</td><td>0.863</td><td>0.880</td></tr>
-<tr><td><code>iron_density</code></td><td>0.850</td><td>1.000</td><td>0.892</td></tr>
-<tr><td><code>line_averaged_argon_density</code></td><td>0.850</td><td>0.888</td><td>0.944</td></tr>
-<tr><td><code>line_averaged_electron_temperature</code></td><td>0.958</td><td>0.944</td><td>0.916</td></tr>
-<tr><td><code>line_averaged_time_derivative_of_electron_density</code></td><td>0.930</td><td>0.908</td><td>—</td></tr>
-<tr><td><code>line_integrated_electron_number_density</code></td><td>0.865</td><td>0.873</td><td>0.895</td></tr>
-<tr><td><code>neon_density</code></td><td>0.850</td><td>0.869</td><td>0.869</td></tr>
-<tr><td><code>time_derivative_of_electron_density</code></td><td>0.877</td><td>0.988</td><td>0.850</td></tr>
-<tr><td><code>volume_averaged_argon_density</code></td><td>0.850</td><td>0.919</td><td>0.959</td></tr>
-<tr><td><code>volume_averaged_electron_temperature</code></td><td>0.958</td><td>0.936</td><td>0.983</td></tr>
+<tr><td><code>argon_density</code></td><td>0.850</td><td>refinement at the floor</td><td>0.869</td><td>graded (quorum mean)</td><td>no</td></tr>
+<tr><td><code>boron_density</code></td><td>0.850</td><td>refinement at the floor</td><td>0.863</td><td>graded (quorum mean)</td><td>no</td></tr>
+<tr><td><code>flux_surface_averaged_electron_density</code></td><td>0.850</td><td>refinement at the floor</td><td>—</td><td>none published</td><td>no</td></tr>
+<tr><td><code>flux_surface_averaged_electron_temperature</code></td><td>0.850</td><td>refinement at the floor</td><td>—</td><td>none published</td><td>no</td></tr>
+<tr><td><code>helium_density</code></td><td>0.850</td><td>refinement at the floor</td><td>—</td><td>none published</td><td>no</td></tr>
+<tr><td><code>iron_density</code></td><td>0.850</td><td>refinement at the floor</td><td>1.000</td><td>graded (quorum mean)</td><td>no</td></tr>
+<tr><td><code>line_averaged_argon_density</code></td><td>0.850</td><td>refinement at the floor</td><td>0.887</td><td>graded (quorum mean)</td><td>no</td></tr>
+<tr><td><code>line_averaged_electron_temperature</code></td><td>0.958</td><td>graded (accept)</td><td>0.944</td><td>graded (quorum mean)</td><td>yes</td></tr>
+<tr><td><code>line_averaged_time_derivative_of_electron_density</code></td><td>0.930</td><td>graded (accept)</td><td>0.908</td><td>graded (quorum mean)</td><td>yes</td></tr>
+<tr><td><code>line_integrated_electron_density</code></td><td>0.895</td><td>graded (accept)</td><td>—</td><td>none published</td><td>yes</td></tr>
+<tr><td><code>line_integrated_electron_number_density</code></td><td>0.865</td><td>graded (accept)</td><td>0.873</td><td>graded (quorum mean)</td><td>yes</td></tr>
+<tr><td><code>neon_density</code></td><td>0.850</td><td>refinement at the floor</td><td>0.869</td><td>graded (quorum mean)</td><td>no</td></tr>
+<tr><td><code>time_derivative_of_electron_density</code></td><td>0.877</td><td>graded (accept)</td><td>0.988</td><td>graded (quorum mean)</td><td>yes</td></tr>
+<tr><td><code>volume_averaged_argon_density</code></td><td>0.850</td><td>refinement at the floor</td><td>0.919</td><td>graded (quorum mean)</td><td>no</td></tr>
+<tr><td><code>volume_averaged_electron_temperature</code></td><td>0.958</td><td>graded (accept)</td><td>0.936</td><td>graded (quorum mean)</td><td>yes</td></tr>
 </tbody>
 </table>
 
-<p><strong>The median is lower, and the comparison cannot be read as a quality drop.</strong> Written median 0.850 over fifteen names against a published <code>reviewer_score_docs</code> median of 0.908 over the eleven that exist live. The written names were reviewed by the Jev-deciding cascade, which records the acceptance floor (0.85 exactly, from <code>DEFAULT_MIN_SCORE</code>) when a decision passes and grades only the four names it routed to the chat reviewer; the published scores are quorum means from the graded reviewer chain. Nine of the fifteen written names carry the floor, so the medians measure two scoring regimes rather than two qualities. A like-for-like comparison needs one regime on both sides, and this node does not have it.</p>
+<p><strong>6 of 15 written names pass the review they were given.</strong> The criterion is the review's own route: the cascade records accept only for a decision score at or above <code>DEFAULT_MIN_SCORE</code> (0.85), and the other nine carry a decision mapped just below that floor, which is a refinement decision. The new regime column states which measure each new score is; the earlier scores are graded quorum means from the documentation reviewer chain, and three of the fifteen have no published documentation score at all.</p>
 
+<p><strong>The median, over the names graded on both sides.</strong> Five names were graded here and carry a published score. Their new median is 0.9302 and their earlier median is 0.9362, so the new score is lower by 0.0059. The nine floor decisions are excluded rather than blended in, because a decision recorded at the acceptance floor and a graded score are not the same measure.</p>
+
+<h4>Stated limits</h4>
+
+<ul>
+<li>The review ran on a disposable graph carrying only the fifteen names, so it had none of the graph-derived context a live review receives: no Data Dictionary source context, no scored review examples and no catalog neighbours. The nine refinement decisions are therefore a lower bound under degraded context, not a measure of the documentation.</li>
+<li>The two regimes differ in kind: the written scores are Jev-deciding decisions, the earlier scores are quorum means from the reviewer chain. Only the six graded written scores are compared, and even those were decided by one judgment rather than a quorum.</li>
+<li>The writer run reported twelve of the fifteen names present in the published catalog; the other three were seeded from the name alone, so their descriptions are not the catalog's.</li>
+</ul>
 <h4>Cost of writing one family member</h4>
 
 <table>
@@ -97,7 +110,7 @@ EXIT=0</pre>
 </tbody>
 </table>
 
-<p>Writing one family member costs about USD 0.012, against a published all-axis median of USD 0.152 per name and USD 0.073 for documentation review alone. Total metered spend for the two runs was USD 0.209 — USD 0.207 of writing and USD 0.0017 of review — against the node's USD 5 ceiling.</p>
+<p>Writing one family member costs about USD 0.012, against a published all-axis median of USD 0.152 per name and USD 0.073 for documentation review alone. Total metered spend for the node is USD 0.208 — USD 0.207 of writing and USD 0.0017 of review — against the node's USD 5 ceiling.</p>
 
 <h3 id="sdbc-rendered-shared-wording-proposal">Wording proposed to the grammar library</h3>
 
