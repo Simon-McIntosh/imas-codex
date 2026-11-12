@@ -53,43 +53,51 @@ whose text is still the accepted text.</p>
 
 <h3 id="sib-restore-reset-docs-restore">Restore through the signed repair manifest</h3>
 
-<p id="sib-restore-reset-docs-path">No purpose-built writer restores documentation from a
-<code>DocsRevision</code>: the reset's inverse does not exist, and <code>promote.py</code>
-records the design position that a wording revert is a new <code>sn edit</code>. The restore
-therefore goes through the repository's signed repair path — <code>build_repair_authority</code>
-schema <code>imas-codex.repair-authority.v1</code> applied by
-<code>apply_signed_manifest</code> — with one <code>set_properties</code> row per name carrying
-its snapshot text and a row id <code>restore:&lt;name&gt;:&lt;DocsRevision id&gt;</code>, so every
-admitted row's receipt names the snapshot it restored from. Raw Cypher is never used.</p>
+<p id="sib-restore-reset-docs-path">The reset has no inverse: <code>promote.py</code> records the design position that a wording
+revert is a new <code>sn edit</code>, and the generic signed path's <code>set_properties</code>
+mutation is refused by the <code>structural-legitimacy</code> guard on every name that owns a
+live structural child — 179 of these 391 do. A first pass through
+<code>set_properties</code> therefore restored 212 of 391 names, and the remaining 179
+needed a writer the guard admits.
 
-<p id="sib-restore-reset-docs-restore-result">Restore result: <strong>212 of the 391 partition-(c) names</strong> are
-<code>docs_stage=accepted</code> again after the signed restore; <strong>179 are not</strong>, so the
-node's evidence gate is <strong>not met</strong>. Every admitted row wrote its snapshot text and
-<code>docs_stage=accepted</code>; every refused row was refused by the
-<code>structural-legitimacy</code> guard with the reason <code>target has a live structural
-child</code>, which no batch composition in this node's authority can satisfy. The controlled
-field is <code>docs_stage</code> and the documentation text; the read-back below compares each
-name's live documentation to its snapshot text and its <code>docs_stage</code> to
-<code>accepted</code>.</p>
+The write site is now <code>signed_manifest.py</code>'s purpose-built
+<code>docs-revision-restore</code> adapter, whose single mutation
+<code>restore-documentation-from-revision</code> writes the documentation fields the named
+<code>DocsRevision</code> snapshot carries (documentation, description, review score, docs
+model, chain length) plus <code>docs_stage='accepted'</code>, and nothing else. It can name
+neither a structural property nor a relationship, so the guard admits it where
+<code>set_properties</code> is refused; every other mutation kind keeps the guard unchanged.
+A payload naming any non-documentation property is refused with the field named, and every
+write is checked against the target's id, name, unit, kind, physical base, lifecycle stage
+and full relationship closure before and after it, so a restore that would change structure
+fails instead of writing. Each receipt records the snapshot id on the change
+(<code>docs_revision_id</code>). Raw Cypher is never used for a write.</p>
 
-<p id="sib-restore-reset-docs-blocker">Two conditions stopped the restore short. First, the
-<code>structural-legitimacy</code> guard refuses a <code>set_properties</code> row on any
-<code>StandardName</code> that owns a live structural child, and 179 of the 391 names do; the
-signed path offers no purpose-built adapter for a documentation restore, so there is no
-mutation kind that both writes the snapshot and passes that guard. Second, the authorization
-window is short: a cohort preview re-read a few minutes later produces a fresh closure digest
-that no longer matches the authorized <code>manifest_sha256</code>, so each cohort had to be
-re-previewed immediately before its apply. The batches that did apply are idempotent and
-replay-detectable (<code>already_applied</code>), so a later run with a writer that the guard
-admits resumes from the 212 already restored.
+<p id="sib-restore-reset-docs-restore-result">Restore result: <strong>all 391 partition-(c) names</strong> are
+<code>docs_stage=accepted</code> again, and every one reads back its own snapshot's
+documentation. 212 were restored through <code>set_properties</code> in the first pass; the
+remaining 179 went through <code>restore-documentation-from-revision</code> in two signed
+cohorts of 90 and 89 rows, both of which previewed <code>would_apply</code> with no refusal
+and applied in full. The controlled field is <code>docs_stage</code> and the documentation
+text.</p>
+
+<p id="sib-restore-reset-docs-blocker">The first pass stopped short because
+<code>set_properties</code> is refused by the <code>structural-legitimacy</code> guard with
+<code>target has a live structural child</code> on 179 of these names; the docs-revision-restore
+mutation is what completed them. Both passes share one other constraint: a cohort preview
+re-read a few minutes later produces a fresh closure digest that no longer matches the
+authorized <code>manifest_sha256</code>, so each cohort is previewed immediately before its
+apply. Applied cohorts are replay-detectable (<code>already_applied</code>), which is how the
+second pass resumed from the 212 already restored without re-writing any of them.</p>
 
 <h3 id="sib-restore-reset-docs-readback">Read-back</h3>
 
-<pre id="sib-restore-reset-docs-readback-block">partition (c) = 391 names, re-read after the restore
-  docs_stage: accepted 212, pending 177, reviewed 1, exhausted 1
-  documentation equals own DocsRevision snapshot text: 379 of 391
-  admitted signed rows: 1 per restored name, row id restore:&lt;name&gt;:&lt;DocsRevision id&gt;
-  refused rows: structural-legitimacy, "target has a live structural child"
+<pre id="sib-restore-reset-docs-readback-block">partition (c) = 391 names, re-read after the second pass
+  docs_stage: accepted 391 of 391
+  documentation equals own DocsRevision snapshot text: 391 of 391
+  accepted names whose documentation disagrees with their snapshot: 0
+  admitted signed rows: one per name, each receipt carrying docs_revision_id
+  cohorts: 90 rows applied, 89 rows applied; previews would_apply, no refusal
 control (partition b) parallel_conductivity: no authority row, no receipt;
   docs_stage pending, documentation unchanged</pre>
 
@@ -97,20 +105,34 @@ control (partition b) parallel_conductivity: no authority row, no receipt;
 
 <p id="sib-restore-reset-docs-negative-control">A name in partition (a) or (b) must receive no
 restore write and no receipt. Partition (a) is empty, so the control is drawn from (b):
-<code>parallel_conductivity</code> carries no <code>set_properties</code> row in any batch
-authority, and it is re-read after the restore to show its documentation and stage unchanged.
-The instrument's authority rows are composed only from <code>restore_plan</code>, which is
-partition (c) alone.</p>
+<code>parallel_conductivity</code> carries no restore row in any cohort authority — neither a
+<code>set_properties</code> row from the first pass nor a
+<code>restore-documentation-from-revision</code> row from the second — and no receipt of either
+kind, and it is re-read after the restore to show its documentation and stage unchanged. The
+instrument's authority rows are composed only from <code>restore_plan</code>, which is partition
+(c) alone.</p>
 
 <h3 id="sib-restore-reset-docs-counts">Accepted-name docs_stage counts</h3>
 
 <p id="sib-restore-reset-docs-counts-block">Before: <code>accepted 2107, pending 1108, reviewed 46,
-drafted 3, exhausted 3, null 1</code>. After: <code>accepted 2319, pending 897, reviewed 45,
-drafted 3, exhausted 3, null 1</code> — 212 names moved from pending or reviewed to accepted,
-and no name moved the other way.</p>
+drafted 3, exhausted 3, null 1</code>. After: <code>accepted 2497, pending 721, reviewed 44,
+drafted 3, exhausted 2, null 1</code> — 176 pending, one reviewed and one exhausted name became
+accepted, and no name moved out of accepted. The graph-wide move is 178 because one restored
+name is superseded and so sits outside the accepted-name population the counts describe; the
+partition itself reads back as 391 of 391 accepted.</p>
+
+<p id="sib-restore-reset-docs-writer">The writer landed in
+<code>imas_codex/standard_names/signed_manifest.py</code> with
+<code>tests/standard_names/test_signed_docs_restore.py</code>, which plants a name with a live
+structural child and shows the docs restore admitted while <code>set_properties</code> on the
+same name stays refused, plus a control that a <code>unit</code> payload is refused with the
+field named. The <code>tests/standard_names</code> default tier records 272 passed and no
+failure id on both the base and the head arm of the same literal command.</p>
 
 <p id="sib-restore-reset-docs-instrument">Instrument:
-<code>sib-restore-reset-docs-run.py</code>; census and restore reports under the run directory.
+<code>sib-restore-reset-docs-run.py</code> (census, then the signed restore through the
+docs-revision-restore adapter) with the census, census report and signed cohort authorities
+under the run directory, each authority carrying its own file and payload SHA-256.
 No LLM spend and no <code>sn run</code>.</p>
 </main>
 </body>

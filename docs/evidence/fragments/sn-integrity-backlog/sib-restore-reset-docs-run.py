@@ -31,8 +31,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-from collections import Counter
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -75,7 +74,7 @@ RETURN coalesce(sn.docs_stage, 'null') AS docs_stage, count(sn) AS n
 
 
 def now_utc() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+    return datetime.now(UTC).isoformat(timespec="seconds")
 
 
 def stage_map(path: Path) -> dict[str, dict[str, Any]]:
@@ -204,7 +203,9 @@ def census(gc: Any, drain_run_dir: Path) -> dict[str, Any]:
         "drift_dry_run": {
             "detected": dry["detected"],
             "renamed": dry["renamed"],
-            "steered": dry["steering_count"] if "steering_count" in dry else dry["steered"],
+            "steered": dry["steering_count"]
+            if "steering_count" in dry
+            else dry["steered"],
             "dry_run": dry["dry_run"],
             "requires_steering_among_attributed": len(steering),
             "unchecked_sources": len(unchecked),
@@ -216,214 +217,119 @@ def census(gc: Any, drain_run_dir: Path) -> dict[str, Any]:
     }
 
 
-def _guard(implementation: str, participant_ids: list[str]) -> dict[str, Any]:
-    kind = (
-        "collateral_immutability"
-        if implementation == "out-of-allowlist-immutability"
-        else "semantic_authority"
-    )
-    return {
-        "id": implementation,
-        "kind": kind,
-        "implementation": implementation,
-        "participant_ids": participant_ids,
-    }
-
-
-def _restore_properties(snap: dict[str, Any]) -> dict[str, Any]:
-    props: dict[str, Any] = {
-        "documentation": snap.get("documentation") or "",
-        "description": snap.get("description") or "",
-        "docs_stage": "accepted",
-        "edit_status": "applied",
-        "docs_chain_length": int(snap.get("revision_number") or 0) + 1,
-    }
-    if snap.get("reviewer_score_docs") is not None:
-        props["reviewer_score_docs"] = float(snap["reviewer_score_docs"])
-    if snap.get("model") is not None:
-        props["docs_model"] = snap["model"]
-    return props
-
-
-def _row(row_id: str, sn_id: str, properties: dict[str, Any]) -> dict[str, Any]:
-    return {
-        "id": row_id,
-        "identity": {"id": row_id, "kind": "standard_name", "target_id": sn_id},
-        "participants": [
-            {"id": sn_id, "kind": "node", "graph_label": "StandardName"}
-        ],
-        "selection": SELECTION,
-        "mutations": [
-            {
-                "id": f"{row_id}:mutation",
-                "order": 0,
-                "kind": "set_properties",
-                "participant_id": sn_id,
-                "arguments": {"properties": properties},
-            }
-        ],
-        "guards": [
-            _guard("structural-legitimacy", [sn_id]),
-            _guard("out-of-allowlist-immutability", [sn_id]),
-        ],
-        "orphan_policy": "refuse",
-    }
-
-
-def _authority(rows: list[dict[str, Any]], operation: str) -> dict[str, Any]:
-    from imas_codex.standard_names.signed_manifest import signed_payload_sha256
-
-    authority: dict[str, Any] = {
-        "schema": "imas-codex.repair-authority.v1",
-        "operation_id": operation,
-        "authority_mode": "external_reviewed",
-        "rows": rows,
-        "repair_rows": [row["id"] for row in rows],
-        "selection": SELECTION,
-        "receipt_policy": {
-            "id": "one-per-restored-name",
-            "operation": OPERATION,
-            "cardinality": "per_target",
-            "expected_count": "admitted_rows",
-            "link_participant_kind": "standard_name",
-            "replay_projection": ["manifest_sha256", "row_id"],
-        },
-        "orphan_policy": "refuse",
-    }
-    payload_sha256 = signed_payload_sha256(authority)
-    authority["signature"] = {
-        "canonicalization": "json-sort-keys-v1",
-        "sha256": payload_sha256,
-    }
-    return authority
-
-
 def restore(gc: Any, census_data: dict[str, Any], out_dir: Path) -> dict[str, Any]:
+    """Restore each partition-(c) name from its own snapshot, in signed cohorts.
+
+    The mutation is ``signed_manifest``'s docs-revision-restore kind, which
+    writes only the documentation fields a ``DocsRevision`` carries plus
+    ``docs_stage='accepted'``, so it is admitted on names that own a live
+    structural child where ``set_properties`` is refused.
+    """
     from imas_codex.standard_names.signed_manifest import (
+        _DOCS_RESTORE_ADAPTER,
+        _DOCS_RESTORE_GUARDS,
+        _DOCS_RESTORE_MUTATION,
         apply_signed_manifest,
         signed_payload_sha256,
     )
 
     plan = census_data["restore_plan"]
-    rows: list[dict[str, Any]] = []
-    missing_snapshot: list[str] = []
-    no_score: list[str] = []
-    for item in plan:
-        sn_id = item["sn_id"]
-        snap = snapshot(gc, sn_id, item["revision_id"])
-        if not snap or not (snap.get("documentation") or ""):
-            missing_snapshot.append(sn_id)
-            continue
-        if snap.get("reviewer_score_docs") is None:
-            no_score.append(sn_id)
-        rows.append(_row(f"restore:{sn_id}:{item['revision_id']}", sn_id, _restore_properties(snap)))
-
+    names = [item["sn_id"] for item in plan]
+    stage = {
+        row["id"]: row["docs_stage"]
+        for row in gc.query(
+            "UNWIND $names AS id MATCH (sn:StandardName {id: id}) "
+            "RETURN sn.id AS id, sn.docs_stage AS docs_stage",
+            names=names,
+        )
+    }
+    todo = [item for item in plan if stage.get(item["sn_id"]) != "accepted"]
+    rows = [
+        {
+            "id": f"docs:{item['sn_id']}",
+            "sn_id": item["sn_id"],
+            "snapshot_id": item["revision_id"],
+            "selection": SELECTION,
+        }
+        for item in todo
+    ]
     reason = (
         "restore the accepted documentation that the 2026-11-11 drift "
         "refresh reset, from each name's own DocsRevision snapshot"
     )
-    from imas_codex.standard_names.signed_manifest import SignedManifestConflict
-
-    batches = [rows[i : i + 60] for i in range(0, len(rows), 60)]
     receipts: list[dict[str, Any]] = []
-    for index, batch in enumerate(batches):
-        authority = _authority(batch, f"docs-restore-batch-{index:02d}")
+    for index, offset in enumerate(range(0, len(rows), 90)):
+        batch = rows[offset : offset + 90]
+        authority: dict[str, Any] = {
+            "schema": "imas-codex.docs-revision-restore.v1",
+            "operation_id": OPERATION,
+            "rows": batch,
+            "selection": SELECTION,
+        }
+        authority["signature"] = {
+            "canonicalization": "json-sort-keys-v1",
+            "sha256": signed_payload_sha256(authority),
+        }
         authority_path = out_dir / f"restore-authority-{index:02d}.json"
         raw = json.dumps(authority, sort_keys=True, indent=2).encode()
         authority_path.write_bytes(raw)
         file_sha256 = hashlib.sha256(raw).hexdigest()
         payload_sha256 = authority["signature"]["sha256"]
-        attempt = 0
-        while True:
-            attempt += 1
-            preview = apply_signed_manifest(
+        preview = apply_signed_manifest(
+            authority_path,
+            authority_file_sha256=file_sha256,
+            authority_payload_sha256=payload_sha256,
+            authority_adapter=_DOCS_RESTORE_ADAPTER,
+            mutation_kind=_DOCS_RESTORE_MUTATION,
+            guard_set=_DOCS_RESTORE_GUARDS,
+            reason=reason,
+            gc=gc,
+        )
+        entry: dict[str, Any] = {
+            "batch": index,
+            "authority": str(authority_path),
+            "authority_file_sha256": file_sha256,
+            "rows": len(batch),
+            "preview": preview.get("outcome"),
+            "refusals": (preview.get("refusals") or [])[:20],
+        }
+        if not preview.get("refusals"):
+            applied = apply_signed_manifest(
                 authority_path,
                 authority_file_sha256=file_sha256,
                 authority_payload_sha256=payload_sha256,
+                authority_adapter=_DOCS_RESTORE_ADAPTER,
+                mutation_kind=_DOCS_RESTORE_MUTATION,
+                guard_set=_DOCS_RESTORE_GUARDS,
                 reason=reason,
+                apply=True,
+                manifest_sha256=preview["manifest_sha256"],
                 gc=gc,
             )
-            applied = None
-            if preview.get("counts", {}).get("admitted"):
-                try:
-                    applied = apply_signed_manifest(
-                        authority_path,
-                        authority_file_sha256=file_sha256,
-                        authority_payload_sha256=payload_sha256,
-                        reason=reason,
-                        apply=True,
-                        manifest_sha256=preview["manifest_sha256"],
-                        gc=gc,
-                    )
-                except SignedManifestConflict as exc:
-                    if attempt >= 3:
-                        receipts.append(
-                            {
-                                "batch": index,
-                                "authority": str(authority_path),
-                                "rows": len(batch),
-                                "attempts": attempt,
-                                "error": str(exc),
-                            }
-                        )
-                        break
-                    continue
-            receipts.append(
-                {
-                    "batch": index,
-                    "authority": str(authority_path),
-                    "authority_file_sha256": file_sha256,
-                    "attempts": attempt,
-                    "rows": len(batch),
-                    "preview": {
-                        "outcome": preview.get("outcome"),
-                        "counts": preview.get("counts"),
-                        "refusals": (preview.get("refusals") or [])[:20],
-                        "refusal_count": len(preview.get("refusals") or []),
-                    },
-                    "applied": None
-                    if applied is None
-                    else {
-                        "outcome": applied.get("outcome"),
-                        "changed": applied.get("changed"),
-                        "counts": applied.get("counts"),
-                        "manifest_sha256": applied.get("manifest_sha256"),
-                    },
-                }
-            )
-            break
+            entry["applied"] = applied.get("outcome")
+            entry["changed"] = applied.get("changed")
+            entry["docs_revision_ids"] = applied.get("docs_revision_ids")
+        receipts.append(entry)
 
-    names = [item["sn_id"] for item in plan if item["sn_id"] not in missing_snapshot]
     after = live_state(gc, names)
     readback = []
     for item in plan:
-        sn_id = item["sn_id"]
-        if sn_id in missing_snapshot:
-            continue
-        snap = snapshot(gc, sn_id, item["revision_id"])
-        state = after.get(sn_id, {})
+        snap = snapshot(gc, item["sn_id"], item["revision_id"])
+        state = after.get(item["sn_id"], {})
         readback.append(
             {
-                "sn_id": sn_id,
+                "sn_id": item["sn_id"],
                 "revision_id": item["revision_id"],
-                "documentation_equals_snapshot": state.get("documentation")
-                == (snap or {}).get("documentation"),
+                "documentation_equals_snapshot": (state.get("documentation") or "")
+                == ((snap or {}).get("documentation") or ""),
                 "docs_stage": state.get("docs_stage"),
                 "docs_stage_accepted": state.get("docs_stage") == "accepted",
             }
         )
 
     return {
-        "authority_path": str(authority_path),
-        "authority_file_sha256": file_sha256,
-        "authority_payload_sha256": payload_sha256,
-        "rows": len(rows),
-        "missing_snapshot": missing_snapshot,
-        "names_without_snapshot_score": no_score,
-        "batches": receipts,
-        "applied_changes": sum(
-            (r.get("applied") or {}).get("changed") or 0 for r in receipts
-        ),
+        "cohorts": receipts,
+        "changed_total": sum(entry.get("changed", 0) for entry in receipts),
         "readback": readback,
         "readback_all_equal": all(r["documentation_equals_snapshot"] for r in readback),
         "readback_all_accepted": all(r["docs_stage_accepted"] for r in readback),
@@ -454,14 +360,21 @@ def main() -> int:
                 raise SystemExit("restore needs --census")
             result = restore(gc, json.loads(Path(args.census).read_text()), work)
     out.write_text(json.dumps(result, indent=1, sort_keys=True))
-    print(json.dumps({
-        "phase": args.phase,
-        "out": str(out),
-        "partition": {k: v["count"] for k, v in result.get("partition", {}).items()},
-        "rows": result.get("rows"),
-        "readback_all_equal": result.get("readback_all_equal"),
-        "readback_all_accepted": result.get("readback_all_accepted"),
-    }, indent=1))
+    print(
+        json.dumps(
+            {
+                "phase": args.phase,
+                "out": str(out),
+                "partition": {
+                    k: v["count"] for k, v in result.get("partition", {}).items()
+                },
+                "rows": result.get("rows"),
+                "readback_all_equal": result.get("readback_all_equal"),
+                "readback_all_accepted": result.get("readback_all_accepted"),
+            },
+            indent=1,
+        )
+    )
     return 0
 
 
