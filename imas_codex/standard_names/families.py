@@ -1254,7 +1254,8 @@ RETURN m.id AS id,
        m.description AS description,
        m.physics_domain AS physics_domain,
        m.domain_correction AS domain_correction,
-       sources
+       sources,
+       {", ".join(f"{seg} AS {seg}" for seg in DOMAIN_FAMILY_SEGMENTS)}
 ORDER BY m.id
 """
 

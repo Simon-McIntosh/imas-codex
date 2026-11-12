@@ -441,3 +441,4 @@ def test_the_census_groups_by_the_same_signature_as_the_seeded_read(
     assert seeded <= keys, f"the census misses families it must group: {seeded - keys}"
     for seed in seeds:
         assert len(fam.fetch_domain_family(seed, graph)["members"]) == 3
+
