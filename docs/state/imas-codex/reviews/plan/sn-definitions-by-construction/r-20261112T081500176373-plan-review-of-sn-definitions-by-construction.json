@@ -17,7 +17,30 @@
   "plan_slug": "sn-definitions-by-construction",
   "plan_version": 4,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "affc144c12b109c6c901c0f926a800f144790b11",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a72's score clause is replaced by a control: at least ten written names reviewed beside the published definition of the same name in the same run and route, accepted at least as often, with each send-back listed by reason",
+      "reason": "",
+      "when": "2026-11-12T08:33:54.515802+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "affc144c12b109c6c901c0f926a800f144790b11",
+      "commit_basis": "edit",
+      "note": "\u00a72's score clause is replaced by a control: at least ten written names reviewed beside the published definition of the same name in the same run and route, accepted at least as often, with each send-back listed by reason",
+      "reason": "",
+      "when": "2026-11-12T08:33:54.515802+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-definitions-by-construction/r-20261112T081500176373-plan-review-of-sn-definitions-by-construction.json",
   "review_run_id": "r-20261112T081500176373-plan-review-of-sn-definitions-by-construction",
   "reviewed_blob_sha": "43dd8930034511c337d06e2c02b85bf1c7efffca",
   "rubric": "content",
