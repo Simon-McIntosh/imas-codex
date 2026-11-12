@@ -1,0 +1,48 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T02:43:37.426Z",
+  "dispatched_at": "2026-11-12T02:38:02Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-pipeline-hygiene/r-20261112T023717677764-plan-review-of-sn-pipeline-hygiene/plan.html:33",
+      "id": "reasoning-1",
+      "reason": "`content_sha256` is a derived digest rather than a calibrated value, so a node comparing calibrated values will exclude it and reach the same endpoint; naming it would remove a false blocker, not change the work.",
+      "text": "\u00a71's reconstruction branch exempts \"the recorded source path\" from the unchanged-values comparison, but the committed artifact also carries `content_sha256`, which `_content_digest` computes over the whole document including each axis block's `source_receipts` (`imas_codex/standard_names/review/cascade_calibration.py:591-597`); committing the two receipts at a repository path therefore changes two fields, not one, and the test's own assertion is full equality (`test_cascade_calibration.py:113`)",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "c31a9b9781a224d9b2af24dec869e340e3c89a82",
+  "plan_fingerprint": "b3be400bac45e2117d2453ce4a401f1f37b7c1cbf39bbdf8f8b0bdd464d3d25b",
+  "plan_slug": "sn-pipeline-hygiene",
+  "plan_version": 27,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T023717677764-plan-review-of-sn-pipeline-hygiene",
+  "reviewed_blob_sha": "b6f820135e4b7e5963694b554b086c3da30f5320",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 all 13 ids resolve in the tree: `test_cascade_calibration.py:104`, `test_catalog_layout_hierarchy.py:755`, `test_compose_prompt_examples_round_trip.py:207`, `test_gap_rule_verdicts.py:115,183,232,299,508`, `test_geometry_enumeration_collapse.py:226`, `test_manifest_generability.py:173,226,276`; the geometry id now reads the test's own name (`test_unregistered_locus_rejects_the_ordinal_compound`).",
+    "done_when": "pass \u2014 \u00a71's measure is a named compute-partition run reporting none of 13 named ids failing at the merged head, plus a non-skipping arm for the cascade-calibration id, plus a mutation control (\"each product fix is shown to matter by the test failing again when that fix alone is reverted\"); all three can fail, and \u00a71's cited comment records the control being exercised (head 276 passed / 2 skipped EXIT=0 against base 1 failed EXIT=1).",
+    "evidence_paths": "pass \u2014 \u00a71 writes its diagnosis into the landing evidence under `docs/evidence/fragments/<plan>/`, the durable path \u00a72 and \u00a73 already used, not a scratchpad.",
+    "naming": "pass \u2014 \u00a71 introduces no symbol, file or comment carrying a plan label, stage name or ticket number; it only names existing test ids.",
+    "reasoning": "pass with one minor finding \u2014 the opening's re-measurement claim matches its cited comments (five of six already green at base, cascade skipping) and the done-when's reconstruction branch is now bounded to calibrated values of the committed artifact; the residual defect is that the exemption covers only the recorded source path while a derived digest also moves with it.",
+    "single_goal": "pass \u2014 \u00a71 delivers one thing, the disposition of the 13 recorded-red ids.",
+    "wiring": "pass \u2014 \u00a71 declares no relationship (`data-links=\"\"`) and the plan's `plan-standalone` plus followup f-sph-001 record \u00a71 as independent of every other section, so no dependency is missing and none points at the wrong node."
+  },
+  "section_digests": {
+    "_document": "e887bb3cd3aabc5d770baee9b75d62f9060b3acd8cf9ce6521b85731ecb3d369",
+    "s1": "6c7ce003b6eaddfc625831d909473de570f043c2ff5449f741bcb6f21e026024",
+    "s2": "e9d021306c93e843cfa1ad6c6c66f401b766ba90335edf46b9827be8671de3e5",
+    "s3": "a205991a491d3ca44d31ed4fd17f44659f56c383526f7ed4ee27ad22f9520561",
+    "s4": "e19655648e3f9a005df4834ac35f5fb2bc214b6707a17a98b1218f40d3cd2c7d",
+    "s5": "22355c76f1a73f28bb10c96b7844c864ff49c695fe02732dc5952823ab5cfd70",
+    "s6": "8159bf6d6723b63ae9ea529cb516e69681047379b40e53f1271a4f47c9b0194f",
+    "s7": "a32106acdcff60e7fdf2ad612ff1962f13bfa360ce0b1a5c122f5be40f3b7845",
+    "s8": "1b61eb49b7e3985650f5e8b81e1658ef1d47c219e7f293bc18878de8199fdfdb"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T02:50:36.417917+00:00",
+  "total": null
+}
