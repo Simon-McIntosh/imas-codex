@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-pipeline-hygiene">
+<meta name="node-id" content="sph-red-other">
+<title>Five of six red ids were already green; the sixth was an unclassified semantic negative</title>
+</head>
+<body>
+<main>
+<h1 id="sph-red-other-title">Five of six red ids were already green; the sixth was an unclassified semantic negative</h1>
+
+<p id="sph-red-other-summary">
+Base revision <code>a5e781f6c</code>, worktree
+<code>/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f5c460d-ed3a-4460-943c-233208992958/sph-red-other</code>.
+Five of the six ids named in the brief already pass at base: the
+catalog-layout ordering-cycle id and all three manifest-generability ids
+report green with no change, and the cascade-calibration id does not fail
+either — it <em>skips</em>, because the two frozen receipt files it reads no
+longer exist on disk (see <a href="#sph-red-other-cascade">the cascade
+section</a>). The one real failure is the compose-prompt NC-25 id, whose
+negative example is a valid public-grammar name, so it was always a semantic
+negative that the declared set had failed to classify. The repair is one line
+in the test's own declaration set; no product file changed.
+</p>
+
+<h2 id="sph-red-other-nc25">NC-25: an unclassified semantic negative</h2>
+<p>
+<code>test_nc_rule_bad_example_has_declared_public_oracle_disposition</code>
+asserts that every <code>examples_bad</code> entry of a composition rule is
+either rejected by the strict public parser or listed in
+<code>_SEMANTIC_NEGATIVE_EXAMPLES</code>. Rule NC-25 ("Prefer
+<code>&lt;quantity&gt;_of_&lt;named_entity&gt;</code> over attribute-stacking")
+rejects <code>neutral_beam_injector_beam_tangency_radius</code> on meaning, not
+grammar: the parser accepts it, and the rule's prose asks for
+<code>radius_of_neutral_beam_injector</code>. The rule is therefore correct and
+the test's declaration set is incomplete, so the fix follows the diagnosis as a
+test-only classification, not a weakening of the assertion.
+</p>
+<pre id="sph-red-other-nc25-diff"><code>_SEMANTIC_NEGATIVE_EXAMPLES = {
+    ("NC-1", "area_of_flux_surface"),
+    ("NC-13", "radial_outline"),
+    ("NC-13", "vertical_outline"),
++   ("NC-25", "neutral_beam_injector_beam_tangency_radius"),
+    ("NC-28", "plasma_current_reference_waveform"),
+    ...</code></pre>
+<p>
+The sibling bad example on the same rule, <code>ec_launcher_mirror_rotation_angle</code>,
+is correctly absent: it fails strict parsing because <code>ec</code> is not
+acceptable spelling, so it needs no semantic declaration.
+</p>
+
+<h2 id="sph-red-other-already-green">Ids already green at base</h2>
+<table id="sph-red-other-green-table">
+<thead><tr><th>Id</th><th>Base observation</th><th>Action</th></tr></thead>
+<tbody>
+<tr>
+<td><code>test_catalog_layout_hierarchy.py::TestOrderingCycleDetection::test_export_ledgers_cycle_and_writes_packet</code></td>
+<td>passes in 9.0&#8201;s at base</td>
+<td>none</td>
+</tr>
+<tr>
+<td><code>test_manifest_generability.py::test_a_cut_refuses_a_manifest_it_cannot_generate_rather_than_counting</code></td>
+<td>passes, 5/5 file green at base</td>
+<td>none</td>
+</tr>
+<tr>
+<td><code>test_manifest_generability.py::test_a_manifest_whose_sources_all_reach_a_name_is_not_refused</code></td>
+<td>passes</td>
+<td>none</td>
+</tr>
+<tr>
+<td><code>test_manifest_generability.py::test_every_manifest_source_is_carried_or_names_its_blocking_mechanism</code></td>
+<td>passes</td>
+<td>none</td>
+</tr>
+</tbody>
+</table>
+<p>
+These four were re-run in the same head arm as the repair and remain green, so
+the claim is not taken from an older log.
+</p>
+
+<h2 id="sph-red-other-cascade">Cascade calibration: the id skips, it does not fail</h2>
+<p>
+<code>test_matched_policy_rebuilds_from_frozen_scores_and_receipts</code> carries
+a pre-existing <code>skipif</code> on
+<code>cascade_calibration.DEFAULT_NAME_RECEIPTS</code> and
+<code>DEFAULT_DOCS_RECEIPTS</code>. A solo run with <code>-rs</code> reports:
+</p>
+<pre><code>SKIPPED [1] tests/standard_names/test_cascade_calibration.py:99:
+    frozen calibration receipts are not installed
+10 passed, 1 skipped</code></pre>
+<p>
+Both paths are absolute and point into the reckon run store:
+<code>~/.config/reckon/crew/runs/r-20261016T101231058904-srtj-evidence-supply/evidence-decisions.jsonl</code>
+and
+<code>~/.config/reckon/crew/runs/r-20261017T200215613429-srtj-docs-score-arm/documentation-score-frozen.json.xz</code>.
+Neither directory exists any more; the two runs remain registered in
+<code>run_store.db</code> but their working directories are gone, and a bounded
+search of the store found neither filename. This node cannot restore them: they
+are outside its write scope and outside the repository. The id therefore
+produces no signal here — it is neither a passing repair nor a reproducible
+failure, and the defect it was written to guard is the one
+<code>sib-cascade-calibration-crash</code> already repaired by cancelling the
+periodic stack dump. The coordinator owns the decision on this id.
+</p>
+
+<h2 id="sph-red-other-arms">Measured arms</h2>
+<p>
+Both arms ran the same four files with the same command, so the failure ids
+compare directly. Base arm: <strong>1 failed, 275 passed, 2 skipped in
+83.86&#8201;s</strong> (<code>EXIT=1</code>), the single failure being the NC-25
+id. Head arm: <strong>276 passed, 2 skipped in 70.91&#8201;s</strong>
+(<code>EXIT=0</code>). One skip in each arm is the cascade receipt skip above;
+the other is pre-existing in the catalog-layout file and appears in both arms.
+Added failure ids against base: <strong>0</strong>.
+</p>
+
+<h2 id="sph-red-other-control">Negative control</h2>
+<p>
+Reverting the single added line (removing the NC-25 entry) and re-running the
+parametrized test turns it red:
+</p>
+<pre><code>FAILED tests/standard_names/test_compose_prompt_examples_round_trip.py::
+  test_nc_rule_bad_example_has_declared_public_oracle_disposition
+  [NC-25-neutral_beam_injector_beam_tangency_radius]
+1 failed, 59 passed, 1 warning in 19.46s
+EXIT=1</code></pre>
+<p>
+No test was weakened, skipped or deleted by this node, and the product source
+is untouched.
+</p>
+</main>
+</body>
+</html>
