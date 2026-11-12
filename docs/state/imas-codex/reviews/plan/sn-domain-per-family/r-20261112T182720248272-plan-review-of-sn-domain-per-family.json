@@ -1,0 +1,68 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T18:36:30.313Z",
+  "dispatched_at": "2026-11-12T18:29:50Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-domain-per-family.html:70",
+      "id": "done_when-1",
+      "reason": "the node would have to choose between failing bullet 2 and writing a domain the ruling says must be held split, and one clause (an exception in bullet 2 for a listed family, or a statement that a \u00a71 family is decided under the widened options rather than held split) removes the choice.",
+      "text": "done-when bullet 2 requires \"the eight families in \u00a71 each read one domain\", while the changed paragraph (line 67) and the lead's ruling it records now fix that any family of two or more members the live pass leaves undecided \"is held split, each member decided on its own sources\", and bullet 1's exception then formally permits those members to carry more than one `physics_domain`; \u00a75 admits up to 24 such families (plan.html:92) and nothing excludes the eight \u00a71 patterns from that set (under \u00a72's narrower options they decide at p=0.78\u20131.00 against a 0.68 floor, so the risk is bounded but not excluded, and widening the option set raises the candidate entropy), leaving \u00a73 with a done-when it cannot satisfy for a \u00a71 family that falls below the floor",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "c8f0480fe390372ca54b90b2ad60461926932458",
+  "plan_fingerprint": "78957e78cd5ca3a0f8c51bbe57b28448be7031651bb00351dd172db1ddcd8454",
+  "plan_slug": "sn-domain-per-family",
+  "plan_version": 25,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "57c7da811b82d115063250bbf4e6a4c505543f65",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Section 3's second done-when now excepts a section 1 family the pass leaves undecided: it is reported as held split under the ruling with each member's domain listed, and is not written to one domain.",
+      "reason": "",
+      "when": "2026-11-12T19:02:54.471256+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "57c7da811b82d115063250bbf4e6a4c505543f65",
+      "commit_basis": "edit",
+      "note": "Section 3's second done-when now excepts a section 1 family the pass leaves undecided: it is reported as held split under the ruling with each member's domain listed, and is not written to one domain.",
+      "reason": "",
+      "when": "2026-11-12T19:02:54.471256+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-sn-domain-per-family.v25.json",
+  "review_run_id": "r-20261112T182720248272-plan-review-of-sn-domain-per-family",
+  "reviewed_blob_sha": "9d55ed125d2fa4db890e5338c0adcd3b2377824b",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every path \u00a73 names resolves: `docs/evidence/fragments/sn-domain-per-family/` exists with `family-label-set.json`, `labelled-comparison.json` and the gate logs; `sn-catalog-consistency` \u00a75 resolves as a section and its domain-audit endpoint is stated at line 77 of that plan; `docs/evidence/fragments/sn-domain-per-family/widened-options.json` does not exist yet but is \u00a75's declared deliverable (plan.html:92) and \u00a73 declares `depends-on s5`, so the anchor resolves through that dependency rather than to a renamed or deleted target.",
+    "done_when": "a finding \u2014 \u00a73's done-when bullet 2 requires the eight \u00a71 families each to read one domain, but the section's new held-split ruling removes the only path by which a family left undecided could receive one.",
+    "evidence_paths": "pass \u2014 \u00a73 names `docs/evidence/fragments/sn-domain-per-family/`, the durable directory that already holds \u00a72's committed gate log and fragments, and no bullet writes to a scratchpad or node-local temporary path.",
+    "naming": "pass \u2014 \u00a73 carries no plan, stage, sprint or ticket label into any symbol or comment, and \"the 2026-11-12 ruling\" is a provenance date for a recorded lead decision, not a plan identifier; no changelog prose was introduced by the change.",
+    "reasoning": "pass \u2014 the section's stated cause (a family offered only its sources' domains cannot agree and cannot be right) is the one \u00a71's census and \u00a72's committed measurements support; the delivered records are obtainable and falsifiable, since bullet 4 plants a split family and a whole family so the read-back must both fire and stay silent, and bullet 1's exception set is enumerable from \u00a75's listing; \u00a73 prescribes no code path, step sequence, formula or function, stating only what counts as done.",
+    "single_goal": "pass \u2014 \u00a73 delivers one thing, the live pass writing one domain per family; the transport/general share (bullet 3) and the spend figure (bullet 5) are recorded measures of that same pass, not a second deliverable.",
+    "wiring": "pass \u2014 `plan-section-depends-on` carries `s3: [s2, s5]`, so \u00a73's new reliance on \u00a75's undecided listing is ordered before it; `sn-catalog-consistency` \u00a75 declares `depends-on sn-domain-per-family#s3` (docs/plans/sn-catalog-consistency.html:22) exactly as \u00a73's paragraph claims; the gate `g-sdpf-disputed-items` is wired to s3 and its required evidence, `docs/evidence/fragments/sn-domain-family-labels/disputed-items.json`, now carries `lead_ruling` on all 12 items (committed 398238a33) while the gate record still reads `data-status=\"open\"` \u2014 plan-record bookkeeping the coordinator closes, not a content defect."
+  },
+  "section_digests": {
+    "_document": "f250140e0efd072e27479d27052893ba71f3bb380d4e1353ed009647ac246472",
+    "s1": "3d2539102f47a199cec8a14a89d42968505b563a51a390ee64710cc35f227476",
+    "s2": "aa40e5c5659822e9d8c22d4cd2fc0823ad3615e0d88e3bfdd032248dbfce0b3c",
+    "s3": "95409d8da9ed03ac9c5bad365fe7840c80738ed49fcd1421ed936cfb60f60a28",
+    "s4": "02a78d9adf06476e76fb104849bcb4b1b0a2065ec569400e183771b85461eb4c",
+    "s5": "b0855588bfef32ef9c6c0877b91f163c6cdcdcabff891b65286989af595edb8e"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T19:02:40.829521+00:00",
+  "total": null
+}
