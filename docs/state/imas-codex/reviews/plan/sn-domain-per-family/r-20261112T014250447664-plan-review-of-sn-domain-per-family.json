@@ -152,6 +152,16 @@
       "note": "\u00a72 now records the decision once for the family, and each member and a newly composed name read that one record",
       "reason": "",
       "when": "2026-11-12T02:03:51.223511+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "4a7c953bb89f511fd172eac662055195230624c4",
+      "commit_basis": "edit",
+      "finding": "interface_budget-1",
+      "note": "\u00a74 now states the refusal joins the export's existing gates and exclusion vocabulary and adds no option; \u00a72 states the per-family path replaces the per-name entry rather than standing beside it",
+      "reason": "",
+      "when": "2026-11-12T02:04:04.724811+00:00"
     }
   ],
   "responses": {
@@ -202,6 +212,15 @@
       "note": "\u00a72's family definition now names the pattern family, not the parent-edge family, as the grouping, with the locus held fixed",
       "reason": "",
       "when": "2026-11-12T02:03:34.147117+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "4a7c953bb89f511fd172eac662055195230624c4",
+      "commit_basis": "edit",
+      "note": "\u00a74 now states the refusal joins the export's existing gates and exclusion vocabulary and adds no option; \u00a72 states the per-family path replaces the per-name entry rather than standing beside it",
+      "reason": "",
+      "when": "2026-11-12T02:04:04.724811+00:00"
     },
     "reuse_search-1": {
       "action": "declined",
