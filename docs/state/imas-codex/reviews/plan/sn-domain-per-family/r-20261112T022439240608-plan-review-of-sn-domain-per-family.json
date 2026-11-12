@@ -58,6 +58,16 @@
       "note": "\u00a73 now states that family, there and in \u00a74, is the family \u00a72 defines, with the locus held fixed",
       "reason": "",
       "when": "2026-11-12T05:56:54.791648+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "fe216bc0513978d0a4ef36ecf5c6d1ed71725670",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "\u00a73 now routes a family \u00a72 reports undecided to the lead, whose recorded correction naming the family gives it one domain or holds it split, so the existing exception covers it",
+      "reason": "",
+      "when": "2026-11-12T05:57:06.226141+00:00"
     }
   ],
   "responses": {
@@ -75,6 +85,15 @@
       "note": "\u00a73 now states that family, there and in \u00a74, is the family \u00a72 defines, with the locus held fixed",
       "reason": "",
       "when": "2026-11-12T05:56:54.791648+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "fe216bc0513978d0a4ef36ecf5c6d1ed71725670",
+      "commit_basis": "edit",
+      "note": "\u00a73 now routes a family \u00a72 reports undecided to the lead, whose recorded correction naming the family gives it one domain or holds it split, so the existing exception covers it",
+      "reason": "",
+      "when": "2026-11-12T05:57:06.226141+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-domain-per-family/r-20261112T022439240608-plan-review-of-sn-domain-per-family.json",
