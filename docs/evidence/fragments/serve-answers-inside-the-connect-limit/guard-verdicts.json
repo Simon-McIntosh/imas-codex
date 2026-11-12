@@ -1,0 +1,175 @@
+{
+ "guard": "tests/discovery/test_engine_import_order.py::test_initialize_path_imports_no_command_module_or_schema_runtime",
+ "revision": "9a1c18b3d",
+ "host": "98dci4-srv-1006",
+ "utc": "2026-11-12T08:13:08Z",
+ "method": "'cold' starts each run in a fresh interpreter (pytest); 'warm' pre-imports imas_codex.llm.server so warmup.start() has already run before the guard's own subprocesses. Each run executes both parametrised arms (warm-up suppressed, warm-up running) and passes only when both print VERDICT=clean. The 20 runs were launched concurrently, which stresses the warm-up race rather than hiding it.",
+ "same_verdict_all_runs": true,
+ "runs": [
+  {
+   "state": "cold",
+   "run": 1,
+   "summary": "2 passed, 1 warning in 26.09s",
+   "exit_code": 0,
+   "suppressed": "passed",
+   "running": "passed"
+  },
+  {
+   "state": "cold",
+   "run": 2,
+   "summary": "2 passed, 1 warning in 26.00s",
+   "exit_code": 0,
+   "suppressed": "passed",
+   "running": "passed"
+  },
+  {
+   "state": "cold",
+   "run": 3,
+   "summary": "2 passed, 1 warning in 25.96s",
+   "exit_code": 0,
+   "suppressed": "passed",
+   "running": "passed"
+  },
+  {
+   "state": "cold",
+   "run": 4,
+   "summary": "2 passed, 1 warning in 25.92s",
+   "exit_code": 0,
+   "suppressed": "passed",
+   "running": "passed"
+  },
+  {
+   "state": "cold",
+   "run": 5,
+   "summary": "2 passed, 1 warning in 26.01s",
+   "exit_code": 0,
+   "suppressed": "passed",
+   "running": "passed"
+  },
+  {
+   "state": "cold",
+   "run": 6,
+   "summary": "2 passed, 1 warning in 26.01s",
+   "exit_code": 0,
+   "suppressed": "passed",
+   "running": "passed"
+  },
+  {
+   "state": "cold",
+   "run": 7,
+   "summary": "2 passed, 1 warning in 25.95s",
+   "exit_code": 0,
+   "suppressed": "passed",
+   "running": "passed"
+  },
+  {
+   "state": "cold",
+   "run": 8,
+   "summary": "2 passed, 1 warning in 25.81s",
+   "exit_code": 0,
+   "suppressed": "passed",
+   "running": "passed"
+  },
+  {
+   "state": "cold",
+   "run": 9,
+   "summary": "2 passed, 1 warning in 26.11s",
+   "exit_code": 0,
+   "suppressed": "passed",
+   "running": "passed"
+  },
+  {
+   "state": "cold",
+   "run": 10,
+   "summary": "2 passed, 1 warning in 26.03s",
+   "exit_code": 0,
+   "suppressed": "passed",
+   "running": "passed"
+  },
+  {
+   "state": "warm",
+   "run": 1,
+   "summary": "2 passed, 2 warnings in 26.58s",
+   "exit_code": 0,
+   "suppressed": "passed",
+   "running": "passed"
+  },
+  {
+   "state": "warm",
+   "run": 2,
+   "summary": "2 passed, 2 warnings in 25.91s",
+   "exit_code": 0,
+   "suppressed": "passed",
+   "running": "passed"
+  },
+  {
+   "state": "warm",
+   "run": 3,
+   "summary": "2 passed, 2 warnings in 26.17s",
+   "exit_code": 0,
+   "suppressed": "passed",
+   "running": "passed"
+  },
+  {
+   "state": "warm",
+   "run": 4,
+   "summary": "2 passed, 2 warnings in 25.94s",
+   "exit_code": 0,
+   "suppressed": "passed",
+   "running": "passed"
+  },
+  {
+   "state": "warm",
+   "run": 5,
+   "summary": "2 passed, 2 warnings in 26.11s",
+   "exit_code": 0,
+   "suppressed": "passed",
+   "running": "passed"
+  },
+  {
+   "state": "warm",
+   "run": 6,
+   "summary": "2 passed, 2 warnings in 25.88s",
+   "exit_code": 0,
+   "suppressed": "passed",
+   "running": "passed"
+  },
+  {
+   "state": "warm",
+   "run": 7,
+   "summary": "2 passed, 2 warnings in 25.86s",
+   "exit_code": 0,
+   "suppressed": "passed",
+   "running": "passed"
+  },
+  {
+   "state": "warm",
+   "run": 8,
+   "summary": "2 passed, 2 warnings in 25.97s",
+   "exit_code": 0,
+   "suppressed": "passed",
+   "running": "passed"
+  },
+  {
+   "state": "warm",
+   "run": 9,
+   "summary": "2 passed, 2 warnings in 26.05s",
+   "exit_code": 0,
+   "suppressed": "passed",
+   "running": "passed"
+  },
+  {
+   "state": "warm",
+   "run": 10,
+   "summary": "2 passed, 2 warnings in 25.97s",
+   "exit_code": 0,
+   "suppressed": "passed",
+   "running": "passed"
+  }
+ ],
+ "counts": {
+  "cold": 10,
+  "warm": 10
+ },
+ "earlier_flake": "One earlier cold run failed with 'dictionary changed size during iteration' from inspecting sys.modules while the warm-up threads imported into it; the guard now snapshots list(sys.modules) first."
+}

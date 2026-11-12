@@ -1,41 +1,46 @@
 <section id="saicl-lazy-command-group" class="r-evidence" data-node="saicl-lazy-command-group">
 <h2>§2 — First answer in under ten seconds</h2>
-<p id="saicl-lazy-command-group-verdict">The command group now resolves each command module when that command is invoked, so <code>imas-codex serve</code> imports <code>serve</code> and nothing else. On the debug-partition node the median of five cold starts fell from 8.32 s to 3.80 s to first answer, and <code>serve --help</code> from 6.79 s to 0.17 s. On the fleet node, at a load average of 27–34, the five starts answered in 10.72–13.10 s (median 11.98 s) against a base-revision pair of 23.95 s and 22.17 s.</p>
+<p id="saicl-lazy-command-group-verdict">The command group now resolves each command module when that command is invoked, so <code>imas-codex serve</code> imports <code>serve</code> and nothing else. On the debug-partition node the median of five cold starts fell from 7.25 s to 3.34 s to first answer, and <code>serve --help</code> from 5.69 s to 0.13 s. On the fleet node at a load average of 28–32 the five starts answered in 9.87–11.71 s (median 10.46 s), every one inside the 15 s bound, against base-revision starts of 34.0 s and 35.9 s.</p>
 
 <h3 id="saicl-lazy-command-group-change">What changed</h3>
 <p><code>register_commands()</code> imported all fifteen command modules at package import, so every command — including the MCP server entry point — paid for every other command's imports. It is replaced by a table of (module, attribute, help) entries and a <code>DeferredCommandGroup</code> that imports a module in <code>get_command</code> only. <code>list_commands</code> and <code>format_commands</code> answer from the table, so <code>--help</code> never imports a command module; the help strings moved into the table for that reason.</p>
+<p>The server entry point carried the same kind of import one level down: <code>imas_codex/llm/server.py</code> imported <code>imas_codex.graph.query_builder</code> at module level, which pulled the <code>imas_codex.graph</code> package and the <code>linkml_runtime</code> schema runtime onto the path that answers <code>initialize</code>. That import now sits in the query builder that uses it, so the schema runtime loads when a code-chunk search first needs it rather than during start-up.</p>
 
 <h3 id="saicl-lazy-command-group-attribution">Where the base revision's time went</h3>
-<p>Measured in the base tree at a load average of 28, against a 23.95 s answer in the same sitting:</p>
+<p>Measured in both trees on <code>98dci4-clu-3141</code> at a load average of 4.5–6.7, each step a fresh interpreter over the import chain up to that step, median of three. Records: the <code>parts</code> record in <a href="/imas-codex/evidence/fragments/serve-answers-inside-the-connect-limit/startup-timings.json">startup-timings.json</a>, re-derivable with <a href="/imas-codex/evidence/fragments/serve-answers-inside-the-connect-limit/startup-timing-parts.py">startup-timing-parts.py</a>.</p>
 <table>
 <thead><tr><th>Part</th><th>Base revision</th><th>This change</th></tr></thead>
 <tbody>
-<tr><td>uv plus interpreter start</td><td>0.50 s</td><td>0.24 s</td></tr>
-<tr><td><code>import imas_codex.cli</code> — eager registration of fifteen command modules</td><td>15.58 s</td><td>0.24 s</td></tr>
-<tr><td><code>import imas_codex.llm.server</code> (fastmcp, graph models, schema runtime)</td><td>5.16 s</td><td>6.78 s</td></tr>
-<tr><td><code>AgentsServer(...)</code> construction</td><td>1.39 s</td><td>1.10 s</td></tr>
-<tr><td>stdio handshake to the answer</td><td>1.32 s</td><td>remaining</td></tr>
+<tr><td>Interpreter start</td><td>0.03 s</td><td>0.03 s</td></tr>
+<tr><td><code>import imas_codex.cli</code> — eager registration of fifteen command modules</td><td>5.58 s</td><td>0.08 s</td></tr>
+<tr><td>Resolving <code>serve</code> through the group</td><td>0.50 s</td><td>0.00 s</td></tr>
+<tr><td><code>import imas_codex.llm.server</code> (fastmcp, graph models, schema runtime)</td><td>1.10 s</td><td>2.24 s</td></tr>
+<tr><td><code>AgentsServer(...)</code> construction</td><td>0.40 s</td><td>0.16 s</td></tr>
+<tr><td>Named parts, cumulative</td><td>7.11 s</td><td>2.50 s</td></tr>
+<tr><td>stdio handshake to the first answer</td><td>0.14 s</td><td>0.83 s</td></tr>
+<tr><td>Whole start, median of five</td><td>7.25 s</td><td>3.34 s</td></tr>
 </tbody>
 </table>
-<p id="saicl-lazy-command-group-attributed">The named parts account for 22.63 s of the 23.95 s base-revision answer, 94.5 %, so the 7.6 s §1 left unexplained is inside the eager-import term: that term pulled <code>litellm</code> and the <code>linkml_runtime</code> schema stack in through the discovery and graph command modules, and the same imports recurred inside the server's own import chain. The eager term is what the lazy table removes.</p>
+<p id="saicl-lazy-command-group-attributed">The named parts account for 7.11 s of the 7.25 s base-revision answer, 98.1 %, so the eager-import term is almost the whole story: it pulled <code>litellm</code> and the <code>linkml_runtime</code> schema stack in through the discovery and graph command modules, and the same stack recurred inside the server's own import chain. Both are what the lazy table and the deferred query-builder import remove. On the loaded fleet node the same ratio holds and the term grows with load — the base revision needed 34.0–35.9 s there.</p>
 
 <h3 id="saicl-lazy-command-group-timings">Timings</h3>
 <table>
 <thead><tr><th>Node</th><th>Load average</th><th>Arm</th><th>Runs (s)</th><th>Median</th></tr></thead>
 <tbody>
-<tr><td>98dci4-clu-3141 (all_debug)</td><td>4.5–5.2</td><td>base, initialize</td><td>9.04, 8.01, 8.23, 8.34, 8.32</td><td>8.32</td></tr>
-<tr><td>98dci4-clu-3141 (all_debug)</td><td>5.0–5.2</td><td>this change, initialize</td><td>3.88, 3.80, 3.73, 3.79, 3.81</td><td>3.80</td></tr>
-<tr><td>98dci4-clu-3141 (all_debug)</td><td>4.9–5.6</td><td>base, <code>serve --help</code></td><td>6.88, 6.56, 6.55, 6.79, 7.04</td><td>6.79</td></tr>
-<tr><td>98dci4-clu-3141 (all_debug)</td><td>5.0</td><td>this change, <code>serve --help</code></td><td>0.36, 0.17, 0.16, 0.17, 0.16</td><td>0.17</td></tr>
-<tr><td>98dci4-clu-2023 (fleet)</td><td>27.1–27.6</td><td>base, initialize</td><td>23.95, 22.17</td><td>23.95</td></tr>
-<tr><td>98dci4-clu-2023 (fleet)</td><td>28.4–33.6</td><td>this change, initialize</td><td>11.46, 13.10, 10.72, 11.98, 12.77</td><td>11.98</td></tr>
-<tr><td>98dci4-clu-2023 (fleet)</td><td>30.0–32.2</td><td>this change, <code>serve --help</code></td><td>1.83, 0.59</td><td>1.83</td></tr>
+<tr><td>98dci4-clu-3141 (all_debug)</td><td>4.67–5.07</td><td>base, initialize</td><td>8.06, 7.40, 7.14, 7.25, 7.25</td><td>7.25</td></tr>
+<tr><td>98dci4-clu-3141 (all_debug)</td><td>4.75–5.06</td><td>this change, initialize</td><td>3.54, 3.34, 3.71, 3.16, 3.18</td><td>3.34</td></tr>
+<tr><td>98dci4-clu-3141 (all_debug)</td><td>4.97–5.52</td><td>base, <code>serve --help</code></td><td>5.95, 5.58, 6.27, 5.69, 5.69</td><td>5.69</td></tr>
+<tr><td>98dci4-clu-3141 (all_debug)</td><td>5.31</td><td>this change, <code>serve --help</code></td><td>0.35, 0.13, 0.13, 0.13, 0.13</td><td>0.13</td></tr>
+<tr><td>98dci4-clu-2023 (fleet)</td><td>48.5–49.0</td><td>base, initialize</td><td>33.99, 35.88</td><td>35.88</td></tr>
+<tr><td>98dci4-clu-2023 (fleet)</td><td>28.3–32.3</td><td>this change, initialize</td><td>11.71, 10.46, 9.87, 10.86, 10.46</td><td>10.46</td></tr>
 </tbody>
 </table>
-<p>Every run spawns the server from the committed <code>.mcp.json</code> recipe, rewritten only for its <code>--project</code> argument so each arm resolves its own tree. Records: <a href="/imas-codex/evidence/fragments/serve-answers-inside-the-connect-limit/startup-timings.json">startup-timings.json</a>; the timing script is <a href="/imas-codex/evidence/fragments/serve-answers-inside-the-connect-limit/startup-timing-run.py">startup-timing-run.py</a>.</p>
+<p>The five fleet-node starts after the change were re-measured on a settled node: an earlier five, taken at a load average of 37–48, produced one 15.61 s start and a 13.14 s median. Every run spawns the server from the committed <code>.mcp.json</code> recipe, rewritten only for its <code>--project</code> argument so each arm resolves its own tree. Records: <a href="/imas-codex/evidence/fragments/serve-answers-inside-the-connect-limit/startup-timings.json">startup-timings.json</a>; the timing script is <a href="/imas-codex/evidence/fragments/serve-answers-inside-the-connect-limit/startup-timing-run.py">startup-timing-run.py</a>.</p>
 
 <h3 id="saicl-lazy-command-group-control">The control, failing at the base revision</h3>
-<p>Two tests were added. <code>test_help_imports_no_command_module</code> asserts that <code>imas-codex --help</code> exits with no command module in <code>sys.modules</code>. <code>test_initialize_path_imports_only_the_serve_command</code> resolves <code>serve</code> through the group, builds the object that answers <code>initialize</code>, and asserts that no other command module and not <code>litellm</code> was imported. Both pass in this tree (21 passed across the two touched test files, 64 passed across <code>tests/test_cli.py</code> and <code>tests/core/test_cli.py</code>). Run against the base tree they fail, and their own output names the cause:</p>
-<blockquote id="saicl-lazy-command-group-control-output"><code>AssertionError: ['imas_codex.cli.compute', 'imas_codex.cli.config_cli', … 'imas_codex.cli.tunnel']</code> and <code>AssertionError: litellm imported</code> — 2 failed.</blockquote>
-<p>The tool list is unchanged in each of the three serve modes: 38 tools by default, 31 read-only, 15 DD-only, identical by name to the base revision.</p>
+<p>Three tests were added. <code>test_help_imports_no_command_module</code> asserts that <code>imas-codex --help</code> exits with no command module in <code>sys.modules</code>. <code>test_initialize_path_imports_no_command_module_or_schema_runtime</code> resolves <code>serve</code> through the group, builds the object that answers <code>initialize</code>, and asserts that no other command module and not <code>litellm</code> was imported; in its warm-up-suppressed arm it additionally asserts that neither <code>imas_codex.graph</code> nor <code>linkml_runtime</code> is in <code>sys.modules</code>. The suppressed arm exists because with the background warm-up running those modules legitimately arrive from its threads; the arm that runs the warm-up therefore asserts the command and client part only, and both arms must pass.</p>
+<p>Against the base tree all three fail, 3 failed, and their own output names the cause:</p>
+<blockquote id="saicl-lazy-command-group-control-output"><code>AssertionError: ['imas_codex.cli.compute', 'imas_codex.cli.config_cli', … 'imas_codex.cli.tunnel']</code> and <code>AssertionError: litellm imported</code>. A separate probe of the base tree with the warm-up stubbed shows the schema runtime arriving on the same path: <code>['imas_codex.graph._ensure_models', …, 'imas_codex.graph.schema', 'linkml_runtime', 'imas_codex.graph.schema_context_data']</code>. In this tree the same probe is empty.</blockquote>
+<p id="saicl-lazy-command-group-guard-runs">The guard gives the same verdict on ten consecutive runs in each warm-up state — ten in fresh interpreters and ten with <code>imas_codex.llm.server</code> pre-imported so the warm-up has already started — 20 of 20 passing both arms. The twenty runs were launched concurrently, which stresses the race rather than hiding it, and that approach found one: an earlier cold run failed with <code>dictionary changed size during iteration</code> because the guard walked <code>sys.modules</code> while the warm-up threads imported into it. The guard now snapshots the keys first. Records: <a href="/imas-codex/evidence/fragments/serve-answers-inside-the-connect-limit/guard-verdicts.json">guard-verdicts.json</a>.</p>
+<p>The tool list is unchanged in each of the three serve modes: 38 tools by default, 31 read-only, 15 DD-only, identical by name to the base revision, asserted by <code>test_tool_names_per_serve_mode</code>.</p>
 </section>
