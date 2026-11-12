@@ -1,0 +1,38 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T05:46:11.278Z",
+  "dispatched_at": "2026-11-12T05:39:40Z",
+  "findings": [],
+  "plan_commit": "d8a424a51a2aca159d6bc3625a27fe5ccf2771ed",
+  "plan_fingerprint": "55f2424f070016626a83a849c5ad97b16ad225ece23abde16331ceeb70e15ed1",
+  "plan_slug": "sn-definitions-by-construction",
+  "plan_version": 2,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T053801539782-plan-review-of-sn-definitions-by-construction",
+  "reviewed_blob_sha": "c88635b689126d87ba51437dfdc222f042bf4621",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the snapshot is identical to HEAD's plan file; the cited evidence files, docs/plans/sn-domain-per-family.html#s3 and the 279 batch entries in sib-consistency-batches.json all resolve.",
+    "done_when": "pass \u2014 every section names a control that can fail: \u00a72 a planted divergent family and a planted altered shared part, \u00a73 a planted equal-spelling pair plus a planted dimension mismatch and a planted clean pair, \u00a75 an 80 %/10 % threshold on held-out labels plus a planted normalised quantity, \u00a76 a family planted divergent after the pass, \u00a77 a catalog planted with each of the four defects; \u00a74's read-only census is controlled by a blind second reader and the ten \u00a71 names.",
+    "evidence_paths": "pass \u2014 the new comment cites docs/evidence/fragments/sn-definitions-by-construction/published-registry-conformance.txt, which exists beside its run script, and \u00a72\u2013\u00a77 commit their censuses and gate logs under the same directory rather than a scratch path.",
+    "naming": "pass \u2014 the changed lines introduce no plan labels, stage names, ticket numbers or version tags into symbols or comments; plan-version 2 and the decision timestamps are document metadata.",
+    "reasoning": "pass \u2014 \u00a71's figures re-check against the three committed censuses (32/49/23 operators, 8 flux-surface-average notation forms, 14/32, 15/49, 13/23, 20 families / 281 members / 14 fully divergent, 279 batches); the new \u00a71 comment's counts (548, 150, 16, 13, 12, 30, 243) reproduce in published-registry-conformance.txt and its \"does not reach the export\" claim holds because export.py's gate set contains no conformance gate; the population decision's cited evidence holds, since core_profiles puts neutrals in a separate container and sums ion charge states within the ion one; and no section prescribes a code path, step sequence or formula.",
+    "single_goal": "pass \u2014 the changed unit adds no deliverable; each of \u00a72\u2013\u00a77 still carries one.",
+    "wiring": "pass \u2014 plan-section-depends-on now declares s5 waiting on s4, which matches \u00a75's done-when measuring on \u00a74's labelled names; s6 on s2\u2013s5 and s7 on s6 plus sn-domain-per-family#s3 also resolve."
+  },
+  "section_digests": {
+    "_document": "c299db3e965ab12a879a63c1d08865a56963dde7744eeb490bdc0a47f1b3edb9",
+    "s1": "9adbcbc148d1c43c1c6c08859f48ed5e98950e523c8148ecb0cb80857fdec8f7",
+    "s2": "bc275f27e23217127807d45fee0e9977f7c8b5800d01c20a34d8ade145799bea",
+    "s3": "e7694a6e595ff66ba52afcef8b2834d1537611dc87ef79213c7cfc23804a2f67",
+    "s4": "4dc4334fea0840530cdd38b8cfddcca3584bf0feba4ae6118abddc72878b5ede",
+    "s5": "87e587eb4a25dafd61a783961966692c2c164331ce6bd9b665b27bf3ec18c746",
+    "s6": "ef84a3d62e01937f14f0a28e69e1b486a4adb24d35e86da9d7d3d5b244b9b7e6",
+    "s7": "3bf8397e4c0fcbca018b6aee9f5b466ded384549e74817c22de7ef17c95be780"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T06:00:47.504040+00:00",
+  "total": null
+}
