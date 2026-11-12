@@ -4400,6 +4400,64 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "b71f496012869c0fa547b5be778e04828d530532",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 4322,
+    "scratch_host": "98dci4-clu-2023.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261112T021115157173-sdpf-family-decision",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 4322,
+        "path": "/tmp/reckon-crew-scratch/r-20261112T021115157173-sdpf-family-decision"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 1,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "dirty",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [
+            " M tests/standard_names/test_family_domain_decision.py"
+          ],
+          "head": "b71f496012869c0fa547b5be778e04828d530532",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdpf-family-decision",
+          "reclaimable": false,
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:534ff6dfb5fe73983d952a22dbffa3325891204828972c698fa22facbb7e7836",
+          "status_entries": [
+            {
+              "code": " M",
+              "path": "tests/standard_names/test_family_domain_decision.py"
+            }
+          ],
+          "withheld": "uncommitted changes in the worktree; commit or discard them, and nothing reclaims a worktree holding work that exists nowhere else"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_withheld": "uncommitted changes in the worktree; commit or discard them, and nothing reclaims a worktree holding work that exists nowhere else"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],
