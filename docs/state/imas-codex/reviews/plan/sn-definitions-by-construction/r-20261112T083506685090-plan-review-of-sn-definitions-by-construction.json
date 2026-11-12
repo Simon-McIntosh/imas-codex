@@ -25,7 +25,30 @@
   "plan_slug": "sn-definitions-by-construction",
   "plan_version": 8,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "1f83ca4e2eb25922b620b279006e7ee19a7ecee7",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a72 now names the pipeline's documentation review as the judge and states that the section's own conformance check does not stand in for it",
+      "reason": "",
+      "when": "2026-11-12T09:12:27.245818+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "1f83ca4e2eb25922b620b279006e7ee19a7ecee7",
+      "commit_basis": "edit",
+      "note": "\u00a72 now names the pipeline's documentation review as the judge and states that the section's own conformance check does not stand in for it",
+      "reason": "",
+      "when": "2026-11-12T09:12:27.245818+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-definitions-by-construction/r-20261112T083506685090-plan-review-of-sn-definitions-by-construction.json",
   "review_run_id": "r-20261112T083506685090-plan-review-of-sn-definitions-by-construction",
   "reviewed_blob_sha": "8246aade312439012efa819b842c735487972fa2",
   "rubric": "content",
