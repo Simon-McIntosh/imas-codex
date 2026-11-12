@@ -1,0 +1,38 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T11:36:56.377Z",
+  "dispatched_at": "2026-11-12T11:32:38Z",
+  "findings": [],
+  "plan_commit": "b7aadf360c7ed7fec853060f40655af695f541e3",
+  "plan_fingerprint": "61903ee6caec7e44d0ed81a7181edeb87eed6d950e77cd71113f77d58ac33d62",
+  "plan_slug": "sn-definitions-by-construction",
+  "plan_version": 17,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T113130697221-plan-review-of-sn-definitions-by-construction",
+  "reviewed_blob_sha": "d7a1e312fcab568b6aeaef6230af68b2f4222971",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the evidence directory and each file named in \u00a72, \u00a71 and the records resolve in the repository, `sn-domain-per-family.html` carries the `s3` \u00a77 depends on, and \u00a75's `data-links` target `sn-definitions-by-construction#s4` resolves in the same document.",
+    "done_when": "pass \u2014 \u00a72 states seven measures over the five named operators, a five-member species family, the committed wording census, the altered-shared-part write read back, the documentation-review control of ten names, cost per family member, and a committed gate log; the census bullet carries its own negative control (\"counts more than one on a family planted with a divergent member\") and the altered-part bullet can fail on the defect it names, since a stored text equal to the model's altered sentence is exactly what it forbids.",
+    "evidence_paths": "pass \u2014 the wording census and the gate log sit under the repository's `docs/evidence/fragments/sn-definitions-by-construction/` directory (verified present, with `published-operator-census.txt`, `published-family-census.txt`, `published-registry-conformance.txt`, `published-unit-census.txt`, `name-definition-labels.json`), and the gate is named for a compute partition, so nothing durable is placed in a node-local temporary path.",
+    "naming": "pass \u2014 \u00a72's text carries no plan label, stage name, ticket number or version tag into a symbol, filename or comment, and the only plan-to-plan reference in the document (`sn-catalog-consistency` \u00a72, \u00a71 line 51) is prose about a plan, not a name carried into code.",
+    "reasoning": "pass \u2014 the changed bullet now states the guarantee as what is stored (\"the settled wording, or nothing\"), which is the outcome the pipeline can actually be read-back checked on, and it sits consistently beside \u00a72's earlier statement that departures are reported as a further class of the documentation conformance findings the writer already acts on: \u00a71's own explanation of the eight recorded forms (the writer restates the canonical equation and the existing check passes all but one variant) supports that the path acts on the class it raises, so the root cause and the evidence agree, the measure can fail, and no code path, step sequence or function is prescribed.",
+    "single_goal": "pass \u2014 \u00a72 has one deliverable, the shared parts rendered from one stored wording; the review-control and cost bullets are evidence that the render did not degrade the definitions or cost more, not second deliverables.",
+    "wiring": "pass \u2014 `plan-section-depends-on` declares s5 on s4, s6 on s2\u2013s5 and s7 on s6 plus `sn-domain-per-family#s3`, and that plan carries an `s3` anchor, so every declared target resolves and \u00a72's consumers are ordered behind it."
+  },
+  "section_digests": {
+    "_document": "c299db3e965ab12a879a63c1d08865a56963dde7744eeb490bdc0a47f1b3edb9",
+    "s1": "9adbcbc148d1c43c1c6c08859f48ed5e98950e523c8148ecb0cb80857fdec8f7",
+    "s2": "f8453331438ca2b94cc1d4c5968e8649aab7b936c8e32d6403f3e0320feb67c7",
+    "s3": "e7694a6e595ff66ba52afcef8b2834d1537611dc87ef79213c7cfc23804a2f67",
+    "s4": "4dc4334fea0840530cdd38b8cfddcca3584bf0feba4ae6118abddc72878b5ede",
+    "s5": "87e587eb4a25dafd61a783961966692c2c164331ce6bd9b665b27bf3ec18c746",
+    "s6": "ef84a3d62e01937f14f0a28e69e1b486a4adb24d35e86da9d7d3d5b244b9b7e6",
+    "s7": "3bf8397e4c0fcbca018b6aee9f5b466ded384549e74817c22de7ef17c95be780"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T11:55:35.156932+00:00",
+  "total": null
+}
