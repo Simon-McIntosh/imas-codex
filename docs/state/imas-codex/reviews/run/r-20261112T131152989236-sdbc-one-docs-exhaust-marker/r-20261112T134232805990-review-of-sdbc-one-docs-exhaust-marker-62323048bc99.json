@@ -1,0 +1,52 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run records no baseline arm, so no base-to-head difference was taken; its head gate log (~/.cache/imas-codex-sdbc-one-docs-exhaust-marker/gate.log) reports 113 passed and 0 failed at 62323048b, so no failing test exists at the head to attribute to this change",
+  "call_sites": [
+    "imas_codex/standard_names/worker_tasks/worker_generate_docs.py:1031",
+    "imas_codex/standard_names/worker_tasks/worker_refine_docs.py:396"
+  ],
+  "completed_at": "2026-11-12T13:52:24.297Z",
+  "dispatched_at": "2026-11-12T13:44:50Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_docs_exhaust_marker.py",
+      "id": "f2095b61762",
+      "line": 25,
+      "severity": "non-blocking",
+      "text": "`_FakeGraphClient` duplicates `RecordingGraphClient` in tests/recording_graph_client.py:21, which documents the identical capability (`calls` holds one (cypher, params) pair per query, the answer is an empty list) and is imported by eight suites; `_FakeServices.GraphClient` could return that owner instead of a second recorder."
+    },
+    {
+      "file": "tests/standard_names/test_docs_exhaust_marker.py",
+      "id": "f709ed8899d",
+      "line": 89,
+      "severity": "non-blocking",
+      "text": "the parameter assertions at lines 89, 90 and 93 compare the values the test itself passed in (sn_id, token, error_msg) against what the marker handed back, so they hold for any passthrough implementation and cannot fail on a wrong value; the statement-substring assertions above them carry the guard."
+    },
+    {
+      "file": "tests/standard_names/test_docs_exhaust_marker.py",
+      "id": "f6c818ff7a6",
+      "line": 48,
+      "severity": "non-blocking",
+      "text": "`_marker(**kwargs)` accepts keyword arguments and silently discards them, so a caller passing a misspelled or unwanted argument sees it vanish instead of raising."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is that both documentation writers mark a name docs-exhausted through one function whose query a test exercises; at 62323048b `imas_codex/standard_names/graph_store/graph_claim_release.py:1230` is that one function and `git grep \"docs_stage = 'exhausted'\"` over imas_codex/ returns exactly one production hit, at graph_claim_release.py:1255.\nVERDICT done_when: the done_when asks for one owner plus a client-boundary test per stage plus four mutation reds plus a terminal-state test red by its own assertion; tests/standard_names/test_docs_exhaust_marker.py:57 and :125 read the statement and parameters for each stage, and the four negative-control logs each redden the named assertion.\nVERDICT write_paths: the node declared eight paths; the landed commit 62323048b touches worker_generate_docs.py:1031, worker_refine_docs.py:396, tests/standard_names/test_docs_exhaust_marker.py and tests/standard_names/test_refine_docs_settled_wording.py:81, all inside them.\nVERDICT manifest: read; status is `complete`, negative_control_log is a bare path, tests carries the literal command, and test_logs names six logs whose gate.log header records revision 62323048b and ends with a bare EXIT=0.\nVERDICT diff: read 62323048b against its base ac31a3fc3 commit by commit: two `services=get_services()` additions with their deferred imports, one `@pytest.mark.timeout(120)` marker, and the new 216-line test; the refactor itself (single owner, copy removed) is in the inherited base commit ac31a3fc3.\nCALL_SITES: imas_codex/standard_names/worker_tasks/worker_generate_docs.py:1031, imas_codex/standard_names/worker_tasks/worker_refine_docs.py:396\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/graph_store/graph_claim_release.py:1230 is the only definition and graph_claim_release.py:1255 the only copy of the transition's query in the package.\nSCORE evidence: 18\nJUSTIFICATION evidence: the gate log at ~/.cache/imas-codex-sdbc-one-docs-exhaust-marker/gate.log records revision 62323048b, `113 passed` and a final `EXIT=0`, and each of the four mutation logs reddens the assertion its mutation names.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in 62323048b sits inside the manifest's declared write paths, and the timeout bump at tests/standard_names/test_refine_docs_settled_wording.py:81 is the one the brief sanctions.\nSCORE durability: 18\nJUSTIFICATION durability: tests/standard_names/test_docs_exhaust_marker.py:203 fails with `the <writer> writer did not reach the docs-exhaust marker` if either call site drops its services handle, and the four mutation logs show the statement assertions reddening.\nSCORE fit: 17\nJUSTIFICATION fit: the call sites use the deferred `get_services()` import idiom already used at imas_codex/standard_names/worker_tasks/worker_compose_batches.py:69, and no added name carries a plan or ticket label.\nSCORE reuse: 5\nJUSTIFICATION reuse: tests/standard_names/test_docs_exhaust_marker.py:25 re-implements the recorder that tests/recording_graph_client.py:21 already owns and eight suites import.\nFINDING tests/standard_names/test_docs_exhaust_marker.py:25 non-blocking: `_FakeGraphClient` duplicates `RecordingGraphClient` in tests/recording_graph_client.py:21, which documents the identical capability (`calls` holds one `(cypher, params)` pair per query and the answer is an empty list) and is imported by eight suites; `_FakeServices.GraphClient` could return that owner instead of a second recorder.\nFINDING tests/standard_names/test_docs_exhaust_marker.py:89 non-blocking: the parameter assertions at lines 89, 90 and 93 compare the values the test itself passed in (`sn_id`, `token`, `error_msg`) against what the marker handed back, so they hold for any passthrough implementation and cannot fail on a wrong value; the statement-substring assertions above them carry the guard.\nFINDING tests/standard_names/test_docs_exhaust_marker.py:48 non-blocking: `_marker(**kwargs)` accepts keyword arguments and silently discards them, so a future caller that passes a misspelled or unwanted argument sees it vanish instead of raising.\n",
+  "review_run_id": "r-20261112T134232805990-review-of-sdbc-one-docs-exhaust-marker-62323048bc99",
+  "reviewed_base_sha": "ac31a3fc3dff13531c21585b4a23dc1da5ce8bdf",
+  "reviewed_head_sha": "62323048bc99d165ac7f2b8344702a7ad51e02c2",
+  "reviewed_run_id": "r-20261112T131152989236-sdbc-one-docs-exhaust-marker",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T14:16:58.896809+00:00",
+  "total": 96
+}
