@@ -33,7 +33,30 @@
   "plan_slug": "sn-domain-per-family",
   "plan_version": 12,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "11a84b946514102f6698a2529bab9d23fa1f9e74",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a75's second bullet now compares the share of member names, the same share \u00a72 reads, on the same families",
+      "reason": "",
+      "when": "2026-11-12T09:34:51.942021+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "11a84b946514102f6698a2529bab9d23fa1f9e74",
+      "commit_basis": "edit",
+      "note": "\u00a75's second bullet now compares the share of member names, the same share \u00a72 reads, on the same families",
+      "reason": "",
+      "when": "2026-11-12T09:34:51.942021+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-domain-per-family/r-20261112T091255384431-plan-review-of-sn-domain-per-family.json",
   "review_run_id": "r-20261112T091255384431-plan-review-of-sn-domain-per-family",
   "reviewed_blob_sha": "34c860efae4baa96597b340d0943d6e48314db6d",
   "rubric": "content",
