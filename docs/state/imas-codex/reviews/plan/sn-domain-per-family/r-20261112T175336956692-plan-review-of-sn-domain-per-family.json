@@ -35,6 +35,16 @@
       "note": "Section 5 now names the listing: the 24 families the chosen option set leaves undecided, in docs/evidence/fragments/sn-domain-per-family/widened-options.json, which the section's node commits.",
       "reason": "",
       "when": "2026-11-12T18:17:08.685077+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "68dc7c24382956755071c13c8009035be444dcb4",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "Section 3 now states the same rule: the 2026-11-12 ruling is the recorded correction for every family section 5 lists, its read-back excuses those families, and only an undecided family outside that listing goes to the lead.",
+      "reason": "",
+      "when": "2026-11-12T18:17:28.290901+00:00"
     }
   ],
   "responses": {
@@ -46,6 +56,15 @@
       "note": "Section 5 now names the listing: the 24 families the chosen option set leaves undecided, in docs/evidence/fragments/sn-domain-per-family/widened-options.json, which the section's node commits.",
       "reason": "",
       "when": "2026-11-12T18:17:08.685077+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "68dc7c24382956755071c13c8009035be444dcb4",
+      "commit_basis": "edit",
+      "note": "Section 3 now states the same rule: the 2026-11-12 ruling is the recorded correction for every family section 5 lists, its read-back excuses those families, and only an undecided family outside that listing goes to the lead.",
+      "reason": "",
+      "when": "2026-11-12T18:17:28.290901+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-domain-per-family/r-20261112T175336956692-plan-review-of-sn-domain-per-family.json",
