@@ -101,6 +101,16 @@
     in <code>legacy_authority.py</code>, and the rule reports that site. Gate
     logs are under <code>~/.cache/imas-codex-s19/</code>.
   </p>
+  <p>
+    The reachable test files (the boundary rule plus the files exercising the
+    five exported names, the six closed imports and the edited modules) pass at
+    both heads with no failure: 710 passed at this head against 709 passed and
+    1 skipped at <code>6f9eb556</code>, the extra pass being the new rule. No
+    test id fails at either head, so the delta is zero. The whole of
+    <code>tests/standard_names</code> was started at both heads but not
+    completed within this node's time fence; the focused gate above is the
+    selected one, per the repository's gate-from-what-changed policy.
+  </p>
 </section>
 </body>
 </html>
