@@ -35,9 +35,22 @@
       "note": "the opening paragraph now says the landed decision already files safety_factor and greenwald_density at the readers domain, and that source-bounded options fail only where no source lives in the concept domain",
       "reason": "",
       "when": "2026-11-12T13:16:54.332695+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "finding": "done_when-1",
+      "reason": "both arms are measured in one run on the same 35 families, so whatever rule the node applies to a family left below the floor applies to both arms and the comparison stays like for like; the node records the rule it used",
+      "when": "2026-11-12T13:18:05.683631+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "declined",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "reason": "both arms are measured in one run on the same 35 families, so whatever rule the node applies to a family left below the floor applies to both arms and the comparison stays like for like; the node records the rule it used",
+      "when": "2026-11-12T13:18:05.683631+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
