@@ -537,6 +537,14 @@ checks:
   - documentation
   retrieval: false
   audit_finding_class: locus_definition
+- id: definition_states_qualifier_name_lacks
+  axis: docs
+  dimension: physics_accuracy
+  evidence_fields:
+  - description
+  - documentation
+  retrieval: false
+  audit_finding_class: name_definition_disagreement
 - id: template_note
   axis: docs
   dimension: documentation_quality

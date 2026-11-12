@@ -1,0 +1,2833 @@
+{
+ "schema": "name-definition-check",
+ "check": {
+  "id": "definition_states_qualifier_name_lacks",
+  "implementation": "imas_codex.standard_names.audits.name_definition_agreement_check",
+  "reads": "description, documentation, name",
+  "calls_a_model": false
+ },
+ "labels": {
+  "path": "docs/evidence/fragments/sn-definitions-by-construction/name-definition-labels.json",
+  "produced_by": "one reader, reading name, description, documentation and unit together; no pipeline judge, review check or decide_batch produced any label",
+  "labelled_total": 381,
+  "mismatched_under_ruling": 71,
+  "second_reading": {
+   "path": "docs/evidence/fragments/sn-name-definition-second-reading/labels.json",
+   "produced_by": "a separate reader, with no sight of this record's labels, and told the species-population ruling before it read",
+   "status": "met",
+   "exact_class_agreement_under_ruling": 45,
+   "joined": 60
+  }
+ },
+ "split": {
+  "seed": 7714,
+  "development_share": 0.3333333333333333,
+  "development_names": 127,
+  "held_out_names": 254,
+  "shaped_on": "development third only; held-out rows' labels were not read before the rule set was frozen"
+ },
+ "development_arm": {
+  "names": 127,
+  "mismatched": 24,
+  "mismatched_found": 21,
+  "recall": 0.875,
+  "agreeing": 103,
+  "agreeing_flagged": 7,
+  "false_flag_rate": 0.068,
+  "mismatched_missed": [
+   {
+    "name": "deuterium_deuterium_emissivity_due_to_fusion",
+    "pattern": "energy-channel"
+   },
+   {
+    "name": "volume_averaged_ion_density",
+    "pattern": "parent"
+   },
+   {
+    "name": "total_trapped_particle_density",
+    "pattern": "parent"
+   }
+  ],
+  "agreeing_flagged_names": [
+   {
+    "name": "tritium_density",
+    "families": [
+     "unstated-aggregation"
+    ]
+   },
+   {
+    "name": "triangularity_of_flux_surface",
+    "families": [
+     "unstated-normalisation"
+    ]
+   },
+   {
+    "name": "inverse_of_square_of_major_radius",
+    "families": [
+     "unstated-aggregation"
+    ]
+   },
+   {
+    "name": "displacement_of_passive_structure",
+    "families": [
+     "unstated-relative-reference"
+    ]
+   },
+   {
+    "name": "current_density_due_to_bootstrap_current_drive",
+    "families": [
+     "abstract-parent-as-quantity"
+    ]
+   },
+   {
+    "name": "magnetic_shear_at_internal_transport_barrier",
+    "families": [
+     "unstated-normalisation"
+    ]
+   },
+   {
+    "name": "poloidal_beta",
+    "families": [
+     "unstated-aggregation"
+    ]
+   }
+  ]
+ },
+ "held_out_arm": {
+  "names": 254,
+  "mismatched": 47,
+  "mismatched_found": 14,
+  "recall": 0.298,
+  "agreeing": 207,
+  "agreeing_flagged": 11,
+  "false_flag_rate": 0.053,
+  "mismatched_missed": [
+   {
+    "name": "voltage_of_mass_spectrometer",
+    "pattern": "device-part"
+   },
+   {
+    "name": "radial_ion_charge_state_energy_diffusion_coefficient",
+    "pattern": "norm"
+   },
+   {
+    "name": "parallel_peak_launched_refractive_index_of_lower_hybrid_antenna",
+    "pattern": "res-selection"
+   },
+   {
+    "name": "parallel_counter_passing_fast_particle_pressure",
+    "pattern": "weight"
+   },
+   {
+    "name": "density_at_pedestal_maximum",
+    "pattern": "locus"
+   },
+   {
+    "name": "area_of_flux_loop",
+    "pattern": "effective"
+   },
+   {
+    "name": "electron_source_rate_due_to_surface_emission",
+    "pattern": "eq-electron-weight"
+   },
+   {
+    "name": "current_due_to_fusion_reactions",
+    "pattern": "res-direction"
+   },
+   {
+    "name": "surface_emissivity",
+    "pattern": "spectral-band"
+   },
+   {
+    "name": "flux_surface_averaged_toroidal_current_density",
+    "pattern": "weight"
+   },
+   {
+    "name": "turns_per_metre_of_rogowski_coil",
+    "pattern": "layer-scope"
+   },
+   {
+    "name": "total_heating_power_due_to_fusion_reactions",
+    "pattern": "aggregation"
+   },
+   {
+    "name": "radius_of_neutral_beam_injector",
+    "pattern": "device-part"
+   },
+   {
+    "name": "neutral_internal_state_energy_flux_at_wall",
+    "pattern": "energy-channel"
+   },
+   {
+    "name": "per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field_amplitude",
+    "pattern": "weight"
+   },
+   {
+    "name": "alfven_frequency",
+    "pattern": "complex-angular"
+   },
+   {
+    "name": "current_weighted_average_external_magnetic_flux",
+    "pattern": "parent"
+   },
+   {
+    "name": "flux_at_limiter",
+    "pattern": "parent"
+   },
+   {
+    "name": "momentum",
+    "pattern": "parent"
+   },
+   {
+    "name": "electron_torque_density_due_to_collisions",
+    "pattern": "parent"
+   },
+   {
+    "name": "power_density_due_to_collisions",
+    "pattern": "parent"
+   },
+   {
+    "name": "density_at_magnetic_axis",
+    "pattern": "parent"
+   },
+   {
+    "name": "particle_diffusivity",
+    "pattern": "parent"
+   },
+   {
+    "name": "particle_density",
+    "pattern": "parent"
+   },
+   {
+    "name": "trapped_fast_particle_pressure",
+    "pattern": "parent"
+   },
+   {
+    "name": "particle_velocity_due_to_convection",
+    "pattern": "parent"
+   },
+   {
+    "name": "radiated_power_of_breeder_blanket_module",
+    "pattern": "parent"
+   },
+   {
+    "name": "torque_density",
+    "pattern": "parent"
+   },
+   {
+    "name": "field_line_length",
+    "pattern": "narrower-object"
+   },
+   {
+    "name": "maximum_of_back_surface_neutron_flux",
+    "pattern": "narrower-object"
+   },
+   {
+    "name": "energy_of_detector_pixel",
+    "pattern": "narrower-object"
+   },
+   {
+    "name": "focal_length_of_line_of_sight",
+    "pattern": "narrower-object"
+   },
+   {
+    "name": "radius_of_detector",
+    "pattern": "narrower-object"
+   }
+  ],
+  "agreeing_flagged_names": [
+   {
+    "name": "inverse_of_square_of_magnetic_field_magnitude",
+    "families": [
+     "unstated-aggregation"
+    ]
+   },
+   {
+    "name": "hard_xray_brightness",
+    "families": [
+     "unstated-normalisation"
+    ]
+   },
+   {
+    "name": "perpendicular_refractive_index",
+    "families": [
+     "unstated-normalisation"
+    ]
+   },
+   {
+    "name": "toroidal_magnetic_flux_due_to_diamagnetic_drift",
+    "families": [
+     "unstated-relative-reference"
+    ]
+   },
+   {
+    "name": "toroidal_ion_charge_state_momentum_source",
+    "families": [
+     "unstated-normalisation"
+    ]
+   },
+   {
+    "name": "accumulated_tritium_count_due_to_gas_injection",
+    "families": [
+     "equivalent-electron-count"
+    ]
+   },
+   {
+    "name": "tungsten_density_at_separatrix",
+    "families": [
+     "unstated-aggregation"
+    ]
+   },
+   {
+    "name": "volume_averaged_effective_charge",
+    "families": [
+     "unstated-normalisation"
+    ]
+   },
+   {
+    "name": "fast_particle_torque_due_to_j_cross_b_force",
+    "families": [
+     "unstated-integration"
+    ]
+   },
+   {
+    "name": "toroidal_fast_ion_charge_state_torque_due_to_collisions",
+    "families": [
+     "unstated-integration"
+    ]
+   },
+   {
+    "name": "toroidal_neon_velocity_at_plasma_boundary",
+    "families": [
+     "unstated-aggregation"
+    ]
+   }
+  ]
+ },
+ "readers_disagree": {
+  "names_scored": 15,
+  "flagged": [
+   "current_density_due_to_bootstrap_current_drive",
+   "pulse_duration"
+  ]
+ },
+ "catalog_arm": {
+  "catalog_path": "/home/ITER/mcintos/Code/imas-standard-names-catalog/standard_names",
+  "published_names": 1975,
+  "flagged": 206,
+  "by_family": {
+   "abstract-parent-as-quantity": 4,
+   "equivalent-electron-count": 65,
+   "unstated-aggregation": 48,
+   "unstated-integration": 38,
+   "unstated-normalisation": 38,
+   "unstated-relative-reference": 9,
+   "unstated-restriction": 4,
+   "vector-for-scalar": 2
+  },
+  "names": [
+   {
+    "name": "fast_electron_absorbed_wave_power_density",
+    "file": "auxiliary_heating.yml",
+    "unit": "W.m^-3",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'flux-surface-averaged', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "fast_ion_charge_state_absorbed_wave_power",
+    "file": "auxiliary_heating.yml",
+    "unit": "W",
+    "families": [
+     "unstated-integration"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-integration: definition states 'Volume-integrated', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "ion_charge_state_power",
+    "file": "auxiliary_heating.yml",
+    "unit": "W",
+    "families": [
+     "unstated-integration"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-integration: definition states 'Volume-integrated', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "per_toroidal_mode_fast_electron_power_density",
+    "file": "auxiliary_heating.yml",
+    "unit": "W.m^-3",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'flux-surface average', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "per_toroidal_mode_thermal_ion_power_density",
+    "file": "auxiliary_heating.yml",
+    "unit": "W.m^-3",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'flux-surface average', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "thermal_ion_absorbed_wave_power_density",
+    "file": "auxiliary_heating.yml",
+    "unit": "W.m^-3",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'flux-surface average', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "wave_phase_of_antenna_strap",
+    "file": "auxiliary_heating.yml",
+    "unit": "rad",
+    "families": [
+     "unstated-relative-reference"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-relative-reference: definition states 'defined relative to', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "forward_wave_phase_of_ion_cyclotron_heating_antenna",
+    "file": "auxiliary_heating.yml",
+    "unit": "rad",
+    "families": [
+     "unstated-relative-reference"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-relative-reference: definition states 'Relative phase of', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "per_toroidal_mode_fast_ion_power_density",
+    "file": "auxiliary_heating.yml",
+    "unit": "W.m^-3",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'Flux-surface-averaged', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "per_toroidal_mode_thermal_electron_power_density",
+    "file": "auxiliary_heating.yml",
+    "unit": "W.m^-3",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'flux-surface average', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "per_toroidal_mode_thermal_ion_charge_state_power_density",
+    "file": "auxiliary_heating.yml",
+    "unit": "W.m^-3",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'Flux-surface-averaged', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "density_at_plasma_boundary",
+    "file": "edge_plasma_physics.yml",
+    "unit": "m^-3",
+    "families": [
+     "abstract-parent-as-quantity"
+    ],
+    "findings": [
+     "name_definition_disagreement: abstract-parent-as-quantity: definition declares 'intentionally unspecified by this parent' without fixing one quantity"
+    ],
+    "disposition": "hold-from-the-cut"
+   },
+   {
+    "name": "electron_density_at_pedestal_maximum",
+    "file": "edge_plasma_physics.yml",
+    "unit": "m^-3",
+    "families": [
+     "unstated-normalisation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-normalisation: definition states 'normalized', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "electron_density_at_plasma_boundary",
+    "file": "edge_plasma_physics.yml",
+    "unit": "m^-3",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'flux-surface average', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "electron_pressure_over_scrape_off_layer",
+    "file": "edge_plasma_physics.yml",
+    "unit": "Pa",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'Volume-averaged', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "neutral_pressure_over_scrape_off_layer",
+    "file": "edge_plasma_physics.yml",
+    "unit": "Pa",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'Volume-averaged', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "toroidal_neon_velocity_at_plasma_boundary",
+    "file": "edge_plasma_physics.yml",
+    "unit": "m.s^-1",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'flux-surface average', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "toroidal_neutral_state_momentum_source",
+    "file": "edge_plasma_physics.yml",
+    "unit": "kg.m^-1.s^-2",
+    "families": [
+     "unstated-normalisation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-normalisation: definition states 'normalized', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "toroidal_plasma_momentum_at_pedestal_top",
+    "file": "edge_plasma_physics.yml",
+    "unit": "kg.m.s^-1",
+    "families": [
+     "unstated-integration"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-integration: definition states 'volume-integrated', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "parallel_ion_charge_state_energy_diffusion_coefficient",
+    "file": "edge_plasma_physics.yml",
+    "unit": "m^2.s^-1",
+    "families": [
+     "unstated-normalisation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-normalisation: definition states 'normalized', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "parallel_ion_charge_state_momentum_source",
+    "file": "edge_plasma_physics.yml",
+    "unit": "kg.m^-1.s^-2",
+    "families": [
+     "unstated-normalisation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-normalisation: definition states 'normalized', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "parallel_ion_energy_diffusion_coefficient",
+    "file": "edge_plasma_physics.yml",
+    "unit": "m^2.s^-1",
+    "families": [
+     "unstated-normalisation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-normalisation: definition states 'normalized', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "pedestal_thermal_electron_energy",
+    "file": "edge_plasma_physics.yml",
+    "unit": "J",
+    "families": [
+     "unstated-integration"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-integration: definition states 'Volume-integrated', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "pedestal_thermal_ion_energy",
+    "file": "edge_plasma_physics.yml",
+    "unit": "J",
+    "families": [
+     "unstated-integration"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-integration: definition states 'Volume-integrated', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "thermal_ion_energy_diffusion_coefficient",
+    "file": "edge_plasma_physics.yml",
+    "unit": "m^2.s^-1",
+    "families": [
+     "unstated-normalisation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-normalisation: definition states 'normalized', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "toroidal_ion_charge_state_momentum_source",
+    "file": "edge_plasma_physics.yml",
+    "unit": "kg.m^-1.s^-2",
+    "families": [
+     "unstated-normalisation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-normalisation: definition states 'normalized', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "toroidal_neutral_momentum_source",
+    "file": "edge_plasma_physics.yml",
+    "unit": "kg.m^-1.s^-2",
+    "families": [
+     "unstated-normalisation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-normalisation: definition states 'normalized', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "refractive_index",
+    "file": "electromagnetic_wave_diagnostics.yml",
+    "unit": "1",
+    "families": [
+     "vector-for-scalar"
+    ],
+    "findings": [
+     "name_definition_disagreement: vector-for-scalar: definition states 'gradient vector', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "perpendicular_refractive_index",
+    "file": "electromagnetic_wave_diagnostics.yml",
+    "unit": "1",
+    "families": [
+     "unstated-normalisation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-normalisation: definition states 'normalized', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "right_hand_circularly_polarized_wave_electric_field_real_part",
+    "file": "electromagnetic_wave_diagnostics.yml",
+    "unit": "V.m^-1",
+    "families": [
+     "unstated-relative-reference"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-relative-reference: definition states 'defined relative to', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "beta",
+    "file": "equilibrium.yml",
+    "unit": "1",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'volume-averaged', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "inverse_of_square_of_magnetic_field_magnitude",
+    "file": "equilibrium.yml",
+    "unit": "T^-2",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'flux-surface-averaged', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "magnetic_field",
+    "file": "equilibrium.yml",
+    "unit": "T",
+    "families": [
+     "abstract-parent-as-quantity"
+    ],
+    "findings": [
+     "name_definition_disagreement: abstract-parent-as-quantity: definition declares 'unqualified parent quantity' without fixing one quantity"
+    ],
+    "disposition": "hold-from-the-cut"
+   },
+   {
+    "name": "magnetic_flux_due_to_diamagnetic_drift",
+    "file": "equilibrium.yml",
+    "unit": "Wb",
+    "families": [
+     "unstated-relative-reference"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-relative-reference: definition states 'defined relative to', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "magnetic_shear_at_magnetic_axis",
+    "file": "equilibrium.yml",
+    "unit": "1",
+    "families": [
+     "unstated-normalisation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-normalisation: definition states 'normalized', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "poloidal_beta",
+    "file": "equilibrium.yml",
+    "unit": "1",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'volume-averaged', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+    "file": "equilibrium.yml",
+    "unit": "Wb^-1.m^2",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'flux-surface average', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "inverse_of_square_of_major_radius",
+    "file": "equilibrium.yml",
+    "unit": "m^-2",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'flux-surface-averaged', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "toroidal_flux_coordinate_gradient",
+    "file": "equilibrium.yml",
+    "unit": "1",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'flux-surface average', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "flux_surface_averaged_square_of_toroidal_flux_coordinate_gradient_magnitude",
+    "file": "equilibrium.yml",
+    "unit": "1",
+    "families": [
+     "unstated-normalisation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-normalisation: definition states 'normalized', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_magnetic_field_magnitude",
+    "file": "equilibrium.yml",
+    "unit": "T^-2",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'flux-surface average', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "toroidal_magnetic_flux_due_to_diamagnetic_drift",
+    "file": "equilibrium.yml",
+    "unit": "Wb",
+    "families": [
+     "unstated-relative-reference"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-relative-reference: definition states 'relative to a reference', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "triangularity_of_flux_surface",
+    "file": "equilibrium.yml",
+    "unit": "1",
+    "families": [
+     "unstated-normalisation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-normalisation: definition states 'normalized', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "lower_triangularity_of_flux_surface",
+    "file": "equilibrium.yml",
+    "unit": "1",
+    "families": [
+     "unstated-normalisation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-normalisation: definition states 'normalized', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "upper_triangularity_of_flux_surface",
+    "file": "equilibrium.yml",
+    "unit": "1",
+    "families": [
+     "unstated-normalisation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-normalisation: definition states 'normalized', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "accumulated_deuterated_methane_prefill_count",
+    "file": "general.yml",
+    "unit": "1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "accumulated_total_prefill_gas_count",
+    "file": "general.yml",
+    "unit": "1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "deuterated_methane_source_rate",
+    "file": "general.yml",
+    "unit": "s^-1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "neon_density",
+    "file": "general.yml",
+    "unit": "m^-3",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'volume-averaged', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "pulse_duration",
+    "file": "machine_operations.yml",
+    "unit": "s",
+    "families": [
+     "unstated-restriction"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-restriction: one-discharge-phase: definition states 'confined-plasma phase', which the name does not"
+    ],
+    "disposition": "rename"
+   },
+   {
+    "name": "effective_charge",
+    "file": "magnetohydrodynamics.yml",
+    "unit": "1",
+    "families": [
+     "unstated-normalisation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-normalisation: definition states 'normalized', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "perturbed_vacuum_magnetic_field",
+    "file": "magnetohydrodynamics.yml",
+    "unit": "T",
+    "families": [
+     "unstated-relative-reference"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-relative-reference: definition states 'defined relative to', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "perturbed_plasma_magnetic_vector_potential",
+    "file": "magnetohydrodynamics.yml",
+    "unit": "T.m",
+    "families": [
+     "unstated-relative-reference"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-relative-reference: definition states 'relative to a reference', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "neutron_flux_maximum_at_first_wall",
+    "file": "neutronics.yml",
+    "unit": "W.m^-2",
+    "families": [
+     "unstated-restriction"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-restriction: one-module-of-a-system: definition states 'of a breeding-blanket module', which the name does not"
+    ],
+    "disposition": "rename"
+   },
+   {
+    "name": "x_direction_unit_vector_of_neutron_detector",
+    "file": "particle_measurement_diagnostics.yml",
+    "unit": "m",
+    "families": [
+     "unstated-normalisation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-normalisation: definition states 'normalized', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "line_averaged_hydrogen_density",
+    "file": "particle_measurement_diagnostics.yml",
+    "unit": "m^-3",
+    "families": [
+     "unstated-normalisation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-normalisation: definition states 'normalized', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "accumulated_ammonia_count",
+    "file": "plant_systems.yml",
+    "unit": "1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "accumulated_ammonia_deuterated_count",
+    "file": "plant_systems.yml",
+    "unit": "1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "accumulated_argon_count",
+    "file": "plant_systems.yml",
+    "unit": "1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "accumulated_carbon_count_due_to_gas_injection",
+    "file": "plant_systems.yml",
+    "unit": "1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "accumulated_deuterium_count_due_to_gas_injection",
+    "file": "plant_systems.yml",
+    "unit": "1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "accumulated_ethane_count",
+    "file": "plant_systems.yml",
+    "unit": "1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "accumulated_helium_3_count_due_to_gas_injection",
+    "file": "plant_systems.yml",
+    "unit": "1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "accumulated_helium_3_prefill_count_due_to_gas_injection",
+    "file": "plant_systems.yml",
+    "unit": "1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "accumulated_hydrogen_count_due_to_gas_injection",
+    "file": "plant_systems.yml",
+    "unit": "1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "accumulated_hydrogen_prefill_count",
+    "file": "plant_systems.yml",
+    "unit": "1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "accumulated_krypton_count",
+    "file": "plant_systems.yml",
+    "unit": "1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "accumulated_lithium_count_due_to_gas_injection",
+    "file": "plant_systems.yml",
+    "unit": "1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "accumulated_lithium_prefill_count_due_to_gas_injection",
+    "file": "plant_systems.yml",
+    "unit": "1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "accumulated_neon_count",
+    "file": "plant_systems.yml",
+    "unit": "1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "accumulated_nitrogen_count_due_to_gas_injection",
+    "file": "plant_systems.yml",
+    "unit": "1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "accumulated_oxygen_prefill_count_due_to_gas_injection",
+    "file": "plant_systems.yml",
+    "unit": "1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "accumulated_propane_count_due_to_gas_injection",
+    "file": "plant_systems.yml",
+    "unit": "1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "accumulated_silane_count_due_to_gas_injection",
+    "file": "plant_systems.yml",
+    "unit": "1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "accumulated_total_gas_count",
+    "file": "plant_systems.yml",
+    "unit": "1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "accumulated_tritium_count_due_to_gas_injection",
+    "file": "plant_systems.yml",
+    "unit": "1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "accumulated_xenon_count_due_to_gas_injection",
+    "file": "plant_systems.yml",
+    "unit": "1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "accumulated_xenon_prefill_count",
+    "file": "plant_systems.yml",
+    "unit": "1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "ammonia_deuterated_prefill_count",
+    "file": "plant_systems.yml",
+    "unit": "1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "ammonia_deuterated_source_rate",
+    "file": "plant_systems.yml",
+    "unit": "s^-1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "ammonia_prefill_count",
+    "file": "plant_systems.yml",
+    "unit": "1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "ammonia_source_rate",
+    "file": "plant_systems.yml",
+    "unit": "s^-1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "argon_prefill_count",
+    "file": "plant_systems.yml",
+    "unit": "1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "carbon_prefill_count_due_to_gas_injection",
+    "file": "plant_systems.yml",
+    "unit": "1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "deuterium_prefill_count",
+    "file": "plant_systems.yml",
+    "unit": "1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "deuterium_source_rate_due_to_injection",
+    "file": "plant_systems.yml",
+    "unit": "s^-1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "electron_source_rate_due_to_injection",
+    "file": "plant_systems.yml",
+    "unit": "s^-1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "ethane_prefill_count",
+    "file": "plant_systems.yml",
+    "unit": "1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "ethane_source_rate",
+    "file": "plant_systems.yml",
+    "unit": "s^-1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "ethylene_prefill_count",
+    "file": "plant_systems.yml",
+    "unit": "1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "ethylene_source_rate",
+    "file": "plant_systems.yml",
+    "unit": "s^-1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "krypton_prefill_count",
+    "file": "plant_systems.yml",
+    "unit": "1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "methane_carbon_13_source_rate",
+    "file": "plant_systems.yml",
+    "unit": "s^-1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "methane_source_rate",
+    "file": "plant_systems.yml",
+    "unit": "s^-1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "neon_prefill_count",
+    "file": "plant_systems.yml",
+    "unit": "1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "neon_source_rate",
+    "file": "plant_systems.yml",
+    "unit": "s^-1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "nitrogen_prefill_count",
+    "file": "plant_systems.yml",
+    "unit": "1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "nitrogen_source_rate",
+    "file": "plant_systems.yml",
+    "unit": "s^-1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "propane_prefill_count",
+    "file": "plant_systems.yml",
+    "unit": "1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "propane_source_rate",
+    "file": "plant_systems.yml",
+    "unit": "s^-1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "silane_source_rate",
+    "file": "plant_systems.yml",
+    "unit": "s^-1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent\\nelectron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "source_rate_due_to_gas_injection",
+    "file": "plant_systems.yml",
+    "unit": "s^-1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "argon_source_rate_due_to_gas_injection",
+    "file": "plant_systems.yml",
+    "unit": "s^-1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "beryllium_source_rate_due_to_gas_injection",
+    "file": "plant_systems.yml",
+    "unit": "s^-1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "carbon_source_rate_due_to_gas_injection",
+    "file": "plant_systems.yml",
+    "unit": "s^-1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "helium_3_source_rate_due_to_gas_injection",
+    "file": "plant_systems.yml",
+    "unit": "s^-1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "helium_4_source_rate_due_to_gas_injection",
+    "file": "plant_systems.yml",
+    "unit": "s^-1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "hydrogen_source_rate_due_to_gas_injection",
+    "file": "plant_systems.yml",
+    "unit": "s^-1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "krypton_source_rate_due_to_gas_injection",
+    "file": "plant_systems.yml",
+    "unit": "s^-1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "lithium_source_rate_due_to_gas_injection",
+    "file": "plant_systems.yml",
+    "unit": "s^-1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "oxygen_source_rate_due_to_gas_injection",
+    "file": "plant_systems.yml",
+    "unit": "s^-1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "total_lower_gas_source_rate_of_vacuum_vessel_due_to_gas_injection",
+    "file": "plant_systems.yml",
+    "unit": "s^-1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "total_neutral_source_rate_due_to_gas_injection",
+    "file": "plant_systems.yml",
+    "unit": "s^-1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "tritium_source_rate_due_to_gas_injection",
+    "file": "plant_systems.yml",
+    "unit": "s^-1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "xenon_source_rate_due_to_gas_injection",
+    "file": "plant_systems.yml",
+    "unit": "s^-1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "electron_particle_flux_at_wall_due_to_pumping",
+    "file": "plasma_wall_interactions.yml",
+    "unit": "s^-1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "incident_neutral_particle_flux_at_wall",
+    "file": "plasma_wall_interactions.yml",
+    "unit": "s^-1",
+    "families": [
+     "unstated-integration"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-integration: definition states 'wall-integrated', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "total_particle_source_rate_of_divertor_due_to_recycling",
+    "file": "plasma_wall_interactions.yml",
+    "unit": "s^-1",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "angular_width_of_bragg_crystal",
+    "file": "radiation_measurement_diagnostics.yml",
+    "unit": "rad",
+    "families": [
+     "unstated-restriction"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-restriction: one-instrument-class: definition states 'in an X-ray crystal spectrometer', which the name does not"
+    ],
+    "disposition": "rename"
+   },
+   {
+    "name": "deuterium_density",
+    "file": "radiation_measurement_diagnostics.yml",
+    "unit": "m^-3",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'volume-averaged', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "hard_xray_brightness",
+    "file": "radiation_measurement_diagnostics.yml",
+    "unit": "m^-2.s^-1.sr^-1",
+    "families": [
+     "unstated-normalisation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-normalisation: definition states 'normalized', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "tritium_density",
+    "file": "radiation_measurement_diagnostics.yml",
+    "unit": "m^-3",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'volume-averaged', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "radius_of_reflector",
+    "file": "spectroscopy.yml",
+    "unit": "m",
+    "families": [
+     "unstated-restriction"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-restriction: one-instrument-class: definition states 'in an X-ray crystal spectrometer', which the name does not"
+    ],
+    "disposition": "rename"
+   },
+   {
+    "name": "tritium_breeding_ratio",
+    "file": "structural_components.yml",
+    "unit": "1",
+    "families": [
+     "unstated-normalisation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-normalisation: definition states 'normalization', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "tritium_breeding_ratio_of_breeder_blanket_module",
+    "file": "structural_components.yml",
+    "unit": "1",
+    "families": [
+     "unstated-normalisation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-normalisation: definition states 'normalized', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "argon_density",
+    "file": "transport.yml",
+    "unit": "m^-3",
+    "families": [
+     "equivalent-electron-count"
+    ],
+    "findings": [
+     "name_definition_disagreement: equivalent-electron-count: definition states 'equivalent-electron', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "co_passing_power_density",
+    "file": "transport.yml",
+    "unit": "W.m^-3",
+    "families": [
+     "unstated-aggregation",
+     "abstract-parent-as-quantity"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'Flux-surface-averaged', which the name does not",
+     "name_definition_disagreement: abstract-parent-as-quantity: definition declares 'is the unqualified parent' without fixing one quantity"
+    ],
+    "disposition": "hold-from-the-cut"
+   },
+   {
+    "name": "co_passing_thermal_ion_charge_state_power_density_due_to_collisions",
+    "file": "transport.yml",
+    "unit": "W.m^-3",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'Flux-surface-averaged', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "counter_passing_fast_ion_charge_state_power_density_due_to_collisions",
+    "file": "transport.yml",
+    "unit": "W.m^-3",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'Flux-surface-averaged', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "counter_passing_power_density",
+    "file": "transport.yml",
+    "unit": "W.m^-3",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'Flux-surface-averaged', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "effective_charge_at_internal_transport_barrier",
+    "file": "transport.yml",
+    "unit": "1",
+    "families": [
+     "unstated-normalisation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-normalisation: definition states 'normalized', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "fast_ion_charge_state_power_due_to_collisions",
+    "file": "transport.yml",
+    "unit": "W",
+    "families": [
+     "unstated-integration"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-integration: definition states 'Volume-integrated', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "fast_ion_power_due_to_charge_exchange",
+    "file": "transport.yml",
+    "unit": "W",
+    "families": [
+     "unstated-integration"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-integration: definition states 'Volume-integrated', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "fast_particle_power_due_to_collisions",
+    "file": "transport.yml",
+    "unit": "W",
+    "families": [
+     "unstated-integration"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-integration: definition states 'volume-integrated', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "ion_energy_diffusivity",
+    "file": "transport.yml",
+    "unit": "m^2.s^-1",
+    "families": [
+     "unstated-normalisation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-normalisation: definition states 'normalized', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "ion_torque",
+    "file": "transport.yml",
+    "unit": "kg.m^2.s^-2",
+    "families": [
+     "unstated-integration"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-integration: definition states 'Volume-integrated', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "explicit_ion_torque",
+    "file": "transport.yml",
+    "unit": "kg.m^2.s^-2",
+    "families": [
+     "unstated-integration"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-integration: definition states 'Volume-integrated', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "magnetic_shear_at_internal_transport_barrier",
+    "file": "transport.yml",
+    "unit": "1",
+    "families": [
+     "unstated-normalisation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-normalisation: definition states 'normalized', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "ion_momentum_source",
+    "file": "transport.yml",
+    "unit": "kg.m^-1.s^-2",
+    "families": [
+     "unstated-normalisation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-normalisation: definition states 'normalized', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "net_ion_momentum_source",
+    "file": "transport.yml",
+    "unit": "kg.m^-1.s^-2",
+    "families": [
+     "unstated-normalisation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-normalisation: definition states 'normalized', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "neutral_internal_state_momentum_source",
+    "file": "transport.yml",
+    "unit": "kg.m^-1.s^-2",
+    "families": [
+     "unstated-normalisation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-normalisation: definition states 'normalized', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "neutral_internal_state_source_rate",
+    "file": "transport.yml",
+    "unit": "m^-3.s^-1",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'flux-surface-averaged', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "neutral_momentum_source",
+    "file": "transport.yml",
+    "unit": "kg.m^-1.s^-2",
+    "families": [
+     "unstated-normalisation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-normalisation: definition states 'normalized', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "neutral_source_rate",
+    "file": "transport.yml",
+    "unit": "m^-3.s^-1",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'flux-surface-averaged', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "parallel_net_ion_momentum_source",
+    "file": "transport.yml",
+    "unit": "kg.m^-1.s^-2",
+    "families": [
+     "unstated-normalisation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-normalisation: definition states 'normalized', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "parallel_neutral_internal_state_energy_diffusivity",
+    "file": "transport.yml",
+    "unit": "m^2.s^-1",
+    "families": [
+     "unstated-normalisation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-normalisation: definition states 'normalized', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "fast_particle_density",
+    "file": "transport.yml",
+    "unit": "m^-3",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'flux-surface-averaged', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "plasma_momentum",
+    "file": "transport.yml",
+    "unit": "kg.m.s^-1",
+    "families": [
+     "unstated-integration"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-integration: definition states 'volume-integrated', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "power_due_to_collisions",
+    "file": "transport.yml",
+    "unit": "W",
+    "families": [
+     "unstated-integration"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-integration: definition states 'Volume-integrated', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "ion_power_due_to_collisions",
+    "file": "transport.yml",
+    "unit": "W",
+    "families": [
+     "unstated-integration"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-integration: definition states 'Volume-integrated', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "fast_ion_power_due_to_collisions",
+    "file": "transport.yml",
+    "unit": "W",
+    "families": [
+     "unstated-integration"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-integration: definition states 'Volume-integrated', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "rate_due_to_beam_beam_fusion",
+    "file": "transport.yml",
+    "unit": "Hz",
+    "families": [
+     "unstated-integration"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-integration: definition states 'volume-integrated', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "runaway_electron_convection_velocity",
+    "file": "transport.yml",
+    "unit": "m.s^-1",
+    "families": [
+     "vector-for-scalar"
+    ],
+    "findings": [
+     "name_definition_disagreement: vector-for-scalar: definition states 'vector quantity', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "source_due_to_diamagnetic_drift",
+    "file": "transport.yml",
+    "unit": "kg.m^-1.s^-2",
+    "families": [
+     "unstated-normalisation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-normalisation: definition states 'normalized', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "momentum_source_due_to_diamagnetic_drift",
+    "file": "transport.yml",
+    "unit": "kg.m^-1.s^-2",
+    "families": [
+     "unstated-normalisation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-normalisation: definition states 'normalized', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "source_rate_due_to_beam_beam_fusion",
+    "file": "transport.yml",
+    "unit": "Hz",
+    "families": [
+     "unstated-integration"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-integration: definition states 'volume-integrated', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "neutron_source_rate_due_to_beam_beam_fusion",
+    "file": "transport.yml",
+    "unit": "Hz",
+    "families": [
+     "unstated-integration"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-integration: definition states 'volume-integrated', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "deuterium_deuterium_neutron_source_rate_due_to_beam_beam_fusion",
+    "file": "transport.yml",
+    "unit": "Hz",
+    "families": [
+     "unstated-integration"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-integration: definition states 'Volume-integrated', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "source_rate_due_to_thermal_fusion",
+    "file": "transport.yml",
+    "unit": "Hz",
+    "families": [
+     "unstated-integration"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-integration: definition states 'volume-integrated', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "counter_passing_thermal_electron_power_density_due_to_collisions",
+    "file": "transport.yml",
+    "unit": "W.m^-3",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'Flux-surface-averaged', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "thermal_electron_power_due_to_collisions",
+    "file": "transport.yml",
+    "unit": "W",
+    "families": [
+     "unstated-integration"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-integration: definition states 'Volume-integrated', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "thermal_ion_charge_state_power_due_to_collisions",
+    "file": "transport.yml",
+    "unit": "W",
+    "families": [
+     "unstated-integration"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-integration: definition states 'Volume-integrated', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "thermal_ion_charge_state_torque_due_to_collisions",
+    "file": "transport.yml",
+    "unit": "N.m",
+    "families": [
+     "unstated-integration"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-integration: definition states 'Volume-integrated', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "thermal_ion_energy",
+    "file": "transport.yml",
+    "unit": "J",
+    "families": [
+     "unstated-integration"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-integration: definition states 'Volume-integrated', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "counter_passing_thermal_ion_power_density_due_to_collisions",
+    "file": "transport.yml",
+    "unit": "W.m^-3",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'Flux-surface-averaged', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "thermal_ion_power_due_to_collisions",
+    "file": "transport.yml",
+    "unit": "W",
+    "families": [
+     "unstated-integration"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-integration: definition states 'Volume-integrated', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "thermal_particle_power_due_to_thermalization",
+    "file": "transport.yml",
+    "unit": "W",
+    "families": [
+     "unstated-integration"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-integration: definition states 'Volume-integrated', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "thermal_particle_source_rate",
+    "file": "transport.yml",
+    "unit": "m^-3.s^-1",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'flux-surface-averaged', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "co_passing_thermal_particle_source_rate",
+    "file": "transport.yml",
+    "unit": "m^-3.s^-1",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'flux-surface-averaged', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "counter_passing_thermal_particle_source_rate",
+    "file": "transport.yml",
+    "unit": "m^-3.s^-1",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'flux-surface-averaged', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "thermal_plasma_energy",
+    "file": "transport.yml",
+    "unit": "J",
+    "families": [
+     "unstated-integration"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-integration: definition states 'Volume-integrated', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "toroidal_counter_passing_thermal_ion_charge_state_torque_density_due_to_collisions",
+    "file": "transport.yml",
+    "unit": "N.m^-2",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'Flux-surface-averaged', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "toroidal_current_density_due_to_fast_ion",
+    "file": "transport.yml",
+    "unit": "A.m^-2",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'flux-surface-averaged', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "toroidal_fast_ion_charge_state_torque_due_to_collisions",
+    "file": "transport.yml",
+    "unit": "N.m",
+    "families": [
+     "unstated-integration"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-integration: definition states 'Volume-integrated', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "toroidal_thermal_electron_torque_due_to_collisions",
+    "file": "transport.yml",
+    "unit": "N.m",
+    "families": [
+     "unstated-integration"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-integration: definition states 'volume-integrated', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "toroidal_thermal_ion_charge_state_torque_due_to_collisions",
+    "file": "transport.yml",
+    "unit": "N.m",
+    "families": [
+     "unstated-integration"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-integration: definition states 'volume-integrated', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "toroidal_counter_passing_fast_electron_torque_density_due_to_collisions",
+    "file": "transport.yml",
+    "unit": "N.m^-2",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'Flux-surface-averaged', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "toroidal_counter_passing_fast_ion_torque_density_due_to_collisions",
+    "file": "transport.yml",
+    "unit": "N.m^-2",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'Flux-surface-averaged', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "toroidal_counter_passing_torque_density_due_to_j_cross_b_force",
+    "file": "transport.yml",
+    "unit": "N.m^-2",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'Flux-surface-averaged', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "fast_torque_due_to_collisions",
+    "file": "transport.yml",
+    "unit": "N.m",
+    "families": [
+     "unstated-integration"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-integration: definition states 'volume-integrated', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "thermal_ion_torque_due_to_collisions",
+    "file": "transport.yml",
+    "unit": "N.m",
+    "families": [
+     "unstated-integration"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-integration: definition states 'volume-integrated', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "toroidal_fast_torque_due_to_collisions",
+    "file": "transport.yml",
+    "unit": "N.m",
+    "families": [
+     "unstated-integration"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-integration: definition states 'volume-integrated', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "particle_torque_due_to_j_cross_b_force",
+    "file": "transport.yml",
+    "unit": "N.m",
+    "families": [
+     "unstated-integration"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-integration: definition states 'volume-integrated', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "fast_particle_torque_due_to_j_cross_b_force",
+    "file": "transport.yml",
+    "unit": "N.m",
+    "families": [
+     "unstated-integration"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-integration: definition states 'volume-integrated', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "toroidal_fast_particle_torque_due_to_j_cross_b_force",
+    "file": "transport.yml",
+    "unit": "N.m",
+    "families": [
+     "unstated-integration"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-integration: definition states 'Volume-integrated', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "total_momentum_source",
+    "file": "transport.yml",
+    "unit": "kg.m^-1.s^-2",
+    "families": [
+     "unstated-normalisation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-normalisation: definition states 'normalized', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "trapped_power_density",
+    "file": "transport.yml",
+    "unit": "W.m^-3",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'Flux-surface-averaged', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "trapped_thermal_ion_charge_state_power_density_due_to_collisions",
+    "file": "transport.yml",
+    "unit": "W.m^-3",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'Flux-surface-averaged', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "trapped_thermal_ion_power_density_due_to_collisions",
+    "file": "transport.yml",
+    "unit": "W.m^-3",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'Flux-surface-averaged', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "trapped_thermal_particle_source_rate",
+    "file": "transport.yml",
+    "unit": "m^-3.s^-1",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'flux-surface-averaged', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "volume_integrated_particle_source_rate",
+    "file": "transport.yml",
+    "unit": "s^-1",
+    "families": [
+     "abstract-parent-as-quantity"
+    ],
+    "findings": [
+     "name_definition_disagreement: abstract-parent-as-quantity: definition declares 'from a given source contribution' without fixing one quantity"
+    ],
+    "disposition": "hold-from-the-cut"
+   },
+   {
+    "name": "parallel_co_passing_fast_particle_pressure",
+    "file": "transport.yml",
+    "unit": "Pa",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'Flux-surface-averaged', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "perpendicular_co_passing_fast_particle_pressure",
+    "file": "transport.yml",
+    "unit": "Pa",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'Flux-surface-averaged', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "perpendicular_counter_passing_fast_particle_pressure",
+    "file": "transport.yml",
+    "unit": "Pa",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'flux-surface-averaged', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "toroidal_trapped_fast_current_density",
+    "file": "transport.yml",
+    "unit": "A.m^-2",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'flux-surface-averaged', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "parallel_fast_particle_energy",
+    "file": "transport.yml",
+    "unit": "J",
+    "families": [
+     "unstated-integration"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-integration: definition states 'volume-integrated', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "ion_charge_state_energy_diffusion_coefficient",
+    "file": "transport.yml",
+    "unit": "m^2.s^-1",
+    "families": [
+     "unstated-normalisation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-normalisation: definition states 'normalized', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "ion_energy_diffusion_coefficient",
+    "file": "transport.yml",
+    "unit": "m^2.s^-1",
+    "families": [
+     "unstated-normalisation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-normalisation: definition states 'normalized', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "neutral_energy_diffusion_coefficient",
+    "file": "transport.yml",
+    "unit": "m^2.s^-1",
+    "families": [
+     "unstated-normalisation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-normalisation: definition states 'normalized', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "perpendicular_fast_particle_pressure",
+    "file": "transport.yml",
+    "unit": "Pa",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'Flux-surface-averaged', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "thermal_electron_energy",
+    "file": "transport.yml",
+    "unit": "J",
+    "families": [
+     "unstated-integration"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-integration: definition states 'Volume-integrated', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "parallel_trapped_fast_particle_pressure",
+    "file": "transport.yml",
+    "unit": "Pa",
+    "families": [
+     "unstated-aggregation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-aggregation: definition states 'flux-surface-averaged', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "volume_averaged_effective_charge",
+    "file": "transport.yml",
+    "unit": "1",
+    "families": [
+     "unstated-normalisation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-normalisation: definition states 'normalized', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "momentum_flux_due_to_e_cross_b_drift",
+    "file": "turbulence.yml",
+    "unit": "1",
+    "families": [
+     "unstated-normalisation",
+     "unstated-relative-reference"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-normalisation: definition states 'normalization', which the name does not",
+     "name_definition_disagreement: unstated-relative-reference: definition states 'relative to a reference', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "perpendicular_normalized_particle_perturbed_pressure",
+    "file": "turbulence.yml",
+    "unit": "1",
+    "families": [
+     "unstated-relative-reference"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-relative-reference: definition states 'relative to a reference', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   },
+   {
+    "name": "electrostatic_potential_amplitude",
+    "file": "turbulence.yml",
+    "unit": "1",
+    "families": [
+     "unstated-normalisation"
+    ],
+    "findings": [
+     "name_definition_disagreement: unstated-normalisation: definition states 'Normalized', which the name does not"
+    ],
+    "disposition": "rewrite-the-definition"
+   }
+  ]
+ },
+ "abstract_parent_census": {
+  "umbrella_definitions": 3,
+  "states_one_quantity": 1,
+  "states_no_single_quantity": 2,
+  "names": [
+   {
+    "name": "density_at_plasma_boundary",
+    "states_one_quantity": false
+   },
+   {
+    "name": "magnetic_field",
+    "states_one_quantity": false
+   },
+   {
+    "name": "co_passing_power_density",
+    "states_one_quantity": true
+   }
+  ]
+ },
+ "gate": {
+  "recall_floor": 0.8,
+  "false_flag_ceiling": 0.1,
+  "recall": 0.298,
+  "false_flag_rate": 0.053,
+  "met": false
+ }
+}

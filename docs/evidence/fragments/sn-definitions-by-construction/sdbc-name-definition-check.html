@@ -1,0 +1,149 @@
+<section class="evidence-fragment" id="sdbc-name-definition-check" data-plan-section="sn-definitions-by-construction#s5">
+  <h2>A review check that a name and its definition say the same thing</h2>
+
+  <p class="ledger">
+    <strong>Measure.</strong> On the held-out two thirds of §4's labelled names the
+    check finds <strong>14 of 47</strong> names labelled as mismatched
+    (<strong>29.8 %</strong> recall) and flags <strong>11 of 207</strong> names labelled
+    as agreeing (<strong>5.3 %</strong> false-flag rate). The recall floor of 80 %
+    is <strong>not met</strong>; the false-flag ceiling of 10 % is met. Counts are
+    from <code>name-definition-check-results.json</code>.
+  </p>
+
+  <h3>What was built</h3>
+
+  <p>
+    One entry in the named review taxonomy,
+    <code>definition_states_qualifier_name_lacks</code> (axis <code>docs</code>,
+    dimension <code>physics_accuracy</code>), decided deterministically by
+    <code>name_definition_agreement_check</code> in
+    <code>imas_codex/standard_names/audits.py</code> and carried into the review
+    report by <code>run_name_definition_checks</code>. It adds no new gate or
+    command: its refusal is the docs review's existing rejection, and a flagged
+    name rejects review unless a recorded reason answers it. It calls no model.
+  </p>
+
+  <p>
+    The check reads the definition and the name against each other, one qualifier
+    family at a time — equivalent-electron counting, an aggregation
+    (flux-surface or volume average), an integration (volume, surface, wall), a
+    normalisation, a relative reference, a vector stated for a scalar, a
+    restriction to one face, one coil instance, one module, one reaction branch,
+    one instrument class or one discharge phase, and an explicitly unspecified
+    umbrella. A family fires only when the definition's wording adds the
+    qualifier and the name carries none of the tokens that would state it. The
+    description is read as the definition; the documentation is read only for the
+    two families whose wording cannot describe a neighbouring quantity.
+  </p>
+
+  <h3>The labels, and how they stayed held out</h3>
+
+  <p>
+    The labels are §4's, produced by <strong>one reader</strong> reading name,
+    description, documentation and unit together — not by this check, not by the
+    pipeline judge, and not by any model that runs the check
+    (<em>"one reader, reading name, description, documentation and unit together;
+    no pipeline judge, review check or decide_batch produced any label"</em>). A
+    second, independent reader labelled 60 of the same names and agrees exactly on
+    class under the lead's species ruling for 45 of 60 (75 %).
+  </p>
+
+  <p>
+    The 381 labelled names were split once, by committed seed 7714, stratified by
+    class under the ruling: <strong>127 development</strong> and
+    <strong>254 held-out</strong>. The rule set was shaped on the development
+    third only; the held-out rows' labels were not read until the rules were
+    frozen. On the development third the check reaches 21 of 24 (87.5 %) recall at
+    7 of 103 (6.8 %) false flags — the figure the shaping produced, and the figure
+    the held-out arm refutes.
+  </p>
+
+  <h3>Why the held-out arm fails, and what it says</h3>
+
+  <p>
+    The development third was not a smaller copy of the sample. Of its 24
+    mismatched names, 5 were the equivalent-electron family and 6 the umbrella
+    family, and the lexical families the check reads carried 21 of them. The
+    held-out two thirds concentrate in the two families a lexical rule reads
+    worst: <strong>12 of the 47</strong> are umbrella parents and
+    <strong>5</strong> are definitions narrowed to one object, against 1
+    equivalent-electron case (see the <code>mismatched_missed</code> list in the
+    results file). The check's precision transfers (5.3 % false flags on held-out
+    against 6.8 % on development); its recall does not.
+  </p>
+
+  <div class="figure">
+    <p>
+      The honest reading is that <em>a lexical check over the description alone
+      cannot carry the umbrella-parent and narrowed-object classes</em>: those two
+      families are 17 of the 47 held-out mismatches and the rules recognise them
+      only when the definition uses the catalog's own umbrella wording. Reaching
+      80 % needs a read of what the definition quantifies, which is the judgment
+      the pipeline's review seat exists to make. This node delivers the working
+      deterministic check, its taxonomy entry and its refusal test, and records
+      the measure that says a deterministic rule is not sufficient. Turning the
+      entry into a Jev question is the next decision, and it belongs to the
+      coordinator.
+    </p>
+  </div>
+
+  <h3>The catalog arm</h3>
+
+  <p>
+    Run over all <strong>1,975</strong> published names in the catalog checkout,
+    the frozen check flags <strong>206</strong>. By family:
+  </p>
+
+  <table>
+    <thead><tr><th>Family</th><th>Findings</th><th>Disposition</th></tr></thead>
+    <tbody>
+      <tr><td>equivalent-electron-count</td><td>65</td><td>rewrite the definition</td></tr>
+      <tr><td>unstated-aggregation</td><td>48</td><td>rewrite the definition</td></tr>
+      <tr><td>unstated-integration</td><td>38</td><td>rewrite the definition</td></tr>
+      <tr><td>unstated-normalisation</td><td>38</td><td>rewrite the definition</td></tr>
+      <tr><td>unstated-relative-reference</td><td>9</td><td>rewrite the definition</td></tr>
+      <tr><td>abstract-parent-as-quantity</td><td>4</td><td>hold from the cut</td></tr>
+      <tr><td>unstated-restriction</td><td>4</td><td>rename</td></tr>
+      <tr><td>vector-for-scalar</td><td>2</td><td>rewrite the definition</td></tr>
+    </tbody>
+  </table>
+
+  <p>
+    Each flagged name carries one disposition in the results file: 198 rewrite the
+    definition, 4 rename, 4 hold from the cut. Every one of the 206 is listed with
+    its family, file and unit.
+  </p>
+
+  <h3>Abstract parents</h3>
+
+  <p>
+    The catalog files carry no parent flag, so the census reads the definition
+    wording. Three published definitions declare an umbrella explicitly: one
+    states one quantity and two state no single quantity
+    (<code>abstract_parent_census</code> in the results file). Those two are the
+    section's defect: an abstract parent published with a definition that fixes no
+    single quantity. The other 19 umbrella names §4 labelled are not published
+    with that wording, which is why the lexical check misses them.
+  </p>
+
+  <h3>Readers disagreeing</h3>
+
+  <p>
+    The 15 names the two readers disagree on are scored separately on the first
+    reader's ruling column. The check flags 2 of them —
+    <code>current_density_due_to_bootstrap_current_drive</code> (umbrella) and
+    <code>pulse_duration</code> (restricted to the confined-plasma phase).
+  </p>
+
+  <h3>The refusal, shown</h3>
+
+  <p>
+    <code>tests/standard_names/test_name_definition_agreement.py</code> plants a
+    normalised quantity under an unnormalised name and runs the docs review with
+    every rubric in its accepted category and every claim supported: the review
+    <strong>rejects</strong>, and the only check that stops failing when the same
+    name states the normalisation is this one. The negative control mutates the
+    check so the planted normalisation is not read; two tests fail and the gate
+    log records <code>EXIT=1</code>.
+  </p>
+</section>

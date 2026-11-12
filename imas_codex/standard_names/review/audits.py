@@ -728,6 +728,33 @@ def run_house_style_checks(names: list[dict[str, Any]]) -> list[LintFinding]:
     return findings
 
 
+def run_name_definition_checks(names: list[dict[str, Any]]) -> list[LintFinding]:
+    """Emit the name-versus-definition findings for each candidate.
+
+    Each finding names the qualifier family the definition states and the name
+    does not, so a reviewer reads which wording is missing from the name. The
+    check reads the candidate's own name, description and documentation and is
+    model-free.
+    """
+
+    from imas_codex.standard_names.audits import name_definition_agreement_check
+
+    findings: list[LintFinding] = []
+    for name in names:
+        name_id = name.get("id", "")
+        for issue in name_definition_agreement_check(name):
+            detail = issue.split(":", 1)[1].strip()
+            findings.append(
+                LintFinding(
+                    name_id=name_id,
+                    finding_type="name_definition_disagreement",
+                    detail=detail,
+                    severity="warning",
+                )
+            )
+    return findings
+
+
 def run_documentation_gate_checks(
     names: list[dict[str, Any]],
 ) -> list[LintFinding]:
