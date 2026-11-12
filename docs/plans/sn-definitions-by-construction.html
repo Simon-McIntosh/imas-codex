@@ -24,7 +24,7 @@
   <title>One Wording Per Concept, By Construction | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="18">
+<meta name="plan-version" content="19">
 <meta name="plan-modified" content="2026-11-12">
 </head>
 <body>
@@ -164,6 +164,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261112T110823542516-review-of-sdbc-rendered-shared-wording-c6da053286d3" data-who="reckon-build" data-when="2026-11-12T11:24:31.559Z">
     <div class="r-comment-body"><p>Independent review of run r-20261112T063332484056-sdbc-rendered-shared-wording over the commits it gained since its 84f1f3ca5 review — 700e39f36, 0fddf4152, 8e55338a6, c6da05328 (base 84f1f3ca53bf949b60d5d1abb532ff50833b6865, head c6da053286d3943b8559a1ac2b1e091dfe1dd3c2): scores goal_fidelity 18, evidence 16, scope_discipline 20, durability 15, fit 17, reuse 16 (total 102), added_failure_count 0. All three blocking findings from the previous review are answered — the refusal is now proved through process_generate_docs_batch and process_refine_docs_batch with persist asserted uncalled, the 0.45-0.75 paraphrase band is closed at docs_gates.py:1139-1144 and reported at :1076-1088, and the refine stage renders through the one renderer and refuses before persist. Five non-blocking findings remain, none holding the node: the refine population clause has no test of its own, one clause of the removal band is unreachable, a contradicting refinement is treated as retryable, SHARED_PART_ALTERED is not in the review barring set, and the evidence section carries no figure.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261112T063332484056-sdbc-rendered-shared-wording" data-who="reckon-build" data-when="2026-11-12T11:03:53Z">
+    <div class="r-comment-body"><p>The shared parts of a definition (operator sentence and equation, species population, locus) are settled text shown to the model before it writes, a written text that contradicts the population the stored wording counts is refused before persistence as contradicted_shared_part beside the paraphrase class shared_part_altered, the description states the same population, the definition opens with a sentence rather than a bare fragment, the wording census counts 1 form per operator and 1 wording for a five-member species family (2 with one member planted divergent), and the fifteen names written around the settled parts are accepted for 11 of 15 against 11 of 15 for the published definitions reviewed in the same disposable graph, with the single shortfall carrying a DD-source-unavailable hold.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261112T075018136012-review-of-sdbc-unit-spelling-723d44eabf52" data-who="reckon-build" data-when="2026-11-12T08:11:23.275Z">
     <div class="r-comment-body"><p>independent review of r-20261112T020847184170-sdbc-unit-spelling at head 723d44eab scores goal_fidelity 17, evidence 13, scope_discipline 18, durability 15, fit 16, reuse 5, with added_failure_count 0 and five non-blocking findings (evidence fragment says 43 divergences against the artifact's 44; manifest says 1630 quantities against the artifact's 1608; gate logs are headed revision 043171ac2 whose tree lacks the graph test they run; the disposable-graph write assertion echoes a value the code under test produced; quantity_dimension_issues duplicates the name-vs-unit owner in audits.py)</p></div>
