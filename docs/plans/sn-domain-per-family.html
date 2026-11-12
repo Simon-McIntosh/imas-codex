@@ -24,7 +24,7 @@
   <title>A Family Shares One Domain: Domain Decided Per Concept, Not Per Source | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="18">
+<meta name="plan-version" content="19">
 <meta name="plan-modified" content="2026-11-12">
 </head>
 <body>
@@ -95,8 +95,8 @@
 <h2><span class="sec">§</span> Followups</h2>
 <article class="r-fu" data-id="f-sdpf-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-11-12" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Build the per-family domain decision</h4>
-    <div class="r-fu-body"><p>§2 is ready. §5 widens the options of §2's decision and waits for §2. §3 writes the live graph and waits for §2 and §5; §4 waits for §3.</p></div>
-    <pre class="r-fu-prompt">/reckon-build sn-domain-per-family §2</pre>
+    <div class="r-fu-body"><p>§2 has landed. §5 widens the options of §2's decision and is next. §3 writes the live graph and waits for §5 and for the lead's ruling on the twelve disputed sheet items; §4 waits for §3.</p></div>
+    <pre class="r-fu-prompt">/reckon-build sn-domain-per-family §5</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -118,6 +118,13 @@
 <div class="r-comment" data-section="s2" data-id="c-close-s2" data-who="reckon-build" data-when="2026-11-12T10:30:00Z">
     <div class="r-comment-body"><p>§2 closed (<code>sdpf-family-decision</code> and <code>sdpf-labelled-comparison</code>, both reviewed at their final heads and landed). One domain decision is stored per pattern family with the locus held fixed, every member reads it, and the judgments paid equal the families decided; 57 graph-tier tests pass on a compute partition and the single-writer guard is unchanged. Measured against two readers who never saw a stored domain, on the items both gave the same domain: over 35 families (2,835 member names) the per-family decision files 48.6 % of member names under the readers' domain against 43.2 % for the stored per-name domains; over 61 single names 63.9 % against 54.1 %. On the 169 calibration names it reads 72.2 % with an undecided name left at its stored domain and 60.4 % with every undecided name counted wrong, against 54.4 % stored. 42 families are undecided, 30 of them with two or more members, the largest holding 51, 47 and 33 names; none of their members is written. A planted family with disjoint source domains receives one domain and the per-name path gives it two. One clause is met short: five of the eight families §1 names carry a label both readers agree on; two of the other three are among the twelve disputed items awaiting the lead's ruling under §5. The decision is right for about half of family members because a family is still offered only its sources' domains, which §5 addresses. Evidence: <code>docs/evidence/fragments/sn-domain-per-family/sdpf-family-decision.html</code>, <code>sdpf-labelled-comparison.html</code> and <code>labelled-comparison.json</code>.</p></div>
 </div>
+</section>
+<section data-reckon="gates" id="gates" class="r-gates">
+<h2><span class="sec">§</span> Evidence gates</h2>
+<div class="r-gate" data-id="g-sdpf-disputed-items" data-section="s3" data-gated-sections="s3" data-status="open" data-verdict="">
+    <h4 class="r-gate-measure">the lead&#x27;s ruling is recorded on each of the 12 sheet items the two blind readers gave different domains</h4>
+    <p class="r-gate-required-evidence">docs/evidence/fragments/sn-domain-family-labels/disputed-items.json with lead_ruling filled on every item</p>
+    </div>
 </section>
 </main>
 </body>
