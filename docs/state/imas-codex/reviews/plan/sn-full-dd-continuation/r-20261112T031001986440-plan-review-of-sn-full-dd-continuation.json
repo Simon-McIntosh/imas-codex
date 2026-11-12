@@ -1,0 +1,70 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T03:16:25.495Z",
+  "dispatched_at": "2026-11-12T03:10:53Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-full-dd-continuation.html:70",
+      "id": "reasoning-1",
+      "reason": "the section's whole diagnosis arm is scoped by a false exclusion, so a dispatched node would hunt a writer outside the drain's own pipeline, re-derive an attribution \u00a752 has already committed, and miss that a repair node (r-20261111T222612732717-sib-restore-reset-docs) has already restored 391 of 391 partition-(c) names to accepted; \u00a76 should cite the recorded attribution and keep only the guard, which is still open because reset_standard_name_docs snapshots a DocsRevision and records no reason for the demotion.",
+      "text": "\u00a76 asserts \"Something other than the drain's own writes lowered accepted documentation\", but the \u00a752 record it cites has already attributed the fall to the drain's own pipeline: 400 of the 405 names that left accepted documentation carry a DocsRevision receipt from refresh_drifted_sources -> apply_edit(docs) -> reset_standard_name_docs at 17:28:08-17:28:35Z, which is inside the drain run's own window (17:24:01Z start, 18:58:15Z stop); 4 more left by supersession and 1 by a name-stage reversal, so none of the 405 is left for an outside writer",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-full-dd-continuation.html:22",
+      "id": "wiring-1",
+      "reason": "a \u00a76 run dispatched beside \u00a73 or during \u00a74's reading puts a writer inside the quiescent window \u00a73 and \u00a74 exist to establish, which is exactly the defect that put \u00a75 behind \u00a74 in this same version; the dependency table needs \u00a76 ordered against \u00a73 and \u00a74.",
+      "text": "\u00a76 declares a dependency on the \u00a752 writers alone, yet its done-when requires running one scoped `sn run`, which writes the graph, and neither \u00a73 (checkpoint requires \"no other graph writer ... running\") nor \u00a74 (single post-run reading taken \"with no graph writer running\") is ordered against it, while followup f-sfdc-001 at line 76 says \"\u00a76 waits only on the \u00a752 writers\"",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-full-dd-continuation.html:66",
+      "id": "reasoning-2",
+      "reason": "s5 reads its backlog live at its own start and computes its ceiling from that read, so the arithmetic and the restoration target are unaffected; only the citation is stale, and the wording \"which lands with that run\" for a fragment already committed should be corrected with it.",
+      "text": "s5 still opens \"The cause of the stall and of the fall is under investigation in `sn-integrity-backlog` \u00a752\", but \u00a752 is `data-status=\"done\"` and has recorded both the stall's attribution and the documentation demotion's, and a nodes list under it shows 391 names already restored",
+      "type": "reasoning",
+      "would_change": false
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-full-dd-continuation.html:56",
+      "id": "done_when-1",
+      "reason": "the alternative is the deliberate remedy for an arithmetically unreachable floor (828 runnable sources at the census's own 21.7% yield gives about 180 accepted against a 300 shortfall), and the shortfall and measured yield it requires are the evidence a coordinator needs to judge the run, so it replaces the floor rather than weakening it.",
+      "text": "\u00a74's new alternative endpoint accepts \"every source in them was run with its outcome recorded and the shortfall against 5,503 is reported\", a condition that a run reaching zero of the 300 accepted still satisfies",
+      "type": "done_when",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "7da8406c991b5c400a998d456b87db22298ec54d",
+  "plan_fingerprint": "b386bfc9df572a6d4de8ac566bddae3b064fd8a061a60aea0efb47a5c292b321",
+  "plan_slug": "sn-full-dd-continuation",
+  "plan_version": 14,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T031001986440-plan-review-of-sn-full-dd-continuation",
+  "reviewed_blob_sha": "4895d6f417e2d2cedc2c397dcfc4ddd3b6691ae4",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `docs/evidence/fragments/sn-integrity-backlog/sib-docs-drain-after-admission.html` resolves and carries every figure \u00a75 and \u00a76 quote (2,866\u21923,004, 2,368\u21922,028, 413\u2192926, USD 11.141891, stop_reason stalled, 21 newly covered); `sn-integrity-backlog#s52` and `#s51` resolve; the census JSON resolves and reconciles (`source_class_sum` 920 against `live_sources_unaccepted` 920).",
+    "done_when": "pass \u2014 each changed node carries a measure that can fail: \u00a74 keeps its planted-source class control and now states a reachable alternative endpoint (classes exhausted, every outcome recorded, shortfall and yield reported); \u00a75 keeps the planted-pending-name read-back; \u00a76 declares a mutation control (\"a test that fails when the guard is removed\").",
+    "evidence_paths": "pass \u2014 every changed node writes under `docs/evidence/fragments/sn-full-dd-continuation/` in the repository; no changed section names a scratchpad or node-local temporary path.",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or version tags reach a symbol, file or comment in the changed units; no changelog prose.",
+    "reasoning": "a finding \u2014 \u00a76's stated premise excludes a writer that the \u00a752 record it cites has already named as the one responsible, so the section argues against its own evidence.",
+    "single_goal": "pass \u2014 \u00a76 carries one deliverable (the demotion mechanism and the guard that records it), and s5's earlier second deliverable is now correctly separated out into it.",
+    "wiring": "a finding \u2014 \u00a76 writes the graph through one scoped `sn run` but declares `depends-on` only `sn-integrity-backlog#s52` (line 22), while \u00a73 requires its checkpoint taken with \"no other graph writer ... running\" and \u00a74 requires its single post-run reading taken \"with no graph writer running\"; followup f-sfdc-001 (line 76) states \"\u00a76 waits only on the \u00a752 writers\", which invites dispatch alongside them."
+  },
+  "section_digests": {
+    "_document": "01cbdc4e59abf4c2beaceb88fa7be653cd70697976717f1a9d60245722bde3fc",
+    "s1": "6edb6bfc73bfa8f3d3435cdd83ea2fde91367cf006a53a93995f459601295db8",
+    "s2": "0685f8ecfe2877442317711cdd765607eba5e0b9e9f44a51b65954020d68e962",
+    "s3": "ab19f940f4ac471bd28ace7cbc2c493228d057ab3ff0af70892c2a687f09888a",
+    "s4": "e459b2be3ae391bc013bdd3bbed4eb97fbee74ddc186bbf7b8c7f30ed50016e4",
+    "s5": "a47df761127242348b5d1b7657bbd320924f869729e2a73f371b13e5f0ae0634",
+    "s6": "b69f4c480a9cf3a5bb789f9ec172fd784a2950de5ff28f25eb6162d59232fd0e"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T06:32:00.917397+00:00",
+  "total": null
+}
