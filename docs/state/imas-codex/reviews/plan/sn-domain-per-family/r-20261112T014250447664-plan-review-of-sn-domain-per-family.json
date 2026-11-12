@@ -81,7 +81,30 @@
   "plan_slug": "sn-domain-per-family",
   "plan_version": 0,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "4a7c953bb89f511fd172eac662055195230624c4",
+      "commit_basis": "edit",
+      "finding": "duplicate_owner-1",
+      "note": "\u00a72 now defines a family as the repository's existing pattern family with the locus held fixed, so the one signature is reused and the narrower scope is stated; \u00a71 says its species-token grouping is a subset of that",
+      "reason": "",
+      "when": "2026-11-12T02:02:18.370621+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "4a7c953bb89f511fd172eac662055195230624c4",
+      "commit_basis": "edit",
+      "note": "\u00a72 now defines a family as the repository's existing pattern family with the locus held fixed, so the one signature is reused and the narrower scope is stated; \u00a71 says its species-token grouping is a subset of that",
+      "reason": "",
+      "when": "2026-11-12T02:02:18.370621+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-domain-per-family/r-20261112T014250447664-plan-review-of-sn-domain-per-family.json",
   "review_run_id": "r-20261112T014250447664-plan-review-of-sn-domain-per-family",
   "reviewed_blob_sha": "cae8fec2d9d9c7ef60e946f64fcfc041e94cc6e6",
   "rubric": "design",
