@@ -1,0 +1,53 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T18:01:06.608Z",
+  "dispatched_at": "2026-11-12T17:56:16Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-domain-per-family.html:92",
+      "id": "reasoning-1",
+      "reason": "the node judging \"at most 24\" against the committed 30 cannot tell which set the ceiling was drawn from, so the sentence that grounds the bar has to name that set (or cite where the 24 were listed) before the node runs.",
+      "text": "bullet 4 fixes the undecided bound as \"at most 24, the bound the lead set on 2026-11-12 after reading the 24 listed families\", but no committed artifact lists 24 families: the only listing, `docs/evidence/fragments/sn-domain-per-family/labelled-comparison.json`, carries 42 undecided families, 30 of them with two or more members (`undecided_summary`), so the bound's stated provenance cannot be reconciled with the record it points at",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-domain-per-family.html:92",
+      "id": "reasoning-2",
+      "reason": "\u00a73's node is sent to buy a ruling it has already been given, and its gate reports the plan's own held-split outcome as failure, so the two sections must state one rule for a below-floor family.",
+      "text": "bullet 4 says the families below the floor \"are held split with each member decided on its own sources, so \u00a73 is not left to settle the catalog one ruling at a time\", while \u00a73 (plan.html:67) still has the coordinator bring each such family to the lead and record \"a correction naming the family\", and \u00a73's first done-when excuses a split family only when it is covered by \"a recorded lead correction that names the family\"; under the lead's standing ruling those held-split families are excused by nothing \u00a73 recognises, so \u00a73's read-back would count up to 24 correctly held families as failures",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "68dc7c24382956755071c13c8009035be444dcb4",
+  "plan_fingerprint": "abc8cc67dd87a717bfe324ebbf72ddfe0d152f50688e339ab6f7d0d923128ea3",
+  "plan_slug": "sn-domain-per-family",
+  "plan_version": 24,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T175336956692-plan-review-of-sn-domain-per-family",
+  "reviewed_blob_sha": "62cd064a2cca74a79f9e1b72d5d4c68afabea3ae",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `docs/evidence/fragments/sn-domain-per-family/`, `docs/evidence/fragments/sn-domain-family-labels/`, `disputed-items.json` and `docs/plans/sn-catalog-grouping.html` all resolve in the tree.",
+    "done_when": "pass \u2014 each bullet is a measurable reading (share higher than stored, accuracy at or above 0.597 taken over all calibration names with an undecided name counted wrong, at-most-24 undecided families of two or more members, transport/general counts), and bullet 7 is the declared negative control (a planted name must receive its concept's domain, and the same name offered only its source's domains must not).",
+    "evidence_paths": "pass \u2014 the section names `docs/evidence/fragments/sn-domain-per-family/` for its evidence and for the committed gate log, all durable repository paths.",
+    "naming": "pass \u2014 \u00a75's changed text introduces no plan label, stage name, ticket number or changelog prose.",
+    "reasoning": "two findings \u2014 the bound of 24 is attributed to a listing of 24 families that no committed artifact holds, and bullet 4's held-split rule contradicts \u00a73's per-family trip to the lead.",
+    "single_goal": "pass \u2014 \u00a75 carries one deliverable, the widened option set of \u00a72's single family decision, and makes no graph write.",
+    "wiring": "pass \u2014 \u00a75 declares `depends-on sn-domain-per-family#s2` (s2 is done), \u00a73 declares its dependence on \u00a75, and the disputed-items gate on \u00a73 matches the lead ruling now recorded in `docs/evidence/fragments/sn-domain-family-labels/disputed-items.json`."
+  },
+  "section_digests": {
+    "_document": "f250140e0efd072e27479d27052893ba71f3bb380d4e1353ed009647ac246472",
+    "s1": "3d2539102f47a199cec8a14a89d42968505b563a51a390ee64710cc35f227476",
+    "s2": "aa40e5c5659822e9d8c22d4cd2fc0823ad3615e0d88e3bfdd032248dbfce0b3c",
+    "s3": "81754c7454a907e859184cc5850ebc11c5882110ed5cca5b1b19629460c1cb2b",
+    "s4": "02a78d9adf06476e76fb104849bcb4b1b0a2065ec569400e183771b85461eb4c",
+    "s5": "2b548dfcc6ec6db0afb8045e89afc794c749e6f03d42807481c244c3902665e0"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T18:14:52.276084+00:00",
+  "total": null
+}
