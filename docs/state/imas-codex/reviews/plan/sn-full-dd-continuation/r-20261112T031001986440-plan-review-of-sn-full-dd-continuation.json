@@ -71,9 +71,28 @@
       "note": "\u00a75 now records that \u00a752 attributed, fixed and largely restored the demotion, and drains only the backlog it reads at its start.",
       "reason": "",
       "when": "2026-11-12T06:34:34.380051+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "96e111b851e3f8ef0d61cf946b931f7064b2d1b2",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a74's alternative endpoint now also requires the run's yield over the sources it ran to be at least 16% (the full run's 21.7% less a quarter), or the lead's recorded acceptance of a lower yield.",
+      "reason": "",
+      "when": "2026-11-12T06:34:44.489486+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "96e111b851e3f8ef0d61cf946b931f7064b2d1b2",
+      "commit_basis": "edit",
+      "note": "\u00a74's alternative endpoint now also requires the run's yield over the sources it ran to be at least 16% (the full run's 21.7% less a quarter), or the lead's recorded acceptance of a lower yield.",
+      "reason": "",
+      "when": "2026-11-12T06:34:44.489486+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "",
