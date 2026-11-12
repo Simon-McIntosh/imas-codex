@@ -41,7 +41,30 @@
   "plan_slug": "sn-pipeline-hygiene",
   "plan_version": 15,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "3ec806af3d73129d215938fb4a08bd8b0ee285cb",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "\u00a71's prose now records the 2026-11-12 state: twelve of the thirteen ids pass at head after the two landed nodes, and the cascade-calibration id skips on missing frozen receipts, which is the remaining work.",
+      "reason": "",
+      "when": "2026-11-12T01:31:47.475359+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "3ec806af3d73129d215938fb4a08bd8b0ee285cb",
+      "commit_basis": "edit",
+      "note": "\u00a71's prose now records the 2026-11-12 state: twelve of the thirteen ids pass at head after the two landed nodes, and the cascade-calibration id skips on missing frozen receipts, which is the remaining work.",
+      "reason": "",
+      "when": "2026-11-12T01:31:47.475359+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-pipeline-hygiene/r-20261112T004959430081-plan-review-of-sn-pipeline-hygiene.json",
   "review_run_id": "r-20261112T004959430081-plan-review-of-sn-pipeline-hygiene",
   "reviewed_blob_sha": "61873bba6a0fff21df41f60350964049600c65e1",
   "rubric": "content",
