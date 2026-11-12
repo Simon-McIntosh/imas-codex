@@ -284,6 +284,29 @@ def test_a_single_option_family_is_put_to_the_wider_question(
     assert decision.choice == CONCEPT
 
 
+def test_the_default_option_set_is_the_escalated_fallback(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A caller that names no option set gets the escalated fallback."""
+    asked: list[dict] = []
+
+    async def decide(states, questions, **_kwargs):  # noqa: ANN001
+        asked.append(questions[dd.QUESTION])
+        options = list(questions[dd.QUESTION]["criteria"])
+        return [({dd.QUESTION: {"choice": options[0], "probabilities": {options[0]: 0.91}}}, 0.2)], 0.4
+
+    monkeypatch.setattr(dd, "decide_batch", decide)
+    decision = asyncio.run(
+        dd.decide_family_domain("sourceless-family", SOURCELESS, {}, model="stub")
+    )
+    assert len(asked) == 1, (
+        "the default set asks the single-option family the wider question, so the "
+        "shipped behaviour is the escalated fallback and not the pre-widening one"
+    )
+    assert PRIOR in asked[0]["instructions"]
+    assert decision.decided
+
+
 def test_a_single_option_family_keeps_its_option_below_the_floor(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

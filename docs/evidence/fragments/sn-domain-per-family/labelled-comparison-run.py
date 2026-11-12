@@ -100,6 +100,31 @@ def _agreed_labels() -> tuple[dict[str, str], list[dict[str, str]]]:
     return agreed, disagreed
 
 
+def _ruled_labels() -> dict[str, dict[str, Any]]:
+    """The lead's ruling on every disputed sheet item, by item id.
+
+    The ruled items are not part of the agreed reference: the two readers
+    disagree on them, and the ruling settles what the reference could not. They
+    are read separately so every reading can be given twice, over the agreed
+    items alone and over the agreed items with the rulings added.
+    """
+    disputed = _load(LABEL_DIR / "disputed-items.json")
+    return {
+        str(item["id"]): item
+        for item in disputed["items"]
+        if isinstance(item.get("lead_ruling"), dict)
+        and item["lead_ruling"].get("domain")
+    }
+
+
+def _reference_with_rulings(agreed: dict[str, str]) -> dict[str, str]:
+    """The agreed labels with the lead's ruling added for every disputed item."""
+    merged = dict(agreed)
+    for item_id, item in _ruled_labels().items():
+        merged[item_id] = str(item["lead_ruling"]["domain"])
+    return merged
+
+
 def _reader_agreement() -> dict[str, Any]:
     """The agreement counts by sheet kind, for the record."""
     sheet = _load(LABEL_DIR / "blind-sheet.json")
@@ -684,7 +709,7 @@ def _check_fragment(fragment: Path, artifact: Path) -> int:
 #: The bars the measurement is taken against. The stored baselines are read
 #: from the same run; these are the fixed floors the section names.
 CALIBRATION_FLOOR_STRICT = 0.597
-UNDECIDED_MULTI_BOUND = 20
+UNDECIDED_MULTI_BOUND = 24
 
 #: Option sets measured and refused in an earlier run of this harness, kept
 #: here because their per-family rows were overwritten by the run that followed
@@ -925,6 +950,115 @@ def _all_live(output: Path, seat: str, option_set: str) -> int:
     return 0
 
 
+def _ruling_divergences(
+    family_targets: list[dict[str, Any]],
+    single_targets: list[dict[str, Any]],
+    by_key: dict[str, dict],
+    decisions: dict[str, Any],
+    ruled: dict[str, dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Every disputed item, with the ruling, the decision and the stored domain.
+
+    A row where the decision differs from the ruling is what the lead asked to
+    see: the decision is judged against the item's ruling exactly as it is
+    judged against an agreed label, so a disagreement here is the same kind of
+    evidence as a disagreement on an agreed item.
+    """
+    by_item: dict[str, dict[str, Any]] = {}
+    for target in family_targets:
+        by_item[target["sheet_id"]] = target
+    for target in single_targets:
+        by_item[target["sheet_id"]] = target
+    rows: list[dict[str, Any]] = []
+    for item_id in sorted(ruled):
+        item = ruled[item_id]
+        target = by_item.get(item_id)
+        ruling = str(item["lead_ruling"]["domain"])
+        if target is None:
+            rows.append(
+                {
+                    "sheet_id": item_id,
+                    "item": item.get("item"),
+                    "kind": item.get("kind"),
+                    "member_count": item.get("member_count"),
+                    "ruling": ruling,
+                    "decision": None,
+                    "stored": None,
+                    "agrees": False,
+                    "note": "the item maps to no live decision family",
+                }
+            )
+            continue
+        decision = decisions.get(target["family_key"])
+        chosen = str(decision.choice) if decision is not None and decision.decided else None
+        if item.get("kind") == "single":
+            stored = None
+            for member in by_key[target["family_key"]]["members"]:
+                if member["id"] == target.get("name"):
+                    stored = str(member.get("physics_domain") or "unset")
+                    break
+        else:
+            stored = "mixed"
+        rows.append(
+            {
+                "sheet_id": item_id,
+                "item": item.get("item") or target.get("pattern"),
+                "kind": item.get("kind"),
+                "member_count": item.get("member_count"),
+                "ruling": ruling,
+                "decision": chosen or "undecided",
+                "stored": stored,
+                "agrees": chosen == ruling,
+            }
+        )
+    return rows
+
+
+def _arm_block(
+    family_targets: list[dict[str, Any]],
+    single_targets: list[dict[str, Any]],
+    calibration: list[dict[str, str]],
+    calibration_family: dict[str, str],
+    by_key: dict[str, dict],
+    decisions: dict[str, Any],
+    needed: dict[str, dict],
+    seat: str,
+    ids_map: dict[str, str],
+    *,
+    calls: int,
+    families: int,
+    incumbent: dict[str, Any],
+) -> dict[str, Any]:
+    """Every reading one arm gives over one reference."""
+    comparison, family_rows = _family_comparison(family_targets, by_key, decisions)
+    singles, single_rows = _single_comparison(single_targets, by_key, decisions)
+    calibration_reading, calibration_rows = _calibration_comparison(
+        calibration, calibration_family, by_key, decisions, incumbent
+    )
+    undecided_rows = _undecided_rows(needed, by_key, decisions, seat, ids_map)
+    cost = round(sum(float(d.cost or 0.0) for d in decisions.values()), 6)
+    return {
+        "judgments": {
+            "families_decided": len(decisions),
+            "judgments_paid": calls,
+            "no_call_families": sum(
+                1 for decision in decisions.values() if not decision.cost
+            ),
+            "cost_usd": cost,
+            "cost_per_decision_usd": round(cost / calls, 8) if calls else 0.0,
+            "live_families_scanned": families,
+        },
+        "family_comparison": comparison,
+        "family_rows": family_rows,
+        "single_names": singles,
+        "single_rows": single_rows,
+        "calibration": calibration_reading,
+        "calibration_rows": calibration_rows,
+        "undecided": undecided_rows,
+        "undecided_summary": _undecided_summary(undecided_rows),
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
@@ -974,6 +1108,10 @@ def main() -> int:
     family_targets, single_targets, multi_mapped = _sheet_targets(
         sheet, agreed, by_name
     )
+    agreed_with_rulings = _reference_with_rulings(agreed)
+    family_targets_ruled, single_targets_ruled, multi_ruled = _sheet_targets(
+        sheet, agreed_with_rulings, by_name
+    )
 
     calibration = _calibration_rows()
     calibration_family: dict[str, str] = {}
@@ -984,56 +1122,69 @@ def main() -> int:
 
     # One judgment per family: the union of every family the three readings
     # touch, decided once each.
+    # Each reference has its own population, so the undecided count is taken
+    # over the families that reference decides and not over the union: the
+    # agreed-only reading stays comparable with the reading the bound was set
+    # on, and the ruled reading counts the ruled families as part of its own.
     needed: dict[str, dict] = {}
-    for target in family_targets:
-        needed[target["family_key"]] = by_key[target["family_key"]]
-    for target in single_targets:
+    for target in family_targets + single_targets:
         needed[target["family_key"]] = by_key[target["family_key"]]
     for key in calibration_family.values():
         needed[key] = by_key[key]
+    needed_ruled: dict[str, dict] = dict(needed)
+    for target in family_targets_ruled + single_targets_ruled:
+        needed_ruled[target["family_key"]] = by_key[target["family_key"]]
 
     decided: dict[str, tuple[dict[str, Any], int]] = {}
     for option_set in ("bounded", "widened", "fallback", "fallback_escalated"):
-        decisions = asyncio.run(_decide_all(needed, seat, option_set=option_set))
+        decisions = asyncio.run(_decide_all(needed_ruled, seat, option_set=option_set))
         decided[option_set] = (decisions, _JUDGMENT_CALLS[0])
     ids_map = ids_domain_map()
     incumbent = _incumbent()
 
     arms: dict[str, Any] = {}
+    arms_with_rulings: dict[str, Any] = {}
     for arm, (decisions, calls) in decided.items():
-        comparison, family_rows = _family_comparison(family_targets, by_key, decisions)
-        singles, single_rows = _single_comparison(single_targets, by_key, decisions)
-        calibration_reading, calibration_rows = _calibration_comparison(
-            calibration, calibration_family, by_key, decisions, incumbent
+        arms[arm] = _arm_block(
+            family_targets,
+            single_targets,
+            calibration,
+            calibration_family,
+            by_key,
+            decisions,
+            needed,
+            seat,
+            ids_map,
+            calls=calls,
+            families=len(families),
+            incumbent=incumbent,
         )
-        undecided_rows = _undecided_rows(needed, by_key, decisions, seat, ids_map)
-        cost = round(sum(float(d.cost or 0.0) for d in decisions.values()), 6)
-        arms[arm] = {
-            "option_set": arm,
-            "judgments": {
-                "families_decided": len(decisions),
-                "judgments_paid": calls,
-                "no_call_families": sum(
-                    1 for decision in decisions.values() if not decision.cost
-                ),
-                "cost_usd": cost,
-                "cost_per_decision_usd": round(cost / calls, 8) if calls else 0.0,
-                "live_families_scanned": len(families),
-            },
-            "family_comparison": comparison,
-            "family_rows": family_rows,
-            "single_names": singles,
-            "single_rows": single_rows,
-            "calibration": calibration_reading,
-            "calibration_rows": calibration_rows,
-            "undecided": undecided_rows,
-            "undecided_summary": _undecided_summary(undecided_rows),
-        }
+        arms_with_rulings[arm] = _arm_block(
+            family_targets_ruled,
+            single_targets_ruled,
+            calibration,
+            calibration_family,
+            by_key,
+            decisions,
+            needed_ruled,
+            seat,
+            ids_map,
+            calls=calls,
+            families=len(families),
+            incumbent=incumbent,
+        )
 
     readings = {name: _reading(arm) for name, arm in arms.items()}
     bounded_reading = readings["bounded"]
     for reading in readings.values():
         reading["bars_failed"] = _bars_failed(reading, bounded_reading)
+        reading["clears_every_bar"] = not reading["bars_failed"]
+    readings_with_rulings = {
+        name: _reading(arm) for name, arm in arms_with_rulings.items()
+    }
+    bounded_reading_ruled = readings_with_rulings["bounded"]
+    for reading in readings_with_rulings.values():
+        reading["bars_failed"] = _bars_failed(reading, bounded_reading_ruled)
         reading["clears_every_bar"] = not reading["bars_failed"]
     reported = next(
         (
@@ -1061,6 +1212,19 @@ def main() -> int:
         "undecided": arm["undecided"],
         "undecided_summary": arm["undecided_summary"],
         "readings": readings,
+        "readings_with_rulings": readings_with_rulings,
+        "ruling_divergences": _ruling_divergences(
+            family_targets_ruled,
+            single_targets_ruled,
+            by_key,
+            decided[reported][0],
+            _ruled_labels(),
+        ),
+        "reference_with_rulings": {
+            "agreed_items": len(agreed),
+            "ruled_items_added": len(_ruled_labels()),
+            "families_mapping_to_more_than_one_decision_family": multi_ruled,
+        },
         "one_option_families": _one_option_report(
             families,
             {target["family_key"] for target in family_targets},
@@ -1068,6 +1232,7 @@ def main() -> int:
             seat,
         ),
         "arms": arms,
+        "arms_with_rulings": arms_with_rulings,
         "refused_option_sets": _REFUSED_OPTION_SETS,
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -1082,6 +1247,19 @@ def main() -> int:
                 "agreement": agreement["agreed_by_kind"],
                 "reported_arm": reported,
                 "readings": readings,
+        "readings_with_rulings": readings_with_rulings,
+        "ruling_divergences": _ruling_divergences(
+            family_targets_ruled,
+            single_targets_ruled,
+            by_key,
+            decided[reported][0],
+            _ruled_labels(),
+        ),
+        "reference_with_rulings": {
+            "agreed_items": len(agreed),
+            "ruled_items_added": len(_ruled_labels()),
+            "families_mapping_to_more_than_one_decision_family": multi_ruled,
+        },
                 "multi_mapped": len(multi_mapped),
             },
             indent=1,

@@ -966,15 +966,16 @@ async def decide_family_domain(
     ids_map: Mapping[str, str],
     *,
     model: str,
-    option_set: str = "bounded",
+    option_set: str = "fallback_escalated",
 ) -> FamilyDomainDecision:
     """Ask Jev one domain Choice for the whole family and return the decision.
 
-    ``option_set`` selects which domains the Choice is offered:
+    ``option_set`` selects which domains the Choice is offered, and defaults to
+    ``fallback_escalated``:
 
     ``bounded``
-        the domains the family's own sources supply, which is the shipped
-        behaviour;
+        the domains the family's own sources supply, which is the behaviour
+        before the widening;
     ``widened``
         every domain of every band a source domain falls in, every band
         umbrella, and ``general``, so the sources' stored domains are evidence
@@ -1153,6 +1154,41 @@ def fan_out_family_decision(
     return tuple(writes)
 
 
+def split_undecided_family(
+    gc: Any,
+    decision: FamilyDomainDecision,
+    members: Sequence[Mapping[str, Any]],
+    ids_map: Mapping[str, str],
+    *,
+    model: str,
+) -> tuple[NameDomainWrite, ...]:
+    """Decide each member of a family below the floor on its own sources.
+
+    The family is held split rather than left unwritten: the per-name form asks
+    about each member separately, so a member whose own sources place it still
+    receives a domain, and a member that cannot be placed keeps its stored one.
+    A family of one member is not split, because the per-name form is the same
+    question it was already asked.
+    """
+    if decision.decided or len(members) < 2:
+        return ()
+    writes: list[NameDomainWrite] = []
+    for member in members:
+        name_decision = asyncio.run(
+            decide_domain(
+                str(member["id"]),
+                str(member.get("description") or ""),
+                member.get("sources") or {},
+                ids_map,
+                model=model,
+            )
+        )
+        if not name_decision.decided:
+            continue
+        writes.append(write_name_domain(gc, str(member["id"]), name_decision))
+    return tuple(writes)
+
+
 def decide_and_write_family(
     gc: Any,
     sn_id: str,
@@ -1179,7 +1215,12 @@ def decide_and_write_family(
         decide_family_domain(family_id, members, ids_map, model=model)
     )
     store_family_decision(gc, decision)
-    writes = fan_out_family_decision(gc, decision)
+    if decision.decided:
+        writes = fan_out_family_decision(gc, decision)
+    else:
+        writes = split_undecided_family(
+            gc, decision, members, ids_map, model=model
+        )
     written = {entry.sn_id for entry in writes}
     return FamilyDomainOutcome(
         decision=decision,
