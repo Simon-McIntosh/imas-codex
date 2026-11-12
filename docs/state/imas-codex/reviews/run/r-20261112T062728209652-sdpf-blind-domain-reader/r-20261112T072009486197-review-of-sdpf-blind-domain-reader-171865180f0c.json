@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-12T07:37:05.257Z",
+  "dispatched_at": "2026-11-12T07:21:38Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-domain-family-labels/labels.json",
+      "line": "7",
+      "severity": "non-blocking",
+      "text": "non-blocking: item-006 (<X>_density_at_plasma_boundary, the last closed flux surface) is filed core_plasma_physics while labels.json:55 files <X>_density_at_pedestal_top as edge_plasma_physics, so the two neighbouring radial loci land on opposite sides; labels-notes.md:9-16 states the rule that produces it and names the boundary and pedestal-top items as the calls it is least sure of, so it is a documented call rather than an oversight, but a scorer comparing these 34 family members against the stored domain should treat both as the reference's weakest calls."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-domain-family-labels/labels.json",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the deliverable has no in-repository guard \u2014 the only check is the one-shot command recorded at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T062728209652-sdpf-blind-domain-reader/gate-labels.log, which asserts the three done_when conditions but not that each entry carries a confidence from {high, medium, low}, a second_choice that is null or a domain key, or a non-empty reason, so a later edit can hollow an entry out and every check the repository holds still passes; the node's fence to two data paths left it no file in which to place such a check, so this is recorded for a follow-on rather than against the worker."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "one commit, 151 insertions and 0 deletions across two new files; docs/evidence/fragments/sn-domain-family-labels/labels-notes.md:1 is a 268-word statement of the boundary rules and labels.json:2-114 is one row per sheet id, all inside the declared scope.",
+    "done_when": "the measure is exactly one entry for each of the 113 ids, every domain a key of the sheet's domains, and the file parsing; /home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T062728209652-sdpf-blind-domain-reader/gate-labels.log prints entries 113, distinct_ids 113, ids_matching_sheet 113, domains_outside_sheet_keys 0, ids_in_sheet_order True, EXIT=0, which asserts that measure and no more.",
+    "goal": "the goal is one physics domain per item of the blind sheet, labelled without sight of the stored domain; docs/evidence/fragments/sn-domain-family-labels/labels.json carries 113 entries (40 family, 73 single) with 113 distinct ids in sheet order, and the reviewed run's own stream.jsonl records only blind-sheet.json and reader-brief.md as reads, so the sheet was the sole input.",
+    "manifest": "read; status complete, commit 171865180f0c, changed_paths the two landed files, tests the inline python3 -I labels check, test_logs gate-labels.log, and its stated distribution (high 65, medium 41, low 7; 25 domains; general 0) reconciles exactly with labels.json.",
+    "write_paths": "the fence was docs/evidence/fragments/sn-domain-family-labels/labels.json and labels-notes.md; git diff --name-status 96e111b85..171865180 lists exactly those two as additions, with no third path and no deletion."
+  },
+  "justifications": {
+    "durability": "no committed check asserts docs/evidence/fragments/sn-domain-family-labels/labels.json:1, so the gate is a one-shot run-log command and an edit that dropped entries or hollowed out a reason would pass every check the repository holds.",
+    "evidence": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T062728209652-sdpf-blind-domain-reader/gate-labels.log records the four done_when figures and EXIT=0, but its command asserts only ids, order and domain keys, not the confidence, second_choice and reason fields the brief requires each entry to carry.",
+    "fit": "labels.json:2 follows the one-object-per-line shape the fragment directory already uses, labels-notes.md:1 states the mechanism rather than a plan label, and neither filename carries a version, plan or ticket identifier.",
+    "goal_fidelity": "docs/evidence/fragments/sn-domain-family-labels/labels.json:2-114 labels all 113 items coherently against the sheet's own domains, and the only defect is that a few radial-locus calls are arguable rather than wrong.",
+    "reuse": "no owner of a shared standard-name label store exists; the capability search over the tree found only per-evaluation evidence fragments (docs/evidence/fragments/sn-judgment-evaluation/sje-docs-labels.html and docs/evidence/fragments/sn-review-through-jev/), which are separate studies rather than a mechanism this addition forks.",
+    "scope_discipline": "git diff --name-status 96e111b85..171865180 shows only the two fenced additions, and the scratch label parts and merge script stayed under the run's /tmp scratch rather than the repository."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is one physics domain per item of the blind sheet, labelled without sight of the stored domain; docs/evidence/fragments/sn-domain-family-labels/labels.json carries 113 entries (40 family, 73 single) with 113 distinct ids in sheet order, and the reviewed run's own stream.jsonl records only blind-sheet.json and reader-brief.md as reads, so the sheet was the sole input.\nVERDICT done_when: the measure is exactly one entry for each of the 113 ids, every domain a key of the sheet's domains, and the file parsing; /home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T062728209652-sdpf-blind-domain-reader/gate-labels.log prints entries 113, distinct_ids 113, ids_matching_sheet 113, domains_outside_sheet_keys 0, ids_in_sheet_order True, EXIT=0, which asserts that measure and no more.\nVERDICT write_paths: the fence was docs/evidence/fragments/sn-domain-family-labels/labels.json and labels-notes.md; git diff --name-status 96e111b85..171865180 lists exactly those two as additions, with no third path and no deletion.\nVERDICT manifest: read; status complete, commit 171865180f0c, changed_paths the two landed files, tests the inline python3 -I labels check, test_logs gate-labels.log, and its stated distribution (high 65, medium 41, low 7; 25 domains; general 0) reconciles exactly with labels.json.\nVERDICT diff: one commit, 151 insertions and 0 deletions across two new files; docs/evidence/fragments/sn-domain-family-labels/labels-notes.md:1 is a 268-word statement of the boundary rules and labels.json:2-114 is one row per sheet id, all inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-domain-family-labels/labels.json:2-114 labels all 113 items coherently against the sheet's own domains, and the only defect is that a few radial-locus calls are arguable rather than wrong.\nSCORE evidence: 17\nJUSTIFICATION evidence: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T062728209652-sdpf-blind-domain-reader/gate-labels.log records the four done_when figures and EXIT=0, but its command asserts only ids, order and domain keys, not the confidence, second_choice and reason fields the brief requires each entry to carry.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-status 96e111b85..171865180 shows only the two fenced additions, and the scratch label parts and merge script stayed under the run's /tmp scratch rather than the repository.\nSCORE durability: 8\nJUSTIFICATION durability: no committed check asserts docs/evidence/fragments/sn-domain-family-labels/labels.json:1, so the gate is a one-shot run-log command and an edit that dropped entries or hollowed out a reason would pass every check the repository holds.\nSCORE fit: 19\nJUSTIFICATION fit: labels.json:2 follows the one-object-per-line shape the fragment directory already uses, labels-notes.md:1 states the mechanism rather than a plan label, and neither filename carries a version, plan or ticket identifier.\nSCORE reuse: 19\nJUSTIFICATION reuse: no owner of a shared standard-name label store exists; the capability search over the tree found only per-evaluation evidence fragments (docs/evidence/fragments/sn-judgment-evaluation/sje-docs-labels.html and docs/evidence/fragments/sn-review-through-jev/), which are separate studies rather than a mechanism this addition forks.\nFINDING docs/evidence/fragments/sn-domain-family-labels/labels.json:7 non-blocking: item-006 (<X>_density_at_plasma_boundary, the last closed flux surface) is filed core_plasma_physics while labels.json:55 files <X>_density_at_pedestal_top as edge_plasma_physics, so the two neighbouring radial loci land on opposite sides; labels-notes.md:9-16 states the rule that produces it and names the boundary and pedestal-top items as the calls it is least sure of, so it is a documented call rather than an oversight, but a scorer comparing these 34 family members against the stored domain should treat both as the reference's weakest calls.\nFINDING docs/evidence/fragments/sn-domain-family-labels/labels.json:1 non-blocking: the deliverable has no in-repository guard \u2014 the only check is the one-shot command recorded at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T062728209652-sdpf-blind-domain-reader/gate-labels.log, which asserts the three done_when conditions but not that each entry carries a confidence from {high, medium, low}, a second_choice that is null or a domain key, or a non-empty reason, so a later edit can hollow an entry out and every check the repository holds still passes; the node's fence to two data paths left it no file in which to place such a check, so this is recorded for a follow-on rather than against the worker.\n",
+  "review_run_id": "r-20261112T072009486197-review-of-sdpf-blind-domain-reader-171865180f0c",
+  "reviewed_base_sha": "96e111b851e3f8ef0d61cf946b931f7064b2d1b2",
+  "reviewed_head_sha": "171865180f0c418cfb7a702b6075a77fad27f113",
+  "reviewed_run_id": "r-20261112T062728209652-sdpf-blind-domain-reader",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261112T072009486197-review-of-sdpf-blind-domain-reader-171865180f0c"
+  },
+  "reviewer_run_id": "r-20261112T072009486197-review-of-sdpf-blind-domain-reader-171865180f0c",
+  "scores": {
+    "durability": 8,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T07:40:53.944649+00:00",
+  "total": 102
+}
