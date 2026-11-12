@@ -747,7 +747,7 @@ def test_altered_shared_part_is_refused_before_it_is_stored():
         worker_generate_docs as owning_worker,
     )
 
-    altered = "The density counts every atom of the species, neutral or charged."
+    altered = "The density covers the whole species population."
     documentation = f"{altered}\n\nA written note specific to this name alone."
     conventions = conventions_context_for("argon_density")
 
@@ -761,3 +761,107 @@ def test_altered_shared_part_is_refused_before_it_is_stored():
         owning_worker._refuse_altered_shared_parts(
             "argon_density", documentation, conventions
         )
+
+
+ARGON_DENSITY_CONTRADICTION = (
+    "The argon density is summed over all charge states, including neutral atoms "
+    "and ions, from neutral argon at Z=0.\n\n"
+    r"$$n_{Ar} = \sum_{Z=0}^{18} n_{Ar^{Z+}}$$"
+)
+
+
+def test_free_text_including_neutrals_is_refused_before_it_is_stored():
+    """The observed contradiction is refused: text that counts neutrals under
+    a stored population that excludes them."""
+
+    from imas_codex.standard_names.context import conventions_context_for
+    from imas_codex.standard_names.docs_gates import (
+        HouseStyleFindingClass,
+        conformance_findings,
+    )
+    from imas_codex.standard_names.worker_tasks import (
+        worker_generate_docs as owning_worker,
+    )
+
+    findings = conformance_findings(
+        "argon_density",
+        description="Argon density summed over all charge states, including neutral atoms.",
+        documentation=ARGON_DENSITY_CONTRADICTION,
+    )
+    contradictory = [
+        finding
+        for finding in findings
+        if finding.finding_class is HouseStyleFindingClass.CONTRADICTED_SHARED_PART
+    ]
+    assert contradictory, "the neutral-inclusive text was not refused"
+    assert "neutral" in contradictory[0].detail.lower()
+
+    # Text the writer itself negates agrees with the stored population.
+    from imas_codex.standard_names.docs_gates import population_contradiction
+
+    assert (
+        population_contradiction(
+            "argon_density",
+            "The sum runs over all ionic charge states, including every ion but "
+            "excluding neutral atoms.",
+        )
+        is None
+    )
+
+    with pytest.raises(owning_worker.SharedPartAltered):
+        owning_worker._refuse_altered_shared_parts(
+            "argon_density",
+            ARGON_DENSITY_CONTRADICTION,
+            conventions_context_for("argon_density"),
+            description="Argon density summed over all charge states, including neutral atoms.",
+        )
+
+
+def test_description_states_the_settled_population():
+    """The one-line description carries the population the definition counts."""
+
+    from imas_codex.standard_names.docs_gates import description_with_population
+
+    written = description_with_population(
+        "argon_density", "Number density of argon in the plasma."
+    )
+    assert "neutral atoms excluded" in written
+    # A description that already names the population is left as written.
+    assert (
+        description_with_population(
+            "argon_density", "Number density of argon ions, neutral atoms excluded."
+        )
+        == "Number density of argon ions, neutral atoms excluded."
+    )
+    # A quantity that is not a species density carries no species population.
+    assert (
+        description_with_population(
+            "electron_temperature", "Temperature of the electrons in the plasma."
+        )
+        == "Temperature of the electrons in the plasma."
+    )
+
+
+def test_rendered_text_does_not_open_with_a_bare_fragment():
+    """A fragment opening is completed by the first note, not left alone."""
+
+    from imas_codex.standard_names.worker_tasks import (
+        worker_generate_docs as owning_worker,
+    )
+
+    rendered = owning_worker._joined_opening(
+        "Number density of argon",
+        ["The density counts ions summed over all charge states."],
+    )
+    opening, _, rest = rendered.partition("\n\n")
+    assert opening.endswith(".")
+    assert "ions summed over all charge states" in opening
+    assert rest.strip() == ""
+
+    # A fragment the model itself wrote is completed the same way.
+    from imas_codex.standard_names.docs_gates import open_without_fragment
+
+    completed = open_without_fragment(
+        "Number density of argon\n\nIts continuum definition is:\n\n$$n = N/V$$"
+    )
+    assert completed.startswith("Number density of argon. Its continuum definition is:")

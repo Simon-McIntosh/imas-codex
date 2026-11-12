@@ -617,6 +617,7 @@ class HouseStyleFindingClass(StrEnum):
     TEMPLATE_NOTE = "template_note"
     NON_CANONICAL_EQUATION = "non_canonical_equation"
     SHARED_PART_ALTERED = "shared_part_altered"
+    CONTRADICTED_SHARED_PART = "contradicted_shared_part"
 
 
 @dataclass(frozen=True)
@@ -793,6 +794,41 @@ SPECIES_POPULATION_SENTENCE = (
     "The density counts ions summed over all charge states; neutral atoms are excluded."
 )
 
+
+# A bare species density counts ions only. Free text that includes neutral
+# atoms, or that sums from the neutral charge state, states the opposite
+# population and cannot stand beside the stored sentence.
+_NEUTRAL_MENTION_RE = re.compile(r"\bneutrals?\b|z\s*=\s*0\b", re.IGNORECASE)
+_NEUTRAL_NEGATION_RE = re.compile(
+    r"(?:exclud|exclus|omitt|ignor|except|apart\s+from|instead\s+of"
+    r"|\bno\b|\bnot\b|\bnever\b|\bwithout\b|\bnor\b)",
+    re.IGNORECASE,
+)
+
+
+def population_contradiction(name: str, text: str) -> str | None:
+    """Return the phrase that contradicts the stored population, if any.
+
+    A bare species density counts ions summed over all charge states with
+    neutral atoms excluded. Text that includes neutral atoms, or that starts a
+    sum at the neutral charge state, says the opposite of the stored sentence
+    and is refused rather than published beside it. A mention the text itself
+    negates ("... but excluding neutral atoms") agrees with the stored
+    population and is not a contradiction.
+    """
+
+    if not text or not is_species_density_name(name):
+        return None
+    for mention in _NEUTRAL_MENTION_RE.finditer(text):
+        before = text[max(0, mention.start() - 40) : mention.start()]
+        after = text[mention.end() : mention.end() + 30]
+        if _NEUTRAL_NEGATION_RE.search(before) or _NEUTRAL_NEGATION_RE.search(after):
+            continue
+        start = max(0, mention.start() - 60)
+        return text[start : mention.end() + 30].strip()
+    return None
+
+
 _OPERATOR_TOKENS: frozenset[str] | None = None
 
 # Two sentences whose word sets agree this closely state the same shared part,
@@ -842,7 +878,28 @@ def is_species_density_name(name: str) -> bool:
     except ParseError:
         return False
     subjects = [q.token for q in ir.qualifiers if q.token in load_subjects()]
-    return len(subjects) == 1 and name.split("_")[-1] == "density"
+    if len(subjects) != 1 or name.split("_")[-1] != "density":
+        return False
+    # The population rule counts ions over charge states, which describes an
+    # atomic species rather than a lepton or an aggregate such as a beam.
+    single = {"alpha_particle", "electron", "neutron", "runaway_electron"}
+    aggregate = {
+        "edge_localized_mode",
+        "halo",
+        "hard_xray",
+        "impurity_ion",
+        "impurity_species",
+        "ion",
+        "ion_species",
+        "neutral_beam",
+        "neutral_species",
+        "pellet",
+        "pellet_species",
+        "shattered_pellet",
+        "shattered_pellet_fragment",
+        "shattered_pellet_species",
+    }
+    return subjects[0] not in single | aggregate
 
 
 def shared_part_sentences(
@@ -871,6 +928,76 @@ def shared_part_sentences(
     return tuple(parts)
 
 
+def fixed_shared_parts(
+    name: str, conventions: AppliedConventions | dict[str, Any] | None
+) -> tuple[dict[str, str], ...]:
+    """Return the settled text the model must write around, not paraphrase.
+
+    Each entry names the part, the anchor it is registered under, the sentence
+    every name carrying it states, and the equation where the part has one.
+    """
+
+    if not conventions:
+        return ()
+    if isinstance(conventions, dict):
+        conventions = AppliedConventions.model_validate(conventions)
+    equations = {
+        concept.token: concept.equation.strip()
+        for concept in conventions.concepts
+        if concept.equation
+    }
+    parts: list[dict[str, str]] = []
+    for anchor, sentence in shared_part_sentences(name, conventions):
+        token = anchor.split(":", 1)[1]
+        part = {"part": "population" if anchor.startswith("population:") else anchor}
+        parts.append(
+            {
+                "part": part["part"],
+                "anchor": anchor,
+                "sentence": sentence,
+                "equation": equations.get(token, ""),
+            }
+        )
+    return tuple(parts)
+
+
+def description_with_population(name: str, description: str) -> str:
+    """State the settled population in a species density's one-line description."""
+
+    if not is_species_density_name(name):
+        return description
+    text = description.strip().rstrip(".")
+    if not text:
+        return description
+    lowered = text.lower()
+    if "neutral" in lowered or "exclud" in lowered:
+        return description
+    if "charge state" in lowered:
+        return f"{text}, with neutral atoms excluded."
+    return (
+        f"{text}. The ions of the species are counted over all charge states, "
+        "with neutral atoms excluded."
+    )
+
+
+def open_without_fragment(documentation: str) -> str:
+    """Complete a bare opening fragment with the paragraph that follows it.
+
+    A definition that opens with a noun phrase alone ("Number density of
+    argon") and a blank line reads as a truncated heading. The fragment is
+    joined to the next paragraph so the definition opens with a sentence.
+    """
+
+    paragraphs = documentation.split("\n\n")
+    if len(paragraphs) < 2:
+        return documentation
+    head = paragraphs[0].strip()
+    if not head or head.endswith((".", "!", "?", ":")) or head.startswith("$$"):
+        return documentation
+    merged = f"{head.rstrip(',;')}. {paragraphs[1].strip()}"
+    return "\n\n".join([merged, *paragraphs[2:]])
+
+
 def _word_set(text: str) -> set[str]:
     return set(re.findall(r"[a-z0-9_]+", text.lower()))
 
@@ -894,6 +1021,7 @@ def shared_part_findings(
     name: str,
     conventions: AppliedConventions,
     documentation: str,
+    description: str = "",
 ) -> list[HouseStyleFinding]:
     """Report a written definition whose shared part departs from its wording.
 
@@ -901,11 +1029,26 @@ def shared_part_findings(
     stored sentence unchanged. A definition that omits it, or that states the
     same part in other words, has had the shared wording altered by whoever
     wrote it, and is reported for that part rather than scored on the prose.
+    Text that states the opposite of a shared part is reported separately: it
+    contradicts the stored wording rather than paraphrasing it.
     """
 
     parts = shared_part_sentences(name, conventions)
     if not parts or not documentation.strip():
         return []
+    contradiction = population_contradiction(name, f"{description}\n{documentation}")
+    if contradiction is not None:
+        return [
+            HouseStyleFinding(
+                finding_class=HouseStyleFindingClass.CONTRADICTED_SHARED_PART,
+                registry_entry="population:species",
+                detail=(
+                    f"the written text includes neutral atoms ({contradiction!r}) "
+                    f"where the stored wording reads {SPECIES_POPULATION_SENTENCE!r}"
+                ),
+                sentence=SPECIES_POPULATION_SENTENCE,
+            )
+        ]
     written = _collapsed(documentation)
     sentences = _prose_sentences(documentation)
     findings: list[HouseStyleFinding] = []
@@ -1389,7 +1532,9 @@ def conformance_findings(
             description=description,
             documentation=documentation,
         ),
-        *shared_part_findings(name, conventions, documentation),
+        *shared_part_findings(
+            name, conventions, documentation, description=description
+        ),
     ]
 
 
