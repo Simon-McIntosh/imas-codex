@@ -1,0 +1,50 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T02:25:26.718Z",
+  "dispatched_at": "2026-11-12T02:19:14Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/serve-answers-inside-the-connect-limit.html:52",
+      "id": "done_when-1",
+      "reason": "a worker cannot make this control deterministic without a decision the plan does not settle (defer warmup until after `initialize`, or exempt the deliberate background imports from the prohibited set), and an indeterminate head arm will be read as a failing gate and invites weakening the control rather than repairing it.",
+      "text": "the guard requires a test to fail when the discovery commands or the schema runtime are imported before the server answers `initialize`, but importing `imas_codex.llm.server` \u2014 which `serve` does immediately \u2014 calls `warmup.start()` at module load (`imas_codex/llm/server.py:83`), and its `discovery` and `graph` groups import `imas_codex.discovery` and `imas_codex.graph`/`graph.schema` in background threads (`imas_codex/llm/_warmup.py:98-124`), so at head the guard fails whenever those threads win the race with the handshake and passes when they lose; the documented head design keeps that warmup rather than removing it",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/serve-answers-inside-the-connect-limit.html:50",
+      "id": "reasoning-1",
+      "reason": "with no stated base quantity for the arm and no consistent breakdown to attribute against, the node will either fail an unreachable 90 % target or substitute its own denominator, and the receipt will not show what the gate claims to show.",
+      "text": "the 90 % attribution arm is measured against \"the base revision's wall time to first answer\", which \u00a71 gives as 35.1 s, while every number the plan offers comes from the `--help` profile (19.9 s of 27.5 s), so the arm silently demands about 31.6 s of attributed time \u2014 some 11.7 s beyond anything the plan has measured \u2014 and \u00a71's own breakdown does not add up: 11.5 s of language-model client plus 4.6 s of schema runtime plus 3.9 s of facility configuration is 20.0 s against the 18.6 s they are said to arrive through, so a reader cannot tell whether the parts are additive, nested, or double-counted",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "fdf3617086c2eb3b2c533c7f9810ff80b71a4be7",
+  "plan_fingerprint": "5b74f3569523e4c0de86d98448167e5b411230b9eac5cc6f94c97b15932fa377",
+  "plan_slug": "serve-answers-inside-the-connect-limit",
+  "plan_version": 0,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T021620744685-plan-review-of-serve-answers-inside-the-connect-limit",
+  "reviewed_blob_sha": "6f9c0c142ae903a7f9a838a29bea70264fa0d619",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the spawn anchor `.mcp.json` at the repository root exists and invokes `uv run --no-sync --project ${HOME}/Code/imas-codex imas-codex serve`, which is the form \u00a72 says the server is spawned as; the cited evidence directory resolves; no extensionless href is cited.",
+    "done_when": "a finding \u2014 the new import guard at \u00a72 line 52 forbids importing the discovery commands and the schema runtime before `initialize` is answered, while the server's own import path starts background warmup threads that import exactly those packages at module load, so the head arm of that control is a race rather than a measure.",
+    "evidence_paths": "pass \u2014 \u00a72 line 45 names `docs/evidence/fragments/serve-answers-inside-the-connect-limit/`, which exists in the tree and is tracked (`briefs/lazy-command-group.md`), so the timings, loads and base arms land on a durable committed path rather than a scratchpad.",
+    "naming": "pass \u2014 the section and its done-when name outcomes (cold starts, first answer, named parts) rather than symbols, and carry no plan labels, stage names, ticket numbers or changelog prose.",
+    "reasoning": "a finding \u2014 the attribution arm at \u00a72 line 50 is scored against a base quantity \u00a71 never measured and rests on a breakdown whose parts exceed the total they are said to sum to, and the section prescribes no implementation, which is correct.",
+    "single_goal": "pass \u2014 \u00a72 has one deliverable (the server's time to first answer), and each done-when arm measures a facet of it: the quiet-node median, the loaded-node starts, the attribution receipt, the command-line cost, the import guard, tool-name parity and command-list parity.",
+    "wiring": "pass \u2014 the plan declares itself standalone with no depends-on, informs or gates to name, and its one section-to-followup link (f-saicl-001, whose prompt names \u00a72) resolves to a section that exists."
+  },
+  "section_digests": {
+    "_document": "5e2c783815e69924c53eb2d6d4d73623b019a3ec61c110aef2ee43e3849cb0b6",
+    "s1": "6c87335b00f52a7c2a64ee7c06ad022be9bc7092987c1e229639aea06016d904",
+    "s2": "3f10b514753f05c7198672d9f1b961c552dd84769001b92b7b4d34fa4986fe40"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T02:32:02.546954+00:00",
+  "total": null
+}
