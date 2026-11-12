@@ -23,11 +23,10 @@ from unittest.mock import AsyncMock, MagicMock, call, patch
 
 import pytest
 
-from tests.standard_names.graph_transaction_doubles import transaction_double
-
 from imas_codex.standard_names.worker_tasks import (
     worker_common as _owning_worker_common,
 )
+from tests.standard_names.graph_transaction_doubles import transaction_double
 
 # =============================================================================
 # Path constants
@@ -122,7 +121,6 @@ def _persist_call(gc):
         if _PERSIST_STATEMENT in call_obj.args[0]:
             return call_obj
     raise AssertionError("the docs persist statement was never issued")
-
 
 
 @contextmanager
@@ -652,3 +650,114 @@ def test_generate_docs_prompt_includes_metadata_requirements():
     assert "name:" in system.lower(), (
         "System prompt must instruct LLM to use name: inline link form for cross-refs"
     )
+
+
+# =============================================================================
+# Shared definition parts
+# =============================================================================
+
+
+def _rendered_documentation(name: str) -> str:
+    """Render one name's definition through the writer's own renderer."""
+
+    from imas_codex.standard_names.context import conventions_context_for
+    from imas_codex.standard_names.worker_tasks import (
+        worker_generate_docs as owning_worker,
+    )
+
+    written = (
+        f"A written note about {name.replace('_', ' ')} that the model supplies, "
+        "specific to this node's name alone and written by the model."
+    )
+    return owning_worker._documentation_with_registry_form(
+        name, written, conventions_context_for(name)
+    )
+
+
+@pytest.mark.parametrize(
+    ("operator", "left", "right"),
+    [
+        (
+            "flux_surface_averaged",
+            "flux_surface_averaged_electron_density",
+            "flux_surface_averaged_electron_temperature",
+        ),
+        (
+            "volume_averaged",
+            "volume_averaged_argon_density",
+            "volume_averaged_electron_temperature",
+        ),
+        (
+            "line_averaged",
+            "line_averaged_argon_density",
+            "line_averaged_electron_temperature",
+        ),
+        (
+            "line_integrated",
+            "line_integrated_electron_density",
+            "line_integrated_radiance",
+        ),
+        (
+            "time_derivative",
+            "time_derivative_of_magnetic_field",
+            "time_derivative_of_electron_density",
+        ),
+    ],
+)
+def test_two_quantities_carry_one_operator_sentence(operator, left, right):
+    """One operator is stated in one wording whichever quantity it is applied to."""
+
+    from imas_standard_names.grammar.terms import select_conventions
+
+    from imas_codex.standard_names.docs_gates import shared_part_sentences
+
+    left_sentences = shared_part_sentences(left, select_conventions(left))
+    right_sentences = shared_part_sentences(right, select_conventions(right))
+    left_operator = next(
+        text for anchor, text in left_sentences if anchor == f"concept:{operator}"
+    )
+    right_operator = next(
+        text for anchor, text in right_sentences if anchor == f"concept:{operator}"
+    )
+
+    assert left_operator == right_operator
+    assert left_operator in _rendered_documentation(left)
+    assert right_operator in _rendered_documentation(right)
+
+
+def test_species_family_carries_one_population_statement():
+    """Every member of a species family states the population identically."""
+
+    from imas_codex.standard_names.docs_gates import SPECIES_POPULATION_SENTENCE
+
+    members = ["argon_density", "iron_density", "boron_density", "neon_density"]
+    for member in members:
+        assert SPECIES_POPULATION_SENTENCE in _rendered_documentation(member)
+
+
+def test_altered_shared_part_is_refused_before_it_is_stored():
+    """A definition that restates the population is refused, not persisted."""
+
+    from imas_codex.standard_names.context import conventions_context_for
+    from imas_codex.standard_names.docs_gates import (
+        HouseStyleFindingClass,
+        conformance_findings,
+    )
+    from imas_codex.standard_names.worker_tasks import (
+        worker_generate_docs as owning_worker,
+    )
+
+    altered = "The density counts every atom of the species, neutral or charged."
+    documentation = f"{altered}\n\nA written note specific to this name alone."
+    conventions = conventions_context_for("argon_density")
+
+    findings = conformance_findings("argon_density", documentation=documentation)
+    assert any(
+        finding.finding_class is HouseStyleFindingClass.SHARED_PART_ALTERED
+        for finding in findings
+    )
+
+    with pytest.raises(owning_worker.SharedPartAltered):
+        owning_worker._refuse_altered_shared_parts(
+            "argon_density", documentation, conventions
+        )

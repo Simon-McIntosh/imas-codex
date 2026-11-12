@@ -600,3 +600,48 @@ class TestBuildWorklist:
         # via the deterministic id fallback in select_anchor.
         assert worklist[0]["anchor"] is not None
         assert worklist[0]["deferred"] is False
+
+
+def test_shared_part_census_counts_one_wording_per_family():
+    """A rendered family is one wording; a planted divergence is counted as two."""
+
+    from imas_standard_names.grammar.terms import select_conventions
+
+    from imas_codex.standard_names.context import conventions_context_for
+    from imas_codex.standard_names.docs_gates import shared_part_sentences
+    from imas_codex.standard_names.harmonize import shared_part_form_counts
+    from imas_codex.standard_names.worker_tasks import (
+        worker_generate_docs as owning_worker,
+    )
+
+    members = ["argon_density", "iron_density", "boron_density", "neon_density"]
+
+    def rendered(name: str) -> dict[str, str]:
+        written = f"A note about {name.replace('_', ' ')} specific to this name."
+        return {
+            "id": name,
+            "documentation": owning_worker._documentation_with_registry_form(
+                name, written, conventions_context_for(name)
+            ),
+        }
+
+    entries = [rendered(member) for member in members]
+
+    def population(entry: dict[str, str]) -> str:
+        return next(
+            text
+            for anchor, text in shared_part_sentences(
+                entry["id"], select_conventions(entry["id"])
+            )
+            if anchor == "population:species"
+        )
+
+    agreed = shared_part_form_counts(entries, population)
+    assert len(agreed) == 1
+
+    entries[-1]["documentation"] = entries[-1]["documentation"].replace(
+        "neutral atoms are excluded",
+        "and neutral atoms are included",
+    )
+    divergent = shared_part_form_counts(entries, population)
+    assert len(divergent) > 1

@@ -1,0 +1,58 @@
+<section id="sdbc-rendered-shared-wording" data-node="sdbc-rendered-shared-wording">
+<h2>Shared definition parts rendered from one stored wording</h2>
+
+<p>A definition has parts that belong to a concept shared with other names — the operator applied, the population counted, the locus — and parts that belong to this name alone. The writer now emits only the latter. Every shared part is substituted from one stored wording, and a definition that departs from it after rendering is refused before it is stored.</p>
+
+<h3 id="sdbc-rendered-shared-wording-mechanism">The mechanism</h3>
+
+<table>
+<thead><tr><th>Part</th><th>Stored wording</th><th>Where it is rendered</th></tr></thead>
+<tbody>
+<tr><td>Operator</td><td><code>operator_definition_sentence</code>: the grammar library's operator entry, sentence and equation, unchanged for every name that applies it</td><td><code>docs_gates.shared_part_sentences</code>, installed by <code>_documentation_with_registry_form</code></td></tr>
+<tr><td>Population</td><td><code>SPECIES_POPULATION_SENTENCE</code>: <q>The density counts ions summed over all charge states; neutral atoms are excluded.</q> — the catalog decision of 2026-11-12</td><td>same renderer, on every bare species density</td></tr>
+<tr><td>Locus</td><td><code>locus_definition_sentence</code>: the locus registry's definition with its equation and symbols</td><td>same renderer, unchanged by this section</td></tr>
+</tbody>
+</table>
+
+<p>The renderer removes a written sentence that states a shared part in other words and installs the stored sentence, so a definition carries one wording per part rather than two. <code>shared_part_findings</code> reports a definition that still carries a paraphrase or omits the part, as a further class of the documentation conformance findings (<code>shared_part_altered</code>), and <code>_refuse_altered_shared_parts</code> refuses such a definition in the writer before <code>persist_generated_docs</code> runs.</p>
+
+<h3 id="sdbc-rendered-shared-wording-census">The wording census</h3>
+
+<p>Measured by <code>harmonize.shared_part_form_counts</code>, which reads the written definition rather than the stored sentence, so it can report a departure. Over names rendered by the writer's own renderer (<code>rendered-wording-census.json</code>):</p>
+
+<table>
+<thead><tr><th>Group</th><th>Names</th><th>Wording forms</th><th>Published baseline</th></tr></thead>
+<tbody>
+<tr><td><code>flux_surface_averaged</code></td><td>electron density, electron temperature</td><td>1</td><td>8 forms over 32 names</td></tr>
+<tr><td><code>volume_averaged</code></td><td>argon density, electron temperature</td><td>1</td><td>15 of 49 descriptions use no operator phrase</td></tr>
+<tr><td><code>line_averaged</code></td><td>argon density, electron temperature</td><td>1</td><td>13 of 23 descriptions use no operator phrase</td></tr>
+<tr><td><code>line_integrated</code></td><td>electron density, radiance</td><td>1</td><td>one published name</td></tr>
+<tr><td><code>time_derivative</code></td><td>magnetic field, electron density</td><td>1</td><td>3 published names</td></tr>
+<tr><td>species family</td><td>argon, iron, boron, neon, helium density</td><td>1</td><td>20 of 20 published species families carry more than one wording</td></tr>
+<tr><td>species family, one member planted divergent</td><td>same five, last member's population clause flipped</td><td>2</td><td>—</td></tr>
+</tbody>
+</table>
+
+<p>The planted divergence is the census's control: the same measure that counts one form on the rendered family counts two when one member states a different population. The declared mutation — a census that reports the first member's form for every member — turns that test red (<code>test_shared_part_census_counts_one_wording_per_family</code> <code>FAILED</code>, <code>1 failed</code>), while the unmutated head arm is green.</p>
+
+<h3 id="sdbc-rendered-shared-wording-gate">The gate</h3>
+
+<p>Run on <code>all_debug</code> from this node's worktree on 2026-11-12:</p>
+
+<pre># command: uv run --no-sync python -m pytest -p no:cacheprovider tests/standard_names/test_generate_docs.py tests/standard_names/test_docs_gates.py tests/standard_names/test_harmonize.py
+=================== 94 passed, 1 warning in 64.24s (0:01:04) ===================
+EXIT=0</pre>
+
+<p>The tests that carry this section's measure are <code>test_two_quantities_carry_one_operator_sentence</code> (five operators, two quantities each), <code>test_species_family_carries_one_population_statement</code>, <code>test_altered_shared_part_is_refused_before_it_is_stored</code> and <code>test_shared_part_census_counts_one_wording_per_family</code>.</p>
+
+<h3 id="sdbc-rendered-shared-wording-unmeasured">Not measured by this node</h3>
+
+<ul>
+<li>The names above are rendered by the writer's own renderer with fixed input prose, not written by the documentation model on a disposable graph. No model call was made, so the node's metered spend is USD 0 against the USD 5 ceiling.</li>
+<li>The documentation review scores of names written this way, beside their previous scores, and the cost of writing one family member beside the present per-name cost, are therefore not recorded here. Both need the model on the disposable graph.</li>
+</ul>
+
+<h3 id="sdbc-rendered-shared-wording-proposal">Wording proposed to the grammar library</h3>
+
+<p>The species population rule has no sentence in the grammar library's <code>concepts.yml</code>. It is stored in this repository as <code>docs_gates.SPECIES_POPULATION_SENTENCE</code> and proposed upstream as a population entry so that one stored wording serves every species name.</p>
+</section>

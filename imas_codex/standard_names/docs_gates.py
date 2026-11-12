@@ -616,6 +616,7 @@ class HouseStyleFindingClass(StrEnum):
     TEMPLATE_OPENING = "template_opening"
     TEMPLATE_NOTE = "template_note"
     NON_CANONICAL_EQUATION = "non_canonical_equation"
+    SHARED_PART_ALTERED = "shared_part_altered"
 
 
 @dataclass(frozen=True)
@@ -625,6 +626,7 @@ class HouseStyleFinding:
     finding_class: HouseStyleFindingClass
     registry_entry: str
     detail: str
+    sentence: str = ""
 
 
 _TEMPLATE_PLACEHOLDER_RE = re.compile(r"\{[^{}]+\}")
@@ -780,6 +782,199 @@ def locus_definition_sentence(concept: Any) -> str:
     else:
         clause = f"{clause}."
     return f"{definition} {clause}"
+
+
+# The population a bare species density counts is one decision for the
+# catalog: ions, summed over all charge states, with neutral atoms excluded. A
+# name that includes neutral atoms says so in the name. The grammar library
+# carries no sentence for this rule yet, so it is stored here for a reviewer to
+# read and change, and proposed upstream.
+SPECIES_POPULATION_SENTENCE = (
+    "The density counts ions summed over all charge states; neutral atoms are excluded."
+)
+
+_OPERATOR_TOKENS: frozenset[str] | None = None
+
+# Two sentences whose word sets agree this closely state the same shared part,
+# so the one that is not the stored wording is an alteration of it rather than
+# a different claim.
+_PARAPHRASE_OVERLAP = 0.75
+
+
+def _operator_tokens() -> frozenset[str]:
+    """The tokens the operator registry defines."""
+
+    global _OPERATOR_TOKENS
+    if _OPERATOR_TOKENS is None:
+        from imas_standard_names.grammar.vocab_loaders import load_operators
+
+        _OPERATOR_TOKENS = frozenset(load_operators().operators)
+    return _OPERATOR_TOKENS
+
+
+def operator_definition_sentence(concept: Any) -> str:
+    """Render an operator's defining sentence from its registry entry.
+
+    The registry supplies every word, so two names that apply the operator to
+    different quantities carry this sentence unchanged; only the parts stored
+    in the name are substituted around it.
+    """
+
+    definition = concept.definition.strip()
+    if not definition:
+        return ""
+    if not definition.endswith("."):
+        definition = f"{definition}."
+    phrase = concept.phrase.strip()
+    if not phrase:
+        return definition
+    return f"The {phrase} is {definition[0].lower()}{definition[1:]}"
+
+
+def is_species_density_name(name: str) -> bool:
+    """Whether *name* is a bare species number density."""
+
+    from imas_standard_names.grammar.parser import ParseError, parse
+    from imas_standard_names.grammar.vocab_loaders import load_subjects
+
+    try:
+        ir = parse(name, strict=True).ir
+    except ParseError:
+        return False
+    subjects = [q.token for q in ir.qualifiers if q.token in load_subjects()]
+    return len(subjects) == 1 and name.split("_")[-1] == "density"
+
+
+def shared_part_sentences(
+    name: str, conventions: AppliedConventions
+) -> tuple[tuple[str, str], ...]:
+    """Return the stored wording of each shared part *name* carries.
+
+    Each entry pairs the registry anchor with the sentence every name carrying
+    that part must state.
+    """
+
+    parts: list[tuple[str, str]] = []
+    operators = _operator_tokens()
+    loci = _locus_registry_tokens()
+    for concept in conventions.concepts:
+        if concept.token in operators:
+            sentence = operator_definition_sentence(concept)
+        elif concept.token in loci:
+            sentence = locus_definition_sentence(concept)
+        else:
+            continue
+        if sentence and sentence not in {text for _, text in parts}:
+            parts.append((f"concept:{concept.token}", sentence))
+    if is_species_density_name(name):
+        parts.append(("population:species", SPECIES_POPULATION_SENTENCE))
+    return tuple(parts)
+
+
+def _word_set(text: str) -> set[str]:
+    return set(re.findall(r"[a-z0-9_]+", text.lower()))
+
+
+def _sentence_overlap(left: str, right: str) -> float:
+    a, b = _word_set(left), _word_set(right)
+    if not a or not b:
+        return 0.0
+    return len(a & b) / len(a | b)
+
+
+def _prose_sentences(text: str) -> list[str]:
+    return [
+        sentence.strip()
+        for sentence in re.split(r"(?<=[.!?])\s+|\n+", text)
+        if sentence.strip()
+    ]
+
+
+def shared_part_findings(
+    name: str,
+    conventions: AppliedConventions,
+    documentation: str,
+) -> list[HouseStyleFinding]:
+    """Report a written definition whose shared part departs from its wording.
+
+    A shared part is stated once for the catalog, so a definition carries the
+    stored sentence unchanged. A definition that omits it, or that states the
+    same part in other words, has had the shared wording altered by whoever
+    wrote it, and is reported for that part rather than scored on the prose.
+    """
+
+    parts = shared_part_sentences(name, conventions)
+    if not parts or not documentation.strip():
+        return []
+    written = _collapsed(documentation)
+    sentences = _prose_sentences(documentation)
+    findings: list[HouseStyleFinding] = []
+    for anchor, sentence in parts:
+        stored = _collapsed(sentence)
+        if stored in written:
+            continue
+        altered = next(
+            (
+                candidate
+                for candidate in sentences
+                if _sentence_overlap(candidate, stored) >= _PARAPHRASE_OVERLAP
+            ),
+            None,
+        )
+        if altered is None:
+            detail = f"the definition omits the stored wording: {stored}"
+        else:
+            detail = (
+                f"the definition states the shared part in other words "
+                f"({_collapsed(altered)[:160]!r}) where the stored wording "
+                f"reads {stored!r}"
+            )
+        findings.append(
+            HouseStyleFinding(
+                finding_class=HouseStyleFindingClass.SHARED_PART_ALTERED,
+                registry_entry=anchor,
+                detail=detail,
+                sentence=stored,
+            )
+        )
+    return findings
+
+
+def replace_altered_shared_parts(
+    documentation: str, parts: tuple[tuple[str, str], ...]
+) -> str:
+    """State each shared part in its stored wording, dropping a paraphrase.
+
+    The writer's own sentences are kept; a sentence that restates a shared part
+    in other words is removed and the stored sentence is appended, so the
+    definition carries one wording per shared part rather than two.
+    """
+
+    lines = documentation.splitlines()
+    added: list[str] = []
+    for _, sentence in parts:
+        stored = _collapsed(sentence)
+        present = any(stored in _collapsed(text) for text in [*lines, *added])
+        if present:
+            continue
+        kept_lines: list[str] = []
+        for line in lines:
+            if not line.strip():
+                kept_lines.append(line)
+                continue
+            kept = [
+                candidate
+                for candidate in _prose_sentences(line)
+                if stored in _collapsed(line)
+                or _sentence_overlap(candidate, stored) < _PARAPHRASE_OVERLAP
+            ]
+            kept_lines.append(" ".join(kept))
+        lines = kept_lines
+        added.append(sentence)
+    text = "\n".join(lines).strip()
+    if added:
+        text = "\n\n".join([text, *added])
+    return text
 
 
 def _collapsed(text: str) -> str:
@@ -1188,11 +1383,14 @@ def conformance_findings(
     """Select a name's registry entries and return its conformance findings."""
 
     conventions = select_conventions(name)
-    return house_style_findings(
-        conventions,
-        description=description,
-        documentation=documentation,
-    )
+    return [
+        *house_style_findings(
+            conventions,
+            description=description,
+            documentation=documentation,
+        ),
+        *shared_part_findings(name, conventions, documentation),
+    ]
 
 
 def score_documentation(

@@ -1,0 +1,107 @@
+{
+  "operators": {
+    "flux_surface_averaged": {
+      "names": [
+        "flux_surface_averaged_electron_density",
+        "flux_surface_averaged_electron_temperature"
+      ],
+      "form_count": 1,
+      "forms": {
+        "the flux surface average is the average of a quantity over a closed magnetic flux surface weighted by the inverse magnitude of the poloidal flux gradient": [
+          "flux_surface_averaged_electron_density",
+          "flux_surface_averaged_electron_temperature"
+        ]
+      }
+    },
+    "volume_averaged": {
+      "names": [
+        "volume_averaged_argon_density",
+        "volume_averaged_electron_temperature"
+      ],
+      "form_count": 1,
+      "forms": {
+        "the volume average is the integral of a quantity over a stated volume divided by that volume": [
+          "volume_averaged_argon_density",
+          "volume_averaged_electron_temperature"
+        ]
+      }
+    },
+    "line_averaged": {
+      "names": [
+        "line_averaged_argon_density",
+        "line_averaged_electron_temperature"
+      ],
+      "form_count": 1,
+      "forms": {
+        "the line average is the integral of a quantity along a stated chord divided by the chord length": [
+          "line_averaged_argon_density",
+          "line_averaged_electron_temperature"
+        ]
+      }
+    },
+    "line_integrated": {
+      "names": [
+        "line_integrated_electron_density",
+        "line_integrated_radiance"
+      ],
+      "form_count": 1,
+      "forms": {
+        "the line integral is the integral of a quantity along a stated path": [
+          "line_integrated_electron_density",
+          "line_integrated_radiance"
+        ]
+      }
+    },
+    "time_derivative": {
+      "names": [
+        "time_derivative_of_magnetic_field",
+        "time_derivative_of_electron_density"
+      ],
+      "form_count": 1,
+      "forms": {
+        "the time derivative is the rate of change of a quantity with time at a fixed point or label": [
+          "time_derivative_of_magnetic_field",
+          "time_derivative_of_electron_density"
+        ]
+      }
+    }
+  },
+  "families": {
+    "species": {
+      "members": [
+        "argon_density",
+        "iron_density",
+        "boron_density",
+        "neon_density",
+        "helium_density"
+      ],
+      "form_count": 1,
+      "forms": {
+        "the density counts ions summed over all charge states neutral atoms are excluded": [
+          "argon_density",
+          "iron_density",
+          "boron_density",
+          "neon_density",
+          "helium_density"
+        ]
+      },
+      "planted_divergent_form_count": 2,
+      "planted_forms": {
+        "the density counts ions summed over all charge states neutral atoms are excluded": [
+          "argon_density",
+          "iron_density",
+          "boron_density",
+          "neon_density"
+        ],
+        "the density counts ions summed over all charge states and neutral atoms are included": [
+          "helium_density"
+        ]
+      }
+    }
+  },
+  "published_baseline": {
+    "flux_surface_averaged_forms": 8,
+    "flux_surface_averaged_names": 32,
+    "species_families_with_more_than_one_wording": "20 of 20 (published-family-census.txt)"
+  }
+}

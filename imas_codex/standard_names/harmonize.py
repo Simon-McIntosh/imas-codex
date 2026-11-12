@@ -104,6 +104,51 @@ def drift(members: list[dict[str, Any]], *, n: int = 6) -> float:
     return 1.0 - (max_cohort / len(members))
 
 
+def written_part_form(documentation: str, stored_sentence: str) -> str:
+    """Return the wording one definition uses for a shared part.
+
+    The sentence that shares the most words with the stored wording is returned
+    with its words normalized, so two definitions stating the part in the same
+    words yield one form, while a paraphrase yields a different form and an
+    omission yields its own. The measure reads what was written, never the
+    stored sentence, so it can report a definition that departs from it.
+    """
+
+    stored = set(_TOKEN_RE.findall(stored_sentence.lower()))
+    forms: list[str] = []
+    for sentence in re.split(r"(?<=[.!?])\s+|\n+", documentation or ""):
+        tokens = _TOKEN_RE.findall(sentence.lower())
+        if not tokens:
+            continue
+        overlap = len(set(tokens) & stored) / len(set(tokens) | stored) if stored else 0.0
+        if overlap >= 0.5:
+            forms.append(" ".join("#" if t.isdigit() else t for t in tokens))
+    if not forms:
+        return "<omitted>"
+    return " | ".join(sorted(forms))
+
+
+def shared_part_form_counts(
+    entries: Sequence[dict[str, Any]],
+    stored_sentence_for: Any,
+) -> dict[str, list[str]]:
+    """Count the wording forms one shared part is written in across *entries*.
+
+    Returns each form against the names that use it, so a part carried as one
+    wording has a single entry and a family whose members word it differently
+    has several. A definition omitting the part is counted under
+    ``<omitted>``: it has not agreed with the others, it has said nothing.
+    """
+
+    forms: dict[str, list[str]] = {}
+    for entry in entries:
+        form = written_part_form(
+            entry.get("documentation") or "", stored_sentence_for(entry)
+        )
+        forms.setdefault(form, []).append(entry.get("id") or entry.get("name") or "")
+    return forms
+
+
 def group_signature(members: list[dict[str, Any]]) -> str:
     """Stable, content-sensitive signature for a family's membership + docs.
 

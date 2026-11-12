@@ -591,6 +591,8 @@ def _documentation_with_registry_form(
         _opening_line,
         house_style_findings,
         locus_definition_sentence,
+        replace_altered_shared_parts,
+        shared_part_sentences,
     )
 
     written = normalize_prose_spelling(documentation)
@@ -652,7 +654,42 @@ def _documentation_with_registry_form(
         if sentence and sentence not in written:
             written = f"{written.rstrip()}\n\n{sentence}"
         break
+    written = replace_altered_shared_parts(
+        written, shared_part_sentences(name, applied)
+    )
     return written
+
+
+class SharedPartAltered(ValueError):
+    """A definition departed from a shared part's stored wording."""
+
+
+def _refuse_altered_shared_parts(
+    name: str,
+    documentation: str,
+    conventions: dict[str, Any] | None,
+) -> None:
+    """Refuse a definition whose shared part was altered after rendering.
+
+    The shared parts are stated once for the catalog. A definition that carries
+    one of them in other words has been edited away from the stored wording,
+    and is refused before it is persisted rather than published.
+    """
+
+    if not conventions:
+        return
+    from imas_standard_names.grammar.terms import AppliedConventions
+
+    from imas_codex.standard_names.docs_gates import shared_part_findings
+
+    applied = AppliedConventions.model_validate(conventions)
+    findings = shared_part_findings(name, applied, documentation)
+    if findings:
+        raise SharedPartAltered(
+            "; ".join(
+                f"{finding.registry_entry}: {finding.detail}" for finding in findings
+            )
+        )
 
 
 async def process_generate_docs_batch(
@@ -875,15 +912,19 @@ async def process_generate_docs_batch(
                 )
                 lease.charge_event(cost, _event)
 
-            # ── Persist ───────────────────────────────────────────────
+            # Persist the rendered definition once its shared parts conform
+            rendered_documentation = _documentation_with_registry_form(
+                sn_id, result_obj.documentation, prompt_context["conventions"]
+            )
+            _refuse_altered_shared_parts(
+                sn_id, rendered_documentation, prompt_context["conventions"]
+            )
             await _asyncio.to_thread(
                 persist_generated_docs,
                 sn_id=sn_id,
                 claim_token=claim_token,
                 description=normalize_description_text(result_obj.description),
-                documentation=_documentation_with_registry_form(
-                    sn_id, result_obj.documentation, prompt_context["conventions"]
-                ),
+                documentation=rendered_documentation,
                 model=model,
                 run_id=mgr.run_id,
             )
