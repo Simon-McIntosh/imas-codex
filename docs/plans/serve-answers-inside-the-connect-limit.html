@@ -6,8 +6,8 @@
   <meta name="docs-project" content="imas-codex">
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="serve-answers-inside-the-connect-limit">
-  <meta name="plan-title" content="The MCP Server Answers Inside The Client's Connect Limit">
-  <meta name="plan-summary" content="Cut imas-codex serve's time to its first protocol answer below the client's 30 s connect limit on a loaded node, so sessions start with their tools.">
+  <meta name="plan-title" content="The MCP Server Answers Inside The Client&#x27;s Connect Limit">
+  <meta name="plan-summary" content="Cut imas-codex serve&#x27;s time to its first protocol answer below the client&#x27;s 30 s connect limit on a loaded node, so sessions start with their tools.">
   <meta name="plan-status" content="active">
   <meta name="plan-roi" content="mid">
   <meta name="plan-effort-hours" content="3.0">
@@ -23,6 +23,8 @@
   <title>The MCP Server Answers Inside The Client's Connect Limit | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-11-12">
 </head>
 <body>
   <main class="plan-doc">
@@ -37,7 +39,7 @@
         <tr><td><code>reckon mcp</code></td><td>11.5 s warm; over 30 s at session start</td><td>30 s</td></tr>
       </tbody>
     </table>
-    <p>For <code>imas-codex serve</code> the time is spent before the server exists. <code>imas-codex serve --help</code>, which starts nothing, took 27.5 s, and an import profile of the command-line package accounts for 19.9 s of it: 18.6 s arrives through the discovery commands, of which the language-model client library is 11.5 s, the schema runtime 4.6 s and the facility configuration 3.9 s. The server command pays for every other command's imports. The remaining 7.6 s of the 27.5 s is not attributed by that profile, and process spawn does not explain it.</p>
+    <p>For <code>imas-codex serve</code> the time is spent before the server exists. <code>imas-codex serve --help</code>, which starts nothing, took 27.5 s, and an import profile of the command-line package accounts for 19.9 s of it: 18.6 s arrives through the discovery commands, of which the language-model client library is 11.5 s, the schema runtime 4.6 s and the facility configuration 3.9 s. Those three are cumulative import times that include what each imports in turn, so they overlap and do not sum to the 18.6 s. The server command pays for every other command's imports. The remaining 7.6 s of the 27.5 s is not attributed by that profile, and process spawn does not explain it. Nothing here attributes the further 7.6 s between the 27.5 s help reading and the 35.1 s first answer; §2's attribution is of the whole 35.1 s.</p>
     <p>The client's connect limit was raised to 180 s in the user's Claude Code settings on 2026-11-12 as a stopgap. That hides the delay and does not remove it: every session still waits half a minute for its tools, and any client without that setting still fails. The <code>reckon mcp</code> half belongs to the reckon repository and is not in this plan.</p>
 
     <h2 id="s2">§2 — First answer in under ten seconds</h2>
@@ -49,23 +51,21 @@
       <li>five starts on the fleet node, where sessions run, each answer in under 15 s, with the node's load average recorded beside each and the base revision timed in the same sitting;</li>
       <li>the record attributes at least 90 % of the base revision's wall time to first answer to named parts, so the 7.6 s §1 leaves unexplained is accounted for;</li>
       <li><code>imas-codex serve --help</code> returns in under 10 s on the debug-partition node by the same measure;</li>
-      <li>a test fails when any of the discovery commands, the language-model client library or the schema runtime is imported before the server answers <code>initialize</code>, or by the time <code>imas-codex --help</code> exits, and that test is shown failing at the base revision;</li>
+      <li>a test fails when any of the discovery commands, the language-model client library or the schema runtime is imported on the path that answers <code>initialize</code>, or by the time <code>imas-codex --help</code> exits, and that test is shown failing at the base revision; the server's deferred background warm-up is outside that path, and the test gives the same verdict on ten consecutive runs whether or not the warm-up has started;</li>
       <li>the tool list the server answers with is identical, by name, to the list at the base revision in each of its three serve modes;</li>
       <li><code>imas-codex --help</code> still lists every command it lists at the base revision, and the command-line test files pass with no added failure.</li>
     </ul>
 
-    <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-    </section>
+    
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-saicl-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-11-12">
-        <h4 class="r-fu-title">Cut the server's start-up time</h4>
-        <div class="r-fu-body"><p>§2 is ready and independent of every other plan.</p></div>
-        <pre class="r-fu-prompt">/reckon-build serve-answers-inside-the-connect-limit §2</pre>
-      </article>
-    </section>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-saicl-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-11-12" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Cut the server&#x27;s start-up time</h4>
+    <div class="r-fu-body"><p>§2 is ready and independent of every other plan.</p></div>
+    <pre class="r-fu-prompt">/reckon-build serve-answers-inside-the-connect-limit §2</pre>
+    </article>
+</section>
   </main>
 </body>
 </html>
