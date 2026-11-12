@@ -373,28 +373,115 @@ def _source_domain(graph: GraphClient, sn_id: str) -> str | None:
     return rows[0]["domain"] if rows else None
 
 
+OWN_DOMAIN = {
+    "electron": MEMBER_DOMAINS[0],
+    "argon": MEMBER_DOMAINS[1],
+    "krypton": MEMBER_DOMAINS[2],
+}
+
+
+def _split_batch(seen: list[str], *, per_name: float = 0.9) -> Any:
+    """The family question falls below the floor; each per-name question decides.
+
+    Each member is answered with the domain its own source sits in, which is
+    what makes the split a per-name decision rather than a second family one.
+    """
+
+    async def decide(states, questions, **_kwargs):  # noqa: ANN001
+        family_question = "family of" in str(questions)
+        seen.append("family" if family_question else "name")
+        if family_question:
+            return [(_answer("transport", 0.4), 0.0)], 0.0
+        options = list(questions[dd.QUESTION]["criteria"])
+        subject = str(states[0]["name"]).rsplit(":", 1)[-1]
+        wanted = OWN_DOMAIN[subject]
+        return [
+            (_answer(wanted if wanted in options else options[0], per_name), 0.0)
+        ], 0.0
+
+    return decide
+
+
 @pytest.mark.graph
-def test_a_family_below_the_floor_writes_none_of_its_members(
+def test_a_family_below_the_floor_is_held_split_across_its_members(
     graph: GraphClient, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """An undecided family is reported whole, and no member's domain moves."""
+    """A family the floor refuses is split: each member is asked on its own."""
     members = _plant_family(
         graph,
         {"physical_base": "ion_temperature"},
         ["electron", "argon", "krypton"],
         "sn:e2e-floor",
+        domains=MEMBER_DOMAINS,
     )
-    monkeypatch.setattr(dd, "decide_batch", _fake_batch(_answer("transport", 0.4)))
+    seen: list[str] = []
+    recorded: list[tuple[str, str | None, tuple[str, ...]]] = []
+
+    class _Write:
+        def __init__(self, sn_id: str, domain: str | None) -> None:
+            self.sn_id = sn_id
+            self.physics_domain = domain
+
+    def _record(gc, sn_id, decision, **_kwargs):  # noqa: ANN001
+        recorded.append((sn_id, decision.choice, tuple(decision.candidates)))
+        return _Write(sn_id, decision.choice)
+
+    monkeypatch.setattr(dd, "decide_batch", _split_batch(seen))
+    monkeypatch.setattr(dd, "write_name_domain", _record)
     outcome = dd.decide_and_write_family(graph, members[0], IDS_MAP, model="test-model")
-    assert outcome.decision.decided is False
-    assert outcome.writes == ()
-    assert set(outcome.unwritten) == set(members)
-    assert set(_physics_domains(graph, members).values()) == {"general"}, (
-        "an undecided family leaves every member's domain untouched"
+    assert outcome.decision.decided is False, (
+        "the family itself is still below the floor; the split is held, not decided"
     )
     record = dd.read_family_decision(graph, members[0])
     assert record is not None and record.choice is None
     assert "floor" in (record.undecided_reason or "")
+    assert seen.count("name") == len(members), (
+        f"each member is put to the per-name form once: {seen}"
+    )
+    assert set(outcome.unwritten) == set(), (
+        f"no member is left unwritten: {outcome.unwritten}"
+    )
+    assert len(recorded) == len(members), recorded
+    offered = {sn_id: candidates for sn_id, _choice, candidates in recorded}
+    for member in members:
+        own = _source_domain(graph, member)
+        assert own in offered[member], (
+            "each member is offered the domain its own sources carry, not the "
+            f"family's union: {member} offered {offered[member]}"
+        )
+    for sn_id, choice, _candidates in recorded:
+        assert choice == OWN_DOMAIN[sn_id.rsplit(":", 1)[-1]], (
+            "each member is decided on its own sources rather than the "
+            f"family's single answer: {sn_id} settled on {choice}"
+        )
+
+
+@pytest.mark.graph
+def test_a_member_its_own_sources_cannot_place_keeps_its_stored_domain(
+    graph: GraphClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The split asks every member, and writes only the ones it can place."""
+    members = _plant_family(
+        graph,
+        {"physical_base": "ion_heat_flux"},
+        ["electron", "argon", "krypton"],
+        "sn:e2e-floor-control",
+    )
+    seen: list[str] = []
+    monkeypatch.setattr(dd, "decide_batch", _split_batch(seen, per_name=0.4))
+    outcome = dd.decide_and_write_family(graph, members[0], IDS_MAP, model="test-model")
+    assert outcome.decision.decided is False
+    assert seen.count("name") == len(members), (
+        f"every member is still put to its own question: {seen}"
+    )
+    assert outcome.writes == (), (
+        "a member whose own sources fall below the floor is not written: "
+        f"{outcome.writes}"
+    )
+    assert set(outcome.unwritten) == set(members)
+    assert set(_physics_domains(graph, members).values()) == {"general"}, (
+        "a member the per-name form cannot place keeps its stored domain"
+    )
 
 
 @pytest.mark.graph

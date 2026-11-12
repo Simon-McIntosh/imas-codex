@@ -31,7 +31,7 @@ import asyncio
 import json
 from collections import Counter
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from functools import lru_cache
 from typing import Any
@@ -52,8 +52,10 @@ __all__ = [
     "FamilyDomainDecision",
     "FamilyDomainOutcome",
     "NameDomainWrite",
+    "band_domains",
     "band_of",
     "band_umbrella",
+    "build_family_domain_question",
     "build_family_question",
     "build_family_state",
     "build_question",
@@ -63,6 +65,7 @@ __all__ = [
     "decide_domain",
     "decide_family_domain",
     "derived_parent_domain_decision",
+    "domain_bands",
     "dominant_domain",
     "family_candidate_domains",
     "family_path_counts",
@@ -85,6 +88,17 @@ CONCURRENCY = 8
 #: it; the derivation and the accuracy above it are recorded in
 #: ``docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-writer.html``.
 CONFIDENCE_FLOOR: float = 0.68
+
+#: The option sets the one family decision can be offered. ``bounded`` is the
+#: domains the family's sources supply, ``widened`` the whole bands those
+#: domains fall in, and ``fallback`` the bounded set first with the widened set
+#: only for a family the bounded answer leaves undecided.
+OPTION_SETS: tuple[str, ...] = (
+    "bounded",
+    "widened",
+    "fallback",
+    "fallback_escalated",
+)
 
 
 def _pretty(raw: str) -> str:
@@ -113,6 +127,19 @@ def band_of(domain: str) -> str | None:
 def band_umbrella(domain: str) -> str | None:
     band = band_of(domain)
     return _bands()[2].get(band) if band else None
+
+
+def domain_bands() -> tuple[str, ...]:
+    """Every band umbrella, in precedence order: the widened first-stage options."""
+    return tuple(band["umbrella"] for band in _guidance().get("precedence") or ())
+
+
+def band_domains(umbrella: str) -> tuple[str, ...]:
+    """The domains one band holds, in precedence order, the umbrella among them."""
+    for band in _guidance().get("precedence") or ():
+        if band["umbrella"] == umbrella:
+            return tuple(band["domains"])
+    return ()
 
 
 def option_text(domain: str) -> str:
@@ -633,6 +660,44 @@ def build_family_state(
     }
 
 
+def build_family_domain_question(
+    options: Sequence[str],
+    member_count: int,
+    *,
+    prior: str | None = None,
+) -> dict[str, Any]:
+    """The second stage: which domain of the chosen band the family belongs to."""
+    instructions = (
+        f"Choose the one physics domain that best describes this family of "
+        f"{member_count} standard names, which measure the same quantity at "
+        "the same locus and differ only in species, charge state, component or "
+        "device. Judge the concept the family names, not which IDS carries any "
+        "one member's sources: every member receives the domain you choose. "
+        "These options are every domain of the bands this family's source "
+        "domains fall in, together with every band umbrella, so a domain none "
+        "of its sources' paths lives in may be the right one: the sources' "
+        "stored domains are evidence, not a bound. Prefer "
+        "the most specific option that plainly fits the quantity; choose the "
+        "band umbrella only when no narrower option fits. The options are "
+        "listed most specific first."
+    )
+    if prior is not None:
+        instructions += (
+            f" Every source path this family's names are drawn from is stored "
+            f"under {prior}, which is the domain the family would keep when no "
+            "option plainly fits; that is where the data lives, not where the "
+            "quantity belongs."
+        )
+    order = sorted(options, key=lambda d: (band_of(d) != "general", d))
+    return {
+        QUESTION: {
+            "type": "choice",
+            "instructions": instructions,
+            "criteria": {domain: option_text(domain) for domain in order},
+        }
+    }
+
+
 def build_family_question(options: Sequence[str], member_count: int) -> dict[str, Any]:
     """The Choice for a family: one domain for every name it holds.
 
@@ -680,35 +745,151 @@ def _family_recorded_correction(
     return recorded.pop() if len(recorded) == 1 else None
 
 
-async def decide_family_domain(
+def _answer_of(results: Any, key: str) -> Any:
+    """The Choice answer for *key* in a ``decide_batch`` result, or ``None``."""
+    if results and results[0]:
+        answers = results[0][0]
+        if isinstance(answers, dict):
+            return answers.get(key)
+    return None
+
+
+def _probabilities(answer: Mapping[str, Any]) -> dict[str, float]:
+    return {
+        _pretty(str(k)): float(v)
+        for k, v in (answer.get("probabilities") or {}).items()
+    }
+
+
+def widened_candidate_domains(
+    members: Sequence[Mapping[str, Any]], ids_map: Mapping[str, str]
+) -> tuple[str, ...]:
+    """The domains a family is offered when its sources do not bound it.
+
+    Every domain of every band a source domain falls in, so a source in
+    ``transport`` no longer pins the family to ``transport``; every band
+    umbrella, so a concept in another band can be reached at that band's
+    umbrella; and ``general``. The sources' stored domains stay in the set as
+    evidence of where the data lives, not as its limit.
+    """
+    found = set(family_candidate_domains(members, ids_map))
+    for domain in list(found):
+        umbrella = band_umbrella(domain)
+        if umbrella:
+            found |= set(band_domains(umbrella))
+    found |= set(domain_bands())
+    found.add("general")
+    return tuple(sorted(found))
+
+
+async def _decide_widened(
     family_id: str,
+    member_ids: tuple[str, ...],
     members: Sequence[Mapping[str, Any]],
     ids_map: Mapping[str, str],
-    *,
     model: str,
+    *,
+    prior: str | None = None,
 ) -> FamilyDomainDecision:
-    """Ask Jev one domain Choice for the whole family and return the decision.
+    """One Choice over the band-widened option set.
 
-    A family whose options collapse to one domain takes it without a call. A
-    recorded lead correction wins over the Choice and applies to the whole
-    family. A call that fails, or a choice below :data:`CONFIDENCE_FLOOR`,
-    leaves the family undecided and names the reason: the caller writes none
-    of its members.
+    A family sourced entirely from one part of the Data Dictionary is no
+    longer offered only that part's domains: the whole band the source sits in
+    is offered, so the concept's own domain can be chosen even where no source
+    lives. A single call keeps the option list short enough that a decided
+    answer stays above :data:`CONFIDENCE_FLOOR`.
+
+    ``prior`` is the domain a family with a single source domain would
+    otherwise keep without a judgment. When it is given, an answer that places
+    nothing above the floor, or a call that fails, leaves the family holding
+    ``prior`` rather than undecided: the source domain remains the answer until
+    a judgment displaces it.
     """
-    member_ids = tuple(str(member.get("id")) for member in members)
-    options = family_candidate_domains(members, ids_map)
-    corrected_domain = _family_recorded_correction(members)
-    if corrected_domain is not None:
+    if not members:
+        return FamilyDomainDecision(
+            family_id=family_id,
+            members=member_ids,
+            candidates=(),
+            choice=None,
+            probability=None,
+            model=model,
+            decided_at=None,
+            undecided_reason="the family has no members",
+        )
+    options = widened_candidate_domains(members, ids_map)
+
+    def held(reason: str, cost: float) -> FamilyDomainDecision:
+        if prior is not None:
+            return kept(cost)
         return FamilyDomainDecision(
             family_id=family_id,
             members=member_ids,
             candidates=options,
-            choice=corrected_domain,
-            probability=1.0,
-            model="recorded-correction",
-            decided_at=datetime.now(UTC).isoformat(),
-            corrected=True,
+            choice=None,
+            probability=None,
+            model=model,
+            decided_at=None,
+            undecided_reason=reason,
+            cost=cost,
         )
+
+    def kept(cost: float) -> FamilyDomainDecision:
+        """The family keeps its only source domain; the judgment did not displace it."""
+        return FamilyDomainDecision(
+            family_id=family_id,
+            members=member_ids,
+            candidates=options,
+            choice=prior,
+            probability=None,
+            model=model,
+            decided_at=datetime.now(UTC).isoformat(),
+            cost=cost,
+        )
+
+    results, cost = await decide_batch(
+        [build_family_state(family_id, members, ids_map, options)],
+        build_family_domain_question(options, len(members), prior=prior),
+        model=model,
+        service=SERVICE_TAG,
+        concurrency=CONCURRENCY,
+    )
+    answer = _answer_of(results, QUESTION)
+    if not isinstance(answer, dict):
+        return held("the Jev call returned no answer", cost)
+    choice = answer.get("choice")
+    probability = _probabilities(answer).get(_pretty(str(choice)))
+    if choice not in options:
+        return held(f"the choice {choice!r} is not one of the candidates", cost)
+    if probability is None:
+        return held("the answer carried no probability", cost)
+    if probability < CONFIDENCE_FLOOR:
+        return held(
+            f"chosen probability {probability:.3f} is below the floor "
+            + f"{CONFIDENCE_FLOOR:.2f}",
+            cost,
+        )
+    return FamilyDomainDecision(
+        family_id=family_id,
+        members=member_ids,
+        candidates=options,
+        choice=str(choice),
+        probability=probability,
+        model=model,
+        decided_at=datetime.now(UTC).isoformat(),
+        cost=cost,
+    )
+
+
+async def _decide_bounded(
+    family_id: str,
+    member_ids: tuple[str, ...],
+    members: Sequence[Mapping[str, Any]],
+    options: tuple[str, ...],
+    model: str,
+    *,
+    ids_map: Mapping[str, str],
+) -> FamilyDomainDecision:
+    """One Choice over the domains the family's own sources supply."""
     if len(options) <= 1:
         return FamilyDomainDecision(
             family_id=family_id,
@@ -726,11 +907,7 @@ async def decide_family_domain(
         service=SERVICE_TAG,
         concurrency=CONCURRENCY,
     )
-    answer: dict[str, Any] | None = None
-    if results and results[0]:
-        answers = results[0][0]
-        if isinstance(answers, dict):
-            answer = answers.get(QUESTION)
+    answer = _answer_of(results, QUESTION)
 
     def held(reason: str) -> FamilyDomainDecision:
         return FamilyDomainDecision(
@@ -748,10 +925,7 @@ async def decide_family_domain(
     if not isinstance(answer, dict):
         return held("the Jev call returned no answer")
     choice = answer.get("choice")
-    probabilities = {
-        str(k): float(v) for k, v in (answer.get("probabilities") or {}).items()
-    }
-    probability = probabilities.get(str(choice))
+    probability = _probabilities(answer).get(str(choice))
     if choice not in options:
         return held(f"the choice {choice!r} is not one of the candidates")
     if probability is None:
@@ -771,6 +945,86 @@ async def decide_family_domain(
         decided_at=datetime.now(UTC).isoformat(),
         cost=cost,
     )
+
+
+async def decide_family_domain(
+    family_id: str,
+    members: Sequence[Mapping[str, Any]],
+    ids_map: Mapping[str, str],
+    *,
+    model: str,
+    option_set: str = "fallback_escalated",
+) -> FamilyDomainDecision:
+    """Ask Jev one domain Choice for the whole family and return the decision.
+
+    ``option_set`` selects which domains the Choice is offered, and defaults to
+    ``fallback_escalated``:
+
+    ``bounded``
+        the domains the family's own sources supply, which is the behaviour
+        before the widening;
+    ``widened``
+        every domain of every band a source domain falls in, every band
+        umbrella, and ``general``, so the sources' stored domains are evidence
+        rather than a bound;
+    ``fallback``
+        the bounded set first, and the widened set only for a family the
+        bounded answer leaves undecided, so a family the narrow options already
+        settle is never re-litigated and a family they cannot place is still
+        offered the concept's own domain;
+    ``fallback_escalated``
+        ``fallback``, with a family whose bounded options collapse to one
+        domain also put to the widened question. Such a family would otherwise
+        take its source domain at probability 1.0 without any judgment, which
+        is the case this decision exists to get right: a name whose only source
+        sits in another part of the dictionary can never be placed. The source
+        domain is stated in the question as evidence, and the family keeps it
+        when the judgment puts nothing above the floor. This is the opt-in set:
+        it is the fallback behaviour with that shortcut removed, and it is what
+        a caller asking for a source-independent decision should name.
+
+    Under ``bounded``, ``widened`` and ``fallback`` a family whose options
+    collapse to one domain takes it without a call. A
+    recorded lead correction wins over the Choice and applies to the whole
+    family. A call that fails, or a choice below :data:`CONFIDENCE_FLOOR`,
+    leaves the family undecided and names the reason: the caller writes none
+    of its members.
+    """
+    if option_set not in OPTION_SETS:
+        raise ValueError(f"unknown option set {option_set!r}")
+    member_ids = tuple(str(member.get("id")) for member in members)
+    options = family_candidate_domains(members, ids_map)
+    corrected_domain = _family_recorded_correction(members)
+    if corrected_domain is not None:
+        return FamilyDomainDecision(
+            family_id=family_id,
+            members=member_ids,
+            candidates=options,
+            choice=corrected_domain,
+            probability=1.0,
+            model="recorded-correction",
+            decided_at=datetime.now(UTC).isoformat(),
+            corrected=True,
+        )
+    if option_set == "widened":
+        return await _decide_widened(family_id, member_ids, members, ids_map, model)
+    bounded = await _decide_bounded(
+        family_id, member_ids, members, options, model, ids_map=ids_map
+    )
+    single_source = options[0] if len(options) == 1 else None
+    if option_set == "fallback":
+        if bounded.decided:
+            return bounded
+        widened = await _decide_widened(family_id, member_ids, members, ids_map, model)
+        return replace(widened, cost=bounded.cost + widened.cost)
+    if option_set != "fallback_escalated":
+        return bounded
+    if bounded.decided and single_source is None:
+        return bounded
+    widened = await _decide_widened(
+        family_id, member_ids, members, ids_map, model, prior=single_source
+    )
+    return replace(widened, cost=bounded.cost + widened.cost)
 
 
 #: One record per family, holding the decision every member reads. The family
@@ -887,6 +1141,41 @@ def fan_out_family_decision(
     return tuple(writes)
 
 
+def split_undecided_family(
+    gc: Any,
+    decision: FamilyDomainDecision,
+    members: Sequence[Mapping[str, Any]],
+    ids_map: Mapping[str, str],
+    *,
+    model: str,
+) -> tuple[NameDomainWrite, ...]:
+    """Decide each member of a family below the floor on its own sources.
+
+    The family is held split rather than left unwritten: the per-name form asks
+    about each member separately, so a member whose own sources place it still
+    receives a domain, and a member that cannot be placed keeps its stored one.
+    A family of one member is not split, because the per-name form is the same
+    question it was already asked.
+    """
+    if decision.decided or len(members) < 2:
+        return ()
+    writes: list[NameDomainWrite] = []
+    for member in members:
+        name_decision = asyncio.run(
+            decide_domain(
+                str(member["id"]),
+                str(member.get("description") or ""),
+                member.get("sources") or {},
+                ids_map,
+                model=model,
+            )
+        )
+        if not name_decision.decided:
+            continue
+        writes.append(write_name_domain(gc, str(member["id"]), name_decision))
+    return tuple(writes)
+
+
 def decide_and_write_family(
     gc: Any,
     sn_id: str,
@@ -913,7 +1202,10 @@ def decide_and_write_family(
         decide_family_domain(family_id, members, ids_map, model=model)
     )
     store_family_decision(gc, decision)
-    writes = fan_out_family_decision(gc, decision)
+    if decision.decided:
+        writes = fan_out_family_decision(gc, decision)
+    else:
+        writes = split_undecided_family(gc, decision, members, ids_map, model=model)
     written = {entry.sn_id for entry in writes}
     return FamilyDomainOutcome(
         decision=decision,

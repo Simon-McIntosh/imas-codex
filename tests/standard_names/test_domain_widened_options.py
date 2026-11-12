@@ -1,0 +1,396 @@
+"""A family's domain options are not bounded by where its sources live.
+
+A name whose sources all sit in one part of the Data Dictionary is offered only
+that part's domains when the options are drawn from the sources, so a concept
+that belongs elsewhere cannot receive its domain. The widened decision offers
+every domain of the band the concept is judged to belong to, so the sources'
+stored domains are evidence rather than a bound.
+
+The model is stubbed here: the test is about which options the decision is
+offered and which it can therefore choose, not about the model's judgment.
+"""
+
+from __future__ import annotations
+
+import asyncio
+from typing import Any
+
+import pytest
+
+from imas_codex.standard_names import domain_decision as dd
+
+#: A concept in the heating band whose only Data Dictionary source sits in
+#: transport: the family's sources cannot reach the domain the concept needs.
+CONCEPT = "auxiliary_heating"
+SOURCE_DOMAIN = "transport"
+PLANTED = [
+    {
+        "id": "neutral_beam_shine_through_fraction",
+        "description": "Fraction of injected neutral beam power that passes through the plasma.",
+        "physics_domain": SOURCE_DOMAIN,
+        "domain_correction": None,
+        "sources": {
+            "dd:equilibrium/time_slice/profiles_1d/neutral_beam": SOURCE_DOMAIN
+        },
+    }
+]
+
+#: The same concept in a family of two names whose sources disagree, so the
+#: source-bounded set offers two domains and can therefore answer below the
+#: floor: a family with one option is auto-decided and never reaches a second
+#: judgment.
+PLANTED_PAIR = [
+    PLANTED[0],
+    {
+        "id": "neutral_beam_power_absorbed",
+        "description": "Fraction of the injected neutral beam power absorbed by the plasma.",
+        "physics_domain": "equilibrium",
+        "domain_correction": None,
+        "sources": {"dd:equilibrium/time_slice/profiles_1d/beam_power": "equilibrium"},
+    },
+]
+
+
+def _stub(concept: str, *, domain_probability: float = 0.9, fallback: str = "") -> Any:
+    """A stub that picks *concept* when it is offered and *fallback* otherwise.
+
+    Which options the decision is offered is the subject of these tests, so the
+    stub plays a model that would choose the concept's domain whenever it can.
+    """
+
+    async def decide(states, questions, **_kwargs):  # noqa: ANN001
+        options = list(questions[dd.QUESTION]["criteria"])
+        if concept in options:
+            choice = concept
+        elif fallback in options:
+            choice = fallback
+        else:
+            choice = options[0]
+        return [
+            (
+                {
+                    dd.QUESTION: {
+                        "choice": choice,
+                        "probabilities": {choice: domain_probability},
+                    }
+                },
+                0.0,
+            )
+        ], 0.0
+
+    return decide
+
+
+def test_the_widened_option_set_reaches_past_the_source_band() -> None:
+    """A source in transport no longer pins the family to transport's band alone."""
+    options = dd.widened_candidate_domains(PLANTED, {})
+    assert {"equilibrium", "core_plasma_physics"} <= set(options), (
+        "every domain of the source's band is offered"
+    )
+    assert {"auxiliary_heating", "edge_plasma_physics"} <= set(options), (
+        "every band umbrella is offered, so another band is reachable"
+    )
+    assert "current_drive" not in options, (
+        "a specific domain in an unrelated band is reached through that band's "
+        "umbrella, not offered directly"
+    )
+
+
+def test_a_single_source_does_not_bound_the_options(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The concept's domain is offered though no source lives in it."""
+    monkeypatch.setattr(dd, "decide_batch", _stub(CONCEPT))
+
+    bounded = dd.family_candidate_domains(PLANTED, {})
+    assert CONCEPT not in bounded, (
+        "the source-bounded option set cannot reach the concept's domain; if this "
+        "fails the comparison arm is not the narrow set it claims to be"
+    )
+
+    decision = asyncio.run(
+        dd.decide_family_domain(
+            "planted-family", PLANTED, {}, model="stub", option_set="widened"
+        )
+    )
+    assert decision.decided, decision.undecided_reason
+    assert decision.choice == CONCEPT, (
+        "a name sourced only from transport must still receive its concept's "
+        "domain under the widened options"
+    )
+    assert CONCEPT in decision.candidates
+    assert set(decision.candidates) == set(dd.widened_candidate_domains(PLANTED, {}))
+    assert decision.probability == pytest.approx(0.9)
+
+
+def test_the_same_name_offered_only_its_sources_does_not(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The comparison arm keeps the source domain, which is the defect."""
+    monkeypatch.setattr(dd, "decide_batch", _stub(CONCEPT, fallback=SOURCE_DOMAIN))
+
+    decision = asyncio.run(
+        dd.decide_family_domain(
+            "planted-family", PLANTED, {}, model="stub", option_set="bounded"
+        )
+    )
+    assert decision.decided, decision.undecided_reason
+    assert decision.choice == SOURCE_DOMAIN
+    assert CONCEPT not in decision.candidates
+
+
+def test_a_band_below_the_floor_leaves_the_family_undecided(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A family none of whose options clears the floor writes nothing."""
+    monkeypatch.setattr(dd, "decide_batch", _stub(CONCEPT, domain_probability=0.4))
+    decision = asyncio.run(
+        dd.decide_family_domain(
+            "planted-family", PLANTED, {}, model="stub", option_set="widened"
+        )
+    )
+    assert not decision.decided
+    assert decision.choice is None
+    assert "below the floor" in decision.undecided_reason
+
+
+def test_the_fallback_set_widens_only_what_the_bounded_answer_cannot_place(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A family the narrow options leave undecided gets a second, wider Choice.
+
+    The first Choice is offered only the sources' domains and answers
+    ``transport`` below the floor; the second is offered the widened set and
+    reaches the concept's domain. Both judgments are paid for and the record
+    carries their total.
+    """
+    asked: list[list[str]] = []
+
+    async def decide(states, questions, **_kwargs):  # noqa: ANN001
+        options = list(questions[dd.QUESTION]["criteria"])
+        asked.append(options)
+        if CONCEPT in options:
+            return [
+                (
+                    {dd.QUESTION: {"choice": CONCEPT, "probabilities": {CONCEPT: 0.9}}},
+                    0.5,
+                )
+            ], 1.5
+        return [
+            (
+                {
+                    dd.QUESTION: {
+                        "choice": SOURCE_DOMAIN,
+                        "probabilities": {SOURCE_DOMAIN: 0.4},
+                    }
+                },
+                0.5,
+            )
+        ], 1.5
+
+    monkeypatch.setattr(dd, "decide_batch", decide)
+
+    decision = asyncio.run(
+        dd.decide_family_domain(
+            "planted-family", PLANTED_PAIR, {}, model="stub", option_set="fallback"
+        )
+    )
+    assert len(asked) == 2, "the second judgment runs only after the first"
+    assert CONCEPT not in asked[0] and CONCEPT in asked[1]
+    assert decision.decided, decision.undecided_reason
+    assert decision.choice == CONCEPT
+    assert decision.cost == pytest.approx(3.0)
+
+
+def test_the_fallback_set_does_not_re_litigate_a_placed_family(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A family the narrow options place costs one judgment and keeps its answer."""
+    asked: list[list[str]] = []
+
+    async def decide(states, questions, **_kwargs):  # noqa: ANN001
+        options = list(questions[dd.QUESTION]["criteria"])
+        asked.append(options)
+        return [
+            (
+                {
+                    dd.QUESTION: {
+                        "choice": SOURCE_DOMAIN,
+                        "probabilities": {SOURCE_DOMAIN: 0.8},
+                    }
+                },
+                0.5,
+            )
+        ], 1.5
+
+    monkeypatch.setattr(dd, "decide_batch", decide)
+
+    decision = asyncio.run(
+        dd.decide_family_domain(
+            "planted-family", PLANTED_PAIR, {}, model="stub", option_set="fallback"
+        )
+    )
+    assert len(asked) == 1, "a decided family is not offered the wider options"
+    assert decision.choice == SOURCE_DOMAIN
+    assert decision.cost == pytest.approx(1.5)
+
+
+#: A family whose members carry no Data Dictionary sources at all. The option
+#: union is then ``general`` alone, so the family is decided at probability 1.0
+#: without any judgment and never reaches a wider question.
+SOURCELESS = [
+    {
+        "id": "some_derived_parent",
+        "description": "A parent whose members carry no Data Dictionary source of their own.",
+        "physics_domain": "general",
+        "domain_correction": None,
+        "sources": {},
+    }
+]
+PRIOR = "general"
+
+
+def test_a_single_option_family_is_put_to_the_wider_question(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The sourceless family is asked, with its single option stated as evidence."""
+    asked: list[dict] = []
+
+    async def decide(states, questions, **_kwargs):  # noqa: ANN001
+        asked.append(questions[dd.QUESTION])
+        options = list(questions[dd.QUESTION]["criteria"])
+        choice = CONCEPT if CONCEPT in options else options[0]
+        return [
+            ({dd.QUESTION: {"choice": choice, "probabilities": {choice: 0.87}}}, 0.5)
+        ], 1.0
+
+    monkeypatch.setattr(dd, "decide_batch", decide)
+
+    decision = asyncio.run(
+        dd.decide_family_domain(
+            "sourceless-family",
+            SOURCELESS,
+            {},
+            model="stub",
+            option_set="fallback_escalated",
+        )
+    )
+    assert len(asked) == 1, "the single-option family is asked exactly once"
+    assert CONCEPT in asked[0]["criteria"], "the wider options are offered"
+    assert PRIOR in asked[0]["instructions"], (
+        "the family's single option is stated to the judgment as evidence"
+    )
+    assert decision.decided, decision.undecided_reason
+    assert decision.choice == CONCEPT
+
+
+def test_the_default_option_set_is_the_escalated_fallback(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A caller that names no option set gets the escalated fallback."""
+    asked: list[dict] = []
+
+    async def decide(states, questions, **_kwargs):  # noqa: ANN001
+        asked.append(questions[dd.QUESTION])
+        options = list(questions[dd.QUESTION]["criteria"])
+        return [
+            (
+                {
+                    dd.QUESTION: {
+                        "choice": options[0],
+                        "probabilities": {options[0]: 0.91},
+                    }
+                },
+                0.2,
+            )
+        ], 0.4
+
+    monkeypatch.setattr(dd, "decide_batch", decide)
+    decision = asyncio.run(
+        dd.decide_family_domain("sourceless-family", SOURCELESS, {}, model="stub")
+    )
+    assert len(asked) == 1, (
+        "the default set asks the single-option family the wider question, so the "
+        "shipped behaviour is the escalated fallback and not the pre-widening one"
+    )
+    assert PRIOR in asked[0]["instructions"]
+    assert decision.decided
+
+
+def test_a_single_option_family_keeps_its_option_below_the_floor(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A judgment that places nothing above the floor leaves the family's option."""
+
+    async def decide(states, questions, **_kwargs):  # noqa: ANN001
+        options = list(questions[dd.QUESTION]["criteria"])
+        return [
+            (
+                {
+                    dd.QUESTION: {
+                        "choice": options[0],
+                        "probabilities": {options[0]: 0.35},
+                    }
+                },
+                0.5,
+            )
+        ], 1.0
+
+    monkeypatch.setattr(dd, "decide_batch", decide)
+
+    decision = asyncio.run(
+        dd.decide_family_domain(
+            "sourceless-family",
+            SOURCELESS,
+            {},
+            model="stub",
+            option_set="fallback_escalated",
+        )
+    )
+    assert decision.decided
+    assert decision.choice == PRIOR
+    assert decision.probability is None, (
+        "the family is kept by its single option, not by a probability above the floor"
+    )
+
+
+def test_the_fallback_set_still_takes_a_single_option_without_a_judgment(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The set the escalated one extends keeps its no-call shortcut."""
+
+    async def decide(states, questions, **_kwargs):  # noqa: ANN001
+        raise AssertionError("a one-option family needs no judgment")
+
+    monkeypatch.setattr(dd, "decide_batch", decide)
+
+    decision = asyncio.run(
+        dd.decide_family_domain(
+            "sourceless-family", SOURCELESS, {}, model="stub", option_set="fallback"
+        )
+    )
+    assert decision.decided
+    assert decision.choice == PRIOR
+    assert decision.probability == 1.0
+
+
+def test_the_declared_domain_order_is_read_from_its_one_owner() -> None:
+    """The module holds no second copy of the declared domain precedence.
+
+    ``imas_codex.definitions.physics.load_domain_precedence`` owns that order
+    and validates it against the ISN vocabulary; a flattening kept beside it
+    drifts the moment the loader's validation changes.
+    """
+    from imas_codex.definitions.physics import load_domain_precedence
+
+    shared = tuple(load_domain_precedence())
+    assert not hasattr(dd, "all_domains"), (
+        "the module builds its own flat domain list; the shared loader owns it"
+    )
+    assert "all_domains" not in dd.__all__
+    local = tuple(
+        domain for band in dd.domain_bands() for domain in dd.band_domains(band)
+    )
+    assert local == shared, (
+        "the module's bands read the same declared order the shared loader returns"
+    )
