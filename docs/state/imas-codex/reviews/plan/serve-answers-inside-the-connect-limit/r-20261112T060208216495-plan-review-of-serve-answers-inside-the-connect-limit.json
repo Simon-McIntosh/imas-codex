@@ -32,6 +32,13 @@
       "finding": "done_when-1",
       "reason": "a worker cannot set the fleet node's load; the arm already times the base revision in the same sitting, so the pair shows what that load left to explain, and the import guard, not the timing, is what holds the result afterwards",
       "when": "2026-11-12T06:22:03.305249+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "finding": "single_goal-1",
+      "reason": "the help path and the handshake path pay the same eager registration, so removing it is one deliverable; the fourth done-when bounds serve --help at 10 s, and the opening line means a discovery command still pays its own imports when it is the one invoked",
+      "when": "2026-11-12T06:22:13.899542+00:00"
     }
   ],
   "responses": {
@@ -40,6 +47,12 @@
       "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
       "reason": "a worker cannot set the fleet node's load; the arm already times the base revision in the same sitting, so the pair shows what that load left to explain, and the import guard, not the timing, is what holds the result afterwards",
       "when": "2026-11-12T06:22:03.305249+00:00"
+    },
+    "single_goal-1": {
+      "action": "declined",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "reason": "the help path and the handshake path pay the same eager registration, so removing it is one deliverable; the fourth done-when bounds serve --help at 10 s, and the opening line means a discovery command still pays its own imports when it is the one invoked",
+      "when": "2026-11-12T06:22:13.899542+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/serve-answers-inside-the-connect-limit/r-20261112T060208216495-plan-review-of-serve-answers-inside-the-connect-limit.json",
