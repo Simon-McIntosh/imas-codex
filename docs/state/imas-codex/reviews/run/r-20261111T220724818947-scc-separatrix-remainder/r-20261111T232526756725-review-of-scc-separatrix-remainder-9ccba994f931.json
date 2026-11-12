@@ -1,0 +1,78 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run declares neither a baseline_suite nor an after_suite arm, stating that no file under test coverage changed because the node edits an evidence fragment and its generator only. Its three gate logs (cases-probe.log, cases-applied.log, census-post.log) each end in a bare EXIT=0 line and none carries a pytest summary or a FAILED id, so the added-failure pair is 0 and [].",
+  "base_log_revision": "5451edc9186c5adc9a57af38af2773385fab791b",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-11T23:51:47.037Z",
+  "dispatched_at": "2026-11-11T23:31:13Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-catalog-consistency/scc-separatrix-remainder.html",
+      "line": "291",
+      "severity": "non-blocking",
+      "text": "non-blocking: the published record states 'the guard was shown refusing by injecting each defect in turn', but the reviewed run's manifest records negative_control_note 'None declared for this node. No mutation was applied to falsify a check' and no injection log exists; the sentence is a static template in scc-separatrix-remainder-run.py:909 so it prints whether or not --inject ran, and the claim is not reproducible on the shipped record because inject() at run.py:224-228 needs a signed_rename row and the post-apply census has none (StopIteration)."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-consistency/scc-separatrix-remainder-run.py",
+      "line": "924",
+      "severity": "non-blocking",
+      "text": "non-blocking: OUT_OF_LINE_QUERY filters on n.name_stage <> 'superseded' while the census and cross-check at :266-339 use n.status <> 'superseded'; the two liveness predicates disagree by 11 rows (the apply probe returns 3268, the census 3279), and a Cypher <> drops a null name_stage silently, so a live name carrying a separatrix path but no name_stage would be invisible to the apply path and never reported."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-consistency/scc-separatrix-remainder.html",
+      "line": "2",
+      "severity": "non-blocking",
+      "text": "non-blocking: the headline '101 of 107 live names now conform' is hand-computed (107 live minus the 6 collisions) rather than emitted by the instrument, and it counts four live names ending _at_separatrix (argon_density_at_separatrix and toroidal_tritium_velocity_at_separatrix, the two rename predecessors still live pending name review, plus deuterium_tritium_density_at_separatrix and parallel_electric_field_at_separatrix) as conforming although the record's own action column marks all four supersede_onto_holder."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-consistency/scc-separatrix-remainder-run.py",
+      "line": "959",
+      "severity": "non-blocking",
+      "text": "non-blocking: run_cases passes run_id into probe_and_apply at :967, but probe_and_apply never forwards it to edit.apply_edit at :1003 and :1028, so the --run-id named in the manifest's apply gate does not label the writes; the 'run' column in the landing table cites writer-generated ids (sn-edit-20261111T224946Z etc.) instead, and the parameter is dead."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-consistency/scc-separatrix-remainder.html",
+      "line": "27",
+      "severity": "non-blocking",
+      "text": "non-blocking: the node's done_when and plan \u00a76 both carry a spend ceiling of USD 2, but neither the landing record nor the manifest records any spend; the work appears to be pure graph I/O with no LLM call, so the figure is almost certainly 0, yet no artefact states it and a reader cannot confirm the ceiling was honoured."
+    }
+  ],
+  "head_log_revision": "5451edc9186c5adc9a57af38af2773385fab791b",
+  "item_aggregate": 6,
+  "justifications": {
+    "durability": "no test exercises this fragment; the publish guard assert_invariants at scc-separatrix-remainder-run.py:176-213 is real and refuses before write_atomic at :695, but its refusal is never shown on the shipped record and the tombstone-target injection cannot run against it.",
+    "evidence": "census-post.log:6-7 records the post-apply live read-back (population=211 live=107 tombstones=104 cross_check_agrees=True) with EXIT=0 and the committed JSON carries the same totals, but the 'one suffix per DD locus' measure is reported through collisions rather than gated, and the negative-control sentence at html:291 is unbacked.",
+    "fit": "the fragment follows the sibling docs/evidence/fragments/*-run.py idiom (revision/command header, bare EXIT= line, NODE-prefixed ids) and passes ruff, but the inherited invariant template at scc-separatrix-remainder-run.py:909 and the dead run_id parameter at :959 are idiom mismatches.",
+    "goal_fidelity": "scc-separatrix-remainder.html:4-10 records three applies through edit.apply_edit and :11-24 lists the six out-of-line names with locus, unit, DD path, lineage and the writer refusal, left unwritten, which is exactly the goal's split between cases the rulings cover and cases they do not.",
+    "reuse": "scc-separatrix-remainder-run.py:59 imports imas_codex.standard_names.edit and calls edit.apply_edit at :1003 and :1028, the repository's single owner of the signed rename, and reuses the census instrument it was adapted from in place rather than forking a new rename path.",
+    "scope_discipline": "git diff --stat fc99c61f0..9ccba994f adds exactly the three declared fragment paths, scc-separatrix-remainder-run.py, scc-separatrix-remainder.html and scc-separatrix-remainder.json, and nothing else."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to re-read the separatrix census, apply every case the existing rulings cover through a signed route, and escalate the cases needing a new ruling unwritten; scc-separatrix-remainder.html:4-10 records three applies and :11-24 lists six out-of-line names with evidence and no write.\nVERDICT done_when: the done_when asks for a live read-back showing one suffix per DD locus with ruled exceptions named, every change signed, no tombstone revived, spend under USD 2; census-post.log:7 records population=211 live=107 tombstones=104 cross_check_agrees=True at EXIT=0, but the six remaining separatrix-locus mismatches are reported rather than gated and spend is unrecorded.\nVERDICT write_paths: the node was fenced to four paths under docs/evidence/fragments/sn-catalog-consistency/; git diff --stat fc99c61f0..9ccba994f adds exactly three of them (run.py, html, json) and nothing outside the fence.\nVERDICT manifest: read; status complete, commits 5451edc91 and 9ccba994f, changed_paths the three fragments, tests naming the probe, apply and post-apply census invocations, test_logs naming three logs that each end in EXIT=0, baseline_suite and after_suite both 'Not run' because no covered source changed.\nVERDICT diff: read both commits against fc99c61f0; 5451edc91 adds the census instrument and a read-only record, 9ccba994f adds probe_and_apply and the apply/outstanding narrative, and the only paths touched are the three declared fragments.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: scc-separatrix-remainder.html:6-8 records the three signed applies and :12-19 lists the six outstanding names with locus, unit, DD path, lineage and refusal text, matching the goal's apply-versus-escalate split.\nSCORE evidence: 14\nJUSTIFICATION evidence: census-post.log:7 records the post-apply read-back with cross_check_agrees=True at EXIT=0, but html:291 asserts a negative control the manifest says was never run and the conformance headline at html:2 is hand-computed rather than emitted.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat fc99c61f0..9ccba994f lists only scc-separatrix-remainder-run.py, scc-separatrix-remainder.html and scc-separatrix-remainder.json, all inside the declared fence.\nSCORE durability: 11\nJUSTIFICATION durability: assert_invariants at scc-separatrix-remainder-run.py:176-213 blocks a bad publish, but no test runs it and the shipped record carries zero signed_rename rows so inject(tombstone-target) at :224 cannot even execute against it.\nSCORE fit: 17\nJUSTIFICATION fit: the fragment matches the sibling evidence-runner idiom and passes ruff, but scc-separatrix-remainder-run.py:909 hardcodes a negative-control claim and :959 carries a run_id parameter that is never used.\nSCORE reuse: 18\nJUSTIFICATION reuse: scc-separatrix-remainder-run.py:1003 and :1028 call imas_codex/standard_names/edit.py's apply_edit, the repository's owner of the signed rename, adding no second rename path.\nFINDING docs/evidence/fragments/sn-catalog-consistency/scc-separatrix-remainder.html:291 non-blocking: the record claims the guard was shown refusing by injection while the manifest records no mutation and no injection log exists; the template at run.py:909 prints regardless and inject(tombstone-target) cannot run post-apply.\nFINDING docs/evidence/fragments/sn-catalog-consistency/scc-separatrix-remainder-run.py:924 non-blocking: OUT_OF_LINE_QUERY uses name_stage while the census uses status, the two disagree by 11 rows (3268 vs 3279), and a null name_stage is silently dropped by Cypher <>.\nFINDING docs/evidence/fragments/sn-catalog-consistency/scc-separatrix-remainder.html:2 non-blocking: '101 of 107 conform' is hand-computed and counts four live _at_separatrix stubs as conforming while the record's own action column marks them supersede_onto_holder.\nFINDING docs/evidence/fragments/sn-catalog-consistency/scc-separatrix-remainder-run.py:959 non-blocking: run_id is passed to probe_and_apply but never forwarded to edit.apply_edit, so the manifest's --run-id does not label the writes and the parameter is dead.\nFINDING docs/evidence/fragments/sn-catalog-consistency/scc-separatrix-remainder.html:27 non-blocking: the USD 2 spend ceiling from the done_when is recorded nowhere, so the ceiling cannot be confirmed from the deliverable even though the work appears to be pure graph I/O.\n",
+  "review_run_id": "r-20261111T232526756725-review-of-scc-separatrix-remainder-9ccba994f931",
+  "reviewed_base_sha": "fc99c61f0f311bf33b6ca594ba565398169827b9",
+  "reviewed_head_sha": "9ccba994f931b8f115281309e07003841edb0912",
+  "reviewed_run_id": "r-20261111T220724818947-scc-separatrix-remainder",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261111T232526756725-review-of-scc-separatrix-remainder-9ccba994f931"
+  },
+  "reviewer_run_id": "r-20261111T232526756725-review-of-scc-separatrix-remainder-9ccba994f931",
+  "scores": {
+    "durability": 11,
+    "evidence": 14,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T00:12:15.026491+00:00",
+  "total": 98
+}
