@@ -43,9 +43,28 @@
       "note": "\u00a73 now waits on \u00a72 as well as on the \u00a752 writers, so the checkpoint covers the cohort's produced sources.",
       "reason": "",
       "when": "2026-11-12T03:08:06.010959+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "c8113cdfdf4f7e65cdff47ff48608346ddaebf4f",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "\u00a74's done-when now accepts, in place of the +300 floor, that every source in the advanceable classes was run with its outcome recorded and the shortfall against 5,503 reported with the measured yield, so a run that exhausts its classes first has a stated endpoint.",
+      "reason": "",
+      "when": "2026-11-12T03:08:16.198401+00:00"
     }
   ],
   "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "c8113cdfdf4f7e65cdff47ff48608346ddaebf4f",
+      "commit_basis": "edit",
+      "note": "\u00a74's done-when now accepts, in place of the +300 floor, that every source in the advanceable classes was run with its outcome recorded and the shortfall against 5,503 reported with the measured yield, so a run that exhausts its classes first has a stated endpoint.",
+      "reason": "",
+      "when": "2026-11-12T03:08:16.198401+00:00"
+    },
     "wiring-1": {
       "action": "acted",
       "by": "",
