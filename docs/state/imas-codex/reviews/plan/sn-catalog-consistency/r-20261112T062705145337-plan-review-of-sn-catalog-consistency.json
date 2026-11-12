@@ -1,0 +1,56 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T06:36:12.316Z",
+  "dispatched_at": "2026-11-12T06:28:25Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:44",
+      "id": "wiring-1",
+      "reason": "a coordinator dispatching \u00a72 as written would close it with the rename and advisory batches untouched and \u00a73 could never reach its first item.",
+      "text": "\u00a72 now takes \"only what [sn-definitions-by-construction \u00a76] leaves: the families the consistency census still counts divergent after it lands\", and its done-when no longer enumerates the batch artifact; but the sizing artifact still carries batch-272 (rename-unit-pair-advisories, 3 rows) and batches 274\u2013279 (advisory-unexported-references, 147 rows), which are not definition-divergence rows and so fall outside \u00a72's new precondition, while \u00a73 (line 62) still requires \"no unit warning on the momentum_flux or momentum_source families \u2026 and no documentation link to a name the cut does not export\" \u2014 150 rows of release-candidate repair now belong to no section",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:45",
+      "id": "reasoning-1",
+      "reason": "a node would set its per-batch ceiling from a near-empty batch and call its witness met by another plan's write, so both instruments would report a pass on work this section did not do.",
+      "text": "the spend paragraph is unchanged while the section's trigger changed: \"batch 1 measures the real per-name cost and every later batch runs under a ceiling\" still points at batch-001, which sib-consistency-batches.json records as the flux-surface-average concept group, and sn-definitions-by-construction \u00a76's done-when reports bringing the flux-surface average from 8 forms to one before \u00a72 starts \u2014 so the rate the whole spend control rests on would be measured on a batch that has nothing left to do, and \u00a72's named witness (\"the flux-surface-average family reads with one definition and one documentation template\", line 50) restates what \u00a76 already delivers rather than witnessing \u00a72's residual work",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "82089a632f0671ac0a81616be2f06c5e5f6559ce",
+  "plan_fingerprint": "1fb2586b57934749e6060367384711f960ca02c180fcee280f358731f72c0480",
+  "plan_slug": "sn-catalog-consistency",
+  "plan_version": 22,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T062705145337-plan-review-of-sn-catalog-consistency",
+  "reviewed_blob_sha": "e2010a7496aaa10bc20fea388dbab47d00ab7ccd",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 sn-definitions-by-construction#s6 and #s7, sn-domain-per-family#s3, sn-integrity-backlog#s52, sn-full-dd-continuation#s4 and sn-catalog-grouping#s3 each resolve to the section the text describes, and docs/evidence/fragments/sn-integrity-backlog/sib-consistency-batches.json and sib-consistency-census.json both exist under the paths cited.",
+    "done_when": "pass \u2014 s2's six-endpoint list ends in a disposable-graph planted control, s3's dry run carries a planted dangling-link control, and s5 keeps its planted disagreeing-edges control; each measure can fail.",
+    "evidence_paths": "pass \u2014 every artifact the units name sits in the repository's evidence trees (docs/evidence/fragments/sn-integrity-backlog/, docs/evidence/fragments/sn-catalog-consistency/), and no unit routes a gate to a scratchpad or node-local temporary path.",
+    "naming": "pass \u2014 the changed text introduces no plan label, stage name, ticket number or changelog prose; \"batch 1 / batch-001\" is an artifact identifier, not a plan stage.",
+    "reasoning": "a finding \u2014 \u00a72's cost instrument and its named witness are aimed at the family sn-definitions-by-construction \u00a76 is charged to converge, not on the residual population \u00a72 now takes (docs/plans/sn-catalog-consistency.html:45).",
+    "single_goal": "pass \u2014 s2 delivers residual families at one definition and one template, s3 delivers the post-run export dry run, s5 delivers the live-name domain audit against the stored decision; none carries a second deliverable.",
+    "wiring": "a finding \u2014 \u00a72's rewritten precondition narrows its population to census-divergent families and drops its declared ownership of the release-candidate rename batch and the advisory documentation batches, which no other section now owns (docs/plans/sn-catalog-consistency.html:44, :62)."
+  },
+  "section_digests": {
+    "_document": "11f26c61b9c1b623d2ee0cccd12073818b97111edfbe33dd7fa873d7a4ea26b6",
+    "s1": "c69f79e72b8fe8652e9dcd8632a35ca7eaa3a205fd5ee3e2ee98bc74afc136ba",
+    "s2": "a0a886e24e90a010da59925b367cfa3a7c0e91d1639cbe9fb6d1de27cbac3d0a",
+    "s3": "aa1fea350fe30f045ccc80ea17e474ba76d1f634673cf083a8205d5245fb5357",
+    "s4": "ef7bd7f314233248216f8598211014764b74d1c74c308db48db9ab9390a33d55",
+    "s5": "b4ab3db4aa1dcab8fe59cef3b1b0d0a9df32510c951813cd2720aa098724eb07",
+    "s6": "e35c4bf32892d9b90e8392b5e1171957f4973d937daaccdee3ab610d3c1c937e",
+    "s7": "abb53d14a3cb7db35add3d596e723e7c0e012bbee6e7f328d2b7b520a5956700",
+    "s8": "124c4cffdc2b27efae89ba41f97a27ff57b01c0b53ce596b6c025f1e6523e626"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T06:39:58.430578+00:00",
+  "total": null
+}
