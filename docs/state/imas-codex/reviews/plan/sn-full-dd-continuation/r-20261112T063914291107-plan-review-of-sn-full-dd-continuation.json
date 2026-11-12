@@ -25,7 +25,30 @@
   "plan_slug": "sn-full-dd-continuation",
   "plan_version": 20,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "60654017d5a358945583eeb69862cbfa0ed10ec9",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a75's floor is replaced: every accepted name whose documentation was not accepted at \u00a75's start reaches accepted documentation or is listed with its stage and recorded reason, so the measure counts only what \u00a75 itself drains",
+      "reason": "",
+      "when": "2026-11-12T14:46:01.903533+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "60654017d5a358945583eeb69862cbfa0ed10ec9",
+      "commit_basis": "edit",
+      "note": "\u00a75's floor is replaced: every accepted name whose documentation was not accepted at \u00a75's start reaches accepted documentation or is listed with its stage and recorded reason, so the measure counts only what \u00a75 itself drains",
+      "reason": "",
+      "when": "2026-11-12T14:46:01.903533+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-full-dd-continuation/r-20261112T063914291107-plan-review-of-sn-full-dd-continuation.json",
   "review_run_id": "r-20261112T063914291107-plan-review-of-sn-full-dd-continuation",
   "reviewed_blob_sha": "57029d41a40e53e299ac0963f925763b5c8daf3e",
   "rubric": "content",
