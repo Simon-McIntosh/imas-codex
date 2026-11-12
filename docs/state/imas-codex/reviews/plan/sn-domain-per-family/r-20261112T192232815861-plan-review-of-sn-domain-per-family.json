@@ -1,0 +1,122 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T19:36:26.196Z",
+  "dispatched_at": "2026-11-12T19:26:43Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-domain-per-family.html:71",
+      "id": "done_when-1",
+      "reason": "this is the section's only bullet about the held-split case and the pass's actual writes turn on it, so a node reading one outcome and the coordinator reviewing the other would each be right about a different graph state.",
+      "text": "the changed exception says a \u00a71 family the pass leaves undecided \"is not written to one domain\", while the paragraph above it and \u00a75's ruling both say such a family is held split with \"each member decided on its own sources\"; a worker can satisfy the clause by leaving every member at its stored domain (nothing written) or by rewriting each member individually (a \u00a75 judgment per member), and the two produce different stored domains and different judgment counts",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-domain-per-family.html:68",
+      "id": "evidence_paths-1",
+      "reason": "a worker dispatched on \u00a73 has to decide the placement itself and may run the live pass in place with no committed gate receipt, which is exactly what the named-partition and committed-log bullets exist to prevent.",
+      "text": "\u00a73's done-when names no compute partition and requires no committed gate log, though the section writes the live graph over 1,247 families and takes a checkpoint before it, while \u00a72's seventh bullet and \u00a75's ninth both name a partition and a committed log",
+      "type": "evidence_paths",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-domain-per-family.html:136",
+      "id": "wiring-1",
+      "reason": "\u00a73 is declared implementable behind an open gate whose condition has been met, so the section reads as blocked on a ruling already made and the gate's state, not the plan's content, would decide whether a node dispatches.",
+      "text": "gate g-sdpf-disputed-items gates \u00a73 and still reads data-status=\"open\" with no verdict, while its required evidence is satisfied on HEAD (docs/evidence/fragments/sn-domain-family-labels/disputed-items.json carries lead_ruling on all 12 items) and the ruling is recorded in the plan's own comment c-s5-lead-ruling-disputed-and-bound",
+      "type": "wiring",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "47036075a41427bece72216649fcb9e190f7fd1c",
+  "plan_fingerprint": "68351dc21f72d4c823f2e396ccffb15ef64d67dd42212c3d849b3e288ad100a1",
+  "plan_slug": "sn-domain-per-family",
+  "plan_version": 28,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "47036075a41427bece72216649fcb9e190f7fd1c",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The clause now says each member of a held-split family is written the domain decided on its own sources, the members' domains are listed, and the family is not forced to one domain.",
+      "reason": "",
+      "when": "2026-11-12T20:00:54.801060+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "47036075a41427bece72216649fcb9e190f7fd1c",
+      "commit_basis": "edit",
+      "finding": "evidence_paths-1",
+      "note": "Section 3's done-when now names the all_debug partition for the live pass and its read-back and requires the gate log committed under the evidence directory.",
+      "reason": "",
+      "when": "2026-11-12T20:01:14.334912+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "47036075a41427bece72216649fcb9e190f7fd1c",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "Gate g-sdpf-disputed-items is passed, citing disputed-items.json with all twelve rulings.",
+      "reason": "",
+      "when": "2026-11-12T20:01:32.265236+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "47036075a41427bece72216649fcb9e190f7fd1c",
+      "commit_basis": "edit",
+      "note": "The clause now says each member of a held-split family is written the domain decided on its own sources, the members' domains are listed, and the family is not forced to one domain.",
+      "reason": "",
+      "when": "2026-11-12T20:00:54.801060+00:00"
+    },
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "47036075a41427bece72216649fcb9e190f7fd1c",
+      "commit_basis": "edit",
+      "note": "Section 3's done-when now names the all_debug partition for the live pass and its read-back and requires the gate log committed under the evidence directory.",
+      "reason": "",
+      "when": "2026-11-12T20:01:14.334912+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "47036075a41427bece72216649fcb9e190f7fd1c",
+      "commit_basis": "edit",
+      "note": "Gate g-sdpf-disputed-items is passed, citing disputed-items.json with all twelve rulings.",
+      "reason": "",
+      "when": "2026-11-12T20:01:32.265236+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-sn-domain-per-family.v28.json",
+  "review_run_id": "r-20261112T192232815861-plan-review-of-sn-domain-per-family",
+  "reviewed_blob_sha": "d3c767908303e2d1b9558c983aac76970881f198",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 docs/evidence/fragments/sn-domain-per-family/ and docs/evidence/fragments/sn-domain-family-labels/disputed-items.json both exist at HEAD, sn-catalog-consistency \u00a75 resolves and its metadata carries the declared wait on sn-domain-per-family#s3, and \u00a75's widened-options.json listing (delivered at the \u00a75 node's head d77fb15b, not yet on main) reports 24 undecided families of two or more members, matching the ruling \u00a73 relies on.",
+    "done_when": "a finding \u2014 \u00a73's second done-when bullet (plan.html:71) admits two different graph outcomes for a \u00a71 family the pass leaves undecided, because \"is not written to one domain\" does not say whether its members are left at their stored domains or rewritten individually as the ruling says.",
+    "evidence_paths": "a finding \u2014 \u00a73 names docs/evidence/fragments/sn-domain-per-family/ as its evidence directory and that path resolves, but no bullet requires the pass's gate log committed there and no compute partition is named for a live-graph pass over 1,247 families, unlike \u00a72's seventh bullet and \u00a75's ninth.",
+    "naming": "pass \u2014 \u00a73 names no symbol, file of code or plan label, and its prose states mechanism rather than carrying a ticket reference.",
+    "reasoning": "pass \u2014 \u00a73's stated cause (a family offered only its sources' domains, then left undecided under the wider set) matches the shipped measurement, its endpoint is obtainable from the live graph, and the section prescribes no code path or formula.",
+    "single_goal": "pass \u2014 \u00a73 has one deliverable, the live names brought to one domain per family; its share, spend and audit bullets are measures of that one pass, not second deliverables.",
+    "wiring": "a finding \u2014 every depends-on and the g-sdpf-disputed-items relationship resolve correctly, but that gate is still open; that gate's required evidence is committed and the ruling is recorded, so \u00a73 reads as gated on a ruling that has already been made."
+  },
+  "section_digests": {
+    "_document": "f250140e0efd072e27479d27052893ba71f3bb380d4e1353ed009647ac246472",
+    "s1": "3d2539102f47a199cec8a14a89d42968505b563a51a390ee64710cc35f227476",
+    "s2": "aa40e5c5659822e9d8c22d4cd2fc0823ad3615e0d88e3bfdd032248dbfce0b3c",
+    "s3": "fb4a64dbcfce7cadff2d01765ff841885fcc2687cbc01346ed5813ab722048a0",
+    "s4": "02a78d9adf06476e76fb104849bcb4b1b0a2065ec569400e183771b85461eb4c",
+    "s5": "b0855588bfef32ef9c6c0877b91f163c6cdcdcabff891b65286989af595edb8e"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T20:00:42.328177+00:00",
+  "total": null
+}
