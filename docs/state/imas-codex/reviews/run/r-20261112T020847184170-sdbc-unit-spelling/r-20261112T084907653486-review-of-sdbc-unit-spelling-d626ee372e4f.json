@@ -1,0 +1,60 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-12T09:00:59.600Z",
+  "dispatched_at": "2026-11-12T08:53:20Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/audits.py",
+      "line": 1581,
+      "severity": "blocking",
+      "text": "imas_codex/standard_names/audits.py:1581 blocking: the token-loop skip added by 3ce5df85f excludes only a head equal to the whole quantity or ending in '_' + token, so a component word of a compound head is still judged by spelling \u2014 'torque' inside 'torque_density' is not skipped and fails the N.m entry; reproduced as name_unit_consistency_check({'id':'ion_torque_density','unit':'N.m^-2'}) -> [\"audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']\"], which flags the very spelling the same census resolves for torque_density (canonical N.m^-2, 86 names). 87 of the 128 committed dimension_mismatches are this false positive, so the census overstates the \u00a75 hand-off by 87 and the pipeline audit will flag correctly-spelled names."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/sdbc-unit-spelling.html",
+      "line": 34,
+      "severity": "non-blocking",
+      "text": "docs/evidence/fragments/sn-definitions-by-construction/sdbc-unit-spelling.html:34 non-blocking: the fragment states that 128 names carry a unit whose dimension does not fit the quantity their head states, but 87 of those are the torque-density false positives above and the true count is 41, so the headline passed to \u00a75 is wrong by a factor of three and must be regenerated with the census after the code repair."
+    },
+    {
+      "file": "tests/standard_names/test_unit_spelling_census.py",
+      "line": 51,
+      "severity": "non-blocking",
+      "text": "tests/standard_names/test_unit_spelling_census.py:51 non-blocking: the census test plants ion_torque_density only with the wrong unit s^-1, so it asserts a mismatch and never asserts that the clean case name_unit_consistency_check({'id':'ion_torque_density','unit':'N.m^-2'}) == [] returns nothing; no assertion pins the head branch's clean path, which is why the false positive passes all 588 gate tests."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T020847184170-sdbc-unit-spelling/manifest.md",
+      "line": 20,
+      "severity": "non-blocking",
+      "text": "manifest.md:20 non-blocking: the reviewed run's baseline_suite and after_suite keys are present but empty, so added_failure_count and added_failure_ids cannot be derived from the pair the evidence contract names; they were derived here from gate.log (588 passed, EXIT=0), head.log (15 passed), suite.log (16 passed) and regression.log (69 passed), all EXIT=0 with no failing ids."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "pass \u2014 the head branch is reached from audits.py:3718 (the pipeline audit entry) and audits.py:5096 (unit_spelling_census), and its issue text is matched by signed_manifest.py:443, so the false positive reaches the live audit as well as the census.",
+    "diff": "read commit by commit against 723d44eab \u2014 3ce5df85f folds QUANTITY_EXPECTED_UNITS into audits._NAME_TOKEN_UNIT_EXPECTATIONS, deletes quantity_dimension_issues, points the census at name_unit_consistency_check and rewrites the disposable-graph test; d626ee372 changes one line of the html to cite gate.log at 3ce5df85f.",
+    "done_when": "partial \u2014 the census the done_when asserts is committed at docs/evidence/fragments/sn-definitions-by-construction/unit-spelling-census.json and records 3264 names, 1607 quantities, 4 duplicates all resolved, 0 unresolved and 44 unrecorded divergences, but 87 of its 128 dimension_mismatches are false positives produced by the token loop at audits.py:1581.",
+    "goal": "pass with defect \u2014 the review covers only the commits gained since the prior review (723d44eab..d626ee372); the goal those commits serve is to fold the quantity-versus-unit rule into the one check audits.name_unit_consistency_check owns, and imas_codex/standard_names/audits.py:1531 now carries the head branch while unit_audit.quantity_dimension_issues is deleted, but the consolidation misjudges compound heads.",
+    "manifest": "read \u2014 it reports status complete, six commits, the gate at /home/ITER/mcintos/.cache/imas-codex-sdbc-unit-spelling/gate.log with 588 passed, and a negative control; its baseline_suite and after_suite keys are present but empty, so added_failure_count is derived from the gate logs instead.",
+    "write_paths": "pass \u2014 both commits touch only imas_codex/standard_names/audits.py, imas_codex/standard_names/unit_audit.py, tests/standard_names/test_unit_spelling_census.py, docs/evidence/fragments/sn-definitions-by-construction/sdbc-unit-spelling.html and docs/evidence/fragments/sn-definitions-by-construction/unit-spelling-census.json, all five declared in the reviewed manifest."
+  },
+  "node": "sdbc-unit-spelling",
+  "plan": "imas-codex:sn-definitions-by-construction \u00a73",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the commits gained since the prior review consolidate the quantity-versus-unit rule into the check imas_codex/standard_names/audits.py:1531 already owns and delete unit_audit.quantity_dimension_issues, which is the reuse repair the prior review asked for; the consolidation is real but misjudges compound heads.\nVERDICT done_when: the census the done_when asserts is committed at docs/evidence/fragments/sn-definitions-by-construction/unit-spelling-census.json with 3264 names, 1607 quantities, 4 duplicates resolved, 0 unresolved and 44 unrecorded divergences, but 87 of its 128 dimension_mismatches are false positives from audits.py:1581.\nVERDICT write_paths: both delta commits touch only the five declared paths \u2014 audits.py, unit_audit.py, the census test, the html fragment and the census JSON.\nVERDICT manifest: read; status complete, six commits, gate.log with 588 passed at 3ce5df85f, a red negative control, and empty baseline_suite/after_suite keys.\nVERDICT diff: read commit by commit against 723d44eab; 3ce5df85f folds the expectation table into _NAME_TOKEN_UNIT_EXPECTATIONS and deletes quantity_dimension_issues, and d626ee372 changes one html line to cite gate.log.\nCALL_SITES: imas_codex/standard_names/audits.py:3718, imas_codex/standard_names/audits.py:5096, imas_codex/standard_names/signed_manifest.py:443\nSCORE goal_fidelity: 11\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/audits.py:1531 now carries the head branch and unit_audit.quantity_dimension_issues is deleted, but audits.py:1581 misjudges every compound-head quantity, so the census's central measure is wrong.\nSCORE evidence: 12\nJUSTIFICATION evidence: /home/ITER/mcintos/.cache/imas-codex-sdbc-unit-spelling/gate.log records 588 passed with EXIT=0 at revision 3ce5df85f, but it cannot detect that the artifact it produces carries 87 false mismatches.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in 3ce5df85f and d626ee372 is one of the five declared write paths at manifest.md:3.\nSCORE durability: 9\nJUSTIFICATION durability: no assertion pins name_unit_consistency_check({'id':'ion_torque_density','unit':'N.m^-2'}) == [], so the regression this repair introduced passes all 588 gate tests, though the write assertion at tests/standard_names/test_unit_spelling_census.py:246 now compares a graph read against a literal rather than against its own input.\nSCORE fit: 13\nJUSTIFICATION fit: the comment at imas_codex/standard_names/audits.py:1576 states that the words inside a head are not judged on their own while the condition at audits.py:1581 leaves 'torque' judged inside 'torque_density', so the comment contradicts the code it guards.\nSCORE reuse: 18\nJUSTIFICATION reuse: imas_codex/standard_names/unit_audit.py no longer defines quantity_dimension_issues or QUANTITY_EXPECTED_UNITS, and audits._NAME_TOKEN_UNIT_EXPECTATIONS is the single table the census at audits.py:5096 reads.\nFINDING imas_codex/standard_names/audits.py:1581 blocking: the token-loop skip does not exclude a component word of a compound head, so 'torque' inside 'torque_density' is judged by spelling; reproduced as name_unit_consistency_check({'id':'ion_torque_density','unit':'N.m^-2'}) -> [\"name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']\"], which flags the spelling the census itself records as canonical and accounts for 87 of the 128 mismatches.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/sdbc-unit-spelling.html:34 non-blocking: the fragment's 128-name headline is 87 false positives and the true count is 41, so it must be regenerated after the code repair.\nFINDING tests/standard_names/test_unit_spelling_census.py:51 non-blocking: the clean compound-head case is never asserted, which is why the false positive passes the gate.\nFINDING manifest.md:20 non-blocking: baseline_suite and after_suite are empty, so added_failure_count was derived from gate.log, head.log, suite.log and regression.log, all EXIT=0 with no failing ids.",
+  "review_run_id": "r-20261112T084907653486-review-of-sdbc-unit-spelling-d626ee372e4f",
+  "reviewed_base_sha": "723d44eabf527e6408106171c1ad3530f62f26ef",
+  "reviewed_head_sha": "d626ee372e4f2af35ce8ade02ac2d0e0f94a1484",
+  "reviewed_run_id": "r-20261112T020847184170-sdbc-unit-spelling",
+  "scores": {
+    "durability": 9,
+    "evidence": 12,
+    "fit": 13,
+    "goal_fidelity": 11,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T09:17:26.717401+00:00",
+  "total": 82
+}

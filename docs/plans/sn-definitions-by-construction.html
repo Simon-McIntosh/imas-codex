@@ -24,7 +24,7 @@
   <title>One Wording Per Concept, By Construction | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="9">
+<meta name="plan-version" content="10">
 <meta name="plan-modified" content="2026-11-12">
 </head>
 <body>
@@ -158,6 +158,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261112T075018136012-review-of-sdbc-unit-spelling-723d44eabf52" data-who="reckon-build" data-when="2026-11-12T08:11:23.275Z">
     <div class="r-comment-body"><p>independent review of r-20261112T020847184170-sdbc-unit-spelling at head 723d44eab scores goal_fidelity 17, evidence 13, scope_discipline 18, durability 15, fit 16, reuse 5, with added_failure_count 0 and five non-blocking findings (evidence fragment says 43 divergences against the artifact's 44; manifest says 1630 quantities against the artifact's 1608; gate logs are headed revision 043171ac2 whose tree lacks the graph test they run; the disposable-graph write assertion echoes a value the code under test produced; quantity_dimension_issues duplicates the name-vs-unit owner in audits.py)</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261112T084907653486-review-of-sdbc-unit-spelling-d626ee372e4f" data-who="reckon-build" data-when="2026-11-12T09:00:59.600Z">
+    <div class="r-comment-body"><p>independent review of r-20261112T020847184170-sdbc-unit-spelling at d626ee372: total 11+12+19+9+13+18; the reuse repair landed (quantity_dimension_issues deleted, one table read by the census), but the token-loop skip at audits.py:1581 still judges &#x27;torque&#x27; inside &#x27;torque_density&#x27;, so 87 of the census&#x27;s 128 dimension_mismatches are false positives and the html:34 headline must be regenerated</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261112T080434867556-review-of-sdbc-name-definition-count-c95592d087d3" data-who="reckon-build" data-when="2026-11-12T08:14:11.199Z">
     <div class="r-comment-body"><p>independent review of r-20261112T021004189810-sdbc-name-definition-count at head c95592d087d3bc3781ea6d51dcf53f9cb6f5b47c from base 4b14dd935ca9c58218cce9d8145baa11a2bfa8fd: scores goal_fidelity 19, evidence 14, scope_discipline 20, durability 9, fit 16, reuse 18 (total 97); three non-blocking findings - the landing page's draw arithmetic does not reconcile (373 allocated + 8 added, stated as 371 + 10), the only gate log is stamped at the first commit 096610f40 rather than the landed head, and a plan-document reference sits in the sampler's docstring</p></div>
