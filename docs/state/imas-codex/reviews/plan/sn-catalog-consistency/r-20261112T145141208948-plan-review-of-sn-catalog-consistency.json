@@ -43,6 +43,16 @@
       "note": "witness now reads the release-candidate unit-pair advisory list, which names the three batch-272 names today, so it fails before the work",
       "reason": "",
       "when": "2026-11-12T15:18:33.354364+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "36f22faf376d5b7be18189b87dbb6d47ac12bfdd",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "dropped the claim that definitions \u00a76 does not reach these rows; \u00a72 re-reads each row after \u00a76 lands and takes only rows still standing, recording any \u00a76 already settled",
+      "reason": "",
+      "when": "2026-11-12T15:18:42.577519+00:00"
     }
   ],
   "responses": {
@@ -54,6 +64,15 @@
       "note": "witness now reads the release-candidate unit-pair advisory list, which names the three batch-272 names today, so it fails before the work",
       "reason": "",
       "when": "2026-11-12T15:18:33.354364+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "36f22faf376d5b7be18189b87dbb6d47ac12bfdd",
+      "commit_basis": "edit",
+      "note": "dropped the claim that definitions \u00a76 does not reach these rows; \u00a72 re-reads each row after \u00a76 lands and takes only rows still standing, recording any \u00a76 already settled",
+      "reason": "",
+      "when": "2026-11-12T15:18:42.577519+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-catalog-consistency/r-20261112T145141208948-plan-review-of-sn-catalog-consistency.json",
