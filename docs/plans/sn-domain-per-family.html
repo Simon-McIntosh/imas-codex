@@ -29,7 +29,7 @@
   <main class="plan-doc">
     <h2 id="s1">§1 — What the release candidate shows, and why</h2>
     <section data-reckon="section" data-id="s1" data-effort-hours="0.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section>
-    <p>The catalog release candidate <code>v0.4.0rc8</code> files each name under one physics domain. A reader looking for the argon density at the plasma boundary expects to find it beside the krypton one. They are in different files. Measured on 2026-11-12 over the 1,975 published names, by grouping names that differ only in their species token:</p>
+    <p>The catalog release candidate <code>v0.4.0rc8</code> files each name under one physics domain. A reader looking for the argon density at the plasma boundary expects to find it beside the krypton one. They are in different files. Measured on 2026-11-12 over the 1,975 published names, by grouping names that differ only in their species token. The table and the per-domain counts are in <code>docs/evidence/fragments/sn-definitions-by-construction/published-family-census.txt</code> and <code>published-operator-census.txt</code>, with the scripts that produced them beside each:</p>
     <table>
       <thead><tr><th>Family (species written as X)</th><th>Members</th><th>Domains its members are filed under</th></tr></thead>
       <tbody>
@@ -52,7 +52,8 @@
     <p>Done when:</p>
     <ul>
       <li>for every family, the decision one member stores equals the decision every other member stores, read back from a disposable graph seeded with the eight families in §1;</li>
-      <li>on the labelled names the domain decision was calibrated on in <code>sn-catalog-grouping</code>, the per-family decision's accuracy is recorded beside the per-name decision's on the same names, and is not lower;</li>
+      <li>on at least 30 families of three or more members, the eight in §1 among them, each given one domain by a reader who has not seen either decision, the share of member names the per-family decision files under the reader's domain is recorded beside the share the per-name decision does, and is higher; the label set and who produced it are committed with the evidence;</li>
+      <li>on the labelled names the domain decision was calibrated on in <code>sn-catalog-grouping</code>, almost all of them single-member families, the accuracy is recorded as a regression reading and is not lower;</li>
       <li>a family whose answer does not clear the confidence floor is reported undecided as a family, with its members listed, and none of its members is written;</li>
       <li>a family planted with two members whose sources carry disjoint domains receives one domain, and the same two names decided by the per-name path, kept only as the test's comparison, receive two;</li>
       <li>every domain write still goes through the one writer, shown by the existing guard test passing unchanged;</li>
@@ -61,10 +62,10 @@
 
     <h2 id="s3">§3 — The live names brought to one domain per family</h2>
     <section data-reckon="section" data-id="s3" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
-    <p>The per-family decision is applied to every live family. This absorbs the grouping half of <code>sn-catalog-consistency</code> §5: that section keeps its domain-audit endpoint, and its family-agreement endpoint is met here. A graph checkpoint is taken before the first write, with every graph-touching worker at rest.</p>
+    <p>The per-family decision is applied to every live family. <code>sn-catalog-consistency</code> §5 declares a wait on this section: its family-agreement endpoint reads the same grouping census this section moves, and its domain-audit endpoint stays its own. A graph checkpoint is taken before the first write, with every graph-touching worker at rest.</p>
     <p>Done when:</p>
     <ul>
-      <li>a read-back over every live name lists zero families whose members carry more than one <code>physics_domain</code>, or lists each remaining family with the recorded reason it stands, and the count before the first write is recorded beside it;</li>
+      <li>a read-back over every live name lists zero families whose members carry more than one <code>physics_domain</code>, apart from families held split by a recorded lead correction that names the family; those are listed with the correction, their count is recorded, and the count of split families before the first write is recorded beside both;</li>
       <li>the eight families in §1 each read one domain, named in the evidence;</li>
       <li>the share of published names filed under transport and under general is recorded before and after, with the twenty largest moves between domains listed by family so a physicist can read them;</li>
       <li>the read-back counts a family planted split in a disposable graph, and stays silent on a family planted whole;</li>
@@ -79,7 +80,7 @@
     <ul>
       <li>a name composed into a family that already has a stored decision is written with that decision and no new judgment is paid for, shown on a disposable graph;</li>
       <li>an export dry run of a catalog with one family planted across two domains names that family and exits non-zero, and the same dry run on the repaired live graph reports none;</li>
-      <li>a family listed with a recorded reason in §3 is reported as an accepted exception rather than a failure, and removing its reason makes the dry run fail.</li>
+      <li>a family held split by a recorded lead correction in §3 is reported as an accepted exception rather than a failure, and removing the correction makes the dry run fail.</li>
     </ul>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
