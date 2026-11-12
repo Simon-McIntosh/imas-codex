@@ -1,0 +1,63 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T09:43:07.077Z",
+  "dispatched_at": "2026-11-12T09:37:53Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-definitions-by-construction.html:65",
+      "id": "done_when-1",
+      "reason": "this done-when is the only measure of that guard, and its own record shows a node satisfying the letter of it while the real write path never refuses, so the endpoint must name the plant going through the pipeline's write path.",
+      "text": "the rendering-violation control reads \"refused before it is stored, shown by a test that plants one\", which a test of the refusal alone satisfies; the plan's own \u00a72 record (`c-run-r-20261112T085541527625-\u2026-3fc2991d9dfb`, line 175) reports the previous node's \"test bypasses the pipeline\" while \"the refusal is unreachable in the pipeline\", so the gate can pass with a guard that never fires",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-definitions-by-construction.html:66",
+      "id": "done_when-2",
+      "reason": "a written arm that fails the review into non-judgment would be dropped silently, so the acceptance comparison could read as good over a filtered set, and one clause fixing the exclusion to \"at least one arm\" (counting the per-arm totals) closes it.",
+      "text": "the exclusion \"a name the review returns no judgment on in either arm is left out of both arms and counted\" can be read as no judgment in *both* arms, under which a name the review decides in one arm only is neither counted nor in the \"decided in both arms\" population; the gate could then compare ten decided pairs drawn from an arbitrarily larger written set with no record of the written arm's own non-judgment rate",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-definitions-by-construction.html:59",
+      "id": "reasoning-1",
+      "reason": "the species-population ruling is already recorded as a decision on the plan, so correcting the citation changes where a reader is pointed but not what any node delivers.",
+      "text": "\"the split measured in \u00a71\" names a measurement \u00a71 does not make: its population row (line 40) says \"some members include neutral atoms, most exclude them, some do not say\" with no count, and the only counted split in the plan is 40 of a 381-name sample in \u00a74's record",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "11a84b946514102f6698a2529bab9d23fa1f9e74",
+  "plan_fingerprint": "2a754f97bae255e6608826283c8add54531b7adee65087c32414a4b849926ca7",
+  "plan_slug": "sn-definitions-by-construction",
+  "plan_version": 12,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T093652651940-plan-review-of-sn-definitions-by-construction",
+  "reviewed_blob_sha": "ed631212a4769c7d1a72c8f46752be2d9dcf4812",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the evidence directory exists and contains the cited censuses (`published-operator-census.txt`, `published-family-census.txt`), \u00a71 and \u00a74 resolve, and the snapshot blob matches the plan file at HEAD (`ed631212a4`); no extensionless href in this section fails to resolve as `<path>.html`.",
+    "done_when": "two findings \u2014 \u00a72's rendering-refusal control (line 65) is satisfiable by a test that never reaches the write path, and its review-control exclusion (line 66) leaves a name decided in one arm only unaccounted.",
+    "evidence_paths": "pass \u2014 the gate log is committed under `docs/evidence/fragments/sn-definitions-by-construction/`, a durable repository path that already holds the censuses this section reuses.",
+    "naming": "pass \u2014 \u00a72 carries no plan labels, stage names, ticket numbers or version tags, and names no symbol, file or function for the worker to call.",
+    "reasoning": "a finding \u2014 the section's population paragraph cites \"the split measured in \u00a71\", and \u00a71's population row states the split only qualitatively with no count; the other two checks hold: \u00a71's measured form counts support the stated root cause, and the endpoint is reachable and its comparison can fail.",
+    "single_goal": "pass \u2014 \u00a72 delivers one thing, shared parts rendered from one stored wording; the population ruling is a precondition recorded before dispatch and the documentation-review clause verifies the same deliverable.",
+    "wiring": "pass \u2014 `plan-section-depends-on` declares s5 on s4, s6 on s2\u2013s5 and s7 on s6 plus `sn-domain-per-family#s3`; \u00a72's own precondition (the species-population ruling) is recorded as a decision on the plan, so no dependency it needs is missing."
+  },
+  "section_digests": {
+    "_document": "c299db3e965ab12a879a63c1d08865a56963dde7744eeb490bdc0a47f1b3edb9",
+    "s1": "9adbcbc148d1c43c1c6c08859f48ed5e98950e523c8148ecb0cb80857fdec8f7",
+    "s2": "cc7c3877d924cd2017ca87a6ba3e9fb308e5f73bb5908889d9085e740df99d0e",
+    "s3": "e7694a6e595ff66ba52afcef8b2834d1537611dc87ef79213c7cfc23804a2f67",
+    "s4": "4dc4334fea0840530cdd38b8cfddcca3584bf0feba4ae6118abddc72878b5ede",
+    "s5": "87e587eb4a25dafd61a783961966692c2c164331ce6bd9b665b27bf3ec18c746",
+    "s6": "ef84a3d62e01937f14f0a28e69e1b486a4adb24d35e86da9d7d3d5b244b9b7e6",
+    "s7": "3bf8397e4c0fcbca018b6aee9f5b466ded384549e74817c22de7ef17c95be780"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T10:08:57.322329+00:00",
+  "total": null
+}
