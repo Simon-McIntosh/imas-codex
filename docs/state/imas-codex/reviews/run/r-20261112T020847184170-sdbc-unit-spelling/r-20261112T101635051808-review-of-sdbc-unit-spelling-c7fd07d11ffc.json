@@ -1,0 +1,60 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-12T10:27:13.007Z",
+  "dispatched_at": "2026-11-12T10:17:40Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/sdbc-unit-spelling.html",
+      "line": 37,
+      "severity": "non-blocking",
+      "text": "docs/evidence/fragments/sn-definitions-by-construction/sdbc-unit-spelling.html:37 non-blocking: the fragment cites '590 passed at revision 738740a40 on job 1311574', while the gate log it names opens on revision c7fd07d11ffc989b417a158ec3fa2547fd994df4 and the reviewed manifest reports job 1311578, so the prose and the log it cites disagree on both the revision and the job; and the same sentence says the census artifact 'was regenerated on job 1311536', which is the pre-repair job whose census recorded 128 dimension mismatches against the committed 41, so the citation cannot be the run that produced the artifact."
+    },
+    {
+      "file": "/home/ITER/mcintos/.cache/imas-codex-sdbc-unit-spelling/census.log",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "census.log:1 non-blocking: the only census log on disk opens on revision d626ee372e4f2af35ce8ade02ac2d0e0f94a1484 (mtime 10:26:10, two minutes before e510fe9de was committed at 10:28:12), and the code at that revision produces the 128-mismatch census, not the committed 41; the committed artifact was therefore produced from an uncommitted post-repair tree and no log on disk records the run that produced it, so a later reader regenerating at the logged revision will not reproduce the artifact and has nothing to compare against."
+    },
+    {
+      "file": "imas_codex/standard_names/audits.py",
+      "line": 1535,
+      "severity": "non-blocking",
+      "text": "imas_codex/standard_names/audits.py:1535 non-blocking: the head branch compares the unit of the registered quantity head only, and quantity_of_name does not treat a dimension-changing prefix as a qualifier, so 'volume_integrated_toroidal_fast_electron_torque_density_due_to_collisions' with unit N.m is reported as a torque_density mismatch in docs/evidence/fragments/sn-definitions-by-construction/unit-spelling-census.json even though a volume-integrated torque density is a torque and the name does say what it is; the \u00a75 hand-off of 41 is therefore an upper bound, and this entry would have the shape \u00a75 acts on a correctly spelled name."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T020847184170-sdbc-unit-spelling/manifest.md",
+      "line": 22,
+      "severity": "non-blocking",
+      "text": "manifest.md:22 non-blocking: baseline_suite and after_suite are recorded as prose sentences ('588 passed, 1 deselected at revision 3ce5df85f ...') instead of the required JSON carrying revision, command, exit_status, log_path, completed, failure_count and failure_ids, and both name the same gate.log which now holds only the after arm at c7fd07d11, so the baseline arm cannot be read back; added_failure_count here was derived from the after arm alone (590 passed, EXIT=0, no failing ids), which is sound only because that arm is green."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "the repaired rule is reached from imas_codex/standard_names/worker_tasks/worker_compose_and_validate.py:1374 and worker_compose_batches.py:1061 through run_audits at audits.py:3722, and its issue text is matched at imas_codex/standard_names/signed_manifest.py:443; live_unit_spelling_census has no production caller \u2014 only the test imports it.",
+    "diff": "read commit by commit against d626ee372 \u2014 e510fe9de rewrites the head-skip condition at audits.py:1579 to 'token in quantity.split(\"_\")', registers flow_rate in unit_audit.QUANTITY_HEADS, adds test_a_compound_head_is_judged_once_and_its_words_not_separately and regenerates the census (128 mm -> 41, quantity_count 1607 -> 1608); 738740a40 adds LIVE_NAME_CENSUS_QUERY and live_unit_spelling_census at audits.py:5198 and test_the_committed_census_is_reproducible_from_the_repository; c7fd07d11 changes one html line.",
+    "done_when": "the committed census at docs/evidence/fragments/sn-definitions-by-construction/unit-spelling-census.json now records 3264 names, 1608 quantities, 4 duplicate quantities all resolved, 46 divergences of which 43 unrecorded, 3 names with no unit, and 41 dimension mismatches (down from 128), which is the done_when's 'zero quantities carried in two dimensionally equal spellings without a recorded spelling' plus the \u00a75 hand-off; one residual false positive remains among the 41.",
+    "goal": "the delta since the prior reviewed head serves the node goal \u2014 one recorded unit spelling per quantity and one name-versus-unit rule \u2014 and imas_codex/standard_names/audits.py:1582 now skips every word of the name's own registered compound head, so the torque-density spelling the census records as canonical no longer fails the rule; the repair is real and the census was regenerated with it.",
+    "manifest": "read \u2014 status complete, nine commits, gate log at c7fd07d11 with 590 passed and EXIT=0, three negative controls each recording a red run; its baseline_suite and after_suite keys hold prose sentences rather than the required JSON, and the baseline log the prose names was overwritten by the after run.",
+    "write_paths": "the delta touches only imas_codex/standard_names/audits.py, imas_codex/standard_names/unit_audit.py, tests/standard_names/test_unit_spelling_census.py, docs/evidence/fragments/sn-definitions-by-construction/sdbc-unit-spelling.html and docs/evidence/fragments/sn-definitions-by-construction/unit-spelling-census.json, all five inside the eight declared at the reviewed manifest.md:3."
+  },
+  "node": "sdbc-unit-spelling",
+  "plan": "imas-codex:sn-definitions-by-construction \u00a73",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is one recorded unit spelling per quantity with one name-versus-unit rule, and imas_codex/standard_names/audits.py:1582 now skips every word of the name's own registered compound head, so the torque-density spelling the census records as canonical no longer fails the rule.\nVERDICT done_when: the census at docs/evidence/fragments/sn-definitions-by-construction/unit-spelling-census.json records 3264 names, 1608 quantities, 4 duplicate quantities all resolved, 0 unresolved, 43 unrecorded divergences and 41 dimension mismatches, down from 128, so the zero-unresolved measure holds and the \u00a75 hand-off shrank by the false positives the prior review named.\nVERDICT write_paths: the delta touches five paths, all inside the eight declared at the reviewed manifest.md:3 \u2014 audits.py, unit_audit.py, the census test, the html fragment and the census JSON.\nVERDICT manifest: read; status complete, nine commits, gate.log at c7fd07d11 with 590 passed and EXIT=0, and three negative controls each recording a red run; baseline_suite and after_suite are prose rather than JSON.\nVERDICT diff: read commit by commit against d626ee372 \u2014 e510fe9de repairs the compound-head skip, registers flow_rate and regenerates the census; 738740a40 commits LIVE_NAME_CENSUS_QUERY and live_unit_spelling_census at audits.py:5198; c7fd07d11 changes one html line.\nCALL_SITES: imas_codex/standard_names/worker_tasks/worker_compose_and_validate.py:1374, imas_codex/standard_names/worker_tasks/worker_compose_batches.py:1061, imas_codex/standard_names/audits.py:3722, imas_codex/standard_names/signed_manifest.py:443\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/audits.py:1579 now skips a component word of the name's own head, so the ion_torque_density/N.m^-2 case the prior review reproduced returns [] and the census falls from 128 to 41 mismatches.\nSCORE evidence: 13\nJUSTIFICATION evidence: /home/ITER/mcintos/.cache/imas-codex-sdbc-unit-spelling/gate.log records 590 passed with EXIT=0 at c7fd07d11 on a clean tree, but census.log:1 names d626ee372, whose code yields 128 mismatches, so the committed census has no log that can substantiate it.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in e510fe9de, 738740a40 and c7fd07d11 is one of the eight declared write paths at manifest.md:3.\nSCORE durability: 17\nJUSTIFICATION durability: tests/standard_names/test_unit_spelling_census.py:153 asserts name_unit_consistency_check({'id':'ion_torque_density','unit':'N.m^-2'}) == [] and :159 asserts the same name with N.m still reports 'torque_density', so over-skipping and under-skipping each redden; negative-control-facfbbc6521.log shows the first failing when the skip is reverted.\nSCORE fit: 17\nJUSTIFICATION fit: imas_codex/standard_names/audits.py:1575 states the mechanism ('any word of that head ... is not judged again by spelling') and the code at audits.py:1579 now does exactly that, and unit_audit.py:120's flow_rate comment explains the physics rather than a plan item.\nSCORE reuse: 18\nJUSTIFICATION reuse: live_unit_spelling_census at audits.py:5211 is a passthrough to the existing unit_spelling_census and quantity_of_name rather than a second census, and no existing loader reads every live name with its unit \u2014 the closest, graph_store/graph_cost_and_claims.py:391, is a claim-token drain rather than a catalog read.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/sdbc-unit-spelling.html:37 non-blocking: the fragment cites 590 passed at revision 738740a40 on job 1311574 while gate.log opens on c7fd07d11 and the manifest reports job 1311578, and it credits the census to job 1311536, the pre-repair run whose census carried 128 mismatches.\nFINDING census.log:1 non-blocking: the only census log opens on d626ee372, whose code produces 128 mismatches, not the committed 41, so the artifact came from an uncommitted post-repair tree and no log records that run.\nFINDING imas_codex/standard_names/audits.py:1535 non-blocking: a dimension-changing prefix is not treated as a qualifier, so volume_integrated_toroidal_fast_electron_torque_density_due_to_collisions with N.m is reported as a torque_density mismatch although the name states its integration.\nFINDING manifest.md:22 non-blocking: baseline_suite and after_suite are prose, not the required JSON, and both name a gate.log that now holds only the after arm, so the baseline cannot be read back.",
+  "review_run_id": "r-20261112T101635051808-review-of-sdbc-unit-spelling-c7fd07d11ffc",
+  "reviewed_base_sha": "d626ee372e4f2af35ce8ade02ac2d0e0f94a1484",
+  "reviewed_head_sha": "c7fd07d11ffc989b417a158ec3fa2547fd994df4",
+  "reviewed_run_id": "r-20261112T020847184170-sdbc-unit-spelling",
+  "scores": {
+    "durability": 17,
+    "evidence": 13,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T10:31:54.565429+00:00",
+  "total": 101
+}
