@@ -35,9 +35,28 @@
       "note": "\u00a73 now sends only families of two or more members to the lead and states that a single name below the floor keeps its stored domain and is listed, as \u00a75 says",
       "reason": "",
       "when": "2026-11-12T08:13:17.336549+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "b4533d2c211e51cdf0073dded23a233ea58a68eb",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a75 bullet 1 now counts an undecided drawn name at its stored domain, records how many were left undecided, and also gives the share over decided names",
+      "reason": "",
+      "when": "2026-11-12T08:13:31.270101+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "b4533d2c211e51cdf0073dded23a233ea58a68eb",
+      "commit_basis": "edit",
+      "note": "\u00a75 bullet 1 now counts an undecided drawn name at its stored domain, records how many were left undecided, and also gives the share over decided names",
+      "reason": "",
+      "when": "2026-11-12T08:13:31.270101+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
