@@ -21,7 +21,7 @@
   <title>Standard Name Integrity Backlog | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="483">
+<meta name="plan-version" content="484">
 <meta name="plan-modified" content="2026-11-12">
 <meta name="plan-sprint" content="S18">
 <meta name="plan-blocks" content="">
@@ -1510,6 +1510,9 @@ holder's declared unit matches the unit its held DD path declares.</p></div>
 </div>
 <div class="r-comment" data-section="s52" data-id="c-run-r-20261111T171523372171-sib-docs-drain-after-admission" data-who="reckon-build" data-when="2026-11-11T23:18:37Z">
     <div class="r-comment-body"><p>One flush on partition all failed with stop_reason stalled: billed USD 11.141891 of USD 20; stranded 0 to 0 and held-for-run 136 to 148; accepted-name docs stages 2368/80/5/413 to 2028/46/3/926 (accepted/reviewed/drafted/pending), plus 1 exhausted; 105 exact-run stamped docs acceptances, including 21 newly covered; final live receipt and refusal are committed, with remaining pipeline work recorded outside_scope. Repair commit 796174267 adds verified offline report and ledger guards; dimension-durability acted, dimension-goal_fidelity declined within the evidence-only scope; original terminal measure remains unmet.</p></div>
+</div>
+<div class="r-comment" data-section="s52" data-id="c-run-r-20261112T004840874471-review-of-sib-restore-reset-docs-748927474661" data-who="reckon-build" data-when="2026-11-12T01:13:35.260Z">
+    <div class="r-comment-body"><p>review of r-20261111T222612732717-sib-restore-reset-docs at 748927474661: 391 of 391 partition-(c) names restored to their own DocsRevision text and docs_stage accepted, independently re-read; scores 20/16/20/18/18/18, added failures 0 against the node&#x27;s 272-passed base and head arms, five non-blocking findings and no blocking one.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261012T162346807302-review-of-sib-row-census" data-who="reckon-build" data-when="2026-10-12T16:39:58.712Z">
     <div class="r-comment-body"><p>reviewed r-20261012T145528571333-sib-row-census at a7a70db00 against c7b4c626e; total 93/120 (goal_fidelity 15, evidence 13, scope_discipline 19, durability 11, fit 15, reuse 20); two blocking findings — the landing record's verdict tallies and the manifest's row-count both disagree with the 38 rows the census file holds.</p></div>
